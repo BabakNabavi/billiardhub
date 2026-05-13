@@ -26,7 +26,7 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
-      roles: user.roles,
+      roles: [user.primaryRole, ...user.secondaryRoles],
     });
 
     return {
@@ -36,7 +36,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        roles: user.roles,
+        roles: [user.primaryRole, ...user.secondaryRoles],
       },
     };
   }
@@ -55,7 +55,7 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
-      roles: user.roles,
+      roles: [user.primaryRole, ...user.secondaryRoles],
     });
 
     return {
@@ -65,7 +65,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        roles: user.roles,
+        roles: [user.primaryRole, ...user.secondaryRoles],
       },
     };
   }

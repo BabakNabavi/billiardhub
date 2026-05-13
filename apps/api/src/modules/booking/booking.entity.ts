@@ -20,8 +20,10 @@ export enum BookingStatus {
 
 export enum TableType {
   SNOOKER = 'snooker',
-  NINE_BALL = 'nine_ball',
-  EIGHT_BALL = 'eight_ball',
+  POCKET = 'pocket',
+  HIGHBALL = 'highball',
+  VIP_SNOOKER = 'vip_snooker',
+  VIP_POCKET = 'vip_pocket',
 }
 
 @Entity('bookings')
@@ -43,11 +45,8 @@ export class Booking {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({
-    type: 'enum',
-    enum: TableType,
-  })
-  tableType: TableType;
+  @Column({ type: 'varchar' })
+  tableType: string;
 
   @Column()
   tableNumber: number;
@@ -58,12 +57,8 @@ export class Booking {
   @Column({ type: 'timestamptz' })
   endTime: Date;
 
-  @Column({
-    type: 'enum',
-    enum: BookingStatus,
-    default: BookingStatus.PENDING,
-  })
-  status: BookingStatus;
+  @Column({ type: 'varchar', default: 'pending' })
+  status: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   totalPrice: number;

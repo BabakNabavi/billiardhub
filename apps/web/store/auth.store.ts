@@ -6,7 +6,9 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  roles: string[];
+  primaryRole: string;
+  secondaryRoles: string[];
+  isProfileComplete: boolean;
 }
 
 interface AuthStore {
