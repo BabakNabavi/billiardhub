@@ -41,6 +41,15 @@ export class BookingController {
     return this.bookingService.findByClub(clubId);
   }
 
+  @Get('slots')
+  getSlots(
+    @Query('clubId') clubId: string,
+    @Query('tableNumber') tableNumber: string,
+    @Query('date') date: string,
+  ) {
+    return this.bookingService.getTableSlots(clubId, parseInt(tableNumber), date);
+  }
+
   @Get('availability')
   checkAvailability(
     @Query('clubId') clubId: string,

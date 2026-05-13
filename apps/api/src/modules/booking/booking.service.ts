@@ -23,7 +23,6 @@ export class BookingService {
     notes?: string;
   }): Promise<Booking> {
     return this.dataSource.transaction(async (manager) => {
-      // بررسی double-booking با Pessimistic Lock
       const existing = await manager
         .createQueryBuilder(Booking, 'booking')
         .where('booking.clubId = :clubId', { clubId: data.clubId })
@@ -57,9 +56,7 @@ export class BookingService {
       where: { id },
       relations: ['club', 'user'],
     });
-    if (!booking) {
-      throw new NotFoundException('رزرو پیدا نشد');
-    }
+    if (!booking) throw new NotFoundException('رزرو پیدا نشد');
     return booking;
   }
 
@@ -77,6 +74,44 @@ export class BookingService {
       relations: ['user'],
       order: { startTime: 'ASC' },
     });
+  }
+
+  async getTableSlots(
+    clubId: string,
+    tableNumber: number,
+    date: string,
+  ): Promise<{ hour: number; isBooked: boolean; bookingId?: string }[]> {
+    const dayStart = new Date(`${date}T00:00:00Z`);
+    const dayEnd = new Date(`${date}T23:59:59Z`);
+
+    const bookings = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .where('booking.clubId = :clubId', { clubId })
+      .andWhere('booking.tableNumber = :tableNumber', { tableNumber })
+      .andWhere('booking.status NOT IN (:...statuses)', {
+        statuses: [BookingStatus.CANCELLED],
+      })
+      .andWhere('booking.startTime >= :dayStart', { dayStart })
+      .andWhere('booking.startTime <= :dayEnd', { dayEnd })
+      .getMany();
+
+    const slots = [];
+    for (let hour = 8; hour <= 23; hour++) {
+      const slotStart = new Date(`${date}T${hour.toString().padStart(2, '0')}:00:00Z`);
+      const slotEnd = new Date(`${date}T${hour.toString().padStart(2, '0')}:59:59Z`);
+
+      const booking = bookings.find(
+        (b) => new Date(b.startTime) <= slotEnd && new Date(b.endTime) >= slotStart,
+      );
+
+      slots.push({
+        hour,
+        isBooked: !!booking,
+        bookingId: booking?.id,
+      });
+    }
+
+    return slots;
   }
 
   async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
