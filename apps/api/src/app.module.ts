@@ -7,6 +7,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClubModule } from './modules/club/club.module';
 import { BookingModule } from './modules/booking/booking.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BookingModule } from './modules/booking/booking.module';
     AuthModule,
     ClubModule,
     BookingModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -14,7 +14,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body>
+      <head>
+        <style>{`
+          * { font-family: 'Vazirmatn', system-ui, sans-serif !important; }
+          input, select, textarea, button { font-family: 'Vazirmatn', system-ui, sans-serif !important; }
+        `}</style>
+      </head>
+      <body className="bg-gray-50">
         <Navbar />
         <main className="max-w-7xl mx-auto px-6 py-8">
           {children}
