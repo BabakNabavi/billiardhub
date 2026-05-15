@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'use';
 import { useAuthStore } from '../store/auth.store';
 import { Search, Bell, ShoppingCart, ChevronDown, User } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();

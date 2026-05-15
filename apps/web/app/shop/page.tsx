@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Search, Tag, ShoppingBag, Star, CheckCircle, MapPin,
     Package, BookOpen, Shirt, Wrench, Circle, LayoutGrid,
-    Flame, Zap, ChevronLeft, ChevronRight, Shield, Trophy,
-    SlidersHorizontal, Timer, TrendingDown, Award
+    Flame, Zap, ChevronLeft, ChevronRight, Timer, TrendingDown,
+    SlidersHorizontal, Bell, ShoppingCart, User
 } from 'lucide-react';
 
 interface Product {
@@ -31,14 +31,14 @@ interface Product {
 }
 
 const categories = [
-    { value: 'all', label: 'همه', icon: <LayoutGrid size={18} />, color: 'from-gray-700 to-gray-500' },
-    { value: 'table', label: 'میز بیلیارد', icon: <Package size={18} />, color: 'from-green-700 to-green-500' },
-    { value: 'cue', label: 'چوب', icon: <SlidersHorizontal size={18} />, color: 'from-amber-700 to-amber-500' },
-    { value: 'ball', label: 'توپ', icon: <Circle size={18} />, color: 'from-red-700 to-red-500' },
-    { value: 'accessory', label: 'لوازم جانبی', icon: <Wrench size={18} />, color: 'from-blue-700 to-blue-500' },
-    { value: 'clothing', label: 'پوشاک', icon: <Shirt size={18} />, color: 'from-purple-700 to-purple-500' },
-    { value: 'educational', label: 'آموزشی', icon: <BookOpen size={18} />, color: 'from-teal-700 to-teal-500' },
-    { value: 'other', label: 'سایر', icon: <ShoppingBag size={18} />, color: 'from-rose-700 to-rose-500' },
+    { value: 'all', label: 'همه', icon: <LayoutGrid size={18} />, bg: '#374151' },
+    { value: 'table', label: 'میز بیلیارد', icon: <Package size={18} />, bg: '#15803d' },
+    { value: 'cue', label: 'چوب', icon: <SlidersHorizontal size={18} />, bg: '#b45309' },
+    { value: 'ball', label: 'توپ', icon: <Circle size={18} />, bg: '#b91c1c' },
+    { value: 'accessory', label: 'لوازم جانبی', icon: <Wrench size={18} />, bg: '#1d4ed8' },
+    { value: 'clothing', label: 'پوشاک', icon: <Shirt size={18} />, bg: '#7e22ce' },
+    { value: 'educational', label: 'آموزشی', icon: <BookOpen size={18} />, bg: '#0f766e' },
+    { value: 'other', label: 'سایر', icon: <ShoppingBag size={18} />, bg: '#be185d' },
 ];
 
 const conditionLabels: Record<string, string> = {
@@ -54,55 +54,33 @@ const roleLabels: Record<string, { label: string; color: string }> = {
     player: { label: 'بازیکن', color: 'text-orange-600' },
     coach: { label: 'مربی', color: 'text-yellow-600' },
     installer: { label: 'متخصص نصب', color: 'text-red-600' },
-    user: { label: 'کاربر', color: 'text-gray-600' },
     referee: { label: 'داور', color: 'text-indigo-600' },
+    user: { label: 'کاربر', color: 'text-gray-600' },
 };
 
 const slides = [
-    {
-        bg: 'from-green-900 to-green-700',
-        title: 'میزهای حرفه‌ای',
-        subtitle: 'بهترین برندهای ایران و جهان',
-        badge: 'تا ۲۰٪ تخفیف',
-        badgeColor: 'bg-yellow-400 text-yellow-900',
-        icon: <Package size={120} className="text-green-300 opacity-20" />,
-    },
-    {
-        bg: 'from-blue-900 to-blue-700',
-        title: 'چوب‌های حرفه‌ای',
-        subtitle: 'Predator، Mezz، Riley و بیشتر',
-        badge: 'ارسال رایگان',
-        badgeColor: 'bg-blue-300 text-blue-900',
-        icon: <SlidersHorizontal size={120} className="text-blue-300 opacity-20" />,
-    },
-    {
-        bg: 'from-purple-900 to-purple-700',
-        title: 'فروش ویژه فصل',
-        subtitle: 'محصولات منتخب با تخفیف استثنایی',
-        badge: 'محدود',
-        badgeColor: 'bg-red-400 text-white',
-        icon: <Trophy size={120} className="text-purple-300 opacity-20" />,
-    },
+    { bg: 'from-green-900 to-green-700', title: 'میزهای حرفه‌ای', subtitle: 'بهترین برندهای ایران و جهان', badge: 'تا ۲۰٪ تخفیف', badgeColor: 'bg-yellow-400 text-yellow-900' },
+    { bg: 'from-blue-900 to-blue-700', title: 'چوب‌های حرفه‌ای', subtitle: 'Predator، Mezz، Riley و بیشتر', badge: 'ارسال رایگان', badgeColor: 'bg-blue-300 text-blue-900' },
+    { bg: 'from-purple-900 to-purple-700', title: 'فروش ویژه فصل', subtitle: 'محصولات منتخب با تخفیف استثنایی', badge: 'محدود', badgeColor: 'bg-red-400 text-white' },
 ];
 
 const sampleProducts: Product[] = [
-    { id: '1', title: 'میز اسنوکر ویراکا مدل M1 Gold حرفه‌ای', price: 85000000, discountPrice: 72000000, discountPercent: 15, category: 'table', condition: 'new', city: 'تهران', images: [], isVerified: true, isOfficialStore: false, isDailyDeal: false, isSpecialSale: false, seller: { firstName: 'علی', lastName: 'محمدی', primaryRole: 'seller' } },
-    { id: '2', title: 'چوب بیلیارد حرفه‌ای Predator 314-3', price: 12000000, discountPrice: undefined, discountPercent: 0, category: 'cue', condition: 'like_new', city: 'مشهد', images: [], isVerified: true, isOfficialStore: false, isDailyDeal: true, isSpecialSale: false, seller: { firstName: 'رضا', lastName: 'احمدی', primaryRole: 'player' } },
-    { id: '3', title: 'ست توپ اسنوکر Aramith Tournament', price: 4500000, discountPrice: 3800000, discountPercent: 16, category: 'ball', condition: 'new', city: 'اصفهان', images: [], isVerified: false, isOfficialStore: true, isDailyDeal: true, isSpecialSale: false, seller: { firstName: 'بیلیارد', lastName: 'پلاس', primaryRole: 'admin' } },
-    { id: '4', title: 'گچ بیلیارد Master Blue Diamond - ۱۴۴ عدد', price: 850000, discountPrice: undefined, discountPercent: 0, category: 'accessory', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: true, seller: { firstName: 'محمد', lastName: 'حسینی', primaryRole: 'seller' } },
+    { id: '1', title: 'میز اسنوکر ویراکا مدل M1 Gold حرفه‌ای', price: 85000000, discountPrice: 72000000, discountPercent: 15, category: 'table', condition: 'new', city: 'تهران', images: [], isVerified: true, isOfficialStore: false, isDailyDeal: false, isSpecialSale: true, seller: { firstName: 'علی', lastName: 'محمدی', primaryRole: 'seller' } },
+    { id: '2', title: 'چوب بیلیارد حرفه‌ای Predator 314-3', price: 12000000, discountPrice: 9600000, discountPercent: 20, category: 'cue', condition: 'like_new', city: 'مشهد', images: [], isVerified: true, isOfficialStore: false, isDailyDeal: true, isSpecialSale: true, seller: { firstName: 'رضا', lastName: 'احمدی', primaryRole: 'player' } },
+    { id: '3', title: 'ست توپ اسنوکر Aramith Tournament', price: 4500000, discountPrice: 3800000, discountPercent: 16, category: 'ball', condition: 'new', city: 'اصفهان', images: [], isVerified: false, isOfficialStore: true, isDailyDeal: true, isSpecialSale: true, seller: { firstName: 'بیلیارد', lastName: 'پلاس', primaryRole: 'admin' } },
+    { id: '4', title: 'گچ بیلیارد Master Blue Diamond - ۱۴۴ عدد', price: 850000, discountPrice: 680000, discountPercent: 20, category: 'accessory', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: true, seller: { firstName: 'محمد', lastName: 'حسینی', primaryRole: 'seller' } },
     { id: '5', title: 'پایه چوب بیلیارد چرمی دستی', price: 2200000, discountPrice: 1900000, discountPercent: 14, category: 'accessory', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: true, seller: { firstName: 'امیر', lastName: 'کریمی', primaryRole: 'manufacturer' } },
-    { id: '6', title: 'میز پاکت بیلیارد ۷ فوت ایرانی', price: 35000000, discountPrice: undefined, discountPercent: 0, category: 'table', condition: 'used', city: 'شیراز', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: false, seller: { firstName: 'حسین', lastName: 'علوی', primaryRole: 'user' } },
-    { id: '7', title: 'کتاب آموزش اسنوکر حرفه‌ای استیو دیویس', price: 350000, discountPrice: 280000, discountPercent: 20, category: 'educational', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: true, isDailyDeal: true, isSpecialSale: false, seller: { firstName: 'بیلیارد', lastName: 'پلاس', primaryRole: 'admin' } },
-    { id: '8', title: 'تی‌شرت اسپرت بیلیارد سایز XL', price: 450000, discountPrice: undefined, discountPercent: 0, category: 'clothing', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: false, seller: { firstName: 'مجید', lastName: 'صادقی', primaryRole: 'seller' } },
+    { id: '6', title: 'میز پاکت بیلیارد ۷ فوت ایرانی', price: 35000000, discountPrice: 28000000, discountPercent: 20, category: 'table', condition: 'used', city: 'شیراز', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: true, seller: { firstName: 'حسین', lastName: 'علوی', primaryRole: 'user' } },
+    { id: '7', title: 'کتاب آموزش اسنوکر حرفه‌ای استیو دیویس', price: 350000, discountPrice: 280000, discountPercent: 20, category: 'educational', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: true, isDailyDeal: true, isSpecialSale: true, seller: { firstName: 'بیلیارد', lastName: 'پلاس', primaryRole: 'admin' } },
+    { id: '8', title: 'تی‌شرت اسپرت بیلیارد سایز XL', price: 450000, discountPrice: 360000, discountPercent: 20, category: 'clothing', condition: 'new', city: 'تهران', images: [], isVerified: false, isOfficialStore: false, isDailyDeal: false, isSpecialSale: true, seller: { firstName: 'مجید', lastName: 'صادقی', primaryRole: 'seller' } },
 ];
 
 function CountdownTimer({ targetDate, dark = false }: { targetDate: Date; dark?: boolean }) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = targetDate.getTime() - now;
+        const calc = () => {
+            const distance = targetDate.getTime() - new Date().getTime();
             if (distance > 0) {
                 setTimeLeft({
                     days: Math.floor(distance / (1000 * 60 * 60 * 24)),
@@ -111,29 +89,31 @@ function CountdownTimer({ targetDate, dark = false }: { targetDate: Date; dark?:
                     seconds: Math.floor((distance % (1000 * 60)) / 1000),
                 });
             }
-        }, 1000);
+        };
+        calc();
+        const interval = setInterval(calc, 1000);
         return () => clearInterval(interval);
     }, [targetDate]);
 
     const pad = (n: number) => n.toLocaleString('fa-IR').padStart(2, '۰');
     const boxClass = dark
-        ? 'bg-gray-800 text-white border border-gray-700'
+        ? 'bg-black bg-opacity-30 text-white'
         : 'bg-white text-gray-900 border border-gray-200 shadow-sm';
 
     return (
-        <div className="flex gap-1.5 items-center">
+        <div className="flex gap-1 items-center">
             {[
                 { value: timeLeft.days, label: 'روز' },
                 { value: timeLeft.hours, label: 'ساعت' },
                 { value: timeLeft.minutes, label: 'دقیقه' },
                 { value: timeLeft.seconds, label: 'ثانیه' },
             ].map((item, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                    <div className={`${boxClass} rounded-xl px-3 py-2 text-center min-w-[3.2rem]`}>
-                        <div className="text-lg font-bold tabular-nums">{pad(item.value)}</div>
-                        <div className={`text-xs ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
+                <div key={i} className="flex items-center gap-1">
+                    <div className={`${boxClass} rounded-xl px-2 py-1 text-center min-w-[2.5rem]`}>
+                        <div className="text-base font-bold tabular-nums">{pad(item.value)}</div>
+                        <div className={`text-xs ${dark ? 'text-red-200' : 'text-gray-500'}`}>{item.label}</div>
                     </div>
-                    {i < 3 && <span className={`font-bold text-xl ${dark ? 'text-gray-500' : 'text-gray-400'}`}>:</span>}
+                    {i < 3 && <span className={`font-bold ${dark ? 'text-red-300' : 'text-gray-400'}`}>:</span>}
                 </div>
             ))}
         </div>
@@ -146,8 +126,7 @@ function ProductCard({ product }: { product: Product }) {
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group border border-gray-100 flex flex-col" style={{ height: '320px' }}>
                 <div className="relative bg-gray-50 flex-shrink-0 overflow-hidden" style={{ height: '160px' }}>
                     {product.images?.length > 0 ? (
-                        <img src={product.images[0]} alt={product.title}
-                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={product.images[0]} alt={product.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                         <div className="h-full w-full flex items-center justify-center">
                             <Package size={52} className="text-gray-200" />
@@ -172,20 +151,16 @@ function ProductCard({ product }: { product: Product }) {
                         </div>
                     )}
                 </div>
-
                 <div className="p-3 flex flex-col flex-1">
-                    <h3 className="font-bold text-gray-800 text-sm leading-5 mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    <h3 className="font-bold text-gray-800 text-sm leading-5 mb-2 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', height: '2.5rem' }}>
                         {product.title}
                     </h3>
-
                     <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                         <span className={`text-xs ${roleLabels[product.seller?.primaryRole]?.color || 'text-gray-500'}`}>
                             {roleLabels[product.seller?.primaryRole]?.label || 'کاربر'}
                         </span>
                         <span className="text-gray-200 text-xs">|</span>
-                        <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
-                            {conditionLabels[product.condition]}
-                        </span>
+                        <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">{conditionLabels[product.condition]}</span>
                         {product.city && (
                             <span className="text-xs text-gray-400 flex items-center gap-0.5">
                                 <MapPin size={9} />
@@ -193,21 +168,14 @@ function ProductCard({ product }: { product: Product }) {
                             </span>
                         )}
                     </div>
-
                     <div className="mt-auto pt-2 border-t border-gray-50">
                         {product.discountPrice ? (
                             <>
-                                <div className="text-xs text-gray-400 line-through">
-                                    {product.price.toLocaleString('fa-IR')} تومان
-                                </div>
-                                <div className="text-green-700 font-bold text-sm">
-                                    {product.discountPrice.toLocaleString('fa-IR')} تومان
-                                </div>
+                                <div className="text-xs text-gray-400 line-through">{product.price.toLocaleString('fa-IR')} تومان</div>
+                                <div className="text-green-700 font-bold text-sm">{product.discountPrice.toLocaleString('fa-IR')} تومان</div>
                             </>
                         ) : (
-                            <div className="text-green-700 font-bold text-sm">
-                                {product.price.toLocaleString('fa-IR')} تومان
-                            </div>
+                            <div className="text-green-700 font-bold text-sm">{product.price.toLocaleString('fa-IR')} تومان</div>
                         )}
                     </div>
                 </div>
@@ -222,8 +190,7 @@ function DealCard({ product }: { product: Product }) {
             <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group border border-red-100 flex flex-col" style={{ height: '280px' }}>
                 <div className="relative bg-gray-50 flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ height: '140px' }}>
                     {product.images?.length > 0 ? (
-                        <img src={product.images[0]} alt={product.title}
-                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={product.images[0]} alt={product.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                         <Package size={48} className="text-gray-200" />
                     )}
@@ -234,7 +201,7 @@ function DealCard({ product }: { product: Product }) {
                     )}
                 </div>
                 <div className="p-3 flex flex-col flex-1">
-                    <h3 className="font-bold text-gray-800 text-xs leading-5 mb-auto overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    <h3 className="font-bold text-gray-800 text-xs leading-5 mb-auto overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', height: '2.5rem' }}>
                         {product.title}
                     </h3>
                     <div className="mt-2 pt-2 border-t border-red-50">
@@ -262,9 +229,7 @@ export default function ShopPage() {
     const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentSlide(prev => (prev + 1) % slides.length);
-        }, 4000);
+        const timer = setInterval(() => setCurrentSlide(prev => (prev + 1) % slides.length), 4000);
         return () => clearInterval(timer);
     }, []);
 
@@ -291,7 +256,7 @@ export default function ShopPage() {
             {/* سرچ */}
             <div className="mb-8">
                 <div className="relative flex items-center bg-white rounded-full shadow-lg border-2 border-gray-100 hover:border-green-400 transition-colors overflow-hidden">
-                    <div className="pr-6 text-gray-400">
+                    <div className="pr-6 text-gray-400 flex-shrink-0">
                         <Search size={20} />
                     </div>
                     <input type="text" value={search} onChange={e => setSearch(e.target.value)}
@@ -306,25 +271,29 @@ export default function ShopPage() {
 
             {/* دسته‌بندی‌ها */}
             <div className="flex gap-3 mb-8 overflow-x-auto pb-2">
-                {categories.map(cat => (
-                    <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-2xl transition-all flex-shrink-0 font-medium text-sm ${
-                            ? `bg-gradient-to-l ${cat.color} text-white shadow-lg scale-105`
-                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 shadow-sm'
-                            }`}>
-                        <span className={selectedCategory === cat.value ? 'text-white' : 'text-gray-500'}>
-                            {cat.icon}
-                        </span>
-                        {cat.label}
-                    </button>
-                ))}
+                {categories.map(cat => {
+                    const isActive = selectedCategory === cat.value;
+                    return (
+                        <button
+                            key={cat.value}
+                            onClick={() => setSelectedCategory(cat.value)}
+                            style={isActive ? { backgroundColor: cat.bg } : {}}
+                            className={`flex items-center gap-2 px-5 py-3 rounded-2xl transition-all flex-shrink-0 font-medium text-sm ${isActive
+                                    ? 'text-white shadow-lg scale-105'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 shadow-sm'
+                                }`}>
+                            <span>{cat.icon}</span>
+                            {cat.label}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* اسلایدر */}
             <div className="relative rounded-3xl overflow-hidden mb-8 shadow-xl" style={{ height: '260px' }}>
                 {slides.map((slide, i) => (
                     <div key={i}
-                        className={`absolute inset-0 bg-gradient-to-l ${slide.bg} transition-all duration-700 ${i === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'
+                        className={`absolute inset-0 bg-gradient-to-l ${slide.bg} transition-all duration-700 ${i === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
                             }`}>
                         <div className="h-full flex items-center justify-between px-12">
                             <div>
@@ -337,14 +306,10 @@ export default function ShopPage() {
                                     مشاهده همه
                                 </button>
                             </div>
-                            <div className="opacity-30">
-                                {slide.icon}
-                            </div>
+                            <Package size={120} className="text-white opacity-10" />
                         </div>
                     </div>
                 ))}
-
-                {/* دکمه‌های اسلایدر */}
                 <button onClick={() => setCurrentSlide(p => (p - 1 + slides.length) % slides.length)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all">
                     <ChevronRight size={20} />
@@ -353,8 +318,6 @@ export default function ShopPage() {
                     className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all">
                     <ChevronLeft size={20} />
                 </button>
-
-                {/* نقاط */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                     {slides.map((_, i) => (
                         <button key={i} onClick={() => setCurrentSlide(i)}
@@ -389,69 +352,68 @@ export default function ShopPage() {
             </div>
 
             {/* فروش ویژه */}
-            <div className="rounded-3xl mb-8 overflow-hidden shadow-xl" style={{ background: 'linear-gradient(135deg, #e8192c 0%, #c0392b 100%)' }}>
-                <div className="flex" style={{ minHeight: '220px' }}>
-                    {/* ستون عنوان */}
-                    <div className="flex-shrink-0 w-40 flex flex-col items-center justify-center p-5 text-white border-l border-red-400 border-opacity-30">
-                        <div className="text-2xl font-black leading-tight text-center mb-4">
+            <div className="rounded-2xl mb-8 overflow-hidden shadow-lg border border-red-200" style={{ background: '#fff' }}>
+                <div className="flex flex-row-reverse">
+                    {/* ستون عنوان - سمت راست */}
+                    <div className="flex-shrink-0 w-36 flex flex-col items-center justify-center p-4 text-white" style={{ background: 'linear-gradient(135deg, #e8192c 0%, #c0392b 100%)' }}>
+                        <div className="text-xl font-black leading-tight text-center mb-3">
                             پیشنهاد<br />شگفت‌<br />انگیز
                         </div>
-                        <div className="bg-black bg-opacity-20 rounded-2xl p-2 mb-3 w-full text-center">
-                            <div className="flex justify-center gap-1 mb-1">
-                                {[
-                                    { v: '۰۶', l: 'روز' },
-                                    { v: '۲۳', l: 'ساعت' },
-                                ].map((t, i) => (
-                                    <div key={i} className="bg-black bg-opacity-30 rounded-lg px-2 py-1 text-center">
+                        <div className="flex gap-1 mb-2">
+                            {[
+                                { v: String(Math.floor((specialSaleDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))).padStart(2, '0'), l: '' },
+                                { v: ':', l: '' },
+                                { v: String(Math.floor(((specialSaleDate.getTime() - Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'), l: '' },
+                                { v: ':', l: '' },
+                                { v: String(Math.floor(((specialSaleDate.getTime() - Date.now()) % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'), l: '' },
+                            ].map((t, i) => (
+                                t.v === ':' ? (
+                                    <span key={i} className="text-white font-bold text-lg">:</span>
+                                ) : (
+                                    <div key={i} className="bg-black bg-opacity-30 rounded px-1.5 py-1 text-center">
                                         <div className="text-white font-bold text-sm">{t.v}</div>
-                                        <div className="text-red-200 text-xs">{t.l}</div>
                                     </div>
-                                ))}
-                            </div>
+                                )
+                            ))}
                         </div>
-                        <div className="text-white text-5xl font-black opacity-60">%</div>
-                        <Link href="/shop"
-                            className="mt-3 text-white text-xs border border-white border-opacity-40 rounded-lg px-3 py-1.5 hover:bg-white hover:bg-opacity-10 flex items-center gap-1">
+                        <div className="text-white text-4xl font-black opacity-50 mb-3">%</div>
+                        <Link href="/shop" className="text-white text-xs border border-white border-opacity-50 rounded px-2 py-1 flex items-center gap-1 hover:bg-white hover:bg-opacity-10">
                             مشاهده همه
-                            <ChevronLeft size={12} />
+                            <ChevronLeft size={10} />
                         </Link>
                     </div>
 
-                    {/* محصولات */}
+                    {/* محصولات اسکرول‌پذیر */}
                     <div className="flex-1 overflow-x-auto">
-                        <div className="flex h-full">
-                            {[...specialSaleProducts, ...sampleProducts.slice(0, 5)].map((product, index) => (
-                                <Link key={`sp-${index}`} href={`/shop/${product.id}`}>
-                                    <div className="bg-white w-44 h-full flex-shrink-0 border-l border-gray-100 last:border-l-0 hover:bg-gray-50 transition-colors flex flex-col">
-                                        <div className="flex-1 flex items-center justify-center p-4">
+                        <div className="flex divide-x divide-x-reverse divide-gray-100">
+                            {specialSaleProducts.map((product, index) => (
+                                <Link key={index} href={`/shop/${product.id}`}>
+                                    <div className="w-44 flex-shrink-0 hover:bg-gray-50 transition-colors flex flex-col p-3" style={{ height: '220px' }}>
+                                        <div className="flex-1 flex items-center justify-center mb-2">
                                             {product.images?.length > 0 ? (
-                                                <img src={product.images[0]} alt={product.title} className="max-h-24 object-contain" />
+                                                <img src={product.images[0]} alt={product.title} className="max-h-20 object-contain" />
                                             ) : (
-                                                <Package size={48} className="text-gray-200" />
+                                                <Package size={44} className="text-gray-200" />
                                             )}
                                         </div>
-                                        <div className="p-3 border-t border-gray-100">
-                                            <div className="text-xs text-gray-700 mb-2 leading-4 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', height: '2rem' }}>
-                                                {product.title}
-                                            </div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    {product.discountPrice ? (
-                                                        <>
-                                                            <div className="text-xs text-gray-400 line-through">{product.price.toLocaleString('fa-IR')}</div>
-                                                            <div className="text-xs font-bold text-gray-800">{product.discountPrice.toLocaleString('fa-IR')}</div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-xs font-bold text-gray-800">{product.price.toLocaleString('fa-IR')}</div>
-                                                    )}
-                                                    <div className="text-xs text-gray-400">تومان</div>
-                                                </div>
-                                                {product.discountPercent > 0 && (
-                                                    <div className="bg-red-500 text-white text-xs font-bold w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0">
-                                                        {product.discountPercent.toLocaleString('fa-IR')}٪
-                                                    </div>
+                                        <div className="text-xs text-gray-700 mb-2 leading-4 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', height: '2rem' }}>
+                                            {product.title}
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                {product.discountPrice && (
+                                                    <div className="text-xs text-gray-400 line-through">{product.price.toLocaleString('fa-IR')}</div>
                                                 )}
+                                                <div className="text-xs font-bold text-gray-900">
+                                                    {(product.discountPrice || product.price).toLocaleString('fa-IR')}
+                                                </div>
+                                                <div className="text-xs text-gray-400">تومان</div>
                                             </div>
+                                            {product.discountPercent > 0 && (
+                                                <div className="bg-red-500 text-white text-xs font-bold w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                                    {product.discountPercent}٪
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </Link>
@@ -460,7 +422,6 @@ export default function ShopPage() {
                     </div>
                 </div>
             </div>
-
             {/* تخفیف امروز */}
             <div className="bg-white rounded-3xl border-2 border-red-100 p-6 mb-8">
                 <div className="flex items-center justify-between mb-6">
@@ -488,12 +449,11 @@ export default function ShopPage() {
             {/* فیلتر + محصولات */}
             <div className="flex gap-6">
                 <div className="w-56 flex-shrink-0">
-                    <div className="bg-white rounded-2xl shadow-sm p-5 sticky top-4 border border-gray-100">
+                    <div className="bg-white rounded-2xl shadow-sm p-5 sticky top-20 border border-gray-100">
                         <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                             <SlidersHorizontal size={16} />
                             فیلترها
                         </h3>
-
                         <div className="mb-5">
                             <label className="block text-sm font-medium text-gray-600 mb-3">وضعیت کالا</label>
                             {[
@@ -511,7 +471,6 @@ export default function ShopPage() {
                                 </label>
                             ))}
                         </div>
-
                         <div className="mb-5 pb-5 border-b border-gray-100">
                             <label className="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" checked={onlyVerified}
@@ -523,7 +482,6 @@ export default function ShopPage() {
                                 </span>
                             </label>
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">مرتب‌سازی</label>
                             <select value={sortBy} onChange={e => setSortBy(e.target.value)}
