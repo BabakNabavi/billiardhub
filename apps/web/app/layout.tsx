@@ -20,9 +20,9 @@ export default function RootLayout({
           input, select, textarea, button { font-family: 'Vazirmatn', system-ui, sans-serif !important; }
         `}</style>
       </head>
-      <body className="bg-gray-50">
+      <body style={{ backgroundColor: '#030a06', margin: 0, padding: 0 }}>
         <Navbar />
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main>
           {children}
         </main>
       </body>
