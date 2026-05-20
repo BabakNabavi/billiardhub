@@ -15,16 +15,23 @@ export class UserService {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  async findByPhone(phone: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { phone } });
+  }
+
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find();
+  }
+
   async create(data: {
-    email: string;
+    phone: string;
     password: string;
     firstName: string;
     lastName: string;
-    phone?: string;
   }): Promise<User> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = this.userRepository.create({
@@ -46,6 +53,13 @@ export class UserService {
     const user = await this.findById(id);
     if (!user) throw new Error('کاربر پیدا نشد');
     Object.assign(user, data);
+    return this.userRepository.save(user);
+  }
+
+  async verify(id: string, status: string): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) throw new Error('کاربر پیدا نشد');
+    user.verificationStatus = status;
     return this.userRepository.save(user);
   }
 

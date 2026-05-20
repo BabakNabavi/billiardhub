@@ -10,62 +10,67 @@ export class AuthService {
   ) {}
 
   async register(data: {
-    email: string;
+    phone: string;
     password: string;
     firstName: string;
     lastName: string;
-    phone?: string;
   }) {
-    const existing = await this.userService.findByEmail(data.email);
+    const existing = await this.userService.findByPhone(data.phone);
     if (existing) {
-      throw new ConflictException('این ایمیل قبلاً ثبت شده است');
+      throw new ConflictException('این شماره قبلاً ثبت شده است');
     }
 
     const user = await this.userService.create(data);
 
     const token = this.jwtService.sign({
       sub: user.id,
-      email: user.email,
-      roles: [user.primaryRole, ...user.secondaryRoles],
+      phone: user.phone,
+      roles: [user.primaryRole, ...(user.secondaryRoles || [])],
     });
 
     return {
       token,
       user: {
         id: user.id,
-        email: user.email,
+        phone: user.phone,
         firstName: user.firstName,
         lastName: user.lastName,
-        roles: [user.primaryRole, ...user.secondaryRoles],
+        primaryRole: user.primaryRole,
+        secondaryRoles: user.secondaryRoles || [],
+        isProfileComplete: user.isProfileComplete,
+        verificationStatus: user.verificationStatus,
       },
     };
   }
 
-  async login(email: string, password: string) {
-    const user = await this.userService.findByEmail(email);
+  async login(phone: string, password: string) {
+    const user = await this.userService.findByPhone(phone);
     if (!user) {
-      throw new UnauthorizedException('ایمیل یا رمز عبور اشتباه است');
+      throw new UnauthorizedException('شماره موبایل یا رمز عبور اشتباه است');
     }
 
     const isValid = await this.userService.validatePassword(password, user.password);
     if (!isValid) {
-      throw new UnauthorizedException('ایمیل یا رمز عبور اشتباه است');
+      throw new UnauthorizedException('شماره موبایل یا رمز عبور اشتباه است');
     }
 
     const token = this.jwtService.sign({
       sub: user.id,
-      email: user.email,
-      roles: [user.primaryRole, ...user.secondaryRoles],
+      phone: user.phone,
+      roles: [user.primaryRole, ...(user.secondaryRoles || [])],
     });
 
     return {
       token,
       user: {
         id: user.id,
-        email: user.email,
+        phone: user.phone,
         firstName: user.firstName,
         lastName: user.lastName,
-        roles: [user.primaryRole, ...user.secondaryRoles],
+        primaryRole: user.primaryRole,
+        secondaryRoles: user.secondaryRoles || [],
+        isProfileComplete: user.isProfileComplete,
+        verificationStatus: user.verificationStatus,
       },
     };
   }
