@@ -136,6 +136,10 @@ export default function Navbar() {
           <Link href="/clubs" className="text-sm text-gray-600 hover:text-green-700 transition-colors">باشگاه‌ها</Link>
           <Link href="/news" className="text-sm text-gray-600 hover:text-green-700 transition-colors">اخبار</Link>
           <Link href="/events" className="text-sm text-gray-600 hover:text-green-700 transition-colors">مسابقات</Link>
+          <Link href="/live" className="text-sm text-gray-600 hover:text-green-700 transition-colors flex items-center gap-1">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            زنده
+          </Link>
           <Link href="/rankings" className="text-sm text-gray-600 hover:text-green-700 transition-colors">رنکینگ</Link>
           <div className="relative" ref={searchRef}>
             <button onClick={() => setSearchOpen(p => !p)}
