@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/auth.store';
 import { Search, Bell, ShoppingCart, ChevronDown, User, X, Trophy, Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench, Newspaper, Calendar, Menu } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import Stories from './Stories';
 
 const exploreMenu = [
   {
@@ -42,12 +43,16 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const profileRef = useRef<HTMLDivElement>(null);
   const exploreRef = useRef<HTMLDivElement>(null);
   const isHomePage = pathname === '/';
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+      setScrollY(window.scrollY);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -61,9 +66,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const navBg = isHomePage
     ? scrolled ? 'rgba(3,10,6,0.97)' : 'rgba(0,0,0,0)'
@@ -90,49 +93,53 @@ export default function Navbar() {
           transition: width 0.3s ease;
         }
         .nav-link:hover::after { width: 100%; }
-
         .explore-btn {
           display: flex; align-items: center; gap: 4px;
-          color: rgba(255,255,255,0.6);
-          font-size: 13px; font-weight: 500;
+          color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500;
           padding: 6px 2px; transition: color 0.3s ease;
           background: none; border: none; cursor: pointer; white-space: nowrap;
         }
         .explore-btn:hover { color: rgba(255,255,255,0.95); }
 
-        .dropdown-item {
+        /* dropdown روشن */
+        .dropdown-item-light {
           display: flex; align-items: flex-start; gap: 10px;
           padding: 10px 12px; border-radius: 10px;
           transition: all 0.2s ease; cursor: pointer; text-decoration: none;
         }
-        .dropdown-item:hover { background: rgba(16,185,129,0.08); }
-        .dropdown-item:hover .di-icon { color: #10b981; }
-        .dropdown-item:hover .di-label { color: #e2e8f0; }
-        .di-icon { color: rgba(255,255,255,0.3); transition: color 0.2s; margin-top: 1px; flex-shrink: 0; }
-        .di-label { color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 600; }
-        .di-desc { color: rgba(255,255,255,0.25); font-size: 11px; margin-top: 1px; }
+        .dropdown-item-light:hover { background: rgba(16,185,129,0.08); }
+        .dropdown-item-light:hover .dil-icon { color: #10b981; }
+        .dropdown-item-light:hover .dil-label { color: #0f2318; }
+        .dil-icon { color: rgba(26,46,36,0.3); transition: color 0.2s; margin-top: 1px; flex-shrink: 0; }
+        .dil-label { color: rgba(26,46,36,0.75); font-size: 13px; font-weight: 600; }
+        .dil-desc  { color: rgba(26,46,36,0.35); font-size: 11px; margin-top: 1px; }
 
         .search-input::placeholder { color: rgba(255,255,255,0.25); }
         .search-input:focus { outline: none; }
 
         @keyframes dropdownIn {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity:0; transform:translateY(-8px); }
+          to   { opacity:1; transform:translateY(0); }
         }
         .dropdown-anim { animation: dropdownIn 0.2s ease forwards; }
 
         @keyframes mobileMenuIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity:0; transform:translateY(-10px); }
+          to   { opacity:1; transform:translateY(0); }
         }
         .mobile-menu-anim { animation: mobileMenuIn 0.25s ease forwards; }
 
-        @media (max-width: 768px) {
+        @keyframes glowPulse {
+          0%,100% { box-shadow: 0 0 4px #ef4444; }
+          50%      { box-shadow: 0 0 12px #ef4444; }
+        }
+
+        @media(max-width:768px) {
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
           .search-bar { max-width: 160px !important; }
         }
-        @media (min-width: 769px) {
+        @media(min-width:769px) {
           .mobile-menu-btn { display: none !important; }
           .mobile-nav-overlay { display: none !important; }
         }
@@ -148,9 +155,9 @@ export default function Navbar() {
 
           {/* لوگو */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(16,185,129,0.3)', fontWeight: 900, fontSize: '16px', color: '#000' }}>B</div>
+            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg,#10b981,#059669)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(16,185,129,0.3)', fontWeight: 900, fontSize: '16px', color: '#000' }}>B</div>
             <span style={{ fontWeight: 900, fontSize: '16px', color: '#fff', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              بیلیارد <span style={{ background: 'linear-gradient(135deg, #10b981, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
+              بیلیارد <span style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
             </span>
           </Link>
 
@@ -164,7 +171,7 @@ export default function Navbar() {
               زنده
             </Link>
 
-            {/* بیشتر */}
+            {/* بیشتر — dropdown روشن کریستالی */}
             <div ref={exploreRef} style={{ position: 'relative' }}>
               <button className="explore-btn" onClick={() => setExploreOpen(p => !p)}>
                 بیشتر
@@ -174,35 +181,38 @@ export default function Navbar() {
               {exploreOpen && (
                 <div className="dropdown-anim" style={{
                   position: 'absolute', top: 'calc(100% + 16px)', right: '-20px',
-                  width: '580px', background: 'rgba(5,15,10,0.97)',
-                  border: '1px solid rgba(16,185,129,0.12)', borderRadius: '20px',
-                  boxShadow: '0 24px 80px rgba(0,0,0,0.6)', backdropFilter: 'blur(30px)',
+                  width: '580px',
+                  background: 'rgba(255,255,255,0.97)',
+                  border: '1px solid rgba(16,185,129,0.15)',
+                  borderRadius: '20px',
+                  boxShadow: '0 24px 80px rgba(16,185,129,0.12), 0 4px 20px rgba(0,0,0,0.08)',
+                  backdropFilter: 'blur(30px)',
                   padding: '20px', zIndex: 200,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid rgba(16,185,129,0.1)' }}>
                     <span style={{ fontSize: '11px', color: '#10b981', letterSpacing: '0.15em', fontWeight: 600 }}>EXPLORE BILLIARD PLUS</span>
-                    <button onClick={() => setExploreOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: '2px' }}><X size={14} /></button>
+                    <button onClick={() => setExploreOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(26,46,36,0.3)', padding: '2px' }}><X size={14} /></button>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                     {exploreMenu.map((section, si) => (
                       <div key={si}>
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '6px', padding: '0 12px' }}>
-                          {section.title.toUpperCase()}
+                        <div style={{ fontSize: '10px', color: 'rgba(26,46,36,0.3)', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '6px', padding: '0 12px' }}>
+                          {section.title}
                         </div>
                         {section.items.map((item, ii) => (
-                          <Link key={ii} href={item.href} className="dropdown-item" onClick={() => setExploreOpen(false)}>
-                            <span className="di-icon">{item.icon}</span>
+                          <Link key={ii} href={item.href} className="dropdown-item-light" onClick={() => setExploreOpen(false)}>
+                            <span className="dil-icon">{item.icon}</span>
                             <div>
-                              <div className="di-label">{item.label}</div>
-                              <div className="di-desc">{item.desc}</div>
+                              <div className="dil-label">{item.label}</div>
+                              <div className="dil-desc">{item.desc}</div>
                             </div>
                           </Link>
                         ))}
                       </div>
                     ))}
                   </div>
-                  <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.15)' }}>پلتفرم تخصصی بیلیارد ایران</span>
+                  <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid rgba(16,185,129,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11px', color: 'rgba(26,46,36,0.3)' }}>پلتفرم تخصصی بیلیارد ایران</span>
                     <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, textDecoration: 'none' }}>ثبت‌نام رایگان ←</Link>
                   </div>
                 </div>
@@ -212,7 +222,7 @@ export default function Navbar() {
 
           {/* سرچ */}
           <div className="search-bar" style={{ flex: 1, maxWidth: '280px', marginRight: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '8px 14px', transition: 'all 0.3s ease' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '8px 14px' }}>
               <Search size={14} style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
                 className="search-input"
@@ -240,7 +250,7 @@ export default function Navbar() {
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
                 <button onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '6px 10px', color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-                  <div style={{ width: '26px', height: '26px', background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 900, fontSize: '12px' }}>
+                  <div style={{ width: '26px', height: '26px', background: 'linear-gradient(135deg,#10b981,#059669)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 900, fontSize: '12px' }}>
                     {user.firstName?.[0]}
                   </div>
                   <span className="desktop-nav" style={{ display: 'flex' }}>{user.firstName}</span>
@@ -248,7 +258,7 @@ export default function Navbar() {
                 </button>
 
                 {profileOpen && (
-                  <div className="dropdown-anim" style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '190px', background: 'rgba(5,15,10,0.97)', border: '1px solid rgba(16,185,129,0.12)', borderRadius: '16px', boxShadow: '0 20px 60px rgba(0,0,0,0.5)', backdropFilter: 'blur(30px)', padding: '8px', zIndex: 200 }}>
+                  <div className="dropdown-anim" style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '190px', background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(16,185,129,0.12)', borderRadius: '16px', boxShadow: '0 20px 60px rgba(16,185,129,0.12)', backdropFilter: 'blur(30px)', padding: '8px', zIndex: 200 }}>
                     {[
                       { href: '/dashboard', label: 'داشبورد' },
                       { href: '/dashboard/shop', label: 'فروشگاه من' },
@@ -257,16 +267,16 @@ export default function Navbar() {
                       { href: '/profile', label: 'ویرایش پروفایل' },
                     ].map((item, i) => (
                       <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}
-                        style={{ display: 'block', padding: '9px 12px', borderRadius: '10px', fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontWeight: 500, transition: 'all 0.2s ease', textDecoration: 'none' }}
-                        onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; (e.target as HTMLElement).style.color = '#e2e8f0'; }}
-                        onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.6)'; }}>
+                        style={{ display: 'block', padding: '9px 12px', borderRadius: '10px', fontSize: '13px', color: 'rgba(26,46,36,0.65)', fontWeight: 500, transition: 'all 0.2s', textDecoration: 'none' }}
+                        onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; (e.target as HTMLElement).style.color = '#0f2318'; }}
+                        onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'rgba(26,46,36,0.65)'; }}>
                         {item.label}
                       </Link>
                     ))}
-                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '4px 0' }} />
+                    <div style={{ height: '1px', background: 'rgba(16,185,129,0.08)', margin: '4px 0' }} />
                     <button onClick={() => { logout(); setProfileOpen(false); router.push('/'); }}
                       style={{ display: 'block', width: '100%', textAlign: 'right', padding: '9px 12px', borderRadius: '10px', fontSize: '13px', color: 'rgba(239,68,68,0.7)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}
-                      onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; (e.target as HTMLElement).style.color = '#fca5a5'; }}
+                      onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; (e.target as HTMLElement).style.color = '#dc2626'; }}
                       onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'rgba(239,68,68,0.7)'; }}>
                       خروج
                     </button>
@@ -275,7 +285,6 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* دکمه موبایل */}
             <button className="mobile-menu-btn"
               onClick={() => setMobileOpen(p => !p)}
               style={{ display: 'none', padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', alignItems: 'center', justifyContent: 'center' }}>
@@ -286,7 +295,7 @@ export default function Navbar() {
 
         {/* منوی موبایل */}
         {mobileOpen && (
-          <div className="mobile-menu-anim" style={{ background: 'rgba(5,15,10,0.98)', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '16px 20px', backdropFilter: 'blur(20px)' }}>
+          <div className="mobile-menu-anim" style={{ background: 'rgba(255,255,255,0.97)', borderTop: '1px solid rgba(16,185,129,0.08)', padding: '16px 20px', backdropFilter: 'blur(20px)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {[
                 { href: '/clubs', label: 'باشگاه‌ها', icon: <Building2 size={16} /> },
@@ -300,27 +309,48 @@ export default function Navbar() {
                 { href: '/coaches', label: 'مربیان', icon: <Star size={16} /> },
               ].map((item, i) => (
                 <Link key={i} href={item.href}
-                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '12px', color: 'rgba(255,255,255,0.6)', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s ease' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; (e.currentTarget as HTMLElement).style.color = '#e2e8f0'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'; }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '12px', color: 'rgba(26,46,36,0.6)', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; (e.currentTarget as HTMLElement).style.color = '#0f2318'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(26,46,36,0.6)'; }}>
                   <span style={{ color: '#10b981' }}>{item.icon}</span>
                   {item.label}
                 </Link>
               ))}
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0' }} />
+              <div style={{ height: '1px', background: 'rgba(16,185,129,0.08)', margin: '8px 0' }} />
               {!user ? (
-                <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#000', fontSize: '14px', fontWeight: 800, textDecoration: 'none' }}>
+                <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontSize: '14px', fontWeight: 800, textDecoration: 'none' }}>
                   <User size={16} /> ورود / ثبت‌نام
                 </Link>
               ) : (
-                <button onClick={() => { logout(); router.push('/'); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: '14px', fontWeight: 700, cursor: 'pointer', width: '100%' }}>
+                <button onClick={() => { logout(); router.push('/'); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#dc2626', fontSize: '14px', fontWeight: 700, cursor: 'pointer', width: '100%' }}>
                   خروج
                 </button>
               )}
             </div>
           </div>
         )}
+
       </nav>
+      {/* Stories زیر navbar — فقط صفحه اصلی */}
+      {isHomePage && (
+        <div style={{
+          position: 'fixed',
+          top: '64px',
+          left: 0,
+          right: 0,
+          zIndex: 49,
+          padding: '12px 32px',
+          opacity: Math.max(0, 1 - scrollY / 700),
+          pointerEvents: scrollY > 560 ? 'none' : 'auto',
+          transition: 'opacity 0.1s linear',
+        }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <Stories />
+          </div>
+        </div>
+      )}
+
+
 
       {!isHomePage && <div style={{ height: '64px' }} />}
     </>
