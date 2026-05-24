@@ -60,7 +60,7 @@ export default function LiveMatchPage() {
         const randomUser = botUsers[Math.floor(Math.random() * botUsers.length)];
         const now = new Date();
         const time = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-        setMessages(prev => [...prev.slice(-60), { id: Date.now().toString(), user: randomUser, text: randomMsg, time }]);
+        setMessages(prev => [...prev.slice(-60), { id: Date.now().toString(), user: randomUser ?? 'کاربر', text: randomMsg ?? '', time }]);
       }
       setViewers(v => Math.max(200, v + Math.floor(Math.random() * 5) - 2));
     }, 2500);

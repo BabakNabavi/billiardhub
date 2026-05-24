@@ -221,7 +221,7 @@ export default function NewsPage() {
     return true;
   });
 
-  const featured = sampleNews[0];
+  const featured = sampleNews[0]!;
   const topNews = sampleNews.slice(1, 4);
   const restNews = sampleNews.slice(4);
   const trending = [...sampleNews].sort((a, b) => b.views - a.views).slice(0, 5);
