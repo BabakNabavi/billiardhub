@@ -117,11 +117,10 @@ export default function RankingsPage() {
           <button key={s.value}
             onClick={() => { setSport(s.value); setGender('آقایان'); setCategory('دسته برتر'); }}
             disabled={s.value === 'highball'}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
-              sport === s.value ? 'bg-green-700 text-white' :
-              s.value === 'highball' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
-              'border border-green-300 text-green-700 hover:bg-green-50'
-            }`}>
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${sport === s.value ? 'bg-green-700 text-white' :
+                s.value === 'highball' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                  'border border-green-300 text-green-700 hover:bg-green-50'
+              }`}>
             {s.label}
             {s.value === 'highball' && <span className="text-xs mr-1">(به زودی)</span>}
           </button>
@@ -137,11 +136,11 @@ export default function RankingsPage() {
                 <button
                   onClick={() => {
                     setGender(g);
-                    setCategory(Object.keys(data[sport][g])[0]);
+                    const first = Object.keys(rankings[sport]?.[g] ?? {})[0];
+                    if (first) setCategory(first);
                   }}
-                  className={`w-full text-right px-4 py-3 font-bold text-sm ${
-                    gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                  }`}>
+                  className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    }`}>
                   {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
                 </button>
                 {gender === g && (
@@ -149,11 +148,10 @@ export default function RankingsPage() {
                     {Object.keys(data[sport][g]).map(cat => (
                       <button key={cat}
                         onClick={() => setCategory(cat)}
-                        className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${
-                          category === cat
+                        className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat
                             ? 'bg-green-100 text-green-800 font-medium'
                             : 'text-gray-600 hover:bg-gray-50'
-                        }`}>
+                          }`}>
                         {cat}
                       </button>
                     ))}
@@ -198,8 +196,8 @@ export default function RankingsPage() {
                         </div>
                         <div className="col-span-1 text-center text-xs">
                           {diff > 0 ? <span className="text-green-600 font-bold">▲{diff}</span> :
-                           diff < 0 ? <span className="text-red-500 font-bold">▼{Math.abs(diff)}</span> :
-                           <span className="text-gray-300">-</span>}
+                            diff < 0 ? <span className="text-red-500 font-bold">▼{Math.abs(diff)}</span> :
+                              <span className="text-gray-300">-</span>}
                         </div>
                         <div className="col-span-1">
                           <div className="w-9 h-9 bg-green-700 rounded-full flex items-center justify-center text-white text-sm font-bold overflow-hidden">
