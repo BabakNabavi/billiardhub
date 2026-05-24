@@ -130,52 +130,52 @@ export default function EventDetailPage() {
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
                 <Link href="/events" className="hover:text-green-700">مسابقات</Link>
                 <ChevronLeft size={14} />
-                <span className="text-gray-600 line-clamp-1">{event.title}</span>
+                <span className="text-gray-600 line-clamp-1">{event?.title}</span>
             </div>
 
             {/* هدر */}
-            <div className={`bg-gradient-to-l ${event.imageBg} rounded-2xl p-8 mb-8 text-white relative overflow-hidden`}>
+            <div className={`bg-gradient-to-l ${event?.imageBg} rounded-2xl p-8 mb-8 text-white relative overflow-hidden`}>
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-x-32 -translate-y-32"></div>
                 <div className="relative flex flex-col lg:flex-row gap-8">
 
                     {/* اطلاعات — سمت راست */}
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">{event.categoryLabel}</span>
-                            <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">{event.sportLabel}</span>
-                            {event.status === 'ongoing' && (
+                            <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">{event?.categoryLabel}</span>
+                            <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">{event?.sportLabel}</span>
+                            {event?.status === 'ongoing' && (
                                 <span className="bg-red-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 animate-pulse">
                                     <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
                                     زنده
                                 </span>
                             )}
                         </div>
-                        <h1 className="text-3xl font-black mb-4 leading-10">{event.title}</h1>
+                        <h1 className="text-3xl font-black mb-4 leading-10">{event?.title}</h1>
                         <div className="space-y-2 text-white opacity-80 text-sm">
-                            <div className="flex items-center gap-2"><MapPin size={14} />{event.location}، {event.city}</div>
-                            <div className="flex items-center gap-2"><Calendar size={14} />{event.startDate.toLocaleDateString('fa-IR')} تا {event.endDate.toLocaleDateString('fa-IR')}</div>
-                            <div className="flex items-center gap-2"><Trophy size={14} />جایزه: {event.prize}</div>
-                            <div className="flex items-center gap-2"><Users size={14} />{event.participants.toLocaleString('fa-IR')} از {event.maxParticipants.toLocaleString('fa-IR')} نفر ثبت‌نام کرده‌اند</div>
+                            <div className="flex items-center gap-2"><MapPin size={14} />{event?.location}، {event?.city}</div>
+                            <div className="flex items-center gap-2"><Calendar size={14} />{event?.startDate.toLocaleDateString('fa-IR')} تا {event?.endDate.toLocaleDateString('fa-IR')}</div>
+                            <div className="flex items-center gap-2"><Trophy size={14} />جایزه: {event?.prize}</div>
+                            <div className="flex items-center gap-2"><Users size={14} />{event?.participants.toLocaleString('fa-IR')} از {event?.maxParticipants.toLocaleString('fa-IR')} نفر ثبت‌نام کرده‌اند</div>
                         </div>
                     </div>
 
                     {/* تایمر — سمت چپ */}
                     <div className="lg:w-80 flex flex-col justify-center">
-                        {event.status === 'upcoming' && (
+                        {event?.status === 'upcoming' && (
                             <div className="bg-black bg-opacity-20 rounded-2xl p-5">
                                 <div className="text-white opacity-70 text-sm mb-4 flex items-center gap-2">
                                     <Timer size={14} />
                                     شروع مسابقات تا:
                                 </div>
-                                <CountdownTimer targetDate={event.startDate} />
-                                {event.registrationOpen && (
+                                <CountdownTimer targetDate={event?.startDate} />
+                                {event?.registrationOpen && (
                                     <button className="mt-5 w-full bg-white text-gray-900 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors">
                                         ثبت‌نام در مسابقه
                                     </button>
                                 )}
                             </div>
                         )}
-                        {event.status === 'ongoing' && (
+                        {event?.status === 'ongoing' && (
                             <div className="bg-black bg-opacity-20 rounded-2xl p-5">
                                 <div className="text-white font-bold mb-3 text-center">در حال برگزاری</div>
                                 <div className="h-3 bg-white bg-opacity-20 rounded-full mb-2">
@@ -197,19 +197,19 @@ export default function EventDetailPage() {
                             <span className="w-1 h-5 bg-green-600 rounded-full"></span>
                             درباره مسابقه
                         </h2>
-                        {event.description.split('\n\n').map((p, i) => (
+                        {event?.description.split('\n\n').map((p, i) => (
                             p.trim() && <p key={i} className="text-gray-700 leading-8 mb-3">{p}</p>
                         ))}
                     </div>
 
-                    {event.schedule.length > 0 && (
+                    {(event?.schedule?.length ?? 0) > 0 && (
                         <div className="bg-white rounded-2xl shadow-sm p-6">
                             <h2 className="font-black text-gray-900 text-lg mb-4 flex items-center gap-2">
                                 <span className="w-1 h-5 bg-blue-600 rounded-full"></span>
                                 برنامه مسابقات
                             </h2>
                             <div className="space-y-3">
-                                {event.schedule.map((item, i) => (
+                                {event?.schedule.map((item, i) => (
                                     <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
                                         <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm flex-shrink-0">
                                             {(i + 1).toLocaleString('fa-IR')}
@@ -230,7 +230,7 @@ export default function EventDetailPage() {
                             جوایز
                         </h2>
                         <div className="space-y-3">
-                            {event.prizes.map((prize, i) => (
+                            {event?.prizes.map((prize, i) => (
                                 <div key={i} className="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-100">
                                     <span className="font-bold text-gray-800">{prize.place}</span>
                                     <span className="font-black text-amber-700">{prize.amount}</span>
@@ -247,12 +247,12 @@ export default function EventDetailPage() {
                             <h3 className="font-black text-gray-900 text-sm mb-4">اطلاعات رویداد</h3>
                             <div className="space-y-3">
                                 {[
-                                    { label: 'برگزارکننده', value: event.organizer },
-                                    { label: 'محل برگزاری', value: `${event.location}، ${event.city}` },
-                                    { label: 'رشته', value: event.sportLabel },
-                                    { label: 'دسته', value: event.categoryLabel },
-                                    { label: 'کل جایزه', value: event.prize },
-                                    { label: 'ظرفیت', value: `${event.maxParticipants.toLocaleString('fa-IR')} نفر` },
+                                    { label: 'برگزارکننده', value: event?.organizer },
+                                    { label: 'محل برگزاری', value: `${event?.location}، ${event?.city}` },
+                                    { label: 'رشته', value: event?.sportLabel },
+                                    { label: 'دسته', value: event?.categoryLabel },
+                                    { label: 'کل جایزه', value: event?.prize },
+                                    { label: 'ظرفیت', value: `${event?.maxParticipants.toLocaleString('fa-IR')} نفر` },
                                 ].map((item, i) => (
                                     <div key={i} className="flex justify-between text-sm border-b border-gray-50 pb-2">
                                         <span className="text-gray-400">{item.label}</span>
@@ -260,7 +260,7 @@ export default function EventDetailPage() {
                                     </div>
                                 ))}
                             </div>
-                            {event.registrationOpen && (
+                            {event?.registrationOpen && (
                                 <button className="w-full mt-4 bg-green-700 text-white py-3 rounded-xl font-bold hover:bg-green-800 transition-colors flex items-center justify-center gap-2">
                                     <CheckCircle size={18} />
                                     ثبت‌نام در مسابقه
