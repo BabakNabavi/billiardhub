@@ -118,8 +118,8 @@ export default function RankingsPage() {
             onClick={() => { setSport(s.value); setGender('آقایان'); setCategory('دسته برتر'); }}
             disabled={s.value === 'highball'}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${sport === s.value ? 'bg-green-700 text-white' :
-                s.value === 'highball' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
-                  'border border-green-300 text-green-700 hover:bg-green-50'
+              s.value === 'highball' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                'border border-green-300 text-green-700 hover:bg-green-50'
               }`}>
             {s.label}
             {s.value === 'highball' && <span className="text-xs mr-1">(به زودی)</span>}
@@ -136,7 +136,8 @@ export default function RankingsPage() {
                 <button
                   onClick={() => {
                     setGender(g);
-                    const first = Object.keys(rankings[sport]?.[g] ?? {})[0];
+                    const first = Object.keys(data[sport]?.[g] ?? {})[0];
+                    if (first) setCategory(first);
                     if (first) setCategory(first);
                   }}
                   className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
@@ -149,8 +150,8 @@ export default function RankingsPage() {
                       <button key={cat}
                         onClick={() => setCategory(cat)}
                         className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat
-                            ? 'bg-green-100 text-green-800 font-medium'
-                            : 'text-gray-600 hover:bg-gray-50'
+                          ? 'bg-green-100 text-green-800 font-medium'
+                          : 'text-gray-600 hover:bg-gray-50'
                           }`}>
                         {cat}
                       </button>
