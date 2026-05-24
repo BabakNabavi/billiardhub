@@ -7,10 +7,11 @@ export default function ScrollReveal({ children, delay = 0 }: { children: React.
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.1 }
-    );
+    const observer = new IntersectionObserver((entries) => {
+  const entry = entries[0];
+  if (!entry) return;
+  if (entry.isIntersecting) { setVisible(true); observer.disconnect(); }
+}, { threshold: 0.1 });
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
