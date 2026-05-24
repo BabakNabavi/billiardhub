@@ -47,10 +47,10 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): nu
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 export default function ClubsPage() {
@@ -80,7 +80,7 @@ export default function ClubsPage() {
   useEffect(() => {
     api.get('/clubs').then(res => {
       if (res.data?.length > 0) setClubs(res.data);
-    }).catch(() => {});
+    }).catch(() => { });
     getUserLocation();
   }, []);
 
@@ -241,8 +241,8 @@ export default function ClubsPage() {
             <Navigation size={15} style={{ color: userLocation ? '#10b981' : 'rgba(26,46,36,0.3)', flexShrink: 0 }} />
             <span style={{ fontSize: '13px', color: userLocation ? '#059669' : 'rgba(26,46,36,0.4)', flex: 1 }}>
               {locationLoading ? 'در حال دریافت موقعیت...' :
-               userLocation ? 'موقعیت شما دریافت شد — باشگاه‌ها بر اساس فاصله مرتب شده‌اند' :
-               locationError || 'برای نمایش نزدیک‌ترین باشگاه‌ها، GPS خود را فعال کنید'}
+                userLocation ? 'موقعیت شما دریافت شد — باشگاه‌ها بر اساس فاصله مرتب شده‌اند' :
+                  locationError || 'برای نمایش نزدیک‌ترین باشگاه‌ها، GPS خود را فعال کنید'}
             </span>
             {!userLocation && !locationLoading && (
               <button onClick={getUserLocation} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: '#059669', cursor: 'pointer', whiteSpace: 'nowrap' }}>
@@ -352,7 +352,7 @@ export default function ClubsPage() {
               {filtered.map((club, i) => (
                 <Link key={club.id} href={`/clubs/${club.id}`} style={{ textDecoration: 'none' }}>
                   <div className="club-card club-anim" style={{ animationDelay: `${i * 0.06}s` }}>
-                    <div style={{ height: '160px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${clubColors[i % clubColors.length][0]}, ${clubColors[i % clubColors.length][1]})` }}>
+                    <div style={{ height: '160px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${clubColors[i % clubColors.length]?.[0] ?? '#064e3b'}, ${clubColors[i % clubColors.length]?.[1] ?? '#065f46'}[1]})` }}>
                       {club.images?.[0] ? (
                         <img src={club.images[0]} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.5)', position: 'absolute', inset: 0 }} />
                       ) : (
@@ -428,7 +428,7 @@ export default function ClubsPage() {
           )}
         </div>
 
-        
+
       </div>
     </>
   );
