@@ -236,6 +236,7 @@ export default function Stories() {
   const nextStory = () => {
     if (activeGroup === null) return;
     const group = groups[activeGroup];
+    if (!group) return;
     if (activeStory < group.stories.length - 1) {
       setActiveStory(p => p + 1);
     } else if (activeGroup < groups.length - 1) {
@@ -244,7 +245,7 @@ export default function Stories() {
       setActiveStory(0);
       setLiked(false);
       setSentReaction('');
-      setSeenGroups(prev => new Set([...prev, groups[next].userId]));
+      setSeenGroups(prev => new Set([...prev, groups[next]?.userId ?? '']));
     } else {
       closeStory();
     }
@@ -266,7 +267,7 @@ export default function Stories() {
     setLiked(false);
     setSentReaction('');
     setShowEmojis(false);
-    setSeenGroups(prev => new Set([...prev, groups[index].userId]));
+    setSeenGroups(prev => new Set([...prev, groups[index]?.userId ?? '']));
   };
 
   // تایمر ساده با setTimeout
