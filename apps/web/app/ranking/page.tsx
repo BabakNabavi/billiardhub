@@ -136,9 +136,7 @@ export default function RankingsPage() {
                 <button
                   onClick={() => {
                     setGender(g);
-                    const first = Object.keys(data[sport]?.[g] ?? {})[0];
-                    if (first) setCategory(first);
-                    if (first) setCategory(first);
+                    setCategory(Object.keys(data[sport]?.[g] ?? {})[0] ?? 'دسته برتر');
                   }}
                   className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                     }`}>
