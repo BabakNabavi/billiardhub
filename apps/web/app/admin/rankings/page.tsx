@@ -109,13 +109,13 @@ export default function AdminRankingsPage() {
         <div className="w-44 flex-shrink-0 space-y-3">
           {['آقایان', 'بانوان'].map(g => (
             <div key={g} className="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <button onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport][g])[0]); }}
+              <button onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
                 className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}>
                 {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
               </button>
               {gender === g && (
                 <div className="p-1">
-                  {Object.keys(rankings[sport][g]).map(cat => (
+                  {Object.keys(rankings[sport]?.[g] ?? {}).map(cat => (
                     <button key={cat} onClick={() => setCategory(cat)}
                       className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat ? 'bg-green-100 text-green-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
                       {cat}
@@ -147,13 +147,12 @@ export default function AdminRankingsPage() {
             {players.map((player, index) => (
               <div key={index} className={`grid grid-cols-12 items-center px-4 py-2 ${index < 16 ? 'bg-green-50' : ''}`}>
                 <div className="col-span-1 text-center">
-                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mx-auto ${
-                    index === 0 ? 'bg-yellow-400 text-white' :
-                    index === 1 ? 'bg-gray-400 text-white' :
-                    index === 2 ? 'bg-amber-600 text-white' :
-                    index < 16 ? 'bg-green-200 text-green-800' :
-                    'bg-gray-100 text-gray-600'
-                  }`}>
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mx-auto ${index === 0 ? 'bg-yellow-400 text-white' :
+                      index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-amber-600 text-white' :
+                          index < 16 ? 'bg-green-200 text-green-800' :
+                            'bg-gray-100 text-gray-600'
+                    }`}>
                     {toFa(index + 1)}
                   </span>
                 </div>
