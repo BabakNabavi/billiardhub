@@ -235,7 +235,7 @@ export default function EventsPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">
-                  {categoryLabels[featured.category].label}
+                  {categoryLabels[featured.category]?.label}
                 </span>
                 <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">
                   {sportLabels[featured.sport]}
