@@ -8,8 +8,9 @@ import ScrollReveal from '../components/ScrollReveal/ScrollReveal';
 const img1 = '/images/billiadr-club-1.jpg';
 const img3 = '/images/billiadr-club-3.jpg';
 
+
 const featuredClubs = [
-  { id: '1', name: 'باشگاه ستاره تهران', city: 'تهران', tables: 12, rating: 4.8, type: 'اسنوکر', img: img1 },
+  { id: '1', name: 'باشگاه سنچوری', city: 'تهران', tables: 12, rating: 4.8, type: 'اسنوکر', img: img1 },
   { id: '2', name: 'باشگاه المپیک مشهد', city: 'مشهد', tables: 8, rating: 4.6, type: 'پاکت', img: img3 },
   { id: '3', name: 'باشگاه پیروزی اصفهان', city: 'اصفهان', tables: 10, rating: 4.7, type: 'هی‌بال', img: img1 },
 ];
@@ -35,8 +36,11 @@ const featuredProducts = [
 
 const heroSlides = [
   { img: img1, title: 'بیلیارد پلاس', sub: 'اولین اکوسیستم جامع بیلیارد ایران', accent: '#10b981', tag: 'PLATFORM' },
-  { img: img3, title: 'رزرو آنلاین', sub: 'بهترین باشگاه‌ها در یک کلیک', accent: '#06b6d4', tag: 'BOOKING' },
+  { img: img3, title: 'رزرو آنلاین', sub: 'بهترین باشگاه‌ها در یک قدمیت', accent: '#06b6d4', tag: 'BOOKING' },
   { img: img1, title: 'مسابقات حرفه‌ای', sub: 'رقابت در بزرگ‌ترین رویدادهای بیلیارد ایران', accent: '#a78bfa', tag: 'TOURNAMENTS' },
+  { img: img1, title: 'فروشگاه تجهیزات', sub: 'خرید و فروش تجهیزات بیلیاردی', accent: '#a78bfa', tag: 'TOURNAMENTS' },
+
+
 ];
 
 function DarkCard({ children, style = {}, hoverGlow = '#10b981' }: {
@@ -287,10 +291,10 @@ export default function HomePage() {
             </div>
 
             {/* Stats */}
-            <div className="hd" style={{ display: 'flex', marginTop: '56px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '30px' }}>
+            <div className="hd" style={{ display: 'flex', marginTop: '56px', borderTop: '1px solid rgba(183, 234, 146, 0.05)', paddingTop: '30px' }}>
               {[{ v: '۵۰۰+', l: 'باشگاه فعال' }, { v: '۱۰K+', l: 'بازیکن' }, { v: '۲۰۰+', l: 'مسابقه' }].map((s, i) => (
                 <div key={i} style={{ flex: 1, textAlign: 'center', borderLeft: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none', padding: '0 18px' }}>
-                  <div style={{ fontSize: 'clamp(20px,3vw,28px)', fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em', textShadow: `0 0 28px ${currentSlide.accent}28` }}>{s.v}</div>
+                  <div style={{ fontSize: 'clamp(20px,3vw,28px)', fontWeight: 900, color: '#ffd000', lineHeight: 1, letterSpacing: '-0.03em', textShadow: `0 0 28px ${currentSlide.accent}28` }}>{s.v}</div>
                   <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.22)', marginTop: '7px', letterSpacing: '0.1em' }}>{s.l}</div>
                 </div>
               ))}

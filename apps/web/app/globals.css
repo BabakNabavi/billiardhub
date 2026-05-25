@@ -705,3 +705,89 @@ input:focus, textarea:focus, select:focus {
 main {
   animation: pageIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
+/* ============================================================
+   RESPONSIVE SYSTEM
+   ============================================================ */
+
+/* Ultrawide */
+@media (min-width: 1600px) {
+  .container { max-width: 1440px; }
+}
+
+/* Desktop large */
+@media (min-width: 1280px) {
+  .section { margin-bottom: 120px; }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .shop-g   { grid-template-columns: repeat(2,1fr) !important; }
+  .events-g { grid-template-columns: repeat(2,1fr) !important; }
+}
+
+/* Mobile landscape + tablet portrait */
+@media (max-width: 900px) {
+  .clubs-g  { grid-template-columns: repeat(2,1fr) !important; }
+  .news-g   { grid-template-columns: repeat(2,1fr) !important; }
+  .shop-g   { grid-template-columns: repeat(2,1fr) !important; }
+  .events-g { grid-template-columns: 1fr !important; }
+
+  .text-hero    { font-size: clamp(28px,5vw,48px); }
+  .text-display { font-size: clamp(36px,6vw,64px); }
+
+  .btn-primary, .btn-ghost {
+    padding: 12px 22px;
+    font-size: 13px;
+  }
+
+  .section { margin-bottom: 72px; }
+  .section-header { margin-bottom: 24px; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .clubs-g  { grid-template-columns: 1fr !important; }
+  .news-g   { grid-template-columns: 1fr !important; }
+  .shop-g   { grid-template-columns: repeat(2,1fr) !important; }
+  .events-g { grid-template-columns: 1fr !important; }
+
+  .container { padding: 0 16px; }
+  .section { margin-bottom: 56px; }
+
+  .glass-dark:hover,
+  .glass-light:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* Small mobile */
+@media (max-width: 390px) {
+  .shop-g { grid-template-columns: 1fr !important; }
+
+  .btn-primary, .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Touch — reduce hover effects */
+@media (hover: none) {
+  .glass-dark:hover,
+  .glass-light:hover {
+    transform: none;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  .neon-btn:hover,
+  .btn-primary:hover {
+    transform: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.15ms !important;
+  }
+}
