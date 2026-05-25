@@ -600,7 +600,7 @@ export default function ClubProfilePage() {
                   میز مورد نظر را انتخاب و آنلاین رزرو کنید
                 </p>
 
-                <button onClick={() => user ? setShowBook(true) : router.push('/login')}
+                <button onClick={() => user ? router.push(`/booking/${club.id}`) : router.push('/login')}
                   style={{ width: '100%', padding: '15px', border: 'none', borderRadius: '14px', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 8px 28px rgba(16,185,129,0.3)', transition: 'all 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <Calendar size={16} /> رزرو میز آنلاین
                 </button>
