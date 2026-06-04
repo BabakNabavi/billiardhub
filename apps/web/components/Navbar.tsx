@@ -1,506 +1,413 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/auth.store';
 import {
-  Menu, X, ChevronDown, Bell, User, LogOut,
-  LayoutDashboard, MessageCircle, ShoppingBag,
-  Trophy, Shield, Calendar, Wrench, Users,
-  Home, BookOpen, Store, Search,
+  Search, Bell, ShoppingCart, ChevronDown, User, X, Trophy,
+  Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
+  Newspaper, Calendar, Menu, ArrowLeft,
 } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import Stories from './Stories';
 
-const NAV_LINKS = [
+const exploreMenu = [
   {
-    label: 'اکوسیستم',
-    icon: <Home size={14}/>,
-    children: [
-      { href:'/clubs',    label:'باشگاه‌ها',     icon:'🎱', desc:'کشف بهترین باشگاه‌ها' },
-      { href:'/players',  label:'بازیکنان',       icon:'👤', desc:'پروفایل و رنکینگ' },
-      { href:'/coaches',  label:'مربیان',          icon:'⭐', desc:'آموزش تخصصی' },
-      { href:'/referees', label:'داوران',          icon:'🛡️', desc:'داوران رسمی' },
+    title: 'بازیکنان و افراد',
+    items: [
+      { href: '/players',  label: 'بازیکنان',      icon: <Users size={15} />,   desc: 'بازیکنان حرفه‌ای' },
+      { href: '/coaches',  label: 'مربیان',         icon: <Star size={15} />,    desc: 'مربیان مجاز' },
+      { href: '/referees', label: 'داوران',          icon: <Trophy size={15} />,  desc: 'داوران رسمی' },
     ],
   },
   {
-    label: 'مسابقات',
-    icon: <Trophy size={14}/>,
-    children: [
-      { href:'/events',   label:'مسابقات',        icon:'🏆', desc:'تورنومنت‌های فعال' },
-      { href:'/live',     label:'زنده',            icon:'🔴', desc:'نتایج آنی' },
-      { href:'/rankings', label:'رنکینگ',          icon:'📊', desc:'جدول رتبه‌بندی' },
+    title: 'فروشندگان',
+    items: [
+      { href: '/sellers',       label: 'فروشگاه‌ها',     icon: <ShoppingBag size={15} />, desc: 'فروشندگان تجهیزات' },
+      { href: '/manufacturers', label: 'تولیدکنندگان',  icon: <Wrench size={15} />,      desc: 'سازندگان تجهیزات' },
+      { href: '/installers',    label: 'متخصصین نصب',   icon: <Wrench size={15} />,      desc: 'نصب و راه‌اندازی' },
     ],
   },
   {
-    label: 'بازار',
-    icon: <Store size={14}/>,
-    children: [
-      { href:'/shop',     label:'فروشگاه',         icon:'🛒', desc:'تجهیزات حرفه‌ای' },
-      { href:'/brands',   label:'برندها',           icon:'🏷️', desc:'برندهای معتبر' },
-      { href:'/services', label:'خدمات فنی',        icon:'🔧', desc:'نصب و تعمیر' },
-    ],
-  },
-  {
-    label: 'رویدادها',
-    icon: <Calendar size={14}/>,
-    children: [
-      { href:'/expo',     label:'نمایشگاه‌ها',    icon:'🏛️', desc:'اکسپو و همایش' },
-      { href:'/news',     label:'اخبار',            icon:'📰', desc:'جدیدترین اخبار' },
+    title: 'محتوا و آموزش',
+    items: [
+      { href: '/news',      label: 'اخبار',    icon: <Newspaper size={15} />, desc: 'آخرین اخبار بیلیارد' },
+      { href: '/events',    label: 'مسابقات',  icon: <Calendar size={15} />,  desc: 'رویدادها و مسابقات' },
+      { href: '/education', label: 'آموزش',    icon: <BookOpen size={15} />,  desc: 'ویدیو و مطالب آموزشی' },
     ],
   },
 ];
 
-function toFa(v: string|number){ return String(v).replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d))); }
+const mobileLinks = [
+  { href: '/clubs',     label: 'باشگاه‌ها',   icon: <Building2 size={17} /> },
+  { href: '/shop',      label: 'فروشگاه',     icon: <ShoppingBag size={17} /> },
+  { href: '/rankings',  label: 'رنکینگ',      icon: <Trophy size={17} /> },
+  { href: '/live',      label: 'پخش زنده',    icon: <Radio size={17} />, live: true },
+  { href: '/news',      label: 'اخبار',       icon: <Newspaper size={17} /> },
+  { href: '/events',    label: 'مسابقات',     icon: <Calendar size={17} /> },
+  { href: '/education', label: 'آموزش',       icon: <BookOpen size={17} /> },
+  { href: '/players',   label: 'بازیکنان',    icon: <Users size={17} /> },
+  { href: '/coaches',   label: 'مربیان',      icon: <Star size={17} /> },
+];
 
 export default function Navbar() {
-  const pathname    = usePathname();
-  const router      = useRouter();
-  const { user, logout, _hydrated } = useAuthStore();
-  const [scrolled,   setScrolled]   = useState(false);
+  const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openMenu,   setOpenMenu]   = useState<string|null>(null);
-  const [userOpen,   setUserOpen]   = useState(false);
-  const dropRef     = useRef<HTMLDivElement>(null);
-  const rafRef      = useRef<number>(0);
+  const [search, setSearch] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const exploreRef  = useRef<HTMLDivElement>(null);
+  const isHomePage  = pathname === '/';
 
-  /* scroll detect */
   useEffect(() => {
+    let ticking = false;
     const fn = () => {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => setScrolled(window.scrollY > 12));
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 50);
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', fn, { passive:true });
-    return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  /* close on outside click */
   useEffect(() => {
     const fn = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
-        setOpenMenu(null); setUserOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
+      if (exploreRef.current  && !exploreRef.current.contains(e.target as Node))  setExploreOpen(false);
     };
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
-  /* close mobile on nav */
-  useEffect(() => { setMobileOpen(false); setOpenMenu(null); }, [pathname]);
+  useEffect(() => { setMobileOpen(false); setExploreOpen(false); }, [pathname]);
 
-  /* lock scroll */
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  const handleLogout = () => { logout(); router.push('/'); setUserOpen(false); };
+  const navBg = isHomePage
+    ? scrolled ? 'rgba(2,8,6,0.97)' : 'rgba(0,0,0,0)'
+    : 'rgba(2,8,6,0.98)';
+
+  const navBorder = isHomePage
+    ? scrolled ? '1px solid rgba(16,185,129,0.1)' : '1px solid transparent'
+    : '1px solid rgba(16,185,129,0.08)';
 
   return (
     <>
       <style>{`
-        @keyframes navDropIn  { from{opacity:0;transform:translateY(-8px) scale(0.97);}to{opacity:1;transform:none;} }
-        @keyframes mobileIn   { from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;} }
-        @keyframes fadeInFast { from{opacity:0;}to{opacity:1;} }
-
-        .nav-item-link {
-          display:flex; align-items:center; gap:8px;
-          padding:7px 12px; border-radius:10px;
-          font-size:13.5px; font-weight:600;
-          color:rgba(15,31,20,0.62);
-          text-decoration:none;
-          transition:all 0.18s cubic-bezier(0.4,0,0.2,1);
-          white-space:nowrap; cursor:pointer;
-          background:transparent; border:none; font-family:inherit;
-          position:relative;
+        .nav-link {
+          position: relative;
+          color: rgba(255,255,255,0.55);
+          font-size: 13px; font-weight: 500;
+          padding: 6px 0;
+          transition: color 0.3s ease;
+          white-space: nowrap; text-decoration: none;
         }
-        .nav-item-link:hover {
-          color:#15803d;
-          background:rgba(22,163,74,0.07);
+        .nav-link:hover { color: rgba(255,255,255,0.95); }
+        .nav-link::after {
+          content: ''; position: absolute; bottom: 0; left: 0;
+          width: 0; height: 1px;
+          background: linear-gradient(90deg, #10b981, #06b6d4);
+          transition: width 0.3s ease;
         }
-        .nav-item-link.open {
-          color:#15803d;
-          background:rgba(22,163,74,0.08);
+        .nav-link:hover::after { width: 100%; }
+        .explore-btn {
+          display: flex; align-items: center; gap: 4px;
+          color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+          padding: 6px 0; background: none; border: none;
+          cursor: pointer; white-space: nowrap; font-family: inherit;
+          transition: color 0.3s ease;
         }
-        .nav-item-link.active {
-          color:#15803d;
-          background:rgba(22,163,74,0.10);
-          font-weight:700;
+        .explore-btn:hover { color: rgba(255,255,255,0.95); }
+        .dil-icon  { color: rgba(26,46,36,0.3); transition: color 0.2s; margin-top:1px; flex-shrink:0; }
+        .dil-label { color: rgba(26,46,36,0.75); font-size:13px; font-weight:600; }
+        .dil-desc  { color: rgba(26,46,36,0.35); font-size:11px; margin-top:1px; }
+        .dropdown-item-light {
+          display:flex; align-items:flex-start; gap:10px;
+          padding:10px 12px; border-radius:10px;
+          transition:all 0.2s ease; cursor:pointer; text-decoration:none;
         }
-
-        .drop-item {
-          display:flex; align-items:center; gap:12px;
-          padding:10px 14px; border-radius:12px;
-          text-decoration:none; transition:all 0.18s;
-          cursor:pointer;
+        .dropdown-item-light:hover { background: rgba(16,185,129,0.08); }
+        .dropdown-item-light:hover .dil-icon  { color: #10b981; }
+        .dropdown-item-light:hover .dil-label { color: #0f2318; }
+        .search-input::placeholder { color: rgba(255,255,255,0.22); }
+        .search-input:focus { outline: none; }
+        @keyframes dropdownIn {
+          from { opacity:0; transform:translateY(-8px) scale(0.98); }
+          to   { opacity:1; transform:translateY(0)    scale(1); }
         }
-        .drop-item:hover {
-          background:rgba(22,163,74,0.07);
+        .dropdown-anim { animation: dropdownIn 0.22s cubic-bezier(0.22,1,0.36,1) forwards; }
+        @keyframes glowPulse {
+          0%,100% { box-shadow: 0 0 4px #ef4444; }
+          50%      { box-shadow: 0 0 14px #ef4444; }
         }
-        .drop-item:hover .drop-label { color:#15803d; }
-
-        .mobile-link {
-          display:flex; align-items:center; gap:12px;
-          padding:14px 20px; text-decoration:none;
-          font-size:15px; font-weight:600;
-          color:rgba(15,31,20,0.75);
-          border-bottom:1px solid rgba(0,40,18,0.05);
-          transition:all 0.18s;
+        @keyframes mobileSlideIn {
+          from { opacity:0; transform:translateX(20px); }
+          to   { opacity:1; transform:translateX(0); }
         }
-        .mobile-link:hover { background:rgba(22,163,74,0.05); color:#15803d; }
-        .mobile-link:last-child { border-bottom:none; }
-
-        .user-drop-item {
-          display:flex; align-items:center; gap:10px;
-          padding:9px 14px; border-radius:10px;
-          font-size:13px; font-weight:600;
-          color:rgba(15,31,20,0.65);
-          transition:all 0.18s; cursor:pointer;
-          border:none; background:none; font-family:inherit; width:100%; text-align:right;
-          text-decoration:none;
+        .desktop-nav { display: flex !important; }
+        .mobile-only { display: none !important; }
+        @media (max-width: 900px) {
+          .desktop-nav { display: none !important; }
+          .mobile-only { display: flex !important; }
         }
-        .user-drop-item:hover { background:rgba(22,163,74,0.06); color:#15803d; }
-        .user-drop-item.danger:hover { background:rgba(220,38,38,0.06); color:#dc2626; }
-
-        /* Chevron rotate */
-        .nav-chevron { transition:transform 0.22s ease; }
-        .nav-chevron.open { transform:rotate(180deg); }
+        @media (max-width: 480px) {
+          .nav-search-wrap { display: none !important; }
+        }
       `}</style>
 
-      {/* ══ NAVBAR ══ */}
-      <header style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-        height: '62px',
-        background: scrolled
-          ? 'rgba(236,244,236,0.85)'
-          : 'rgba(240,246,240,0.72)',
-        backdropFilter: 'blur(28px)',
-        WebkitBackdropFilter: 'blur(28px)',
-        borderBottom: scrolled
-          ? '1px solid rgba(255,255,255,0.65)'
-          : '1px solid rgba(255,255,255,0.50)',
-        boxShadow: scrolled
-          ? '0 2px 20px rgba(0,30,12,0.07), 0 1px 0 rgba(255,255,255,0.8)'
-          : '0 1px 0 rgba(255,255,255,0.60)',
-        transition: 'all 0.35s cubic-bezier(0.4,0,0.2,1)',
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        background: navBg, borderBottom: navBorder,
+        backdropFilter: scrolled || !isHomePage ? 'blur(24px) saturate(1.6)' : 'none',
+        transition: 'background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease',
       }}>
-
-        {/* Inner */}
         <div style={{
-          maxWidth: '1320px', margin: '0 auto',
-          height: '100%', padding: '0 clamp(14px,3vw,32px)',
-          display: 'flex', alignItems: 'center', gap: '6px',
-          position: 'relative',
+          maxWidth: '1440px', margin: '0 auto',
+          padding: '0 clamp(16px, 3vw, 32px)',
+          height: '62px',
+          display: 'flex', alignItems: 'center', gap: '14px',
         }}>
 
-          {/* ── Logo ── */}
-          <Link href="/" style={{
-            display: 'flex', alignItems: 'center', gap: '9px',
-            textDecoration: 'none', flexShrink: 0, marginLeft: '20px',
-          }}>
-            <div style={{
-              width: '34px', height: '34px', borderRadius: '10px',
-              background: 'linear-gradient(135deg,#16a34a,#15803d)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '16px', fontWeight: 900, color: '#fff',
-              boxShadow: '0 3px 10px rgba(22,163,74,0.30), inset 0 1px 0 rgba(255,255,255,0.2)',
-            }}>B</div>
-            <span style={{
-              fontSize: '17px', fontWeight: 900, letterSpacing: '-0.025em',
-              color: '#0f1f14',
-            }}>
-              بیلیارد{' '}
-              <span style={{
-                background: 'linear-gradient(135deg,#16a34a,#0d9488)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              }}>پلاس</span>
+          {/* Logo */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
+            <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
+              B
+            </div>
+            <span style={{ fontWeight: 900, fontSize: '15px', color: '#fff', letterSpacing: '-0.025em', whiteSpace: 'nowrap' }}>
+              بیلیارد <span style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
             </span>
           </Link>
 
-          {/* ── Desktop Nav ── */}
-          <nav ref={dropRef} style={{
-            display: 'flex', alignItems: 'center', gap: '2px',
-            flex: 1,
-          }} className="hidden-mobile">
+          {/* Desktop nav */}
+          <div className="desktop-nav" style={{ alignItems: 'center', gap: '22px', marginRight: '10px', flexShrink: 0 }}>
+            <Link href="/clubs"    className="nav-link">باشگاه‌ها</Link>
+            <Link href="/shop"     className="nav-link">فروشگاه</Link>
+            <Link href="/rankings" className="nav-link">رنکینگ</Link>
+            <Link href="/live" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.55)', fontSize:'13px', fontWeight:500, padding:'6px 0', textDecoration:'none', transition:'color 0.3s', whiteSpace:'nowrap' }}>
+              <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#ef4444', boxShadow:'0 0 8px #ef4444', display:'inline-block', animation:'glowPulse 2s infinite', flexShrink:0 }} />
+              زنده
+            </Link>
 
-            {NAV_LINKS.map(item => (
-              <div key={item.label} style={{ position: 'relative' }}>
-                <button
-                  className={`nav-item-link ${openMenu===item.label?'open':''}`}
-                  onClick={() => setOpenMenu(openMenu===item.label ? null : item.label)}
-                >
-                  {item.icon}
-                  {item.label}
-                  <ChevronDown size={13} className={`nav-chevron ${openMenu===item.label?'open':''}`} style={{ opacity:0.5 }}/>
-                </button>
+            {/* Explore dropdown */}
+            <div ref={exploreRef} style={{ position: 'relative' }}>
+              <button className="explore-btn" onClick={() => setExploreOpen(p => !p)}>
+                بیشتر
+                <ChevronDown size={12} style={{ transition: 'transform 0.3s', transform: exploreOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+              </button>
 
-                {/* Dropdown */}
-                {openMenu === item.label && (
-                  <div style={{
-                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                    minWidth: '240px',
-                    background: 'rgba(248,252,248,0.94)',
-                    border: '1px solid rgba(255,255,255,0.75)',
-                    backdropFilter: 'blur(28px)',
-                    WebkitBackdropFilter: 'blur(28px)',
-                    borderRadius: '18px',
-                    padding: '8px',
-                    boxShadow: '0 12px 48px rgba(0,30,12,0.12), 0 2px 8px rgba(0,30,12,0.06), inset 0 1px 0 rgba(255,255,255,0.80)',
-                    animation: 'navDropIn 0.22s cubic-bezier(0.22,1,0.36,1) both',
-                    zIndex: 200,
-                  }}>
-                    {/* Shimmer top */}
-                    <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.9),transparent)', borderRadius:'1px' }}/>
-
-                    {item.children.map(child => (
-                      <Link key={child.href} href={child.href} className="drop-item"
-                        onClick={() => setOpenMenu(null)}>
-                        <div style={{
-                          width: '36px', height: '36px', borderRadius: '10px',
-                          background: 'rgba(22,163,74,0.07)',
-                          border: '1px solid rgba(22,163,74,0.12)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '16px', flexShrink: 0,
-                        }}>{child.icon}</div>
-                        <div>
-                          <div className="drop-label" style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(15,31,20,0.85)', transition: 'color 0.18s', marginBottom: '2px' }}>
-                            {child.label}
-                          </div>
-                          <div style={{ fontSize: '11px', color: 'rgba(15,31,20,0.40)' }}>{child.desc}</div>
+              {exploreOpen && (
+                <div className="dropdown-anim" style={{
+                  position: 'absolute', top: 'calc(100% + 18px)', right: '-16px',
+                  width: '560px', maxWidth: '90vw',
+                  background: 'rgba(255,255,255,0.97)',
+                  border: '1px solid rgba(16,185,129,0.14)',
+                  borderRadius: '20px',
+                  boxShadow: '0 28px 80px rgba(0,0,0,0.2), 0 0 0 1px rgba(16,185,129,0.05)',
+                  backdropFilter: 'blur(32px)',
+                  padding: '18px', zIndex: 200,
+                }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px', paddingBottom:'10px', borderBottom:'1px solid rgba(16,185,129,0.08)' }}>
+                    <span style={{ fontSize:'10px', color:'#10b981', letterSpacing:'0.18em', fontWeight:700 }}>EXPLORE BILLIARD PLUS</span>
+                    <button onClick={() => setExploreOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(26,46,36,0.3)', padding:'2px', display:'flex' }}><X size={13} /></button>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'6px' }}>
+                    {exploreMenu.map((section, si) => (
+                      <div key={si}>
+                        <div style={{ fontSize:'9px', color:'rgba(26,46,36,0.3)', letterSpacing:'0.18em', fontWeight:700, marginBottom:'5px', padding:'0 12px', textTransform:'uppercase' }}>
+                          {section.title}
                         </div>
-                      </Link>
+                        {section.items.map((item, ii) => (
+                          <Link key={ii} href={item.href} className="dropdown-item-light" onClick={() => setExploreOpen(false)}>
+                            <span className="dil-icon">{item.icon}</span>
+                            <div>
+                              <div className="dil-label">{item.label}</div>
+                              <div className="dil-desc">{item.desc}</div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
-                )}
-              </div>
-            ))}
+                  <div style={{ marginTop:'12px', paddingTop:'10px', borderTop:'1px solid rgba(16,185,129,0.08)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                    <span style={{ fontSize:'11px', color:'rgba(26,46,36,0.3)' }}>پلتفرم تخصصی بیلیارد ایران</span>
+                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize:'12px', color:'#10b981', fontWeight:600, textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
+                      ثبت‌نام رایگان <ArrowLeft size={11} />
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-            {/* Direct links */}
-            <Link href="/messages" className={`nav-item-link ${pathname==='/messages'?'active':''}`} style={{ position:'relative' }}>
-              <MessageCircle size={14}/>
-              پیام‌ها
-            </Link>
-          </nav>
+          {/* Search */}
+          <div className="nav-search-wrap" style={{ flex: 1, maxWidth: '260px', marginRight: 'auto' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', padding:'8px 13px', transition:'all 0.3s' }}>
+              <Search size={13} style={{ color:'rgba(255,255,255,0.22)', flexShrink:0 }} />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="جستجو..." className="search-input"
+                style={{ background:'none', border:'none', color:'#fff', fontSize:'13px', width:'100%' }} />
+              {search && <button onClick={() => setSearch('')} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(255,255,255,0.3)', padding:0, display:'flex' }}><X size={11} /></button>}
+            </div>
+          </div>
 
-          {/* ── Right side ── */}
-          <div style={{ display:'flex', alignItems:'center', gap:'8px', marginRight:'auto', flexShrink:0 }}>
-
-            {/* Search pill */}
-            <button style={{
-              display: 'flex', alignItems: 'center', gap: '7px',
-              padding: '7px 14px',
-              background: 'rgba(255,255,255,0.55)',
-              border: '1px solid rgba(255,255,255,0.70)',
-              borderRadius: '10px',
-              cursor: 'pointer', fontFamily: 'inherit',
-              fontSize: '12px', color: 'rgba(15,31,20,0.45)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: '0 1px 4px rgba(0,30,12,0.06)',
-              transition: 'all 0.2s',
-            }}
-              onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.80)'; (e.currentTarget as HTMLElement).style.color='rgba(15,31,20,0.65)';}}
-              onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.55)'; (e.currentTarget as HTMLElement).style.color='rgba(15,31,20,0.45)';}}>
-              <Search size={13}/> جستجو
+          {/* Right side */}
+          <div style={{ display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
+            <button className="desktop-nav" style={{ position:'relative', background:'none', border:'none', cursor:'pointer', padding:'8px', borderRadius:'8px', color:'rgba(255,255,255,0.35)', transition:'color 0.2s', alignItems:'center', justifyContent:'center' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)'; }}>
+              <Bell size={17} />
+              <span style={{ position:'absolute', top:'7px', right:'7px', width:'5px', height:'5px', background:'#ef4444', borderRadius:'50%', boxShadow:'0 0 6px #ef4444' }} />
             </button>
 
-            {_hydrated && !user ? (
-              /* Auth buttons */
-              <>
-                <Link href="/login" style={{
-                  padding: '8px 16px', borderRadius: '10px',
-                  fontSize: '13px', fontWeight: 600,
-                  color: 'rgba(15,31,20,0.65)',
-                  background: 'rgba(255,255,255,0.50)',
-                  border: '1px solid rgba(255,255,255,0.65)',
-                  textDecoration: 'none', transition: 'all 0.2s',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 1px 4px rgba(0,30,12,0.05)',
-                }}
-                  onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.80)';}}
-                  onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.50)';}}>
-                  ورود
-                </Link>
-                <Link href="/register" style={{
-                  padding: '8px 18px', borderRadius: '10px',
-                  fontSize: '13px', fontWeight: 700,
-                  color: '#fff',
-                  background: 'linear-gradient(135deg,#16a34a,#15803d)',
-                  border: 'none', textDecoration: 'none', transition: 'all 0.2s',
-                  boxShadow: '0 3px 10px rgba(22,163,74,0.28), inset 0 1px 0 rgba(255,255,255,0.15)',
-                }}>
-                  ثبت‌نام
-                </Link>
-              </>
-            ) : _hydrated && user ? (
-              /* User menu */
-              <div style={{ position:'relative' }} ref={dropRef}>
-                <button onClick={()=>setUserOpen(p=>!p)} style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '5px 10px 5px 5px',
-                  background: userOpen ? 'rgba(255,255,255,0.80)' : 'rgba(255,255,255,0.60)',
-                  border: '1px solid rgba(255,255,255,0.70)',
-                  borderRadius: '12px', cursor: 'pointer',
-                  fontFamily: 'inherit', transition: 'all 0.2s',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 1px 6px rgba(0,30,12,0.06)',
-                }}>
-                  <div style={{
-                    width: '30px', height: '30px', borderRadius: '8px',
-                    background: 'linear-gradient(135deg,#16a34a,#15803d)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '13px', fontWeight: 900, color: '#fff',
-                    boxShadow: '0 2px 6px rgba(22,163,74,0.30)',
-                  }}>{user.firstName?.[0] ?? 'U'}</div>
-                  <span style={{ fontSize:'13px', fontWeight:600, color:'rgba(15,31,20,0.75)', maxWidth:'80px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {user.firstName}
-                  </span>
-                  <ChevronDown size={12} className={`nav-chevron ${userOpen?'open':''}`} style={{ color:'rgba(15,31,20,0.40)' }}/>
+            <Link href="/shop" className="desktop-nav" style={{ padding:'8px', borderRadius:'8px', color:'rgba(255,255,255,0.35)', alignItems:'center', transition:'color 0.2s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)'; }}>
+              <ShoppingCart size={17} />
+            </Link>
+
+            {!user ? (
+              <Link href="/login">
+                <button style={{ display:'flex', alignItems:'center', gap:'6px', background:'rgba(16,185,129,0.08)', border:'1px solid rgba(16,185,129,0.2)', borderRadius:'10px', padding:'7px 14px', color:'#6ee7b7', fontSize:'13px', fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', transition:'all 0.3s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.14)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; }}>
+                  <User size={13} /> ورود
+                </button>
+              </Link>
+            ) : (
+              <div ref={profileRef} style={{ position:'relative' }}>
+                <button onClick={() => setProfileOpen(p => !p)} style={{ display:'flex', alignItems:'center', gap:'7px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', padding:'5px 10px', color:'rgba(255,255,255,0.65)', fontSize:'13px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s' }}>
+                  <div style={{ width:'26px', height:'26px', background:'linear-gradient(135deg,#10b981,#059669)', borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:900, fontSize:'12px', flexShrink:0 }}>
+                    {user.firstName?.[0]}
+                  </div>
+                  <span className="desktop-nav" style={{ alignItems:'center' }}>{user.firstName}</span>
+                  <ChevronDown size={11} style={{ transition:'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
                 </button>
 
-                {userOpen && (
-                  <div style={{
-                    position: 'absolute', top: 'calc(100% + 10px)', left: 0,
-                    minWidth: '220px',
-                    background: 'rgba(248,252,248,0.95)',
-                    border: '1px solid rgba(255,255,255,0.75)',
-                    backdropFilter: 'blur(28px)',
-                    WebkitBackdropFilter: 'blur(28px)',
-                    borderRadius: '18px', padding: '8px',
-                    boxShadow: '0 12px 48px rgba(0,30,12,0.12), inset 0 1px 0 rgba(255,255,255,0.80)',
-                    animation: 'navDropIn 0.22s cubic-bezier(0.22,1,0.36,1) both',
-                    zIndex: 200,
-                  }}>
-                    {/* User info */}
-                    <div style={{ padding:'10px 14px 12px', marginBottom:'4px', borderBottom:'1px solid rgba(0,40,18,0.06)' }}>
-                      <div style={{ fontSize:'14px', fontWeight:800, color:'#0f1f14' }}>{user.firstName} {user.lastName}</div>
-                      <div style={{ fontSize:'11px', color:'rgba(15,31,20,0.40)', marginTop:'2px' }}>{user.primaryRole==='admin'?'ادمین':user.primaryRole==='coach'?'مربی':'بازیکن'}</div>
-                    </div>
-
+                {profileOpen && (
+                  <div className="dropdown-anim" style={{ position:'absolute', top:'calc(100% + 10px)', left:0, width:'185px', background:'rgba(255,255,255,0.97)', border:'1px solid rgba(16,185,129,0.1)', borderRadius:'16px', boxShadow:'0 20px 60px rgba(0,0,0,0.18)', backdropFilter:'blur(32px)', padding:'7px', zIndex:200 }}>
                     {[
-                      { href:'/dashboard', icon:<LayoutDashboard size={14}/>, label:'داشبورد' },
-                      { href:'/messages',  icon:<MessageCircle size={14}/>,   label:'پیام‌ها'  },
-                      { href:'/seller',    icon:<ShoppingBag size={14}/>,     label:'فروشگاه من' },
-                    ].map(item => (
-                      <Link key={item.href} href={item.href} className="user-drop-item" onClick={()=>setUserOpen(false)}>
-                        <span style={{ color:'rgba(15,31,20,0.45)' }}>{item.icon}</span>
+                      { href:'/dashboard',        label:'داشبورد' },
+                      { href:'/dashboard/shop',   label:'فروشگاه من' },
+                      ...(user.primaryRole === 'club_owner' ? [{ href:'/dashboard/club', label:'مدیریت باشگاه' }] : []),
+                      ...(user.primaryRole === 'admin'      ? [{ href:'/admin',          label:'⚡ پنل ادمین' }]  : []),
+                      { href:'/profile', label:'ویرایش پروفایل' },
+                    ].map((item, i) => (
+                      <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}
+                        style={{ display:'block', padding:'9px 12px', borderRadius:'10px', fontSize:'13px', color:'rgba(26,46,36,0.65)', fontWeight:500, textDecoration:'none', transition:'all 0.2s' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background='rgba(16,185,129,0.08)'; (e.currentTarget as HTMLElement).style.color='#0f2318'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background='transparent'; (e.currentTarget as HTMLElement).style.color='rgba(26,46,36,0.65)'; }}>
                         {item.label}
                       </Link>
                     ))}
-
-                    <div style={{ height:'1px', background:'rgba(0,40,18,0.06)', margin:'6px 0' }}/>
-
-                    <button className="user-drop-item danger" onClick={handleLogout}>
-                      <LogOut size={14} style={{ color:'rgba(220,38,38,0.55)' }}/>
+                    <div style={{ height:'1px', background:'rgba(16,185,129,0.08)', margin:'4px 0' }} />
+                    <button onClick={() => { logout(); setProfileOpen(false); router.push('/'); }}
+                      style={{ display:'block', width:'100%', textAlign:'right', padding:'9px 12px', borderRadius:'10px', fontSize:'13px', color:'rgba(239,68,68,0.65)', fontWeight:500, background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background='rgba(239,68,68,0.07)'; (e.currentTarget as HTMLElement).style.color='#dc2626'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background='transparent'; (e.currentTarget as HTMLElement).style.color='rgba(239,68,68,0.65)'; }}>
                       خروج
                     </button>
                   </div>
                 )}
               </div>
-            ) : (
-              /* Loading skeleton */
-              <div style={{ width:'90px', height:'36px', borderRadius:'12px', background:'rgba(0,40,18,0.06)' }}/>
             )}
 
-            {/* Mobile menu toggle */}
-            <button onClick={()=>setMobileOpen(p=>!p)} style={{
-              display: 'none',
-              width: '38px', height: '38px', borderRadius: '11px',
-              background: 'rgba(255,255,255,0.55)',
-              border: '1px solid rgba(255,255,255,0.68)',
-              cursor: 'pointer', alignItems: 'center', justifyContent: 'center',
-              color: 'rgba(15,31,20,0.65)',
-              backdropFilter: 'blur(8px)',
-              transition: 'all 0.2s',
-            }} className="mobile-toggle">
-              {mobileOpen ? <X size={18}/> : <Menu size={18}/>}
+            {/* Hamburger */}
+            <button className="mobile-only"
+              onClick={() => setMobileOpen(p => !p)}
+              style={{ padding:'8px', borderRadius:'9px', background: mobileOpen ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)', border:`1px solid ${mobileOpen ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.07)'}`, color: mobileOpen ? '#10b981' : 'rgba(255,255,255,0.6)', cursor:'pointer', alignItems:'center', justifyContent:'center', transition:'all 0.3s' }}>
+              {mobileOpen ? <X size={17} /> : <Menu size={17} />}
             </button>
           </div>
         </div>
-      </header>
 
-      {/* ══ MOBILE DRAWER ══ */}
-      {mobileOpen && (
-        <>
+        {/* Mobile menu overlay */}
+        {mobileOpen && (
           <div style={{
-            position: 'fixed', inset: 0, zIndex: 998,
-            background: 'rgba(6,13,9,0.35)',
-            backdropFilter: 'blur(4px)',
-            animation: 'fadeInFast 0.2s ease both',
-          }} onClick={() => setMobileOpen(false)}/>
-
-          <div style={{
-            position: 'fixed', top: '62px', right: 0, bottom: 0,
-            width: 'min(320px,88vw)', zIndex: 999,
-            background: 'rgba(242,248,242,0.97)',
-            backdropFilter: 'blur(32px)',
-            WebkitBackdropFilter: 'blur(32px)',
-            borderLeft: '1px solid rgba(255,255,255,0.65)',
-            boxShadow: '-8px 0 40px rgba(0,30,12,0.12)',
-            overflowY: 'auto',
-            animation: 'mobileIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
+            position: 'fixed', top: '62px', left: 0, right: 0, bottom: 0,
+            zIndex: 99, background: 'rgba(2,8,6,0.98)', backdropFilter: 'blur(24px)',
+            overflowY: 'auto', padding: '0 0 40px',
+            animation: 'mobileSlideIn 0.28s cubic-bezier(0.22,1,0.36,1) forwards',
           }}>
+            <div style={{ height:'1px', background:'linear-gradient(90deg, transparent, rgba(16,185,129,0.4), transparent)', marginBottom:'8px' }} />
 
-            {/* Inner shimmer */}
-            <div style={{ position:'absolute', top:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.9),transparent)' }}/>
-
-            <div style={{ padding:'8px 0 24px' }}>
-              {NAV_LINKS.map(item => (
-                <div key={item.label}>
-                  <div style={{ padding:'10px 20px 6px', fontSize:'10px', fontWeight:700, letterSpacing:'0.15em', color:'rgba(15,31,20,0.35)', textTransform:'uppercase' }}>
-                    {item.label}
+            <div style={{ padding:'20px 20px 16px' }}>
+              {!user ? (
+                <Link href="/login" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', padding:'15px', borderRadius:'16px', background:'linear-gradient(135deg,#10b981,#059669)', color:'#fff', fontSize:'15px', fontWeight:800, textDecoration:'none', boxShadow:'0 8px 28px rgba(16,185,129,0.3)' }}>
+                  <User size={17} /> ورود / ثبت‌نام رایگان
+                </Link>
+              ) : (
+                <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'14px 16px', background:'rgba(255,255,255,0.04)', borderRadius:'16px', border:'1px solid rgba(255,255,255,0.07)' }}>
+                  <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#10b981,#059669)', borderRadius:'10px', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:900, fontSize:'16px', flexShrink:0 }}>
+                    {user.firstName?.[0]}
                   </div>
-                  {item.children.map(child => (
-                    <Link key={child.href} href={child.href} className="mobile-link">
-                      <span style={{ fontSize:'20px', flexShrink:0 }}>{child.icon}</span>
-                      <div>
-                        <div style={{ fontWeight:700, fontSize:'14px' }}>{child.label}</div>
-                        <div style={{ fontSize:'11px', color:'rgba(15,31,20,0.40)', marginTop:'1px' }}>{child.desc}</div>
-                      </div>
-                    </Link>
-                  ))}
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ color:'#f0faf5', fontWeight:700, fontSize:'14px' }}>{user.firstName} {user.lastName}</div>
+                    <div style={{ color:'rgba(240,250,245,0.35)', fontSize:'11px', marginTop:'2px' }}>{user.primaryRole}</div>
+                  </div>
+                  <button onClick={() => { logout(); router.push('/'); setMobileOpen(false); }}
+                    style={{ padding:'7px 14px', borderRadius:'10px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', color:'#ef4444', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+                    خروج
+                  </button>
                 </div>
-              ))}
+              )}
+            </div>
 
-              {/* Auth section */}
-              <div style={{ padding:'16px 16px 0', borderTop:'1px solid rgba(0,40,18,0.06)', marginTop:'8px' }}>
-                {user ? (
-                  <div>
-                    <Link href="/dashboard" className="mobile-link" style={{ borderRadius:'12px', marginBottom:'6px' }}>
-                      <LayoutDashboard size={18} style={{ color:'#16a34a', flexShrink:0 }}/>
-                      <div>
-                        <div style={{ fontWeight:700 }}>داشبورد</div>
-                        <div style={{ fontSize:'11px', color:'rgba(15,31,20,0.40)' }}>{user.firstName} {user.lastName}</div>
-                      </div>
-                    </Link>
-                    <button onClick={handleLogout} style={{ width:'100%', padding:'13px 18px', borderRadius:'12px', background:'rgba(220,38,38,0.06)', border:'1px solid rgba(220,38,38,0.12)', color:'#dc2626', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:'10px', marginTop:'8px' }}>
-                      <LogOut size={15}/> خروج از حساب
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display:'flex', gap:'8px' }}>
-                    <Link href="/login" style={{ flex:1, padding:'12px', borderRadius:'12px', background:'rgba(255,255,255,0.70)', border:'1px solid rgba(255,255,255,0.75)', color:'rgba(15,31,20,0.70)', fontSize:'13px', fontWeight:700, textAlign:'center', textDecoration:'none', backdropFilter:'blur(8px)' }}>
-                      ورود
-                    </Link>
-                    <Link href="/register" style={{ flex:1, padding:'12px', borderRadius:'12px', background:'linear-gradient(135deg,#16a34a,#15803d)', color:'#fff', fontSize:'13px', fontWeight:700, textAlign:'center', textDecoration:'none', boxShadow:'0 4px 12px rgba(22,163,74,0.28)' }}>
-                      ثبت‌نام
-                    </Link>
-                  </div>
-                )}
-              </div>
+            <div style={{ height:'1px', background:'rgba(255,255,255,0.04)', margin:'0 20px 12px' }} />
+
+            <div style={{ padding:'0 12px', display:'flex', flexDirection:'column', gap:'2px' }}>
+              {mobileLinks.map((item, i) => (
+                <Link key={i} href={item.href}
+                  style={{ display:'flex', alignItems:'center', gap:'14px', padding:'13px 14px', borderRadius:'14px', color:'rgba(240,250,245,0.55)', fontSize:'15px', fontWeight:500, textDecoration:'none', transition:'all 0.2s', animation:`mobileSlideIn 0.3s cubic-bezier(0.22,1,0.36,1) ${i * 0.04}s both` }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background='rgba(16,185,129,0.08)'; (e.currentTarget as HTMLElement).style.color='#f0faf5'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background='transparent'; (e.currentTarget as HTMLElement).style.color='rgba(240,250,245,0.55)'; }}>
+                  <span style={{ color: (item as any).live ? '#ef4444' : 'rgba(16,185,129,0.6)', display:'flex', flexShrink:0 }}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+                  {(item as any).live && (
+                    <span style={{ marginRight:'auto', fontSize:'9px', color:'#ef4444', background:'rgba(239,68,68,0.12)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:'20px', padding:'2px 8px', fontWeight:700, letterSpacing:'0.08em' }}>LIVE</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            <div style={{ margin:'24px 20px 0', padding:'16px', background:'rgba(16,185,129,0.04)', borderRadius:'16px', border:'1px solid rgba(16,185,129,0.1)', textAlign:'center' }}>
+              <div style={{ fontSize:'10px', color:'rgba(16,185,129,0.5)', letterSpacing:'0.2em', fontWeight:700, marginBottom:'6px' }}>BILLIARD PLUS</div>
+              <div style={{ fontSize:'12px', color:'rgba(240,250,245,0.3)' }}>اولین اکوسیستم جامع بیلیارد ایران</div>
             </div>
           </div>
-        </>
+        )}
+      </nav>
+
+      {/* Stories — home only */}
+      {isHomePage && (
+        <div style={{
+          position: 'fixed', top: '62px', left: 0, right: 0, zIndex: 49,
+          padding: 'clamp(8px,1.5vw,12px) clamp(16px,3vw,32px)',
+          opacity: Math.max(0, 1 - scrollY / 700),
+          pointerEvents: scrollY > 560 ? 'none' : 'auto',
+          transition: 'opacity 0.1s linear',
+        }}>
+          <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
+            <Stories />
+          </div>
+        </div>
       )}
 
-      {/* Spacer */}
-      <div style={{ height: '62px' }}/>
-
-      {/* CSS for responsive */}
-      <style>{`
-        @media(max-width:900px) {
-          .hidden-mobile { display:none !important; }
-          .mobile-toggle { display:flex !important; }
-        }
-      `}</style>
+      {!isHomePage && <div style={{ height: '62px' }} />}
     </>
   );
 }

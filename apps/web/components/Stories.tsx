@@ -27,11 +27,11 @@ const sampleGroups: StoryGroup[] = [
 
 const emojis = ['❤️', '🔥', '👏', '😮', '😂', '🎱', '💪', '🏆'];
 const bgGradients: Record<string, string> = {
-  club: 'linear-gradient(160deg, #011a0f 0%, #022c22 50%, #065f46 100%)',
+  club:   'linear-gradient(160deg, #011a0f 0%, #022c22 50%, #065f46 100%)',
   player: 'linear-gradient(160deg, #060e1a 0%, #0c1f35 50%, #075985 100%)',
-  coach: 'linear-gradient(160deg, #0e0520 0%, #1e0a3c 50%, #4c1d95 100%)',
-  shop: 'linear-gradient(160deg, #100900 0%, #1c1000 50%, #78350f 100%)',
-  admin: 'linear-gradient(160deg, #0f0303 0%, #1a0505 50%, #7f1d1d 100%)',
+  coach:  'linear-gradient(160deg, #0e0520 0%, #1e0a3c 50%, #4c1d95 100%)',
+  shop:   'linear-gradient(160deg, #100900 0%, #1c1000 50%, #78350f 100%)',
+  admin:  'linear-gradient(160deg, #0f0303 0%, #1a0505 50%, #7f1d1d 100%)',
 };
 
 const STORY_DURATION = 15000;
@@ -48,12 +48,8 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           from { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
           to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        @keyframes overlayFadeIn {
-          from { opacity: 0; } to { opacity: 1; }
-        }
-        @keyframes storyProgress {
-          from { width: 0%; } to { width: 100%; }
-        }
+        @keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes storyProgress { from { width: 0%; } to { width: 100%; } }
         @keyframes reactionFloat {
           0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.5); }
           40%  { opacity: 1; transform: translateX(-50%) translateY(-50px) scale(1.6); }
@@ -91,29 +87,10 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         .story-icon-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
       `}</style>
 
-      {/* Overlay */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 99998,
-        background: 'rgba(0,0,0,0.85)',
-        backdropFilter: 'blur(20px)',
-        animation: 'overlayFadeIn 0.2s ease',
-      }} onClick={onClose} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 99998, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', animation: 'overlayFadeIn 0.2s ease' }} onClick={onClose} />
 
-      {/* کارت استوری */}
-      <div style={{
-        position: 'fixed',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 99999,
-        width: 'min(400px, 94vw)',
-        height: 'min(700px, 88vh)',
-        borderRadius: '28px',
-        overflow: 'hidden',
-        animation: 'storyModalIn 0.3s cubic-bezier(0.4,0,0.2,1)',
-        boxShadow: `0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08), 0 0 80px ${currentGroup.roleColor}25`,
-      }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 99999, width: 'min(400px, 94vw)', height: 'min(700px, 88vh)', borderRadius: '28px', overflow: 'hidden', animation: 'storyModalIn 0.3s cubic-bezier(0.4,0,0.2,1)', boxShadow: `0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08), 0 0 80px ${currentGroup.roleColor}25` }} onClick={e => e.stopPropagation()}>
 
-        {/* بکگراند */}
         <div style={{ position: 'absolute', inset: 0, background: bgGradients[currentGroup.userRole] || bgGradients.player }}>
           <div style={{ position: 'absolute', top: '-100px', left: '50%', transform: 'translateX(-50%)', width: '350px', height: '350px', borderRadius: '50%', background: `radial-gradient(${currentGroup.roleColor}25, transparent 65%)`, pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '-80px', right: '-50px', width: '250px', height: '250px', borderRadius: '50%', background: `radial-gradient(${currentGroup.roleColor}15, transparent 65%)`, pointerEvents: 'none' }} />
@@ -121,32 +98,22 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '140px', opacity: 0.05, userSelect: 'none', pointerEvents: 'none' }}>🎱</div>
         </div>
 
-        {/* border شیشه‌ای */}
         <div style={{ position: 'absolute', inset: 0, borderRadius: '28px', border: '1px solid rgba(255,255,255,0.1)', pointerEvents: 'none', zIndex: 55 }} />
 
-        {/* ====== PROGRESS BARS ====== */}
+        {/* Progress bars */}
         <div style={{ position: 'absolute', top: '16px', left: '14px', right: '14px', display: 'flex', gap: '5px', zIndex: 50 }}>
           {currentGroup.stories.map((_: any, si: number) => (
             <div key={si} style={{ flex: 1, height: '3px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px', overflow: 'hidden' }}>
               {si < activeStory ? (
                 <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.95)', borderRadius: '3px' }} />
               ) : si === activeStory ? (
-                <div
-                  key={`progress-${activeGroup}-${activeStory}`}
-                  style={{
-                    height: '100%',
-                    background: 'rgba(255,255,255,0.95)',
-                    borderRadius: '3px',
-                    boxShadow: '0 0 6px rgba(255,255,255,0.7)',
-                    animation: `storyProgress ${STORY_DURATION}ms linear forwards`,
-                  }}
-                />
+                <div key={`progress-${activeGroup}-${activeStory}`} style={{ height: '100%', background: 'rgba(255,255,255,0.95)', borderRadius: '3px', boxShadow: '0 0 6px rgba(255,255,255,0.7)', animation: `storyProgress ${STORY_DURATION}ms linear forwards` }} />
               ) : null}
             </div>
           ))}
         </div>
 
-        {/* ====== HEADER ====== */}
+        {/* Header */}
         <div style={{ position: 'absolute', top: '30px', left: '14px', right: '14px', display: 'flex', alignItems: 'center', gap: '10px', zIndex: 50, paddingTop: '6px' }}>
           <div style={{ width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0, background: `${currentGroup.roleColor}25`, border: `2px solid ${currentGroup.roleColor}80`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: '17px', boxShadow: `0 0 16px ${currentGroup.roleColor}50` }}>
             {currentGroup.userAvatar}
@@ -163,11 +130,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           </button>
         </div>
 
-        {/* ناحیه prev/next */}
         <button onClick={onPrev} style={{ position: 'absolute', right: 0, top: '95px', bottom: '140px', width: '38%', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 10 }} />
         <button onClick={onNext} style={{ position: 'absolute', left: 0, top: '95px', bottom: '140px', width: '38%', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 10 }} />
 
-        {/* ====== CAPTION ====== */}
         {currentStory.caption && (
           <div style={{ position: 'absolute', bottom: '130px', left: '16px', right: '16px', zIndex: 20 }}>
             <div style={{ background: 'rgba(0,0,0,0.5)', borderRadius: '18px', padding: '14px 18px', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -178,7 +143,6 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 
         {sentReaction && <div className="story-reaction-pop">{sentReaction}</div>}
 
-        {/* ایموجی‌ها */}
         {showEmojis && (
           <div style={{ position: 'absolute', bottom: '135px', left: '16px', right: '16px', zIndex: 40, background: 'rgba(4,12,8,0.96)', borderRadius: '20px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
             {emojis.map((e: string) => (
@@ -187,21 +151,17 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           </div>
         )}
 
-        {/* ====== BOTTOM BAR ====== */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 30, padding: '14px 16px 26px', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 70%, transparent 100%)' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onKeyDown={e => e.key === 'Enter' && onSendComment()} placeholder="پیام بفرست..." />
-            <button className="story-icon-btn" onClick={onToggleEmojis}
-              style={{ background: showEmojis ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', borderColor: showEmojis ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)', fontSize: '20px' }}>
+            <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background: showEmojis ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', borderColor: showEmojis ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)', fontSize: '20px' }}>
               😊
             </button>
-            <button className="story-icon-btn" onClick={onLike}
-              style={{ background: liked ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)', borderColor: liked ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)' }}>
+            <button className="story-icon-btn" onClick={onLike} style={{ background: liked ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)', borderColor: liked ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)' }}>
               <Heart size={17} fill={liked ? '#ef4444' : 'none'} style={{ color: liked ? '#ef4444' : 'rgba(255,255,255,0.7)' }} />
             </button>
             {comment.trim() && (
-              <button className="story-icon-btn" onClick={onSendComment}
-                style={{ background: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.35)' }}>
+              <button className="story-icon-btn" onClick={onSendComment} style={{ background: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.35)' }}>
                 <Send size={16} style={{ color: '#10b981' }} />
               </button>
             )}
@@ -227,11 +187,7 @@ export default function Stories() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const closeStory = () => {
-    setActiveGroup(null);
-    setShowEmojis(false);
-    setComment('');
-  };
+  const closeStory = () => { setActiveGroup(null); setShowEmojis(false); setComment(''); };
 
   const nextStory = () => {
     if (activeGroup === null) return;
@@ -270,12 +226,9 @@ export default function Stories() {
     setSeenGroups(prev => new Set([...prev, groups[index]?.userId ?? '']));
   };
 
-  // تایمر ساده با setTimeout
   useEffect(() => {
     if (activeGroup === null) return;
-    const timer = setTimeout(() => {
-      nextStory();
-    }, STORY_DURATION);
+    const timer = setTimeout(() => { nextStory(); }, STORY_DURATION);
     return () => clearTimeout(timer);
   }, [activeGroup, activeStory]);
 
@@ -332,21 +285,12 @@ export default function Stories() {
 
       {mounted && activeGroup !== null && (
         <StoryViewer
-          groups={groups}
-          activeGroup={activeGroup}
-          activeStory={activeStory}
-          liked={liked}
-          showEmojis={showEmojis}
-          comment={comment}
-          sentReaction={sentReaction}
-          onClose={closeStory}
-          onNext={nextStory}
-          onPrev={prevStory}
+          groups={groups} activeGroup={activeGroup} activeStory={activeStory}
+          liked={liked} showEmojis={showEmojis} comment={comment} sentReaction={sentReaction}
+          onClose={closeStory} onNext={nextStory} onPrev={prevStory}
           onLike={() => { setLiked(p => !p); if (!liked) handleReaction('❤️'); }}
-          onReaction={handleReaction}
-          onToggleEmojis={() => setShowEmojis(p => !p)}
-          onComment={setComment}
-          onSendComment={() => setComment('')}
+          onReaction={handleReaction} onToggleEmojis={() => setShowEmojis(p => !p)}
+          onComment={setComment} onSendComment={() => setComment('')}
         />
       )}
     </>
