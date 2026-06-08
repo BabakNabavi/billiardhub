@@ -1,7 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# کپی package files از ریشه monorepo
 COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 
