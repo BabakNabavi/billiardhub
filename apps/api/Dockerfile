@@ -1,13 +1,16 @@
 FROM node:20-alpine
-
 WORKDIR /app
 
+# کپی package files از ریشه monorepo
 COPY package*.json ./
-RUN npm ci --only=production
+COPY apps/api/package*.json ./apps/api/
 
-COPY . .
+RUN npm ci --workspace=apps/api
+
+COPY apps/api/ ./apps/api/
+
+WORKDIR /app/apps/api
 RUN npm run build
 
 EXPOSE 4000
-
 CMD ["node", "dist/main"]
