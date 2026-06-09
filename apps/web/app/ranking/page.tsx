@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Trophy, TrendingUp, TrendingDown, Minus, Crown, Medal, Award } from 'lucide-react';
 
 interface RankingPlayer {
   rank: number;
@@ -34,213 +35,440 @@ const samplePlayers: RankingPlayer[] = [
   { rank: 18, previousRank: 17, name: 'امین رستمی', city: 'تبریز', points: 5300 },
   { rank: 19, previousRank: 20, name: 'شاهین نوری', city: 'شیراز', points: 5000 },
   { rank: 20, previousRank: 19, name: 'کیان صفوی', city: 'مشهد', points: 4700 },
-  { rank: 21, previousRank: 22, name: 'دانیال یوسفی', city: 'تهران', points: 4400 },
-  { rank: 22, previousRank: 21, name: 'آرمان فتحی', city: 'اهواز', points: 4100 },
-  { rank: 23, previousRank: 24, name: 'حامد زارع', city: 'اصفهان', points: 3800 },
-  { rank: 24, previousRank: 23, name: 'نیما خلیلی', city: 'تهران', points: 3500 },
-  { rank: 25, previousRank: 26, name: 'صادق منصوری', city: 'قزوین', points: 3200 },
-  { rank: 26, previousRank: 25, name: 'رامین عباسی', city: 'تهران', points: 2900 },
-  { rank: 27, previousRank: 28, name: 'میلاد ناصری', city: 'ساری', points: 2600 },
-  { rank: 28, previousRank: 27, name: 'یاسر حسن‌زاده', city: 'تهران', points: 2300 },
-  { rank: 29, previousRank: 30, name: 'کامران بهرامی', city: 'اراک', points: 2000 },
-  { rank: 30, previousRank: 29, name: 'سجاد معینی', city: 'تهران', points: 1700 },
-  { rank: 31, previousRank: 32, name: 'ایمان قربانی', city: 'همدان', points: 1400 },
-  { rank: 32, previousRank: 31, name: 'پارسا طالبی', city: 'تهران', points: 1100 },
 ];
 
-const data: Record<string, Record<string, Record<string, RankingPlayer[]>>> = {
+const sports = [
+  { value: 'snooker', label: 'اسنوکر', icon: '🎱' },
+  { value: 'pocket', label: 'پاکت بیلیارد', icon: '🎯' },
+  { value: 'highball', label: 'هی‌بال', icon: '⚡', soon: true },
+];
+
+const genders = ['آقایان', 'بانوان'];
+
+const categories: Record<string, Record<string, string[]>> = {
   snooker: {
-    آقایان: {
-      'دسته برتر': samplePlayers,
-      'دسته یک': samplePlayers.map(p => ({ ...p, name: p.name + ' (نمونه)', points: p.points - 500 })),
-      'زیر ۲۱ سال': [],
-      'پیشکسوتان': [],
-    },
-    بانوان: {
-      'دسته برتر': [],
-      'زیر ۲۱ سال': [],
-      'پیشکسوتان': [],
-    },
+    آقایان: ['دسته برتر', 'دسته یک', 'زیر ۲۱ سال', 'پیشکسوتان'],
+    بانوان: ['دسته برتر', 'زیر ۲۱ سال', 'پیشکسوتان'],
   },
   pocket: {
-    آقایان: {
-      'دسته برتر': [],
-      'دسته یک': [],
-      'زیر ۲۱ سال': [],
-      'پیشکسوتان': [],
-    },
-    بانوان: {
-      'دسته برتر': [],
-      'زیر ۲۱ سال': [],
-      'پیشکسوتان': [],
-    },
+    آقایان: ['دسته برتر', 'دسته یک', 'زیر ۲۱ سال', 'پیشکسوتان'],
+    بانوان: ['دسته برتر', 'زیر ۲۱ سال', 'پیشکسوتان'],
   },
+};
+
+const getRankIcon = (rank: number) => {
+  if (rank === 1) return <Crown size={14} style={{ color: '#f59e0b' }} />;
+  if (rank === 2) return <Medal size={14} style={{ color: '#94a3b8' }} />;
+  if (rank === 3) return <Award size={14} style={{ color: '#b45309' }} />;
+  return null;
+};
+
+const getRankColor = (rank: number) => {
+  if (rank === 1) return { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.4)', text: '#f59e0b' };
+  if (rank === 2) return { bg: 'rgba(148,163,184,0.15)', border: 'rgba(148,163,184,0.4)', text: '#94a3b8' };
+  if (rank === 3) return { bg: 'rgba(180,83,9,0.15)', border: 'rgba(180,83,9,0.4)', text: '#b45309' };
+  return { bg: 'rgba(16,185,129,0.05)', border: 'rgba(16,185,129,0.15)', text: 'rgba(240,250,245,0.5)' };
 };
 
 export default function RankingsPage() {
   const [sport, setSport] = useState('snooker');
   const [gender, setGender] = useState('آقایان');
   const [category, setCategory] = useState('دسته برتر');
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
-  const currentCategories = sport !== 'highball' ? Object.keys(data[sport]?.[gender] || {}) : [];
-  const players = sport !== 'highball' ? (data[sport]?.[gender]?.[category] || []) : [];
-  const hasData = players.some(p => p.name);
-
-  const getRowBg = (index: number) => {
-    if (category === 'دسته برتر' && index >= 24) return 'bg-red-50 hover:bg-red-100';
-    if (category === 'دسته یک' && index < 8) return 'bg-blue-50 hover:bg-blue-100';
-    if (index < 16) return 'bg-green-50 hover:bg-green-100';
-    return 'hover:bg-gray-50';
-  };
-
-  const getRankBg = (index: number, rank: number) => {
-    if (rank === 1) return 'bg-yellow-400 text-white';
-    if (rank === 2) return 'bg-gray-400 text-white';
-    if (rank === 3) return 'bg-amber-600 text-white';
-    if (category === 'دسته برتر' && index >= 24) return 'bg-red-200 text-red-800';
-    if (category === 'دسته یک' && index < 8) return 'bg-blue-200 text-blue-800';
-    if (index < 16) return 'bg-green-200 text-green-800';
-    return 'bg-gray-100 text-gray-600';
-  };
+  const currentCategories = categories[sport]?.[gender] ?? [];
+  const players = sport !== 'highball' ? samplePlayers : [];
 
   return (
-    <div className="max-w-4xl mx-auto pb-10">
-      <h1 className="text-2xl font-bold text-green-800 mb-6">🏆 رنکینگ ایران</h1>
+    <>
+      <style>{`
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        @keyframes shimmer { 0%{background-position:200% center;}100%{background-position:-200% center;} }
+        .rank-row { transition: all 0.2s ease; cursor: pointer; }
+        .rank-row:hover { background: rgba(16,185,129,0.06) !important; }
+        .sport-tab { transition: all 0.3s ease; }
+        .sport-tab:hover { background: rgba(16,185,129,0.08) !important; }
+        .cat-btn { transition: all 0.2s ease; }
+        .cat-btn:hover { background: rgba(16,185,129,0.08) !important; color: #10b981 !important; }
+      `}</style>
 
-      {/* انتخاب رشته */}
-      <div className="flex gap-3 mb-6">
-        {[
-          { value: 'snooker', label: 'اسنوکر' },
-          { value: 'pocket', label: 'پاکت بیلیارد' },
-          { value: 'highball', label: 'هی‌بال' },
-        ].map(s => (
-          <button key={s.value}
-            onClick={() => { setSport(s.value); setGender('آقایان'); setCategory('دسته برتر'); }}
-            disabled={s.value === 'highball'}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${sport === s.value ? 'bg-green-700 text-white' :
-              s.value === 'highball' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
-                'border border-green-300 text-green-700 hover:bg-green-50'
-              }`}>
-            {s.label}
-            {s.value === 'highball' && <span className="text-xs mr-1">(به زودی)</span>}
-          </button>
-        ))}
-      </div>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg,#010604 0%,#050c08 100%)',
+        padding: 'clamp(24px,4vw,48px) clamp(16px,3vw,32px)',
+        direction: 'rtl',
+      }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-      {sport !== 'highball' && (
-        <div className="flex gap-4">
-          {/* منوی چپ */}
-          <div className="w-44 flex-shrink-0 space-y-3">
-            {['آقایان', 'بانوان'].map(g => (
-              <div key={g} className="bg-white rounded-xl shadow overflow-hidden">
-                <button
-                  onClick={() => {
-                    setGender(g);
-                    setCategory(Object.keys(data[sport]?.[g] ?? {})[0] ?? 'دسته برتر');
-                  }}
-                  className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-green-700 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                    }`}>
-                  {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
-                </button>
-                {gender === g && (
-                  <div className="p-1">
-                    {Object.keys(data[sport]?.[g] ?? {}).map(cat => (
-                      <button key={cat}
-                        onClick={() => setCategory(cat)}
-                        className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat
-                          ? 'bg-green-100 text-green-800 font-medium'
-                          : 'text-gray-600 hover:bg-gray-50'
-                          }`}>
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                )}
+          {/* Header */}
+          <div style={{ marginBottom: '40px', animation: 'fadeUp 0.6s ease both' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '12px',
+                background: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 8px 24px rgba(245,158,11,0.3)',
+              }}>
+                <Trophy size={20} color="#fff" />
               </div>
+              <div>
+                <h1 style={{
+                  fontSize: 'clamp(22px,3vw,32px)', fontWeight: 900,
+                  color: '#f0faf5', margin: 0, letterSpacing: '-0.025em',
+                }}>
+                  رنکینگ ایران
+                </h1>
+                <p style={{ color: 'rgba(240,250,245,0.35)', fontSize: '13px', margin: '2px 0 0' }}>
+                  جدول امتیازات رسمی فدراسیون بیلیارد ایران
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sport Tabs */}
+          <div style={{
+            display: 'flex', gap: '8px', marginBottom: '28px',
+            animation: 'fadeUp 0.6s 0.1s ease both',
+          }}>
+            {sports.map(s => (
+              <button
+                key={s.value}
+                className="sport-tab"
+                disabled={s.soon}
+                onClick={() => { if (!s.soon) { setSport(s.value); setCategory('دسته برتر'); } }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '10px 20px', borderRadius: '12px',
+                  border: sport === s.value
+                    ? '1px solid rgba(16,185,129,0.5)'
+                    : '1px solid rgba(255,255,255,0.07)',
+                  background: sport === s.value
+                    ? 'rgba(16,185,129,0.12)'
+                    : 'rgba(255,255,255,0.03)',
+                  color: sport === s.value ? '#10b981' : s.soon ? 'rgba(240,250,245,0.2)' : 'rgba(240,250,245,0.5)',
+                  fontSize: '13px', fontWeight: 600,
+                  cursor: s.soon ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                  opacity: s.soon ? 0.5 : 1,
+                }}>
+                <span>{s.icon}</span>
+                <span>{s.label}</span>
+                {s.soon && (
+                  <span style={{
+                    fontSize: '9px', background: 'rgba(245,158,11,0.15)',
+                    color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)',
+                    borderRadius: '20px', padding: '2px 6px', fontWeight: 700,
+                  }}>به زودی</span>
+                )}
+              </button>
             ))}
           </div>
 
-          {/* جدول */}
-          <div className="flex-1">
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-              <div className="bg-green-700 text-white px-4 py-3 flex items-center justify-between">
-                <span className="font-bold">{gender} — {category}</span>
-                <span className="text-sm opacity-80">۳۲ نفر</span>
-              </div>
+          {sport !== 'highball' && (
+            <div style={{ display: 'flex', gap: '20px', animation: 'fadeUp 0.6s 0.2s ease both' }}>
 
-              <div className="grid grid-cols-12 px-4 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b">
-                <div className="col-span-1 text-center">رتبه</div>
-                <div className="col-span-1 text-center">±</div>
-                <div className="col-span-1"></div>
-                <div className="col-span-5">نام بازیکن</div>
-                <div className="col-span-2 text-center">شهر</div>
-                <div className="col-span-2 text-center">امتیاز</div>
-              </div>
+              {/* Sidebar */}
+              <div style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
-              {!hasData ? (
-                <div className="text-center py-16 text-gray-400">
-                  <div className="text-5xl mb-4">🏆</div>
-                  <p>رنکینگ این دسته هنوز اعلام نشده</p>
+                {/* Gender */}
+                <div style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '16px', overflow: 'hidden',
+                }}>
+                  {genders.map(g => (
+                    <button
+                      key={g}
+                      onClick={() => { setGender(g); setCategory('دسته برتر'); }}
+                      style={{
+                        width: '100%', textAlign: 'right',
+                        padding: '12px 16px',
+                        background: gender === g ? 'rgba(16,185,129,0.12)' : 'transparent',
+                        borderBottom: '1px solid rgba(255,255,255,0.04)',
+                        color: gender === g ? '#10b981' : 'rgba(240,250,245,0.45)',
+                        fontSize: '13px', fontWeight: gender === g ? 700 : 500,
+                        cursor: 'pointer', border: 'none', fontFamily: 'inherit',
+                        borderRight: gender === g ? '2px solid #10b981' : '2px solid transparent',
+                        transition: 'all 0.2s',
+                      }}>
+                      {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
+                    </button>
+                  ))}
                 </div>
-              ) : (
-                players.filter(p => p.name).map((player, index) => {
-                  const diff = player.previousRank ? player.previousRank - player.rank : 0;
-                  return (
-                    <Link key={player.rank} href={player.userId ? `/users/${player.userId}` : '#'}>
-                      <div className={`grid grid-cols-12 items-center px-4 py-3 border-b transition-all ${getRowBg(index)}`}>
-                        <div className="col-span-1 text-center">
-                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mx-auto ${getRankBg(index, player.rank)}`}>
-                            {player.rank.toLocaleString('fa-IR')}
-                          </span>
-                        </div>
-                        <div className="col-span-1 text-center text-xs">
-                          {diff > 0 ? <span className="text-green-600 font-bold">▲{diff}</span> :
-                            diff < 0 ? <span className="text-red-500 font-bold">▼{Math.abs(diff)}</span> :
-                              <span className="text-gray-300">-</span>}
-                        </div>
-                        <div className="col-span-1">
-                          <div className="w-9 h-9 bg-green-700 rounded-full flex items-center justify-center text-white text-sm font-bold overflow-hidden">
-                            {player.avatar
-                              ? <img src={player.avatar} alt="" className="w-full h-full object-cover" />
-                              : player.name?.[0]}
+
+                {/* Categories */}
+                <div style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '16px', padding: '8px',
+                }}>
+                  <div style={{
+                    fontSize: '9px', color: 'rgba(16,185,129,0.5)',
+                    letterSpacing: '0.18em', fontWeight: 700,
+                    padding: '6px 8px 10px', textTransform: 'uppercase',
+                  }}>
+                    دسته‌بندی
+                  </div>
+                  {currentCategories.map(cat => (
+                    <button
+                      key={cat}
+                      className="cat-btn"
+                      onClick={() => setCategory(cat)}
+                      style={{
+                        width: '100%', textAlign: 'right',
+                        padding: '9px 12px', borderRadius: '10px',
+                        background: category === cat ? 'rgba(16,185,129,0.1)' : 'transparent',
+                        color: category === cat ? '#10b981' : 'rgba(240,250,245,0.4)',
+                        fontSize: '13px', fontWeight: category === cat ? 600 : 400,
+                        cursor: 'pointer', border: 'none', fontFamily: 'inherit',
+                        display: 'block',
+                      }}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Legend */}
+                <div style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: '14px', padding: '14px',
+                }}>
+                  <div style={{ fontSize: '10px', color: 'rgba(16,185,129,0.4)', letterSpacing: '0.15em', fontWeight: 700, marginBottom: '10px' }}>
+                    راهنما
+                  </div>
+                  {[
+                    { color: '#f59e0b', label: 'رتبه اول' },
+                    { color: '#94a3b8', label: 'رتبه دوم' },
+                    { color: '#b45309', label: 'رتبه سوم' },
+                  ].map(item => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.35)' }}>{item.label}</span>
+                    </div>
+                  ))}
+                  <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <TrendingUp size={11} color="#10b981" />
+                    <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>صعود رتبه</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <TrendingDown size={11} color="#ef4444" />
+                    <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>نزول رتبه</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '20px', overflow: 'hidden',
+                }}>
+                  {/* Table Header */}
+                  <div style={{
+                    padding: '16px 20px',
+                    background: 'rgba(16,185,129,0.06)',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Trophy size={15} color="#10b981" />
+                      <span style={{ color: '#f0faf5', fontWeight: 700, fontSize: '14px' }}>
+                        {gender} — {category}
+                      </span>
+                    </div>
+                    <span style={{
+                      fontSize: '11px', color: 'rgba(16,185,129,0.6)',
+                      background: 'rgba(16,185,129,0.08)',
+                      border: '1px solid rgba(16,185,129,0.2)',
+                      borderRadius: '20px', padding: '3px 10px',
+                    }}>
+                      {players.length} نفر
+                    </span>
+                  </div>
+
+                  {/* Column Headers */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '60px 40px 44px 1fr 90px 90px',
+                    padding: '10px 20px',
+                    background: 'rgba(0,0,0,0.2)',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  }}>
+                    {['رتبه', '±', '', 'نام بازیکن', 'شهر', 'امتیاز'].map((h, i) => (
+                      <div key={i} style={{
+                        fontSize: '10px', color: 'rgba(240,250,245,0.25)',
+                        fontWeight: 600, letterSpacing: '0.08em',
+                        textAlign: i === 0 || i >= 4 ? 'center' : 'right',
+                      }}>
+                        {h}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Rows */}
+                  {players.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(240,250,245,0.2)' }}>
+                      <Trophy size={40} style={{ opacity: 0.2, marginBottom: '12px' }} />
+                      <p style={{ fontSize: '14px' }}>رنکینگ این دسته هنوز اعلام نشده</p>
+                    </div>
+                  ) : players.map((player, index) => {
+                    const diff = player.previousRank ? player.previousRank - player.rank : 0;
+                    const rankStyle = getRankColor(player.rank);
+                    const isTop3 = player.rank <= 3;
+
+                    return (
+                      <Link
+                        key={player.rank}
+                        href={player.userId ? `/players/${player.userId}` : '#'}
+                        style={{ textDecoration: 'none', display: 'block' }}
+                      >
+                        <div
+                          className="rank-row"
+                          onMouseEnter={() => setHoveredRow(index)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '60px 40px 44px 1fr 90px 90px',
+                            alignItems: 'center',
+                            padding: '12px 20px',
+                            borderBottom: '1px solid rgba(255,255,255,0.03)',
+                            background: isTop3
+                              ? `rgba(${player.rank === 1 ? '245,158,11' : player.rank === 2 ? '148,163,184' : '180,83,9'},0.04)`
+                              : 'transparent',
+                          }}>
+
+                          {/* Rank */}
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{
+                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                              width: '32px', height: '32px', borderRadius: '10px',
+                              background: rankStyle.bg,
+                              border: `1px solid ${rankStyle.border}`,
+                              gap: '3px',
+                            }}>
+                              {getRankIcon(player.rank) || (
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: rankStyle.text }}>
+                                  {player.rank}
+                                </span>
+                              )}
+                              {isTop3 && (
+                                <span style={{ fontSize: '11px', fontWeight: 700, color: rankStyle.text }}>
+                                  {player.rank}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Change */}
+                          <div style={{ textAlign: 'center' }}>
+                            {diff > 0 ? (
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                <TrendingUp size={11} color="#10b981" />
+                                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>{diff}</span>
+                              </div>
+                            ) : diff < 0 ? (
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                <TrendingDown size={11} color="#ef4444" />
+                                <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 700 }}>{Math.abs(diff)}</span>
+                              </div>
+                            ) : (
+                              <Minus size={11} color="rgba(240,250,245,0.15)" style={{ margin: '0 auto', display: 'block' }} />
+                            )}
+                          </div>
+
+                          {/* Avatar */}
+                          <div>
+                            <div style={{
+                              width: '34px', height: '34px', borderRadius: '10px',
+                              background: isTop3
+                                ? `linear-gradient(135deg,${rankStyle.text},${rankStyle.text}88)`
+                                : 'linear-gradient(135deg,rgba(16,185,129,0.3),rgba(6,182,212,0.3))',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: '#fff', fontWeight: 900, fontSize: '13px',
+                              border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(16,185,129,0.15)'}`,
+                              overflow: 'hidden',
+                            }}>
+                              {player.avatar
+                                ? <img src={player.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                : player.name?.[0]}
+                            </div>
+                          </div>
+
+                          {/* Name */}
+                          <div style={{
+                            fontSize: '14px',
+                            fontWeight: isTop3 ? 700 : 500,
+                            color: isTop3 ? '#f0faf5' : 'rgba(240,250,245,0.7)',
+                            paddingRight: '8px',
+                          }}>
+                            {player.name}
+                          </div>
+
+                          {/* City */}
+                          <div style={{
+                            textAlign: 'center',
+                            fontSize: '12px',
+                            color: 'rgba(240,250,245,0.3)',
+                          }}>
+                            {player.city || '—'}
+                          </div>
+
+                          {/* Points */}
+                          <div style={{ textAlign: 'center' }}>
+                            <span style={{
+                              fontSize: '13px', fontWeight: 700,
+                              color: isTop3 ? rankStyle.text : '#10b981',
+                              background: isTop3 ? rankStyle.bg : 'rgba(16,185,129,0.08)',
+                              border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(16,185,129,0.15)'}`,
+                              borderRadius: '8px', padding: '3px 8px',
+                            }}>
+                              {player.points.toLocaleString('fa-IR')}
+                            </span>
                           </div>
                         </div>
-                        <div className="col-span-5 font-medium text-gray-800">{player.name}</div>
-                        <div className="col-span-2 text-center text-sm text-gray-500">{player.city || '-'}</div>
-                        <div className="col-span-2 text-center font-bold text-green-700">
-                          {player.points.toLocaleString('fa-IR')}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })
-              )}
-            </div>
+                      </Link>
+                    );
+                  })}
+                </div>
 
-            {/* راهنما */}
-            <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-green-100 border border-green-300 rounded-full inline-block"></span>
-                ۱۶ نفر اول
-              </span>
-              {category === 'دسته برتر' && (
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-red-100 border border-red-300 rounded-full inline-block"></span>
-                  سقوط به دسته یک (۸ نفر آخر)
-                </span>
-              )}
-              {category === 'دسته یک' && (
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-blue-100 border border-blue-300 rounded-full inline-block"></span>
-                  ارتقا به دسته برتر (۸ نفر اول)
-                </span>
-              )}
-              <span className="flex items-center gap-1 text-green-600 font-bold">▲ صعود</span>
-              <span className="flex items-center gap-1 text-red-500 font-bold">▼ نزول</span>
+                {/* Footer note */}
+                <div style={{
+                  marginTop: '16px', padding: '14px 18px',
+                  background: 'rgba(16,185,129,0.04)',
+                  border: '1px solid rgba(16,185,129,0.1)',
+                  borderRadius: '14px',
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                  <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.3)' }}>
+                    رنکینگ رسمی فدراسیون بیلیارد و اسنوکر جمهوری اسلامی ایران — به‌روزرسانی هر هفته
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {sport === 'highball' && (
+            <div style={{
+              textAlign: 'center', padding: '80px 20px',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '24px',
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚡</div>
+              <h2 style={{ color: '#f0faf5', fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
+                رنکینگ هی‌بال
+              </h2>
+              <p style={{ color: 'rgba(240,250,245,0.3)', fontSize: '14px' }}>
+                به زودی راه‌اندازی می‌شود
+              </p>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
