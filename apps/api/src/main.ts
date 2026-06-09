@@ -7,12 +7,14 @@ async function bootstrap() {
 
   // CORS — Netlify + local
   app.enableCors({
-    origin: [
-      'https://astounding-bunny-08f3b8.netlify.app',
-      'http://localhost:3000',
-    ],
-    credentials: true,
-  });
+  origin: [
+    'https://astounding-bunny-08f3b8.netlify.app',
+    'https://billiard-plus.vercel.app',
+    'https://billiard-plus-5g5n5b2zu-babaknabavis-projects.vercel.app',
+    'http://localhost:3000',
+  ],
+  credentials: true,
+});
 
   // Global validation
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
