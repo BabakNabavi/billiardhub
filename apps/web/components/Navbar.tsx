@@ -41,7 +41,7 @@ const exploreMenu = [
 const mobileLinks = [
   { href: '/clubs',     label: 'باشگاه‌ها',   icon: <Building2 size={17} /> },
   { href: '/shop',      label: 'فروشگاه',     icon: <ShoppingBag size={17} /> },
-  { href: '/ranking',  label: 'رنکینگ',      icon: <Trophy size={17} /> },
+  { href: '/ranking',   label: 'رنکینگ', icon: <Trophy size={17} /> },
   { href: '/live',      label: 'پخش زنده',    icon: <Radio size={17} />, live: true },
   { href: '/news',      label: 'اخبار',       icon: <Newspaper size={17} /> },
   { href: '/events',    label: 'مسابقات',     icon: <Calendar size={17} /> },
@@ -195,7 +195,7 @@ export default function Navbar() {
           <div className="desktop-nav" style={{ alignItems: 'center', gap: '22px', marginRight: '10px', flexShrink: 0 }}>
             <Link href="/clubs"    className="nav-link">باشگاه‌ها</Link>
             <Link href="/shop"     className="nav-link">فروشگاه</Link>
-            <Link href="/rankings" className="nav-link">رنکینگ</Link>
+            <Link href="/ranking" className="nav-link">رنکینگ</Link>
             <Link href="/live" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.55)', fontSize:'13px', fontWeight:500, padding:'6px 0', textDecoration:'none', transition:'color 0.3s', whiteSpace:'nowrap' }}>
               <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#ef4444', boxShadow:'0 0 8px #ef4444', display:'inline-block', animation:'glowPulse 2s infinite', flexShrink:0 }} />
               زنده
