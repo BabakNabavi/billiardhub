@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
-  Search, Star, MapPin, Check, Shield, Wrench,
+  Search, Star, MapPin, Check, Shield,
   X, Clock, Award, Users, Camera, ChevronRight,
-  Zap, Tool, Settings,
+  Zap, Wrench, Settings,
 } from 'lucide-react';
 
 /* ══ types ══ */

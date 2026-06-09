@@ -9,6 +9,11 @@ interface User {
   primaryRole: string;
   secondaryRoles: string[];
   isProfileComplete: boolean;
+  phone?: string;
+  bio?: string;
+  city?: string;
+  role?: string;
+  avatar?: string | null;
 }
 
 interface AuthStore {
@@ -16,6 +21,7 @@ interface AuthStore {
   token: string | null;
   _hydrated: boolean;
   setAuth: (user: User, token: string) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
   setHydrated: () => void;
 }
@@ -27,6 +33,7 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       _hydrated: false,
       setAuth: (user, token) => set({ user, token }),
+      login: (user, token) => set({ user, token }),
       logout: () => set({ user: null, token: null }),
       setHydrated: () => set({ _hydrated: true }),
     }),
