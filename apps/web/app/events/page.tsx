@@ -1,485 +1,240 @@
+// ==============================
+// FILE: apps/web/app/events/page.tsx
+// ==============================
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Clock, MapPin, Trophy, Users, ChevronLeft, Flame, Calendar, Timer } from 'lucide-react';
 
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  category: 'club' | 'provincial' | 'national' | 'open' | 'international';
-  sport: 'snooker' | 'pocket' | 'highball';
-  location: string;
-  city: string;
-  startDate: Date;
-  endDate: Date;
-  status: 'upcoming' | 'ongoing' | 'finished';
-  participants: number;
-  maxParticipants: number;
-  prize: string;
-  organizer: string;
-  winner?: string;
-  runnerUp?: string;
-  third?: string;
-  image: string;
-  imageBg: string;
-  registrationOpen: boolean;
-}
-
-const categoryLabels: Record<string, { label: string; color: string; bg: string }> = {
-  club: { label: 'باشگاهی', color: '#16a34a', bg: '#dcfce7' },
-  provincial: { label: 'استانی', color: '#2563eb', bg: '#dbeafe' },
-  national: { label: 'کشوری', color: '#e8192c', bg: '#fee2e2' },
-  open: { label: 'آزاد', color: '#d97706', bg: '#fef3c7' },
-  international: { label: 'بین‌المللی', color: '#7c3aed', bg: '#ede9fe' },
-};
-
-const sportLabels: Record<string, string> = {
-  snooker: 'اسنوکر',
-  pocket: 'پاکت بیلیارد',
-  highball: 'هی‌بال',
-};
-
-const now = new Date();
-
-const sampleEvents: Event[] = [
+const EVENTS = [
   {
-    id: '1',
-    title: 'مسابقات قهرمانی اسنوکر ایران ۱۴۰۳',
-    description: 'بزرگ‌ترین رویداد اسنوکر ایران با حضور ۱۲۸ بازیکن از سراسر کشور',
-    category: 'national',
-    sport: 'snooker',
-    location: 'سالن المپیک تهران',
-    city: 'تهران',
-    startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-    endDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
-    status: 'upcoming',
-    participants: 96,
-    maxParticipants: 128,
-    prize: '۵۰۰ میلیون تومان',
-    organizer: 'فدراسیون بیلیارد ایران',
-    image: '',
-    imageBg: 'from-red-900 to-red-700',
-    registrationOpen: true,
+    id: '1', title: 'لیگ برتر بیلیارد ایران — فصل ۱۴۰۴',
+    category: 'لیگ', discipline: 'اسنوکر', status: 'در جریان',
+    statusColor: '#10b981', startDate: '۱ فروردین ۱۴۰۴', endDate: '۳۰ خرداد ۱۴۰۴',
+    location: 'باشگاه‌های سراسر کشور', prize: '۵۰۰,۰۰۰,۰۰۰ تومان',
+    participants: 24, maxParticipants: 24,
+    level: 'حرفه‌ای', organizer: 'فدراسیون بیلیارد ایران',
+    description: 'معتبرترین رقابت بیلیارد داخلی کشور با حضور ۲۴ تیم برتر.',
+    highlights: ['پخش زنده تمام بازی‌ها', 'داور بین‌المللی', 'جوایز نقدی'],
+    icon: '🏆',
   },
   {
-    id: '2',
-    title: 'لیگ پاکت بیلیارد دسته برتر',
-    description: 'رقابت‌های هفتگی لیگ دسته برتر پاکت بیلیارد با حضور ۳۲ بازیکن',
-    category: 'national',
-    sport: 'pocket',
-    location: 'باشگاه مرکزی تهران',
-    city: 'تهران',
-    startDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
-    endDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
-    status: 'ongoing',
-    participants: 32,
-    maxParticipants: 32,
-    prize: '۲۰۰ میلیون تومان',
-    organizer: 'فدراسیون بیلیارد ایران',
-    image: '',
-    imageBg: 'from-blue-900 to-blue-700',
-    registrationOpen: false,
+    id: '2', title: 'قهرمانی ملی اسنوکر ۱۴۰۴',
+    category: 'ملی', discipline: 'اسنوکر', status: 'ثبت‌نام باز',
+    statusColor: '#f59e0b', startDate: '۱۵ تیر ۱۴۰۴', endDate: '۲۵ تیر ۱۴۰۴',
+    location: 'تهران — سالن وزارت ورزش', prize: '۲۵۰,۰۰۰,۰۰۰ تومان',
+    participants: 18, maxParticipants: 32,
+    level: 'نیمه‌حرفه‌ای و حرفه‌ای', organizer: 'فدراسیون بیلیارد ایران',
+    description: 'مسابقه تعیین قهرمان ملی اسنوکر با شرکت بهترین بازیکنان کشور.',
+    highlights: ['معیار انتخاب تیم ملی', 'مستقیم به رنکینگ ملی', 'پخش آنلاین'],
+    icon: '🥇',
   },
   {
-    id: '3',
-    title: 'مسابقات استانی اسنوکر اصفهان',
-    description: 'مسابقات سالانه استانی اسنوکر با حضور بازیکنان استان اصفهان',
-    category: 'provincial',
-    sport: 'snooker',
-    location: 'باشگاه اسنوکر اصفهان',
-    city: 'اصفهان',
-    startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
-    endDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
-    status: 'upcoming',
-    participants: 45,
-    maxParticipants: 64,
-    prize: '۵۰ میلیون تومان',
-    organizer: 'هیئت بیلیارد استان اصفهان',
-    image: '',
-    imageBg: 'from-amber-900 to-amber-700',
-    registrationOpen: true,
+    id: '3', title: 'جام رمضان — پول آمریکایی',
+    category: 'آزاد', discipline: 'پول آمریکایی', status: 'پایان یافته',
+    statusColor: '#6b7280', startDate: '۱ اردیبهشت ۱۴۰۴', endDate: '۵ اردیبهشت ۱۴۰۴',
+    location: 'باشگاه پرشین — تهران', prize: '۸۰,۰۰۰,۰۰۰ تومان',
+    participants: 64, maxParticipants: 64,
+    level: 'همه سطوح', organizer: 'باشگاه پرشین بیلیارد',
+    description: 'تورنمنت سالانه جام رمضان با استقبال گسترده بازیکنان.',
+    highlights: ['۶۴ شرکت‌کننده', 'فرمت حذفی دوگانه', 'بازی مستمر ۵ روزه'],
+    icon: '🌙',
   },
   {
-    id: '4',
-    title: 'تورنومنت آزاد پاکت بیلیارد مشهد',
-    description: 'مسابقه آزاد پاکت بیلیارد برای همه سطوح بازیکنان',
-    category: 'open',
-    sport: 'pocket',
-    location: 'باشگاه ستاره مشهد',
-    city: 'مشهد',
-    startDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
-    endDate: new Date(now.getTime() + 11 * 24 * 60 * 60 * 1000),
-    status: 'upcoming',
-    participants: 28,
-    maxParticipants: 64,
-    prize: '۳۰ میلیون تومان',
-    organizer: 'باشگاه ستاره مشهد',
-    image: '',
-    imageBg: 'from-green-900 to-green-700',
-    registrationOpen: true,
+    id: '4', title: 'مسابقات دانشجویی سراسری',
+    category: 'دانشجویی', discipline: 'اسنوکر / پول', status: 'ثبت‌نام باز',
+    statusColor: '#f59e0b', startDate: '۲۰ شهریور ۱۴۰۴', endDate: '۲۵ شهریور ۱۴۰۴',
+    location: 'مشهد — پردیس دانشگاه فردوسی', prize: '۴۵,۰۰۰,۰۰۰ تومان',
+    participants: 12, maxParticipants: 48,
+    level: 'دانشجویی', organizer: 'اتحادیه ورزش دانشگاه‌ها',
+    description: 'رویداد سالانه ویژه دانشجویان دانشگاه‌های سراسر کشور.',
+    highlights: ['ویژه دانشجویان', '۳ رشته مختلف', 'اسکان رایگان'],
+    icon: '🎓',
   },
   {
-    id: '5',
-    title: 'جام باشگاه‌های اسنوکر تهران',
-    description: 'رقابت باشگاه‌های برتر تهران در قالب تیمی',
-    category: 'club',
-    sport: 'snooker',
-    location: 'باشگاه‌های تهران',
-    city: 'تهران',
-    startDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-    endDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
-    status: 'finished',
-    participants: 16,
-    maxParticipants: 16,
-    prize: '۱۰۰ میلیون تومان',
-    organizer: 'اتحادیه باشگاه‌های تهران',
-    winner: 'باشگاه ستاره تهران',
-    runnerUp: 'باشگاه پیروزی',
-    third: 'باشگاه المپیک',
-    image: '',
-    imageBg: 'from-slate-800 to-slate-600',
-    registrationOpen: false,
+    id: '5', title: 'قهرمانی بانوان ایران',
+    category: 'بانوان', discipline: 'اسنوکر', status: 'ثبت‌نام باز',
+    statusColor: '#f59e0b', startDate: '۱ مرداد ۱۴۰۴', endDate: '۷ مرداد ۱۴۰۴',
+    location: 'اصفهان — سالن ورزشی پارس', prize: '۶۰,۰۰۰,۰۰۰ تومان',
+    participants: 8, maxParticipants: 16,
+    level: 'حرفه‌ای', organizer: 'کمیته بانوان فدراسیون',
+    description: 'مهم‌ترین مسابقه اسنوکر بانوان در ایران با داوری بین‌المللی.',
+    highlights: ['داور بین‌المللی', 'انتخاب تیم ملی بانوان', 'تله‌کست زنده'],
+    icon: '🌸',
   },
   {
-    id: '6',
-    title: 'مسابقات بین‌المللی کاپ خلیج فارس',
-    description: 'رویداد بین‌المللی با حضور تیم‌های ملی کشورهای منطقه',
-    category: 'international',
-    sport: 'snooker',
-    location: 'مجموعه ورزشی آزادی',
-    city: 'تهران',
-    startDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000),
-    endDate: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000),
-    status: 'upcoming',
-    participants: 8,
-    maxParticipants: 12,
-    prize: '۲ میلیارد تومان',
-    organizer: 'فدراسیون بیلیارد ایران',
-    image: '',
-    imageBg: 'from-purple-900 to-purple-700',
-    registrationOpen: false,
+    id: '6', title: 'اوپن تهران — کارامبول',
+    category: 'بین‌المللی', discipline: 'کارامبول', status: 'زود هنگام',
+    statusColor: '#a78bfa', startDate: '۱۵ آبان ۱۴۰۴', endDate: '۲۰ آبان ۱۴۰۴',
+    location: 'تهران — هتل اسپیناس پالاس', prize: '€ ۱۵,۰۰۰',
+    participants: 0, maxParticipants: 16,
+    level: 'بین‌المللی', organizer: 'فدراسیون جهانی کارامبول UMB',
+    description: 'نخستین رویداد بین‌المللی کارامبول در ایران با حضور بازیکنان اروپایی.',
+    highlights: ['بازیکنان اروپایی و آسیایی', 'رنکینگ جهانی UMB', 'فرمت Round Robin'],
+    icon: '🌍',
   },
 ];
 
-function CountdownTimer({ targetDate }: { targetDate: Date }) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+const DISCIPLINES = ['همه', 'اسنوکر', 'پول آمریکایی', 'کارامبول', 'اسنوکر / پول'];
+const STATUSES = ['همه', 'در جریان', 'ثبت‌نام باز', 'پایان یافته', 'زود هنگام'];
 
-  useEffect(() => {
-    const calc = () => {
-      const diff = targetDate.getTime() - Date.now();
-      if (diff > 0) {
-        setTimeLeft({
-          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((diff % (1000 * 60)) / 1000),
-        });
-      }
-    };
-    calc();
-    const i = setInterval(calc, 1000);
-    return () => clearInterval(i);
-  }, [targetDate]);
-
-  const fa = (n: number) => n.toLocaleString('fa-IR').padStart(2, '۰');
-
-  return (
-    <div className="flex items-center gap-1">
-      {[
-        { v: timeLeft.days, l: 'روز' },
-        { v: timeLeft.hours, l: 'ساعت' },
-        { v: timeLeft.minutes, l: 'دقیقه' },
-        { v: timeLeft.seconds, l: 'ثانیه' },
-      ].map((item, i) => (
-        <div key={i} className="flex items-center gap-1">
-          <div className="bg-gray-900 text-white rounded-lg px-2 py-1 text-center min-w-[2.5rem]">
-            <div className="text-sm font-bold">{fa(item.v)}</div>
-            <div className="text-xs opacity-60">{item.l}</div>
-          </div>
-          {i < 3 && <span className="text-gray-500 font-bold">:</span>}
-        </div>
-      ))}
-    </div>
-  );
-}
+const statusStyle: Record<string, { bg: string; text: string }> = {
+  'در جریان': { bg: 'rgba(16,185,129,0.15)', text: '#10b981' },
+  'ثبت‌نام باز': { bg: 'rgba(245,158,11,0.15)', text: '#f59e0b' },
+  'پایان یافته': { bg: 'rgba(107,114,128,0.15)', text: '#6b7280' },
+  'زود هنگام': { bg: 'rgba(167,139,250,0.15)', text: '#a78bfa' },
+};
 
 export default function EventsPage() {
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'ongoing' | 'finished'>('upcoming');
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [activeSport, setActiveSport] = useState('all');
+  const [discipline, setDiscipline] = useState('همه');
+  const [statusFilter, setStatusFilter] = useState('همه');
 
-  const filtered = sampleEvents.filter(e => {
-    if (e.status !== activeTab) return false;
-    if (activeCategory !== 'all' && e.category !== activeCategory) return false;
-    if (activeSport !== 'all' && e.sport !== activeSport) return false;
-    return true;
+  const filtered = EVENTS.filter(e => {
+    const matchD = discipline === 'همه' || e.discipline === discipline;
+    const matchS = statusFilter === 'همه' || e.status === statusFilter;
+    return matchD && matchS;
   });
 
-  const ongoing = sampleEvents.filter(e => e.status === 'ongoing');
-  const featured = sampleEvents.find(e => e.status === 'upcoming' && e.category === 'national');
+  const live = EVENTS.filter(e => e.status === 'در جریان');
 
   return (
-    <div className="max-w-6xl mx-auto pb-10">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <Trophy size={24} className="text-amber-500" />
-        مسابقات و رویدادها
-      </h1>
-
-      {/* رویداد ویژه */}
-      {featured && (
-        <div className={`bg-gradient-to-l ${featured.imageBg} rounded-2xl p-6 mb-8 text-white relative overflow-hidden`}>
-          <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-x-32 -translate-y-32"></div>
-          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">
-                  {categoryLabels[featured.category]?.label}
-                </span>
-                <span className="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">
-                  {sportLabels[featured.sport]}
-                </span>
-              </div>
-              <h2 className="text-2xl font-black mb-3">{featured.title}</h2>
-              <p className="text-white opacity-80 mb-4">{featured.description}</p>
-              <div className="space-y-2 text-sm opacity-80 mb-4">
-                <div className="flex items-center gap-2">
-                  <MapPin size={14} />
-                  {featured.location}، {featured.city}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Trophy size={14} />
-                  جایزه: {featured.prize}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users size={14} />
-                  {featured.participants.toLocaleString('fa-IR')} از {featured.maxParticipants.toLocaleString('fa-IR')} نفر ثبت‌نام کرده‌اند
-                </div>
-              </div>
-              {featured.registrationOpen && (
-                <button className="bg-white text-gray-900 px-6 py-2.5 rounded-xl font-bold hover:bg-gray-100 text-sm">
-                  ثبت‌نام در مسابقه
-                </button>
-              )}
-            </div>
-            <div className="text-center">
-              <div className="text-white opacity-70 text-sm mb-3 flex items-center justify-center gap-2">
-                <Timer size={14} />
-                شروع مسابقات تا:
-              </div>
-              <CountdownTimer targetDate={featured.startDate} />
-            </div>
+    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(180deg,#050c08 0%,#010604 100%)' }}>
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(ellipse at 20% 0%, rgba(245,158,11,0.1) 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(16,185,129,0.08) 0%, transparent 50%)',
+        }} />
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(16,185,129,0.4) 80px, rgba(16,185,129,0.4) 81px)',
+        }} />
+        <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.4))' }} />
+            <span className="text-xs tracking-widest uppercase" style={{ color: '#f59e0b' }}>BILLIARD PLUS TOURNAMENTS</span>
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(270deg, transparent, rgba(245,158,11,0.4))' }} />
           </div>
-        </div>
-      )}
-
-      {/* مسابقات در حال برگزاری */}
-      {ongoing.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-6 bg-red-500 rounded-full"></div>
-            <h2 className="font-black text-gray-900 flex items-center gap-2">
-              <Flame size={18} className="text-red-500" />
-              در حال برگزاری
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {ongoing.map(event => (
-              <Link key={event.id} href={`/events/${event.id}`}>
-                <div className="bg-white rounded-2xl border-2 border-red-200 p-5 hover:border-red-400 transition-all group">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
-                          <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-                          زنده
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: categoryLabels[event.category]?.bg, color: categoryLabels[event.category]?.color }}>
-                          {categoryLabels[event.category]?.label}
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">{event.title}</h3>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center gap-2"><MapPin size={13} />{event.location}</div>
-                    <div className="flex items-center gap-2"><Trophy size={13} />{event.prize}</div>
-                    <div className="flex items-center gap-2"><Users size={13} />{event.participants.toLocaleString('fa-IR')} بازیکن</div>
-                  </div>
-                  {/* progress bar */}
-                  <div>
-                    <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>پیشرفت مسابقه</span>
-                      <span>{Math.round((Date.now() - event.startDate.getTime()) / (event.endDate.getTime() - event.startDate.getTime()) * 100).toLocaleString('fa-IR')}٪</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-red-500 rounded-full transition-all"
-                        style={{ width: `${Math.min(100, Math.round((Date.now() - event.startDate.getTime()) / (event.endDate.getTime() - event.startDate.getTime()) * 100))}%` }}>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+          <h1 className="text-5xl sm:text-6xl font-black text-center mb-2 leading-none" style={{
+            background: 'linear-gradient(135deg,#f0faf5 30%,#f59e0b)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
+            مسابقات بیلیارد
+          </h1>
+          <p className="text-center mb-10" style={{ color: '#4b5563' }}>تورنمنت‌ها، لیگ‌ها و رویدادهای رسمی کشور</p>
+          <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
+            {[
+              { label: 'در جریان', value: live.length, color: '#10b981' },
+              { label: 'ثبت‌نام باز', value: EVENTS.filter(e => e.status === 'ثبت‌نام باز').length, color: '#f59e0b' },
+              { label: 'رویداد کل', value: EVENTS.length, color: '#a78bfa' },
+            ].map(s => (
+              <div key={s.label} className="text-center rounded-2xl p-4" style={{ background: 'rgba(5,12,8,0.8)', border: `1px solid ${s.color}22` }}>
+                <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
+                <div className="text-xs" style={{ color: '#6b7280' }}>{s.label}</div>
+              </div>
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="sticky top-0 z-40" style={{ background: 'rgba(1,6,4,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(16,185,129,0.1)' }}>
+        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            <span className="text-xs flex-shrink-0" style={{ color: '#4b5563' }}>رشته:</span>
+            {DISCIPLINES.map(d => (
+              <button key={d} onClick={() => setDiscipline(d)}
+                className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={discipline === d ? { background: '#f59e0b', color: '#010604' } : { background: 'rgba(245,158,11,0.08)', color: '#9ca3af', border: '1px solid rgba(245,158,11,0.15)' }}>
+                {d}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            <span className="text-xs flex-shrink-0" style={{ color: '#4b5563' }}>وضعیت:</span>
+            {STATUSES.map(s => (
+              <button key={s} onClick={() => setStatusFilter(s)}
+                className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={statusFilter === s ? { background: '#10b981', color: '#010604' } : { background: 'rgba(16,185,129,0.08)', color: '#9ca3af', border: '1px solid rgba(16,185,129,0.15)' }}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {live.length > 0 && statusFilter === 'همه' && discipline === 'همه' && (
+        <div className="max-w-6xl mx-auto px-4 mt-8">
+          <div className="rounded-2xl p-1 mb-2" style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)' }}>
+            <div className="rounded-xl px-5 py-4 flex items-center gap-4" style={{ background: '#050c08' }}>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#10b981' }} />
+                <span className="text-sm font-bold" style={{ color: '#10b981' }}>LIVE</span>
+              </div>
+              <span className="text-sm" style={{ color: '#9ca3af' }}>{live[0]?.title} — هم‌اکنون در حال برگزاری</span>
+              <Link href={`/events/${live[0]?.id}`} className="mr-auto text-xs px-3 py-1 rounded-full font-bold"
+                style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981' }}>
+                مشاهده زنده ←
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* تب‌ها */}
-      <div className="flex items-center gap-1 bg-gray-100 rounded-2xl p-1 mb-6 w-fit">
-        {[
-          { id: 'upcoming', label: 'آینده', count: sampleEvents.filter(e => e.status === 'upcoming').length },
-          { id: 'ongoing', label: 'در حال برگزاری', count: ongoing.length },
-          { id: 'finished', label: 'پایان یافته', count: sampleEvents.filter(e => e.status === 'finished').length },
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-            className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-              activeTab === tab.id ? 'bg-white shadow-sm text-gray-900 font-bold' : 'text-gray-500 hover:text-gray-700'
-            }`}>
-            {tab.label}
-            {tab.count > 0 && (
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
-                {tab.count.toLocaleString('fa-IR')}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* فیلترها */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="flex gap-2 overflow-x-auto">
-          <button onClick={() => setActiveCategory('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium flex-shrink-0 border transition-colors ${activeCategory === 'all' ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 text-gray-600 hover:border-gray-400'}`}>
-            همه دسته‌ها
-          </button>
-          {Object.entries(categoryLabels).map(([key, val]) => (
-            <button key={key} onClick={() => setActiveCategory(key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium flex-shrink-0 border transition-colors ${activeCategory === key ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:border-gray-400'}`}
-              style={activeCategory === key ? { backgroundColor: val.color } : {}}>
-              {val.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          {[
-            { value: 'all', label: 'همه رشته‌ها' },
-            { value: 'snooker', label: 'اسنوکر' },
-            { value: 'pocket', label: 'پاکت بیلیارد' },
-            { value: 'highball', label: 'هی‌بال' },
-          ].map(s => (
-            <button key={s.value} onClick={() => setActiveSport(s.value)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${activeSport === s.value ? 'bg-green-700 text-white border-green-700' : 'border-gray-200 text-gray-600 hover:border-green-400'}`}>
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* لیست رویدادها */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <Trophy size={48} className="mx-auto mb-4 text-gray-300" />
-          <p>رویدادی در این دسته وجود ندارد</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filtered.map(event => (
-            <Link key={event.id} href={`/events/${event.id}`}>
-              <div className="bg-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all group overflow-hidden">
-                <div className="flex">
-                  {/* رنگ کنار */}
-                  <div className={`w-2 flex-shrink-0 bg-gradient-to-b ${event.imageBg}`}></div>
-
-                  <div className="flex-1 p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                            style={{ backgroundColor: categoryLabels[event.category]?.bg, color: categoryLabels[event.category]?.color }}>
-                            {categoryLabels[event.category]?.label}
-                          </span>
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                            {sportLabels[event.sport]}
-                          </span>
-                          {event.registrationOpen && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                              ثبت‌نام باز
-                            </span>
-                          )}
-                        </div>
-
-                        <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">
-                          {event.title}
-                        </h3>
-                        <p className="text-gray-500 text-sm mb-3">{event.description}</p>
-
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span className="flex items-center gap-1.5"><MapPin size={13} />{event.location}، {event.city}</span>
-                          <span className="flex items-center gap-1.5"><Calendar size={13} />
-                            {event.startDate.toLocaleDateString('fa-IR')} تا {event.endDate.toLocaleDateString('fa-IR')}
-                          </span>
-                          <span className="flex items-center gap-1.5"><Users size={13} />
-                            {event.participants.toLocaleString('fa-IR')}/{event.maxParticipants.toLocaleString('fa-IR')} نفر
-                          </span>
-                          <span className="flex items-center gap-1.5 text-amber-600 font-medium">
-                            <Trophy size={13} />{event.prize}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* سمت راست */}
-                      <div className="flex-shrink-0 text-left">
-                        {event.status === 'upcoming' && (
-                          <div>
-                            <div className="text-xs text-gray-400 mb-2 text-center">شروع تا:</div>
-                            <CountdownTimer targetDate={event.startDate} />
-                            {event.registrationOpen && (
-                              <button className="mt-3 w-full bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-800 transition-colors">
-                                ثبت‌نام
-                              </button>
-                            )}
-                          </div>
-                        )}
-                        {event.status === 'finished' && event.winner && (
-                          <div className="bg-amber-50 rounded-xl p-3 text-sm min-w-[180px]">
-                            <div className="font-bold text-amber-700 mb-2 flex items-center gap-1">
-                              <Trophy size={14} />
-                              نتایج
-                            </div>
-                            <div className="space-y-1 text-gray-600">
-                              <div>🥇 {event.winner}</div>
-                              {event.runnerUp && <div>🥈 {event.runnerUp}</div>}
-                              {event.third && <div>🥉 {event.third}</div>}
-                            </div>
-                          </div>
-                        )}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {filtered.length === 0 ? (
+          <div className="text-center py-20" style={{ color: '#4b5563' }}>
+            <div className="text-5xl mb-4">🏆</div><p>رویدادی یافت نشد</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filtered.map(event => {
+              const fillPct = Math.round((event.participants / event.maxParticipants) * 100);
+              const st = statusStyle[event.status] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6b7280' };
+              return (
+                <Link href={`/events/${event.id}`} key={event.id}
+                  className="group rounded-3xl overflow-hidden flex flex-col cursor-pointer"
+                  style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.12)' }}>
+                  <div className="h-1 w-full" style={{ background: event.status === 'در جریان' ? 'linear-gradient(90deg,#10b981,#06b6d4)' : event.status === 'ثبت‌نام باز' ? 'linear-gradient(90deg,#f59e0b,#ef4444)' : 'rgba(107,114,128,0.3)' }} />
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-4xl">{event.icon}</div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: st.bg, color: st.text }}>{event.status}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(167,139,250,0.1)', color: '#a78bfa' }}>{event.discipline}</span>
                       </div>
                     </div>
-
-                    {/* progress bar برای ongoing */}
-                    {event.status === 'ongoing' && (
-                      <div className="mt-4">
-                        <div className="flex justify-between text-xs text-gray-400 mb-1">
-                          <span>پیشرفت</span>
-                          <span>{Math.min(100, Math.round((Date.now() - event.startDate.getTime()) / (event.endDate.getTime() - event.startDate.getTime()) * 100)).toLocaleString('fa-IR')}٪</span>
+                    <h3 className="font-black text-lg mb-1 leading-snug group-hover:text-emerald-400 transition-colors">{event.title}</h3>
+                    <p className="text-xs mb-4 line-clamp-2" style={{ color: '#6b7280' }}>{event.description}</p>
+                    <div className="space-y-1.5 text-xs mb-4" style={{ color: '#9ca3af' }}>
+                      <div className="flex items-center gap-2"><span>📅</span><span>{event.startDate} تا {event.endDate}</span></div>
+                      <div className="flex items-center gap-2"><span>📍</span><span>{event.location}</span></div>
+                      <div className="flex items-center gap-2"><span>💰</span><span className="font-bold" style={{ color: '#f59e0b' }}>{event.prize}</span></div>
+                    </div>
+                    {event.status !== 'پایان یافته' && (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between text-xs mb-1" style={{ color: '#6b7280' }}>
+                          <span>شرکت‌کنندگان</span><span>{event.participants} / {event.maxParticipants}</span>
                         </div>
-                        <div className="h-1.5 bg-gray-100 rounded-full">
-                          <div className="h-full bg-red-500 rounded-full"
-                            style={{ width: `${Math.min(100, Math.round((Date.now() - event.startDate.getTime()) / (event.endDate.getTime() - event.startDate.getTime()) * 100))}%` }}>
-                          </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(16,185,129,0.1)' }}>
+                          <div className="h-full rounded-full" style={{ width: `${fillPct}%`, background: fillPct >= 90 ? '#ef4444' : fillPct >= 60 ? '#f59e0b' : '#10b981' }} />
                         </div>
                       </div>
                     )}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {event.highlights.map((h, i) => (
+                        <span key={i} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(6,182,212,0.08)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.15)' }}>{h}</span>
+                      ))}
+                    </div>
+                    <div className="mt-auto">
+                      {event.status === 'ثبت‌نام باز' && <button className="w-full py-2.5 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#010604' }}>ثبت‌نام در مسابقه</button>}
+                      {event.status === 'در جریان' && <button className="w-full py-2.5 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>مشاهده نتایج زنده</button>}
+                      {event.status === 'پایان یافته' && <button className="w-full py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(107,114,128,0.15)', color: '#6b7280', border: '1px solid rgba(107,114,128,0.2)' }}>مشاهده نتایج نهایی</button>}
+                      {event.status === 'زود هنگام' && <button className="w-full py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>یادآوری برایم بگذار</button>}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

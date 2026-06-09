@@ -1,436 +1,221 @@
+// ==============================
+// FILE: apps/web/app/news/page.tsx
+// ==============================
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Clock, Eye, ArrowLeft, TrendingUp, Flame } from 'lucide-react';
 
-interface News {
-  id: string;
-  title: string;
-  summary: string;
-  category: string;
-  categoryLabel: string;
-  categoryColor: string;
-  image: string;
-  imageBg: string;
-  author: string;
-  date: string;
-  views: number;
-  tags: string[];
-  isBreaking?: boolean;
-  isFeatured?: boolean;
-}
-
-const sampleNews: News[] = [
+const NEWS = [
   {
-    id: '1',
-    title: 'برگزاری مسابقات قهرمانی اسنوکر ایران ۱۴۰۳ با حضور ۱۲۸ بازیکن',
-    summary: 'مسابقات قهرمانی اسنوکر ایران با حضور بیش از ۱۲۸ بازیکن از سراسر کشور در تهران برگزار می‌شود. این رویداد بزرگ‌ترین مسابقه اسنوکر ایران در ۵ سال گذشته است.',
-    category: 'tournament',
-    categoryLabel: 'مسابقات',
-    categoryColor: '#e8192c',
-    image: '',
-    imageBg: 'from-red-900 to-red-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۳/۱۵',
-    views: 1250,
-    tags: ['مسابقات', 'اسنوکر', 'تهران'],
-    isBreaking: true,
-    isFeatured: true,
+    id: '1', category: 'مسابقات', tag: 'داغ', tagColor: '#ef4444',
+    title: 'قهرمانی ایران در مسابقات اسنوکر آسیا ۲۰۲۴',
+    excerpt: 'تیم ملی بیلیارد ایران موفق شد برای سومین سال متوالی قهرمانی آسیا را به خود اختصاص دهد. علیرضا حیدری با نتایج درخشان خود بهترین بازیکن مسابقات شناخته شد.',
+    author: 'علی احمدی', date: '۱۵ خرداد ۱۴۰۴', readTime: '۵ دقیقه',
+    image: '🏆', featured: true,
   },
   {
-    id: '2',
-    title: 'رنکینگ جدید بازیکنان اسنوکر دسته برتر اعلام شد',
-    summary: 'فدراسیون بیلیارد و اسنوکر ایران رنکینگ جدید دسته برتر آقایان را برای فصل جاری اعلام کرد.',
-    category: 'ranking',
-    categoryLabel: 'رنکینگ',
-    categoryColor: '#2563eb',
-    image: '',
-    imageBg: 'from-blue-900 to-blue-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۳/۱۰',
-    views: 890,
-    tags: ['رنکینگ', 'دسته برتر'],
-    isFeatured: true,
+    id: '2', category: 'بازیکنان', tag: 'ویژه', tagColor: '#f59e0b',
+    title: 'مصاحبه اختصاصی با محمد رضایی؛ راز موفقیتم را می‌گویم',
+    excerpt: 'بازیکن شماره یک رنکینگ ملی درباره مسیر پیشرفتش، تمرینات روزانه و اهدافش برای مسابقات جهانی با بیلیارد پلاس صحبت کرد.',
+    author: 'سارا مرادی', date: '۱۲ خرداد ۱۴۰۴', readTime: '۸ دقیقه',
+    image: '🎱', featured: true,
   },
   {
-    id: '3',
-    title: 'افتتاح باشگاه بیلیارد مجهز در شیراز',
-    summary: 'یک باشگاه بیلیارد مجهز با ۱۵ میز اسنوکر و پاکت بیلیارد در شیراز افتتاح شد.',
-    category: 'club',
-    categoryLabel: 'باشگاه‌ها',
-    categoryColor: '#16a34a',
-    image: '',
-    imageBg: 'from-green-900 to-green-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۳/۰۵',
-    views: 654,
-    tags: ['باشگاه', 'شیراز'],
-    isFeatured: true,
+    id: '3', category: 'تجهیزات', tag: 'جدید', tagColor: '#10b981',
+    title: 'بررسی Riley Conquest ۲۰۲۴؛ بهترین چوب اسنوکر بازار',
+    excerpt: 'جدیدترین محصول شرکت Riley وارد بازار ایران شد. در این مقاله تخصصی با مشخصات فنی، مزایا و نقاط ضعف این چوب آشنا می‌شوید.',
+    author: 'حامد کریمی', date: '۱۰ خرداد ۱۴۰۴', readTime: '۱۰ دقیقه',
+    image: '🎯', featured: false,
   },
   {
-    id: '4',
-    title: 'معرفی میز اسنوکر جدید ویراکا مدل M2 Pro',
-    summary: 'شرکت ویراکا از جدیدترین محصول خود، میز اسنوکر M2 Pro با فناوری جدید رونمایی کرد.',
-    category: 'product',
-    categoryLabel: 'محصولات',
-    categoryColor: '#7c3aed',
-    image: '',
-    imageBg: 'from-purple-900 to-purple-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۲/۲۸',
-    views: 432,
-    tags: ['ویراکا', 'میز اسنوکر'],
+    id: '4', category: 'باشگاه‌ها', tag: '', tagColor: '',
+    title: 'افتتاح بزرگترین باشگاه بیلیارد خاورمیانه در تهران',
+    excerpt: 'مجموعه پلاتینیوم بیلیارد با ۲۴ میز حرفه‌ای، سیستم نورپردازی لیزری و امکانات VIP در شمال تهران افتتاح شد.',
+    author: 'نگین صادقی', date: '۸ خرداد ۱۴۰۴', readTime: '۴ دقیقه',
+    image: '🏛️', featured: false,
   },
   {
-    id: '5',
-    title: 'تیم ملی ایران در مسابقات جهانی پاکت بیلیارد ۲۰۲۴',
-    summary: 'تیم ملی پاکت بیلیارد ایران برای حضور در مسابقات جهانی ۲۰۲۴ آماده می‌شود.',
-    category: 'tournament',
-    categoryLabel: 'مسابقات',
-    categoryColor: '#e8192c',
-    image: '',
-    imageBg: 'from-orange-900 to-orange-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۲/۲۰',
-    views: 1100,
-    tags: ['تیم ملی', 'پاکت بیلیارد'],
+    id: '5', category: 'آموزش', tag: '', tagColor: '',
+    title: '۱۰ تکنیک که هر بازیکن پول باید بداند',
+    excerpt: 'از تکنیک spin تا کنترل cue ball — این راهنمای جامع برای بازیکنان متوسط تا پیشرفته طراحی شده تا مهارت شما را به سطح بعدی ببرد.',
+    author: 'مرتضی علوی', date: '۶ خرداد ۱۴۰۴', readTime: '۱۲ دقیقه',
+    image: '📚', featured: false,
   },
   {
-    id: '6',
-    title: 'برگزاری دوره آموزشی مربیگری اسنوکر در تهران',
-    summary: 'فدراسیون بیلیارد دوره جدید آموزش مربیگری را برای علاقه‌مندان برگزار می‌کند.',
-    category: 'general',
-    categoryLabel: 'عمومی',
-    categoryColor: '#64748b',
-    image: '',
-    imageBg: 'from-slate-800 to-slate-600',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۲/۱۵',
-    views: 320,
-    tags: ['آموزش', 'مربیگری'],
+    id: '6', category: 'رویدادها', tag: 'زنده', tagColor: '#06b6d4',
+    title: 'لیگ برتر بیلیارد ایران؛ هفته دهم — گزارش کامل',
+    excerpt: 'در هفته دهم لیگ برتر، تیم پرشین سوشان با شکست میهمانانش صدر جدول را محکم‌تر در دست گرفت.',
+    author: 'رضا نوری', date: '۵ خرداد ۱۴۰۴', readTime: '۶ دقیقه',
+    image: '⚡', featured: false,
   },
   {
-    id: '7',
-    title: 'قهرمان مسابقات پاکت بیلیارد استانی مشخص شد',
-    summary: 'علی احمدی از تهران با غلبه بر رقبا توانست عنوان قهرمانی مسابقات استانی پاکت بیلیارد را کسب کند.',
-    category: 'tournament',
-    categoryLabel: 'مسابقات',
-    categoryColor: '#e8192c',
-    image: '',
-    imageBg: 'from-yellow-900 to-yellow-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۲/۱۰',
-    views: 567,
-    tags: ['قهرمانی', 'پاکت بیلیارد'],
+    id: '7', category: 'قوانین', tag: '', tagColor: '',
+    title: 'تغییرات قوانین بین‌المللی اسنوکر ۲۰۲۴ — چه چیزی عوض شد؟',
+    excerpt: 'WCBS در آخرین جلسه خود تغییراتی در قوانین مسابقات اسنوکر اعمال کرد. این تغییرات از ژانویه ۲۰۲۵ اجرایی می‌شود.',
+    author: 'علی رضایی', date: '۳ خرداد ۱۴۰۴', readTime: '۷ دقیقه',
+    image: '📋', featured: false,
   },
   {
-    id: '8',
-    title: 'ورود تجهیزات حرفه‌ای Predator به بازار ایران',
-    summary: 'برند معروف Predator برای اولین بار نمایندگی رسمی در ایران تأسیس کرد.',
-    category: 'product',
-    categoryLabel: 'محصولات',
-    categoryColor: '#7c3aed',
-    image: '',
-    imageBg: 'from-indigo-900 to-indigo-700',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۲/۰۵',
-    views: 789,
-    tags: ['Predator', 'تجهیزات'],
+    id: '8', category: 'مسابقات', tag: '', tagColor: '',
+    title: 'ثبت‌نام مسابقات دانشجویی بیلیارد کشور آغاز شد',
+    excerpt: 'فدراسیون بیلیارد ایران ثبت‌نام ششمین دوره مسابقات دانشجویی را با ۳ رشته آغاز کرد.',
+    author: 'فاطمه محمدی', date: '۱ خرداد ۱۴۰۴', readTime: '۳ دقیقه',
+    image: '🎓', featured: false,
   },
 ];
 
-const categories = [
-  { value: 'all', label: 'همه اخبار' },
-  { value: 'tournament', label: 'مسابقات' },
-  { value: 'ranking', label: 'رنکینگ' },
-  { value: 'club', label: 'باشگاه‌ها' },
-  { value: 'product', label: 'محصولات' },
-  { value: 'general', label: 'عمومی' },
-];
-
-function NewsCard({ news, size = 'normal' }: { news: News; size?: 'large' | 'normal' | 'small' }) {
-  return (
-    <Link href={`/news/${news.id}`}>
-      <div className={`group cursor-pointer ${size === 'large' ? '' : 'flex gap-4'}`}>
-        {/* عکس */}
-        <div className={`bg-gradient-to-br ${news.imageBg} flex-shrink-0 overflow-hidden relative ${
-          size === 'large' ? 'w-full h-72 rounded-2xl mb-4' :
-          size === 'small' ? 'w-20 h-20 rounded-xl' :
-          'w-32 h-24 rounded-xl'
-        }`}>
-          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <span className="text-white text-6xl font-black">🎱</span>
-          </div>
-          {news.isBreaking && size === 'large' && (
-            <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 animate-pulse">
-              <Flame size={12} />
-              فوری
-            </div>
-          )}
-        </div>
-
-        {/* محتوا */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: news.categoryColor + '20', color: news.categoryColor }}>
-              {news.categoryLabel}
-            </span>
-            {news.isBreaking && size !== 'large' && (
-              <span className="text-xs font-bold text-red-500 flex items-center gap-0.5">
-                <Flame size={10} />
-                فوری
-              </span>
-            )}
-          </div>
-
-          <h3 className={`font-bold text-gray-900 leading-7 group-hover:text-green-700 transition-colors line-clamp-2 ${
-            size === 'large' ? 'text-xl mb-3' : size === 'small' ? 'text-sm mb-1' : 'text-base mb-2'
-          }`}>
-            {news.title}
-          </h3>
-
-          {size !== 'small' && (
-            <p className="text-gray-500 text-sm leading-6 line-clamp-2 mb-3">{news.summary}</p>
-          )}
-
-          <div className="flex items-center gap-3 text-xs text-gray-400">
-            <span className="flex items-center gap-1">
-              <Clock size={11} />
-              {news.date}
-            </span>
-            <span className="flex items-center gap-1">
-              <Eye size={11} />
-              {news.views.toLocaleString('fa-IR')}
-            </span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
+const CATEGORIES = ['همه', 'مسابقات', 'بازیکنان', 'تجهیزات', 'باشگاه‌ها', 'آموزش', 'رویدادها', 'قوانین'];
 
 export default function NewsPage() {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState('همه');
   const [search, setSearch] = useState('');
 
-  const filtered = sampleNews.filter(n => {
-    if (activeCategory !== 'all' && n.category !== activeCategory) return false;
-    if (search && !n.title.includes(search) && !n.summary.includes(search)) return false;
-    return true;
+  const filtered = NEWS.filter(n => {
+    const matchCat = activeCategory === 'همه' || n.category === activeCategory;
+    const matchSearch = !search || n.title.includes(search) || n.excerpt.includes(search);
+    return matchCat && matchSearch;
   });
 
-  const featured = sampleNews[0]!;
-  const topNews = sampleNews.slice(1, 4);
-  const restNews = sampleNews.slice(4);
-  const trending = [...sampleNews].sort((a, b) => b.views - a.views).slice(0, 5);
+  const featured = filtered.filter(n => n.featured);
+  const regular = filtered.filter(n => !n.featured);
 
   return (
-    <div className="max-w-7xl mx-auto pb-10">
-
-      {/* نوار خبر فوری */}
-      <div className="bg-gray-900 text-white rounded-2xl px-5 py-3 mb-8 flex items-center gap-4 overflow-hidden">
-        <span className="bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 flex-shrink-0">
-          <Flame size={12} />
-          فوری
-        </span>
-        <div className="overflow-hidden flex-1">
-          <p className="text-sm animate-pulse">
-            {featured.title}
+    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(180deg,#050c08 0%,#010604 100%)', borderBottom: '1px solid rgba(16,185,129,0.2)' }}>
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'linear-gradient(rgba(16,185,129,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.5) 1px, transparent 1px)',
+          backgroundSize: '60px 60px'
+        }} />
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.15) 0%, transparent 70%)' }} />
+        <div className="relative max-w-6xl mx-auto px-4 pt-16 pb-10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.4))' }} />
+            <span className="text-xs tracking-[0.3em] uppercase" style={{ color: '#10b981' }}>BILLIARD PLUS NEWS</span>
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(270deg, transparent, rgba(16,185,129,0.4))' }} />
+          </div>
+          <h1 className="text-5xl sm:text-6xl font-black text-center mb-3 leading-none" style={{
+            background: 'linear-gradient(135deg, #f0faf5 30%, #10b981)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            letterSpacing: '-0.02em'
+          }}>
+            اخبار بیلیارد
+          </h1>
+          <p className="text-center text-sm mb-8" style={{ color: '#4b5563', letterSpacing: '0.1em' }}>
+            {new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
+          <div className="max-w-lg mx-auto relative">
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="جستجو در اخبار..."
+              className="w-full px-5 py-3 rounded-2xl text-sm outline-none"
+              style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', color: '#f0faf5' }}
+            />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🔍</span>
+          </div>
         </div>
-        <Link href={`/news/${featured.id}`} className="text-green-400 text-xs flex items-center gap-1 flex-shrink-0 hover:text-green-300">
-          بیشتر <ArrowLeft size={12} />
-        </Link>
       </div>
 
-      <div className="grid grid-cols-12 gap-6 mb-10">
-        {/* خبر اصلی */}
-        <div className="col-span-12 lg:col-span-7">
-          <Link href={`/news/${featured.id}`}>
-            <div className="group cursor-pointer">
-              <div className={`bg-gradient-to-br ${featured.imageBg} w-full rounded-2xl mb-4 relative overflow-hidden`} style={{ height: '420px' }}>
-                <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                  <span className="text-white font-black" style={{ fontSize: '200px' }}>🎱</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-                <div className="absolute bottom-0 right-0 left-0 p-6">
-                  <span className="bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full inline-flex items-center gap-1 mb-3">
-                    <Flame size={12} />
-                    فوری
-                  </span>
-                  <h2 className="text-white text-2xl font-black leading-8 mb-2 group-hover:text-green-300 transition-colors">
-                    {featured.title}
-                  </h2>
-                  <p className="text-gray-300 text-sm leading-6 line-clamp-2 mb-3">{featured.summary}</p>
-                  <div className="flex items-center gap-4 text-gray-400 text-xs">
-                    <span className="flex items-center gap-1"><Clock size={11} />{featured.date}</span>
-                    <span className="flex items-center gap-1"><Eye size={11} />{featured.views.toLocaleString('fa-IR')} بازدید</span>
+      <div className="sticky top-0 z-40" style={{ background: 'rgba(1,6,4,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(16,185,129,0.1)' }}>
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center gap-2 overflow-x-auto py-3" style={{ scrollbarWidth: 'none' }}>
+            {CATEGORIES.map(cat => (
+              <button key={cat} onClick={() => setActiveCategory(cat)}
+                className="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+                style={activeCategory === cat
+                  ? { background: '#10b981', color: '#010604' }
+                  : { background: 'rgba(16,185,129,0.08)', color: '#9ca3af', border: '1px solid rgba(16,185,129,0.15)' }
+                }>{cat}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        {featured.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-6 rounded-full" style={{ background: '#10b981' }} />
+              <h2 className="text-sm font-bold tracking-widest uppercase" style={{ color: '#10b981' }}>اخبار ویژه</h2>
+              <div className="h-px flex-1" style={{ background: 'rgba(16,185,129,0.15)' }} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              {featured[0] && (
+                <Link href={`/news/${featured[0].id}`}
+                  className="lg:col-span-3 group relative overflow-hidden rounded-3xl p-8 flex flex-col justify-end min-h-[340px] cursor-pointer"
+                  style={{ background: 'linear-gradient(180deg, rgba(16,185,129,0.05) 0%, rgba(16,185,129,0.15) 100%)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                  <div className="absolute top-6 right-6 text-6xl opacity-20 group-hover:opacity-30 transition-opacity select-none">{featured[0].image}</div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981' }}>{featured[0].category}</span>
+                      {featured[0].tag && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: `${featured[0].tagColor}22`, color: featured[0].tagColor, border: `1px solid ${featured[0].tagColor}44` }}>{featured[0].tag}</span>}
+                    </div>
+                    <h3 className="text-2xl font-black mb-2 leading-snug group-hover:text-emerald-400 transition-colors">{featured[0].title}</h3>
+                    <p className="text-sm line-clamp-2 mb-4" style={{ color: '#9ca3af' }}>{featured[0].excerpt}</p>
+                    <div className="flex items-center gap-3 text-xs" style={{ color: '#6b7280' }}>
+                      <span>{featured[0].author}</span><span>·</span><span>{featured[0].date}</span><span>·</span><span>{featured[0].readTime} مطالعه</span>
+                    </div>
                   </div>
-                </div>
+                </Link>
+              )}
+              <div className="lg:col-span-2 flex flex-col gap-4">
+                {featured.slice(1).map(n => (
+                  <Link href={`/news/${n.id}`} key={n.id}
+                    className="group relative overflow-hidden rounded-2xl p-6 flex-1 cursor-pointer"
+                    style={{ background: 'rgba(5,12,8,0.8)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                    <div className="absolute top-4 left-4 text-4xl opacity-15 group-hover:opacity-25 transition-opacity select-none">{n.image}</div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>{n.category}</span>
+                      {n.tag && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: `${n.tagColor}22`, color: n.tagColor }}>{n.tag}</span>}
+                    </div>
+                    <h3 className="font-bold mb-1 group-hover:text-emerald-400 transition-colors leading-snug">{n.title}</h3>
+                    <p className="text-xs line-clamp-2 mb-3" style={{ color: '#6b7280' }}>{n.excerpt}</p>
+                    <div className="text-xs" style={{ color: '#4b5563' }}>{n.author} · {n.date}</div>
+                  </Link>
+                ))}
               </div>
             </div>
-          </Link>
-        </div>
+          </div>
+        )}
 
-        {/* اخبار کنار */}
-        <div className="col-span-12 lg:col-span-5 space-y-4">
-          {topNews.map(news => (
-            <Link key={news.id} href={`/news/${news.id}`}>
-              <div className="group flex gap-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer">
-                <div className={`bg-gradient-to-br ${news.imageBg} w-28 h-24 rounded-xl flex-shrink-0 relative overflow-hidden`}>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                    <span className="text-white text-3xl">🎱</span>
-                  </div>
+        {featured.length > 0 && regular.length > 0 && (
+          <div className="flex items-center gap-4 mb-10">
+            <div className="h-px flex-1" style={{ background: 'rgba(16,185,129,0.15)' }} />
+            <span className="text-xs tracking-widest uppercase" style={{ color: '#4b5563' }}>آخرین اخبار</span>
+            <div className="h-px flex-1" style={{ background: 'rgba(16,185,129,0.15)' }} />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {regular.map(n => (
+            <Link href={`/news/${n.id}`} key={n.id}
+              className="group rounded-2xl overflow-hidden cursor-pointer flex flex-col"
+              style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.1)' }}>
+              <div className="flex items-center justify-center h-28 text-5xl"
+                style={{ background: 'linear-gradient(135deg,rgba(16,185,129,0.05),rgba(6,182,212,0.05))', borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
+                {n.image}
+              </div>
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}>{n.category}</span>
+                  {n.tag && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: `${n.tagColor}22`, color: n.tagColor }}>{n.tag}</span>}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full mb-2 inline-block"
-                    style={{ backgroundColor: news.categoryColor + '20', color: news.categoryColor }}>
-                    {news.categoryLabel}
-                  </span>
-                  <h3 className="font-bold text-gray-900 text-sm leading-6 line-clamp-2 mb-2 group-hover:text-green-700 transition-colors">
-                    {news.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
-                    <span className="flex items-center gap-1"><Clock size={10} />{news.date}</span>
-                    <span className="flex items-center gap-1"><Eye size={10} />{news.views.toLocaleString('fa-IR')}</span>
-                  </div>
+                <h3 className="font-bold mb-2 leading-snug group-hover:text-emerald-400 transition-colors flex-1">{n.title}</h3>
+                <p className="text-xs line-clamp-2 mb-4" style={{ color: '#6b7280' }}>{n.excerpt}</p>
+                <div className="flex items-center justify-between text-xs" style={{ color: '#4b5563' }}>
+                  <span>{n.author}</span>
+                  <div className="flex items-center gap-2"><span>{n.readTime}</span><span style={{ color: '#10b981' }}>←</span></div>
                 </div>
               </div>
             </Link>
           ))}
         </div>
-      </div>
 
-      {/* خط جدا */}
-      <div className="border-t-2 border-gray-900 mb-8 flex items-center gap-4">
-        <h2 className="bg-gray-900 text-white px-4 py-2 text-sm font-black -mt-px">همه اخبار</h2>
-      </div>
-
-      {/* فیلتر و سرچ */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="flex gap-2 overflow-x-auto pb-1 flex-1">
-          {categories.map(cat => (
-            <button key={cat.value} onClick={() => setActiveCategory(cat.value)}
-              className={`px-4 py-2 text-sm font-medium flex-shrink-0 transition-all border-b-2 ${
-                activeCategory === cat.value
-                  ? 'border-gray-900 text-gray-900 font-black'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
-              }`}>
-              {cat.label}
-            </button>
-          ))}
-        </div>
-        <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="جستجو در اخبار..."
-          className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 w-full md:w-64" />
-      </div>
-
-      <div className="grid grid-cols-12 gap-6">
-        {/* اخبار اصلی */}
-        <div className="col-span-12 lg:col-span-8">
-          {filtered.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">خبری پیدا نشد</div>
-          ) : (
-            <div className="space-y-6">
-              {/* ردیف اول — ۲ تا بزرگ */}
-              <div className="grid grid-cols-2 gap-6">
-                {filtered.slice(0, 2).map(news => (
-                  <Link key={news.id} href={`/news/${news.id}`}>
-                    <div className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all cursor-pointer overflow-hidden">
-                      <div className={`bg-gradient-to-br ${news.imageBg} relative overflow-hidden`} style={{ height: '180px' }}>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                          <span className="text-white text-5xl">🎱</span>
-                        </div>
-                        <div className="absolute top-3 right-3">
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white"
-                            style={{ color: news.categoryColor }}>
-                            {news.categoryLabel}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-900 leading-6 line-clamp-2 mb-2 group-hover:text-green-700 transition-colors">
-                          {news.title}
-                        </h3>
-                        <p className="text-gray-500 text-sm line-clamp-2 mb-3">{news.summary}</p>
-                        <div className="flex items-center justify-between text-xs text-gray-400">
-                          <span className="flex items-center gap-1"><Clock size={10} />{news.date}</span>
-                          <span className="flex items-center gap-1"><Eye size={10} />{news.views.toLocaleString('fa-IR')}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              {/* بقیه — لیست */}
-              <div className="space-y-4">
-                {filtered.slice(2).map(news => (
-                  <Link key={news.id} href={`/news/${news.id}`}>
-                    <div className="group flex gap-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer">
-                      <div className={`bg-gradient-to-br ${news.imageBg} w-32 h-24 rounded-xl flex-shrink-0 relative overflow-hidden`}>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                          <span className="text-white text-3xl">🎱</span>
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                            style={{ backgroundColor: news.categoryColor + '20', color: news.categoryColor }}>
-                            {news.categoryLabel}
-                          </span>
-                          <span className="text-xs text-gray-400 flex items-center gap-1">
-                            <Clock size={10} />{news.date}
-                          </span>
-                        </div>
-                        <h3 className="font-bold text-gray-900 leading-6 line-clamp-2 mb-1 group-hover:text-green-700 transition-colors">
-                          {news.title}
-                        </h3>
-                        <p className="text-gray-500 text-sm line-clamp-1">{news.summary}</p>
-                      </div>
-                      <div className="flex-shrink-0 text-xs text-gray-400 flex items-center gap-1">
-                        <Eye size={10} />{news.views.toLocaleString('fa-IR')}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ستون کنار — پربازدیدترین‌ها */}
-        <div className="col-span-12 lg:col-span-4">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-            <div className="bg-gray-900 px-5 py-3 flex items-center gap-2">
-              <TrendingUp size={16} className="text-green-400" />
-              <span className="text-white font-black text-sm">پربازدیدترین‌ها</span>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {trending.map((news, i) => (
-                <Link key={news.id} href={`/news/${news.id}`}>
-                  <div className="flex gap-3 p-4 hover:bg-gray-50 transition-colors group">
-                    <span className="text-3xl font-black text-gray-100 w-8 flex-shrink-0 leading-none">
-                      {(i + 1).toLocaleString('fa-IR')}
-                    </span>
-                    <div>
-                      <h4 className="font-bold text-sm text-gray-800 leading-5 line-clamp-2 group-hover:text-green-700 transition-colors mb-1">
-                        {news.title}
-                      </h4>
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <span style={{ color: news.categoryColor }} className="font-medium">{news.categoryLabel}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-0.5"><Eye size={10} />{news.views.toLocaleString('fa-IR')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+        {filtered.length === 0 && (
+          <div className="text-center py-20" style={{ color: '#4b5563' }}>
+            <div className="text-5xl mb-4">📰</div>
+            <p>خبری یافت نشد</p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

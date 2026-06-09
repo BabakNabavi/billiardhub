@@ -83,37 +83,84 @@ export default function RankingsPage() {
     <>
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
-        @keyframes shimmer { 0%{background-position:200% center;}100%{background-position:-200% center;} }
         .rank-row { transition: all 0.2s ease; cursor: pointer; }
         .rank-row:hover { background: rgba(16,185,129,0.06) !important; }
         .sport-tab { transition: all 0.3s ease; }
         .sport-tab:hover { background: rgba(16,185,129,0.08) !important; }
         .cat-btn { transition: all 0.2s ease; }
         .cat-btn:hover { background: rgba(16,185,129,0.08) !important; color: #10b981 !important; }
+
+        /* ── Mobile-first overrides ── */
+        .ranking-layout { display: flex; gap: 20px; }
+        .ranking-sidebar { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+        .ranking-table-wrap { flex: 1; min-width: 0; }
+        .col-grid {
+          display: grid;
+          grid-template-columns: 60px 40px 44px 1fr 90px 90px;
+          align-items: center;
+          padding: 12px 20px;
+        }
+        .col-header {
+          display: grid;
+          grid-template-columns: 60px 40px 44px 1fr 90px 90px;
+          padding: 10px 20px;
+        }
+        .hide-mobile { display: block; }
+        .sport-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        @media (max-width: 768px) {
+          .ranking-layout { flex-direction: column; gap: 12px; }
+          .ranking-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+          .ranking-sidebar > * { flex: 1 1 140px; }
+          .sidebar-legend { display: none; }
+          .col-grid {
+            grid-template-columns: 48px 32px 38px 1fr 70px;
+            padding: 10px 12px;
+          }
+          .col-header {
+            grid-template-columns: 48px 32px 38px 1fr 70px;
+            padding: 8px 12px;
+          }
+          .hide-mobile { display: none; }
+          .sport-tabs { gap: 6px; }
+          .sport-tab { padding: 8px 12px !important; font-size: 12px !important; }
+        }
+
+        @media (max-width: 480px) {
+          .col-grid {
+            grid-template-columns: 42px 28px 36px 1fr 64px;
+            padding: 9px 10px;
+          }
+          .col-header {
+            grid-template-columns: 42px 28px 36px 1fr 64px;
+            padding: 7px 10px;
+          }
+        }
       `}</style>
 
       <div style={{
         minHeight: '100vh',
         background: 'linear-gradient(180deg,#010604 0%,#050c08 100%)',
-        padding: 'clamp(24px,4vw,48px) clamp(16px,3vw,32px)',
+        padding: 'clamp(16px,3vw,48px) clamp(12px,3vw,32px)',
         direction: 'rtl',
       }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
           {/* Header */}
-          <div style={{ marginBottom: '40px', animation: 'fadeUp 0.6s ease both' }}>
+          <div style={{ marginBottom: '28px', animation: 'fadeUp 0.6s ease both' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
               <div style={{
                 width: '40px', height: '40px', borderRadius: '12px',
                 background: 'linear-gradient(135deg,#f59e0b,#d97706)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 8px 24px rgba(245,158,11,0.3)',
+                flexShrink: 0,
               }}>
                 <Trophy size={20} color="#fff" />
               </div>
               <div>
                 <h1 style={{
-                  fontSize: 'clamp(22px,3vw,32px)', fontWeight: 900,
+                  fontSize: 'clamp(20px,3vw,32px)', fontWeight: 900,
                   color: '#f0faf5', margin: 0, letterSpacing: '-0.025em',
                 }}>
                   رنکینگ ایران
@@ -126,19 +173,16 @@ export default function RankingsPage() {
           </div>
 
           {/* Sport Tabs */}
-          <div style={{
-            display: 'flex', gap: '8px', marginBottom: '28px',
-            animation: 'fadeUp 0.6s 0.1s ease both',
-          }}>
+          <div className="sport-tabs" style={{ marginBottom: '24px', animation: 'fadeUp 0.6s 0.1s ease both' }}>
             {sports.map(s => (
               <button
                 key={s.value}
                 className="sport-tab"
-                disabled={s.soon}
+                disabled={!!s.soon}
                 onClick={() => { if (!s.soon) { setSport(s.value); setCategory('دسته برتر'); } }}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '10px 20px', borderRadius: '12px',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '10px 18px', borderRadius: '12px',
                   border: sport === s.value
                     ? '1px solid rgba(16,185,129,0.5)'
                     : '1px solid rgba(255,255,255,0.07)',
@@ -150,6 +194,7 @@ export default function RankingsPage() {
                   cursor: s.soon ? 'not-allowed' : 'pointer',
                   fontFamily: 'inherit',
                   opacity: s.soon ? 0.5 : 1,
+                  whiteSpace: 'nowrap',
                 }}>
                 <span>{s.icon}</span>
                 <span>{s.label}</span>
@@ -165,10 +210,10 @@ export default function RankingsPage() {
           </div>
 
           {sport !== 'highball' && (
-            <div style={{ display: 'flex', gap: '20px', animation: 'fadeUp 0.6s 0.2s ease both' }}>
+            <div className="ranking-layout" style={{ animation: 'fadeUp 0.6s 0.2s ease both' }}>
 
               {/* Sidebar */}
-              <div style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="ranking-sidebar">
 
                 {/* Gender */}
                 <div style={{
@@ -182,14 +227,14 @@ export default function RankingsPage() {
                       onClick={() => { setGender(g); setCategory('دسته برتر'); }}
                       style={{
                         width: '100%', textAlign: 'right',
-                        padding: '12px 16px',
+                        padding: '11px 14px',
                         background: gender === g ? 'rgba(16,185,129,0.12)' : 'transparent',
                         borderBottom: '1px solid rgba(255,255,255,0.04)',
                         color: gender === g ? '#10b981' : 'rgba(240,250,245,0.45)',
                         fontSize: '13px', fontWeight: gender === g ? 700 : 500,
                         cursor: 'pointer', border: 'none', fontFamily: 'inherit',
                         borderRight: gender === g ? '2px solid #10b981' : '2px solid transparent',
-                        transition: 'all 0.2s',
+                        transition: 'all 0.2s', display: 'block',
                       }}>
                       {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
                     </button>
@@ -228,8 +273,8 @@ export default function RankingsPage() {
                   ))}
                 </div>
 
-                {/* Legend */}
-                <div style={{
+                {/* Legend — hidden on mobile via CSS */}
+                <div className="sidebar-legend" style={{
                   background: 'rgba(255,255,255,0.02)',
                   border: '1px solid rgba(255,255,255,0.05)',
                   borderRadius: '14px', padding: '14px',
@@ -260,7 +305,7 @@ export default function RankingsPage() {
               </div>
 
               {/* Table */}
-              <div style={{ flex: 1 }}>
+              <div className="ranking-table-wrap">
                 <div style={{
                   background: 'rgba(255,255,255,0.025)',
                   border: '1px solid rgba(255,255,255,0.07)',
@@ -268,7 +313,7 @@ export default function RankingsPage() {
                 }}>
                   {/* Table Header */}
                   <div style={{
-                    padding: '16px 20px',
+                    padding: '14px 20px',
                     background: 'rgba(16,185,129,0.06)',
                     borderBottom: '1px solid rgba(255,255,255,0.06)',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -290,15 +335,12 @@ export default function RankingsPage() {
                   </div>
 
                   {/* Column Headers */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '60px 40px 44px 1fr 90px 90px',
-                    padding: '10px 20px',
+                  <div className="col-header" style={{
                     background: 'rgba(0,0,0,0.2)',
                     borderBottom: '1px solid rgba(255,255,255,0.04)',
                   }}>
                     {['رتبه', '±', '', 'نام بازیکن', 'شهر', 'امتیاز'].map((h, i) => (
-                      <div key={i} style={{
+                      <div key={i} className={i === 4 ? 'hide-mobile' : ''} style={{
                         fontSize: '10px', color: 'rgba(240,250,245,0.25)',
                         fontWeight: 600, letterSpacing: '0.08em',
                         textAlign: i === 0 || i >= 4 ? 'center' : 'right',
@@ -326,14 +368,10 @@ export default function RankingsPage() {
                         style={{ textDecoration: 'none', display: 'block' }}
                       >
                         <div
-                          className="rank-row"
+                          className="rank-row col-grid"
                           onMouseEnter={() => setHoveredRow(index)}
                           onMouseLeave={() => setHoveredRow(null)}
                           style={{
-                            display: 'grid',
-                            gridTemplateColumns: '60px 40px 44px 1fr 90px 90px',
-                            alignItems: 'center',
-                            padding: '12px 20px',
                             borderBottom: '1px solid rgba(255,255,255,0.03)',
                             background: isTop3
                               ? `rgba(${player.rank === 1 ? '245,158,11' : player.rank === 2 ? '148,163,184' : '180,83,9'},0.04)`
@@ -349,16 +387,17 @@ export default function RankingsPage() {
                               border: `1px solid ${rankStyle.border}`,
                               gap: '3px',
                             }}>
-                              {getRankIcon(player.rank) || (
-                                <span style={{ fontSize: '12px', fontWeight: 700, color: rankStyle.text }}>
-                                  {player.rank}
-                                </span>
-                              )}
-                              {isTop3 && (
-                                <span style={{ fontSize: '11px', fontWeight: 700, color: rankStyle.text }}>
-                                  {player.rank}
-                                </span>
-                              )}
+                              {getRankIcon(player.rank)
+                                ? <>
+                                    {getRankIcon(player.rank)}
+                                    <span style={{ fontSize: '11px', fontWeight: 700, color: rankStyle.text }}>
+                                      {player.rank}
+                                    </span>
+                                  </>
+                                : <span style={{ fontSize: '12px', fontWeight: 700, color: rankStyle.text }}>
+                                    {player.rank}
+                                  </span>
+                              }
                             </div>
                           </div>
 
@@ -403,12 +442,15 @@ export default function RankingsPage() {
                             fontWeight: isTop3 ? 700 : 500,
                             color: isTop3 ? '#f0faf5' : 'rgba(240,250,245,0.7)',
                             paddingRight: '8px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
                           }}>
                             {player.name}
                           </div>
 
-                          {/* City */}
-                          <div style={{
+                          {/* City — hidden on mobile */}
+                          <div className="hide-mobile" style={{
                             textAlign: 'center',
                             fontSize: '12px',
                             color: 'rgba(240,250,245,0.3)',
@@ -424,6 +466,7 @@ export default function RankingsPage() {
                               background: isTop3 ? rankStyle.bg : 'rgba(16,185,129,0.08)',
                               border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(16,185,129,0.15)'}`,
                               borderRadius: '8px', padding: '3px 8px',
+                              whiteSpace: 'nowrap',
                             }}>
                               {player.points.toLocaleString('fa-IR')}
                             </span>
@@ -436,7 +479,7 @@ export default function RankingsPage() {
 
                 {/* Footer note */}
                 <div style={{
-                  marginTop: '16px', padding: '14px 18px',
+                  marginTop: '16px', padding: '12px 16px',
                   background: 'rgba(16,185,129,0.04)',
                   border: '1px solid rgba(16,185,129,0.1)',
                   borderRadius: '14px',
@@ -467,6 +510,7 @@ export default function RankingsPage() {
               </p>
             </div>
           )}
+
         </div>
       </div>
     </>
