@@ -5,22 +5,12 @@ import { Search, Star, MapPin, CheckCircle, X, ChevronLeft } from 'lucide-react'
 import api from '../../lib/api';
 
 interface Coach {
-  id: string;
-  firstName: string;
-  lastName: string;
-  verificationStatus: string;
-  bio: string;
-  city: string;
-  avatar: string;
-  coachProfile: {
-    specialty: string;
-    experience: string;
-    certifications: string;
-    sessionPrice: number;
-  };
+  id: string; firstName: string; lastName: string;
+  verificationStatus: string; bio: string; city: string; avatar: string;
+  coachProfile: { specialty: string; experience: string; certifications: string; sessionPrice: number; };
 }
 
-const specialtyLabels: Record<string,string> = {snooker:'اسنوکر',pocket:'پاکت بیلیارد',highball:'هی‌بال',all:'همه رشته‌ها'};
+const specialtyLabels: Record<string,string> = {snooker:'اسنوکر',pocket:'پاکت بیلیارد',highball:'هی‌بال'};
 
 const mockCoaches: Coach[] = [
   {id:'1',firstName:'استاد احمد',lastName:'رضایی',verificationStatus:'verified',bio:'مربی ملی‌پوش با ۱۵ سال سابقه تدریس در فدراسیون',city:'تهران',avatar:'',coachProfile:{specialty:'snooker',experience:'۱۵',certifications:'مدرک A فدراسیون جهانی',sessionPrice:500000}},
@@ -30,16 +20,21 @@ const mockCoaches: Coach[] = [
 ];
 
 export default function CoachesPage() {
-  const [coaches, setCoaches] = useState<Coach[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [coaches, setCoaches] = useState<Coach[]>(mockCoaches);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [searchFocus, setSearchFocus] = useState(false);
   const [filter, setFilter] = useState('all');
 
   useEffect(()=>{
+    setLoading(true);
     api.get('/user/by-role/coach')
-      .then(res=>{setCoaches(res.data?.length?res.data:mockCoaches);setLoading(false);})
-      .catch(()=>{setCoaches(mockCoaches);setLoading(false);});
+      .then(res=>{
+        // فقط اگه بیشتر از یک نفر برگشت از API استفاده کن
+        if(Array.isArray(res.data) && res.data.length > 1) setCoaches(res.data);
+        setLoading(false);
+      })
+      .catch(()=>setLoading(false));
   },[]);
 
   const filtered=coaches.filter(c=>{
@@ -57,7 +52,6 @@ export default function CoachesPage() {
       `}</style>
       <div style={{minHeight:'100vh',background:'linear-gradient(180deg,#010604 0%,#050c08 100%)',padding:'clamp(24px,4vw,48px) clamp(16px,3vw,32px)',direction:'rtl'}}>
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
-
           <div style={{marginBottom:'32px',animation:'fadeUp 0.6s ease both'}}>
             <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'8px'}}>
               <div style={{width:'40px',height:'40px',borderRadius:'12px',background:'linear-gradient(135deg,#f59e0b,#d97706)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 8px 24px rgba(245,158,11,0.3)',flexShrink:0}}>
@@ -69,7 +63,6 @@ export default function CoachesPage() {
               </div>
             </div>
           </div>
-
           <div style={{display:'flex',flexDirection:'column',gap:'12px',marginBottom:'28px'}}>
             <div style={{display:'flex',alignItems:'center',gap:'10px',background:'rgba(255,255,255,0.04)',border:`1px solid ${searchFocus?'rgba(245,158,11,0.4)':'rgba(255,255,255,0.07)'}`,borderRadius:'14px',padding:'12px 16px',transition:'all 0.3s'}}>
               <Search size={15} color="rgba(240,250,245,0.25)"/>
@@ -87,7 +80,6 @@ export default function CoachesPage() {
               <span style={{marginRight:'auto',color:'rgba(240,250,245,0.25)',fontSize:'12px',alignSelf:'center'}}>{filtered.length} مربی</span>
             </div>
           </div>
-
           {loading?(
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'16px'}}>
               {[1,2,3,4].map(i=><div key={i} style={{height:'200px',background:'rgba(255,255,255,0.03)',borderRadius:'20px',border:'1px solid rgba(255,255,255,0.05)'}}/>)}
@@ -95,12 +87,12 @@ export default function CoachesPage() {
           ):filtered.length===0?(
             <div style={{textAlign:'center',padding:'80px 20px',color:'rgba(240,250,245,0.2)'}}>
               <Star size={40} style={{opacity:0.2,display:'block',margin:'0 auto 12px'}}/>
-              <p style={{fontSize:'14px'}}>مربی‌ای پیدا نشد</p>
+              <p style={{fontSize:'14px',color:'rgba(240,250,245,0.2)'}}>مربی‌ای پیدا نشد</p>
             </div>
           ):(
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'16px'}}>
               {filtered.map((coach,i)=>(
-                <Link key={coach.id} href={`/coaches/${coach.id}`} style={{textDecoration:'none'}}>
+                <Link key={coach.id} href={`/coaches/${coach.id}`} style={{textDecoration:'none',color:'inherit'}}>
                   <div className="coach-card" style={{background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'20px',padding:'20px',cursor:'pointer',animation:`fadeUp 0.5s ${i*0.05}s ease both`,position:'relative',overflow:'hidden'}}>
                     <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(245,158,11,0.4),transparent)'}}/>
                     <div style={{display:'flex',alignItems:'flex-start',gap:'14px',marginBottom:'14px'}}>
@@ -124,7 +116,7 @@ export default function CoachesPage() {
                       </div>
                     )}
                     {coach.coachProfile?.certifications&&<div style={{fontSize:'11px',color:'rgba(240,250,245,0.3)',marginBottom:'8px'}}>🏅 {coach.coachProfile.certifications}</div>}
-                    {coach.bio&&<p style={{color:'rgba(240,250,245,0.4)',fontSize:'12px',lineHeight:1.6,margin:0,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{coach.bio}</p>}
+                    {coach.bio&&<div style={{color:'rgba(240,250,245,0.4)',fontSize:'12px',lineHeight:1.6,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{coach.bio}</div>}
                   </div>
                 </Link>
               ))}
