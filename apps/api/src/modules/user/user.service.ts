@@ -16,8 +16,12 @@ export class UserService {
   }
 
   async findByPhone(phone: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { phone } });
-  }
+  return this.userRepository
+    .createQueryBuilder('user')
+    .addSelect('user.password')
+    .where('user.phone = :phone', { phone })
+    .getOne();
+}
 
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
