@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'file';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Settings, MapPin, CheckCircle, X } from 'lucide-react';
 import api from '../../lib/api';
