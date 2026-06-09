@@ -568,7 +568,7 @@ export default function PlayerProfilePage() {
                           <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '60px', height: '1px', background: `linear-gradient(90deg,transparent,${a.color}50,transparent)` }} />
                           <div style={{ fontSize: '36px', marginBottom: '12px', textAlign: 'center', filter: `drop-shadow(0 0 12px ${a.color}60)` }}>{a.icon}</div>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5', marginBottom: '6px', textAlign: 'center', lineHeight: 1.4 }}>{a.title}</div>
-                          <div style={{ fontSize: '10px', color: a.color, fontWeight: 700, textAlign: 'center', letterSpacing: '0.08em', background: `${a.color}12`, border: `1px solid ${a.color}25`, borderRadius: '20px', padding: '3px 12px', display: 'inline-block', width: 'fit-content', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>{a.year}</div>
+                          <div style={{ fontSize: '10px', color: a.color, fontWeight: 700, textAlign: 'center', letterSpacing: '0.08em', background: `${a.color}12`, border: `1px solid ${a.color}25`, borderRadius: '20px', padding: '3px 12px', width: 'fit-content', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>{a.year}</div>
                         </div>
                       </ScrollReveal>
                     ))}
