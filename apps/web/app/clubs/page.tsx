@@ -295,7 +295,7 @@ export default function ClubsPage() {
 
                 {/* Filter dropdown - fixed z-index and position */}
                 {filterOpen&&(
-                  <div style={{position:'fixed',top:'auto',right:'auto',width:'min(320px,calc(100vw - 32px)',background:'rgba(5,12,8,0.98)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'18px',padding:'18px',zIndex:9999,boxShadow:'0 24px 60px rgba(0,0,0,0.8)',backdropFilter:'blur(24px)',animation:'fadeUp 0.22s ease both',marginTop:'8px'}}>
+                  <div style={{position:'fixed',top:'120px',right:'16px',left:'16px',width:'auto',maxHeight:'80vh',overflowY:'auto',background:'rgba(5,12,8,0.98)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'18px',padding:'18px',zIndex:9999,boxShadow:'0 24px 60px rgba(0,0,0,0.8)',backdropFilter:'blur(24px)',animation:'fadeUp 0.22s ease both'}}>
                     <div style={{position:'absolute',top:'-1px',left:'50%',transform:'translateX(-50%)',width:'80px',height:'1px',background:'linear-gradient(90deg,transparent,rgba(16,185,129,0.5),transparent)'}}/>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
                       <span style={{fontSize:'14px',fontWeight:800,color:'#f0faf5'}}>فیلترها</span>

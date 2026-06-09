@@ -337,7 +337,7 @@ export default function Navbar() {
         {mobileOpen && (
           <div style={{
             position: 'fixed', top: '62px', left: 0, right: 0, bottom: 0,
-            zIndex: 99, background: 'rgba(2,8,6,0.98)', backdropFilter: 'blur(24px)',
+            zIndex: 9999, background: 'rgba(2,8,6,0.98)', backdropFilter: 'blur(24px)',
             overflowY: 'auto', padding: '0 0 40px',
             animation: 'mobileSlideIn 0.28s cubic-bezier(0.22,1,0.36,1) forwards',
           }}>
