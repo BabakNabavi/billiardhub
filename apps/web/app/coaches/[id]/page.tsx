@@ -380,7 +380,7 @@ export default function CoachProfilePage() {
                           ))}
                         </div>
 
-                        <button style={{ width:'100%', padding:'11px', borderRadius:'12px', border:'none', background: selPkg===pkg.id?`linear-gradient(135deg,${pkg.color},${pkg.color}cc)`:`${pkg.color}10`, color: selPkg===pkg.id?'#fff':pkg.color, fontSize:'12px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: selPkg===pkg.id?`0 6px 18px ${pkg.color}35`:'none', border:`1px solid ${selPkg===pkg.id?'transparent':`${pkg.color}22`}` }}>
+                        <button style={{ width:'100%', padding:'11px', borderRadius:'12px', background: selPkg===pkg.id?`linear-gradient(135deg,${pkg.color},${pkg.color}cc)`:`${pkg.color}10`, color: selPkg===pkg.id?'#fff':pkg.color, fontSize:'12px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: selPkg===pkg.id?`0 6px 18px ${pkg.color}35`:'none', border:`1px solid ${selPkg===pkg.id?'transparent':`${pkg.color}22`}` }}>
                           {selPkg===pkg.id?'انتخاب شد ✓':'انتخاب این پکیج'}
                         </button>
                       </div>
