@@ -45,11 +45,17 @@ export class AuthService {
 
   async login(phone: string, password: string) {
     const user = await this.userService.findByPhone(phone);
+    console.log('LOGIN DEBUG - user found:', !!user);
+    console.log('LOGIN DEBUG - password exists:', !!user?.password);
+    console.log('LOGIN DEBUG - password length:', user?.password?.length ?? 0);
+
     if (!user) {
       throw new UnauthorizedException('شماره موبایل یا رمز عبور اشتباه است');
     }
 
     const isValid = await this.userService.validatePassword(password, user.password);
+    console.log('LOGIN DEBUG - isValid:', isValid);
+
     if (!isValid) {
       throw new UnauthorizedException('شماره موبایل یا رمز عبور اشتباه است');
     }
