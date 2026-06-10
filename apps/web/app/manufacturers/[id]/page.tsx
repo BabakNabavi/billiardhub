@@ -1,194 +1,139 @@
-// ==============================
-// FILE: apps/web/app/education/page.tsx
-// ==============================
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import api from '@/lib/api'
 
-const COURSES = [
-  {
-    id: '1', title: 'مبانی اسنوکر از صفر تا حرفه‌ای',
-    instructor: 'استاد محمد رضایی', level: 'مبتدی', discipline: 'اسنوکر',
-    duration: '۲۴ ساعت', lessons: 32, students: 1240,
-    rating: 4.9, price: '۳۵۰,۰۰۰ تومان', isFree: false,
-    tags: ['پایه', 'اسنوکر', 'فریم‌بندی'],
-    description: 'یادگیری کامل اسنوکر از ایستادن صحیح تا کنترل توپ سفید. مناسب برای افراد بدون تجربه.',
-    icon: '🎱', color: '#10b981',
-  },
-  {
-    id: '2', title: 'تکنیک‌های پیشرفته پول آمریکایی',
-    instructor: 'استاد علیرضا حیدری', level: 'پیشرفته', discipline: 'پول آمریکایی',
-    duration: '۱۸ ساعت', lessons: 24, students: 876,
-    rating: 4.8, price: '۴۸۰,۰۰۰ تومان', isFree: false,
-    tags: ['اسپین', 'پوزیشن', 'سیستم'],
-    description: 'کنترل cue ball، system play، و تکنیک‌های حرفه‌ای برای بازیکنان متوسط به بالا.',
-    icon: '🎯', color: '#06b6d4',
-  },
-  {
-    id: '3', title: 'آشنایی با قوانین بین‌المللی بیلیارد',
-    instructor: 'داور علی رضایی', level: 'همه سطوح', discipline: 'عمومی',
-    duration: '۶ ساعت', lessons: 10, students: 2100,
-    rating: 4.7, price: 'رایگان', isFree: true,
-    tags: ['قوانین', 'WCBS', 'داوری'],
-    description: 'قوانین رسمی WCBS برای اسنوکر، پول و کارامبول. ضروری برای شرکت در مسابقات رسمی.',
-    icon: '📋', color: '#f59e0b',
-  },
-  {
-    id: '4', title: 'کارامبول — ورودی به دنیای سه‌گانه',
-    instructor: 'استاد داریوش فرهانی', level: 'مبتدی تا متوسط', discipline: 'کارامبول',
-    duration: '۱۵ ساعت', lessons: 20, students: 412,
-    rating: 4.9, price: '۳۸۰,۰۰۰ تومان', isFree: false,
-    tags: ['کارامبول', 'سیستم‌ها', 'انگل‌بازی'],
-    description: 'معرفی کامل بازی کارامبول و تفاوت آن با سایر رشته‌ها، همراه با تمرین‌های عملی.',
-    icon: '⭕', color: '#a78bfa',
-  },
-  {
-    id: '5', title: 'روانشناسی مسابقه — ذهنیت قهرمانی',
-    instructor: 'دکتر سارا مرادی', level: 'همه سطوح', discipline: 'عمومی',
-    duration: '۸ ساعت', lessons: 12, students: 654,
-    rating: 4.6, price: '۲۸۰,۰۰۰ تومان', isFree: false,
-    tags: ['ذهنیت', 'روانشناسی', 'فشار مسابقه'],
-    description: 'مدیریت اضطراب، تمرکز در لحظه، و ساختن روتین ذهنی برای موفقیت در مسابقات.',
-    icon: '🧠', color: '#10b981',
-  },
-  {
-    id: '6', title: 'نگهداری و سرویس میز بیلیارد',
-    instructor: 'کاوه رستمی — متخصص نصب', level: 'عمومی', discipline: 'تجهیزات',
-    duration: '۴ ساعت', lessons: 8, students: 320,
-    rating: 4.5, price: 'رایگان', isFree: true,
-    tags: ['کوئیش', 'سرویس', 'نگهداری'],
-    description: 'چگونه میز بیلیارد را به درستی نگهداری کنید، گچ مناسب انتخاب کنید و کوئیش را تمیز کنید.',
-    icon: '🔧', color: '#06b6d4',
-  },
-];
+interface Manufacturer {
+  id: string
+  name: string
+  city?: string
+  address?: string
+  description?: string
+  products?: string[]
+  founded?: string
+  phone?: string
+  website?: string
+  rating?: number
+  reviewCount?: number
+  certifications?: string[]
+}
 
-const DISCIPLINES = ['همه', 'اسنوکر', 'پول آمریکایی', 'کارامبول', 'عمومی', 'تجهیزات'];
+const MOCK: Manufacturer[] = [
+  { id: '1', name: 'صنایع بیلیارد ایران', city: 'تهران', address: 'تهران، شهرک صنعتی شمس‌آباد', description: 'تولیدکننده پیشرو میز بیلیارد حرفه‌ای در ایران با ۲۰ سال تجربه. محصولات ما در بیش از ۵۰۰ باشگاه سراسر کشور مورد استفاده قرار می‌گیرند.', products: ['میز اسنوکر ۱۲ فوت', 'میز پول آمریکایی', 'میز کارامبول', 'رویه مخمل'], founded: '۱۳۸۳', phone: '02144556677', website: 'billiard-iran.com', rating: 4.8, reviewCount: 96, certifications: ['استاندارد ملی ایران', 'IBSF Approved'] },
+  { id: '2', name: 'کارخانه میز سبز', city: 'اصفهان', address: 'اصفهان، شهرک صنعتی دولت‌آباد', description: 'تولید میزهای استاندارد بیلیارد برای باشگاه‌ها و منازل با قیمت مناسب', products: ['میز پول', 'میز بیلیارد خانگی', 'میز مینی'], founded: '۱۳۹۰', phone: '03112233445', rating: 4.5, reviewCount: 61, certifications: ['استاندارد ملی ایران'] },
+  { id: '3', name: 'نوین کیو فکتوری', city: 'مشهد', address: 'مشهد، شهرک صنعتی توس', description: 'تخصص در تولید چوب و نوک بیلیارد با کیفیت حرفه‌ای. چوب‌های ما در مسابقات ملی استفاده می‌شوند.', products: ['چوب اسنوکر حرفه‌ای', 'نوک چوب', 'چوب پول'], founded: '۱۳۹۵', phone: '05112233445', rating: 4.6, reviewCount: 48 },
+  { id: '4', name: 'پارس بیلیارد تبریز', city: 'تبریز', address: 'تبریز، شهرک صنعتی باسمنج', description: 'تولید و صادرات تجهیزات بیلیارد به کشورهای همسایه. صادرکننده برتر تجهیزات ورزشی ۱۴۰۱', products: ['میز اسنوکر', 'گوی بیلیارد', 'رویه مخمل'], founded: '۱۳۸۷', phone: '04133221144', rating: 4.4, reviewCount: 73, certifications: ['گواهی صادرات', 'استاندارد ملی ایران'] },
+]
 
-const levelColors: Record<string, string> = {
-  'مبتدی': '#10b981', 'متوسط': '#f59e0b', 'پیشرفته': '#ef4444',
-  'همه سطوح': '#a78bfa', 'مبتدی تا متوسط': '#06b6d4', 'عمومی': '#6b7280',
-};
+export default function ManufacturerDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const router = useRouter()
+  const [mfr, setMfr] = useState<Manufacturer | null>(null)
+  const [loading, setLoading] = useState(true)
 
-export default function EducationPage() {
-  const [disc, setDisc] = useState('همه');
-  const [freeOnly, setFreeOnly] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get(`/manufacturers/${id}`)
+        if (res.data) setMfr(res.data)
+        else setMfr(MOCK.find(m => m.id === id) || null)
+      } catch {
+        setMfr(MOCK.find(m => m.id === id) || null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [id])
 
-  const filtered = COURSES.filter(c => {
-    const matchD = disc === 'همه' || c.discipline === disc;
-    const matchF = !freeOnly || c.isFree;
-    return matchD && matchF;
-  });
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#010604', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#a78bfa', fontSize: '1.2rem' }}>در حال بارگذاری...</div>
+    </div>
+  )
+
+  if (!mfr) return (
+    <div style={{ minHeight: '100vh', background: '#010604', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+      <div style={{ color: '#f0faf5', fontSize: '1.5rem' }}>تولیدکننده یافت نشد</div>
+      <Link href="/manufacturers" style={{ color: '#a78bfa', textDecoration: 'none' }}>← بازگشت</Link>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(180deg,#050c08 0%,#010604 100%)' }}>
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(ellipse at 30% 0%, rgba(6,182,212,0.12) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(167,139,250,0.08) 0%, transparent 50%)',
-        }} />
-        <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-10 text-center">
-          <div className="flex items-center gap-3 mb-4 justify-center">
-            <div className="h-px w-16" style={{ background: 'rgba(6,182,212,0.4)' }} />
-            <span className="text-xs tracking-widest uppercase" style={{ color: '#06b6d4' }}>BILLIARD PLUS ACADEMY</span>
-            <div className="h-px w-16" style={{ background: 'rgba(6,182,212,0.4)' }} />
-          </div>
-          <h1 className="text-5xl sm:text-6xl font-black mb-3 leading-none" style={{
-            background: 'linear-gradient(135deg,#f0faf5 30%,#06b6d4)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>
-            آکادمی آموزش
-          </h1>
-          <p className="mb-8" style={{ color: '#4b5563' }}>از مبتدی تا حرفه‌ای — با بهترین مربیان ایران</p>
-          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-            {[
-              { label: 'دوره', value: COURSES.length, color: '#06b6d4' },
-              { label: 'دانشجو', value: '۶.۲k', color: '#a78bfa' },
-              { label: 'دوره رایگان', value: COURSES.filter(c => c.isFree).length, color: '#10b981' },
-            ].map(s => (
-              <div key={s.label} className="text-center rounded-2xl p-4" style={{ background: 'rgba(5,12,8,0.8)', border: `1px solid ${s.color}22` }}>
-                <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-xs" style={{ color: '#6b7280' }}>{s.label}</div>
+    <div style={{ minHeight: '100vh', background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      <div style={{ background: 'linear-gradient(135deg, #050c08, #0f0a1f)', borderBottom: '1px solid rgba(167,139,250,0.2)', padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <Link href="/manufacturers" style={{ color: '#a78bfa', textDecoration: 'none', fontSize: '0.9rem', display: 'inline-block', marginBottom: '1.5rem' }}>
+            ← بازگشت به تولیدکنندگان
+          </Link>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ width: 'clamp(70px,15vw,100px)', height: 'clamp(70px,15vw,100px)', borderRadius: '16px', background: 'linear-gradient(135deg, #a78bfa, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(2rem,4vw,2.5rem)', flexShrink: 0 }}>🏭</div>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <h1 style={{ margin: '0 0 0.5rem', fontSize: 'clamp(1.3rem, 4vw, 2rem)' }}>{mfr.name}</h1>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', color: '#c4b5fd', fontSize: '0.9rem' }}>
+                {mfr.city && <span>📍 {mfr.city}</span>}
+                {mfr.founded && <span>🏗️ تأسیس {mfr.founded}</span>}
+                {mfr.rating && <span style={{ color: '#f59e0b' }}>⭐ {mfr.rating} ({mfr.reviewCount} نظر)</span>}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="sticky top-0 z-40" style={{ background: 'rgba(1,6,4,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(6,182,212,0.1)' }}>
-        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap gap-2 items-center">
-          {DISCIPLINES.map(d => (
-            <button key={d} onClick={() => setDisc(d)}
-              className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium"
-              style={disc === d ? { background: '#06b6d4', color: '#010604' } : { background: 'rgba(6,182,212,0.08)', color: '#9ca3af', border: '1px solid rgba(6,182,212,0.15)' }}>
-              {d}
-            </button>
-          ))}
-          <button onClick={() => setFreeOnly(!freeOnly)}
-            className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium mr-auto"
-            style={freeOnly ? { background: '#10b981', color: '#010604' } : { background: 'rgba(16,185,129,0.08)', color: '#9ca3af', border: '1px solid rgba(16,185,129,0.15)' }}>
-            فقط رایگان
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'clamp(1rem,3vw,2rem) clamp(1rem,4vw,2rem)', display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))' }}>
+        <div style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+          <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#a78bfa' }}>اطلاعات تماس</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.95rem' }}>
+            {mfr.phone && <div style={{ display: 'flex', gap: '0.75rem' }}><span>📞</span><a href={`tel:${mfr.phone}`} style={{ color: '#c4b5fd', textDecoration: 'none' }}>{mfr.phone}</a></div>}
+            {mfr.address && <div style={{ display: 'flex', gap: '0.75rem' }}><span>📍</span><span style={{ color: '#ddd6fe' }}>{mfr.address}</span></div>}
+            {mfr.website && <div style={{ display: 'flex', gap: '0.75rem' }}><span>🌐</span><span style={{ color: '#c4b5fd' }}>{mfr.website}</span></div>}
+          </div>
+        </div>
+
+        {mfr.description && (
+          <div style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#06b6d4' }}>درباره کارخانه</h2>
+            <div style={{ color: '#cffafe', lineHeight: '1.8', fontSize: '0.95rem' }}>{mfr.description}</div>
+          </div>
+        )}
+
+        {mfr.products && mfr.products.length > 0 && (
+          <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#10b981' }}>محصولات تولیدی</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {mfr.products.map((p, i) => (
+                <span key={i} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '20px', padding: '0.3rem 0.9rem', fontSize: '0.85rem', color: '#6ee7b7' }}>{p}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {mfr.certifications && mfr.certifications.length > 0 && (
+          <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#f59e0b' }}>گواهینامه‌ها</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {mfr.certifications.map((c, i) => (
+                <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#fde68a', fontSize: '0.9rem' }}>
+                  <span>✅</span><span>{c}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {mfr.phone && (
+            <a href={`tel:${mfr.phone}`} style={{ background: 'linear-gradient(135deg, #a78bfa, #7c3aed)', color: '#fff', textDecoration: 'none', padding: '0.85rem 2rem', borderRadius: '12px', fontWeight: '600', flex: '1', minWidth: '150px', textAlign: 'center' }}>
+              📞 تماس با کارخانه
+            </a>
+          )}
+          <button onClick={() => router.back()} style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa', padding: '0.85rem 2rem', borderRadius: '12px', cursor: 'pointer', fontSize: '1rem', flex: '1', minWidth: '150px' }}>
+            بازگشت
           </button>
         </div>
       </div>
-
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map(course => (
-            <Link href={`/education/${course.id}`} key={course.id}
-              className="group rounded-3xl overflow-hidden flex flex-col cursor-pointer"
-              style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.1)' }}>
-              <div className="h-1" style={{ background: `linear-gradient(90deg,${course.color},transparent)` }} />
-              <div className="flex items-center justify-center h-28 text-5xl"
-                style={{ background: `linear-gradient(135deg,${course.color}08,${course.color}15)`, borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
-                {course.icon}
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: `${levelColors[course.level] ?? '#6b7280'}22`, color: levelColors[course.level] ?? '#6b7280' }}>
-                    {course.level}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(167,139,250,0.1)', color: '#a78bfa' }}>{course.discipline}</span>
-                  {course.isFree && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>رایگان</span>}
-                </div>
-                <h3 className="font-black mb-1 leading-snug group-hover:text-cyan-400 transition-colors">{course.title}</h3>
-                <p className="text-xs mb-3 line-clamp-2" style={{ color: '#6b7280' }}>{course.description}</p>
-                <div className="flex items-center gap-1 mb-3 text-xs" style={{ color: '#9ca3af' }}>
-                  <span>👤</span><span>{course.instructor}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs mb-4" style={{ color: '#6b7280' }}>
-                  <span>⏱️ {course.duration} · {course.lessons} جلسه</span>
-                  <span>👥 {course.students.toLocaleString('fa')} دانشجو</span>
-                </div>
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {course.tags.map(t => (
-                    <span key={t} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(6,182,212,0.08)', color: '#06b6d4' }}>#{t}</span>
-                  ))}
-                </div>
-                <div className="mt-auto flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-xs">
-                    <span style={{ color: '#f59e0b' }}>⭐</span>
-                    <span className="font-bold">{course.rating}</span>
-                  </div>
-                  <div className="text-sm font-black" style={{ color: course.isFree ? '#10b981' : '#f59e0b' }}>{course.price}</div>
-                </div>
-                <button className="w-full mt-3 py-2.5 rounded-xl font-bold text-sm"
-                  style={course.isFree
-                    ? { background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }
-                    : { background: 'rgba(6,182,212,0.1)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.2)' }
-                  }>
-                  {course.isFree ? 'شروع رایگان' : 'مشاهده دوره'}
-                </button>
-              </div>
-            </Link>
-          ))}
-        </div>
-        {filtered.length === 0 && (
-          <div className="text-center py-20" style={{ color: '#4b5563' }}>
-            <div className="text-5xl mb-4">📚</div><p>دوره‌ای یافت نشد</p>
-          </div>
-        )}
-      </div>
     </div>
-  );
+  )
 }

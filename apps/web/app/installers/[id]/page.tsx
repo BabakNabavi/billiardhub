@@ -1,201 +1,137 @@
-// ==============================
-// FILE: apps/web/app/installers/[id]/page.tsx
-// ==============================
-'use client';
+'use client'
 
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import api from '@/lib/api'
 
-const INSTALLERS: Record<string, {
-  id: string; name: string; city: string; experience: number; phone: string;
-  email: string; description: string; services: { name: string; price: string; duration: string }[];
-  projects: { title: string; location: string; year: number; type: string }[];
-  stats: { projects: number; rating: number; reviews: number; cities: number };
-  specialties: string[]; avatar: string; available: boolean;
-}> = {
-  '1': {
-    id: '1', name: 'کاوه رستمی', city: 'تهران', experience: 10,
-    phone: '09121111111', email: 'kaveh@billiardinstall.ir',
-    description: 'متخصص نصب و راه‌اندازی میزهای بیلیارد حرفه‌ای با ۱۰ سال تجربه در تهران و البرز. نصب بیش از ۲۰۰ میز اسنوکر و پول در باشگاه‌های معتبر.',
-    services: [
-      { name: 'نصب میز اسنوکر ۱۲ فوت', price: '۳,۵۰۰,۰۰۰ تومان', duration: '۱ روز' },
-      { name: 'نصب میز پول آمریکایی', price: '۲,۰۰۰,۰۰۰ تومان', duration: '۵-۶ ساعت' },
-      { name: 'تنظیم و لول کردن میز', price: '۸۰۰,۰۰۰ تومان', duration: '۲ ساعت' },
-      { name: 'تعویض کوئیش', price: '۱,۲۰۰,۰۰۰ تومان', duration: '۳ ساعت' },
-    ],
-    projects: [
-      { title: 'باشگاه پرشین بیلیارد', location: 'تهران، سعادت‌آباد', year: 2023, type: '۸ میز اسنوکر' },
-      { title: 'هتل اسپیناس پالاس', location: 'تهران، شریعتی', year: 2022, type: '۳ میز VIP' },
-      { title: 'باشگاه کارمندان دولت', location: 'تهران، جماران', year: 2022, type: '۵ میز پول' },
-    ],
-    stats: { projects: 214, rating: 4.9, reviews: 89, cities: 5 },
-    specialties: ['اسنوکر', 'پول آمریکایی', 'کارامبول', 'نصب نورپردازی'],
-    avatar: 'کر', available: true,
-  },
-  '2': {
-    id: '2', name: 'سیاوش حسینی', city: 'اصفهان', experience: 7,
-    phone: '09131111111', email: 'siavash@install.ir',
-    description: 'نصب حرفه‌ای میز بیلیارد در اصفهان و استان‌های مرکزی. متخصص تعمیر و بازسازی میزهای قدیمی.',
-    services: [
-      { name: 'نصب میز اسنوکر', price: '۲,۸۰۰,۰۰۰ تومان', duration: '۱ روز' },
-      { name: 'بازسازی و تعمیر میز', price: 'از ۱,۵۰۰,۰۰۰ تومان', duration: 'متغیر' },
-      { name: 'تعویض لنز (کوئیش)', price: '۹۵۰,۰۰۰ تومان', duration: '۳ ساعت' },
-    ],
-    projects: [
-      { title: 'باشگاه نقش جهان', location: 'اصفهان، خیابان آمادگاه', year: 2023, type: '۶ میز' },
-      { title: 'مجموعه ورزشی آریا', location: 'کاشان', year: 2022, type: '۴ میز پول' },
-    ],
-    stats: { projects: 97, rating: 4.7, reviews: 43, cities: 4 },
-    specialties: ['اسنوکر', 'پول', 'تعمیر و بازسازی'],
-    avatar: 'سح', available: true,
-  },
-  '3': {
-    id: '3', name: 'امیر تاجیک', city: 'مشهد', experience: 5,
-    phone: '09151111111', email: 'amir.tajik@install.ir',
-    description: 'نصب و راه‌اندازی میز بیلیارد در خراسان رضوی. جوان‌ترین متخصص نصب مجاز فدراسیون در منطقه.',
-    services: [
-      { name: 'نصب میز اسنوکر ۱۲ فوت', price: '۳,۰۰۰,۰۰۰ تومان', duration: '۱ روز' },
-      { name: 'نصب میز پول', price: '۱,۸۰۰,۰۰۰ تومان', duration: '۵ ساعت' },
-    ],
-    projects: [
-      { title: 'باشگاه مشهد بیلیارد', location: 'مشهد، احمدآباد', year: 2023, type: '۴ میز اسنوکر' },
-    ],
-    stats: { projects: 52, rating: 4.8, reviews: 28, cities: 2 },
-    specialties: ['اسنوکر', 'پول آمریکایی'],
-    avatar: 'ات', available: false,
-  },
-};
+interface Installer {
+  id: string
+  name: string
+  city?: string
+  address?: string
+  description?: string
+  services?: string[]
+  rating?: number
+  reviewCount?: number
+  phone?: string
+  experience?: string
+  serviceArea?: string[]
+}
 
-export default function InstallerProfilePage() {
-  const params = useParams();
-  const router = useRouter();
-  const id = params?.id as string;
-  const installer = INSTALLERS[id];
+const MOCK: Installer[] = [
+  { id: '1', name: 'تیم نصب و تعمیر ایران بیلیارد', city: 'تهران', address: 'تهران — خدمات در کل تهران', description: 'نصب حرفه‌ای میز بیلیارد و سرویس دوره‌ای با بیش از ۱۰ سال تجربه. تیم متخصص ما آماده نصب انواع میز اسنوکر، پول و کارامبول هستند.', services: ['نصب میز اسنوکر', 'تعویض رویه مخمل', 'تنظیم کوسن', 'تعمیر چوب', 'سرویس سالانه', 'تراز کردن میز'], rating: 4.9, reviewCount: 112, phone: '09121234567', experience: '۱۰+ سال', serviceArea: ['تهران', 'کرج', 'شمال تهران'] },
+  { id: '2', name: 'سرویس بیلیارد شمال تهران', city: 'تهران', address: 'تهران، شمیران', description: 'تخصص در نصب و نگهداری میز بیلیارد در شمال تهران و شمیران', services: ['نصب میز پول', 'تعویض رویه مخمل', 'تراز کردن', 'سرویس دوره‌ای'], rating: 4.6, reviewCount: 78, phone: '09187654321', experience: '۷ سال', serviceArea: ['شمال تهران', 'شمیران'] },
+  { id: '3', name: 'متخصص بیلیارد اصفهان', city: 'اصفهان', address: 'اصفهان، خیابان چهارباغ', description: 'ارائه خدمات نصب و تعمیر تجهیزات بیلیارد در سراسر استان اصفهان', services: ['نصب کامل میز', 'تعمیر', 'سرویس سالانه', 'رنگ‌آمیزی فریم'], rating: 4.7, reviewCount: 65, phone: '09356789012', experience: '۸ سال', serviceArea: ['اصفهان', 'شاهین‌شهر', 'خمینی‌شهر'] },
+  { id: '4', name: 'کارگاه بیلیارد مشهد', city: 'مشهد', address: 'مشهد، بلوار وکیل‌آباد', description: 'خدمات نصب و تعمیر تخصصی برای باشگاه‌ها و منازل در مشهد', services: ['نصب', 'تعمیر', 'رنگ‌آمیزی فریم', 'تعویض کوسن'], rating: 4.5, reviewCount: 44, phone: '09151234567', experience: '۵ سال', serviceArea: ['مشهد'] },
+]
 
-  if (!installer) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#010604', color: '#f0faf5' }}>
-        <div className="text-6xl mb-4">🔧</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#10b981' }}>متخصص مورد نظر یافت نشد</h2>
-        <p className="mb-6" style={{ color: '#6b7280' }}>شناسه متخصص معتبر نیست</p>
-        <button onClick={() => router.push('/installers')}
-          className="px-6 py-3 rounded-xl font-bold"
-          style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
-          بازگشت به متخصصین نصب
-        </button>
-      </div>
-    );
-  }
+export default function InstallerDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const router = useRouter()
+  const [installer, setInstaller] = useState<Installer | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get(`/installers/${id}`)
+        if (res.data) setInstaller(res.data)
+        else setInstaller(MOCK.find(m => m.id === id) || null)
+      } catch {
+        setInstaller(MOCK.find(m => m.id === id) || null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [id])
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#010604', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#06b6d4', fontSize: '1.2rem' }}>در حال بارگذاری...</div>
+    </div>
+  )
+
+  if (!installer) return (
+    <div style={{ minHeight: '100vh', background: '#010604', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+      <div style={{ color: '#f0faf5', fontSize: '1.5rem' }}>متخصص یافت نشد</div>
+      <Link href="/installers" style={{ color: '#06b6d4', textDecoration: 'none' }}>← بازگشت</Link>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
-      <div className="relative" style={{ background: 'linear-gradient(135deg,#050c08,#0a1a0f 50%,#050c08)' }}>
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #10b981 0%, transparent 50%), radial-gradient(circle at 80% 30%, #a78bfa 0%, transparent 50%)' }} />
-        <div className="relative max-w-4xl mx-auto px-4 py-12">
-          <Link href="/installers" className="inline-flex items-center gap-2 mb-8 text-sm hover:opacity-80" style={{ color: '#10b981' }}>
-            ← بازگشت به متخصصین نصب
+    <div style={{ minHeight: '100vh', background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      <div style={{ background: 'linear-gradient(135deg, #050c08, #061418)', borderBottom: '1px solid rgba(6,182,212,0.2)', padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <Link href="/installers" style={{ color: '#06b6d4', textDecoration: 'none', fontSize: '0.9rem', display: 'inline-block', marginBottom: '1.5rem' }}>
+            ← بازگشت به متخصصین
           </Link>
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <div className="w-24 h-24 rounded-2xl flex items-center justify-center text-2xl font-black flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#a78bfa,#06b6d4)', color: '#010604' }}>
-              {installer.avatar}
-            </div>
-            <div className="flex-1 text-center sm:text-right">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
-                <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>
-                  متخصص نصب تایید شده
-                </span>
-                {installer.available
-                  ? <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)' }}>در دسترس</span>
-                  : <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>مشغول</span>
-                }
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ width: 'clamp(70px,15vw,100px)', height: 'clamp(70px,15vw,100px)', borderRadius: '16px', background: 'linear-gradient(135deg, #06b6d4, #10b981)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(2rem,4vw,2.5rem)', flexShrink: 0 }}>🔧</div>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <h1 style={{ margin: '0 0 0.5rem', fontSize: 'clamp(1.3rem, 4vw, 2rem)' }}>{installer.name}</h1>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', color: '#67e8f9', fontSize: '0.9rem' }}>
+                {installer.city && <span>📍 {installer.city}</span>}
+                {installer.experience && <span>⏱️ تجربه: {installer.experience}</span>}
+                {installer.rating && <span style={{ color: '#f59e0b' }}>⭐ {installer.rating} ({installer.reviewCount} نظر)</span>}
               </div>
-              <h1 className="text-3xl font-black mb-1">{installer.name}</h1>
-              <p style={{ color: '#6b7280' }}>{installer.city} · {installer.experience} سال تجربه</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: 'پروژه انجام شده', value: installer.stats.projects, color: '#10b981' },
-            { label: 'شهرهای فعالیت', value: installer.stats.cities, color: '#06b6d4' },
-            { label: 'نظرات', value: installer.stats.reviews, color: '#a78bfa' },
-            { label: 'امتیاز', value: `${installer.stats.rating} ⭐`, color: '#f59e0b' },
-          ].map(s => (
-            <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-              <div className="text-2xl font-black mb-1" style={{ color: s.color }}>{s.value}</div>
-              <div className="text-xs" style={{ color: '#6b7280' }}>{s.label}</div>
-            </div>
-          ))}
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'clamp(1rem,3vw,2rem) clamp(1rem,4vw,2rem)', display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))' }}>
+        <div style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+          <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#06b6d4' }}>اطلاعات تماس</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.95rem' }}>
+            {installer.phone && <div style={{ display: 'flex', gap: '0.75rem' }}><span>📞</span><a href={`tel:${installer.phone}`} style={{ color: '#67e8f9', textDecoration: 'none' }}>{installer.phone}</a></div>}
+            {installer.address && <div style={{ display: 'flex', gap: '0.75rem' }}><span>📍</span><span style={{ color: '#cffafe' }}>{installer.address}</span></div>}
+          </div>
         </div>
 
-        <div className="md:col-span-2 space-y-6">
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-4" style={{ color: '#10b981' }}>خدمات و تعرفه</h2>
-            <div className="space-y-3">
+        {installer.description && (
+          <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#10b981' }}>درباره متخصص</h2>
+            <div style={{ color: '#d1fae5', lineHeight: '1.8', fontSize: '0.95rem' }}>{installer.description}</div>
+          </div>
+        )}
+
+        {installer.services && installer.services.length > 0 && (
+          <div style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#06b6d4' }}>خدمات</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.5rem' }}>
               {installer.services.map((s, i) => (
-                <div key={i} className="p-3 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.1)' }}>
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold text-sm">{s.name}</div>
-                    <div className="text-sm font-bold" style={{ color: '#f59e0b' }}>{s.price}</div>
-                  </div>
-                  <div className="text-xs mt-1" style={{ color: '#6b7280' }}>مدت زمان: {s.duration}</div>
+                <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#cffafe', fontSize: '0.9rem' }}>
+                  <span style={{ color: '#06b6d4' }}>✓</span><span>{s}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-4" style={{ color: '#10b981' }}>پروژه‌های اخیر</h2>
-            <div className="space-y-3">
-              {installer.projects.map((p, i) => (
-                <div key={i} className="flex items-start justify-between p-3 rounded-xl" style={{ background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.1)' }}>
-                  <div>
-                    <div className="font-semibold text-sm">{p.title}</div>
-                    <div className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{p.location}</div>
-                    <div className="text-xs mt-0.5" style={{ color: '#a78bfa' }}>{p.type}</div>
-                  </div>
-                  <span className="text-xs font-bold" style={{ color: '#f59e0b' }}>{p.year}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
 
-        <div className="space-y-6">
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>تخصص‌ها</h2>
-            <div className="flex flex-wrap gap-2">
-              {installer.specialties.map(s => (
-                <span key={s} className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
-                  {s}
-                </span>
+        {installer.serviceArea && installer.serviceArea.length > 0 && (
+          <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '16px', padding: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#f59e0b' }}>منطقه خدمات‌دهی</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {installer.serviceArea.map((a, i) => (
+                <span key={i} style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '20px', padding: '0.3rem 0.9rem', fontSize: '0.85rem', color: '#fde68a' }}>{a}</span>
               ))}
             </div>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>درباره</h2>
-            <p className="text-sm leading-relaxed" style={{ color: '#9ca3af' }}>{installer.description}</p>
-          </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>تماس</h2>
-            <div className="space-y-2 text-sm" style={{ color: '#9ca3af' }}>
-              <div>📞 {installer.phone}</div>
-              <div>✉️ {installer.email}</div>
-              <div>📍 {installer.city}</div>
-            </div>
-            {installer.available && (
-              <button className="w-full mt-4 py-2.5 rounded-xl font-bold text-sm"
-                style={{ background: 'linear-gradient(135deg,#a78bfa,#06b6d4)', color: '#010604' }}>
-                درخواست نصب
-              </button>
-            )}
-          </div>
+        )}
+
+        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {installer.phone && (
+            <a href={`tel:${installer.phone}`} style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: '#fff', textDecoration: 'none', padding: '0.85rem 2rem', borderRadius: '12px', fontWeight: '600', flex: '1', minWidth: '150px', textAlign: 'center' }}>
+              📞 تماس با متخصص
+            </a>
+          )}
+          <button onClick={() => router.back()} style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4', padding: '0.85rem 2rem', borderRadius: '12px', cursor: 'pointer', fontSize: '1rem', flex: '1', minWidth: '150px' }}>
+            بازگشت
+          </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

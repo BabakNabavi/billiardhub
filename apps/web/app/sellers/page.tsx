@@ -1,111 +1,114 @@
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Search, ShoppingBag, MapPin, CheckCircle, X } from 'lucide-react';
-import api from '../../lib/api';
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import api from '@/lib/api'
 
 interface Seller {
-  id: string; firstName: string; lastName: string;
-  verificationStatus: string; bio: string; city: string; avatar: string;
-  sellerProfile: { shopName: string; productTypes: string; website: string; };
+  id: string
+  name: string
+  city?: string
+  description?: string
+  specialties?: string[]
+  rating?: number
+  reviewCount?: number
+  phone?: string
 }
 
-const mockSellers: Seller[] = [
-  {id:'1',firstName:'علی',lastName:'محمدی',verificationStatus:'verified',bio:'فروشنده تخصصی تجهیزات بیلیارد با بیش از ۱۰ سال تجربه',city:'تهران',avatar:'',sellerProfile:{shopName:'فروشگاه بیلیارد آریا',productTypes:'میز، چوب، توپ',website:''}},
-  {id:'2',firstName:'رضا',lastName:'کریمی',verificationStatus:'verified',bio:'واردکننده برندهای معتبر اروپایی',city:'مشهد',avatar:'',sellerProfile:{shopName:'تجهیزات پرو بیلیارد',productTypes:'چوب حرفه‌ای، آقبند',website:''}},
-  {id:'3',firstName:'سارا',lastName:'احمدی',verificationStatus:'pending',bio:'فروش لوازم جانبی و مراقبت از میز',city:'اصفهان',avatar:'',sellerProfile:{shopName:'آنلاین شاپ بیلیارد',productTypes:'لوازم جانبی',website:''}},
-];
+const MOCK_SELLERS: Seller[] = [
+  { id: '1', name: 'فروشگاه بیلیارد ستاره', city: 'تهران', description: 'فروش تخصصی انواع میز بیلیارد، چوب، گوی و لوازم جانبی', specialties: ['میز اسنوکر', 'چوب حرفه‌ای'], rating: 4.7, reviewCount: 84 },
+  { id: '2', name: 'فروشگاه تهران بیلیارد', city: 'تهران', description: 'تامین تجهیزات بیلیارد برای باشگاه‌ها و افراد حرفه‌ای', specialties: ['میز پول', 'نور LED'], rating: 4.4, reviewCount: 52 },
+  { id: '3', name: 'آرسام اسپورت اصفهان', city: 'اصفهان', description: 'بزرگترین مرکز تخصصی بیلیارد در اصفهان', specialties: ['میز اسنوکر', 'لوازم یدکی'], rating: 4.6, reviewCount: 63 },
+  { id: '4', name: 'بیلیارد مشهد', city: 'مشهد', description: 'عرضه تجهیزات حرفه‌ای بیلیارد در خراسان رضوی', specialties: ['میز کارامبول', 'میز پول'], rating: 4.3, reviewCount: 41 },
+]
 
 export default function SellersPage() {
-  const [sellers, setSellers] = useState<Seller[]>(mockSellers);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchFocus, setSearchFocus] = useState(false);
+  const [sellers, setSellers] = useState<Seller[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
-  useEffect(()=>{
-    setLoading(true);
-    api.get('/user/by-role/seller')
-      .then(res=>{
-        if(Array.isArray(res.data) && res.data.length > 1) setSellers(res.data);
-        setLoading(false);
-      })
-      .catch(()=>setLoading(false));
-  },[]);
+  useEffect(() => {
+    const fetchSellers = async () => {
+      try {
+        const res = await api.get('/sellers')
+        setSellers(res.data?.length > 1 ? res.data : MOCK_SELLERS)
+      } catch {
+        setSellers(MOCK_SELLERS)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSellers()
+  }, [])
 
-  const filtered=sellers.filter(s=>
-    `${s.firstName} ${s.lastName} ${s.city} ${s.sellerProfile?.shopName??''}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = sellers.filter(s =>
+    s.name.includes(search) || s.city?.includes(search) || s.description?.includes(search)
+  )
 
-  return(
-    <>
-      <style>{`
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        .seller-card{transition:all 0.3s ease}
-        .seller-card:hover{transform:translateY(-4px);border-color:rgba(16,185,129,0.3)!important;box-shadow:0 20px 60px rgba(0,0,0,0.4)!important}
-      `}</style>
-      <div style={{minHeight:'100vh',background:'linear-gradient(180deg,#010604 0%,#050c08 100%)',padding:'clamp(24px,4vw,48px) clamp(16px,3vw,32px)',direction:'rtl'}}>
-        <div style={{maxWidth:'1100px',margin:'0 auto'}}>
-          <div style={{marginBottom:'36px',animation:'fadeUp 0.6s ease both'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'8px'}}>
-              <div style={{width:'40px',height:'40px',borderRadius:'12px',background:'linear-gradient(135deg,#10b981,#059669)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 8px 24px rgba(16,185,129,0.3)'}}>
-                <ShoppingBag size={20} color="#fff"/>
-              </div>
-              <div>
-                <h1 style={{fontSize:'clamp(22px,3vw,30px)',fontWeight:900,color:'#f0faf5',margin:0,letterSpacing:'-0.025em'}}>فروشندگان</h1>
-                <p style={{color:'rgba(240,250,245,0.35)',fontSize:'13px',margin:'2px 0 0'}}>فروشگاه‌های معتبر تجهیزات بیلیارد</p>
-              </div>
-            </div>
-          </div>
-          <div style={{marginBottom:'28px',animation:'fadeUp 0.6s 0.1s ease both'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'10px',background:'rgba(255,255,255,0.04)',border:`1px solid ${searchFocus?'rgba(16,185,129,0.4)':'rgba(255,255,255,0.07)'}`,borderRadius:'14px',padding:'12px 16px',transition:'all 0.3s'}}>
-              <Search size={15} color="rgba(240,250,245,0.25)"/>
-              <input type="text" value={search} onChange={e=>setSearch(e.target.value)} onFocus={()=>setSearchFocus(true)} onBlur={()=>setSearchFocus(false)}
-                placeholder="جستجو بر اساس نام، شهر یا نوع محصول..."
-                style={{flex:1,background:'none',border:'none',outline:'none',color:'#f0faf5',fontSize:'14px',fontFamily:'inherit'}}/>
-              {search&&<button onClick={()=>setSearch('')} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(240,250,245,0.3)',padding:0,display:'flex'}}><X size={14}/></button>}
-            </div>
-          </div>
-          <div style={{marginBottom:'20px',color:'rgba(240,250,245,0.3)',fontSize:'13px'}}>{filtered.length} فروشنده یافت شد</div>
-          {loading?(
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:'16px'}}>
-              {[1,2,3].map(i=><div key={i} style={{height:'180px',background:'rgba(255,255,255,0.03)',borderRadius:'20px',border:'1px solid rgba(255,255,255,0.05)'}}/>)}
-            </div>
-          ):filtered.length===0?(
-            <div style={{textAlign:'center',padding:'80px 20px'}}>
-              <ShoppingBag size={40} style={{opacity:0.2,display:'block',margin:'0 auto 12px',color:'rgba(240,250,245,0.2)'}}/>
-              <p style={{fontSize:'14px',color:'rgba(240,250,245,0.2)'}}>فروشنده‌ای پیدا نشد</p>
-            </div>
-          ):(
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:'16px'}}>
-              {filtered.map((seller,i)=>(
-                <Link key={seller.id} href={`/sellers/${seller.id}`} style={{textDecoration:'none',color:'inherit'}}>
-                  <div className="seller-card" style={{background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'20px',padding:'20px',cursor:'pointer',animation:`fadeUp 0.5s ${i*0.05}s ease both`}}>
-                    <div style={{display:'flex',alignItems:'flex-start',gap:'14px',marginBottom:'14px'}}>
-                      <div style={{width:'48px',height:'48px',borderRadius:'14px',background:'linear-gradient(135deg,rgba(16,185,129,0.3),rgba(6,182,212,0.3))',border:'1px solid rgba(16,185,129,0.2)',display:'flex',alignItems:'center',justifyContent:'center',color:'#10b981',fontWeight:900,fontSize:'18px',flexShrink:0,overflow:'hidden'}}>
-                        {seller.avatar?<img src={seller.avatar} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:seller.firstName?.[0]}
-                      </div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'2px'}}>
-                          <span style={{color:'#f0faf5',fontWeight:700,fontSize:'15px'}}>{seller.firstName} {seller.lastName}</span>
-                          {seller.verificationStatus==='verified'&&<CheckCircle size={14} color="#10b981"/>}
-                        </div>
-                        {seller.city&&<div style={{display:'flex',alignItems:'center',gap:'4px',color:'rgba(240,250,245,0.35)',fontSize:'12px'}}><MapPin size={11}/><span>{seller.city}</span></div>}
-                      </div>
-                    </div>
-                    {seller.sellerProfile?.shopName&&(
-                      <div style={{background:'rgba(16,185,129,0.06)',border:'1px solid rgba(16,185,129,0.12)',borderRadius:'10px',padding:'8px 12px',marginBottom:'10px'}}>
-                        <div style={{color:'#10b981',fontSize:'13px',fontWeight:600}}>🏪 {seller.sellerProfile.shopName}</div>
-                        {seller.sellerProfile.productTypes&&<div style={{color:'rgba(240,250,245,0.3)',fontSize:'11px',marginTop:'2px'}}>{seller.sellerProfile.productTypes}</div>}
-                      </div>
-                    )}
-                    {seller.bio&&<div style={{color:'rgba(240,250,245,0.4)',fontSize:'12px',lineHeight:1.6,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{seller.bio}</div>}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+  return (
+    <div style={{ minHeight: '100vh', background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      {/* Header */}
+      <div style={{ background: 'linear-gradient(135deg, #050c08, #0a1f14)', borderBottom: '1px solid rgba(16,185,129,0.2)', padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <h1 style={{ margin: '0 0 0.5rem', fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', background: 'linear-gradient(90deg, #10b981, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            فروشندگان تجهیزات
+          </h1>
+          <div style={{ color: '#6ee7b7', fontSize: '0.95rem', marginBottom: '1.5rem' }}>تامین‌کنندگان تخصصی میز، چوب و لوازم بیلیارد</div>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="جستجوی فروشنده..."
+            style={{
+              width: '100%', maxWidth: '400px', padding: '0.75rem 1rem',
+              background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)',
+              borderRadius: '12px', color: '#f0faf5', fontSize: '0.95rem',
+              outline: 'none', boxSizing: 'border-box',
+            }}
+          />
         </div>
       </div>
-    </>
-  );
+
+      {/* Grid */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 2rem)' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center', color: '#10b981', padding: '3rem' }}>در حال بارگذاری...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', color: '#6ee7b7', padding: '3rem' }}>فروشنده‌ای یافت نشد</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '1.25rem' }}>
+            {filtered.map(seller => (
+              <Link
+                key={seller.id}
+                href={`/sellers/${seller.id}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <div style={{
+                  background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)',
+                  borderRadius: '16px', padding: '1.5rem', cursor: 'pointer',
+                  transition: 'border-color 0.2s, background 0.2s',
+                  height: '100%',
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(16,185,129,0.5)'; (e.currentTarget as HTMLDivElement).style.background = 'rgba(16,185,129,0.1)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(16,185,129,0.2)'; (e.currentTarget as HTMLDivElement).style.background = 'rgba(16,185,129,0.05)' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>🏪</div>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '0.2rem' }}>{seller.name}</div>
+                      {seller.city && <div style={{ color: '#6ee7b7', fontSize: '0.85rem' }}>📍 {seller.city}</div>}
+                    </div>
+                  </div>
+                  {seller.description && <div style={{ color: '#a7f3d0', fontSize: '0.88rem', lineHeight: '1.6', marginBottom: '1rem' }}>{seller.description}</div>}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {seller.rating && <span style={{ color: '#f59e0b', fontSize: '0.85rem' }}>⭐ {seller.rating} ({seller.reviewCount})</span>}
+                    <span style={{ color: '#10b981', fontSize: '0.85rem' }}>مشاهده ←</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
