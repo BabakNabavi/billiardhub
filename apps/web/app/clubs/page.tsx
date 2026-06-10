@@ -6,7 +6,7 @@ import api from '../../lib/api';
 import {
   Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
   X, Grid, List, SlidersHorizontal, Users, Check,
-  Navigation,
+  Navigation, ChevronDown,
 } from 'lucide-react';
 
 interface Club {
@@ -33,6 +33,10 @@ const SAMPLE_CLUBS: Club[] = [
   { id:'6', name:'باشگاه مروارید کرج', managerName:'سارا حسینی', description:'فضایی مدرن با تجهیزات استاندارد.', address:'میدان توحید', city:'کرج', province:'البرز', latitude:35.8400, longitude:50.9391, phone:'026-33001234', website:'', snookerTables:2, pocketTables:2, highballTables:1, vipSnookerTables:0, vipPocketTables:0, airHockeyTables:1, dartBoards:2, playstations:2, hasCafe:false, hasParking:true, hasWifi:true, hasProfessionalCoach:false, images:['/images/billiadr-club-3.jpg'], rating:4.1, reviewCount:34, isVerified:false, isOpen:true, closeTime:'۲۳:۰۰', memberCount:280, totalTables:8 },
 ];
 
+// فقط ۶ شهر اول (بدون تکرار) — هر چقدر هم باشگاه زیاد باشه
+const ALL_CITIES = Array.from(new Set(SAMPLE_CLUBS.map(c => c.city))).slice(0, 6);
+const CITIES = ['همه شهرها', ...ALL_CITIES];
+
 const TABLE_TYPES = [
   { key:'snookerTables', label:'اسنوکر', color:'#10b981' },
   { key:'pocketTables', label:'پاکت', color:'#06b6d4' },
@@ -44,6 +48,13 @@ const AMENITIES = [
   { key:'hasParking', label:'پارکینگ', icon: <Car size={12}/> },
   { key:'hasWifi', label:'WiFi', icon: <Wifi size={12}/> },
   { key:'hasProfessionalCoach', label:'مربی', icon: <Trophy size={12}/> },
+];
+
+const SORT_OPTIONS = [
+  { value:'rating',   label:'بهترین امتیاز', icon:'⭐' },
+  { value:'distance', label:'نزدیک‌ترین',    icon:'📍' },
+  { value:'members',  label:'بیشترین عضو',   icon:'👥' },
+  { value:'tables',   label:'بیشترین میز',   icon:'🎱' },
 ];
 
 function toFa(v: string | number) {
@@ -67,12 +78,10 @@ function ClubCard({ club, view }: { club: Club; view: 'grid'|'list' }) {
     <Link href={`/clubs/${club.id}`} style={{ textDecoration:'none', display:'block' }}>
       <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
         style={{ display:'flex', background:hov?'rgba(255,255,255,0.05)':'rgba(255,255,255,0.025)', border:`1px solid ${hov?'rgba(16,185,129,0.25)':'rgba(255,255,255,0.07)'}`, borderRadius:'16px', overflow:'hidden', transition:'all 0.3s', boxShadow:hov?'0 12px 40px rgba(0,0,0,0.4)':'none' }}>
-        {/* Image - hidden on very small screens */}
         <div style={{ width:'clamp(80px,15vw,160px)', flexShrink:0, position:'relative', overflow:'hidden' }}>
           <img src={img} alt={club.name} style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.4)' }} onError={e=>{(e.target as HTMLImageElement).src='/images/billiadr-club-1.jpg';}}/>
           {club.isVerified && <div style={{ position:'absolute', top:'8px', right:'8px', background:'rgba(16,185,129,0.85)', borderRadius:'20px', padding:'2px 7px', fontSize:'8px', fontWeight:700, color:'#fff' }}>✓</div>}
         </div>
-        {/* Content */}
         <div style={{ flex:1, padding:'14px 16px', minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'6px' }}>
             <div style={{ minWidth:0 }}>
@@ -90,7 +99,7 @@ function ClubCard({ club, view }: { club: Club; view: 'grid'|'list' }) {
               </div>
             )}
           </div>
-          <p style={{ fontSize:'11px', color:'rgba(240,250,245,0.35)', margin:'0 0 8px', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:1, WebkitBoxOrient:'vertical' }}>{club.description}</p>
+          <div style={{ fontSize:'11px', color:'rgba(240,250,245,0.35)', margin:'0 0 8px', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:1, WebkitBoxOrient:'vertical' }}>{club.description}</div>
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
             {activeTables.slice(0,3).map(t=>(
               <span key={t.key} style={{ fontSize:'9px', color:t.color, background:`${t.color}10`, border:`1px solid ${t.color}20`, borderRadius:'20px', padding:'2px 7px', fontWeight:700 }}>
@@ -135,7 +144,7 @@ function ClubCard({ club, view }: { club: Club; view: 'grid'|'list' }) {
               </div>
             )}
           </div>
-          <p style={{ fontSize:'11px', color:'rgba(240,250,245,0.4)', lineHeight:1.6, margin:'0 0 10px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{club.description}</p>
+          <div style={{ fontSize:'11px', color:'rgba(240,250,245,0.4)', lineHeight:1.6, margin:'0 0 10px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{club.description}</div>
           <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'10px' }}>
             {activeTables.slice(0,3).map(t=>(
               <span key={t.key} style={{ fontSize:'9px', color:t.color, background:`${t.color}10`, border:`1px solid ${t.color}20`, borderRadius:'20px', padding:'2px 7px', fontWeight:700 }}>
@@ -172,6 +181,7 @@ export default function ClubsPage() {
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('همه شهرها');
   const [sortBy, setSortBy] = useState('rating');
+  const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedTypes, setTypes] = useState<string[]>([]);
   const [selectedAmens, setAmens] = useState<string[]>([]);
@@ -180,9 +190,16 @@ export default function ClubsPage() {
   const [searchFocus, setSearchFocus] = useState(false);
   const [userLoc, setUserLoc] = useState<{lat:number;lon:number}|null>(null);
   const [locLoading, setLocLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
 
-  const CITIES = ['همه شهرها', ...Array.from(new Set(SAMPLE_CLUBS.map(c=>c.city)))];
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 900);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(()=>{
     api.get('/clubs')
@@ -191,7 +208,10 @@ export default function ClubsPage() {
   },[]);
 
   useEffect(()=>{
-    const fn=(e:MouseEvent)=>{if(filterRef.current&&!filterRef.current.contains(e.target as Node))setFilterOpen(false);};
+    const fn=(e:MouseEvent)=>{
+      if(filterRef.current&&!filterRef.current.contains(e.target as Node)) setFilterOpen(false);
+      if(sortRef.current&&!sortRef.current.contains(e.target as Node)) setSortOpen(false);
+    };
     document.addEventListener('mousedown',fn);
     return()=>document.removeEventListener('mousedown',fn);
   },[]);
@@ -233,16 +253,51 @@ export default function ClubsPage() {
     return 0;
   });
 
+  const currentSort = SORT_OPTIONS.find(o => o.value === sortBy) ?? SORT_OPTIONS[0];
+  const availableSorts = SORT_OPTIONS.filter(o => o.value !== 'distance' || userLoc);
+
+  // پنل فیلتر — روی موبایل: fixed تمام‌عرض / روی دسکتاپ: dropdown کوچک کنار دکمه
+  const filterPanelStyle: React.CSSProperties = isMobile ? {
+    position: 'fixed',
+    top: '120px',
+    right: '16px',
+    left: '16px',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    background: 'rgba(5,12,8,0.99)',
+    border: '1px solid rgba(16,185,129,0.2)',
+    borderRadius: '20px',
+    padding: '20px',
+    zIndex: 9999,
+    boxShadow: '0 32px 80px rgba(0,0,0,0.85)',
+    backdropFilter: 'blur(32px)',
+    animation: 'fadeUp 0.22s ease both',
+  } : {
+    position: 'absolute',
+    top: 'calc(100% + 10px)',
+    right: 0,
+    width: '320px',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    background: 'rgba(5,12,8,0.99)',
+    border: '1px solid rgba(16,185,129,0.15)',
+    borderRadius: '20px',
+    padding: '18px',
+    zIndex: 9999,
+    boxShadow: '0 32px 80px rgba(0,0,0,0.85), 0 0 0 1px rgba(16,185,129,0.05)',
+    backdropFilter: 'blur(40px)',
+    animation: 'fadeUp 0.22s ease both',
+  };
+
   return (
     <>
       <style>{`
-        @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes spin{to{transform:rotate(360deg)}}
         .search-inp{background:transparent;border:none;outline:none;color:#f0faf5;font-size:14px;font-family:inherit;width:100%}
         .search-inp::placeholder{color:rgba(240,250,245,0.22)}
         .city-scroll::-webkit-scrollbar{height:0}
-        .sort-sel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 12px;color:rgba(240,250,245,0.7);font-size:12px;font-family:inherit;outline:none;cursor:pointer;-webkit-appearance:none}
-        .sort-sel option{background:#050c08;color:#f0faf5}
+        .dropdown-item:hover{background:rgba(16,185,129,0.08)!important;color:#10b981!important}
         @media(max-width:900px){.clubs-grid{grid-template-columns:repeat(2,1fr)!important}}
         @media(max-width:560px){.clubs-grid{grid-template-columns:1fr!important}}
       `}</style>
@@ -255,9 +310,9 @@ export default function ClubsPage() {
           <div style={{maxWidth:'1280px',margin:'0 auto'}}>
             <div style={{fontSize:'10px',color:'rgba(16,185,129,0.6)',letterSpacing:'0.25em',fontWeight:700,marginBottom:'8px'}}>DISCOVER CLUBS</div>
             <h1 style={{fontSize:'clamp(24px,4vw,44px)',fontWeight:900,color:'#f0faf5',margin:'0 0 8px',letterSpacing:'-0.03em'}}>باشگاه‌های بیلیارد ایران</h1>
-            <p style={{fontSize:'14px',color:'rgba(240,250,245,0.4)',margin:'0 0 24px'}}>از {toFa(SAMPLE_CLUBS.length)} باشگاه برتر انتخاب کنید</p>
+            <div style={{fontSize:'14px',color:'rgba(240,250,245,0.4)',margin:'0 0 24px'}}>از {toFa(SAMPLE_CLUBS.length)} باشگاه برتر انتخاب کنید</div>
 
-            {/* City pills - scrollable */}
+            {/* City pills — حداکثر ۶ شهر */}
             <div className="city-scroll" style={{display:'flex',gap:'8px',overflowX:'auto',paddingBottom:'20px',WebkitOverflowScrolling:'touch'}}>
               {CITIES.map(c=>(
                 <button key={c} onClick={()=>setCity(c)} style={{padding:'7px 16px',borderRadius:'20px',border:`1px solid ${city===c?'rgba(16,185,129,0.5)':'rgba(255,255,255,0.07)'}`,background:city===c?'rgba(16,185,129,0.12)':'rgba(255,255,255,0.03)',color:city===c?'#10b981':'rgba(240,250,245,0.45)',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.2s'}}>
@@ -280,29 +335,32 @@ export default function ClubsPage() {
                 {search&&<button onClick={()=>setSearch('')} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(240,250,245,0.3)',padding:0,display:'flex',flexShrink:0}}><X size={13}/></button>}
               </div>
 
-              {/* Location btn */}
+              {/* Location */}
               <button onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{height:'44px',width:'44px',borderRadius:'12px',border:`1px solid ${sortBy==='distance'?'rgba(16,185,129,0.4)':'rgba(255,255,255,0.08)'}`,background:sortBy==='distance'?'rgba(16,185,129,0.1)':'rgba(255,255,255,0.04)',color:sortBy==='distance'?'#10b981':'rgba(240,250,245,0.4)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all 0.2s'}}>
                 {locLoading?<div style={{width:'14px',height:'14px',border:'2px solid rgba(16,185,129,0.3)',borderTop:'2px solid #10b981',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>:<Navigation size={15}/>}
               </button>
 
-              {/* Filter */}
+              {/* Filter dropdown */}
               <div ref={filterRef} style={{position:'relative',flexShrink:0}}>
-                <button onClick={()=>setFilterOpen(p=>!p)} style={{height:'44px',display:'flex',alignItems:'center',gap:'6px',padding:'0 14px',borderRadius:'12px',border:`1px solid ${filterOpen||activeFilters>0?'rgba(16,185,129,0.4)':'rgba(255,255,255,0.08)'}`,background:filterOpen||activeFilters>0?'rgba(16,185,129,0.1)':'rgba(255,255,255,0.04)',color:filterOpen||activeFilters>0?'#10b981':'rgba(240,250,245,0.5)',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s'}}>
+                <button onClick={()=>{setFilterOpen(p=>!p);setSortOpen(false);}} style={{height:'44px',display:'flex',alignItems:'center',gap:'6px',padding:'0 14px',borderRadius:'12px',border:`1px solid ${filterOpen||activeFilters>0?'rgba(16,185,129,0.4)':'rgba(255,255,255,0.08)'}`,background:filterOpen||activeFilters>0?'rgba(16,185,129,0.1)':'rgba(255,255,255,0.04)',color:filterOpen||activeFilters>0?'#10b981':'rgba(240,250,245,0.5)',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s'}}>
                   <SlidersHorizontal size={13}/>
                   فیلتر
                   {activeFilters>0&&<span style={{width:'16px',height:'16px',borderRadius:'50%',background:'#10b981',color:'#fff',fontSize:'9px',fontWeight:900,display:'flex',alignItems:'center',justifyContent:'center'}}>{toFa(activeFilters)}</span>}
                 </button>
 
-                {/* Filter dropdown - fixed z-index and position */}
-                {filterOpen&&(
-                  <div style={{position:'fixed',top:'120px',right:'16px',left:'16px',width:'auto',maxHeight:'80vh',overflowY:'auto',background:'rgba(5,12,8,0.98)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'18px',padding:'18px',zIndex:9999,boxShadow:'0 24px 60px rgba(0,0,0,0.8)',backdropFilter:'blur(24px)',animation:'fadeUp 0.22s ease both'}}>
+                {filterOpen && (
+                  <div style={filterPanelStyle}>
+                    {/* glow line */}
                     <div style={{position:'absolute',top:'-1px',left:'50%',transform:'translateX(-50%)',width:'80px',height:'1px',background:'linear-gradient(90deg,transparent,rgba(16,185,129,0.5),transparent)'}}/>
+
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
                       <span style={{fontSize:'14px',fontWeight:800,color:'#f0faf5'}}>فیلترها</span>
-                      {activeFilters>0&&<button onClick={clearFilters} style={{fontSize:'11px',color:'#ef4444',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.18)',borderRadius:'20px',padding:'3px 10px',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'3px'}}><X size={9}/>پاک کردن</button>}
+                      <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                        {activeFilters>0&&<button onClick={clearFilters} style={{fontSize:'11px',color:'#ef4444',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.18)',borderRadius:'20px',padding:'3px 10px',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'3px'}}><X size={9}/>پاک</button>}
+                        <button onClick={()=>setFilterOpen(false)} style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'8px',cursor:'pointer',color:'rgba(240,250,245,0.4)',padding:'4px',display:'flex'}}><X size={12}/></button>
+                      </div>
                     </div>
 
-                    {/* Table types */}
                     <div style={{marginBottom:'16px'}}>
                       <div style={{fontSize:'10px',color:'rgba(240,250,245,0.3)',fontWeight:700,letterSpacing:'0.15em',marginBottom:'8px'}}>نوع میز</div>
                       <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
@@ -314,7 +372,6 @@ export default function ClubsPage() {
                       </div>
                     </div>
 
-                    {/* Amenities */}
                     <div style={{marginBottom:'16px'}}>
                       <div style={{fontSize:'10px',color:'rgba(240,250,245,0.3)',fontWeight:700,letterSpacing:'0.15em',marginBottom:'8px'}}>امکانات</div>
                       <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
@@ -326,10 +383,9 @@ export default function ClubsPage() {
                       </div>
                     </div>
 
-                    {/* Toggles */}
                     <div style={{display:'flex',flexDirection:'column',gap:'8px',paddingTop:'12px',borderTop:'1px solid rgba(255,255,255,0.05)'}}>
                       {[{label:'فقط باشگاه‌های باز',val:onlyOpen,set:setOnlyOpen},{label:'فقط تأیید شده‌ها',val:onlyVerified,set:setOnlyVer}].map((toggle,i)=>(
-                        <div key={i} onClick={()=>toggle.set(p=>!p)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer',padding:'6px 0'}}>
+                        <div key={i} onClick={()=>toggle.set((p:boolean)=>!p)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer',padding:'6px 0'}}>
                           <span style={{fontSize:'13px',color:'rgba(240,250,245,0.6)',fontWeight:500}}>{toggle.label}</span>
                           <div style={{width:'36px',height:'20px',borderRadius:'10px',background:toggle.val?'#10b981':'rgba(255,255,255,0.1)',position:'relative',transition:'all 0.3s',flexShrink:0}}>
                             <div style={{position:'absolute',top:'2px',width:'14px',height:'14px',borderRadius:'50%',background:'#fff',transition:'all 0.3s',left:toggle.val?'19px':'2px',boxShadow:'0 2px 4px rgba(0,0,0,0.3)'}}/>
@@ -341,13 +397,30 @@ export default function ClubsPage() {
                 )}
               </div>
 
-              {/* Sort */}
-              <select className="sort-sel" value={sortBy} onChange={e=>setSortBy(e.target.value)}>
-                <option value="rating">بهترین امتیاز</option>
-                {userLoc&&<option value="distance">نزدیک‌ترین</option>}
-                <option value="members">بیشترین عضو</option>
-                <option value="tables">بیشترین میز</option>
-              </select>
+              {/* Sort — custom crystal dropdown */}
+              <div ref={sortRef} style={{position:'relative',flexShrink:0}}>
+                <button onClick={()=>{setSortOpen(p=>!p);setFilterOpen(false);}} style={{height:'44px',display:'flex',alignItems:'center',gap:'7px',padding:'0 14px',borderRadius:'12px',border:`1px solid ${sortOpen?'rgba(16,185,129,0.4)':'rgba(255,255,255,0.08)'}`,background:sortOpen?'rgba(16,185,129,0.08)':'rgba(255,255,255,0.04)',color:'rgba(240,250,245,0.7)',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s',whiteSpace:'nowrap'}}>
+                  <span style={{fontSize:'13px'}}>{currentSort.icon}</span>
+                  {currentSort.label}
+                  <ChevronDown size={11} style={{transition:'transform 0.3s',transform:sortOpen?'rotate(180deg)':'none',color:'rgba(240,250,245,0.4)',marginRight:'2px'}}/>
+                </button>
+
+                {sortOpen && (
+                  <div style={{position:'absolute',top:'calc(100% + 10px)',right:0,minWidth:'180px',background:'rgba(5,12,8,0.99)',border:'1px solid rgba(16,185,129,0.15)',borderRadius:'16px',padding:'6px',zIndex:9999,boxShadow:'0 24px 60px rgba(0,0,0,0.85), 0 0 0 1px rgba(16,185,129,0.04)',backdropFilter:'blur(40px)',animation:'fadeUp 0.2s ease both'}}>
+                    {/* top glow */}
+                    <div style={{position:'absolute',top:'-1px',left:'50%',transform:'translateX(-50%)',width:'60px',height:'1px',background:'linear-gradient(90deg,transparent,rgba(16,185,129,0.5),transparent)'}}/>
+                    <div style={{fontSize:'9px',color:'rgba(16,185,129,0.5)',letterSpacing:'0.2em',fontWeight:700,padding:'6px 12px 8px',borderBottom:'1px solid rgba(255,255,255,0.05)',marginBottom:'4px'}}>مرتب‌سازی</div>
+                    {availableSorts.map(opt=>(
+                      <button key={opt.value} className="dropdown-item" onClick={()=>{setSortBy(opt.value);setSortOpen(false);}}
+                        style={{width:'100%',display:'flex',alignItems:'center',gap:'10px',padding:'10px 12px',borderRadius:'10px',border:'none',background:sortBy===opt.value?'rgba(16,185,129,0.1)':'transparent',color:sortBy===opt.value?'#10b981':'rgba(240,250,245,0.6)',fontSize:'13px',fontWeight:sortBy===opt.value?700:500,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s',textAlign:'right'}}>
+                        <span style={{fontSize:'14px',flexShrink:0}}>{opt.icon}</span>
+                        {opt.label}
+                        {sortBy===opt.value&&<span style={{marginRight:'auto',width:'6px',height:'6px',borderRadius:'50%',background:'#10b981',flexShrink:0}}/>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* View toggle */}
               <div style={{display:'flex',gap:'4px',marginRight:'auto'}}>
@@ -361,7 +434,6 @@ export default function ClubsPage() {
               <div style={{fontSize:'12px',color:'rgba(240,250,245,0.35)',whiteSpace:'nowrap'}}>{toFa(filtered.length)} باشگاه</div>
             </div>
 
-            {/* Location hint */}
             {!userLoc&&(
               <div style={{marginTop:'8px',display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',background:'rgba(16,185,129,0.04)',border:'1px solid rgba(16,185,129,0.1)',borderRadius:'10px',cursor:'pointer'}} onClick={getLocation}>
                 <Navigation size={12} color="#10b981"/>
@@ -373,7 +445,6 @@ export default function ClubsPage() {
 
         {/* CONTENT */}
         <div style={{maxWidth:'1280px',margin:'0 auto',padding:'clamp(20px,3vw,36px) clamp(16px,3vw,32px)'}}>
-
           {loading?(
             <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'12px',padding:'80px',color:'rgba(240,250,245,0.3)',fontSize:'14px'}}>
               <div style={{width:'24px',height:'24px',border:'2px solid rgba(16,185,129,0.15)',borderTop:'2px solid #10b981',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
@@ -383,7 +454,7 @@ export default function ClubsPage() {
             <div style={{textAlign:'center',padding:'80px 24px'}}>
               <div style={{fontSize:'48px',opacity:0.15,marginBottom:'16px'}}>🎱</div>
               <h3 style={{fontSize:'18px',fontWeight:800,color:'#f0faf5',margin:'0 0 8px'}}>باشگاهی یافت نشد</h3>
-              <p style={{fontSize:'13px',color:'rgba(240,250,245,0.35)',margin:'0 0 20px'}}>فیلترها یا جستجو را تغییر دهید</p>
+              <div style={{fontSize:'13px',color:'rgba(240,250,245,0.35)',margin:'0 0 20px'}}>فیلترها یا جستجو را تغییر دهید</div>
               <button onClick={clearFilters} style={{padding:'10px 24px',background:'linear-gradient(135deg,#10b981,#059669)',borderRadius:'12px',color:'#fff',fontSize:'13px',fontWeight:700,border:'none',cursor:'pointer',fontFamily:'inherit'}}>پاک کردن فیلترها</button>
             </div>
           ):view==='grid'?(
@@ -407,7 +478,7 @@ export default function ClubsPage() {
           {!loading&&(
             <div style={{marginTop:'40px',padding:'28px 24px',background:'rgba(255,255,255,0.02)',border:'1px dashed rgba(16,185,129,0.2)',borderRadius:'20px',textAlign:'center'}}>
               <h3 style={{fontSize:'18px',fontWeight:900,color:'#f0faf5',margin:'0 0 6px'}}>باشگاه خود را ثبت کنید</h3>
-              <p style={{fontSize:'13px',color:'rgba(240,250,245,0.35)',margin:'0 0 16px'}}>به هزاران بازیکن دسترسی پیدا کنید</p>
+              <div style={{fontSize:'13px',color:'rgba(240,250,245,0.35)',margin:'0 0 16px'}}>به هزاران بازیکن دسترسی پیدا کنید</div>
               <Link href="/clubs/new" style={{display:'inline-flex',alignItems:'center',gap:'6px',padding:'10px 24px',background:'linear-gradient(135deg,#10b981,#059669)',borderRadius:'12px',color:'#fff',fontSize:'13px',fontWeight:700,textDecoration:'none'}}>ثبت باشگاه ←</Link>
             </div>
           )}
