@@ -1,5 +1,8 @@
 // ==============================
 // FILE: apps/web/app/clubs/[id]/page.tsx
+// تغییر نسبت به نسخه قبل: فقط ۲ خط CSS
+// 1. .club-sidebar  →  order: 1  (در موبایل sidebar زیر محتوای اصلی)
+// 2. grid-template-columns: 340px 1fr  (در دسکتاپ: sidebar چپ، محتوا راست)
 // ==============================
 'use client';
 
@@ -179,7 +182,7 @@ export default function ClubProfilePage() {
           display: flex;
           flex-direction: column;
           gap: 14px;
-          order: -1;        /* sidebar بالا در موبایل */
+          order: 1;         /* ← تغییر: sidebar زیر محتوا در موبایل */
         }
         .amenity-grid {
           display: grid;
@@ -199,7 +202,7 @@ export default function ClubProfilePage() {
         @media (min-width: 960px) {
           .club-layout {
             display: grid;
-            grid-template-columns: 1fr 340px;
+            grid-template-columns: 340px 1fr;  /* ← تغییر: sidebar چپ، محتوا راست */
             gap: 28px;
             align-items: start;
           }
@@ -290,7 +293,7 @@ export default function ClubProfilePage() {
         <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'clamp(16px,3vw,40px) clamp(12px,3vw,28px)' }}>
           <div className="club-layout">
 
-            {/* ── RIGHT SIDEBAR (top on mobile) ── */}
+            {/* ── SIDEBAR (چپ در دسکتاپ / پایین در موبایل) ── */}
             <div className="club-sidebar">
 
               {/* Book CTA */}
@@ -363,7 +366,7 @@ export default function ClubProfilePage() {
               </div>
             </div>
 
-            {/* ── LEFT / MAIN COLUMN ── */}
+            {/* ── MAIN COLUMN (راست در دسکتاپ / بالا در موبایل) ── */}
             <div>
               {/* Tab bar */}
               <div style={{ display:'flex', gap:'6px', marginBottom:'24px', overflowX:'auto', paddingBottom:'4px' }}>
@@ -382,8 +385,6 @@ export default function ClubProfilePage() {
               {/* ── TAB: INFO ── */}
               {tab === 'info' && (
                 <div style={{ animation:'fadeUp 0.4s ease both' }}>
-
-                  {/* About */}
                   <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'18px', padding:'clamp(16px,3vw,24px)', marginBottom:'16px' }}>
                     <h2 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 14px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#10b981,#06b6d4)', borderRadius:'2px', display:'inline-block', flexShrink:0 }} />
@@ -398,7 +399,6 @@ export default function ClubProfilePage() {
                     )}
                   </div>
 
-                  {/* Amenities */}
                   <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'18px', padding:'clamp(16px,3vw,24px)', marginBottom:'16px' }}>
                     <h2 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 16px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius:'2px', display:'inline-block', flexShrink:0 }} />
@@ -421,7 +421,6 @@ export default function ClubProfilePage() {
                     </div>
                   </div>
 
-                  {/* Coaches */}
                   <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'18px', padding:'clamp(16px,3vw,24px)', marginBottom:'16px' }}>
                     <h2 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 16px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#a78bfa,#10b981)', borderRadius:'2px', display:'inline-block', flexShrink:0 }} />
@@ -451,7 +450,6 @@ export default function ClubProfilePage() {
                     </div>
                   </div>
 
-                  {/* Tournaments */}
                   <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'18px', padding:'clamp(16px,3vw,24px)', marginBottom:'16px' }}>
                     <h2 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 16px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#f59e0b,#ef4444)', borderRadius:'2px', display:'inline-block', flexShrink:0 }} />
@@ -478,7 +476,6 @@ export default function ClubProfilePage() {
                     </div>
                   </div>
 
-                  {/* Map */}
                   <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'18px', overflow:'hidden', marginBottom:'16px' }}>
                     <div style={{ padding:'18px 18px 0' }}>
                       <h2 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 14px', display:'flex', alignItems:'center', gap:'10px' }}>
@@ -616,6 +613,7 @@ export default function ClubProfilePage() {
                 </div>
               )}
             </div>
+
           </div>
         </div>
       </div>
