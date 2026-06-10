@@ -253,7 +253,7 @@ export default function ClubsPage() {
     return 0;
   });
 
-  const currentSort = SORT_OPTIONS.find(o => o.value === sortBy) ?? SORT_OPTIONS[0];
+  const currentSort = SORT_OPTIONS.find(o => o.value === sortBy) ?? SORT_OPTIONS[0]!;
   const availableSorts = SORT_OPTIONS.filter(o => o.value !== 'distance' || userLoc);
 
   // پنل فیلتر — روی موبایل: fixed تمام‌عرض / روی دسکتاپ: dropdown کوچک کنار دکمه
