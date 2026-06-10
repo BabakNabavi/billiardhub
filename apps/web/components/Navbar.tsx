@@ -7,7 +7,7 @@ import {
   Search, Bell, ShoppingCart, ChevronDown, User, X, Trophy,
   Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
   Newspaper, Calendar, Menu, ArrowLeft, LogOut, Settings,
-  Zap, Crown, LayoutDashboard,
+  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Stories from './Stories';
@@ -20,39 +20,48 @@ const exploreMenu = [
       { href: '/players',  label: 'بازیکنان',      icon: <Users size={14} />,   desc: 'بازیکنان حرفه‌ای' },
       { href: '/coaches',  label: 'مربیان',         icon: <Star size={14} />,    desc: 'مربیان مجاز' },
       { href: '/referees', label: 'داوران',          icon: <Trophy size={14} />,  desc: 'داوران رسمی' },
+      { href: '/ranking',  label: 'رنکینگ',          icon: <Trophy size={14} />,  desc: 'جدول رنکینگ' },
     ],
   },
   {
-    title: 'فروشندگان',
+    title: 'تجهیزات و خدمات',
     color: '#a78bfa',
     items: [
-      { href: '/sellers',       label: 'فروشگاه‌ها',    icon: <ShoppingBag size={14} />, desc: 'فروشندگان تجهیزات' },
-      { href: '/manufacturers', label: 'تولیدکنندگان', icon: <Wrench size={14} />,      desc: 'سازندگان تجهیزات' },
-      { href: '/installers',    label: 'متخصصین نصب',  icon: <Settings size={14} />,    desc: 'نصب و راه‌اندازی' },
+      { href: '/sellers',       label: 'فروشندگان تجهیزات', icon: <ShoppingBag size={14} />, desc: 'فروشندگان تجهیزات' },
+      { href: '/manufacturers', label: 'تولیدکنندگان',       icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
+      { href: '/installers',    label: 'متخصصین نصب و تعمیر', icon: <Wrench size={14} />,  desc: 'نصب و راه‌اندازی' },
     ],
   },
   {
     title: 'محتوا',
     color: '#06b6d4',
     items: [
-      { href: '/news',      label: 'اخبار',   icon: <Newspaper size={14} />, desc: 'آخرین اخبار' },
-      { href: '/events',    label: 'مسابقات', icon: <Calendar size={14} />,  desc: 'رویدادها' },
-      { href: '/education', label: 'آموزش',   icon: <BookOpen size={14} />,  desc: 'ویدیو آموزشی' },
+      { href: '/news',      label: 'اخبار',   icon: <Newspaper size={14} />,     desc: 'آخرین اخبار' },
+      { href: '/events',    label: 'مسابقات', icon: <Calendar size={14} />,       desc: 'رویدادها' },
+      { href: '/education', label: 'آموزش',   icon: <GraduationCap size={14} />, desc: 'ویدیو آموزشی' },
     ],
   },
 ];
 
+// ترتیب موبایل طبق درخواست:
+// صفحه اصلی - باشگاه‌ها - بیلیارد بازار - بازیکنان - پخش زنده
+// مربیان - داوران - رنکینگ - فروشندگان تجهیزات - تولیدکنندگان
+// متخصصین نصب و تعمیر - آموزش - مسابقات - اخبار
 const mobileLinks = [
-  { href: '/clubs',     label: 'باشگاه‌ها',  icon: <Building2 size={18} />,  color: '#10b981' },
-  { href: '/shop',      label: 'فروشگاه',    icon: <ShoppingBag size={18} />, color: '#06b6d4' },
-  { href: '/ranking',   label: 'رنکینگ',     icon: <Trophy size={18} />,      color: '#f59e0b' },
-  { href: '/live',      label: 'پخش زنده',   icon: <Radio size={18} />,       color: '#ef4444', live: true },
-  { href: '/players',   label: 'بازیکنان',   icon: <Users size={18} />,       color: '#10b981' },
-  { href: '/coaches',   label: 'مربیان',     icon: <Star size={18} />,        color: '#f59e0b' },
-  { href: '/referees',  label: 'داوران',     icon: <Trophy size={18} />,      color: '#a78bfa' },
-  { href: '/sellers',   label: 'فروشندگان',  icon: <ShoppingBag size={18} />, color: '#06b6d4' },
-  { href: '/news',      label: 'اخبار',      icon: <Newspaper size={18} />,   color: '#10b981' },
-  { href: '/events',    label: 'مسابقات',    icon: <Calendar size={18} />,    color: '#a78bfa' },
+  { href: '/',              label: 'صفحه اصلی',            icon: <Home size={18} />,          color: '#10b981', isHome: true },
+  { href: '/clubs',         label: 'باشگاه‌ها',             icon: <Building2 size={18} />,     color: '#10b981' },
+  { href: '/shop',          label: 'بیلیارد بازار',         icon: <ShoppingBag size={18} />,   color: '#06b6d4' },
+  { href: '/players',       label: 'بازیکنان',              icon: <Users size={18} />,          color: '#10b981' },
+  { href: '/live',          label: 'پخش زنده',              icon: <Radio size={18} />,          color: '#ef4444', live: true },
+  { href: '/coaches',       label: 'مربیان',                icon: <Star size={18} />,           color: '#f59e0b' },
+  { href: '/referees',      label: 'داوران',                icon: <Trophy size={18} />,         color: '#a78bfa' },
+  { href: '/ranking',       label: 'رنکینگ',                icon: <Trophy size={18} />,         color: '#f59e0b' },
+  { href: '/sellers',       label: 'فروشندگان تجهیزات',     icon: <ShoppingBag size={18} />,   color: '#06b6d4' },
+  { href: '/manufacturers', label: 'تولیدکنندگان',          icon: <Factory size={18} />,        color: '#a78bfa' },
+  { href: '/installers',    label: 'متخصصین نصب و تعمیر',  icon: <Wrench size={18} />,         color: '#10b981' },
+  { href: '/education',     label: 'آموزش',                 icon: <GraduationCap size={18} />, color: '#06b6d4' },
+  { href: '/events',        label: 'مسابقات',               icon: <Calendar size={18} />,       color: '#a78bfa' },
+  { href: '/news',          label: 'اخبار',                 icon: <Newspaper size={18} />,      color: '#10b981' },
 ];
 
 export default function Navbar() {
@@ -155,6 +164,9 @@ export default function Navbar() {
         .mob  { display:none  !important; }
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
+
+        .mob-link-item { transition: background 0.15s, color 0.15s; }
+        .mob-link-item:hover { background: rgba(255,255,255,0.05) !important; color: #f0faf5 !important; }
       `}</style>
 
       {/* ── NAV ── */}
@@ -176,19 +188,19 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop links */}
+          {/* Desktop links — ترتیب جدید: باشگاه‌ها - بیلیارد بازار - بازیکنان - پخش زنده - بیشتر */}
           <div className="desk" style={{ alignItems:'center', gap:'24px', marginRight:'12px', flexShrink:0 }}>
             <Link href="/clubs"   className={`nav-a ${pathname==='/clubs'?'active':''}`}>باشگاه‌ها</Link>
-            <Link href="/shop"    className={`nav-a ${pathname==='/shop'?'active':''}`}>فروشگاه</Link>
-            <Link href="/ranking" className={`nav-a ${pathname==='/ranking'?'active':''}`}>رنکینگ</Link>
+            <Link href="/shop"    className={`nav-a ${pathname==='/shop'?'active':''}`}>بیلیارد بازار</Link>
+            <Link href="/players" className={`nav-a ${pathname==='/players'?'active':''}`}>بازیکنان</Link>
             <Link href="/live" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize:'13px', fontWeight:500, textDecoration:'none', transition:'color 0.25s', whiteSpace:'nowrap', padding:'6px 2px' }}
               onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.color='rgba(255,255,255,0.9)'}}
               onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.color='rgba(255,255,255,0.5)'}}>
               <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#ef4444', display:'inline-block', animation:'glowPulse 2s infinite', flexShrink:0 }}/>
-              زنده
+              پخش زنده
             </Link>
 
-            {/* Explore */}
+            {/* Explore / بیشتر */}
             <div ref={exploreRef} style={{ position:'relative' }}>
               <button className="exp-btn" onClick={()=>setExploreOpen(p=>!p)}>
                 بیشتر
@@ -198,7 +210,7 @@ export default function Navbar() {
               {exploreOpen && (
                 <div style={{
                   position:'absolute', top:'calc(100% + 16px)', right:'-20px',
-                  width:'540px', maxWidth:'95vw',
+                  width:'580px', maxWidth:'95vw',
                   background:'rgba(8,18,13,0.97)',
                   border:'1px solid rgba(255,255,255,0.08)',
                   borderRadius:'24px',
@@ -207,7 +219,6 @@ export default function Navbar() {
                   padding:'20px', zIndex:300,
                   animation:'fadeDown 0.22s cubic-bezier(0.22,1,0.36,1) both',
                 }}>
-                  {/* top glow line */}
                   <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:'linear-gradient(90deg,transparent,rgba(16,185,129,0.6),transparent)' }}/>
 
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px', paddingBottom:'12px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
@@ -346,7 +357,7 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* ── MOBILE MENU — rendered OUTSIDE nav to avoid z-index trap ── */}
+      {/* ── MOBILE MENU ── */}
       {mobileOpen && (
         <div style={{
           position:'fixed', inset:0, zIndex:9999,
@@ -389,10 +400,17 @@ export default function Navbar() {
           <div style={{ padding:'0 12px', display:'flex', flexDirection:'column', gap:'2px' }}>
             {mobileLinks.map((item, i) => (
               <Link key={i} href={item.href} onClick={()=>setMobileOpen(false)}
-                style={{ display:'flex', alignItems:'center', gap:'14px', padding:'13px 14px', borderRadius:'14px', color:'rgba(240,250,245,0.55)', fontSize:'15px', fontWeight:500, textDecoration:'none', transition:'all 0.15s' }}
-                onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.05)';(e.currentTarget as HTMLElement).style.color='#f0faf5'}}
-                onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='transparent';(e.currentTarget as HTMLElement).style.color='rgba(240,250,245,0.55)'}}>
-                <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:`${item.color}14`, border:`1px solid ${item.color}22`, display:'flex', alignItems:'center', justifyContent:'center', color:item.color, flexShrink:0 }}>
+                className="mob-link-item"
+                style={{
+                  display:'flex', alignItems:'center', gap:'14px',
+                  padding:'13px 14px', borderRadius:'14px',
+                  color: item.isHome ? 'rgba(240,250,245,0.75)' : 'rgba(240,250,245,0.55)',
+                  fontSize:'15px', fontWeight: item.isHome ? 600 : 500,
+                  textDecoration:'none',
+                  // خط جداکننده بعد از صفحه اصلی
+                  ...(item.isHome ? { borderBottom:'1px solid rgba(255,255,255,0.05)', marginBottom:'6px', paddingBottom:'16px' } : {}),
+                }}>
+                <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:`${item.color}14`, border:`1px solid ${item.color}22`, display:'flex', alignItems:'center', justifyContent:'center', color: item.isHome ? item.color : item.color, flexShrink:0 }}>
                   {item.icon}
                 </div>
                 <span>{item.label}</span>
