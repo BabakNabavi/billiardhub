@@ -1,108 +1,123 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import api from '@/lib/api'
+import { useState } from 'react';
+import Link from 'next/link';
 
-interface Installer {
-  id: string
-  name: string
-  city?: string
-  description?: string
-  services?: string[]
-  rating?: number
-  reviewCount?: number
-  phone?: string
-  experience?: string
+const INSTALLERS = [
+  { id: '1', name: 'محمد رضایی', city: 'تهران', verified: true, elite: true, rating: 4.9, reviewCount: 186, jobsDone: 480, since: '۱۳۸۸', regions: ['تهران', 'کرج', 'البرز'], specialties: ['نصب اسنوکر', 'تعویض پارچه', 'سطح‌بندی'], responseTime: '۱ ساعت', emoji: '👨‍🔧' },
+  { id: '2', name: 'تیم نصب تهران بیلیارد', city: 'تهران', verified: true, elite: false, rating: 4.5, reviewCount: 78, jobsDone: 220, since: '۱۳۹۵', regions: ['تهران', 'کرج'], specialties: ['نصب آمریکایی', 'تعویض پارچه'], responseTime: '۳ ساعت', emoji: '🛠️' },
+  { id: '3', name: 'علی اصغر حیدری', city: 'اصفهان', verified: false, elite: false, rating: 4.3, reviewCount: 45, jobsDone: 650, since: '۱۳۷۸', regions: ['اصفهان', 'کاشان', 'یزد'], specialties: ['تعمیر', 'نصب'], responseTime: '۶ ساعت', emoji: '🔧' },
+  { id: '4', name: 'سرویس پیشرفته بیلیارد مشهد', city: 'مشهد', verified: true, elite: false, rating: 4.7, reviewCount: 92, jobsDone: 310, since: '۱۳۹۶', regions: ['مشهد', 'نیشابور'], specialties: ['نصب اسنوکر', 'سرویس دوره‌ای'], responseTime: '۲ ساعت', emoji: '⚙️' },
+];
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div style={{ display: 'flex', gap: 2 }}>
+      {[1,2,3,4,5].map(i => (
+        <svg key={i} width={11} height={11} viewBox="0 0 24 24" fill={i <= Math.round(rating) ? '#06b6d4' : 'none'} stroke="#06b6d4" strokeWidth="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ))}
+    </div>
+  );
 }
 
-const MOCK_INSTALLERS: Installer[] = [
-  { id: '1', name: 'تیم نصب و تعمیر ایران بیلیارد', city: 'تهران', description: 'نصب حرفه‌ای میز بیلیارد و سرویس دوره‌ای با بیش از ۱۰ سال تجربه در تهران', services: ['نصب میز اسنوکر', 'تعویض رویه', 'تنظیم کوسن', 'تعمیر چوب'], rating: 4.9, reviewCount: 112, experience: '۱۰+ سال' },
-  { id: '2', name: 'سرویس بیلیارد شمال تهران', city: 'تهران', description: 'تخصص در نصب و نگهداری میز بیلیارد در شمال تهران', services: ['نصب میز پول', 'تعویض رویه مخمل', 'تراز کردن'], rating: 4.6, reviewCount: 78, experience: '۷ سال' },
-  { id: '3', name: 'متخصص بیلیارد اصفهان', city: 'اصفهان', description: 'ارائه خدمات نصب و تعمیر تجهیزات بیلیارد در سراسر استان اصفهان', services: ['نصب کامل میز', 'تعمیر', 'سرویس سالانه'], rating: 4.7, reviewCount: 65, experience: '۸ سال' },
-  { id: '4', name: 'کارگاه بیلیارد مشهد', city: 'مشهد', description: 'خدمات نصب و تعمیر تخصصی برای باشگاه‌ها و منازل در مشهد', services: ['نصب', 'تعمیر', 'رنگ‌آمیزی فریم'], rating: 4.5, reviewCount: 44, experience: '۵ سال' },
-]
-
 export default function InstallersPage() {
-  const [installers, setInstallers] = useState<Installer[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [activeCity, setActiveCity] = useState('همه');
+  const [onlyVerified, setOnlyVerified] = useState(false);
+  const cities = ['همه', 'تهران', 'اصفهان', 'مشهد', 'شیراز'];
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await api.get('/installers')
-        setInstallers(res.data?.length > 1 ? res.data : MOCK_INSTALLERS)
-      } catch {
-        setInstallers(MOCK_INSTALLERS)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetch()
-  }, [])
-
-  const filtered = installers.filter(i =>
-    i.name.includes(search) || i.city?.includes(search) || i.description?.includes(search)
-  )
+  const filtered = INSTALLERS
+    .filter(s => activeCity === 'همه' || s.city === activeCity)
+    .filter(s => !onlyVerified || s.verified);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
-      <div style={{ background: 'linear-gradient(135deg, #050c08, #0c1a14)', borderBottom: '1px solid rgba(6,182,212,0.2)', padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <h1 style={{ margin: '0 0 0.5rem', fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', background: 'linear-gradient(90deg, #06b6d4, #10b981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            متخصصین نصب و تعمیر
+    <div style={{ background: '#010604', minHeight: '100vh', color: '#f0faf5', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
+      {/* Hero */}
+      <div style={{ background: 'linear-gradient(135deg, #030d18 0%, #021018 100%)', padding: 'clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(28px, 5vw, 48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg, rgba(6,182,212,0.03) 0px, rgba(6,182,212,0.03) 1px, transparent 1px, transparent 20px)', backgroundSize: '28px 28px' }} />
+        <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4', fontSize: 12, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
+            🔧 متخصصین نصب و تعمیر
+          </div>
+          <h1 style={{ fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, margin: '0 0 12px', background: 'linear-gradient(135deg, #f0faf5, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            متخصصین نصب و تعمیر بیلیارد
           </h1>
-          <div style={{ color: '#67e8f9', fontSize: '0.95rem', marginBottom: '1.5rem' }}>متخصصین نصب، تعمیر و نگهداری میز بیلیارد</div>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="جستجوی متخصص..."
-            style={{ width: '100%', maxWidth: '400px', padding: '0.75rem 1rem', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '12px', color: '#f0faf5', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' }}
-          />
+          <p style={{ color: '#6b7280', fontSize: 'clamp(13px, 2vw, 15px)', margin: 0, lineHeight: 1.7 }}>
+            نصب، تنظیم، تعویض پارچه و تعمیر میزهای بیلیارد توسط متخصصان تأیید شده
+          </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 2rem)' }}>
-        {loading ? (
-          <div style={{ textAlign: 'center', color: '#06b6d4', padding: '3rem' }}>در حال بارگذاری...</div>
-        ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#67e8f9', padding: '3rem' }}>متخصصی یافت نشد</div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '1.25rem' }}>
-            {filtered.map(item => (
-              <Link key={item.id} href={`/installers/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '16px', padding: '1.5rem', cursor: 'pointer', height: '100%', transition: 'border-color 0.2s, background 0.2s' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(6,182,212,0.5)'; (e.currentTarget as HTMLDivElement).style.background = 'rgba(6,182,212,0.1)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(6,182,212,0.2)'; (e.currentTarget as HTMLDivElement).style.background = 'rgba(6,182,212,0.05)' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                    <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'linear-gradient(135deg, #06b6d4, #10b981)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>🔧</div>
-                    <div>
-                      <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '0.2rem' }}>{item.name}</div>
-                      <div style={{ color: '#67e8f9', fontSize: '0.85rem' }}>
-                        {item.city && `📍 ${item.city}`}{item.experience && ` · ${item.experience}`}
-                      </div>
-                    </div>
-                  </div>
-                  {item.description && <div style={{ color: '#cffafe', fontSize: '0.88rem', lineHeight: '1.6', marginBottom: '1rem' }}>{item.description}</div>}
-                  {item.services && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1rem' }}>
-                      {item.services.slice(0, 3).map((s, i) => (
-                        <span key={i} style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.25)', borderRadius: '20px', padding: '0.2rem 0.7rem', fontSize: '0.78rem', color: '#67e8f9' }}>{s}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {item.rating && <span style={{ color: '#f59e0b', fontSize: '0.85rem' }}>⭐ {item.rating} ({item.reviewCount})</span>}
-                    <span style={{ color: '#06b6d4', fontSize: '0.85rem' }}>مشاهده ←</span>
-                  </div>
-                </div>
-              </Link>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(20px, 4vw, 32px) clamp(16px, 4vw, 32px)' }}>
+        {/* Filters */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 28, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+            {cities.map(city => (
+              <button key={city} onClick={() => setActiveCity(city)} style={{
+                background: activeCity === city ? '#06b6d4' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${activeCity === city ? '#06b6d4' : 'rgba(255,255,255,0.08)'}`,
+                color: activeCity === city ? '#010604' : '#94a3b8',
+                padding: '7px 14px', borderRadius: 20, fontSize: 12,
+                fontWeight: activeCity === city ? 700 : 400,
+                cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s',
+              }}>{city}</button>
             ))}
           </div>
-        )}
+          <button onClick={() => setOnlyVerified(!onlyVerified)} style={{
+            background: onlyVerified ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${onlyVerified ? 'rgba(6,182,212,0.4)' : 'rgba(255,255,255,0.08)'}`,
+            color: onlyVerified ? '#06b6d4' : '#94a3b8',
+            padding: '7px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
+          }}>✓ تأیید شده</button>
+        </div>
+
+        {/* Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: 16, marginBottom: 48 }}>
+          {filtered.map(installer => (
+            <Link key={installer.id} href={`/installers/${installer.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #030d18, #041420)',
+                border: '1px solid rgba(6,182,212,0.1)', borderRadius: 18,
+                overflow: 'hidden', transition: 'all 0.3s', height: '100%', cursor: 'pointer',
+              }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLDivElement; el.style.border = '1px solid rgba(6,182,212,0.35)'; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = '0 12px 40px rgba(6,182,212,0.08)'; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.border = '1px solid rgba(6,182,212,0.1)'; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'; }}
+              >
+                <div style={{ height: 80, background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(16,185,129,0.03))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px', position: 'relative' }}>
+                  <div style={{ fontSize: 44, opacity: 0.6 }}>{installer.emoji}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+                    {installer.elite && <span style={{ background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)', color: '#10b981', fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>🏆 متخصص برتر</span>}
+                    {installer.verified && <span style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4', fontSize: 10, padding: '2px 8px', borderRadius: 10 }}>✓ تأیید شده</span>}
+                  </div>
+                </div>
+                <div style={{ padding: '16px 18px 18px' }}>
+                  <h3 style={{ color: '#f0faf5', fontSize: 15, fontWeight: 700, margin: '0 0 4px' }}>{installer.name}</h3>
+                  <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>📍 {installer.city} | از {installer.since}</div>
+                  {/* Rating + jobs */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <StarRating rating={installer.rating} />
+                    <span style={{ color: '#f0faf5', fontSize: 13, fontWeight: 700 }}>{installer.rating}</span>
+                    <span style={{ color: '#6b7280', fontSize: 11 }}>({installer.reviewCount})</span>
+                    <span style={{ color: '#06b6d4', fontSize: 12, fontWeight: 600, marginRight: 'auto' }}>{installer.jobsDone} کار</span>
+                  </div>
+                  {/* Regions */}
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 10 }}>
+                    {installer.regions.slice(0, 3).map(r => (
+                      <span key={r} style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.15)', color: '#06b6d4', fontSize: 10, padding: '2px 8px', borderRadius: 10 }}>{r}</span>
+                    ))}
+                  </div>
+                  {/* Footer */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <span style={{ color: '#4b5563', fontSize: 11 }}>⚡ {installer.responseTime}</span>
+                    <span style={{ color: '#06b6d4', fontSize: 12, fontWeight: 600 }}>مشاهده پروفایل ←</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
-  )
+  );
 }
