@@ -4,5 +4,6 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build
+RUN ls -la /app/dist/
 EXPOSE 4000
-CMD ["sh", "-c", "node dist/main.js || echo 'CRASHED' && sleep 3600"]
+CMD ["node", "/app/dist/main.js"]
