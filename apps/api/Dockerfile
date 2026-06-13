@@ -6,4 +6,4 @@ COPY . .
 RUN npm run build
 RUN ls -la dist/
 EXPOSE 4000
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "node dist/main.js 2>&1 | tee /tmp/app.log || (cat /tmp/app.log && exit 1)"]
