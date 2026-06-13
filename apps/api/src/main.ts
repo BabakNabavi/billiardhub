@@ -1,29 +1,17 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  // CORS — Netlify + local
-  app.enableCors({
-  origin: [
-    'https://astounding-bunny-08f3b8.netlify.app',
-    'https://billiard-plus.vercel.app',
-    'https://billiard-plus-5g5n5b2zu-babaknabavis-projects.vercel.app',
-    'http://localhost:3000',
-  ],
-  credentials: true,
-});
-
-  // Global validation
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-
-  // Global prefix
-  app.setGlobalPrefix('api');
-
-  const port = process.env.PORT ?? 4000;
-  await app.listen(port);
-  console.log(`🚀 Backend running on port ${port}`);
+  try {
+    const app = await NestFactory.create(AppModule);
+    app.enableCors({ origin: '*' });
+    app.setGlobalPrefix('api');
+    const port = process.env.PORT ?? 4000;
+    await app.listen(port, '0.0.0.0');
+    console.log(`Backend running on port ${port}`);
+  } catch (err) {
+    console.error('STARTUP ERROR:', err);
+    process.exit(1);
+  }
 }
 bootstrap();
