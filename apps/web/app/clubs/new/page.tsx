@@ -144,7 +144,6 @@ export default function NewClubPage() {
       const imageUrls: string[] = [];
       let videoUrl = '';
 
-      // آپلود عکس‌ها
       if (imageFiles.length > 0) {
         setUploadProgress('در حال آپلود عکس‌ها...');
         for (let i = 0; i < imageFiles.length; i++) {
@@ -159,7 +158,6 @@ export default function NewClubPage() {
         }
       }
 
-      // آپلود ویدیو
       if (videoFile) {
         setUploadProgress('در حال آپلود ویدیو...');
         const url = await uploadFile(
@@ -189,211 +187,250 @@ export default function NewClubPage() {
     }
   };
 
+  const inputCls =
+    'w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors';
+  const inputStyle: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    color: '#f0faf5',
+  };
+  const sectionStyle: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: '16px',
+    padding: '24px',
+    marginBottom: '20px',
+  };
+  const labelCls = 'block text-xs font-medium mb-1 text-emerald-400/70';
+  const headingStyle: React.CSSProperties = {
+    fontSize: '15px',
+    fontWeight: 800,
+    color: '#10b981',
+    marginBottom: '16px',
+  };
+
   return (
-    <div className="max-w-3xl mx-auto pb-10">
-      <h1 className="text-2xl font-bold text-green-800 mb-6">ثبت باشگاه جدید</h1>
+    <>
+      <style>{`
+        .dark-input::placeholder { color: rgba(240,250,245,0.25); }
+        .dark-input:focus { border-color: rgba(16,185,129,0.45) !important; box-shadow: 0 0 0 3px rgba(16,185,129,0.08); }
+        .dark-input { color-scheme: dark; }
+        .dark-file::file-selector-button {
+          background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
+          color: #10b981; border-radius: 8px; padding: 4px 12px; font-size: 12px;
+          cursor: pointer; margin-left: 8px; font-family: inherit;
+        }
+      `}</style>
 
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{error}</div>
-      )}
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806 0%,#060d0a 100%)', direction: 'rtl', paddingBottom: '60px' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px clamp(16px,4vw,32px) 0' }}>
 
-      {/* اطلاعات پایه */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">📋 اطلاعات پایه</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">نام باشگاه *</label>
-            <input type="text" name="name" value={form.name} onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="نام باشگاه" />
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ fontSize: '10px', color: 'rgba(16,185,129,0.6)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: '6px' }}>REGISTER CLUB</div>
+            <h1 style={{ fontSize: 'clamp(22px,4vw,32px)', fontWeight: 900, color: '#f0faf5', margin: 0, letterSpacing: '-0.02em' }}>ثبت باشگاه جدید</h1>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">نام مدیر باشگاه</label>
-            <input type="text" name="managerName" value={form.managerName} onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="نام و نام خانوادگی" />
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">توضیحات</label>
-          <textarea name="description" value={form.description} onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-            rows={3} placeholder="معرفی باشگاه..." />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">آدرس *</label>
-          <input type="text" name="address" value={form.address} onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-            placeholder="آدرس کامل" />
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">شهر *</label>
-            <input type="text" name="city" value={form.city} onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="تهران" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">کشور</label>
-            <input type="text" name="country" value={form.country} onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">موقعیت مکانی *</label>
-          <button type="button" onClick={getLocation} disabled={locationLoading}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-2">
-            {locationLoading ? 'در حال دریافت...' : '📍 دریافت موقعیت فعلی'}
-          </button>
-          {form.latitude && form.longitude && (
-            <p className="text-sm text-green-600 mt-1">
-              ✅ موقعیت دریافت شد: {parseFloat(form.latitude).toFixed(4)}, {parseFloat(form.longitude).toFixed(4)}
-            </p>
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">تلفن</label>
-            <input type="tel" name="phone" value={form.phone} onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="02112345678" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">وبسایت</label>
-            <input type="url" name="website" value={form.website} onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="https://..." />
-          </div>
-        </div>
-      </div>
 
-      {/* تعداد میزها */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">🎱 تعداد میزها</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { key: 'snookerTables', label: 'میز اسنوکر' },
-            { key: 'pocketTables', label: 'میز پاکت بیلیارد' },
-            { key: 'highballTables', label: 'میز هی‌بال' },
-            { key: 'vipSnookerTables', label: 'میز VIP اسنوکر' },
-            { key: 'vipPocketTables', label: 'میز VIP پاکت' },
-            { key: 'airHockeyTables', label: 'ایرهاکی' },
-            { key: 'dartBoards', label: 'دارت' },
-            { key: 'playstations', label: 'پلی‌استیشن' },
-          ].map((item) => (
-            <div key={item.key}>
-              <label className="block text-sm font-medium mb-1">{item.label}</label>
-              <input type="number" min="0"
-                value={(form as any)[item.key]}
-                onChange={(e) => handleNumberChange(item.key, parseInt(e.target.value) || 0)}
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          {error && (
+            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px' }}>
+              {error}
             </div>
-          ))}
-        </div>
-      </div>
+          )}
 
-      {/* امکانات رفاهی */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">✨ امکانات رفاهی</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { key: 'hasCafe', label: 'کافه' },
-            { key: 'hasParking', label: 'پارکینگ' },
-            { key: 'hasWifi', label: 'WiFi' },
-            { key: 'hasProfessionalCoach', label: 'مربی حرفه‌ای' },
-          ].map((item) => (
-            <label key={item.key} className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name={item.key}
-                checked={(form as any)[item.key]}
-                onChange={handleChange}
-                className="w-4 h-4 accent-green-600" />
-              <span className="text-sm">{item.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* امکانات ویژه */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">⭐ امکانات ویژه</h2>
-        <textarea name="specialFeatures" value={form.specialFeatures} onChange={handleChange}
-          className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-          rows={3} placeholder="هر امکانات ویژه‌ای که باشگاه دارد را اینجا بنویسید..." />
-      </div>
-
-      {/* ساعات کاری */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">🕐 ساعات کاری</h2>
-        <div className="space-y-3">
-          {days.map((day) => (
-            <div key={day.key} className="flex items-center gap-4">
-              <div className="w-20 text-sm font-medium">{day.label}</div>
-              <input type="checkbox"
-                checked={(form.workingHours as any)[day.key].isOpen}
-                onChange={(e) => handleWorkingHours(day.key, 'isOpen', e.target.checked)}
-                className="w-4 h-4 accent-green-600" />
-              {(form.workingHours as any)[day.key].isOpen ? (
-                <>
-                  <input type="time"
-                    value={(form.workingHours as any)[day.key].open}
-                    onChange={(e) => handleWorkingHours(day.key, 'open', e.target.value)}
-                    className="border rounded px-2 py-1 text-sm" />
-                  <span className="text-sm">تا</span>
-                  <input type="time"
-                    value={(form.workingHours as any)[day.key].close}
-                    onChange={(e) => handleWorkingHours(day.key, 'close', e.target.value)}
-                    className="border rounded px-2 py-1 text-sm" />
-                </>
-              ) : (
-                <span className="text-sm text-red-500">تعطیل</span>
+          {/* اطلاعات پایه */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>📋 اطلاعات پایه</h2>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className={labelCls}>نام باشگاه *</label>
+                <input type="text" name="name" value={form.name} onChange={handleChange}
+                  className={`${inputCls} dark-input`} style={inputStyle} placeholder="نام باشگاه" />
+              </div>
+              <div>
+                <label className={labelCls}>نام مدیر باشگاه</label>
+                <input type="text" name="managerName" value={form.managerName} onChange={handleChange}
+                  className={`${inputCls} dark-input`} style={inputStyle} placeholder="نام و نام خانوادگی" />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className={labelCls}>توضیحات</label>
+              <textarea name="description" value={form.description} onChange={handleChange}
+                className={`${inputCls} dark-input`} style={inputStyle}
+                rows={3} placeholder="معرفی باشگاه..." />
+            </div>
+            <div className="mb-4">
+              <label className={labelCls}>آدرس *</label>
+              <input type="text" name="address" value={form.address} onChange={handleChange}
+                className={`${inputCls} dark-input`} style={inputStyle} placeholder="آدرس کامل" />
+            </div>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className={labelCls}>شهر *</label>
+                <input type="text" name="city" value={form.city} onChange={handleChange}
+                  className={`${inputCls} dark-input`} style={inputStyle} placeholder="تهران" />
+              </div>
+              <div>
+                <label className={labelCls}>کشور</label>
+                <input type="text" name="country" value={form.country} onChange={handleChange}
+                  className={`${inputCls} dark-input`} style={inputStyle} />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className={labelCls} style={{ display: 'block', marginBottom: '8px' }}>موقعیت مکانی *</label>
+              <button type="button" onClick={getLocation} disabled={locationLoading}
+                style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', opacity: locationLoading ? 0.5 : 1 }}>
+                {locationLoading ? 'در حال دریافت...' : '📍 دریافت موقعیت فعلی'}
+              </button>
+              {form.latitude && form.longitude && (
+                <p style={{ fontSize: '12px', color: '#6ee7b7', marginTop: '8px' }}>
+                  ✅ موقعیت دریافت شد: {parseFloat(form.latitude).toFixed(4)}, {parseFloat(form.longitude).toFixed(4)}
+                </p>
               )}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* آپلود عکس */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">📸 عکس‌های باشگاه</h2>
-        <p className="text-sm text-gray-500 mb-3">حداکثر ۱۰ عکس — فرمت JPG، PNG</p>
-        <input type="file" accept="image/*" multiple onChange={handleImageSelect}
-          className="w-full border rounded-lg px-3 py-2 text-sm" />
-        {imagePreviews.length > 0 && (
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
-            {imagePreviews.map((src, i) => (
-              <div key={i} className="relative">
-                <img src={src} alt="" className="w-full h-20 object-cover rounded-lg" />
-                <button onClick={() => removeImage(i)}
-                  className="absolute top-1 left-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                  ×
-                </button>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>تلفن</label>
+                <input type="tel" name="phone" value={form.phone} onChange={handleChange}
+                  className={`${inputCls} dark-input`} style={inputStyle} placeholder="02112345678" />
               </div>
-            ))}
+              <div>
+                <label className={labelCls}>وبسایت</label>
+                <input type="url" name="website" value={form.website} onChange={handleChange}
+                  className={`${inputCls} dark-input`} style={inputStyle} placeholder="https://..." />
+              </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* آپلود ویدیو */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-bold mb-4 text-green-700">🎬 ویدیوی باشگاه</h2>
-        <p className="text-sm text-gray-500 mb-3">یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت — فرمت MP4</p>
-        <input type="file" accept="video/mp4,video/*" onChange={handleVideoSelect}
-          className="w-full border rounded-lg px-3 py-2 text-sm" />
-        {videoFile && (
-          <p className="text-sm text-green-600 mt-2">✅ {videoFile.name} انتخاب شد</p>
-        )}
-      </div>
+          {/* تعداد میزها */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>🎱 تعداد میزها</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { key: 'snookerTables', label: 'میز اسنوکر' },
+                { key: 'pocketTables', label: 'میز پاکت بیلیارد' },
+                { key: 'highballTables', label: 'میز هی‌بال' },
+                { key: 'vipSnookerTables', label: 'میز VIP اسنوکر' },
+                { key: 'vipPocketTables', label: 'میز VIP پاکت' },
+                { key: 'airHockeyTables', label: 'ایرهاکی' },
+                { key: 'dartBoards', label: 'دارت' },
+                { key: 'playstations', label: 'پلی‌استیشن' },
+              ].map((item) => (
+                <div key={item.key}>
+                  <label className={labelCls}>{item.label}</label>
+                  <input type="number" min="0"
+                    value={(form as any)[item.key]}
+                    onChange={(e) => handleNumberChange(item.key, parseInt(e.target.value) || 0)}
+                    className={`${inputCls} dark-input`} style={inputStyle} />
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {uploadProgress && (
-        <div className="bg-blue-50 text-blue-600 p-3 rounded mb-4 text-sm text-center">
-          {uploadProgress}
+          {/* امکانات رفاهی */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>✨ امکانات رفاهی</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { key: 'hasCafe', label: 'کافه' },
+                { key: 'hasParking', label: 'پارکینگ' },
+                { key: 'hasWifi', label: 'WiFi' },
+                { key: 'hasProfessionalCoach', label: 'مربی حرفه‌ای' },
+              ].map((item) => (
+                <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input type="checkbox" name={item.key}
+                    checked={(form as any)[item.key]}
+                    onChange={handleChange}
+                    style={{ width: '16px', height: '16px', accentColor: '#10b981' }} />
+                  <span style={{ fontSize: '13px', color: 'rgba(240,250,245,0.7)' }}>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* امکانات ویژه */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>⭐ امکانات ویژه</h2>
+            <textarea name="specialFeatures" value={form.specialFeatures} onChange={handleChange}
+              className={`${inputCls} dark-input`} style={inputStyle}
+              rows={3} placeholder="هر امکانات ویژه‌ای که باشگاه دارد را اینجا بنویسید..." />
+          </div>
+
+          {/* ساعات کاری */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>🕐 ساعات کاری</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {days.map((day) => (
+                <div key={day.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '64px', fontSize: '13px', color: 'rgba(240,250,245,0.6)', fontWeight: 600, flexShrink: 0 }}>{day.label}</div>
+                  <input type="checkbox"
+                    checked={(form.workingHours as any)[day.key].isOpen}
+                    onChange={(e) => handleWorkingHours(day.key, 'isOpen', e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: '#10b981', flexShrink: 0 }} />
+                  {(form.workingHours as any)[day.key].isOpen ? (
+                    <>
+                      <input type="time"
+                        value={(form.workingHours as any)[day.key].open}
+                        onChange={(e) => handleWorkingHours(day.key, 'open', e.target.value)}
+                        className="dark-input"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0faf5', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
+                      <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)' }}>تا</span>
+                      <input type="time"
+                        value={(form.workingHours as any)[day.key].close}
+                        onChange={(e) => handleWorkingHours(day.key, 'close', e.target.value)}
+                        className="dark-input"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0faf5', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '12px', color: '#fca5a5' }}>تعطیل</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* آپلود عکس */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>📸 عکس‌های باشگاه</h2>
+            <p style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG، PNG</p>
+            <input type="file" accept="image/*" multiple onChange={handleImageSelect}
+              className="dark-file w-full text-sm" style={{ color: 'rgba(240,250,245,0.5)' }} />
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
+                {imagePreviews.map((src, i) => (
+                  <div key={i} style={{ position: 'relative' }}>
+                    <img src={src} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }} />
+                    <button onClick={() => removeImage(i)}
+                      style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(239,68,68,0.8)', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* آپلود ویدیو */}
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>🎬 ویدیوی باشگاه</h2>
+            <p style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت — فرمت MP4</p>
+            <input type="file" accept="video/mp4,video/*" onChange={handleVideoSelect}
+              className="dark-file w-full text-sm" style={{ color: 'rgba(240,250,245,0.5)' }} />
+            {videoFile && (
+              <p style={{ fontSize: '12px', color: '#6ee7b7', marginTop: '8px' }}>✅ {videoFile.name} انتخاب شد</p>
+            )}
+          </div>
+
+          {uploadProgress && (
+            <div style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', color: '#93c5fd', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', textAlign: 'center' }}>
+              {uploadProgress}
+            </div>
+          )}
+
+          <button onClick={handleSubmit} disabled={loading}
+            style={{ width: '100%', background: loading ? 'rgba(16,185,129,0.3)' : 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '16px', borderRadius: '14px', fontSize: '16px', fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 8px 24px rgba(16,185,129,0.25)' }}>
+            {loading ? uploadProgress || 'در حال ثبت...' : '✅ ثبت باشگاه'}
+          </button>
         </div>
-      )}
-
-      <button onClick={handleSubmit} disabled={loading}
-        className="w-full bg-green-700 text-white py-4 rounded-xl text-lg hover:bg-green-800 disabled:opacity-50">
-        {loading ? uploadProgress || 'در حال ثبت...' : '✅ ثبت باشگاه'}
-      </button>
-    </div>
+      </div>
+    </>
   );
 }
