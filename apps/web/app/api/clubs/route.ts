@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase-server';
+import { getSupabaseServer } from '@/lib/supabase-server';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +13,7 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const { data: clubs, error } = await supabaseServer
+    const { data: clubs, error } = await getSupabaseServer()
       .from('clubs')
       .select('*')
       .eq('isActive', true)

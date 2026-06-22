@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { supabaseServer } from '@/lib/supabase-server';
+import { getSupabaseServer } from '@/lib/supabase-server';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: user, error } = await supabaseServer
+    const { data: user, error } = await getSupabaseServer()
       .from('users')
       .select('*')
       .eq('phone', phone)

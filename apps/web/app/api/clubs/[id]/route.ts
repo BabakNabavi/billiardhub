@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase-server';
+import { getSupabaseServer } from '@/lib/supabase-server';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +18,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const { data: club, error } = await supabaseServer
+    const { data: club, error } = await getSupabaseServer()
       .from('clubs')
       .select('*')
       .eq('id', id)
