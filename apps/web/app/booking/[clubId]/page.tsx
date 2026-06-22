@@ -412,6 +412,7 @@ function BookingContent() {
           transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
           display: flex; align-items: center; gap: 14px;
           user-select: none;
+          font-size: 14px;
         }
         .tbl-card:hover { background: rgba(255,255,255,0.055); }
 
