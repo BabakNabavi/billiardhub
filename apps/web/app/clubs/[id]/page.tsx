@@ -111,13 +111,15 @@ export default function ClubProfilePage() {
   const [tab, setTab]             = useState<'info'|'tables'|'schedule'|'reviews'>('info');
 
   useEffect(() => {
-    api.get(`/clubs/${id}`).then(r => { if (r.data) setClub(r.data); }).catch(() => {});
+    api.get(`/clubs/${id}`)
+      .then(r => { if (r.data) setClub(r.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         setDistance(calcDistance(pos.coords.latitude, pos.coords.longitude, sampleClub.latitude, sampleClub.longitude));
       });
     }
-    setTimeout(() => setLoading(false), 400);
   }, [id]);
 
   const images   = club.images?.length ? club.images : ['/images/billiadr-club-1.jpg'];
