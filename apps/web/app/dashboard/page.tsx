@@ -232,6 +232,21 @@ export default function DashboardPage() {
         }
       `}</style>
 
+      {/* ══ Role activation banner ══ */}
+      {user.primaryRole === 'user' && (
+        <div style={{ background: 'rgba(245,158,11,0.08)', borderBottom: '1px solid rgba(245,158,11,0.2)', padding: '10px clamp(16px,4vw,40px)', direction: 'rtl' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+            <span style={{ fontSize: '13px', color: 'rgba(245,158,11,0.9)', flex: 1, minWidth: '200px' }}>
+              سطح کاربری شما تعیین نشده است. برای استفاده کامل از امکانات، نقش حرفه‌ای خود را فعال کنید.
+            </span>
+            <a href="/profile/role" style={{ fontSize: '12px', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px', padding: '6px 14px', textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              فعال‌سازی نقش
+            </a>
+          </div>
+        </div>
+      )}
+
       <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806 0%,#060d0a 60%,#050c08 100%)', paddingBottom: '80px' }}>
 
         {/* ══════════ DASHBOARD HEADER ══════════ */}

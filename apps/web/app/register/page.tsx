@@ -257,7 +257,7 @@ export default function RegisterPage() {
         .card-title { text-align: center; font-size: 1.3rem; font-weight: 700; color: #f0faf5; margin: 0 0 0.4rem; }
         .card-sub   { text-align: center; font-size: 0.85rem; color: rgba(240,250,245,0.5); margin: 0 0 1.8rem; }
         .form-body  { display: flex; flex-direction: column; gap: 1rem; }
-        .row-2      { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .row-2      { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
         .field      { display: flex; flex-direction: column; gap: 0.4rem; }
         .field label { font-size: 0.82rem; color: rgba(240,250,245,0.6); font-weight: 500; }
         .inp {
