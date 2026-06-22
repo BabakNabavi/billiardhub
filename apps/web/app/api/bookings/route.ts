@@ -4,22 +4,23 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
-  // احراز هویت — اختیاری: اگر token بود decode کن، وگرنه userId = null
-  let userId: string | null = null;
+  // احراز هویت
   const authHeader = req.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    try {
-      const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as { sub: string };
-      userId = payload.sub;
-    } catch {
-      // token نامعتبر — ادامه بدون userId
-    }
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
+  }
+
+  let userId: string;
+  try {
+    const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as { sub: string };
+    userId = payload.sub;
+  } catch {
+    return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401 });
   }
 
   const body = await req.json();
   const { clubId, tableType, tableNumber, startTime, endTime, totalPrice } = body;
 
-  // فقط سه فیلد اجباری
   if (!clubId || !startTime || !endTime) {
     return NextResponse.json(
       { message: 'clubId، startTime و endTime الزامی هستند' },
@@ -27,39 +28,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // بررسی تداخل — فقط اگر tableType و tableNumber ارسال شده باشند
-  if (tableType && tableNumber) {
-    const { data: conflict } = await getSupabaseServer()
-      .from('bookings')
-      .select('id')
-      .eq('clubId', clubId)
-      .eq('tableType', tableType)
-      .eq('tableNumber', tableNumber)
-      .neq('status', 'cancelled')
-      .lt('startTime', endTime)
-      .gt('endTime', startTime)
-      .limit(1)
-      .single();
+  // تبدیل startTime به bookingDate (فقط YYYY-MM-DD)
+  const bookingDate = new Date(startTime).toISOString().slice(0, 10);
 
-    if (conflict) {
-      return NextResponse.json(
-        { message: 'این میز در بازه زمانی انتخابی قبلاً رزرو شده است' },
-        { status: 409 },
-      );
-    }
+  // محاسبه ساعت‌های بین startTime و endTime → timeSlots مثل "10,11,12"
+  const startHour = new Date(startTime).getUTCHours();
+  const endHour   = new Date(endTime).getUTCHours();
+  const hours: number[] = [];
+  for (let h = startHour; h < endHour; h++) {
+    hours.push(h);
+  }
+  const timeSlots  = hours.join(',');
+  const totalHours = hours.length;
+
+  if (totalHours === 0) {
+    return NextResponse.json({ message: 'بازه زمانی معتبر نیست' }, { status: 400 });
   }
 
   const { data: booking, error } = await getSupabaseServer()
     .from('bookings')
     .insert({
-      clubId,
-      ...(tableType     ? { tableType }    : {}),
-      ...(tableNumber   ? { tableNumber }   : {}),
-      startTime,
-      endTime,
-      ...(totalPrice    ? { totalPrice }    : {}),
       userId,
-      status: 'pending',
+      clubId,
+      ...(tableNumber ? { tableId: String(tableNumber) } : {}),
+      tableType:   tableType ?? null,
+      bookingDate,
+      timeSlots,
+      totalHours,
+      totalPrice:  totalPrice ?? 0,
+      status:      'pending',
     })
     .select()
     .single();
