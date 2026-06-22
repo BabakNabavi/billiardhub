@@ -126,6 +126,7 @@ export default function DashboardPage() {
   }, []);
 
   if (!user) return null;
+  const isBasicUser = user.primaryRole === 'user';
 
   return (
     <AuthGuard>
@@ -309,29 +310,46 @@ export default function DashboardPage() {
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(24px,4vw,40px) clamp(16px,3vw,32px)' }}>
 
           {/* ── Quick Stats ── */}
-          <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', marginBottom: '28px' }}>
-            {quickStats.map((s, i) => (
-              <div key={i} className="stat-card" style={{ animationDelay: `${i * 0.08}s`, animation: 'fadeUp 0.5s ease both' }}>
-                <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '60px', height: '1px', background: `linear-gradient(90deg,transparent,${s.color}50,transparent)` }} />
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${s.color}12`, border: `1px solid ${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color }}>
-                    {s.icon}
-                  </div>
-                  {s.trend !== undefined && s.trend !== 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: s.trend > 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>
-                      {s.trend > 0 ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                      {toFa(Math.abs(s.trend))}
-                    </div>
-                  )}
+          {isBasicUser ? (
+            <div style={{ marginBottom: '28px', padding: '28px 24px', background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
+              <div style={{ fontSize: '36px' }}>📊</div>
+              <div>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: '#f0faf5', marginBottom: '8px' }}>
+                  برای مشاهده آمار و رنکینگ، ابتدا نقش حرفه‌ای خود را فعال کنید
                 </div>
-                <div style={{ fontSize: 'clamp(22px,3vw,30px)', fontWeight: 900, color: '#f0faf5', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: '6px', textShadow: `0 0 24px ${s.color}30` }}>
-                  {s.value}
+                <div style={{ fontSize: '13px', color: 'rgba(240,250,245,0.4)', lineHeight: 1.7 }}>
+                  با فعال‌سازی نقش به آمار کامل، رنکینگ ملی و تاریخچه مسابقات دسترسی خواهید داشت
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(240,250,245,0.5)', fontWeight: 600, marginBottom: '3px' }}>{s.label}</div>
-                <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.25)' }}>{s.sub}</div>
               </div>
-            ))}
-          </div>
+              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.08))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '12px', color: '#10b981', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
+                فعال‌سازی نقش ←
+              </Link>
+            </div>
+          ) : (
+            <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', marginBottom: '28px' }}>
+              {quickStats.map((s, i) => (
+                <div key={i} className="stat-card" style={{ animationDelay: `${i * 0.08}s`, animation: 'fadeUp 0.5s ease both' }}>
+                  <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '60px', height: '1px', background: `linear-gradient(90deg,transparent,${s.color}50,transparent)` }} />
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${s.color}12`, border: `1px solid ${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color }}>
+                      {s.icon}
+                    </div>
+                    {s.trend !== undefined && s.trend !== 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: s.trend > 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+                        {s.trend > 0 ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        {toFa(Math.abs(s.trend))}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 'clamp(22px,3vw,30px)', fontWeight: 900, color: '#f0faf5', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: '6px', textShadow: `0 0 24px ${s.color}30` }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'rgba(240,250,245,0.5)', fontWeight: 600, marginBottom: '3px' }}>{s.label}</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.25)' }}>{s.sub}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* ── Main Grid ── */}
           <div className="dash-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
@@ -431,7 +449,7 @@ export default function DashboardPage() {
               </ScrollReveal>
 
               {/* Weekly Activity */}
-              <ScrollReveal>
+              {!isBasicUser && <ScrollReveal>
                 <div className="dash-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <div className="card-label" style={{ margin: 0 }}>
@@ -466,10 +484,10 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 </div>
-              </ScrollReveal>
+              </ScrollReveal>}
 
               {/* Recent Matches */}
-              <ScrollReveal>
+              {!isBasicUser && <ScrollReveal>
                 <div className="dash-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
                     <div className="card-label" style={{ margin: 0 }}>
@@ -498,14 +516,14 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 </div>
-              </ScrollReveal>
+              </ScrollReveal>}
             </div>
 
             {/* ── RIGHT COLUMN ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '130px' }}>
 
               {/* Player rank card */}
-              <ScrollReveal>
+              {!isBasicUser && <ScrollReveal>
                 <div className="dash-card" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(245,158,11,0.2)' }}>
                   <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(245,158,11,0.6),transparent)', boxShadow: '0 0 14px rgba(245,158,11,0.3)' }} />
 
@@ -533,10 +551,10 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 </div>
-              </ScrollReveal>
+              </ScrollReveal>}
 
               {/* Achievements */}
-              <ScrollReveal>
+              {!isBasicUser && <ScrollReveal>
                 <div className="dash-card">
                   <div className="card-label">
                     <span style={{ background: 'linear-gradient(180deg,#a78bfa,#f59e0b)' }} />
@@ -556,7 +574,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 </div>
-              </ScrollReveal>
+              </ScrollReveal>}
 
               {/* Upcoming tournament */}
               <ScrollReveal>
