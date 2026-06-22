@@ -124,7 +124,7 @@ export default function ClubProfilePage() {
 
   const images   = club.images?.length ? club.images : ['/images/billiadr-club-1.jpg'];
   const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
-  const todayH   = club.workingHours?.[todayKey as keyof typeof club.workingHours] as any;
+  const todayH   = (club.workingHours ?? {})?.[todayKey as keyof typeof club.workingHours] as any;
   const isOpen   = (() => {
     if (!todayH?.isOpen) return false;
     const now = new Date().getHours();
@@ -536,7 +536,7 @@ export default function ClubProfilePage() {
                       ساعات کاری هفتگی
                     </h2>
                     <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
-                      {Object.entries(club.workingHours).map(([day, hours]: any) => {
+                      {Object.entries(club.workingHours ?? {}).map(([day, hours]: any) => {
                         const isToday = day === todayKey;
                         return (
                           <div key={day} className="info-row" style={{ background:isToday?'rgba(16,185,129,0.06)':'transparent', border:`1px solid ${isToday?'rgba(16,185,129,0.15)':'transparent'}`, borderRadius:'10px' }}>
