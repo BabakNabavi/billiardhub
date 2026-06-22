@@ -75,8 +75,10 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const profileRef = useRef<HTMLDivElement>(null);
-  const exploreRef = useRef<HTMLDivElement>(null);
+  const profileRef  = useRef<HTMLDivElement>(null);
+  const exploreRef  = useRef<HTMLDivElement>(null);
+  const searchRef   = useRef<HTMLDivElement>(null);
+  const searchBtnRef = useRef<HTMLButtonElement>(null);
   const isHomePage = pathname === '/';
 
   useEffect(() => {
@@ -103,6 +105,20 @@ export default function Navbar() {
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const fn = (e: MouseEvent) => {
+      if (
+        searchRef.current && !searchRef.current.contains(e.target as Node) &&
+        searchBtnRef.current && !searchBtnRef.current.contains(e.target as Node)
+      ) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, [searchOpen]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -177,7 +193,7 @@ export default function Navbar() {
         backdropFilter: scrolled || !isHomePage ? 'blur(32px) saturate(1.8)' : 'none',
         transition:'all 0.4s ease',
       }}>
-        <div style={{ maxWidth:'1440px', margin:'0 auto', padding:'0 clamp(16px,3vw,32px)', height:'62px', display:'flex', alignItems:'center', gap:'12px' }}>
+        <div style={{ maxWidth:'1440px', margin:'0 auto', padding:'0 clamp(16px,3vw,32px)', height:'62px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
 
           {/* Logo */}
           <Link href="/" style={{ display:'flex', alignItems:'center', gap:'9px', textDecoration:'none', flexShrink:0 }}>
@@ -268,7 +284,7 @@ export default function Navbar() {
           <div style={{ display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
 
             {/* Search icon mobile */}
-            <button className="mob" onClick={()=>setSearchOpen(p=>!p)} style={{ width:'36px', height:'36px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', cursor:'pointer', color:'rgba(255,255,255,0.4)', alignItems:'center', justifyContent:'center' }}>
+            <button ref={searchBtnRef} className="mob" onClick={()=>setSearchOpen(p=>!p)} style={{ width:'36px', height:'36px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', cursor:'pointer', color:'rgba(255,255,255,0.4)', alignItems:'center', justifyContent:'center' }}>
               <Search size={15}/>
             </button>
 
@@ -346,7 +362,7 @@ export default function Navbar() {
 
         {/* Mobile search bar */}
         {searchOpen && (
-          <div style={{ padding:'8px 16px 12px', borderTop:'1px solid rgba(255,255,255,0.05)', background:'rgba(2,8,6,0.97)', animation:'fadeDown 0.2s ease both' }}>
+          <div ref={searchRef} style={{ padding:'8px 16px 12px', borderTop:'1px solid rgba(255,255,255,0.05)', background:'rgba(2,8,6,0.97)', animation:'fadeDown 0.2s ease both' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'12px', padding:'10px 14px' }}>
               <Search size={14} color="rgba(255,255,255,0.25)"/>
               <input autoFocus type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="جستجو باشگاه، بازیکن..."
