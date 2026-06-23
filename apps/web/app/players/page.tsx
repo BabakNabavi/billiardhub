@@ -113,7 +113,7 @@ export default function PlayersPage() {
             {!loading && top3.length > 0 && (
               <div style={{ display: 'flex', gap: 10, paddingBottom: 24, overflowX: 'auto' }}>
                 {top3.map((p, i) => {
-                  const spec  = specialtyMeta[p.playerProfile?.specialty] ?? specialtyMeta.snooker;
+                  const spec = specialtyMeta[p.playerProfile?.specialty] ?? { label: 'اسنوکر', color: '#10b981' };
                   const medals = ['🥇','🥈','🥉'];
                   const heights = [72, 56, 48];
                   return (
@@ -191,7 +191,7 @@ export default function PlayersPage() {
           ) : (
             <div className="pgrid">
               {filtered.map((player, i) => {
-                const spec = specialtyMeta[player.playerProfile?.specialty] ?? specialtyMeta.snooker;
+                const spec = specialtyMeta[player.playerProfile?.specialty] ?? { label: 'اسنوکر', color: '#10b981' };
                 const lvl  = levelLabels[player.playerProfile?.level] ?? player.playerProfile?.level ?? '';
                 return (
                   <Link key={player.id} href={`/players/${player.id}`} style={{ textDecoration: 'none' }}>
