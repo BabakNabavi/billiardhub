@@ -50,10 +50,10 @@ const FALLBACK_IMAGES: Record<string, string[]> = {
 }
 
 function getImage(product: Product): string {
-  if (product.images && product.images.length > 0) return product.images[0]
+  if (product.images && product.images.length > 0) return product.images[0]!
   const arr: string[] = (FALLBACK_IMAGES[product.category] ?? FALLBACK_IMAGES['default']) as string[]
   const idx = product.id.charCodeAt(0) % arr.length
-  return arr[idx]
+  return arr[idx]!
 }
 
 // برندهای محبوب بیلیارد
