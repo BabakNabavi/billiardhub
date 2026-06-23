@@ -37,9 +37,9 @@ const FALLBACK_IMAGES: Record<string, string[]> = {
 }
 
 function getImage(product: Product, index = 0): string {
-  if (product.images && product.images.length > index) return product.images[index]
+  if (product.images && product.images.length > index) return product.images[index]!
   const arr = FALLBACK_IMAGES[product.category] || FALLBACK_IMAGES.default
-  return arr[(product.id.charCodeAt(0) + index) % arr.length]
+  return arr[(product.id.charCodeAt(0) + index) % arr.length]!
 }
 
 function getAllImages(product: Product): string[] {
