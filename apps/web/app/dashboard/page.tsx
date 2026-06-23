@@ -8,7 +8,7 @@ import {
   Calendar, Trophy, TrendingUp, Bell, Settings, ChevronRight,
   Target, Activity, Award, Clock, MapPin, Zap, Star,
   CheckCircle, Circle, ArrowLeft, BarChart2, Users,
-  ShoppingBag, Play, Plus, Shield, ChevronUp, ChevronDown,
+  ShoppingBag, Play, Plus, Shield, ChevronUp, ChevronDown, ShieldCheck,
 } from 'lucide-react';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
@@ -237,12 +237,12 @@ export default function DashboardPage() {
       {user.primaryRole === 'user' && (
         <div style={{ background: 'rgba(245,158,11,0.08)', borderBottom: '1px solid rgba(245,158,11,0.2)', padding: '10px clamp(16px,4vw,40px)', direction: 'rtl' }}>
           <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+            <ShieldCheck size={32} color="#f59e0b" style={{ flexShrink: 0 }} />
             <span style={{ fontSize: '13px', color: 'rgba(245,158,11,0.9)', flex: 1, minWidth: '200px' }}>
-              سطح کاربری شما تعیین نشده است. برای استفاده کامل از امکانات، نقش حرفه‌ای خود را فعال کنید.
+              برای دسترسی کامل به تمام امکانات سایت، سطح کاربری و نقش خود را تعیین نمایید
             </span>
             <a href="/profile/role" style={{ fontSize: '12px', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px', padding: '6px 14px', textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              فعال‌سازی نقش
+              تعیین سطح کاربری
             </a>
           </div>
         </div>
