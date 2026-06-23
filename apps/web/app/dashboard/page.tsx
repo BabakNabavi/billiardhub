@@ -311,18 +311,18 @@ export default function DashboardPage() {
 
           {/* ── Quick Stats ── */}
           {isBasicUser ? (
-            <div style={{ marginBottom: '28px', padding: '28px 24px', background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
-              <div style={{ fontSize: '36px' }}>📊</div>
+            <div style={{ marginBottom: '28px', padding: '28px 24px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
+              <ShieldCheck size={32} color="#f59e0b" />
               <div>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#f0faf5', marginBottom: '8px' }}>
-                  برای مشاهده آمار و رنکینگ، ابتدا نقش حرفه‌ای خود را فعال کنید
+                  برای دسترسی کامل به تمام امکانات سایت، سطح کاربری و نقش خود را تعیین نمایید
                 </div>
                 <div style={{ fontSize: '13px', color: 'rgba(240,250,245,0.4)', lineHeight: 1.7 }}>
-                  با فعال‌سازی نقش به آمار کامل، رنکینگ ملی و تاریخچه مسابقات دسترسی خواهید داشت
+                  با تعیین سطح کاربری به آمار کامل، رنکینگ ملی و تاریخچه مسابقات دسترسی خواهید داشت
                 </div>
               </div>
-              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.08))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '12px', color: '#10b981', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
-                فعال‌سازی نقش ←
+              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', color: '#f59e0b', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
+                تعیین سطح کاربری ←
               </Link>
             </div>
           ) : (
