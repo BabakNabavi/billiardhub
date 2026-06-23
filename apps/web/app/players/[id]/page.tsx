@@ -7,8 +7,8 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import {
   MapPin, ChevronRight, Trophy, Calendar, Phone,
-  TrendingUp, Activity, Award, Target, Star,
-  Instagram, Globe, Edit3, Camera, Play, X,
+  TrendingUp, Activity, Award, Target,
+  Globe, Edit3, Camera, Play, X,
   CheckCircle, Shield, Users, Zap,
 } from 'lucide-react';
 
