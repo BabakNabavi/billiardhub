@@ -1,488 +1,590 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../../../store/auth.store';
-import AuthGuard from '../../../components/AuthGuard';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
-const ROLES = [
-  {
-    value: 'user',
-    label: 'کاربر عادی',
-    desc: 'مشاهده محتوا، رزرو میز و دسترسی پایه به سایت',
-    icon: 'ti-user',
-    color: '#94a3b8',
-    rgb: '148,163,184',
-  },
-  {
-    value: 'player',
-    label: 'بازیکن رنکینگی',
-    desc: 'شرکت در مسابقات رسمی، رنکینگ ملی و آمار کامل بازی',
-    icon: 'ti-chart-bar',
-    color: '#10b981',
-    rgb: '16,185,129',
-  },
-  {
-    value: 'coach',
-    label: 'مربی',
-    desc: 'آموزش بازیکنان، مدیریت تمرین‌ها و پروفایل مربیگری',
-    icon: 'ti-school',
-    color: '#a78bfa',
-    rgb: '167,139,250',
-  },
-  {
-    value: 'referee',
-    label: 'داور',
-    desc: 'قضاوت در مسابقات رسمی، ثبت نتایج و گزارش بازی‌ها',
-    icon: 'ti-scale',
-    color: '#f59e0b',
-    rgb: '245,158,11',
-  },
-  {
-    value: 'technician',
-    label: 'خدمات فنی',
-    desc: 'تعمیر، نگهداری و آماده‌سازی حرفه‌ای تجهیزات بیلیارد',
-    icon: 'ti-tool',
-    color: '#06b6d4',
-    rgb: '6,182,212',
-  },
-  {
-    value: 'seller',
-    label: 'فروشنده تجهیزات',
-    desc: 'فروش لوازم، اکسسوری و تجهیزات بیلیارد در فروشگاه',
-    icon: 'ti-shopping-bag',
-    color: '#f97316',
-    rgb: '249,115,22',
-  },
-  {
-    value: 'manufacturer',
-    label: 'تولیدکننده',
-    desc: 'تولید و عرضه مستقیم تجهیزات بیلیارد به بازار',
-    icon: 'ti-building-factory',
-    color: '#ef4444',
-    rgb: '239,68,68',
-  },
-  {
-    value: 'club_owner',
-    label: 'باشگاه‌دار',
-    desc: 'مدیریت باشگاه، ثبت میزها، پذیرش رزرو و رویدادها',
-    icon: 'ti-building-store',
-    color: '#3b82f6',
-    rgb: '59,130,246',
-  },
-] as const;
+// ─── Types (inline — نیاز به import از lib نیست) ──────────────
+type RoleValue =
+  | 'user' | 'player' | 'coach' | 'referee'
+  | 'technician' | 'seller' | 'manufacturer' | 'club_owner'
 
-type RoleValue = typeof ROLES[number]['value'];
+type RoleStatus = 'pending' | 'approved' | 'rejected'
 
-export default function RoleSelectionPage() {
-  const { user, token, updateUser } = useAuthStore();
-  const router = useRouter();
-  const [selected, setSelected] = useState<RoleValue | null>(
-    (user?.primaryRole as RoleValue) ?? null,
-  );
-  const [loading, setLoading] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
+interface RoleRequest {
+  id: string
+  role: RoleValue
+  status: RoleStatus
+  docUrl?: string
+  rejectionNote?: string
+  requestedAt: string
+}
 
-  const selectedRole = ROLES.find(r => r.value === selected);
+interface RoleMeta {
+  value: RoleValue
+  label: string
+  icon: string
+  color: string
+  description: string
+  requiresDoc: boolean
+  docHint: string
+}
 
-  const handleSave = async () => {
-    if (!selected) { setError('لطفاً یک نقش انتخاب کنید'); return; }
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/users/me', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ primaryRole: selected }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.message ?? 'خطا در ذخیره‌سازی'); return; }
-      updateUser({ primaryRole: selected, isProfileComplete: selected !== 'user' });
-      setSaved(true);
-      setTimeout(() => router.push('/dashboard'), 900);
-    } catch {
-      setError('خطا در اتصال به سرور');
-    } finally {
-      setLoading(false);
-    }
-  };
+// ─── Helpers ──────────────────────────────────────────────────
+function toFarsiDigits(n: number | string): string {
+  return String(n).replace(/\d/g, d => ('۰۱۲۳۴۵۶۷۸۹'[+d] ?? d))
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function authHeader(): Record<string, string> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+// ─── Constants ────────────────────────────────────────────────
+const STATUS_LABEL: Record<RoleStatus, string> = {
+  pending:  'در انتظار تأیید',
+  approved: 'تأیید شده',
+  rejected: 'رد شده',
+}
+
+const STATUS_COLOR: Record<RoleStatus, string> = {
+  pending:  '#f59e0b',
+  approved: '#10b981',
+  rejected: '#ef4444',
+}
+
+const ROLES: RoleMeta[] = [
+  { value: 'user',         label: 'کاربر عادی',     icon: 'ti-user',             color: '#94a3b8', description: 'مشاهده و رزرو میز',        requiresDoc: false, docHint: '' },
+  { value: 'player',       label: 'بازیکن رنکینگی', icon: 'ti-chart-bar',        color: '#10b981', description: 'رنکینگ ملی بیلیارد',        requiresDoc: true,  docHint: 'کارت عضویت فدراسیون یا گواهی رتبه‌بندی ملی' },
+  { value: 'coach',        label: 'مربی',            icon: 'ti-school',           color: '#a78bfa', description: 'تدریس و آموزش بیلیارد',     requiresDoc: true,  docHint: 'مدرک مربیگری فدراسیون' },
+  { value: 'referee',      label: 'داور',            icon: 'ti-scale',            color: '#f59e0b', description: 'داوری مسابقات رسمی',        requiresDoc: true,  docHint: 'کارت داوری فدراسیون' },
+  { value: 'technician',   label: 'خدمات فنی',       icon: 'ti-tool',             color: '#06b6d4', description: 'تعمیر و نگهداری تجهیزات',  requiresDoc: false, docHint: '' },
+  { value: 'seller',       label: 'فروشنده',         icon: 'ti-shopping-bag',     color: '#f97316', description: 'فروش تجهیزات بیلیارد',      requiresDoc: true,  docHint: 'جواز کسب یا صفحه فروشگاه رسمی' },
+  { value: 'manufacturer', label: 'تولیدکننده',      icon: 'ti-building-factory', color: '#ef4444', description: 'تولید تجهیزات بیلیارد',     requiresDoc: true,  docHint: 'جواز تولید یا گواهی ثبت برند' },
+  { value: 'club_owner',   label: 'باشگاه‌دار',      icon: 'ti-building-store',   color: '#3b82f6', description: 'مدیریت باشگاه بیلیارد',    requiresDoc: true,  docHint: 'جواز کسب باشگاه یا مجوز اماکن ورزشی' },
+]
+
+const ROLE_MAP = Object.fromEntries(ROLES.map(r => [r.value, r])) as Record<RoleValue, RoleMeta>
+
+// آدرس API بک‌اند NestJS
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+
+// ─── RoleCard ─────────────────────────────────────────────────
+function RoleCard({
+  role,
+  request,
+  isQueued,
+  onToggle,
+}: {
+  role: RoleMeta
+  request?: RoleRequest
+  isQueued: boolean
+  onToggle: () => void
+}) {
+  const status = request?.status
+  const isActive = isQueued || !!status
 
   return (
-    <AuthGuard>
-      {/* Tabler Icons */}
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
-      />
+    <button
+      onClick={onToggle}
+      disabled={status === 'approved'}
+      title={status ? STATUS_LABEL[status] : undefined}
+      style={{
+        background: isActive ? '#162019' : '#111a15',
+        border: `1px solid ${isActive ? hexToRgba(role.color, 0.55) : 'rgba(255,255,255,0.07)'}`,
+        borderRadius: 14,
+        padding: '12px 8px',
+        cursor: status === 'approved' ? 'default' : 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 7,
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'all 0.22s ease',
+        WebkitTapHighlightColor: 'transparent',
+        outline: 'none',
+        opacity: status === 'rejected' ? 0.6 : 1,
+      }}
+    >
+      {/* tinted overlay */}
+      <span style={{
+        position: 'absolute', inset: 0,
+        background: hexToRgba(role.color, isActive ? 0.09 : 0),
+        borderRadius: 'inherit', transition: 'background 0.22s', pointerEvents: 'none',
+      }} />
 
-      <div
-        dir="rtl"
+      {/* check / status ring */}
+      <span style={{
+        position: 'absolute', top: 6, left: 6,
+        width: 16, height: 16, borderRadius: '50%',
+        border: `1.5px solid ${isActive ? role.color : 'rgba(255,255,255,0.12)'}`,
+        background: status === 'approved'
+          ? role.color
+          : isQueued ? role.color : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s', zIndex: 1,
+      }}>
+        {(status === 'approved' || isQueued) && (
+          <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+            <path d="M1 3L3 5L7 1" stroke="#0a0f0d" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        )}
+        {status === 'pending' && !isQueued && (
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f59e0b' }} />
+        )}
+        {status === 'rejected' && !isQueued && (
+          <span style={{ fontSize: 9, color: '#ef4444', fontWeight: 700 }}>✕</span>
+        )}
+      </span>
+
+      {/* icon */}
+      <span style={{
+        width: 44, height: 44, borderRadius: 12,
+        background: hexToRgba(role.color, isActive ? 0.16 : 0.07),
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: isActive ? `0 0 0 6px ${hexToRgba(role.color, 0.1)}` : 'none',
+        transition: 'all 0.22s', position: 'relative', zIndex: 1,
+      }}>
+        <i className={`ti ${role.icon}`} style={{ fontSize: 22, color: role.color }} aria-hidden="true" />
+      </span>
+
+      {/* label */}
+      <span style={{
+        fontSize: 10, color: isActive ? '#e2e8f0' : '#64748b',
+        textAlign: 'center', lineHeight: 1.3,
+        position: 'relative', zIndex: 1,
+        transition: 'color 0.2s', whiteSpace: 'nowrap',
+      }}>
+        {role.label}
+      </span>
+
+      {/* status badge */}
+      {status && (
+        <span style={{ fontSize: 9, color: STATUS_COLOR[status], position: 'relative', zIndex: 1 }}>
+          {STATUS_LABEL[status]}
+        </span>
+      )}
+    </button>
+  )
+}
+
+// ─── DocUploadStep ─────────────────────────────────────────────
+function DocUploadStep({
+  queued,
+  onBack,
+  onDone,
+}: {
+  queued: RoleValue[]
+  onBack: () => void
+  onDone: () => void
+}) {
+  const [files, setFiles]     = useState<Record<string, File | null>>({})
+  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress]   = useState<Record<string, 'idle' | 'uploading' | 'done' | 'error'>>({})
+
+  const rolesNeedDoc = queued.filter(r => ROLE_MAP[r].requiresDoc)
+  const rolesNoDoc   = queued.filter(r => !ROLE_MAP[r].requiresDoc)
+
+  const handleSubmit = async () => {
+    setUploading(true)
+
+    for (const roleVal of queued) {
+      const meta = ROLE_MAP[roleVal]
+      let docUrl: string | undefined
+
+      // آپلود مدرک در صورت نیاز
+      if (meta.requiresDoc && files[roleVal]) {
+        setProgress(p => ({ ...p, [roleVal]: 'uploading' }))
+        const formData = new FormData()
+        formData.append('file', files[roleVal]!)
+        formData.append('role', roleVal)
+
+        try {
+          const upRes = await fetch(`${API}/roles/upload-doc`, {
+            method: 'POST',
+            headers: authHeader(),
+            body: formData,
+          })
+          if (upRes.ok) {
+            const j = await upRes.json()
+            docUrl = j.url
+            setProgress(p => ({ ...p, [roleVal]: 'done' }))
+          } else {
+            setProgress(p => ({ ...p, [roleVal]: 'error' }))
+            continue
+          }
+        } catch {
+          setProgress(p => ({ ...p, [roleVal]: 'error' }))
+          continue
+        }
+      }
+
+      // ثبت درخواست نقش
+      await fetch(`${API}/roles/request`, {
+        method: 'POST',
+        headers: { ...authHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: roleVal, docUrl }),
+      })
+    }
+
+    setUploading(false)
+    onDone()
+  }
+
+  return (
+    <div>
+      <button
+        onClick={onBack}
         style={{
-          minHeight: '100vh',
-          background: '#060e0a',
-          fontFamily: "'Vazirmatn', sans-serif",
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: 'clamp(40px,6vw,72px) clamp(16px,4vw,40px) 80px',
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: 'none', border: 'none', color: '#64748b',
+          fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+          marginBottom: 24, padding: 0,
         }}
       >
-        {/* ── Background Orbs ── */}
-        <div style={{
-          position: 'fixed', top: '-180px', right: '-140px',
-          width: '600px', height: '600px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(16,185,129,0.13) 0%, transparent 65%)',
-          pointerEvents: 'none', filter: 'blur(40px)',
-        }} />
-        <div style={{
-          position: 'fixed', bottom: '-160px', left: '-120px',
-          width: '500px', height: '500px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 65%)',
-          pointerEvents: 'none', filter: 'blur(40px)',
-        }} />
-        <div style={{
-          position: 'fixed', top: '35%', left: '38%',
-          width: '380px', height: '380px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(167,139,250,0.07) 0%, transparent 65%)',
-          pointerEvents: 'none', filter: 'blur(60px)',
-        }} />
+        <i className="ti ti-arrow-right" style={{ fontSize: 16 }} aria-hidden="true" />
+        بازگشت
+      </button>
 
-        {/* ── Header ── */}
-        <div style={{ textAlign: 'center', marginBottom: 'clamp(36px,5vw,56px)', maxWidth: '540px', position: 'relative', zIndex: 2 }}>
-          {/* Badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            background: 'rgba(245,158,11,0.08)',
-            border: '1px solid rgba(245,158,11,0.22)',
-            borderRadius: '100px', padding: '7px 20px',
-            marginBottom: '24px',
-          }}>
-            <i className="ti ti-shield-check" style={{ fontSize: '15px', color: '#f59e0b' }} />
-            <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 500, letterSpacing: '0.06em' }}>
-              تعیین سطح کاربری
-            </span>
-          </div>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)',
+          borderRadius: 20, padding: '4px 14px', fontSize: 11, color: '#10b981', marginBottom: 14,
+        }}>
+          <i className="ti ti-upload" style={{ fontSize: 13 }} aria-hidden="true" />
+          آپلود مدرک تأیید هویت
+        </div>
+        <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.7 }}>
+          برای نقش‌هایی که نیاز به مدرک دارند، فایل خود را آپلود کنید.
+          <br />
+          <span style={{ fontSize: 11, color: '#475569' }}>
+            مدارک توسط ادمین بررسی و تأیید خواهند شد.
+          </span>
+        </p>
+      </div>
 
-          <h1 style={{
-            fontSize: 'clamp(24px,4vw,34px)', fontWeight: 900,
-            color: '#f0fdf4', marginBottom: '14px',
-            letterSpacing: '-0.03em', lineHeight: 1.25,
-          }}>
-            در بیلیارد پلاس<br />
-            <span style={{
-              background: 'linear-gradient(135deg,#10b981,#34d399)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+        {rolesNeedDoc.map(roleVal => {
+          const meta = ROLE_MAP[roleVal]
+          const file = files[roleVal]
+          const st   = progress[roleVal]
+          return (
+            <div key={roleVal} style={{
+              background: '#111a15',
+              border: `1px solid ${file ? hexToRgba(meta.color, 0.4) : 'rgba(255,255,255,0.07)'}`,
+              borderRadius: 14, padding: '14px 16px',
             }}>
-              چه نقشی دارید؟
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <span style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: hexToRgba(meta.color, 0.12),
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <i className={`ti ${meta.icon}`} style={{ fontSize: 17, color: meta.color }} aria-hidden="true" />
+                </span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>{meta.label}</div>
+                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>{meta.docHint}</div>
+                </div>
+              </div>
+
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: '#0a0f0d', border: '1px dashed rgba(255,255,255,0.1)',
+                borderRadius: 10, padding: '10px 14px', cursor: 'pointer',
+              }}>
+                <i className="ti ti-file-upload" style={{ fontSize: 18, color: file ? meta.color : '#475569' }} aria-hidden="true" />
+                <span style={{ fontSize: 11, color: file ? meta.color : '#475569', flex: 1 }}>
+                  {file ? file.name : 'انتخاب فایل (JPG / PNG / PDF)'}
+                </span>
+                {st === 'done'  && <i className="ti ti-check" style={{ fontSize: 14, color: '#10b981' }} aria-hidden="true" />}
+                {st === 'error' && <i className="ti ti-x"     style={{ fontSize: 14, color: '#ef4444' }} aria-hidden="true" />}
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  style={{ display: 'none' }}
+                  onChange={e => setFiles(f => ({ ...f, [roleVal]: e.target.files?.[0] ?? null }))}
+                />
+              </label>
+            </div>
+          )
+        })}
+
+        {rolesNoDoc.length > 0 && (
+          <div style={{
+            background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+            borderRadius: 12, padding: '12px 16px',
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <i className="ti ti-info-circle" style={{ fontSize: 18, color: '#10b981' }} aria-hidden="true" />
+            <span style={{ fontSize: 12, color: '#94a3b8' }}>
+              {rolesNoDoc.map(r => ROLE_MAP[r].label).join('، ')} نیازی به مدرک ندارند و سریع‌تر تأیید می‌شوند.
             </span>
-          </h1>
-
-          <p style={{ fontSize: '13.5px', color: 'rgba(240,253,244,0.4)', lineHeight: 1.9, margin: 0 }}>
-            نقش خود را انتخاب کنید تا به امکانات تخصصی دسترسی پیدا کنید
-          </p>
-        </div>
-
-        {/* ── Role Grid ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(190px,1fr))',
-          gap: '10px',
-          width: '100%', maxWidth: '920px',
-          marginBottom: '28px',
-          position: 'relative', zIndex: 2,
-        }}>
-          {ROLES.map((role, i) => {
-            const isActive = selected === role.value;
-            return (
-              <button
-                key={role.value}
-                onClick={() => { setSelected(role.value); setError(''); }}
-                style={{
-                  position: 'relative',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                  gap: '10px', padding: '26px 14px 22px',
-                  background: isActive
-                    ? `rgba(${role.rgb},0.08)`
-                    : 'rgba(255,255,255,0.025)',
-                  border: `1px solid ${isActive ? role.color : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: '20px',
-                  cursor: 'pointer', textAlign: 'center',
-                  outline: 'none', overflow: 'hidden',
-                  minHeight: '162px',
-                  fontFamily: "'Vazirmatn', sans-serif",
-                  transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                  transform: isActive ? 'translateY(-4px)' : 'none',
-                  boxShadow: isActive
-                    ? `0 0 0 1px rgba(${role.rgb},0.25), 0 16px 40px rgba(${role.rgb},0.18)`
-                    : 'none',
-                  animation: `fadeUp 0.4s ease ${i * 0.045}s both`,
-                }}
-              >
-                {/* Top shimmer line */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-                  background: `linear-gradient(90deg, transparent, ${role.color}, transparent)`,
-                  opacity: isActive ? 1 : 0,
-                  transition: 'opacity 0.3s',
-                }} />
-
-                {/* Inner glow */}
-                <div style={{
-                  position: 'absolute', inset: 0, borderRadius: '20px',
-                  background: `linear-gradient(135deg, rgba(${role.rgb},0.1) 0%, transparent 55%)`,
-                  opacity: isActive ? 1 : 0,
-                  transition: 'opacity 0.3s',
-                  pointerEvents: 'none',
-                }} />
-
-                {/* Check badge */}
-                <div style={{
-                  position: 'absolute', top: '10px', left: '10px',
-                  width: '20px', height: '20px', borderRadius: '50%',
-                  background: role.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  opacity: isActive ? 1 : 0,
-                  transform: isActive ? 'scale(1)' : 'scale(0.4)',
-                  transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-                }}>
-                  <i className="ti ti-check" style={{ fontSize: '11px', color: '#060e0a' }} />
-                </div>
-
-                {/* Icon */}
-                <div style={{
-                  width: '52px', height: '52px', borderRadius: '15px',
-                  background: isActive ? `rgba(${role.rgb},0.15)` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${isActive ? `rgba(${role.rgb},0.4)` : 'rgba(255,255,255,0.08)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.3s',
-                  boxShadow: isActive ? `0 0 24px rgba(${role.rgb},0.3)` : 'none',
-                  position: 'relative', zIndex: 1,
-                }}>
-                  <i
-                    className={`ti ${role.icon}`}
-                    style={{
-                      fontSize: '24px',
-                      color: isActive ? role.color : 'rgba(240,253,244,0.28)',
-                      transition: 'color 0.3s',
-                    }}
-                  />
-                </div>
-
-                {/* Label */}
-                <div style={{
-                  fontSize: '13px', fontWeight: 700,
-                  color: isActive ? role.color : 'rgba(240,253,244,0.78)',
-                  transition: 'color 0.3s',
-                  position: 'relative', zIndex: 1,
-                  lineHeight: 1.3,
-                }}>
-                  {role.label}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Selected Banner ── */}
-        <div style={{
-          width: '100%', maxWidth: '920px',
-          display: 'flex', alignItems: 'center', gap: '14px',
-          padding: '14px 22px',
-          background: 'rgba(255,255,255,0.03)',
-          border: `1px solid ${selectedRole ? `rgba(${selectedRole.rgb},0.18)` : 'rgba(255,255,255,0.07)'}`,
-          borderRadius: '14px',
-          marginBottom: '28px',
-          position: 'relative', zIndex: 2,
-          opacity: selected ? 1 : 0,
-          transform: selected ? 'translateY(0)' : 'translateY(8px)',
-          transition: 'all 0.35s ease',
-          overflow: 'hidden',
-        }}>
-          {/* Banner shimmer line */}
-          {selectedRole && (
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-              background: `linear-gradient(90deg, transparent, ${selectedRole.color}, transparent)`,
-              opacity: 0.5,
-            }} />
-          )}
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '11px', flexShrink: 0,
-            background: selectedRole ? `rgba(${selectedRole.rgb},0.12)` : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${selectedRole ? `rgba(${selectedRole.rgb},0.3)` : 'rgba(255,255,255,0.08)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.3s',
-          }}>
-            {selectedRole && (
-              <i className={`ti ${selectedRole.icon}`} style={{ fontSize: '18px', color: selectedRole.color }} />
-            )}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '13.5px', fontWeight: 700, color: selectedRole?.color ?? '#f0fdf4', marginBottom: '3px' }}>
-              {selectedRole ? `✓ ${selectedRole.label} انتخاب شد` : '—'}
-            </div>
-            <div style={{ fontSize: '12px', color: 'rgba(240,253,244,0.38)', lineHeight: 1.6 }}>
-              {selectedRole?.desc ?? ''}
-            </div>
-          </div>
-          {selectedRole && (
-            <i className="ti ti-circle-check" style={{ fontSize: '22px', color: selectedRole.color, flexShrink: 0 }} />
-          )}
-        </div>
-
-        {/* ── Error ── */}
-        {error && (
-          <div style={{
-            marginBottom: '16px', padding: '10px 20px',
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.22)',
-            borderRadius: '10px', color: '#fca5a5',
-            fontSize: '13px', maxWidth: '920px', width: '100%',
-            textAlign: 'center', position: 'relative', zIndex: 2,
-          }}>
-            {error}
           </div>
         )}
+      </div>
 
-        {/* ── Footer Buttons ── */}
-        <div style={{
-          display: 'flex', gap: '14px', alignItems: 'center',
-          flexWrap: 'wrap', justifyContent: 'center',
-          width: '100%', maxWidth: '920px',
-          position: 'relative', zIndex: 2,
-        }}>
+      <button
+        onClick={handleSubmit}
+        disabled={uploading}
+        style={{
+          width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+          background: uploading ? '#1a2e24' : '#10b981',
+          color: uploading ? '#2d4a38' : '#0a0f0d',
+          fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+          cursor: uploading ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}
+      >
+        {uploading
+          ? <><i className="ti ti-loader-2" style={{ fontSize: 16 }} aria-hidden="true" />در حال ارسال...</>
+          : <><i className="ti ti-send"     style={{ fontSize: 16 }} aria-hidden="true" />ارسال درخواست تأیید</>
+        }
+      </button>
+    </div>
+  )
+}
 
-          {/* Skip button — glass */}
-          <button
-            onClick={() => router.push('/dashboard')}
-            style={{
-              position: 'relative',
-              padding: '14px 28px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '14px',
-              color: 'rgba(240,253,244,0.42)',
-              fontSize: '14px', fontWeight: 500,
-              cursor: 'pointer', fontFamily: "'Vazirmatn', sans-serif",
-              display: 'flex', alignItems: 'center', gap: '8px',
-              transition: 'all 0.25s ease',
-              overflow: 'hidden',
-            }}
-            onMouseEnter={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.background = 'rgba(255,255,255,0.07)';
-              el.style.borderColor = 'rgba(255,255,255,0.18)';
-              el.style.color = 'rgba(240,253,244,0.65)';
-              el.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.background = 'rgba(255,255,255,0.04)';
-              el.style.borderColor = 'rgba(255,255,255,0.1)';
-              el.style.color = 'rgba(240,253,244,0.42)';
-              el.style.transform = 'translateY(0)';
-            }}
-          >
-            {/* glass top shimmer */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-              background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)',
-            }} />
-            <i className="ti ti-clock" style={{ fontSize: '16px' }} />
-            بعداً تعیین می‌کنم
-          </button>
+// ─── Main Page ────────────────────────────────────────────────
+export default function RolePage() {
+  const router = useRouter()
+  const [requests, setRequests] = useState<RoleRequest[]>([])
+  const [queued, setQueued]     = useState<Set<RoleValue>>(new Set())
+  const [step, setStep]         = useState<'select' | 'upload'>('select')
+  const [toast, setToast]       = useState<string | null>(null)
+  const [loading, setLoading]   = useState(true)
 
-          {/* Save button — liquid */}
-          <button
-            onClick={handleSave}
-            disabled={!selected || loading}
-            style={{
-              position: 'relative',
-              padding: '14px 52px',
-              background: selectedRole
-                ? `linear-gradient(135deg, ${selectedRole.color} 0%, ${selectedRole.color}cc 100%)`
-                : 'rgba(255,255,255,0.05)',
-              border: selectedRole ? 'none' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '14px',
-              color: selected ? '#060e0a' : 'rgba(240,253,244,0.2)',
-              fontSize: '15px', fontWeight: 700,
-              cursor: selected && !loading ? 'pointer' : 'not-allowed',
-              fontFamily: "'Vazirmatn', sans-serif",
-              display: 'flex', alignItems: 'center', gap: '10px',
-              transition: 'all 0.35s cubic-bezier(0.4,0,0.2,1)',
-              overflow: 'hidden',
-              flex: 1, maxWidth: '380px', justifyContent: 'center',
-              boxShadow: selectedRole
-                ? `0 4px 24px rgba(${selectedRole.rgb},0.35), inset 0 1px 0 rgba(255,255,255,0.18)`
-                : 'none',
-              opacity: loading ? 0.85 : 1,
-            }}
-            onMouseEnter={e => {
-              if (!selected || loading) return;
-              const el = e.currentTarget as HTMLElement;
-              el.style.transform = 'translateY(-3px)';
-              el.style.filter = 'brightness(1.1)';
-              if (selectedRole)
-                el.style.boxShadow = `0 10px 36px rgba(${selectedRole.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.22)`;
-            }}
-            onMouseLeave={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.transform = 'translateY(0)';
-              el.style.filter = 'brightness(1)';
-              if (selectedRole)
-                el.style.boxShadow = `0 4px 24px rgba(${selectedRole.rgb},0.35), inset 0 1px 0 rgba(255,255,255,0.18)`;
-            }}
-          >
-            {/* liquid shine overlay */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 55%)',
-              opacity: selected ? 1 : 0,
-              transition: 'opacity 0.3s',
-              pointerEvents: 'none',
-            }} />
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-              background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent)',
-              opacity: selected ? 1 : 0,
-            }} />
+  // بارگذاری درخواست‌های قبلی از NestJS
+  useEffect(() => {
+    fetch(`${API}/roles/my`, { headers: authHeader() })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setRequests(Array.isArray(data) ? data : []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
-            {loading ? (
-              <span style={{
-                width: '18px', height: '18px',
-                border: '2px solid rgba(6,14,10,0.3)',
-                borderTop: '2px solid #060e0a',
-                borderRadius: '50%',
-                animation: 'spin 0.7s linear infinite',
-                display: 'inline-block',
-              }} />
-            ) : saved ? (
-              <i className="ti ti-circle-check" style={{ fontSize: '18px' }} />
-            ) : (
-              <i className="ti ti-device-floppy" style={{ fontSize: '18px' }} />
-            )}
-            <span style={{ position: 'relative', zIndex: 1 }}>
-              {loading ? 'در حال ذخیره...' : saved ? 'ذخیره شد!' : 'ذخیره و ادامه'}
-            </span>
-            {!loading && !saved && (
-              <i className="ti ti-arrow-left" style={{ fontSize: '15px', opacity: 0.65, position: 'relative', zIndex: 1 }} />
-            )}
-          </button>
+  // نگاشت role → request برای دسترسی سریع
+  const requestMap = Object.fromEntries(
+    requests.map(r => [r.role, r])
+  ) as Record<string, RoleRequest>
+
+  const toggle = (val: RoleValue) => {
+    if (requestMap[val]?.status === 'approved') return
+    setQueued(prev => {
+      const next = new Set(prev)
+      next.has(val) ? next.delete(val) : next.add(val)
+      return next
+    })
+  }
+
+  const handleDone = () => {
+    showToast('درخواست‌های شما ارسال شد و در انتظار تأیید ادمین است')
+    setQueued(new Set())
+    setStep('select')
+    // reload
+    fetch(`${API}/roles/my`, { headers: authHeader() })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setRequests(Array.isArray(data) ? data : []))
+      .catch(() => {})
+  }
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  const approvedCount = requests.filter(r => r.status === 'approved').length
+  const pendingCount  = requests.filter(r => r.status === 'pending').length
+  const queuedArr     = Array.from(queued) as RoleValue[]
+
+  return (
+    <>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
+      <div style={{
+        minHeight: '100vh', background: '#0a0f0d',
+        fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* liquid orbs */}
+        <div style={{ position: 'fixed', width: 340, height: 340, background: 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%)', top: -100, right: -80, pointerEvents: 'none', filter: 'blur(50px)', zIndex: 0 }} />
+        <div style={{ position: 'fixed', width: 280, height: 280, background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)', bottom: 100, left: -60, pointerEvents: 'none', filter: 'blur(60px)', zIndex: 0 }} />
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '36px 16px 100px' }}>
+
+          {step === 'select' && (
+            <>
+              {/* Header */}
+              <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)',
+                  borderRadius: 20, padding: '4px 14px', fontSize: 11, color: '#10b981', marginBottom: 14,
+                }}>
+                  <i className="ti ti-shield-check" style={{ fontSize: 13 }} aria-hidden="true" />
+                  هویت حرفه‌ای شما
+                </div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0', marginBottom: 8, lineHeight: 1.5 }}>
+                  {requests.length === 0 ? 'نقش‌های خود را انتخاب کنید' : 'مدیریت نقش‌ها'}
+                </h1>
+                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7 }}>
+                  می‌توانید همزمان چند نقش داشته باشید
+                </p>
+              </div>
+
+              {/* Stats */}
+              {requests.length > 0 && (
+                <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                  {[
+                    { label: 'تأیید‌شده', val: toFarsiDigits(approvedCount), color: '#10b981' },
+                    { label: 'در انتظار',  val: toFarsiDigits(pendingCount),  color: '#f59e0b' },
+                    { label: 'کل نقش‌ها', val: toFarsiDigits(requests.length), color: '#94a3b8' },
+                  ].map(s => (
+                    <div key={s.label} style={{
+                      flex: 1, background: '#111a15', border: '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: 12, padding: '10px 12px', textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.val}</div>
+                      <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Grid ۴ ستونه */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 20 }}>
+                {ROLES.map(role => (
+                  <RoleCard
+                    key={role.value}
+                    role={role}
+                    request={requestMap[role.value]}
+                    isQueued={queued.has(role.value)}
+                    onToggle={() => toggle(role.value)}
+                  />
+                ))}
+              </div>
+
+              {/* Chips انتخاب‌شده */}
+              {queued.size > 0 && (
+                <div style={{
+                  background: '#111a15', border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: 14, padding: '14px 16px', marginBottom: 16,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 10, color: '#64748b' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                    {toFarsiDigits(queued.size)} نقش جدید برای درخواست
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {queuedArr.map(val => {
+                      const r = ROLE_MAP[val]
+                      return (
+                        <button key={val} onClick={() => toggle(val)} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          padding: '4px 10px 4px 6px', borderRadius: 20, fontSize: 10,
+                          border: `1px solid ${hexToRgba(r.color, 0.35)}`,
+                          background: hexToRgba(r.color, 0.1), color: r.color,
+                          cursor: 'pointer', fontFamily: 'inherit',
+                        }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: r.color }} />
+                          {r.label}
+                          <i className="ti ti-x" style={{ fontSize: 10, marginRight: 2 }} aria-hidden="true" />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* نقش‌های تأیید‌شده — لینک به پروفایل */}
+              {approvedCount > 0 && (
+                <div style={{
+                  background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+                  borderRadius: 14, padding: '14px 16px', marginBottom: 16,
+                }}>
+                  <div style={{ fontSize: 11, color: '#10b981', marginBottom: 10, fontWeight: 600 }}>
+                    نقش‌های تأیید‌شده — تکمیل پروفایل
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {requests.filter(r => r.status === 'approved').map(req => {
+                      const m = ROLE_MAP[req.role]
+                      return (
+                        <button key={req.role} onClick={() => router.push(`/profile/setup?role=${req.role}`)} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          padding: '6px 12px', borderRadius: 20,
+                          border: `1px solid ${hexToRgba(m.color, 0.4)}`,
+                          background: hexToRgba(m.color, 0.1), color: m.color,
+                          fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                        }}>
+                          <i className={`ti ${m.icon}`} style={{ fontSize: 13 }} aria-hidden="true" />
+                          {m.label}
+                          <i className="ti ti-arrow-left" style={{ fontSize: 11 }} aria-hidden="true" />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* دکمه‌ها */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  onClick={() => setStep('upload')}
+                  disabled={queued.size === 0}
+                  style={{
+                    width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+                    background: queued.size === 0 ? '#1a2e24' : '#10b981',
+                    color: queued.size === 0 ? '#2d4a38' : '#0a0f0d',
+                    fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                    cursor: queued.size === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  <i className="ti ti-arrow-left" style={{ fontSize: 16 }} aria-hidden="true" />
+                  {queued.size === 0
+                    ? 'نقش جدیدی انتخاب کنید'
+                    : `ادامه — درخواست ${toFarsiDigits(queued.size)} نقش`}
+                </button>
+                <button onClick={() => router.push('/dashboard')} style={{
+                  width: '100%', padding: 12, borderRadius: 12,
+                  border: '1px solid rgba(255,255,255,0.07)', background: 'transparent',
+                  color: '#64748b', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
+                }}>
+                  بازگشت به داشبورد
+                </button>
+              </div>
+            </>
+          )}
+
+          {step === 'upload' && (
+            <DocUploadStep
+              queued={queuedArr}
+              onBack={() => setStep('select')}
+              onDone={handleDone}
+            />
+          )}
         </div>
 
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
-          @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
-          @keyframes spin   { to{transform:rotate(360deg)} }
-        `}</style>
+        {/* Toast */}
+        {toast && (
+          <div style={{
+            position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+            background: '#10b981', color: '#0a0f0d', fontSize: 12, fontWeight: 700,
+            fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px',
+            borderRadius: 24, boxShadow: '0 4px 24px rgba(16,185,129,0.35)',
+            zIndex: 100, whiteSpace: 'nowrap', maxWidth: '90vw', textAlign: 'center',
+          }}>
+            {toast}
+          </div>
+        )}
       </div>
-    </AuthGuard>
-  );
+    </>
+  )
 }
