@@ -8,8 +8,8 @@ import { useAuthStore } from '@/store/auth.store';
 import {
   MapPin, ChevronRight, Trophy, Calendar, Phone,
   TrendingUp, Activity, Award, Target,
-  Globe, Edit3, Camera, Play, X,
-  CheckCircle, Shield, Users, Zap,
+  Globe, Camera, Play, X,
+  CheckCircle, Shield, Users,
 } from 'lucide-react';
 
 interface Player {
