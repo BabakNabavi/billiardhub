@@ -143,7 +143,8 @@ export const ROLE_MAP = Object.fromEntries(
 
 // ─── Helpers ──────────────────────────────────────────────────
 export function toFarsiDigits(n: number | string): string {
-  return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d])
+  const fa = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹']
+return String(n).replace(/\d/g, d => fa[+d] ?? d)
 }
 
 export function hexToRgba(hex: string, alpha: number): string {
