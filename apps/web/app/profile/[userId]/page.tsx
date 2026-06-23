@@ -1,168 +1,327 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { ROLE_MAP, RoleValue, toFarsiDigits, hexToRgba } from '@/lib/roles'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 // ─── Types ────────────────────────────────────────────────────
-interface PublicRole {
-  role: RoleValue
-  profile: Record<string, string>
-}
+type RoleValue =
+  | 'user' | 'player' | 'coach' | 'referee'
+  | 'technician' | 'seller' | 'manufacturer' | 'club_owner'
 
-interface PublicUser {
+interface RoleRequest {
   id: string
-  name?: string
-  mobile?: string
-  avatarUrl?: string
-  roles: PublicRole[]
+  role: RoleValue
+  status: 'pending' | 'approved' | 'rejected'
 }
 
-// ─── Field renderer (read-only) ───────────────────────────────
-function ProfileField({ label, value, isUrl }: { label: string; value: string; isUrl?: boolean }) {
-  if (!value) return null
+interface ProfileField {
+  key: string
+  label: string
+  type: 'text' | 'textarea' | 'number' | 'select' | 'url'
+  placeholder: string
+  options?: string[]
+  required: boolean
+}
+
+interface RoleMeta {
+  value: RoleValue
+  label: string
+  icon: string
+  color: string
+  description: string
+  profileFields: ProfileField[]
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
+function toFarsiDigits(n: number | string): string {
+  const fa = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹']
+  return String(n).replace(/\d/g, d => fa[+d] ?? d)
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function authHeader(): Record<string, string> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+
+// ─── Role definitions ─────────────────────────────────────────
+const ROLES: RoleMeta[] = [
+  {
+    value: 'user', label: 'کاربر عادی', icon: 'ti-user', color: '#94a3b8',
+    description: 'مشاهده و رزرو میز',
+    profileFields: [
+      { key: 'displayName', label: 'نام نمایشی', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
+      { key: 'bio', label: 'معرفی کوتاه', type: 'textarea', placeholder: 'چند جمله درباره خودت...', required: false },
+    ],
+  },
+  {
+    value: 'player', label: 'بازیکن رنکینگی', icon: 'ti-chart-bar', color: '#10b981',
+    description: 'رنکینگ ملی بیلیارد',
+    profileFields: [
+      { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
+      { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'هندیکپ'], required: true },
+      { key: 'nationalRank', label: 'رتبه ملی', type: 'number', placeholder: 'مثلاً ۱۲', required: false },
+      { key: 'yearsActive', label: 'سال‌های فعالیت', type: 'number', placeholder: 'مثلاً ۸', required: false },
+      { key: 'club', label: 'باشگاه فعلی', type: 'text', placeholder: 'نام باشگاه', required: false },
+      { key: 'bio', label: 'بیوگرافی ورزشی', type: 'textarea', placeholder: 'افتخارات، سابقه بازی...', required: false },
+      { key: 'instagram', label: 'اینستاگرام', type: 'url', placeholder: 'https://instagram.com/...', required: false },
+    ],
+  },
+  {
+    value: 'coach', label: 'مربی', icon: 'ti-school', color: '#a78bfa',
+    description: 'تدریس و آموزش بیلیارد',
+    profileFields: [
+      { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
+      { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
+      { key: 'licenseLevel', label: 'درجه مربیگری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'ملی'], required: false },
+      { key: 'experience', label: 'سابقه تدریس (سال)', type: 'number', placeholder: 'مثلاً ۵', required: true },
+      { key: 'location', label: 'شهر فعالیت', type: 'text', placeholder: 'تهران، اصفهان...', required: true },
+      { key: 'sessionPrice', label: 'هزینه هر جلسه (تومان)', type: 'number', placeholder: 'مثلاً ۵۰۰۰۰۰', required: false },
+      { key: 'bio', label: 'درباره من', type: 'textarea', placeholder: 'روش تدریس، سوابق، دستاوردها...', required: false },
+    ],
+  },
+  {
+    value: 'referee', label: 'داور', icon: 'ti-scale', color: '#f59e0b',
+    description: 'داوری مسابقات رسمی',
+    profileFields: [
+      { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
+      { key: 'licenseLevel', label: 'درجه داوری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'بین‌المللی'], required: true },
+      { key: 'specialty', label: 'رشته داوری', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
+      { key: 'location', label: 'شهر', type: 'text', placeholder: 'محل اقامت', required: true },
+      { key: 'matchCount', label: 'تعداد مسابقات داوری‌شده', type: 'number', placeholder: 'مثلاً ۴۰', required: false },
+      { key: 'bio', label: 'سوابق داوری', type: 'textarea', placeholder: 'مسابقات مهم، لیگ‌ها...', required: false },
+    ],
+  },
+  {
+    value: 'technician', label: 'خدمات فنی', icon: 'ti-tool', color: '#06b6d4',
+    description: 'تعمیر و نگهداری تجهیزات',
+    profileFields: [
+      { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
+      { key: 'services', label: 'خدمات', type: 'select', placeholder: '', options: ['تعمیر میز', 'تعویض روکش', 'تراز کردن', 'لاک‌زنی', 'همه موارد'], required: true },
+      { key: 'location', label: 'محدوده سرویس', type: 'text', placeholder: 'تهران — کرج', required: true },
+      { key: 'phone', label: 'شماره تماس', type: 'text', placeholder: '۰۹۱۲...', required: true },
+      { key: 'bio', label: 'معرفی', type: 'textarea', placeholder: 'خدمات، تجربه، نمونه کارها...', required: false },
+    ],
+  },
+  {
+    value: 'seller', label: 'فروشنده', icon: 'ti-shopping-bag', color: '#f97316',
+    description: 'فروش تجهیزات بیلیارد',
+    profileFields: [
+      { key: 'displayName', label: 'نام فروشگاه', type: 'text', placeholder: 'نام برند یا فروشگاه', required: true },
+      { key: 'location', label: 'آدرس / شهر', type: 'text', placeholder: 'تهران، بازار بزرگ...', required: true },
+      { key: 'phone', label: 'شماره تماس', type: 'text', placeholder: '۰۲۱...', required: true },
+      { key: 'website', label: 'وب‌سایت / اینستاگرام', type: 'url', placeholder: 'https://...', required: false },
+      { key: 'bio', label: 'معرفی فروشگاه', type: 'textarea', placeholder: 'محصولات، برندها، خدمات...', required: false },
+    ],
+  },
+  {
+    value: 'manufacturer', label: 'تولیدکننده', icon: 'ti-building-factory', color: '#ef4444',
+    description: 'تولید تجهیزات بیلیارد',
+    profileFields: [
+      { key: 'displayName', label: 'نام برند / کارخانه', type: 'text', placeholder: 'نام رسمی', required: true },
+      { key: 'founded', label: 'سال تأسیس', type: 'number', placeholder: 'مثلاً ۱۳۸۵', required: false },
+      { key: 'location', label: 'محل تولید', type: 'text', placeholder: 'استان / شهر', required: true },
+      { key: 'website', label: 'وب‌سایت', type: 'url', placeholder: 'https://...', required: false },
+      { key: 'bio', label: 'درباره برند', type: 'textarea', placeholder: 'تاریخچه، ظرفیت تولید، افتخارات...', required: false },
+    ],
+  },
+  {
+    value: 'club_owner', label: 'باشگاه‌دار', icon: 'ti-building-store', color: '#3b82f6',
+    description: 'مدیریت باشگاه بیلیارد',
+    profileFields: [
+      { key: 'displayName', label: 'نام باشگاه', type: 'text', placeholder: 'نام رسمی باشگاه', required: true },
+      { key: 'location', label: 'آدرس', type: 'text', placeholder: 'شهر — محله', required: true },
+      { key: 'tableCount', label: 'تعداد میزها', type: 'number', placeholder: 'مثلاً ۶', required: true },
+      { key: 'phone', label: 'شماره باشگاه', type: 'text', placeholder: '۰۲۱...', required: true },
+      { key: 'instagram', label: 'اینستاگرام', type: 'url', placeholder: 'https://instagram.com/...', required: false },
+      { key: 'bio', label: 'معرفی باشگاه', type: 'textarea', placeholder: 'امکانات، ساعت‌کاری، خدمات...', required: false },
+    ],
+  },
+]
+
+const ROLE_MAP = Object.fromEntries(ROLES.map(r => [r.value, r])) as Record<RoleValue, RoleMeta>
+
+// ─── Field component ──────────────────────────────────────────
+function Field({
+  field,
+  value,
+  onChange,
+}: {
+  field: ProfileField
+  value: string
+  onChange: (v: string) => void
+}) {
+  const base: React.CSSProperties = {
+    width: '100%', background: '#0a0f0d',
+    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
+    padding: '10px 12px', color: '#e2e8f0', fontSize: 13,
+    fontFamily: 'Vazirmatn, Tahoma, sans-serif', outline: 'none',
+    transition: 'border-color 0.2s', boxSizing: 'border-box',
+  }
+
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4 }}>{label}</div>
-      {isUrl ? (
-        <a
-          href={value}
-          target="_blank"
-          rel="noreferrer"
-          style={{ fontSize: 13, color: '#10b981', wordBreak: 'break-all' }}
+      <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', marginBottom: 6 }}>
+        {field.label}
+        {field.required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
+      </label>
+      {field.type === 'textarea' ? (
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={field.placeholder}
+          rows={3}
+          style={{ ...base, resize: 'vertical', minHeight: 80 }}
+        />
+      ) : field.type === 'select' ? (
+        <select
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          style={{ ...base, appearance: 'none' as any }}
         >
-          {value}
-        </a>
+          <option value="">انتخاب کنید...</option>
+          {field.options?.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
       ) : (
-        <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.6 }}>{value}</div>
+        <input
+          type={field.type === 'number' ? 'number' : 'text'}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={field.placeholder}
+          style={base}
+        />
       )}
     </div>
   )
 }
 
-// ─── Role tab content ─────────────────────────────────────────
-function RoleTabContent({ role, profile }: { role: RoleValue; profile: Record<string, string> }) {
-  const meta = ROLE_MAP[role]
-  const fields = meta.profileFields.filter(f => f.key !== 'displayName' && f.key !== 'bio')
-
-  return (
-    <div style={{
-      background: '#111a15',
-      border: `1px solid ${hexToRgba(meta.color, 0.2)}`,
-      borderRadius: 16, padding: '20px 16px',
-    }}>
-      {/* Role header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <span style={{
-          width: 40, height: 40, borderRadius: 11,
-          background: hexToRgba(meta.color, 0.14),
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <i className={`ti ${meta.icon}`} style={{ fontSize: 20, color: meta.color }} aria-hidden="true" />
-        </span>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>{meta.label}</div>
-          <div style={{ fontSize: 11, color: '#64748b' }}>{meta.description}</div>
-        </div>
-        <div style={{
-          marginRight: 'auto',
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          fontSize: 9, color: '#10b981',
-          background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
-          borderRadius: 20, padding: '3px 8px',
-        }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-          تأیید شده
-        </div>
-      </div>
-
-      {/* Bio — full width */}
-      {profile.bio && (
-        <div style={{
-          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: 12, padding: '12px 14px', marginBottom: 16,
-          fontSize: 13, color: '#94a3b8', lineHeight: 1.8,
-        }}>
-          {profile.bio}
-        </div>
-      )}
-
-      {/* Key-value fields */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
-        {fields.map(f => {
-          if (!profile[f.key]) return null
-          return (
-            <ProfileField
-              key={f.key}
-              label={f.label}
-              value={profile[f.key]}
-              isUrl={f.type === 'url'}
-            />
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ─── Avatar ───────────────────────────────────────────────────
-function Avatar({ name, url, size = 72 }: { name?: string; url?: string; size?: number }) {
-  const initials = name
-    ? name.trim().split(' ').map(p => p[0]).slice(0, 2).join('')
-    : '?'
-
-  if (url) {
-    return (
-      <img
-        src={url}
-        alt={name ?? ''}
-        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}
-      />
-    )
-  }
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.3, fontWeight: 700, color: '#0a0f0d',
-    }}>
-      {initials}
-    </div>
-  )
-}
-
-// ─── Page ─────────────────────────────────────────────────────
-export default function PublicProfilePage() {
-  const { userId } = useParams() as { userId: string }
-  const router = useRouter()
-
-  const [user, setUser]         = useState<PublicUser | null>(null)
-  const [activeTab, setActiveTab] = useState<RoleValue | null>(null)
-  const [loading, setLoading]   = useState(true)
-  const [notFound, setNotFound] = useState(false)
+// ─── RoleForm ─────────────────────────────────────────────────
+function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
+  const [data, setData]       = useState<Record<string, string>>({})
+  const [saving, setSaving]   = useState(false)
+  const [saved, setSaved]     = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/users/${userId}/public`)
-      .then(r => {
-        if (!r.ok) { setNotFound(true); return null }
-        return r.json()
-      })
-      .then(j => {
-        if (!j) return
-        setUser(j.user)
-        if (j.user.roles?.length > 0) setActiveTab(j.user.roles[0].role)
-      })
-      .catch(() => setNotFound(true))
+    setLoading(true)
+    fetch(`${API}/roles/${role.value}/profile`, {
+      headers: authHeader(),
+    })
+      .then(r => r.json())
+      .then(j => { if (j.profile) setData(j.profile) })
+      .catch(() => {})
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [role.value])
+
+  const handleSave = async () => {
+    const missing = role.profileFields.filter(f => f.required && !data[f.key])
+    if (missing.length > 0) return
+    setSaving(true)
+    await fetch(`${API}/roles/${role.value}/profile`, {
+      method: 'PUT',
+      headers: { ...authHeader(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => { setSaved(false); onSaved() }, 1200)
+  }
 
   if (loading) return (
-    <div style={{
-      minHeight: '100vh', background: '#0a0f0d',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Vazirmatn, Tahoma, sans-serif',
-    }}>
+    <div style={{ textAlign: 'center', padding: '40px 0', color: '#475569', fontSize: 12 }}>
+      در حال بارگذاری...
+    </div>
+  )
+
+  const filledCount = role.profileFields.filter(f => data[f.key]).length
+  const pct = Math.round((filledCount / role.profileFields.length) * 100)
+
+  return (
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, color: '#64748b' }}>تکمیل پروفایل</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: role.color }}>{toFarsiDigits(pct)}٪</span>
+        </div>
+        <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 4 }}>
+          <div style={{ height: '100%', borderRadius: 4, background: role.color, width: `${pct}%`, transition: 'width 0.3s' }} />
+        </div>
+      </div>
+
+      {role.profileFields.map(f => (
+        <Field
+          key={f.key}
+          field={f}
+          value={data[f.key] ?? ''}
+          onChange={v => setData(d => ({ ...d, [f.key]: v }))}
+        />
+      ))}
+
+      <button
+        onClick={handleSave}
+        disabled={saving || saved}
+        style={{
+          width: '100%', padding: '13px', borderRadius: 12, border: 'none',
+          background: saved ? '#10b981' : saving ? '#1a2e24' : role.color,
+          color: '#0a0f0d', fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
+          cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}
+      >
+        {saved
+          ? <><i className="ti ti-check" style={{ fontSize: 16 }} aria-hidden="true" />ذخیره شد</>
+          : saving
+          ? <><i className="ti ti-loader-2" style={{ fontSize: 16 }} aria-hidden="true" />در حال ذخیره...</>
+          : <><i className="ti ti-device-floppy" style={{ fontSize: 16 }} aria-hidden="true" />ذخیره پروفایل</>
+        }
+      </button>
+    </div>
+  )
+}
+
+// ─── Inner (needs useSearchParams) ───────────────────────────
+function ProfileSetupInner() {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const initRole     = (searchParams.get('role') ?? '') as RoleValue
+
+  const [userRoles, setUserRoles] = useState<RoleRequest[]>([])
+  const [activeTab, setActiveTab] = useState<RoleValue | null>(null)
+  const [loading, setLoading]     = useState(true)
+  const [toast, setToast]         = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch(`${API}/roles/my`, { headers: authHeader() })
+      .then(r => r.ok ? r.json() : [])
+      .then((data: RoleRequest[]) => {
+        const approved = data.filter(r => r.status === 'approved')
+        setUserRoles(approved)
+        if (initRole && approved.find(r => r.role === initRole)) {
+          setActiveTab(initRole)
+        } else if (approved.length > 0) {
+          const first = approved[0]
+          if (first) setActiveTab(first.role)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2500)
+  }
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#0a0f0d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
       <div style={{ textAlign: 'center', color: '#64748b', fontSize: 13 }}>
         <i className="ti ti-loader-2" style={{ fontSize: 28, color: '#10b981', display: 'block', marginBottom: 12 }} />
         در حال بارگذاری...
@@ -170,146 +329,91 @@ export default function PublicProfilePage() {
     </div>
   )
 
-  if (notFound || !user) return (
-    <div style={{
-      minHeight: '100vh', background: '#0a0f0d',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
-    }}>
+  if (userRoles.length === 0) return (
+    <div style={{ minHeight: '100vh', background: '#0a0f0d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl' }}>
       <div style={{ textAlign: 'center', padding: 32 }}>
-        <i className="ti ti-user-off" style={{ fontSize: 40, color: '#334155', display: 'block', marginBottom: 16 }} />
-        <div style={{ color: '#e2e8f0', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>کاربر یافت نشد</div>
-        <button onClick={() => router.back()} style={{
-          background: '#111a15', border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 10, padding: '10px 20px', color: '#94a3b8',
-          fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', marginTop: 12,
-        }}>
-          بازگشت
+        <i className="ti ti-lock" style={{ fontSize: 40, color: '#334155', display: 'block', marginBottom: 16 }} />
+        <div style={{ color: '#e2e8f0', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>هنوز نقشی تأیید نشده</div>
+        <div style={{ color: '#64748b', fontSize: 13, marginBottom: 24, lineHeight: 1.7 }}>ابتدا نقش درخواست بدید و منتظر تأیید ادمین بمانید.</div>
+        <button onClick={() => router.push('/profile/role')} style={{ background: '#10b981', color: '#0a0f0d', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+          درخواست نقش
         </button>
       </div>
     </div>
   )
 
-  const activeRoleData = user.roles.find(r => r.role === activeTab)
-  const displayName = activeRoleData?.profile?.displayName ?? user.name ?? 'کاربر بیلیارد پلاس'
+  const activeMeta = activeTab ? ROLE_MAP[activeTab] : null
 
   return (
     <>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-      <div style={{
-        minHeight: '100vh', background: '#0a0f0d',
-        fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
-        position: 'relative', overflow: 'hidden',
-      }}>
-        {/* orb */}
-        <div style={{
-          position: 'fixed', width: 360, height: 360,
-          background: activeTab
-            ? `radial-gradient(circle, ${hexToRgba(ROLE_MAP[activeTab].color, 0.14)} 0%, transparent 70%)`
-            : 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)',
-          top: -100, right: -80, filter: 'blur(55px)', zIndex: 0, pointerEvents: 'none',
-          transition: 'background 0.5s',
-        }} />
+      <div style={{ minHeight: '100vh', background: '#0a0f0d', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', width: 300, height: 300, background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)', top: -80, right: -60, pointerEvents: 'none', filter: 'blur(50px)', zIndex: 0 }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '0 0 80px' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '28px 16px 100px' }}>
 
-          {/* Cover / hero */}
-          <div style={{
-            height: 160,
-            background: activeTab
-              ? `linear-gradient(160deg, ${hexToRgba(ROLE_MAP[activeTab].color, 0.25)} 0%, #0a0f0d 100%)`
-              : 'linear-gradient(160deg, rgba(16,185,129,0.2) 0%, #0a0f0d 100%)',
-            position: 'relative',
-            transition: 'background 0.5s',
-          }}>
-            <button
-              onClick={() => router.back()}
-              style={{
-                position: 'absolute', top: 16, right: 16,
-                background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 10, width: 36, height: 36,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#94a3b8',
-              }}
-            >
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+            <button onClick={() => router.push('/profile/role')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8' }}>
               <i className="ti ti-arrow-right" style={{ fontSize: 18 }} aria-hidden="true" />
             </button>
-          </div>
-
-          {/* Profile info */}
-          <div style={{ padding: '0 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: -36, marginBottom: 20 }}>
-              <div style={{
-                border: '3px solid #0a0f0d', borderRadius: '50%',
-                background: '#0a0f0d', flexShrink: 0,
-              }}>
-                <Avatar name={displayName} url={user.avatarUrl} size={72} />
-              </div>
-              <div style={{ paddingBottom: 4 }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>{displayName}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                  {user.roles.map(r => {
-                    const m = ROLE_MAP[r.role]
-                    return (
-                      <span key={r.role} style={{
-                        fontSize: 10, color: m.color,
-                        background: hexToRgba(m.color, 0.1),
-                        border: `1px solid ${hexToRgba(m.color, 0.3)}`,
-                        borderRadius: 20, padding: '2px 8px',
-                        display: 'inline-flex', alignItems: 'center', gap: 4,
-                      }}>
-                        <i className={`ti ${m.icon}`} style={{ fontSize: 10 }} aria-hidden="true" />
-                        {m.label}
-                      </span>
-                    )
-                  })}
-                </div>
-              </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>پروفایل کاری</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>{toFarsiDigits(userRoles.length)} نقش تأیید‌شده</div>
             </div>
-
-            {/* Role tabs */}
-            {user.roles.length > 1 && (
-              <div style={{
-                display: 'flex', gap: 6, marginBottom: 16,
-                overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none',
-              }}>
-                {user.roles.map(r => {
-                  const m = ROLE_MAP[r.role]
-                  const isActive = activeTab === r.role
-                  return (
-                    <button
-                      key={r.role}
-                      onClick={() => setActiveTab(r.role)}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '7px 14px', borderRadius: 10, flexShrink: 0,
-                        border: `1px solid ${isActive ? hexToRgba(m.color, 0.5) : 'rgba(255,255,255,0.07)'}`,
-                        background: isActive ? hexToRgba(m.color, 0.12) : '#111a15',
-                        color: isActive ? m.color : '#64748b',
-                        fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s',
-                      }}
-                    >
-                      <i className={`ti ${m.icon}`} style={{ fontSize: 14 }} aria-hidden="true" />
-                      {m.label}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Active role profile */}
-            {activeTab && activeRoleData && (
-              <RoleTabContent role={activeTab} profile={activeRoleData.profile} />
-            )}
-
-            {user.roles.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '32px 0', color: '#475569', fontSize: 13 }}>
-                این کاربر هنوز پروفایلی تکمیل نکرده است.
-              </div>
-            )}
           </div>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+            {userRoles.map(ur => {
+              const m = ROLE_MAP[ur.role]
+              if (!m) return null
+              const isActive = activeTab === ur.role
+              return (
+                <button key={ur.role} onClick={() => setActiveTab(ur.role)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, flexShrink: 0, border: `1px solid ${isActive ? hexToRgba(m.color, 0.5) : 'rgba(255,255,255,0.07)'}`, background: isActive ? hexToRgba(m.color, 0.12) : '#111a15', color: isActive ? m.color : '#64748b', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <i className={`ti ${m.icon}`} style={{ fontSize: 15 }} aria-hidden="true" />
+                  {m.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Form */}
+          {activeMeta && activeTab && (
+            <div style={{ background: '#111a15', border: `1px solid ${hexToRgba(activeMeta.color, 0.2)}`, borderRadius: 16, padding: '20px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <span style={{ width: 36, height: 36, borderRadius: 10, background: hexToRgba(activeMeta.color, 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <i className={`ti ${activeMeta.icon}`} style={{ fontSize: 18, color: activeMeta.color }} aria-hidden="true" />
+                </span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>{activeMeta.label}</div>
+                  <div style={{ fontSize: 10, color: '#64748b' }}>{activeMeta.description}</div>
+                </div>
+                <button onClick={() => router.push(`/profile/${activeTab}`)} style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, color: activeMeta.color, background: hexToRgba(activeMeta.color, 0.1), border: `1px solid ${hexToRgba(activeMeta.color, 0.3)}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  <i className="ti ti-eye" style={{ fontSize: 12 }} aria-hidden="true" />
+                  مشاهده صفحه
+                </button>
+              </div>
+              <RoleForm role={activeMeta} onSaved={() => showToast(`پروفایل ${activeMeta.label} ذخیره شد`)} />
+            </div>
+          )}
         </div>
+
+        {toast && (
+          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: '#10b981', color: '#0a0f0d', fontSize: 12, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap' }}>
+            ✓ {toast}
+          </div>
+        )}
       </div>
     </>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────
+export default function ProfileSetupPage() {
+  return (
+    <Suspense>
+      <ProfileSetupInner />
+    </Suspense>
   )
 }
