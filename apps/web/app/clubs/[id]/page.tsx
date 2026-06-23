@@ -45,24 +45,24 @@ const sampleClub: Club = {
 };
 
 const coaches = [
-  { name: 'امیر رضایی', title: 'مربی ارشد اسنوکر',    exp: '۱۲ سال', rating: 4.9, matches: 340 },
-  { name: 'سارا محمدی', title: 'مربی پاکت بیلیارد',   exp: '۸ سال',  rating: 4.7, matches: 210 },
-  { name: 'کاوه نوری',  title: 'مربی VIP',             exp: '۱۵ سال', rating: 5.0, matches: 520 },
+  { name: 'امیر رضایی', title: 'مربی ارشد اسنوکر',  exp: '۱۲ سال', rating: 4.9, matches: 340 },
+  { name: 'سارا محمدی', title: 'مربی پاکت بیلیارد', exp: '۸ سال',  rating: 4.7, matches: 210 },
+  { name: 'کاوه نوری',  title: 'مربی VIP',           exp: '۱۵ سال', rating: 5.0, matches: 520 },
 ];
 
 const reviews = [
   { name: 'محمد ح.',   rating: 5, text: 'بهترین باشگاه تهران. میزهای درجه یک و فضای واقعاً حرفه‌ای.', date: '۱۴۰۴/۰۲/۱۵', verified: true },
-  { name: 'نیلوفر ع.', rating: 5, text: 'مربی‌ها فوق‌العاده‌اند. در ۳ جلسه پیشرفت زیادی داشتم.', date: '۱۴۰۴/۰۲/۰۸', verified: true },
-  { name: 'رضا ک.',    rating: 4, text: 'میزهای VIP واقعاً باکیفیتن. فقط پارکینگ کمی شلوغه.', date: '۱۴۰۴/۰۱/۲۸', verified: false },
+  { name: 'نیلوفر ع.', rating: 5, text: 'مربی‌ها فوق‌العاده‌اند. در ۳ جلسه پیشرفت زیادی داشتم.',    date: '۱۴۰۴/۰۲/۰۸', verified: true },
+  { name: 'رضا ک.',    rating: 4, text: 'میزهای VIP واقعاً باکیفیتن. فقط پارکینگ کمی شلوغه.',        date: '۱۴۰۴/۰۱/۲۸', verified: false },
 ];
 
 const tableTypes = [
   { key: 'snookerTables',    label: 'اسنوکر',     color: '#10b981', price: '۱۸۰,۰۰۰' },
   { key: 'pocketTables',     label: 'پاکت',        color: '#06b6d4', price: '۱۵۰,۰۰۰' },
   { key: 'highballTables',   label: 'هی‌بال',      color: '#a78bfa', price: '۱۲۰,۰۰۰' },
-  { key: 'vipSnookerTables', label: 'VIP اسنوکر', color: '#f59e0b', price: '۳۵۰,۰۰۰' },
-  { key: 'vipPocketTables',  label: 'VIP پاکت',   color: '#f59e0b', price: '۳۰۰,۰۰۰' },
-  { key: 'airHockeyTables',  label: 'ایرهاکی',    color: '#ef4444', price: '۱۰۰,۰۰۰' },
+  { key: 'vipSnookerTables', label: 'VIP اسنوکر',  color: '#f59e0b', price: '۳۵۰,۰۰۰' },
+  { key: 'vipPocketTables',  label: 'VIP پاکت',    color: '#f59e0b', price: '۳۰۰,۰۰۰' },
+  { key: 'airHockeyTables',  label: 'ایرهاکی',     color: '#ef4444', price: '۱۰۰,۰۰۰' },
 ];
 
 const dayNames: Record<string, string> = {
@@ -75,17 +75,28 @@ function toFa(v: string | number) {
 }
 
 function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number): string {
-  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return d < 1 ? `${Math.round(d*1000)} متر` : `${d.toFixed(1)} کیلومتر`;
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return d < 1 ? `${Math.round(d * 1000)} متر` : `${d.toFixed(1)} کیلومتر`;
+}
+
+// ── تابع مستقل برای محاسبه isOpen ──
+function calcIsOpen(todayH: any): boolean {
+  if (!todayH || !todayH.isOpen) return false;
+  const now  = new Date().getHours();
+  const open = parseInt(todayH.open);
+  const cls  = todayH.close === '24:00' ? 24 : parseInt(todayH.close);
+  return now >= open && now < cls;
 }
 
 export default function ClubProfilePage() {
-  const params    = useParams();
-  const id        = params.id as string;
-  const router    = useRouter();
-  const { user }  = useAuthStore();
+  const params   = useParams();
+  const id       = params.id as string;
+  const router   = useRouter();
+  const { user } = useAuthStore();
 
   const [club, setClub]           = useState<Club>(sampleClub);
   const [loading, setLoading]     = useState(true);
@@ -105,26 +116,17 @@ export default function ClubProfilePage() {
     }
   }, [id]);
 
-  const images    = club.images?.length ? club.images : ['/images/billiadr-club-1.jpg'];
-  const todayKey  = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
-  const todayH    = (club.workingHours ?? {})?.[todayKey] as any;
-  const isOpen    = (() => {
-    if (!todayH?.isOpen) return false;
-    const now  = new Date().getHours();
-    const open = parseInt(todayH.open);
-    const cls  = todayH.close === '24:00' ? 24 : parseInt(todayH.close);
-    return now >= open && now < cls;
-  })();
+  const images   = club.images?.length ? club.images : ['/images/billiadr-club-1.jpg'];
+  const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+  const todayH   = (club.workingHours ?? {})?.[todayKey as string] as any;
+  const isOpen   = calcIsOpen(todayH);
 
   const activeTables = tableTypes.filter(t => (club as any)[t.key] > 0);
-
   const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#020806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20 }}>
-      <div style={{ position: 'relative', width: 48, height: 48 }}>
-        <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(16,185,129,0.1)', borderTop: '2px solid #10b981', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      </div>
+      <div style={{ width: 48, height: 48, border: '2px solid rgba(16,185,129,0.1)', borderTop: '2px solid #10b981', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <div style={{ fontSize: 13, color: 'rgba(240,250,245,0.3)' }}>در حال بارگذاری...</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
@@ -149,13 +151,10 @@ export default function ClubProfilePage() {
         .coach-card { padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;transition:all 0.3s }
         .coach-card:hover { background:rgba(255,255,255,0.055);border-color:rgba(16,185,129,0.25);transform:translateY(-3px) }
 
-        /* ── LAYOUT ── */
-        /* موبایل: ستون واحد، sidebar پایین */
-        .club-layout { display:flex;flex-direction:column;gap:20px }
+        .club-layout  { display:flex;flex-direction:column;gap:20px }
         .club-sidebar { display:flex;flex-direction:column;gap:14px;order:2 }
         .club-main    { order:1 }
 
-        /* دسکتاپ: sidebar راست (چون RTL)، محتوا چپ */
         @media(min-width:960px){
           .club-layout  { display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start }
           .club-main    { order:1 }
@@ -165,22 +164,18 @@ export default function ClubProfilePage() {
         .amenity-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px }
         @media(max-width:400px){ .amenity-grid{grid-template-columns:1fr} .tab-btn{padding:8px 12px;font-size:12px} }
 
-        /* دکمه رزرو fixed در موبایل */
         .book-fixed {
-          display:flex;
-          position:fixed;bottom:0;left:0;right:0;
-          padding:12px 16px;
-          background:rgba(2,8,6,0.97);
+          display:flex;position:fixed;bottom:0;left:0;right:0;
+          padding:12px 16px;background:rgba(2,8,6,0.97);
           border-top:1px solid rgba(16,185,129,0.2);
-          backdrop-filter:blur(20px);
-          z-index:200;
+          backdrop-filter:blur(20px);z-index:200;
         }
         @media(min-width:960px){ .book-fixed{display:none} }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806 0%,#060d0a 100%)', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
-        {/* ══ HERO IMAGE ══ */}
+        {/* HERO */}
         <div style={{ position: 'relative', height: 'clamp(280px,50vw,580px)', overflow: 'hidden' }}>
           <img src={images[activeImg] ?? images[0]} alt={club.name}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48) saturate(0.7)', transition: 'opacity 0.7s' }} />
@@ -225,20 +220,18 @@ export default function ClubProfilePage() {
             </div>
           </div>
 
-          {/* arrow nav */}
           {images.length > 1 && (
             <>
-              <button onClick={() => setActiveImg(p => (p-1+images.length)%images.length)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={() => setActiveImg(p => (p - 1 + images.length) % images.length)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronRight size={16} />
               </button>
-              <button onClick={() => setActiveImg(p => (p+1)%images.length)} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={() => setActiveImg(p => (p + 1) % images.length)} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronLeft size={16} />
               </button>
             </>
           )}
         </div>
 
-        {/* thumbnail strip — فقط اگه بیش از ۱ تصویر داریم */}
         {images.length > 1 && (
           <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '10px 16px', display: 'flex', gap: 8, overflowX: 'auto' }}>
             {images.map((img, i) => (
@@ -249,14 +242,12 @@ export default function ClubProfilePage() {
           </div>
         )}
 
-        {/* ══ MAIN ══ */}
+        {/* MAIN */}
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(16px,3vw,36px) clamp(12px,3vw,28px)' }}>
           <div className="club-layout">
 
-            {/* ── MAIN COLUMN ── */}
+            {/* MAIN COLUMN */}
             <div className="club-main">
-
-              {/* Tab bar */}
               <div style={{ display: 'flex', gap: 6, marginBottom: 24, overflowX: 'auto', paddingBottom: 4 }}>
                 {[
                   { key: 'info',     label: 'اطلاعات' },
@@ -270,11 +261,9 @@ export default function ClubProfilePage() {
                 ))}
               </div>
 
-              {/* ── INFO TAB ── */}
+              {/* INFO */}
               {tab === 'info' && (
                 <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-                  {/* درباره */}
                   <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                     <h2 style={{ fontSize: 15, fontWeight: 800, color: '#f0faf5', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#10b981,#06b6d4)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
@@ -289,7 +278,6 @@ export default function ClubProfilePage() {
                     )}
                   </div>
 
-                  {/* امکانات */}
                   <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                     <h2 style={{ fontSize: 15, fontWeight: 800, color: '#f0faf5', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
@@ -312,7 +300,6 @@ export default function ClubProfilePage() {
                     </div>
                   </div>
 
-                  {/* مربیان */}
                   <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                     <h2 style={{ fontSize: 15, fontWeight: 800, color: '#f0faf5', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#a78bfa,#10b981)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
@@ -342,7 +329,6 @@ export default function ClubProfilePage() {
                     </div>
                   </div>
 
-                  {/* نقشه */}
                   <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden' }}>
                     <div style={{ padding: '16px 18px 0' }}>
                       <h2 style={{ fontSize: 15, fontWeight: 800, color: '#f0faf5', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -369,7 +355,7 @@ export default function ClubProfilePage() {
                 </div>
               )}
 
-              {/* ── TABLES TAB ── */}
+              {/* TABLES */}
               {tab === 'tables' && (
                 <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {activeTables.map((t, i) => (
@@ -395,7 +381,7 @@ export default function ClubProfilePage() {
                 </div>
               )}
 
-              {/* ── SCHEDULE TAB ── */}
+              {/* SCHEDULE */}
               {tab === 'schedule' && (
                 <div style={{ animation: 'fadeUp 0.4s ease both' }}>
                   <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
@@ -407,7 +393,7 @@ export default function ClubProfilePage() {
                       {Object.entries(club.workingHours ?? {}).map(([day, hours]: any) => {
                         const isToday = day === todayKey;
                         return (
-                          <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderRadius: 10, background: isToday ? 'rgba(16,185,129,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(16,185,129,0.15)' : 'transparent'}`, transition: 'background 0.2s' }}>
+                          <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderRadius: 10, background: isToday ? 'rgba(16,185,129,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(16,185,129,0.15)' : 'transparent'}` }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                               <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#10b981' : 'rgba(240,250,245,0.55)', fontSize: 13, minWidth: 68 }}>{dayNames[day]}</span>
                               {isToday && <span style={{ fontSize: 9, background: 'rgba(16,185,129,0.15)', color: '#10b981', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>امروز</span>}
@@ -428,13 +414,13 @@ export default function ClubProfilePage() {
                 </div>
               )}
 
-              {/* ── REVIEWS TAB ── */}
+              {/* REVIEWS */}
               {tab === 'reviews' && (
                 <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                     <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
                       <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                        <div style={{ fontSize: 44, fontWeight: 900, color: '#f0faf5', lineHeight: 1, letterSpacing: '-0.04em' }}>۴.۸</div>
+                        <div style={{ fontSize: 44, fontWeight: 900, color: '#f0faf5', lineHeight: 1 }}>۴.۸</div>
                         <div style={{ display: 'flex', gap: 3, justifyContent: 'center', margin: '6px 0 4px' }}>
                           {[1,2,3,4,5].map(s => <Star key={s} size={14} style={{ color: '#f59e0b', fill: s <= 4 ? '#f59e0b' : 'transparent' }} />)}
                         </div>
@@ -480,10 +466,8 @@ export default function ClubProfilePage() {
               )}
             </div>
 
-            {/* ── SIDEBAR (راست در دسکتاپ / پایین در موبایل) ── */}
+            {/* SIDEBAR */}
             <div className="club-sidebar">
-
-              {/* Book CTA — دسکتاپ */}
               <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(16,185,129,0.6),transparent)' }} />
                 <div style={{ fontSize: 10, color: 'rgba(16,185,129,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: 12, textAlign: 'center' }}>رزرو آنلاین</div>
@@ -504,7 +488,6 @@ export default function ClubProfilePage() {
                 </button>
               </div>
 
-              {/* Contact */}
               <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 18 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#f0faf5', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
@@ -530,7 +513,6 @@ export default function ClubProfilePage() {
                 </div>
               </div>
 
-              {/* Stats */}
               <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: 18 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#f0faf5', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
@@ -538,10 +520,10 @@ export default function ClubProfilePage() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                   {[
-                    { label: 'اعضای فعال',  v: '۱,۲۰۰+', color: '#10b981' },
-                    { label: 'مسابقات',      v: '۴۸',     color: '#f59e0b' },
-                    { label: 'سال‌ها سابقه', v: '۱۵',     color: '#a78bfa' },
-                    { label: 'ظرفیت روزانه', v: '۸۰ نفر', color: '#06b6d4' },
+                    { label: 'اعضای فعال',   v: '۱,۲۰۰+', color: '#10b981' },
+                    { label: 'مسابقات',       v: '۴۸',     color: '#f59e0b' },
+                    { label: 'سال‌ها سابقه',  v: '۱۵',     color: '#a78bfa' },
+                    { label: 'ظرفیت روزانه',  v: '۸۰ نفر', color: '#06b6d4' },
                   ].map((x, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: 10 }}>
                       <span style={{ fontSize: 12, color: 'rgba(240,250,245,0.45)' }}>{x.label}</span>
@@ -554,7 +536,7 @@ export default function ClubProfilePage() {
           </div>
         </div>
 
-        {/* ══ FIXED BOOK BUTTON — فقط موبایل ══ */}
+        {/* FIXED BOOK — موبایل */}
         <div className="book-fixed">
           <button onClick={goBook} style={{ flex: 1, padding: '14px', border: 'none', borderRadius: 14, background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 8px 28px rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <Calendar size={16} /> رزرو میز آنلاین
