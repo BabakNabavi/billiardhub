@@ -38,12 +38,12 @@ const FALLBACK_IMAGES: Record<string, string[]> = {
 
 function getImage(product: Product, index = 0): string {
   if (product.images && product.images.length > index) return product.images[index]!
-  const arr = FALLBACK_IMAGES[product.category] || FALLBACK_IMAGES.default
+  const arr = (FALLBACK_IMAGES[product.category] ?? FALLBACK_IMAGES['default'])!
   return arr[(product.id.charCodeAt(0) + index) % arr.length]!
 }
 
 function getAllImages(product: Product): string[] {
-  const fallback = FALLBACK_IMAGES[product.category] || FALLBACK_IMAGES.default
+  const fallback = (FALLBACK_IMAGES[product.category] ?? FALLBACK_IMAGES['default'])!
   if (product.images && product.images.length > 0) return product.images
   return fallback.slice(0, 3)
 }
