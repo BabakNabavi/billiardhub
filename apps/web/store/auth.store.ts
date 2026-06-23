@@ -24,6 +24,7 @@ interface AuthStore {
   login: (user: User, token: string) => void;
   logout: () => void;
   setHydrated: () => void;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -36,6 +37,9 @@ export const useAuthStore = create<AuthStore>()(
       login: (user, token) => set({ user, token }),
       logout: () => set({ user: null, token: null }),
       setHydrated: () => set({ _hydrated: true }),
+      updateUser: (updates) => set((state) => ({
+        user: state.user ? { ...state.user, ...updates } : null,
+      })),
     }),
     {
       name: 'auth-storage',
