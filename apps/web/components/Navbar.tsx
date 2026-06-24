@@ -343,7 +343,9 @@ export default function Navbar() {
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '200px', background: 'rgba(247,247,245,0.97)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '18px', boxShadow: '0 24px 60px rgba(28,28,26,0.14)', backdropFilter: 'blur(40px)', padding: '8px', zIndex: 300, animation: 'fadeDown 0.2s ease both' }}>
                     <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '6px' }}>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: '#1C1C1A' }}>{user.firstName} {user.lastName}</div>
-                      <div style={{ fontSize: '10px', color: 'rgba(28,28,26,0.35)', marginTop: '2px' }}>{user.primaryRole}</div>
+                      <div style={{ fontSize: '10px', color: 'rgba(28,28,26,0.35)', marginTop: '2px' }}>
+                        {({'admin':'ادمین سیستم','user':'کاربر','player':'بازیکن رنکینگی','coach':'مربی','referee':'داور','club_owner':'باشگاه‌دار','seller':'فروشنده','manufacturer':'تولیدکننده','installer':'متخصص نصب'} as Record<string,string>)[user.primaryRole] ?? user.primaryRole}
+                      </div>
                     </div>
                     {[
                       { href: '/dashboard',       label: 'داشبورد',         icon: <LayoutDashboard size={13} /> },

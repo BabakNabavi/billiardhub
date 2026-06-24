@@ -117,6 +117,10 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    if (user?.primaryRole === 'admin') { router.replace('/admin'); }
+  }, [user, router]);
+
+  useEffect(() => {
     const fn = () => {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => setScrollY(window.scrollY));
@@ -126,6 +130,7 @@ export default function DashboardPage() {
   }, []);
 
   if (!user) return null;
+  if (user.primaryRole === 'admin') return null;
   const isBasicUser = user.primaryRole === 'user';
 
   return (
