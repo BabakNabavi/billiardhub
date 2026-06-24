@@ -198,7 +198,8 @@ export default function HomePage() {
         @keyframes trustScroll { from{transform:translateX(0);}to{transform:translateX(-50%);} }
         @keyframes pulse       { 0%,100%{opacity:1;}50%{opacity:0.4;} }
         @keyframes fadeUp      { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;} }
-        @keyframes shine       { 0%{transform:translateX(-100%);}100%{transform:translateX(300%);} }
+        @keyframes shine         { 0%{transform:translateX(-100%);}100%{transform:translateX(300%);} }
+        @keyframes slideProgress { from{width:0%}to{width:100%} }
         .ha { animation:heroFadeIn 1.4s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
         .hb { animation:heroFadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 0.45s both; }
         .hc { animation:heroFadeIn 1s  cubic-bezier(0.22,1,0.36,1) 0.75s both; }
@@ -283,7 +284,7 @@ export default function HomePage() {
 
         {heroSlides.map((s, i) => (
           <div key={i} style={{ position:'absolute', inset:0, opacity: i === heroSlide ? 1 : 0, transition:'opacity 2.8s cubic-bezier(0.4,0,0.2,1)', transform:`scale(${heroScale})`, willChange:'transform', zIndex:0 }}>
-            <img src={s.img} alt="" loading={i === 0 ? 'eager' : 'lazy'} style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.18) saturate(0.5) contrast(1.1)' }} />
+            <img src={s.img} alt="" loading={i === 0 ? 'eager' : 'lazy'} style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.28) saturate(0.65) contrast(1.08)' }} />
           </div>
         ))}
 
@@ -293,16 +294,31 @@ export default function HomePage() {
         </video>
 
         {/* gradient overlays */}
-        <div style={{ position:'absolute', inset:0, zIndex:2, pointerEvents:'none', background:'linear-gradient(to bottom,rgba(1,6,4,0.68) 0%,rgba(1,6,4,0.04) 30%,rgba(1,6,4,0.04) 55%,rgba(1,6,4,0.94) 100%)' }} />
-        <div style={{ position:'absolute', inset:0, zIndex:2, pointerEvents:'none', background:'linear-gradient(to left,rgba(1,6,4,0.60) 0%,transparent 55%)' }} />
+        <div style={{ position:'absolute', inset:0, zIndex:2, pointerEvents:'none', background:'linear-gradient(to bottom,rgba(1,6,4,0.72) 0%,rgba(1,6,4,0.08) 28%,rgba(1,6,4,0.08) 52%,rgba(1,6,4,0.96) 100%)' }} />
+        <div style={{ position:'absolute', inset:0, zIndex:2, pointerEvents:'none', background:'linear-gradient(to left,rgba(1,6,4,0.78) 0%,rgba(1,6,4,0.28) 38%,transparent 60%)' }} />
         <div style={{ position:'absolute', inset:0, zIndex:3, pointerEvents:'none', background:`radial-gradient(ellipse 55% 55% at 25% 65%,${currentSlide.accent}10 0%,transparent 100%)`, transition:'background 2.8s ease' }} />
         <div style={{ position:'absolute', top:'-10%', left:'-8%', width:'60vw', height:'60vw', maxWidth:'750px', maxHeight:'750px', borderRadius:'50%', zIndex:3, pointerEvents:'none', background:`radial-gradient(ellipse,${currentSlide.accent}06 0%,transparent 65%)`, animation:'ambientFloat 16s ease-in-out infinite', filter:'blur(40px)', transition:'background 2.8s ease' }} />
         {/* side accent line */}
-        <div style={{ position:'absolute', right:'52px', top:'28%', bottom:'28%', width:'1px', zIndex:5, pointerEvents:'none', background:`linear-gradient(to bottom,transparent,${currentSlide.accent}50,transparent)`, boxShadow:`0 0 18px ${currentSlide.accent}35`, transition:'all 2.8s ease', animation:'borderGlow 4s ease-in-out infinite' }} />
+        <div style={{ position:'absolute', right:'148px', top:'28%', bottom:'28%', width:'1px', zIndex:5, pointerEvents:'none', background:`linear-gradient(to bottom,transparent,${currentSlide.accent}40,transparent)`, boxShadow:`0 0 14px ${currentSlide.accent}30`, transition:'all 2.8s ease', animation:'borderGlow 4s ease-in-out infinite' }} />
+
+        {/* Slide thumbnail strip */}
+        <div style={{ position:'absolute', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:10, display:'flex', flexDirection:'column', gap:'10px', opacity:Math.max(0, heroOpacity - 0.1) }}>
+          {heroSlides.map((s, i) => (
+            <button key={i} onClick={() => setHeroSlide(i)} style={{ position:'relative', width:'80px', height:'52px', borderRadius:'10px', overflow:'hidden', border: i === heroSlide ? `1.5px solid ${s.accent}` : '1.5px solid rgba(255,255,255,0.12)', cursor:'pointer', padding:0, transition:'all 0.4s ease', boxShadow: i === heroSlide ? `0 0 16px ${s.accent}40` : 'none', flexShrink:0, opacity: i === heroSlide ? 1 : 0.55 }}>
+              <img src={s.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.55) saturate(0.6)' }} />
+              {i === heroSlide && (
+                <div style={{ position:'absolute', inset:0, background:`${s.accent}18`, borderRadius:'8px' }} />
+              )}
+              <div style={{ position:'absolute', bottom:'4px', left:'50%', transform:'translateX(-50%)', fontSize:'7px', color:'rgba(255,255,255,0.65)', fontWeight:700, letterSpacing:'0.08em', whiteSpace:'nowrap' }}>
+                {String(i + 1).padStart(2,'0')}
+              </div>
+            </button>
+          ))}
+        </div>
 
         {/* Hero content */}
         <div style={{ position:'absolute', inset:0, zIndex:10, display:'flex', alignItems:'center', padding:'0 7%', transform:`translateY(${contentY}px)`, opacity:heroOpacity }}>
-          <div style={{ maxWidth:'620px', textAlign:'right' }}>
+          <div key={heroSlide} style={{ maxWidth:'620px', textAlign:'right' }}>
             <div className="hb" style={{ display:'inline-flex', alignItems:'center', gap:'10px', background:'rgba(255,255,255,0.04)', border:`1px solid ${currentSlide.accent}30`, borderRadius:'100px', padding:'8px 22px', marginBottom:'28px', backdropFilter:'blur(24px)', transition:'all 2.8s ease' }}>
               <span style={{ width:'5px', height:'5px', borderRadius:'50%', background:currentSlide.accent, boxShadow:`0 0 10px ${currentSlide.accent},0 0 20px ${currentSlide.accent}70`, display:'inline-block', flexShrink:0, animation:'neonPulse 3s infinite' }} />
               <span style={{ color:currentSlide.accent, fontSize:'9px', fontWeight:700, letterSpacing:'0.22em' }}>{currentSlide.tag}</span>
@@ -329,11 +345,28 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Slide dots */}
-        <div style={{ position:'absolute', bottom:'38px', left:'50%', transform:'translateX(-50%)', zIndex:10, display:'flex', gap:'10px', opacity:heroOpacity }}>
-          {heroSlides.map((s, i) => (
-            <button key={i} onClick={() => setHeroSlide(i)} style={{ height:'2px', width: i === heroSlide ? '36px' : '10px', borderRadius:'1px', border:'none', cursor:'pointer', padding:0, background: i === heroSlide ? s.accent : 'rgba(255,255,255,0.18)', transition:'all 0.6s ease', boxShadow: i === heroSlide ? `0 0 14px ${s.accent}` : 'none' }} />
-          ))}
+        {/* Magazine-style slide counter */}
+        <div style={{ position:'absolute', bottom:'44px', left:'50%', transform:'translateX(-50%)', zIndex:10, display:'flex', flexDirection:'column', alignItems:'center', gap:'14px', opacity:heroOpacity }}>
+          {/* progress track */}
+          <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
+            {heroSlides.map((s, i) => (
+              <button key={i} onClick={() => setHeroSlide(i)} style={{ position:'relative', height:'2px', width: i === heroSlide ? '44px' : '14px', borderRadius:'1px', border:'none', cursor:'pointer', padding:0, background:'rgba(255,255,255,0.15)', overflow:'hidden', transition:'width 0.5s cubic-bezier(0.4,0,0.2,1)' }}>
+                {i === heroSlide && (
+                  <span style={{ position:'absolute', inset:0, background:s.accent, boxShadow:`0 0 10px ${s.accent}`, borderRadius:'1px', animation:'slideProgress 6s linear forwards' }} />
+                )}
+              </button>
+            ))}
+          </div>
+          {/* counter */}
+          <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+            <span style={{ fontSize:'11px', fontWeight:800, color:'#fff', letterSpacing:'0.05em', fontVariantNumeric:'tabular-nums' }}>
+              {String(heroSlide + 1).padStart(2,'0')}
+            </span>
+            <span style={{ width:'20px', height:'1px', background:'rgba(255,255,255,0.22)' }} />
+            <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.28)', letterSpacing:'0.05em', fontVariantNumeric:'tabular-nums' }}>
+              {String(heroSlides.length).padStart(2,'0')}
+            </span>
+          </div>
         </div>
 
         {/* Video control */}
@@ -428,49 +461,79 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════
           5. TOURNAMENT SPOTLIGHT — full-width dark
       ══════════════════════════════════════════════════════════ */}
-      <section style={{ position:'relative', background:'#0F0E0C', overflow:'hidden', minHeight:'560px' }}>
-        <img src={IMG.snooker} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity:0.32, filter:'saturate(0.6) contrast(1.1)' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(8,6,4,0.96) 0%,rgba(8,6,4,0.75) 50%,rgba(8,6,4,0.30) 100%)', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(8,6,4,0.4) 0%,transparent 30%,transparent 70%,rgba(8,6,4,0.6) 100%)', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', top:'50%', left:'20%', transform:'translate(-50%,-50%)', width:'600px', height:'600px', borderRadius:'50%', background:`radial-gradient(${GOLD}08,transparent 70%)`, filter:'blur(60px)', pointerEvents:'none' }} />
-        <ScrollReveal delay={0}>
-          <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'90px 7%', position:'relative', zIndex:2 }}>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:'60px', alignItems:'center' }}>
-              <div>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:'10px', background:'rgba(199,166,106,0.10)', border:`1px solid ${GOLD_BOR}`, borderRadius:'100px', padding:'8px 20px', marginBottom:'28px' }}>
-                  <Trophy size={12} style={{ color:GOLD }} />
-                  <span style={{ fontSize:'9px', color:GOLD, fontWeight:700, letterSpacing:'0.22em' }}>FEATURED TOURNAMENT</span>
+      <section style={{ position:'relative', background:'#0C0B09', overflow:'hidden', minHeight:'620px', display:'grid', gridTemplateColumns:'1fr 1fr' }}>
+
+        {/* Left: dark content panel */}
+        <div style={{ position:'relative', zIndex:2, display:'flex', alignItems:'center', padding:'90px 7% 90px 7%' }}>
+          {/* subtle ambient glow behind text */}
+          <div style={{ position:'absolute', top:'40%', left:'30%', transform:'translate(-50%,-50%)', width:'420px', height:'420px', borderRadius:'50%', background:`radial-gradient(${GOLD}06,transparent 70%)`, filter:'blur(50px)', pointerEvents:'none' }} />
+          <div style={{ position:'relative', zIndex:1 }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:'10px', background:'rgba(199,166,106,0.08)', border:`1px solid ${GOLD_BOR}`, borderRadius:'100px', padding:'8px 20px', marginBottom:'28px' }}>
+              <span style={{ width:'5px', height:'5px', borderRadius:'50%', background:GOLD, boxShadow:`0 0 8px ${GOLD}`, display:'inline-block', animation:'neonPulse 3s infinite' }} />
+              <Trophy size={10} style={{ color:GOLD }} />
+              <span style={{ fontSize:'9px', color:GOLD, fontWeight:700, letterSpacing:'0.22em' }}>FEATURED TOURNAMENT</span>
+            </div>
+            <h2 style={{ fontSize:'clamp(26px,3.8vw,52px)', fontWeight:900, color:'#fff', margin:'0 0 18px', letterSpacing:'-0.04em', lineHeight:1.04, textShadow:'0 0 60px rgba(199,166,106,0.12)' }}>
+              مسابقات سراسری<br />اسنوکر ایران ۱۴۰۴
+            </h2>
+            <div style={{ height:'1.5px', width:'52px', background:`linear-gradient(90deg,${GOLD},transparent)`, marginBottom:'20px', boxShadow:`0 0 14px ${GOLD}50` }} />
+            <p style={{ fontSize:'15px', color:'rgba(255,255,255,0.40)', maxWidth:'400px', lineHeight:1.85, marginBottom:'36px' }}>
+              بزرگ‌ترین رویداد بیلیارد کشور با حضور ۶۴ بازیکن برتر ملی — رقابت برای کسب عنوان قهرمانی ایران
+            </p>
+            {/* 3-stat row */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'0', borderTop:'1px solid rgba(255,255,255,0.06)', paddingTop:'28px', marginBottom:'36px' }}>
+              {[{ label:'جایزه', value:'۵۰M', sub:'تومان' }, { label:'بازیکنان', value:'۶۴', sub:'نفر شرکت‌کننده' }, { label:'برگزاری', value:'۱۵', sub:'خرداد ۱۴۰۴' }].map((stat, i) => (
+                <div key={i} style={{ textAlign:'right', borderLeft: i < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none', paddingLeft: i < 2 ? '0' : '0', paddingRight:'0' }}>
+                  <div style={{ fontSize:'10px', color:'rgba(255,255,255,0.28)', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'6px' }}>{stat.label}</div>
+                  <div style={{ fontSize:'clamp(22px,2.8vw,34px)', fontWeight:900, color:GOLD, letterSpacing:'-0.03em', lineHeight:1 }}>{stat.value}</div>
+                  <div style={{ fontSize:'10px', color:'rgba(255,255,255,0.25)', marginTop:'4px' }}>{stat.sub}</div>
                 </div>
-                <h2 style={{ fontSize:'clamp(28px,4.5vw,58px)', fontWeight:900, color:'#fff', margin:'0 0 18px', letterSpacing:'-0.04em', lineHeight:1.02, textShadow:'0 0 80px rgba(199,166,106,0.15)' }}>
-                  مسابقات سراسری اسنوکر ایران ۱۴۰۴
-                </h2>
-                <p style={{ fontSize:'16px', color:'rgba(255,255,255,0.42)', maxWidth:'480px', lineHeight:1.8, marginBottom:'36px' }}>
-                  بزرگ‌ترین رویداد بیلیارد کشور با حضور ۶۴ بازیکن برتر ملی — رقابت برای کسب عنوان قهرمانی ایران
-                </p>
-                <div style={{ display:'flex', gap:'36px', marginBottom:'40px' }}>
-                  {[{ label:'جایزه نقدی', value:'۵۰ میلیون' }, { label:'بازیکنان', value:'۶۴ نفر' }, { label:'تاریخ برگزاری', value:'۱۵ خرداد ۱۴۰۴' }].map((stat, i) => (
-                    <div key={i} style={{ borderRight: i > 0 ? `1px solid rgba(255,255,255,0.08)` : 'none', paddingRight: i > 0 ? '36px' : 0 }}>
-                      <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.30)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'6px' }}>{stat.label}</div>
-                      <div style={{ fontSize:'clamp(18px,2.5vw,26px)', fontWeight:900, color:GOLD, letterSpacing:'-0.02em' }}>{stat.value}</div>
-                    </div>
-                  ))}
+              ))}
+            </div>
+            {/* رشته‌ها */}
+            <div style={{ display:'flex', gap:'8px', marginBottom:'32px', flexWrap:'wrap' }}>
+              {[{ name:'اسنوکر', color:'#C7A66A' }, { name:'پاکت', color:'#30C55A' }, { name:'هی‌بال', color:'#007AFF' }].map((cat, i) => (
+                <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px', padding:'6px 14px', background:`${cat.color}10`, border:`1px solid ${cat.color}28`, borderRadius:'20px' }}>
+                  <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:cat.color, display:'inline-block' }} />
+                  <span style={{ fontSize:'11px', color:cat.color, fontWeight:700 }}>{cat.name}</span>
                 </div>
-                <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
-                  <Link href="/events/1"><button className="prem-btn">ثبت‌نام در مسابقه</button></Link>
-                  <Link href="/events"><button className="ghost-btn" style={{ display:'flex', alignItems:'center', gap:'8px' }}>همه رویدادها <ArrowLeft size={14} /></button></Link>
-                </div>
-              </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:'16px', flexShrink:0 }}>
-                {['اسنوکر', 'پاکت', 'هی‌بال'].map((cat, i) => (
-                  <div key={i} style={{ padding:'16px 24px', background:'rgba(255,255,255,0.04)', border:`1px solid rgba(255,255,255,0.07)`, borderRadius:'14px', textAlign:'center', minWidth:'130px' }}>
-                    <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.28)', marginBottom:'4px' }}>رشته</div>
-                    <div style={{ fontSize:'14px', fontWeight:700, color:'#fff' }}>{cat}</div>
-                  </div>
-                ))}
-              </div>
+              ))}
+            </div>
+            <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
+              <Link href="/events/1"><button className="prem-btn">ثبت‌نام در مسابقه</button></Link>
+              <Link href="/events"><button className="ghost-btn" style={{ display:'flex', alignItems:'center', gap:'8px' }}>همه رویدادها <ArrowLeft size={14} /></button></Link>
             </div>
           </div>
-        </ScrollReveal>
+        </div>
+
+        {/* Right: cinematic image panel */}
+        <div style={{ position:'relative', overflow:'hidden' }}>
+          <img src={IMG.snooker} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.50) saturate(0.70) contrast(1.05)' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+          {/* left edge fade to blend with content panel */}
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(12,11,9,0.98) 0%,rgba(12,11,9,0.30) 30%,rgba(12,11,9,0.05) 100%)', pointerEvents:'none' }} />
+          {/* top/bottom fade */}
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(12,11,9,0.50) 0%,transparent 20%,transparent 80%,rgba(12,11,9,0.50) 100%)', pointerEvents:'none' }} />
+          {/* Gold tint overlay */}
+          <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse 70% 60% at 60% 50%,rgba(199,166,106,0.06),transparent 70%)`, pointerEvents:'none' }} />
+          {/* Corner badge */}
+          <div style={{ position:'absolute', top:'28px', right:'28px', zIndex:2 }}>
+            <div style={{ background:'rgba(199,166,106,0.90)', backdropFilter:'blur(16px)', borderRadius:'14px', padding:'12px 18px', textAlign:'center' }}>
+              <div style={{ fontSize:'8px', color:'rgba(0,0,0,0.55)', fontWeight:700, letterSpacing:'0.15em', marginBottom:'4px' }}>PRIZE POOL</div>
+              <div style={{ fontSize:'20px', fontWeight:900, color:'#1C1C1A', lineHeight:1, letterSpacing:'-0.03em' }}>۵۰M</div>
+              <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.5)', marginTop:'2px' }}>تومان</div>
+            </div>
+          </div>
+          {/* Bottom caption */}
+          <div style={{ position:'absolute', bottom:'28px', left:'24px', right:'24px', zIndex:2 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px' }}>
+              <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'#ef4444', boxShadow:'0 0 8px #ef4444', display:'inline-block', animation:'neonPulse 1.8s infinite' }} />
+              <span style={{ fontSize:'9px', color:'rgba(255,255,255,0.55)', fontWeight:700, letterSpacing:'0.18em' }}>REGISTRATION OPEN</span>
+            </div>
+            <div style={{ fontSize:'13px', color:'rgba(255,255,255,0.35)', lineHeight:1.5 }}>
+              تهران · مجموعه ورزشی آزادی · خرداد ۱۴۰۴
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════
