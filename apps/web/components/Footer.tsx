@@ -1,150 +1,186 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
+import { Shield, MapPin, Phone, Mail, Instagram, ChevronLeft } from 'lucide-react';
+
+const GOLD     = '#C7A66A';
+const GOLD_DIM = 'rgba(199,166,106,0.65)';
+const GOLD_BOR = 'rgba(199,166,106,0.20)';
+const DIM      = 'rgba(255,255,255,0.38)';
+const DIM2     = 'rgba(255,255,255,0.16)';
+
+const nav = [
+  {
+    heading: 'PLATFORM',
+    color: GOLD,
+    links: [
+      { href: '/clubs',    label: 'باشگاه‌ها'   },
+      { href: '/shop',     label: 'فروشگاه'     },
+      { href: '/ranking',  label: 'رنکینگ'      },
+      { href: '/live',     label: 'پخش زنده'    },
+      { href: '/events',   label: 'مسابقات'     },
+    ],
+  },
+  {
+    heading: 'EXPLORE',
+    color: '#6AACCC',
+    links: [
+      { href: '/players',   label: 'بازیکنان'  },
+      { href: '/coaches',   label: 'مربیان'    },
+      { href: '/referees',  label: 'داوران'    },
+      { href: '/education', label: 'آموزش'     },
+      { href: '/news',      label: 'اخبار'     },
+    ],
+  },
+  {
+    heading: 'ACCOUNT',
+    color: '#A78BFA',
+    links: [
+      { href: '/register',       label: 'ثبت‌نام رایگان' },
+      { href: '/login',          label: 'ورود'           },
+      { href: '/dashboard',      label: 'داشبورد'        },
+      { href: '/profile',        label: 'پروفایل'        },
+      { href: '/dashboard/shop', label: 'فروشگاه من'     },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
-    <>
+    <footer style={{ background: '#111110', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
+
+      {/* Subtle ambient glow */}
+      <div style={{ position: 'absolute', top: 0, left: '30%', width: '500px', height: '300px', background: `radial-gradient(ellipse, ${GOLD}05, transparent 70%)`, filter: 'blur(60px)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '360px', height: '1px', background: `linear-gradient(90deg,transparent,${GOLD}40,transparent)` }} />
+
       <style>{`
-        .footer-link {
-          color: rgba(255,255,255,0.35);
+        .ft-link {
+          color: ${DIM};
           font-size: 13px;
           text-decoration: none;
-          transition: color 0.3s ease;
-          display: block;
-          padding: 4px 0;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 5px 0;
+          transition: color 0.25s ease;
+          line-height: 1.5;
         }
-        .footer-link:hover { color: #C7A66A; }
-        .footer-social {
-          width: 36px; height: 36px;
-          border-radius: 8px;
+        .ft-link:hover { color: ${GOLD}; }
+        .ft-link svg { opacity: 0; transition: opacity 0.25s ease; flex-shrink: 0; }
+        .ft-link:hover svg { opacity: 1; }
+        .ft-social {
+          width: 38px; height: 38px;
+          border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
-          background: rgba(0,0,0,0.04);
-          border: 1px solid rgba(0,0,0,0.06);
-          color: rgba(255,255,255,0.3);
-          font-size: 14px; font-weight: 700;
-          transition: all 0.3s ease;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.09);
+          color: ${DIM};
+          font-size: 13px; font-weight: 700;
+          transition: all 0.28s ease;
           cursor: pointer; text-decoration: none;
         }
-        .footer-social:hover {
-          background: rgba(199,166,106,0.1);
-          border-color: rgba(199,166,106,0.3);
-          color: #C7A66A;
+        .ft-social:hover {
+          background: rgba(199,166,106,0.12);
+          border-color: ${GOLD_BOR};
+          color: ${GOLD};
+          transform: translateY(-2px);
         }
         @media (max-width: 900px) {
-          .footer-grid {
-            grid-template-columns: 1fr 1fr !important;
-            gap: 32px !important;
-          }
-          .footer-brand { grid-column: 1 / -1; }
+          .ft-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
+          .ft-brand { grid-column: 1 / -1; }
         }
-        @media (max-width: 480px) {
-          .footer-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .footer-brand { grid-column: 1; }
-          .footer-inner { padding: 40px 20px 20px !important; }
-          .footer-bottom { flex-direction: column !important; gap: 12px !important; text-align: center; }
-          .footer-bottom-links { justify-content: center !important; }
+        @media (max-width: 520px) {
+          .ft-grid { grid-template-columns: 1fr !important; }
+          .ft-brand { grid-column: 1; }
+          .ft-inner { padding: 44px 20px 24px !important; }
+          .ft-bottom { flex-direction: column !important; gap: 14px !important; text-align: center; }
+          .ft-bottom-links { justify-content: center !important; }
         }
       `}</style>
 
-      
+      <div className="ft-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '64px 7% 28px' }}>
 
-      <footer style={{
-        background: '#FFFFFF',
-        borderTop: '1px solid rgba(0,0,0,0.04)',
-        position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '600px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(199,166,106,0.3), transparent)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: 0, left: '30%', width: '300px', height: '200px', background: 'radial-gradient(ellipse, rgba(199,166,106,0.03), transparent 70%)', pointerEvents: 'none' }} />
+        {/* ── Main grid ─────────────────────────────── */}
+        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr', gap: '52px', marginBottom: '52px' }}>
 
-        <div className="footer-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '60px 24px 24px' }}>
-          <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '48px', marginBottom: '48px' }}>
-
-            {/* لوگو و توضیح */}
-            <div className="footer-brand">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #C7A66A, #A07840)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '18px', color: '#000', boxShadow: '0 0 20px rgba(199,166,106,0.3)', flexShrink: 0 }}>B</div>
-                <span style={{ fontWeight: 900, fontSize: '18px', color: '#fff', letterSpacing: '-0.02em' }}>
-                  بیلیارد{' '}
-                  <span style={{ background: 'linear-gradient(135deg, #C7A66A, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
-                </span>
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '13px', lineHeight: 1.8, marginBottom: '20px', maxWidth: '260px' }}>
-                اولین پلتفرم تخصصی بیلیارد ایران. رزرو میز، رنکینگ رسمی، فروشگاه تجهیزات و پخش زنده مسابقات.
-              </p>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {['T', 'I', 'Y', 'T'].map((s, i) => (
-                  <a key={i} className="footer-social">{s}</a>
-                ))}
+          {/* Brand column */}
+          <div className="ft-brand">
+            {/* Logo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '18px' }}>
+              <div style={{ width: '38px', height: '38px', background: `linear-gradient(135deg,${GOLD},#A07840)`, borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '19px', color: '#fff', boxShadow: `0 0 22px ${GOLD}30`, flexShrink: 0 }}>B</div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: '17px', color: '#fff', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                  بیلیارد <span style={{ background: `linear-gradient(135deg,${GOLD},#e8c98a)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
+                </div>
+                <div style={{ fontSize: '9px', color: DIM2, letterSpacing: '0.18em', marginTop: '4px' }}>BILLIARD PLUS · IRAN</div>
               </div>
             </div>
 
-            {/* پلتفرم */}
-            <div>
-              <div style={{ fontSize: '11px', color: '#C7A66A', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '16px' }}>PLATFORM</div>
-              {[
-                { href: '/clubs', label: 'باشگاه‌ها' },
-                { href: '/shop', label: 'فروشگاه' },
-                { href: '/rankings', label: 'رنکینگ' },
-                { href: '/live', label: 'پخش زنده' },
-                { href: '/events', label: 'مسابقات' },
-              ].map((item, i) => (
-                <Link key={i} href={item.href} className="footer-link">{item.label}</Link>
-              ))}
+            <p style={{ color: DIM, fontSize: '13px', lineHeight: 1.85, marginBottom: '22px', maxWidth: '270px' }}>
+              اولین پلتفرم تخصصی بیلیارد ایران. رزرو میز، رنکینگ رسمی، فروشگاه تجهیزات و پخش زنده مسابقات.
+            </p>
+
+            {/* Trust badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.07)', border: `1px solid ${GOLD_BOR}`, borderRadius: '10px', padding: '8px 14px', marginBottom: '24px' }}>
+              <Shield size={13} style={{ color: GOLD, flexShrink: 0 }} />
+              <span style={{ fontSize: '11px', color: GOLD_DIM, fontWeight: 600, lineHeight: 1.4 }}>تأیید شده توسط فدراسیون بیلیارد ایران</span>
             </div>
 
-            {/* اکتشاف */}
-            <div>
-              <div style={{ fontSize: '11px', color: '#06b6d4', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '16px' }}>EXPLORE</div>
+            {/* Socials */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {[
-                { href: '/players', label: 'بازیکنان' },
-                { href: '/coaches', label: 'مربیان' },
-                { href: '/referees', label: 'داوران' },
-                { href: '/news', label: 'اخبار' },
-                { href: '/education', label: 'آموزش' },
-              ].map((item, i) => (
-                <Link key={i} href={item.href} className="footer-link">{item.label}</Link>
-              ))}
-            </div>
-
-            {/* حساب */}
-            <div>
-              <div style={{ fontSize: '11px', color: '#a78bfa', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '16px' }}>ACCOUNT</div>
-              {[
-                { href: '/register', label: 'ثبت‌نام رایگان' },
-                { href: '/login', label: 'ورود' },
-                { href: '/dashboard', label: 'داشبورد' },
-                { href: '/profile', label: 'پروفایل' },
-                { href: '/dashboard/shop', label: 'فروشگاه من' },
-              ].map((item, i) => (
-                <Link key={i} href={item.href} className="footer-link">{item.label}</Link>
+                { label: 'T', title: 'تلگرام'   },
+                { label: 'I', title: 'اینستاگرام' },
+                { label: 'Y', title: 'یوتیوب'    },
+                { label: 'X', title: 'توییتر'    },
+              ].map(s => (
+                <a key={s.label} className="ft-social" title={s.title} aria-label={s.title}>{s.label}</a>
               ))}
             </div>
           </div>
 
-          <div style={{ height: '1px', background: 'rgba(0,0,0,0.04)', marginBottom: '24px' }} />
-
-          <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.15)' }}>
-              © ۱۴۰۳ بیلیارد پلاس — تمام حقوق محفوظ است
-            </div>
-            <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.08)', letterSpacing: '0.1em' }}>
-              BILLIARD PLUS · IRAN · 2024
-            </div>
-            <div className="footer-bottom-links" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-              {['حریم خصوصی', 'قوانین', 'تماس با ما'].map((item, i) => (
-                <span key={i} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', transition: 'color 0.3s ease' }}
-                  onMouseEnter={e => { (e.target as HTMLElement).style.color = '#C7A66A'; }}
-                  onMouseLeave={e => { (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.15)'; }}>
-                  {item}
-                </span>
+          {/* Nav columns */}
+          {nav.map(col => (
+            <div key={col.heading}>
+              <div style={{ fontSize: '10px', color: col.color, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '18px', opacity: 0.9 }}>{col.heading}</div>
+              {col.links.map(item => (
+                <Link key={item.href} href={item.href} className="ft-link">
+                  <ChevronLeft size={10} />
+                  {item.label}
+                </Link>
               ))}
             </div>
+          ))}
+        </div>
+
+        {/* ── Contact strip ─────────────────────────── */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '20px 0', marginBottom: '24px', display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+          {[
+            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />,  text: 'تهران، ایران' },
+            { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />,  text: '۰۲۱-۱۲۳۴۵۶۷۸' },
+            { icon: <Mail   size={13} style={{ color: GOLD, flexShrink: 0 }} />,  text: 'info@billiardplus.ir' },
+          ].map((c, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: DIM, fontSize: '12px' }}>
+              {c.icon}{c.text}
+            </div>
+          ))}
+        </div>
+
+        {/* ── Bottom bar ────────────────────────────── */}
+        <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ fontSize: '12px', color: DIM2 }}>© ۱۴۰۳ بیلیارد پلاس — تمام حقوق محفوظ است</div>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.10)', letterSpacing: '0.12em' }}>BILLIARD PLUS · IRAN · 2024</div>
+          <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
+            {['حریم خصوصی', 'قوانین', 'تماس با ما'].map(item => (
+              <span key={item} style={{ fontSize: '12px', color: DIM2, cursor: 'pointer', transition: 'color 0.25s ease' }}
+                onMouseEnter={e => { (e.target as HTMLElement).style.color = GOLD; }}
+                onMouseLeave={e => { (e.target as HTMLElement).style.color = DIM2; }}>
+                {item}
+              </span>
+            ))}
           </div>
         </div>
-      </footer>
-    </>
+      </div>
+    </footer>
   );
 }
