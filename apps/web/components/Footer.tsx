@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, MapPin, Phone, Mail, Instagram, ChevronLeft } from 'lucide-react';
+import { Shield, MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD     = '#C7A66A';
 const GOLD_DIM = 'rgba(199,166,106,0.65)';
