@@ -1,4 +1,4 @@
-// ==============================
+﻿// ==============================
 // FILE: apps/web/app/live/[id]/page.tsx
 // ==============================
 'use client';
@@ -71,11 +71,11 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
   const fillPct = Math.round((stream.score1 / stream.totalFrames) * 100);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
 
       {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', flexShrink: 0, background: '#050c08', borderBottom: '1px solid rgba(16,185,129,0.15)' }}>
-        <button onClick={() => router.push('/live')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10b981', fontSize: 14, fontFamily: 'Vazirmatn, sans-serif', padding: 0, textDecoration: 'none' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', flexShrink: 0, background: '#050c08', borderBottom: '1px solid rgba(199,166,106,0.15)' }}>
+        <button onClick={() => router.push('/live')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C7A66A', fontSize: 14, fontFamily: 'Vazirmatn, sans-serif', padding: 0, textDecoration: 'none' }}>
           ← زنده
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 'auto' }}>
@@ -83,7 +83,7 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
           <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>LIVE</span>
           <span style={{ fontSize: 11, color: '#6b7280' }}>👁 {viewers.toLocaleString('fa')}</span>
         </div>
-        <button onClick={() => setChatOpen(o => !o)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 11, fontFamily: 'Vazirmatn, sans-serif', cursor: 'pointer', background: chatOpen ? 'rgba(16,185,129,0.15)' : 'rgba(107,114,128,0.15)', color: chatOpen ? '#10b981' : '#6b7280', border: `1px solid ${chatOpen ? 'rgba(16,185,129,0.3)' : 'rgba(107,114,128,0.2)'}` }}>
+        <button onClick={() => setChatOpen(o => !o)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 11, fontFamily: 'Vazirmatn, sans-serif', cursor: 'pointer', background: chatOpen ? 'rgba(199,166,106,0.15)' : 'rgba(107,114,128,0.15)', color: chatOpen ? '#C7A66A' : '#6b7280', border: `1px solid ${chatOpen ? 'rgba(199,166,106,0.3)' : 'rgba(107,114,128,0.2)'}` }}>
           {chatOpen ? '💬 بستن چت' : '💬 باز کردن چت'}
         </button>
       </div>
@@ -95,14 +95,14 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
           {/* Video */}
           <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', maxHeight: '56vw' }}>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at center,#0d3320 0%,#061a0f 60%,#010604 100%)' }}>
-              <div style={{ position: 'relative', width: '70%', height: '55%', borderRadius: 16, background: 'linear-gradient(135deg,#0a5c2e,#0d7a3c)', border: '4px solid #5c3a1e', boxShadow: '0 0 40px rgba(16,185,129,0.2)' }}>
-                <div style={{ position: 'absolute', inset: 8, borderRadius: 12, border: '2px solid rgba(255,255,255,0.08)' }} />
-                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(255,255,255,0.1)' }} />
-                <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 10, fontWeight: 700, opacity: 0.4, color: '#10b981', letterSpacing: 2 }}>BILLIARD PLUS</div>
+              <div style={{ position: 'relative', width: '70%', height: '55%', borderRadius: 16, background: 'linear-gradient(135deg,#0a5c2e,#0d7a3c)', border: '4px solid #5c3a1e', boxShadow: '0 0 40px rgba(199,166,106,0.2)' }}>
+                <div style={{ position: 'absolute', inset: 8, borderRadius: 12, border: '2px solid rgba(0,0,0,0.06)' }} />
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(0,0,0,0.08)' }} />
+                <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 10, fontWeight: 700, opacity: 0.4, color: '#C7A66A', letterSpacing: 2 }}>BILLIARD PLUS</div>
                 {[
                   { x: '30%', y: '40%', color: '#ef4444' },
                   { x: '55%', y: '35%', color: '#f59e0b' },
-                  { x: '65%', y: '55%', color: '#f0faf5' },
+                  { x: '65%', y: '55%', color: '#111111' },
                   { x: '40%', y: '60%', color: '#3b82f6' },
                 ].map((b, i) => (
                   <div key={i} style={{ position: 'absolute', width: 12, height: 12, borderRadius: '50%', left: b.x, top: b.y, background: b.color, boxShadow: `0 0 6px ${b.color}88`, transform: 'translate(-50%,-50%)' }} />
@@ -112,7 +112,7 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block' }} />
                 <span style={{ fontSize: 10, fontWeight: 900, color: '#fff' }}>LIVE</span>
               </div>
-              <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 8px', borderRadius: 8, background: 'rgba(0,0,0,0.6)', fontSize: 11, color: '#f0faf5', fontFamily: 'monospace' }}>
+              <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 8px', borderRadius: 8, background: 'rgba(0,0,0,0.6)', fontSize: 11, color: '#111111', fontFamily: 'monospace' }}>
                 ▶ {stream.startedAt}
               </div>
             </div>
@@ -127,20 +127,20 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Scoreboard */}
-          <div style={{ margin: '12px 16px 0', borderRadius: 16, overflow: 'hidden', background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <div style={{ textAlign: 'center', padding: '6px 0', fontSize: 11, fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.08)', borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
+          <div style={{ margin: '12px 16px 0', borderRadius: 16, overflow: 'hidden', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <div style={{ textAlign: 'center', padding: '6px 0', fontSize: 11, fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.08)', borderBottom: '1px solid rgba(199,166,106,0.08)' }}>
               ● LIVE · فریم {stream.frame} از {stream.totalFrames}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', alignItems: 'center', padding: '14px 16px' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>{stream.player1}</div>
-                <div style={{ fontSize: 40, fontWeight: 900, color: '#10b981', lineHeight: 1 }}>{stream.score1}</div>
+                <div style={{ fontSize: 40, fontWeight: 900, color: '#C7A66A', lineHeight: 1 }}>{stream.score1}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 11, color: '#4b5563', marginBottom: 6 }}>{stream.discipline}</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#6b7280' }}>VS</div>
-                <div style={{ marginTop: 8, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 2, width: `${fillPct}%`, background: 'linear-gradient(90deg,#10b981,#06b6d4)', transition: 'width 0.7s' }} />
+                <div style={{ marginTop: 8, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 2, width: `${fillPct}%`, background: 'linear-gradient(90deg,#C7A66A,#A07840)', transition: 'width 0.7s' }} />
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
@@ -152,18 +152,18 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
 
           {/* Title */}
           <div style={{ padding: '12px 16px 16px' }}>
-            <div style={{ fontSize: 16, fontWeight: 900, margin: '0 0 4px', color: '#f0faf5' }}>{stream.title}</div>
+            <div style={{ fontSize: 16, fontWeight: 900, margin: '0 0 4px', color: '#111111' }}>{stream.title}</div>
             <div style={{ fontSize: 12, color: '#6b7280' }}>{stream.tournament}</div>
           </div>
         </div>
 
         {/* Chat */}
         {chatOpen && (
-          <div style={{ display: 'flex', flexDirection: 'column', background: '#050c08', borderTop: '1px solid rgba(16,185,129,0.1)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', flexShrink: 0, borderBottom: '1px solid rgba(16,185,129,0.1)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', background: '#050c08', borderTop: '1px solid rgba(199,166,106,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', flexShrink: 0, borderBottom: '1px solid rgba(199,166,106,0.1)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#f0faf5' }}>💬 نظرات زنده</span>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>{comments.length}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#111111' }}>💬 نظرات زنده</span>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(199,166,106,0.15)', color: '#C7A66A' }}>{comments.length}</span>
               </div>
               <button onClick={() => setChatOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4b5563', fontSize: 13, fontFamily: 'Vazirmatn, sans-serif' }}>
                 ✕ بستن
@@ -173,12 +173,12 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
             <div ref={chatRef} style={{ overflowY: 'auto', padding: '10px 12px', maxHeight: 280, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {comments.map(c => (
                 <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
                     {c.user[0]}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>{c.user}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#C7A66A' }}>{c.user}</span>
                       <span style={{ fontSize: 10, color: '#4b5563' }}>{c.time}</span>
                     </div>
                     <div style={{ fontSize: 13, lineHeight: 1.4, color: '#d1d5db', wordBreak: 'break-word' }}>{c.text}</div>
@@ -191,9 +191,9 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
               ))}
             </div>
 
-            <div style={{ padding: '10px 12px', flexShrink: 0, borderTop: '1px solid rgba(16,185,129,0.1)', display: 'flex', gap: 8 }}>
-              <input value={newComment} onChange={e => setNewComment(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendComment()} placeholder="نظر بنویس..." style={{ flex: 1, minWidth: 0, padding: '8px 12px', borderRadius: 12, fontSize: 13, outline: 'none', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} />
-              <button onClick={sendComment} style={{ padding: '8px 14px', borderRadius: 12, flexShrink: 0, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: 'Vazirmatn, sans-serif', background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+            <div style={{ padding: '10px 12px', flexShrink: 0, borderTop: '1px solid rgba(199,166,106,0.1)', display: 'flex', gap: 8 }}>
+              <input value={newComment} onChange={e => setNewComment(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendComment()} placeholder="نظر بنویس..." style={{ flex: 1, minWidth: 0, padding: '8px 12px', borderRadius: 12, fontSize: 13, outline: 'none', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.15)', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} />
+              <button onClick={sendComment} style={{ padding: '8px 14px', borderRadius: 12, flexShrink: 0, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: 'Vazirmatn, sans-serif', background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
                 ارسال
               </button>
             </div>

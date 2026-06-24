@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -20,9 +20,9 @@ const levelLabels: Record<string, string> = {
 const levelRank: Record<string, number> = { world_pro: 4, national: 3, premier: 2, league1: 1 };
 
 const specialtyMeta: Record<string, { label: string; color: string }> = {
-  snooker:  { label: 'اسنوکر',        color: '#10b981' },
-  pocket:   { label: 'پاکت بیلیارد', color: '#06b6d4' },
-  highball: { label: 'هی‌بال',         color: '#a78bfa' },
+  snooker:  { label: 'اسنوکر',        color: '#C7A66A' },
+  pocket:   { label: 'پاکت بیلیارد', color: '#3b82f6' },
+  highball: { label: 'هی‌بال',         color: '#8b5cf6' },
 };
 
 const MOCK: Player[] = [
@@ -85,10 +85,10 @@ export default function PlayersPage() {
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
         @keyframes shimmer{ 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
-        .srch{ background:transparent;border:none;outline:none;color:#f0faf5;font-size:14px;font-family:inherit;width:100% }
-        .srch::placeholder{ color:rgba(240,250,245,0.22) }
+        .srch{ background:transparent;border:none;outline:none;color:#111111;font-size:14px;font-family:inherit;width:100% }
+        .srch::placeholder{ color:rgba(0,0,0,0.28) }
         .pcard{ transition:all 0.3s cubic-bezier(0.4,0,0.2,1) }
-        .pcard:hover{ transform:translateY(-4px)!important;border-color:rgba(16,185,129,0.3)!important;box-shadow:0 20px 60px rgba(0,0,0,0.45)!important }
+        .pcard:hover{ transform:translateY(-4px)!important;border-color:rgba(199,166,106,0.30)!important;box-shadow:0 12px 40px rgba(0,0,0,0.12)!important }
         .pill-btn{ transition:all 0.2s;cursor:pointer;font-family:inherit }
 
         .pgrid{ display:grid;grid-template-columns:repeat(3,1fr);gap:14px }
@@ -96,32 +96,32 @@ export default function PlayersPage() {
         @media(max-width:520px){ .pgrid{grid-template-columns:1fr;gap:10px} }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806 0%,#060d0a 100%)', direction: 'rtl', paddingBottom: 60 }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', paddingBottom: 60 }}>
 
         {/* ══ HERO ══ */}
-        <div style={{ position: 'relative', background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: 'clamp(28px,5vw,52px) clamp(16px,4vw,40px) 0', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', background: 'linear-gradient(180deg,#111111 0%,#1a1a1a 100%)', borderBottom: '1px solid rgba(0,0,0,0.05)', padding: 'clamp(28px,5vw,52px) clamp(16px,4vw,40px) 0', overflow: 'hidden' }}>
           {/* glow orb */}
-          <div style={{ position: 'absolute', top: '-30%', right: '-5%', width: '45vw', height: '45vw', maxWidth: 440, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(16,185,129,0.08) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-20%', left: '10%', width: '35vw', height: '35vw', maxWidth: 340, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(6,182,212,0.06) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '-30%', right: '-5%', width: '45vw', height: '45vw', maxWidth: 440, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(199,166,106,0.10) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-20%', left: '10%', width: '35vw', height: '35vw', maxWidth: 340, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(199,166,106,0.07) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
 
           <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: 10, color: 'rgba(16,185,129,0.6)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: 8 }}>PLAYER RANKING</div>
-            <h1 style={{ fontSize: 'clamp(24px,4vw,44px)', fontWeight: 900, color: '#f0faf5', margin: '0 0 6px', letterSpacing: '-0.03em' }}>بازیکنان رنکینگی</h1>
-            <p style={{ fontSize: 13, color: 'rgba(240,250,245,0.35)', margin: '0 0 28px' }}>بهترین بازیکنان بیلیارد ایران</p>
+            <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: 8 }}>PLAYER RANKING</div>
+            <h1 style={{ fontSize: 'clamp(24px,4vw,44px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.03em' }}>بازیکنان رنکینگی</h1>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.40)', margin: '0 0 28px' }}>بهترین بازیکنان بیلیارد ایران</p>
 
             {/* TOP 3 podium */}
             {!loading && top3.length > 0 && (
               <div style={{ display: 'flex', gap: 10, paddingBottom: 24, overflowX: 'auto' }}>
                 {top3.map((p, i) => {
-                  const spec = specialtyMeta[p.playerProfile?.specialty] ?? { label: 'اسنوکر', color: '#10b981' };
+                  const spec = specialtyMeta[p.playerProfile?.specialty] ?? { label: 'اسنوکر', color: '#C7A66A' };
                   const medals = ['🥇','🥈','🥉'];
                   const heights = [72, 56, 48];
                   return (
                     <Link key={p.id} href={`/players/${p.id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '14px 20px', background: i === 0 ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${i === 0 ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 18, minWidth: 120, transition: 'all 0.3s', cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '14px 20px', background: i === 0 ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.05)', border: `1px solid ${i === 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.08)'}`, borderRadius: 18, minWidth: 120, transition: 'all 0.3s', cursor: 'pointer' }}>
                         <span style={{ fontSize: 20 }}>{medals[i]}</span>
                         <Avatar player={p} color={spec.color} size={44} />
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#f0faf5', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.firstName} {p.lastName}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.firstName} {p.lastName}</div>
                         <span style={{ fontSize: 10, color: spec.color, background: `${spec.color}14`, border: `1px solid ${spec.color}22`, borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>{spec.label}</span>
                       </div>
                     </Link>
@@ -137,10 +137,10 @@ export default function PlayersPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
 
             {/* Search */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: `1.5px solid ${searchFocus ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 14, padding: '0 16px', height: 48, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(16,185,129,0.08)' : 'none' }}>
-              <Search size={15} color="rgba(240,250,245,0.25)" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF', border: `1.5px solid ${searchFocus ? 'rgba(199,166,106,0.45)' : 'rgba(0,0,0,0.10)'}`, borderRadius: 14, padding: '0 16px', height: 48, transition: 'all 0.3s', boxShadow: searchFocus ? '0 0 0 3px rgba(199,166,106,0.10)' : 'none' }}>
+              <Search size={15} color="rgba(0,0,0,0.30)" />
               <input className="srch" type="text" value={search} onChange={e => setSearch(e.target.value)} onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)} placeholder="جستجوی نام یا شهر..." />
-              {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(240,250,245,0.3)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={14} /></button>}
+              {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={14} /></button>}
             </div>
 
             {/* Filters row */}
@@ -152,7 +152,7 @@ export default function PlayersPage() {
                 { v: 'pocket',   l: 'پاکت' },
                 { v: 'highball', l: 'هی‌بال' },
               ].map(f => (
-                <button key={f.v} className="pill-btn" onClick={() => setSpecialty(f.v)} style={{ padding: '6px 16px', borderRadius: 20, border: `1px solid ${specialty === f.v ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.07)'}`, background: specialty === f.v ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)', color: specialty === f.v ? '#10b981' : 'rgba(240,250,245,0.45)', fontSize: 12, fontWeight: 600 }}>
+                <button key={f.v} className="pill-btn" onClick={() => setSpecialty(f.v)} style={{ padding: '6px 16px', borderRadius: 20, border: `1px solid ${specialty === f.v ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.08)'}`, background: specialty === f.v ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.03)', color: specialty === f.v ? '#A07840' : 'rgba(0,0,0,0.45)', fontSize: 12, fontWeight: 600 }}>
                   {f.l}
                 </button>
               ))}
@@ -163,13 +163,13 @@ export default function PlayersPage() {
                   { v: 'level', l: 'سطح' },
                   { v: 'exp',   l: 'تجربه' },
                 ].map(s => (
-                  <button key={s.v} className="pill-btn" onClick={() => setSortBy(s.v as any)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sortBy === s.v ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.07)'}`, background: sortBy === s.v ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.03)', color: sortBy === s.v ? '#f59e0b' : 'rgba(240,250,245,0.4)', fontSize: 11, fontWeight: 600 }}>
+                  <button key={s.v} className="pill-btn" onClick={() => setSortBy(s.v as any)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sortBy === s.v ? 'rgba(199,166,106,0.45)' : 'rgba(0,0,0,0.08)'}`, background: sortBy === s.v ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.03)', color: sortBy === s.v ? '#A07840' : 'rgba(0,0,0,0.40)', fontSize: 11, fontWeight: 600 }}>
                     ↕ {s.l}
                   </button>
                 ))}
               </div>
 
-              <span style={{ fontSize: 12, color: 'rgba(240,250,245,0.25)' }}>{toFa(filtered.length)} بازیکن</span>
+              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>{toFa(filtered.length)} بازیکن</span>
             </div>
           </div>
 
@@ -177,25 +177,25 @@ export default function PlayersPage() {
           {loading ? (
             <div className="pgrid">
               {[1,2,3,4,5,6].map(i => (
-                <div key={i} style={{ height: 180, background: 'rgba(255,255,255,0.03)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.04) 50%,transparent 100%)', animation: 'shimmer 1.5s infinite' }} />
+                <div key={i} style={{ height: 180, background: '#F3F2EF', borderRadius: 20, border: '1px solid rgba(0,0,0,0.06)', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.60) 50%,transparent 100%)', animation: 'shimmer 1.5s infinite' }} />
                 </div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-              <div style={{ fontSize: 40, opacity: 0.12, marginBottom: 14 }}>🎱</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#f0faf5', marginBottom: 6 }}>بازیکنی یافت نشد</div>
-              <div style={{ fontSize: 13, color: 'rgba(240,250,245,0.3)' }}>جستجو یا فیلترها را تغییر دهید</div>
+              <div style={{ fontSize: 40, opacity: 0.20, marginBottom: 14 }}>🎱</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 6 }}>بازیکنی یافت نشد</div>
+              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>جستجو یا فیلترها را تغییر دهید</div>
             </div>
           ) : (
             <div className="pgrid">
               {filtered.map((player, i) => {
-                const spec = specialtyMeta[player.playerProfile?.specialty] ?? { label: 'اسنوکر', color: '#10b981' };
+                const spec = specialtyMeta[player.playerProfile?.specialty] ?? { label: 'اسنوکر', color: '#C7A66A' };
                 const lvl  = levelLabels[player.playerProfile?.level] ?? player.playerProfile?.level ?? '';
                 return (
                   <Link key={player.id} href={`/players/${player.id}`} style={{ textDecoration: 'none' }}>
-                    <div className="pcard" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: 18, cursor: 'pointer', animation: `fadeUp 0.5s ${i * 0.04}s ease both`, position: 'relative', overflow: 'hidden', height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div className="pcard" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 20, padding: 18, cursor: 'pointer', animation: `fadeUp 0.5s ${i * 0.04}s ease both`, position: 'relative', overflow: 'hidden', height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
 
                       {/* shimmer top line */}
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg,transparent,${spec.color}55,transparent)` }} />
@@ -205,18 +205,18 @@ export default function PlayersPage() {
                         <Avatar player={player} color={spec.color} size={50} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
-                            <span style={{ color: '#f0faf5', fontWeight: 800, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.firstName} {player.lastName}</span>
+                            <span style={{ color: '#111111', fontWeight: 800, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.firstName} {player.lastName}</span>
                             {player.verificationStatus === 'verified' && (
                               <Shield size={12} style={{ color: spec.color, flexShrink: 0 }} />
                             )}
                           </div>
                           {player.city && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(240,250,245,0.35)', fontSize: 11 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(0,0,0,0.40)', fontSize: 11 }}>
                               <MapPin size={10} />{player.city}
                             </div>
                           )}
                         </div>
-                        <ChevronLeft size={15} color="rgba(240,250,245,0.15)" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <ChevronLeft size={15} color="rgba(0,0,0,0.20)" style={{ flexShrink: 0, marginTop: 2 }} />
                       </div>
 
                       {/* tags */}
@@ -225,12 +225,12 @@ export default function PlayersPage() {
                           {spec.label}
                         </span>
                         {lvl && (
-                          <span style={{ fontSize: 11, color: 'rgba(240,250,245,0.45)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '3px 10px' }}>
+                          <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.50)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '3px 10px' }}>
                             {lvl}
                           </span>
                         )}
                         {player.playerProfile?.experience && (
-                          <span style={{ fontSize: 11, color: 'rgba(240,250,245,0.3)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '3px 10px' }}>
+                          <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 20, padding: '3px 10px' }}>
                             {player.playerProfile.experience} سال
                           </span>
                         )}
@@ -238,7 +238,7 @@ export default function PlayersPage() {
 
                       {/* bio */}
                       {player.bio && (
-                        <div style={{ color: 'rgba(240,250,245,0.38)', fontSize: 12, lineHeight: 1.65, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', marginTop: 'auto' }}>
+                        <div style={{ color: 'rgba(0,0,0,0.48)', fontSize: 12, lineHeight: 1.65, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', marginTop: 'auto' }}>
                           {player.bio}
                         </div>
                       )}

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -26,7 +26,7 @@ const BRANDS: Brand[] = [
     id:'predator', name:'پردیتور', nameEn:'PREDATOR', country:'ایالات متحده', flag:'🇺🇸',
     category:['cue','shaft','tip'], founded:1994,
     description:'پیشگام فناوری Low Deflection در صنعت چوب بیلیارد. محصولات پردیتور استاندارد طلایی بازیکنان حرفه‌ای در سراسر جهان هستند.',
-    logo:'P', coverImg:'/images/billiadr-club-1.jpg', accentColor:'#10b981',
+    logo:'P', coverImg:'/images/billiadr-club-1.jpg', accentColor:'#C7A66A',
     rating:4.9, reviewCount:1240, products:47, dealers:12, tournaments:38,
     isOfficial:true, isFeatured:true, isVerified:true, tier:'platinum',
     tags:['Low Deflection','Carbon Fiber','Professional','WPBSA'],
@@ -89,7 +89,7 @@ const BRANDS: Brand[] = [
     id:'master', name:'مستر', nameEn:'MASTER', country:'ایالات متحده', flag:'🇺🇸',
     category:['chalk','accessory'], founded:1867,
     description:'گچ مستر بیش از ۱۵۰ سال است که انتخاب اول بازیکنان در سراسر جهان است. ساده، مطمئن، و بی‌نظیر در کیفیت.',
-    logo:'M', coverImg:'/images/billiadr-club-3.jpg', accentColor:'#10b981',
+    logo:'M', coverImg:'/images/billiadr-club-3.jpg', accentColor:'#C7A66A',
     rating:4.5, reviewCount:1840, products:8, dealers:18, tournaments:0,
     isOfficial:false, isFeatured:false, isVerified:true, tier:'silver',
     tags:['Chalk','Classic','150+ Years','Economy'],
@@ -105,9 +105,9 @@ const CATEGORIES = [
 ];
 
 const TIERS = [
-  { key:'platinum', label:'پلاتینیوم', color:'#e2e8f0', bg:'rgba(226,232,240,0.1)', border:'rgba(226,232,240,0.25)' },
+  { key:'platinum', label:'پلاتینیوم', color: '#111111', bg:'rgba(226,232,240,0.1)', border:'rgba(226,232,240,0.25)' },
   { key:'gold',     label:'طلایی',     color:'#f59e0b', bg:'rgba(245,158,11,0.1)',  border:'rgba(245,158,11,0.25)'  },
-  { key:'silver',   label:'نقره‌ای',   color:'#94a3b8', bg:'rgba(148,163,184,0.1)', border:'rgba(148,163,184,0.2)'  },
+  { key:'silver',   label:'نقره‌ای',   color: 'rgba(0,0,0,0.50)', bg:'rgba(148,163,184,0.1)', border:'rgba(148,163,184,0.2)'  },
 ];
 
 function toFa(v: string|number){ return String(v).replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d))); }
@@ -120,7 +120,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
   if (featured) return (
     <Link href={`/brands/${brand.id}`} style={{ textDecoration:'none', display:'block' }}>
       <div onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
-        style={{ position:'relative', borderRadius:'24px', overflow:'hidden', background: hovered?'rgba(255,255,255,0.05)':'rgba(255,255,255,0.025)', border:`1px solid ${hovered?`${brand.accentColor}35`:'rgba(255,255,255,0.07)'}`, transition:'all 0.4s cubic-bezier(0.4,0,0.2,1)', transform: hovered?'translateY(-7px)':'none', boxShadow: hovered?`0 28px 64px rgba(0,0,0,0.5),0 0 0 1px ${brand.accentColor}12`:'0 4px 20px rgba(0,0,0,0.25)', height:'100%', display:'flex', flexDirection:'column' }}>
+        style={{ position:'relative', borderRadius:'24px', overflow:'hidden', background: hovered?'rgba(0,0,0,0.04)':'#FFFFFF', border:`1px solid ${hovered?`${brand.accentColor}35`:'rgba(0,0,0,0.07)'}`, transition:'all 0.4s cubic-bezier(0.4,0,0.2,1)', transform: hovered?'translateY(-7px)':'none', boxShadow: hovered?`0 28px 64px rgba(0,0,0,0.5),0 0 0 1px ${brand.accentColor}12`:'0 4px 20px rgba(0,0,0,0.25)', height:'100%', display:'flex', flexDirection:'column' }}>
 
         {/* Cover */}
         <div style={{ height:'180px', position:'relative', overflow:'hidden', flexShrink:0 }}>
@@ -150,8 +150,8 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
             <span style={{ fontSize:'10px', color:brand.accentColor, letterSpacing:'0.15em', fontWeight:700 }}>{brand.nameEn}</span>
             {brand.isVerified && <Check size={11} style={{ color:brand.accentColor }}/>}
           </div>
-          <h3 style={{ fontSize:'18px', fontWeight:900, color:'#f0faf5', margin:'0 0 8px', letterSpacing:'-0.02em' }}>{brand.name}</h3>
-          <p style={{ fontSize:'12px', color:'rgba(240,250,245,0.45)', lineHeight:1.7, margin:'0 0 14px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brand.description}</p>
+          <h3 style={{ fontSize:'18px', fontWeight:900, color: '#111111', margin:'0 0 8px', letterSpacing:'-0.02em' }}>{brand.name}</h3>
+          <p style={{ fontSize:'12px', color:'rgba(0,0,0,0.45)', lineHeight:1.7, margin:'0 0 14px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brand.description}</p>
 
           {/* Tags */}
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap', marginBottom:'14px' }}>
@@ -161,15 +161,15 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
           </div>
 
           {/* Stats */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'0', borderTop:'1px solid rgba(255,255,255,0.05)', paddingTop:'14px', marginTop:'auto' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'0', borderTop:'1px solid rgba(0,0,0,0.04)', paddingTop:'14px', marginTop:'auto' }}>
             {[
               { v:toFa(brand.products),    l:'محصول'     },
               { v:toFa(brand.dealers),     l:'نمایندگی'  },
               { v:toFa(brand.tournaments), l:'مسابقه'    },
             ].map((s,i) => (
-              <div key={i} style={{ textAlign:'center', borderLeft: i>0?'1px solid rgba(255,255,255,0.05)':'none' }}>
-                <div style={{ fontSize:'16px', fontWeight:900, color:'#f0faf5', letterSpacing:'-0.02em' }}>{s.v}</div>
-                <div style={{ fontSize:'9px', color:'rgba(240,250,245,0.3)', marginTop:'2px' }}>{s.l}</div>
+              <div key={i} style={{ textAlign:'center', borderLeft: i>0?'1px solid rgba(0,0,0,0.04)':'none' }}>
+                <div style={{ fontSize:'16px', fontWeight:900, color: '#111111', letterSpacing:'-0.02em' }}>{s.v}</div>
+                <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -182,7 +182,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
   return (
     <Link href={`/brands/${brand.id}`} style={{ textDecoration:'none', display:'block' }}>
       <div onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
-        style={{ display:'flex', alignItems:'center', gap:'16px', padding:'18px 20px', background: hovered?'rgba(255,255,255,0.05)':'rgba(255,255,255,0.025)', border:`1px solid ${hovered?`${brand.accentColor}28`:'rgba(255,255,255,0.07)'}`, borderRadius:'18px', transition:'all 0.35s cubic-bezier(0.4,0,0.2,1)', transform: hovered?'translateX(-4px)':'none', boxShadow: hovered?`0 16px 40px rgba(0,0,0,0.4),0 0 0 1px ${brand.accentColor}08`:'none' }}>
+        style={{ display:'flex', alignItems:'center', gap:'16px', padding:'18px 20px', background: hovered?'rgba(0,0,0,0.04)':'#FFFFFF', border:`1px solid ${hovered?`${brand.accentColor}28`:'rgba(0,0,0,0.07)'}`, borderRadius:'18px', transition:'all 0.35s cubic-bezier(0.4,0,0.2,1)', transform: hovered?'translateX(-4px)':'none', boxShadow: hovered?`0 16px 40px rgba(0,0,0,0.4),0 0 0 1px ${brand.accentColor}08`:'none' }}>
 
         {/* Logo */}
         <div style={{ width:'52px', height:'52px', borderRadius:'15px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', fontWeight:900, color:'#fff', flexShrink:0, boxShadow: hovered?`0 8px 20px ${brand.accentColor}35`:'none', transition:'box-shadow 0.3s' }}>
@@ -192,12 +192,12 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         {/* Info */}
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', flexWrap:'wrap' }}>
-            <span style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', letterSpacing:'-0.01em' }}>{brand.name}</span>
+            <span style={{ fontSize:'15px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>{brand.name}</span>
             <span style={{ fontSize:'9px', color:brand.accentColor, letterSpacing:'0.12em', fontWeight:700 }}>{brand.nameEn}</span>
             {brand.isVerified && <Check size={11} style={{ color:brand.accentColor }}/>}
             <span style={{ fontSize:'9px', padding:'2px 8px', borderRadius:'20px', background:tier.bg, border:`1px solid ${tier.border}`, color:tier.color, fontWeight:700 }}>{tier.label}</span>
           </div>
-          <div style={{ fontSize:'12px', color:'rgba(240,250,245,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brand.description}</div>
+          <div style={{ fontSize:'12px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brand.description}</div>
         </div>
 
         {/* Country */}
@@ -207,8 +207,8 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         <div style={{ display:'flex', gap:'20px', flexShrink:0 }}>
           {[{v:toFa(brand.products),l:'محصول'},{v:toFa(brand.dealers),l:'نماینده'}].map((s,i) => (
             <div key={i} style={{ textAlign:'center' }}>
-              <div style={{ fontSize:'16px', fontWeight:900, color:'#f0faf5', letterSpacing:'-0.02em' }}>{s.v}</div>
-              <div style={{ fontSize:'9px', color:'rgba(240,250,245,0.3)' }}>{s.l}</div>
+              <div style={{ fontSize:'16px', fontWeight:900, color: '#111111', letterSpacing:'-0.02em' }}>{s.v}</div>
+              <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)' }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -254,33 +254,33 @@ export default function BrandsPage() {
         @keyframes ambient { 0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-14px);} }
         @keyframes shimmer { from{background-position:-200% center;}to{background-position:200% center;} }
 
-        .s-bar  { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.08); border-radius:14px; padding:0 16px; height:50px; transition:all 0.3s; }
-        .s-bar.focus { border-color:rgba(16,185,129,0.4); background:rgba(255,255,255,0.06); box-shadow:0 0 0 3px rgba(16,185,129,0.08); }
+        .s-bar  { display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.04); border:1.5px solid rgba(0,0,0,0.06); border-radius:14px; padding:0 16px; height:50px; transition:all 0.3s; }
+        .s-bar.focus { border-color:rgba(199,166,106,0.4); background:rgba(0,0,0,0.05); box-shadow:0 0 0 3px rgba(199,166,106,0.08); }
         .s-inp  { flex:1; background:transparent; border:none; outline:none; color:#f0faf5; font-size:14px; font-family:inherit; }
-        .s-inp::placeholder { color:rgba(240,250,245,0.22); }
+        .s-inp::placeholder { color:rgba(0,0,0,0.32); }
         .cat-btn { padding:7px 16px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.2s; }
-        .cat-btn.active { background:rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.35); color:#10b981; }
-        .cat-btn:not(.active) { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.07); color:rgba(240,250,245,0.45); }
-        .sort-sel { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:9px 14px; color:rgba(240,250,245,0.7); font-size:12px; font-family:inherit; outline:none; cursor:pointer; }
+        .cat-btn.active { background:rgba(199,166,106,0.12); border-color:rgba(199,166,106,0.35); color:#C7A66A; }
+        .cat-btn:not(.active) { background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.07); color:rgba(0,0,0,0.45); }
+        .sort-sel { background:rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.06); border-radius:10px; padding:9px 14px; color:rgba(0,0,0,0.48); font-size:12px; font-family:inherit; outline:none; cursor:pointer; }
         .view-btn { width:36px; height:36px; border-radius:9px; border:1px solid; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
-        .view-btn.active { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:#10b981; }
-        .view-btn:not(.active) { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.08); color:rgba(240,250,245,0.4); }
+        .view-btn.active { background:rgba(199,166,106,0.1); border-color:rgba(199,166,106,0.3); color:#C7A66A; }
+        .view-btn:not(.active) { background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.06); color:rgba(0,0,0,0.42); }
         @media(max-width:900px) { .brand-grid{grid-template-columns:repeat(2,1fr)!important;} .feat-grid{grid-template-columns:repeat(2,1fr)!important;} }
         @media(max-width:560px) { .brand-grid{grid-template-columns:1fr!important;} .feat-grid{grid-template-columns:1fr!important;} }
       `}</style>
 
-      <div style={{ minHeight:'100vh', background:'linear-gradient(180deg,#020806,#060d0a)', paddingBottom:'80px' }}>
+      <div style={{ minHeight:'100vh', background:'#F7F7F5', paddingBottom:'80px' }}>
 
         {/* ══ HERO ══ */}
-        <div style={{ position:'relative', background:'rgba(2,8,6,0.98)', borderBottom:'1px solid rgba(255,255,255,0.05)', padding:'clamp(32px,5vw,60px) clamp(16px,4vw,48px) 0', overflow:'hidden' }}>
+        <div style={{ position:'relative', background:'rgba(2,8,6,0.98)', borderBottom:'1px solid rgba(0,0,0,0.04)', padding:'clamp(32px,5vw,60px) clamp(16px,4vw,48px) 0', overflow:'hidden' }}>
           <div style={{ position:'absolute', top:'-20%', right:'-5%', width:'50vw', height:'50vw', maxWidth:'560px', borderRadius:'50%', background:'radial-gradient(rgba(6,182,212,0.06),transparent 65%)', filter:'blur(40px)', animation:'ambient 16s ease-in-out infinite', pointerEvents:'none' }}/>
 
           <div style={{ maxWidth:'1280px', margin:'0 auto' }}>
             <div style={{ fontSize:'10px', color:'rgba(6,182,212,0.65)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'10px' }}>BRAND ECOSYSTEM</div>
-            <h1 style={{ fontSize:'clamp(28px,5vw,52px)', fontWeight:900, color:'#f0faf5', margin:'0 0 10px', letterSpacing:'-0.035em', lineHeight:1.05 }}>
+            <h1 style={{ fontSize:'clamp(28px,5vw,52px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.035em', lineHeight:1.05 }}>
               برندهای صنعت بیلیارد
             </h1>
-            <p style={{ fontSize:'15px', color:'rgba(240,250,245,0.4)', margin:'0 0 28px', maxWidth:'480px' }}>
+            <p style={{ fontSize:'15px', color:'rgba(0,0,0,0.42)', margin:'0 0 28px', maxWidth:'480px' }}>
               از معتبرترین برندهای جهانی و داخلی تجهیزات بیلیارد کشف کنید
             </p>
 
@@ -294,14 +294,14 @@ export default function BrandsPage() {
         </div>
 
         {/* ══ TOOLBAR ══ */}
-        <div style={{ background:'rgba(2,8,6,0.97)', borderBottom:'1px solid rgba(255,255,255,0.05)', padding:'12px clamp(16px,4vw,48px)', position:'sticky', top:'62px', zIndex:90, backdropFilter:'blur(24px)' }}>
+        <div style={{ background:'rgba(2,8,6,0.97)', borderBottom:'1px solid rgba(0,0,0,0.04)', padding:'12px clamp(16px,4vw,48px)', position:'sticky', top:'62px', zIndex:90, backdropFilter:'blur(24px)' }}>
           <div style={{ maxWidth:'1280px', margin:'0 auto', display:'flex', gap:'10px', alignItems:'center', flexWrap:'wrap' }}>
             <div className={`s-bar ${sfocus?'focus':''}`} style={{ flex:1, minWidth:'200px', maxWidth:'340px' }}>
-              <Search size={15} style={{ color:'rgba(240,250,245,0.25)', flexShrink:0 }}/>
+              <Search size={15} style={{ color:'rgba(0,0,0,0.30)', flexShrink:0 }}/>
               <input className="s-inp" value={search} onChange={e=>setSearch(e.target.value)}
                 onFocus={()=>setSfocus(true)} onBlur={()=>setSfocus(false)}
                 placeholder="جستجو برند، کشور..."/>
-              {search && <button onClick={()=>setSearch('')} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(240,250,245,0.3)', padding:0, display:'flex' }}><X size={13}/></button>}
+              {search && <button onClick={()=>setSearch('')} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(0,0,0,0.35)', padding:0, display:'flex' }}><X size={13}/></button>}
             </div>
 
             <div style={{ display:'flex', gap:'7px', overflowX:'auto' }}>
@@ -327,7 +327,7 @@ export default function BrandsPage() {
               ))}
             </div>
 
-            <div style={{ fontSize:'12px', color:'rgba(240,250,245,0.3)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} برند</div>
+            <div style={{ fontSize:'12px', color:'rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} برند</div>
           </div>
         </div>
 
@@ -337,14 +337,14 @@ export default function BrandsPage() {
           <div style={{ display:'flex', gap:'clamp(20px,4vw,48px)', marginBottom:'40px', flexWrap:'wrap' }}>
             {[
               { v:toFa(BRANDS.length),                              l:'برند ثبت‌شده',    c:'#06b6d4' },
-              { v:toFa(BRANDS.filter(b=>b.isVerified).length),     l:'برند تأیید شده',  c:'#10b981' },
+              { v:toFa(BRANDS.filter(b=>b.isVerified).length),     l:'برند تأیید شده',  c:'#C7A66A' },
               { v:toFa(BRANDS.reduce((a,b)=>a+b.products,0)),      l:'محصول کل',        c:'#a78bfa' },
               { v:toFa(BRANDS.reduce((a,b)=>a+b.dealers,0)),       l:'نمایندگی فعال',   c:'#f59e0b' },
               { v:toFa(BRANDS.reduce((a,b)=>a+b.tournaments,0)),   l:'مسابقه حمایت‌شده',c:'#ef4444' },
             ].map((s,i) => (
               <div key={i} style={{ textAlign:'center', animation:`fadeUp 0.5s ease ${i*0.08}s both` }}>
                 <div style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
-                <div style={{ fontSize:'10px', color:'rgba(240,250,245,0.3)', marginTop:'3px' }}>{s.l}</div>
+                <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -354,7 +354,7 @@ export default function BrandsPage() {
             <section style={{ marginBottom:'48px' }}>
               <div style={{ marginBottom:'20px' }}>
                 <div style={{ fontSize:'9px', color:'rgba(6,182,212,0.6)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'7px' }}>FEATURED BRANDS</div>
-                <h2 style={{ fontSize:'clamp(20px,3vw,26px)', fontWeight:900, color:'#f0faf5', margin:'0', letterSpacing:'-0.025em' }}>برندهای ویژه</h2>
+                <h2 style={{ fontSize:'clamp(20px,3vw,26px)', fontWeight:900, color: '#111111', margin:'0', letterSpacing:'-0.025em' }}>برندهای ویژه</h2>
                 <div style={{ height:'1px', width:'52px', marginTop:'10px', background:'linear-gradient(90deg,#06b6d4,transparent)', boxShadow:'0 0 10px rgba(6,182,212,0.4)' }}/>
               </div>
               <div className="feat-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'18px' }}>
@@ -371,7 +371,7 @@ export default function BrandsPage() {
           <section>
             <div style={{ marginBottom:'20px' }}>
               <div style={{ fontSize:'9px', color:'rgba(167,139,250,0.6)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'7px' }}>ALL BRANDS</div>
-              <h2 style={{ fontSize:'clamp(20px,3vw,26px)', fontWeight:900, color:'#f0faf5', margin:0, letterSpacing:'-0.025em' }}>
+              <h2 style={{ fontSize:'clamp(20px,3vw,26px)', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.025em' }}>
                 {category==='all'&&tier==='all'&&!search ? 'همه برندها' : `نتایج (${toFa(filtered.length)})`}
               </h2>
               <div style={{ height:'1px', width:'52px', marginTop:'10px', background:'linear-gradient(90deg,#a78bfa,transparent)', boxShadow:'0 0 10px rgba(167,139,250,0.4)' }}/>
@@ -380,8 +380,8 @@ export default function BrandsPage() {
             {filtered.length===0 ? (
               <div style={{ textAlign:'center', padding:'80px 24px' }}>
                 <div style={{ fontSize:'48px', opacity:0.1, marginBottom:'14px' }}>🏭</div>
-                <h3 style={{ fontSize:'18px', fontWeight:800, color:'#f0faf5', margin:'0 0 8px' }}>برندی یافت نشد</h3>
-                <button onClick={()=>{setSearch('');setCategory('all');setTier('all');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#10b981,#059669)', border:'none', borderRadius:'12px', color:'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
+                <h3 style={{ fontSize:'18px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>برندی یافت نشد</h3>
+                <button onClick={()=>{setSearch('');setCategory('all');setTier('all');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'12px', color:'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
                   پاک کردن فیلترها
                 </button>
               </div>
@@ -407,8 +407,8 @@ export default function BrandsPage() {
           {/* Register brand CTA */}
           <div style={{ marginTop:'60px', padding:'44px 40px', background:'rgba(6,182,212,0.03)', border:'1px dashed rgba(6,182,212,0.2)', borderRadius:'28px', textAlign:'center' }}>
             <div style={{ fontSize:'10px', color:'rgba(6,182,212,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>FOR MANUFACTURERS</div>
-            <h3 style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:900, color:'#f0faf5', margin:'0 0 10px', letterSpacing:'-0.025em' }}>برند خود را ثبت کنید</h3>
-            <p style={{ fontSize:'14px', color:'rgba(240,250,245,0.35)', margin:'0 0 24px', maxWidth:'420px', marginLeft:'auto', marginRight:'auto' }}>
+            <h3 style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>برند خود را ثبت کنید</h3>
+            <p style={{ fontSize:'14px', color:'rgba(0,0,0,0.40)', margin:'0 0 24px', maxWidth:'420px', marginLeft:'auto', marginRight:'auto' }}>
               به اکوسیستم صنعت بیلیارد ایران بپیوندید و با هزاران باشگاه، مربی و بازیکن در ارتباط باشید
             </p>
             <Link href="/brands/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'13px 30px', background:'linear-gradient(135deg,#06b6d4,#0891b2)', borderRadius:'13px', color:'#fff', fontSize:'14px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 24px rgba(6,182,212,0.25)' }}>

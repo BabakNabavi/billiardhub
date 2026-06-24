@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -11,7 +11,7 @@ interface StatCardProps {
   delay?:   number;
 }
 
-export function StatCard({ value, label, sub, color = '#10b981', icon, delay = 0 }: StatCardProps) {
+export function StatCard({ value, label, sub, color = '#C7A66A', icon, delay = 0 }: StatCardProps) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,8 +27,8 @@ export function StatCard({ value, label, sub, color = '#10b981', icon, delay = 0
   return (
     <div ref={ref} style={{
       padding: '28px 24px',
-      background: 'rgba(255,255,255,0.025)',
-      border: '1px solid rgba(255,255,255,0.07)',
+      background: '#FFFFFF',
+      border: '1px solid rgba(0,0,0,0.07)',
       borderRadius: '20px',
       backdropFilter: 'blur(20px)',
       textAlign: 'center',
@@ -45,7 +45,7 @@ export function StatCard({ value, label, sub, color = '#10b981', icon, delay = 0
       )}
 
       <div style={{
-        fontSize: 'clamp(28px,4vw,40px)', fontWeight: 900, color: '#f0faf5',
+        fontSize: 'clamp(28px,4vw,40px)', fontWeight: 900, color: '#111111',
         letterSpacing: '-0.03em', lineHeight: 1,
         textShadow: `0 0 40px ${color}30`,
         marginBottom: '8px',
@@ -53,12 +53,12 @@ export function StatCard({ value, label, sub, color = '#10b981', icon, delay = 0
         {value}
       </div>
 
-      <div style={{ fontSize: '13px', color: 'rgba(240,250,245,0.5)', fontWeight: 600, letterSpacing: '0.02em' }}>
+      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, letterSpacing: '0.02em' }}>
         {label}
       </div>
 
       {sub && (
-        <div style={{ fontSize: '11px', color: 'rgba(240,250,245,0.2)', marginTop: '5px', letterSpacing: '0.04em' }}>
+        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginTop: '5px', letterSpacing: '0.04em' }}>
           {sub}
         </div>
       )}

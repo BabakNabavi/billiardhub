@@ -29,12 +29,12 @@ export default function RootLayout({
           input, select, textarea, button { font-family: 'Estedad', 'Vazirmatn', system-ui, sans-serif !important; }
           body { margin: 0; padding: 0; }
           ::-webkit-scrollbar { width: 5px; }
-          ::-webkit-scrollbar-track { background: #020806; }
-          ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.25); border-radius: 3px; }
-          ::-webkit-scrollbar-thumb:hover { background: rgba(16,185,129,0.45); }
+          ::-webkit-scrollbar-track { background: rgba(28,28,26,0.04); }
+          ::-webkit-scrollbar-thumb { background: rgba(184,147,58,0.3); border-radius: 3px; }
+          ::-webkit-scrollbar-thumb:hover { background: rgba(184,147,58,0.55); }
         `}</style>
       </head>
-      <body style={{ backgroundColor: '#020806', margin: 0, padding: 0 }}>
+      <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
         <Navbar />
         <main>{children}</main>
         <Footer />

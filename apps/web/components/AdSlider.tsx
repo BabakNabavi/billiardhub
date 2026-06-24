@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -25,7 +25,7 @@ const ads: Ad[] = [
         subtitle: 'بهترین میز اسنوکر ساخت ایران — کیفیت بین‌المللی، قیمت رقابتی',
         cta: 'مشاهده محصول',
         href: '/shop/1',
-        accent: '#10b981',
+        accent: '#C7A66A',
         bg: 'linear-gradient(135deg, #022c22 0%, #064e3b 40%, #065f46 100%)',
         imageUrl: 'https://example.com/table.jpg',
         tag: 'تبلیغ ویژه',
@@ -132,8 +132,8 @@ export default function AdSlider() {
         .ad-nav-btn {
           width: 40px; height: 40px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(0,0,0,0.05);
+          border: 1px solid rgba(0,0,0,0.08);
           display: flex; align-items: center; justify-content: center;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -141,7 +141,7 @@ export default function AdSlider() {
           color: rgba(255,255,255,0.5);
         }
         .ad-nav-btn:hover {
-          background: rgba(255,255,255,0.12);
+          background: rgba(0,0,0,0.09);
           border-color: rgba(255,255,255,0.2);
           color: #fff;
         }
@@ -169,7 +169,7 @@ export default function AdSlider() {
                     position: 'absolute', top: '16px', right: '16px',
                     zIndex: 10,
                     background: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(0,0,0,0.06)',
                     borderRadius: '20px',
                     padding: '4px 12px',
                     fontSize: '10px',
@@ -226,7 +226,7 @@ export default function AdSlider() {
                                         {ad.brand}
                                     </div>
                                     <div style={{ height: '1px', width: '40px', background: `${ad.accent}40` }} />
-                                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', border: `1px solid ${ad.accent}30`, borderRadius: '20px', padding: '2px 10px' }}>
+                                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', background: 'rgba(0,0,0,0.04)', border: `1px solid ${ad.accent}30`, borderRadius: '20px', padding: '2px 10px' }}>
                                         {ad.tag}
                                     </div>
                                 </div>
@@ -270,7 +270,7 @@ export default function AdSlider() {
                 </div>
 
                 {/* progress bar */}
-                <div style={{ height: '2px', background: 'rgba(255,255,255,0.05)' }}>
+                <div style={{ height: '2px', background: 'rgba(0,0,0,0.04)' }}>
                     <div key={current} className="ad-progress" style={{ height: '100%', background: `linear-gradient(90deg, ${ad.accent}, ${ad.accent}80)`, boxShadow: `0 0 10px ${ad.accent}` }} />
                 </div>
 

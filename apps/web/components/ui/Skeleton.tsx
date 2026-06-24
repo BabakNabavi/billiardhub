@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { CSSProperties } from 'react';
 
@@ -14,7 +14,7 @@ export function Skeleton({ width = '100%', height = '16px', radius = '8px', styl
     <div style={{
       width, height,
       borderRadius: radius,
-      background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
+      background: 'linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.04) 75%)',
       backgroundSize: '200% 100%',
       animation: 'skeletonShimmer 1.6s ease-in-out infinite',
       ...style,
@@ -24,7 +24,7 @@ export function Skeleton({ width = '100%', height = '16px', radius = '8px', styl
 
 export function ClubCardSkeleton() {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
+    <div style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
       <Skeleton height="190px" radius="0" />
       <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <Skeleton height="18px" width="70%" />
@@ -40,7 +40,7 @@ export function ClubCardSkeleton() {
 
 export function NewsCardSkeleton() {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
+    <div style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
       <Skeleton height="160px" radius="0" />
       <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <Skeleton height="14px" />
@@ -56,7 +56,7 @@ export function NewsCardSkeleton() {
 
 export function ProductCardSkeleton() {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
+    <div style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
       <Skeleton height="140px" radius="0" />
       <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <Skeleton height="13px" />

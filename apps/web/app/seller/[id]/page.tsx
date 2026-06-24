@@ -1,4 +1,4 @@
-// ==============================
+﻿// ==============================
 // FILE: apps/web/app/sellers/[id]/page.tsx
 // ==============================
 'use client';
@@ -69,13 +69,13 @@ export default function SellerProfilePage() {
 
   if (!seller) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#010604', color: '#f0faf5' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#F7F7F5', color: '#111111' }}>
         <div className="text-6xl mb-4">🏪</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#10b981' }}>فروشگاه مورد نظر یافت نشد</h2>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: '#C7A66A' }}>فروشگاه مورد نظر یافت نشد</h2>
         <p className="mb-6" style={{ color: '#6b7280' }}>شناسه فروشنده معتبر نیست</p>
         <button onClick={() => router.push('/sellers')}
           className="px-6 py-3 rounded-xl font-bold"
-          style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+          style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
           بازگشت به فروشندگان
         </button>
       </div>
@@ -83,17 +83,17 @@ export default function SellerProfilePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
+    <div className="min-h-screen" style={{ background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
       <div className="relative" style={{ background: 'linear-gradient(135deg,#050c08,#0a1a0f 50%,#050c08)' }}>
         <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #10b981 0%, transparent 50%), radial-gradient(circle at 70% 30%, #06b6d4 0%, transparent 50%)' }} />
+          style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #C7A66A 0%, transparent 50%), radial-gradient(circle at 70% 30%, #06b6d4 0%, transparent 50%)' }} />
         <div className="relative max-w-4xl mx-auto px-4 py-12">
-          <Link href="/sellers" className="inline-flex items-center gap-2 mb-8 text-sm hover:opacity-80" style={{ color: '#10b981' }}>
+          <Link href="/sellers" className="inline-flex items-center gap-2 mb-8 text-sm hover:opacity-80" style={{ color: '#C7A66A' }}>
             ← بازگشت به فروشندگان
           </Link>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             <div className="w-24 h-24 rounded-2xl flex items-center justify-center text-2xl font-black flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+              style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
               {seller.avatar}
             </div>
             <div className="flex-1 text-center sm:text-right">
@@ -103,7 +103,7 @@ export default function SellerProfilePage() {
                     ✓ فروشنده تایید شده
                   </span>
                 )}
-                <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)' }}>
+                <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(199,166,106,0.15)', color: '#C7A66A', border: '1px solid rgba(199,166,106,0.3)' }}>
                   {seller.category}
                 </span>
               </div>
@@ -117,12 +117,12 @@ export default function SellerProfilePage() {
       <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'فروش موفق', value: seller.stats.sales.toLocaleString('fa'), color: '#10b981' },
+            { label: 'فروش موفق', value: seller.stats.sales.toLocaleString('fa'), color: '#C7A66A' },
             { label: 'سال سابقه', value: seller.stats.years, color: '#06b6d4' },
             { label: 'نظرات', value: seller.stats.reviews, color: '#a78bfa' },
             { label: 'امتیاز', value: `${seller.stats.rating} ⭐`, color: '#f59e0b' },
           ].map(s => (
-            <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
+            <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
               <div className="text-2xl font-black mb-1" style={{ color: s.color }}>{s.value}</div>
               <div className="text-xs" style={{ color: '#6b7280' }}>{s.label}</div>
             </div>
@@ -130,11 +130,11 @@ export default function SellerProfilePage() {
         </div>
 
         <div className="md:col-span-2 space-y-6">
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-4" style={{ color: '#10b981' }}>محصولات نمونه</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-4" style={{ color: '#C7A66A' }}>محصولات نمونه</h2>
             <div className="space-y-3">
               {seller.products.map((p, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.1)' }}>
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(199,166,106,0.05)', border: '1px solid rgba(199,166,106,0.1)' }}>
                   <div>
                     <div className="font-semibold text-sm">{p.name}</div>
                     <div className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{p.category}</div>
@@ -144,15 +144,15 @@ export default function SellerProfilePage() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>درباره فروشگاه</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>درباره فروشگاه</h2>
             <p className="leading-relaxed" style={{ color: '#9ca3af' }}>{seller.description}</p>
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>برندهای موجود</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>برندهای موجود</h2>
             <div className="flex flex-wrap gap-2">
               {seller.brands.map(b => (
                 <span key={b} className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>
@@ -161,8 +161,8 @@ export default function SellerProfilePage() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>اطلاعات تماس</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>اطلاعات تماس</h2>
             <div className="space-y-2 text-sm" style={{ color: '#9ca3af' }}>
               <div>📞 {seller.phone}</div>
               <div>✉️ {seller.email}</div>
@@ -170,7 +170,7 @@ export default function SellerProfilePage() {
               <div>🕐 {seller.workingHours}</div>
             </div>
             <button className="w-full mt-4 py-2.5 rounded-xl font-bold text-sm"
-              style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+              style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
               تماس با فروشگاه
             </button>
           </div>

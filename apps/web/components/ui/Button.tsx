@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { colors, radius, transition } from '../../lib/tokens';
 import { CSSProperties, ReactNode, useState } from 'react';
@@ -46,21 +46,21 @@ export function Button({
     primary: {
       background: hovered
         ? 'linear-gradient(135deg,#12d492,#059669)'
-        : 'linear-gradient(135deg,#10b981,#059669)',
+        : 'linear-gradient(135deg,#C7A66A,#A07840)',
       color: '#fff',
       boxShadow: hovered
-        ? `0 0 0 1px rgba(16,185,129,0.5), 0 12px 40px rgba(16,185,129,0.45), 0 0 60px rgba(16,185,129,0.15)`
-        : `0 0 0 1px rgba(16,185,129,0.25), 0 8px 28px rgba(16,185,129,0.25)`,
+        ? `0 0 0 1px rgba(199,166,106,0.5), 0 12px 40px rgba(199,166,106,0.45), 0 0 60px rgba(199,166,106,0.15)`
+        : `0 0 0 1px rgba(199,166,106,0.25), 0 8px 28px rgba(199,166,106,0.25)`,
       transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
     },
     ghost: {
-      background: hovered ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
+      background: hovered ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)',
       color: colors.text.primary,
-      border: `1px solid ${hovered ? colors.border.strong : 'rgba(255,255,255,0.12)'}`,
-      boxShadow: hovered ? `0 0 24px rgba(16,185,129,0.08)` : 'none',
+      border: `1px solid ${hovered ? colors.border.strong : 'rgba(0,0,0,0.09)'}`,
+      boxShadow: hovered ? `0 0 24px rgba(199,166,106,0.08)` : 'none',
     },
     outline: {
-      background: hovered ? 'rgba(16,185,129,0.08)' : 'transparent',
+      background: hovered ? 'rgba(199,166,106,0.08)' : 'transparent',
       color: colors.accent.green,
       border: `1px solid ${hovered ? colors.border.strong : colors.border.accent}`,
     },
@@ -84,7 +84,7 @@ export function Button({
       {variant === 'primary' && (
         <span style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.12) 50%,transparent 70%)',
+          background: 'linear-gradient(105deg,transparent 30%,rgba(0,0,0,0.09) 50%,transparent 70%)',
           opacity: hovered ? 1 : 0, transition: 'opacity 0.3s',
         }} />
       )}

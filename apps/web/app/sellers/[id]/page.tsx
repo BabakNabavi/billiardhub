@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -130,7 +130,7 @@ const MOCK_SELLERS: Record<string, SellerData> = {
 
 // ─── Category Color Map ───────────────────────────────────────────────────────
 const CAT_COLORS: Record<string, string> = {
-  'چوب بیلیارد': '#10b981',
+  'چوب بیلیارد': '#C7A66A',
   'میز بیلیارد': '#a78bfa',
   'توپ': '#f59e0b',
   'کِیس چوب': '#06b6d4',
@@ -146,7 +146,7 @@ const Icons = {
     </svg>
   ),
   verified: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="#10b981" stroke="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#C7A66A" stroke="none">
       <path d="M12 2L13.9 7.5H20L14.9 11L16.8 16.5L12 13L7.2 16.5L9.1 11L4 7.5H10.1L12 2Z" />
     </svg>
   ),
@@ -213,11 +213,11 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const catColor = CAT_COLORS[product.category] || '#10b981';
+  const catColor = CAT_COLORS[product.category] || '#C7A66A';
   return (
     <div style={{
       background: 'linear-gradient(145deg, #0d1f18, #0a1912)',
-      border: '1px solid rgba(16,185,129,0.12)',
+      border: '1px solid rgba(199,166,106,0.12)',
       borderRadius: 16,
       overflow: 'hidden',
       transition: 'all 0.3s ease',
@@ -225,11 +225,11 @@ function ProductCard({ product }: { product: Product }) {
       position: 'relative',
     }}
     onMouseEnter={e => {
-      (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(16,185,129,0.4)';
+      (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(199,166,106,0.4)';
       (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
     }}
     onMouseLeave={e => {
-      (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(16,185,129,0.12)';
+      (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(199,166,106,0.12)';
       (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
     }}
     >
@@ -244,7 +244,7 @@ function ProductCard({ product }: { product: Product }) {
         {product.badge && (
           <div style={{
             position: 'absolute', top: 12, right: 12,
-            background: product.badge === 'پرفروش' ? '#10b981' : product.badge === 'جدید' ? '#06b6d4' : '#f59e0b',
+            background: product.badge === 'پرفروش' ? '#C7A66A' : product.badge === 'جدید' ? '#06b6d4' : '#f59e0b',
             color: '#010604', fontSize: 11, fontWeight: 700,
             padding: '3px 10px', borderRadius: 20,
           }}>{product.badge}</div>
@@ -255,7 +255,7 @@ function ProductCard({ product }: { product: Product }) {
         <div style={{ fontSize: 11, color: catColor, marginBottom: 6, fontWeight: 600 }}>
           {product.category}
         </div>
-        <div style={{ color: '#f0faf5', fontSize: 14, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>
+        <div style={{ color: '#111111', fontSize: 14, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>
           {product.name}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
@@ -263,12 +263,12 @@ function ProductCard({ product }: { product: Product }) {
           <span style={{ color: '#6b7280', fontSize: 11 }}>{product.sold} فروش</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ color: '#10b981', fontSize: 15, fontWeight: 700 }}>
+          <div style={{ color: '#C7A66A', fontSize: 15, fontWeight: 700 }}>
             {product.price} <span style={{ fontSize: 11, fontWeight: 400 }}>تومان</span>
           </div>
           <button style={{
-            background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
-            color: '#10b981', padding: '6px 12px', borderRadius: 8,
+            background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.3)',
+            color: '#C7A66A', padding: '6px 12px', borderRadius: 8,
             fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
           }}>
             {Icons.cart()} افزودن
@@ -295,7 +295,7 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
     : seller.products.filter(p => p.category === activeCategory);
 
   return (
-    <div style={{ background: '#010604', minHeight: '100vh', color: '#f0faf5', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
+    <div style={{ background: '#F7F7F5', minHeight: '100vh', color: '#111111', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
 
       {/* ── Hero Cover ─────────────────────────────────────────────────── */}
       <div style={{ position: 'relative', height: 'clamp(180px, 28vw, 340px)', overflow: 'hidden' }}>
@@ -307,11 +307,11 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
           {/* Animated dots pattern */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.08) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(199,166,106,0.08) 1px, transparent 1px)',
             backgroundSize: '32px 32px',
           }} />
           {/* Glow orbs */}
-          <div style={{ position: 'absolute', top: '20%', left: '10%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.12), transparent 70%)', filter: 'blur(40px)' }} />
+          <div style={{ position: 'absolute', top: '20%', left: '10%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.12), transparent 70%)', filter: 'blur(40px)' }} />
           <div style={{ position: 'absolute', bottom: '10%', right: '15%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.1), transparent 70%)', filter: 'blur(30px)' }} />
           {/* Large billiard ball decorative */}
           <div style={{ position: 'absolute', left: '5%', top: '50%', transform: 'translateY(-50%)', fontSize: 'clamp(60px, 12vw, 120px)', opacity: 0.06 }}>🎱</div>
@@ -329,7 +329,7 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
               width: 'clamp(80px, 14vw, 110px)', height: 'clamp(80px, 14vw, 110px)',
               borderRadius: 20,
               background: 'linear-gradient(135deg, #0d2b1e, #0a1f16)',
-              border: '3px solid rgba(16,185,129,0.35)',
+              border: '3px solid rgba(199,166,106,0.35)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 'clamp(32px, 6vw, 48px)',
               flexShrink: 0,
@@ -339,11 +339,11 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
             {/* Name + badges */}
             <div style={{ flex: 1, minWidth: 220 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                <h1 style={{ fontSize: 'clamp(18px, 3.5vw, 26px)', fontWeight: 800, margin: 0, color: '#f0faf5' }}>
+                <h1 style={{ fontSize: 'clamp(18px, 3.5vw, 26px)', fontWeight: 800, margin: 0, color: '#111111' }}>
                   {seller.name}
                 </h1>
                 {seller.verified && (
-                  <span style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.4)', color: '#10b981', fontSize: 11, padding: '3px 10px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                  <span style={{ background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.4)', color: '#C7A66A', fontSize: 11, padding: '3px 10px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
                     ✓ تأیید شده
                   </span>
                 )}
@@ -357,10 +357,10 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
                 {seller.tagline}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#94a3b8', fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(0,0,0,0.50)', fontSize: 13 }}>
                   {Icons.location()} {seller.city}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#94a3b8', fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(0,0,0,0.50)', fontSize: 13 }}>
                   📅 از {seller.since}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#f59e0b', fontSize: 13, fontWeight: 600 }}>
@@ -372,10 +372,10 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
 
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button style={{ background: '#10b981', color: '#010604', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button style={{ background: '#C7A66A', color: '#010604', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {Icons.chat()} پیام دادن
               </button>
-              <button style={{ background: 'rgba(255,255,255,0.06)', color: '#f0faf5', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: 12, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button style={{ background: 'rgba(0,0,0,0.05)', color: '#111111', border: '1px solid rgba(0,0,0,0.08)', padding: '10px 16px', borderRadius: 12, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {Icons.share()} اشتراک‌گذاری
               </button>
             </div>
@@ -388,14 +388,14 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
           gap: 12, marginBottom: 32,
         }}>
           {[
-            { label: 'محصولات', value: seller.productCount, icon: '📦', color: '#10b981' },
+            { label: 'محصولات', value: seller.productCount, icon: '📦', color: '#C7A66A' },
             { label: 'فروش موفق', value: seller.totalSales, icon: '✅', color: '#06b6d4' },
             { label: 'امتیاز', value: seller.rating + '/۵', icon: '⭐', color: '#f59e0b' },
             { label: 'زمان پاسخ', value: seller.responseTime, icon: '⚡', color: '#a78bfa' },
           ].map(stat => (
             <div key={stat.label} style={{
               background: 'linear-gradient(135deg, #0d1f18, #0a1912)',
-              border: '1px solid rgba(16,185,129,0.1)',
+              border: '1px solid rgba(199,166,106,0.1)',
               borderRadius: 14, padding: '14px 16px',
               textAlign: 'center',
             }}>
@@ -411,15 +411,15 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
         {/* ── Brands Strip ───────────────────────────────────────────────── */}
         <div style={{
           background: 'linear-gradient(90deg, #0d1f18, #0a1912, #0d1f18)',
-          border: '1px solid rgba(16,185,129,0.1)',
+          border: '1px solid rgba(199,166,106,0.1)',
           borderRadius: 14, padding: '14px 20px', marginBottom: 32,
           display: 'flex', alignItems: 'center', gap: 16, overflowX: 'auto',
         }}>
           <span style={{ color: '#6b7280', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0 }}>برندهای نمایندگی:</span>
           {seller.brands.map(brand => (
             <span key={brand} style={{
-              background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)',
-              color: '#10b981', padding: '5px 14px', borderRadius: 20,
+              background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.2)',
+              color: '#C7A66A', padding: '5px 14px', borderRadius: 20,
               fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
             }}>{brand}</span>
           ))}
@@ -428,15 +428,15 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
         {/* ── Tab Navigation ─────────────────────────────────────────────── */}
         <div style={{
           display: 'flex', gap: 4, marginBottom: 28,
-          background: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: 4,
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(0,0,0,0.03)', borderRadius: 14, padding: 4,
+          border: '1px solid rgba(0,0,0,0.05)',
         }}>
           {(['products', 'about', 'reviews'] as const).map(tab => {
             const labels: Record<string, string> = { products: `محصولات (${seller.products.length})`, about: 'درباره فروشگاه', reviews: `نظرات (${seller.reviewCount})` };
             return (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
                 flex: 1, padding: '10px 4px', borderRadius: 10, border: 'none',
-                background: activeTab === tab ? '#10b981' : 'transparent',
+                background: activeTab === tab ? '#C7A66A' : 'transparent',
                 color: activeTab === tab ? '#010604' : '#94a3b8',
                 fontWeight: activeTab === tab ? 700 : 400,
                 fontSize: 'clamp(12px, 2vw, 14px)', cursor: 'pointer', transition: 'all 0.2s',
@@ -452,8 +452,8 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
             <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 24 }}>
               {allCategories.map(cat => (
                 <button key={cat} onClick={() => setActiveCategory(cat)} style={{
-                  background: activeCategory === cat ? '#10b981' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${activeCategory === cat ? '#10b981' : 'rgba(255,255,255,0.08)'}`,
+                  background: activeCategory === cat ? '#C7A66A' : 'rgba(0,0,0,0.04)',
+                  border: `1px solid ${activeCategory === cat ? '#C7A66A' : 'rgba(0,0,0,0.06)'}`,
                   color: activeCategory === cat ? '#010604' : '#94a3b8',
                   padding: '7px 16px', borderRadius: 20, fontSize: 13,
                   fontWeight: activeCategory === cat ? 700 : 400,
@@ -471,13 +471,13 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
         {activeTab === 'about' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: 20, marginBottom: 48 }}>
             {/* About text */}
-            <div style={{ background: 'linear-gradient(135deg, #0d1f18, #0a1912)', border: '1px solid rgba(16,185,129,0.1)', borderRadius: 16, padding: 24 }}>
-              <h3 style={{ color: '#10b981', fontSize: 16, fontWeight: 700, marginBottom: 14, marginTop: 0 }}>درباره فروشگاه</h3>
-              <p style={{ color: '#94a3b8', fontSize: 14, lineHeight: 1.9, margin: 0 }}>{seller.about}</p>
+            <div style={{ background: 'linear-gradient(135deg, #0d1f18, #0a1912)', border: '1px solid rgba(199,166,106,0.1)', borderRadius: 16, padding: 24 }}>
+              <h3 style={{ color: '#C7A66A', fontSize: 16, fontWeight: 700, marginBottom: 14, marginTop: 0 }}>درباره فروشگاه</h3>
+              <p style={{ color: 'rgba(0,0,0,0.50)', fontSize: 14, lineHeight: 1.9, margin: 0 }}>{seller.about}</p>
             </div>
             {/* Contact info */}
-            <div style={{ background: 'linear-gradient(135deg, #0d1f18, #0a1912)', border: '1px solid rgba(16,185,129,0.1)', borderRadius: 16, padding: 24 }}>
-              <h3 style={{ color: '#10b981', fontSize: 16, fontWeight: 700, marginBottom: 16, marginTop: 0 }}>اطلاعات تماس</h3>
+            <div style={{ background: 'linear-gradient(135deg, #0d1f18, #0a1912)', border: '1px solid rgba(199,166,106,0.1)', borderRadius: 16, padding: 24 }}>
+              <h3 style={{ color: '#C7A66A', fontSize: 16, fontWeight: 700, marginBottom: 16, marginTop: 0 }}>اطلاعات تماس</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {[
                   { icon: Icons.phone(), label: seller.phone },
@@ -485,22 +485,22 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
                   { icon: Icons.location(), label: seller.address },
                   { icon: Icons.clock(), label: seller.workHours },
                 ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, color: '#94a3b8', fontSize: 13 }}>
-                    <span style={{ color: '#10b981', flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, color: 'rgba(0,0,0,0.50)', fontSize: 13 }}>
+                    <span style={{ color: '#C7A66A', flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
                     <span style={{ lineHeight: 1.5 }}>{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
             {/* Categories served */}
-            <div style={{ background: 'linear-gradient(135deg, #0d1f18, #0a1912)', border: '1px solid rgba(16,185,129,0.1)', borderRadius: 16, padding: 24 }}>
-              <h3 style={{ color: '#10b981', fontSize: 16, fontWeight: 700, marginBottom: 14, marginTop: 0 }}>دسته‌بندی محصولات</h3>
+            <div style={{ background: 'linear-gradient(135deg, #0d1f18, #0a1912)', border: '1px solid rgba(199,166,106,0.1)', borderRadius: 16, padding: 24 }}>
+              <h3 style={{ color: '#C7A66A', fontSize: 16, fontWeight: 700, marginBottom: 14, marginTop: 0 }}>دسته‌بندی محصولات</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {seller.categories.map(cat => (
                   <span key={cat} style={{
-                    background: `${CAT_COLORS[cat] || '#10b981'}15`,
-                    border: `1px solid ${CAT_COLORS[cat] || '#10b981'}30`,
-                    color: CAT_COLORS[cat] || '#10b981',
+                    background: `${CAT_COLORS[cat] || '#C7A66A'}15`,
+                    border: `1px solid ${CAT_COLORS[cat] || '#C7A66A'}30`,
+                    color: CAT_COLORS[cat] || '#C7A66A',
                     padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
                   }}>{cat}</span>
                 ))}
@@ -515,7 +515,7 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
             {/* Rating summary */}
             <div style={{
               background: 'linear-gradient(135deg, #0d1f18, #0a1912)',
-              border: '1px solid rgba(16,185,129,0.1)', borderRadius: 16,
+              border: '1px solid rgba(199,166,106,0.1)', borderRadius: 16,
               padding: 24, marginBottom: 20,
               display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center',
             }}>
@@ -528,7 +528,7 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
                 {[5,4,3,2,1].map(star => (
                   <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                     <span style={{ color: '#f59e0b', fontSize: 12, width: 8 }}>{star}</span>
-                    <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3 }}>
+                    <div style={{ flex: 1, height: 6, background: 'rgba(0,0,0,0.05)', borderRadius: 3 }}>
                       <div style={{
                         height: '100%', borderRadius: 3, background: '#f59e0b',
                         width: star === 5 ? '70%' : star === 4 ? '20%' : star === 3 ? '7%' : '2%',
@@ -546,22 +546,22 @@ export default function SellerDetailPage({ params }: { params: { id: string } })
               ) : seller.reviews.map(review => (
                 <div key={review.id} style={{
                   background: 'linear-gradient(135deg, #0d1f18, #0a1912)',
-                  border: '1px solid rgba(16,185,129,0.1)', borderRadius: 14, padding: 20,
+                  border: '1px solid rgba(199,166,106,0.1)', borderRadius: 14, padding: 20,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#10b981' }}>
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#C7A66A' }}>
                         {review.author.charAt(0)}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, color: '#f0faf5', fontSize: 14 }}>{review.author}</div>
+                        <div style={{ fontWeight: 700, color: '#111111', fontSize: 14 }}>{review.author}</div>
                         <div style={{ color: '#4b5563', fontSize: 11 }}>{review.date}</div>
                       </div>
                     </div>
                     <StarRating rating={review.rating} size={13} />
                   </div>
-                  <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.7, marginBottom: 8 }}>{review.text}</div>
-                  <div style={{ color: '#10b981', fontSize: 11, opacity: 0.7 }}>محصول: {review.product}</div>
+                  <div style={{ color: 'rgba(0,0,0,0.50)', fontSize: 13, lineHeight: 1.7, marginBottom: 8 }}>{review.text}</div>
+                  <div style={{ color: '#C7A66A', fontSize: 11, opacity: 0.7 }}>محصول: {review.product}</div>
                 </div>
               ))}
             </div>

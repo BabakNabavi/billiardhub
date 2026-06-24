@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -190,13 +190,13 @@ export default function NewClubPage() {
   const inputCls =
     'w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors';
   const inputStyle: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    color: '#f0faf5',
+    background: 'rgba(0,0,0,0.04)',
+    border: '1px solid rgba(0,0,0,0.08)',
+    color: '#111111',
   };
   const sectionStyle: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.07)',
+    background: 'rgba(0,0,0,0.03)',
+    border: '1px solid rgba(0,0,0,0.07)',
     borderRadius: '16px',
     padding: '24px',
     marginBottom: '20px',
@@ -205,29 +205,29 @@ export default function NewClubPage() {
   const headingStyle: React.CSSProperties = {
     fontSize: '15px',
     fontWeight: 800,
-    color: '#10b981',
+    color: '#C7A66A',
     marginBottom: '16px',
   };
 
   return (
     <>
       <style>{`
-        .dark-input::placeholder { color: rgba(240,250,245,0.25); }
-        .dark-input:focus { border-color: rgba(16,185,129,0.45) !important; box-shadow: 0 0 0 3px rgba(16,185,129,0.08); }
+        .dark-input::placeholder { color: rgba(0,0,0,0.30); }
+        .dark-input:focus { border-color: rgba(199,166,106,0.45) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.08); }
         .dark-input { color-scheme: dark; }
         .dark-file::file-selector-button {
-          background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
-          color: #10b981; border-radius: 8px; padding: 4px 12px; font-size: 12px;
+          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.25);
+          color: #C7A66A; border-radius: 8px; padding: 4px 12px; font-size: 12px;
           cursor: pointer; margin-left: 8px; font-family: inherit;
         }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806 0%,#060d0a 100%)', direction: 'rtl', paddingBottom: '60px' }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', paddingBottom: '60px' }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px clamp(16px,4vw,32px) 0' }}>
 
           <div style={{ marginBottom: '28px' }}>
-            <div style={{ fontSize: '10px', color: 'rgba(16,185,129,0.6)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: '6px' }}>REGISTER CLUB</div>
-            <h1 style={{ fontSize: 'clamp(22px,4vw,32px)', fontWeight: 900, color: '#f0faf5', margin: 0, letterSpacing: '-0.02em' }}>ثبت باشگاه جدید</h1>
+            <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: '6px' }}>REGISTER CLUB</div>
+            <h1 style={{ fontSize: 'clamp(22px,4vw,32px)', fontWeight: 900, color: '#111111', margin: 0, letterSpacing: '-0.02em' }}>ثبت باشگاه جدید</h1>
           </div>
 
           {error && (
@@ -339,8 +339,8 @@ export default function NewClubPage() {
                   <input type="checkbox" name={item.key}
                     checked={(form as any)[item.key]}
                     onChange={handleChange}
-                    style={{ width: '16px', height: '16px', accentColor: '#10b981' }} />
-                  <span style={{ fontSize: '13px', color: 'rgba(240,250,245,0.7)' }}>{item.label}</span>
+                    style={{ width: '16px', height: '16px', accentColor: '#C7A66A' }} />
+                  <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.48)' }}>{item.label}</span>
                 </label>
               ))}
             </div>
@@ -360,24 +360,24 @@ export default function NewClubPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {days.map((day) => (
                 <div key={day.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '64px', fontSize: '13px', color: 'rgba(240,250,245,0.6)', fontWeight: 600, flexShrink: 0 }}>{day.label}</div>
+                  <div style={{ width: '64px', fontSize: '13px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, flexShrink: 0 }}>{day.label}</div>
                   <input type="checkbox"
                     checked={(form.workingHours as any)[day.key].isOpen}
                     onChange={(e) => handleWorkingHours(day.key, 'isOpen', e.target.checked)}
-                    style={{ width: '16px', height: '16px', accentColor: '#10b981', flexShrink: 0 }} />
+                    style={{ width: '16px', height: '16px', accentColor: '#C7A66A', flexShrink: 0 }} />
                   {(form.workingHours as any)[day.key].isOpen ? (
                     <>
                       <input type="time"
                         value={(form.workingHours as any)[day.key].open}
                         onChange={(e) => handleWorkingHours(day.key, 'open', e.target.value)}
                         className="dark-input"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0faf5', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
-                      <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)' }}>تا</span>
+                        style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
+                      <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>تا</span>
                       <input type="time"
                         value={(form.workingHours as any)[day.key].close}
                         onChange={(e) => handleWorkingHours(day.key, 'close', e.target.value)}
                         className="dark-input"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0faf5', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
+                        style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
                     </>
                   ) : (
                     <span style={{ fontSize: '12px', color: '#fca5a5' }}>تعطیل</span>
@@ -390,14 +390,14 @@ export default function NewClubPage() {
           {/* آپلود عکس */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>📸 عکس‌های باشگاه</h2>
-            <p style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG، PNG</p>
+            <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG، PNG</p>
             <input type="file" accept="image/*" multiple onChange={handleImageSelect}
-              className="dark-file w-full text-sm" style={{ color: 'rgba(240,250,245,0.5)' }} />
+              className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {imagePreviews.length > 0 && (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
                 {imagePreviews.map((src, i) => (
                   <div key={i} style={{ position: 'relative' }}>
-                    <img src={src} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }} />
+                    <img src={src} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }} />
                     <button onClick={() => removeImage(i)}
                       style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(239,68,68,0.8)', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
                       ×
@@ -411,9 +411,9 @@ export default function NewClubPage() {
           {/* آپلود ویدیو */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>🎬 ویدیوی باشگاه</h2>
-            <p style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت — فرمت MP4</p>
+            <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت — فرمت MP4</p>
             <input type="file" accept="video/mp4,video/*" onChange={handleVideoSelect}
-              className="dark-file w-full text-sm" style={{ color: 'rgba(240,250,245,0.5)' }} />
+              className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {videoFile && (
               <p style={{ fontSize: '12px', color: '#6ee7b7', marginTop: '8px' }}>✅ {videoFile.name} انتخاب شد</p>
             )}
@@ -426,7 +426,7 @@ export default function NewClubPage() {
           )}
 
           <button onClick={handleSubmit} disabled={loading}
-            style={{ width: '100%', background: loading ? 'rgba(16,185,129,0.3)' : 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '16px', borderRadius: '14px', fontSize: '16px', fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 8px 24px rgba(16,185,129,0.25)' }}>
+            style={{ width: '100%', background: loading ? 'rgba(199,166,106,0.3)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '16px', borderRadius: '14px', fontSize: '16px', fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 8px 24px rgba(199,166,106,0.25)' }}>
             {loading ? uploadProgress || 'در حال ثبت...' : '✅ ثبت باشگاه'}
           </button>
         </div>

@@ -1,4 +1,4 @@
-// ==============================
+﻿// ==============================
 // FILE: apps/web/app/referees/[id]/page.tsx
 // ==============================
 'use client';
@@ -71,13 +71,13 @@ export default function RefereeProfilePage() {
 
   if (!referee) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#010604', color: '#f0faf5' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#F7F7F5', color: '#111111' }}>
         <div className="text-6xl mb-4">🎱</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#10b981' }}>داور مورد نظر یافت نشد</h2>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: '#C7A66A' }}>داور مورد نظر یافت نشد</h2>
         <p className="mb-6" style={{ color: '#6b7280' }}>شناسه داور معتبر نیست</p>
         <button onClick={() => router.push('/referees')}
           className="px-6 py-3 rounded-xl font-bold"
-          style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+          style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
           بازگشت به داوران
         </button>
       </div>
@@ -85,23 +85,23 @@ export default function RefereeProfilePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
+    <div className="min-h-screen" style={{ background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#050c08 0%,#0a1a0f 50%,#050c08 100%)' }}>
         <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #10b981 0%, transparent 50%), radial-gradient(circle at 80% 20%, #06b6d4 0%, transparent 50%)' }} />
+          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #C7A66A 0%, transparent 50%), radial-gradient(circle at 80% 20%, #06b6d4 0%, transparent 50%)' }} />
         <div className="relative max-w-4xl mx-auto px-4 py-12">
-          <Link href="/referees" className="inline-flex items-center gap-2 mb-8 text-sm hover:opacity-80 transition-opacity" style={{ color: '#10b981' }}>
+          <Link href="/referees" className="inline-flex items-center gap-2 mb-8 text-sm hover:opacity-80 transition-opacity" style={{ color: '#C7A66A' }}>
             ← بازگشت به لیست داوران
           </Link>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             <div className="relative flex-shrink-0">
               <div className="w-28 h-28 rounded-2xl flex items-center justify-center text-3xl font-black"
-                style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+                style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
                 {referee.avatar}
               </div>
               {referee.available && (
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2"
-                  style={{ background: '#10b981', borderColor: '#010604' }} />
+                  style={{ background: '#C7A66A', borderColor: '#010604' }} />
               )}
             </div>
             <div className="flex-1 text-center sm:text-right">
@@ -110,7 +110,7 @@ export default function RefereeProfilePage() {
                   {referee.level}
                 </span>
                 {referee.available
-                  ? <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)' }}>در دسترس</span>
+                  ? <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(199,166,106,0.15)', color: '#C7A66A', border: '1px solid rgba(199,166,106,0.3)' }}>در دسترس</span>
                   : <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>مشغول</span>
                 }
               </div>
@@ -124,12 +124,12 @@ export default function RefereeProfilePage() {
       <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'کل مسابقات', value: referee.stats.total, color: '#10b981' },
+            { label: 'کل مسابقات', value: referee.stats.total, color: '#C7A66A' },
             { label: 'ملی', value: referee.stats.national, color: '#06b6d4' },
             { label: 'بین‌المللی', value: referee.stats.international, color: '#f59e0b' },
             { label: 'امتیاز', value: referee.stats.rating + ' ⭐', color: '#a78bfa' },
           ].map(s => (
-            <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
+            <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
               <div className="text-2xl font-black mb-1" style={{ color: s.color }}>{s.value}</div>
               <div className="text-xs" style={{ color: '#6b7280' }}>{s.label}</div>
             </div>
@@ -137,15 +137,15 @@ export default function RefereeProfilePage() {
         </div>
 
         <div className="md:col-span-2 space-y-6">
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>درباره داور</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>درباره داور</h2>
             <p className="leading-relaxed" style={{ color: '#9ca3af' }}>{referee.bio}</p>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-4" style={{ color: '#10b981' }}>سابقه مسابقات</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-4" style={{ color: '#C7A66A' }}>سابقه مسابقات</h2>
             <div className="space-y-3">
               {referee.tournaments.map((t, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.1)' }}>
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(199,166,106,0.05)', border: '1px solid rgba(199,166,106,0.1)' }}>
                   <div>
                     <div className="font-semibold text-sm">{t.name}</div>
                     <div className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{t.role}</div>
@@ -158,8 +158,8 @@ export default function RefereeProfilePage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>تخصص‌ها</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>تخصص‌ها</h2>
             <div className="flex flex-wrap gap-2">
               {referee.specialties.map(s => (
                 <span key={s} className="text-xs px-3 py-1 rounded-full font-medium"
@@ -169,19 +169,19 @@ export default function RefereeProfilePage() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>گواهینامه‌ها</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>گواهینامه‌ها</h2>
             <div className="space-y-2">
               {referee.certifications.map((c, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm" style={{ color: '#9ca3af' }}>
-                  <span style={{ color: '#10b981', marginTop: 2 }}>✓</span>
+                  <span style={{ color: '#C7A66A', marginTop: 2 }}>✓</span>
                   <span>{c}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="rounded-2xl p-6" style={{ background: '#050c08', border: '1px solid rgba(16,185,129,0.15)' }}>
-            <h2 className="text-lg font-bold mb-3" style={{ color: '#10b981' }}>تماس</h2>
+          <div className="rounded-2xl p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 className="text-lg font-bold mb-3" style={{ color: '#C7A66A' }}>تماس</h2>
             <div className="space-y-2 text-sm" style={{ color: '#9ca3af' }}>
               <div>📞 {referee.phone}</div>
               <div>✉️ {referee.email}</div>
@@ -189,7 +189,7 @@ export default function RefereeProfilePage() {
             </div>
             {referee.available && (
               <button className="w-full mt-4 py-2.5 rounded-xl font-bold text-sm"
-                style={{ background: 'linear-gradient(135deg,#10b981,#06b6d4)', color: '#010604' }}>
+                style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
                 درخواست داوری
               </button>
             )}

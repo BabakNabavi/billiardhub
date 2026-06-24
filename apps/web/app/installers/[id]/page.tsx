@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 
@@ -146,7 +146,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
   const [activeTab, setActiveTab] = useState<'services' | 'portfolio' | 'reviews' | 'contact'>('services');
 
   return (
-    <div style={{ background: '#010604', minHeight: '100vh', color: '#f0faf5', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
+    <div style={{ background: '#F7F7F5', minHeight: '100vh', color: '#111111', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <div style={{ position: 'relative', height: 'clamp(180px, 28vw, 320px)', overflow: 'hidden' }}>
@@ -155,7 +155,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg, rgba(6,182,212,0.03) 0px, rgba(6,182,212,0.03) 2px, transparent 2px, transparent 16px)', backgroundSize: '22px 22px' }} />
           {/* Glows */}
           <div style={{ position: 'absolute', top: '20%', right: '30%', width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.12), transparent 70%)', filter: 'blur(50px)' }} />
-          <div style={{ position: 'absolute', bottom: '10%', left: '10%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.08), transparent 70%)', filter: 'blur(40px)' }} />
+          <div style={{ position: 'absolute', bottom: '10%', left: '10%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.08), transparent 70%)', filter: 'blur(40px)' }} />
           {/* Large icon */}
           <div style={{ position: 'absolute', right: '5%', top: '50%', transform: 'translateY(-50%)', fontSize: 'clamp(60px, 14vw, 130px)', opacity: 0.05 }}>🔧</div>
         </div>
@@ -174,7 +174,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
             {/* Avatar */}
             <div style={{
               width: 'clamp(70px, 12vw, 90px)', height: 'clamp(70px, 12vw, 90px)', borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(16,185,129,0.1))',
+              background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(199,166,106,0.1))',
               border: '3px solid rgba(6,182,212,0.35)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 'clamp(24px, 5vw, 36px)', flexShrink: 0,
@@ -188,7 +188,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                   <span style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.35)', color: '#06b6d4', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>✓ تأیید شده</span>
                 )}
                 {installer.elite && (
-                  <span style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.35)', color: '#10b981', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 700 }}>🏆 متخصص برتر</span>
+                  <span style={{ background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.35)', color: '#C7A66A', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 700 }}>🏆 متخصص برتر</span>
                 )}
               </div>
               <div style={{ color: '#06b6d4', fontSize: 'clamp(11px, 2vw, 13px)', marginBottom: 10, opacity: 0.9 }}>{installer.tagline}</div>
@@ -206,7 +206,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                 <div style={{ color: '#6b7280', fontSize: 11 }}>کار انجام شده</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 800, color: '#10b981' }}>{installer.rating}</div>
+                <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 800, color: '#C7A66A' }}>{installer.rating}</div>
                 <div style={{ color: '#6b7280', fontSize: 11 }}>{installer.reviewCount} نظر</div>
               </div>
             </div>
@@ -234,8 +234,8 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
         {/* ── Tab Nav ─────────────────────────────────────────────────────── */}
         <div style={{
           display: 'flex', gap: 4, marginBottom: 28,
-          background: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: 4,
-          border: '1px solid rgba(255,255,255,0.06)', overflowX: 'auto',
+          background: 'rgba(0,0,0,0.03)', borderRadius: 14, padding: 4,
+          border: '1px solid rgba(0,0,0,0.05)', overflowX: 'auto',
         }}>
           {([
             ['services', `خدمات (${installer.services.length})`],
@@ -268,7 +268,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                 onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(6,182,212,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
                 >
                   <div style={{ fontSize: 32, marginBottom: 12 }}>{service.icon}</div>
-                  <h3 style={{ color: '#f0faf5', fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{service.title}</h3>
+                  <h3 style={{ color: '#111111', fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{service.title}</h3>
                   <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 14px', lineHeight: 1.7 }}>{service.description}</p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ color: '#06b6d4', fontWeight: 700, fontSize: 14 }}>{service.price}</span>
@@ -286,7 +286,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                 <h3 style={{ color: '#06b6d4', fontSize: 15, fontWeight: 700, margin: '0 0 16px' }}>گواهینامه‌ها و تخصص‌ها</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {installer.certifications.map((cert: string, i: number) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 13 }}>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(0,0,0,0.50)', fontSize: 13 }}>
                       <span style={{ color: '#06b6d4' }}>✓</span> {cert}
                     </div>
                   ))}
@@ -312,7 +312,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                       {/* Before/After placeholder */}
                       <div style={{
                         width: 'clamp(80px, 18%, 160px)', minHeight: 130, flexShrink: 0,
-                        background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(16,185,129,0.05))',
+                        background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(199,166,106,0.05))',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
                         fontSize: 36, opacity: 0.4,
                       }}>
@@ -322,15 +322,15 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                       {/* Content */}
                       <div style={{ flex: 1, padding: 20, minWidth: 200 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                          <h4 style={{ color: '#f0faf5', fontSize: 'clamp(14px, 2.5vw, 16px)', fontWeight: 700, margin: 0 }}>{item.title}</h4>
+                          <h4 style={{ color: '#111111', fontSize: 'clamp(14px, 2.5vw, 16px)', fontWeight: 700, margin: 0 }}>{item.title}</h4>
                           <span style={{ color: '#6b7280', fontSize: 12 }}>{item.year}</span>
                         </div>
                         <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>📍 {item.location} | ⏱ {item.duration}</div>
-                        <p style={{ color: '#94a3b8', fontSize: 13, margin: '0 0 12px', lineHeight: 1.6 }}>{item.description}</p>
+                        <p style={{ color: 'rgba(0,0,0,0.50)', fontSize: 13, margin: '0 0 12px', lineHeight: 1.6 }}>{item.description}</p>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           <span style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: 11, padding: '2px 10px', borderRadius: 20 }}>{item.type}</span>
                           {item.tags.map((tag: string) => (
-                            <span key={tag} style={{ background: 'rgba(255,255,255,0.04)', color: '#6b7280', fontSize: 11, padding: '2px 10px', borderRadius: 20 }}>{tag}</span>
+                            <span key={tag} style={{ background: 'rgba(0,0,0,0.04)', color: '#6b7280', fontSize: 11, padding: '2px 10px', borderRadius: 20 }}>{tag}</span>
                           ))}
                         </div>
                       </div>
@@ -361,7 +361,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                 {[5,4,3,2,1].map(s => (
                   <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ color: '#06b6d4', fontSize: 12, width: 8 }}>{s}</span>
-                    <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3 }}>
+                    <div style={{ flex: 1, height: 6, background: 'rgba(0,0,0,0.05)', borderRadius: 3 }}>
                       <div style={{ height: '100%', borderRadius: 3, background: '#06b6d4', width: s === 5 ? '75%' : s === 4 ? '18%' : '4%' }} />
                     </div>
                   </div>
@@ -383,13 +383,13 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                         {review.author.charAt(0)}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, color: '#f0faf5', fontSize: 14 }}>{review.author}</div>
+                        <div style={{ fontWeight: 700, color: '#111111', fontSize: 14 }}>{review.author}</div>
                         <div style={{ color: '#4b5563', fontSize: 11 }}>{review.business} — {review.date}</div>
                       </div>
                     </div>
                     <StarRating rating={review.rating} size={13} />
                   </div>
-                  <p style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.7, margin: 0 }}>{review.text}</p>
+                  <p style={{ color: 'rgba(0,0,0,0.50)', fontSize: 13, lineHeight: 1.7, margin: 0 }}>{review.text}</p>
                 </div>
               ))}
             </div>
@@ -411,7 +411,7 @@ export default function InstallerDetailPage({ params }: { params: { id: string }
                   <span style={{ fontSize: 18, flexShrink: 0 }}>{icon}</span>
                   <div>
                     <div style={{ color: '#4b5563', fontSize: 11, marginBottom: 2 }}>{label}</div>
-                    <div style={{ color: '#94a3b8', fontSize: 14 }}>{val}</div>
+                    <div style={{ color: 'rgba(0,0,0,0.50)', fontSize: 14 }}>{val}</div>
                   </div>
                 </div>
               ))}

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
@@ -13,7 +13,7 @@ interface ToastProps {
 }
 
 const config = {
-  success: { icon: <CheckCircle size={16} />, color: '#10b981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.25)' },
+  success: { icon: <CheckCircle size={16} />, color: '#C7A66A', bg: 'rgba(199,166,106,0.1)',  border: 'rgba(199,166,106,0.25)' },
   error:   { icon: <XCircle size={16} />,     color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.25)'  },
   warning: { icon: <AlertCircle size={16} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)' },
   info:    { icon: <Info size={16} />,        color: '#06b6d4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.25)'  },
@@ -57,7 +57,7 @@ export function Toast({ message, type = 'success', duration = 4000, onClose }: T
       </div>
 
       <span style={{ color: c.color, flexShrink: 0 }}>{c.icon}</span>
-      <span style={{ fontSize: '13px', color: '#f0faf5', fontWeight: 500, flex: 1, lineHeight: 1.5 }}>{message}</span>
+      <span style={{ fontSize: '13px', color: '#111111', fontWeight: 500, flex: 1, lineHeight: 1.5 }}>{message}</span>
       <button onClick={() => { setLeaving(true); setTimeout(onClose, 400); }}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: '2px', display: 'flex', flexShrink: 0, transition: 'color 0.2s' }}
         onMouseEnter={e => { (e.currentTarget).style.color = 'rgba(255,255,255,0.7)'; }}

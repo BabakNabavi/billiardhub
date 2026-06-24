@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -17,11 +17,11 @@ interface StoryGroup {
 }
 
 const sampleGroups: StoryGroup[] = [
-  { userId: '1', userName: 'باشگاه ستاره', userAvatar: 'س', userRole: 'club', roleColor: '#10b981', roleLabel: 'باشگاه', allSeen: false, stories: [{ id: '1', caption: 'میز جدید اسنوکر نصب شد 🎱', createdAt: '۲ ساعت پیش' }, { id: '1b', caption: 'رزرو آنلاین فعال شد ✅', createdAt: '۲ ساعت پیش' }] },
+  { userId: '1', userName: 'باشگاه ستاره', userAvatar: 'س', userRole: 'club', roleColor: '#C7A66A', roleLabel: 'باشگاه', allSeen: false, stories: [{ id: '1', caption: 'میز جدید اسنوکر نصب شد 🎱', createdAt: '۲ ساعت پیش' }, { id: '1b', caption: 'رزرو آنلاین فعال شد ✅', createdAt: '۲ ساعت پیش' }] },
   { userId: '2', userName: 'علی محمدی', userAvatar: 'ع', userRole: 'player', roleColor: '#06b6d4', roleLabel: 'بازیکن', allSeen: false, stories: [{ id: '2a', caption: 'تمرین امروز 💪', createdAt: '۳ ساعت پیش' }, { id: '2b', caption: 'آماده مسابقه‌ام!', createdAt: '۳ ساعت پیش' }] },
   { userId: '3', userName: 'Predator Shop', userAvatar: 'P', userRole: 'shop', roleColor: '#f59e0b', roleLabel: 'فروشگاه', allSeen: false, stories: [{ id: '3', caption: 'تخفیف ۳۰٪ چوب‌های حرفه‌ای 🔥', createdAt: '۴ ساعت پیش' }] },
   { userId: '4', userName: 'رضا احمدی', userAvatar: 'ر', userRole: 'coach', roleColor: '#a78bfa', roleLabel: 'مربی', allSeen: true, stories: [{ id: '4', caption: 'کلاس آموزشی فردا ساعت ۱۰', createdAt: '۵ ساعت پیش' }] },
-  { userId: '5', userName: 'باشگاه المپیک', userAvatar: 'ا', userRole: 'club', roleColor: '#10b981', roleLabel: 'باشگاه', allSeen: true, stories: [{ id: '5', caption: 'مسابقات هفتگی جمعه', createdAt: '۶ ساعت پیش' }] },
+  { userId: '5', userName: 'باشگاه المپیک', userAvatar: 'ا', userRole: 'club', roleColor: '#C7A66A', roleLabel: 'باشگاه', allSeen: true, stories: [{ id: '5', caption: 'مسابقات هفتگی جمعه', createdAt: '۶ ساعت پیش' }] },
   { userId: '6', userName: 'کاوه موسوی', userAvatar: 'ک', userRole: 'player', roleColor: '#06b6d4', roleLabel: 'بازیکن', allSeen: true, stories: [{ id: '6', caption: 'قهرمان هفته 🏆', createdAt: '۸ ساعت پیش' }] },
 ];
 
@@ -62,25 +62,25 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         }
         .story-emoji-btn {
           font-size: 24px; padding: 10px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(0,0,0,0.05);
+          border: 1px solid rgba(0,0,0,0.06);
           border-radius: 12px; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           transition: all 0.2s ease;
         }
         .story-emoji-btn:hover { transform: scale(1.35); background: rgba(255,255,255,0.14); }
         .story-msg-input {
-          flex: 1; background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.12);
+          flex: 1; background: rgba(0,0,0,0.06);
+          border: 1px solid rgba(0,0,0,0.09);
           border-radius: 100px; padding: 11px 18px;
           color: #fff; font-size: 13px; outline: none; font-family: inherit;
         }
         .story-msg-input::placeholder { color: rgba(255,255,255,0.3); }
-        .story-msg-input:focus { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+        .story-msg-input:focus { background: rgba(0,0,0,0.09); border-color: rgba(255,255,255,0.2); }
         .story-icon-btn {
           width: 42px; height: 42px; border-radius: 50%;
-          border: 1px solid rgba(255,255,255,0.12);
-          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(0,0,0,0.09);
+          background: rgba(0,0,0,0.06);
           cursor: pointer; display: flex; align-items: center; justify-content: center;
           flex-shrink: 0; transition: all 0.3s ease; color: #fff;
         }
@@ -89,16 +89,16 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 
       <div style={{ position: 'fixed', inset: 0, zIndex: 99998, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', animation: 'overlayFadeIn 0.2s ease' }} onClick={onClose} />
 
-      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 99999, width: 'min(400px, 94vw)', height: 'min(700px, 88vh)', borderRadius: '28px', overflow: 'hidden', animation: 'storyModalIn 0.3s cubic-bezier(0.4,0,0.2,1)', boxShadow: `0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08), 0 0 80px ${currentGroup.roleColor}25` }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 99999, width: 'min(400px, 94vw)', height: 'min(700px, 88vh)', borderRadius: '28px', overflow: 'hidden', animation: 'storyModalIn 0.3s cubic-bezier(0.4,0,0.2,1)', boxShadow: `0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.06), 0 0 80px ${currentGroup.roleColor}25` }} onClick={e => e.stopPropagation()}>
 
         <div style={{ position: 'absolute', inset: 0, background: bgGradients[currentGroup.userRole] || bgGradients.player }}>
           <div style={{ position: 'absolute', top: '-100px', left: '50%', transform: 'translateX(-50%)', width: '350px', height: '350px', borderRadius: '50%', background: `radial-gradient(${currentGroup.roleColor}25, transparent 65%)`, pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '-80px', right: '-50px', width: '250px', height: '250px', borderRadius: '50%', background: `radial-gradient(${currentGroup.roleColor}15, transparent 65%)`, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.04) 0%, transparent 50%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '140px', opacity: 0.05, userSelect: 'none', pointerEvents: 'none' }}>🎱</div>
         </div>
 
-        <div style={{ position: 'absolute', inset: 0, borderRadius: '28px', border: '1px solid rgba(255,255,255,0.1)', pointerEvents: 'none', zIndex: 55 }} />
+        <div style={{ position: 'absolute', inset: 0, borderRadius: '28px', border: '1px solid rgba(0,0,0,0.08)', pointerEvents: 'none', zIndex: 55 }} />
 
         {/* Progress bars */}
         <div style={{ position: 'absolute', top: '16px', left: '14px', right: '14px', display: 'flex', gap: '5px', zIndex: 50 }}>
@@ -125,7 +125,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           <span style={{ fontSize: '10px', color: currentGroup.roleColor, background: `${currentGroup.roleColor}18`, border: `1px solid ${currentGroup.roleColor}40`, borderRadius: '20px', padding: '4px 11px', fontWeight: 700, backdropFilter: 'blur(10px)', flexShrink: 0 }}>
             {currentGroup.roleLabel}
           </span>
-          <button onClick={onClose} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <button onClick={onClose} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(0,0,0,0.09)', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <X size={15} />
           </button>
         </div>
@@ -135,7 +135,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 
         {currentStory.caption && (
           <div style={{ position: 'absolute', bottom: '130px', left: '16px', right: '16px', zIndex: 20 }}>
-            <div style={{ background: 'rgba(0,0,0,0.5)', borderRadius: '18px', padding: '14px 18px', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ background: 'rgba(0,0,0,0.5)', borderRadius: '18px', padding: '14px 18px', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)' }}>
               <p style={{ color: '#fff', fontSize: '15px', margin: 0, lineHeight: 1.7, fontWeight: 500 }}>{currentStory.caption}</p>
             </div>
           </div>
@@ -144,7 +144,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         {sentReaction && <div className="story-reaction-pop">{sentReaction}</div>}
 
         {showEmojis && (
-          <div style={{ position: 'absolute', bottom: '135px', left: '16px', right: '16px', zIndex: 40, background: 'rgba(4,12,8,0.96)', borderRadius: '20px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+          <div style={{ position: 'absolute', bottom: '135px', left: '16px', right: '16px', zIndex: 40, background: 'rgba(4,12,8,0.96)', borderRadius: '20px', padding: '16px', border: '1px solid rgba(0,0,0,0.06)', backdropFilter: 'blur(24px)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
             {emojis.map((e: string) => (
               <button key={e} className="story-emoji-btn" onClick={() => onReaction(e)}>{e}</button>
             ))}
@@ -154,15 +154,15 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 30, padding: '14px 16px 26px', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 70%, transparent 100%)' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onKeyDown={e => e.key === 'Enter' && onSendComment()} placeholder="پیام بفرست..." />
-            <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background: showEmojis ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', borderColor: showEmojis ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)', fontSize: '20px' }}>
+            <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background: showEmojis ? 'rgba(199,166,106,0.2)' : 'rgba(0,0,0,0.06)', borderColor: showEmojis ? 'rgba(199,166,106,0.4)' : 'rgba(0,0,0,0.09)', fontSize: '20px' }}>
               😊
             </button>
-            <button className="story-icon-btn" onClick={onLike} style={{ background: liked ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)', borderColor: liked ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)' }}>
+            <button className="story-icon-btn" onClick={onLike} style={{ background: liked ? 'rgba(239,68,68,0.2)' : 'rgba(0,0,0,0.06)', borderColor: liked ? 'rgba(239,68,68,0.5)' : 'rgba(0,0,0,0.09)' }}>
               <Heart size={17} fill={liked ? '#ef4444' : 'none'} style={{ color: liked ? '#ef4444' : 'rgba(255,255,255,0.7)' }} />
             </button>
             {comment.trim() && (
-              <button className="story-icon-btn" onClick={onSendComment} style={{ background: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.35)' }}>
-                <Send size={16} style={{ color: '#10b981' }} />
+              <button className="story-icon-btn" onClick={onSendComment} style={{ background: 'rgba(199,166,106,0.15)', borderColor: 'rgba(199,166,106,0.35)' }}>
+                <Send size={16} style={{ color: '#C7A66A' }} />
               </button>
             )}
           </div>
@@ -259,17 +259,17 @@ export default function Stories() {
       <div className="stories-strip">
         {user && (
           <div className="story-thumb">
-            <div style={{ width: '62px', height: '62px', borderRadius: '50%', background: 'rgba(16,185,129,0.07)', border: '2px dashed rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+            <div style={{ width: '62px', height: '62px', borderRadius: '50%', background: 'rgba(199,166,106,0.07)', border: '2px dashed rgba(199,166,106,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C7A66A' }}>
               <Plus size={24} />
             </div>
-            <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 600 }}>جدید</span>
+            <span style={{ fontSize: '11px', color: '#C7A66A', fontWeight: 600 }}>جدید</span>
           </div>
         )}
         {groups.map((g, i) => {
           const isSeen = seenGroups.has(g.userId) || g.allSeen;
           return (
             <div key={g.userId} className="story-thumb" onClick={() => openStory(i)}>
-              <div style={{ padding: '2.5px', borderRadius: '50%', background: isSeen ? 'rgba(255,255,255,0.1)' : `linear-gradient(135deg, ${g.roleColor}, #06b6d4)` }}>
+              <div style={{ padding: '2.5px', borderRadius: '50%', background: isSeen ? 'rgba(0,0,0,0.08)' : `linear-gradient(135deg, ${g.roleColor}, #06b6d4)` }}>
                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '20px', color: '#fff', border: '2.5px solid #0d2016', background: `linear-gradient(135deg, ${g.roleColor}30, ${g.roleColor}10)` }}>
                   {g.userAvatar}
                 </div>

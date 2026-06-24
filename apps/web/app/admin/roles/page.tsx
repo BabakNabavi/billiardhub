@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -51,7 +51,7 @@ function RequestCard({
 
   return (
     <div style={{
-      background: '#111a15', border: '1px solid rgba(255,255,255,0.07)',
+      background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.07)',
       borderRadius: 14, padding: '16px', marginBottom: 12,
     }}>
       {/* Row 1: user + role */}
@@ -64,7 +64,7 @@ function RequestCard({
           <i className={`ti ${meta.icon}`} style={{ fontSize: 20, color: meta.color }} aria-hidden="true" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', marginBottom: 2 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 2 }}>
             {req.users?.name ?? req.users?.mobile ?? req.user_id.slice(0, 8)}
           </div>
           <div style={{ fontSize: 11, color: meta.color }}>{meta.label}</div>
@@ -81,7 +81,7 @@ function RequestCard({
 
       {/* Time + doc */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 10, color: '#475569' }}>
+        <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)' }}>
           <i className="ti ti-clock" style={{ fontSize: 11, marginLeft: 3 }} aria-hidden="true" />
           {timeAgo(req.requested_at)}
         </span>
@@ -91,7 +91,7 @@ function RequestCard({
             target="_blank"
             rel="noreferrer"
             style={{
-              fontSize: 10, color: '#10b981', textDecoration: 'none',
+              fontSize: 10, color: '#C7A66A', textDecoration: 'none',
               display: 'inline-flex', alignItems: 'center', gap: 4,
             }}
           >
@@ -117,8 +117,8 @@ function RequestCard({
                 disabled={busy}
                 style={{
                   flex: 1, padding: '9px', borderRadius: 10, border: 'none',
-                  background: busy ? '#1a2e24' : '#10b981',
-                  color: busy ? '#2d4a38' : '#0a0f0d',
+                  background: busy ? 'rgba(0,0,0,0.04)' : '#C7A66A',
+                  color: busy ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
                   fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: busy ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
@@ -147,8 +147,8 @@ function RequestCard({
                 placeholder="دلیل رد (اختیاری)"
                 rows={2}
                 style={{
-                  width: '100%', background: '#0a0f0d', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 10, padding: '8px 12px', color: '#e2e8f0', fontSize: 12,
+                  width: '100%', background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 10, padding: '8px 12px', color: '#111111', fontSize: 12,
                   fontFamily: 'inherit', resize: 'none', marginBottom: 8, outline: 'none',
                 }}
               />
@@ -168,8 +168,8 @@ function RequestCard({
                   onClick={() => setRejecting(false)}
                   style={{
                     flex: 1, padding: '9px', borderRadius: 10,
-                    border: '1px solid rgba(255,255,255,0.1)', background: 'transparent',
-                    color: '#64748b', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
+                    border: '1px solid rgba(0,0,0,0.08)', background: 'transparent',
+                    color: 'rgba(0,0,0,0.45)', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
                   }}
                 >
                   انصراف
@@ -238,26 +238,26 @@ export default function AdminRolesPage() {
     <>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
       <div style={{
-        minHeight: '100vh', background: '#0a0f0d',
+        minHeight: '100vh', background: '#F7F7F5',
         fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
         position: 'relative',
       }}>
-        <div style={{ position: 'fixed', width: 300, height: 300, background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)', top: -80, right: -60, filter: 'blur(50px)', zIndex: 0, pointerEvents: 'none' }} />
+        <div style={{ position: 'fixed', width: 300, height: 300, background: 'radial-gradient(circle, rgba(199,166,106,0.12) 0%, transparent 70%)', top: -80, right: -60, filter: 'blur(50px)', zIndex: 0, pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 560, margin: '0 auto', padding: '28px 16px 80px' }}>
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
             <button onClick={() => router.push('/dashboard')} style={{
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)',
               borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#94a3b8',
+              cursor: 'pointer', color: 'rgba(0,0,0,0.50)',
             }}>
               <i className="ti ti-arrow-right" style={{ fontSize: 18 }} aria-hidden="true" />
             </button>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>مدیریت درخواست نقش</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>پانل ادمین</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#111111' }}>مدیریت درخواست نقش</div>
+              <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>پانل ادمین</div>
             </div>
           </div>
 
@@ -269,8 +269,8 @@ export default function AdminRolesPage() {
                 onClick={() => setFilter(t.status)}
                 style={{
                   flex: 1, padding: '8px', borderRadius: 10,
-                  border: `1px solid ${filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.5) : 'rgba(255,255,255,0.07)'}`,
-                  background: filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.1) : '#111a15',
+                  border: `1px solid ${filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.5) : 'rgba(0,0,0,0.07)'}`,
+                  background: filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.1) : 'rgba(0,0,0,0.04)',
                   color: filter === t.status ? STATUS_COLOR[t.status] : '#64748b',
                   fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s',
                 }}
@@ -282,17 +282,17 @@ export default function AdminRolesPage() {
 
           {/* List */}
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#475569', fontSize: 13 }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(0,0,0,0.38)', fontSize: 13 }}>
               در حال بارگذاری...
             </div>
           ) : requests.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
               <i className="ti ti-inbox" style={{ fontSize: 36, color: '#1e293b', display: 'block', marginBottom: 12 }} />
-              <span style={{ fontSize: 13, color: '#475569' }}>درخواستی وجود ندارد</span>
+              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>درخواستی وجود ندارد</span>
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 11, color: '#475569', marginBottom: 12 }}>
+              <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', marginBottom: 12 }}>
                 {toFarsiDigits(requests.length)} درخواست
               </div>
               {requests.map(r => (
@@ -305,7 +305,7 @@ export default function AdminRolesPage() {
         {toast && (
           <div style={{
             position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-            background: '#10b981', color: '#0a0f0d', fontSize: 12, fontWeight: 700,
+            background: '#C7A66A', color: '#FFFFFF', fontSize: 12, fontWeight: 700,
             fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px',
             borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap',
           }}>

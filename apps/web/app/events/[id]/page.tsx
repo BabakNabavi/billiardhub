@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
@@ -38,7 +38,7 @@ const sampleTournament = {
   prize: '۵۰,۰۰۰,۰۰۰',
   prizes: [
     { place: '🥇 اول',   amount: '۲۵,۰۰۰,۰۰۰', color: '#f59e0b' },
-    { place: '🥈 دوم',   amount: '۱۲,۰۰۰,۰۰۰', color: '#94a3b8' },
+    { place: '🥈 دوم',   amount: '۱۲,۰۰۰,۰۰۰', color: 'rgba(0,0,0,0.50)' },
     { place: '🥉 سوم',   amount: '۷,۰۰۰,۰۰۰',  color: '#cd7c4a' },
     { place: '4 نفر بعدی', amount: '۱,۵۰۰,۰۰۰', color: '#06b6d4' },
   ],
@@ -130,7 +130,7 @@ function MatchCard({ match }: { match: Match }) {
   const winner      = isCompleted ? (match.score1 > match.score2 ? 1 : 2) : 0;
 
   return (
-    <div style={{ background: isLive ? 'rgba(239,68,68,0.05)' : 'rgba(255,255,255,0.025)', border: `1px solid ${isLive ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '16px', padding: '16px 18px', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ background: isLive ? 'rgba(239,68,68,0.05)' : '#FFFFFF', border: `1px solid ${isLive ? 'rgba(239,68,68,0.2)' : 'rgba(0,0,0,0.07)'}`, borderRadius: '16px', padding: '16px 18px', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
 
       {/* live glow */}
       {isLive && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg,transparent,rgba(239,68,68,0.6),transparent)', boxShadow: '0 0 12px rgba(239,68,68,0.3)' }} />}
@@ -144,10 +144,10 @@ function MatchCard({ match }: { match: Match }) {
               <span style={{ fontSize: '9px', color: '#ef4444', fontWeight: 700, letterSpacing: '0.1em' }}>LIVE</span>
             </div>
           )}
-          {isCompleted && <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, letterSpacing: '0.1em' }}>FINAL</span>}
-          {match.status === 'upcoming' && <span style={{ fontSize: '10px', color: 'rgba(240,250,245,0.35)', letterSpacing: '0.08em' }}>UPCOMING</span>}
+          {isCompleted && <span style={{ fontSize: '10px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.1em' }}>FINAL</span>}
+          {match.status === 'upcoming' && <span style={{ fontSize: '10px', color: 'rgba(0,0,0,0.40)', letterSpacing: '0.08em' }}>UPCOMING</span>}
         </div>
-        <div style={{ display: 'flex', gap: '8px', fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>
+        <div style={{ display: 'flex', gap: '8px', fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>
           <span>{match.round}</span>
           <span>·</span>
           <span>{match.table}</span>
@@ -161,24 +161,24 @@ function MatchCard({ match }: { match: Match }) {
 
         {/* Player 1 */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', opacity: isCompleted && winner === 2 ? 0.45 : 1 }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0, boxShadow: isCompleted && winner === 1 ? '0 0 14px rgba(16,185,129,0.4)' : 'none' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0, boxShadow: isCompleted && winner === 1 ? '0 0 14px rgba(199,166,106,0.4)' : 'none' }}>
             {match.player1.avatar}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: '13px', fontWeight: isCompleted && winner === 1 ? 800 : 600, color: isCompleted && winner === 1 ? '#f0faf5' : 'rgba(240,250,245,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '13px', fontWeight: isCompleted && winner === 1 ? 800 : 600, color: isCompleted && winner === 1 ? '#f0faf5' : 'rgba(0,0,0,0.48)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {match.player1.name.split(' ').slice(-1)[0]}
             </div>
-            <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)' }}>#{toFa(match.player1.rank)}</div>
+            <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>#{toFa(match.player1.rank)}</div>
           </div>
         </div>
 
         {/* Score */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: isCompleted && winner === 1 ? '#10b981' : isLive ? '#f0faf5' : 'rgba(240,250,245,0.4)', letterSpacing: '-0.02em', minWidth: '24px', textAlign: 'center', textShadow: isCompleted && winner === 1 ? '0 0 16px rgba(16,185,129,0.5)' : 'none' }}>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: isCompleted && winner === 1 ? '#C7A66A' : isLive ? '#f0faf5' : 'rgba(0,0,0,0.42)', letterSpacing: '-0.02em', minWidth: '24px', textAlign: 'center', textShadow: isCompleted && winner === 1 ? '0 0 16px rgba(199,166,106,0.5)' : 'none' }}>
             {match.status === 'upcoming' ? '-' : toFa(match.score1)}
           </div>
-          <div style={{ fontSize: '13px', color: 'rgba(240,250,245,0.2)', fontWeight: 700 }}>:</div>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: isCompleted && winner === 2 ? '#10b981' : isLive ? '#f0faf5' : 'rgba(240,250,245,0.4)', letterSpacing: '-0.02em', minWidth: '24px', textAlign: 'center', textShadow: isCompleted && winner === 2 ? '0 0 16px rgba(16,185,129,0.5)' : 'none' }}>
+          <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.30)', fontWeight: 700 }}>:</div>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: isCompleted && winner === 2 ? '#C7A66A' : isLive ? '#f0faf5' : 'rgba(0,0,0,0.42)', letterSpacing: '-0.02em', minWidth: '24px', textAlign: 'center', textShadow: isCompleted && winner === 2 ? '0 0 16px rgba(199,166,106,0.5)' : 'none' }}>
             {match.status === 'upcoming' ? '-' : toFa(match.score2)}
           </div>
         </div>
@@ -186,10 +186,10 @@ function MatchCard({ match }: { match: Match }) {
         {/* Player 2 */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'flex-end', opacity: isCompleted && winner === 1 ? 0.45 : 1 }}>
           <div style={{ minWidth: 0, textAlign: 'right' }}>
-            <div style={{ fontSize: '13px', fontWeight: isCompleted && winner === 2 ? 800 : 600, color: isCompleted && winner === 2 ? '#f0faf5' : 'rgba(240,250,245,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '13px', fontWeight: isCompleted && winner === 2 ? 800 : 600, color: isCompleted && winner === 2 ? '#f0faf5' : 'rgba(0,0,0,0.48)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {match.player2.name.split(' ').slice(-1)[0]}
             </div>
-            <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)' }}>#{toFa(match.player2.rank)}</div>
+            <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>#{toFa(match.player2.rank)}</div>
           </div>
           <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg,#06b6d4,#0891b2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0, boxShadow: isCompleted && winner === 2 ? '0 0 14px rgba(6,182,212,0.4)' : 'none' }}>
             {match.player2.avatar}
@@ -204,14 +204,14 @@ function MatchCard({ match }: { match: Match }) {
 function BracketMatch({ p1, p2, s1, s2, done, live }: any) {
   const winner = done ? (s1 > s2 ? 1 : 2) : 0;
   return (
-    <div style={{ background: live ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.025)', border: `1px solid ${live ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '12px', overflow: 'hidden', width: '200px', position: 'relative' }}>
+    <div style={{ background: live ? 'rgba(239,68,68,0.06)' : '#FFFFFF', border: `1px solid ${live ? 'rgba(239,68,68,0.2)' : 'rgba(0,0,0,0.07)'}`, borderRadius: '12px', overflow: 'hidden', width: '200px', position: 'relative' }}>
       {live && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg,transparent,rgba(239,68,68,0.5),transparent)' }} />}
       {[{ name: p1, score: s1, w: winner === 1 }, { name: p2, score: s2, w: winner === 2 }].map((p, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', background: i === 0 ? 'transparent' : 'rgba(255,255,255,0.02)', borderTop: i === 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-          <span style={{ fontSize: '12px', fontWeight: p.w ? 800 : 500, color: p.w ? '#f0faf5' : 'rgba(240,250,245,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '130px' }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', background: i === 0 ? 'transparent' : 'rgba(255,255,255,0.02)', borderTop: i === 1 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
+          <span style={{ fontSize: '12px', fontWeight: p.w ? 800 : 500, color: p.w ? '#f0faf5' : 'rgba(0,0,0,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '130px' }}>
             {p.name.split(' ').slice(-1)[0]}
           </span>
-          <span style={{ fontSize: '14px', fontWeight: 900, color: p.w ? '#10b981' : done ? 'rgba(240,250,245,0.25)' : 'rgba(240,250,245,0.4)', flexShrink: 0, marginRight: '8px', textShadow: p.w ? '0 0 12px rgba(16,185,129,0.5)' : 'none' }}>
+          <span style={{ fontSize: '14px', fontWeight: 900, color: p.w ? '#C7A66A' : done ? 'rgba(0,0,0,0.30)' : 'rgba(0,0,0,0.42)', flexShrink: 0, marginRight: '8px', textShadow: p.w ? '0 0 12px rgba(199,166,106,0.5)' : 'none' }}>
             {done || live ? toFa(p.score) : '-'}
           </span>
         </div>
@@ -249,21 +249,21 @@ export default function TournamentPage() {
         @keyframes liveGlow { 0%,100%{box-shadow:0 0 8px rgba(239,68,68,0.4);}50%{box-shadow:0 0 20px rgba(239,68,68,0.7);} }
 
         .tab-btn { padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; border:1px solid transparent; cursor:pointer; font-family:inherit; transition:all 0.3s; white-space:nowrap; }
-        .tab-btn.active { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:#10b981; }
-        .tab-btn:not(.active) { background:rgba(255,255,255,0.03); color:rgba(240,250,245,0.4); }
-        .tab-btn:not(.active):hover { background:rgba(255,255,255,0.06); color:rgba(240,250,245,0.7); }
+        .tab-btn.active { background:rgba(199,166,106,0.1); border-color:rgba(199,166,106,0.3); color:#C7A66A; }
+        .tab-btn:not(.active) { background:rgba(0,0,0,0.03); color:rgba(0,0,0,0.42); }
+        .tab-btn:not(.active):hover { background:rgba(0,0,0,0.05); color:rgba(0,0,0,0.48); }
 
         .player-row { display:flex; align-items:center; gap:14px; padding:13px 16px; border-radius:13px; transition:all 0.25s; cursor:default; }
-        .player-row:hover { background:rgba(255,255,255,0.03); }
+        .player-row:hover { background:rgba(0,0,0,0.03); }
 
-        .prize-card { padding:18px 20px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:16px; display:flex; align-items:center; gap:16px; transition:all 0.35s; }
-        .prize-card:hover { background:rgba(255,255,255,0.04); transform:translateX(-4px); }
+        .prize-card { padding:18px 20px; background:#FFFFFF; border:1px solid rgba(0,0,0,0.07); border-radius:16px; display:flex; align-items:center; gap:16px; transition:all 0.35s; }
+        .prize-card:hover { background:rgba(0,0,0,0.04); transform:translateX(-4px); }
 
         @media(max-width:900px) { .t-grid{grid-template-columns:1fr !important;} }
         @media(max-width:640px) { .stat-bar{grid-template-columns:repeat(2,1fr)!important;} }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806 0%,#060d0a 100%)' }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5' }}>
 
         {/* ══════════ CINEMATIC HERO ══════════ */}
         <div style={{ position: 'relative', height: 'clamp(500px,68vh,740px)', overflow: 'hidden' }}>
@@ -276,17 +276,17 @@ export default function TournamentPage() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(2,8,6,0.6) 0%, transparent 55%)' }} />
           {/* Red live glow */}
           {t.status === 'live' && <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 55% 55% at 20% 65%, rgba(239,68,68,0.08) 0%, transparent 100%)' }} />}
-          <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse 55% 55% at 20% 65%, rgba(16,185,129,0.07) 0%, transparent 100%)` }} />
+          <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse 55% 55% at 20% 65%, rgba(199,166,106,0.07) 0%, transparent 100%)` }} />
 
           {/* Ambient orb */}
           <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '55vw', height: '55vw', maxWidth: '700px', maxHeight: '700px', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(245,158,11,0.05) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
 
           {/* Top nav */}
           <div style={{ position: 'absolute', top: '24px', left: 0, right: 0, zIndex: 10, padding: '0 clamp(16px,4vw,48px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Link href="/events" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 14px' }}>
+            <Link href="/events" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '10px', padding: '7px 14px' }}>
               <ChevronRight size={13} /> مسابقات
             </Link>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '12px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '12px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '10px', padding: '7px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>
               <Share2 size={12} /> اشتراک‌گذاری
             </button>
           </div>
@@ -295,8 +295,8 @@ export default function TournamentPage() {
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(24px,4vw,52px)', opacity: heroOpacity }}>
 
             {/* Status badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: t.status === 'live' ? 'rgba(239,68,68,0.12)' : t.status === 'completed' ? 'rgba(255,255,255,0.06)' : 'rgba(16,185,129,0.1)', border: `1px solid ${t.status === 'live' ? 'rgba(239,68,68,0.3)' : t.status === 'completed' ? 'rgba(255,255,255,0.1)' : 'rgba(16,185,129,0.25)'}`, borderRadius: '100px', padding: '6px 18px', marginBottom: '18px', backdropFilter: 'blur(16px)', animation: t.status === 'live' ? 'liveGlow 3s infinite' : 'none' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.status === 'live' ? '#ef4444' : t.status === 'completed' ? '#94a3b8' : '#10b981', boxShadow: `0 0 8px ${t.status === 'live' ? '#ef4444' : t.status === 'completed' ? '#94a3b8' : '#10b981'}`, display: 'inline-block', animation: 'pulse 2s infinite' }} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: t.status === 'live' ? 'rgba(239,68,68,0.12)' : t.status === 'completed' ? 'rgba(0,0,0,0.05)' : 'rgba(199,166,106,0.1)', border: `1px solid ${t.status === 'live' ? 'rgba(239,68,68,0.3)' : t.status === 'completed' ? 'rgba(0,0,0,0.08)' : 'rgba(199,166,106,0.25)'}`, borderRadius: '100px', padding: '6px 18px', marginBottom: '18px', backdropFilter: 'blur(16px)', animation: t.status === 'live' ? 'liveGlow 3s infinite' : 'none' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.status === 'live' ? '#ef4444' : t.status === 'completed' ? '#94a3b8' : '#C7A66A', boxShadow: `0 0 8px ${t.status === 'live' ? '#ef4444' : t.status === 'completed' ? '#94a3b8' : '#C7A66A'}`, display: 'inline-block', animation: 'pulse 2s infinite' }} />
               <span style={{ fontSize: '10px', color: t.status === 'live' ? '#fca5a5' : t.status === 'completed' ? '#94a3b8' : '#6ee7b7', fontWeight: 700, letterSpacing: '0.15em' }}>
                 {t.status === 'live' ? '● LIVE NOW' : t.status === 'completed' ? 'COMPLETED' : 'UPCOMING'}
               </span>
@@ -312,16 +312,16 @@ export default function TournamentPage() {
 
             {/* Meta badges */}
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
-                <MapPin size={11} style={{ color: '#10b981' }} /> {t.venue}، {t.city}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(0,0,0,0.06)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+                <MapPin size={11} style={{ color: '#C7A66A' }} /> {t.venue}، {t.city}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
-                <Calendar size={11} style={{ color: '#10b981' }} /> {t.startDate} — {t.endDate}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(0,0,0,0.06)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+                <Calendar size={11} style={{ color: '#C7A66A' }} /> {t.startDate} — {t.endDate}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(245,158,11,0.15)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: '#fcd34d' }}>
                 <Trophy size={11} /> {t.prize} تومان
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(0,0,0,0.06)', backdropFilter: 'blur(12px)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
                 <Users size={11} style={{ color: '#06b6d4' }} /> {toFa(t.participants)}/{toFa(t.maxParticipants)}
               </div>
             </div>
@@ -340,39 +340,39 @@ export default function TournamentPage() {
             </div>
             {liveMatches.map((m, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '100px', flexShrink: 0 }}>
-                <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.7)', fontWeight: 600 }}>{m.player1.name.split(' ').slice(-1)[0]}</span>
+                <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.48)', fontWeight: 600 }}>{m.player1.name.split(' ').slice(-1)[0]}</span>
                 <span style={{ fontSize: '14px', fontWeight: 900, color: '#ef4444' }}>{toFa(m.score1)}:{toFa(m.score2)}</span>
-                <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.7)', fontWeight: 600 }}>{m.player2.name.split(' ').slice(-1)[0]}</span>
-                <span style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)' }}>{m.round}</span>
+                <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.48)', fontWeight: 600 }}>{m.player2.name.split(' ').slice(-1)[0]}</span>
+                <span style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>{m.round}</span>
               </div>
             ))}
           </div>
         )}
 
         {/* ══════════ PROGRESS BAR ══════════ */}
-        <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0 clamp(16px,4vw,40px)' }}>
+        <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '0 clamp(16px,4vw,40px)' }}>
           <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderBottom: 'none' }}>
               {[
                 { v: toFa(t.stats.totalMatches),     l: 'کل مسابقات',     c: '#f0faf5'  },
-                { v: toFa(t.stats.completedMatches), l: 'برگزارشده',      c: '#10b981'  },
+                { v: toFa(t.stats.completedMatches), l: 'برگزارشده',      c: '#C7A66A'  },
                 { v: toFa(t.stats.remainingMatches), l: 'باقی‌مانده',     c: '#06b6d4'  },
                 { v: toFa(t.stats.highestBreak),     l: 'بالاترین بریک',  c: '#f59e0b'  },
               ].map((s, i) => (
-                <div key={i} style={{ padding: '18px 16px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <div key={i} style={{ padding: '18px 16px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
                   <div style={{ fontSize: 'clamp(20px,3vw,28px)', fontWeight: 900, color: s.c, letterSpacing: '-0.03em', textShadow: `0 0 20px ${s.c}30` }}>{s.v}</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)', marginTop: '4px', letterSpacing: '0.05em' }}>{s.l}</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)', marginTop: '4px', letterSpacing: '0.05em' }}>{s.l}</div>
                 </div>
               ))}
             </div>
             {/* Progress */}
             <div style={{ padding: '12px 0 14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '7px' }}>
-                <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.35)' }}>پیشرفت مسابقات</span>
-                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>{toFa(progress)}٪</span>
+                <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.40)' }}>پیشرفت مسابقات</span>
+                <span style={{ fontSize: '11px', color: '#C7A66A', fontWeight: 700 }}>{toFa(progress)}٪</span>
               </div>
-              <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg,#10b981,#06b6d4)', borderRadius: '2px', boxShadow: '0 0 10px rgba(16,185,129,0.5)', transition: 'width 1s ease' }} />
+              <div style={{ height: '4px', background: 'rgba(0,0,0,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg,#C7A66A,#A07840)', borderRadius: '2px', boxShadow: '0 0 10px rgba(199,166,106,0.5)', transition: 'width 1s ease' }} />
               </div>
             </div>
           </div>
@@ -423,24 +423,24 @@ export default function TournamentPage() {
 
                   {/* About */}
                   <ScrollReveal>
-                    <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '26px', marginBottom: '20px' }}>
-                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ width: '3px', height: '16px', background: 'linear-gradient(180deg,#10b981,#06b6d4)', borderRadius: '2px', display: 'inline-block' }} />
+                    <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '26px', marginBottom: '20px' }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ width: '3px', height: '16px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block' }} />
                         درباره مسابقه
                       </h3>
-                      <p style={{ fontSize: '14px', color: 'rgba(240,250,245,0.5)', lineHeight: 1.9, margin: '0 0 20px' }}>{t.description}</p>
+                      <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.9, margin: '0 0 20px' }}>{t.description}</p>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px' }}>
                         {[
-                          { label: 'فرمت',      value: t.format,  icon: <Activity size={13} style={{ color: '#10b981' }} /> },
+                          { label: 'فرمت',      value: t.format,  icon: <Activity size={13} style={{ color: '#C7A66A' }} /> },
                           { label: 'نوع',       value: t.type,    icon: <Target size={13} style={{ color: '#06b6d4' }} /> },
                           { label: 'حامی مالی', value: t.sponsor, icon: <Shield size={13} style={{ color: '#f59e0b' }} /> },
                           { label: 'مکان',      value: t.venue,   icon: <MapPin size={13} style={{ color: '#a78bfa' }} /> },
                         ].map((r, i) => (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '12px' }}>
                             <span style={{ flexShrink: 0 }}>{r.icon}</span>
                             <div style={{ minWidth: 0 }}>
-                              <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)', marginBottom: '2px' }}>{r.label}</div>
-                              <div style={{ fontSize: '13px', fontWeight: 600, color: '#f0faf5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.value}</div>
+                              <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)', marginBottom: '2px' }}>{r.label}</div>
+                              <div style={{ fontSize: '13px', fontWeight: 600, color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.value}</div>
                             </div>
                           </div>
                         ))}
@@ -450,27 +450,27 @@ export default function TournamentPage() {
 
                   {/* Featured players */}
                   <ScrollReveal>
-                    <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '26px', marginBottom: '20px' }}>
-                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '26px', marginBottom: '20px' }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#111111', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ width: '3px', height: '16px', background: 'linear-gradient(180deg,#f59e0b,#a78bfa)', borderRadius: '2px', display: 'inline-block' }} />
                         بازیکنان برتر
                       </h3>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {players.slice(0, 5).map((p, i) => (
                           <div key={i} className="player-row">
-                            <div style={{ width: '28px', textAlign: 'center', fontSize: '14px', fontWeight: 800, color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7c4a' : 'rgba(240,250,245,0.25)', flexShrink: 0 }}>
+                            <div style={{ width: '28px', textAlign: 'center', fontSize: '14px', fontWeight: 800, color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7c4a' : 'rgba(0,0,0,0.30)', flexShrink: 0 }}>
                               {i < 3 ? ['🥇','🥈','🥉'][i] : toFa(i + 1)}
                             </div>
-                            <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `linear-gradient(135deg, ${['#10b981','#06b6d4','#a78bfa','#f59e0b','#ef4444'][i % 5]}, ${['#059669','#0891b2','#7c3aed','#d97706','#dc2626'][i % 5]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `linear-gradient(135deg, ${['#C7A66A','#06b6d4','#a78bfa','#f59e0b','#ef4444'][i % 5]}, ${['#059669','#0891b2','#7c3aed','#d97706','#dc2626'][i % 5]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
                               {p.avatar}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5', marginBottom: '3px' }}>{p.name}</div>
-                              <div style={{ fontSize: '11px', color: 'rgba(240,250,245,0.35)' }}>{p.city} · رنک #{toFa(p.rank)}</div>
+                              <div style={{ fontSize: '13px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{p.name}</div>
+                              <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.40)' }}>{p.city} · رنک #{toFa(p.rank)}</div>
                             </div>
                             <div style={{ textAlign: 'left', flexShrink: 0 }}>
                               <div style={{ fontSize: '13px', fontWeight: 700, color: '#f59e0b' }}>{toFa(p.points.toLocaleString())}</div>
-                              <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)' }}>امتیاز</div>
+                              <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>امتیاز</div>
                             </div>
                           </div>
                         ))}
@@ -480,9 +480,9 @@ export default function TournamentPage() {
 
                   {/* Recent completed */}
                   <ScrollReveal>
-                    <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '26px' }}>
-                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5', margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ width: '3px', height: '16px', background: 'linear-gradient(180deg,#06b6d4,#10b981)', borderRadius: '2px', display: 'inline-block' }} />
+                    <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '26px' }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#111111', margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ width: '3px', height: '16px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block' }} />
                         آخرین نتایج
                       </h3>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -501,7 +501,7 @@ export default function TournamentPage() {
                     if (filtered.length === 0) return null;
                     return (
                       <div key={status}>
-                        <div style={{ fontSize: '11px', color: status === 'live' ? '#ef4444' : status === 'upcoming' ? '#06b6d4' : '#10b981', fontWeight: 700, letterSpacing: '0.15em', marginBottom: '10px', paddingRight: '4px' }}>
+                        <div style={{ fontSize: '11px', color: status === 'live' ? '#ef4444' : status === 'upcoming' ? '#06b6d4' : '#C7A66A', fontWeight: 700, letterSpacing: '0.15em', marginBottom: '10px', paddingRight: '4px' }}>
                           {status === 'live' ? '● در حال بازی' : status === 'upcoming' ? 'پیش رو' : 'پایان‌یافته'}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
@@ -516,15 +516,15 @@ export default function TournamentPage() {
               {/* ── TAB: BRACKET ── */}
               {tab === 'bracket' && (
                 <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '28px', overflowX: 'auto' }}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5', margin: '0 0 24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '28px', overflowX: 'auto' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#111111', margin: '0 0 24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span style={{ width: '3px', height: '16px', background: 'linear-gradient(180deg,#f59e0b,#ef4444)', borderRadius: '2px', display: 'inline-block' }} />
                       جدول حذفی
                     </h3>
                     <div style={{ display: 'flex', gap: '32px', alignItems: 'center', minWidth: 'max-content', paddingBottom: '8px' }}>
                       {bracket.rounds.map((round, ri) => (
                         <div key={ri} style={{ display: 'flex', flexDirection: 'column', gap: `${Math.pow(2, ri + 1) * 8}px`, justifyContent: 'center' }}>
-                          <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.35)', fontWeight: 700, letterSpacing: '0.15em', textAlign: 'center', marginBottom: '12px', padding: '5px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.40)', fontWeight: 700, letterSpacing: '0.15em', textAlign: 'center', marginBottom: '12px', padding: '5px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.05)' }}>
                             {round.name}
                           </div>
                           {round.matches.map((m, mi) => (
@@ -543,30 +543,30 @@ export default function TournamentPage() {
                   <style>{`@media(max-width:640px){.groups-grid{grid-template-columns:1fr!important;}}`}</style>
                   {groups.map((g, gi) => (
                     <ScrollReveal key={gi} delay={gi * 0.1}>
-                      <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
+                      <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
                         {/* Header */}
-                        <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '14px', fontWeight: 800, color: '#f0faf5', letterSpacing: '-0.01em' }}>{g.name}</span>
-                          <div style={{ display: 'flex', gap: '16px', fontSize: '10px', color: 'rgba(240,250,245,0.3)', fontWeight: 700, letterSpacing: '0.08em' }}>
+                        <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em' }}>{g.name}</span>
+                          <div style={{ display: 'flex', gap: '16px', fontSize: '10px', color: 'rgba(0,0,0,0.35)', fontWeight: 700, letterSpacing: '0.08em' }}>
                             <span>W</span><span>L</span><span>PTS</span>
                           </div>
                         </div>
                         {/* Rows */}
                         <div>
                           {g.players.map((r, i) => (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 20px', borderBottom: i < g.players.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: i < 2 ? 'rgba(16,185,129,0.02)' : 'transparent' }}>
-                              <span style={{ fontSize: '12px', fontWeight: 700, color: i < 2 ? '#10b981' : 'rgba(240,250,245,0.3)', width: '16px', flexShrink: 0 }}>{toFa(i + 1)}</span>
-                              <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: `linear-gradient(135deg, ${['#10b981','#06b6d4','#a78bfa','#f59e0b'][i]},${['#059669','#0891b2','#7c3aed','#d97706'][i]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 20px', borderBottom: i < g.players.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none', background: i < 2 ? 'rgba(199,166,106,0.02)' : 'transparent' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: i < 2 ? '#C7A66A' : 'rgba(0,0,0,0.35)', width: '16px', flexShrink: 0 }}>{toFa(i + 1)}</span>
+                              <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: `linear-gradient(135deg, ${['#C7A66A','#06b6d4','#a78bfa','#f59e0b'][i]},${['#059669','#0891b2','#7c3aed','#d97706'][i]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
                                 {r.player.avatar}
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: '13px', fontWeight: 600, color: '#f0faf5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.player.name.split(' ').slice(-1)[0]}</div>
-                                {i < 2 && <div style={{ fontSize: '9px', color: '#10b981', fontWeight: 700, letterSpacing: '0.06em' }}>صعود کرد</div>}
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.player.name.split(' ').slice(-1)[0]}</div>
+                                {i < 2 && <div style={{ fontSize: '9px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.06em' }}>صعود کرد</div>}
                               </div>
                               <div style={{ display: 'flex', gap: '16px', fontSize: '13px', flexShrink: 0 }}>
-                                <span style={{ color: '#10b981', fontWeight: 700 }}>{toFa(r.w)}</span>
+                                <span style={{ color: '#C7A66A', fontWeight: 700 }}>{toFa(r.w)}</span>
                                 <span style={{ color: '#ef4444', fontWeight: 700 }}>{toFa(r.l)}</span>
-                                <span style={{ color: '#f0faf5', fontWeight: 800, minWidth: '18px', textAlign: 'left' }}>{toFa(r.pts)}</span>
+                                <span style={{ color: '#111111', fontWeight: 800, minWidth: '18px', textAlign: 'left' }}>{toFa(r.pts)}</span>
                               </div>
                             </div>
                           ))}
@@ -580,9 +580,9 @@ export default function TournamentPage() {
               {/* ── TAB: PLAYERS ── */}
               {tab === 'players' && (
                 <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
                     {/* Table header */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '10px', color: 'rgba(240,250,245,0.35)', fontWeight: 700, letterSpacing: '0.1em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(0,0,0,0.04)', fontSize: '10px', color: 'rgba(0,0,0,0.40)', fontWeight: 700, letterSpacing: '0.1em' }}>
                       <span style={{ width: '28px' }}>#</span>
                       <span style={{ flex: 1 }}>بازیکن</span>
                       <span style={{ width: '60px', textAlign: 'left' }}>شهر</span>
@@ -590,18 +590,18 @@ export default function TournamentPage() {
                       <span style={{ width: '70px', textAlign: 'left' }}>امتیاز</span>
                     </div>
                     {players.map((p, i) => (
-                      <div key={i} className="player-row" style={{ borderBottom: i < players.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', borderRadius: 0 }}>
-                        <span style={{ width: '28px', fontSize: '13px', fontWeight: 800, color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7c4a' : 'rgba(240,250,245,0.25)', flexShrink: 0 }}>
+                      <div key={i} className="player-row" style={{ borderBottom: i < players.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none', borderRadius: 0 }}>
+                        <span style={{ width: '28px', fontSize: '13px', fontWeight: 800, color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7c4a' : 'rgba(0,0,0,0.30)', flexShrink: 0 }}>
                           {i < 3 ? ['🥇','🥈','🥉'][i] : toFa(i + 1)}
                         </span>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `linear-gradient(135deg, ${['#10b981','#06b6d4','#a78bfa','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6'][i % 8]}, ${['#059669','#0891b2','#7c3aed','#d97706','#dc2626','#7c3aed','#db2777','#0d9488'][i % 8]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `linear-gradient(135deg, ${['#C7A66A','#06b6d4','#a78bfa','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6'][i % 8]}, ${['#059669','#0891b2','#7c3aed','#d97706','#dc2626','#7c3aed','#db2777','#0d9488'][i % 8]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, color: '#fff', flexShrink: 0 }}>
                           {p.avatar}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
                         </div>
-                        <span style={{ width: '60px', fontSize: '12px', color: 'rgba(240,250,245,0.4)', flexShrink: 0 }}>{p.city}</span>
-                        <span style={{ width: '50px', fontSize: '12px', color: 'rgba(240,250,245,0.4)', flexShrink: 0 }}>#{toFa(p.rank)}</span>
+                        <span style={{ width: '60px', fontSize: '12px', color: 'rgba(0,0,0,0.42)', flexShrink: 0 }}>{p.city}</span>
+                        <span style={{ width: '50px', fontSize: '12px', color: 'rgba(0,0,0,0.42)', flexShrink: 0 }}>#{toFa(p.rank)}</span>
                         <span style={{ width: '70px', fontSize: '13px', fontWeight: 700, color: '#f59e0b', flexShrink: 0 }}>{toFa(p.points.toLocaleString())}</span>
                       </div>
                     ))}
@@ -614,16 +614,16 @@ export default function TournamentPage() {
             <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
               {/* Prize pool */}
-              <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '22px', overflow: 'hidden', position: 'relative' }}>
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '22px', overflow: 'hidden', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(245,158,11,0.6),transparent)', boxShadow: '0 0 16px rgba(245,158,11,0.3)' }} />
                 <div style={{ padding: '22px 22px 14px' }}>
                   <div style={{ fontSize: '10px', color: 'rgba(245,158,11,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>PRIZE POOL</div>
                   <div style={{ fontSize: '36px', fontWeight: 900, color: '#f59e0b', textAlign: 'center', lineHeight: 1, letterSpacing: '-0.04em', textShadow: '0 0 40px rgba(245,158,11,0.4)', marginBottom: '4px' }}>{t.prize}</div>
-                  <div style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(240,250,245,0.3)', marginBottom: '18px' }}>تومان</div>
+                  <div style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(0,0,0,0.35)', marginBottom: '18px' }}>تومان</div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
                   {t.prizes.map((p, i) => (
-                    <div key={i} className="prize-card" style={{ borderRadius: 0, border: 'none', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                    <div key={i} className="prize-card" style={{ borderRadius: 0, border: 'none', borderTop: '1px solid rgba(0,0,0,0.04)' }}>
                       <div style={{ fontSize: '18px', flexShrink: 0 }}>{['🥇','🥈','🥉','🎯'][i] ?? '🎯'}</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '12px', color: p.color, fontWeight: 700 }}>{p.place}</div>
@@ -635,49 +635,49 @@ export default function TournamentPage() {
               </div>
 
               {/* Tournament info */}
-              <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '20px' }}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '20px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#111111', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '3px', height: '14px', background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: '2px', display: 'inline-block' }} />
                   اطلاعات مسابقه
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {[
-                    { icon: <Calendar size={13} style={{ color: '#10b981' }} />, label: 'شروع',    v: t.startDate    },
-                    { icon: <Calendar size={13} style={{ color: '#10b981' }} />, label: 'پایان',   v: t.endDate      },
+                    { icon: <Calendar size={13} style={{ color: '#C7A66A' }} />, label: 'شروع',    v: t.startDate    },
+                    { icon: <Calendar size={13} style={{ color: '#C7A66A' }} />, label: 'پایان',   v: t.endDate      },
                     { icon: <MapPin size={13} style={{ color: '#06b6d4' }} />,   label: 'مکان',    v: t.venue        },
                     { icon: <Users size={13} style={{ color: '#a78bfa' }} />,    label: 'بازیکنان', v: `${toFa(t.participants)}/${toFa(t.maxParticipants)}` },
                     { icon: <Award size={13} style={{ color: '#f59e0b' }} />,    label: 'حامی',    v: t.sponsor      },
                   ].map((r, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '10px', transition: 'background 0.2s' }}>
                       <span style={{ flexShrink: 0 }}>{r.icon}</span>
-                      <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.4)', flex: 1 }}>{r.label}</span>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#f0faf5' }}>{r.v}</span>
+                      <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)', flex: 1 }}>{r.label}</span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#111111' }}>{r.v}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Participation */}
-              <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '20px' }}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '20px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#111111', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '3px', height: '14px', background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: '2px', display: 'inline-block' }} />
                   ظرفیت
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.4)' }}>ثبت‌نام‌شدگان</span>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5' }}>{toFa(t.participants)}/{toFa(t.maxParticipants)}</span>
+                  <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)' }}>ثبت‌نام‌شدگان</span>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#111111' }}>{toFa(t.participants)}/{toFa(t.maxParticipants)}</span>
                 </div>
-                <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden', marginBottom: '12px' }}>
-                  <div style={{ height: '100%', width: `${(t.participants / t.maxParticipants) * 100}%`, background: 'linear-gradient(90deg,#10b981,#06b6d4)', borderRadius: '3px', boxShadow: '0 0 8px rgba(16,185,129,0.4)' }} />
+                <div style={{ height: '6px', background: 'rgba(0,0,0,0.05)', borderRadius: '3px', overflow: 'hidden', marginBottom: '12px' }}>
+                  <div style={{ height: '100%', width: `${(t.participants / t.maxParticipants) * 100}%`, background: 'linear-gradient(90deg,#C7A66A,#A07840)', borderRadius: '3px', boxShadow: '0 0 8px rgba(199,166,106,0.4)' }} />
                 </div>
-                <div style={{ textAlign: 'center', padding: '12px', background: t.registrationOpen ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.03)', border: `1px solid ${t.registrationOpen ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '12px', fontSize: '12px', color: t.registrationOpen ? '#10b981' : 'rgba(240,250,245,0.3)', fontWeight: 600 }}>
+                <div style={{ textAlign: 'center', padding: '12px', background: t.registrationOpen ? 'rgba(199,166,106,0.06)' : 'rgba(0,0,0,0.03)', border: `1px solid ${t.registrationOpen ? 'rgba(199,166,106,0.2)' : 'rgba(0,0,0,0.05)'}`, borderRadius: '12px', fontSize: '12px', color: t.registrationOpen ? '#C7A66A' : 'rgba(0,0,0,0.35)', fontWeight: 600 }}>
                   {t.registrationOpen ? '✅ ثبت‌نام باز است' : '🔒 ثبت‌نام بسته است'}
                 </div>
               </div>
 
               {/* Stats */}
-              <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '20px' }}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0faf5', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: '20px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#111111', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '3px', height: '14px', background: 'linear-gradient(180deg,#ef4444,transparent)', borderRadius: '2px', display: 'inline-block' }} />
                   آمار مسابقه
                 </div>
@@ -685,10 +685,10 @@ export default function TournamentPage() {
                   {[
                     { label: 'بالاترین بریک',  v: toFa(t.stats.highestBreak),  c: '#f59e0b' },
                     { label: 'میانگین بریک',   v: toFa(t.stats.avgBreak),      c: '#06b6d4' },
-                    { label: 'مسابقات انجام‌شده', v: toFa(t.stats.completedMatches), c: '#10b981' },
+                    { label: 'مسابقات انجام‌شده', v: toFa(t.stats.completedMatches), c: '#C7A66A' },
                   ].map((s, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', borderRadius: '10px' }}>
-                      <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.4)' }}>{s.label}</span>
+                      <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)' }}>{s.label}</span>
                       <span style={{ fontSize: '14px', fontWeight: 800, color: s.c, letterSpacing: '-0.01em' }}>{s.v}</span>
                     </div>
                   ))}
