@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -58,7 +58,7 @@ const categories: Record<string, Record<string, string[]>> = {
 
 const getRankIcon = (rank: number) => {
   if (rank === 1) return <Crown size={14} style={{ color: '#f59e0b' }} />;
-  if (rank === 2) return <Medal size={14} style={{ color: '#94a3b8' }} />;
+  if (rank === 2) return <Medal size={14} style={{ color: 'rgba(0,0,0,0.50)' }} />;
   if (rank === 3) return <Award size={14} style={{ color: '#b45309' }} />;
   return null;
 };
@@ -67,7 +67,7 @@ const getRankColor = (rank: number) => {
   if (rank === 1) return { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.4)', text: '#f59e0b' };
   if (rank === 2) return { bg: 'rgba(148,163,184,0.15)', border: 'rgba(148,163,184,0.4)', text: '#94a3b8' };
   if (rank === 3) return { bg: 'rgba(180,83,9,0.15)', border: 'rgba(180,83,9,0.4)', text: '#b45309' };
-  return { bg: 'rgba(16,185,129,0.05)', border: 'rgba(16,185,129,0.15)', text: 'rgba(240,250,245,0.5)' };
+  return { bg: 'rgba(199,166,106,0.06)', border: 'rgba(199,166,106,0.18)', text: 'rgba(0,0,0,0.45)' };
 };
 
 export default function RankingsPage() {
@@ -84,11 +84,11 @@ export default function RankingsPage() {
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
         .rank-row { transition: all 0.2s ease; cursor: pointer; }
-        .rank-row:hover { background: rgba(16,185,129,0.06) !important; }
+        .rank-row:hover { background: rgba(199,166,106,0.06) !important; }
         .sport-tab { transition: all 0.3s ease; }
-        .sport-tab:hover { background: rgba(16,185,129,0.08) !important; }
+        .sport-tab:hover { background: rgba(199,166,106,0.08) !important; }
         .cat-btn { transition: all 0.2s ease; }
-        .cat-btn:hover { background: rgba(16,185,129,0.08) !important; color: #10b981 !important; }
+        .cat-btn:hover { background: rgba(199,166,106,0.08) !important; color: #A07840 !important; }
 
         /* ── Mobile-first overrides ── */
         .ranking-layout { display: flex; gap: 20px; }
@@ -140,7 +140,7 @@ export default function RankingsPage() {
 
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg,#010604 0%,#050c08 100%)',
+        background: '#F7F7F5',
         padding: 'clamp(16px,3vw,48px) clamp(12px,3vw,32px)',
         direction: 'rtl',
       }}>
@@ -161,11 +161,11 @@ export default function RankingsPage() {
               <div>
                 <h1 style={{
                   fontSize: 'clamp(20px,3vw,32px)', fontWeight: 900,
-                  color: '#f0faf5', margin: 0, letterSpacing: '-0.025em',
+                  color: '#111111', margin: 0, letterSpacing: '-0.025em',
                 }}>
                   رنکینگ ایران
                 </h1>
-                <p style={{ color: 'rgba(240,250,245,0.35)', fontSize: '13px', margin: '2px 0 0' }}>
+                <p style={{ color: 'rgba(0,0,0,0.45)', fontSize: '13px', margin: '2px 0 0' }}>
                   جدول امتیازات رسمی فدراسیون بیلیارد ایران
                 </p>
               </div>
@@ -184,12 +184,12 @@ export default function RankingsPage() {
                   display: 'flex', alignItems: 'center', gap: '6px',
                   padding: '10px 18px', borderRadius: '12px',
                   border: sport === s.value
-                    ? '1px solid rgba(16,185,129,0.5)'
-                    : '1px solid rgba(255,255,255,0.07)',
+                    ? '1px solid rgba(199,166,106,0.45)'
+                    : '1px solid rgba(0,0,0,0.09)',
                   background: sport === s.value
-                    ? 'rgba(16,185,129,0.12)'
-                    : 'rgba(255,255,255,0.03)',
-                  color: sport === s.value ? '#10b981' : s.soon ? 'rgba(240,250,245,0.2)' : 'rgba(240,250,245,0.5)',
+                    ? 'rgba(199,166,106,0.12)'
+                    : '#FFFFFF',
+                  color: sport === s.value ? '#A07840' : s.soon ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.55)',
                   fontSize: '13px', fontWeight: 600,
                   cursor: s.soon ? 'not-allowed' : 'pointer',
                   fontFamily: 'inherit',
@@ -217,9 +217,10 @@ export default function RankingsPage() {
 
                 {/* Gender */}
                 <div style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.07)',
                   borderRadius: '16px', overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                 }}>
                   {genders.map(g => (
                     <button
@@ -228,12 +229,12 @@ export default function RankingsPage() {
                       style={{
                         width: '100%', textAlign: 'right',
                         padding: '11px 14px',
-                        background: gender === g ? 'rgba(16,185,129,0.12)' : 'transparent',
-                        borderBottom: '1px solid rgba(255,255,255,0.04)',
-                        color: gender === g ? '#10b981' : 'rgba(240,250,245,0.45)',
+                        background: gender === g ? 'rgba(199,166,106,0.10)' : 'transparent',
+                        borderBottom: '1px solid rgba(0,0,0,0.05)',
+                        color: gender === g ? '#A07840' : 'rgba(0,0,0,0.50)',
                         fontSize: '13px', fontWeight: gender === g ? 700 : 500,
                         cursor: 'pointer', border: 'none', fontFamily: 'inherit',
-                        borderRight: gender === g ? '2px solid #10b981' : '2px solid transparent',
+                        borderRight: gender === g ? '2px solid #C7A66A' : '2px solid transparent',
                         transition: 'all 0.2s', display: 'block',
                       }}>
                       {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
@@ -243,12 +244,13 @@ export default function RankingsPage() {
 
                 {/* Categories */}
                 <div style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.07)',
                   borderRadius: '16px', padding: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                 }}>
                   <div style={{
-                    fontSize: '9px', color: 'rgba(16,185,129,0.5)',
+                    fontSize: '9px', color: 'rgba(199,166,106,0.70)',
                     letterSpacing: '0.18em', fontWeight: 700,
                     padding: '6px 8px 10px', textTransform: 'uppercase',
                   }}>
@@ -262,8 +264,8 @@ export default function RankingsPage() {
                       style={{
                         width: '100%', textAlign: 'right',
                         padding: '9px 12px', borderRadius: '10px',
-                        background: category === cat ? 'rgba(16,185,129,0.1)' : 'transparent',
-                        color: category === cat ? '#10b981' : 'rgba(240,250,245,0.4)',
+                        background: category === cat ? 'rgba(199,166,106,0.10)' : 'transparent',
+                        color: category === cat ? '#A07840' : 'rgba(0,0,0,0.48)',
                         fontSize: '13px', fontWeight: category === cat ? 600 : 400,
                         cursor: 'pointer', border: 'none', fontFamily: 'inherit',
                         display: 'block',
@@ -275,31 +277,32 @@ export default function RankingsPage() {
 
                 {/* Legend — hidden on mobile via CSS */}
                 <div className="sidebar-legend" style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.07)',
                   borderRadius: '14px', padding: '14px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}>
-                  <div style={{ fontSize: '10px', color: 'rgba(16,185,129,0.4)', letterSpacing: '0.15em', fontWeight: 700, marginBottom: '10px' }}>
+                  <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.65)', letterSpacing: '0.15em', fontWeight: 700, marginBottom: '10px' }}>
                     راهنما
                   </div>
                   {[
                     { color: '#f59e0b', label: 'رتبه اول' },
-                    { color: '#94a3b8', label: 'رتبه دوم' },
+                    { color: 'rgba(0,0,0,0.50)', label: 'رتبه دوم' },
                     { color: '#b45309', label: 'رتبه سوم' },
                   ].map(item => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.35)' }}>{item.label}</span>
+                      <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.45)' }}>{item.label}</span>
                     </div>
                   ))}
-                  <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '8px 0' }} />
+                  <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <TrendingUp size={11} color="#10b981" />
-                    <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>صعود رتبه</span>
+                    <TrendingUp size={11} color="#16a34a" />
+                    <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.40)' }}>صعود رتبه</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <TrendingDown size={11} color="#ef4444" />
-                    <span style={{ fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>نزول رتبه</span>
+                    <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.40)' }}>نزول رتبه</span>
                   </div>
                 </div>
               </div>
@@ -307,27 +310,28 @@ export default function RankingsPage() {
               {/* Table */}
               <div className="ranking-table-wrap">
                 <div style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.07)',
                   borderRadius: '20px', overflow: 'hidden',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
                 }}>
                   {/* Table Header */}
                   <div style={{
                     padding: '14px 20px',
-                    background: 'rgba(16,185,129,0.06)',
-                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(199,166,106,0.06)',
+                    borderBottom: '1px solid rgba(0,0,0,0.06)',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Trophy size={15} color="#10b981" />
-                      <span style={{ color: '#f0faf5', fontWeight: 700, fontSize: '14px' }}>
+                      <Trophy size={15} color="#C7A66A" />
+                      <span style={{ color: '#111111', fontWeight: 700, fontSize: '14px' }}>
                         {gender} — {category}
                       </span>
                     </div>
                     <span style={{
-                      fontSize: '11px', color: 'rgba(16,185,129,0.6)',
-                      background: 'rgba(16,185,129,0.08)',
-                      border: '1px solid rgba(16,185,129,0.2)',
+                      fontSize: '11px', color: '#A07840',
+                      background: 'rgba(199,166,106,0.10)',
+                      border: '1px solid rgba(199,166,106,0.28)',
                       borderRadius: '20px', padding: '3px 10px',
                     }}>
                       {players.length} نفر
@@ -336,13 +340,13 @@ export default function RankingsPage() {
 
                   {/* Column Headers */}
                   <div className="col-header" style={{
-                    background: 'rgba(0,0,0,0.2)',
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    background: '#F3F2EF',
+                    borderBottom: '1px solid rgba(0,0,0,0.06)',
                   }}>
                     {['رتبه', '±', '', 'نام بازیکن', 'شهر', 'امتیاز'].map((h, i) => (
                       <div key={i} className={i === 4 ? 'hide-mobile' : ''} style={{
-                        fontSize: '10px', color: 'rgba(240,250,245,0.25)',
-                        fontWeight: 600, letterSpacing: '0.08em',
+                        fontSize: '10px', color: 'rgba(0,0,0,0.35)',
+                        fontWeight: 700, letterSpacing: '0.08em',
                         textAlign: i === 0 || i >= 4 ? 'center' : 'right',
                       }}>
                         {h}
@@ -352,7 +356,7 @@ export default function RankingsPage() {
 
                   {/* Rows */}
                   {players.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(240,250,245,0.2)' }}>
+                    <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.28)' }}>
                       <Trophy size={40} style={{ opacity: 0.2, marginBottom: '12px' }} />
                       <p style={{ fontSize: '14px' }}>رنکینگ این دسته هنوز اعلام نشده</p>
                     </div>
@@ -372,7 +376,7 @@ export default function RankingsPage() {
                           onMouseEnter={() => setHoveredRow(index)}
                           onMouseLeave={() => setHoveredRow(null)}
                           style={{
-                            borderBottom: '1px solid rgba(255,255,255,0.03)',
+                            borderBottom: '1px solid rgba(0,0,0,0.05)',
                             background: isTop3
                               ? `rgba(${player.rank === 1 ? '245,158,11' : player.rank === 2 ? '148,163,184' : '180,83,9'},0.04)`
                               : 'transparent',
@@ -405,8 +409,8 @@ export default function RankingsPage() {
                           <div style={{ textAlign: 'center' }}>
                             {diff > 0 ? (
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
-                                <TrendingUp size={11} color="#10b981" />
-                                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>{diff}</span>
+                                <TrendingUp size={11} color="#16a34a" />
+                                <span style={{ fontSize: '10px', color: '#16a34a', fontWeight: 700 }}>{diff}</span>
                               </div>
                             ) : diff < 0 ? (
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
@@ -414,7 +418,7 @@ export default function RankingsPage() {
                                 <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 700 }}>{Math.abs(diff)}</span>
                               </div>
                             ) : (
-                              <Minus size={11} color="rgba(240,250,245,0.15)" style={{ margin: '0 auto', display: 'block' }} />
+                              <Minus size={11} color="rgba(0,0,0,0.18)" style={{ margin: '0 auto', display: 'block' }} />
                             )}
                           </div>
 
@@ -424,10 +428,10 @@ export default function RankingsPage() {
                               width: '34px', height: '34px', borderRadius: '10px',
                               background: isTop3
                                 ? `linear-gradient(135deg,${rankStyle.text},${rankStyle.text}88)`
-                                : 'linear-gradient(135deg,rgba(16,185,129,0.3),rgba(6,182,212,0.3))',
+                                : 'linear-gradient(135deg,rgba(199,166,106,0.20),rgba(199,166,106,0.10))',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               color: '#fff', fontWeight: 900, fontSize: '13px',
-                              border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(16,185,129,0.15)'}`,
+                              border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(199,166,106,0.15)'}`,
                               overflow: 'hidden',
                             }}>
                               {player.avatar
@@ -440,7 +444,7 @@ export default function RankingsPage() {
                           <div style={{
                             fontSize: '14px',
                             fontWeight: isTop3 ? 700 : 500,
-                            color: isTop3 ? '#f0faf5' : 'rgba(240,250,245,0.7)',
+                            color: isTop3 ? '#111111' : 'rgba(0,0,0,0.65)',
                             paddingRight: '8px',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
@@ -453,7 +457,7 @@ export default function RankingsPage() {
                           <div className="hide-mobile" style={{
                             textAlign: 'center',
                             fontSize: '12px',
-                            color: 'rgba(240,250,245,0.3)',
+                            color: 'rgba(0,0,0,0.38)',
                           }}>
                             {player.city || '—'}
                           </div>
@@ -462,9 +466,9 @@ export default function RankingsPage() {
                           <div style={{ textAlign: 'center' }}>
                             <span style={{
                               fontSize: '13px', fontWeight: 700,
-                              color: isTop3 ? rankStyle.text : '#10b981',
-                              background: isTop3 ? rankStyle.bg : 'rgba(16,185,129,0.08)',
-                              border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(16,185,129,0.15)'}`,
+                              color: isTop3 ? rankStyle.text : '#A07840',
+                              background: isTop3 ? rankStyle.bg : 'rgba(199,166,106,0.08)',
+                              border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(199,166,106,0.22)'}`,
                               borderRadius: '8px', padding: '3px 8px',
                               whiteSpace: 'nowrap',
                             }}>
@@ -480,13 +484,13 @@ export default function RankingsPage() {
                 {/* Footer note */}
                 <div style={{
                   marginTop: '16px', padding: '12px 16px',
-                  background: 'rgba(16,185,129,0.04)',
-                  border: '1px solid rgba(16,185,129,0.1)',
+                  background: 'rgba(199,166,106,0.06)',
+                  border: '1px solid rgba(199,166,106,0.18)',
                   borderRadius: '14px',
                   display: 'flex', alignItems: 'center', gap: '10px',
                 }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
-                  <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.3)' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C7A66A', flexShrink: 0 }} />
+                  <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)' }}>
                     رنکینگ رسمی فدراسیون بیلیارد و اسنوکر جمهوری اسلامی ایران — به‌روزرسانی هر هفته
                   </span>
                 </div>
@@ -497,15 +501,16 @@ export default function RankingsPage() {
           {sport === 'highball' && (
             <div style={{
               textAlign: 'center', padding: '80px 20px',
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: '#FFFFFF',
+              border: '1px solid rgba(0,0,0,0.07)',
               borderRadius: '24px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
             }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚡</div>
-              <h2 style={{ color: '#f0faf5', fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
+              <h2 style={{ color: '#111111', fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
                 رنکینگ هی‌بال
               </h2>
-              <p style={{ color: 'rgba(240,250,245,0.3)', fontSize: '14px' }}>
+              <p style={{ color: 'rgba(0,0,0,0.40)', fontSize: '14px' }}>
                 به زودی راه‌اندازی می‌شود
               </p>
             </div>

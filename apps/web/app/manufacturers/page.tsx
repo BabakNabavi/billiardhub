@@ -1,4 +1,4 @@
-// ════════════════════════════════════════════════════════════════
+﻿// ════════════════════════════════════════════════════════════════
 // FILE 1: apps/web/app/manufacturers/page.tsx
 // ════════════════════════════════════════════════════════════════
 'use client';
@@ -20,7 +20,7 @@ export default function ManufacturersPage() {
   const filtered = MANUFACTURERS.filter(m => activeCity === 'همه' || m.city === activeCity);
 
   return (
-    <div style={{ background: '#010604', minHeight: '100vh', color: '#f0faf5', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
+    <div style={{ background: '#F7F7F5', minHeight: '100vh', color: '#111111', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
       {/* Hero */}
       <div style={{ background: 'linear-gradient(135deg, #05081a 0%, #030512 100%)', padding: 'clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(28px, 5vw, 48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(167,139,250,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.04) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
@@ -42,8 +42,8 @@ export default function ManufacturersPage() {
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 28 }}>
           {cities.map(city => (
             <button key={city} onClick={() => setActiveCity(city)} style={{
-              background: activeCity === city ? '#a78bfa' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${activeCity === city ? '#a78bfa' : 'rgba(255,255,255,0.08)'}`,
+              background: activeCity === city ? '#a78bfa' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${activeCity === city ? '#a78bfa' : 'rgba(0,0,0,0.06)'}`,
               color: activeCity === city ? '#010604' : '#94a3b8',
               padding: '7px 14px', borderRadius: 20, fontSize: 12,
               fontWeight: activeCity === city ? 700 : 400,
@@ -69,7 +69,7 @@ export default function ManufacturersPage() {
                 </div>
                 <div style={{ padding: '16px 18px 18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                    <h3 style={{ color: '#f0faf5', fontSize: 15, fontWeight: 700, margin: 0, lineHeight: 1.4, flex: 1 }}>{mfr.name}</h3>
+                    <h3 style={{ color: '#111111', fontSize: 15, fontWeight: 700, margin: 0, lineHeight: 1.4, flex: 1 }}>{mfr.name}</h3>
                     {mfr.verified && <span style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 10, padding: '2px 7px', borderRadius: 10, fontWeight: 600, marginRight: 8, flexShrink: 0 }}>✓</span>}
                   </div>
                   <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>📍 {mfr.city} | از {mfr.since}</div>
@@ -77,7 +77,7 @@ export default function ManufacturersPage() {
                     {[
                       ['🏭', mfr.totalProduced + ' تولید', '#a78bfa'],
                       ['🌍', mfr.exportCountries + ' کشور صادرات', '#06b6d4'],
-                      ['👷', mfr.employees + ' پرسنل', '#10b981'],
+                      ['👷', mfr.employees + ' پرسنل', '#C7A66A'],
                       ['📋', mfr.certifications + ' گواهینامه', '#f59e0b'],
                     ].map(([icon, label, color], i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -91,7 +91,7 @@ export default function ManufacturersPage() {
                       <span key={s} style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: 10, padding: '2px 8px', borderRadius: 10 }}>{s}</span>
                     ))}
                   </div>
-                  <div style={{ textAlign: 'left', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12 }}>
+                  <div style={{ textAlign: 'left', borderTop: '1px solid rgba(0,0,0,0.04)', paddingTop: 12 }}>
                     <span style={{ color: '#a78bfa', fontSize: 12, fontWeight: 600 }}>مشاهده پروفایل ←</span>
                   </div>
                 </div>

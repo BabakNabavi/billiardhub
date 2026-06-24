@@ -1,4 +1,4 @@
-// apps/web/lib/roles.ts
+﻿// apps/web/lib/roles.ts
 // ─── single source of truth برای همه صفحات فرانت ──────────
 
 export type RoleValue =
@@ -47,7 +47,7 @@ export const ROLES: RoleMeta[] = [
     ],
   },
   {
-    value: 'player', label: 'بازیکن رنکینگی', icon: 'ti-chart-bar', color: '#10b981',
+    value: 'player', label: 'بازیکن رنکینگی', icon: 'ti-chart-bar', color: '#C7A66A',
     description: 'رنکینگ ملی بیلیارد', requiresDoc: true,
     docHint: 'کارت عضویت فدراسیون یا گواهی رتبه‌بندی ملی',
     profileFields: [
@@ -162,7 +162,7 @@ export const STATUS_LABEL: Record<RoleStatus, string> = {
 
 export const STATUS_COLOR: Record<RoleStatus, string> = {
   pending:  '#f59e0b',
-  approved: '#10b981',
+  approved: '#C7A66A',
   rejected: '#ef4444',
 }
 

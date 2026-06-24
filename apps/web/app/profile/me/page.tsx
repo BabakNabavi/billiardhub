@@ -58,6 +58,9 @@ function authHeader(): Record<string,string> {
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
+const GOLD = '#C7A66A'
+const GOLD_DARK = '#A07840'
+
 const PROVINCES = [
   'آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز',
   'ایلام','بوشهر','تهران','چهارمحال و بختیاری','خراسان جنوبی',
@@ -68,16 +71,16 @@ const PROVINCES = [
 ]
 
 // ─── Section wrapper ──────────────────────────────────────────
-function Section({ title, icon, color = '#10b981', children }: {
+function Section({ title, icon, color = '#C7A66A', children }: {
   title: string; icon: string; color?: string; children: React.ReactNode
 }) {
   return (
-    <div style={{ background: '#111a15', border: `1px solid ${hexToRgba(color, 0.15)}`, borderRadius: 18, padding: '20px', marginBottom: 16 }}>
+    <div style={{ background: '#FFFFFF', border: `1px solid ${hexToRgba(color, 0.15)}`, borderRadius: 18, padding: '20px', marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
         <span style={{ width: 34, height: 34, borderRadius: 10, background: hexToRgba(color, 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <i className={`ti ${icon}`} style={{ fontSize: 17, color }} />
         </span>
-        <span style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>{title}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{title}</span>
       </div>
       {children}
     </div>
@@ -88,7 +91,7 @@ function Section({ title, icon, color = '#10b981', children }: {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', marginBottom: 6 }}>{label}</label>
+      <label style={{ display: 'block', fontSize: 11, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>{label}</label>
       {children}
     </div>
   )
@@ -96,8 +99,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
-  background: '#0a0f0d', border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 10, padding: '10px 12px', color: '#e2e8f0',
+  background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
+  borderRadius: 10, padding: '10px 12px', color: '#111111',
   fontSize: 13, fontFamily: 'inherit', outline: 'none',
 }
 
@@ -146,10 +149,10 @@ function ClubSearch({
         style={inputStyle}
       />
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button onClick={() => { onManual(manual); setUseManual(false) }} style={{ flex: 1, padding: '8px', borderRadius: 8, background: '#10b981', border: 'none', color: '#0a0f0d', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+        <button onClick={() => { onManual(manual); setUseManual(false) }} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#FFFFFF', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
           ثبت
         </button>
-        <button onClick={() => setUseManual(false)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: '#64748b', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}>
+        <button onClick={() => setUseManual(false)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.45)', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}>
           انصراف
         </button>
       </div>
@@ -159,7 +162,7 @@ function ClubSearch({
   return (
     <div style={{ position: 'relative' }}>
       <div style={{ position: 'relative' }}>
-        <i className="ti ti-search" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: '#475569' }} />
+        <i className="ti ti-search" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'rgba(0,0,0,0.38)' }} />
         <input
           value={q}
           onChange={e => { setQ(e.target.value); setOpen(true) }}
@@ -170,17 +173,17 @@ function ClubSearch({
       </div>
 
       {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#0f1a12', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, marginTop: 4, maxHeight: 220, overflowY: 'auto' }}>
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: 12, marginTop: 4, maxHeight: 220, overflowY: 'auto' }}>
           {loading && (
-            <div style={{ padding: '12px 14px', fontSize: 12, color: '#475569' }}>در حال جستجو...</div>
+            <div style={{ padding: '12px 14px', fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>در حال جستجو...</div>
           )}
           {!loading && clubs.map(c => (
-            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(c.name); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(c.name); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111111', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span>{c.name}</span>
-              <span style={{ fontSize: 10, color: '#475569' }}>{c.city} · {toFa(c.memberCount ?? 0)} عضو</span>
+              <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)' }}>{c.city} · {toFa(c.memberCount ?? 0)} عضو</span>
             </button>
           ))}
-          <button onClick={() => { setOpen(false); setUseManual(true) }} style={{ width: '100%', padding: '10px 14px', background: 'rgba(16,185,129,0.05)', border: 'none', color: '#10b981', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right' }}>
+          <button onClick={() => { setOpen(false); setUseManual(true) }} style={{ width: '100%', padding: '10px 14px', background: 'rgba(199,166,106,0.05)', border: 'none', color: '#A07840', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right' }}>
             <i className="ti ti-plus" style={{ marginLeft: 6, fontSize: 13 }} />
             باشگاه من در لیست نیست
           </button>
@@ -301,8 +304,8 @@ export default function ProfileMePage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0a0f0d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
-      <i className="ti ti-loader-2" style={{ fontSize: 32, color: '#10b981' }} />
+    <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
+      <i className="ti ti-loader-2" style={{ fontSize: 32, color: '#C7A66A' }} />
     </div>
   )
 
@@ -315,16 +318,16 @@ export default function ProfileMePage() {
     <>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
 
-      <div style={{ minHeight: '100vh', background: '#0a0f0d', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl', position: 'relative' }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl', position: 'relative' }}>
 
         {/* orbs */}
-        <div style={{ position: 'fixed', width: 400, height: 400, background: 'radial-gradient(circle,rgba(16,185,129,0.12) 0%,transparent 70%)', top: -100, right: -80, filter: 'blur(60px)', zIndex: 0, pointerEvents: 'none' }} />
+        <div style={{ position: 'fixed', width: 400, height: 400, background: 'radial-gradient(circle,rgba(199,166,106,0.12) 0%,transparent 70%)', top: -100, right: -80, filter: 'blur(60px)', zIndex: 0, pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '0 0 100px' }}>
 
           {/* ── Cover & avatar ── */}
-          <div style={{ height: 140, background: 'linear-gradient(160deg,rgba(16,185,129,0.2) 0%,#0a0f0d 100%)', position: 'relative' }}>
-            <button onClick={() => router.push('/dashboard')} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8' }}>
+          <div style={{ height: 140, background: 'linear-gradient(160deg,rgba(199,166,106,0.25) 0%,rgba(199,166,106,0.05) 100%)', position: 'relative' }}>
+            <button onClick={() => router.push('/dashboard')} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.50)' }}>
               <i className="ti ti-arrow-right" style={{ fontSize: 18 }} />
             </button>
           </div>
@@ -333,24 +336,24 @@ export default function ProfileMePage() {
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: -40, marginBottom: 20 }}>
               {/* avatar */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
-                <div style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid #0a0f0d', overflow: 'hidden', background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#0a0f0d' }}>
+                <div style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid #FFFFFF', overflow: 'hidden', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#FFFFFF' }}>
                   {profile.avatar
                     ? <img src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : fullName.trim()[0]
                   }
                 </div>
-                <button onClick={() => fileRef.current?.click()} style={{ position: 'absolute', bottom: 2, left: 2, width: 22, height: 22, borderRadius: '50%', background: '#10b981', border: '2px solid #0a0f0d', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                  <i className="ti ti-camera" style={{ fontSize: 11, color: '#0a0f0d' }} />
+                <button onClick={() => fileRef.current?.click()} style={{ position: 'absolute', bottom: 2, left: 2, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <i className="ti ti-camera" style={{ fontSize: 11, color: '#FFFFFF' }} />
                 </button>
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
               </div>
 
               <div style={{ paddingBottom: 4, flex: 1 }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#e2e8f0' }}>{fullName}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#111111' }}>{fullName}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 10, color: '#64748b' }}>{profile.phone}</span>
+                  <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.45)' }}>{profile.phone}</span>
                   {isVerified
-                    ? <span style={{ fontSize: 9, color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 20, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    ? <span style={{ fontSize: 9, color: '#C7A66A', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <i className="ti ti-shield-check" style={{ fontSize: 10 }} />احراز شده
                       </span>
                     : <button onClick={() => router.push('/profile/verify')} style={{ fontSize: 9, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 20, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -422,7 +425,7 @@ export default function ProfileMePage() {
 
             {/* ── باشگاه ── */}
             <Section title="باشگاه" icon="ti-building-store" color="#a78bfa">
-              <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 12px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 باشگاهی که در آن بازی می‌کنید را انتخاب کنید
               </p>
               {clubName && (
@@ -441,7 +444,7 @@ export default function ProfileMePage() {
 
             {/* ── کارت بانکی ── */}
             <Section title="کارت بانکی" icon="ti-credit-card" color="#f59e0b">
-              <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 12px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 برای لغو رزرو و تسویه حساب — کارت باید به نام خودتان باشد
               </p>
               {profile.bankCard && (
@@ -468,7 +471,7 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── دسترسی‌ها ── */}
-            <Section title="دسترسی‌ها" icon="ti-lock-open" color="#10b981">
+            <Section title="دسترسی‌ها" icon="ti-lock-open" color="#C7A66A">
               {[
                 { label: 'رزرو میز', ok: isVerified, icon: 'ti-table' },
                 { label: 'خرید و فروش', ok: isVerified, icon: 'ti-shopping-bag' },
@@ -476,11 +479,11 @@ export default function ProfileMePage() {
                 { label: 'ثبت آگهی', ok: isVerified, icon: 'ti-plus' },
                 { label: 'پروفایل عمومی', ok: true, icon: 'ti-user' },
               ].map(f => (
-                <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <i className={`ti ${f.icon}`} style={{ fontSize: 16, color: f.ok ? '#10b981' : '#334155', flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: f.ok ? '#94a3b8' : '#334155', flex: 1 }}>{f.label}</span>
+                <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <i className={`ti ${f.icon}`} style={{ fontSize: 16, color: f.ok ? '#C7A66A' : 'rgba(0,0,0,0.35)', flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: f.ok ? '#111111' : 'rgba(0,0,0,0.35)', flex: 1 }}>{f.label}</span>
                   {f.ok
-                    ? <i className="ti ti-check" style={{ fontSize: 14, color: '#10b981' }} />
+                    ? <i className="ti ti-check" style={{ fontSize: 14, color: '#C7A66A' }} />
                     : <span style={{ fontSize: 10, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', borderRadius: 20, padding: '2px 8px' }}>نیاز به احراز</span>
                   }
                 </div>
@@ -491,7 +494,7 @@ export default function ProfileMePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: saving ? '#1a2e24' : '#10b981', color: saving ? '#2d4a38' : '#0a0f0d', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: saving ? 'none' : '0 4px 16px rgba(16,185,129,0.3)' }}>
+              style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: saving ? 'rgba(199,166,106,0.10)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: saving ? 'rgba(0,0,0,0.35)' : '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: saving ? 'none' : '0 4px 16px rgba(199,166,106,0.3)' }}>
               {saving
                 ? <><i className="ti ti-loader-2" style={{ fontSize: 16 }} />در حال ذخیره...</>
                 : <><i className="ti ti-device-floppy" style={{ fontSize: 16 }} />ذخیره پروفایل</>
@@ -502,7 +505,7 @@ export default function ProfileMePage() {
 
         {/* Toast */}
         {toast && (
-          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#10b981' : '#ef4444', color: toast.type === 'success' ? '#0a0f0d' : '#fff', fontSize: 12, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
+          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#C7A66A' : '#ef4444', color: '#FFFFFF', fontSize: 12, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
             {toast.type === 'success' ? '✓' : '✕'} {toast.msg}
           </div>
         )}

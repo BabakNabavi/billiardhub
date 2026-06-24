@@ -192,7 +192,7 @@ export default function RegisterPage() {
       <style jsx>{`
         .register-root {
           min-height: 100vh;
-          background: #010604;
+          background: linear-gradient(180deg,#111111 0%,#1a1a1a 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -209,98 +209,97 @@ export default function RegisterPage() {
         }
         .glow-1 {
           width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(199,166,106,0.10) 0%, transparent 70%);
           top: -100px; right: -100px;
         }
         .glow-2 {
           width: 400px; height: 400px;
-          background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(199,166,106,0.06) 0%, transparent 70%);
           bottom: -80px; left: -80px;
         }
         .register-card {
           position: relative; z-index: 10;
           width: 100%; max-width: 440px;
-          background: linear-gradient(145deg, rgba(16,185,129,0.06), rgba(5,12,8,0.95));
-          border: 1px solid rgba(16,185,129,0.2);
-          border-radius: 20px;
+          background: #FFFFFF;
+          border: 1px solid rgba(0,0,0,0.08);
+          border-radius: 24px;
           padding: 2.5rem 2rem;
-          backdrop-filter: blur(12px);
-          box-shadow: 0 0 60px rgba(16,185,129,0.05), 0 20px 40px rgba(0,0,0,0.5);
+          box-shadow: 0 8px 40px rgba(0,0,0,0.24), 0 2px 8px rgba(0,0,0,0.10);
         }
         .logo-wrap {
           display: flex; align-items: center; gap: 0.6rem;
           justify-content: center; margin-bottom: 1.8rem;
         }
         .logo-icon { font-size: 1.8rem; }
-        .logo-text { font-size: 1.3rem; font-weight: 700; color: #10b981; letter-spacing: -0.01em; }
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: #A07840; letter-spacing: -0.01em; }
         .steps {
           display: flex; align-items: center; justify-content: center;
           gap: 0; margin-bottom: 1.5rem; position: relative;
         }
         .step-dot {
           width: 32px; height: 32px; border-radius: 50%;
-          border: 2px solid rgba(16,185,129,0.3);
-          color: rgba(240,250,245,0.4);
+          border: 2px solid rgba(199,166,106,0.30);
+          color: rgba(0,0,0,0.35);
           font-size: 0.85rem; font-weight: 700;
           display: flex; align-items: center; justify-content: center;
-          transition: all 0.3s; position: relative; z-index: 1; background: #010604;
+          transition: all 0.3s; position: relative; z-index: 1; background: #FFFFFF;
         }
-        .step-dot.active { border-color: #10b981; color: #10b981; box-shadow: 0 0 12px rgba(16,185,129,0.4); }
-        .step-dot.done   { border-color: #10b981; background: #10b981; color: #010604; }
+        .step-dot.active { border-color: #C7A66A; color: #A07840; box-shadow: 0 0 12px rgba(199,166,106,0.25); }
+        .step-dot.done   { border-color: #C7A66A; background: #C7A66A; color: #FFFFFF; }
         .step-dot + .step-dot { margin-right: 48px; }
         .step-line {
-          position: absolute; height: 2px; background: #10b981;
+          position: absolute; height: 2px; background: #C7A66A;
           top: 50%; right: calc(50% + 16px); width: 0; max-width: 48px;
           transform: translateY(-50%); transition: width 0.4s ease;
-          box-shadow: 0 0 6px rgba(16,185,129,0.6);
+          box-shadow: 0 0 6px rgba(199,166,106,0.40);
         }
-        .card-title { text-align: center; font-size: 1.3rem; font-weight: 700; color: #f0faf5; margin: 0 0 0.4rem; }
-        .card-sub   { text-align: center; font-size: 0.85rem; color: rgba(240,250,245,0.5); margin: 0 0 1.8rem; }
+        .card-title { text-align: center; font-size: 1.3rem; font-weight: 800; color: #111111; margin: 0 0 0.4rem; }
+        .card-sub   { text-align: center; font-size: 0.85rem; color: rgba(0,0,0,0.45); margin: 0 0 1.8rem; }
         .form-body  { display: flex; flex-direction: column; gap: 1rem; }
         .row-2      { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
         .field      { display: flex; flex-direction: column; gap: 0.4rem; }
-        .field label { font-size: 0.82rem; color: rgba(240,250,245,0.6); font-weight: 500; }
+        .field label { font-size: 0.82rem; color: rgba(0,0,0,0.55); font-weight: 600; }
         .inp {
-          background: rgba(16,185,129,0.05);
-          border: 1px solid rgba(16,185,129,0.2);
+          background: #F7F7F5;
+          border: 1px solid rgba(0,0,0,0.10);
           border-radius: 10px; padding: 0.7rem 0.9rem;
-          color: #f0faf5; font-family: inherit; font-size: 0.95rem;
+          color: #111111; font-family: inherit; font-size: 0.95rem;
           transition: border-color 0.2s, box-shadow 0.2s; outline: none; text-align: right;
         }
-        .inp::placeholder { color: rgba(240,250,245,0.25); }
-        .inp:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+        .inp::placeholder { color: rgba(0,0,0,0.28); }
+        .inp:focus { border-color: rgba(199,166,106,0.50); box-shadow: 0 0 0 3px rgba(199,166,106,0.10); }
         .otp-note {
-          font-size: 0.78rem; color: rgba(240,250,245,0.35);
+          font-size: 0.78rem; color: rgba(0,0,0,0.40);
           text-align: center; margin: 0;
           padding: 0.5rem 0.75rem;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: rgba(199,166,106,0.06);
+          border: 1px solid rgba(199,166,106,0.15);
           border-radius: 8px;
         }
         .btn-primary {
           width: 100%; padding: 0.85rem;
-          background: linear-gradient(135deg, #10b981, #059669);
+          background: linear-gradient(135deg, #C7A66A, #A07840);
           border: none; border-radius: 10px;
-          color: #010604; font-family: inherit; font-size: 1rem; font-weight: 700;
+          color: #FFFFFF; font-family: inherit; font-size: 1rem; font-weight: 700;
           cursor: pointer; transition: opacity 0.2s, box-shadow 0.2s;
           display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-          box-shadow: 0 4px 20px rgba(16,185,129,0.25); margin-top: 0.25rem;
+          box-shadow: 0 4px 20px rgba(199,166,106,0.30); margin-top: 0.25rem;
         }
-        .btn-primary:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 4px 28px rgba(16,185,129,0.4); }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 4px 28px rgba(199,166,106,0.45); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
         .spinner {
           display: inline-block; width: 18px; height: 18px;
-          border: 2px solid rgba(1,6,4,0.3); border-top-color: #010604;
+          border: 2px solid rgba(255,255,255,0.3); border-top-color: #FFFFFF;
           border-radius: 50%; animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .error-msg {
           margin: 0.75rem 0 0; padding: 0.6rem 0.9rem;
-          background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
-          border-radius: 8px; color: #fca5a5; font-size: 0.83rem; text-align: center;
+          background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22);
+          border-radius: 8px; color: #dc2626; font-size: 0.83rem; text-align: center;
         }
-        .footer-note { text-align: center; font-size: 0.83rem; color: rgba(240,250,245,0.4); margin: 1.2rem 0 0; }
-        .link-green  { color: #10b981; text-decoration: none; font-weight: 600; }
+        .footer-note { text-align: center; font-size: 0.83rem; color: rgba(0,0,0,0.40); margin: 1.2rem 0 0; }
+        .link-green  { color: #A07840; text-decoration: none; font-weight: 600; }
         .link-green:hover { text-decoration: underline; }
         @media (max-width: 480px) {
           .register-card { padding: 2rem 1.25rem; }

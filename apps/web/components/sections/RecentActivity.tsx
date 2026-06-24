@@ -1,14 +1,14 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Calendar, Trophy, ShoppingBag, MapPin } from 'lucide-react';
 import ScrollReveal from '../ScrollReveal/ScrollReveal';
 
 const activities = [
-  { type: 'booking',  user: 'علی م.',    action: 'میز اسنوکر رزرو کرد',     club: 'باشگاه ستاره تهران', time: '۲ دقیقه پیش',  color: '#10b981', icon: <Calendar size={13} /> },
+  { type: 'booking',  user: 'علی م.',    action: 'میز اسنوکر رزرو کرد',     club: 'باشگاه ستاره تهران', time: '۲ دقیقه پیش',  color: '#C7A66A', icon: <Calendar size={13} /> },
   { type: 'event',    user: 'رضا ک.',    action: 'در مسابقه ثبت‌نام کرد',    club: 'جام پاکت تهران',    time: '۵ دقیقه پیش',  color: '#a78bfa', icon: <Trophy size={13} />   },
   { type: 'purchase', user: 'سارا ه.',   action: 'چوب Predator خرید',        club: 'فروشگاه بیلیارد پلاس', time: '۱۱ دقیقه پیش', color: '#f59e0b', icon: <ShoppingBag size={13} /> },
-  { type: 'booking',  user: 'محمد ع.',   action: 'میز VIP رزرو کرد',         club: 'باشگاه المپیک مشهد', time: '۱۸ دقیقه پیش', color: '#10b981', icon: <Calendar size={13} /> },
+  { type: 'booking',  user: 'محمد ع.',   action: 'میز VIP رزرو کرد',         club: 'باشگاه المپیک مشهد', time: '۱۸ دقیقه پیش', color: '#C7A66A', icon: <Calendar size={13} /> },
   { type: 'event',    user: 'نیما ف.',   action: 'قهرمان هفته شد',           club: 'لیگ هی‌بال اصفهان',  time: '۲۵ دقیقه پیش', color: '#f59e0b', icon: <Trophy size={13} />   },
   { type: 'club',     user: 'کاوه م.',   action: 'باشگاه جدید ثبت کرد',      club: 'شیراز',              time: '۳۲ دقیقه پیش', color: '#06b6d4', icon: <MapPin size={13} />   },
 ];
@@ -28,8 +28,8 @@ export function RecentActivity() {
       <section style={{ marginBottom: '110px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px' }}>
           <div>
-            <div style={{ fontSize: '9px', color: 'rgba(16,185,129,0.6)', letterSpacing: '0.28em', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase' }}>LIVE ACTIVITY</div>
-            <h2 style={{ fontSize: 'clamp(20px,2.5vw,26px)', fontWeight: 900, color: '#f0faf5', margin: 0, letterSpacing: '-0.025em' }}>
+            <div style={{ fontSize: '9px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.28em', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase' }}>LIVE ACTIVITY</div>
+            <h2 style={{ fontSize: 'clamp(20px,2.5vw,26px)', fontWeight: 900, color: '#111111', margin: 0, letterSpacing: '-0.025em' }}>
               فعالیت‌های اخیر
             </h2>
           </div>
@@ -45,8 +45,8 @@ export function RecentActivity() {
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: '14px',
               padding: '14px 18px',
-              background: 'rgba(255,255,255,0.025)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: '#FFFFFF',
+              border: '1px solid rgba(0,0,0,0.05)',
               borderRadius: '14px',
               opacity: i < visible ? 1 : 0,
               transform: i < visible ? 'translateY(0)' : 'translateY(10px)',
@@ -59,15 +59,15 @@ export function RecentActivity() {
 
               {/* Content */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '13px', color: '#f0faf5', fontWeight: 600, marginBottom: '3px' }}>
+                <div style={{ fontSize: '13px', color: '#111111', fontWeight: 600, marginBottom: '3px' }}>
                   <span style={{ color: a.color }}>{a.user}</span>
                   {' '}{a.action}
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>{a.club}</div>
+                <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>{a.club}</div>
               </div>
 
               {/* Time */}
-              <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.2)', letterSpacing: '0.04em', flexShrink: 0 }}>
+              <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.30)', letterSpacing: '0.04em', flexShrink: 0 }}>
                 {a.time}
               </div>
             </div>

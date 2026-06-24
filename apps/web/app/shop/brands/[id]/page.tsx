@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
@@ -16,7 +16,7 @@ const BRANDS: Record<string, any> = {
     id:'predator', name:'پردیتور', nameEn:'PREDATOR',
     country:'ایالات متحده', flag:'🇺🇸', founded:1994,
     website:'www.predatorcues.com', city:'نیواورلئان',
-    logo:'P', accentColor:'#10b981',
+    logo:'P', accentColor:'#C7A66A',
     coverImg:'/images/billiadr-club-1.jpg',
     tier:'platinum', isVerified:true, isOfficial:true,
     tagline:'از مرز ممکن فراتر برو',
@@ -25,7 +25,7 @@ const BRANDS: Record<string, any> = {
     stats:{ products:47, dealers:180, tournaments:38, players:1200, countries:45, yearsActive:31 },
     certifications:['WPBSA Official Supplier','BCA Certified','WPA Tour Partner','EPA Approved'],
     collections:[
-      { name:'314 Series',      desc:'تکنولوژی Low Deflection نسل جدید',  color:'#10b981', items:8  },
+      { name:'314 Series',      desc:'تکنولوژی Low Deflection نسل جدید',  color:'#C7A66A', items:8  },
       { name:'Revo Carbon',     desc:'شفت کربنی انقلابی',               color:'#06b6d4', items:5  },
       { name:'Z-3 Series',      desc:'مقرون‌به‌صرفه با کیفیت حرفه‌ای',   color:'#a78bfa', items:6  },
       { name:'SP Series',       desc:'چوب‌های سری ویژه بازیکنان',        color:'#f59e0b', items:12 },
@@ -88,15 +88,15 @@ export default function BrandProfilePage() {
         @keyframes shimmer { 0%{background-position:-200% center;}100%{background-position:200% center;} }
 
         .tab-b { padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; border:1px solid transparent; cursor:pointer; font-family:inherit; transition:all 0.3s; white-space:nowrap; }
-        .tab-b.active { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:#10b981; }
-        .tab-b:not(.active) { background:rgba(255,255,255,0.03); color:rgba(240,250,245,0.4); }
-        .tab-b:not(.active):hover { background:rgba(255,255,255,0.06); color:rgba(240,250,245,0.7); }
+        .tab-b.active { background:rgba(199,166,106,0.1); border-color:rgba(199,166,106,0.3); color:#C7A66A; }
+        .tab-b:not(.active) { background:rgba(0,0,0,0.03); color:rgba(0,0,0,0.42); }
+        .tab-b:not(.active):hover { background:rgba(0,0,0,0.05); color:rgba(0,0,0,0.48); }
 
-        .prod-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; overflow:hidden; transition:all 0.35s; cursor:pointer; }
-        .prod-card:hover { background:rgba(255,255,255,0.055); border-color:rgba(16,185,129,0.25); transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
+        .prod-card { background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.07); border-radius:16px; overflow:hidden; transition:all 0.35s; cursor:pointer; }
+        .prod-card:hover { background:rgba(255,255,255,0.055); border-color:rgba(199,166,106,0.25); transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
 
-        .dealer-row { display:flex; align-items:center; gap:14px; padding:14px 18px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:all 0.25s; }
-        .dealer-row:hover { background:rgba(255,255,255,0.04); border-color:rgba(16,185,129,0.2); }
+        .dealer-row { display:flex; align-items:center; gap:14px; padding:14px 18px; background:#FFFFFF; border:1px solid rgba(0,0,0,0.05); border-radius:14px; transition:all 0.25s; }
+        .dealer-row:hover { background:rgba(0,0,0,0.04); border-color:rgba(199,166,106,0.2); }
 
         .milestone-dot::before { content:''; position:absolute; top:'50%'; right:'-25px'; transform:'translateY(-50%)'; width:'10px'; height:'10px'; borderRadius:'50%'; }
 
@@ -104,7 +104,7 @@ export default function BrandProfilePage() {
         @media(max-width:640px) { .coll-g{grid-template-columns:repeat(2,1fr)!important;} .prod-g{grid-template-columns:repeat(2,1fr)!important;} }
       `}</style>
 
-      <div style={{ minHeight:'100vh', background:'linear-gradient(180deg,#020806,#060d0a)', paddingBottom:'80px' }}>
+      <div style={{ minHeight:'100vh', background:'#F7F7F5', paddingBottom:'80px' }}>
 
         {/* ══ HERO ══ */}
         <div style={{ position:'relative', height:'clamp(440px,58vh,620px)', overflow:'hidden' }}>
@@ -116,10 +116,10 @@ export default function BrandProfilePage() {
 
           {/* Nav */}
           <div style={{ position:'absolute', top:'24px', left:0, right:0, padding:'0 clamp(16px,4vw,48px)', display:'flex', justifyContent:'space-between', zIndex:10 }}>
-            <Link href="/brands" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize:'12px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', padding:'7px 14px' }}>
+            <Link href="/brands" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize:'12px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px' }}>
               <ChevronRight size={13}/> برندها
             </Link>
-            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize:'12px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
+            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize:'12px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
               <Share2 size={12}/> اشتراک
             </button>
           </div>
@@ -129,7 +129,7 @@ export default function BrandProfilePage() {
             <div style={{ display:'flex', alignItems:'flex-end', gap:'28px', flexWrap:'wrap' }}>
 
               {/* Logo */}
-              <div style={{ width:'clamp(72px,12vw,110px)', height:'clamp(72px,12vw,110px)', borderRadius:'24px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'clamp(28px,6vw,44px)', fontWeight:900, color:'#fff', border:'3px solid rgba(16,185,129,0.4)', boxShadow:`0 0 40px ${brand.accentColor}30,0 20px 60px rgba(0,0,0,0.5)`, flexShrink:0 }}>
+              <div style={{ width:'clamp(72px,12vw,110px)', height:'clamp(72px,12vw,110px)', borderRadius:'24px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'clamp(28px,6vw,44px)', fontWeight:900, color:'#fff', border:'3px solid rgba(199,166,106,0.4)', boxShadow:`0 0 40px ${brand.accentColor}30,0 20px 60px rgba(0,0,0,0.5)`, flexShrink:0 }}>
                 {brand.logo}
               </div>
 
@@ -137,14 +137,14 @@ export default function BrandProfilePage() {
                 {/* Tags */}
                 <div style={{ display:'flex', gap:'8px', marginBottom:'12px', flexWrap:'wrap' }}>
                   <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(226,232,240,0.1)', border:'1px solid rgba(226,232,240,0.2)', borderRadius:'20px', padding:'4px 13px', backdropFilter:'blur(16px)' }}>
-                    <Award size={10} style={{ color:'#e2e8f0' }}/><span style={{ fontSize:'9px', color:'#e2e8f0', fontWeight:700, letterSpacing:'0.12em' }}>PLATINUM BRAND</span>
+                    <Award size={10} style={{ color: '#111111' }}/><span style={{ fontSize:'9px', color: '#111111', fontWeight:700, letterSpacing:'0.12em' }}>PLATINUM BRAND</span>
                   </div>
                   {brand.isVerified && (
                     <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:`${brand.accentColor}12`, border:`1px solid ${brand.accentColor}28`, borderRadius:'20px', padding:'4px 13px', backdropFilter:'blur(16px)' }}>
                       <Check size={10} style={{ color:brand.accentColor }}/><span style={{ fontSize:'9px', color:brand.accentColor, fontWeight:700 }}>تأیید شده</span>
                     </div>
                   )}
-                  <div style={{ display:'inline-flex', alignItems:'center', gap:'5px', background:'rgba(255,255,255,0.06)', borderRadius:'20px', padding:'4px 12px' }}>
+                  <div style={{ display:'inline-flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.05)', borderRadius:'20px', padding:'4px 12px' }}>
                     <span style={{ fontSize:'14px' }}>{brand.flag}</span><span style={{ fontSize:'9px', color:'rgba(255,255,255,0.5)', fontWeight:600 }}>{brand.country}</span>
                   </div>
                 </div>
@@ -158,10 +158,10 @@ export default function BrandProfilePage() {
 
               {/* Actions */}
               <div style={{ display:'flex', gap:'10px', flexShrink:0, flexWrap:'wrap' }}>
-                <button onClick={()=>setFollowed(f=>!f)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 22px', borderRadius:'12px', border:'none', background: followed?'rgba(16,185,129,0.15)':'linear-gradient(135deg,#10b981,#059669)', color: followed?'#10b981':'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: followed?'none':'0 8px 24px rgba(16,185,129,0.3)', ...(followed?{border:'1px solid rgba(16,185,129,0.3)'}:{}) }}>
+                <button onClick={()=>setFollowed(f=>!f)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 22px', borderRadius:'12px', border:'none', background: followed?'rgba(199,166,106,0.15)':'linear-gradient(135deg,#C7A66A,#A07840)', color: followed?'#C7A66A':'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: followed?'none':'0 8px 24px rgba(199,166,106,0.3)', ...(followed?{border:'1px solid rgba(199,166,106,0.3)'}:{}) }}>
                   {followed?<><Check size={14}/>دنبال می‌کنید</>:<><Heart size={14}/>دنبال کردن</>}
                 </button>
-                <a href={`https://${brand.website}`} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 18px', borderRadius:'12px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.7)', fontSize:'13px', fontWeight:600, textDecoration:'none', transition:'all 0.3s' }}>
+                <a href={`https://${brand.website}`} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize:'13px', fontWeight:600, textDecoration:'none', transition:'all 0.3s' }}>
                   <ExternalLink size={14}/>
                 </a>
               </div>
@@ -170,19 +170,19 @@ export default function BrandProfilePage() {
         </div>
 
         {/* ══ STATS BAR ══ */}
-        <div style={{ background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(255,255,255,0.05)', padding:'0 clamp(16px,4vw,48px)' }}>
+        <div style={{ background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(0,0,0,0.04)', padding:'0 clamp(16px,4vw,48px)' }}>
           <div style={{ maxWidth:'1280px', margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(6,1fr)' }}>
             {[
               { v:toFa(brand.stats.products),   l:'محصول',          c:brand.accentColor },
               { v:toFa(brand.stats.dealers),    l:'نماینده جهانی',  c:'#a78bfa' },
               { v:toFa(brand.stats.tournaments),l:'مسابقه',         c:'#f59e0b' },
               { v:toFa(brand.stats.players),    l:'بازیکن حرفه‌ای', c:'#06b6d4' },
-              { v:toFa(brand.stats.countries),  l:'کشور',           c:'#10b981' },
+              { v:toFa(brand.stats.countries),  l:'کشور',           c:'#C7A66A' },
               { v:toFa(brand.stats.yearsActive),l:'سال فعالیت',     c:'#ef4444' },
             ].map((s,i) => (
-              <div key={i} style={{ padding:'18px 10px', textAlign:'center', borderLeft: i>0?'1px solid rgba(255,255,255,0.05)':'none' }}>
-                <div style={{ fontSize:'clamp(16px,2.5vw,22px)', fontWeight:900, color:'#f0faf5', letterSpacing:'-0.02em', textShadow:`0 0 14px ${s.c}25` }}>{s.v}</div>
-                <div style={{ fontSize:'9px', color:'rgba(240,250,245,0.3)', marginTop:'3px' }}>{s.l}</div>
+              <div key={i} style={{ padding:'18px 10px', textAlign:'center', borderLeft: i>0?'1px solid rgba(0,0,0,0.04)':'none' }}>
+                <div style={{ fontSize:'clamp(16px,2.5vw,22px)', fontWeight:900, color: '#111111', letterSpacing:'-0.02em', textShadow:`0 0 14px ${s.c}25` }}>{s.v}</div>
+                <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -208,17 +208,17 @@ export default function BrandProfilePage() {
                 <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:'20px' }}>
 
                   {/* About */}
-                  <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 14px', display:'flex', alignItems:'center', gap:'10px' }}>
+                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
+                    <h3 style={{ fontSize:'15px', fontWeight:800, color: '#111111', margin:'0 0 14px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:`linear-gradient(180deg,${brand.accentColor},#06b6d4)`, borderRadius:'2px', display:'inline-block' }}/>
                       درباره {brand.name}
                     </h3>
-                    <p style={{ fontSize:'14px', color:'rgba(240,250,245,0.55)', lineHeight:1.9, margin:0 }}>{brand.description}</p>
+                    <p style={{ fontSize:'14px', color:'rgba(0,0,0,0.50)', lineHeight:1.9, margin:0 }}>{brand.description}</p>
                   </div>
 
                   {/* Collections */}
-                  <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 20px', display:'flex', alignItems:'center', gap:'10px' }}>
+                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
+                    <h3 style={{ fontSize:'15px', fontWeight:800, color: '#111111', margin:'0 0 20px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#a78bfa,#f59e0b)', borderRadius:'2px', display:'inline-block' }}/>
                       کلکسیون‌ها
                     </h3>
@@ -227,8 +227,8 @@ export default function BrandProfilePage() {
                         <div key={i} style={{ padding:'16px 14px', background:`${c.color}07`, border:`1px solid ${c.color}18`, borderRadius:'16px', cursor:'pointer', transition:'all 0.3s' }}
                           onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.transform='translateY(-4px)';(e.currentTarget as HTMLElement).style.background=`${c.color}12`;}}
                           onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform='none';(e.currentTarget as HTMLElement).style.background=`${c.color}07`;}}>
-                          <div style={{ fontSize:'13px', fontWeight:800, color:'#f0faf5', marginBottom:'6px', letterSpacing:'-0.01em', lineHeight:1.3 }}>{c.name}</div>
-                          <div style={{ fontSize:'11px', color:'rgba(240,250,245,0.4)', marginBottom:'10px', lineHeight:1.5 }}>{c.desc}</div>
+                          <div style={{ fontSize:'13px', fontWeight:800, color: '#111111', marginBottom:'6px', letterSpacing:'-0.01em', lineHeight:1.3 }}>{c.name}</div>
+                          <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.42)', marginBottom:'10px', lineHeight:1.5 }}>{c.desc}</div>
                           <div style={{ fontSize:'10px', color:c.color, fontWeight:700 }}>{toFa(c.items)} محصول</div>
                         </div>
                       ))}
@@ -236,22 +236,22 @@ export default function BrandProfilePage() {
                   </div>
 
                   {/* Brand Ambassadors */}
-                  <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 18px', display:'flex', alignItems:'center', gap:'10px' }}>
+                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
+                    <h3 style={{ fontSize:'15px', fontWeight:800, color: '#111111', margin:'0 0 18px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#f59e0b,#ef4444)', borderRadius:'2px', display:'inline-block' }}/>
                       سفرای برند
                     </h3>
                     <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                       {brand.ambassadors.map((a: any, i: number) => (
-                        <div key={i} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 16px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:'14px', transition:'all 0.2s' }}
-                          onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)';}}
+                        <div key={i} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 16px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'14px', transition:'all 0.2s' }}
+                          onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(0,0,0,0.04)';}}
                           onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.02)';}}>
                           <div style={{ width:'44px', height:'44px', borderRadius:'13px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', fontWeight:900, color:'#fff', flexShrink:0 }}>
                             {a.name[0]}
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontSize:'14px', fontWeight:700, color:'#f0faf5', marginBottom:'3px' }}>{a.name}</div>
-                            <div style={{ fontSize:'11px', color:'rgba(240,250,245,0.4)' }}>{a.title}</div>
+                            <div style={{ fontSize:'14px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{a.name}</div>
+                            <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.42)' }}>{a.title}</div>
                           </div>
                           <div style={{ fontSize:'20px', flexShrink:0 }}>{a.country}</div>
                         </div>
@@ -260,24 +260,24 @@ export default function BrandProfilePage() {
                   </div>
 
                   {/* Certifications */}
-                  <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 18px', display:'flex', alignItems:'center', gap:'10px' }}>
-                      <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#10b981,#a78bfa)', borderRadius:'2px', display:'inline-block' }}/>
+                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
+                    <h3 style={{ fontSize:'15px', fontWeight:800, color: '#111111', margin:'0 0 18px', display:'flex', alignItems:'center', gap:'10px' }}>
+                      <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#C7A66A,#a78bfa)', borderRadius:'2px', display:'inline-block' }}/>
                       گواهینامه‌ها
                     </h3>
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'10px' }}>
                       {brand.certifications.map((cert: string, i: number) => (
-                        <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(16,185,129,0.04)', border:'1px solid rgba(16,185,129,0.12)', borderRadius:'13px' }}>
-                          <Shield size={13} style={{ color:'#10b981', flexShrink:0 }}/>
-                          <span style={{ fontSize:'12px', color:'rgba(240,250,245,0.65)', fontWeight:500 }}>{cert}</span>
+                        <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(199,166,106,0.04)', border:'1px solid rgba(199,166,106,0.12)', borderRadius:'13px' }}>
+                          <Shield size={13} style={{ color:'#C7A66A', flexShrink:0 }}/>
+                          <span style={{ fontSize:'12px', color:'rgba(0,0,0,0.48)', fontWeight:500 }}>{cert}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Gallery */}
-                  <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', overflow:'hidden' }}>
-                    <div style={{ padding:'22px 24px 16px', fontSize:'15px', fontWeight:800, color:'#f0faf5', display:'flex', alignItems:'center', gap:'10px' }}>
+                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', overflow:'hidden' }}>
+                    <div style={{ padding:'22px 24px 16px', fontSize:'15px', fontWeight:800, color: '#111111', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius:'2px', display:'inline-block' }}/>
                       گالری
                     </div>
@@ -311,7 +311,7 @@ export default function BrandProfilePage() {
                             {p.tag && <div style={{ position:'absolute', top:'8px', right:'8px', background:`${brand.accentColor}85`, backdropFilter:'blur(6px)', color:'#fff', fontSize:'9px', fontWeight:700, padding:'2px 8px', borderRadius:'20px' }}>{p.tag}</div>}
                           </div>
                           <div style={{ padding:'12px' }}>
-                            <div style={{ fontSize:'12px', fontWeight:700, color:'#f0faf5', marginBottom:'6px', lineHeight:1.4 }}>{p.name}</div>
+                            <div style={{ fontSize:'12px', fontWeight:700, color: '#111111', marginBottom:'6px', lineHeight:1.4 }}>{p.name}</div>
                             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                               <div style={{ fontSize:'14px', fontWeight:900, color:brand.accentColor }}>{toFa((p.price/1000000).toFixed(1))}م</div>
                               <div style={{ display:'flex', alignItems:'center', gap:'3px' }}>
@@ -335,16 +335,16 @@ export default function BrandProfilePage() {
                       <div style={{ width:'44px', height:'44px', borderRadius:'13px', background:`${brand.accentColor}10`, border:`1px solid ${brand.accentColor}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', flexShrink:0 }}>🏪</div>
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'3px' }}>
-                          <span style={{ fontSize:'14px', fontWeight:700, color:'#f0faf5' }}>{d.name}</span>
+                          <span style={{ fontSize:'14px', fontWeight:700, color: '#111111' }}>{d.name}</span>
                           {d.verified && <Check size={12} style={{ color:brand.accentColor }}/>}
                         </div>
-                        <div style={{ display:'flex', gap:'10px', fontSize:'11px', color:'rgba(240,250,245,0.4)' }}>
+                        <div style={{ display:'flex', gap:'10px', fontSize:'11px', color:'rgba(0,0,0,0.42)' }}>
                           <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><MapPin size={9} style={{ color:brand.accentColor }}/>{d.city}</span>
                           <span>·</span>
                           <span>{d.type}</span>
                         </div>
                       </div>
-                      <div style={{ fontSize:'10px', padding:'4px 12px', borderRadius:'20px', background: d.verified?`${brand.accentColor}10`:'rgba(255,255,255,0.04)', color: d.verified?brand.accentColor:'rgba(240,250,245,0.3)', border:`1px solid ${d.verified?`${brand.accentColor}25`:'rgba(255,255,255,0.07)'}`, fontWeight:700, flexShrink:0 }}>
+                      <div style={{ fontSize:'10px', padding:'4px 12px', borderRadius:'20px', background: d.verified?`${brand.accentColor}10`:'rgba(0,0,0,0.04)', color: d.verified?brand.accentColor:'rgba(0,0,0,0.35)', border:`1px solid ${d.verified?`${brand.accentColor}25`:'rgba(0,0,0,0.07)'}`, fontWeight:700, flexShrink:0 }}>
                         {d.verified?'تأیید شده':'ثبت‌نشده'}
                       </div>
                     </div>
@@ -355,8 +355,8 @@ export default function BrandProfilePage() {
               {/* ════ STORY ════ */}
               {tab==='story' && (
                 <div style={{ animation:'fadeUp 0.4s ease both' }}>
-                  <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'28px', position:'relative' }}>
-                    <h3 style={{ fontSize:'15px', fontWeight:800, color:'#f0faf5', margin:'0 0 28px', display:'flex', alignItems:'center', gap:'10px' }}>
+                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'28px', position:'relative' }}>
+                    <h3 style={{ fontSize:'15px', fontWeight:800, color: '#111111', margin:'0 0 28px', display:'flex', alignItems:'center', gap:'10px' }}>
                       <span style={{ width:'3px', height:'16px', background:`linear-gradient(180deg,${brand.accentColor},#a78bfa)`, borderRadius:'2px', display:'inline-block' }}/>
                       تاریخچه و میلستون‌ها
                     </h3>
@@ -364,19 +364,19 @@ export default function BrandProfilePage() {
                     {/* Timeline */}
                     <div style={{ position:'relative', paddingRight:'32px' }}>
                       {/* Line */}
-                      <div style={{ position:'absolute', right:'6px', top:0, bottom:0, width:'2px', background:'linear-gradient(to bottom,rgba(255,255,255,0.08),transparent)' }}/>
+                      <div style={{ position:'absolute', right:'6px', top:0, bottom:0, width:'2px', background:'linear-gradient(to bottom,rgba(0,0,0,0.06),transparent)' }}/>
 
                       {brand.milestones.map((m: any, i: number) => (
                         <div key={i} style={{ position:'relative', marginBottom: i<brand.milestones.length-1?'28px':'0' }}>
                           {/* Dot */}
                           <div style={{ position:'absolute', right:'-26px', top:'4px', width:'10px', height:'10px', borderRadius:'50%', background:brand.accentColor, boxShadow:`0 0 10px ${brand.accentColor}60`, border:'2px solid rgba(6,13,10,0.98)' }}/>
 
-                          <div style={{ padding:'16px 18px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:'14px' }}>
+                          <div style={{ padding:'16px 18px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'14px' }}>
                             <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
                               <span style={{ fontSize:'10px', color:brand.accentColor, background:`${brand.accentColor}12`, border:`1px solid ${brand.accentColor}22`, borderRadius:'20px', padding:'2px 10px', fontWeight:700 }}>{m.year}</span>
-                              <span style={{ fontSize:'14px', fontWeight:800, color:'#f0faf5', letterSpacing:'-0.01em' }}>{m.title}</span>
+                              <span style={{ fontSize:'14px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>{m.title}</span>
                             </div>
-                            <p style={{ fontSize:'13px', color:'rgba(240,250,245,0.5)', margin:0, lineHeight:1.6 }}>{m.desc}</p>
+                            <p style={{ fontSize:'13px', color:'rgba(0,0,0,0.45)', margin:0, lineHeight:1.6 }}>{m.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -390,7 +390,7 @@ export default function BrandProfilePage() {
             <div style={{ position:'sticky', top:'80px', display:'flex', flexDirection:'column', gap:'16px' }}>
 
               {/* Brand info card */}
-              <div style={{ background:'rgba(255,255,255,0.025)', border:`1px solid ${brand.accentColor}22`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
+              <div style={{ background:'#FFFFFF', border:`1px solid ${brand.accentColor}22`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:`linear-gradient(90deg,transparent,${brand.accentColor}55,transparent)`, boxShadow:`0 0 14px ${brand.accentColor}35` }}/>
                 <div style={{ fontSize:'10px', color:`${brand.accentColor}70`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'16px', textAlign:'center' }}>BRAND INFO</div>
 
@@ -400,9 +400,9 @@ export default function BrandProfilePage() {
                   { l:'وب‌سایت',   v:brand.website                      },
                   { l:'شهر',       v:brand.city                         },
                 ].map((r,i) => (
-                  <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom: i<3?'1px solid rgba(255,255,255,0.04)':'none' }}>
-                    <span style={{ fontSize:'12px', color:'rgba(240,250,245,0.4)' }}>{r.l}</span>
-                    <span style={{ fontSize:'12px', fontWeight:600, color:'#f0faf5' }}>{r.v}</span>
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom: i<3?'1px solid rgba(0,0,0,0.04)':'none' }}>
+                    <span style={{ fontSize:'12px', color:'rgba(0,0,0,0.42)' }}>{r.l}</span>
+                    <span style={{ fontSize:'12px', fontWeight:600, color: '#111111' }}>{r.v}</span>
                   </div>
                 ))}
 
@@ -412,8 +412,8 @@ export default function BrandProfilePage() {
               </div>
 
               {/* Quick stats */}
-              <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(240,250,245,0.3)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>آمار سریع</div>
+              <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>آمار سریع</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                   {[
                     { l:'محصولات فعال',   v:toFa(brand.stats.products),   c:brand.accentColor },
@@ -422,7 +422,7 @@ export default function BrandProfilePage() {
                     { l:'بازیکن حرفه‌ای',v:toFa(brand.stats.players),    c:'#06b6d4'         },
                   ].map((s,i) => (
                     <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                      <span style={{ fontSize:'12px', color:'rgba(240,250,245,0.4)' }}>{s.l}</span>
+                      <span style={{ fontSize:'12px', color:'rgba(0,0,0,0.42)' }}>{s.l}</span>
                       <span style={{ fontSize:'14px', fontWeight:800, color:s.c }}>{s.v}</span>
                     </div>
                   ))}
@@ -430,16 +430,16 @@ export default function BrandProfilePage() {
               </div>
 
               {/* Related brands */}
-              <div style={{ background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(240,250,245,0.3)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>برندهای مشابه</div>
+              <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>برندهای مشابه</div>
                 {[{n:'RILEY',c:'#a78bfa',id:'riley'},{n:'MEZZ',c:'#ef4444',id:'mezz'}].map((b,i) => (
                   <Link key={i} href={`/brands/${b.id}`} style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'10px', padding:'10px', borderRadius:'12px', transition:'background 0.2s', marginBottom: i<1?'6px':'0' }}
-                    onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)';}}
+                    onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(0,0,0,0.04)';}}
                     onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='transparent';}}>
                     <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:`${b.c}12`, border:`1px solid ${b.c}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', fontWeight:900, color:b.c, flexShrink:0 }}>{b.n[0]}</div>
                     <div>
-                      <div style={{ fontSize:'13px', fontWeight:700, color:'#f0faf5' }}>{b.n}</div>
-                      <div style={{ fontSize:'10px', color:'rgba(240,250,245,0.35)' }}>مشاهده برند ←</div>
+                      <div style={{ fontSize:'13px', fontWeight:700, color: '#111111' }}>{b.n}</div>
+                      <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.40)' }}>مشاهده برند ←</div>
                     </div>
                   </Link>
                 ))}

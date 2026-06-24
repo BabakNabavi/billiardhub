@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -80,7 +80,7 @@ const TYPE_LABEL: Record<string, string> = {
   highball: 'هی‌بال', vip_snooker: 'VIP اسنوکر', vip_pocket: 'VIP پاکت',
 };
 const TYPE_COLOR: Record<string, string> = {
-  snooker: '#10b981', pocket: '#06b6d4',
+  snooker: '#C7A66A', pocket: '#06b6d4',
   highball: '#a78bfa', vip_snooker: '#f59e0b', vip_pocket: '#f59e0b',
 };
 
@@ -141,19 +141,19 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <button onClick={onPrev} style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', color: 'rgba(240,250,245,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={onPrev} style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronRight size={15} />
         </button>
-        <span style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5', letterSpacing: '-0.01em' }}>
+        <span style={{ fontSize: '15px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em' }}>
           {jMonths[jMonth - 1]} {toFa(jYear)}
         </span>
-        <button onClick={onNext} style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', color: 'rgba(240,250,245,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={onNext} style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronLeft size={15} />
         </button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '3px', marginBottom: '6px' }}>
         {jDayNames.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontSize: '10px', color: 'rgba(240,250,245,0.3)', fontWeight: 700, padding: '4px 0' }}>{d}</div>
+          <div key={d} style={{ textAlign: 'center', fontSize: '10px', color: 'rgba(0,0,0,0.35)', fontWeight: 700, padding: '4px 0' }}>{d}</div>
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '3px' }}>
@@ -166,10 +166,10 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
             <button key={i} disabled={isPast} onClick={() => !isPast && onSelect(day)} style={{
               height: '38px', borderRadius: '9px', border: 'none', fontSize: '13px',
               fontWeight: isToday ? 800 : 500, cursor: isPast ? 'not-allowed' : 'pointer',
-              background: isSel ? 'linear-gradient(135deg,#10b981,#059669)' : isToday ? 'rgba(16,185,129,0.1)' : 'transparent',
-              color: isSel ? '#fff' : isPast ? 'rgba(240,250,245,0.15)' : isToday ? '#10b981' : 'rgba(240,250,245,0.8)',
-              boxShadow: isSel ? '0 4px 12px rgba(16,185,129,0.35)' : 'none',
-              outline: isToday && !isSel ? '1px solid rgba(16,185,129,0.3)' : 'none',
+              background: isSel ? 'linear-gradient(135deg,#C7A66A,#A07840)' : isToday ? 'rgba(199,166,106,0.1)' : 'transparent',
+              color: isSel ? '#fff' : isPast ? 'rgba(0,0,0,0.12)' : isToday ? '#C7A66A' : 'rgba(0,0,0,0.55)',
+              boxShadow: isSel ? '0 4px 12px rgba(199,166,106,0.35)' : 'none',
+              outline: isToday && !isSel ? '1px solid rgba(199,166,106,0.3)' : 'none',
               opacity: isPast ? 0.4 : 1, transition: 'all 0.18s',
             }}>{toFa(day)}</button>
           );
@@ -309,27 +309,27 @@ function BookingContent() {
   const endHour = sorted.length > 0 ? sorted[sorted.length - 1]! + 1 : undefined;
   const totalHours = sorted.length;
   const totalPrice = selectedTable ? totalHours * selectedTable.pricePerHour : 0;
-  const accentColor = selectedTable ? (TYPE_COLOR[selectedTable.type] ?? '#10b981') : '#10b981';
+  const accentColor = selectedTable ? (TYPE_COLOR[selectedTable.type] ?? '#C7A66A') : '#C7A66A';
   const dateLabel = jDay ? `${toFa(jDay)} ${jMonths[jMonth - 1]} ${toFa(jYear)}` : '';
   const canConfirm = !!selectedTable && !!jDay && selectedSlots.length > 0;
 
   if (loading) return (
-    <div style={{ minHeight: '80vh', background: '#020806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ width: '40px', height: '40px', border: '2px solid rgba(16,185,129,0.1)', borderTop: '2px solid #10b981', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '80vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ width: '40px', height: '40px', border: '2px solid rgba(199,166,106,0.1)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   );
 
   if (success) return (
-    <div style={{ minHeight: '80vh', background: '#020806', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      <div style={{ maxWidth: '460px', width: '100%', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '28px', padding: 'clamp(32px,6vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '150px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(16,185,129,0.6),transparent)' }} />
-        <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', boxShadow: '0 12px 36px rgba(16,185,129,0.35)' }}>
+    <div style={{ minHeight: '80vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ maxWidth: '460px', width: '100%', background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.2)', borderRadius: '28px', padding: 'clamp(32px,6vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '150px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
+        <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', boxShadow: '0 12px 36px rgba(199,166,106,0.35)' }}>
           <CheckCircle size={30} style={{ color: '#fff' }} />
         </div>
-        <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#f0faf5', margin: '0 0 10px' }}>رزرو ثبت شد!</h2>
-        <p style={{ fontSize: '14px', color: 'rgba(240,250,245,0.45)', margin: '0 0 24px', lineHeight: 1.7 }}>رزرو شما با موفقیت ثبت شد و باشگاه مطلع شد.</p>
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '16px 18px', marginBottom: '24px', textAlign: 'right' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#111111', margin: '0 0 10px' }}>رزرو ثبت شد!</h2>
+        <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', margin: '0 0 24px', lineHeight: 1.7 }}>رزرو شما با موفقیت ثبت شد و باشگاه مطلع شد.</p>
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', padding: '16px 18px', marginBottom: '24px', textAlign: 'right' }}>
           {[
             { l: 'میز', v: selectedTable?.name ?? '' },
             { l: 'تاریخ', v: dateLabel },
@@ -337,15 +337,15 @@ function BookingContent() {
             { l: 'مدت', v: `${toFa(totalHours)} ساعت` },
             { l: 'مبلغ کل', v: `${toFa(totalPrice.toLocaleString())} تومان` },
           ].map((r, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-              <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.35)' }}>{r.l}</span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#f0faf5' }}>{r.v}</span>
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
+              <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>{r.l}</span>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111' }}>{r.v}</span>
             </div>
           ))}
         </div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/clubs" style={{ padding: '12px 26px', background: 'linear-gradient(135deg,#10b981,#059669)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>باشگاه‌ها</Link>
-          <Link href="/dashboard" style={{ padding: '12px 26px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'rgba(240,250,245,0.7)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>داشبورد</Link>
+          <Link href="/clubs" style={{ padding: '12px 26px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>باشگاه‌ها</Link>
+          <Link href="/dashboard" style={{ padding: '12px 26px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '12px', color: 'rgba(0,0,0,0.48)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>داشبورد</Link>
         </div>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
@@ -358,29 +358,29 @@ function BookingContent() {
         @keyframes spin   { to{transform:rotate(360deg);} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
         @keyframes expand { from{opacity:0;transform:scaleY(0.95);}to{opacity:1;transform:scaleY(1);} }
-        .tbl-card { padding:16px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;gap:14px;user-select:none;font-size:14px; }
+        .tbl-card { padding:16px 18px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);border-radius:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;gap:14px;user-select:none;font-size:14px; }
         .tbl-card:hover { background:rgba(255,255,255,0.055); }
         .slot-btn { height:52px;border-radius:11px;font-size:13px;font-weight:700;border:1px solid;cursor:pointer;font-family:inherit;transition:all 0.18s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;user-select:none; }
         .slot-btn:active:not(:disabled) { transform:scale(0.94); }
-        .slot-free { background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.09);color:rgba(240,250,245,0.65); }
-        .slot-free:hover { background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);color:#10b981; }
-        .slot-start { border-color:rgba(16,185,129,0.55);color:#10b981; }
-        .slot-range { background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.4);color:#10b981; }
+        .slot-free { background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.07);color:rgba(0,0,0,0.48); }
+        .slot-free:hover { background:rgba(199,166,106,0.08);border-color:rgba(199,166,106,0.3);color:#C7A66A; }
+        .slot-start { border-color:rgba(199,166,106,0.55);color:#C7A66A; }
+        .slot-range { background:rgba(199,166,106,0.12);border-color:rgba(199,166,106,0.4);color:#C7A66A; }
         .slot-busy { background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.14);color:rgba(239,68,68,0.35);cursor:not-allowed; }
         @media(max-width:640px){ .slot-grid{grid-template-columns:repeat(4,1fr)!important;} }
         @media(max-width:380px){ .slot-grid{grid-template-columns:repeat(3,1fr)!important;} }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#020806,#060d0a)', paddingBottom: '80px' }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: '80px' }}>
 
-        <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0 clamp(16px,4vw,40px)', position: 'sticky', top: '62px', zIndex: 90, backdropFilter: 'blur(24px)' }}>
+        <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '0 clamp(16px,4vw,40px)', position: 'sticky', top: '62px', zIndex: 90, backdropFilter: 'blur(24px)' }}>
           <div style={{ maxWidth: '720px', margin: '0 auto', height: '52px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <Link href={`/clubs/${clubId}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(240,250,245,0.4)', fontSize: '12px', textDecoration: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '9px', padding: '7px 13px', flexShrink: 0 }}>
+            <Link href={`/clubs/${clubId}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(0,0,0,0.42)', fontSize: '12px', textDecoration: 'none', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '9px', padding: '7px 13px', flexShrink: 0 }}>
               <ChevronRight size={13} /> بازگشت
             </Link>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '9px', color: 'rgba(16,185,129,0.55)', letterSpacing: '0.2em', fontWeight: 700 }}>ONLINE BOOKING</div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#f0faf5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club?.name ?? 'رزرو میز'}</div>
+              <div style={{ fontSize: '9px', color: 'rgba(199,166,106,0.55)', letterSpacing: '0.2em', fontWeight: 700 }}>ONLINE BOOKING</div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club?.name ?? 'رزرو میز'}</div>
             </div>
           </div>
         </div>
@@ -396,29 +396,29 @@ function BookingContent() {
           )}
 
           {/* TABLE */}
-          <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(240,250,245,0.45)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
-              <span style={{ width: '3px', height: '13px', background: 'linear-gradient(180deg,#10b981,#06b6d4)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
+          <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
+              <span style={{ width: '3px', height: '13px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
               انتخاب میز
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {tables.map(table => {
-                const color = TYPE_COLOR[table.type] ?? '#10b981';
+                const color = TYPE_COLOR[table.type] ?? '#C7A66A';
                 const isSel = selectedTable?.id === table.id;
                 return (
                   <div key={table.id} className="tbl-card" onClick={() => handleTableSelect(table)}
-                    style={{ borderColor: isSel ? `${color}45` : 'rgba(255,255,255,0.08)', background: isSel ? `${color}0d` : 'rgba(255,255,255,0.03)', boxShadow: isSel ? `0 0 0 1px ${color}20,0 8px 28px rgba(0,0,0,0.4)` : 'none', transform: isSel ? 'translateY(-1px)' : 'none' }}>
+                    style={{ borderColor: isSel ? `${color}45` : 'rgba(0,0,0,0.06)', background: isSel ? `${color}0d` : 'rgba(0,0,0,0.03)', boxShadow: isSel ? `0 0 0 1px ${color}20,0 8px 28px rgba(0,0,0,0.4)` : 'none', transform: isSel ? 'translateY(-1px)' : 'none' }}>
                     <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${color}12`, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>🎱</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '14px', fontWeight: 800, color: isSel ? color : '#f0faf5' }}>{table.name}</span>
                         <span style={{ fontSize: '9px', color, background: `${color}12`, border: `1px solid ${color}22`, borderRadius: '20px', padding: '2px 9px', fontWeight: 700 }}>{TYPE_LABEL[table.type] ?? table.type}</span>
                       </div>
-                      {(table.brand || table.model) && <div style={{ fontSize: '11px', color: 'rgba(240,250,245,0.3)' }}>{table.brand} {table.model}</div>}
+                      {(table.brand || table.model) && <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>{table.brand} {table.model}</div>}
                     </div>
                     <div style={{ textAlign: 'left', flexShrink: 0 }}>
                       <div style={{ fontSize: '15px', fontWeight: 900, color }}>{table.pricePerHour > 0 ? toFa(table.pricePerHour.toLocaleString()) : 'رایگان'}</div>
-                      {table.pricePerHour > 0 && <div style={{ fontSize: '10px', color: 'rgba(240,250,245,0.3)' }}>تومان / ساعت</div>}
+                      {table.pricePerHour > 0 && <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>تومان / ساعت</div>}
                     </div>
                     {isSel && (
                       <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -432,33 +432,33 @@ function BookingContent() {
           </div>
 
           {/* DATE */}
-          <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(240,250,245,0.45)', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
-              <span style={{ width: '3px', height: '13px', background: 'linear-gradient(180deg,#f59e0b,#10b981)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
+          <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
+              <span style={{ width: '3px', height: '13px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
               انتخاب تاریخ
             </div>
             <JalaliCalendar jYear={jYear} jMonth={jMonth} selectedDay={jDay} todayJY={tJY} todayJM={tJM} todayJD={tJD}
               onSelect={d => { setJDay(d); setSelectedSlots([]); setRangeStart(null); }}
               onPrev={prevMonth} onNext={nextMonth} />
             {jDay && (
-              <div style={{ marginTop: '14px', padding: '11px 14px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '11px', display: 'flex', alignItems: 'center', gap: '8px', animation: 'fadeUp 0.3s ease both' }}>
-                <Check size={13} style={{ color: '#10b981', flexShrink: 0 }} />
-                <span style={{ fontSize: '13px', color: '#10b981', fontWeight: 600 }}>{dateLabel}</span>
+              <div style={{ marginTop: '14px', padding: '11px 14px', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: '11px', display: 'flex', alignItems: 'center', gap: '8px', animation: 'fadeUp 0.3s ease both' }}>
+                <Check size={13} style={{ color: '#C7A66A', flexShrink: 0 }} />
+                <span style={{ fontSize: '13px', color: '#C7A66A', fontWeight: 600 }}>{dateLabel}</span>
               </div>
             )}
           </div>
 
           {/* TIME */}
           {selectedTable && jDay && (
-            <div ref={slotsRef} style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px', transformOrigin: 'top', animation: 'expand 0.4s cubic-bezier(0.22,1,0.36,1) both' }}>
+            <div ref={slotsRef} style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px', transformOrigin: 'top', animation: 'expand 0.4s cubic-bezier(0.22,1,0.36,1) both' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(240,250,245,0.45)', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
                   <span style={{ width: '3px', height: '13px', background: `linear-gradient(180deg,${accentColor},transparent)`, borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                   انتخاب ساعت
                 </div>
-                <div style={{ display: 'flex', gap: '12px', fontSize: '10px', color: 'rgba(240,250,245,0.3)' }}>
+                <div style={{ display: 'flex', gap: '12px', fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>
                   {[
-                    { bg: 'rgba(255,255,255,0.06)', bc: 'rgba(255,255,255,0.1)', l: 'آزاد' },
+                    { bg: 'rgba(0,0,0,0.05)', bc: 'rgba(0,0,0,0.08)', l: 'آزاد' },
                     { bg: `${accentColor}12`, bc: `${accentColor}40`, l: 'انتخاب' },
                     { bg: 'rgba(239,68,68,0.05)', bc: 'rgba(239,68,68,0.15)', l: 'مشغول' },
                   ].map((x, i) => (
@@ -470,8 +470,8 @@ function BookingContent() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 13px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', marginBottom: '14px', fontSize: '11px', color: 'rgba(240,250,245,0.35)' }}>
-                <Info size={12} style={{ color: 'rgba(240,250,245,0.25)', flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 13px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '10px', marginBottom: '14px', fontSize: '11px', color: 'rgba(0,0,0,0.40)' }}>
+                <Info size={12} style={{ color: 'rgba(0,0,0,0.30)', flexShrink: 0 }} />
                 {rangeStart !== null ? `ساعت ${toFa(rangeStart)}:۰۰ شروع شد — حالا ساعت پایان را انتخاب کنید` : 'روی ساعت شروع کلیک کنید، سپس ساعت پایان را انتخاب کنید'}
               </div>
 
@@ -482,8 +482,8 @@ function BookingContent() {
               )}
 
               {slotsLoad ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '36px', color: 'rgba(240,250,245,0.3)', fontSize: '13px' }}>
-                  <div style={{ width: '18px', height: '18px', border: '2px solid rgba(16,185,129,0.15)', borderTop: '2px solid #10b981', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '36px', color: 'rgba(0,0,0,0.35)', fontSize: '13px' }}>
+                  <div style={{ width: '18px', height: '18px', border: '2px solid rgba(199,166,106,0.15)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                   در حال دریافت ساعات...
                 </div>
               ) : (
@@ -496,9 +496,9 @@ function BookingContent() {
                       <button key={slot.hour} className={cls} disabled={slot.isBooked}
                         onClick={() => handleSlotClick(slot.hour, slot.isBooked)}
                         style={{
-                          borderColor: slot.isBooked ? 'rgba(239,68,68,0.14)' : isStart ? `${accentColor}60` : isSel ? `${accentColor}45` : 'rgba(255,255,255,0.09)',
-                          background: slot.isBooked ? 'rgba(239,68,68,0.04)' : isStart ? `${accentColor}20` : isSel ? `${accentColor}12` : 'rgba(255,255,255,0.03)',
-                          color: slot.isBooked ? 'rgba(239,68,68,0.3)' : (isStart || isSel) ? accentColor : 'rgba(240,250,245,0.65)',
+                          borderColor: slot.isBooked ? 'rgba(239,68,68,0.14)' : isStart ? `${accentColor}60` : isSel ? `${accentColor}45` : 'rgba(0,0,0,0.07)',
+                          background: slot.isBooked ? 'rgba(239,68,68,0.04)' : isStart ? `${accentColor}20` : isSel ? `${accentColor}12` : 'rgba(0,0,0,0.03)',
+                          color: slot.isBooked ? 'rgba(239,68,68,0.3)' : (isStart || isSel) ? accentColor : 'rgba(0,0,0,0.48)',
                           boxShadow: isStart ? `0 0 16px ${accentColor}35` : isSel ? `0 0 10px ${accentColor}18` : 'none',
                         }}>
                         <span>{toFa(slot.hour)}:۰۰</span>
@@ -516,7 +516,7 @@ function BookingContent() {
                     <Clock size={14} /> {toFa(startHour)}:۰۰ تا {toFa(endHour)}:۰۰
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ fontSize: '12px', color: 'rgba(240,250,245,0.5)', background: 'rgba(255,255,255,0.06)', padding: '4px 12px', borderRadius: '20px', fontWeight: 600 }}>{toFa(totalHours)} ساعت</span>
+                    <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.05)', padding: '4px 12px', borderRadius: '20px', fontWeight: 600 }}>{toFa(totalHours)} ساعت</span>
                     <span style={{ fontSize: '12px', color: accentColor, fontWeight: 800, background: `${accentColor}10`, padding: '4px 12px', borderRadius: '20px' }}>{toFa(totalPrice.toLocaleString())} تومان</span>
                   </div>
                 </div>
@@ -526,12 +526,12 @@ function BookingContent() {
 
           {/* CONFIRM */}
           {canConfirm && (
-            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden', marginBottom: '16px', animation: 'fadeUp 0.4s ease both' }}>
-              <div style={{ background: `linear-gradient(135deg,${accentColor}10,rgba(255,255,255,0.02))`, borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 22px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden', marginBottom: '16px', animation: 'fadeUp 0.4s ease both' }}>
+              <div style={{ background: `linear-gradient(135deg,${accentColor}10,rgba(255,255,255,0.02))`, borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '16px 22px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${accentColor}14`, border: `1px solid ${accentColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>🎱</div>
                 <div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5', marginBottom: '2px' }}>{selectedTable?.name}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(240,250,245,0.4)' }}>{club?.name} · {TYPE_LABEL[selectedTable?.type ?? ''] ?? ''}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#111111', marginBottom: '2px' }}>{selectedTable?.name}</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.42)' }}>{club?.name} · {TYPE_LABEL[selectedTable?.type ?? ''] ?? ''}</div>
                 </div>
               </div>
               <div style={{ padding: '18px 22px' }}>
@@ -542,23 +542,23 @@ function BookingContent() {
                   { l: 'مدت', v: `${toFa(totalHours)} ساعت` },
                   { l: 'نرخ ساعتی', v: `${toFa((selectedTable?.pricePerHour ?? 0).toLocaleString())} تومان` },
                 ].map((r, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <span style={{ fontSize: '13px', color: 'rgba(240,250,245,0.4)' }}>{r.l}</span>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#f0faf5' }}>{r.v}</span>
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                    <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>{r.l}</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111' }}>{r.v}</span>
                   </div>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0 0' }}>
-                  <span style={{ fontSize: '15px', fontWeight: 800, color: '#f0faf5' }}>مبلغ کل</span>
+                  <span style={{ fontSize: '15px', fontWeight: 800, color: '#111111' }}>مبلغ کل</span>
                   <span style={{ fontSize: '20px', fontWeight: 900, color: accentColor, letterSpacing: '-0.025em' }}>
                     {toFa(totalPrice.toLocaleString())} <span style={{ fontSize: '12px', opacity: 0.7 }}>تومان</span>
                   </span>
                 </div>
               </div>
-              <div style={{ margin: '0 22px 18px', padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.13)', borderRadius: '12px', fontSize: '11px', color: 'rgba(240,250,245,0.4)', lineHeight: 1.7 }}>
+              <div style={{ margin: '0 22px 18px', padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.13)', borderRadius: '12px', fontSize: '11px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7 }}>
                 ⚠️ پس از تأیید، باشگاه از رزرو شما مطلع خواهد شد و پیامک ارسال می‌شود.
               </div>
               <div style={{ padding: '0 22px 22px' }}>
-                <button onClick={handleConfirm} disabled={booking} style={{ width: '100%', padding: '15px', borderRadius: '13px', border: 'none', background: booking ? 'rgba(16,185,129,0.3)' : 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontSize: '15px', fontWeight: 800, cursor: booking ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', boxShadow: booking ? 'none' : '0 8px 28px rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
+                <button onClick={handleConfirm} disabled={booking} style={{ width: '100%', padding: '15px', borderRadius: '13px', border: 'none', background: booking ? 'rgba(199,166,106,0.3)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', fontSize: '15px', fontWeight: 800, cursor: booking ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', boxShadow: booking ? 'none' : '0 8px 28px rgba(199,166,106,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
                   {booking
                     ? <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />در حال ثبت رزرو...</>
                     : <><Check size={16} /> تأیید و ثبت رزرو</>

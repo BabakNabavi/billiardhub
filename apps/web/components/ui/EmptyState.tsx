@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+﻿import { ReactNode } from 'react';
 import Link from 'next/link';
 
 interface EmptyStateProps {
@@ -19,12 +19,12 @@ export function EmptyState({ icon = '🎱', title, desc, action }: EmptyStatePro
         <div style={{ fontSize: '48px', position: 'relative' }}>{icon}</div>
       </div>
 
-      <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f0faf5', margin: 0, letterSpacing: '-0.02em' }}>
+      <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111111', margin: 0, letterSpacing: '-0.02em' }}>
         {title}
       </h3>
 
       {desc && (
-        <p style={{ fontSize: '14px', color: 'rgba(240,250,245,0.35)', margin: 0, lineHeight: 1.7, maxWidth: '320px' }}>
+        <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.40)', margin: 0, lineHeight: 1.7, maxWidth: '320px' }}>
           {desc}
         </p>
       )}
@@ -34,20 +34,20 @@ export function EmptyState({ icon = '🎱', title, desc, action }: EmptyStatePro
           <Link href={action.href} style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             marginTop: '8px', padding: '11px 24px', borderRadius: '12px',
-            background: 'linear-gradient(135deg,#10b981,#059669)',
+            background: 'linear-gradient(135deg,#C7A66A,#A07840)',
             color: '#fff', fontSize: '13px', fontWeight: 700,
             textDecoration: 'none',
-            boxShadow: '0 8px 24px rgba(16,185,129,0.25)',
+            boxShadow: '0 8px 24px rgba(199,166,106,0.25)',
           }}>
             {action.label}
           </Link>
         ) : (
           <button onClick={action.onClick} style={{
             marginTop: '8px', padding: '11px 24px', borderRadius: '12px',
-            background: 'linear-gradient(135deg,#10b981,#059669)',
+            background: 'linear-gradient(135deg,#C7A66A,#A07840)',
             color: '#fff', fontSize: '13px', fontWeight: 700,
             border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-            boxShadow: '0 8px 24px rgba(16,185,129,0.25)',
+            boxShadow: '0 8px 24px rgba(199,166,106,0.25)',
           }}>
             {action.label}
           </button>

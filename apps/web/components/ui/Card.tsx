@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { colors, radius, shadow, transition } from '../../lib/tokens';
 import { CSSProperties, ReactNode, useState } from 'react';
@@ -34,17 +34,17 @@ export function Card({
 
   const light: CSSProperties = {
     background:    hovered ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.78)',
-    border:        `1px solid ${hovered ? 'rgba(16,185,129,0.28)' : 'rgba(16,185,129,0.1)'}`,
+    border:        `1px solid ${hovered ? 'rgba(199,166,106,0.28)' : 'rgba(199,166,106,0.1)'}`,
     borderRadius:  radius.lg,
     backdropFilter:'blur(24px)',
     boxShadow:     hovered
-      ? `0 20px 50px rgba(16,185,129,0.12), inset 0 1px 0 rgba(255,255,255,1)`
-      : `0 4px 20px rgba(16,185,129,0.06), inset 0 1px 0 rgba(255,255,255,0.9)`,
+      ? `0 20px 50px rgba(199,166,106,0.12), inset 0 1px 0 rgba(255,255,255,1)`
+      : `0 4px 20px rgba(199,166,106,0.06), inset 0 1px 0 rgba(255,255,255,0.9)`,
     transform:     hovered ? 'translateY(-6px)' : 'translateY(0)',
   };
 
   const accent: CSSProperties = {
-    background:   'rgba(16,185,129,0.06)',
+    background:   'rgba(199,166,106,0.06)',
     border:       `1px solid ${colors.border.accent}`,
     borderRadius: radius.lg,
     backdropFilter:'blur(12px)',

@@ -1,4 +1,4 @@
-// Design tokens — single source of truth
+﻿// Design tokens — single source of truth
 
 export const colors = {
   bg: {
@@ -9,23 +9,23 @@ export const colors = {
     cardHover:'rgba(255,255,255,0.055)',
   },
   accent: {
-    green:  '#10b981',
-    dark:   '#059669',
+    green:  '#C7A66A',
+    dark:   '#A07840',
     cyan:   '#06b6d4',
     violet: '#a78bfa',
     amber:  '#f59e0b',
     red:    '#ef4444',
   },
   text: {
-    primary:   '#f0faf5',
-    secondary: 'rgba(240,250,245,0.5)',
-    muted:     'rgba(240,250,245,0.25)',
-    dark:      '#0f2318',
+    primary:   '#111111',
+    secondary: 'rgba(0,0,0,0.50)',
+    muted:     'rgba(0,0,0,0.30)',
+    dark:      'rgba(0,0,0,0.35)',
   },
   border: {
     base:   'rgba(255,255,255,0.07)',
-    accent: 'rgba(16,185,129,0.2)',
-    strong: 'rgba(16,185,129,0.35)',
+    accent: 'rgba(199,166,106,0.20)',
+    strong: 'rgba(199,166,106,0.35)',
   },
 } as const;
 

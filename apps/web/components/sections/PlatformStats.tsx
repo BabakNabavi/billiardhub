@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { Trophy, Building2, Users, Calendar, ShoppingBag, Star } from 'lucide-react';
 import { StatCard } from '../ui/StatCard';
 import ScrollReveal from '../ScrollReveal/ScrollReveal';
 
 const stats = [
-  { value: '۵۴۸',   label: 'باشگاه فعال',      sub: 'در ۳۱ استان',       color: '#10b981', icon: <Building2 size={20} /> },
+  { value: '۵۴۸',   label: 'باشگاه فعال',      sub: 'در ۳۱ استان',       color: '#C7A66A', icon: <Building2 size={20} /> },
   { value: '۱۲,۴۰۰', label: 'بازیکن ثبت‌شده',   sub: 'از سراسر ایران',    color: '#06b6d4', icon: <Users size={20} />    },
   { value: '۲۱۸',   label: 'مسابقه برگزارشده',  sub: 'در سال جاری',       color: '#a78bfa', icon: <Trophy size={20} />   },
   { value: '۳,۲۰۰+', label: 'رزرو آنلاین',       sub: 'هر ماه',           color: '#f59e0b', icon: <Calendar size={20} /> },
@@ -19,13 +19,13 @@ export function PlatformStats() {
       <section style={{ marginBottom: '110px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div style={{ fontSize: '9px', color: 'rgba(16,185,129,0.6)', letterSpacing: '0.28em', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '9px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.28em', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase' }}>
             PLATFORM SCALE
           </div>
-          <h2 style={{ fontSize: 'clamp(24px,3.5vw,34px)', fontWeight: 900, color: '#f0faf5', margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+          <h2 style={{ fontSize: 'clamp(24px,3.5vw,34px)', fontWeight: 900, color: '#111111', margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
             اکوسیستم بیلیارد ایران
           </h2>
-          <p style={{ fontSize: '15px', color: 'rgba(240,250,245,0.35)', margin: '0 auto', maxWidth: '380px', lineHeight: 1.7 }}>
+          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.40)', margin: '0 auto', maxWidth: '380px', lineHeight: 1.7 }}>
             بزرگ‌ترین پلتفرم تخصصی بیلیارد با حضور فعال در تمام استان‌های کشور
           </p>
         </div>

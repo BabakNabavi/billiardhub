@@ -6,6 +6,9 @@
 
 import { useState } from 'react';
 
+const GOLD = '#C7A66A';
+const GOLD_DARK = '#A07840';
+
 const RESULTS = [
   {
     id: '1', date: '۱۵ خرداد ۱۴۰۴', tournament: 'لیگ برتر ایران — هفته ۱۰',
@@ -42,105 +45,90 @@ export default function ResultsPage() {
   const filtered = RESULTS.filter(r => disc === 'همه' || r.discipline === disc);
 
   return (
-    <div className="min-h-screen" style={{ background: '#010604', color: '#f0faf5', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
+    <div style={{ minHeight: '100vh', background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} dir="rtl">
 
       {/* Hero */}
-      <div className="relative overflow-hidden px-4 pt-12 pb-8"
-        style={{ background: 'linear-gradient(180deg,#050c08,#010604)' }}>
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%,rgba(6,182,212,0.1),transparent 60%)' }} />
-        <div className="relative max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4"
-            style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
-            <span className="text-xs font-bold tracking-widest" style={{ color: '#06b6d4' }}>🏁 RESULTS</span>
+      <div style={{ background: 'linear-gradient(180deg,#111111 0%,#1a1a1a 100%)', position: 'relative', overflow: 'hidden', padding: 'clamp(40px,5vw,64px) 16px clamp(32px,4vw,48px)', textAlign: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `radial-gradient(ellipse at 50% 0%,rgba(199,166,106,0.10),transparent 60%)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 999, marginBottom: 16, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: GOLD }}>🏁 RESULTS</span>
           </div>
-          <h1 className="text-4xl font-black mb-2" style={{
-            background: 'linear-gradient(135deg,#f0faf5 40%,#06b6d4)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>نتایج مسابقات</h1>
-          <p className="text-sm" style={{ color: '#4b5563' }}>آخرین نتایج و گزارش‌های کامل</p>
+          <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: `linear-gradient(135deg,#FFFFFF 40%,${GOLD})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>نتایج مسابقات</h1>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: 0 }}>آخرین نتایج و گزارش‌های کامل</p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="sticky top-0 z-40"
-        style={{ background: 'rgba(1,6,4,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(6,182,212,0.1)' }}>
-        <div className="max-w-2xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      {/* Sticky Filter */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(247,247,245,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '10px 16px', display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {DISCIPLINES.map(d => (
             <button key={d} onClick={() => setDisc(d)}
-              className="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold"
-              style={disc === d
-                ? { background: '#06b6d4', color: '#010604' }
-                : { background: 'rgba(6,182,212,0.08)', color: '#9ca3af', border: '1px solid rgba(6,182,212,0.15)' }}>
+              style={{ flexShrink: 0, padding: '6px 16px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', border: 'none',
+                ...(disc === d
+                  ? { background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, color: '#FFFFFF', boxShadow: `0 4px 12px rgba(199,166,106,0.30)` }
+                  : { background: 'rgba(199,166,106,0.08)', color: 'rgba(0,0,0,0.50)', border: '1px solid rgba(199,166,106,0.20)' })
+              }}>
               {d}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+      {/* Results list */}
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {filtered.map(round => (
-          <div key={round.id} className="rounded-2xl overflow-hidden"
-            style={{ background: '#050c08', border: '1px solid rgba(6,182,212,0.12)' }}>
+          <div key={round.id} style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
 
             {/* Round header */}
-            <button className="w-full px-4 py-4 flex items-center gap-3 text-right"
+            <button style={{ width: '100%', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               onClick={() => setExpanded(e => ({ ...e, [round.id]: !e[round.id] }))}>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <span className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(6,182,212,0.1)', color: '#06b6d4' }}>{round.discipline}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(167,139,250,0.1)', color: '#a78bfa' }}>{round.round}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 600 }}>{round.discipline}</span>
+                  <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(139,92,246,0.08)', color: '#8b5cf6', fontWeight: 600 }}>{round.round}</span>
                 </div>
-                <div className="font-bold text-sm truncate">{round.tournament}</div>
-                <div className="text-xs mt-0.5" style={{ color: '#6b7280' }}>📅 {round.date} · {round.matches.length} بازی</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: '#111111' }}>{round.tournament}</div>
+                <div style={{ fontSize: 12, marginTop: 2, color: 'rgba(0,0,0,0.40)' }}>📅 {round.date} · {round.matches.length} بازی</div>
               </div>
-              <span className="text-sm flex-shrink-0" style={{ color: '#4b5563' }}>
-                {expanded[round.id] ? '▲' : '▼'}
-              </span>
+              <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.35)', flexShrink: 0 }}>{expanded[round.id] ? '▲' : '▼'}</span>
             </button>
 
             {/* Matches */}
             {expanded[round.id] && (
-              <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid rgba(6,182,212,0.08)' }}>
+              <div style={{ padding: '0 16px 16px', borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 12 }}>
                 {round.matches.map((m, i) => (
-                  <div key={i} className="rounded-xl p-4 mt-3"
-                    style={{ background: 'rgba(6,182,212,0.04)', border: '1px solid rgba(6,182,212,0.1)' }}>
+                  <div key={i} style={{ borderRadius: 16, padding: 16, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.06)' }}>
 
                     {/* Score row */}
-                    <div className="grid grid-cols-3 items-center gap-2 mb-3">
-                      <div className={`text-center ${m.winner === 1 ? '' : 'opacity-50'}`}>
-                        <div className="text-xs mb-1 truncate" style={{ color: m.winner === 1 ? '#f0faf5' : '#6b7280' }}>
-                          {m.winner === 1 && <span className="text-yellow-400 ml-1">🏆</span>}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <div style={{ textAlign: 'center', opacity: m.winner === 1 ? 1 : 0.45 }}>
+                        <div style={{ fontSize: 11, marginBottom: 4, color: m.winner === 1 ? '#111111' : 'rgba(0,0,0,0.40)', fontWeight: m.winner === 1 ? 700 : 400 }}>
+                          {m.winner === 1 && <span style={{ marginLeft: 4 }}>🏆</span>}
                           {m.player1}
                         </div>
-                        <div className="text-3xl font-black" style={{ color: m.winner === 1 ? '#10b981' : '#6b7280' }}>
-                          {m.score1}
-                        </div>
+                        <div style={{ fontSize: 32, fontWeight: 900, color: m.winner === 1 ? GOLD_DARK : 'rgba(0,0,0,0.30)' }}>{m.score1}</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-xs mb-1" style={{ color: '#4b5563' }}>فریم</div>
-                        <div className="text-sm font-bold" style={{ color: '#6b7280' }}>—</div>
-                        <div className="text-xs mt-1" style={{ color: '#4b5563' }}>نهایی</div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginBottom: 4 }}>فریم</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.25)' }}>—</div>
+                        <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginTop: 4 }}>نهایی</div>
                       </div>
-                      <div className={`text-center ${m.winner === 2 ? '' : 'opacity-50'}`}>
-                        <div className="text-xs mb-1 truncate" style={{ color: m.winner === 2 ? '#f0faf5' : '#6b7280' }}>
-                          {m.winner === 2 && <span className="text-yellow-400 ml-1">🏆</span>}
+                      <div style={{ textAlign: 'center', opacity: m.winner === 2 ? 1 : 0.45 }}>
+                        <div style={{ fontSize: 11, marginBottom: 4, color: m.winner === 2 ? '#111111' : 'rgba(0,0,0,0.40)', fontWeight: m.winner === 2 ? 700 : 400 }}>
+                          {m.winner === 2 && <span style={{ marginLeft: 4 }}>🏆</span>}
                           {m.player2}
                         </div>
-                        <div className="text-3xl font-black" style={{ color: m.winner === 2 ? '#10b981' : '#6b7280' }}>
-                          {m.score2}
-                        </div>
+                        <div style={{ fontSize: 32, fontWeight: 900, color: m.winner === 2 ? GOLD_DARK : 'rgba(0,0,0,0.30)' }}>{m.score2}</div>
                       </div>
                     </div>
 
                     {/* Meta */}
-                    <div className="flex items-center gap-3 flex-wrap"
-                      style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 8 }}>
-                      <span className="text-xs" style={{ color: '#6b7280' }}>⏱ {m.duration}</span>
-                      <span className="text-xs" style={{ color: '#6b7280' }}>🎱 {m.frames} فریم</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 10 }}>
+                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>⏱ {m.duration}</span>
+                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>🎱 {m.frames} فریم</span>
                       {m.highBreak > 0 && (
-                        <span className="text-xs font-bold ml-auto" style={{ color: '#f59e0b' }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, marginRight: 'auto', color: GOLD_DARK }}>
                           ⚡ بالاترین بریک: {m.highBreak}
                         </span>
                       )}
@@ -153,9 +141,9 @@ export default function ResultsPage() {
         ))}
 
         {filtered.length === 0 && (
-          <div className="text-center py-16" style={{ color: '#4b5563' }}>
-            <div className="text-4xl mb-3">🏁</div>
-            <p>نتیجه‌ای یافت نشد</p>
+          <div style={{ textAlign: 'center', padding: '64px 20px' }}>
+            <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.15 }}>🏁</div>
+            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: 0 }}>نتیجه‌ای یافت نشد</p>
           </div>
         )}
       </div>

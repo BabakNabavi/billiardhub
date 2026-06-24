@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 
@@ -14,22 +14,22 @@ export default function Footer() {
           display: block;
           padding: 4px 0;
         }
-        .footer-link:hover { color: #10b981; }
+        .footer-link:hover { color: #C7A66A; }
         .footer-social {
           width: 36px; height: 36px;
           border-radius: 8px;
           display: flex; align-items: center; justify-content: center;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(0,0,0,0.04);
+          border: 1px solid rgba(0,0,0,0.06);
           color: rgba(255,255,255,0.3);
           font-size: 14px; font-weight: 700;
           transition: all 0.3s ease;
           cursor: pointer; text-decoration: none;
         }
         .footer-social:hover {
-          background: rgba(16,185,129,0.1);
-          border-color: rgba(16,185,129,0.3);
-          color: #10b981;
+          background: rgba(199,166,106,0.1);
+          border-color: rgba(199,166,106,0.3);
+          color: #C7A66A;
         }
         @media (max-width: 900px) {
           .footer-grid {
@@ -52,12 +52,12 @@ export default function Footer() {
       
 
       <footer style={{
-        backgroundColor: '#020806',
-        borderTop: '1px solid rgba(255,255,255,0.04)',
+        backgroundcolor: '#FFFFFF',
+        borderTop: '1px solid rgba(0,0,0,0.04)',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '600px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.3), transparent)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: 0, left: '30%', width: '300px', height: '200px', background: 'radial-gradient(ellipse, rgba(16,185,129,0.03), transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '600px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(199,166,106,0.3), transparent)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, left: '30%', width: '300px', height: '200px', background: 'radial-gradient(ellipse, rgba(199,166,106,0.03), transparent 70%)', pointerEvents: 'none' }} />
 
         <div className="footer-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '60px 24px 24px' }}>
           <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '48px', marginBottom: '48px' }}>
@@ -65,10 +65,10 @@ export default function Footer() {
             {/* لوگو و توضیح */}
             <div className="footer-brand">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '18px', color: '#000', boxShadow: '0 0 20px rgba(16,185,129,0.3)', flexShrink: 0 }}>B</div>
+                <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #C7A66A, #A07840)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '18px', color: '#000', boxShadow: '0 0 20px rgba(199,166,106,0.3)', flexShrink: 0 }}>B</div>
                 <span style={{ fontWeight: 900, fontSize: '18px', color: '#fff', letterSpacing: '-0.02em' }}>
                   بیلیارد{' '}
-                  <span style={{ background: 'linear-gradient(135deg, #10b981, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
+                  <span style={{ background: 'linear-gradient(135deg, #C7A66A, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>پلاس</span>
                 </span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '13px', lineHeight: 1.8, marginBottom: '20px', maxWidth: '260px' }}>
@@ -83,7 +83,7 @@ export default function Footer() {
 
             {/* پلتفرم */}
             <div>
-              <div style={{ fontSize: '11px', color: '#10b981', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '16px' }}>PLATFORM</div>
+              <div style={{ fontSize: '11px', color: '#C7A66A', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '16px' }}>PLATFORM</div>
               {[
                 { href: '/clubs', label: 'باشگاه‌ها' },
                 { href: '/shop', label: 'فروشگاه' },
@@ -124,19 +124,19 @@ export default function Footer() {
             </div>
           </div>
 
-          <div style={{ height: '1px', background: 'rgba(255,255,255,0.04)', marginBottom: '24px' }} />
+          <div style={{ height: '1px', background: 'rgba(0,0,0,0.04)', marginBottom: '24px' }} />
 
           <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.15)' }}>
               © ۱۴۰۳ بیلیارد پلاس — تمام حقوق محفوظ است
             </div>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.1)', letterSpacing: '0.1em' }}>
+            <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.08)', letterSpacing: '0.1em' }}>
               BILLIARD PLUS · IRAN · 2024
             </div>
             <div className="footer-bottom-links" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               {['حریم خصوصی', 'قوانین', 'تماس با ما'].map((item, i) => (
                 <span key={i} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', transition: 'color 0.3s ease' }}
-                  onMouseEnter={e => { (e.target as HTMLElement).style.color = '#10b981'; }}
+                  onMouseEnter={e => { (e.target as HTMLElement).style.color = '#C7A66A'; }}
                   onMouseLeave={e => { (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.15)'; }}>
                   {item}
                 </span>
