@@ -117,7 +117,7 @@ function ClubSearch({
   const [loading, setLoading] = useState(false)
   const [useManual, setUseManual] = useState(false)
   const [manual, setManual] = useState(manualValue ?? '')
-  const timer = useRef<NodeJS.Timeout>()
+  const timer = useRef<number | null>(null)
 
   const search = async (v: string) => {
     setLoading(true)
@@ -130,9 +130,9 @@ function ClubSearch({
   }
 
   useEffect(() => {
-    clearTimeout(timer.current)
+    if (timer.current) clearTimeout(timer.current)
     if (q.length < 1) { search(''); return }
-    timer.current = setTimeout(() => search(q), 400)
+    timer.current = window.setTimeout(() => search(q), 400)
   }, [q])
 
   useEffect(() => { search('') }, [])
