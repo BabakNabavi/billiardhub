@@ -52,7 +52,7 @@ export default function Footer() {
       
 
       <footer style={{
-        backgroundcolor: '#FFFFFF',
+        background: '#FFFFFF',
         borderTop: '1px solid rgba(0,0,0,0.04)',
         position: 'relative', overflow: 'hidden',
       }}>
