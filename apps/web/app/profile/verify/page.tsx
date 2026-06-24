@@ -13,8 +13,15 @@ function toEn(v: string) {
 }
 
 function authHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('auth-storage') : null
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    const token = parsed?.state?.token
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  } catch {
+    return {}
+  }
 }
 
 // ─── Steps ────────────────────────────────────────────────────
