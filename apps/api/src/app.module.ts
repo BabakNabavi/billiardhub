@@ -9,6 +9,7 @@ import { ClubModule } from './modules/club/club.module';
 import { ProductModule } from './modules/product/product.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { RoleModule } from './modules/role/role.module';
+import { VerifyModule } from './modules/auth/verify.module';
 
 @Module({
   imports: [
@@ -27,6 +28,8 @@ import { RoleModule } from './modules/role/role.module';
     ClubModule,
     ProductModule,
     BookingsModule,
+    RoleModule,
+    VerifyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,27 +1,30 @@
+// apps/api/src/modules/user/user.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 export enum UserRole {
-  USER = 'user',
-  PLAYER = 'player',
-  COACH = 'coach',
-  REFEREE = 'referee',
-  CLUB_OWNER = 'club_owner',
-  SELLER = 'seller',
+  USER         = 'user',
+  PLAYER       = 'player',
+  COACH        = 'coach',
+  REFEREE      = 'referee',
+  CLUB_OWNER   = 'club_owner',
+  SELLER       = 'seller',
   MANUFACTURER = 'manufacturer',
-  INSTALLER = 'installer',
-  ADMIN = 'admin',
+  INSTALLER    = 'installer',
+  ADMIN        = 'admin',
 }
 
 export enum VerificationStatus {
   UNVERIFIED = 'unverified',
-  PENDING = 'pending',
-  VERIFIED = 'verified',
+  PENDING    = 'pending',
+  VERIFIED   = 'verified',
 }
 
 @Entity('users')
@@ -32,7 +35,7 @@ export class User {
   @Column({ unique: true, nullable: true })
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column()
@@ -44,38 +47,64 @@ export class User {
   @Column({ nullable: true })
   phone: string;
 
-  // role اصلی
+  // ─── نقش‌ها ───────────────────────────────────────────────
   @Column({ type: 'varchar', default: 'user' })
   primaryRole: string;
 
-  // role‌های فرعی
   @Column({ type: 'text', array: true, default: [] })
   secondaryRoles: string[];
 
-  // وضعیت تأیید
+  // ─── وضعیت تأیید کلی ─────────────────────────────────────
   @Column({ type: 'varchar', default: 'unverified' })
   verificationStatus: string;
 
-  // پروفایل تکمیل شده؟
   @Column({ default: false })
   isProfileComplete: boolean;
 
-  // عکس پروفایل
+  // ─── احراز هویت ──────────────────────────────────────────
+  @Column({ nullable: true, name: 'national_id' })
+  nationalId: string;
+
+  @Column({ default: false, name: 'national_id_verified' })
+  nationalIdVerified: boolean;
+
+  @Column({ default: false, name: 'phone_verified' })
+  phoneVerified: boolean;
+
+  @Column({ default: false, name: 'email_verified' })
+  emailVerified: boolean;
+
+  // ─── OTP موقت ────────────────────────────────────────────
+  @Column({ nullable: true, name: 'otp_code', select: false })
+  otpCode: string;
+
+  @Column({ nullable: true, name: 'otp_expires_at', type: 'timestamptz' })
+  otpExpiresAt: Date;
+
+  @Column({ default: 0, name: 'otp_attempts' })
+  otpAttempts: number;
+
+  // ─── پروفایل پایه ────────────────────────────────────────
   @Column({ nullable: true })
   avatar: string;
 
-  // اطلاعات پایه پروفایل
   @Column({ nullable: true })
   bio: string;
 
   @Column({ nullable: true })
-  city: string;
+  province: string;           // استان
+
+  @Column({ nullable: true })
+  city: string;               // شهر
 
   @Column({ nullable: true })
   country: string;
 
+  @Column({ nullable: true, name: 'birth_date' })
+  birthDate: string;          // 1370/01/01
+
   @Column({ nullable: true })
-  birthDate: string;
+  gender: string;             // male | female
 
   @Column({ nullable: true })
   instagram: string;
@@ -83,7 +112,21 @@ export class User {
   @Column({ nullable: true })
   telegram: string;
 
-  // اطلاعات اختصاصی هر role (JSON)
+  // ─── باشگاه ──────────────────────────────────────────────
+  @Column({ nullable: true, name: 'club_id' })
+  clubId: string;
+
+  @Column({ nullable: true, name: 'club_name_manual' })
+  clubNameManual: string;     // اگه باشگاه تو لیست نبود
+
+  // ─── کارت بانکی ──────────────────────────────────────────
+  @Column({ nullable: true, name: 'bank_card', select: false })
+  bankCard: string;
+
+  @Column({ nullable: true, name: 'bank_card_owner' })
+  bankCardOwner: string;
+
+  // ─── پروفایل‌های تخصصی (JSON) ────────────────────────────
   @Column({ type: 'jsonb', nullable: true })
   playerProfile: object;
 
@@ -102,7 +145,7 @@ export class User {
   @Column({ type: 'jsonb', nullable: true })
   sellerProfile: object;
 
-  // مدارک آپلود شده
+  // ─── متفرقه ──────────────────────────────────────────────
   @Column({ type: 'text', array: true, default: [] })
   documents: string[];
 
