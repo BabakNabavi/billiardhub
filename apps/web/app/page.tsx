@@ -777,12 +777,12 @@ export default function HomePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
-                <h2 className="sec-title" style={{ color: TEXT }}>یافتن باشگاه‌ها</h2>
+                <h2 className="sec-title" style={{ color: TEXT }}>باشگاه‌های منتخب</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
-              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '13px', fontWeight: 600, transition: 'color 0.25s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GRN; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_M; }}>
+              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '13px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#4ADE80'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#30C55A'; }}>
                 مشاهده ۵۴۸ باشگاه <ArrowLeft size={13} />
               </Link>
             </div>
@@ -794,9 +794,20 @@ export default function HomePage() {
             ))}
           </div>
           <SR delay={200}>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '36px', flexWrap: 'wrap' }}>
-              <Link href="/clubs"><button className="btn-green"><MapPin size={14} /> جستجو روی نقشه</button></Link>
-              <Link href="/clubs"><button className="btn-outline">همه باشگاه‌ها</button></Link>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '36px' }}>
+              <Link href="/clubs" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '13px 32px', borderRadius: '16px', cursor: 'pointer',
+                  background: 'linear-gradient(135deg,#1a7a42,#22a855)',
+                  border: '1px solid rgba(48,197,90,0.35)',
+                  boxShadow: '0 4px 20px rgba(48,197,90,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+                  color: '#fff', fontSize: '15px', fontWeight: 700,
+                  fontFamily: 'inherit', transition: 'all 0.25s',
+                }}>
+                  <MapPin size={16} /> نزدیک‌ترین باشگاه
+                </button>
+              </Link>
             </div>
           </SR>
         </div>
