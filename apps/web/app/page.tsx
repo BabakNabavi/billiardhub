@@ -852,12 +852,12 @@ export default function HomePage() {
       </section>
 
       {/* §4 COMMUNITY ═══════════════════════════════════════════ */}
-      <section style={{ position: 'relative', background: '#060408', overflow: 'hidden',
-        padding: 'clamp(80px,8vw,120px) clamp(16px,5%,80px) clamp(110px,12vw,160px)' }}>
+      <section style={{ position: 'relative', background: 'linear-gradient(to bottom,#0E0515 0%,#100818 60%,#1A0A22 100%)', overflow: 'hidden',
+        padding: 'clamp(80px,8vw,120px) clamp(16px,5%,80px) clamp(140px,16vw,220px)' }}>
         {/* background image */}
-        <img src={IMG.bg1} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.16, filter: 'saturate(0.30) contrast(1.12)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        {/* gradient — fades OUT at bottom to separate from next section */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(6,4,8,0.72) 0%,rgba(6,4,8,0.08) 28%,rgba(6,4,8,0.08) 62%,rgba(6,4,8,0.98) 100%)', pointerEvents: 'none' }} />
+        <img src={IMG.bg1} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, filter: 'saturate(0.35) contrast(1.12) hue-rotate(260deg)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        {/* gradient overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(14,5,21,0.80) 0%,rgba(14,5,21,0.04) 30%,rgba(14,5,21,0.04) 58%,rgba(14,5,21,0.96) 100%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SR>
             <div style={{ textAlign: 'center', marginBottom: '56px' }}>
@@ -910,6 +910,9 @@ export default function HomePage() {
           </SR>
         </div>
       </section>
+
+      {/* ── Section divider ─────────────────────────────────────── */}
+      <div style={{ position: 'relative', height: '3px', background: 'linear-gradient(90deg,transparent 0%,rgba(185,123,255,0.55) 25%,rgba(199,166,106,0.70) 50%,rgba(74,158,255,0.55) 75%,transparent 100%)', boxShadow: '0 0 24px rgba(185,123,255,0.30)' }} />
 
       {/* §5 EDUCATION ═══════════════════════════════════════════ */}
       <section style={{ position: 'relative', background: '#0D1526', overflow: 'hidden', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
