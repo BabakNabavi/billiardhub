@@ -820,12 +820,12 @@ export default function HomePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
-                <h2 className="sec-title" style={{ color: TEXT }}>بازار تجهیزات</h2>
+                <h2 className="sec-title" style={{ color: TEXT }}>بیلیارد بازار</h2>
                 <div className="sec-rule" style={{ color: BRN }} />
               </div>
-              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '13px', fontWeight: 600, transition: 'color 0.25s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = BRN; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_M; }}>
+              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '13px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#4ADE80'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#30C55A'; }}>
                 مشاهده ۱٬۸۵۰ محصول <ArrowLeft size={13} />
               </Link>
             </div>
