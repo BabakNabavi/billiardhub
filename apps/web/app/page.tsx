@@ -558,6 +558,16 @@ export default function HomePage() {
           .mkt-sub      { grid-template-columns:1fr !important; }
         }
 
+        /* ══ LAPTOP SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
+        @media(max-height:800px) and (min-width:601px){
+          .hero-content { padding-top:clamp(120px,16vh,180px) !important; }
+          .hero-desc    { display:none !important; }
+        }
+        @media(max-height:680px) and (min-width:601px){
+          .hero-content { padding-top:clamp(90px,12vh,130px) !important; }
+          .hero-sub     { display:none !important; }
+        }
+
         /* ══ MOBILE XS ≤400px ══ */
         @media(max-width:400px){
           .comm-grid { grid-template-columns:1fr !important; }
@@ -695,7 +705,7 @@ export default function HomePage() {
           {/* Action buttons — hidden on mobile */}
           <div className="he hero-actions" style={{ display: 'flex', gap: '11px', marginTop: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/clubs"><button className="btn-primary"><Building2 size={15} /> یافتن باشگاه</button></Link>
-            <Link href="/shop"><button className="btn-ghost-dark"><ShoppingBag size={15} /> بازار تجهیزات</button></Link>
+            <Link href="/shop"><button className="btn-ghost-dark"><ShoppingBag size={15} /> بیلیارد بازار</button></Link>
           </div>
         </div>
 
