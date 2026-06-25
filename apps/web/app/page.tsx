@@ -59,25 +59,59 @@ const PRP = '#4A2D8A';
    IMAGES
 ═══════════════════════════════════════════════════════════════ */
 const IMG = {
-  wall1: '/images/wallpaper1.jpg',
-  wall2: '/images/wallpaper2.jpg',
-  wall3: '/images/wallpaper3.png',
-  wall4: '/images/wallpaper4.png',
-  wall5: '/images/wallpaper5.jfif',
-  club1: '/images/billiadr-club-1.jpg',
-  club2: '/images/billiadr-club-2.jpg',
-  club3: '/images/billiadr-club-3.jpg',
-  club5: '/images/billiadr-club-5.jpg',
-  club6: '/images/billiadr-club-6.jpg',
-  table:    '/images/Home_table.jpg',
-  proTable: '/images/Pro_table.jpg',
-  snooker:  '/images/snooker-table.jpg',
-  snooker2: '/images/snooker-table-2.jpg',
-  cue:   '/images/cue_billiard.jpg',
-  cue2:  '/images/cue_billiard_2.jpg',
-  ball:  '/images/Ball-1.jpg',
-  chalk: '/images/pool_chalk_1.jpg',
-  rest:  '/images/rest-pool-2.jpg',
+  // Hero wallpapers — now in /images/clubs/
+  wall1: '/images/clubs/wallpaper1.jpg',
+  wall2: '/images/clubs/wallpaper2.jpg',
+  wall3: '/images/clubs/wallpaper3.png',
+  wall4: '/images/clubs/wallpaper4.png',
+  wall5: '/images/clubs/wallpaper5.jfif',
+
+  // Real club photos (new organised folder)
+  club1: '/images/clubs/IMG_0956.jpeg',
+  club2: '/images/clubs/IMG_0957.jpeg',
+  club3: '/images/clubs/IMG_0958.jpeg',
+  club4: '/images/clubs/IMG_0959.jpeg',
+  club5: '/images/clubs/IMG_0955.png',
+  club6: '/images/clubs/IMG_0960.png',
+  clubA: '/images/clubs/billiadr-club-1.jpg',
+  clubB: '/images/clubs/billiadr-club-2.jpg',
+  clubC: '/images/clubs/billiadr-club-3.jpg',
+
+  // Equipment / shop
+  table:    '/images/shop/Home_table.jpg',
+  proTable: '/images/shop/Pro_table.jpg',
+  snooker:  '/images/shop/snooker-table.jpg',
+  snooker2: '/images/shop/snooker-table-2.jpg',
+  cue:      '/images/shop/cue_billiard.jpg',
+  cue2:     '/images/shop/cue_billiard_2.jpg',
+  ball:     '/images/shop/Ball-1.jpg',
+  chalk:    '/images/shop/pool_chalk_1.jpg',
+  rest:     '/images/shop/rest-pool-2.jpg',
+
+  // Education / learn
+  learn1: '/images/learn/IMG_0976.png',
+  learn2: '/images/learn/IMG_0978.png',
+
+  // Background
+  bg1: '/images/background/8_Ball_Pool.jpg',
+  bg2: '/images/background/billiadr-club-5.jpg',
+
+  // Coaches
+  coach1: '/images/coaches/IMG_0969.png',
+  coach2: '/images/coaches/IMG_0971 (1).png',
+
+  // Services
+  svc1: '/images/services/IMG_0961.png',
+  svc2: '/images/services/IMG_0962.png',
+  svc3: '/images/services/IMG_0963.png',
+
+  // Stores
+  store1: '/images/stores/IMG_0974.png',
+  store2: '/images/stores/IMG_0975.png',
+
+  // Manufactures
+  mfr1: '/images/manufactures/IMG_0965.png',
+  mfr2: '/images/manufactures/IMG_0966.png',
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -480,7 +514,7 @@ export default function HomePage() {
             filter: 'brightness(0.22) saturate(0.38) contrast(1.14)',
             transform: `scale(${heroS})`, transformOrigin: 'center', willChange: 'transform',
           }}>
-          <source src="/images/hero.mp4" type="video/mp4" />
+          <source src="/images/video/hero.mp4" type="video/mp4" />
         </video>
 
         {/* ── Layer 2: wallpaper slides crossfading over video ── */}
@@ -739,7 +773,7 @@ export default function HomePage() {
 
       {/* §4 COMMUNITY ═══════════════════════════════════════════ */}
       <section style={{ position: 'relative', background: '#0B0908', overflow: 'hidden', padding: 'clamp(80px,8vw,120px) clamp(16px,5%,80px)' }}>
-        <img src={IMG.club3} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.13, filter: 'saturate(0.25) contrast(1.15)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <img src={IMG.bg2} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.13, filter: 'saturate(0.25) contrast(1.15)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(8,6,4,0.65) 0%,rgba(8,6,4,0.15) 30%,rgba(8,6,4,0.15) 68%,rgba(8,6,4,0.72) 100%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SR>
@@ -785,13 +819,13 @@ export default function HomePage() {
 
       {/* §5 EDUCATION ═══════════════════════════════════════════ */}
       <section style={{ position: 'relative', background: '#0D1526', overflow: 'hidden', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
-        <img src={IMG.proTable} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.08, filter: 'saturate(0.3) contrast(1.1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <img src={IMG.learn1} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.08, filter: 'saturate(0.3) contrast(1.1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(13,21,38,0) 0%,rgba(13,21,38,0.98) 54%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <div className="edu-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(32px,6vw,80px)', alignItems: 'center' }}>
             <SR direction="right">
               <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: 'clamp(260px,40vw,480px)' }}>
-                <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <img src={IMG.learn2} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(13,21,38,0.96) 0%,transparent 52%)' }} />
                 <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(44px) saturate(220%)', WebkitBackdropFilter: 'blur(44px) saturate(220%)', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '14px', padding: '10px 18px' }}>
                   <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.72)', fontWeight: 700, letterSpacing: '0.16em' }}>BILLIARD ACADEMY</span>
