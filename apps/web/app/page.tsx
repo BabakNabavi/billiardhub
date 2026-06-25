@@ -659,13 +659,9 @@ export default function HomePage() {
             fontSize: 'clamp(11px,1.2vw,14px)', fontWeight: 400,
             margin: '0 0 36px', textAlign: 'center', lineHeight: 2, direction: 'rtl',
           }}>
-            <span style={{ color: '#FFD166' }}>از باشگاه‌ها تا قهرمانان</span>
+            <span style={{ color: '#30C55A' }}>از پیدا کردن باشگاه و رزرو میز تا قهرمانان</span>
             <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
-            <span style={{ color: '#30C55A' }}>پیدا کردن باشگاه و رزرو میز</span>
-            <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
-            <span style={{ color: '#4A9EFF' }}>خرید تجهیزات بیلیاردی</span>
-            <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
-            <span style={{ color: '#F472B6' }}>مربیان حرفه‌ای</span>
+            <span style={{ color: '#4A9EFF' }}>از خرید و فروش تجهیزات تا آموزش و مربیان حرفه‌ای</span>
           </p>
 
           {/* Trust strip — 4 liquid glass cards, each unique color */}
