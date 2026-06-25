@@ -657,10 +657,10 @@ export default function HomePage() {
           {/* Subtitle — نقطه‌ی اتصال */}
           <p className="hc" style={{
             fontSize: 'clamp(14px,1.9vw,22px)', fontWeight: 500,
-            margin: '0 0 16px', letterSpacing: '0.02em', textAlign: 'center', lineHeight: 1.6,
+            margin: '0 0 16px', letterSpacing: '0.01em', textAlign: 'center', lineHeight: 1.7,
+            color: 'rgba(255,255,255,0.82)',
           }}>
-            <span style={{ color: '#F472B6', textShadow: '0 0 20px rgba(244,114,182,0.50)' }}>نقطه‌ی اتصال </span>
-            <span style={{ color: '#30C55A', textShadow: '0 0 20px rgba(48,197,90,0.50)' }}>جامعه‌ی بیلیارد</span>
+            اتصال بی‌واسطه بازیکنان، باشگاه‌ها و برترین تولیدکنندگان و فروشندگان در ایران و جهان
           </p>
 
           {/* Third line — services */}
