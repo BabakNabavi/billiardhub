@@ -411,6 +411,9 @@ export default function HomePage() {
 
   return (
     <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&display=swap" rel="stylesheet" />
       <style>{`
         @keyframes fadeUp    { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
         @keyframes fadeTagIn { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
@@ -519,13 +522,9 @@ export default function HomePage() {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* Push content below: navbar(62px) + stories(~78px) + buffer = 160px */
-          .hero-content {
-            justify-content:flex-start !important;
-            padding-top:160px !important;
-            padding-bottom:90px !important;
-          }
-          .hero-h1      { font-size:clamp(44px,13.5vw,70px) !important; margin-bottom:16px !important; }
+          /* On mobile: navbar(62px) + stories(~78px) = ~140px → 150px padding */
+          .hero-content { padding-top:150px !important; padding-bottom:60px !important; }
+          .hero-h1      { font-size:clamp(40px,12vw,66px) !important; margin-bottom:12px !important; }
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
@@ -570,7 +569,7 @@ export default function HomePage() {
           }}>
             <img src={s.bg} alt="" loading={i === 0 ? 'eager' : 'lazy'}
               style={{ width: '100%', height: '100%', objectFit: 'cover',
-                filter: 'brightness(0.72) saturate(0.80) contrast(1.06)',
+                filter: 'brightness(0.72) saturate(0.80) contrast(1.06) blur(2.5px)',
                 transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
@@ -596,8 +595,8 @@ export default function HomePage() {
         {/* ── CONTENT — no key prop → animates exactly ONCE on page load ── */}
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          padding: '0 clamp(16px,5%,80px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+          padding: 'clamp(160px,26vh,280px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
@@ -610,42 +609,51 @@ export default function HomePage() {
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: GOLD,
               boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
               display: 'inline-block', animation: 'pulse2 3s ease-in-out infinite' }} />
-            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '9px', fontWeight: 700, letterSpacing: '0.28em', whiteSpace: 'nowrap' }}>
-              THE DIGITAL HOME OF BILLIARDS
+            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '9px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+              BILLIARD PLUS · IRAN
             </span>
           </div>
 
-          {/* Headline */}
+          {/* Headline — Billiard Hub in Cormorant Garamond */}
           <h1 className="hb hero-h1" style={{
-            fontSize: 'clamp(52px,11vw,138px)', fontWeight: 900, color: '#fff',
-            lineHeight: 0.88, margin: '0 0 22px', letterSpacing: '-0.062em', textAlign: 'center',
-            textShadow: '0 0 160px rgba(199,166,106,0.06),0 2px 0 rgba(0,0,0,0.65)',
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: 'clamp(56px,10vw,130px)', fontWeight: 700, color: '#fff',
+            lineHeight: 0.90, margin: '0 0 16px', letterSpacing: '-0.02em', textAlign: 'center',
+            textShadow: '0 0 180px rgba(199,166,106,0.10),0 4px 32px rgba(0,0,0,0.60)',
           }}>
-            خانه بیلیارد
+            Billiard Hub
           </h1>
 
-          {/* Subtitle — hidden on mobile */}
-          <p className="hc hero-sub" style={{
-            fontSize: 'clamp(13px,1.5vw,17px)', color: 'rgba(255,255,255,0.26)',
-            margin: '0 0 44px', letterSpacing: '0.10em', textAlign: 'center', fontWeight: 400, lineHeight: 2,
+          {/* English subtitle — same Cormorant font */}
+          <p className="hc" style={{
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: 'clamp(14px,1.8vw,22px)', fontStyle: 'italic', fontWeight: 300,
+            color: 'rgba(255,255,255,0.45)', margin: '0 0 40px',
+            letterSpacing: '0.06em', textAlign: 'center', lineHeight: 1.5,
           }}>
-            یافتن باشگاه · خرید تجهیزات · ارتباط با جامعه · ارتقای بازی
+            The Digital Home of Billiard
           </p>
 
-          {/* Trust strip — 2×2 on mobile */}
+          {/* Trust strip — 4 liquid glass cards, each unique color */}
           <div className="hd trust-strip">
             {[
-              { n: '۵۴۸',   l: 'باشگاه' },
-              { n: '۱۲K+',  l: 'بازیکن' },
-              { n: '۱٬۸۵۰', l: 'محصول'  },
-              { n: '۳۱',    l: 'استان'  },
+              { n: '۵۴۸',   l: 'باشگاه', clr: '#C7A66A', rgb: '199,166,106' },
+              { n: '۱۲K+',  l: 'بازیکن', clr: '#30C55A', rgb: '48,197,90'   },
+              { n: '۱٬۸۵۰', l: 'محصول',  clr: '#4A9EFF', rgb: '74,158,255'  },
+              { n: '۳۱',    l: 'استان',  clr: '#B97BFF', rgb: '185,123,255' },
             ].map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 15px',
-                background: 'rgba(255,255,255,0.055)', backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: '26px', justifyContent: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{s.n}</span>
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.26)', letterSpacing: '0.06em' }}>{s.l}</span>
+              <div key={i} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '3px', padding: '10px 18px',
+                background: `rgba(${s.rgb},0.12)`,
+                backdropFilter: 'blur(28px) saturate(220%)',
+                WebkitBackdropFilter: 'blur(28px) saturate(220%)',
+                border: `1px solid rgba(${s.rgb},0.28)`,
+                borderRadius: '20px',
+                boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(${s.rgb},0.12)`,
+              }}>
+                <span style={{ fontSize: '15px', fontWeight: 900, color: s.clr, letterSpacing: '-0.03em', lineHeight: 1, textShadow: `0 0 18px rgba(${s.rgb},0.50)` }}>{s.n}</span>
+                <span style={{ fontSize: '9px', color: `rgba(${s.rgb},0.72)`, letterSpacing: '0.10em', fontWeight: 600, textTransform: 'uppercase' }}>{s.l}</span>
               </div>
             ))}
           </div>
