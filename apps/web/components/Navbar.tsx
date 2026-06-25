@@ -466,11 +466,12 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Stories — home only */}
+      {/* Stories — home only, cinematic strip */}
       {isHomePage && (
         <div style={{
           position: 'fixed', top: '62px', left: 0, right: 0, zIndex: 49,
-          padding: 'clamp(8px,1.5vw,12px) clamp(16px,3vw,32px)',
+          padding: '6px clamp(16px,3vw,32px) 4px',
+          background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
           opacity: Math.max(0, 1 - scrollY / 700),
           pointerEvents: scrollY > 560 ? 'none' : 'auto',
           transition: 'opacity 0.1s linear',
