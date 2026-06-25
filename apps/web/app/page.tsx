@@ -228,7 +228,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <div style={{ height: '12px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
               <div><span style={{ fontSize: '16px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span><span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.30)', marginRight: '4px' }}>ت/ساعت</span></div>
-              <div style={{ background: `linear-gradient(135deg,${GRN},#124d30)`, color: '#fff', fontSize: '11px', fontWeight: 700, padding: '9px 18px', borderRadius: '10px', boxShadow: '0 4px 14px rgba(30,102,65,0.40)' }}>رزرو آنلاین</div>
+              <div style={{ background: 'rgba(30,102,65,0.16)', backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)', color: '#fff', fontSize: '11px', fontWeight: 700, padding: '9px 18px', borderRadius: '10px', border: '1px solid rgba(48,197,90,0.30)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28), 0 4px 14px rgba(30,102,65,0.18)' }}>رزرو آنلاین</div>
             </div>
           </div>
         </div>
@@ -360,11 +360,12 @@ function DiscoveryPanel() {
 
           <Link href={cur.href} style={{ display: 'contents' }}>
             <button className="dp-cta" style={{
-              background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, color: '#fff',
-              border: 'none', borderRadius: '16px', padding: '11px 24px', fontSize: '13px', fontWeight: 800,
+              background: 'rgba(199,166,106,0.18)', color: '#fff',
+              border: '1px solid rgba(199,166,106,0.44)', borderRadius: '16px', padding: '11px 24px', fontSize: '13px', fontWeight: 800,
               cursor: 'pointer', fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-              boxShadow: '0 4px 20px rgba(199,166,106,0.44)',
+              backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)',
+              boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.36), 0 4px 20px rgba(199,166,106,0.16)',
             }}>
               <Search size={13} /> جستجو
             </button>
@@ -426,38 +427,63 @@ export default function HomePage() {
         .he { animation:fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.78s both; }
         .hf { animation:fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.90s both; }
 
+        /* ── iOS 26 Liquid Glass Buttons ── */
         .btn-primary {
           display:inline-flex;align-items:center;gap:8px;
-          background:linear-gradient(135deg,${GOLD},${GOLD_D}); color:#fff;
-          border:none;border-radius:14px;padding:14px 32px;font-size:14px;font-weight:800;
+          background:rgba(199,166,106,0.14);
+          backdrop-filter:blur(28px) saturate(220%);
+          -webkit-backdrop-filter:blur(28px) saturate(220%);
+          color:#fff;
+          border:1px solid rgba(199,166,106,0.40);
+          border-radius:14px;padding:14px 32px;font-size:14px;font-weight:800;
           cursor:pointer;font-family:inherit;
-          box-shadow:0 0 0 1px ${GOLD_BOR},0 6px 26px rgba(199,166,106,0.28);
-          transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s ease;
+          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.36),inset 0 -1px 0 rgba(0,0,0,0.08),0 6px 28px rgba(199,166,106,0.16);
+          transition:transform .3s cubic-bezier(.4,0,.2,1),background .28s ease,box-shadow .3s ease;
         }
-        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 0 1px ${GOLD_BOR},0 12px 36px rgba(199,166,106,0.40);}
+        .btn-primary:hover{
+          transform:translateY(-2px);
+          background:rgba(199,166,106,0.22);
+          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.42),inset 0 -1px 0 rgba(0,0,0,0.08),0 12px 40px rgba(199,166,106,0.24);
+        }
         .btn-green {
           display:inline-flex;align-items:center;gap:8px;
-          background:linear-gradient(135deg,${GRN},#124d30);color:#fff;
-          border:none;border-radius:14px;padding:14px 30px;font-size:14px;font-weight:800;
-          cursor:pointer;font-family:inherit;box-shadow:0 6px 22px rgba(30,102,65,0.26);
-          transition:transform .3s ease,box-shadow .3s ease;
+          background:rgba(30,102,65,0.14);
+          backdrop-filter:blur(28px) saturate(220%);
+          -webkit-backdrop-filter:blur(28px) saturate(220%);
+          color:#fff;
+          border:1px solid rgba(30,102,65,0.38);
+          border-radius:14px;padding:14px 30px;font-size:14px;font-weight:800;
+          cursor:pointer;font-family:inherit;
+          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.32),inset 0 -1px 0 rgba(0,0,0,0.06),0 6px 24px rgba(30,102,65,0.14);
+          transition:transform .3s ease,background .28s ease,box-shadow .3s ease;
         }
-        .btn-green:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(30,102,65,0.38);}
+        .btn-green:hover{transform:translateY(-2px);background:rgba(30,102,65,0.22);box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.38),0 12px 36px rgba(30,102,65,0.22);}
         .btn-outline {
           display:inline-flex;align-items:center;gap:8px;
-          background:transparent;color:${TEXT};border:1.5px solid rgba(26,25,23,0.12);
+          background:rgba(255,255,255,0.55);
+          backdrop-filter:blur(24px) saturate(200%);
+          -webkit-backdrop-filter:blur(24px) saturate(200%);
+          color:${TEXT};
+          border:1px solid rgba(26,25,23,0.12);
           border-radius:14px;padding:13px 28px;font-size:14px;font-weight:600;
-          cursor:pointer;font-family:inherit;transition:all .28s;
+          cursor:pointer;font-family:inherit;
+          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.90),0 4px 16px rgba(0,0,0,0.06);
+          transition:all .28s;
         }
-        .btn-outline:hover{border-color:${GRN};color:${GRN};}
+        .btn-outline:hover{background:rgba(255,255,255,0.72);border-color:rgba(30,102,65,0.30);color:${GRN};}
         .btn-ghost-dark {
           display:inline-flex;align-items:center;gap:8px;
-          background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.78);
-          border:1px solid rgba(255,255,255,0.16);border-radius:14px;
-          padding:14px 28px;font-size:14px;font-weight:600;
-          cursor:pointer;font-family:inherit;backdrop-filter:blur(16px);transition:all .28s ease;
+          background:rgba(255,255,255,0.10);
+          backdrop-filter:blur(28px) saturate(220%);
+          -webkit-backdrop-filter:blur(28px) saturate(220%);
+          color:rgba(255,255,255,0.88);
+          border:1px solid rgba(255,255,255,0.22);
+          border-radius:14px;padding:14px 28px;font-size:14px;font-weight:600;
+          cursor:pointer;font-family:inherit;
+          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.32),inset 0 -1px 0 rgba(0,0,0,0.06),0 4px 18px rgba(0,0,0,0.12);
+          transition:all .28s ease;
         }
-        .btn-ghost-dark:hover{background:rgba(255,255,255,0.14);border-color:${GOLD_BOR};}
+        .btn-ghost-dark:hover{background:rgba(255,255,255,0.17);border-color:rgba(199,166,106,0.40);box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.40),0 8px 28px rgba(0,0,0,0.16);}
 
         .sec-label{font-size:9px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;margin-bottom:14px;display:block;}
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
@@ -528,7 +554,7 @@ export default function HomePage() {
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', zIndex: 1,
-            filter: 'brightness(0.22) saturate(0.38) contrast(1.14)',
+            filter: 'brightness(0.52) saturate(0.62) contrast(1.08)',
             transform: `scale(${heroS})`, transformOrigin: 'center', willChange: 'transform',
           }}>
           <source src="/images/video/hero.mp4" type="video/mp4" />
@@ -538,13 +564,13 @@ export default function HomePage() {
         {HERO_SLIDES.map((s, i) => (
           <div key={i} style={{
             position: 'absolute', inset: 0, zIndex: 2,
-            opacity: i === slide ? 1 : 0,
+            opacity: i === slide ? 0.48 : 0,
             transition: 'opacity 3.2s cubic-bezier(0.4,0,0.2,1)',
             pointerEvents: 'none',
           }}>
             <img src={s.bg} alt="" loading={i === 0 ? 'eager' : 'lazy'}
               style={{ width: '100%', height: '100%', objectFit: 'cover',
-                filter: 'brightness(0.35) saturate(0.62) contrast(1.08)',
+                filter: 'brightness(0.72) saturate(0.80) contrast(1.06)',
                 transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
@@ -680,15 +706,8 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* §1B SEARCH DISCOVERY — cinematic bridge */}
-      <section style={{ background: 'linear-gradient(to bottom,#04020A 0%,#F2F0EC 100%)', padding: '0 clamp(16px,5%,80px) clamp(36px,5vw,56px)' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <DiscoveryPanel />
-        </div>
-      </section>
-
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section style={{ background: '#F2F0EC', padding: 'clamp(40px,5vw,72px) clamp(16px,5%,80px) clamp(72px,8vw,108px)' }}>
+      <section style={{ background: '#F2F0EC', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
@@ -752,7 +771,7 @@ export default function HomePage() {
                         <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.24)', textDecoration: 'line-through', marginBottom: '3px' }}>{PRODUCTS[0]!.price.toLocaleString('fa-IR')} ت</div>
                         <div style={{ fontSize: 'clamp(18px,2.4vw,28px)', fontWeight: 900, color: GOLD }}>{PRODUCTS[0]!.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></div>
                       </div>
-                      <div style={{ background: `linear-gradient(135deg,${BRN},#4a2412)`, color: '#fff', fontSize: '12px', fontWeight: 700, padding: '12px 22px', borderRadius: '12px', boxShadow: '0 4px 16px rgba(107,58,31,0.40)' }}>افزودن به سبد</div>
+                      <div style={{ background: 'rgba(107,58,31,0.16)', backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '12px 22px', borderRadius: '12px', border: '1px solid rgba(199,140,80,0.32)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 16px rgba(107,58,31,0.16)' }}>افزودن به سبد</div>
                     </div>
                   </div>
                 </div>
