@@ -224,6 +224,82 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
 /* ══════════════════════════════════════════════
    PAGE
 ══════════════════════════════════════════════ */
+const SLIDER_IMAGES = [
+  { src: '/images/clubs/wallpaper1.jpg',            title: 'باشگاه‌های حرفه‌ای', sub: 'تجربه بازی در بهترین محیط‌ها' },
+  { src: '/images/clubs/wallpaper2.jpg',            title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر جا' },
+  { src: '/images/clubs/wallpaper3.png',            title: 'مربیان مجاز',          sub: 'یادگیری با بهترین‌ها' },
+  { src: '/images/clubs/IMG_0957.jpeg',             title: '۵۴۸ باشگاه',          sub: 'در سراسر ایران' },
+  { src: '/images/clubs/photo_2026-05-25_08-57-23.jpg', title: 'جامعه بیلیارد',  sub: 'بیلیارد پلاس، اتصال همه' },
+];
+
+
+function HeroSliderFull({ city, setCity, cities }: { city: string; setCity: (c: string) => void; cities: string[] }) {
+  const [active, setActive] = useState(0);
+  const [prevIdx, setPrevIdx] = useState<number | null>(null);
+  const [fading, setFading]   = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const goTo = (idx: number) => {
+    if (idx === active || fading) return;
+    setPrevIdx(active); setActive(idx); setFading(true);
+    setTimeout(() => { setPrevIdx(null); setFading(false); }, 700);
+  };
+
+  useEffect(() => {
+    timerRef.current = setTimeout(() => goTo((active + 1) % SLIDER_IMAGES.length), 4500);
+    return () => clearTimeout(timerRef.current);
+  }, [active]);
+
+  return (
+    <div style={{ position: 'relative', height: 'clamp(280px,40vw,500px)', overflow: 'hidden', background: '#0a0a0a' }}>
+      {SLIDER_IMAGES.map((s, i) => (
+        <div key={i} style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url(${s.src})`, backgroundSize: 'cover', backgroundPosition: 'center',
+          opacity: i === active ? 1 : 0,
+          transition: 'opacity 0.75s ease',
+          zIndex: i === active ? 2 : i === prevIdx ? 1 : 0,
+        }} />
+      ))}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 3, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.82), transparent)' }} />
+
+      {/* text */}
+      <div style={{ position: 'absolute', top: 0, bottom: 52, left: 0, right: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(24px,4vw,64px)', direction: 'rtl' }}>
+        <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.85)', letterSpacing: '0.26em', fontWeight: 700, marginBottom: 12 }}>DISCOVER CLUBS</div>
+        <h1 style={{ fontSize: 'clamp(24px,4.2vw,52px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
+          {SLIDER_IMAGES[active]?.title}
+        </h1>
+        <p style={{ fontSize: 'clamp(13px,1.4vw,18px)', color: 'rgba(255,255,255,0.62)', margin: 0, fontWeight: 400 }}>
+          {SLIDER_IMAGES[active]?.sub}
+        </p>
+      </div>
+
+      {/* dots */}
+      <div style={{ position: 'absolute', bottom: 62, right: 'clamp(24px,4vw,64px)', zIndex: 6, display: 'flex', gap: 7 }}>
+        {SLIDER_IMAGES.map((_, i) => (
+          <button key={i} onClick={() => goTo(i)} style={{
+            width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
+            background: i === active ? '#C7A66A' : 'rgba(255,255,255,0.32)',
+            transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)',
+          }} />
+        ))}
+      </div>
+
+      {/* city pills */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 5, padding: '8px clamp(16px,4vw,40px)', background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(14px)', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="city-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch', maxWidth: 1280, margin: '0 auto' }}>
+          {cities.map(c => (
+            <button key={c} onClick={() => setCity(c)} style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${city === c ? 'rgba(199,166,106,0.55)' : 'rgba(255,255,255,0.14)'}`, background: city === c ? 'rgba(199,166,106,0.18)' : 'rgba(255,255,255,0.06)', color: city === c ? '#C7A66A' : 'rgba(255,255,255,0.60)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s' }}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ClubsPage() {
   const [clubs, setClubs]           = useState<Club[]>([]);
   const [loading, setLoading]       = useState(true);
@@ -309,13 +385,15 @@ export default function ClubsPage() {
         /* grid */
         .clubs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
 
+        /* 14-inch / small laptop */
+        @media(max-width:1200px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
+
         /* tablet */
-        @media(max-width:900px)  { .clubs-grid { grid-template-columns:repeat(2,1fr) } }
+        @media(max-width:768px)  { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:12px } }
 
         /* mobile — 1 ستون */
         @media(max-width:560px)  {
           .clubs-grid { grid-template-columns:1fr; gap:12px }
-          /* روی موبایل toolbar دو ردیف می‌شه */
           .toolbar-row { flex-wrap:wrap }
           .toolbar-search { min-width:100%!important; order:-1 }
         }
@@ -323,23 +401,9 @@ export default function ClubsPage() {
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: 80, direction: 'rtl' }}>
 
-        {/* ══ HERO ══ */}
-        <div style={{ position: 'relative', background: 'linear-gradient(180deg,#111111 0%,#1a1a1a 100%)', borderBottom: '1px solid rgba(0,0,0,0.05)', padding: 'clamp(28px,4vw,48px) clamp(16px,4vw,40px) 0', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-40%', right: '-10%', width: '50vw', height: '50vw', maxWidth: 500, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(199,166,106,0.10) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
-          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-            <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.7)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: 8 }}>DISCOVER CLUBS</div>
-            <h1 style={{ fontSize: 'clamp(22px,4vw,42px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.03em' }}>باشگاه‌های بیلیارد ایران</h1>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.40)', margin: '0 0 22px' }}>از {toFa(SAMPLE_CLUBS.length)} باشگاه برتر انتخاب کنید</div>
-
-            {/* city pills */}
-            <div className="city-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 20, WebkitOverflowScrolling: 'touch' }}>
-              {CITIES.map(c => (
-                <button key={c} onClick={() => setCity(c)} style={{ padding: '7px 16px', borderRadius: 20, border: `1px solid ${city === c ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.09)'}`, background: city === c ? 'rgba(199,166,106,0.15)' : 'rgba(0,0,0,0.05)', color: city === c ? '#C7A66A' : 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s' }}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* ══ HERO SLIDER ══ */}
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
+          <HeroSliderFull city={city} setCity={setCity} cities={CITIES} />
         </div>
 
         {/* ══ STICKY TOOLBAR ══ */}
