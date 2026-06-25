@@ -155,14 +155,32 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
               </div>
             )}
           </div>
-          {/* open/close — liquid glass */}
-          <div style={{ position: 'absolute', top: 10, left: 10, background: club.isOpen ? 'rgba(22,163,74,0.18)' : 'rgba(239,68,68,0.16)', backdropFilter: 'blur(20px) saturate(220%)', WebkitBackdropFilter: 'blur(20px) saturate(220%)', border: `1px solid ${club.isOpen ? 'rgba(74,222,128,0.38)' : 'rgba(248,113,113,0.38)'}`, boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28)`, borderRadius: 20, padding: '4px 10px', fontSize: 10, fontWeight: 700, color: club.isOpen ? '#4ade80' : '#f87171', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#4ade80' : '#f87171', display: 'inline-block', boxShadow: club.isOpen ? '0 0 6px #4ade80' : '0 0 6px #f87171' }} />
+          {/* open/close — exact trust-card style */}
+          <div style={{
+            position: 'absolute', top: 10, left: 10,
+            background: club.isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)',
+            backdropFilter: 'blur(28px) saturate(220%)', WebkitBackdropFilter: 'blur(28px) saturate(220%)',
+            border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`,
+            boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px ${club.isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)'}`,
+            borderRadius: 20, padding: '4px 10px', fontSize: 10, fontWeight: 700,
+            color: club.isOpen ? '#30C55A' : '#ef4444',
+            textShadow: club.isOpen ? '0 0 18px rgba(48,197,90,0.50)' : '0 0 18px rgba(239,68,68,0.50)',
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#30C55A' : '#ef4444', display: 'inline-block', boxShadow: club.isOpen ? '0 0 8px rgba(48,197,90,0.70)' : '0 0 8px rgba(239,68,68,0.70)' }} />
             {club.isOpen ? `تا ${club.closeTime}` : 'بسته'}
           </div>
 
-          {/* رزرو badge روی تصویر — liquid glass */}
-          <div style={{ position: 'absolute', bottom: 10, left: 10, background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(24px) saturate(240%)', WebkitBackdropFilter: 'blur(24px) saturate(240%)', border: '1px solid rgba(199,166,106,0.50)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), 0 4px 18px rgba(199,166,106,0.22)', borderRadius: 20, padding: '5px 14px', fontSize: 11, fontWeight: 800, color: '#D4A843', textShadow: '0 0 14px rgba(212,168,67,0.50)' }}>
+          {/* رزرو badge — exact trust-card style (gold) */}
+          <div style={{
+            position: 'absolute', bottom: 10, left: 10,
+            background: 'rgba(199,166,106,0.12)',
+            backdropFilter: 'blur(28px) saturate(220%)', WebkitBackdropFilter: 'blur(28px) saturate(220%)',
+            border: '1px solid rgba(199,166,106,0.28)',
+            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(199,166,106,0.12)',
+            borderRadius: 20, padding: '5px 14px', fontSize: 11, fontWeight: 800,
+            color: '#C7A66A', textShadow: '0 0 18px rgba(199,166,106,0.50)',
+          }}>
             رزرو آنلاین
           </div>
 
