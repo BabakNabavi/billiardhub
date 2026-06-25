@@ -663,36 +663,36 @@ export default function HomePage() {
             اتصال بی‌واسطه بازیکنان، باشگاه‌ها و برترین تولیدکنندگان و فروشندگان در ایران و جهان
           </p>
 
-          {/* Hero CTA buttons — stacked, card style */}
+          {/* Hero CTA buttons — stacked, trust-card style green */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', margin: '4px 0 24px' }}>
             <Link href="/clubs" style={{ textDecoration: 'none', width: '100%', maxWidth: '280px' }}>
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                 padding: '13px 24px', borderRadius: '18px', cursor: 'pointer',
-                background: 'rgba(184,147,58,0.14)',
-                backdropFilter: 'blur(32px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-                border: '1px solid rgba(184,147,58,0.32)',
-                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.18), 0 4px 20px rgba(184,147,58,0.15)',
+                background: 'rgba(48,197,90,0.12)',
+                backdropFilter: 'blur(28px) saturate(220%)',
+                WebkitBackdropFilter: 'blur(28px) saturate(220%)',
+                border: '1px solid rgba(48,197,90,0.28)',
+                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(48,197,90,0.14)',
                 transition: 'all 0.25s',
               }}>
-                <Calendar size={16} color="#B8933A" />
-                <span style={{ fontSize: '15px', fontWeight: 700, color: '#B8933A', letterSpacing: '0.01em' }}>رزرو آنلاین میز</span>
+                <Calendar size={16} color="#30C55A" />
+                <span style={{ fontSize: '15px', fontWeight: 700, color: '#30C55A', letterSpacing: '0.01em', textShadow: '0 0 16px rgba(48,197,90,0.50)' }}>رزرو آنلاین میز</span>
               </div>
             </Link>
             <Link href="/shop" style={{ textDecoration: 'none', width: '100%', maxWidth: '280px' }}>
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                 padding: '13px 24px', borderRadius: '18px', cursor: 'pointer',
-                background: 'rgba(255,255,255,0.07)',
-                backdropFilter: 'blur(32px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.10), 0 4px 20px rgba(0,0,0,0.15)',
+                background: 'rgba(48,197,90,0.12)',
+                backdropFilter: 'blur(28px) saturate(220%)',
+                WebkitBackdropFilter: 'blur(28px) saturate(220%)',
+                border: '1px solid rgba(48,197,90,0.28)',
+                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(48,197,90,0.14)',
                 transition: 'all 0.25s',
               }}>
-                <ShoppingBag size={16} color="rgba(255,255,255,0.70)" />
-                <span style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.80)', letterSpacing: '0.01em' }}>بیلیارد بازار</span>
+                <ShoppingBag size={16} color="#30C55A" />
+                <span style={{ fontSize: '15px', fontWeight: 700, color: '#30C55A', letterSpacing: '0.01em', textShadow: '0 0 16px rgba(48,197,90,0.50)' }}>بیلیارد بازار</span>
               </div>
             </Link>
           </div>
