@@ -560,11 +560,11 @@ export default function HomePage() {
 
         /* ══ LAPTOP SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-content { padding-top:clamp(200px,26vh,260px) !important; }
+          .hero-content { padding-top:clamp(220px,28vh,270px) !important; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(110px,14vh,150px) !important; }
+          .hero-content { padding-top:clamp(215px,32vh,248px) !important; }
           .hero-sub     { display:none !important; }
         }
 
@@ -627,7 +627,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(190px,27vh,300px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(220px,27vh,300px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
