@@ -33,7 +33,7 @@ const SAMPLE_CLUBS: Club[] = [
 ];
 
 const TABLE_TYPES = [
-  { key:'snookerTables',    label:'اسنوکر',     color:'#C7A66A' },
+  { key:'snookerTables',    label:'اسنوکر',     color:'#30C55A' },
   { key:'pocketTables',     label:'پاکت',        color:'#3b82f6' },
   { key:'highballTables',   label:'هی‌بال',      color:'#8b5cf6' },
   { key:'vipSnookerTables', label:'VIP',         color:'#f59e0b' },
