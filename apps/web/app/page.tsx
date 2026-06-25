@@ -89,8 +89,8 @@ const IMG = {
   rest:     '/images/shop/rest-pool-2.jpg',
 
   // Education / learn
-  learn1: '/images/learn/IMG_0976.png',
-  learn2: '/images/learn/IMG_0978.png',
+  learn1: '/images/learn/learn1.webp',
+  learn2: '/images/learn/learn.png',
 
   // Background
   bg1: '/images/background/8_Ball_Pool.jpg',
@@ -903,8 +903,8 @@ export default function HomePage() {
                 <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)', border: '2.5px solid #0B0908', marginLeft: '-13px', zIndex: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>+۱۲K</div>
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Link href="/education"><button className="btn-primary">شروع یادگیری <ArrowLeft size={13} /></button></Link>
-                <Link href="/coaches"><button className="btn-ghost-dark">پیدا کردن مربی <ArrowLeft size={13} /></button></Link>
+                <Link href="/clubs"><button className="btn-primary">یافتن باشگاه</button></Link>
+                <Link href="/tournaments"><button className="btn-ghost-dark">مشاهده مسابقات</button></Link>
               </div>
             </div>
           </SR>
@@ -964,7 +964,7 @@ export default function HomePage() {
               <SR delay={160}>
                 <div style={{ display: 'flex', gap: '11px', flexWrap: 'wrap' }}>
                   <Link href="/education"><button className="btn-primary">شروع یادگیری</button></Link>
-                  <Link href="/coaches"><button className="btn-ghost-dark">یافتن مربی <ArrowLeft size={13} /></button></Link>
+                  <Link href="/coaches"><button className="btn-ghost-dark">پیدا کردن مربی</button></Link>
                 </div>
               </SR>
             </div>
