@@ -95,6 +95,7 @@ export default function Navbar() {
         requestAnimationFrame(() => {
           setScrolled(window.scrollY > 50);
           setScrollY(window.scrollY);
+          if (window.scrollY > 30) setSearchOpen(false);
           ticking = false;
         });
         ticking = true;
@@ -157,7 +158,7 @@ export default function Navbar() {
         @keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
 
         .nav-a {
-          position:relative; color:${TEXT_MUT}; font-size:13px; font-weight:500;
+          position:relative; color:${TEXT_MUT}; font-size:14px; font-weight:500;
           padding:6px 2px; white-space:nowrap; text-decoration:none; transition:color 0.25s;
           letter-spacing:0.01em;
         }
@@ -173,7 +174,7 @@ export default function Navbar() {
 
         .exp-btn {
           display:flex; align-items:center; gap:5px; color:${TEXT_MUT};
-          font-size:13px; font-weight:500; background:none; border:none; cursor:pointer;
+          font-size:14px; font-weight:500; background:none; border:none; cursor:pointer;
           font-family:inherit; padding:6px 2px; transition:color 0.25s; white-space:nowrap;
         }
         .exp-btn:hover { color:${TEXT}; }
@@ -208,12 +209,12 @@ export default function Navbar() {
         transition: 'all 0.4s ease',
         boxShadow: isLight ? '0 1px 0 rgba(28,28,26,0.04), 0 4px 24px rgba(28,28,26,0.04)' : 'none',
       }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '62px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
 
           {/* Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: 900, color: '#fff', boxShadow: `0 4px 14px rgba(184,147,58,0.35)` }}>B</div>
-            <span style={{ fontWeight: 900, fontSize: '15px', color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 900, color: '#fff', boxShadow: `0 4px 18px rgba(184,147,58,0.38)` }}>B</div>
+            <span style={{ fontWeight: 900, fontSize: '18px', color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               بیلیارد{' '}
               <span style={{ color: GOLD }}>پلاس</span>
             </span>
@@ -384,25 +385,31 @@ export default function Navbar() {
 
       </nav>
 
-      {/* Mobile search overlay — dark glass, below stories on home page */}
+      {/* Mobile search bar — liquid glass, right below navbar, closes on scroll */}
       {searchOpen && (
         <div ref={searchRef} style={{
           position: 'fixed',
-          top: isHomePage ? '165px' : '66px',
-          left: 0, right: 0, zIndex: 195,
-          padding: '10px 16px 14px',
-          background: 'rgba(4,2,10,0.84)',
-          backdropFilter: 'blur(40px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-          borderBottom: '1px solid rgba(199,166,106,0.18)',
-          animation: 'fadeDown 0.22s cubic-bezier(0.22,1,0.36,1) both',
+          top: '72px',
+          left: 0, right: 0, zIndex: 180,
+          padding: '10px clamp(16px,3vw,32px) 12px',
+          background: 'linear-gradient(to bottom, rgba(18,10,32,0.58), rgba(10,5,20,0.46))',
+          backdropFilter: 'blur(52px) saturate(240%)',
+          WebkitBackdropFilter: 'blur(52px) saturate(240%)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
-          <div style={{ maxWidth: '640px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '14px', padding: '13px 16px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10)' }}>
-            <Search size={16} color="rgba(255,255,255,0.38)" />
+          <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px',
+            background: 'rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '16px', padding: '12px 16px',
+            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.12), 0 2px 12px rgba(0,0,0,0.14)',
+          }}>
+            <Search size={16} color="rgba(255,255,255,0.36)" />
             <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو باشگاه، بازیکن، مربی..."
-              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.90)', fontSize: '14px', fontFamily: 'inherit' }} />
-            {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.38)', padding: 0, display: 'flex' }}><X size={13} /></button>}
-            <button onClick={() => setSearchOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.45)', padding: '5px', display: 'flex' }}><X size={13} /></button>
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontSize: '14px', fontFamily: 'inherit' }} />
+            {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.36)', padding: 0, display: 'flex' }}><X size={13} /></button>}
+            <button onClick={() => setSearchOpen(false)} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.40)', padding: '5px', display: 'flex', flexShrink: 0 }}><X size={13} /></button>
           </div>
         </div>
       )}
@@ -413,7 +420,7 @@ export default function Navbar() {
           position: 'fixed', inset: 0, zIndex: 9999,
           background: '#F7F7F5',
           overflowY: 'auto',
-          paddingTop: '62px',
+          paddingTop: '72px',
           animation: 'fadeIn 0.25s ease both',
         }}>
           <div style={{ height: '1px', background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
@@ -449,13 +456,13 @@ export default function Navbar() {
                 className="mob-link-item"
                 style={{
                   display: 'flex', alignItems: 'center', gap: '14px',
-                  padding: '16px 14px', borderRadius: '14px',
+                  padding: '12px 14px', borderRadius: '12px',
                   color: item.isHome ? '#1C1C1A' : 'rgba(28,28,26,0.55)',
-                  fontSize: '16px', fontWeight: item.isHome ? 600 : 500,
+                  fontSize: '15px', fontWeight: item.isHome ? 600 : 500,
                   textDecoration: 'none',
-                  ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '6px', paddingBottom: '18px' } : {}),
+                  ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '4px', paddingBottom: '14px' } : {}),
                 }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
                   {item.icon}
                 </div>
                 <span>{item.label}</span>
@@ -478,15 +485,17 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Stories — home only, cinematic strip */}
+      {/* Stories — home only, slides down when search opens */}
       {isHomePage && (
         <div style={{
-          position: 'fixed', top: '62px', left: 0, right: 0, zIndex: 49,
+          position: 'fixed',
+          top: searchOpen ? '144px' : '72px',
+          left: 0, right: 0, zIndex: 49,
           padding: '6px clamp(16px,3vw,32px) 4px',
           background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
           opacity: Math.max(0, 1 - scrollY / 700),
           pointerEvents: scrollY > 560 ? 'none' : 'auto',
-          transition: 'opacity 0.1s linear',
+          transition: 'top 0.38s cubic-bezier(0.22,1,0.36,1), opacity 0.1s linear',
         }}>
           <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
             <Stories />
@@ -494,7 +503,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {!isHomePage && <div style={{ height: '62px' }} />}
+      {!isHomePage && <div style={{ height: '72px' }} />}
     </>
   );
 }
