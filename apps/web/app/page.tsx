@@ -662,6 +662,10 @@ export default function HomePage() {
             <span style={{ color: '#30C55A' }}>از پیدا کردن باشگاه و رزرو میز تا قهرمانان</span>
             <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
             <span style={{ color: '#4A9EFF' }}>از خرید و فروش تجهیزات تا آموزش و مربیان حرفه‌ای</span>
+            <br />
+            <span style={{ color: '#F472B6' }}>از تولیدکنندگان تجهیزات و خدمات فنی تا مسابقات و اخبار همه در</span>
+            <br />
+            <span style={{ color: GOLD, fontWeight: 700, fontSize: '1.15em', textShadow: '0 0 24px rgba(199,166,106,0.60)', letterSpacing: '0.04em' }}>بیلیارد پلاس</span>
           </p>
 
           {/* Trust strip — 4 liquid glass cards, each unique color */}
