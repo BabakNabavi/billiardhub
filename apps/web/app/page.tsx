@@ -542,9 +542,10 @@ export default function HomePage() {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* On mobile: navbar(62px) + stories(~78px) = ~140px → 150px padding */
-          .hero-content { padding-top:150px !important; padding-bottom:60px !important; }
-          .hero-h1      { font-size:clamp(40px,12vw,66px) !important; margin-bottom:12px !important; }
+          /* navbar(62) + stories(78) + 70px breathing room = 210px */
+          .hero-content { padding-top:210px !important; padding-bottom:60px !important; }
+          .hero-h1      { font-size:clamp(34px,11vw,58px) !important; margin-bottom:12px !important; }
+          .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
@@ -616,7 +617,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(160px,26vh,280px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(200px,30vh,320px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
@@ -634,24 +635,37 @@ export default function HomePage() {
             </span>
           </div>
 
-          {/* Headline — Billiard Hub in Cormorant Garamond */}
+          {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: 'clamp(56px,10vw,130px)', fontWeight: 700, color: '#fff',
-            lineHeight: 0.90, margin: '0 0 16px', letterSpacing: '-0.02em', textAlign: 'center',
-            textShadow: '0 0 180px rgba(199,166,106,0.10),0 4px 32px rgba(0,0,0,0.60)',
+            fontSize: 'clamp(36px,6.5vw,82px)', fontWeight: 900, lineHeight: 1.05,
+            margin: '0 0 18px', letterSpacing: '-0.04em', textAlign: 'center',
           }}>
-            Billiard Hub
+            <span style={{ color: '#fff' }}>پلتفرم </span>
+            <span style={{ color: '#FFD166', textShadow: '0 0 32px rgba(255,209,102,0.55)' }}>جامع </span>
+            <span style={{ color: '#4A9EFF', textShadow: '0 0 32px rgba(74,158,255,0.55)' }}>بیلیارد</span>
           </h1>
 
-          {/* English subtitle — same Cormorant font */}
+          {/* Subtitle — نقطه‌ی اتصال */}
           <p className="hc" style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: 'clamp(14px,1.8vw,22px)', fontStyle: 'italic', fontWeight: 300,
-            color: 'rgba(255,255,255,0.45)', margin: '0 0 40px',
-            letterSpacing: '0.06em', textAlign: 'center', lineHeight: 1.5,
+            fontSize: 'clamp(14px,1.9vw,22px)', fontWeight: 500,
+            margin: '0 0 16px', letterSpacing: '0.02em', textAlign: 'center', lineHeight: 1.6,
           }}>
-            The Digital Home of Billiard
+            <span style={{ color: '#F472B6', textShadow: '0 0 20px rgba(244,114,182,0.50)' }}>نقطه‌ی اتصال </span>
+            <span style={{ color: '#30C55A', textShadow: '0 0 20px rgba(48,197,90,0.50)' }}>جامعه‌ی بیلیارد</span>
+          </p>
+
+          {/* Third line — services */}
+          <p className="hc hero-desc" style={{
+            fontSize: 'clamp(11px,1.2vw,14px)', fontWeight: 400,
+            margin: '0 0 36px', textAlign: 'center', lineHeight: 2, direction: 'rtl',
+          }}>
+            <span style={{ color: '#FFD166' }}>از باشگاه‌ها تا قهرمانان</span>
+            <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
+            <span style={{ color: '#30C55A' }}>پیدا کردن باشگاه و رزرو میز</span>
+            <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
+            <span style={{ color: '#4A9EFF' }}>خرید تجهیزات بیلیاردی</span>
+            <span style={{ color: 'rgba(255,255,255,0.22)' }}> · </span>
+            <span style={{ color: '#F472B6' }}>مربیان حرفه‌ای</span>
           </p>
 
           {/* Trust strip — 4 liquid glass cards, each unique color */}
