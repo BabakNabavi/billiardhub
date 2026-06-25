@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -7,6 +7,12 @@ import { ToastProvider } from '../components/ui/Toast';
 export const metadata: Metadata = {
   title: "بیلیارد پلاس",
   description: "اکوسیستم تخصصی بیلیارد ایران",
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -28,6 +34,9 @@ export default function RootLayout({
           * { font-family: 'Estedad', 'Vazirmatn', system-ui, sans-serif !important; box-sizing: border-box; }
           input, select, textarea, button { font-family: 'Estedad', 'Vazirmatn', system-ui, sans-serif !important; }
           body { margin: 0; padding: 0; }
+          @media (max-width: 900px) {
+            input, textarea, select { font-size: 16px !important; }
+          }
           ::-webkit-scrollbar { width: 5px; }
           ::-webkit-scrollbar-track { background: rgba(28,28,26,0.04); }
           ::-webkit-scrollbar-thumb { background: rgba(184,147,58,0.3); border-radius: 3px; }
