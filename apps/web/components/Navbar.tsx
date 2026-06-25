@@ -146,8 +146,8 @@ export default function Navbar() {
 
   const TEXT      = isLight ? '#1C1C1A' : 'rgba(255,255,255,0.88)';
   const TEXT_MUT  = isLight ? 'rgba(28,28,26,0.48)' : 'rgba(255,255,255,0.48)';
-  const BORDER_C  = isLight ? 'rgba(28,28,26,0.08)' : 'rgba(0,0,0,0.08)';
-  const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(0,0,0,0.05)';
+  const BORDER_C  = isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.18)';
+  const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
 
   return (
     <>
