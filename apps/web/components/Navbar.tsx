@@ -297,26 +297,32 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+          {/* Right actions — all icon buttons 44×44px, icon size 22 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
 
-            <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)} style={{ width: '44px', height: '44px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: TEXT_MUT, alignItems: 'center', justifyContent: 'center' }}>
-              <Search size={20} />
+            {/* Search — mobile only */}
+            <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)}
+              style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: TEXT_MUT, flexShrink: 0 }}>
+              <Search size={22} />
             </button>
 
-            <button className="desk" style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', color: TEXT_MUT, transition: 'color 0.2s', alignItems: 'center', justifyContent: 'center' }}
+            {/* Bell — desktop only */}
+            <button className="desk"
+              style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '12px', color: TEXT_MUT, transition: 'color 0.2s', flexShrink: 0 }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = TEXT }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '7px', right: '7px', width: '5px', height: '5px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 6px #ef4444' }} />
+              <Bell size={22} />
+              <span style={{ position: 'absolute', top: '9px', right: '9px', width: '6px', height: '6px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 6px #ef4444' }} />
             </button>
 
-            <Link href="/cart" className="desk" style={{ padding: '8px', borderRadius: '8px', color: TEXT_MUT, alignItems: 'center', transition: 'color 0.2s', position: 'relative' }}
+            {/* Cart — desktop only */}
+            <Link href="/cart" className="desk"
+              style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', color: TEXT_MUT, transition: 'color 0.2s', flexShrink: 0 }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
-              <ShoppingCart size={20} />
+              <ShoppingCart size={22} />
               {cartCount > 0 && (
-                <span style={{ position: 'absolute', top: 2, left: 2, minWidth: 16, height: 16, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, color: '#fff', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', boxShadow: `0 2px 8px rgba(184,147,58,0.5)` }}>
+                <span style={{ position: 'absolute', top: 6, left: 6, minWidth: 16, height: 16, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, color: '#fff', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', boxShadow: `0 2px 8px rgba(184,147,58,0.5)` }}>
                   {cartCount > 9 ? '۹+' : String(cartCount).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)}
                 </span>
               )}
@@ -324,20 +330,20 @@ export default function Navbar() {
 
             {!user ? (
               <Link href="/login">
-                <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '10px', padding: '8px 16px', color: GOLD, fontSize: '14px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)' }}
+                <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '10px 18px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(184,147,58,0.15)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = GOLD_LIGHT }}>
-                  <User size={16} /> ورود
+                  <User size={18} /> ورود
                 </button>
               </Link>
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
-                <button onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '10px', padding: '5px 10px', color: TEXT_MUT, fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)' }}>
-                  <div style={{ width: '26px', height: '26px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '12px', flexShrink: 0 }}>
+                <button onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
+                  <div style={{ width: '30px', height: '30px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '13px', flexShrink: 0 }}>
                     {user.firstName?.[0]}
                   </div>
                   <span className="desk" style={{ alignItems: 'center', color: TEXT }}>{user.firstName}</span>
-                  <ChevronDown size={11} style={{ transition: 'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', color: TEXT_MUT }} />
+                  <ChevronDown size={13} style={{ transition: 'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', color: TEXT_MUT }} />
                 </button>
 
                 {profileOpen && (
@@ -377,8 +383,8 @@ export default function Navbar() {
 
             {/* Hamburger */}
             <button className="mob" onClick={() => setMobileOpen(p => !p)}
-              style={{ padding: '10px', borderRadius: '12px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }}>
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', flexShrink: 0, transition: 'all 0.3s' }}>
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
