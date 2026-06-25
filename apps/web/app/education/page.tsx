@@ -71,7 +71,7 @@ export default function EducationPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', borderRadius: 20, padding: '5px 14px', marginBottom: 20 }}>
             <span style={{ fontSize: 12 }}>🎱</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#a78bfa', letterSpacing: '0.06em' }}>BILLIARD PLUS ACADEMY</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#a78bfa', letterSpacing: '0.06em' }}>BILLIARDHUB ACADEMY</span>
           </div>
 
           <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(28px,5vw,48px)', lineHeight: 1.15, fontWeight: 900, letterSpacing: '-0.03em', color: '#FFFFFF' }}>
@@ -208,7 +208,7 @@ export default function EducationPage() {
             می‌خواهی مربی بیلیارد باشی؟
           </div>
           <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, lineHeight: 1.7, marginBottom: 24 }}>
-            اگر تجربه تدریس داری، دوره خودت را در بیلیارد پلاس منتشر کن و به هزاران نفر آموزش بده
+            اگر تجربه تدریس داری، دوره خودت را در بیلیارد هاب منتشر کن و به هزاران نفر آموزش بده
           </div>
           <button style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, color: '#fff', border: 'none', borderRadius: 14, padding: '14px 36px', fontSize: 15, cursor: 'pointer', fontWeight: 800, fontFamily: 'inherit', boxShadow: `0 8px 24px rgba(199,166,106,0.30)` }}>
             همکاری با ما ←

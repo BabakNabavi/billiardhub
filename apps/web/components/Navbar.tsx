@@ -44,7 +44,7 @@ const exploreMenu = [
       { href: '/news',      label: 'اخبار',    icon: <Newspaper size={14} />,     desc: 'آخرین اخبار' },
       { href: '/events',    label: 'مسابقات',  icon: <Calendar size={14} />,       desc: 'رویدادها' },
       { href: '/education', label: 'آموزش',    icon: <GraduationCap size={14} />, desc: 'ویدیو آموزشی' },
-      { href: '/about',     label: 'درباره ما', icon: <Users size={14} />,         desc: 'داستان بیلیارد پلاس' },
+      { href: '/about',     label: 'درباره ما', icon: <Users size={14} />,         desc: 'داستان بیلیارد هاب' },
       { href: '/contact',   label: 'تماس با ما',icon: <Bell size={14} />,          desc: 'پشتیبانی ۲۴/۷' },
     ],
   },
@@ -214,9 +214,9 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 900, color: '#fff', boxShadow: `0 4px 18px rgba(184,147,58,0.38)` }}>B</div>
-            <span style={{ fontWeight: 900, fontSize: '18px', color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
-              بیلیارد{' '}
-              <span style={{ color: GOLD }}>پلاس</span>
+            <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+              <span style={{ color: isLight ? '#1C1C1A' : '#ffffff' }}>بیلیارد</span>{' '}
+              <span style={{ color: GOLD }}>هاب</span>
             </span>
           </Link>
 
@@ -253,7 +253,7 @@ export default function Navbar() {
                   <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '1px', background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-                    <span style={{ fontSize: '9px', color: `${GOLD}`, letterSpacing: '0.22em', fontWeight: 700, opacity: 0.7 }}>EXPLORE BILLIARD PLUS</span>
+                    <span style={{ fontSize: '9px', color: `${GOLD}`, letterSpacing: '0.22em', fontWeight: 700, opacity: 0.7 }}>EXPLORE BILLIARDHUB</span>
                     <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.4)', padding: '4px', display: 'flex' }}>
                       <X size={12} />
                     </button>
@@ -491,8 +491,8 @@ export default function Navbar() {
           </div>
 
           <div style={{ margin: '20px 20px 40px', padding: '16px', background: GOLD_LIGHT, borderRadius: '16px', border: `1px solid ${GOLD_BORDER}`, textAlign: 'center' }}>
-            <div style={{ fontSize: '9px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700, marginBottom: '5px', opacity: 0.7 }}>BILLIARD PLUS</div>
-            <div style={{ fontSize: '12px', color: 'rgba(28,28,26,0.4)' }}>اولین اکوسیستم جامع بیلیارد ایران</div>
+            <div style={{ fontSize: '9px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700, marginBottom: '5px', opacity: 0.7 }}>BILLIARDHUB</div>
+            <div style={{ fontSize: '12px', color: 'rgba(28,28,26,0.4)' }}>اکوسیستم جامع و هوشمند بیلیارد ایران</div>
           </div>
         </div>
       )}

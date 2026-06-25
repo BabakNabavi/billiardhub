@@ -113,7 +113,7 @@ export default function EventsPage() {
         <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-10">
           <div className="flex items-center gap-3 mb-4">
             <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, rgba(199,166,106,0.4))` }} />
-            <span className="text-xs tracking-widest uppercase" style={{ color: GOLD }}>BILLIARD PLUS TOURNAMENTS</span>
+            <span className="text-xs tracking-widest uppercase" style={{ color: GOLD }}>BILLIARDHUB TOURNAMENTS</span>
             <div className="h-px flex-1" style={{ background: `linear-gradient(270deg, transparent, rgba(199,166,106,0.4))` }} />
           </div>
           <h1 className="text-5xl sm:text-6xl font-black text-center mb-2 leading-none" style={{

@@ -89,7 +89,7 @@ export default function RegisterPage() {
         {/* logo */}
         <div className="logo-wrap">
           <div className="logo-icon">🎱</div>
-          <span className="logo-text">بیلیارد پلاس</span>
+          <span className="logo-text">بیلیارد هاب</span>
         </div>
 
         {/* step indicator */}

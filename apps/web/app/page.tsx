@@ -175,7 +175,7 @@ const PRODUCTS = [
 const NEWS = [
   { id:'1', title:'برگزاری اولین مسابقات بین‌المللی بیلیارد در تهران', date:'۵ خرداد', views:2341, cat:'مسابقات', clr:'#1A6641', img:IMG.snooker2 },
   { id:'2', title:'معرفی جدیدترین میزهای اسنوکر وارداتی',              date:'۳ خرداد', views:1876, cat:'تجهیزات', clr:BLU,       img:IMG.cue2    },
-  { id:'3', title:'آکادمی بیلیارد پلاس؛ آموزش آنلاین',                  date:'۱ خرداد', views:3102, cat:'آموزش',   clr:PRP,       img:IMG.proTable },
+  { id:'3', title:'آکادمی بیلیارد هاب؛ آموزش آنلاین',                   date:'۱ خرداد', views:3102, cat:'آموزش',   clr:PRP,       img:IMG.proTable },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -641,7 +641,7 @@ export default function HomePage() {
               boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
               display: 'inline-block', animation: 'pulse2 3s ease-in-out infinite' }} />
             <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '9px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              BILLIARD PLUS · IRAN
+              BILLIARDHUB · IRAN
             </span>
           </div>
 
@@ -650,8 +650,9 @@ export default function HomePage() {
             fontSize: 'clamp(26px,4.2vw,60px)', fontWeight: 900, lineHeight: 1.08,
             margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
-            <span style={{ color: '#fff' }}>پلتفرم جامع و هوشمند </span>
-            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>بیلیارد</span>
+            <span style={{ color: '#ffffff' }}>بیلیارد </span>
+            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>هاب</span>
+            <span style={{ color: '#ffffff' }}>؛ پلتفرم جامع و هوشمند بیلیارد</span>
           </h1>
 
           {/* Subtitle — نقطه‌ی اتصال */}

@@ -98,7 +98,7 @@ export default function LiveStreamPage({ params }: { params: { id: string } }) {
               <div style={{ position: 'relative', width: '70%', height: '55%', borderRadius: 16, background: 'linear-gradient(135deg,#0a5c2e,#0d7a3c)', border: '4px solid #5c3a1e', boxShadow: '0 0 40px rgba(199,166,106,0.2)' }}>
                 <div style={{ position: 'absolute', inset: 8, borderRadius: 12, border: '2px solid rgba(0,0,0,0.06)' }} />
                 <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(0,0,0,0.08)' }} />
-                <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 10, fontWeight: 700, opacity: 0.4, color: '#C7A66A', letterSpacing: 2 }}>BILLIARD PLUS</div>
+                <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 10, fontWeight: 700, opacity: 0.4, color: '#C7A66A', letterSpacing: 2 }}>BILLIARDHUB</div>
                 {[
                   { x: '30%', y: '40%', color: '#ef4444' },
                   { x: '55%', y: '35%', color: '#f59e0b' },
