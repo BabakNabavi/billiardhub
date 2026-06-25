@@ -66,15 +66,15 @@ const IMG = {
   wall4: '/images/clubs/wallpaper4.png',
   wall5: '/images/clubs/wallpaper5.jfif',
 
-  // Real club photos (new organised folder)
-  club1: '/images/clubs/IMG_0956.jpeg',
-  club2: '/images/clubs/IMG_0957.jpeg',
-  club3: '/images/clubs/IMG_0958.jpeg',
-  club4: '/images/clubs/IMG_0959.jpeg',
-  club5: '/images/clubs/IMG_0955.png',
-  club6: '/images/clubs/IMG_0960.png',
-  clubA: '/images/clubs/billiadr-club-1.jpg',
-  clubB: '/images/clubs/billiadr-club-2.jpg',
+  // Real club photos — filenames match current /public/images/clubs/
+  club1: '/images/clubs/club6.jpeg',
+  club2: '/images/clubs/club7.jpeg',
+  club3: '/images/clubs/club8.jpg',
+  club4: '/images/clubs/club9.jpeg',
+  club5: '/images/clubs/club5.jpeg',
+  club6: '/images/clubs/club4.png',
+  clubA: '/images/clubs/club1.png',
+  clubB: '/images/clubs/club2.jpg',
   clubC: '/images/clubs/billiadr-club-3.jpg',
 
   // Equipment / shop
@@ -198,7 +198,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         }}
       >
         <img src={hov ? club.img2 : club.img} alt={club.name}
-          onError={e => { (e.target as HTMLImageElement).src = club.img; }}
+          onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
             filter: hov ? 'brightness(0.62) saturate(0.80)' : 'brightness(0.52) saturate(0.70)',
             transition: 'filter 0.6s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
