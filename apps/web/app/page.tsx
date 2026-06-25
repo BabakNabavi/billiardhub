@@ -544,7 +544,7 @@ export default function HomePage() {
         @media(max-width:600px){
           /* navbar(72) + stories(116) + 56px spacing = 244px */
           .hero-content { padding-top:244px !important; padding-bottom:60px !important; }
-          .hero-h1      { font-size:clamp(20px,6.2vw,30px) !important; margin-bottom:12px !important; }
+          .hero-h1      { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
