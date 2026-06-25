@@ -542,9 +542,9 @@ export default function HomePage() {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* navbar(72) + stories(116) + 80px spacing = 268px */
-          .hero-content { padding-top:268px !important; padding-bottom:60px !important; }
-          .hero-h1      { font-size:clamp(34px,11vw,58px) !important; margin-bottom:12px !important; }
+          /* navbar(72) + stories(116) + 56px spacing = 244px */
+          .hero-content { padding-top:244px !important; padding-bottom:60px !important; }
+          .hero-h1      { font-size:clamp(17px,5.2vw,26px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
@@ -627,7 +627,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(210px,30vh,320px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(190px,27vh,300px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
