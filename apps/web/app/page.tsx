@@ -848,15 +848,18 @@ export default function HomePage() {
       </section>
 
       {/* §4 COMMUNITY ═══════════════════════════════════════════ */}
-      <section style={{ position: 'relative', background: '#0B0908', overflow: 'hidden', padding: 'clamp(80px,8vw,120px) clamp(16px,5%,80px)' }}>
-        <img src={IMG.bg2} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.13, filter: 'saturate(0.25) contrast(1.15)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(8,6,4,0.65) 0%,rgba(8,6,4,0.15) 30%,rgba(8,6,4,0.15) 68%,rgba(8,6,4,0.72) 100%)', pointerEvents: 'none' }} />
+      <section style={{ position: 'relative', background: '#060408', overflow: 'hidden',
+        padding: 'clamp(80px,8vw,120px) clamp(16px,5%,80px) clamp(110px,12vw,160px)' }}>
+        {/* background image */}
+        <img src={IMG.bg1} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.16, filter: 'saturate(0.30) contrast(1.12)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        {/* gradient — fades OUT at bottom to separate from next section */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(6,4,8,0.72) 0%,rgba(6,4,8,0.08) 28%,rgba(6,4,8,0.08) 62%,rgba(6,4,8,0.98) 100%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <SR>
             <div style={{ textAlign: 'center', marginBottom: '56px' }}>
               <span className="sec-label" style={{ color: GOLD_DIM }}>JOIN THE COMMUNITY</span>
-              <h2 style={{ fontSize: 'clamp(28px,5vw,64px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.054em', lineHeight: 0.94, margin: '0 0 18px' }}>جامعه بیلیارد ایران</h2>
-              <p style={{ fontSize: 'clamp(13px,1.6vw,17px)', color: 'rgba(255,255,255,0.30)', lineHeight: 1.90, maxWidth: '440px', margin: '0 auto' }}>بزرگ‌ترین اکوسیستم بیلیارد خاورمیانه</p>
+              <h2 style={{ fontSize: 'clamp(28px,5vw,64px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.054em', lineHeight: 0.94, margin: '0 0 14px' }}>جامعه بیلیارد ایران</h2>
+              <p style={{ fontSize: 'clamp(13px,1.6vw,17px)', color: 'rgba(255,255,255,0.32)', lineHeight: 1.90, maxWidth: '480px', margin: '0 auto' }}>بزرگ‌ترین اکوسیستم بیلیارد خاورمیانه — از مبتدی تا قهرمان</p>
             </div>
           </SR>
           <div className="comm-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '18px', marginBottom: '52px' }}>
@@ -896,8 +899,8 @@ export default function HomePage() {
                 <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)', border: '2.5px solid #0B0908', marginLeft: '-13px', zIndex: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>+۱۲K</div>
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Link href="/ranking"><button className="btn-primary">رنکینگ ملی <ArrowLeft size={13} /></button></Link>
-                <Link href="/register"><button className="btn-ghost-dark">ثبت‌نام رایگان</button></Link>
+                <Link href="/education"><button className="btn-primary">شروع یادگیری <ArrowLeft size={13} /></button></Link>
+                <Link href="/coaches"><button className="btn-ghost-dark">پیدا کردن مربی <ArrowLeft size={13} /></button></Link>
               </div>
             </div>
           </SR>
