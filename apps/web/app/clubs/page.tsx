@@ -62,10 +62,23 @@ function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+const CLUB_IMG_POOL = [
+  '/images/clubs/club6.jpeg',
+  '/images/clubs/club7.jpeg',
+  '/images/clubs/club8.jpg',
+  '/images/clubs/club9.jpeg',
+  '/images/clubs/club5.jpeg',
+  '/images/clubs/club1.png',
+  '/images/clubs/club2.jpg',
+  '/images/clubs/club3.jpg',
+];
+
 /* ── CARD ── */
-function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
+function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; idx?: number }) {
   const [hov, setHov] = useState(false);
-  const img = club.images?.[0] ?? '/images/clubs/club1.png';
+  const poolImg = CLUB_IMG_POOL[idx % CLUB_IMG_POOL.length]!;
+  const apiImg  = club.images?.[0];
+  const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
   const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
 
   if (view === 'list') return (
@@ -83,7 +96,7 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
         {/* thumbnail */}
         <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
           <img src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/club1.png'; }} />
+            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           {club.isVerified && (
             <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(199,166,106,0.88)', borderRadius: 20, padding: '2px 7px', fontSize: 9, fontWeight: 700, color: '#fff' }}>✓</div>
           )}
@@ -144,7 +157,7 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
         <div style={{ height: 'clamp(140px,22vw,190px)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <img src={img} alt={club.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.80)', transition: 'transform 400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: hov ? 'scale(1.06)' : 'scale(1.00)', willChange: 'transform' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/club1.png'; }} />
+            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />
 
           {/* top badges */}
@@ -577,7 +590,7 @@ export default function ClubsPage() {
             <div className="clubs-grid">
               {filtered.map((club, i) => (
                 <div key={club.id} style={{ animation: `fadeUp 0.5s ease ${i * 0.05}s both` }}>
-                  <ClubCard club={club} view="grid" />
+                  <ClubCard club={club} view="grid" idx={i} />
                 </div>
               ))}
             </div>
@@ -585,7 +598,7 @@ export default function ClubsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {filtered.map((club, i) => (
                 <div key={club.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.04}s both` }}>
-                  <ClubCard club={club} view="list" />
+                  <ClubCard club={club} view="list" idx={i} />
                 </div>
               ))}
             </div>
