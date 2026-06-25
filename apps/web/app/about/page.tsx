@@ -16,7 +16,7 @@ const TEAM = [
 ]
 
 const MILESTONES = [
-  { year: '۱۳۹۹', title: 'تأسیس بیلیارد پلاس', desc: 'با ثبت اولین ۵۰ باشگاه در تهران' },
+  { year: '۱۳۹۹', title: 'تأسیس بیلیارد هاب', desc: 'با ثبت اولین ۵۰ باشگاه در تهران' },
   { year: '۱۴۰۰', title: 'گسترش به کل کشور', desc: 'حضور در ۱۵ استان و ۲۰۰ باشگاه' },
   { year: '۱۴۰۱', title: 'راه‌اندازی فروشگاه', desc: 'اولین پلتفرم خرید تجهیزات بیلیارد ایران' },
   { year: '۱۴۰۲', title: 'سیستم مسابقات', desc: 'برگزاری ۱۰۰+ تورنمنت آنلاین و حضوری' },
@@ -54,7 +54,7 @@ export default function AboutPage() {
         <div style={{ position: 'relative', height: '70vh', minHeight: 500, overflow: 'hidden', background: '#F7F7F5' }}>
           <img
             src="/images/billiadr-club-1.jpg"
-            alt="بیلیارد پلاس"
+            alt="بیلیارد هاب"
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.18) saturate(0.5)', transform: 'scale(1.05)' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(1,6,4,0.5) 0%, rgba(1,6,4,0.05) 30%, rgba(1,6,4,0.95) 100%)' }} />
@@ -102,7 +102,7 @@ export default function AboutPage() {
                 </h2>
                 <div style={{ height: 1, width: 50, background: 'linear-gradient(90deg,#C7A66A,transparent)', marginBottom: 24, boxShadow: '0 0 10px rgba(199,166,106,0.50)' }} />
                 <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: '0 0 16px' }}>
-                  بیلیارد پلاس با اعتقاد به اینکه بیلیارد فراتر از یک بازی است، پلتفرمی ساخته که همه اجزای این اکوسیستم را به هم متصل می‌کند: از باشگاه‌ها و بازیکنان تا مربیان، مسابقات و تجهیزات.
+                  بیلیارد هاب با اعتقاد به اینکه بیلیارد فراتر از یک بازی است، پلتفرمی ساخته که همه اجزای این اکوسیستم را به هم متصل می‌کند: از باشگاه‌ها و بازیکنان تا مربیان، مسابقات و تجهیزات.
                 </p>
                 <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0 }}>
                   هدف ما ارتقاء سطح بیلیارد ایران به استانداردهای بین‌المللی و فراهم کردن بستری برای رشد نسل جدید بازیکنان حرفه‌ای است.

@@ -92,7 +92,7 @@ export default function NewsPage() {
         <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '64px 24px 40px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ height: 1, flex: 1, background: `linear-gradient(90deg, transparent, rgba(199,166,106,0.40))` }} />
-            <span style={{ fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD }}>BILLIARD PLUS NEWS</span>
+            <span style={{ fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD }}>BILLIARDHUB NEWS</span>
             <div style={{ height: 1, flex: 1, background: `linear-gradient(270deg, transparent, rgba(199,166,106,0.40))` }} />
           </div>
           <h1 style={{

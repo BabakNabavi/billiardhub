@@ -272,7 +272,7 @@ export default function ShopPage() {
           <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '52px 20px 48px', textAlign: 'center' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GOLD_LIGHT, border: `1px solid ${GOLD_BOR}`, borderRadius: 100, padding: '6px 18px', marginBottom: 20, animation: 'fadeUp 0.6s ease both' }}>
               <i className="ti ti-shopping-bag" style={{ fontSize: 13, color: GOLD }} />
-              <span style={{ fontSize: 10, color: GOLD, fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARD PLUS — بیلیارد بازار</span>
+              <span style={{ fontSize: 10, color: GOLD, fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARDHUB — بیلیارد بازار</span>
             </div>
             <h1 style={{ fontSize: 'clamp(28px,5vw,52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px', animation: 'fadeUp 0.6s ease 0.1s both' }}>
               تجهیزات حرفه‌ای بیلیارد
@@ -504,7 +504,7 @@ export default function ShopPage() {
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 500, height: 300, background: `radial-gradient(ellipse,rgba(199,166,106,0.08),transparent 70%)`, pointerEvents: 'none', filter: 'blur(20px)' }} />
               <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 160, height: 1, background: `linear-gradient(90deg,transparent,${GOLD}50,transparent)` }} />
               <div style={{ position: 'relative' }}>
-                <p style={{ fontSize: 10, color: GOLD_DIM, letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>SELL ON BILLIARD PLUS</p>
+                <p style={{ fontSize: 10, color: GOLD_DIM, letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>SELL ON BILLIARDHUB</p>
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 10px' }}>می‌خواهید بفروشید؟</h2>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.28)', margin: '0 0 24px', lineHeight: 1.7 }}>آگهی رایگان ثبت کنید و به هزاران خریدار دسترسی پیدا کنید</p>
                 <Link href="/shop/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', padding: '13px 28px', borderRadius: 13, textDecoration: 'none', fontWeight: 800, fontSize: 14, boxShadow: `0 8px 28px rgba(199,166,106,0.35)` }}>

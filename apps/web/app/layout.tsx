@@ -5,8 +5,8 @@ import Footer from "../components/Footer";
 import { ToastProvider } from '../components/ui/Toast';
 
 export const metadata: Metadata = {
-  title: "بیلیارد پلاس",
-  description: "اکوسیستم تخصصی بیلیارد ایران",
+  title: "بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد",
+  description: "اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و برترین تولیدکنندگان تجهیزات بیلیارد در ایران و جهان.",
 };
 
 export const viewport: Viewport = {
