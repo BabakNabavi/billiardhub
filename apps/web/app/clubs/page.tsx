@@ -24,12 +24,12 @@ interface Club {
 }
 
 const SAMPLE_CLUBS: Club[] = [
-  { id:'1', name:'باشگاه سنچوری تهران', managerName:'محمد احمدی', description:'مجهزترین باشگاه اسنوکر تهران با ۱۵ سال سابقه.', address:'خ ولیعصر، بالاتر از ونک', city:'تهران', province:'تهران', latitude:35.7575, longitude:51.4079, phone:'021-88001234', website:'', snookerTables:4, pocketTables:3, highballTables:2, vipSnookerTables:2, vipPocketTables:1, airHockeyTables:1, dartBoards:3, playstations:4, hasCafe:true, hasParking:true, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club1.jpeg'], rating:4.8, reviewCount:124, isVerified:true, isOpen:true, closeTime:'۲۴:۰۰', memberCount:1200, totalTables:13 },
-  { id:'2', name:'باشگاه المپیک مشهد', managerName:'رضا کریمی', description:'باشگاه تخصصی پاکت بیلیارد با بهترین تجهیزات.', address:'بلوار احمدآباد', city:'مشهد', province:'خراسان رضوی', latitude:36.2972, longitude:59.6067, phone:'051-33001234', website:'', snookerTables:2, pocketTables:5, highballTables:1, vipSnookerTables:1, vipPocketTables:0, airHockeyTables:0, dartBoards:2, playstations:2, hasCafe:true, hasParking:true, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club2.webp'], rating:4.6, reviewCount:89, isVerified:true, isOpen:true, closeTime:'۲۳:۰۰', memberCount:800, totalTables:11 },
-  { id:'3', name:'باشگاه پیروزی اصفهان', managerName:'علی موسوی', description:'محیطی دوستانه برای علاقه‌مندان به بیلیارد.', address:'خ چهارباغ عباسی', city:'اصفهان', province:'اصفهان', latitude:32.6546, longitude:51.6680, phone:'031-33001234', website:'', snookerTables:3, pocketTables:2, highballTables:3, vipSnookerTables:0, vipPocketTables:0, airHockeyTables:0, dartBoards:1, playstations:3, hasCafe:false, hasParking:true, hasWifi:false, hasProfessionalCoach:false, images:['/images/clubs/club3.jpg'], rating:4.3, reviewCount:56, isVerified:false, isOpen:false, closeTime:'۲۲:۰۰', memberCount:450, totalTables:9 },
-  { id:'4', name:'باشگاه شاهین شیراز', managerName:'حسین نوری', description:'باشگاه VIP با جو لوکس و مربیان حرفه‌ای.', address:'خ زند', city:'شیراز', province:'فارس', latitude:29.5918, longitude:52.5837, phone:'071-33001234', website:'', snookerTables:2, pocketTables:1, highballTables:1, vipSnookerTables:3, vipPocketTables:2, airHockeyTables:0, dartBoards:0, playstations:2, hasCafe:true, hasParking:true, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club4.png'], rating:4.9, reviewCount:201, isVerified:true, isOpen:true, closeTime:'۲۴:۰۰', memberCount:320, totalTables:9 },
-  { id:'5', name:'باشگاه آریا تبریز', managerName:'کاوه رستمی', description:'بزرگترین مجموعه بیلیارد شمال غرب کشور.', address:'خ شریعتی', city:'تبریز', province:'آذربایجان شرقی', latitude:38.0800, longitude:46.2919, phone:'041-33001234', website:'', snookerTables:5, pocketTables:4, highballTables:2, vipSnookerTables:1, vipPocketTables:0, airHockeyTables:2, dartBoards:4, playstations:6, hasCafe:true, hasParking:false, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club5.jpeg'], rating:4.5, reviewCount:143, isVerified:true, isOpen:true, closeTime:'۲۳:۳۰', memberCount:950, totalTables:18 },
-  { id:'6', name:'باشگاه مروارید کرج', managerName:'سارا حسینی', description:'فضایی مدرن با تجهیزات استاندارد.', address:'میدان توحید', city:'کرج', province:'البرز', latitude:35.8400, longitude:50.9391, phone:'026-33001234', website:'', snookerTables:2, pocketTables:2, highballTables:1, vipSnookerTables:0, vipPocketTables:0, airHockeyTables:1, dartBoards:2, playstations:2, hasCafe:false, hasParking:true, hasWifi:true, hasProfessionalCoach:false, images:['/images/clubs/club1.jpeg'], rating:4.1, reviewCount:34, isVerified:false, isOpen:true, closeTime:'۲۳:۰۰', memberCount:280, totalTables:8 },
+  { id:'1', name:'باشگاه سنچوری تهران', managerName:'محمد احمدی', description:'مجهزترین باشگاه اسنوکر تهران با ۱۵ سال سابقه.', address:'خ ولیعصر، بالاتر از ونک', city:'تهران', province:'تهران', latitude:35.7575, longitude:51.4079, phone:'021-88001234', website:'', snookerTables:4, pocketTables:3, highballTables:2, vipSnookerTables:2, vipPocketTables:1, airHockeyTables:1, dartBoards:3, playstations:4, hasCafe:true, hasParking:true, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club6.jpeg'], rating:4.8, reviewCount:124, isVerified:true, isOpen:true, closeTime:'۲۴:۰۰', memberCount:1200, totalTables:13 },
+  { id:'2', name:'باشگاه المپیک مشهد', managerName:'رضا کریمی', description:'باشگاه تخصصی پاکت بیلیارد با بهترین تجهیزات.', address:'بلوار احمدآباد', city:'مشهد', province:'خراسان رضوی', latitude:36.2972, longitude:59.6067, phone:'051-33001234', website:'', snookerTables:2, pocketTables:5, highballTables:1, vipSnookerTables:1, vipPocketTables:0, airHockeyTables:0, dartBoards:2, playstations:2, hasCafe:true, hasParking:true, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club7.webp'], rating:4.6, reviewCount:89, isVerified:true, isOpen:true, closeTime:'۲۳:۰۰', memberCount:800, totalTables:11 },
+  { id:'3', name:'باشگاه پیروزی اصفهان', managerName:'علی موسوی', description:'محیطی دوستانه برای علاقه‌مندان به بیلیارد.', address:'خ چهارباغ عباسی', city:'اصفهان', province:'اصفهان', latitude:32.6546, longitude:51.6680, phone:'031-33001234', website:'', snookerTables:3, pocketTables:2, highballTables:3, vipSnookerTables:0, vipPocketTables:0, airHockeyTables:0, dartBoards:1, playstations:3, hasCafe:false, hasParking:true, hasWifi:false, hasProfessionalCoach:false, images:['/images/clubs/club8.png'], rating:4.3, reviewCount:56, isVerified:false, isOpen:false, closeTime:'۲۲:۰۰', memberCount:450, totalTables:9 },
+  { id:'4', name:'باشگاه شاهین شیراز', managerName:'حسین نوری', description:'باشگاه VIP با جو لوکس و مربیان حرفه‌ای.', address:'خ زند', city:'شیراز', province:'فارس', latitude:29.5918, longitude:52.5837, phone:'071-33001234', website:'', snookerTables:2, pocketTables:1, highballTables:1, vipSnookerTables:3, vipPocketTables:2, airHockeyTables:0, dartBoards:0, playstations:2, hasCafe:true, hasParking:true, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club9.jpeg'], rating:4.9, reviewCount:201, isVerified:true, isOpen:true, closeTime:'۲۴:۰۰', memberCount:320, totalTables:9 },
+  { id:'5', name:'باشگاه آریا تبریز', managerName:'کاوه رستمی', description:'بزرگترین مجموعه بیلیارد شمال غرب کشور.', address:'خ شریعتی', city:'تبریز', province:'آذربایجان شرقی', latitude:38.0800, longitude:46.2919, phone:'041-33001234', website:'', snookerTables:5, pocketTables:4, highballTables:2, vipSnookerTables:1, vipPocketTables:0, airHockeyTables:2, dartBoards:4, playstations:6, hasCafe:true, hasParking:false, hasWifi:true, hasProfessionalCoach:true, images:['/images/clubs/club1.png'], rating:4.5, reviewCount:143, isVerified:true, isOpen:true, closeTime:'۲۳:۳۰', memberCount:950, totalTables:18 },
+  { id:'6', name:'باشگاه مروارید کرج', managerName:'سارا حسینی', description:'فضایی مدرن با تجهیزات استاندارد.', address:'میدان توحید', city:'کرج', province:'البرز', latitude:35.8400, longitude:50.9391, phone:'026-33001234', website:'', snookerTables:2, pocketTables:2, highballTables:1, vipSnookerTables:0, vipPocketTables:0, airHockeyTables:1, dartBoards:2, playstations:2, hasCafe:false, hasParking:true, hasWifi:true, hasProfessionalCoach:false, images:['/images/clubs/club2.jpg'], rating:4.1, reviewCount:34, isVerified:false, isOpen:true, closeTime:'۲۳:۰۰', memberCount:280, totalTables:8 },
 ];
 
 const TABLE_TYPES = [
@@ -65,7 +65,7 @@ function calcDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 /* ── CARD ── */
 function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
   const [hov, setHov] = useState(false);
-  const img = club.images?.[0] ?? '/images/clubs/club1.jpeg';
+  const img = club.images?.[0] ?? '/images/clubs/club1.png';
   const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
 
   if (view === 'list') return (
@@ -83,7 +83,7 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
         {/* thumbnail */}
         <div style={{ width: 'clamp(70px,18vw,140px)', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
           <img src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/club1.jpeg'; }} />
+            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/club1.png'; }} />
           {club.isVerified && (
             <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(199,166,106,0.88)', borderRadius: 20, padding: '2px 7px', fontSize: 9, fontWeight: 700, color: '#fff' }}>✓</div>
           )}
@@ -144,7 +144,7 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
         <div style={{ height: 'clamp(140px,22vw,190px)', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <img src={img} alt={club.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.80)', transition: 'transform 400ms cubic-bezier(0.25,0.46,0.45,0.94)', transform: hov ? 'scale(1.06)' : 'scale(1.00)', willChange: 'transform' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/club1.jpeg'; }} />
+            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/club1.png'; }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(6,13,10,0.88) 100%)' }} />
 
           {/* top badges */}
@@ -155,14 +155,14 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
               </div>
             )}
           </div>
-          {/* open/close */}
-          <div style={{ position: 'absolute', top: 10, left: 10, background: club.isOpen ? 'rgba(22,163,74,0.82)' : 'rgba(239,68,68,0.82)', border: 'none', borderRadius: 20, padding: '3px 9px', fontSize: 10, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'inline-block', opacity: 0.8 }} />
+          {/* open/close — liquid glass */}
+          <div style={{ position: 'absolute', top: 10, left: 10, background: club.isOpen ? 'rgba(22,163,74,0.18)' : 'rgba(239,68,68,0.16)', backdropFilter: 'blur(20px) saturate(220%)', WebkitBackdropFilter: 'blur(20px) saturate(220%)', border: `1px solid ${club.isOpen ? 'rgba(74,222,128,0.38)' : 'rgba(248,113,113,0.38)'}`, boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28)`, borderRadius: 20, padding: '4px 10px', fontSize: 10, fontWeight: 700, color: club.isOpen ? '#4ade80' : '#f87171', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#4ade80' : '#f87171', display: 'inline-block', boxShadow: club.isOpen ? '0 0 6px #4ade80' : '0 0 6px #f87171' }} />
             {club.isOpen ? `تا ${club.closeTime}` : 'بسته'}
           </div>
 
-          {/* رزرو badge روی تصویر — همیشه visible */}
-          <div style={{ position: 'absolute', bottom: 10, left: 10, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 20, padding: '5px 14px', fontSize: 11, fontWeight: 800, color: '#fff', boxShadow: '0 4px 12px rgba(199,166,106,0.40)' }}>
+          {/* رزرو badge روی تصویر — liquid glass */}
+          <div style={{ position: 'absolute', bottom: 10, left: 10, background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(24px) saturate(240%)', WebkitBackdropFilter: 'blur(24px) saturate(240%)', border: '1px solid rgba(199,166,106,0.50)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), 0 4px 18px rgba(199,166,106,0.22)', borderRadius: 20, padding: '5px 14px', fontSize: 11, fontWeight: 800, color: '#D4A843', textShadow: '0 0 14px rgba(212,168,67,0.50)' }}>
             رزرو آنلاین
           </div>
 
@@ -227,9 +227,9 @@ function ClubCard({ club, view }: { club: Club; view: 'grid' | 'list' }) {
    PAGE
 ══════════════════════════════════════════════ */
 const SLIDER_IMAGES = [
-  { src: '/images/clubs/club1.jpeg', title: 'باشگاه‌های حرفه‌ای', sub: 'تجربه بازی در بهترین محیط‌ها' },
-  { src: '/images/clubs/club2.webp', title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر جا' },
-  { src: '/images/clubs/club3.jpg',  title: 'مربیان مجاز',          sub: 'یادگیری با بهترین‌ها' },
+  { src: '/images/clubs/club1.png',  title: 'باشگاه‌های حرفه‌ای', sub: 'تجربه بازی در بهترین محیط‌ها' },
+  { src: '/images/clubs/club2.jpg',  title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر جا' },
+  { src: '/images/clubs/club3.jpg',  title: 'مربیان',               sub: 'یادگیری با بهترین‌ها' },
   { src: '/images/clubs/club4.png',  title: '۵۴۸ باشگاه',          sub: 'در سراسر ایران' },
   { src: '/images/clubs/club5.jpeg', title: 'جامعه بیلیارد',        sub: 'بیلیارد پلاس، اتصال همه' },
 ];
@@ -291,7 +291,7 @@ function HeroSliderFull({ city, setCity, cities }: { city: string; setCity: (c: 
         <h1 style={{ fontSize: 'clamp(24px,4.2vw,52px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
           {SLIDER_IMAGES[active]?.title}
         </h1>
-        <p style={{ fontSize: 'clamp(13px,1.4vw,18px)', color: 'rgba(255,255,255,0.62)', margin: 0, fontWeight: 400 }}>
+        <p style={{ fontSize: 'clamp(13px,1.4vw,18px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
           {SLIDER_IMAGES[active]?.sub}
         </p>
       </div>
@@ -407,11 +407,8 @@ export default function ClubsPage() {
         /* grid */
         .clubs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
 
-        /* 14-inch / small laptop */
-        @media(max-width:1200px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
-
-        /* tablet */
-        @media(max-width:768px)  { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:12px } }
+        /* 14-inch / small laptop ≤1366px → 2 columns */
+        @media(max-width:1366px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
 
         /* mobile — 1 ستون */
         @media(max-width:560px)  {
