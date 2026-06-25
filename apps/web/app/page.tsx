@@ -224,7 +224,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.42)', fontSize: '11px' }}><MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} /><span style={{ color: '#fff', fontSize: '12px', fontWeight: 700 }}>{club.rating}</span><span style={{ color: 'rgba(255,255,255,0.26)', fontSize: '10px' }}>({club.reviews})</span></span>
           </div>
-          <div style={{ overflow: 'hidden', maxHeight: hov ? '52px' : '0px', transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)' }}>
+          <div style={{ overflow: 'hidden', maxHeight: hov ? '90px' : '0px', transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)' }}>
             <div style={{ height: '12px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
               <div><span style={{ fontSize: '16px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span><span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.30)', marginRight: '4px' }}>ت/ساعت</span></div>
@@ -472,6 +472,25 @@ export default function HomePage() {
         .trust-strip { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
         .hero-arrows { position:absolute;bottom:36px;right:28px;display:flex;gap:6px;z-index:10; }
 
+        /* ══ TABLET ≤1100px ══ */
+        @media(max-width:1100px){
+          .clubs-grid  { grid-template-columns:1fr 1fr !important; }
+          .mkt-split   { grid-template-columns:1fr !important; }
+          .news-grid   { grid-template-columns:1fr !important; }
+        }
+
+        /* ══ TABLET ≤900px ══ */
+        @media(max-width:900px){
+          .comm-grid   { grid-template-columns:repeat(2,1fr) !important; }
+          .edu-split   { grid-template-columns:1fr !important; }
+        }
+
+        /* ══ MOBILE ≤720px ══ */
+        @media(max-width:720px){
+          .clubs-grid  { grid-template-columns:1fr !important; }
+          .dp-tabs     { grid-template-columns:repeat(2,1fr) !important; }
+        }
+
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
           /* Push content below: navbar(62px) + stories(~78px) + buffer = 160px */
@@ -480,25 +499,23 @@ export default function HomePage() {
             padding-top:160px !important;
             padding-bottom:90px !important;
           }
-          .hero-h1  { font-size:clamp(44px,13.5vw,70px) !important; margin-bottom:16px !important; }
-          .hero-sub { display:none !important; }
+          .hero-h1      { font-size:clamp(44px,13.5vw,70px) !important; margin-bottom:16px !important; }
+          .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
-          .dp-tabs { grid-template-columns:repeat(2,1fr) !important; }
-          .trust-strip { display:grid !important; grid-template-columns:1fr 1fr !important; gap:8px !important; max-width:280px; }
+          .trust-strip  { display:grid !important; grid-template-columns:1fr 1fr !important; gap:8px !important; max-width:280px; }
           .hero-actions { display:none !important; }
           .hero-arrows  { display:none !important; }
-          .dp-cta { width:100% !important; }
+          .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
+          .dp-cta       { width:100% !important; }
+          .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
+          .mkt-sub      { grid-template-columns:1fr !important; }
         }
 
-        @media(max-width:1100px){ .clubs-grid{grid-template-columns:1fr 1fr !important;} }
-        @media(max-width:720px) { .clubs-grid{grid-template-columns:1fr !important;} }
-        @media(max-width:1100px){ .mkt-split{grid-template-columns:1fr !important;} }
-        @media(max-width:600px) { .mkt-sub{grid-template-columns:1fr !important;} }
-        @media(max-width:900px) { .comm-grid{grid-template-columns:repeat(2,1fr)!important;} }
-        @media(max-width:480px) { .comm-grid{grid-template-columns:1fr 1fr !important;} }
-        @media(max-width:1000px){ .edu-split{grid-template-columns:1fr !important;} }
-        @media(max-width:900px) { .news-grid{grid-template-columns:1fr !important;} }
+        /* ══ MOBILE XS ≤400px ══ */
+        @media(max-width:400px){
+          .comm-grid { grid-template-columns:1fr !important; }
+        }
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
@@ -586,16 +603,11 @@ export default function HomePage() {
             fontSize: 'clamp(13px,1.5vw,17px)', color: 'rgba(255,255,255,0.26)',
             margin: '0 0 44px', letterSpacing: '0.10em', textAlign: 'center', fontWeight: 400, lineHeight: 2,
           }}>
-            کشف باشگاه · خرید تجهیزات · ارتباط با جامعه · ارتقای بازی
+            یافتن باشگاه · خرید تجهیزات · ارتباط با جامعه · ارتقای بازی
           </p>
 
-          {/* Discovery Panel */}
-          <div className="hd" style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '26px' }}>
-            <DiscoveryPanel />
-          </div>
-
           {/* Trust strip — 2×2 on mobile */}
-          <div className="he trust-strip">
+          <div className="hd trust-strip">
             {[
               { n: '۵۴۸',   l: 'باشگاه' },
               { n: '۱۲K+',  l: 'بازیکن' },
@@ -613,7 +625,7 @@ export default function HomePage() {
           </div>
 
           {/* Action buttons — hidden on mobile */}
-          <div className="hf hero-actions" style={{ display: 'flex', gap: '11px', marginTop: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="he hero-actions" style={{ display: 'flex', gap: '11px', marginTop: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/clubs"><button className="btn-primary"><Building2 size={15} /> یافتن باشگاه</button></Link>
             <Link href="/shop"><button className="btn-ghost-dark"><ShoppingBag size={15} /> بازار تجهیزات</button></Link>
           </div>
@@ -668,14 +680,21 @@ export default function HomePage() {
         </button>
       </div>
 
+      {/* §1B SEARCH DISCOVERY — cinematic bridge */}
+      <section style={{ background: 'linear-gradient(to bottom,#04020A 0%,#F2F0EC 100%)', padding: '0 clamp(16px,5%,80px) clamp(36px,5vw,56px)' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <DiscoveryPanel />
+        </div>
+      </section>
+
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section style={{ background: '#F2F0EC', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
+      <section style={{ background: '#F2F0EC', padding: 'clamp(40px,5vw,72px) clamp(16px,5%,80px) clamp(72px,8vw,108px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
-                <h2 className="sec-title" style={{ color: TEXT }}>کشف باشگاه‌ها</h2>
+                <h2 className="sec-title" style={{ color: TEXT }}>یافتن باشگاه‌ها</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
               <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '13px', fontWeight: 600, transition: 'color 0.25s' }}
@@ -743,7 +762,7 @@ export default function HomePage() {
               {PRODUCTS.slice(1).map((p, i) => (
                 <SR key={p.id} delay={i * 70} direction="right">
                   <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                    <div className="prod-hover" style={{ display: 'flex', borderRadius: '18px', overflow: 'hidden', background: '#F5F3EF', border: `1px solid ${BORDER}`, boxShadow: '0 2px 10px rgba(26,25,23,0.05)' }}>
+                    <div className="prod-hover" style={{ display: 'flex', borderRadius: '18px', overflow: 'hidden', background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(32px) saturate(200%)', WebkitBackdropFilter: 'blur(32px) saturate(200%)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(26,25,23,0.07), inset 0 1px 0 rgba(255,255,255,1)' }}>
                       <div style={{ width: '140px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                         <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(8,4,1,0.82) 0%,transparent 52%)' }} />
@@ -785,17 +804,28 @@ export default function HomePage() {
           </SR>
           <div className="comm-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '18px', marginBottom: '52px' }}>
             {[
-              { v: '۱۲٬۴۰۰', l: 'بازیکن ثبت‌شده', s: 'از سراسر ایران',   gold: true  },
-              { v: '۵۴۸',    l: 'باشگاه فعال',     s: 'در ۳۱ استان',      gold: false },
-              { v: '۲۱۸',    l: 'مسابقه سالانه',   s: 'ملی و بین‌المللی', gold: false },
-              { v: '۳۱',     l: 'استان',            s: 'حضور سراسری',      gold: false },
+              { v: '۱۲٬۴۰۰', l: 'بازیکن ثبت‌شده', s: 'از سراسر ایران',   clr: GOLD,  clrR:'199,166,106' },
+              { v: '۵۴۸',    l: 'باشگاه فعال',     s: 'در ۳۱ استان',      clr: '#30C55A', clrR:'48,197,90' },
+              { v: '۲۱۸',    l: 'مسابقه سالانه',   s: 'ملی و بین‌المللی', clr: '#4A9EFF', clrR:'74,158,255' },
+              { v: '۳۱',     l: 'استان',            s: 'حضور سراسری',      clr: '#B97BFF', clrR:'185,123,255' },
             ].map((s, i) => (
               <SR key={i} delay={i * 70}>
-                <div style={{ padding: 'clamp(18px,3vw,30px) clamp(12px,2vw,18px)', textAlign: 'center', background: 'rgba(255,255,255,0.040)', backdropFilter: 'blur(28px) saturate(180%)', WebkitBackdropFilter: 'blur(28px) saturate(180%)', border: s.gold ? `1px solid rgba(199,166,106,0.22)` : '1px solid rgba(255,255,255,0.06)', borderRadius: '22px', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.06) 0%,transparent 100%)', pointerEvents: 'none' }} />
-                  <div style={{ fontSize: 'clamp(22px,3.8vw,50px)', fontWeight: 900, color: s.gold ? GOLD : '#fff', letterSpacing: '-0.05em', lineHeight: 1, marginBottom: '8px', position: 'relative' }}>{s.v}</div>
-                  <div style={{ fontSize: 'clamp(11px,1.2vw,13px)', fontWeight: 700, color: 'rgba(255,255,255,0.68)', marginBottom: '4px', position: 'relative' }}>{s.l}</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.26)', position: 'relative' }}>{s.s}</div>
+                <div style={{
+                  padding: 'clamp(20px,3vw,34px) clamp(12px,2vw,20px)', textAlign: 'center',
+                  background: `rgba(${s.clrR},0.06)`,
+                  backdropFilter: 'blur(40px) saturate(240%)', WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+                  border: `1px solid rgba(${s.clrR},0.18)`,
+                  borderRadius: '24px', position: 'relative', overflow: 'hidden',
+                  boxShadow: `inset 0 1px 0 rgba(${s.clrR},0.22), 0 8px 32px rgba(0,0,0,0.22)`,
+                  transition: 'transform 0.35s ease, box-shadow 0.35s ease',
+                }}>
+                  {/* top glass sheen */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg,rgba(${s.clrR},0.10) 0%,transparent 100%)`, pointerEvents: 'none', borderRadius: 'inherit' }} />
+                  {/* ambient orb */}
+                  <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '80px', background: `radial-gradient(ellipse,rgba(${s.clrR},0.22),transparent 68%)`, filter: 'blur(18px)', pointerEvents: 'none' }} />
+                  <div style={{ fontSize: 'clamp(26px,4vw,54px)', fontWeight: 900, color: s.clr, letterSpacing: '-0.055em', lineHeight: 1, marginBottom: '10px', position: 'relative', textShadow: `0 0 32px rgba(${s.clrR},0.40)` }}>{s.v}</div>
+                  <div style={{ fontSize: 'clamp(11px,1.2vw,13px)', fontWeight: 700, color: 'rgba(255,255,255,0.78)', marginBottom: '5px', position: 'relative' }}>{s.l}</div>
+                  <div style={{ fontSize: '10px', color: `rgba(${s.clrR},0.55)`, position: 'relative', fontWeight: 600 }}>{s.s}</div>
                 </div>
               </SR>
             ))}
