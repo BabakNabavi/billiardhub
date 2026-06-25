@@ -542,14 +542,14 @@ export default function HomePage() {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* navbar(72) + stories(116) + 108px spacing = 296px */
-          .hero-content { padding-top:296px !important; padding-bottom:60px !important; }
+          /* navbar(72) + stories(116) + 80px spacing = 268px */
+          .hero-content { padding-top:268px !important; padding-bottom:60px !important; }
           .hero-h1      { font-size:clamp(34px,11vw,58px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
-          .trust-strip  { display:grid !important; grid-template-columns:1fr 1fr !important; gap:8px !important; max-width:280px; }
+          .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
           .hero-actions { display:none !important; }
           .hero-arrows  { display:none !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
@@ -627,7 +627,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(240px,34vh,360px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(210px,30vh,320px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
@@ -647,11 +647,11 @@ export default function HomePage() {
 
           {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
-            fontSize: 'clamp(36px,6.5vw,82px)', fontWeight: 900, lineHeight: 1.05,
-            margin: '0 0 18px', letterSpacing: '-0.04em', textAlign: 'center',
+            fontSize: 'clamp(26px,4.2vw,60px)', fontWeight: 900, lineHeight: 1.08,
+            margin: '0 0 14px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
             <span style={{ color: '#fff' }}>پلتفرم جامع و هوشمند </span>
-            <span style={{ color: '#B8933A', textShadow: '0 0 32px rgba(184,147,58,0.6)' }}>بیلیارد</span>
+            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>بیلیارد</span>
           </h1>
 
           {/* Subtitle — نقطه‌ی اتصال */}
