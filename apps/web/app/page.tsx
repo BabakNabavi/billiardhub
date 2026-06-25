@@ -663,38 +663,28 @@ export default function HomePage() {
             اتصال بی‌واسطه بازیکنان، باشگاه‌ها و برترین تولیدکنندگان و فروشندگان در ایران و جهان
           </p>
 
-          {/* Hero CTA buttons — stacked, trust-card style gold */}
+          {/* Hero CTA buttons — liquid glass gold */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', margin: '4px 0 24px' }}>
-            <Link href="/clubs" style={{ textDecoration: 'none', width: '100%', maxWidth: '280px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                padding: '13px 24px', borderRadius: '18px', cursor: 'pointer',
-                background: 'rgba(199,166,106,0.12)',
-                backdropFilter: 'blur(28px) saturate(220%)',
-                WebkitBackdropFilter: 'blur(28px) saturate(220%)',
-                border: '1px solid rgba(199,166,106,0.28)',
-                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(199,166,106,0.12)',
-                transition: 'all 0.25s',
-              }}>
-                <Calendar size={16} color="#C7A66A" />
-                <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '0.01em', textShadow: '0 0 18px rgba(199,166,106,0.50)' }}>رزرو آنلاین میز</span>
-              </div>
-            </Link>
-            <Link href="/shop" style={{ textDecoration: 'none', width: '100%', maxWidth: '280px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                padding: '13px 24px', borderRadius: '18px', cursor: 'pointer',
-                background: 'rgba(199,166,106,0.12)',
-                backdropFilter: 'blur(28px) saturate(220%)',
-                WebkitBackdropFilter: 'blur(28px) saturate(220%)',
-                border: '1px solid rgba(199,166,106,0.28)',
-                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(199,166,106,0.12)',
-                transition: 'all 0.25s',
-              }}>
-                <ShoppingBag size={16} color="#C7A66A" />
-                <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '0.01em', textShadow: '0 0 18px rgba(199,166,106,0.50)' }}>بیلیارد بازار</span>
-              </div>
-            </Link>
+            {[
+              { href: '/clubs', icon: <Calendar size={16} color="#C7A66A" />, label: 'رزرو آنلاین میز' },
+              { href: '/shop',  icon: <ShoppingBag size={16} color="#C7A66A" />, label: 'بیلیارد بازار' },
+            ].map((btn, i) => (
+              <Link key={i} href={btn.href} style={{ textDecoration: 'none', width: '100%', maxWidth: '280px' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  padding: '13px 24px', borderRadius: '20px', cursor: 'pointer',
+                  background: 'rgba(199,166,106,0.06)',
+                  backdropFilter: 'blur(48px) saturate(260%)',
+                  WebkitBackdropFilter: 'blur(48px) saturate(260%)',
+                  border: '1px solid rgba(199,166,106,0.22)',
+                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(199,166,106,0.10), 0 4px 24px rgba(199,166,106,0.08)',
+                  transition: 'all 0.25s',
+                }}>
+                  {btn.icon}
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '0.01em', textShadow: '0 0 20px rgba(199,166,106,0.55)' }}>{btn.label}</span>
+                </div>
+              </Link>
+            ))}
           </div>
 
           {/* Third line — services */}
