@@ -206,14 +206,14 @@ export default function Stories() {
         }
         .st-item:hover .st-ring { box-shadow: 0 6px 20px rgba(0,0,0,0.36); }
         .st-inner {
-          width: 64px; height: 64px; border-radius: 50%;
+          width: 67px; height: 67px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 24px; color: #fff;
+          font-weight: 900; font-size: 25px; color: #fff;
           border: 2px solid rgba(4,2,10,0.55);
         }
         .st-name {
           font-size: 10px; font-weight: 600; white-space: nowrap;
-          overflow: hidden; text-overflow: ellipsis; max-width: 72px;
+          overflow: hidden; text-overflow: ellipsis; max-width: 76px;
           line-height: 1.2;
         }
       `}</style>
