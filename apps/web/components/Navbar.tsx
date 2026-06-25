@@ -84,6 +84,8 @@ export default function Navbar() {
   const [scrollY, setScrollY] = useState(0);
   const profileRef   = useRef<HTMLDivElement>(null);
   const exploreRef   = useRef<HTMLDivElement>(null);
+  const searchRef    = useRef<HTMLDivElement>(null);
+  const searchBtnRef = useRef<HTMLButtonElement>(null);
   const isHomePage   = pathname === '/';
 
   useEffect(() => {
@@ -93,6 +95,7 @@ export default function Navbar() {
         requestAnimationFrame(() => {
           setScrolled(window.scrollY > 50);
           setScrollY(window.scrollY);
+          if (window.scrollY > 30) setSearchOpen(false);
           ticking = false;
         });
         ticking = true;
@@ -110,6 +113,18 @@ export default function Navbar() {
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const fn = (e: MouseEvent) => {
+      if (
+        searchRef.current && !searchRef.current.contains(e.target as Node) &&
+        searchBtnRef.current && !searchBtnRef.current.contains(e.target as Node)
+      ) { setSearchOpen(false); setSearch(''); }
+    };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, [searchOpen]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -194,43 +209,7 @@ export default function Navbar() {
         transition: 'all 0.4s ease',
         boxShadow: isLight ? '0 1px 0 rgba(28,28,26,0.04), 0 4px 24px rgba(28,28,26,0.04)' : 'none',
       }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', position: 'relative' }}>
-
-          {/* Inline search — mobile, overlays navbar content */}
-          {searchOpen && (
-            <div className="mob" style={{
-              position: 'absolute', inset: 0, zIndex: 20,
-              display: 'flex', alignItems: 'center',
-              padding: '0 clamp(12px,3vw,24px)', gap: '10px',
-              background: isLight ? 'rgba(247,247,245,0.97)' : 'rgba(10,6,20,0.72)',
-              backdropFilter: 'blur(40px) saturate(220%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(220%)',
-              animation: 'fadeIn 0.18s ease',
-            }}>
-              <Search size={16} color={isLight ? 'rgba(28,28,26,0.35)' : 'rgba(255,255,255,0.35)'} style={{ flexShrink: 0 }} />
-              <input
-                autoFocus
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="جستجو باشگاه، بازیکن، مربی..."
-                style={{
-                  flex: 1, background: 'none', border: 'none', outline: 'none',
-                  color: isLight ? '#1C1C1A' : 'rgba(255,255,255,0.88)',
-                  fontSize: '15px', fontFamily: 'inherit',
-                }}
-              />
-              {search && (
-                <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isLight ? 'rgba(28,28,26,0.35)' : 'rgba(255,255,255,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}>
-                  <X size={15} />
-                </button>
-              )}
-              <button onClick={() => { setSearchOpen(false); setSearch(''); }}
-                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isLight ? 'rgba(28,28,26,0.06)' : 'rgba(255,255,255,0.10)', border: `1px solid ${isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.14)'}`, borderRadius: '10px', cursor: 'pointer', color: isLight ? 'rgba(28,28,26,0.5)' : 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                <X size={16} />
-              </button>
-            </div>
-          )}
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
@@ -322,7 +301,7 @@ export default function Navbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
 
             {/* Search — mobile only */}
-            <button className="mob" onClick={() => setSearchOpen(p => !p)}
+            <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)}
               style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: searchOpen ? GOLD_LIGHT : SURF, border: `1px solid ${searchOpen ? GOLD_BORDER : BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: searchOpen ? GOLD : TEXT_MUT, flexShrink: 0, transition: 'all 0.3s' }}>
               <Search size={22} />
             </button>
@@ -413,6 +392,40 @@ export default function Navbar() {
       </nav>
 
 
+      {/* Search pill — floats below navbar, no dark backdrop */}
+      {searchOpen && (
+        <div ref={searchRef} style={{
+          position: 'fixed', top: '72px', left: 0, right: 0, zIndex: 180,
+          padding: '8px clamp(16px,3vw,32px) 0',
+          animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
+        }}>
+          <div style={{
+            maxWidth: '560px', margin: '0 auto',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            background: 'rgba(255,255,255,0.10)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            borderRadius: '20px', padding: '11px 16px',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 28px rgba(0,0,0,0.28)',
+            backdropFilter: 'blur(48px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(48px) saturate(200%)',
+          }}>
+            <Search size={15} color="rgba(255,255,255,0.38)" style={{ flexShrink: 0 }} />
+            <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="جستجو باشگاه، بازیکن، مربی..."
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontSize: '14px', fontFamily: 'inherit' }} />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
+                <X size={13} />
+              </button>
+            )}
+            <button onClick={() => { setSearchOpen(false); setSearch(''); }}
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.42)', padding: '4px', display: 'flex', flexShrink: 0 }}>
+              <X size={13} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── MOBILE MENU ── */}
       {mobileOpen && (
         <div style={{
@@ -488,12 +501,13 @@ export default function Navbar() {
       {isHomePage && (
         <div style={{
           position: 'fixed',
-          top: '72px',
+          top: searchOpen ? '130px' : '72px',
           left: 0, right: 0, zIndex: 49,
           padding: '6px clamp(16px,3vw,32px) 4px',
           background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
           opacity: Math.max(0, 1 - scrollY / 700),
           pointerEvents: scrollY > 560 ? 'none' : 'auto',
+          transition: 'top 0.38s cubic-bezier(0.22,1,0.36,1)',
         }}>
           <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
             <Stories />
