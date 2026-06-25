@@ -786,17 +786,19 @@ export default function HomePage() {
           <SR delay={200}>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '36px' }}>
               <Link href="/clubs" style={{ textDecoration: 'none' }}>
-                <button style={{
+                <div style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '13px 32px', borderRadius: '16px', cursor: 'pointer',
-                  background: 'linear-gradient(135deg,#1a7a42,#22a855)',
-                  border: '1px solid rgba(48,197,90,0.35)',
-                  boxShadow: '0 4px 20px rgba(48,197,90,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                  color: '#fff', fontSize: '15px', fontWeight: 700,
-                  fontFamily: 'inherit', transition: 'all 0.25s',
+                  padding: '13px 32px', borderRadius: '20px', cursor: 'pointer',
+                  background: 'rgba(48,197,90,0.06)',
+                  backdropFilter: 'blur(48px) saturate(260%)',
+                  WebkitBackdropFilter: 'blur(48px) saturate(260%)',
+                  border: '1px solid rgba(48,197,90,0.22)',
+                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(48,197,90,0.10), 0 4px 24px rgba(48,197,90,0.08)',
+                  transition: 'all 0.25s',
                 }}>
-                  <MapPin size={16} /> نزدیک‌ترین باشگاه
-                </button>
+                  <MapPin size={16} color="#30C55A" />
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#30C55A', textShadow: '0 0 20px rgba(48,197,90,0.55)' }}>نزدیک‌ترین باشگاه</span>
+                </div>
               </Link>
             </div>
           </SR>
