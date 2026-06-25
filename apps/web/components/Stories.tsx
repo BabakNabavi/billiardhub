@@ -189,31 +189,31 @@ export default function Stories() {
     <>
       <style>{`
         .st-strip {
-          display: flex; gap: 18px; overflow-x: auto;
-          padding: 6px 2px 10px; scrollbar-width: none;
+          display: flex; gap: 20px; overflow-x: auto;
+          padding: 8px 4px 12px; scrollbar-width: none;
           -ms-overflow-style: none; direction: ltr;
         }
         .st-strip::-webkit-scrollbar { display: none; }
         .st-item {
           display: flex; flex-direction: column; align-items: center;
-          gap: 6px; cursor: pointer; flex-shrink: 0;
+          gap: 7px; cursor: pointer; flex-shrink: 0;
           transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
         }
-        .st-item:hover { transform: translateY(-2px) scale(1.06); }
+        .st-item:hover { transform: translateY(-2px) scale(1.05); }
         .st-ring {
           padding: 3px; border-radius: 50%;
           transition: box-shadow 0.22s ease;
         }
-        .st-item:hover .st-ring { box-shadow: 0 6px 20px rgba(0,0,0,0.36); }
+        .st-item:hover .st-ring { box-shadow: 0 6px 22px rgba(0,0,0,0.40); }
         .st-inner {
-          width: 62px; height: 62px; border-radius: 50%;
+          width: 80px; height: 80px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 22px; color: #fff;
-          border: 1.5px solid rgba(4,2,10,0.60);
+          font-weight: 900; font-size: 28px; color: #fff;
+          border: 2px solid rgba(4,2,10,0.55);
         }
         .st-name {
-          font-size: 10px; font-weight: 600; white-space: nowrap;
-          overflow: hidden; text-overflow: ellipsis; max-width: 72px;
+          font-size: 11px; font-weight: 600; white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis; max-width: 86px;
           line-height: 1.2;
         }
       `}</style>

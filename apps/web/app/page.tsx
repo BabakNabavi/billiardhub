@@ -542,8 +542,8 @@ export default function HomePage() {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* navbar(72) + stories(100) + 108px spacing = 280px */
-          .hero-content { padding-top:280px !important; padding-bottom:60px !important; }
+          /* navbar(72) + stories(116) + 108px spacing = 296px */
+          .hero-content { padding-top:296px !important; padding-bottom:60px !important; }
           .hero-h1      { font-size:clamp(34px,11vw,58px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
