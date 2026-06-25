@@ -430,63 +430,83 @@ export default function HomePage() {
         .he { animation:fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.78s both; }
         .hf { animation:fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.90s both; }
 
-        /* ── iOS 26 Liquid Glass Buttons ── */
+        /* ══ Community-card-style Liquid Glass Buttons ══
+           Exact same pattern: colored rgba bg + blur(40) saturate(240)
+           + colored border + inset top sheen + text-shadow glow          */
+        .btn-primary,.btn-green,.btn-outline,.btn-ghost-dark {
+          position:relative; overflow:hidden;
+          display:inline-flex; align-items:center; gap:8px;
+          border-radius:14px; cursor:pointer; font-family:inherit;
+          transition:transform .32s cubic-bezier(.4,0,.2,1),background .28s ease,box-shadow .32s ease;
+        }
+        /* top glass sheen — same as community cards */
+        .btn-primary::before,.btn-green::before,.btn-outline::before,.btn-ghost-dark::before {
+          content:''; position:absolute; top:0; left:0; right:0; height:55%;
+          pointer-events:none; border-radius:inherit;
+        }
+        /* ambient bottom orb — same as community cards */
+        .btn-primary::after,.btn-green::after,.btn-ghost-dark::after {
+          content:''; position:absolute; bottom:-20px; left:50%; transform:translateX(-50%);
+          width:70%; height:60px;
+          filter:blur(14px); pointer-events:none; border-radius:50%;
+        }
+
+        /* ─── GOLD / Primary ─── */
         .btn-primary {
-          display:inline-flex;align-items:center;gap:8px;
-          background:rgba(199,166,106,0.14);
-          backdrop-filter:blur(28px) saturate(220%);
-          -webkit-backdrop-filter:blur(28px) saturate(220%);
-          color:#fff;
-          border:1px solid rgba(199,166,106,0.40);
-          border-radius:14px;padding:14px 32px;font-size:14px;font-weight:800;
-          cursor:pointer;font-family:inherit;
-          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.36),inset 0 -1px 0 rgba(0,0,0,0.08),0 6px 28px rgba(199,166,106,0.16);
-          transition:transform .3s cubic-bezier(.4,0,.2,1),background .28s ease,box-shadow .3s ease;
+          background:rgba(199,166,106,0.10);
+          backdrop-filter:blur(40px) saturate(240%);
+          -webkit-backdrop-filter:blur(40px) saturate(240%);
+          color:${GOLD};
+          border:1px solid rgba(199,166,106,0.22);
+          padding:14px 32px; font-size:14px; font-weight:800;
+          box-shadow:inset 0 1px 0 rgba(199,166,106,0.32), 0 8px 32px rgba(0,0,0,0.22);
+          text-shadow:0 0 26px rgba(199,166,106,0.55);
         }
-        .btn-primary:hover{
-          transform:translateY(-2px);
-          background:rgba(199,166,106,0.22);
-          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.42),inset 0 -1px 0 rgba(0,0,0,0.08),0 12px 40px rgba(199,166,106,0.24);
-        }
+        .btn-primary::before { background:linear-gradient(180deg,rgba(199,166,106,0.14) 0%,transparent 100%); }
+        .btn-primary::after  { background:radial-gradient(ellipse,rgba(199,166,106,0.24),transparent 70%); }
+        .btn-primary:hover   { transform:translateY(-2px); background:rgba(199,166,106,0.16); box-shadow:inset 0 1px 0 rgba(199,166,106,0.38),0 14px 44px rgba(0,0,0,0.28),0 0 28px rgba(199,166,106,0.08); }
+
+        /* ─── GREEN ─── */
         .btn-green {
-          display:inline-flex;align-items:center;gap:8px;
-          background:rgba(30,102,65,0.14);
-          backdrop-filter:blur(28px) saturate(220%);
-          -webkit-backdrop-filter:blur(28px) saturate(220%);
-          color:#fff;
-          border:1px solid rgba(30,102,65,0.38);
-          border-radius:14px;padding:14px 30px;font-size:14px;font-weight:800;
-          cursor:pointer;font-family:inherit;
-          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.32),inset 0 -1px 0 rgba(0,0,0,0.06),0 6px 24px rgba(30,102,65,0.14);
-          transition:transform .3s ease,background .28s ease,box-shadow .3s ease;
+          background:rgba(48,197,90,0.10);
+          backdrop-filter:blur(40px) saturate(240%);
+          -webkit-backdrop-filter:blur(40px) saturate(240%);
+          color:#30C55A;
+          border:1px solid rgba(48,197,90,0.22);
+          padding:14px 30px; font-size:14px; font-weight:800;
+          box-shadow:inset 0 1px 0 rgba(48,197,90,0.28), 0 8px 32px rgba(0,0,0,0.22);
+          text-shadow:0 0 24px rgba(48,197,90,0.55);
         }
-        .btn-green:hover{transform:translateY(-2px);background:rgba(30,102,65,0.22);box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.38),0 12px 36px rgba(30,102,65,0.22);}
+        .btn-green::before { background:linear-gradient(180deg,rgba(48,197,90,0.14) 0%,transparent 100%); }
+        .btn-green::after  { background:radial-gradient(ellipse,rgba(48,197,90,0.24),transparent 70%); }
+        .btn-green:hover   { transform:translateY(-2px); background:rgba(48,197,90,0.16); box-shadow:inset 0 1px 0 rgba(48,197,90,0.34),0 14px 44px rgba(0,0,0,0.28); }
+
+        /* ─── OUTLINE (light backgrounds) ─── */
         .btn-outline {
-          display:inline-flex;align-items:center;gap:8px;
-          background:rgba(255,255,255,0.55);
-          backdrop-filter:blur(24px) saturate(200%);
-          -webkit-backdrop-filter:blur(24px) saturate(200%);
+          background:rgba(26,25,23,0.06);
+          backdrop-filter:blur(40px) saturate(240%);
+          -webkit-backdrop-filter:blur(40px) saturate(240%);
           color:${TEXT};
-          border:1px solid rgba(26,25,23,0.12);
-          border-radius:14px;padding:13px 28px;font-size:14px;font-weight:600;
-          cursor:pointer;font-family:inherit;
-          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.90),0 4px 16px rgba(0,0,0,0.06);
-          transition:all .28s;
+          border:1px solid rgba(26,25,23,0.14);
+          padding:13px 28px; font-size:14px; font-weight:600;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.82), 0 6px 24px rgba(0,0,0,0.06);
         }
-        .btn-outline:hover{background:rgba(255,255,255,0.72);border-color:rgba(30,102,65,0.30);color:${GRN};}
+        .btn-outline::before { background:linear-gradient(180deg,rgba(255,255,255,0.62) 0%,transparent 100%); }
+        .btn-outline:hover   { background:rgba(26,25,23,0.10); border-color:rgba(30,102,65,0.28); color:${GRN}; transform:translateY(-2px); }
+
+        /* ─── GHOST DARK (dark sections) ─── */
         .btn-ghost-dark {
-          display:inline-flex;align-items:center;gap:8px;
-          background:rgba(255,255,255,0.10);
-          backdrop-filter:blur(28px) saturate(220%);
-          -webkit-backdrop-filter:blur(28px) saturate(220%);
+          background:rgba(255,255,255,0.08);
+          backdrop-filter:blur(40px) saturate(240%);
+          -webkit-backdrop-filter:blur(40px) saturate(240%);
           color:rgba(255,255,255,0.88);
-          border:1px solid rgba(255,255,255,0.22);
-          border-radius:14px;padding:14px 28px;font-size:14px;font-weight:600;
-          cursor:pointer;font-family:inherit;
-          box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.32),inset 0 -1px 0 rgba(0,0,0,0.06),0 4px 18px rgba(0,0,0,0.12);
-          transition:all .28s ease;
+          border:1px solid rgba(255,255,255,0.18);
+          padding:14px 28px; font-size:14px; font-weight:600;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.30), 0 8px 32px rgba(0,0,0,0.22);
         }
-        .btn-ghost-dark:hover{background:rgba(255,255,255,0.17);border-color:rgba(199,166,106,0.40);box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.40),0 8px 28px rgba(0,0,0,0.16);}
+        .btn-ghost-dark::before { background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 100%); }
+        .btn-ghost-dark::after  { background:radial-gradient(ellipse,rgba(255,255,255,0.18),transparent 70%); }
+        .btn-ghost-dark:hover   { transform:translateY(-2px); background:rgba(255,255,255,0.13); border-color:rgba(199,166,106,0.32); box-shadow:inset 0 1px 0 rgba(255,255,255,0.38),0 14px 44px rgba(0,0,0,0.28); }
 
         .sec-label{font-size:9px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;margin-bottom:14px;display:block;}
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
