@@ -709,27 +709,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── Slide progress ── */}
-        <div style={{ position: 'absolute', bottom: '36px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', opacity: heroO }}>
-          <div style={{ display: 'flex', gap: '5px' }}>
-            {HERO_SLIDES.map((_, i) => (
-              <button key={i} onClick={() => setSlide(i)} style={{
-                position: 'relative', height: '2px', width: i === slide ? '44px' : '12px',
-                borderRadius: '1px', border: 'none', padding: 0, cursor: 'pointer',
-                background: 'rgba(255,255,255,0.14)', overflow: 'hidden',
-                transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
-              }}>
-                {i === slide && <span style={{ position: 'absolute', inset: 0, background: GOLD, boxShadow: `0 0 8px ${GOLD}`, animation: 'slideBar 7s linear forwards' }} />}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#fff' }}>{String(slide + 1).padStart(2, '0')}</span>
-            <span style={{ width: '16px', height: '1px', background: 'rgba(255,255,255,0.18)' }} />
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.22)' }}>{String(HERO_SLIDES.length).padStart(2, '0')}</span>
-          </div>
-        </div>
 
         {/* ── Prev/next arrows — hidden on mobile ── */}
         <div className="hero-arrows" style={{ opacity: heroO }}>

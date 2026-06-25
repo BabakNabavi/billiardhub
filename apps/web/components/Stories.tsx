@@ -189,31 +189,31 @@ export default function Stories() {
     <>
       <style>{`
         .st-strip {
-          display: flex; gap: 14px; overflow-x: auto;
-          padding: 4px 2px 6px; scrollbar-width: none;
+          display: flex; gap: 18px; overflow-x: auto;
+          padding: 6px 2px 10px; scrollbar-width: none;
           -ms-overflow-style: none; direction: ltr;
         }
         .st-strip::-webkit-scrollbar { display: none; }
         .st-item {
           display: flex; flex-direction: column; align-items: center;
-          gap: 5px; cursor: pointer; flex-shrink: 0;
+          gap: 6px; cursor: pointer; flex-shrink: 0;
           transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
         }
         .st-item:hover { transform: translateY(-2px) scale(1.06); }
         .st-ring {
-          padding: 2px; border-radius: 50%;
+          padding: 3px; border-radius: 50%;
           transition: box-shadow 0.22s ease;
         }
-        .st-item:hover .st-ring { box-shadow: 0 4px 16px rgba(0,0,0,0.28); }
+        .st-item:hover .st-ring { box-shadow: 0 6px 20px rgba(0,0,0,0.36); }
         .st-inner {
-          width: 44px; height: 44px; border-radius: 50%;
+          width: 62px; height: 62px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 16px; color: #fff;
+          font-weight: 900; font-size: 22px; color: #fff;
           border: 1.5px solid rgba(4,2,10,0.60);
         }
         .st-name {
-          font-size: 9px; font-weight: 600; white-space: nowrap;
-          overflow: hidden; text-overflow: ellipsis; max-width: 58px;
+          font-size: 10px; font-weight: 600; white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis; max-width: 72px;
           line-height: 1.2;
         }
       `}</style>

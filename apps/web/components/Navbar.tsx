@@ -299,8 +299,8 @@ export default function Navbar() {
           {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
 
-            <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)} style={{ width: '36px', height: '36px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '10px', cursor: 'pointer', color: TEXT_MUT, alignItems: 'center', justifyContent: 'center' }}>
-              <Search size={15} />
+            <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)} style={{ width: '44px', height: '44px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: TEXT_MUT, alignItems: 'center', justifyContent: 'center' }}>
+              <Search size={18} />
             </button>
 
             <button className="desk" style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', color: TEXT_MUT, transition: 'color 0.2s', alignItems: 'center', justifyContent: 'center' }}
@@ -376,24 +376,36 @@ export default function Navbar() {
 
             {/* Hamburger */}
             <button className="mob" onClick={() => setMobileOpen(p => !p)}
-              style={{ padding: '8px', borderRadius: '10px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }}>
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+              style={{ padding: '10px', borderRadius: '12px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }}>
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile search bar */}
-        {searchOpen && (
-          <div ref={searchRef} style={{ padding: '8px 16px 12px', borderTop: '1px solid rgba(28,28,26,0.06)', background: 'rgba(247,247,245,0.97)', animation: 'fadeDown 0.2s ease both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(28,28,26,0.04)', border: '1px solid rgba(28,28,26,0.07)', borderRadius: '12px', padding: '10px 14px' }}>
-              <Search size={14} color="rgba(28,28,26,0.3)" />
-              <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو باشگاه، بازیکن..."
-                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#1C1C1A', fontSize: '14px', fontFamily: 'inherit' }} />
-              {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(28,28,26,0.3)', padding: 0, display: 'flex' }}><X size={13} /></button>}
-            </div>
-          </div>
-        )}
       </nav>
+
+      {/* Mobile search overlay — dark glass, below stories on home page */}
+      {searchOpen && (
+        <div ref={searchRef} style={{
+          position: 'fixed',
+          top: isHomePage ? '165px' : '66px',
+          left: 0, right: 0, zIndex: 195,
+          padding: '10px 16px 14px',
+          background: 'rgba(4,2,10,0.84)',
+          backdropFilter: 'blur(40px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+          borderBottom: '1px solid rgba(199,166,106,0.18)',
+          animation: 'fadeDown 0.22s cubic-bezier(0.22,1,0.36,1) both',
+        }}>
+          <div style={{ maxWidth: '640px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '14px', padding: '13px 16px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10)' }}>
+            <Search size={16} color="rgba(255,255,255,0.38)" />
+            <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو باشگاه، بازیکن، مربی..."
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.90)', fontSize: '14px', fontFamily: 'inherit' }} />
+            {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.38)', padding: 0, display: 'flex' }}><X size={13} /></button>}
+            <button onClick={() => setSearchOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.45)', padding: '5px', display: 'flex' }}><X size={13} /></button>
+          </div>
+        </div>
+      )}
 
       {/* ── MOBILE MENU ── */}
       {mobileOpen && (
@@ -437,13 +449,13 @@ export default function Navbar() {
                 className="mob-link-item"
                 style={{
                   display: 'flex', alignItems: 'center', gap: '14px',
-                  padding: '13px 14px', borderRadius: '14px',
+                  padding: '16px 14px', borderRadius: '14px',
                   color: item.isHome ? '#1C1C1A' : 'rgba(28,28,26,0.55)',
-                  fontSize: '15px', fontWeight: item.isHome ? 600 : 500,
+                  fontSize: '16px', fontWeight: item.isHome ? 600 : 500,
                   textDecoration: 'none',
-                  ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '6px', paddingBottom: '16px' } : {}),
+                  ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '6px', paddingBottom: '18px' } : {}),
                 }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
                   {item.icon}
                 </div>
                 <span>{item.label}</span>
