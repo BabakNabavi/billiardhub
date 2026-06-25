@@ -79,6 +79,7 @@ export default function Navbar() {
   const [exploreOpen, setExploreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const profileRef   = useRef<HTMLDivElement>(null);
@@ -113,6 +114,7 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setExploreOpen(false);
+    setSearchOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -192,7 +194,43 @@ export default function Navbar() {
         transition: 'all 0.4s ease',
         boxShadow: isLight ? '0 1px 0 rgba(28,28,26,0.04), 0 4px 24px rgba(28,28,26,0.04)' : 'none',
       }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', position: 'relative' }}>
+
+          {/* Inline search — mobile, overlays navbar content */}
+          {searchOpen && (
+            <div className="mob" style={{
+              position: 'absolute', inset: 0, zIndex: 20,
+              display: 'flex', alignItems: 'center',
+              padding: '0 clamp(12px,3vw,24px)', gap: '10px',
+              background: isLight ? 'rgba(247,247,245,0.97)' : 'rgba(10,6,20,0.72)',
+              backdropFilter: 'blur(40px) saturate(220%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(220%)',
+              animation: 'fadeIn 0.18s ease',
+            }}>
+              <Search size={16} color={isLight ? 'rgba(28,28,26,0.35)' : 'rgba(255,255,255,0.35)'} style={{ flexShrink: 0 }} />
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="جستجو باشگاه، بازیکن، مربی..."
+                style={{
+                  flex: 1, background: 'none', border: 'none', outline: 'none',
+                  color: isLight ? '#1C1C1A' : 'rgba(255,255,255,0.88)',
+                  fontSize: '15px', fontFamily: 'inherit',
+                }}
+              />
+              {search && (
+                <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isLight ? 'rgba(28,28,26,0.35)' : 'rgba(255,255,255,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}>
+                  <X size={15} />
+                </button>
+              )}
+              <button onClick={() => { setSearchOpen(false); setSearch(''); }}
+                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isLight ? 'rgba(28,28,26,0.06)' : 'rgba(255,255,255,0.10)', border: `1px solid ${isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.14)'}`, borderRadius: '10px', cursor: 'pointer', color: isLight ? 'rgba(28,28,26,0.5)' : 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                <X size={16} />
+              </button>
+            </div>
+          )}
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
@@ -284,8 +322,8 @@ export default function Navbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
 
             {/* Search — mobile only */}
-            <button className="mob"
-              style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: TEXT_MUT, flexShrink: 0 }}>
+            <button className="mob" onClick={() => setSearchOpen(p => !p)}
+              style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: searchOpen ? GOLD_LIGHT : SURF, border: `1px solid ${searchOpen ? GOLD_BORDER : BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: searchOpen ? GOLD : TEXT_MUT, flexShrink: 0, transition: 'all 0.3s' }}>
               <Search size={22} />
             </button>
 
