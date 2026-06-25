@@ -648,7 +648,7 @@ export default function HomePage() {
           {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
             fontSize: 'clamp(26px,4.2vw,60px)', fontWeight: 900, lineHeight: 1.08,
-            margin: '0 0 14px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
+            margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
             <span style={{ color: '#fff' }}>پلتفرم جامع و هوشمند </span>
             <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>بیلیارد</span>
@@ -657,7 +657,7 @@ export default function HomePage() {
           {/* Subtitle — نقطه‌ی اتصال */}
           <p className="hc" style={{
             fontSize: 'clamp(14px,1.9vw,22px)', fontWeight: 500,
-            margin: '0 0 16px', letterSpacing: '0.01em', textAlign: 'center', lineHeight: 1.7,
+            margin: '0 0 24px', letterSpacing: '0.01em', textAlign: 'center', lineHeight: 1.7,
             color: 'rgba(255,255,255,0.82)',
           }}>
             اتصال بی‌واسطه بازیکنان، باشگاه‌ها و برترین تولیدکنندگان و فروشندگان در ایران و جهان
