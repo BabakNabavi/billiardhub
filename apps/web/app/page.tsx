@@ -560,7 +560,7 @@ export default function HomePage() {
 
         /* ══ LAPTOP SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-content { padding-top:clamp(150px,19vh,210px) !important; }
+          .hero-content { padding-top:clamp(200px,26vh,260px) !important; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
