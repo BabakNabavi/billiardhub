@@ -499,7 +499,7 @@ export default function Navbar() {
 
       {/* Stories — home only, slides down when search opens */}
       {isHomePage && (
-        <div style={{
+        <div className="hero-stories-bar" style={{
           position: 'fixed',
           top: searchOpen ? '130px' : '72px',
           left: 0, right: 0, zIndex: 49,
