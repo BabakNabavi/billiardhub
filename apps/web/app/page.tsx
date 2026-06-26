@@ -162,7 +162,7 @@ const FILTER_DATA: Record<string, { label: string; opts: string[] }[]> = {
 ═══════════════════════════════════════════════════════════════ */
 const CLUBS = [
   { id:'1', name:'باشگاه ستاره تهران',   city:'تهران',  dist:'ونک',        tables:12, rating:4.9, reviews:284, type:'اسنوکر', img:IMG.club2, img2:IMG.club3, price:80000, badge:'برترین', tags:['VIP','پارکینگ','کافه'] },
-  { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.club5, img2:IMG.club1, price:65000, badge:null,      tags:['مربی','مسابقه'] },
+  { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.clubB, img2:IMG.club1, price:65000, badge:null,      tags:['مربی','مسابقه'] },
   { id:'3', name:'باشگاه پیروزی اصفهان', city:'اصفهان', dist:'چهارباغ',    tables:10, rating:4.8, reviews:198, type:'هی‌بال', img:IMG.club6, img2:IMG.club2, price:75000, badge:'جدید',    tags:['آموزش','مبتدی'] },
   { id:'4', name:'باشگاه حافظ شیراز',    city:'شیراز',  dist:'لطفعلی‌خان', tables:6,  rating:4.6, reviews:89,  type:'اسنوکر', img:IMG.club1, img2:IMG.snooker, price:55000, badge:null,   tags:['هفت روز'] },
 ];
@@ -208,11 +208,21 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,transparent 30%,rgba(0,0,0,0.80) 80%,rgba(0,0,0,0.96) 100%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '14px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.80)', letterSpacing: '0.08em' }}>{club.type}</span>
+            {(() => {
+              const typeColor: Record<string, { clr: string; rgb: string }> = {
+                'اسنوکر': { clr: '#30C55A', rgb: '48,197,90'   },
+                'پاکت':   { clr: '#3b82f6', rgb: '59,130,246'  },
+                'هی‌بال': { clr: '#8b5cf6', rgb: '139,92,246'  },
+              };
+              const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
+              return (
+                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: tc.clr, letterSpacing: '0.08em' }}>{club.type}</span>
+              );
+            })()}
             {club.badge && <span style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#fff', boxShadow: '0 2px 10px rgba(199,166,106,0.40)' }}>{club.badge}</span>}
           </div>
           <button onClick={e => { e.preventDefault(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
-            <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s' }} />
+            <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
           </button>
         </div>
         {hov && (
@@ -417,12 +427,13 @@ export default function HomePage() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&display=swap" rel="stylesheet" />
       <style>{`
-        @keyframes fadeUp    { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
-        @keyframes fadeTagIn { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
-        @keyframes pulse2    { 0%,100%{opacity:1;}50%{opacity:0.20;} }
-        @keyframes slideBar  { from{width:0;}to{width:100%;} }
-        @keyframes floatOrb  { 0%,100%{transform:translate(0,0);}38%{transform:translate(22px,-16px);}70%{transform:translate(-16px,12px);} }
-        @keyframes dropUp    { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;} }
+        @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
+        @keyframes fadeTagIn   { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
+        @keyframes pulse2      { 0%,100%{opacity:1;}50%{opacity:0.20;} }
+        @keyframes slideBar    { from{width:0;}to{width:100%;} }
+        @keyframes floatOrb    { 0%,100%{transform:translate(0,0);}38%{transform:translate(22px,-16px);}70%{transform:translate(-16px,12px);} }
+        @keyframes dropUp      { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;} }
+        @keyframes gentlePulse { 0%,100%{opacity:1;}50%{opacity:0.25;} }
 
         /* Hero entrance — runs ONCE on mount. No key prop = no replay on slide change. */
         .ha { animation:fadeUp 1.5s cubic-bezier(0.22,1,0.36,1) 0.08s both; }
@@ -538,6 +549,7 @@ export default function HomePage() {
         /* ══ MOBILE — hero content 10vh lower ══ */
         @media(max-width:600px){
           .hero-content { padding-top:clamp(220px,37vh,350px) !important; }
+          .trust-strip  { margin-top:10vh !important; }
         }
 
         /* ══ MOBILE XS ≤400px ══ */
@@ -636,20 +648,21 @@ export default function HomePage() {
           </p>
 
           {/* Hero CTA buttons — exact trust-card style */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', margin: '4px 0 24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '4px 0 24px', flexWrap: 'wrap' }}>
             {[
               { href: '/clubs', icon: <Calendar size={16} color="#C7A66A" />, label: 'رزرو آنلاین میز' },
               { href: '/shop',  icon: <ShoppingBag size={16} color="#C7A66A" />, label: 'بیلیارد بازار' },
             ].map((btn, i) => (
-              <Link key={i} href={btn.href} style={{ textDecoration: 'none', width: '100%', maxWidth: '280px' }}>
+              <Link key={i} href={btn.href} style={{ textDecoration: 'none' }}>
                 <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  padding: '10px 24px', borderRadius: '20px', cursor: 'pointer',
+                  display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  padding: '10px 20px', borderRadius: '20px', cursor: 'pointer',
                   background: 'rgba(199,166,106,0.10)',
                   border: '1px solid rgba(199,166,106,0.22)',
+                  whiteSpace: 'nowrap',
                 }}>
                   {btn.icon}
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
                 </div>
               </Link>
             ))}
