@@ -216,10 +216,10 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               };
               const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
               return (
-                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: tc.clr }}>{club.type}</span>
+                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: tc.clr }}>{club.type}</span>
               );
             })()}
-            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
+            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
           </div>
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
             <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
@@ -227,7 +227,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         </div>
         {hov && (
           <div style={{ position: 'absolute', top: '56px', right: '14px', display: 'flex', gap: '5px', flexWrap: 'wrap', zIndex: 2, animation: 'fadeTagIn 0.3s ease both' }}>
-            {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '3px 10px', fontSize: '9px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
+            {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '5px 12px', fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
           </div>
         )}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: hov ? '22px 18px 20px' : '18px 18px 16px', background: 'rgba(10,8,6,0.42)', backdropFilter: 'blur(32px) saturate(180%)', WebkitBackdropFilter: 'blur(32px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.07)', transition: 'padding 0.35s ease' }}>
@@ -614,7 +614,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(310px,37vh,420px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(290px,34vh,400px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
@@ -627,8 +627,8 @@ export default function HomePage() {
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: GOLD,
               boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
               display: 'inline-block', animation: 'pulse2 3s ease-in-out infinite' }} />
-            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '9px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              BILLIARDHUB · IRAN
+            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '11px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+              BILLIARD HUB IRAN
             </span>
           </div>
 
