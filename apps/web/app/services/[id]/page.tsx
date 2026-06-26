@@ -411,7 +411,7 @@ export default function ServiceProviderPage() {
               {/* Book CTA */}
               <div style={{ background:'#FFFFFF', border:`1px solid ${p.avatarColor}22`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:`linear-gradient(90deg,transparent,${p.avatarColor}55,transparent)`, boxShadow:`0 0 14px ${p.avatarColor}35` }}/>
-                <div style={{ fontSize:'10px', color:`${p.avatarColor}70`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'14px', textAlign:'center' }}>درخواست خدمت</div>
+                <div style={{ fontSize:'10px', color:`${p.avatarColor}70`, fontWeight:700, marginBottom:'14px', textAlign:'center' }}>درخواست خدمت</div>
                 <div style={{ fontSize:'13px', color:'rgba(0,0,0,0.45)', marginBottom:'16px', textAlign:'center', lineHeight:1.6 }}>
                   از {toFa(p.priceFrom.toLocaleString())} تومان
                 </div>
@@ -435,7 +435,7 @@ export default function ServiceProviderPage() {
 
               {/* Specialities */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'12px', textTransform:'uppercase' }}>تخصص‌ها</div>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'12px' }}>تخصص‌ها</div>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'7px' }}>
                   {p.speciality.map((s: string) => (
                     <span key={s} style={{ fontSize:'11px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'5px 12px', fontWeight:600 }}>{s}</span>
@@ -445,7 +445,7 @@ export default function ServiceProviderPage() {
 
               {/* Stats */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>آمار کاری</div>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار کاری</div>
                 {[
                   { l:'پروژه تکمیل‌شده', v:toFa(p.jobs),          c:p.avatarColor },
                   { l:'سال‌های تجربه',   v:toFa(p.experience),    c:'#a78bfa'     },

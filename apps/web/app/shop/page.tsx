@@ -485,7 +485,7 @@ export default function ShopPage() {
                     <i className="ti ti-speakerphone" style={{ fontSize: 20, color: GOLD }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, color: GOLD_DIM, fontWeight: 700, letterSpacing: '0.12em', margin: '0 0 3px' }}>فضای تبلیغاتی</p>
+                    <p style={{ fontSize: 10, color: GOLD_DIM, fontWeight: 700, margin: '0 0 3px' }}>فضای تبلیغاتی</p>
                     <p style={{ fontSize: 15, fontWeight: 800, color: '#fff', margin: '0 0 2px' }}>آگهی کسب‌وکار خود را اینجا ثبت کنید</p>
                     <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.26)', margin: 0 }}>به هزاران بازیکن حرفه‌ای دسترسی پیدا کنید</p>
                   </div>

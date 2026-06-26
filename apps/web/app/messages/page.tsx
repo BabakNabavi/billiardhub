@@ -136,7 +136,7 @@ function MsgBubble({ msg, isMe }: { msg: Message; isMe: boolean }) {
     <div style={{ display: 'flex', justifyContent: isMe ? 'flex-start' : 'flex-end', margin: '4px 0' }}>
       <div style={{ maxWidth: '280px', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: '16px', overflow: 'hidden' }}>
         <div style={{ background: 'linear-gradient(135deg,#064e3b,#065f46)', padding: '12px 14px' }}>
-          <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.15em', fontWeight: 700, marginBottom: '4px' }}>تأییدیه رزرو</div>
+          <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '4px' }}>تأییدیه رزرو</div>
           <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff' }}>{msg.bookingCard.club}</div>
         </div>
         <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -438,13 +438,13 @@ function MessagesContent() {
               <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 10px' }}>
                 {/* Pinned */}
                 {filtered.filter(c => c.pinned).length > 0 && (
-                  <div style={{ padding: '8px 6px 4px', fontSize: '10px', color: 'rgba(0,0,0,0.30)', fontWeight: 700, letterSpacing: '0.1em' }}>📌 پین شده</div>
+                  <div style={{ padding: '8px 6px 4px', fontSize: '10px', color: 'rgba(0,0,0,0.30)', fontWeight: 700 }}>📌 پین شده</div>
                 )}
                 {filtered.filter(c => c.pinned).map(c => <ConvItem key={c.id} conv={c} active={activeId === c.id} onClick={() => openConv(c.id)} />)}
 
                 {/* All */}
                 {filtered.filter(c => c.pinned).length > 0 && (
-                  <div style={{ padding: '10px 6px 4px', fontSize: '10px', color: 'rgba(0,0,0,0.30)', fontWeight: 700, letterSpacing: '0.1em' }}>همه مکالمات</div>
+                  <div style={{ padding: '10px 6px 4px', fontSize: '10px', color: 'rgba(0,0,0,0.30)', fontWeight: 700 }}>همه مکالمات</div>
                 )}
                 {filtered.filter(c => !c.pinned).map(c => <ConvItem key={c.id} conv={c} active={activeId === c.id} onClick={() => openConv(c.id)} />)}
 

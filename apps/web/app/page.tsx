@@ -216,10 +216,10 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               };
               const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
               return (
-                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: tc.clr, letterSpacing: '0.08em' }}>{club.type}</span>
+                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: tc.clr }}>{club.type}</span>
               );
             })()}
-            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#C7A66A', letterSpacing: '0.06em' }}>{club.badge}</span>}
+            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
           </div>
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
             <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
@@ -644,7 +644,7 @@ export default function HomePage() {
           {/* Subtitle — نقطه‌ی اتصال */}
           <p className="hc" style={{
             fontSize: 'clamp(14px,1.9vw,22px)', fontWeight: 500,
-            margin: '0 0 24px', letterSpacing: '0.01em', textAlign: 'center', lineHeight: 1.7,
+            margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
             color: 'rgba(255,255,255,0.82)',
           }}>
             اتصال بی‌واسطه بازیکنان، باشگاه‌ها و برترین تولیدکنندگان و فروشندگان در ایران و جهان
@@ -690,7 +690,7 @@ export default function HomePage() {
                 boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(${s.rgb},0.12)`,
               }}>
                 <span style={{ fontSize: '15px', fontWeight: 900, color: s.clr, letterSpacing: '-0.03em', lineHeight: 1, textShadow: `0 0 18px rgba(${s.rgb},0.50)` }}>{s.n}</span>
-                <span style={{ fontSize: '9px', color: `rgba(${s.rgb},0.72)`, letterSpacing: '0.10em', fontWeight: 600, textTransform: 'uppercase' }}>{s.l}</span>
+                <span style={{ fontSize: '9px', color: `rgba(${s.rgb},0.72)`, fontWeight: 600 }}>{s.l}</span>
               </div>
             ))}
           </div>

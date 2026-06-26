@@ -159,7 +159,7 @@ export default function AboutPage() {
                   <div key={i} style={{ display: 'flex', gap: 24, alignItems: 'center', flexDirection: i % 2 === 0 ? 'row-reverse' : 'row' }}>
                     {/* Content */}
                     <div style={{ flex: 1, padding: '20px 24px', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, textAlign: i % 2 === 0 ? 'left' : 'right', animation: `fadeUp 0.5s ease ${i * 0.1}s both` }}>
-                      <p style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.1em', margin: '0 0 6px' }}>{m.year}</p>
+                      <p style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, margin: '0 0 6px' }}>{m.year}</p>
                       <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 6px' }}>{m.title}</h3>
                       <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{m.desc}</p>
                     </div>

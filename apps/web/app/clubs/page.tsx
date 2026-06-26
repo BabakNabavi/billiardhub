@@ -492,7 +492,7 @@ export default function ClubsPage() {
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700, letterSpacing: '0.15em', marginBottom: 8 }}>نوع میز</div>
+                      <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>نوع میز</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {TABLE_TYPES.map(t => (
                           <button key={t.key} onClick={() => toggleType(t.key)} style={{ padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 600, border: `1px solid ${selectedTypes.includes(t.key) ? `${t.color}40` : 'rgba(0,0,0,0.09)'}`, background: selectedTypes.includes(t.key) ? `${t.color}14` : 'transparent', color: selectedTypes.includes(t.key) ? t.color : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
@@ -503,7 +503,7 @@ export default function ClubsPage() {
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700, letterSpacing: '0.15em', marginBottom: 8 }}>امکانات</div>
+                      <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>امکانات</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {AMENITIES.map(a => (
                           <button key={a.key} onClick={() => toggleAmen(a.key)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, border: `1px solid ${selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.10)' : 'transparent', color: selectedAmens.includes(a.key) ? '#A07840' : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
