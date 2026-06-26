@@ -112,13 +112,6 @@ function MatchCard({
           <span style={{ fontSize: 10, color: '#bbb', fontWeight: 600 }}>استراحت</span>
         ) : player ? (
           <>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-              background: `hsl(${player.name.charCodeAt(0) * 15},50%,85%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 9, fontWeight: 900,
-              color: `hsl(${player.name.charCodeAt(0) * 15},50%,35%)` }}>
-              {player.name[0]}
-            </div>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#111', flex: 1,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.name}
@@ -296,6 +289,7 @@ export default function BracketPage() {
           if (nm && winner) { if (m.matchIndex % 2 === 0) nm.player1 = winner; else nm.player2 = winner; }
         }
       });
+      try { localStorage.setItem(`bracket-${t.id}`, JSON.stringify(next)); } catch {}
       return next;
     });
     setConfirmed(true); setByeDlg(false);
@@ -303,7 +297,12 @@ export default function BracketPage() {
 
   const handleStart = () => {
     const hasEmpty = matches.filter(m => m.round === 1).some(m => !m.player1 || !m.player2);
-    if (hasEmpty) { setByeDlg(true); } else { setConfirmed(true); }
+    if (hasEmpty) {
+      setByeDlg(true);
+    } else {
+      try { localStorage.setItem(`bracket-${t.id}`, JSON.stringify(matches)); } catch {}
+      setConfirmed(true);
+    }
   };
 
   const reset = () => {
@@ -600,8 +599,10 @@ export default function BracketPage() {
                 <Play size={11} /> شروع
               </button>
             ) : (
-              <button onClick={() => router.push(`/tournaments/${t.id}/live`)}
-                style={lqBtn(true, '48,197,90', '#30C55A')}>
+              <button onClick={() => {
+                try { localStorage.setItem(`bracket-${t.id}`, JSON.stringify(matches)); } catch {}
+                router.push(`/tournaments/${t.id}/live`);
+              }} style={lqBtn(true, '48,197,90', '#30C55A')}>
                 <Check size={11} /> نمای زنده
               </button>
             )}
@@ -645,12 +646,6 @@ export default function BracketPage() {
                     border: `1px solid ${tapPlayer?.id === p.id ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.08)'}`,
                     cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.14s',
                   }}>
-                  <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                    background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 8, fontWeight: 900, color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
-                    {p.name[0]}
-                  </div>
                   <span style={{ fontSize: 12, fontWeight: 700,
                     color: tapPlayer?.id === p.id ? '#C7A66A' : '#333' }}>
                     {p.name}
@@ -684,12 +679,6 @@ export default function BracketPage() {
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px',
                   borderRadius: 9, marginBottom: 5, background: 'rgba(0,0,0,0.02)',
                   border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
-                <div style={{ width: 25, height: 25, borderRadius: '50%', flexShrink: 0,
-                  background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 900, color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
-                  {p.name[0]}
-                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#111',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>

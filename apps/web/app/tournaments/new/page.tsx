@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Trophy, ChevronRight, Check, AlertCircle, CreditCard,
+  Trophy, ChevronRight, ChevronLeft, Check, AlertCircle, CreditCard,
   Calendar, Clock, Users, FileText, Image,
 } from 'lucide-react';
 
@@ -45,6 +45,13 @@ function maxDays(jm: number): number {
   if (jm <= 11) return 30;
   return 29;
 }
+
+function jFirstWeekday(jy: number, jm: number): number {
+  const [gy, gm, gd] = j2g(jy, jm, 1);
+  return (new Date(gy, gm - 1, gd).getDay() + 1) % 7; // 0=Sat … 6=Fri
+}
+
+const J_DAY_NAMES = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 
 function toFa(v: string | number): string {
   return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]!);
@@ -152,60 +159,141 @@ function lqBtn(active: boolean, rgb = '199,166,106', color = '#C7A66A'): React.C
   };
 }
 
-// ── Jalali Date Picker ────────────────────────────────────────────────────────
+// ── Jalali Calendar Date Picker ───────────────────────────────────────────────
 
 function DatePicker({ value, onChange, label, required }: {
   value: string; onChange: (v: string, weekday: string) => void;
   label: string; required?: boolean;
 }) {
-  const [y, setY] = useState(1405);
-  const [m, setM] = useState(5);
-  const [d, setD] = useState(1);
-  const [touched, setTouched] = useState(false);
+  const [open, setOpen]   = useState(false);
+  const [viewY, setViewY] = useState(1405);
+  const [viewM, setViewM] = useState(4);
+  const [selY, setSelY]   = useState<number | null>(null);
+  const [selM, setSelM]   = useState<number | null>(null);
+  const [selD, setSelD]   = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const handleChange = (ny: number, nm: number, nd: number) => {
-    setY(ny); setM(nm);
-    const safe = Math.min(nd, maxDays(nm));
-    setD(safe); setTouched(true);
-    const monthName = MONTHS[nm - 1]!;
-    const wd = jalaliWeekday(ny, nm, safe);
-    onChange(`${toFa(safe)} ${monthName} ${toFa(ny)}`, wd);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const prevM = () => {
+    if (viewM === 1) { setViewM(12); setViewY(y => y - 1); }
+    else setViewM(m => m - 1);
+  };
+  const nextM = () => {
+    if (viewM === 12) { setViewM(1); setViewY(y => y + 1); }
+    else setViewM(m => m + 1);
   };
 
-  const weekday = touched ? jalaliWeekday(y, m, d) : '';
+  const handleSelect = (d: number) => {
+    setSelD(d); setSelY(viewY); setSelM(viewM); setOpen(false);
+    const wd    = jalaliWeekday(viewY, viewM, d);
+    const mName = MONTHS[viewM - 1]!;
+    onChange(`${toFa(d)} ${mName} ${toFa(viewY)}`, wd);
+  };
+
+  const dim   = maxDays(viewM);
+  const off   = jFirstWeekday(viewY, viewM);
+  const cells = [...Array(off).fill(null), ...Array.from({ length: dim }, (_, i) => i + 1)];
+
+  const displayVal = selD ? `${toFa(selD)} ${MONTHS[selM! - 1]} ${toFa(selY!)}` : '';
+  const weekday    = selD ? jalaliWeekday(selY!, selM!, selD) : '';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
         {label}{required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
       </label>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <select value={d} onChange={e => handleChange(y, m, +e.target.value)}
-          style={{ ...selectStyle, flex: 1 }}>
-          {Array.from({ length: maxDays(m) }, (_, i) => i + 1).map(day => (
-            <option key={day} value={day}>{toFa(day)}</option>
-          ))}
-        </select>
-        <select value={m} onChange={e => handleChange(y, +e.target.value, d)}
-          style={{ ...selectStyle, flex: 2 }}>
-          {MONTHS.map((mn, i) => (
-            <option key={i + 1} value={i + 1}>{mn}</option>
-          ))}
-        </select>
-        <select value={y} onChange={e => handleChange(+e.target.value, m, d)}
-          style={{ ...selectStyle, flex: 1.5 }}>
-          {[1403, 1404, 1405, 1406, 1407, 1408].map(yr => (
-            <option key={yr} value={yr}>{toFa(yr)}</option>
-          ))}
-        </select>
+
+      <div ref={ref} style={{ position: 'relative' }}>
+        {/* Trigger */}
+        <div onClick={() => setOpen(v => !v)} style={{
+          ...inputStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+          borderColor: open ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.10)',
+          userSelect: 'none',
+        } as React.CSSProperties}>
+          <Calendar size={15} color="#C7A66A" style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, color: selD ? '#111' : '#bbb', fontSize: 14 }}>
+            {displayVal || 'انتخاب تاریخ'}
+          </span>
+          <span style={{ fontSize: 10, color: '#ccc' }}>{open ? '▲' : '▼'}</span>
+        </div>
+
+        {/* Calendar popup */}
+        {open && (
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 300,
+            background: '#fff', borderRadius: 18, padding: '18px 16px',
+            border: '1px solid rgba(0,0,0,0.10)',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.14)', minWidth: 296,
+          }}>
+            {/* Month navigation */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <button onClick={prevM} style={{
+                width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)',
+                background: 'rgba(0,0,0,0.03)', cursor: 'pointer', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.45)',
+              }}>
+                <ChevronRight size={15} />
+              </button>
+              <span style={{ fontSize: 17, fontWeight: 800, color: '#111' }}>
+                {MONTHS[viewM - 1]} {toFa(viewY)}
+              </span>
+              <button onClick={nextM} style={{
+                width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)',
+                background: 'rgba(0,0,0,0.03)', cursor: 'pointer', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.45)',
+              }}>
+                <ChevronLeft size={15} />
+              </button>
+            </div>
+
+            {/* Day name headers */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 6 }}>
+              {J_DAY_NAMES.map(d => (
+                <div key={d} style={{
+                  textAlign: 'center', fontSize: 11, color: 'rgba(0,0,0,0.35)',
+                  fontWeight: 700, padding: '4px 0',
+                }}>{d}</div>
+              ))}
+            </div>
+
+            {/* Day cells */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 3 }}>
+              {cells.map((day, i) => {
+                if (!day) return <div key={i} />;
+                const isSel = selY === viewY && selM === viewM && selD === day;
+                return (
+                  <button key={i} onClick={() => handleSelect(day as number)} style={{
+                    height: 37, borderRadius: 9, border: 'none', fontSize: 13,
+                    fontWeight: isSel ? 800 : 500, cursor: 'pointer', fontFamily: 'inherit',
+                    background: isSel ? 'linear-gradient(135deg,#C7A66A,#A07840)' : 'transparent',
+                    color: isSel ? '#fff' : 'rgba(0,0,0,0.60)',
+                    boxShadow: isSel ? '0 3px 10px rgba(199,166,106,0.35)' : 'none',
+                    transition: 'all 0.14s',
+                  }}>
+                    {toFa(day as number)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Selected date badge */}
       {weekday && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)',
           borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, color: '#A07840',
           alignSelf: 'flex-start' }}>
           <Calendar size={11} color="#C7A66A" />
-          {value} — {weekday}
+          {displayVal} — {weekday}
         </div>
       )}
     </div>
@@ -402,7 +490,9 @@ export default function NewTournamentPage() {
                   <input
                     value={entryFeeDisplay}
                     onChange={e => {
-                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                      const raw = e.target.value
+                        .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+                        .replace(/[^0-9]/g, '');
                       setFeeRaw(raw);
                     }}
                     placeholder="مثال: ۵۰۰٬۰۰۰"
