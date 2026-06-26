@@ -622,7 +622,7 @@ export default function HomePage() {
             display: 'inline-flex', alignItems: 'center', gap: '10px',
             background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(24px)',
             border: '1px solid rgba(255,255,255,0.11)', borderRadius: '100px',
-            padding: '7px 22px', marginBottom: '28px',
+            padding: '7px 22px', marginBottom: '28px', transform: 'translateY(-5vh)',
           }}>
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: GOLD,
               boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
