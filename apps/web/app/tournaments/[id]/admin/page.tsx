@@ -392,10 +392,7 @@ export default function TournamentAdminPage() {
                       </div>
                     )}
                     {r.receiptNote && (
-                      <div style={{ fontSize: 12, color: '#777', marginTop: 4,
-                        padding: '4px 8px', borderRadius: 8,
-                        background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)',
-                        lineHeight: 1.5, wordBreak: 'break-word' }}>
+                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
                         {r.receiptNote}
                       </div>
                     )}
