@@ -139,6 +139,13 @@ export default function LivePage() {
   const [tick, setTick]     = useState(0);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`bracket-${id}`);
+      if (saved) setMatches(JSON.parse(saved));
+    } catch {}
+  }, [id]);
+
+  useEffect(() => {
     const iv = setInterval(() => setTick(t => t + 1), 30000);
     return () => clearInterval(iv);
   }, []);
