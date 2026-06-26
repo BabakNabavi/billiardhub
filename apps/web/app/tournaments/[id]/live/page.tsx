@@ -400,11 +400,11 @@ export default function LivePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72 }}>
+      fontFamily: 'Vazirmatn, sans-serif' }}>
 
       {/* Header */}
       <div style={{ background: '#111', color: '#fff',
-        padding: '16px clamp(16px,4vw,48px) 0' }}>
+        marginTop: -72, padding: '88px clamp(16px,4vw,48px) 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
