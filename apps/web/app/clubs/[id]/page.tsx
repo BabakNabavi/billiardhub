@@ -147,6 +147,7 @@ export default function ClubProfilePage() {
 
   const activeTables = tableTypes.filter(t => (club as any)[t.key] > 0);
   const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
+  const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, paddingTop: 72 }}>
@@ -672,7 +673,7 @@ export default function ClubProfilePage() {
       </div>
 
       {/* ── #7: Coach popup — click outside (backdrop) to close ── */}
-      {activeCoach !== null && (
+      {popupCoach !== null && (
         <>
           {/* Backdrop */}
           <div
@@ -699,30 +700,30 @@ export default function ClubProfilePage() {
             {/* Avatar */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
               <div style={{ width: 68, height: 68, borderRadius: 20, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#fff' }}>
-                {coaches[activeCoach].name[0]}
+                {popupCoach.name[0]}
               </div>
             </div>
 
             {/* Info */}
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
-              <div style={{ fontSize: 18, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{coaches[activeCoach].name}</div>
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{coaches[activeCoach].title} · {coaches[activeCoach].exp} تجربه</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{popupCoach.title} · {popupCoach.exp} تجربه</div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <Star size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                  <span style={{ fontSize: 15, fontWeight: 900, color: '#111111' }}>{coaches[activeCoach].rating}</span>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: '#111111' }}>{popupCoach.rating}</span>
                 </div>
                 <span style={{ width: 1, height: 14, background: 'rgba(0,0,0,0.12)', display: 'inline-block' }} />
-                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{toFa(coaches[activeCoach].matches)} مسابقه</span>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{toFa(popupCoach.matches)} مسابقه</span>
               </div>
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', lineHeight: 1.7, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
-                {coaches[activeCoach].bio}
+                {popupCoach.bio}
               </div>
             </div>
 
             {/* CTA — navigate to coach page on second tap/click */}
             <button
-              onClick={() => { setActiveCoach(null); router.push(`/coaches/${coaches[activeCoach].id}`); }}
+              onClick={() => { setActiveCoach(null); router.push(`/coaches/${popupCoach.id}`); }}
               style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               مشاهده صفحه مربی <ChevronLeft size={15} />
             </button>
