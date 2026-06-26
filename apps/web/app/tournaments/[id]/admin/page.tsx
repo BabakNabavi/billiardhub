@@ -391,16 +391,15 @@ export default function TournamentAdminPage() {
                         {r.playerInfo}
                       </div>
                     )}
+                    {r.receiptNote && (
+                      <div style={{ fontSize: 12, color: '#777', marginTop: 4,
+                        padding: '4px 8px', borderRadius: 8,
+                        background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)',
+                        lineHeight: 1.5, wordBreak: 'break-word' }}>
+                        {r.receiptNote}
+                      </div>
+                    )}
                   </div>
-
-                  {/* Receipt note */}
-                  {r.receiptNote && (
-                    <div style={{ fontSize: 12, color: '#777', maxWidth: 120,
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      flexShrink: 0 }}>
-                      {r.receiptNote}
-                    </div>
-                  )}
 
                   {/* Time */}
                   <div style={{ fontSize: 12, color: '#bbb', flexShrink: 0 }}>{r.registeredAt}</div>
