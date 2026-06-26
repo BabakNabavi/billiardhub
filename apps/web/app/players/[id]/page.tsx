@@ -464,7 +464,7 @@ export default function PlayerProfilePage() {
             <div className="player-sidebar">
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:18, position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:-1, left:'50%', transform:'translateX(-50%)', width:'70%', height:1, background:`linear-gradient(90deg,transparent,${lvlMeta.color}50,transparent)` }} />
-                <p style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.40)', letterSpacing:'0.12em', margin:'0 0 14px' }}>ارتباط با بازیکن</p>
+                <p style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.40)', margin:'0 0 14px' }}>ارتباط با بازیکن</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                   {player.phone && (
                     <a href={`tel:${player.phone}`} style={{ display:'flex', alignItems:'center', gap:10, padding:'11px 14px', background:'rgba(199,166,106,0.07)', border:'1px solid rgba(199,166,106,0.18)', borderRadius:12, textDecoration:'none' }}>
@@ -491,7 +491,7 @@ export default function PlayerProfilePage() {
               </div>
 
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:18 }}>
-                <p style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.40)', letterSpacing:'0.12em', margin:'0 0 14px' }}>خلاصه آمار</p>
+                <p style={{ fontSize:11, fontWeight:700, color:'rgba(0,0,0,0.40)', margin:'0 0 14px' }}>خلاصه آمار</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                   {[
                     { label:'رنک ملی',       v:player.nationalRank  ? `#${toFa(player.nationalRank)}`  : '—', color:'#f59e0b' },

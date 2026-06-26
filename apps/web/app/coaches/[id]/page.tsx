@@ -360,11 +360,11 @@ export default function CoachProfilePage() {
                         style={{ background: selPkg===pkg.id?`${pkg.color}0e`:'#FFFFFF', border:`1px solid ${selPkg===pkg.id?`${pkg.color}40`:'rgba(0,0,0,0.07)'}`, boxShadow: selPkg===pkg.id?`0 12px 36px rgba(0,0,0,0.4),0 0 0 1px ${pkg.color}20`:'none' }}>
 
                         {pkg.popular && (
-                          <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', background:`linear-gradient(135deg,${pkg.color},${pkg.color}cc)`, color:'#fff', fontSize:'9px', fontWeight:700, padding:'4px 16px', borderRadius:'0 0 12px 12px', letterSpacing:'0.1em' }}>محبوب‌ترین</div>
+                          <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', background:`linear-gradient(135deg,${pkg.color},${pkg.color}cc)`, color:'#fff', fontSize:'9px', fontWeight:700, padding:'4px 16px', borderRadius:'0 0 12px 12px' }}>محبوب‌ترین</div>
                         )}
 
                         <div style={{ marginTop: pkg.popular?'16px':'0', marginBottom:'16px' }}>
-                          <div style={{ fontSize:'11px', color:pkg.color, fontWeight:700, letterSpacing:'0.1em', marginBottom:'6px', textTransform:'uppercase' }}>{pkg.title}</div>
+                          <div style={{ fontSize:'11px', color:pkg.color, fontWeight:700, marginBottom:'6px' }}>{pkg.title}</div>
                           <div style={{ fontSize:'28px', fontWeight:900, color:'#111111', letterSpacing:'-0.03em', marginBottom:'2px', textShadow:`0 0 20px ${pkg.color}30` }}>
                             {toFa((pkg.price/1000000).toFixed(1))}م
                           </div>
@@ -462,7 +462,7 @@ export default function CoachProfilePage() {
               {/* Book CTA */}
               <div style={{ background:'#FFFFFF', border:`1px solid ${coach.avatarColor}25`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:`linear-gradient(90deg,transparent,${coach.avatarColor}60,transparent)`, boxShadow:`0 0 14px ${coach.avatarColor}40` }}/>
-                <div style={{ fontSize:'10px', color:`${coach.avatarColor}80`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'14px', textAlign:'center' }}>رزرو جلسه</div>
+                <div style={{ fontSize:'10px', color:`${coach.avatarColor}80`, fontWeight:700, marginBottom:'14px', textAlign:'center' }}>رزرو جلسه</div>
                 <div style={{ fontSize:'28px', fontWeight:900, color:'#C7A66A', textAlign:'center', letterSpacing:'-0.03em', marginBottom:'4px', textShadow:'0 0 20px rgba(199,166,106,0.4)' }}>
                   {toFa(coach.hourlyRate.toLocaleString())}
                 </div>
@@ -483,7 +483,7 @@ export default function CoachProfilePage() {
 
               {/* Specialities */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>تخصص‌ها</div>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>تخصص‌ها</div>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'7px' }}>
                   {coach.speciality.map((s: string) => (
                     <span key={s} style={{ fontSize:'11px', color:coach.avatarColor, background:`${coach.avatarColor}10`, border:`1px solid ${coach.avatarColor}22`, borderRadius:'20px', padding:'5px 12px', fontWeight:600 }}>{s}</span>
@@ -505,7 +505,7 @@ export default function CoachProfilePage() {
 
               {/* Quick stats */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(167,139,250,0.6)', letterSpacing:'0.18em', fontWeight:700, marginBottom:'14px' }}>آمار مربی</div>
+                <div style={{ fontSize:'11px', color:'rgba(167,139,250,0.6)', fontWeight:700, marginBottom:'14px' }}>آمار مربی</div>
                 {[
                   { l:'شاگردان فعال',   v:toFa(coach.students),  c:'#a78bfa' },
                   { l:'جلسات برگزار',   v:toFa(coach.sessions),  c:'#06b6d4' },

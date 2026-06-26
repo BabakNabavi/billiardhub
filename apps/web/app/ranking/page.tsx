@@ -282,7 +282,7 @@ export default function RankingsPage() {
                   borderRadius: '14px', padding: '14px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}>
-                  <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.65)', letterSpacing: '0.15em', fontWeight: 700, marginBottom: '10px' }}>
+                  <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.65)', fontWeight: 700, marginBottom: '10px' }}>
                     راهنما
                   </div>
                   {[

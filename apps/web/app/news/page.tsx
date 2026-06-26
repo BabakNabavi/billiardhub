@@ -103,7 +103,7 @@ export default function NewsPage() {
           }}>
             اخبار بیلیارد
           </h1>
-          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.40)', marginBottom: 32, letterSpacing: '0.08em' }}>
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.40)', marginBottom: 32 }}>
             {new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
           {/* Search */}
@@ -154,7 +154,7 @@ export default function NewsPage() {
           <div style={{ marginBottom: 48 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
               <div style={{ width: 3, height: 20, borderRadius: 99, background: GOLD }} />
-              <h2 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD_DARK, margin: 0 }}>اخبار ویژه</h2>
+              <h2 style={{ fontSize: 12, fontWeight: 700, color: GOLD_DARK, margin: 0 }}>اخبار ویژه</h2>
               <div style={{ height: 1, flex: 1, background: 'rgba(0,0,0,0.07)' }} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16 }}>
@@ -217,7 +217,7 @@ export default function NewsPage() {
         {featured.length > 0 && regular.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
             <div style={{ height: 1, flex: 1, background: 'rgba(0,0,0,0.07)' }} />
-            <span style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>آخرین اخبار</span>
+            <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>آخرین اخبار</span>
             <div style={{ height: 1, flex: 1, background: 'rgba(0,0,0,0.07)' }} />
           </div>
         )}

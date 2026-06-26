@@ -36,7 +36,7 @@ export function RecentActivity() {
           {/* Live dot */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '4px 12px', marginTop: '18px' }}>
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 700, letterSpacing: '0.06em' }}>زنده</span>
+            <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 700 }}>زنده</span>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ export function RecentActivity() {
               </div>
 
               {/* Time */}
-              <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.30)', letterSpacing: '0.04em', flexShrink: 0 }}>
+              <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.30)', flexShrink: 0 }}>
                 {a.time}
               </div>
             </div>

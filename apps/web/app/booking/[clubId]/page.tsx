@@ -397,7 +397,7 @@ function BookingContent() {
 
           {/* TABLE */}
           <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '3px', height: '13px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
               انتخاب میز
             </div>
@@ -433,7 +433,7 @@ function BookingContent() {
 
           {/* DATE */}
           <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '3px', height: '13px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
               انتخاب تاریخ
             </div>
@@ -452,7 +452,7 @@ function BookingContent() {
           {selectedTable && jDay && (
             <div ref={slotsRef} style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px', transformOrigin: 'top', animation: 'expand 0.4s cubic-bezier(0.22,1,0.36,1) both' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.04em' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '3px', height: '13px', background: `linear-gradient(180deg,${accentColor},transparent)`, borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                   انتخاب ساعت
                 </div>

@@ -413,7 +413,7 @@ export default function BrandProfilePage() {
 
               {/* Quick stats */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>آمار سریع</div>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار سریع</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                   {[
                     { l:'محصولات فعال',   v:toFa(brand.stats.products),   c:brand.accentColor },
@@ -431,7 +431,7 @@ export default function BrandProfilePage() {
 
               {/* Related brands */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'14px', textTransform:'uppercase' }}>برندهای مشابه</div>
+                <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>برندهای مشابه</div>
                 {[{n:'RILEY',c:'#a78bfa',id:'riley'},{n:'MEZZ',c:'#ef4444',id:'mezz'}].map((b,i) => (
                   <Link key={i} href={`/brands/${b.id}`} style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'10px', padding:'10px', borderRadius:'12px', transition:'background 0.2s', marginBottom: i<1?'6px':'0' }}
                     onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(0,0,0,0.04)';}}
