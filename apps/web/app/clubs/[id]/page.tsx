@@ -6,8 +6,8 @@ import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/auth.store';
 import {
   MapPin, Phone, Globe, Clock, Star, Navigation,
-  ChevronLeft, ChevronRight, Calendar, Wifi, Car,
-  Coffee, Trophy, Check, Users, Images,
+  ChevronLeft, ChevronRight, Calendar, Check,
+  Camera, Plus,
 } from 'lucide-react';
 
 interface Club {
@@ -19,6 +19,8 @@ interface Club {
   dartBoards: number; playstations: number;
   hasCafe: boolean; hasParking: boolean; hasWifi: boolean; hasProfessionalCoach: boolean;
   specialFeatures: string; workingHours: any; images: string[]; videos: string[];
+  logo?: string;
+  hasActiveStory?: boolean;
 }
 
 const sampleClub: Club = {
@@ -41,18 +43,14 @@ const sampleClub: Club = {
   },
   images: ['/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg'],
   videos: [],
+  logo: undefined,
+  hasActiveStory: true,
 };
 
 const coaches = [
   { name: 'امیر رضایی', title: 'مربی ارشد اسنوکر',  exp: '۱۲ سال', rating: 4.9, matches: 340 },
   { name: 'سارا محمدی', title: 'مربی پاکت بیلیارد', exp: '۸ سال',  rating: 4.7, matches: 210 },
   { name: 'کاوه نوری',  title: 'مربی VIP',           exp: '۱۵ سال', rating: 5.0, matches: 520 },
-];
-
-const reviews = [
-  { name: 'محمد ح.',   rating: 5, text: 'بهترین باشگاه تهران. میزهای درجه یک و فضای واقعاً حرفه‌ای.', date: '۱۴۰۴/۰۲/۱۵', verified: true },
-  { name: 'نیلوفر ع.', rating: 5, text: 'مربی‌ها فوق‌العاده‌اند. در ۳ جلسه پیشرفت زیادی داشتم.',    date: '۱۴۰۴/۰۲/۰۸', verified: true },
-  { name: 'رضا ک.',    rating: 4, text: 'میزهای VIP واقعاً باکیفیتن. فقط پارکینگ کمی شلوغه.',        date: '۱۴۰۴/۰۱/۲۸', verified: false },
 ];
 
 const tableTypes = [
@@ -65,10 +63,10 @@ const tableTypes = [
 ];
 
 const galleryAlbums = [
-  { name: 'مسابقات کشوری ۱۴۰۵', cover: '/images/clubs/club6.jpeg',          count: 24 },
-  { name: 'مهمانان ویژه',         cover: '/images/clubs/club7.jpeg',          count: 12 },
-  { name: 'تجهیزات و داخلی',      cover: '/images/clubs/club8.jpg',           count: 15 },
-  { name: 'رویدادهای هفتگی',      cover: '/images/clubs/club9.jpeg',          count: 18 },
+  { name: 'مسابقات کشوری ۱۴۰۵', cover: '/images/clubs/club6.jpeg', count: 24 },
+  { name: 'مهمانان ویژه',         cover: '/images/clubs/club7.jpeg', count: 12 },
+  { name: 'تجهیزات و داخلی',      cover: '/images/clubs/club8.jpg',  count: 15 },
+  { name: 'رویدادهای هفتگی',      cover: '/images/clubs/club9.jpeg', count: 18 },
 ];
 const galleryImages = [
   '/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg',
@@ -114,6 +112,9 @@ export default function ClubProfilePage() {
   const [distance, setDistance] = useState<string | null>(null);
   const [tab, setTab]           = useState<'info' | 'tables' | 'gallery' | 'schedule'>('info');
 
+  /* mock: in real app derive from auth vs. club.managerId */
+  const isAdmin = false;
+
   useEffect(() => {
     api.get(`/clubs/${id}`)
       .then(r => { if (r.data) setClub(r.data); })
@@ -130,6 +131,7 @@ export default function ClubProfilePage() {
   const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
   const todayH   = (club.workingHours ?? {})?.[todayKey as string] as any;
   const isOpen   = calcIsOpen(todayH);
+  const hasStory = !!club.hasActiveStory;
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -141,7 +143,7 @@ export default function ClubProfilePage() {
   const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20 }}>
+    <div style={{ minHeight: '100vh', background: '#0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, paddingTop: 72 }}>
       <div style={{ width: 48, height: 48, border: '2px solid rgba(199,166,106,0.10)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', fontFamily: 'Vazirmatn, sans-serif' }}>در حال بارگذاری...</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -154,7 +156,6 @@ export default function ClubProfilePage() {
         @keyframes spin      { to{transform:rotate(360deg)} }
         @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
         @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes slideIn   { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:none} }
 
         .tab-btn { padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid transparent;cursor:pointer;font-family:inherit;transition:all 0.25s;white-space:nowrap;flex-shrink:0 }
         .tab-btn.active { background:rgba(199,166,106,0.12);border-color:rgba(199,166,106,0.35);color:#C7A66A }
@@ -186,12 +187,16 @@ export default function ClubProfilePage() {
           z-index:200;
         }
         @media(min-width:960px){ .book-fixed{display:none} }
+
+        .book-btn-desktop:hover { background:rgba(199,166,106,0.20) !important; }
+        .story-avatar { cursor:${hasStory ? 'pointer' : 'default'} }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
+      {/* ── 1. paddingTop:72 — clears the fixed 72px navbar ── */}
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90, paddingTop: 72 }}>
 
-        {/* ══ HERO — cinematic crossfade slider ══ */}
-        <div style={{ position: 'relative', height: 'clamp(300px,52vw,600px)', overflow: 'hidden', background: '#0A0806' }}>
+        {/* ══ HERO — 15% smaller height, viewport-height capped ══ */}
+        <div style={{ position: 'relative', height: 'min(clamp(255px,44vw,510px),58vh)', overflow: 'hidden', background: '#0A0806' }}>
 
           {/* Crossfade image stack */}
           {images.map((img, i) => (
@@ -208,13 +213,13 @@ export default function ClubProfilePage() {
               }} />
           ))}
 
-          {/* Cinematic gradient overlays */}
+          {/* Cinematic overlays */}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(4,2,8,0.72) 0%,transparent 28%,transparent 42%,rgba(4,2,8,0.98) 100%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 60% at 18% 60%,rgba(199,166,106,0.07) 0%,transparent 100%)', pointerEvents: 'none' }} />
 
           {/* Slide dots */}
           {images.length > 1 && (
-            <div style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
+            <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
               {images.map((_, i) => (
                 <button key={i} onClick={() => setSlide(i)} style={{
                   width: i === slide ? 22 : 6, height: 6, borderRadius: 3,
@@ -227,8 +232,8 @@ export default function ClubProfilePage() {
             </div>
           )}
 
-          {/* Top nav */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'clamp(14px,3vw,24px) clamp(16px,4vw,36px)', paddingTop: 'clamp(48px,6vw,64px)' }}>
+          {/* Top nav — normal padding since hero is now below navbar */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'clamp(14px,2.5vw,20px) clamp(16px,4vw,36px)' }}>
             <button onClick={() => router.push('/clubs')} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.82)', fontSize: 13, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
               <ChevronRight size={14} /> باشگاه‌ها
             </button>
@@ -243,27 +248,86 @@ export default function ClubProfilePage() {
           {/* Prev / Next arrows */}
           {images.length > 1 && (
             <>
-              <button onClick={() => setSlide(s => (s - 1 + images.length) % images.length)} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.16)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}>
+              <button onClick={() => setSlide(s => (s - 1 + images.length) % images.length)} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.16)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronRight size={17} />
               </button>
-              <button onClick={() => setSlide(s => (s + 1) % images.length)} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.16)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}>
+              <button onClick={() => setSlide(s => (s + 1) % images.length)} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.16)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronLeft size={17} />
               </button>
             </>
           )}
 
-          {/* Hero info — avatar + name */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(16px,3vw,36px) clamp(16px,4vw,40px)' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '4px 14px', marginBottom: 12 }}>
+          {/* Hero bottom info */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(14px,2.5vw,28px) clamp(16px,4vw,40px)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '4px 14px', marginBottom: 10 }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
               <span style={{ fontSize: 10, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
             </div>
 
-            {/* Avatar + Name row */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 12 }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(199,166,106,0.18)', border: '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#C7A66A', flexShrink: 0, backdropFilter: 'blur(20px)' }}>
-                {club.name[0]}
+            {/* ── Avatar + Name row ── */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 10 }}>
+
+              {/* ── 4 & 5: Avatar — 10% larger + story ring ── */}
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+
+                {/* Story ring: gradient outer → dark gap → avatar */}
+                {hasStory && (
+                  <div style={{
+                    position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0,
+                    background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
+                  }} />
+                )}
+                {hasStory && (
+                  <div style={{
+                    position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1,
+                    border: '3px solid rgba(10,8,6,0.92)',
+                  }} />
+                )}
+
+                {/* Avatar — 62×62 (10% larger than original 56×56) */}
+                <div className="story-avatar" style={{
+                  position: 'relative', zIndex: 2,
+                  width: 62, height: 62, borderRadius: '50%',
+                  background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)',
+                  border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 24, fontWeight: 900, color: '#C7A66A',
+                  backdropFilter: 'blur(20px)',
+                  overflow: 'hidden',
+                }}>
+                  {club.logo
+                    ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : club.name[0]
+                  }
+                </div>
+
+                {/* Admin: camera/edit button for logo change */}
+                {isAdmin && (
+                  <button style={{
+                    position: 'absolute', bottom: -2, left: -2, zIndex: 3,
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: '#C7A66A', border: '2px solid #0A0806',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', padding: 0,
+                  }}>
+                    <Camera size={10} color="#0A0806" />
+                  </button>
+                )}
+
+                {/* Admin: story post button */}
+                {isAdmin && !hasStory && (
+                  <button style={{
+                    position: 'absolute', top: -2, left: -2, zIndex: 3,
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: '#ef4444', border: '2px solid #0A0806',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', padding: 0,
+                  }}>
+                    <Plus size={10} color="#fff" />
+                  </button>
+                )}
               </div>
+
               <h1 style={{ fontSize: 'clamp(20px,5vw,50px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
                 {club.name}
               </h1>
@@ -303,12 +367,13 @@ export default function ClubProfilePage() {
             ))}
           </div>
 
-          {/* ── INFO TAB — 2-col grid on desktop ── */}
+          {/* ── INFO TAB ── */}
           {tab === 'info' && (
             <div className="info-grid" style={{ animation: 'fadeUp 0.4s ease both' }}>
 
               {/* Main column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
@@ -399,14 +464,16 @@ export default function ClubProfilePage() {
                 </div>
               </div>
 
-              {/* Sidebar — booking + contact + stats */}
+              {/* ── Sidebar — booking + contact + stats ── */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                {/* Booking box — no button, green free count, bolder numbers */}
+                {/* ── 6. Booking box — with desktop reserve button ── */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
                   <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+
+                  {/* Free / Busy / Total counters */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 16 }}>
                     {[
                       { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
                       { v: '۳',  l: 'مشغول',    c: '#ef4444',          rgb: '239,68,68'   },
@@ -418,6 +485,23 @@ export default function ClubProfilePage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Desktop reserve button — LQ style */}
+                  <button
+                    className="book-btn-desktop"
+                    onClick={goBook}
+                    style={{
+                      width: '100%', padding: '13px',
+                      background: 'rgba(199,166,106,0.12)',
+                      border: '1px solid rgba(199,166,106,0.35)',
+                      borderRadius: 18, color: '#C7A66A',
+                      fontSize: 14, fontWeight: 800,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      transition: 'background 0.25s',
+                    }}>
+                    <Calendar size={15} /> رزرو آنلاین
+                  </button>
                 </div>
 
                 {/* Contact info */}
@@ -499,8 +583,6 @@ export default function ClubProfilePage() {
           {/* ── GALLERY TAB ── */}
           {tab === 'gallery' && (
             <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 28 }}>
-
-              {/* Albums horizontal scroll */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
@@ -516,7 +598,7 @@ export default function ClubProfilePage() {
                           onMouseEnter={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.06)'; }}
                           onMouseLeave={e => { (e.target as HTMLImageElement).style.transform = 'scale(1)'; }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
-                        <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: '10px 10px 10px' }}>
+                        <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
                           <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
                           <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.count)} عکس</div>
                         </div>
@@ -525,8 +607,6 @@ export default function ClubProfilePage() {
                   ))}
                 </div>
               </div>
-
-              {/* All photos grid */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
@@ -534,7 +614,7 @@ export default function ClubProfilePage() {
                 </div>
                 <div className="gallery-grid">
                   {galleryImages.map((img, i) => (
-                    <div key={i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', position: 'relative', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+                    <div key={i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
                       <img src={img} alt=""
                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)', transition: 'transform 0.4s ease, filter 0.3s' }}
@@ -581,7 +661,7 @@ export default function ClubProfilePage() {
           )}
         </div>
 
-        {/* ── STICKY RESERVE BUTTON — mobile only, LQ style ── */}
+        {/* ── STICKY RESERVE BUTTON — mobile only ── */}
         <div className="book-fixed">
           <button onClick={goBook} style={{ width: '100%', padding: '14px', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, background: 'rgba(199,166,106,0.14)', color: '#C7A66A', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <Calendar size={16} /> رزرو میز آنلاین
