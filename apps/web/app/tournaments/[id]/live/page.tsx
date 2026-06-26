@@ -153,6 +153,12 @@ export default function LivePage() {
   const roundGroups = Array.from({ length: totalRounds }, (_, i) => i + 1)
     .map(r => ({ round: r, ms: matches.filter(m => m.round === r) }));
 
+  /* Double-sided bracket helpers */
+  const innerRounds = Array.from({ length: totalRounds - 1 }, (_, i) => i + 1);
+  const bracketFinal = matches.find(m => m.round === totalRounds);
+  const lhalf = (r: number) => { const all = matches.filter(m => m.round === r); return all.filter(m => m.matchIndex < all.length / 2); };
+  const rhalf = (r: number) => { const all = matches.filter(m => m.round === r); return all.filter(m => m.matchIndex >= all.length / 2); };
+
   const liveNow  = matches.filter(m => m.status === 'in_progress');
   const upcoming = matches.filter(m => m.status === 'waiting' && m.player1 && m.player2);
   const done     = matches.filter(m => m.status === 'completed');
@@ -181,81 +187,117 @@ export default function LivePage() {
     setScoreModal(null);
   };
 
-  /* ── Bracket view ── */
-  const BracketView = () => (
-    <div style={{ overflowX: 'auto', padding: '24px 0' }}>
-      <div style={{ display: 'flex', gap: 0, direction: 'ltr', alignItems: 'stretch',
-        minWidth: 'max-content', padding: '0 24px' }}>
-        {roundGroups.map(({ round, ms }, ri) => (
-          <div key={round}>
-            <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#bbb',
-              letterSpacing: '0.08em', marginBottom: 14, padding: '0 16px' }}>
-              {roundLabel(round, totalRounds)}
+  /* ── Single match card for live bracket ── */
+  const LiveCard = ({ m }: { m: TournamentMatch }) => {
+    const isLive = m.status === 'in_progress';
+    const isDone = m.status === 'completed';
+    const clickable = !isDone && !!m.player1 && !!m.player2;
+    return (
+      <div onClick={() => clickable && setScoreModal(m)} style={{
+        width: 158, borderRadius: 9, overflow: 'hidden',
+        border: `2px solid ${isLive ? '#ef4444' : isDone ? 'rgba(48,197,90,0.28)' : 'rgba(0,0,0,0.08)'}`,
+        background: '#fff', cursor: clickable ? 'pointer' : 'default',
+        boxShadow: isLive ? '0 4px 16px rgba(239,68,68,0.14)' : '0 1px 6px rgba(0,0,0,0.05)',
+        transition: 'all 0.18s',
+      }}>
+        {isLive && (
+          <div style={{ padding: '3px 9px', background: '#ef4444',
+            fontSize: 9, fontWeight: 800, color: '#fff',
+            display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Circle size={5} fill="#fff" /> زنده
+          </div>
+        )}
+        {([m.player1, m.player2] as (TournamentMatch['player1'])[]).map((p, si) => {
+          const score = si === 0 ? m.score1 : m.score2;
+          const isWinner = isDone && m.winner?.id === p?.id;
+          return (
+            <div key={si} style={{
+              padding: '7px 9px', display: 'flex', alignItems: 'center', gap: 6,
+              borderBottom: si === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+              background: isWinner ? 'rgba(48,197,90,0.05)' : 'transparent',
+            }}>
+              <span style={{ flex: 1, fontSize: 11, fontWeight: isWinner ? 800 : 600,
+                color: p ? (isWinner ? '#30C55A' : '#111') : '#ccc',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {p?.name ?? '—'}
+              </span>
+              {score != null && (
+                <span style={{ fontSize: 15, fontWeight: 900, color: isWinner ? '#30C55A' : '#bbb' }}>
+                  {toFa(score)}
+                </span>
+              )}
+              {isWinner && <Trophy size={10} color="#30C55A" style={{ flexShrink: 0 }} />}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column',
-              padding: `${Math.pow(2, ri) * 30}px 16px`, gap: 0 }}>
-              {ms.map(m => {
-                const isLive  = m.status === 'in_progress';
-                const isDone  = m.status === 'completed';
-                return (
-                  <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 18 }}>
-                    <div
-                      onClick={() => !isDone && m.player1 && m.player2 && setScoreModal(m)}
-                      style={{
-                        width: 200, borderRadius: 14, overflow: 'hidden',
-                        border: `2px solid ${isLive ? '#ef4444' : isDone ? 'rgba(48,197,90,0.30)' : 'rgba(0,0,0,0.08)'}`,
-                        background: '#fff', cursor: isLive ? 'pointer' : 'default',
-                        boxShadow: isLive ? '0 4px 20px rgba(239,68,68,0.12)' : '0 2px 8px rgba(0,0,0,0.05)',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {isLive && (
-                        <div style={{ padding: '5px 12px', background: '#ef4444',
-                          fontSize: 10, fontWeight: 800, color: '#fff',
-                          display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <Circle size={6} fill="#fff" /> زنده — کلیک برای ثبت نتیجه
-                        </div>
-                      )}
-                      {[m.player1, m.player2].map((p, si) => {
-                        const score = si === 0 ? m.score1 : m.score2;
-                        const isWinner = isDone && m.winner?.id === p?.id;
-                        return (
-                          <div key={si} style={{
-                            padding: '10px 12px', display: 'flex', alignItems: 'center',
-                            gap: 8, borderBottom: si === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                            background: isWinner ? 'rgba(48,197,90,0.05)' : 'transparent',
-                          }}>
-                            <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-                              background: p ? `hsl(${p.name.charCodeAt(0) * 15},50%,85%)` : '#f5f5f5',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 11, fontWeight: 800,
-                              color: p ? `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` : '#ddd',
-                            }}>
-                              {p?.name[0] ?? '?'}
-                            </div>
-                            <span style={{ flex: 1, fontSize: 12, fontWeight: isWinner ? 800 : 600,
-                              color: p ? (isWinner ? '#30C55A' : '#111') : '#ccc',
-                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                            }}>
-                              {p?.name ?? (si === 0 ? 'بازیکن ۱' : 'بازیکن ۲')}
-                            </span>
-                            {score != null && (
-                              <span style={{ fontSize: 18, fontWeight: 900,
-                                color: isWinner ? '#30C55A' : '#ccc' }}>
-                                {toFa(score)}
-                              </span>
-                            )}
-                            {isWinner && <Trophy size={12} color="#30C55A" />}
-                          </div>
-                        );
-                      })}
-                    </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  /* ── Double-sided bracket view ── */
+  const BracketView = () => (
+    <div style={{ overflowX: 'auto', padding: '20px 0', WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
+      <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
+        minWidth: 'max-content', padding: '0 16px', gap: 0 }}>
+
+        {/* LEFT HALF: R1 → SF */}
+        {innerRounds.map((round, ri) => {
+          const ms = lhalf(round);
+          const pad = Math.pow(2, ri) * 20;
+          return (
+            <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ textAlign: 'center', fontSize: 9, fontWeight: 800, color: '#ccc',
+                letterSpacing: '0.08em', marginBottom: 10, padding: '0 8px' }}>
+                {roundLabel(round, totalRounds)}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
+                {ms.map(m => (
+                  <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 12 }}>
+                    <LiveCard m={m} />
                   </div>
-                );
-              })}
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* FINAL in center */}
+        {bracketFinal && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
+              textAlign: 'center', padding: '0 10px', marginBottom: 10 }}>
+              🏆 فینال
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
+              flex: 1, padding: `${Math.pow(2, innerRounds.length) * 20}px 10px` }}>
+              <LiveCard m={bracketFinal} />
             </div>
           </div>
-        ))}
+        )}
+
+        {/* RIGHT HALF: SF → R1 (reversed) */}
+        {[...innerRounds].reverse().map((round, ri) => {
+          const ms = rhalf(round);
+          const mirrorRi = innerRounds.length - 1 - ri;
+          const pad = Math.pow(2, mirrorRi) * 20;
+          return (
+            <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ textAlign: 'center', fontSize: 9, fontWeight: 800, color: '#ccc',
+                letterSpacing: '0.08em', marginBottom: 10, padding: '0 8px' }}>
+                {roundLabel(round, totalRounds)}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
+                {ms.map(m => (
+                  <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 12 }}>
+                    <LiveCard m={m} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
