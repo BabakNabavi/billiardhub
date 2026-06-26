@@ -145,7 +145,6 @@ export default function ClubProfilePage() {
     return () => clearInterval(t);
   }, [images.length]);
 
-  const activeTables = tableTypes.filter(t => (club as any)[t.key] > 0);
   const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
 
@@ -192,10 +191,6 @@ export default function ClubProfilePage() {
         .book-fixed {
           position:fixed;bottom:0;left:0;right:0;
           padding:12px 16px 16px;
-          background:rgba(10,8,6,0.94);
-          border-top:1px solid rgba(199,166,106,0.15);
-          backdrop-filter:blur(24px);
-          -webkit-backdrop-filter:blur(24px);
           z-index:200;
         }
         @media(min-width:960px){ .book-fixed{display:none} }
@@ -209,7 +204,7 @@ export default function ClubProfilePage() {
         .tourn-card:hover { transform:translateY(-2px); }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90, paddingTop: 72 }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
         {/* ══ HERO ══ */}
         <div style={{ position: 'relative', height: 'min(clamp(255px,44vw,510px),58vh)', overflow: 'hidden', background: '#0A0806' }}>
@@ -229,7 +224,7 @@ export default function ClubProfilePage() {
             </div>
           )}
 
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'clamp(14px,2.5vw,20px) clamp(16px,4vw,36px)' }}>
+          <div style={{ position: 'absolute', top: 72, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'clamp(10px,2vw,16px) clamp(16px,4vw,36px)' }}>
             <button onClick={() => router.push('/clubs')} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.82)', fontSize: 13, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
               <ChevronRight size={14} /> باشگاه‌ها
             </button>
@@ -323,64 +318,7 @@ export default function ClubProfilePage() {
                   )}
                 </div>
 
-                {/* ── #9 + #10 + #11: انتخاب میز — professional, large header, model names, VIP gold ── */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)', overflow: 'hidden' }}>
-                  {/* Section header — big, professional */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                    <div>
-                      <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>انتخاب میز</h2>
-                      <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: 0, fontWeight: 500 }}>میز مناسب را انتخاب کنید و رزرو کنید</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '6px 14px' }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#30C55A', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-                      <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700 }}>{toFa(activeTables.reduce((s, t) => s + (club as any)[t.key], 0))} میز موجود</span>
-                    </div>
-                  </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {activeTables.map((t, i) => (
-                      <div key={i} className={`table-card ${t.isVip ? 'vip' : ''}`}
-                        style={{ border: t.isVip ? '1px solid rgba(199,166,106,0.30)' : `1px solid rgba(${t.rgb},0.14)` }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-
-                          {/* Icon */}
-                          <div style={{ width: 52, height: 52, borderRadius: 16, background: t.isVip ? 'linear-gradient(135deg,rgba(199,166,106,0.18),rgba(199,166,106,0.08))' : `rgba(${t.rgb},0.10)`, border: t.isVip ? '1px solid rgba(199,166,106,0.30)' : `1px solid rgba(${t.rgb},0.18)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
-                            🎱
-                          </div>
-
-                          {/* Name + model */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            {/* #10: bigger label, #11: VIP → gold */}
-                            <div style={{ fontSize: 17, fontWeight: 900, color: t.isVip ? '#C7A66A' : '#111111', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {t.label}
-                              {t.isVip && (
-                                <span style={{ fontSize: 9, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', color: '#C7A66A', borderRadius: 20, padding: '2px 8px', fontWeight: 800 }}>VIP</span>
-                              )}
-                            </div>
-                            {/* #10: model name below (as admin enters) */}
-                            <div style={{ fontSize: 11, color: t.isVip ? 'rgba(199,166,106,0.70)' : 'rgba(0,0,0,0.35)', fontFamily: 'monospace, Courier New', letterSpacing: '0.04em', marginBottom: 6 }}>
-                              {t.model}
-                            </div>
-                            <span style={{ fontSize: 11, color: t.color, background: `rgba(${t.rgb},0.10)`, border: `1px solid rgba(${t.rgb},0.22)`, borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>
-                              {toFa((club as any)[t.key])} میز
-                            </span>
-                          </div>
-
-                          {/* Price + book */}
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-                            <div style={{ textAlign: 'left' }}>
-                              <div style={{ fontSize: 16, fontWeight: 900, color: t.isVip ? '#C7A66A' : '#111111' }}>{t.price}</div>
-                              <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', textAlign: 'center' }}>تومان / ساعت</div>
-                            </div>
-                            <button onClick={goBook} style={{ padding: '9px 18px', background: t.isVip ? 'rgba(199,166,106,0.12)' : `rgba(${t.rgb},0.10)`, border: t.isVip ? '1px solid rgba(199,166,106,0.35)' : `1px solid rgba(${t.rgb},0.25)`, borderRadius: 20, color: t.color, fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <Calendar size={12} /> رزرو
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Amenities */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
@@ -728,8 +666,6 @@ export default function ClubProfilePage() {
               مشاهده صفحه مربی <ChevronLeft size={15} />
             </button>
 
-            {/* Dismiss hint */}
-            <div style={{ textAlign: 'center', marginTop: 10, fontSize: 11, color: 'rgba(0,0,0,0.28)' }}>ضربه بیرون از این کادر برای بستن</div>
           </div>
         </>
       )}
