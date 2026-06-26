@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,9 +8,10 @@ import { useAuthStore } from '../../../store/auth.store';
 import AuthGuard from '../../../components/AuthGuard';
 import {
   ChevronRight, ChevronLeft, Check, Clock,
-  Calendar, CheckCircle, AlertCircle, X, Info,
+  Calendar, CheckCircle, AlertCircle, X, Info, CreditCard,
 } from 'lucide-react';
 
+/* ── Jalali helpers ── */
 function toJalali(gy: number, gm: number, gd: number): [number, number, number] {
   const leap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
   const g_d = [31, leap(gy) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -29,7 +30,6 @@ function toJalali(gy: number, gm: number, gd: number): [number, number, number] 
   for (let i = 0; i < 11 && days >= (j_d[i] ?? 0); i++) { days -= (j_d[i] ?? 0); jm++; }
   return [jy, jm + 1, days + 1];
 }
-
 function jalaliToGregorian(jy: number, jm: number, jd: number): [number, number, number] {
   const jy2 = jy - 979, jm2 = jm - 1, jd2 = jd - 1;
   let j_dn = 365 * jy2 + Math.floor(jy2 / 33) * 8 + Math.floor((jy2 % 33 + 3) / 4);
@@ -47,7 +47,6 @@ function jalaliToGregorian(jy: number, jm: number, jd: number): [number, number,
   for (let i = 0; g_dn >= (gml[i] ?? 0); i++) { g_dn -= (gml[i] ?? 0); gm++; }
   return [gy, gm + 1, g_dn + 1];
 }
-
 function jDaysInMonth(jy: number, jm: number) {
   if (jm <= 6) return 31;
   if (jm <= 11) return 30;
@@ -68,6 +67,10 @@ function toFa(v: string | number) {
 const jMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 const jDayNames = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 
+/* #13 — selections are always green, regardless of table type */
+const SEL_COLOR = '#30C55A';
+const SEL_RGB   = '48,197,90';
+
 interface Table {
   id: string; number: number; name: string;
   type: string; brand: string; model: string; pricePerHour: number;
@@ -85,37 +88,28 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 const FALLBACK_TABLES: Table[] = [
-  { id: 't1', number: 1, name: 'میز اسنوکر ۱', type: 'snooker', brand: 'Viraka', model: 'M1 Gold', pricePerHour: 180000 },
-  { id: 't2', number: 2, name: 'میز اسنوکر ۲', type: 'snooker', brand: 'BCE', model: 'Heritage', pricePerHour: 180000 },
-  { id: 't3', number: 3, name: 'میز اسنوکر ۳', type: 'snooker', brand: 'Viraka', model: 'M2 Pro', pricePerHour: 180000 },
-  { id: 't4', number: 4, name: 'میز پاکت ۱', type: 'pocket', brand: 'Brunswick', model: 'Gold Crown', pricePerHour: 150000 },
-  { id: 't5', number: 5, name: 'میز پاکت ۲', type: 'pocket', brand: 'Diamond', model: 'Pro Am', pricePerHour: 150000 },
-  { id: 't6', number: 6, name: 'میز هی‌بال ۱', type: 'highball', brand: 'Artis', model: 'Vienna', pricePerHour: 120000 },
-  { id: 't7', number: 7, name: 'VIP اسنوکر ۱', type: 'vip_snooker', brand: 'Viraka', model: 'M1 VIP', pricePerHour: 350000 },
-  { id: 't8', number: 8, name: 'VIP اسنوکر ۲', type: 'vip_snooker', brand: 'Riley', model: 'Renaissance', pricePerHour: 350000 },
+  { id: 't1', number: 1, name: 'میز اسنوکر ۱',  type: 'snooker',     brand: 'Viraka',     model: 'M1 Gold',       pricePerHour: 180000 },
+  { id: 't2', number: 2, name: 'میز اسنوکر ۲',  type: 'snooker',     brand: 'BCE',        model: 'Heritage',      pricePerHour: 180000 },
+  { id: 't3', number: 3, name: 'میز اسنوکر ۳',  type: 'snooker',     brand: 'Viraka',     model: 'M2 Pro',        pricePerHour: 180000 },
+  { id: 't4', number: 4, name: 'میز پاکت ۱',    type: 'pocket',      brand: 'Brunswick',  model: 'Gold Crown',    pricePerHour: 150000 },
+  { id: 't5', number: 5, name: 'میز پاکت ۲',    type: 'pocket',      brand: 'Diamond',    model: 'Pro Am',        pricePerHour: 150000 },
+  { id: 't6', number: 6, name: 'میز هی‌بال ۱',  type: 'highball',    brand: 'Artis',      model: 'Vienna',        pricePerHour: 120000 },
+  { id: 't7', number: 7, name: 'VIP اسنوکر ۱',  type: 'vip_snooker', brand: 'Viraka',     model: 'M1 VIP',        pricePerHour: 350000 },
+  { id: 't8', number: 8, name: 'VIP اسنوکر ۲',  type: 'vip_snooker', brand: 'Riley',      model: 'Renaissance',   pricePerHour: 350000 },
 ];
 
-// ── ساعت‌های گذشته رو خودکار مشغول می‌کنه ──
 function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
   const now = new Date();
   const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  if (isoDate !== todayISO) return slots; // روزهای آینده دست نخور
+  if (isoDate !== todayISO) return slots;
   const currentHour = now.getHours();
-  return slots.map(s => ({
-    ...s,
-    isBooked: s.isBooked || s.hour <= currentHour,
-  }));
+  return slots.map(s => ({ ...s, isBooked: s.isBooked || s.hour <= currentHour }));
 }
-
 function genFallbackSlots(isoDate: string): Slot[] {
   const booked = [12, 13, 17, 18];
-  const rawSlots: Slot[] = Array.from({ length: 15 }, (_, i) => ({
-    hour: i + 9,
-    isBooked: booked.includes(i + 9),
-  }));
+  const rawSlots: Slot[] = Array.from({ length: 15 }, (_, i) => ({ hour: i + 9, isBooked: booked.includes(i + 9) }));
   return applyPastHours(rawSlots, isoDate);
 }
-
 function buildRange(slots: Slot[], start: number, end: number): { range: number[]; blocked: boolean } {
   const lo = Math.min(start, end);
   const hi = Math.max(start, end);
@@ -129,14 +123,22 @@ function buildRange(slots: Slot[], start: number, end: number): { range: number[
   return { range, blocked: false };
 }
 
-function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD, onSelect, onPrev, onNext }: {
+/* ── #12: Jalali calendar with 4-week (28-day) future lock ── */
+function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD, maxJY, maxJM, maxJD, onSelect, onPrev, onNext }: {
   jYear: number; jMonth: number; selectedDay: number | null;
   todayJY: number; todayJM: number; todayJD: number;
+  maxJY: number;  maxJM: number;  maxJD: number;
   onSelect: (d: number) => void; onPrev: () => void; onNext: () => void;
 }) {
   const dim = jDaysInMonth(jYear, jMonth);
   const off = (jFirstWD(jYear, jMonth) + 1) % 7;
   const cells: (number | null)[] = [...Array(off).fill(null), ...Array.from({ length: dim }, (_, i) => i + 1)];
+
+  /* Next month's first day as Jalali */
+  const nextJM = jMonth === 12 ? 1 : jMonth + 1;
+  const nextJY = jMonth === 12 ? jYear + 1 : jYear;
+  /* Disable next-month button if the entire next month is beyond the cutoff */
+  const nextBlocked = nextJY > maxJY || (nextJY === maxJY && nextJM > maxJM) || (nextJY === maxJY && nextJM === maxJM && 1 > maxJD);
 
   return (
     <div>
@@ -147,7 +149,7 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
         <span style={{ fontSize: '15px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em' }}>
           {jMonths[jMonth - 1]} {toFa(jYear)}
         </span>
-        <button onClick={onNext} style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={nextBlocked ? undefined : onNext} disabled={nextBlocked} style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', cursor: nextBlocked ? 'not-allowed' : 'pointer', color: nextBlocked ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: nextBlocked ? 0.4 : 1 }}>
           <ChevronLeft size={15} />
         </button>
       </div>
@@ -160,51 +162,72 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
         {cells.map((day, i) => {
           if (!day) return <div key={i} />;
           const isPast = jYear < todayJY || (jYear === todayJY && jMonth < todayJM) || (jYear === todayJY && jMonth === todayJM && day < todayJD);
-          const isSel = day === selectedDay;
-          const isToday = day === todayJD && jMonth === todayJM && jYear === todayJY;
+          /* #12: lock days beyond 28-day window */
+          const isFutureLocked = jYear > maxJY || (jYear === maxJY && jMonth > maxJM) || (jYear === maxJY && jMonth === maxJM && day > maxJD);
+          const isDisabled = isPast || isFutureLocked;
+          const isSel    = day === selectedDay;
+          const isToday  = day === todayJD && jMonth === todayJM && jYear === todayJY;
           return (
-            <button key={i} disabled={isPast} onClick={() => !isPast && onSelect(day)} style={{
+            <button key={i} disabled={isDisabled} onClick={() => !isDisabled && onSelect(day)} style={{
               height: '38px', borderRadius: '9px', border: 'none', fontSize: '13px',
-              fontWeight: isToday ? 800 : 500, cursor: isPast ? 'not-allowed' : 'pointer',
-              background: isSel ? 'linear-gradient(135deg,#C7A66A,#A07840)' : isToday ? 'rgba(199,166,106,0.1)' : 'transparent',
-              color: isSel ? '#fff' : isPast ? 'rgba(0,0,0,0.12)' : isToday ? '#C7A66A' : 'rgba(0,0,0,0.55)',
+              fontWeight: isToday ? 800 : 500,
+              cursor: isDisabled ? 'not-allowed' : 'pointer',
+              background: isSel ? 'linear-gradient(135deg,#C7A66A,#A07840)' : isToday ? 'rgba(199,166,106,0.1)' : isFutureLocked ? 'rgba(0,0,0,0.03)' : 'transparent',
+              color: isSel ? '#fff' : isDisabled ? 'rgba(0,0,0,0.12)' : isToday ? '#C7A66A' : 'rgba(0,0,0,0.55)',
               boxShadow: isSel ? '0 4px 12px rgba(199,166,106,0.35)' : 'none',
               outline: isToday && !isSel ? '1px solid rgba(199,166,106,0.3)' : 'none',
-              opacity: isPast ? 0.4 : 1, transition: 'all 0.18s',
+              opacity: isDisabled ? (isFutureLocked ? 0.25 : 0.4) : 1,
+              transition: 'all 0.18s',
+              textDecoration: isFutureLocked ? 'line-through' : 'none',
             }}>{toFa(day)}</button>
           );
         })}
+      </div>
+      {/* #12: helper note below calendar */}
+      <div style={{ marginTop: '12px', fontSize: '10px', color: 'rgba(0,0,0,0.32)', textAlign: 'center' }}>
+        رزرو تا حداکثر ۴ هفته آینده امکان‌پذیر است
       </div>
     </div>
   );
 }
 
 function BookingContent() {
-  const params = useParams();
-  const clubId = params.clubId as string;
-  const router = useRouter();
+  const params  = useParams();
+  const clubId  = params.clubId as string;
+  const router  = useRouter();
   const { user } = useAuthStore();
 
-  const [club, setClub] = useState<Club | null>(null);
-  const [tables, setTables] = useState<Table[]>([]);
-  const [slots, setSlots] = useState<Slot[]>([]);
+  const [club, setClub]               = useState<Club | null>(null);
+  const [tables, setTables]           = useState<Table[]>([]);
+  const [slots, setSlots]             = useState<Slot[]>([]);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
-  const [rangeStart, setRangeStart] = useState<number | null>(null);
+  const [rangeStart, setRangeStart]   = useState<number | null>(null);
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
-  const [rangeError, setRangeError] = useState('');
+  const [rangeError, setRangeError]   = useState('');
 
   const today = new Date();
   const [tJY, tJM, tJD] = toJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
-  const [jYear, setJYear] = useState(tJY);
+
+  /* #12: 4-week (28-day) maximum booking horizon */
+  const maxDateG = new Date(today);
+  maxDateG.setDate(today.getDate() + 28);
+  const [mJY, mJM, mJD] = toJalali(maxDateG.getFullYear(), maxDateG.getMonth() + 1, maxDateG.getDate());
+
+  const [jYear,  setJYear]  = useState(tJY);
   const [jMonth, setJMonth] = useState(tJM);
-  const [jDay, setJDay] = useState<number | null>(null);
+  const [jDay,   setJDay]   = useState<number | null>(null);
   const isoDate = jDay ? toISO(jYear, jMonth, jDay) : '';
 
-  const [loading, setLoading] = useState(true);
-  const [slotsLoad, setSlotsLoad] = useState(false);
-  const [booking, setBooking] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading]         = useState(true);
+  const [slotsLoad, setSlotsLoad]     = useState(false);
+  const [booking, setBooking]         = useState(false);
+  const [error, setError]             = useState('');
+  /* #15: payment redirect state — replaces simple 'success' boolean */
+  const [pendingPayment, setPendingPayment] = useState<{
+    bookingId: string;
+    paymentUrl: string | null;
+  } | null>(null);
+
   const slotsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -226,45 +249,24 @@ function BookingContent() {
     setSelectedSlots([]);
     setRangeStart(null);
     setRangeError('');
-
     api.get(`/bookings/slots?clubId=${clubId}&tableNumber=${selectedTable.number}&date=${isoDate}`)
       .then(r => {
-        // اگه API داده داد فیلتر ساعت گذشته بزن، وگرنه fallback بده
         const raw: Slot[] = Array.isArray(r.data) && r.data.length > 0 ? r.data : genFallbackSlots(isoDate);
         setSlots(applyPastHours(raw, isoDate));
         setSlotsLoad(false);
         setTimeout(() => slotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
       })
-      .catch(() => {
-        setSlots(genFallbackSlots(isoDate));
-        setSlotsLoad(false);
-      });
+      .catch(() => { setSlots(genFallbackSlots(isoDate)); setSlotsLoad(false); });
   }, [selectedTable, isoDate, clubId]);
 
   const handleSlotClick = useCallback((hour: number, isBooked: boolean) => {
     if (isBooked) return;
     setRangeError('');
-    if (rangeStart === null) {
-      setRangeStart(hour);
-      setSelectedSlots([hour]);
-      return;
-    }
-    if (hour === rangeStart) {
-      setRangeStart(null);
-      setSelectedSlots([]);
-      return;
-    }
-    if (hour < rangeStart) {
-      setRangeStart(hour);
-      setSelectedSlots([hour]);
-      setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید');
-      return;
-    }
+    if (rangeStart === null) { setRangeStart(hour); setSelectedSlots([hour]); return; }
+    if (hour === rangeStart) { setRangeStart(null); setSelectedSlots([]); return; }
+    if (hour < rangeStart) { setRangeStart(hour); setSelectedSlots([hour]); setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید'); return; }
     const { range, blocked } = buildRange(slots, rangeStart, hour);
-    if (blocked) {
-      setRangeError('این بازه شامل ساعات رزرو شده است. لطفاً بازه دیگری انتخاب کنید');
-      return;
-    }
+    if (blocked) { setRangeError('این بازه شامل ساعات رزرو شده است. لطفاً بازه دیگری انتخاب کنید'); return; }
     setSelectedSlots(range);
     setRangeStart(null);
   }, [rangeStart, slots]);
@@ -277,26 +279,39 @@ function BookingContent() {
     setSlots([]);
   };
 
-  const prevMonth = () => { if (jMonth === 1) { setJMonth(12); setJYear(y => y - 1); } else setJMonth(m => m - 1); setJDay(null); };
-  const nextMonth = () => { if (jMonth === 12) { setJMonth(1); setJYear(y => y + 1); } else setJMonth(m => m + 1); setJDay(null); };
+  const prevMonth = () => {
+    if (jMonth === 1) { setJMonth(12); setJYear(y => y - 1); } else setJMonth(m => m - 1);
+    setJDay(null);
+  };
+  const nextMonth = () => {
+    if (jMonth === 12) { setJMonth(1); setJYear(y => y + 1); } else setJMonth(m => m + 1);
+    setJDay(null);
+  };
 
+  /* #15: after booking, route to payment */
   const handleConfirm = async () => {
     if (!selectedTable || selectedSlots.length === 0 || !isoDate) return;
-    const sorted = [...selectedSlots].sort((a, b) => a - b);
+    const sorted    = [...selectedSlots].sort((a, b) => a - b);
     const startHour = sorted[0]!;
-    const endHour = sorted[sorted.length - 1]! + 1;
+    const endHour   = sorted[sorted.length - 1]! + 1;
     const startTime = new Date(`${isoDate}T${String(startHour).padStart(2, '0')}:00:00Z`);
-    const endTime = new Date(`${isoDate}T${String(endHour).padStart(2, '00')}:00:00Z`);
-    const totalHrs = sorted.length;
-    const totalPrc = totalHrs * selectedTable.pricePerHour;
+    const endTime   = new Date(`${isoDate}T${String(endHour).padStart(2, '00')}:00:00Z`);
+    const totalHrs  = sorted.length;
+    const totalPrc  = totalHrs * selectedTable.pricePerHour;
     setBooking(true); setError('');
     try {
-      await api.post('/bookings', {
+      const res = await api.post('/bookings', {
         clubId, tableType: selectedTable.type, tableNumber: selectedTable.number,
         startTime: startTime.toISOString(), endTime: endTime.toISOString(),
         totalPrice: totalPrc, currency: 'IRR',
       });
-      setSuccess(true);
+      const bookingId  = res.data?.id ?? '';
+      const paymentUrl = res.data?.paymentUrl ?? null; // gateway sets this when active
+      setPendingPayment({ bookingId, paymentUrl });
+      /* If payment is active, auto-redirect after brief delay */
+      if (paymentUrl) {
+        setTimeout(() => { window.location.href = paymentUrl; }, 900);
+      }
     } catch (e: any) {
       setError(e?.response?.data?.message || 'خطا در ثبت رزرو. لطفاً دوباره تلاش کنید.');
     } finally {
@@ -304,15 +319,16 @@ function BookingContent() {
     }
   };
 
-  const sorted = [...selectedSlots].sort((a, b) => a - b);
-  const startHour = sorted[0];
-  const endHour = sorted.length > 0 ? sorted[sorted.length - 1]! + 1 : undefined;
+  const sorted     = [...selectedSlots].sort((a, b) => a - b);
+  const startHour  = sorted[0];
+  const endHour    = sorted.length > 0 ? sorted[sorted.length - 1]! + 1 : undefined;
   const totalHours = sorted.length;
   const totalPrice = selectedTable ? totalHours * selectedTable.pricePerHour : 0;
   const accentColor = selectedTable ? (TYPE_COLOR[selectedTable.type] ?? '#C7A66A') : '#C7A66A';
-  const dateLabel = jDay ? `${toFa(jDay)} ${jMonths[jMonth - 1]} ${toFa(jYear)}` : '';
-  const canConfirm = !!selectedTable && !!jDay && selectedSlots.length > 0;
+  const dateLabel   = jDay ? `${toFa(jDay)} ${jMonths[jMonth - 1]} ${toFa(jYear)}` : '';
+  const canConfirm  = !!selectedTable && !!jDay && selectedSlots.length > 0;
 
+  /* ── Loading ── */
   if (loading) return (
     <div style={{ minHeight: '80vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
       <div style={{ width: '40px', height: '40px', border: '2px solid rgba(199,166,106,0.1)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -320,38 +336,73 @@ function BookingContent() {
     </div>
   );
 
-  if (success) return (
-    <div style={{ minHeight: '80vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      <div style={{ maxWidth: '460px', width: '100%', background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.2)', borderRadius: '28px', padding: 'clamp(32px,6vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '150px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
-        <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', boxShadow: '0 12px 36px rgba(199,166,106,0.35)' }}>
-          <CheckCircle size={30} style={{ color: '#fff' }} />
-        </div>
-        <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#111111', margin: '0 0 10px' }}>رزرو ثبت شد!</h2>
-        <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', margin: '0 0 24px', lineHeight: 1.7 }}>رزرو شما با موفقیت ثبت شد و باشگاه مطلع شد.</p>
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', padding: '16px 18px', marginBottom: '24px', textAlign: 'right' }}>
-          {[
-            { l: 'میز', v: selectedTable?.name ?? '' },
-            { l: 'تاریخ', v: dateLabel },
-            { l: 'ساعت', v: startHour !== undefined && endHour !== undefined ? `${toFa(startHour)}:۰۰ تا ${toFa(endHour)}:۰۰` : '' },
-            { l: 'مدت', v: `${toFa(totalHours)} ساعت` },
-            { l: 'مبلغ کل', v: `${toFa(totalPrice.toLocaleString())} تومان` },
-          ].map((r, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
-              <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>{r.l}</span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111' }}>{r.v}</span>
+  /* ── #15: Payment redirect screen ── */
+  if (pendingPayment) return (
+    <div style={{ minHeight: '80vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      <div style={{ maxWidth: '480px', width: '100%', background: '#FFFFFF', border: '1px solid rgba(48,197,90,0.2)', borderRadius: '28px', padding: 'clamp(32px,6vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '150px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(48,197,90,0.6),transparent)' }} />
+
+        {pendingPayment.paymentUrl ? (
+          /* Payment active: connecting animation */
+          <>
+            <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg,#30C55A,#22a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', boxShadow: '0 12px 36px rgba(48,197,90,0.30)' }}>
+              <div style={{ width: '28px', height: '28px', border: '3px solid rgba(255,255,255,0.3)', borderTop: '3px solid #fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/clubs" style={{ padding: '12px 26px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>باشگاه‌ها</Link>
-          <Link href="/dashboard" style={{ padding: '12px 26px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '12px', color: 'rgba(0,0,0,0.48)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>داشبورد</Link>
-        </div>
+            <h2 style={{ fontSize: '20px', fontWeight: 900, color: '#111111', margin: '0 0 10px' }}>در حال اتصال به درگاه پرداخت...</h2>
+            <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', margin: '0 0 24px', lineHeight: 1.7 }}>رزرو شما ثبت شد. لطفاً منتظر بمانید.</p>
+            <a href={pendingPayment.paymentUrl} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 26px', background: 'linear-gradient(135deg,#30C55A,#22a34a)', borderRadius: '13px', color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
+              <CreditCard size={15} /> انتقال دستی به درگاه
+            </a>
+          </>
+        ) : (
+          /* Payment inactive: booking confirmed, payment coming soon */
+          <>
+            <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg,#30C55A,#22a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', boxShadow: '0 12px 36px rgba(48,197,90,0.28)' }}>
+              <CheckCircle size={30} style={{ color: '#fff' }} />
+            </div>
+            <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#111111', margin: '0 0 10px' }}>رزرو ثبت شد!</h2>
+            <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', margin: '0 0 20px', lineHeight: 1.7 }}>
+              برای تکمیل رزرو، پرداخت آنلاین لازم است.
+            </p>
+
+            {/* Booking summary */}
+            <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', padding: '16px 18px', marginBottom: '18px', textAlign: 'right' }}>
+              {[
+                { l: 'میز',      v: selectedTable?.name ?? '' },
+                { l: 'تاریخ',   v: dateLabel },
+                { l: 'ساعت',    v: startHour !== undefined && endHour !== undefined ? `${toFa(startHour)}:۰۰ تا ${toFa(endHour)}:۰۰` : '' },
+                { l: 'مدت',     v: `${toFa(totalHours)} ساعت` },
+                { l: 'مبلغ کل', v: `${toFa(totalPrice.toLocaleString())} تومان` },
+              ].map((r, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
+                  <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>{r.l}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111' }}>{r.v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Payment inactive notice */}
+            <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.18)', borderRadius: '14px', padding: '14px 16px', marginBottom: '22px', textAlign: 'right' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#f59e0b', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CreditCard size={13} /> درگاه پرداخت آنلاین
+              </div>
+              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
+                پرداخت آنلاین به زودی فعال می‌شود. رزرو شما در سیستم ثبت و نگه‌داشته شده است و پس از فعال‌سازی درگاه می‌توانید تکمیل کنید.
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/dashboard" style={{ padding: '12px 26px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>مشاهده رزروها</Link>
+              <Link href="/clubs"     style={{ padding: '12px 26px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '12px', color: 'rgba(0,0,0,0.48)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>باشگاه‌ها</Link>
+            </div>
+          </>
+        )}
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   );
 
+  /* ── Main booking form ── */
   return (
     <>
       <style>{`
@@ -363,16 +414,17 @@ function BookingContent() {
         .slot-btn { height:52px;border-radius:11px;font-size:13px;font-weight:700;border:1px solid;cursor:pointer;font-family:inherit;transition:all 0.18s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;user-select:none; }
         .slot-btn:active:not(:disabled) { transform:scale(0.94); }
         .slot-free { background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.07);color:rgba(0,0,0,0.48); }
-        .slot-free:hover { background:rgba(199,166,106,0.08);border-color:rgba(199,166,106,0.3);color:#C7A66A; }
-        .slot-start { border-color:rgba(199,166,106,0.55);color:#C7A66A; }
-        .slot-range { background:rgba(199,166,106,0.12);border-color:rgba(199,166,106,0.4);color:#C7A66A; }
-        .slot-busy { background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.14);color:rgba(239,68,68,0.35);cursor:not-allowed; }
+        .slot-free:hover { background:rgba(48,197,90,0.07);border-color:rgba(48,197,90,0.28);color:#30C55A; }
+        .slot-start { background:rgba(48,197,90,0.12);border-color:rgba(48,197,90,0.55);color:#30C55A; }
+        .slot-range { background:rgba(48,197,90,0.12);border-color:rgba(48,197,90,0.40);color:#30C55A; }
+        .slot-busy  { background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.14);color:rgba(239,68,68,0.35);cursor:not-allowed; }
         @media(max-width:640px){ .slot-grid{grid-template-columns:repeat(4,1fr)!important;} }
         @media(max-width:380px){ .slot-grid{grid-template-columns:repeat(3,1fr)!important;} }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: '80px' }}>
 
+        {/* Sticky header */}
         <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '0 clamp(16px,4vw,40px)', position: 'sticky', top: '62px', zIndex: 90, backdropFilter: 'blur(24px)' }}>
           <div style={{ maxWidth: '720px', margin: '0 auto', height: '52px', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <Link href={`/clubs/${clubId}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(0,0,0,0.42)', fontSize: '12px', textDecoration: 'none', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '9px', padding: '7px 13px', flexShrink: 0 }}>
@@ -395,7 +447,7 @@ function BookingContent() {
             </div>
           )}
 
-          {/* TABLE */}
+          {/* TABLE SELECTION */}
           <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '3px', height: '13px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
@@ -431,15 +483,20 @@ function BookingContent() {
             </div>
           </div>
 
-          {/* DATE */}
+          {/* DATE SELECTION */}
           <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '3px', height: '13px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
               انتخاب تاریخ
             </div>
-            <JalaliCalendar jYear={jYear} jMonth={jMonth} selectedDay={jDay} todayJY={tJY} todayJM={tJM} todayJD={tJD}
+            {/* #12: pass max date to calendar */}
+            <JalaliCalendar
+              jYear={jYear} jMonth={jMonth} selectedDay={jDay}
+              todayJY={tJY} todayJM={tJM} todayJD={tJD}
+              maxJY={mJY}   maxJM={mJM}   maxJD={mJD}
               onSelect={d => { setJDay(d); setSelectedSlots([]); setRangeStart(null); }}
-              onPrev={prevMonth} onNext={nextMonth} />
+              onPrev={prevMonth} onNext={nextMonth}
+            />
             {jDay && (
               <div style={{ marginTop: '14px', padding: '11px 14px', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: '11px', display: 'flex', alignItems: 'center', gap: '8px', animation: 'fadeUp 0.3s ease both' }}>
                 <Check size={13} style={{ color: '#C7A66A', flexShrink: 0 }} />
@@ -448,19 +505,20 @@ function BookingContent() {
             )}
           </div>
 
-          {/* TIME */}
+          {/* TIME SELECTION */}
           {selectedTable && jDay && (
             <div ref={slotsRef} style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', padding: 'clamp(18px,3vw,26px)', marginBottom: '16px', transformOrigin: 'top', animation: 'expand 0.4s cubic-bezier(0.22,1,0.36,1) both' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '3px', height: '13px', background: `linear-gradient(180deg,${accentColor},transparent)`, borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
+                  <span style={{ width: '3px', height: '13px', background: `linear-gradient(180deg,${SEL_COLOR},transparent)`, borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                   انتخاب ساعت
                 </div>
+                {/* #13: legend uses green for 'انتخاب' */}
                 <div style={{ display: 'flex', gap: '12px', fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>
                   {[
-                    { bg: 'rgba(0,0,0,0.05)', bc: 'rgba(0,0,0,0.08)', l: 'آزاد' },
-                    { bg: `${accentColor}12`, bc: `${accentColor}40`, l: 'انتخاب' },
-                    { bg: 'rgba(239,68,68,0.05)', bc: 'rgba(239,68,68,0.15)', l: 'مشغول' },
+                    { bg: 'rgba(0,0,0,0.05)',          bc: 'rgba(0,0,0,0.08)',          l: 'آزاد'   },
+                    { bg: `rgba(${SEL_RGB},0.12)`,     bc: `rgba(${SEL_RGB},0.40)`,     l: 'انتخاب' },
+                    { bg: 'rgba(239,68,68,0.05)',       bc: 'rgba(239,68,68,0.15)',      l: 'مشغول'  },
                   ].map((x, i) => (
                     <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <span style={{ width: '11px', height: '11px', borderRadius: '3px', background: x.bg, border: `1px solid ${x.bc}`, display: 'inline-block' }} />
@@ -472,7 +530,9 @@ function BookingContent() {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 13px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '10px', marginBottom: '14px', fontSize: '11px', color: 'rgba(0,0,0,0.40)' }}>
                 <Info size={12} style={{ color: 'rgba(0,0,0,0.30)', flexShrink: 0 }} />
-                {rangeStart !== null ? `ساعت ${toFa(rangeStart)}:۰۰ شروع شد — حالا ساعت پایان را انتخاب کنید` : 'روی ساعت شروع کلیک کنید، سپس ساعت پایان را انتخاب کنید'}
+                {rangeStart !== null
+                  ? `ساعت ${toFa(rangeStart)}:۰۰ شروع شد — حالا ساعت پایان را انتخاب کنید`
+                  : 'روی ساعت شروع کلیک کنید، سپس ساعت پایان را انتخاب کنید'}
               </div>
 
               {rangeError && (
@@ -489,17 +549,18 @@ function BookingContent() {
               ) : (
                 <div className="slot-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: '7px' }}>
                   {slots.map(slot => {
-                    const isSel = selectedSlots.includes(slot.hour);
+                    const isSel   = selectedSlots.includes(slot.hour);
                     const isStart = rangeStart === slot.hour;
-                    const cls = slot.isBooked ? 'slot-btn slot-busy' : isStart ? 'slot-btn slot-start' : isSel ? 'slot-btn slot-range' : 'slot-btn slot-free';
+                    const cls     = slot.isBooked ? 'slot-btn slot-busy' : isStart ? 'slot-btn slot-start' : isSel ? 'slot-btn slot-range' : 'slot-btn slot-free';
                     return (
                       <button key={slot.hour} className={cls} disabled={slot.isBooked}
                         onClick={() => handleSlotClick(slot.hour, slot.isBooked)}
                         style={{
-                          borderColor: slot.isBooked ? 'rgba(239,68,68,0.14)' : isStart ? `${accentColor}60` : isSel ? `${accentColor}45` : 'rgba(0,0,0,0.07)',
-                          background: slot.isBooked ? 'rgba(239,68,68,0.04)' : isStart ? `${accentColor}20` : isSel ? `${accentColor}12` : 'rgba(0,0,0,0.03)',
-                          color: slot.isBooked ? 'rgba(239,68,68,0.3)' : (isStart || isSel) ? accentColor : 'rgba(0,0,0,0.48)',
-                          boxShadow: isStart ? `0 0 16px ${accentColor}35` : isSel ? `0 0 10px ${accentColor}18` : 'none',
+                          /* #13: selected = green, busy = red, free = neutral */
+                          borderColor: slot.isBooked ? 'rgba(239,68,68,0.14)' : isStart ? `rgba(${SEL_RGB},0.60)` : isSel ? `rgba(${SEL_RGB},0.45)` : 'rgba(0,0,0,0.07)',
+                          background:  slot.isBooked ? 'rgba(239,68,68,0.04)' : isStart ? `rgba(${SEL_RGB},0.18)` : isSel ? `rgba(${SEL_RGB},0.12)` : 'rgba(0,0,0,0.03)',
+                          color:       slot.isBooked ? 'rgba(239,68,68,0.3)'  : (isStart || isSel) ? SEL_COLOR : 'rgba(0,0,0,0.48)',
+                          boxShadow:   isStart ? `0 0 16px rgba(${SEL_RGB},0.35)` : isSel ? `0 0 10px rgba(${SEL_RGB},0.18)` : 'none',
                         }}>
                         <span>{toFa(slot.hour)}:۰۰</span>
                         {slot.isBooked && <span style={{ fontSize: '9px', opacity: 0.6 }}>مشغول</span>}
@@ -511,20 +572,20 @@ function BookingContent() {
               )}
 
               {selectedSlots.length > 0 && startHour !== undefined && endHour !== undefined && (
-                <div style={{ marginTop: '14px', padding: '13px 16px', background: `${accentColor}0e`, border: `1px solid ${accentColor}28`, borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', animation: 'fadeUp 0.3s ease both' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: accentColor, fontSize: '14px', fontWeight: 700 }}>
+                <div style={{ marginTop: '14px', padding: '13px 16px', background: `rgba(${SEL_RGB},0.08)`, border: `1px solid rgba(${SEL_RGB},0.25)`, borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', animation: 'fadeUp 0.3s ease both' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: SEL_COLOR, fontSize: '14px', fontWeight: 700 }}>
                     <Clock size={14} /> {toFa(startHour)}:۰۰ تا {toFa(endHour)}:۰۰
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.05)', padding: '4px 12px', borderRadius: '20px', fontWeight: 600 }}>{toFa(totalHours)} ساعت</span>
-                    <span style={{ fontSize: '12px', color: accentColor, fontWeight: 800, background: `${accentColor}10`, padding: '4px 12px', borderRadius: '20px' }}>{toFa(totalPrice.toLocaleString())} تومان</span>
+                    <span style={{ fontSize: '12px', color: SEL_COLOR, fontWeight: 800, background: `rgba(${SEL_RGB},0.10)`, padding: '4px 12px', borderRadius: '20px' }}>{toFa(totalPrice.toLocaleString())} تومان</span>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* CONFIRM */}
+          {/* CONFIRM BOX */}
           {canConfirm && (
             <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden', marginBottom: '16px', animation: 'fadeUp 0.4s ease both' }}>
               <div style={{ background: `linear-gradient(135deg,${accentColor}10,rgba(255,255,255,0.02))`, borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '16px 22px', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -536,10 +597,10 @@ function BookingContent() {
               </div>
               <div style={{ padding: '18px 22px' }}>
                 {[
-                  { l: 'تاریخ', v: dateLabel },
-                  { l: 'شروع', v: startHour !== undefined ? `${toFa(startHour)}:۰۰` : '' },
-                  { l: 'پایان', v: endHour !== undefined ? `${toFa(endHour)}:۰۰` : '' },
-                  { l: 'مدت', v: `${toFa(totalHours)} ساعت` },
+                  { l: 'تاریخ',      v: dateLabel },
+                  { l: 'شروع',       v: startHour !== undefined ? `${toFa(startHour)}:۰۰` : '' },
+                  { l: 'پایان',      v: endHour !== undefined ? `${toFa(endHour)}:۰۰` : '' },
+                  { l: 'مدت',        v: `${toFa(totalHours)} ساعت` },
                   { l: 'نرخ ساعتی', v: `${toFa((selectedTable?.pricePerHour ?? 0).toLocaleString())} تومان` },
                 ].map((r, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
@@ -554,14 +615,18 @@ function BookingContent() {
                   </span>
                 </div>
               </div>
-              <div style={{ margin: '0 22px 18px', padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.13)', borderRadius: '12px', fontSize: '11px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7 }}>
-                ⚠️ پس از تأیید، باشگاه از رزرو شما مطلع خواهد شد و پیامک ارسال می‌شود.
+
+              {/* #14: updated warning text */}
+              <div style={{ margin: '0 22px 18px', padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.13)', borderRadius: '12px', fontSize: '11px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7, display: 'flex', alignItems: 'flex-start', gap: '7px' }}>
+                <Info size={13} style={{ color: '#f59e0b', flexShrink: 0, marginTop: 1 }} />
+                رزروها تنها تا ۲ ساعت پیش از زمان شروع قابل لغو هستند
               </div>
+
               <div style={{ padding: '0 22px 22px' }}>
                 <button onClick={handleConfirm} disabled={booking} style={{ width: '100%', padding: '15px', borderRadius: '13px', border: 'none', background: booking ? 'rgba(199,166,106,0.3)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', fontSize: '15px', fontWeight: 800, cursor: booking ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', boxShadow: booking ? 'none' : '0 8px 28px rgba(199,166,106,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }}>
                   {booking
                     ? <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />در حال ثبت رزرو...</>
-                    : <><Check size={16} /> تأیید و ثبت رزرو</>
+                    : <><CreditCard size={16} /> تأیید و پرداخت</>
                   }
                 </button>
               </div>
