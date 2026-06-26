@@ -78,16 +78,17 @@ function MatchCard({
     const isOver = draggingOver === slotId;
     const isDragging = dragFromSlot?.matchId === match.id && dragFromSlot.slot === slot;
     const isBye = player?.id === 'bye';
-    const isEmptyReady = isMobile && tapPlayerActive && !player;
+    const isR1  = match.round === 1;
+    const isEmptyReady = isMobile && tapPlayerActive && !player && isR1;
 
     return (
       <div
-        draggable={!isMobile && !!player && !isBye}
-        onDragStart={!isMobile && player && !isBye ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
+        draggable={!isMobile && !!player && !isBye && isR1}
+        onDragStart={!isMobile && player && !isBye && isR1 ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
         onDragOver={!isMobile ? e => onDragOver(e, match.id, slot) : undefined}
         onDragLeave={!isMobile ? onDragLeave : undefined}
         onDrop={!isMobile ? e => onDrop(e, match.id, slot) : undefined}
-        onClick={isMobile ? () => onSlotTap?.(match.id, slot, player) : undefined}
+        onClick={isMobile && isR1 ? () => onSlotTap?.(match.id, slot, player) : undefined}
         style={{
           padding: '6px 9px', minHeight: 33,
           background: isBye ? 'rgba(0,0,0,0.02)'
@@ -101,9 +102,9 @@ function MatchCard({
             : player && !isBye ? 'rgba(0,0,0,0.08)'
             : 'rgba(0,0,0,0.10)'}`,
           borderRadius: 7,
-          cursor: isMobile
+          cursor: isMobile && isR1
             ? (player && !isBye ? 'pointer' : tapPlayerActive ? 'pointer' : 'default')
-            : (player && !isBye ? 'grab' : 'default'),
+            : (!isMobile && player && !isBye && isR1 ? 'grab' : 'default'),
           transition: 'all 0.12s', opacity: isDragging ? 0.3 : 1,
           display: 'flex', alignItems: 'center', gap: 6,
         }}
@@ -211,6 +212,7 @@ export default function BracketPage() {
     setMatches(prev => {
       const next = prev.map(m => ({ ...m }));
       const tm = next.find(m => m.id === targetMatchId)!;
+      if (tm.round !== 1) return prev; // only Round 1 placements allowed
       const current = targetSlot === 1 ? tm.player1 : tm.player2;
       if (dragFromPool) {
         if (current) setPool(p => [...p.filter(x => x.id !== dragFromPool.id), current]);
@@ -242,6 +244,8 @@ export default function BracketPage() {
 
   /* ── Mobile tap-to-assign ── */
   const handleSlotTap = (matchId: string, slot: 1 | 2, currentPlayer?: TournamentPlayer) => {
+    const matchRef = matches.find(m => m.id === matchId);
+    if (!matchRef || matchRef.round !== 1) return; // only Round 1
     if (currentPlayer && currentPlayer.id !== 'bye') {
       // Remove player from slot → back to pool
       setMatches(prev => prev.map(m => {
