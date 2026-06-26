@@ -613,7 +613,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(220px,27vh,300px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(310px,37vh,420px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
