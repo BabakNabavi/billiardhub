@@ -100,8 +100,8 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {club.isVerified && (
             <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(199,166,106,0.88)', borderRadius: 20, padding: '2px 7px', fontSize: 9, fontWeight: 700, color: '#fff' }}>✓</div>
           )}
-          {/* open badge روی تصویر */}
-          <div style={{ position: 'absolute', bottom: 8, right: 8, background: club.isOpen ? 'rgba(22,163,74,0.88)' : 'rgba(239,68,68,0.85)', borderRadius: 20, padding: '2px 7px', fontSize: 9, fontWeight: 700, color: '#fff' }}>
+          {/* open badge روی تصویر — same pill style as table type badges */}
+          <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 9, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
             {club.isOpen ? 'باز' : 'بسته'}
           </div>
         </div>
@@ -127,8 +127,8 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
                 {toFa((club as any)[t.key])} {t.label}
               </span>
             ))}
-            {/* دکمه رزرو همیشه visible */}
-            <span style={{ fontSize: 11, color: '#A07840', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, padding: '4px 14px', fontWeight: 700, marginRight: 'auto', flexShrink: 0 }}>
+            {/* دکمه رزرو — same pill style as table type badges */}
+            <span style={{ fontSize: 10, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0 }}>
               رزرو ←
             </span>
           </div>
@@ -168,31 +168,28 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
               </div>
             )}
           </div>
-          {/* open/close — exact trust-card style */}
+          {/* open/close — same pill style as table type badges */}
           <div style={{
             position: 'absolute', top: 10, left: 10,
-            background: club.isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)',
-            backdropFilter: 'blur(28px) saturate(220%)', WebkitBackdropFilter: 'blur(28px) saturate(220%)',
-            border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`,
-            boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px ${club.isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)'}`,
-            borderRadius: 20, padding: '4px 10px', fontSize: 10, fontWeight: 700,
+            fontSize: 10, fontWeight: 700,
             color: club.isOpen ? '#30C55A' : '#ef4444',
-            textShadow: club.isOpen ? '0 0 18px rgba(48,197,90,0.50)' : '0 0 18px rgba(239,68,68,0.50)',
+            background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)',
+            border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`,
+            borderRadius: 20, padding: '2px 8px',
             display: 'flex', alignItems: 'center', gap: 4,
           }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#30C55A' : '#ef4444', display: 'inline-block', boxShadow: club.isOpen ? '0 0 8px rgba(48,197,90,0.70)' : '0 0 8px rgba(239,68,68,0.70)' }} />
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#30C55A' : '#ef4444', display: 'inline-block' }} />
             {club.isOpen ? `تا ${club.closeTime}` : 'بسته'}
           </div>
 
-          {/* رزرو badge — exact trust-card style (gold) */}
+          {/* رزرو badge — same pill style as table type badges (gold) */}
           <div style={{
             position: 'absolute', bottom: 10, left: 10,
-            background: 'rgba(199,166,106,0.12)',
-            backdropFilter: 'blur(28px) saturate(220%)', WebkitBackdropFilter: 'blur(28px) saturate(220%)',
-            border: '1px solid rgba(199,166,106,0.28)',
-            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(199,166,106,0.12)',
-            borderRadius: 20, padding: '5px 14px', fontSize: 11, fontWeight: 800,
-            color: '#C7A66A', textShadow: '0 0 18px rgba(199,166,106,0.50)',
+            fontSize: 10, fontWeight: 700,
+            color: '#C7A66A',
+            background: 'rgba(199,166,106,0.10)',
+            border: '1px solid rgba(199,166,106,0.22)',
+            borderRadius: 20, padding: '2px 8px',
           }}>
             رزرو آنلاین
           </div>

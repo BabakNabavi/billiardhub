@@ -650,9 +650,8 @@ export default function HomePage() {
             fontSize: 'clamp(26px,4.2vw,60px)', fontWeight: 900, lineHeight: 1.08,
             margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
-            <span style={{ color: '#ffffff' }}>بیلیارد </span>
-            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>هاب</span>
-            <span style={{ color: '#ffffff' }}>؛ پلتفرم جامع و هوشمند بیلیارد</span>
+            <span style={{ color: '#ffffff' }}>پلتفرم جامع و هوشمند </span>
+            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>بیلیارد</span>
           </h1>
 
           {/* Subtitle — نقطه‌ی اتصال */}
