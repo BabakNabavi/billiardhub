@@ -251,7 +251,7 @@ export default function RankingsPage() {
                 }}>
                   <div style={{
                     fontSize: '9px', color: 'rgba(199,166,106,0.70)',
-                    letterSpacing: '0.18em', fontWeight: 700,
+                    fontWeight: 700,
                     padding: '6px 8px 10px', textTransform: 'uppercase',
                   }}>
                     دسته‌بندی
@@ -346,7 +346,7 @@ export default function RankingsPage() {
                     {['رتبه', '±', '', 'نام بازیکن', 'شهر', 'امتیاز'].map((h, i) => (
                       <div key={i} className={i === 4 ? 'hide-mobile' : ''} style={{
                         fontSize: '10px', color: 'rgba(0,0,0,0.35)',
-                        fontWeight: 700, letterSpacing: '0.08em',
+                        fontWeight: 700,
                         textAlign: i === 0 || i >= 4 ? 'center' : 'right',
                       }}>
                         {h}

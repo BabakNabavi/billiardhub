@@ -361,7 +361,7 @@ export default function TournamentPage() {
               ].map((s, i) => (
                 <div key={i} style={{ padding: '18px 16px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
                   <div style={{ fontSize: 'clamp(20px,3vw,28px)', fontWeight: 900, color: s.c, letterSpacing: '-0.03em', textShadow: `0 0 20px ${s.c}30` }}>{s.v}</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)', marginTop: '4px', letterSpacing: '0.05em' }}>{s.l}</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)', marginTop: '4px' }}>{s.l}</div>
                 </div>
               ))}
             </div>
@@ -501,7 +501,7 @@ export default function TournamentPage() {
                     if (filtered.length === 0) return null;
                     return (
                       <div key={status}>
-                        <div style={{ fontSize: '11px', color: status === 'live' ? '#ef4444' : status === 'upcoming' ? '#06b6d4' : '#C7A66A', fontWeight: 700, letterSpacing: '0.15em', marginBottom: '10px', paddingRight: '4px' }}>
+                        <div style={{ fontSize: '11px', color: status === 'live' ? '#ef4444' : status === 'upcoming' ? '#06b6d4' : '#C7A66A', fontWeight: 700, marginBottom: '10px', paddingRight: '4px' }}>
                           {status === 'live' ? '● در حال بازی' : status === 'upcoming' ? 'پیش رو' : 'پایان‌یافته'}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
@@ -561,7 +561,7 @@ export default function TournamentPage() {
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.player.name.split(' ').slice(-1)[0]}</div>
-                                {i < 2 && <div style={{ fontSize: '9px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.06em' }}>صعود کرد</div>}
+                                {i < 2 && <div style={{ fontSize: '9px', color: '#C7A66A', fontWeight: 700 }}>صعود کرد</div>}
                               </div>
                               <div style={{ display: 'flex', gap: '16px', fontSize: '13px', flexShrink: 0 }}>
                                 <span style={{ color: '#C7A66A', fontWeight: 700 }}>{toFa(r.w)}</span>
@@ -582,7 +582,7 @@ export default function TournamentPage() {
                 <div style={{ animation: 'fadeUp 0.4s ease both' }}>
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
                     {/* Table header */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(0,0,0,0.04)', fontSize: '10px', color: 'rgba(0,0,0,0.40)', fontWeight: 700, letterSpacing: '0.1em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(0,0,0,0.04)', fontSize: '10px', color: 'rgba(0,0,0,0.40)', fontWeight: 700 }}>
                       <span style={{ width: '28px' }}>#</span>
                       <span style={{ flex: 1 }}>بازیکن</span>
                       <span style={{ width: '60px', textAlign: 'left' }}>شهر</span>
