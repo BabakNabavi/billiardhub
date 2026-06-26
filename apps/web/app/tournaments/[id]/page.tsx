@@ -112,7 +112,7 @@ export default function TournamentPublicPage() {
       </div>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '28px clamp(16px,4vw,40px)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr clamp(280px,35%,360px)', gap: 24,
+        <div className="tdgrid" style={{ display: 'grid', gridTemplateColumns: '1fr clamp(280px,35%,360px)', gap: 24,
           alignItems: 'start' }}>
 
           {/* ── Left: details ── */}
@@ -215,7 +215,7 @@ export default function TournamentPublicPage() {
           </div>
 
           {/* ── Right: registration card ── */}
-          <div style={{ position: 'sticky', top: 96 }}>
+          <div className="treg" style={{ position: 'sticky', top: 96 }}>
             <div style={{
               background: '#fff', borderRadius: 24, padding: '26px 24px',
               border: '1px solid rgba(0,0,0,0.07)',
@@ -346,6 +346,10 @@ export default function TournamentPublicPage() {
         @keyframes lp {
           0%,100% { opacity:1; transform:scale(1); }
           50% { opacity:0.4; transform:scale(1.5); }
+        }
+        @media (max-width: 767px) {
+          .tdgrid { grid-template-columns: 1fr !important; }
+          .treg { position: static !important; top: auto !important; order: -1; }
         }
       `}</style>
     </div>
