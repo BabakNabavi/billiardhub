@@ -536,13 +536,13 @@ export default function HomePage() {
           .mkt-sub      { grid-template-columns:1fr !important; }
         }
 
-        /* ══ LAPTOP SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
+        /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-content { padding-top:clamp(220px,28vh,270px) !important; }
+          .hero-content { padding-top:clamp(220px,28vh,270px) !important; zoom:0.95; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(215px,32vh,248px) !important; }
+          .hero-content { padding-top:clamp(215px,32vh,248px) !important; zoom:0.90; }
           .hero-sub     { display:none !important; }
         }
 
