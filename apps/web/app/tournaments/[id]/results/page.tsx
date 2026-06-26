@@ -77,7 +77,7 @@ export default function ResultsPage() {
 
       {/* Hero */}
       <div style={{ background: 'linear-gradient(160deg,#0a0a0a 0%,#1a1209 60%,#2a1800 100%)',
-        position: 'relative', paddingTop: 72, overflow: 'hidden', paddingBottom: 48 }}>
+        position: 'relative', marginTop: -72, paddingTop: 72, overflow: 'hidden', paddingBottom: 48 }}>
         {/* glow orbs */}
         <div style={{ position: 'absolute', top: -80, right: -80, width: 320, height: 320,
           borderRadius: '50%', background: 'rgba(199,166,106,0.07)', filter: 'blur(60px)', pointerEvents: 'none' }} />
