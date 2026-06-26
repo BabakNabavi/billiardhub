@@ -571,29 +571,28 @@ export default function ClubProfilePage() {
           {/* ── SCHEDULE TAB ── */}
           {tab === 'schedule' && (
             <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 3, height: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
                   ساعات کاری هفتگی
-                </h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {(['saturday','sunday','monday','tuesday','wednesday','thursday','friday'] as const).map(day => {
                     const hours = (club.workingHours ?? {})[day] as any;
                     if (!hours) return null;
                     const isToday = day === todayKey;
                     return (
-                      <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderRadius: 12, background: isToday ? 'rgba(199,166,106,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(199,166,106,0.18)' : 'transparent'}` }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#C7A66A' : 'rgba(0,0,0,0.50)', fontSize: 13, minWidth: 68 }}>{dayNames[day]}</span>
-                          {isToday && <span style={{ fontSize: 9, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>امروز</span>}
-                        </div>
+                      <div key={day} style={{ display: 'flex', alignItems: 'center', padding: '7px 10px', borderRadius: 9, background: isToday ? 'rgba(199,166,106,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(199,166,106,0.18)' : 'transparent'}` }}>
+                        <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#C7A66A' : 'rgba(0,0,0,0.50)', fontSize: 12, width: 62, flexShrink: 0 }}>{dayNames[day]}</span>
+                        {isToday && <span style={{ fontSize: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', padding: '1px 6px', borderRadius: 20, fontWeight: 700, marginLeft: 6, flexShrink: 0 }}>امروز</span>}
+                        <span style={{ flex: 1 }} />
                         {hours.isOpen ? (
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Clock size={10} style={{ color: '#C7A66A' }} />
+                          <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Clock size={9} style={{ color: '#C7A66A' }} />
                             {toFa(hours.open)} — {toFa(hours.close)}
                           </span>
                         ) : (
-                          <span style={{ fontSize: 11, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', padding: '2px 10px', borderRadius: 20, fontWeight: 600 }}>تعطیل</span>
+                          <span style={{ fontSize: 10, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>تعطیل</span>
                         )}
                       </div>
                     );
