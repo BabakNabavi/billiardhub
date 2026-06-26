@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronRight, Shuffle, Save, FolderOpen, Check,
-  Trophy, RotateCcw, Play, Info,
+  Trophy, RotateCcw, Play, Info, X,
 } from 'lucide-react';
 import {
   SAMPLE_TOURNAMENTS, SAMPLE_PLAYERS, BRACKET_TEMPLATES, toFa,
@@ -59,6 +59,7 @@ function lqBtn(active: boolean, rgb = '199,166,106', color = '#C7A66A'): React.C
 function MatchCard({
   match, draggingOver, onDrop, onDragOver, onDragLeave,
   dragFromSlot, onSlotDragStart, isByeMatch,
+  onSlotTap, tapPlayerActive, isMobile,
 }: {
   match: TournamentMatch;
   draggingOver: string | null;
@@ -68,26 +69,41 @@ function MatchCard({
   dragFromSlot: { matchId: string; slot: 1 | 2 } | null;
   onSlotDragStart: (e: React.DragEvent, matchId: string, slot: 1 | 2, player: TournamentPlayer) => void;
   isByeMatch?: boolean;
+  onSlotTap?: (matchId: string, slot: 1 | 2, player?: TournamentPlayer) => void;
+  tapPlayerActive?: boolean;
+  isMobile?: boolean;
 }) {
   const renderSlot = (player: TournamentPlayer | undefined, slot: 1 | 2) => {
     const slotId = `${match.id}-${slot}`;
     const isOver = draggingOver === slotId;
     const isDragging = dragFromSlot?.matchId === match.id && dragFromSlot.slot === slot;
     const isBye = player?.id === 'bye';
+    const isEmptyReady = isMobile && tapPlayerActive && !player;
 
     return (
       <div
-        draggable={!!player && !isBye}
-        onDragStart={player && !isBye ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
-        onDragOver={e => onDragOver(e, match.id, slot)}
-        onDragLeave={onDragLeave}
-        onDrop={e => onDrop(e, match.id, slot)}
+        draggable={!isMobile && !!player && !isBye}
+        onDragStart={!isMobile && player && !isBye ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
+        onDragOver={!isMobile ? e => onDragOver(e, match.id, slot) : undefined}
+        onDragLeave={!isMobile ? onDragLeave : undefined}
+        onDrop={!isMobile ? e => onDrop(e, match.id, slot) : undefined}
+        onClick={isMobile ? () => onSlotTap?.(match.id, slot, player) : undefined}
         style={{
           padding: '6px 9px', minHeight: 33,
-          background: isBye ? 'rgba(0,0,0,0.02)' : isOver ? 'rgba(199,166,106,0.10)' : player ? '#fff' : 'rgba(0,0,0,0.015)',
-          border: `1px ${isOver ? 'solid' : player && !isBye ? 'solid' : 'dashed'} ${
-            isOver ? '#C7A66A' : player && !isBye ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.10)'}`,
-          borderRadius: 7, cursor: player && !isBye ? 'grab' : 'default',
+          background: isBye ? 'rgba(0,0,0,0.02)'
+            : isEmptyReady ? 'rgba(199,166,106,0.06)'
+            : isOver ? 'rgba(199,166,106,0.10)'
+            : player ? '#fff'
+            : 'rgba(0,0,0,0.015)',
+          border: `1px ${isOver || isEmptyReady ? 'solid' : player && !isBye ? 'solid' : 'dashed'} ${
+            isOver ? '#C7A66A'
+            : isEmptyReady ? 'rgba(199,166,106,0.45)'
+            : player && !isBye ? 'rgba(0,0,0,0.08)'
+            : 'rgba(0,0,0,0.10)'}`,
+          borderRadius: 7,
+          cursor: isMobile
+            ? (player && !isBye ? 'pointer' : tapPlayerActive ? 'pointer' : 'default')
+            : (player && !isBye ? 'grab' : 'default'),
           transition: 'all 0.12s', opacity: isDragging ? 0.3 : 1,
           display: 'flex', alignItems: 'center', gap: 6,
         }}
@@ -110,9 +126,16 @@ function MatchCard({
             {player.rank && (
               <span style={{ fontSize: 9, color: '#C7A66A', fontWeight: 700 }}>#{toFa(player.rank)}</span>
             )}
+            {isMobile && (
+              <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 900, flexShrink: 0 }}>×</span>
+            )}
           </>
+        ) : isEmptyReady ? (
+          <span style={{ fontSize: 10, color: '#C7A66A', fontWeight: 700 }}>← بزنید</span>
         ) : (
-          <span style={{ fontSize: 10, color: '#ddd' }}>بکشید اینجا</span>
+          <span style={{ fontSize: 10, color: '#ddd' }}>
+            {isMobile ? '—' : 'بکشید اینجا'}
+          </span>
         )}
       </div>
     );
@@ -123,7 +146,7 @@ function MatchCard({
       background: isByeMatch ? 'rgba(48,197,90,0.03)' : '#fff',
       borderRadius: 9, overflow: 'hidden',
       border: `1px solid ${isByeMatch ? 'rgba(48,197,90,0.18)' : 'rgba(0,0,0,0.08)'}`,
-      boxShadow: '0 1px 5px rgba(0,0,0,0.04)', width: 165,
+      boxShadow: '0 1px 5px rgba(0,0,0,0.04)', width: 155,
     }}>
       <div style={{ padding: '3px 9px',
         background: isByeMatch ? 'rgba(48,197,90,0.07)' : 'rgba(0,0,0,0.02)',
@@ -152,6 +175,14 @@ export default function BracketPage() {
   const totalRounds = Math.log2(totalSlots);
   const needsBye    = approvedPlayers.length < totalSlots;
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 700);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const [method, setMethod]     = useState<'manual' | 'random' | null>(null);
   const [showRandom, setShowR]  = useState(false);
   const [showT, setShowT]       = useState(false);
@@ -161,11 +192,16 @@ export default function BracketPage() {
 
   const [matches, setMatches]   = useState<TournamentMatch[]>(generateEmptyBracket(totalSlots));
   const [pool, setPool]         = useState<TournamentPlayer[]>(approvedPlayers);
+
+  /* Desktop drag state */
   const [dragFromPool, setDFP]  = useState<TournamentPlayer | null>(null);
   const [dragFromSlot, setDFS]  = useState<{ matchId: string; slot: 1 | 2; player: TournamentPlayer } | null>(null);
   const [draggingOver, setDO]   = useState<string | null>(null);
 
-  /* Drag handlers */
+  /* Mobile tap state */
+  const [tapPlayer, setTapPlayer] = useState<TournamentPlayer | null>(null);
+
+  /* ── Desktop Drag handlers ── */
   const handlePoolDragStart = (e: React.DragEvent, player: TournamentPlayer) => {
     setDFP(player); setDFS(null); e.dataTransfer.effectAllowed = 'move';
   };
@@ -211,6 +247,27 @@ export default function BracketPage() {
     setDFP(null); setDFS(null); setDO(null);
   };
 
+  /* ── Mobile tap-to-assign ── */
+  const handleSlotTap = (matchId: string, slot: 1 | 2, currentPlayer?: TournamentPlayer) => {
+    if (currentPlayer && currentPlayer.id !== 'bye') {
+      // Remove player from slot → back to pool
+      setMatches(prev => prev.map(m => {
+        if (m.id !== matchId) return m;
+        return slot === 1 ? { ...m, player1: undefined } : { ...m, player2: undefined };
+      }));
+      setPool(prev => [...prev, currentPlayer]);
+      if (tapPlayer?.id === currentPlayer.id) setTapPlayer(null);
+    } else if (tapPlayer && !currentPlayer) {
+      // Place selected player into slot
+      setMatches(prev => prev.map(m => {
+        if (m.id !== matchId) return m;
+        return slot === 1 ? { ...m, player1: tapPlayer } : { ...m, player2: tapPlayer };
+      }));
+      setPool(prev => prev.filter(p => p.id !== tapPlayer.id));
+      setTapPlayer(null);
+    }
+  };
+
   /* Randomize */
   const randomize = () => {
     const padded = needsBye
@@ -252,6 +309,7 @@ export default function BracketPage() {
   const reset = () => {
     setMatches(generateEmptyBracket(totalSlots));
     setPool(approvedPlayers); setMethod(null); setSaved(false); setConfirmed(false);
+    setTapPlayer(null);
   };
 
   /* Bracket split helpers */
@@ -314,7 +372,7 @@ export default function BracketPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
             {[
               { key: 'manual' as const, label: 'دستی', icon: <Trophy size={20} color="#C7A66A" />,
-                rgb: '199,166,106', color: '#C7A66A', desc: 'بازیکنان را با کشیدن روی جدول قرار دهید',
+                rgb: '199,166,106', color: '#C7A66A', desc: 'بازیکنان را روی جدول قرار دهید',
                 badge: '✓ پیشنهاد' },
               { key: null as null, label: 'تصادفی', icon: <Shuffle size={20} color="#8b5cf6" />,
                 rgb: '139,92,246', color: '#8b5cf6', desc: 'سیستم بازیکنان را تصادفی چیده‌می‌شود',
@@ -421,6 +479,87 @@ export default function BracketPage() {
     </div>
   );
 
+  /* ── Bracket canvas (shared mobile/desktop) ── */
+  const BracketCanvas = () => (
+    <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '16px 12px',
+      flex: isMobile ? undefined : 1,
+      WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
+      <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
+        minWidth: 'max-content', gap: 0 }}>
+
+        {/* LEFT HALF columns: R1 → QF → SF */}
+        {innerRounds.map((round, ri) => {
+          const ms = leftHalf(round);
+          const pad = Math.pow(2, ri) * 18;
+          return (
+            <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
+                letterSpacing: '0.08em', textAlign: 'center', padding: '0 8px', marginBottom: 8 }}>
+                {roundLabel(round, totalRounds)}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
+                {ms.map(m => (
+                  <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 10 }}>
+                    <MatchCard match={m} draggingOver={draggingOver}
+                      onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                      dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                      isByeMatch={isByeM(m)}
+                      onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* CENTER — FINAL */}
+        {finalMatch && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
+              textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
+              🏆 فینال
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
+              flex: 1, padding: `${Math.pow(2, innerRounds.length) * 18}px 10px` }}>
+              <MatchCard match={finalMatch} draggingOver={draggingOver}
+                onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+            </div>
+          </div>
+        )}
+
+        {/* RIGHT HALF columns: SF → QF → R1 */}
+        {[...innerRounds].reverse().map((round, ri) => {
+          const ms = rightHalf(round);
+          const mirrorRi = innerRounds.length - 1 - ri;
+          const pad = Math.pow(2, mirrorRi) * 18;
+          return (
+            <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
+                letterSpacing: '0.08em', textAlign: 'center', padding: '0 8px', marginBottom: 8 }}>
+                {roundLabel(round, totalRounds)}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
+                {ms.map(m => (
+                  <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 10 }}>
+                    <MatchCard match={m} draggingOver={draggingOver}
+                      onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                      dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                      isByeMatch={isByeM(m)}
+                      onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   /* ── Main bracket builder ── */
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
@@ -432,7 +571,7 @@ export default function BracketPage() {
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
         padding: '10px clamp(12px,3vw,28px)', position: 'sticky', top: 72, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 4,
               background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#999', fontFamily: 'inherit' }}>
               <ChevronRight size={13} /> براکت
@@ -454,128 +593,116 @@ export default function BracketPage() {
             </button>
             <button onClick={() => setSaved(true)}
               style={lqBtn(true, saved ? '48,197,90' : '199,166,106', saved ? '#30C55A' : '#C7A66A')}>
-              <Save size={11} /> {saved ? 'ذخیره شد ✓' : 'ذخیره قالب'}
+              <Save size={11} /> {saved ? 'ذخیره شد ✓' : 'ذخیره'}
             </button>
             {!confirmed ? (
               <button onClick={handleStart} style={lqBtn(true)}>
-                <Play size={11} /> شروع مسابقه
+                <Play size={11} /> شروع
               </button>
             ) : (
               <button onClick={() => router.push(`/tournaments/${t.id}/live`)}
                 style={lqBtn(true, '48,197,90', '#30C55A')}>
-                <Check size={11} /> تایید شد — نمای زنده
+                <Check size={11} /> نمای زنده
               </button>
             )}
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', height: 'calc(100vh - 165px)', overflow: 'hidden' }}>
-
-        {/* Player pool sidebar */}
-        <div style={{ width: 185, flexShrink: 0, background: '#fff',
-          borderLeft: '1px solid rgba(0,0,0,0.06)', overflowY: 'auto', padding: '12px 10px' }}
-          onDragOver={e => e.preventDefault()} onDrop={handlePoolDrop}>
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#ccc',
-            letterSpacing: '0.10em', marginBottom: 10 }}>بازیکنان</div>
-          {pool.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '18px 0', color: '#ddd', fontSize: 11 }}>
-              <Check size={18} style={{ marginBottom: 5 }} /><br />همه تخصیص یافتند
-            </div>
-          ) : pool.map(p => (
-            <div key={p.id} draggable onDragStart={e => handlePoolDragStart(e, p)}
-              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px',
-                borderRadius: 9, marginBottom: 5, background: 'rgba(0,0,0,0.02)',
-                border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
-              <div style={{ width: 25, height: 25, borderRadius: '50%', flexShrink: 0,
-                background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 900, color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
-                {p.name[0]}
+      {/* ── MOBILE LAYOUT ── */}
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 130px)' }}>
+          {/* Player chips strip */}
+          <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
+            flexShrink: 0 }}>
+            {tapPlayer ? (
+              <div style={{ padding: '8px 14px 6px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, fontSize: 12, color: '#C7A66A', fontWeight: 700 }}>
+                  «{tapPlayer.name}» انتخاب شد — روی جایگاه خالی بزنید
+                </div>
+                <button onClick={() => setTapPlayer(null)} style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)',
+                  borderRadius: 20, padding: '4px 10px', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 11, color: '#ef4444', fontWeight: 700,
+                }}>
+                  <X size={10} /> لغو
+                </button>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#111',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                {p.rank && <div style={{ fontSize: 9, color: '#C7A66A' }}>#{toFa(p.rank)}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── Double-sided bracket canvas ── */}
-        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '16px 12px' }}>
-          <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
-            minWidth: 'max-content', gap: 0 }}>
-
-            {/* LEFT HALF columns: R1 → QF → SF */}
-            {innerRounds.map((round, ri) => {
-              const ms = leftHalf(round);
-              const pad = Math.pow(2, ri) * 20;
-              return (
-                <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
-                    letterSpacing: '0.08em', textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
-                    {roundLabel(round, totalRounds)}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column',
-                    justifyContent: 'space-around', flex: 1, padding: `${pad}px 10px` }}>
-                    {ms.map(m => (
-                      <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 12 }}>
-                        <MatchCard match={m} draggingOver={draggingOver}
-                          onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
-                          dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
-                          isByeMatch={isByeM(m)} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* CENTER — FINAL */}
-            {finalMatch && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
-                  textAlign: 'center', padding: '0 12px', marginBottom: 8 }}>
-                  🏆 فینال
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                  flex: 1, padding: `${Math.pow(2, innerRounds.length) * 20}px 12px` }}>
-                  <MatchCard match={finalMatch} draggingOver={draggingOver}
-                    onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
-                    dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart} />
-                </div>
+            ) : (
+              <div style={{ padding: '8px 14px 4px', fontSize: 11, color: '#bbb', fontWeight: 700 }}>
+                {pool.length > 0 ? 'روی بازیکن بزنید تا انتخاب شود' : '✓ همه بازیکنان تخصیص یافتند'}
               </div>
             )}
+            <div style={{ overflowX: 'auto', display: 'flex', gap: 7, padding: '4px 14px 10px',
+              WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
+              {pool.map(p => (
+                <button key={p.id} onClick={() => setTapPlayer(tapPlayer?.id === p.id ? null : p)}
+                  style={{
+                    flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '6px 11px', borderRadius: 20,
+                    background: tapPlayer?.id === p.id ? 'rgba(199,166,106,0.13)' : 'rgba(0,0,0,0.03)',
+                    border: `1px solid ${tapPlayer?.id === p.id ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.08)'}`,
+                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.14s',
+                  }}>
+                  <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                    background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 8, fontWeight: 900, color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
+                    {p.name[0]}
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700,
+                    color: tapPlayer?.id === p.id ? '#C7A66A' : '#333' }}>
+                    {p.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-            {/* RIGHT HALF columns: SF → QF → R1 */}
-            {[...innerRounds].reverse().map((round, ri) => {
-              const ms = rightHalf(round);
-              const mirrorRi = innerRounds.length - 1 - ri;
-              const pad = Math.pow(2, mirrorRi) * 20;
-              return (
-                <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
-                    letterSpacing: '0.08em', textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
-                    {roundLabel(round, totalRounds)}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column',
-                    justifyContent: 'space-around', flex: 1, padding: `${pad}px 10px` }}>
-                    {ms.map(m => (
-                      <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 12 }}>
-                        <MatchCard match={m} draggingOver={draggingOver}
-                          onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
-                          dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
-                          isByeMatch={isByeM(m)} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          {/* Bracket scrollable area */}
+          <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
+            <BracketCanvas />
           </div>
         </div>
-      </div>
+      ) : (
+        /* ── DESKTOP LAYOUT ── */
+        <div style={{ display: 'flex', height: 'calc(100vh - 165px)', overflow: 'hidden' }}>
+
+          {/* Player pool sidebar */}
+          <div style={{ width: 185, flexShrink: 0, background: '#fff',
+            borderLeft: '1px solid rgba(0,0,0,0.06)', overflowY: 'auto', padding: '12px 10px' }}
+            onDragOver={e => e.preventDefault()} onDrop={handlePoolDrop}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: '#ccc',
+              letterSpacing: '0.10em', marginBottom: 10 }}>بازیکنان</div>
+            {pool.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '18px 0', color: '#ddd', fontSize: 11 }}>
+                <Check size={18} style={{ marginBottom: 5 }} /><br />همه تخصیص یافتند
+              </div>
+            ) : pool.map(p => (
+              <div key={p.id} draggable onDragStart={e => handlePoolDragStart(e, p)}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px',
+                  borderRadius: 9, marginBottom: 5, background: 'rgba(0,0,0,0.02)',
+                  border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
+                <div style={{ width: 25, height: 25, borderRadius: '50%', flexShrink: 0,
+                  background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 10, fontWeight: 900, color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
+                  {p.name[0]}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#111',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                  {p.rank && <div style={{ fontSize: 9, color: '#C7A66A' }}>#{toFa(p.rank)}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bracket canvas */}
+          <BracketCanvas />
+        </div>
+      )}
     </div>
   );
 }
