@@ -210,7 +210,7 @@ export default function ClubProfilePage() {
         .tourn-card:hover { transform:translateY(-2px); }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom, #0A0806 72px, #F7F7F5 72px)', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90, paddingTop: 72 }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
         {/* ══ HERO ══ */}
         <div style={{ position: 'relative', height: 'min(clamp(255px,44vw,510px),58vh)', overflow: 'hidden', background: '#0A0806' }}>
@@ -231,12 +231,12 @@ export default function ClubProfilePage() {
           )}
 
           {/* Back button — top-right corner */}
-          <button onClick={() => router.push('/clubs')} style={{ position: 'absolute', top: 4, right: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.82)', fontSize: 13, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+          <button onClick={() => router.push('/clubs')} style={{ position: 'absolute', top: 74, right: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.82)', fontSize: 13, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
             <ChevronRight size={14} /> باشگاه‌ها
           </button>
 
           {/* Status badge — top-left corner */}
-          <div style={{ position: 'absolute', top: 4, left: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
+          <div style={{ position: 'absolute', top: 74, left: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOpen ? '#30C55A' : '#ef4444', animation: 'pulse 2s infinite', display: 'inline-block' }} />
             <span style={{ fontSize: 12, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(todayH?.close || '')}` : 'بسته است'}</span>
           </div>
