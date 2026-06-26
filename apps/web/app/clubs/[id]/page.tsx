@@ -64,10 +64,10 @@ const tableTypes = [
 ];
 
 const tournaments = [
-  { title: 'لیگ داخلی اسنوکر — پاییز ۱۴۰۵', date: '۱۵ مهر ۱۴۰۵', type: 'اسنوکر', status: 'ثبت‌نام باز',       statusColor: '#30C55A', participants: 24, prize: '۵۰,۰۰۰,۰۰۰ تومان' },
-  { title: 'مسابقات پاکت سری A',              date: '۲۸ شهریور ۱۴۰۵', type: 'پاکت',   status: 'در حال برگزاری', statusColor: '#f59e0b', participants: 16, prize: '۳۰,۰۰۰,۰۰۰ تومان' },
-  { title: 'جام VIP هشتم',                    date: '۱ آبان ۱۴۰۵',   type: 'VIP',    status: 'به زودی',         statusColor: '#8b5cf6', participants: 8,  prize: '۱۲۰,۰۰۰,۰۰۰ تومان' },
-  { title: 'تور هفتگی آماتور',                date: 'هر جمعه',         type: 'پاکت',   status: 'جاری',            statusColor: '#06b6d4', participants: 12, prize: 'جایزه نقدی + تندیس' },
+  { id: 't1', title: 'لیگ داخلی اسنوکر — پاییز ۱۴۰۵', date: '۱۵ مهر ۱۴۰۵',    type: 'اسنوکر', status: 'ثبت‌نام باز',       statusColor: '#30C55A', participants: 24, prize: '۵۰,۰۰۰,۰۰۰ تومان' },
+  { id: 't2', title: 'مسابقات پاکت سری A',              date: '۲۸ شهریور ۱۴۰۵', type: 'پاکت',   status: 'در حال برگزاری', statusColor: '#f59e0b', participants: 16, prize: '۳۰,۰۰۰,۰۰۰ تومان' },
+  { id: 't4', title: 'جام VIP هشتم',                    date: '۱ آبان ۱۴۰۵',    type: 'VIP',    status: 'به زودی',         statusColor: '#8b5cf6', participants: 8,  prize: '۱۲۰,۰۰۰,۰۰۰ تومان' },
+  { id: 't3', title: 'تور هفتگی آماتور',                date: 'هر جمعه',          type: 'پاکت',   status: 'پایان یافته',     statusColor: '#06b6d4', participants: 12, prize: 'جایزه نقدی + تندیس' },
 ];
 
 const galleryAlbums = [
@@ -562,7 +562,8 @@ export default function ClubProfilePage() {
               {/* Tournament list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {tournaments.map((t, i) => (
-                  <div key={i} className="tourn-card">
+                  <div key={i} className="tourn-card" onClick={() => router.push(`/tournaments/${t.id}`)}
+                    style={{ cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
                       <div style={{ width: 48, height: 48, borderRadius: 14, background: `${t.statusColor}12`, border: `1px solid ${t.statusColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <Trophy size={20} style={{ color: t.statusColor }} />
@@ -593,6 +594,9 @@ export default function ClubProfilePage() {
                   </div>
                 ))}
               </div>
+              <button onClick={() => router.push('/tournaments')} style={{ width: '100%', marginTop: 6, padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.45)', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <Trophy size={13} /> مشاهده همه مسابقات
+              </button>
 
               <div style={{ marginTop: 20, padding: '14px 18px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.18)', borderRadius: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>برای شرکت در مسابقات یا برگزاری رویداد خاص با ما تماس بگیرید</div>
