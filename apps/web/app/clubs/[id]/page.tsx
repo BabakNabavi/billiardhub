@@ -188,6 +188,10 @@ export default function ClubProfilePage() {
         .sidebar-col { display:none }
         @media(min-width:960px){ .sidebar-col{display:flex;flex-direction:column;gap:14px} }
 
+        /* mobile-only sections: visible on mobile, hidden on desktop */
+        .mobile-only { display:flex;flex-direction:column;gap:14px }
+        @media(min-width:960px){ .mobile-only{display:none} }
+
         .book-fixed {
           position:fixed;bottom:0;left:0;right:0;
           padding:12px 16px 16px;
@@ -398,6 +402,68 @@ export default function ClubProfilePage() {
                     </a>
                   </div>
                 </div>
+                {/* Mobile-only: booking summary + contact + stats */}
+                <div className="mobile-only">
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
+                    <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+                      {[
+                        { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
+                        { v: '۳',  l: 'مشغول',    c: '#ef4444',          rgb: '239,68,68'   },
+                        { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
+                      ].map((x, i) => (
+                        <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
+                          <div style={{ fontSize: 26, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
+                          <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
+                      اطلاعات تماس
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
+                        <MapPin size={14} style={{ color: '#C7A66A', marginTop: 2, flexShrink: 0 }} />
+                        <span style={{ lineHeight: 1.6 }}>{club.address}، {club.city}</span>
+                      </div>
+                      {club.phone && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                          <Phone size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
+                          <span style={{ color: 'rgba(0,0,0,0.45)' }}>{club.phone}</span>
+                        </div>
+                      )}
+                      {club.website && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                          <Globe size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
+                          <a href={club.website} target="_blank" rel="noopener noreferrer" style={{ color: '#C7A66A', textDecoration: 'none' }}>{club.website.replace('https://', '')}</a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
+                      آمار باشگاه
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                      {[
+                        { label: 'اعضای فعال',  v: '۱,۲۰۰+', color: '#C7A66A' },
+                        { label: 'مسابقات',      v: '۴۸',     color: '#f59e0b' },
+                        { label: 'سال‌ها سابقه', v: '۱۵',     color: '#a78bfa' },
+                        { label: 'ظرفیت روزانه', v: '۸۰ نفر', color: '#06b6d4' },
+                      ].map((x, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
+                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
+                          <span style={{ fontSize: 14, fontWeight: 800, color: x.color }}>{x.v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Sidebar — desktop only */}
@@ -573,7 +639,7 @@ export default function ClubProfilePage() {
 
           {/* ── SCHEDULE TAB ── */}
           {tab === 'schedule' && (
-            <div style={{ animation: 'fadeUp 0.4s ease both' }}>
+            <div style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400 }}>
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 3, height: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
@@ -585,10 +651,11 @@ export default function ClubProfilePage() {
                     if (!hours) return null;
                     const isToday = day === todayKey;
                     return (
-                      <div key={day} style={{ display: 'flex', alignItems: 'center', padding: '7px 10px', borderRadius: 9, background: isToday ? 'rgba(199,166,106,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(199,166,106,0.18)' : 'transparent'}` }}>
-                        <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#C7A66A' : 'rgba(0,0,0,0.50)', fontSize: 12, width: 62, flexShrink: 0 }}>{dayNames[day]}</span>
-                        {isToday && <span style={{ fontSize: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', padding: '1px 6px', borderRadius: 20, fontWeight: 700, marginLeft: 6, flexShrink: 0 }}>امروز</span>}
-                        <span style={{ flex: 1 }} />
+                      <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: 9, background: isToday ? 'rgba(199,166,106,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(199,166,106,0.18)' : 'transparent'}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#C7A66A' : 'rgba(0,0,0,0.50)', fontSize: 12, width: 52, flexShrink: 0 }}>{dayNames[day]}</span>
+                          {isToday && <span style={{ fontSize: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', padding: '1px 6px', borderRadius: 20, fontWeight: 700, flexShrink: 0 }}>امروز</span>}
+                        </div>
                         {hours.isOpen ? (
                           <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
                             <Clock size={9} style={{ color: '#C7A66A' }} />
