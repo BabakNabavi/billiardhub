@@ -178,8 +178,8 @@ export default function ClubProfilePage() {
         .album-scroll { display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none }
         .album-scroll::-webkit-scrollbar { display:none }
 
-        .gallery-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px }
-        @media(max-width:480px){ .gallery-grid{grid-template-columns:repeat(2,1fr)} }
+        .gallery-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:6px }
+        @media(max-width:480px){ .gallery-grid{grid-template-columns:repeat(3,1fr)} }
 
         .amenity-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px }
         @media(max-width:400px){ .amenity-grid{grid-template-columns:1fr} }
@@ -539,8 +539,8 @@ export default function ClubProfilePage() {
                 </div>
                 <div className="album-scroll">
                   {galleryAlbums.map((album, i) => (
-                    <div key={i} style={{ flexShrink: 0, width: 148, cursor: 'pointer' }}>
-                      <div style={{ width: 148, height: 148, borderRadius: 18, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)' }}>
+                    <div key={i} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}>
+                      <div style={{ width: 110, height: 110, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)' }}>
                         <img src={album.cover} alt={album.name} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)', transition: 'transform 0.4s ease' }} onMouseEnter={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.06)'; }} onMouseLeave={e => { (e.target as HTMLImageElement).style.transform = 'scale(1)'; }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
                         <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
@@ -577,7 +577,9 @@ export default function ClubProfilePage() {
                   ساعات کاری هفتگی
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {Object.entries(club.workingHours ?? {}).map(([day, hours]: any) => {
+                  {(['saturday','sunday','monday','tuesday','wednesday','thursday','friday'] as const).map(day => {
+                    const hours = (club.workingHours ?? {})[day] as any;
+                    if (!hours) return null;
                     const isToday = day === todayKey;
                     return (
                       <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderRadius: 12, background: isToday ? 'rgba(199,166,106,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(199,166,106,0.18)' : 'transparent'}` }}>
