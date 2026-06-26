@@ -192,6 +192,8 @@ export default function ClubProfilePage() {
           position:fixed;bottom:0;left:0;right:0;
           padding:12px 16px 16px;
           z-index:200;
+          background:#ffffff;
+          box-shadow:0 -1px 0 rgba(0,0,0,0.07);
         }
         @media(min-width:960px){ .book-fixed{display:none} }
         .book-btn-desktop:hover { background:rgba(199,166,106,0.20) !important; }
@@ -607,7 +609,7 @@ export default function ClubProfilePage() {
         {/* Sticky mobile reserve button */}
         <div className="book-fixed">
           <button onClick={goBook} style={{ width: '100%', padding: '14px', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, background: 'rgba(199,166,106,0.14)', color: '#C7A66A', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Calendar size={16} /> رزرو میز آنلاین
+          <Calendar size={16} /> رزرو آنلاین میز
           </button>
         </div>
       </div>
