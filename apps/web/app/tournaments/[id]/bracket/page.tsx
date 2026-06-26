@@ -3,16 +3,15 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  ChevronRight, Shuffle, Save, FolderOpen, Check, X,
-  Trophy, AlertCircle, RotateCcw, Play,
+  ChevronRight, Shuffle, Save, FolderOpen, Check,
+  Trophy, RotateCcw, Play, Info,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, SAMPLE_REGISTRATIONS, SAMPLE_PLAYERS,
-  BRACKET_TEMPLATES, toFa,
+  SAMPLE_TOURNAMENTS, SAMPLE_PLAYERS, BRACKET_TEMPLATES, toFa,
   type TournamentPlayer, type TournamentMatch,
 } from '../../../../lib/mock-tournaments';
 
-type BracketMethod = 'manual' | 'random';
+const BYE_PLAYER: TournamentPlayer = { id: 'bye', name: 'استراحت', phone: '' };
 
 function generateEmptyBracket(totalSlots: number): TournamentMatch[] {
   const rounds = Math.log2(totalSlots);
@@ -27,7 +26,7 @@ function generateEmptyBracket(totalSlots: number): TournamentMatch[] {
   return matches;
 }
 
-function shuffleArray<T>(arr: T[]): T[] {
+function shuffleArr<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -36,76 +35,84 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-const ROUND_LABELS: Record<number, string> = {
-  1: 'مرحله اول', 2: 'یک‌چهارم', 3: 'نیمه‌نهایی', 4: 'فینال',
-  5: 'فینال', 6: 'فینال',
-};
 function roundLabel(round: number, totalRounds: number): string {
-  const fromEnd = totalRounds - round + 1;
-  if (fromEnd === 1) return 'فینال';
-  if (fromEnd === 2) return 'نیمه‌نهایی';
-  if (fromEnd === 3) return 'یک‌چهارم';
+  const fe = totalRounds - round + 1;
+  if (fe === 1) return 'فینال';
+  if (fe === 2) return 'نیمه نهایی';
+  if (fe === 3) return 'یک چهارم';
   return `مرحله ${toFa(round)}`;
 }
 
-/* ── Match card ── */
+function lqBtn(active: boolean, rgb = '199,166,106', color = '#C7A66A'): React.CSSProperties {
+  return {
+    padding: '8px 18px', borderRadius: 20,
+    border: `1px solid rgba(${rgb},${active ? '0.30' : '0.10'})`,
+    background: `rgba(${rgb},${active ? '0.12' : '0.04'})`,
+    color: active ? color : 'rgba(0,0,0,0.22)',
+    fontSize: 12, fontWeight: 800, cursor: active ? 'pointer' : 'not-allowed',
+    fontFamily: 'inherit', transition: 'all 0.18s', display: 'inline-flex',
+    alignItems: 'center', gap: 5,
+  };
+}
+
+/* ── Match Card ── */
 function MatchCard({
-  match, isDraggingOver, onDrop, onDragOver, onDragLeave,
-  slotDrag, onSlotDragStart,
+  match, draggingOver, onDrop, onDragOver, onDragLeave,
+  dragFromSlot, onSlotDragStart, isByeMatch,
 }: {
   match: TournamentMatch;
-  isDraggingOver: string | null;
+  draggingOver: string | null;
   onDrop: (e: React.DragEvent, matchId: string, slot: 1 | 2) => void;
   onDragOver: (e: React.DragEvent, matchId: string, slot: 1 | 2) => void;
   onDragLeave: () => void;
-  slotDrag: { matchId: string; slot: 1 | 2 } | null;
+  dragFromSlot: { matchId: string; slot: 1 | 2 } | null;
   onSlotDragStart: (e: React.DragEvent, matchId: string, slot: 1 | 2, player: TournamentPlayer) => void;
+  isByeMatch?: boolean;
 }) {
   const renderSlot = (player: TournamentPlayer | undefined, slot: 1 | 2) => {
     const slotId = `${match.id}-${slot}`;
-    const isOver = isDraggingOver === slotId;
-    const isDragging = slotDrag?.matchId === match.id && slotDrag.slot === slot;
+    const isOver = draggingOver === slotId;
+    const isDragging = dragFromSlot?.matchId === match.id && dragFromSlot.slot === slot;
+    const isBye = player?.id === 'bye';
 
     return (
       <div
-        draggable={!!player}
-        onDragStart={player ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
+        draggable={!!player && !isBye}
+        onDragStart={player && !isBye ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
         onDragOver={e => onDragOver(e, match.id, slot)}
         onDragLeave={onDragLeave}
         onDrop={e => onDrop(e, match.id, slot)}
         style={{
-          padding: '10px 14px', minHeight: 44,
-          background: isOver ? 'rgba(199,166,106,0.12)' : player ? '#fff' : 'rgba(0,0,0,0.02)',
-          border: `1.5px ${isOver ? 'solid' : player ? 'solid' : 'dashed'} ${
-            isOver ? '#C7A66A' : player ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.12)'}`,
-          borderRadius: 10, cursor: player ? 'grab' : 'default',
-          transition: 'all 0.15s',
-          opacity: isDragging ? 0.4 : 1,
-          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '6px 9px', minHeight: 33,
+          background: isBye ? 'rgba(0,0,0,0.02)' : isOver ? 'rgba(199,166,106,0.10)' : player ? '#fff' : 'rgba(0,0,0,0.015)',
+          border: `1px ${isOver ? 'solid' : player && !isBye ? 'solid' : 'dashed'} ${
+            isOver ? '#C7A66A' : player && !isBye ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.10)'}`,
+          borderRadius: 7, cursor: player && !isBye ? 'grab' : 'default',
+          transition: 'all 0.12s', opacity: isDragging ? 0.3 : 1,
+          display: 'flex', alignItems: 'center', gap: 6,
         }}
       >
-        {player ? (
+        {isBye ? (
+          <span style={{ fontSize: 10, color: '#bbb', fontWeight: 600 }}>استراحت</span>
+        ) : player ? (
           <>
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+            <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
               background: `hsl(${player.name.charCodeAt(0) * 15},50%,85%)`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 800,
-              color: `hsl(${player.name.charCodeAt(0) * 15},50%,35%)`,
-            }}>
+              fontSize: 9, fontWeight: 900,
+              color: `hsl(${player.name.charCodeAt(0) * 15},50%,35%)` }}>
               {player.name[0]}
             </div>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#111', flex: 1 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#111', flex: 1,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.name}
             </span>
             {player.rank && (
-              <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700 }}>
-                #{toFa(player.rank)}
-              </span>
+              <span style={{ fontSize: 9, color: '#C7A66A', fontWeight: 700 }}>#{toFa(player.rank)}</span>
             )}
           </>
         ) : (
-          <span style={{ fontSize: 12, color: '#bbb' }}>بازیکن را اینجا بکشید</span>
+          <span style={{ fontSize: 10, color: '#ddd' }}>بکشید اینجا</span>
         )}
       </div>
     );
@@ -113,247 +120,252 @@ function MatchCard({
 
   return (
     <div style={{
-      background: '#fff', borderRadius: 14, overflow: 'hidden',
-      border: '1px solid rgba(0,0,0,0.08)',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-      width: 210,
+      background: isByeMatch ? 'rgba(48,197,90,0.03)' : '#fff',
+      borderRadius: 9, overflow: 'hidden',
+      border: `1px solid ${isByeMatch ? 'rgba(48,197,90,0.18)' : 'rgba(0,0,0,0.08)'}`,
+      boxShadow: '0 1px 5px rgba(0,0,0,0.04)', width: 165,
     }}>
-      <div style={{ padding: '6px 14px', background: 'rgba(0,0,0,0.02)',
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
-        fontSize: 11, fontWeight: 700, color: '#aaa' }}>
-        بازی {toFa(match.matchIndex + 1)}
+      <div style={{ padding: '3px 9px',
+        background: isByeMatch ? 'rgba(48,197,90,0.07)' : 'rgba(0,0,0,0.02)',
+        borderBottom: '1px solid rgba(0,0,0,0.04)',
+        fontSize: 9, fontWeight: 700, color: isByeMatch ? '#30C55A' : '#ccc',
+        display: 'flex', alignItems: 'center', gap: 3 }}>
+        {isByeMatch ? <><Check size={8} /> پیشروی خودکار</> : `بازی ${toFa(match.matchIndex + 1)}`}
       </div>
-      <div style={{ padding: '10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ padding: '6px 7px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {renderSlot(match.player1, 1)}
-        <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#ddd' }}>VS</div>
+        <div style={{ textAlign: 'center', fontSize: 9, fontWeight: 700, color: '#ececec' }}>VS</div>
         {renderSlot(match.player2, 2)}
       </div>
     </div>
   );
 }
 
+/* ── Page ── */
 export default function BracketPage() {
   const { id }  = useParams() as { id: string };
   const router  = useRouter();
   const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
-  const approvedPlayers = SAMPLE_PLAYERS.slice(0, t.registeredCount > 8 ? 8 : t.registeredCount);
-  const totalSlots = t.maxPlayers <= 16 ? t.maxPlayers : 16;
+  const approvedPlayers = SAMPLE_PLAYERS.slice(0, Math.min(t.registeredCount, t.maxPlayers));
+  const totalSlots  = t.maxPlayers <= 16 ? t.maxPlayers : 16;
   const totalRounds = Math.log2(totalSlots);
+  const needsBye    = approvedPlayers.length < totalSlots;
 
-  const [method, setMethod]         = useState<BracketMethod | null>(null);
-  const [showRandom, setShowRandom] = useState(false);
-  const [showTemplates, setTemplates] = useState(false);
-  const [saved, setSaved]           = useState(false);
-  const [confirmed, setConfirmed]   = useState(false);
+  const [method, setMethod]     = useState<'manual' | 'random' | null>(null);
+  const [showRandom, setShowR]  = useState(false);
+  const [showT, setShowT]       = useState(false);
+  const [byeDlg, setByeDlg]     = useState(false);
+  const [saved, setSaved]       = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
-  const [matches, setMatches]     = useState<TournamentMatch[]>(generateEmptyBracket(totalSlots));
-  const [pool, setPool]           = useState<TournamentPlayer[]>(approvedPlayers);
-  const [dragFromPool, setDFP]    = useState<TournamentPlayer | null>(null);
-  const [dragFromSlot, setDFS]    = useState<{ matchId: string; slot: 1 | 2; player: TournamentPlayer } | null>(null);
-  const [draggingOver, setDO]     = useState<string | null>(null);
+  const [matches, setMatches]   = useState<TournamentMatch[]>(generateEmptyBracket(totalSlots));
+  const [pool, setPool]         = useState<TournamentPlayer[]>(approvedPlayers);
+  const [dragFromPool, setDFP]  = useState<TournamentPlayer | null>(null);
+  const [dragFromSlot, setDFS]  = useState<{ matchId: string; slot: 1 | 2; player: TournamentPlayer } | null>(null);
+  const [draggingOver, setDO]   = useState<string | null>(null);
 
-  /* Drag from pool */
+  /* Drag handlers */
   const handlePoolDragStart = (e: React.DragEvent, player: TournamentPlayer) => {
-    setDFP(player);
-    setDFS(null);
-    e.dataTransfer.effectAllowed = 'move';
+    setDFP(player); setDFS(null); e.dataTransfer.effectAllowed = 'move';
   };
-
-  /* Drag from slot */
   const handleSlotDragStart = (e: React.DragEvent, matchId: string, slot: 1 | 2, player: TournamentPlayer) => {
-    setDFS({ matchId, slot, player });
-    setDFP(null);
-    e.dataTransfer.effectAllowed = 'move';
+    setDFS({ matchId, slot, player }); setDFP(null); e.dataTransfer.effectAllowed = 'move';
   };
-
   const handleDragOver = (e: React.DragEvent, matchId: string, slot: 1 | 2) => {
-    e.preventDefault();
-    setDO(`${matchId}-${slot}`);
+    e.preventDefault(); setDO(`${matchId}-${slot}`);
   };
   const handleDragLeave = () => setDO(null);
 
   const handleDrop = (e: React.DragEvent, targetMatchId: string, targetSlot: 1 | 2) => {
-    e.preventDefault();
-    setDO(null);
-
+    e.preventDefault(); setDO(null);
     setMatches(prev => {
       const next = prev.map(m => ({ ...m }));
-      const targetMatch = next.find(m => m.id === targetMatchId)!;
-      const currentOccupant = targetSlot === 1 ? targetMatch.player1 : targetMatch.player2;
-
+      const tm = next.find(m => m.id === targetMatchId)!;
+      const current = targetSlot === 1 ? tm.player1 : tm.player2;
       if (dragFromPool) {
-        // From pool → slot
-        if (currentOccupant) {
-          setPool(p => [...p.filter(x => x.id !== dragFromPool.id), currentOccupant]);
-        } else {
-          setPool(p => p.filter(x => x.id !== dragFromPool.id));
-        }
-        if (targetSlot === 1) targetMatch.player1 = dragFromPool;
-        else targetMatch.player2 = dragFromPool;
+        if (current) setPool(p => [...p.filter(x => x.id !== dragFromPool.id), current]);
+        else setPool(p => p.filter(x => x.id !== dragFromPool.id));
+        if (targetSlot === 1) tm.player1 = dragFromPool; else tm.player2 = dragFromPool;
       } else if (dragFromSlot) {
-        // From slot → slot
-        const sourceMatch = next.find(m => m.id === dragFromSlot.matchId)!;
-        if (dragFromSlot.slot === 1) sourceMatch.player1 = currentOccupant;
-        else sourceMatch.player2 = currentOccupant;
-        if (targetSlot === 1) targetMatch.player1 = dragFromSlot.player;
-        else targetMatch.player2 = dragFromSlot.player;
-        if (!currentOccupant) {
-          if (dragFromSlot.slot === 1) sourceMatch.player1 = undefined;
-          else sourceMatch.player2 = undefined;
-        }
+        const sm = next.find(m => m.id === dragFromSlot.matchId)!;
+        if (dragFromSlot.slot === 1) sm.player1 = current ?? undefined;
+        else sm.player2 = current ?? undefined;
+        if (targetSlot === 1) tm.player1 = dragFromSlot.player; else tm.player2 = dragFromSlot.player;
+        if (!current) { if (dragFromSlot.slot === 1) sm.player1 = undefined; else sm.player2 = undefined; }
       }
       return next;
     });
     setDFP(null); setDFS(null);
   };
 
-  /* Pool drag-back */
   const handlePoolDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (dragFromSlot) {
       setMatches(prev => prev.map(m => {
         if (m.id !== dragFromSlot.matchId) return m;
-        const copy = { ...m };
-        if (dragFromSlot.slot === 1) copy.player1 = undefined;
-        else copy.player2 = undefined;
-        return copy;
+        return dragFromSlot.slot === 1 ? { ...m, player1: undefined } : { ...m, player2: undefined };
       }));
       setPool(prev => [...prev, dragFromSlot.player]);
     }
     setDFP(null); setDFS(null); setDO(null);
   };
 
+  /* Randomize */
   const randomize = () => {
-    const shuffled = shuffleArray(approvedPlayers);
+    const padded = needsBye
+      ? [...shuffleArr(approvedPlayers), ...Array(totalSlots - approvedPlayers.length).fill(BYE_PLAYER)]
+      : shuffleArr(approvedPlayers);
     setMatches(prev => {
       const next = [...prev];
       const r1 = next.filter(m => m.round === 1);
-      r1.forEach((m, i) => {
-        m.player1 = shuffled[i * 2];
-        m.player2 = shuffled[i * 2 + 1];
+      r1.forEach((m, i) => { m.player1 = padded[i * 2]; m.player2 = padded[i * 2 + 1]; });
+      return next;
+    });
+    setPool([]); setShowR(false); setMethod('random');
+  };
+
+  /* Apply BYE and start */
+  const applyByes = () => {
+    setMatches(prev => {
+      const next = prev.map(m => ({ ...m }));
+      next.filter(m => m.round === 1).forEach(m => {
+        if (!m.player1 && m.player2) m.player1 = BYE_PLAYER;
+        if (m.player1 && !m.player2) m.player2 = BYE_PLAYER;
+        if (m.player1?.id === 'bye' || m.player2?.id === 'bye') {
+          const winner = m.player1?.id === 'bye' ? m.player2 : m.player1;
+          m.winner = winner; m.status = 'completed';
+          const nm = next.find(x => x.round === 2 && x.matchIndex === Math.floor(m.matchIndex / 2));
+          if (nm && winner) { if (m.matchIndex % 2 === 0) nm.player1 = winner; else nm.player2 = winner; }
+        }
       });
       return next;
     });
-    setPool([]);
-    setShowRandom(false);
-    setMethod('random');
+    setConfirmed(true); setByeDlg(false);
+  };
+
+  const handleStart = () => {
+    const hasEmpty = matches.filter(m => m.round === 1).some(m => !m.player1 || !m.player2);
+    if (hasEmpty) { setByeDlg(true); } else { setConfirmed(true); }
   };
 
   const reset = () => {
     setMatches(generateEmptyBracket(totalSlots));
-    setPool(approvedPlayers);
-    setMethod(null);
-    setSaved(false);
-    setConfirmed(false);
+    setPool(approvedPlayers); setMethod(null); setSaved(false); setConfirmed(false);
   };
 
-  const roundGroups = Array.from({ length: totalRounds }, (_, i) => i + 1)
-    .map(r => ({ round: r, matches: matches.filter(m => m.round === r) }));
+  /* Bracket split helpers */
+  const innerRounds = Array.from({ length: totalRounds - 1 }, (_, i) => i + 1);
+  const finalMatch = matches.find(m => m.round === totalRounds);
+
+  const leftHalf = (r: number) => {
+    const all = matches.filter(m => m.round === r);
+    return all.filter(m => m.matchIndex < all.length / 2);
+  };
+  const rightHalf = (r: number) => {
+    const all = matches.filter(m => m.round === r);
+    return all.filter(m => m.matchIndex >= all.length / 2);
+  };
+
+  const isByeM = (m: TournamentMatch) =>
+    m.status === 'completed' && (m.player1?.id === 'bye' || m.player2?.id === 'bye');
+
+  const slotRef = dragFromSlot ? { matchId: dragFromSlot.matchId, slot: dragFromSlot.slot } : null;
 
   /* ── Method selection ── */
   if (!method && !showRandom) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88, display: 'flex',
-      flexDirection: 'column' }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88 }}>
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '20px clamp(16px,4vw,48px)' }}>
+        padding: '16px clamp(16px,4vw,48px)' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={() => router.push(`/tournaments/${t.id}/admin`)} style={{
             display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-            cursor: 'pointer', fontSize: 14, color: '#777', fontFamily: 'inherit',
-          }}>
-            <ChevronRight size={15} /> مدیریت
+            cursor: 'pointer', fontSize: 13, color: '#777', fontFamily: 'inherit' }}>
+            <ChevronRight size={14} /> مدیریت
           </button>
           <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>ایجاد براکت</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>ایجاد براکت دو طرفه</span>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '40px 20px' }}>
-        <div style={{ maxWidth: 640, width: '100%' }}>
-          <h1 style={{ fontSize: 26, fontWeight: 900, color: '#111', margin: '0 0 8px',
-            textAlign: 'center' }}>روش چیدمان براکت</h1>
-          <p style={{ fontSize: 14, color: '#777', textAlign: 'center', margin: '0 0 36px', lineHeight: 1.7 }}>
-            در اکثر باشگاه‌ها مدیر براکت را بر اساس سطح بازیکنان می‌چیند تا بازی‌های جذاب‌تری داشته باشیم
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '40px 20px', minHeight: 'calc(100vh - 200px)' }}>
+        <div style={{ maxWidth: 580, width: '100%' }}>
+          {needsBye && (
+            <div style={{ marginBottom: 20, padding: '14px 18px',
+              background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.22)',
+              borderRadius: 16, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <Info size={15} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
+              <p style={{ fontSize: 13, color: '#78350f', margin: 0, lineHeight: 1.6 }}>
+                <strong>{toFa(approvedPlayers.length)} نفر</strong> ثبت‌نام کرده‌اند از {toFa(totalSlots)} ظرفیت.
+                {' '}{toFa(totalSlots - approvedPlayers.length)} جایگاه با «استراحت» (BYE) پر می‌شود.
+              </p>
+            </div>
+          )}
+
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 6px', textAlign: 'center' }}>
+            روش چیدمان براکت
+          </h1>
+          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', margin: '0 0 28px' }}>
+            جدول دو طرفه — نیمی از بازیکنان در هر طرف
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-            {/* Manual */}
-            <button onClick={() => setMethod('manual')} style={{
-              background: '#fff', borderRadius: 24, padding: '32px 28px',
-              border: '2px solid rgba(199,166,106,0.25)',
-              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right',
-              transition: 'all 0.2s', boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-            }}>
-              <div style={{ width: 52, height: 52, borderRadius: 16, marginBottom: 16,
-                background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Trophy size={24} color="#C7A66A" />
-              </div>
-              <div style={{ fontSize: 17, fontWeight: 900, color: '#111', marginBottom: 8 }}>
-                چیدمان دستی
-              </div>
-              <div style={{ fontSize: 13, color: '#777', lineHeight: 1.7 }}>
-                شما بازیکنان را با کشیدن و رها کردن در جدول قرار می‌دهید. کنترل کامل دارید.
-              </div>
-              <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 5,
-                background: 'rgba(199,166,106,0.10)', borderRadius: 20,
-                padding: '6px 14px', fontSize: 12, fontWeight: 700, color: '#C7A66A' }}>
-                ✓ پیشنهاد ما
-              </div>
-            </button>
-
-            {/* Random */}
-            <button onClick={() => setShowRandom(true)} style={{
-              background: '#fff', borderRadius: 24, padding: '32px 28px',
-              border: '2px solid rgba(0,0,0,0.08)',
-              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right',
-              transition: 'all 0.2s', boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-            }}>
-              <div style={{ width: 52, height: 52, borderRadius: 16, marginBottom: 16,
-                background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.20)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Shuffle size={24} color="#8b5cf6" />
-              </div>
-              <div style={{ fontSize: 17, fontWeight: 900, color: '#111', marginBottom: 8 }}>
-                چیدمان تصادفی
-              </div>
-              <div style={{ fontSize: 13, color: '#777', lineHeight: 1.7 }}>
-                سیستم به‌صورت خودکار بازیکنان را به‌صورت تصادفی در جدول قرار می‌دهد.
-              </div>
-            </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+            {[
+              { key: 'manual' as const, label: 'دستی', icon: <Trophy size={20} color="#C7A66A" />,
+                rgb: '199,166,106', color: '#C7A66A', desc: 'بازیکنان را با کشیدن روی جدول قرار دهید',
+                badge: '✓ پیشنهاد' },
+              { key: null as null, label: 'تصادفی', icon: <Shuffle size={20} color="#8b5cf6" />,
+                rgb: '139,92,246', color: '#8b5cf6', desc: 'سیستم بازیکنان را تصادفی چیده‌می‌شود',
+                badge: '' },
+            ].map((opt, i) => (
+              <button key={i} onClick={() => i === 0 ? setMethod('manual') : setShowR(true)} style={{
+                background: '#fff', borderRadius: 18, padding: '22px 18px',
+                border: `1px solid rgba(${opt.rgb},0.20)`,
+                cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right',
+                boxShadow: '0 3px 12px rgba(0,0,0,0.05)',
+              }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, marginBottom: 12,
+                  background: `rgba(${opt.rgb},0.10)`, border: `1px solid rgba(${opt.rgb},0.18)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {opt.icon}
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 900, color: '#111', marginBottom: 5 }}>{opt.label}</div>
+                <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5 }}>{opt.desc}</div>
+                {opt.badge && (
+                  <div style={{ marginTop: 12, display: 'inline-flex', background: `rgba(${opt.rgb},0.10)`,
+                    border: `1px solid rgba(${opt.rgb},0.22)`, borderRadius: 20,
+                    padding: '4px 12px', fontSize: 11, fontWeight: 800, color: opt.color }}>
+                    {opt.badge}
+                  </div>
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* Load template */}
-          <button onClick={() => setTemplates(v => !v)} style={{
-            width: '100%', padding: '14px', borderRadius: 16, border: 'none',
-            background: 'rgba(0,0,0,0.04)', cursor: 'pointer', fontFamily: 'inherit',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            fontSize: 14, fontWeight: 700, color: '#666',
+          <button onClick={() => setShowT(v => !v)} style={{
+            width: '100%', padding: '11px', borderRadius: 20,
+            border: '1px solid rgba(0,0,0,0.10)', background: 'rgba(0,0,0,0.03)',
+            cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, color: '#666',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
           }}>
-            <FolderOpen size={16} />
-            بارگذاری قالب قبلی
+            <FolderOpen size={14} /> بارگذاری قالب
           </button>
-
-          {showTemplates && (
-            <div style={{ background: '#fff', borderRadius: 16, padding: '16px',
-              border: '1px solid rgba(0,0,0,0.08)', marginTop: 12 }}>
+          {showT && (
+            <div style={{ background: '#fff', borderRadius: 14, padding: '12px',
+              border: '1px solid rgba(0,0,0,0.08)', marginTop: 10 }}>
               {BRACKET_TEMPLATES.map(tpl => (
-                <button key={tpl.id} onClick={() => { setMethod('manual'); setTemplates(false); }} style={{
+                <button key={tpl.id} onClick={() => { setMethod('manual'); setShowT(false); }} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  width: '100%', padding: '12px 14px', borderRadius: 12, border: 'none',
-                  background: 'rgba(0,0,0,0.02)', cursor: 'pointer', fontFamily: 'inherit',
-                  marginBottom: 8, transition: 'background 0.15s',
+                  width: '100%', padding: '10px 12px', borderRadius: 10, border: 'none',
+                  background: 'rgba(0,0,0,0.02)', cursor: 'pointer', fontFamily: 'inherit', marginBottom: 6,
                 }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{tpl.name}</div>
-                    <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
-                      {tpl.date} • {toFa(tpl.players)} نفر
-                    </div>
+                    <div style={{ fontSize: 11, color: '#aaa' }}>{tpl.date} • {toFa(tpl.players)} نفر</div>
                   </div>
-                  <div style={{ fontSize: 13, color: '#C7A66A', fontWeight: 700 }}>بارگذاری</div>
+                  <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 800 }}>بارگذاری</span>
                 </button>
               ))}
             </div>
@@ -365,38 +377,44 @@ export default function BracketPage() {
 
   /* ── Random confirm dialog ── */
   if (showRandom) return (
-    <div style={{ minHeight: '100vh', background: 'rgba(0,0,0,0.40)', display: 'flex',
+    <div style={{ minHeight: '100vh', background: 'rgba(0,0,0,0.45)', display: 'flex',
       alignItems: 'center', justifyContent: 'center', padding: 20, direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif' }}>
-      <div style={{ background: '#fff', borderRadius: 24, padding: '40px 36px',
-        maxWidth: 440, width: '100%', textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%',
-          background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.20)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 20px' }}>
-          <Shuffle size={28} color="#8b5cf6" />
-        </div>
-        <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: '0 0 12px' }}>
-          چیدمان تصادفی
-        </h2>
-        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, margin: '0 0 28px' }}>
-          سیستم {toFa(approvedPlayers.length)} بازیکن را به‌صورت کاملاً تصادفی در جدول قرار می‌دهد. آیا مطمئن هستید؟
+      <div style={{ background: '#fff', borderRadius: 22, padding: '32px 28px',
+        maxWidth: 380, width: '100%', textAlign: 'center' }}>
+        <Shuffle size={28} color="#8b5cf6" style={{ marginBottom: 14 }} />
+        <h2 style={{ fontSize: 18, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>چیدمان تصادفی</h2>
+        <p style={{ fontSize: 13, color: '#777', lineHeight: 1.7, margin: '0 0 22px' }}>
+          {toFa(approvedPlayers.length)} بازیکن تصادفی در جدول چیده می‌شوند.
+          {needsBye && ` ${toFa(totalSlots - approvedPlayers.length)} جایگاه استراحت (BYE) اضافه می‌شود.`}
         </p>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={() => setShowRandom(false)} style={{
-            flex: 1, padding: '13px', borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.10)',
-            background: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            color: '#555', fontFamily: 'inherit',
-          }}>
-            انصراف
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          <button onClick={() => setShowR(false)} style={lqBtn(true, '0,0,0', '#666')}>انصراف</button>
+          <button onClick={randomize} style={lqBtn(true, '139,92,246', '#8b5cf6')}>
+            <Shuffle size={13} /> تصادفی کن
           </button>
-          <button onClick={randomize} style={{
-            flex: 1, padding: '13px', borderRadius: 14, border: 'none',
-            background: 'linear-gradient(135deg,#8b5cf6,#7c3aed)', color: '#fff',
-            fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-          }}>
-            <Shuffle size={14} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
-            تصادفی کن
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── BYE dialog ── */
+  const ByeDialog = () => (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+      direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif' }}>
+      <div style={{ background: '#fff', borderRadius: 22, padding: '30px 26px',
+        maxWidth: 380, width: '100%', textAlign: 'center', boxShadow: '0 24px 80px rgba(0,0,0,0.20)' }}>
+        <div style={{ fontSize: 32, marginBottom: 12 }}>🏖️</div>
+        <h3 style={{ fontSize: 17, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>جایگاه‌های خالی</h3>
+        <p style={{ fontSize: 13, color: '#666', lineHeight: 1.7, margin: '0 0 22px' }}>
+          برخی جایگاه‌ها بازیکن ندارند. «استراحت» (BYE) اضافه می‌شود و
+          بازیکن مقابل خودکار پیشروی می‌کند.
+        </p>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          <button onClick={() => setByeDlg(false)} style={lqBtn(true, '0,0,0', '#666')}>بازگشت</button>
+          <button onClick={applyByes} style={lqBtn(true)}>
+            <Check size={13} /> تایید و شروع
           </button>
         </div>
       </div>
@@ -408,145 +426,153 @@ export default function BracketPage() {
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88 }}>
 
-      {/* Header */}
+      {byeDlg && <ByeDialog />}
+
+      {/* Sticky header */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '16px clamp(16px,4vw,40px)', position: 'sticky', top: 72, zIndex: 50 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button onClick={reset} style={{
-              display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 13, color: '#888', fontFamily: 'inherit',
-            }}>
-              <ChevronRight size={15} /> براکت
+        padding: '10px clamp(12px,3vw,28px)', position: 'sticky', top: 72, zIndex: 50 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 4,
+              background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#999', fontFamily: 'inherit' }}>
+              <ChevronRight size={13} /> براکت
             </button>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>
-              چیدمان {method === 'manual' ? 'دستی' : 'تصادفی'}
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#111' }}>
+              {method === 'manual' ? 'دستی' : 'تصادفی'} — دو طرفه
             </span>
-            <span style={{ fontSize: 12, color: '#aaa' }}>
-              {toFa(pool.length)} بازیکن تخصیص نیافته
-            </span>
+            {pool.length > 0 && (
+              <span style={{ fontSize: 11, color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
+                border: '1px solid rgba(245,158,11,0.20)', borderRadius: 20,
+                padding: '2px 10px', fontWeight: 700 }}>
+                {toFa(pool.length)} باقی‌مانده
+              </span>
+            )}
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={reset} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-              borderRadius: 10, border: '1.5px solid rgba(0,0,0,0.10)',
-              background: '#fff', fontSize: 13, fontWeight: 700, color: '#666',
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}>
-              <RotateCcw size={13} /> بازنشانی
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+            <button onClick={reset} style={lqBtn(true, '0,0,0', '#777')}>
+              <RotateCcw size={11} /> بازنشانی
             </button>
-            <button onClick={() => setSaved(true)} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-              borderRadius: 10, border: 'none',
-              background: saved ? 'rgba(48,197,90,0.10)' : 'rgba(199,166,106,0.12)',
-              color: saved ? '#30C55A' : '#A07840',
-              fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-            }}>
-              {saved ? <><Check size={13} /> ذخیره شد</> : <><Save size={13} /> ذخیره قالب</>}
+            <button onClick={() => setSaved(true)}
+              style={lqBtn(true, saved ? '48,197,90' : '199,166,106', saved ? '#30C55A' : '#C7A66A')}>
+              <Save size={11} /> {saved ? 'ذخیره شد ✓' : 'ذخیره قالب'}
             </button>
-            <button onClick={() => setConfirmed(true)} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px',
-              borderRadius: 10, border: 'none',
-              background: confirmed ? '#30C55A' : 'linear-gradient(135deg,#C7A66A,#A07840)',
-              color: '#fff', fontSize: 13, fontWeight: 700,
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}>
-              {confirmed ? <><Check size={13} /> تایید شد — </> : <><Play size={13} />  شروع مسابقه</>}
-              {confirmed && <span onClick={() => router.push(`/tournaments/${t.id}/live`)}
-                style={{ textDecoration: 'underline', cursor: 'pointer' }}>نمای زنده</span>}
-            </button>
+            {!confirmed ? (
+              <button onClick={handleStart} style={lqBtn(true)}>
+                <Play size={11} /> شروع مسابقه
+              </button>
+            ) : (
+              <button onClick={() => router.push(`/tournaments/${t.id}/live`)}
+                style={lqBtn(true, '48,197,90', '#30C55A')}>
+                <Check size={11} /> تایید شد — نمای زنده
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', height: 'calc(100vh - 180px)', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', height: 'calc(100vh - 165px)', overflow: 'hidden' }}>
 
-        {/* ── Player Pool ── */}
-        <div style={{
-          width: 240, flexShrink: 0, background: '#fff',
-          borderLeft: '1px solid rgba(0,0,0,0.06)', overflowY: 'auto',
-          padding: '16px',
-        }}
-          onDragOver={e => e.preventDefault()}
-          onDrop={handlePoolDrop}
-        >
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#aaa',
-            letterSpacing: '0.10em', textTransform: 'uppercase', marginBottom: 14 }}>
-            بازیکنان
-          </div>
-
+        {/* Player pool sidebar */}
+        <div style={{ width: 185, flexShrink: 0, background: '#fff',
+          borderLeft: '1px solid rgba(0,0,0,0.06)', overflowY: 'auto', padding: '12px 10px' }}
+          onDragOver={e => e.preventDefault()} onDrop={handlePoolDrop}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: '#ccc',
+            letterSpacing: '0.10em', marginBottom: 10 }}>بازیکنان</div>
           {pool.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px 0', color: '#ccc' }}>
-              <Check size={24} style={{ marginBottom: 8 }} />
-              <p style={{ fontSize: 12, margin: 0 }}>همه تخصیص یافتند</p>
+            <div style={{ textAlign: 'center', padding: '18px 0', color: '#ddd', fontSize: 11 }}>
+              <Check size={18} style={{ marginBottom: 5 }} /><br />همه تخصیص یافتند
             </div>
-          ) : (
-            pool.map(p => (
-              <div
-                key={p.id}
-                draggable
-                onDragStart={e => handlePoolDragStart(e, p)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 12px', borderRadius: 12, marginBottom: 8,
-                  background: 'rgba(0,0,0,0.02)', border: '1.5px solid rgba(0,0,0,0.07)',
-                  cursor: 'grab', transition: 'all 0.15s',
-                }}
-              >
-                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                  background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, fontWeight: 800,
-                  color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
-                  {p.name[0]}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#111',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {p.name}
-                  </div>
-                  {p.rank && <div style={{ fontSize: 11, color: '#C7A66A' }}>رتبه #{toFa(p.rank)}</div>}
-                </div>
+          ) : pool.map(p => (
+            <div key={p.id} draggable onDragStart={e => handlePoolDragStart(e, p)}
+              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px',
+                borderRadius: 9, marginBottom: 5, background: 'rgba(0,0,0,0.02)',
+                border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
+              <div style={{ width: 25, height: 25, borderRadius: '50%', flexShrink: 0,
+                background: `hsl(${p.name.charCodeAt(0) * 15},50%,85%)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 900, color: `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` }}>
+                {p.name[0]}
               </div>
-            ))
-          )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#111',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                {p.rank && <div style={{ fontSize: 9, color: '#C7A66A' }}>#{toFa(p.rank)}</div>}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* ── Bracket canvas ── */}
-        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '24px 32px' }}>
-          <div style={{ display: 'flex', gap: 0, direction: 'ltr', alignItems: 'stretch',
-            minWidth: 'max-content' }}>
-            {roundGroups.map(({ round, matches: rMatches }, roundIdx) => (
-              <div key={round} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {/* Round label */}
-                <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 800, color: '#aaa',
-                  letterSpacing: '0.08em', padding: '0 16px', marginBottom: 16 }}>
-                  {roundLabel(round, totalRounds)}
-                </div>
+        {/* ── Double-sided bracket canvas ── */}
+        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '16px 12px' }}>
+          <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
+            minWidth: 'max-content', gap: 0 }}>
 
-                {/* Matches */}
-                <div style={{
-                  display: 'flex', flexDirection: 'column',
-                  justifyContent: 'space-around', flex: 1,
-                  gap: 0,
-                  padding: `${Math.pow(2, roundIdx) * 30}px 16px`,
-                }}>
-                  {rMatches.map(m => (
-                    <div key={m.id} style={{ marginBottom: Math.pow(2, roundIdx) * 18 }}>
-                      <MatchCard
-                        match={m}
-                        isDraggingOver={draggingOver}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        slotDrag={dragFromSlot ? { matchId: dragFromSlot.matchId, slot: dragFromSlot.slot } : null}
-                        onSlotDragStart={handleSlotDragStart}
-                      />
-                    </div>
-                  ))}
+            {/* LEFT HALF columns: R1 → QF → SF */}
+            {innerRounds.map((round, ri) => {
+              const ms = leftHalf(round);
+              const pad = Math.pow(2, ri) * 20;
+              return (
+                <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
+                    letterSpacing: '0.08em', textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
+                    {roundLabel(round, totalRounds)}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column',
+                    justifyContent: 'space-around', flex: 1, padding: `${pad}px 10px` }}>
+                    {ms.map(m => (
+                      <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 12 }}>
+                        <MatchCard match={m} draggingOver={draggingOver}
+                          onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                          dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                          isByeMatch={isByeM(m)} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* CENTER — FINAL */}
+            {finalMatch && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
+                  textAlign: 'center', padding: '0 12px', marginBottom: 8 }}>
+                  🏆 فینال
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                  flex: 1, padding: `${Math.pow(2, innerRounds.length) * 20}px 12px` }}>
+                  <MatchCard match={finalMatch} draggingOver={draggingOver}
+                    onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                    dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart} />
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* RIGHT HALF columns: SF → QF → R1 */}
+            {[...innerRounds].reverse().map((round, ri) => {
+              const ms = rightHalf(round);
+              const mirrorRi = innerRounds.length - 1 - ri;
+              const pad = Math.pow(2, mirrorRi) * 20;
+              return (
+                <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
+                    letterSpacing: '0.08em', textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
+                    {roundLabel(round, totalRounds)}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column',
+                    justifyContent: 'space-around', flex: 1, padding: `${pad}px 10px` }}>
+                    {ms.map(m => (
+                      <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 12 }}>
+                        <MatchCard match={m} draggingOver={draggingOver}
+                          onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                          dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                          isByeMatch={isByeM(m)} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

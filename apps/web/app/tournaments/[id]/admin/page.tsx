@@ -36,7 +36,8 @@ function StatusBadge({ status }: { status: RegistrationStatus }) {
 }
 
 function StoryCard({ type, label, desc }: { type: string; label: string; desc: string }) {
-  const [gen, setGen] = useState(false);
+  const [gen, setGen]       = useState(false);
+  const [published, setPub] = useState(false);
   return (
     <div style={{
       background: '#fff', borderRadius: 20, overflow: 'hidden',
@@ -118,21 +119,46 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
         )}
 
         <div style={{ position: 'absolute', bottom: 12, right: 12, left: 12, textAlign: 'center',
-          fontSize: 10, color: 'rgba(255,255,255,0.30)' }}>billiard-hub.ir</div>
+          fontSize: 10, color: 'rgba(255,255,255,0.30)' }}>billiardhub.net</div>
       </div>
 
       <div style={{ padding: '16px 18px' }}>
         <div style={{ fontSize: 14, fontWeight: 800, color: '#111', marginBottom: 4 }}>{label}</div>
         <div style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>{desc}</div>
-        <button onClick={() => setGen(true)} style={{
-          width: '100%', padding: '11px', borderRadius: 12, border: 'none',
-          background: gen ? 'rgba(48,197,90,0.10)' : 'linear-gradient(135deg,#C7A66A,#A07840)',
-          color: gen ? '#30C55A' : '#fff', fontSize: 13, fontWeight: 700,
-          cursor: 'pointer', fontFamily: 'inherit',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        }}>
-          {gen ? <><Check size={14} /> دانلود آماده</> : <><Camera size={14} /> تولید استوری</>}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button onClick={() => setGen(true)} style={{
+            width: '100%', padding: '10px', borderRadius: 20,
+            border: `1px solid rgba(199,166,106,${gen ? '0' : '0.30'})`,
+            background: gen ? 'rgba(48,197,90,0.10)' : 'rgba(199,166,106,0.12)',
+            color: gen ? '#30C55A' : '#C7A66A', fontSize: 13, fontWeight: 800,
+            cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+          }}>
+            {gen ? <><Check size={13} /> دانلود آماده</> : <><Camera size={13} /> تولید استوری</>}
+          </button>
+          {gen && (
+            <button onClick={() => setPub(true)} style={{
+              width: '100%', padding: '10px', borderRadius: 20,
+              border: `1px solid rgba(${published ? '48,197,90' : '139,92,246'},0.30)`,
+              background: `rgba(${published ? '48,197,90' : '139,92,246'},0.10)`,
+              color: published ? '#30C55A' : '#8b5cf6', fontSize: 13, fontWeight: 800,
+              cursor: published ? 'default' : 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            }}>
+              {published
+                ? <><Check size={13} /> منتشر شد در استوری‌های سایت</>
+                : <><Share2 size={13} /> انتشار در استوری‌های سایت</>}
+            </button>
+          )}
+          {published && (
+            <div style={{ padding: '8px 12px', borderRadius: 12,
+              background: 'rgba(48,197,90,0.06)', border: '1px solid rgba(48,197,90,0.18)',
+              fontSize: 11, color: '#065f46', fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>
+              این استوری در بخش استوری‌های سایت <strong>billiardhub.net</strong> منتشر شد
+              و بازدیدکنندگان می‌توانند آن را ببینند.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

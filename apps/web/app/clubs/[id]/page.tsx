@@ -9,6 +9,9 @@ import {
   ChevronLeft, ChevronRight, Calendar, Check,
   Camera, Plus, Trophy, Users, Medal,
 } from 'lucide-react';
+import {
+  SAMPLE_TOURNAMENTS, STATUS_LABELS, STATUS_COLORS, GAME_TYPE_LABELS,
+} from '../../../lib/mock-tournaments';
 
 interface Club {
   id: string; name: string; managerName: string; description: string;
@@ -63,12 +66,7 @@ const tableTypes = [
   { key: 'airHockeyTables',  label: 'ایرهاکی',       model: 'Carrom Air Striker',  isVip: false, color: '#ef4444', rgb: '239,68,68',    price: '۱۰۰,۰۰۰' },
 ];
 
-const tournaments = [
-  { id: 't1', title: 'لیگ داخلی اسنوکر — پاییز ۱۴۰۵', date: '۱۵ مهر ۱۴۰۵',    type: 'اسنوکر', status: 'ثبت‌نام باز',       statusColor: '#30C55A', participants: 24, prize: '۵۰,۰۰۰,۰۰۰ تومان' },
-  { id: 't2', title: 'مسابقات پاکت سری A',              date: '۲۸ شهریور ۱۴۰۵', type: 'پاکت',   status: 'در حال برگزاری', statusColor: '#f59e0b', participants: 16, prize: '۳۰,۰۰۰,۰۰۰ تومان' },
-  { id: 't4', title: 'جام VIP هشتم',                    date: '۱ آبان ۱۴۰۵',    type: 'VIP',    status: 'به زودی',         statusColor: '#8b5cf6', participants: 8,  prize: '۱۲۰,۰۰۰,۰۰۰ تومان' },
-  { id: 't3', title: 'تور هفتگی آماتور',                date: 'هر جمعه',          type: 'پاکت',   status: 'پایان یافته',     statusColor: '#06b6d4', participants: 12, prize: 'جایزه نقدی + تندیس' },
-];
+// Tournaments are loaded dynamically from SAMPLE_TOURNAMENTS in the component
 
 const galleryAlbums = [
   { name: 'مسابقات کشوری ۱۴۰۵', cover: '/images/clubs/club6.jpeg', count: 24 },
@@ -542,14 +540,16 @@ export default function ClubProfilePage() {
           )}
 
           {/* ── #8: TOURNAMENTS TAB ── */}
-          {tab === 'tournaments' && (
+          {tab === 'tournaments' && (() => {
+            const clubTournaments = SAMPLE_TOURNAMENTS.filter(t => t.clubId === id || SAMPLE_TOURNAMENTS.indexOf(t) < 3);
+            return (
             <div style={{ animation: 'fadeUp 0.4s ease both' }}>
               {/* Stats row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 24 }}>
                 {[
-                  { icon: <Trophy size={20} style={{ color: '#C7A66A' }} />, v: '۴۸', l: 'مسابقه برگزار شده', c: '#C7A66A', rgb: '199,166,106' },
-                  { icon: <Users size={20} style={{ color: '#06b6d4' }} />,   v: '۳۸۰', l: 'شرکت‌کننده کل',  c: '#06b6d4', rgb: '6,182,212'   },
-                  { icon: <Medal size={20} style={{ color: '#f59e0b' }} />,   v: '۱۲',  l: 'قهرمان متفاوت',  c: '#f59e0b', rgb: '245,158,11'  },
+                  { icon: <Trophy size={20} style={{ color: '#C7A66A' }} />, v: toFa(clubTournaments.length), l: 'مسابقه برگزار شده', c: '#C7A66A', rgb: '199,166,106' },
+                  { icon: <Users size={20} style={{ color: '#06b6d4' }} />,   v: toFa(clubTournaments.reduce((s,t) => s + t.registeredCount, 0)), l: 'شرکت‌کننده کل',  c: '#06b6d4', rgb: '6,182,212'   },
+                  { icon: <Medal size={20} style={{ color: '#f59e0b' }} />,   v: toFa(clubTournaments.filter(t => t.status === 'finished').length), l: 'مسابقه پایان یافته', c: '#f59e0b', rgb: '245,158,11'  },
                 ].map((x, i) => (
                   <div key={i} style={{ background: '#FFFFFF', border: `1px solid rgba(${x.rgb},0.14)`, borderRadius: 16, padding: '16px 12px', textAlign: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>{x.icon}</div>
@@ -559,20 +559,23 @@ export default function ClubProfilePage() {
                 ))}
               </div>
 
-              {/* Tournament list */}
+              {/* Tournament list from shared mock data */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {tournaments.map((t, i) => (
-                  <div key={i} className="tourn-card" onClick={() => router.push(`/tournaments/${t.id}`)}
+                {clubTournaments.map((t) => {
+                  const statusColor = STATUS_COLORS[t.status];
+                  const statusLabel = STATUS_LABELS[t.status];
+                  return (
+                  <div key={t.id} className="tourn-card" onClick={() => router.push(`/tournaments/${t.id}`)}
                     style={{ cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-                      <div style={{ width: 48, height: 48, borderRadius: 14, background: `${t.statusColor}12`, border: `1px solid ${t.statusColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Trophy size={20} style={{ color: t.statusColor }} />
+                      <div style={{ width: 48, height: 48, borderRadius: 14, background: `${statusColor}12`, border: `1px solid ${statusColor}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Trophy size={20} style={{ color: statusColor }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 160 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                          <div style={{ fontSize: 17, fontWeight: 800, color: '#111111' }}>{t.title}</div>
-                          <span style={{ fontSize: 11, color: t.statusColor, background: `${t.statusColor}12`, border: `1px solid ${t.statusColor}25`, borderRadius: 20, padding: '2px 10px', fontWeight: 700, flexShrink: 0 }}>
-                            {t.status}
+                          <div style={{ fontSize: 17, fontWeight: 800, color: '#111111' }}>{t.name}</div>
+                          <span style={{ fontSize: 11, color: statusColor, background: `${statusColor}12`, border: `1px solid ${statusColor}25`, borderRadius: 20, padding: '2px 10px', fontWeight: 700, flexShrink: 0 }}>
+                            {statusLabel}
                           </span>
                         </div>
                         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
@@ -580,19 +583,20 @@ export default function ClubProfilePage() {
                             <Clock size={11} style={{ color: '#C7A66A' }} /> {t.date}
                           </span>
                           <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <Users size={11} style={{ color: '#C7A66A' }} /> {toFa(t.participants)} نفر
+                            <Users size={11} style={{ color: '#C7A66A' }} /> {toFa(t.registeredCount)} نفر
                           </span>
-                          <span style={{ fontSize: 13, color: '#C7A66A', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🏆 {t.prize}
+                          <span style={{ fontSize: 13, color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {t.prizeInfo.split('|')[0]?.trim()}
                           </span>
                         </div>
                       </div>
                       <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.32)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '4px 12px', fontWeight: 600, flexShrink: 0 }}>
-                        {t.type}
+                        {GAME_TYPE_LABELS[t.gameType]}
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <button onClick={() => router.push('/tournaments')} style={{ width: '100%', marginTop: 6, padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.45)', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <Trophy size={13} /> مشاهده همه مسابقات
@@ -605,7 +609,7 @@ export default function ClubProfilePage() {
                 </a>
               </div>
             </div>
-          )}
+          );})()}
 
           {/* ── GALLERY TAB ── */}
           {tab === 'gallery' && (
