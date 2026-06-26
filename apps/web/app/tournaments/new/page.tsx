@@ -103,7 +103,7 @@ for (let h = 7; h <= 24; h++) {
 // ── Components ────────────────────────────────────────────────────────────────
 
 const GAME_TYPES = [
-  { key: '8ball'   as GameType, label: 'ال',       color: '#3b82f6', rgb: '59,130,246'  },
+  { key: '8ball'   as GameType, label: 'ایت بال',  color: '#3b82f6', rgb: '59,130,246'  },
   { key: '9ball'   as GameType, label: 'ناین بال', color: '#30C55A', rgb: '48,197,90'   },
   { key: 'snooker' as GameType, label: 'اسنوکر', color: '#C7A66A', rgb: '199,166,106' },
   { key: 'other'   as GameType, label: 'سایر',   color: '#8b5cf6', rgb: '139,92,246'  },

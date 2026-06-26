@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronRight, Shuffle, Save, FolderOpen, Check,
@@ -187,9 +187,9 @@ export default function BracketPage() {
   const [matches, setMatches]   = useState<TournamentMatch[]>(generateEmptyBracket(totalSlots));
   const [pool, setPool]         = useState<TournamentPlayer[]>(approvedPlayers);
 
-  /* Desktop drag state */
-  const [dragFromPool, setDFP]  = useState<TournamentPlayer | null>(null);
-  const [dragFromSlot, setDFS]  = useState<{ matchId: string; slot: 1 | 2; player: TournamentPlayer } | null>(null);
+  /* Desktop drag — use refs so dragstart never triggers a re-render that breaks the drag */
+  const dragPoolRef = useRef<TournamentPlayer | null>(null);
+  const dragSlotRef = useRef<{ matchId: string; slot: 1 | 2; player: TournamentPlayer } | null>(null);
   const [draggingOver, setDO]   = useState<string | null>(null);
 
   /* Mobile tap state */
@@ -197,10 +197,12 @@ export default function BracketPage() {
 
   /* ── Desktop Drag handlers ── */
   const handlePoolDragStart = (e: React.DragEvent, player: TournamentPlayer) => {
-    setDFP(player); setDFS(null); e.dataTransfer.effectAllowed = 'move';
+    dragPoolRef.current = player; dragSlotRef.current = null;
+    e.dataTransfer.effectAllowed = 'move';
   };
   const handleSlotDragStart = (e: React.DragEvent, matchId: string, slot: 1 | 2, player: TournamentPlayer) => {
-    setDFS({ matchId, slot, player }); setDFP(null); e.dataTransfer.effectAllowed = 'move';
+    dragSlotRef.current = { matchId, slot, player }; dragPoolRef.current = null;
+    e.dataTransfer.effectAllowed = 'move';
   };
   const handleDragOver = (e: React.DragEvent, matchId: string, slot: 1 | 2) => {
     e.preventDefault(); setDO(`${matchId}-${slot}`);
@@ -209,37 +211,41 @@ export default function BracketPage() {
 
   const handleDrop = (e: React.DragEvent, targetMatchId: string, targetSlot: 1 | 2) => {
     e.preventDefault(); setDO(null);
+    const fromPool = dragPoolRef.current;
+    const fromSlot = dragSlotRef.current;
+    dragPoolRef.current = null; dragSlotRef.current = null;
     setMatches(prev => {
       const next = prev.map(m => ({ ...m }));
-      const tm = next.find(m => m.id === targetMatchId)!;
-      if (tm.round !== 1) return prev; // only Round 1 placements allowed
+      const tm = next.find(m => m.id === targetMatchId);
+      if (!tm || tm.round !== 1) return prev;
       const current = targetSlot === 1 ? tm.player1 : tm.player2;
-      if (dragFromPool) {
-        if (current) setPool(p => [...p.filter(x => x.id !== dragFromPool.id), current]);
-        else setPool(p => p.filter(x => x.id !== dragFromPool.id));
-        if (targetSlot === 1) tm.player1 = dragFromPool; else tm.player2 = dragFromPool;
-      } else if (dragFromSlot) {
-        const sm = next.find(m => m.id === dragFromSlot.matchId)!;
-        if (dragFromSlot.slot === 1) sm.player1 = current ?? undefined;
+      if (fromPool) {
+        if (current) setPool(p => [...p.filter(x => x.id !== fromPool.id), current]);
+        else setPool(p => p.filter(x => x.id !== fromPool.id));
+        if (targetSlot === 1) tm.player1 = fromPool; else tm.player2 = fromPool;
+      } else if (fromSlot) {
+        const sm = next.find(m => m.id === fromSlot.matchId);
+        if (!sm) return prev;
+        if (fromSlot.slot === 1) sm.player1 = current ?? undefined;
         else sm.player2 = current ?? undefined;
-        if (targetSlot === 1) tm.player1 = dragFromSlot.player; else tm.player2 = dragFromSlot.player;
-        if (!current) { if (dragFromSlot.slot === 1) sm.player1 = undefined; else sm.player2 = undefined; }
+        if (targetSlot === 1) tm.player1 = fromSlot.player; else tm.player2 = fromSlot.player;
       }
       return next;
     });
-    setDFP(null); setDFS(null);
   };
 
   const handlePoolDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (dragFromSlot) {
+    const fromSlot = dragSlotRef.current;
+    dragPoolRef.current = null; dragSlotRef.current = null;
+    if (fromSlot) {
       setMatches(prev => prev.map(m => {
-        if (m.id !== dragFromSlot.matchId) return m;
-        return dragFromSlot.slot === 1 ? { ...m, player1: undefined } : { ...m, player2: undefined };
+        if (m.id !== fromSlot.matchId) return m;
+        return fromSlot.slot === 1 ? { ...m, player1: undefined } : { ...m, player2: undefined };
       }));
-      setPool(prev => [...prev, dragFromSlot.player]);
+      setPool(prev => [...prev, fromSlot.player]);
     }
-    setDFP(null); setDFS(null); setDO(null);
+    setDO(null);
   };
 
   /* ── Mobile tap-to-assign ── */
@@ -331,7 +337,7 @@ export default function BracketPage() {
   const isByeM = (m: TournamentMatch) =>
     m.status === 'completed' && (m.player1?.id === 'bye' || m.player2?.id === 'bye');
 
-  const slotRef = dragFromSlot ? { matchId: dragFromSlot.matchId, slot: dragFromSlot.slot } : null;
+  const slotRef = null; // drag state now in refs, no re-render needed
 
   /* ── Method selection ── */
   if (!method && !showRandom) return (
