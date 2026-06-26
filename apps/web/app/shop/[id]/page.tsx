@@ -577,7 +577,7 @@ export default function ProductDetailPage() {
                   ))}
                   {product.description && (
                     <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(0,0,0,0.04)' }}>
-                      <p style={{ fontSize: 12, fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: 10, letterSpacing: '0.1em' }}>توضیحات</p>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>توضیحات</p>
                       <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0, whiteSpace: 'pre-line' }}>{product.description}</p>
                     </div>
                   )}

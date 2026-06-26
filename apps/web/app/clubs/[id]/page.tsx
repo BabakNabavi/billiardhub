@@ -184,6 +184,10 @@ export default function ClubProfilePage() {
         .amenity-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px }
         @media(max-width:400px){ .amenity-grid{grid-template-columns:1fr} }
 
+        /* sidebar: hidden on mobile, visible on desktop only */
+        .sidebar-col { display:none }
+        @media(min-width:960px){ .sidebar-col{display:flex;flex-direction:column;gap:14px} }
+
         .book-fixed {
           position:fixed;bottom:0;left:0;right:0;
           padding:12px 16px 16px;
@@ -454,8 +458,8 @@ export default function ClubProfilePage() {
                 </div>
               </div>
 
-              {/* Sidebar */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Sidebar — desktop only */}
+              <div className="sidebar-col">
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
                   <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>

@@ -140,7 +140,7 @@ export default function CoachProfilePage() {
                 <div style={{ display:'flex', gap:'8px', marginBottom:'10px', flexWrap:'wrap' }}>
                   {coach.isFederation && (
                     <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:'20px', padding:'4px 13px', backdropFilter:'blur(16px)' }}>
-                      <Shield size={10} style={{ color:'#f59e0b' }}/><span style={{ fontSize:'9px', color:'#f59e0b', fontWeight:700, letterSpacing:'0.12em' }}>مربی فدراسیون</span>
+                      <Shield size={10} style={{ color:'#f59e0b' }}/><span style={{ fontSize:'9px', color:'#f59e0b', fontWeight:700 }}>مربی فدراسیون</span>
                     </div>
                   )}
                   <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:`${coach.avatarColor}12`, border:`1px solid ${coach.avatarColor}28`, borderRadius:'20px', padding:'4px 13px', backdropFilter:'blur(16px)' }}>
