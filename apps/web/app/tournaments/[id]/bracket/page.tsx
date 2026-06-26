@@ -336,7 +336,7 @@ export default function BracketPage() {
   /* ── Method selection ── */
   if (!method && !showRandom) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88 }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72 }}>
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
         padding: '16px clamp(16px,4vw,48px)' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -566,7 +566,7 @@ export default function BracketPage() {
   /* ── Main bracket builder ── */
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88 }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72 }}>
 
       {byeDlg && <ByeDialog />}
 

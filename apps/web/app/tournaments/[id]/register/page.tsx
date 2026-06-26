@@ -40,7 +40,7 @@ export default function RegisterPage() {
   if (state === 'pending') return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', padding: '20px', paddingTop: 100 }}>
+      justifyContent: 'center', padding: '20px', paddingTop: 88 }}>
       <div style={{ background: '#fff', borderRadius: 28, padding: '48px 36px',
         maxWidth: 460, width: '100%', textAlign: 'center',
         boxShadow: '0 8px 48px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -103,7 +103,7 @@ export default function RegisterPage() {
   if (state === 'approved') return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', padding: '20px', paddingTop: 100 }}>
+      justifyContent: 'center', padding: '20px', paddingTop: 88 }}>
       <div style={{ background: '#fff', borderRadius: 28, padding: '48px 36px',
         maxWidth: 460, width: '100%', textAlign: 'center',
         boxShadow: '0 8px 48px rgba(0,0,0,0.10)' }}>
@@ -157,7 +157,7 @@ export default function RegisterPage() {
   if (state === 'rejected') return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', padding: '20px', paddingTop: 100 }}>
+      justifyContent: 'center', padding: '20px', paddingTop: 88 }}>
       <div style={{ background: '#fff', borderRadius: 28, padding: '48px 36px',
         maxWidth: 460, width: '100%', textAlign: 'center',
         boxShadow: '0 8px 48px rgba(0,0,0,0.10)' }}>
@@ -190,7 +190,7 @@ export default function RegisterPage() {
   /* ── State: Form ── */
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88, paddingBottom: 60 }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72, paddingBottom: 60 }}>
 
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',

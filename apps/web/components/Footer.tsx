@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
+import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD     = '#C7A66A';
 const GOLD_DIM = 'rgba(199,166,106,0.65)';
@@ -90,11 +90,13 @@ export default function Footer() {
           .ft-brand { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
-          .ft-grid { grid-template-columns: 1fr !important; }
-          .ft-brand { grid-column: 1; }
-          .ft-inner { padding: 44px 20px 24px !important; }
+          .ft-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 20px !important; }
+          .ft-brand { grid-column: 1 / -1 !important; }
+          .ft-inner { padding: 36px 20px 24px !important; }
           .ft-bottom { flex-direction: column !important; gap: 14px !important; text-align: center; }
           .ft-bottom-links { justify-content: center !important; }
+          .ft-link { font-size: 12px !important; padding: 4px 0 !important; }
+          .ft-link svg { display: none; }
         }
       `}</style>
 
@@ -119,12 +121,6 @@ export default function Footer() {
             <p style={{ color: DIM, fontSize: '14px', lineHeight: 1.85, marginBottom: '22px', maxWidth: '270px' }}>
               اولین پلتفرم تخصصی بیلیارد ایران. رزرو میز، رنکینگ رسمی، فروشگاه تجهیزات و پخش زنده مسابقات.
             </p>
-
-            {/* Trust badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.07)', border: `1px solid ${GOLD_BOR}`, borderRadius: '10px', padding: '8px 14px', marginBottom: '24px' }}>
-              <Shield size={13} style={{ color: GOLD, flexShrink: 0 }} />
-              <span style={{ fontSize: '12px', color: GOLD_DIM, fontWeight: 600, lineHeight: 1.4 }}>تأیید شده توسط فدراسیون بیلیارد ایران</span>
-            </div>
 
             {/* Socials */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -162,7 +162,7 @@ export default function TournamentsPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88, paddingBottom: 60 }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72, paddingBottom: 60 }}>
 
       {/* ── Hero bar ── */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
