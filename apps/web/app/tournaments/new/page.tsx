@@ -70,6 +70,28 @@ function fmtCard(raw: string): string {
   return digits.replace(/(.{4})/g, '$1-').replace(/-$/, '');
 }
 
+function numToWords(n: number): string {
+  if (!n || n === 0) return 'صفر';
+  const ones = ['','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه',
+                 'ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'];
+  const tens  = ['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'];
+  const h3    = ['','صد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'];
+  function c3(x: number): string {
+    if (x === 0) return '';
+    if (x < 20)  return ones[x]!;
+    if (x < 100) { const t = Math.floor(x/10), o = x%10; return o ? tens[t]!+' و '+ones[o]! : tens[t]!; }
+    const hh = Math.floor(x/100), r = x%100;
+    return r ? h3[hh]!+' و '+c3(r) : h3[hh]!;
+  }
+  const parts: string[] = [];
+  let rem = n;
+  if (rem >= 1_000_000_000) { parts.push(c3(Math.floor(rem/1_000_000_000))+' میلیارد'); rem %= 1_000_000_000; }
+  if (rem >= 1_000_000)     { parts.push(c3(Math.floor(rem/1_000_000))+' میلیون');    rem %= 1_000_000; }
+  if (rem >= 1_000)         { parts.push(c3(Math.floor(rem/1_000))+' هزار');          rem %= 1_000; }
+  if (rem > 0)              parts.push(c3(rem));
+  return parts.join(' و ');
+}
+
 // ── Time options ──────────────────────────────────────────────────────────────
 
 const TIME_OPTIONS: string[] = [];
@@ -81,8 +103,8 @@ for (let h = 7; h <= 24; h++) {
 // ── Components ────────────────────────────────────────────────────────────────
 
 const GAME_TYPES = [
-  { key: '8ball'   as GameType, label: '۸ بال',  color: '#3b82f6', rgb: '59,130,246'  },
-  { key: '9ball'   as GameType, label: '۹ بال',  color: '#30C55A', rgb: '48,197,90'   },
+  { key: '8ball'   as GameType, label: 'ال',       color: '#3b82f6', rgb: '59,130,246'  },
+  { key: '9ball'   as GameType, label: 'ناین بال', color: '#30C55A', rgb: '48,197,90'   },
   { key: 'snooker' as GameType, label: 'اسنوکر', color: '#C7A66A', rgb: '199,166,106' },
   { key: 'other'   as GameType, label: 'سایر',   color: '#8b5cf6', rgb: '139,92,246'  },
 ];
@@ -300,6 +322,68 @@ function DatePicker({ value, onChange, label, required }: {
   );
 }
 
+function TimePicker({ value, onChange, label, required }: {
+  value: string; onChange: (v: string) => void;
+  label?: string; required?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {label && (
+        <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+          {label}{required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
+        </label>
+      )}
+      <div ref={ref} style={{ position: 'relative' }}>
+        <div onClick={() => setOpen(v => !v)} style={{
+          ...inputStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+          borderColor: open ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.10)',
+          userSelect: 'none',
+        } as React.CSSProperties}>
+          <Clock size={15} color="#C7A66A" style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, color: value ? '#111' : '#bbb', fontSize: 14,
+            direction: 'ltr', textAlign: 'right' }}>
+            {value ? toFa(value) : 'انتخاب ساعت'}
+          </span>
+          <span style={{ fontSize: 10, color: '#ccc' }}>{open ? '▲' : '▼'}</span>
+        </div>
+        {open && (
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 300,
+            background: '#fff', borderRadius: 16, overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.10)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.14)', minWidth: 160,
+            maxHeight: 280, overflowY: 'auto',
+          }}>
+            {TIME_OPTIONS.map(t => (
+              <div key={t} onClick={() => { onChange(t); setOpen(false); }} style={{
+                padding: '10px 16px', cursor: 'pointer', fontSize: 14,
+                fontWeight: value === t ? 800 : 500,
+                color: value === t ? '#C7A66A' : '#333',
+                background: value === t ? 'rgba(199,166,106,0.08)' : 'transparent',
+                borderBottom: '1px solid rgba(0,0,0,0.04)',
+                transition: 'background 0.1s', direction: 'ltr', textAlign: 'center',
+              }}>
+                {toFa(t)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function NewTournamentPage() {
@@ -315,6 +399,7 @@ export default function NewTournamentPage() {
   const [startTime, setStart]     = useState('');
   const [deadline, setDead]       = useState('');
   const [deadWd, setDeadWd]       = useState('');
+  const [deadlineTime, setDeadlineTime] = useState('');
   const [maxPlayers, setMax]      = useState(16);
   const [entryFeeRaw, setFeeRaw]  = useState('');
   const [prizeInfo, setPrize]     = useState('');
@@ -328,7 +413,7 @@ export default function NewTournamentPage() {
 
   const canNext = [
     name.trim().length > 2,
-    !!date && !!startTime && !!deadline,
+    !!date && !!startTime && !!deadline && !!deadlineTime,
     prizeInfo.trim().length > 2,
     true,
   ][step];
@@ -454,18 +539,14 @@ export default function NewTournamentPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <DatePicker label="تاریخ مسابقه" required value={date}
                   onChange={(v, wd) => { setDate(v); setDateWd(wd); }} />
-                <FormField label="ساعت شروع" required>
-                  <select value={startTime} onChange={e => setStart(e.target.value)} style={selectStyle}>
-                    <option value="">انتخاب ساعت</option>
-                    {TIME_OPTIONS.map(t => (
-                      <option key={t} value={t}>{toFa(t)}</option>
-                    ))}
-                  </select>
-                </FormField>
+                <TimePicker label="ساعت شروع" required value={startTime} onChange={setStart} />
               </div>
 
-              <DatePicker label="مهلت ثبت‌نام" required value={deadline}
-                onChange={(v, wd) => { setDead(v); setDeadWd(wd); }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <DatePicker label="مهلت ثبت‌نام" required value={deadline}
+                  onChange={(v, wd) => { setDead(v); setDeadWd(wd); }} />
+                <TimePicker label="ساعت مهلت" required value={deadlineTime} onChange={setDeadlineTime} />
+              </div>
 
               <FormField label="حداکثر تعداد بازیکن" required>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
@@ -503,7 +584,7 @@ export default function NewTournamentPage() {
                 </div>
                 {entryFeeRaw && (
                   <p style={{ fontSize: 12, color: '#A07840', margin: 0, fontWeight: 700 }}>
-                    {entryFeeDisplay} تومان
+                    {numToWords(parseInt(entryFeeRaw, 10))} تومان
                   </p>
                 )}
               </FormField>
