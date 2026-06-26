@@ -178,7 +178,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
             borderRadius: 20, padding: '2px 8px',
             display: 'flex', alignItems: 'center', gap: 4,
           }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#30C55A' : '#ef4444', display: 'inline-block' }} />
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: club.isOpen ? '#30C55A' : '#ef4444', display: 'inline-block', animation: club.isOpen ? 'gentlePulse 2.8s ease-in-out infinite' : 'none' }} />
             {club.isOpen ? `تا ${club.closeTime}` : 'بسته'}
           </div>
 
@@ -425,8 +425,9 @@ export default function ClubsPage() {
   return (
     <>
       <style>{`
-        @keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes spin    { to{transform:rotate(360deg)} }
+        @keyframes fadeUp      { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin        { to{transform:rotate(360deg)} }
+        @keyframes gentlePulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
         .srch-inp { background:transparent;border:none;outline:none;color:#111111;font-size:14px;font-family:inherit;width:100% }
         .srch-inp::placeholder { color:rgba(0,0,0,0.28) }
         .city-scroll::-webkit-scrollbar { height:0 }
