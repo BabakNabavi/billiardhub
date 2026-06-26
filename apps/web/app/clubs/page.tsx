@@ -6,7 +6,7 @@ import api from '../../lib/api';
 import {
   Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
   X, SlidersHorizontal, Users, Check, Navigation,
-  ChevronDown, Grid3X3, AlignJustify,
+  ChevronDown, Grid3X3, AlignJustify, Gamepad2,
 } from 'lucide-react';
 
 interface Club {
@@ -39,10 +39,11 @@ const TABLE_TYPES = [
   { key:'vipSnookerTables', label:'VIP',         color:'#f59e0b' },
 ];
 const AMENITIES = [
-  { key:'hasCafe',              label:'کافه',      icon: <Coffee size={13}/> },
-  { key:'hasParking',           label:'پارکینگ',   icon: <Car size={13}/> },
-  { key:'hasWifi',              label:'WiFi',      icon: <Wifi size={13}/> },
-  { key:'hasProfessionalCoach', label:'مربی',      icon: <Trophy size={13}/> },
+  { key:'hasCafe',              label:'کافه',           icon: <Coffee size={13}/> },
+  { key:'hasParking',           label:'پارکینگ',        icon: <Car size={13}/> },
+  { key:'hasWifi',              label:'WiFi',           icon: <Wifi size={13}/> },
+  { key:'hasProfessionalCoach', label:'مربی',           icon: <Trophy size={13}/> },
+  { key:'playstations',         label:'پلی استیشن',     icon: <Gamepad2 size={13}/> },
 ];
 const SORT_OPTIONS = [
   { value:'rating',   label:'بهترین امتیاز' },
