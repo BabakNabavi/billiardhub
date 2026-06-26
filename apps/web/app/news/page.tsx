@@ -92,18 +92,18 @@ export default function NewsPage() {
         <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '64px 24px 40px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ height: 1, flex: 1, background: `linear-gradient(90deg, transparent, rgba(199,166,106,0.40))` }} />
-            <span style={{ fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD }}>BILLIARDHUB NEWS</span>
+            <span style={{ fontSize: 11, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD }}>BILLIARDHUB NEWS</span>
             <div style={{ height: 1, flex: 1, background: `linear-gradient(270deg, transparent, rgba(199,166,106,0.40))` }} />
           </div>
           <h1 style={{
-            fontSize: 'clamp(40px,8vw,72px)', fontWeight: 900, textAlign: 'center',
+            fontSize: 'clamp(44px, 8.8vw, 79px)', fontWeight: 900, textAlign: 'center',
             margin: '0 0 12px', lineHeight: 1, letterSpacing: '-0.04em',
             background: `linear-gradient(135deg, #FFFFFF 30%, ${GOLD})`,
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>
             اخبار بیلیارد
           </h1>
-          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.40)', marginBottom: 32 }}>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.40)', marginBottom: 32 }}>
             {new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
           {/* Search */}
@@ -115,11 +115,11 @@ export default function NewsPage() {
               style={{
                 width: '100%', padding: '13px 20px', borderRadius: 14,
                 background: 'rgba(0,0,0,0.05)', border: `1px solid ${search ? 'rgba(199,166,106,0.4)' : 'rgba(0,0,0,0.08)'}`,
-                color: '#FFFFFF', fontSize: 14, fontFamily: 'inherit', outline: 'none',
+                color: '#FFFFFF', fontSize: 15, fontFamily: 'inherit', outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
-            <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 16, opacity: 0.5 }}>🔍</span>
+            <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 18, opacity: 0.5 }}>🔍</span>
           </div>
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function NewsPage() {
                 onClick={() => setActiveCategory(cat)}
                 style={{
                   flexShrink: 0, padding: '6px 16px', borderRadius: 99,
-                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  fontSize: 14, fontWeight: 600, cursor: 'pointer',
                   fontFamily: 'inherit', transition: 'all 0.18s',
                   border: activeCategory === cat ? `1px solid rgba(199,166,106,0.40)` : '1px solid rgba(0,0,0,0.09)',
                   background: activeCategory === cat ? 'rgba(199,166,106,0.12)' : '#FFFFFF',
@@ -154,7 +154,7 @@ export default function NewsPage() {
           <div style={{ marginBottom: 48 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
               <div style={{ width: 3, height: 20, borderRadius: 99, background: GOLD }} />
-              <h2 style={{ fontSize: 12, fontWeight: 700, color: GOLD_DARK, margin: 0 }}>اخبار ویژه</h2>
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: GOLD_DARK, margin: 0 }}>اخبار ویژه</h2>
               <div style={{ height: 1, flex: 1, background: 'rgba(0,0,0,0.07)' }} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16 }}>
@@ -172,16 +172,16 @@ export default function NewsPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.18)'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.12)'; }}
                 >
-                  <div style={{ position: 'absolute', top: 24, right: 24, fontSize: 56, opacity: 0.15 }}>{featured[0].image}</div>
+                  <div style={{ position: 'absolute', top: 24, right: 24, fontSize: 62, opacity: 0.15 }}>{featured[0].image}</div>
                   <div style={{ position: 'absolute', inset: 0, backgroundImage: `radial-gradient(ellipse at 30% 0%, rgba(199,166,106,0.10) 0%, transparent 60%)`, pointerEvents: 'none' }} />
                   <div style={{ position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                      <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 99, background: 'rgba(199,166,106,0.18)', color: GOLD, fontWeight: 700 }}>{featured[0].category}</span>
-                      {featured[0].tag && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 99, background: `${featured[0].tagColor}22`, color: featured[0].tagColor, border: `1px solid ${featured[0].tagColor}44`, fontWeight: 700 }}>{featured[0].tag}</span>}
+                      <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 99, background: 'rgba(199,166,106,0.18)', color: GOLD, fontWeight: 700 }}>{featured[0].category}</span>
+                      {featured[0].tag && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 99, background: `${featured[0].tagColor}22`, color: featured[0].tagColor, border: `1px solid ${featured[0].tagColor}44`, fontWeight: 700 }}>{featured[0].tag}</span>}
                     </div>
-                    <h3 style={{ fontSize: 'clamp(18px,2.5vw,26px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 10px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>{featured[0].title}</h3>
-                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px', lineHeight: 1.65 }}>{featured[0].excerpt}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
+                    <h3 style={{ fontSize: 'clamp(20px, 2.8vw, 29px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 10px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>{featured[0].title}</h3>
+                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px', lineHeight: 1.65 }}>{featured[0].excerpt}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
                       <span>{featured[0].author}</span><span>·</span><span>{featured[0].date}</span><span>·</span><span>{featured[0].readTime} مطالعه</span>
                     </div>
                   </div>
@@ -199,14 +199,14 @@ export default function NewsPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 36px rgba(0,0,0,0.10)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(199,166,106,0.28)'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.07)'; }}
                 >
-                  <div style={{ position: 'absolute', top: 16, left: 16, fontSize: 36, opacity: 0.10 }}>{n.image}</div>
+                  <div style={{ position: 'absolute', top: 16, left: 16, fontSize: 40, opacity: 0.10 }}>{n.image}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 99, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 700 }}>{n.category}</span>
-                    {n.tag && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 99, background: `${n.tagColor}18`, color: n.tagColor, fontWeight: 700 }}>{n.tag}</span>}
+                    <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 99, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 700 }}>{n.category}</span>
+                    {n.tag && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 99, background: `${n.tagColor}18`, color: n.tagColor, fontWeight: 700 }}>{n.tag}</span>}
                   </div>
-                  <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 8px', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{n.title}</h3>
-                  <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.48)', margin: '0 0 12px', lineHeight: 1.65 }}>{n.excerpt}</p>
-                  <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginTop: 'auto' }}>{n.author} · {n.date}</div>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 8px', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{n.title}</h3>
+                  <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.48)', margin: '0 0 12px', lineHeight: 1.65 }}>{n.excerpt}</p>
+                  <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.35)', marginTop: 'auto' }}>{n.author} · {n.date}</div>
                 </Link>
               ))}
             </div>
@@ -217,7 +217,7 @@ export default function NewsPage() {
         {featured.length > 0 && regular.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
             <div style={{ height: 1, flex: 1, background: 'rgba(0,0,0,0.07)' }} />
-            <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>آخرین اخبار</span>
+            <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>آخرین اخبار</span>
             <div style={{ height: 1, flex: 1, background: 'rgba(0,0,0,0.07)' }} />
           </div>
         )}
@@ -236,17 +236,17 @@ export default function NewsPage() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 40px rgba(0,0,0,0.10)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(199,166,106,0.24)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.07)'; }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 110, fontSize: 48, background: 'linear-gradient(135deg,rgba(199,166,106,0.06),rgba(199,166,106,0.03))', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 110, fontSize: 53, background: 'linear-gradient(135deg,rgba(199,166,106,0.06),rgba(199,166,106,0.03))', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                 {n.image}
               </div>
               <div style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                  <span style={{ fontSize: 10, padding: '3px 9px', borderRadius: 99, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 700 }}>{n.category}</span>
-                  {n.tag && <span style={{ fontSize: 10, padding: '3px 9px', borderRadius: 99, background: `${n.tagColor}18`, color: n.tagColor, fontWeight: 700 }}>{n.tag}</span>}
+                  <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 99, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 700 }}>{n.category}</span>
+                  {n.tag && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 99, background: `${n.tagColor}18`, color: n.tagColor, fontWeight: 700 }}>{n.tag}</span>}
                 </div>
-                <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 8px', lineHeight: 1.4, flex: 1, letterSpacing: '-0.01em' }}>{n.title}</h3>
-                <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.48)', margin: '0 0 16px', lineHeight: 1.65 }}>{n.excerpt}</p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: 'rgba(0,0,0,0.35)' }}>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 8px', lineHeight: 1.4, flex: 1, letterSpacing: '-0.01em' }}>{n.title}</h3>
+                <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.48)', margin: '0 0 16px', lineHeight: 1.65 }}>{n.excerpt}</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>
                   <span>{n.author}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span>{n.readTime}</span>
@@ -260,8 +260,8 @@ export default function NewsPage() {
 
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'rgba(0,0,0,0.40)' }}>
-            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>📰</div>
-            <p style={{ fontSize: 16 }}>خبری یافت نشد</p>
+            <div style={{ fontSize: 53, marginBottom: 16, opacity: 0.3 }}>📰</div>
+            <p style={{ fontSize: 18 }}>خبری یافت نشد</p>
           </div>
         )}
       </div>

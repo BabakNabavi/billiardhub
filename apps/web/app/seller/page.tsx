@@ -131,12 +131,12 @@ function SellerContent() {
           <div style={{ maxWidth:'1280px', margin:'0 auto', height:'56px', display:'flex', alignItems:'center', gap:'16px' }}>
             {/* Store info */}
             <div style={{ display:'flex', alignItems:'center', gap:'12px', flex:1, minWidth:0 }}>
-              <div style={{ width:'38px', height:'38px', borderRadius:'11px', background:'linear-gradient(135deg,#C7A66A,#A07840)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', fontWeight:900, color:'#fff', flexShrink:0, boxShadow:'0 4px 12px rgba(199,166,106,0.3)' }}>
+              <div style={{ width:'38px', height:'38px', borderRadius:'11px', background:'linear-gradient(135deg,#C7A66A,#A07840)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '18px', fontWeight:900, color:'#fff', flexShrink:0, boxShadow:'0 4px 12px rgba(199,166,106,0.3)' }}>
                 {user?.firstName?.[0]??'S'}
               </div>
               <div style={{ minWidth:0 }}>
-                <div style={{ fontSize:'9px', color:'rgba(199,166,106,0.6)', letterSpacing:'0.2em', fontWeight:700 }}>SELLER DASHBOARD</div>
-                <div style={{ fontSize:'15px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                <div style={{ fontSize: '10px', color:'rgba(199,166,106,0.6)', letterSpacing:'0.2em', fontWeight:700 }}>SELLER DASHBOARD</div>
+                <div style={{ fontSize: '17px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                   فروشگاه {user?.firstName ?? ''} {user?.lastName ?? ''}
                 </div>
               </div>
@@ -147,12 +147,12 @@ function SellerContent() {
               {/* Alerts */}
               {(pendingOrders > 0 || unreadMsgs > 0) && (
                 <div style={{ display:'flex', gap:'6px' }}>
-                  {pendingOrders > 0 && <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', fontSize:'11px', color:'#f59e0b', fontWeight:700 }}><AlertCircle size={11}/>{toFa(pendingOrders)} سفارش جدید</div>}
-                  {unreadMsgs > 0 && <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', fontSize:'11px', color:'#C7A66A', fontWeight:700 }}><MessageCircle size={11}/>{toFa(unreadMsgs)} پیام جدید</div>}
+                  {pendingOrders > 0 && <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', fontSize: '12px', color:'#f59e0b', fontWeight:700 }}><AlertCircle size={11}/>{toFa(pendingOrders)} سفارش جدید</div>}
+                  {unreadMsgs > 0 && <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', fontSize: '12px', color:'#C7A66A', fontWeight:700 }}><MessageCircle size={11}/>{toFa(unreadMsgs)} پیام جدید</div>}
                 </div>
               )}
 
-              <button onClick={() => setTab('products')} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'10px', color:'#fff', fontSize:'12px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 4px 14px rgba(199,166,106,0.3)' }}>
+              <button onClick={() => setTab('products')} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'10px', color:'#fff', fontSize: '13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 4px 14px rgba(199,166,106,0.3)' }}>
                 <Plus size={14} /> محصول جدید
               </button>
             </div>
@@ -171,7 +171,7 @@ function SellerContent() {
             ].map(t => (
               <button key={t.k} className={`s-tab ${tab===t.k?'active':''}`} onClick={()=>setTab(t.k as Tab)}>
                 {t.icon}{t.l}
-                {(t.badge??0) > 0 && <span style={{ minWidth:'18px', height:'18px', borderRadius:'9px', background: tab===t.k?'#C7A66A':'#ef4444', color:'#fff', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', padding:'0 4px' }}>{toFa(t.badge!)}</span>}
+                {(t.badge??0) > 0 && <span style={{ minWidth:'18px', height:'18px', borderRadius:'9px', background: tab===t.k?'#C7A66A':'#ef4444', color:'#fff', fontSize: '10px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', padding:'0 4px' }}>{toFa(t.badge!)}</span>}
               </button>
             ))}
           </div>
@@ -198,11 +198,11 @@ function SellerContent() {
                       <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:`${s.color}12`, border:`1px solid ${s.color}22`, display:'flex', alignItems:'center', justifyContent:'center', color:s.color }}>
                         {s.icon}
                       </div>
-                      {s.trend!==0 && <div style={{ display:'flex', alignItems:'center', gap:'2px', fontSize:'11px', color:'#C7A66A', fontWeight:700 }}><ChevronUp size={11}/>{toFa(s.trend)}٪</div>}
+                      {s.trend!==0 && <div style={{ display:'flex', alignItems:'center', gap:'2px', fontSize: '12px', color:'#C7A66A', fontWeight:700 }}><ChevronUp size={11}/>{toFa(s.trend)}٪</div>}
                     </div>
-                    <div style={{ fontSize:'clamp(20px,2.5vw,26px)', fontWeight:900, color: '#111111', letterSpacing:'-0.03em', marginBottom:'4px', textShadow:`0 0 20px ${s.color}25` }}>{s.value}</div>
-                    <div style={{ fontSize:'12px', color:'rgba(0,0,0,0.45)', fontWeight:600, marginBottom:'2px' }}>{s.label}</div>
-                    <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.30)' }}>{s.sub}</div>
+                    <div style={{ fontSize: 'clamp(22px, 2.8vw, 29px)', fontWeight:900, color: '#111111', letterSpacing:'-0.03em', marginBottom:'4px', textShadow:`0 0 20px ${s.color}25` }}>{s.value}</div>
+                    <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.45)', fontWeight:600, marginBottom:'2px' }}>{s.label}</div>
+                    <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.30)' }}>{s.sub}</div>
                   </div>
                 ))}
               </div>
@@ -214,15 +214,15 @@ function SellerContent() {
                   <div className="s-card">
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
                       <div>
-                        <div style={{ fontSize:'10px', color:'rgba(199,166,106,0.5)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'4px' }}>MONTHLY SALES</div>
-                        <div style={{ fontSize:'16px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>فروش ماهانه</div>
+                        <div style={{ fontSize: '11px', color:'rgba(199,166,106,0.5)', letterSpacing:'0.15em', fontWeight:700, marginBottom:'4px' }}>MONTHLY SALES</div>
+                        <div style={{ fontSize: '18px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>فروش ماهانه</div>
                       </div>
-                      <div style={{ fontSize:'13px', color:'#C7A66A', fontWeight:700 }}>+۲۳٪</div>
+                      <div style={{ fontSize: '14px', color:'#C7A66A', fontWeight:700 }}>+۲۳٪</div>
                     </div>
                     <RevenueChart />
                     <div style={{ display:'flex', gap:'6px', marginTop:'10px', overflowX:'auto', paddingBottom:'2px' }}>
                       {MONTHS.map((m,i) => (
-                        <div key={i} style={{ flex:1, textAlign:'center', fontSize:'9px', color:'rgba(0,0,0,0.30)', whiteSpace:'nowrap' }}>{m.slice(0,3)}</div>
+                        <div key={i} style={{ flex:1, textAlign:'center', fontSize: '10px', color:'rgba(0,0,0,0.30)', whiteSpace:'nowrap' }}>{m.slice(0,3)}</div>
                       ))}
                     </div>
                   </div>
@@ -230,11 +230,11 @@ function SellerContent() {
                   {/* Recent orders */}
                   <div className="s-card">
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
-                      <div style={{ fontSize:'15px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em', display:'flex', alignItems:'center', gap:'8px' }}>
+                      <div style={{ fontSize: '17px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em', display:'flex', alignItems:'center', gap:'8px' }}>
                         <span style={{ width:'3px', height:'15px', background:'linear-gradient(180deg,#f59e0b,transparent)', borderRadius:'2px', display:'inline-block' }} />
                         آخرین سفارش‌ها
                       </div>
-                      <button onClick={()=>setTab('orders')} style={{ fontSize:'11px', color:'#C7A66A', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', fontFamily:'inherit' }}>
+                      <button onClick={()=>setTab('orders')} style={{ fontSize: '12px', color:'#C7A66A', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px', fontFamily:'inherit' }}>
                         همه <ChevronRight size={11}/>
                       </button>
                     </div>
@@ -244,11 +244,11 @@ function SellerContent() {
                         return (
                           <div key={o.id} className="order-row">
                             <div style={{ flex:1, minWidth:'120px' }}>
-                              <div style={{ fontSize:'13px', fontWeight:600, color: '#111111', marginBottom:'2px' }}>{o.buyer}</div>
-                              <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.40)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.product}</div>
+                              <div style={{ fontSize: '14px', fontWeight:600, color: '#111111', marginBottom:'2px' }}>{o.buyer}</div>
+                              <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.product}</div>
                             </div>
-                            <div style={{ fontSize:'13px', fontWeight:700, color:'#C7A66A', flexShrink:0 }}>{toFa((o.total/1000000).toFixed(1))}م</div>
-                            <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', background:cfg.bg, border:`1px solid ${cfg.border}`, borderRadius:'20px', fontSize:'10px', color:cfg.color, fontWeight:700, flexShrink:0 }}>
+                            <div style={{ fontSize: '14px', fontWeight:700, color:'#C7A66A', flexShrink:0 }}>{toFa((o.total/1000000).toFixed(1))}م</div>
+                            <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', background:cfg.bg, border:`1px solid ${cfg.border}`, borderRadius:'20px', fontSize: '11px', color:cfg.color, fontWeight:700, flexShrink:0 }}>
                               {cfg.icon}{cfg.label}
                             </div>
                           </div>
@@ -264,16 +264,16 @@ function SellerContent() {
                   {/* Store score */}
                   <div className="s-card" style={{ textAlign:'center', border:'1px solid rgba(199,166,106,0.2)' }}>
                     <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'100px', height:'1px', background:'linear-gradient(90deg,transparent,rgba(199,166,106,0.5),transparent)' }} />
-                    <div style={{ fontSize:'9px', color:'rgba(199,166,106,0.5)', letterSpacing:'0.2em', fontWeight:700, marginBottom:'10px' }}>SELLER SCORE</div>
-                    <div style={{ fontSize:'48px', fontWeight:900, color:'#C7A66A', letterSpacing:'-0.04em', textShadow:'0 0 30px rgba(199,166,106,0.4)', lineHeight:1, marginBottom:'4px' }}>۹۲</div>
-                    <div style={{ fontSize:'13px', color:'rgba(0,0,0,0.42)', marginBottom:'14px' }}>از ۱۰۰</div>
+                    <div style={{ fontSize: '10px', color:'rgba(199,166,106,0.5)', letterSpacing:'0.2em', fontWeight:700, marginBottom:'10px' }}>SELLER SCORE</div>
+                    <div style={{ fontSize: '53px', fontWeight:900, color:'#C7A66A', letterSpacing:'-0.04em', textShadow:'0 0 30px rgba(199,166,106,0.4)', lineHeight:1, marginBottom:'4px' }}>۹۲</div>
+                    <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)', marginBottom:'14px' }}>از ۱۰۰</div>
                     {[
                       { l:'کیفیت محصول', v:96, c:'#C7A66A' },
                       { l:'زمان ارسال',  v:88, c:'#06b6d4' },
                       { l:'پاسخ به پیام',v:94, c:'#a78bfa' },
                     ].map((m,i) => (
                       <div key={i} style={{ marginBottom:'10px' }}>
-                        <div style={{ display:'flex', justifyContent:'space-between', fontSize:'11px', marginBottom:'4px' }}>
+                        <div style={{ display:'flex', justifyContent:'space-between', fontSize: '12px', marginBottom:'4px' }}>
                           <span style={{ color:'rgba(0,0,0,0.45)' }}>{m.l}</span>
                           <span style={{ color:m.c, fontWeight:700 }}>{toFa(m.v)}٪</span>
                         </div>
@@ -283,7 +283,7 @@ function SellerContent() {
                       </div>
                     ))}
                     <div style={{ display:'flex', gap:'6px', marginTop:'14px', justifyContent:'center' }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'4px', padding:'4px 10px', background:'rgba(199,166,106,0.08)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', fontSize:'10px', color:'#C7A66A', fontWeight:700 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:'4px', padding:'4px 10px', background:'rgba(199,166,106,0.08)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', fontSize: '11px', color:'#C7A66A', fontWeight:700 }}>
                         <Shield size={10}/> فروشنده تأیید شده
                       </div>
                     </div>
@@ -291,21 +291,21 @@ function SellerContent() {
 
                   {/* Top products */}
                   <div className="s-card">
-                    <div style={{ fontSize:'13px', fontWeight:700, color: '#111111', marginBottom:'14px', display:'flex', alignItems:'center', gap:'8px' }}>
+                    <div style={{ fontSize: '14px', fontWeight:700, color: '#111111', marginBottom:'14px', display:'flex', alignItems:'center', gap:'8px' }}>
                       <span style={{ width:'3px', height:'13px', background:'linear-gradient(180deg,#a78bfa,transparent)', borderRadius:'2px', display:'inline-block' }} />
                       پرفروش‌ترین‌ها
                     </div>
                     {PRODUCTS.sort((a,b)=>b.sold-a.sold).slice(0,3).map((p,i) => (
                       <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: i<2?'12px':'0', padding:'10px', background:'rgba(255,255,255,0.02)', borderRadius:'12px' }}>
-                        <div style={{ fontSize:'13px', fontWeight:800, color:'rgba(0,0,0,0.30)', width:'16px', flexShrink:0 }}>{toFa(i+1)}</div>
+                        <div style={{ fontSize: '14px', fontWeight:800, color:'rgba(0,0,0,0.30)', width:'16px', flexShrink:0 }}>{toFa(i+1)}</div>
                         <div style={{ width:'36px', height:'36px', borderRadius:'10px', overflow:'hidden', flexShrink:0 }}>
                           <img src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.5)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}} />
                         </div>
                         <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ fontSize:'12px', fontWeight:600, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.title}</div>
-                          <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.40)', marginTop:'1px' }}>{toFa(p.sold)} فروش</div>
+                          <div style={{ fontSize: '13px', fontWeight:600, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.title}</div>
+                          <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.40)', marginTop:'1px' }}>{toFa(p.sold)} فروش</div>
                         </div>
-                        <div style={{ fontSize:'12px', fontWeight:700, color:'#C7A66A', flexShrink:0 }}>{toFa((p.price/1000000).toFixed(1))}م</div>
+                        <div style={{ fontSize: '13px', fontWeight:700, color:'#C7A66A', flexShrink:0 }}>{toFa((p.price/1000000).toFixed(1))}م</div>
                       </div>
                     ))}
                   </div>
@@ -313,21 +313,21 @@ function SellerContent() {
                   {/* Messages preview */}
                   {MSGS.filter(m=>m.unread).length > 0 && (
                     <div className="s-card" style={{ border:'1px solid rgba(199,166,106,0.15)' }}>
-                      <div style={{ fontSize:'13px', fontWeight:700, color: '#111111', marginBottom:'12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      <div style={{ fontSize: '14px', fontWeight:700, color: '#111111', marginBottom:'12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                           <span style={{ width:'3px', height:'13px', background:'linear-gradient(180deg,#C7A66A,transparent)', borderRadius:'2px', display:'inline-block' }} />
                           پیام‌های جدید
                         </div>
-                        <span style={{ fontSize:'10px', color:'#C7A66A', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>{toFa(unreadMsgs)}</span>
+                        <span style={{ fontSize: '11px', color:'#C7A66A', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>{toFa(unreadMsgs)}</span>
                       </div>
                       {MSGS.filter(m=>m.unread).map(m => (
                         <div key={m.id} style={{ marginBottom:'8px', padding:'10px', background:'rgba(199,166,106,0.04)', border:'1px solid rgba(199,166,106,0.1)', borderRadius:'12px', cursor:'pointer' }} onClick={()=>setTab('messages')}>
-                          <div style={{ fontSize:'12px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{m.buyer}</div>
-                          <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.45)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{m.text}</div>
-                          <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.30)', marginTop:'3px' }}>{m.time}</div>
+                          <div style={{ fontSize: '13px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{m.buyer}</div>
+                          <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.45)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{m.text}</div>
+                          <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.30)', marginTop:'3px' }}>{m.time}</div>
                         </div>
                       ))}
-                      <button onClick={()=>setTab('messages')} style={{ width:'100%', padding:'8px', marginTop:'4px', background:'rgba(199,166,106,0.06)', border:'1px solid rgba(199,166,106,0.15)', borderRadius:'10px', color:'#C7A66A', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+                      <button onClick={()=>setTab('messages')} style={{ width:'100%', padding:'8px', marginTop:'4px', background:'rgba(199,166,106,0.06)', border:'1px solid rgba(199,166,106,0.15)', borderRadius:'10px', color:'#C7A66A', fontSize: '12px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
                         مشاهده همه پیام‌ها →
                       </button>
                     </div>
@@ -346,7 +346,7 @@ function SellerContent() {
                     <button key={f.k} className={`filter-pill ${prodFilter===f.k?'active':''}`} onClick={()=>setPF(f.k as any)}>{f.l}</button>
                   ))}
                 </div>
-                <button style={{ display:'flex', alignItems:'center', gap:'7px', padding:'10px 18px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'11px', color:'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 6px 18px rgba(199,166,106,0.28)' }}>
+                <button style={{ display:'flex', alignItems:'center', gap:'7px', padding:'10px 18px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'11px', color:'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 6px 18px rgba(199,166,106,0.28)' }}>
                   <Plus size={14}/> افزودن محصول
                 </button>
               </div>
@@ -359,14 +359,14 @@ function SellerContent() {
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', flexWrap:'wrap' }}>
-                        <span style={{ fontSize:'14px', fontWeight:700, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.title}</span>
-                        <span style={{ fontSize:'9px', padding:'2px 8px', borderRadius:'20px', background: p.active?'rgba(199,166,106,0.1)':'rgba(0,0,0,0.04)', color: p.active?'#C7A66A':'rgba(0,0,0,0.35)', border:`1px solid ${p.active?'rgba(199,166,106,0.25)':'rgba(0,0,0,0.07)'}`, fontWeight:700 }}>
+                        <span style={{ fontSize: '15px', fontWeight:700, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.title}</span>
+                        <span style={{ fontSize: '10px', padding:'2px 8px', borderRadius:'20px', background: p.active?'rgba(199,166,106,0.1)':'rgba(0,0,0,0.04)', color: p.active?'#C7A66A':'rgba(0,0,0,0.35)', border:`1px solid ${p.active?'rgba(199,166,106,0.25)':'rgba(0,0,0,0.07)'}`, fontWeight:700 }}>
                           {p.active?'فعال':'غیرفعال'}
                         </span>
-                        {p.stock<=3&&p.stock>0 && <span style={{ fontSize:'9px', padding:'2px 8px', borderRadius:'20px', background:'rgba(245,158,11,0.1)', color:'#f59e0b', border:'1px solid rgba(245,158,11,0.2)', fontWeight:700 }}>موجودی کم</span>}
-                        {p.stock===0 && <span style={{ fontSize:'9px', padding:'2px 8px', borderRadius:'20px', background:'rgba(239,68,68,0.08)', color:'#ef4444', border:'1px solid rgba(239,68,68,0.2)', fontWeight:700 }}>ناموجود</span>}
+                        {p.stock<=3&&p.stock>0 && <span style={{ fontSize: '10px', padding:'2px 8px', borderRadius:'20px', background:'rgba(245,158,11,0.1)', color:'#f59e0b', border:'1px solid rgba(245,158,11,0.2)', fontWeight:700 }}>موجودی کم</span>}
+                        {p.stock===0 && <span style={{ fontSize: '10px', padding:'2px 8px', borderRadius:'20px', background:'rgba(239,68,68,0.08)', color:'#ef4444', border:'1px solid rgba(239,68,68,0.2)', fontWeight:700 }}>ناموجود</span>}
                       </div>
-                      <div style={{ display:'flex', gap:'14px', fontSize:'11px', color:'rgba(0,0,0,0.40)', flexWrap:'wrap' }}>
+                      <div style={{ display:'flex', gap:'14px', fontSize: '12px', color:'rgba(0,0,0,0.40)', flexWrap:'wrap' }}>
                         <span>{toFa(p.price.toLocaleString())} ت</span>
                         <span>موجودی: {toFa(p.stock)}</span>
                         <span>فروش: {toFa(p.sold)}</span>
@@ -403,20 +403,20 @@ function SellerContent() {
                   const cfg = STATUS_CFG[o.status];
                   return (
                     <div key={o.id} className="order-row">
-                      <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.30)', fontFamily:'monospace', flexShrink:0 }}>#{o.id}</div>
+                      <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.30)', fontFamily:'monospace', flexShrink:0 }}>#{o.id}</div>
                       <div style={{ flex:1, minWidth:'140px' }}>
-                        <div style={{ fontSize:'14px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{o.buyer}</div>
-                        <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.product}</div>
+                        <div style={{ fontSize: '15px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{o.buyer}</div>
+                        <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.product}</div>
                       </div>
-                      <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.40)', flexShrink:0 }}>{o.city} · {o.date}</div>
-                      <div style={{ fontSize:'14px', fontWeight:800, color:'#C7A66A', flexShrink:0 }}>{toFa((o.total/1000000).toFixed(1))}م</div>
-                      <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 11px', background:cfg.bg, border:`1px solid ${cfg.border}`, borderRadius:'20px', fontSize:'11px', color:cfg.color, fontWeight:700, flexShrink:0 }}>
+                      <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)', flexShrink:0 }}>{o.city} · {o.date}</div>
+                      <div style={{ fontSize: '15px', fontWeight:800, color:'#C7A66A', flexShrink:0 }}>{toFa((o.total/1000000).toFixed(1))}م</div>
+                      <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 11px', background:cfg.bg, border:`1px solid ${cfg.border}`, borderRadius:'20px', fontSize: '12px', color:cfg.color, fontWeight:700, flexShrink:0 }}>
                         {cfg.icon}{cfg.label}
                       </div>
 
                       {/* Status update */}
                       {o.status==='pending' && (
-                        <button style={{ padding:'6px 13px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.25)', borderRadius:'10px', color:'#C7A66A', fontSize:'11px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
+                        <button style={{ padding:'6px 13px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.25)', borderRadius:'10px', color:'#C7A66A', fontSize: '12px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
                           تأیید
                         </button>
                       )}
@@ -440,24 +440,24 @@ function SellerContent() {
                   { l:'زمان ارسال',    v:'۱.۸ روز',c:'#f59e0b', trend:'-۰.۳' },
                 ].map((s,i) => (
                   <div key={i} className="s-card">
-                    <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.12em', fontWeight:700, marginBottom:'8px', textTransform:'uppercase' }}>{s.l}</div>
-                    <div style={{ fontSize:'clamp(22px,3vw,30px)', fontWeight:900, color:s.c, letterSpacing:'-0.02em', marginBottom:'4px', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
-                    <div style={{ fontSize:'11px', color:'#C7A66A', fontWeight:600 }}>{s.trend}</div>
+                    <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.35)', letterSpacing:'0.12em', fontWeight:700, marginBottom:'8px', textTransform:'uppercase' }}>{s.l}</div>
+                    <div style={{ fontSize: 'clamp(24px, 3.3vw, 33px)', fontWeight:900, color:s.c, letterSpacing:'-0.02em', marginBottom:'4px', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
+                    <div style={{ fontSize: '12px', color:'#C7A66A', fontWeight:600 }}>{s.trend}</div>
                   </div>
                 ))}
               </div>
 
               <div className="s-card">
-                <div style={{ fontSize:'15px', fontWeight:800, color: '#111111', marginBottom:'20px', display:'flex', alignItems:'center', gap:'10px' }}>
+                <div style={{ fontSize: '17px', fontWeight:800, color: '#111111', marginBottom:'20px', display:'flex', alignItems:'center', gap:'10px' }}>
                   <span style={{ width:'3px', height:'15px', background:'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius:'2px', display:'inline-block' }} />
                   درآمد ماهانه ۱۴۰۴
                 </div>
                 <RevenueChart />
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:'0', marginTop:'14px', paddingTop:'14px', borderTop:'1px solid rgba(0,0,0,0.04)' }}>
                   {MONTHLY.slice(6).map((v,i) => (
-                    <div key={i} style={{ textAlign:'center', fontSize:'11px', color:'rgba(0,0,0,0.45)', fontWeight:600 }}>
+                    <div key={i} style={{ textAlign:'center', fontSize: '12px', color:'rgba(0,0,0,0.45)', fontWeight:600 }}>
                       <div>{toFa(v)}م</div>
-                      <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.30)', marginTop:'2px' }}>{MONTHS[i+6]?.slice(0,4)}</div>
+                      <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.30)', marginTop:'2px' }}>{MONTHS[i+6]?.slice(0,4)}</div>
                     </div>
                   ))}
                 </div>
@@ -470,19 +470,19 @@ function SellerContent() {
             <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:'10px' }}>
               {MSGS.map(m => (
                 <div key={m.id} style={{ display:'flex', alignItems:'flex-start', gap:'14px', padding:'16px 18px', background: m.unread?'rgba(199,166,106,0.04)':'#FFFFFF', border:`1px solid ${m.unread?'rgba(199,166,106,0.15)':'rgba(0,0,0,0.05)'}`, borderRadius:'16px', cursor:'pointer', transition:'all 0.2s' }}>
-                  <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'linear-gradient(135deg,#C7A66A,#A07840)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', fontWeight:900, color:'#fff', flexShrink:0 }}>
+                  <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'linear-gradient(135deg,#C7A66A,#A07840)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '18px', fontWeight:900, color:'#fff', flexShrink:0 }}>
                     {m.buyer[0]}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', flexWrap:'wrap' }}>
-                      <span style={{ fontSize:'14px', fontWeight: m.unread?800:600, color: '#111111' }}>{m.buyer}</span>
-                      <span style={{ fontSize:'11px', color:'rgba(0,0,0,0.40)' }}>درباره: {m.product}</span>
+                      <span style={{ fontSize: '15px', fontWeight: m.unread?800:600, color: '#111111' }}>{m.buyer}</span>
+                      <span style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)' }}>درباره: {m.product}</span>
                       {m.unread && <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#C7A66A', display:'inline-block', boxShadow:'0 0 6px #C7A66A' }} />}
                     </div>
-                    <div style={{ fontSize:'13px', color:'rgba(0,0,0,0.50)', lineHeight:1.5 }}>{m.text}</div>
-                    <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.30)', marginTop:'5px' }}>{m.time}</div>
+                    <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.50)', lineHeight:1.5 }}>{m.text}</div>
+                    <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.30)', marginTop:'5px' }}>{m.time}</div>
                   </div>
-                  <button style={{ padding:'8px 16px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', color:'rgba(0,0,0,0.45)', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
+                  <button style={{ padding:'8px 16px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', color:'rgba(0,0,0,0.45)', fontSize: '13px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
                     پاسخ
                   </button>
                 </div>

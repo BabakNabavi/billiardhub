@@ -37,13 +37,13 @@ export default function InstallersPage() {
       <div style={{ background: 'linear-gradient(135deg, #030d18 0%, #021018 100%)', padding: 'clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(28px, 5vw, 48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg, rgba(6,182,212,0.03) 0px, rgba(6,182,212,0.03) 1px, transparent 1px, transparent 20px)', backgroundSize: '28px 28px' }} />
         <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4', fontSize: 12, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4', fontSize: 13, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
             🔧 متخصصین نصب و تعمیر
           </div>
-          <h1 style={{ fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, margin: '0 0 12px', background: 'linear-gradient(135deg, #f0faf5, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h1 style={{ fontSize: 'clamp(24px, 5.5vw, 40px)', fontWeight: 900, margin: '0 0 12px', background: 'linear-gradient(135deg, #f0faf5, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             متخصصین نصب و تعمیر بیلیارد
           </h1>
-          <p style={{ color: '#6b7280', fontSize: 'clamp(13px, 2vw, 15px)', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ color: '#6b7280', fontSize: 'clamp(14px, 2.2vw, 17px)', margin: 0, lineHeight: 1.7 }}>
             نصب، تنظیم، تعویض پارچه و تعمیر میزهای بیلیارد توسط متخصصان تأیید شده
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function InstallersPage() {
                 background: activeCity === city ? '#06b6d4' : 'rgba(0,0,0,0.04)',
                 border: `1px solid ${activeCity === city ? '#06b6d4' : 'rgba(0,0,0,0.06)'}`,
                 color: activeCity === city ? '#010604' : '#94a3b8',
-                padding: '7px 14px', borderRadius: 20, fontSize: 12,
+                padding: '7px 14px', borderRadius: 20, fontSize: 13,
                 fontWeight: activeCity === city ? 700 : 400,
                 cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s',
               }}>{city}</button>
@@ -68,7 +68,7 @@ export default function InstallersPage() {
             background: onlyVerified ? 'rgba(6,182,212,0.15)' : 'rgba(0,0,0,0.04)',
             border: `1px solid ${onlyVerified ? 'rgba(6,182,212,0.4)' : 'rgba(0,0,0,0.06)'}`,
             color: onlyVerified ? '#06b6d4' : '#94a3b8',
-            padding: '7px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
+            padding: '7px 14px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
           }}>✓ تأیید شده</button>
         </div>
 
@@ -85,32 +85,32 @@ export default function InstallersPage() {
               onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.border = '1px solid rgba(6,182,212,0.1)'; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'; }}
               >
                 <div style={{ height: 80, background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(199,166,106,0.03))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px', position: 'relative' }}>
-                  <div style={{ fontSize: 44, opacity: 0.6 }}>{installer.emoji}</div>
+                  <div style={{ fontSize: 48, opacity: 0.6 }}>{installer.emoji}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-                    {installer.elite && <span style={{ background: 'rgba(199,166,106,0.2)', border: '1px solid rgba(199,166,106,0.4)', color: '#C7A66A', fontSize: 10, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>🏆 متخصص برتر</span>}
-                    {installer.verified && <span style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4', fontSize: 10, padding: '2px 8px', borderRadius: 10 }}>✓ تأیید شده</span>}
+                    {installer.elite && <span style={{ background: 'rgba(199,166,106,0.2)', border: '1px solid rgba(199,166,106,0.4)', color: '#C7A66A', fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>🏆 متخصص برتر</span>}
+                    {installer.verified && <span style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4', fontSize: 11, padding: '2px 8px', borderRadius: 10 }}>✓ تأیید شده</span>}
                   </div>
                 </div>
                 <div style={{ padding: '16px 18px 18px' }}>
-                  <h3 style={{ color: '#111111', fontSize: 15, fontWeight: 700, margin: '0 0 4px' }}>{installer.name}</h3>
-                  <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>📍 {installer.city} | از {installer.since}</div>
+                  <h3 style={{ color: '#111111', fontSize: 17, fontWeight: 700, margin: '0 0 4px' }}>{installer.name}</h3>
+                  <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 10 }}>📍 {installer.city} | از {installer.since}</div>
                   {/* Rating + jobs */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                     <StarRating rating={installer.rating} />
-                    <span style={{ color: '#111111', fontSize: 13, fontWeight: 700 }}>{installer.rating}</span>
-                    <span style={{ color: '#6b7280', fontSize: 11 }}>({installer.reviewCount})</span>
-                    <span style={{ color: '#06b6d4', fontSize: 12, fontWeight: 600, marginRight: 'auto' }}>{installer.jobsDone} کار</span>
+                    <span style={{ color: '#111111', fontSize: 14, fontWeight: 700 }}>{installer.rating}</span>
+                    <span style={{ color: '#6b7280', fontSize: 12 }}>({installer.reviewCount})</span>
+                    <span style={{ color: '#06b6d4', fontSize: 13, fontWeight: 600, marginRight: 'auto' }}>{installer.jobsDone} کار</span>
                   </div>
                   {/* Regions */}
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 10 }}>
                     {installer.regions.slice(0, 3).map(r => (
-                      <span key={r} style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.15)', color: '#06b6d4', fontSize: 10, padding: '2px 8px', borderRadius: 10 }}>{r}</span>
+                      <span key={r} style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.15)', color: '#06b6d4', fontSize: 11, padding: '2px 8px', borderRadius: 10 }}>{r}</span>
                     ))}
                   </div>
                   {/* Footer */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(0,0,0,0.04)' }}>
-                    <span style={{ color: '#4b5563', fontSize: 11 }}>⚡ {installer.responseTime}</span>
-                    <span style={{ color: '#06b6d4', fontSize: 12, fontWeight: 600 }}>مشاهده پروفایل ←</span>
+                    <span style={{ color: '#4b5563', fontSize: 12 }}>⚡ {installer.responseTime}</span>
+                    <span style={{ color: '#06b6d4', fontSize: 13, fontWeight: 600 }}>مشاهده پروفایل ←</span>
                   </div>
                 </div>
               </div>

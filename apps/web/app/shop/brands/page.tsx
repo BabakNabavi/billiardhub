@@ -129,17 +129,17 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,transparent 40%,rgba(6,13,10,0.9) 100%)' }}/>
 
           {/* Logo */}
-          <div style={{ position:'absolute', bottom:'-24px', right:'20px', width:'60px', height:'60px', borderRadius:'16px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'22px', fontWeight:900, color:'#fff', border:'3px solid rgba(6,13,10,0.98)', boxShadow:`0 8px 24px ${brand.accentColor}40` }}>
+          <div style={{ position:'absolute', bottom:'-24px', right:'20px', width:'60px', height:'60px', borderRadius:'16px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '24px', fontWeight:900, color:'#fff', border:'3px solid rgba(6,13,10,0.98)', boxShadow:`0 8px 24px ${brand.accentColor}40` }}>
             {brand.logo}
           </div>
 
           {/* Tier badge */}
-          <div style={{ position:'absolute', top:'12px', right:'12px', display:'flex', alignItems:'center', gap:'5px', background:tier.bg, border:`1px solid ${tier.border}`, backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 10px', fontSize:'9px', color:tier.color, fontWeight:700 }}>
+          <div style={{ position:'absolute', top:'12px', right:'12px', display:'flex', alignItems:'center', gap:'5px', background:tier.bg, border:`1px solid ${tier.border}`, backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 10px', fontSize: '10px', color:tier.color, fontWeight:700 }}>
             <Award size={9}/> {tier.label}
           </div>
 
           {/* Country */}
-          <div style={{ position:'absolute', top:'12px', left:'12px', background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 10px', fontSize:'11px' }}>
+          <div style={{ position:'absolute', top:'12px', left:'12px', background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 10px', fontSize: '12px' }}>
             {brand.flag}
           </div>
         </div>
@@ -147,16 +147,16 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         {/* Content */}
         <div style={{ padding:'32px 20px 18px', flex:1, display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'4px' }}>
-            <span style={{ fontSize:'10px', color:brand.accentColor, letterSpacing:'0.15em', fontWeight:700 }}>{brand.nameEn}</span>
+            <span style={{ fontSize: '11px', color:brand.accentColor, letterSpacing:'0.15em', fontWeight:700 }}>{brand.nameEn}</span>
             {brand.isVerified && <Check size={11} style={{ color:brand.accentColor }}/>}
           </div>
-          <h3 style={{ fontSize:'18px', fontWeight:900, color: '#111111', margin:'0 0 8px', letterSpacing:'-0.02em' }}>{brand.name}</h3>
-          <p style={{ fontSize:'12px', color:'rgba(0,0,0,0.45)', lineHeight:1.7, margin:'0 0 14px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brand.description}</p>
+          <h3 style={{ fontSize: '20px', fontWeight:900, color: '#111111', margin:'0 0 8px', letterSpacing:'-0.02em' }}>{brand.name}</h3>
+          <p style={{ fontSize: '13px', color:'rgba(0,0,0,0.45)', lineHeight:1.7, margin:'0 0 14px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brand.description}</p>
 
           {/* Tags */}
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap', marginBottom:'14px' }}>
             {brand.tags.slice(0,3).map(t => (
-              <span key={t} style={{ fontSize:'9px', color:brand.accentColor, background:`${brand.accentColor}10`, border:`1px solid ${brand.accentColor}20`, borderRadius:'20px', padding:'2px 8px', fontWeight:600 }}>{t}</span>
+              <span key={t} style={{ fontSize: '10px', color:brand.accentColor, background:`${brand.accentColor}10`, border:`1px solid ${brand.accentColor}20`, borderRadius:'20px', padding:'2px 8px', fontWeight:600 }}>{t}</span>
             ))}
           </div>
 
@@ -168,8 +168,8 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
               { v:toFa(brand.tournaments), l:'مسابقه'    },
             ].map((s,i) => (
               <div key={i} style={{ textAlign:'center', borderLeft: i>0?'1px solid rgba(0,0,0,0.04)':'none' }}>
-                <div style={{ fontSize:'16px', fontWeight:900, color: '#111111', letterSpacing:'-0.02em' }}>{s.v}</div>
-                <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
+                <div style={{ fontSize: '18px', fontWeight:900, color: '#111111', letterSpacing:'-0.02em' }}>{s.v}</div>
+                <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -185,30 +185,30 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         style={{ display:'flex', alignItems:'center', gap:'16px', padding:'18px 20px', background: hovered?'rgba(0,0,0,0.04)':'#FFFFFF', border:`1px solid ${hovered?`${brand.accentColor}28`:'rgba(0,0,0,0.07)'}`, borderRadius:'18px', transition:'all 0.35s cubic-bezier(0.4,0,0.2,1)', transform: hovered?'translateX(-4px)':'none', boxShadow: hovered?`0 16px 40px rgba(0,0,0,0.4),0 0 0 1px ${brand.accentColor}08`:'none' }}>
 
         {/* Logo */}
-        <div style={{ width:'52px', height:'52px', borderRadius:'15px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', fontWeight:900, color:'#fff', flexShrink:0, boxShadow: hovered?`0 8px 20px ${brand.accentColor}35`:'none', transition:'box-shadow 0.3s' }}>
+        <div style={{ width:'52px', height:'52px', borderRadius:'15px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '22px', fontWeight:900, color:'#fff', flexShrink:0, boxShadow: hovered?`0 8px 20px ${brand.accentColor}35`:'none', transition:'box-shadow 0.3s' }}>
           {brand.logo}
         </div>
 
         {/* Info */}
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', flexWrap:'wrap' }}>
-            <span style={{ fontSize:'15px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>{brand.name}</span>
-            <span style={{ fontSize:'9px', color:brand.accentColor, letterSpacing:'0.12em', fontWeight:700 }}>{brand.nameEn}</span>
+            <span style={{ fontSize: '17px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>{brand.name}</span>
+            <span style={{ fontSize: '10px', color:brand.accentColor, letterSpacing:'0.12em', fontWeight:700 }}>{brand.nameEn}</span>
             {brand.isVerified && <Check size={11} style={{ color:brand.accentColor }}/>}
-            <span style={{ fontSize:'9px', padding:'2px 8px', borderRadius:'20px', background:tier.bg, border:`1px solid ${tier.border}`, color:tier.color, fontWeight:700 }}>{tier.label}</span>
+            <span style={{ fontSize: '10px', padding:'2px 8px', borderRadius:'20px', background:tier.bg, border:`1px solid ${tier.border}`, color:tier.color, fontWeight:700 }}>{tier.label}</span>
           </div>
-          <div style={{ fontSize:'12px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brand.description}</div>
+          <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brand.description}</div>
         </div>
 
         {/* Country */}
-        <div style={{ fontSize:'20px', flexShrink:0 }}>{brand.flag}</div>
+        <div style={{ fontSize: '22px', flexShrink:0 }}>{brand.flag}</div>
 
         {/* Stats */}
         <div style={{ display:'flex', gap:'20px', flexShrink:0 }}>
           {[{v:toFa(brand.products),l:'محصول'},{v:toFa(brand.dealers),l:'نماینده'}].map((s,i) => (
             <div key={i} style={{ textAlign:'center' }}>
-              <div style={{ fontSize:'16px', fontWeight:900, color: '#111111', letterSpacing:'-0.02em' }}>{s.v}</div>
-              <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)' }}>{s.l}</div>
+              <div style={{ fontSize: '18px', fontWeight:900, color: '#111111', letterSpacing:'-0.02em' }}>{s.v}</div>
+              <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.35)' }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -216,7 +216,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         {/* Rating */}
         <div style={{ display:'flex', alignItems:'center', gap:'4px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', padding:'5px 10px', flexShrink:0 }}>
           <Star size={11} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>
-          <span style={{ fontSize:'12px', fontWeight:800, color:'#f59e0b' }}>{brand.rating}</span>
+          <span style={{ fontSize: '13px', fontWeight:800, color:'#f59e0b' }}>{brand.rating}</span>
         </div>
       </div>
     </Link>
@@ -276,11 +276,11 @@ export default function BrandsPage() {
           <div style={{ position:'absolute', top:'-20%', right:'-5%', width:'50vw', height:'50vw', maxWidth:'560px', borderRadius:'50%', background:'radial-gradient(rgba(6,182,212,0.06),transparent 65%)', filter:'blur(40px)', animation:'ambient 16s ease-in-out infinite', pointerEvents:'none' }}/>
 
           <div style={{ maxWidth:'1280px', margin:'0 auto' }}>
-            <div style={{ fontSize:'10px', color:'rgba(6,182,212,0.65)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'10px' }}>BRAND ECOSYSTEM</div>
-            <h1 style={{ fontSize:'clamp(28px,5vw,52px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.035em', lineHeight:1.05 }}>
+            <div style={{ fontSize: '11px', color:'rgba(6,182,212,0.65)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'10px' }}>BRAND ECOSYSTEM</div>
+            <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 57px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.035em', lineHeight:1.05 }}>
               برندهای صنعت بیلیارد
             </h1>
-            <p style={{ fontSize:'15px', color:'rgba(0,0,0,0.42)', margin:'0 0 28px', maxWidth:'480px' }}>
+            <p style={{ fontSize: '17px', color:'rgba(0,0,0,0.42)', margin:'0 0 28px', maxWidth:'480px' }}>
               از معتبرترین برندهای جهانی و داخلی تجهیزات بیلیارد کشف کنید
             </p>
 
@@ -307,7 +307,7 @@ export default function BrandsPage() {
             <div style={{ display:'flex', gap:'7px', overflowX:'auto' }}>
               {CATEGORIES.map(c => (
                 <button key={c.key} className={`cat-btn ${category===c.key?'active':''}`} onClick={()=>setCategory(c.key)}>
-                  {c.label} <span style={{ fontSize:'9px', opacity:0.5 }}>({toFa(c.count)})</span>
+                  {c.label} <span style={{ fontSize: '10px', opacity:0.5 }}>({toFa(c.count)})</span>
                 </button>
               ))}
             </div>
@@ -321,13 +321,13 @@ export default function BrandsPage() {
 
             <div style={{ display:'flex', gap:'4px' }}>
               {[{k:'grid',icon:'⊞'},{k:'list',icon:'☰'}].map(v => (
-                <button key={v.k} className={`view-btn ${view===v.k?'active':''}`} onClick={()=>setView(v.k as any)} style={{ fontSize:'14px' }}>
+                <button key={v.k} className={`view-btn ${view===v.k?'active':''}`} onClick={()=>setView(v.k as any)} style={{ fontSize: '15px' }}>
                   {v.icon}
                 </button>
               ))}
             </div>
 
-            <div style={{ fontSize:'12px', color:'rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} برند</div>
+            <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} برند</div>
           </div>
         </div>
 
@@ -343,8 +343,8 @@ export default function BrandsPage() {
               { v:toFa(BRANDS.reduce((a,b)=>a+b.tournaments,0)),   l:'مسابقه حمایت‌شده',c:'#ef4444' },
             ].map((s,i) => (
               <div key={i} style={{ textAlign:'center', animation:`fadeUp 0.5s ease ${i*0.08}s both` }}>
-                <div style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
-                <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
+                <div style={{ fontSize: 'clamp(22px, 3.3vw, 31px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
+                <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -353,8 +353,8 @@ export default function BrandsPage() {
           {category==='all' && tier==='all' && !search && (
             <section style={{ marginBottom:'48px' }}>
               <div style={{ marginBottom:'20px' }}>
-                <div style={{ fontSize:'9px', color:'rgba(6,182,212,0.6)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'7px' }}>FEATURED BRANDS</div>
-                <h2 style={{ fontSize:'clamp(20px,3vw,26px)', fontWeight:900, color: '#111111', margin:'0', letterSpacing:'-0.025em' }}>برندهای ویژه</h2>
+                <div style={{ fontSize: '10px', color:'rgba(6,182,212,0.6)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'7px' }}>FEATURED BRANDS</div>
+                <h2 style={{ fontSize: 'clamp(22px, 3.3vw, 29px)', fontWeight:900, color: '#111111', margin:'0', letterSpacing:'-0.025em' }}>برندهای ویژه</h2>
                 <div style={{ height:'1px', width:'52px', marginTop:'10px', background:'linear-gradient(90deg,#06b6d4,transparent)', boxShadow:'0 0 10px rgba(6,182,212,0.4)' }}/>
               </div>
               <div className="feat-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'18px' }}>
@@ -370,8 +370,8 @@ export default function BrandsPage() {
           {/* All brands */}
           <section>
             <div style={{ marginBottom:'20px' }}>
-              <div style={{ fontSize:'9px', color:'rgba(167,139,250,0.6)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'7px' }}>ALL BRANDS</div>
-              <h2 style={{ fontSize:'clamp(20px,3vw,26px)', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.025em' }}>
+              <div style={{ fontSize: '10px', color:'rgba(167,139,250,0.6)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'7px' }}>ALL BRANDS</div>
+              <h2 style={{ fontSize: 'clamp(22px, 3.3vw, 29px)', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.025em' }}>
                 {category==='all'&&tier==='all'&&!search ? 'همه برندها' : `نتایج (${toFa(filtered.length)})`}
               </h2>
               <div style={{ height:'1px', width:'52px', marginTop:'10px', background:'linear-gradient(90deg,#a78bfa,transparent)', boxShadow:'0 0 10px rgba(167,139,250,0.4)' }}/>
@@ -379,9 +379,9 @@ export default function BrandsPage() {
 
             {filtered.length===0 ? (
               <div style={{ textAlign:'center', padding:'80px 24px' }}>
-                <div style={{ fontSize:'48px', opacity:0.1, marginBottom:'14px' }}>🏭</div>
-                <h3 style={{ fontSize:'18px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>برندی یافت نشد</h3>
-                <button onClick={()=>{setSearch('');setCategory('all');setTier('all');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'12px', color:'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
+                <div style={{ fontSize: '53px', opacity:0.1, marginBottom:'14px' }}>🏭</div>
+                <h3 style={{ fontSize: '20px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>برندی یافت نشد</h3>
+                <button onClick={()=>{setSearch('');setCategory('all');setTier('all');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'12px', color:'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
                   پاک کردن فیلترها
                 </button>
               </div>
@@ -406,12 +406,12 @@ export default function BrandsPage() {
 
           {/* Register brand CTA */}
           <div style={{ marginTop:'60px', padding:'44px 40px', background:'rgba(6,182,212,0.03)', border:'1px dashed rgba(6,182,212,0.2)', borderRadius:'28px', textAlign:'center' }}>
-            <div style={{ fontSize:'10px', color:'rgba(6,182,212,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>FOR MANUFACTURERS</div>
-            <h3 style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>برند خود را ثبت کنید</h3>
-            <p style={{ fontSize:'14px', color:'rgba(0,0,0,0.40)', margin:'0 0 24px', maxWidth:'420px', marginLeft:'auto', marginRight:'auto' }}>
+            <div style={{ fontSize: '11px', color:'rgba(6,182,212,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>FOR MANUFACTURERS</div>
+            <h3 style={{ fontSize: 'clamp(22px, 3.3vw, 31px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>برند خود را ثبت کنید</h3>
+            <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.40)', margin:'0 0 24px', maxWidth:'420px', marginLeft:'auto', marginRight:'auto' }}>
               به اکوسیستم صنعت بیلیارد ایران بپیوندید و با هزاران باشگاه، مربی و بازیکن در ارتباط باشید
             </p>
-            <Link href="/brands/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'13px 30px', background:'linear-gradient(135deg,#06b6d4,#0891b2)', borderRadius:'13px', color:'#fff', fontSize:'14px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 24px rgba(6,182,212,0.25)' }}>
+            <Link href="/brands/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'13px 30px', background:'linear-gradient(135deg,#06b6d4,#0891b2)', borderRadius:'13px', color:'#fff', fontSize: '15px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 24px rgba(6,182,212,0.25)' }}>
               ثبت برند ←
             </Link>
           </div>

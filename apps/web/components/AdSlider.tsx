@@ -172,7 +172,7 @@ export default function AdSlider() {
                     border: '1px solid rgba(0,0,0,0.06)',
                     borderRadius: '20px',
                     padding: '4px 12px',
-                    fontSize: '10px',
+                    fontSize: '11px',
                     color: 'rgba(255,255,255,0.3)',
                     letterSpacing: '0.1em',
                     backdropFilter: 'blur(10px)',
@@ -222,22 +222,22 @@ export default function AdSlider() {
 
                                 {/* برند */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                    <div style={{ fontSize: '11px', color: ad.accent, letterSpacing: '0.25em', fontWeight: 700 }}>
+                                    <div style={{ fontSize: '12px', color: ad.accent, letterSpacing: '0.25em', fontWeight: 700 }}>
                                         {ad.brand}
                                     </div>
                                     <div style={{ height: '1px', width: '40px', background: `${ad.accent}40` }} />
-                                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', background: 'rgba(0,0,0,0.04)', border: `1px solid ${ad.accent}30`, borderRadius: '20px', padding: '2px 10px' }}>
+                                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', background: 'rgba(0,0,0,0.04)', border: `1px solid ${ad.accent}30`, borderRadius: '20px', padding: '2px 10px' }}>
                                         {ad.tag}
                                     </div>
                                 </div>
 
                                 {/* تیتر */}
-                                <h3 style={{ fontSize: '32px', fontWeight: 900, color: '#ffffff', margin: '0 0 12px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                                <h3 style={{ fontSize: '35px', fontWeight: 900, color: '#ffffff', margin: '0 0 12px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                                     {ad.title}
                                 </h3>
 
                                 {/* توضیح */}
-                                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: '500px' }}>
+                                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.45)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: '500px' }}>
                                     {ad.subtitle}
                                 </p>
 
@@ -260,7 +260,7 @@ export default function AdSlider() {
                                     position: 'relative',
                                 }}>
                                     <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: `1px solid ${ad.accent}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <div style={{ fontSize: '32px', opacity: 0.6 }}>🎱</div>
+                                        <div style={{ fontSize: '35px', opacity: 0.6 }}>🎱</div>
                                     </div>
                                     <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: `radial-gradient(ellipse, ${ad.accent}08, transparent 70%)` }} />
                                 </div>

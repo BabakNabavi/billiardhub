@@ -61,16 +61,16 @@ function RequestCard({
           background: hexToRgba(meta.color, 0.12),
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <i className={`ti ${meta.icon}`} style={{ fontSize: 20, color: meta.color }} aria-hidden="true" />
+          <i className={`ti ${meta.icon}`} style={{ fontSize: 22, color: meta.color }} aria-hidden="true" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 2 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 2 }}>
             {req.users?.name ?? req.users?.mobile ?? req.user_id.slice(0, 8)}
           </div>
-          <div style={{ fontSize: 11, color: meta.color }}>{meta.label}</div>
+          <div style={{ fontSize: 12, color: meta.color }}>{meta.label}</div>
         </div>
         <div style={{
-          fontSize: 10, color: STATUS_COLOR[req.status],
+          fontSize: 11, color: STATUS_COLOR[req.status],
           background: hexToRgba(STATUS_COLOR[req.status], 0.1),
           border: `1px solid ${hexToRgba(STATUS_COLOR[req.status], 0.3)}`,
           borderRadius: 20, padding: '3px 10px',
@@ -81,8 +81,8 @@ function RequestCard({
 
       {/* Time + doc */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)' }}>
-          <i className="ti ti-clock" style={{ fontSize: 11, marginLeft: 3 }} aria-hidden="true" />
+        <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)' }}>
+          <i className="ti ti-clock" style={{ fontSize: 12, marginLeft: 3 }} aria-hidden="true" />
           {timeAgo(req.requested_at)}
         </span>
         {req.doc_url && (
@@ -91,17 +91,17 @@ function RequestCard({
             target="_blank"
             rel="noreferrer"
             style={{
-              fontSize: 10, color: '#C7A66A', textDecoration: 'none',
+              fontSize: 11, color: '#C7A66A', textDecoration: 'none',
               display: 'inline-flex', alignItems: 'center', gap: 4,
             }}
           >
-            <i className="ti ti-file" style={{ fontSize: 11 }} aria-hidden="true" />
+            <i className="ti ti-file" style={{ fontSize: 12 }} aria-hidden="true" />
             مشاهده مدرک
           </a>
         )}
         {meta.requiresDoc && !req.doc_url && (
-          <span style={{ fontSize: 10, color: '#f59e0b' }}>
-            <i className="ti ti-alert-triangle" style={{ fontSize: 11, marginLeft: 3 }} aria-hidden="true" />
+          <span style={{ fontSize: 11, color: '#f59e0b' }}>
+            <i className="ti ti-alert-triangle" style={{ fontSize: 12, marginLeft: 3 }} aria-hidden="true" />
             مدرک آپلود نشده
           </span>
         )}
@@ -119,11 +119,11 @@ function RequestCard({
                   flex: 1, padding: '9px', borderRadius: 10, border: 'none',
                   background: busy ? 'rgba(0,0,0,0.04)' : '#C7A66A',
                   color: busy ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
-                  fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: busy ? 'not-allowed' : 'pointer',
+                  fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: busy ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >
-                <i className="ti ti-check" style={{ fontSize: 14 }} aria-hidden="true" />
+                <i className="ti ti-check" style={{ fontSize: 15 }} aria-hidden="true" />
                 تأیید
               </button>
               <button
@@ -131,11 +131,11 @@ function RequestCard({
                 style={{
                   flex: 1, padding: '9px', borderRadius: 10,
                   border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)',
-                  color: '#ef4444', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+                  color: '#ef4444', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >
-                <i className="ti ti-x" style={{ fontSize: 14 }} aria-hidden="true" />
+                <i className="ti ti-x" style={{ fontSize: 15 }} aria-hidden="true" />
                 رد کردن
               </button>
             </div>
@@ -148,7 +148,7 @@ function RequestCard({
                 rows={2}
                 style={{
                   width: '100%', background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
-                  borderRadius: 10, padding: '8px 12px', color: '#111111', fontSize: 12,
+                  borderRadius: 10, padding: '8px 12px', color: '#111111', fontSize: 13,
                   fontFamily: 'inherit', resize: 'none', marginBottom: 8, outline: 'none',
                 }}
               />
@@ -159,7 +159,7 @@ function RequestCard({
                   style={{
                     flex: 1, padding: '9px', borderRadius: 10, border: 'none',
                     background: '#ef4444', color: '#fff',
-                    fontSize: 12, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+                    fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
                   }}
                 >
                   تأیید رد
@@ -169,7 +169,7 @@ function RequestCard({
                   style={{
                     flex: 1, padding: '9px', borderRadius: 10,
                     border: '1px solid rgba(0,0,0,0.08)', background: 'transparent',
-                    color: 'rgba(0,0,0,0.45)', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
+                    color: 'rgba(0,0,0,0.45)', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
                   }}
                 >
                   انصراف
@@ -184,7 +184,7 @@ function RequestCard({
       {req.status === 'rejected' && req.rejection_note && (
         <div style={{
           background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: 10, padding: '8px 12px', fontSize: 11, color: '#fca5a5',
+          borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#fca5a5',
         }}>
           {req.rejection_note}
         </div>
@@ -253,11 +253,11 @@ export default function AdminRolesPage() {
               borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', color: 'rgba(0,0,0,0.50)',
             }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 18 }} aria-hidden="true" />
+              <i className="ti ti-arrow-right" style={{ fontSize: 20 }} aria-hidden="true" />
             </button>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#111111' }}>مدیریت درخواست نقش</div>
-              <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>پانل ادمین</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>مدیریت درخواست نقش</div>
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>پانل ادمین</div>
             </div>
           </div>
 
@@ -272,7 +272,7 @@ export default function AdminRolesPage() {
                   border: `1px solid ${filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.5) : 'rgba(0,0,0,0.07)'}`,
                   background: filter === t.status ? hexToRgba(STATUS_COLOR[t.status], 0.1) : 'rgba(0,0,0,0.04)',
                   color: filter === t.status ? STATUS_COLOR[t.status] : '#64748b',
-                  fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s',
+                  fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s',
                 }}
               >
                 {t.label}
@@ -282,17 +282,17 @@ export default function AdminRolesPage() {
 
           {/* List */}
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(0,0,0,0.38)', fontSize: 13 }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(0,0,0,0.38)', fontSize: 14 }}>
               در حال بارگذاری...
             </div>
           ) : requests.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <i className="ti ti-inbox" style={{ fontSize: 36, color: '#1e293b', display: 'block', marginBottom: 12 }} />
-              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>درخواستی وجود ندارد</span>
+              <i className="ti ti-inbox" style={{ fontSize: 40, color: '#1e293b', display: 'block', marginBottom: 12 }} />
+              <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)' }}>درخواستی وجود ندارد</span>
             </div>
           ) : (
             <>
-              <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginBottom: 12 }}>
                 {toFarsiDigits(requests.length)} درخواست
               </div>
               {requests.map(r => (
@@ -305,7 +305,7 @@ export default function AdminRolesPage() {
         {toast && (
           <div style={{
             position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-            background: '#C7A66A', color: '#FFFFFF', fontSize: 12, fontWeight: 700,
+            background: '#C7A66A', color: '#FFFFFF', fontSize: 13, fontWeight: 700,
             fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px',
             borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap',
           }}>

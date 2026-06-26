@@ -99,10 +99,10 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           <img src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           {club.isVerified && (
-            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(199,166,106,0.88)', borderRadius: 20, padding: '2px 7px', fontSize: 9, fontWeight: 700, color: '#fff' }}>✓</div>
+            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(199,166,106,0.88)', borderRadius: 20, padding: '2px 7px', fontSize: 10, fontWeight: 700, color: '#fff' }}>✓</div>
           )}
           {/* open badge روی تصویر — same pill style as table type badges */}
-          <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 9, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
+          <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
             {club.isOpen ? 'باز' : 'بسته'}
           </div>
         </div>
@@ -110,26 +110,26 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
         {/* content */}
         <div style={{ flex: 1, padding: '14px 16px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 800, color: '#111111', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.name}</h3>
             {club.rating && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 20, padding: '3px 8px' }}>
                 <Star size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                <span style={{ fontSize: 12, fontWeight: 800, color: '#f59e0b' }}>{toFa(club.rating)}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#f59e0b' }}>{toFa(club.rating)}</span>
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
             <MapPin size={10} color="#C7A66A" />{club.city}
             {club.distance !== undefined && <span style={{ color: '#A07840' }}>· {toFa(club.distance.toFixed(1))} km</span>}
           </div>
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 'auto' }}>
             {activeTables.slice(0, 3).map(t => (
-              <span key={t.key} style={{ fontSize: 10, color: t.color, background: `${t.color}12`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
+              <span key={t.key} style={{ fontSize: 11, color: t.color, background: `${t.color}12`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                 {toFa((club as any)[t.key])} {t.label}
               </span>
             ))}
             {/* دکمه رزرو — same pill style as table type badges */}
-            <span style={{ fontSize: 10, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0 }}>
               رزرو ←
             </span>
           </div>
@@ -164,7 +164,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* top badges */}
           <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             {club.isVerified && (
-              <div style={{ background: 'rgba(199,166,106,0.90)', borderRadius: 20, padding: '3px 8px', fontSize: 9, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 2 }}>
+              <div style={{ background: 'rgba(199,166,106,0.90)', borderRadius: 20, padding: '3px 8px', fontSize: 10, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Check size={8} /> تأیید
               </div>
             )}
@@ -172,7 +172,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* open/close — same pill style as table type badges */}
           <div style={{
             position: 'absolute', top: 10, left: 10,
-            fontSize: 10, fontWeight: 700,
+            fontSize: 11, fontWeight: 700,
             color: club.isOpen ? '#30C55A' : '#ef4444',
             background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)',
             border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`,
@@ -186,7 +186,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* رزرو badge — same pill style as table type badges (gold) */}
           <div style={{
             position: 'absolute', bottom: 10, left: 10,
-            fontSize: 10, fontWeight: 700,
+            fontSize: 11, fontWeight: 700,
             color: '#C7A66A',
             background: 'rgba(199,166,106,0.10)',
             border: '1px solid rgba(199,166,106,0.22)',
@@ -195,7 +195,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
             رزرو آنلاین
           </div>
 
-          <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.50)', borderRadius: 20, padding: '3px 9px', fontSize: 11, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 3 }}>
+          <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.50)', borderRadius: 20, padding: '3px 9px', fontSize: 12, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 3 }}>
             <MapPin size={9} color="#C7A66A" />{club.city}
           </div>
         </div>
@@ -203,23 +203,23 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
         {/* body */}
         <div style={{ padding: '14px 14px 0', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>{club.name}</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: 0, lineHeight: 1.25 }}>{club.name}</h3>
             {club.rating && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
                 <Star size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                <span style={{ fontSize: 12, fontWeight: 800, color: '#f59e0b' }}>{toFa(club.rating)}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#f59e0b' }}>{toFa(club.rating)}</span>
               </div>
             )}
           </div>
 
-          <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {club.description}
           </div>
 
           {/* table type pills */}
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {activeTables.slice(0, 3).map(t => (
-              <span key={t.key} style={{ fontSize: 10, color: t.color, background: `${t.color}10`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
+              <span key={t.key} style={{ fontSize: 11, color: t.color, background: `${t.color}10`, border: `1px solid ${t.color}22`, borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                 {toFa((club as any)[t.key])} {t.label}
               </span>
             ))}
@@ -239,11 +239,11 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
         <div style={{ padding: '10px 14px 14px', marginTop: 'auto' }}>
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 10 }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 3 }}>
               <Users size={10} />{toFa(club.memberCount ?? 0)} عضو
             </span>
             {club.distance !== undefined && (
-              <span style={{ fontSize: 11, color: '#A07840' }}>📍 {toFa(club.distance.toFixed(1))} km</span>
+              <span style={{ fontSize: 12, color: '#A07840' }}>📍 {toFa(club.distance.toFixed(1))} km</span>
             )}
           </div>
         </div>
@@ -316,11 +316,11 @@ function HeroSliderFull({ city, setCity, cities }: { city: string; setCity: (c: 
 
       {/* text */}
       <div style={{ position: 'absolute', top: 0, bottom: 52, left: 0, right: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(24px,4vw,64px)', direction: 'rtl' }}>
-        <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.85)', letterSpacing: '0.26em', fontWeight: 700, marginBottom: 12 }}>DISCOVER CLUBS</div>
-        <h1 style={{ fontSize: 'clamp(24px,4.2vw,52px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
+        <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.85)', letterSpacing: '0.26em', fontWeight: 700, marginBottom: 12 }}>DISCOVER CLUBS</div>
+        <h1 style={{ fontSize: 'clamp(26px, 4.6vw, 57px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
           {SLIDER_IMAGES[active]?.title}
         </h1>
-        <p style={{ fontSize: 'clamp(13px,1.4vw,18px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
+        <p style={{ fontSize: 'clamp(14px, 1.5vw, 20px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
           {SLIDER_IMAGES[active]?.sub}
         </p>
       </div>
@@ -340,7 +340,7 @@ function HeroSliderFull({ city, setCity, cities }: { city: string; setCity: (c: 
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 5, padding: '8px clamp(16px,4vw,40px)', background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(14px)', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="city-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch', maxWidth: 1280, margin: '0 auto' }}>
           {cities.map(c => (
-            <button key={c} onClick={() => setCity(c)} style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${city === c ? 'rgba(199,166,106,0.55)' : 'rgba(255,255,255,0.14)'}`, background: city === c ? 'rgba(199,166,106,0.18)' : 'rgba(255,255,255,0.06)', color: city === c ? '#C7A66A' : 'rgba(255,255,255,0.60)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s' }}>
+            <button key={c} onClick={() => setCity(c)} style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${city === c ? 'rgba(199,166,106,0.55)' : 'rgba(255,255,255,0.14)'}`, background: city === c ? 'rgba(199,166,106,0.18)' : 'rgba(255,255,255,0.06)', color: city === c ? '#C7A66A' : 'rgba(255,255,255,0.60)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s' }}>
               {c}
             </button>
           ))}
@@ -367,6 +367,7 @@ export default function ClubsPage() {
   const [onlyVerified, setOnlyVer]  = useState(false);
   const [userLoc, setUserLoc]       = useState<{ lat: number; lon: number } | null>(null);
   const [locLoading, setLocLoading] = useState(false);
+  const [locError, setLocError]     = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef   = useRef<HTMLDivElement>(null);
 
@@ -386,11 +387,13 @@ export default function ClubsPage() {
   }, []);
 
   const getLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) { setLocError(true); return; }
     setLocLoading(true);
+    setLocError(false);
     navigator.geolocation.getCurrentPosition(
       pos => { setUserLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setSortBy('distance'); setLocLoading(false); },
-      () => setLocLoading(false),
+      () => { setLocLoading(false); setLocError(true); },
+      { timeout: 8000, enableHighAccuracy: false },
     );
   };
 
@@ -476,26 +479,26 @@ export default function ClubsPage() {
 
               {/* Filter */}
               <div ref={filterRef} style={{ position: 'relative', flexShrink: 0 }}>
-                <button onClick={() => { setFilterOpen(p => !p); setSortOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', borderRadius: 12, border: `1px solid ${filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: filterOpen || activeFilters > 0 ? '#A07840' : 'rgba(0,0,0,0.55)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                <button onClick={() => { setFilterOpen(p => !p); setSortOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', borderRadius: 12, border: `1px solid ${filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: filterOpen || activeFilters > 0 ? '#A07840' : 'rgba(0,0,0,0.55)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                   <SlidersHorizontal size={13} /> فیلتر
-                  {activeFilters > 0 && <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#C7A66A', color: '#fff', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toFa(activeFilters)}</span>}
+                  {activeFilters > 0 && <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#C7A66A', color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toFa(activeFilters)}</span>}
                 </button>
 
                 {filterOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: 300, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 18, padding: 18, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.14)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                      <span style={{ fontSize: 14, fontWeight: 800, color: '#111111' }}>فیلترها</span>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>فیلترها</span>
                       <div style={{ display: 'flex', gap: 8 }}>
-                        {activeFilters > 0 && <button onClick={clearFilters} style={{ fontSize: 11, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 20, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>پاک</button>}
+                        {activeFilters > 0 && <button onClick={clearFilters} style={{ fontSize: 12, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 20, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>پاک</button>}
                         <button onClick={() => setFilterOpen(false)} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8, cursor: 'pointer', color: 'rgba(0,0,0,0.45)', padding: 4, display: 'flex' }}><X size={12} /></button>
                       </div>
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>نوع میز</div>
+                      <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>نوع میز</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {TABLE_TYPES.map(t => (
-                          <button key={t.key} onClick={() => toggleType(t.key)} style={{ padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 600, border: `1px solid ${selectedTypes.includes(t.key) ? `${t.color}40` : 'rgba(0,0,0,0.09)'}`, background: selectedTypes.includes(t.key) ? `${t.color}14` : 'transparent', color: selectedTypes.includes(t.key) ? t.color : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                          <button key={t.key} onClick={() => toggleType(t.key)} style={{ padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${selectedTypes.includes(t.key) ? `${t.color}40` : 'rgba(0,0,0,0.09)'}`, background: selectedTypes.includes(t.key) ? `${t.color}14` : 'transparent', color: selectedTypes.includes(t.key) ? t.color : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                             {t.label}
                           </button>
                         ))}
@@ -503,10 +506,10 @@ export default function ClubsPage() {
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>امکانات</div>
+                      <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', fontWeight: 700, marginBottom: 8 }}>امکانات</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {AMENITIES.map(a => (
-                          <button key={a.key} onClick={() => toggleAmen(a.key)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, border: `1px solid ${selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.10)' : 'transparent', color: selectedAmens.includes(a.key) ? '#A07840' : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                          <button key={a.key} onClick={() => toggleAmen(a.key)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: selectedAmens.includes(a.key) ? 'rgba(199,166,106,0.10)' : 'transparent', color: selectedAmens.includes(a.key) ? '#A07840' : 'rgba(0,0,0,0.50)', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                             {a.icon}{a.label}
                           </button>
                         ))}
@@ -519,7 +522,7 @@ export default function ClubsPage() {
                         { label: 'فقط تأیید شده‌ها',   val: onlyVerified, set: setOnlyVer },
                       ].map((tog, i) => (
                         <div key={i} onClick={() => tog.set((p: boolean) => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '6px 0' }}>
-                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.60)', fontWeight: 500 }}>{tog.label}</span>
+                          <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.60)', fontWeight: 500 }}>{tog.label}</span>
                           <div style={{ width: 36, height: 20, borderRadius: 10, background: tog.val ? '#C7A66A' : 'rgba(0,0,0,0.12)', position: 'relative', transition: 'all 0.3s', flexShrink: 0 }}>
                             <div style={{ position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'all 0.3s', left: tog.val ? 19 : 3, boxShadow: '0 2px 4px rgba(0,0,0,0.20)' }} />
                           </div>
@@ -532,7 +535,7 @@ export default function ClubsPage() {
 
               {/* Sort */}
               <div ref={sortRef} style={{ position: 'relative', flexShrink: 0 }}>
-                <button onClick={() => { setSortOpen(p => !p); setFilterOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px', borderRadius: 12, border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortOpen ? 'rgba(199,166,106,0.08)' : '#FFFFFF', color: 'rgba(0,0,0,0.65)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
+                <button onClick={() => { setSortOpen(p => !p); setFilterOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px', borderRadius: 12, border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortOpen ? 'rgba(199,166,106,0.08)' : '#FFFFFF', color: 'rgba(0,0,0,0.65)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
                   {currentSort.label}
                   <ChevronDown size={11} style={{ transition: 'transform 0.3s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: 'rgba(0,0,0,0.35)' }} />
                 </button>
@@ -540,7 +543,7 @@ export default function ClubsPage() {
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, minWidth: 170, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 6, zIndex: 9999, boxShadow: '0 20px 60px rgba(0,0,0,0.12)', backdropFilter: 'blur(20px)', animation: 'fadeUp 0.2s ease both' }}>
                     {availSorts.map(opt => (
                       <button key={opt.value} className="dd-item" onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 9, border: 'none', background: sortBy === opt.value ? 'rgba(199,166,106,0.10)' : 'transparent', color: sortBy === opt.value ? '#A07840' : 'rgba(0,0,0,0.65)', fontSize: 13, fontWeight: sortBy === opt.value ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', textAlign: 'right' }}>
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 9, border: 'none', background: sortBy === opt.value ? 'rgba(199,166,106,0.10)' : 'transparent', color: sortBy === opt.value ? '#A07840' : 'rgba(0,0,0,0.65)', fontSize: 14, fontWeight: sortBy === opt.value ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', textAlign: 'right' }}>
                         {opt.label}
                         {sortBy === opt.value && <span style={{ marginRight: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#C7A66A' }} />}
                       </button>
@@ -558,14 +561,19 @@ export default function ClubsPage() {
                 ))}
               </div>
 
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>{toFa(filtered.length)} باشگاه</div>
+              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>{toFa(filtered.length)} باشگاه</div>
             </div>
 
             {/* location hint */}
             {!userLoc && (
-              <div onClick={getLocation} style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.18)', borderRadius: 10, cursor: 'pointer' }}>
-                <Navigation size={12} color="#C7A66A" />
-                <span style={{ fontSize: 11, color: '#A07840' }}>برای نمایش نزدیک‌ترین باشگاه‌ها، مکان‌یابی را فعال کنید</span>
+              <div
+                onClick={locError ? undefined : getLocation}
+                style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: locError ? 'rgba(239,68,68,0.06)' : 'rgba(199,166,106,0.06)', border: `1px solid ${locError ? 'rgba(239,68,68,0.22)' : 'rgba(199,166,106,0.18)'}`, borderRadius: 10, cursor: locError ? 'default' : 'pointer' }}
+              >
+                <Navigation size={12} color={locError ? '#ef4444' : '#C7A66A'} />
+                <span style={{ fontSize: 12, color: locError ? '#ef4444' : '#A07840' }}>
+                  {locError ? 'دسترسی به موقعیت مکانی رد شد — تنظیمات مرورگر را بررسی کنید' : 'برای نمایش نزدیک‌ترین باشگاه‌ها، مکان‌یابی را فعال کنید'}
+                </span>
               </div>
             )}
           </div>
@@ -574,16 +582,16 @@ export default function ClubsPage() {
         {/* ══ CONTENT ══ */}
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px)' }}>
           {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '80px', color: 'rgba(0,0,0,0.40)', fontSize: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '80px', color: 'rgba(0,0,0,0.40)', fontSize: 15 }}>
               <div style={{ width: 22, height: 22, border: '2px solid rgba(199,166,106,0.20)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               در حال بارگذاری...
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 24px' }}>
-              <div style={{ fontSize: 40, opacity: 0.15, marginBottom: 14 }}>🎱</div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>باشگاهی یافت نشد</h3>
-              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px' }}>فیلترها یا جستجو را تغییر دهید</div>
-              <button onClick={clearFilters} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>پاک کردن فیلترها</button>
+              <div style={{ fontSize: 44, opacity: 0.15, marginBottom: 14 }}>🎱</div>
+              <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>باشگاهی یافت نشد</h3>
+              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px' }}>فیلترها یا جستجو را تغییر دهید</div>
+              <button onClick={clearFilters} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>پاک کردن فیلترها</button>
             </div>
           ) : view === 'grid' ? (
             <div className="clubs-grid">
@@ -605,9 +613,9 @@ export default function ClubsPage() {
 
           {!loading && (
             <div style={{ marginTop: 40, padding: '28px 24px', background: '#111111', border: 'none', borderRadius: 20, textAlign: 'center' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', animation: 'gentlePulse 2.8s ease-in-out infinite' }}>باشگاه خود را ثبت کنید</h3>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>به هزاران بازیکن دسترسی پیدا کنید</div>
-              <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, color: '#C7A66A', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+              <h3 style={{ fontSize: 19, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', animation: 'gentlePulse 2.8s ease-in-out infinite' }}>باشگاه خود را ثبت کنید</h3>
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>به هزاران بازیکن دسترسی پیدا کنید</div>
+              <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, color: '#C7A66A', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
                 ثبت باشگاه ←
               </Link>
             </div>

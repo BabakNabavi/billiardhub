@@ -45,7 +45,7 @@ export function StatCard({ value, label, sub, color = '#C7A66A', icon, delay = 0
       )}
 
       <div style={{
-        fontSize: 'clamp(28px,4vw,40px)', fontWeight: 900, color: '#111111',
+        fontSize: 'clamp(31px, 4.4vw, 44px)', fontWeight: 900, color: '#111111',
         letterSpacing: '-0.03em', lineHeight: 1,
         textShadow: `0 0 40px ${color}30`,
         marginBottom: '8px',
@@ -53,12 +53,12 @@ export function StatCard({ value, label, sub, color = '#C7A66A', icon, delay = 0
         {value}
       </div>
 
-      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>
+      <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>
         {label}
       </div>
 
       {sub && (
-        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginTop: '5px' }}>
+        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)', marginTop: '5px' }}>
           {sub}
         </div>
       )}

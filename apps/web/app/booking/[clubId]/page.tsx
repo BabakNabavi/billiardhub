@@ -148,11 +148,11 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
     <div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}}>
         <button onClick={onPrev} style={{width:'32px',height:'32px',borderRadius:'9px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.06)',cursor:'pointer',color:'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',justifyContent:'center'}}><ChevronRight size={15}/></button>
-        <span style={{fontSize:'15px',fontWeight:800,color:'#111111'}}>{jMonths[jMonth-1]} {toFa(jYear)}</span>
+        <span style={{fontSize: '17px',fontWeight:800,color:'#111111'}}>{jMonths[jMonth-1]} {toFa(jYear)}</span>
         <button onClick={nextBlocked?undefined:onNext} disabled={nextBlocked} style={{width:'32px',height:'32px',borderRadius:'9px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.06)',cursor:nextBlocked?'not-allowed':'pointer',color:nextBlocked?'rgba(0,0,0,0.15)':'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',justifyContent:'center',opacity:nextBlocked?.35:1}}><ChevronLeft size={15}/></button>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'3px',marginBottom:'6px'}}>
-        {jDayNames.map(d=><div key={d} style={{textAlign:'center',fontSize:'10px',color:'rgba(0,0,0,0.35)',fontWeight:700,padding:'4px 0'}}>{d}</div>)}
+        {jDayNames.map(d=><div key={d} style={{textAlign:'center',fontSize: '11px',color:'rgba(0,0,0,0.35)',fontWeight:700,padding:'4px 0'}}>{d}</div>)}
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'3px'}}>
         {cells.map((day,i)=>{
@@ -164,7 +164,7 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
           const isToday = day===todayJD&&jMonth===todayJM&&jYear===todayJY;
           return (
             <button key={i} disabled={isDisabled} onClick={()=>!isDisabled&&onSelect(day)} style={{
-              height:'38px',borderRadius:'9px',border:'none',fontSize:'13px',
+              height:'38px',borderRadius:'9px',border:'none',fontSize: '14px',
               fontWeight:isToday?800:500, cursor:isDisabled?'not-allowed':'pointer',
               background:isSel?'linear-gradient(135deg,#C7A66A,#A07840)':isToday?'rgba(199,166,106,0.1)':isFutureLocked?'rgba(0,0,0,0.02)':'transparent',
               color:isSel?'#fff':isDisabled?'rgba(0,0,0,0.12)':isToday?'#C7A66A':'rgba(0,0,0,0.55)',
@@ -177,7 +177,7 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
           );
         })}
       </div>
-      <div style={{marginTop:'10px',fontSize:'10px',color:'rgba(0,0,0,0.30)',textAlign:'center'}}>رزرو تا حداکثر ۴ هفته آینده امکان‌پذیر است</div>
+      <div style={{marginTop:'10px',fontSize: '11px',color:'rgba(0,0,0,0.30)',textAlign:'center'}}>رزرو تا حداکثر ۴ هفته آینده امکان‌پذیر است</div>
     </div>
   );
 }
@@ -362,9 +362,9 @@ function BookingContent() {
               <div style={{width:'64px',height:'64px',borderRadius:'50%',background:'linear-gradient(135deg,#30C55A,#22a34a)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',boxShadow:'0 12px 36px rgba(48,197,90,0.28)'}}>
                 <div style={{width:'26px',height:'26px',border:'3px solid rgba(255,255,255,0.3)',borderTop:'3px solid #fff',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
               </div>
-              <h2 style={{fontSize:'19px',fontWeight:900,color:'#111',margin:'0 0 10px'}}>در حال اتصال به درگاه پرداخت...</h2>
-              <p style={{fontSize:'13px',color:'rgba(0,0,0,0.45)',lineHeight:1.7,margin:'0 0 20px'}}>رزرو ثبت شد. لطفاً منتظر بمانید.</p>
-              <a href={pendingPayment.paymentUrl} style={{display:'inline-flex',alignItems:'center',gap:'8px',padding:'12px 26px',background:'linear-gradient(135deg,#30C55A,#22a34a)',borderRadius:'13px',color:'#fff',fontSize:'14px',fontWeight:700,textDecoration:'none'}}>
+              <h2 style={{fontSize: '21px',fontWeight:900,color:'#111',margin:'0 0 10px'}}>در حال اتصال به درگاه پرداخت...</h2>
+              <p style={{fontSize: '14px',color:'rgba(0,0,0,0.45)',lineHeight:1.7,margin:'0 0 20px'}}>رزرو ثبت شد. لطفاً منتظر بمانید.</p>
+              <a href={pendingPayment.paymentUrl} style={{display:'inline-flex',alignItems:'center',gap:'8px',padding:'12px 26px',background:'linear-gradient(135deg,#30C55A,#22a34a)',borderRadius:'13px',color:'#fff',fontSize: '15px',fontWeight:700,textDecoration:'none'}}>
                 <CreditCard size={14}/> انتقال دستی به درگاه
               </a>
             </div>
@@ -376,24 +376,24 @@ function BookingContent() {
                 <div style={{width:'60px',height:'60px',borderRadius:'50%',background:'linear-gradient(135deg,#30C55A,#22a34a)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px',boxShadow:'0 8px 24px rgba(48,197,90,0.28)'}}>
                   <CheckCircle size={26} style={{color:'#fff'}}/>
                 </div>
-                <h2 style={{fontSize:'20px',fontWeight:900,color:'#111',margin:'0 0 6px'}}>رزرو تأیید شد!</h2>
-                <p style={{fontSize:'13px',color:'rgba(0,0,0,0.42)',margin:0,lineHeight:1.6}}>
+                <h2 style={{fontSize: '22px',fontWeight:900,color:'#111',margin:'0 0 6px'}}>رزرو تأیید شد!</h2>
+                <p style={{fontSize: '14px',color:'rgba(0,0,0,0.42)',margin:0,lineHeight:1.6}}>
                   برای تکمیل رزرو، پرداخت آنلاین لازم است
                 </p>
               </div>
 
               {/* Tracking number — prominent */}
               <div style={{margin:'18px 20px 0',padding:'14px 18px',background:'rgba(199,166,106,0.06)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:'16px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}>
-                <span style={{fontSize:'11px',color:'rgba(0,0,0,0.42)',fontWeight:600}}>شماره پیگیری</span>
-                <span style={{fontSize:'16px',fontWeight:900,color:'#C7A66A',fontFamily:'monospace',letterSpacing:'0.08em'}}>{pendingPayment.trackingNumber}</span>
+                <span style={{fontSize: '12px',color:'rgba(0,0,0,0.42)',fontWeight:600}}>شماره پیگیری</span>
+                <span style={{fontSize: '18px',fontWeight:900,color:'#C7A66A',fontFamily:'monospace',letterSpacing:'0.08em'}}>{pendingPayment.trackingNumber}</span>
               </div>
 
               {/* Receipt rows */}
               <div style={{margin:'12px 20px'}}>
                 {receiptRows.map((r,i)=>(
                   <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:i<receiptRows.length-1?'1px solid rgba(0,0,0,0.05)':'none',gap:12}}>
-                    <span style={{fontSize:'12px',color:'rgba(0,0,0,0.40)',flexShrink:0}}>{r.l}</span>
-                    <span style={{fontSize:'13px',fontWeight:700,color:r.l==='مبلغ کل'?SEL_COLOR:'#111',textAlign:'left'}}>{r.v}</span>
+                    <span style={{fontSize: '13px',color:'rgba(0,0,0,0.40)',flexShrink:0}}>{r.l}</span>
+                    <span style={{fontSize: '14px',fontWeight:700,color:r.l==='مبلغ کل'?SEL_COLOR:'#111',textAlign:'left'}}>{r.v}</span>
                   </div>
                 ))}
               </div>
@@ -401,17 +401,17 @@ function BookingContent() {
               {/* Payment inactive notice */}
               <div style={{margin:'0 20px 20px',padding:'12px 14px',background:'rgba(245,158,11,0.05)',border:'1px solid rgba(245,158,11,0.16)',borderRadius:'12px',display:'flex',alignItems:'flex-start',gap:8}}>
                 <CreditCard size={13} style={{color:'#f59e0b',flexShrink:0,marginTop:2}}/>
-                <span style={{fontSize:'11px',color:'rgba(0,0,0,0.42)',lineHeight:1.7}}>
+                <span style={{fontSize: '12px',color:'rgba(0,0,0,0.42)',lineHeight:1.7}}>
                   درگاه پرداخت به زودی فعال می‌شود. رزرو شما ثبت و نگه‌داشته شده است.
                 </span>
               </div>
 
               {/* #20: Print / PDF buttons (LQ style), replace old dashboard/clubs links */}
               <div style={{display:'flex',gap:10,padding:'0 20px 24px'}}>
-                <button onClick={()=>printReceipt(receiptRows,`پیگیری: ${pendingPayment.trackingNumber}`,club?.name??'')} style={{flex:1,padding:'12px 8px',background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.30)',borderRadius:'20px',color:'#C7A66A',fontSize:'13px',fontWeight:800,cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:7}}>
+                <button onClick={()=>printReceipt(receiptRows,`پیگیری: ${pendingPayment.trackingNumber}`,club?.name??'')} style={{flex:1,padding:'12px 8px',background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.30)',borderRadius:'20px',color:'#C7A66A',fontSize: '14px',fontWeight:800,cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:7}}>
                   <Printer size={14}/> چاپ رسید
                 </button>
-                <button onClick={()=>printReceipt(receiptRows,`پیگیری: ${pendingPayment.trackingNumber}`,club?.name??'')} style={{flex:1,padding:'12px 8px',background:'rgba(48,197,90,0.10)',border:'1px solid rgba(48,197,90,0.30)',borderRadius:'20px',color:SEL_COLOR,fontSize:'13px',fontWeight:800,cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:7}}>
+                <button onClick={()=>printReceipt(receiptRows,`پیگیری: ${pendingPayment.trackingNumber}`,club?.name??'')} style={{flex:1,padding:'12px 8px',background:'rgba(48,197,90,0.10)',border:'1px solid rgba(48,197,90,0.30)',borderRadius:'20px',color:SEL_COLOR,fontSize: '14px',fontWeight:800,cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:7}}>
                   <FileDown size={14}/> دریافت PDF
                 </button>
               </div>
@@ -421,8 +421,8 @@ function BookingContent() {
 
         {/* Quick nav links below the card */}
         <div style={{display:'flex',gap:10,justifyContent:'center',marginTop:16}}>
-          <Link href="/dashboard" style={{padding:'9px 20px',background:'rgba(199,166,106,0.08)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:'20px',color:'#C7A66A',fontSize:'12px',fontWeight:700,textDecoration:'none'}}>داشبورد</Link>
-          <Link href="/clubs"    style={{padding:'9px 20px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.08)',borderRadius:'20px',color:'rgba(0,0,0,0.45)',fontSize:'12px',fontWeight:600,textDecoration:'none'}}>باشگاه‌ها</Link>
+          <Link href="/dashboard" style={{padding:'9px 20px',background:'rgba(199,166,106,0.08)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:'20px',color:'#C7A66A',fontSize: '13px',fontWeight:700,textDecoration:'none'}}>داشبورد</Link>
+          <Link href="/clubs"    style={{padding:'9px 20px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.08)',borderRadius:'20px',color:'rgba(0,0,0,0.45)',fontSize: '13px',fontWeight:600,textDecoration:'none'}}>باشگاه‌ها</Link>
         </div>
 
         <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
@@ -458,12 +458,12 @@ function BookingContent() {
         {/* #18: Sticky header — back button with LQ style */}
         <div style={{background:'rgba(247,247,245,0.96)',borderBottom:'1px solid rgba(0,0,0,0.06)',padding:'0 clamp(16px,4vw,40px)',position:'sticky',top:'62px',zIndex:90,backdropFilter:'blur(24px)'}}>
           <div style={{maxWidth:'720px',margin:'0 auto',height:'54px',display:'flex',alignItems:'center',gap:'14px'}}>
-            <Link href={`/clubs/${clubId}`} style={{display:'flex',alignItems:'center',gap:'6px',color:'#C7A66A',fontSize:'12px',textDecoration:'none',background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.28)',borderRadius:'20px',padding:'7px 16px',flexShrink:0,fontWeight:800}}>
+            <Link href={`/clubs/${clubId}`} style={{display:'flex',alignItems:'center',gap:'6px',color:'#C7A66A',fontSize: '13px',textDecoration:'none',background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.28)',borderRadius:'20px',padding:'7px 16px',flexShrink:0,fontWeight:800}}>
               <ChevronRight size={13}/> برگشت به باشگاه
             </Link>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:'9px',color:'rgba(199,166,106,0.55)',letterSpacing:'0.2em',fontWeight:700}}>ONLINE BOOKING</div>
-              <div style={{fontSize:'14px',fontWeight:800,color:'#111111',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{club?.name??'رزرو میز'}</div>
+              <div style={{fontSize: '10px',color:'rgba(199,166,106,0.55)',letterSpacing:'0.2em',fontWeight:700}}>ONLINE BOOKING</div>
+              <div style={{fontSize: '15px',fontWeight:800,color:'#111111',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{club?.name??'رزرو میز'}</div>
             </div>
           </div>
         </div>
@@ -473,14 +473,14 @@ function BookingContent() {
           {error && (
             <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'13px 16px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'12px',marginBottom:'18px',animation:'fadeUp 0.3s ease both'}}>
               <AlertCircle size={15} style={{color:'#ef4444',flexShrink:0}}/>
-              <span style={{fontSize:'13px',color:'#fca5a5',flex:1}}>{error}</span>
+              <span style={{fontSize: '14px',color:'#fca5a5',flex:1}}>{error}</span>
               <button onClick={()=>setError('')} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(239,68,68,0.5)',padding:0,display:'flex'}}><X size={13}/></button>
             </div>
           )}
 
           {/* TABLE SELECTION */}
           <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(18px,3vw,26px)',marginBottom:'14px'}}>
-            <div style={{fontSize:'12px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'16px',display:'flex',alignItems:'center',gap:'8px'}}>
+            <div style={{fontSize: '13px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'16px',display:'flex',alignItems:'center',gap:'8px'}}>
               <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#C7A66A,#A07840)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               انتخاب میز
             </div>
@@ -492,19 +492,19 @@ function BookingContent() {
                 return (
                   <div key={table.id} className="tbl-card" onClick={()=>handleTableSelect(table)}
                     style={{borderColor:isSel?`${color}45`:'rgba(0,0,0,0.06)',background:isSel?`${color}0d`:'rgba(0,0,0,0.03)',boxShadow:isSel?`0 0 0 1px ${color}20,0 8px 24px rgba(0,0,0,0.06)`:'none',transform:isSel?'translateY(-1px)':'none'}}>
-                    <div style={{width:'42px',height:'42px',borderRadius:'12px',background:`${color}12`,border:`1px solid ${color}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',flexShrink:0}}>🎱</div>
+                    <div style={{width:'42px',height:'42px',borderRadius:'12px',background:`${color}12`,border:`1px solid ${color}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize: '22px',flexShrink:0}}>🎱</div>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'3px',flexWrap:'wrap'}}>
-                        <span style={{fontSize:'14px',fontWeight:800,color:isSel?color:'#111'}}>{table.name}</span>
-                        <span style={{fontSize:'9px',color,background:`${color}12`,border:`1px solid ${color}22`,borderRadius:'20px',padding:'2px 9px',fontWeight:700}}>{TYPE_LABEL[table.type]??table.type}</span>
+                        <span style={{fontSize: '15px',fontWeight:800,color:isSel?color:'#111'}}>{table.name}</span>
+                        <span style={{fontSize: '10px',color,background:`${color}12`,border:`1px solid ${color}22`,borderRadius:'20px',padding:'2px 9px',fontWeight:700}}>{TYPE_LABEL[table.type]??table.type}</span>
                         {/* #22: morning discount badge */}
-                        {disc>0&&<span style={{fontSize:'9px',color:SEL_COLOR,background:`rgba(${SEL_RGB},0.10)`,border:`1px solid rgba(${SEL_RGB},0.25)`,borderRadius:'20px',padding:'2px 9px',fontWeight:700}}>صبح −{disc}٪</span>}
+                        {disc>0&&<span style={{fontSize: '10px',color:SEL_COLOR,background:`rgba(${SEL_RGB},0.10)`,border:`1px solid rgba(${SEL_RGB},0.25)`,borderRadius:'20px',padding:'2px 9px',fontWeight:700}}>صبح −{disc}٪</span>}
                       </div>
-                      {(table.brand||table.model)&&<div style={{fontSize:'11px',color:'rgba(0,0,0,0.35)',fontFamily:'monospace'}}>{table.brand} {table.model}</div>}
+                      {(table.brand||table.model)&&<div style={{fontSize: '12px',color:'rgba(0,0,0,0.35)',fontFamily:'monospace'}}>{table.brand} {table.model}</div>}
                     </div>
                     <div style={{textAlign:'left',flexShrink:0}}>
-                      <div style={{fontSize:'15px',fontWeight:900,color}}>{toFa(table.pricePerHour.toLocaleString())}</div>
-                      <div style={{fontSize:'10px',color:'rgba(0,0,0,0.35)'}}>تومان / ساعت</div>
+                      <div style={{fontSize: '17px',fontWeight:900,color}}>{toFa(table.pricePerHour.toLocaleString())}</div>
+                      <div style={{fontSize: '11px',color:'rgba(0,0,0,0.35)'}}>تومان / ساعت</div>
                     </div>
                     {isSel&&<div style={{width:'26px',height:'26px',borderRadius:'50%',background:color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><Check size={13} style={{color:'#fff'}}/></div>}
                   </div>
@@ -515,7 +515,7 @@ function BookingContent() {
 
           {/* #21: PLAYER COUNT */}
           <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(16px,3vw,22px)',marginBottom:'14px'}}>
-            <div style={{fontSize:'12px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px'}}>
+            <div style={{fontSize: '13px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px'}}>
               <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#06b6d4,#a78bfa)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               تعداد بازیکنان
             </div>
@@ -523,17 +523,17 @@ function BookingContent() {
               <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
                 <button className="player-btn" disabled={playerCount<=1} onClick={()=>setPlayerCount(p=>Math.max(1,p-1))}><Minus size={14}/></button>
                 <div style={{textAlign:'center',minWidth:60}}>
-                  <div style={{fontSize:'28px',fontWeight:900,color:'#111',lineHeight:1}}>{toFa(playerCount)}</div>
-                  <div style={{fontSize:'11px',color:'rgba(0,0,0,0.40)',marginTop:2}}>نفر</div>
+                  <div style={{fontSize: '31px',fontWeight:900,color:'#111',lineHeight:1}}>{toFa(playerCount)}</div>
+                  <div style={{fontSize: '12px',color:'rgba(0,0,0,0.40)',marginTop:2}}>نفر</div>
                 </div>
                 <button className="player-btn" disabled={playerCount>=8} onClick={()=>setPlayerCount(p=>Math.min(8,p+1))}><Plus size={14}/></button>
               </div>
               {playerCount>1?(
-                <div style={{padding:'10px 16px',background:'rgba(48,197,90,0.07)',border:'1px solid rgba(48,197,90,0.20)',borderRadius:'14px',fontSize:'12px',color:'rgba(0,0,0,0.45)',lineHeight:1.7}}>
+                <div style={{padding:'10px 16px',background:'rgba(48,197,90,0.07)',border:'1px solid rgba(48,197,90,0.20)',borderRadius:'14px',fontSize: '13px',color:'rgba(0,0,0,0.45)',lineHeight:1.7}}>
                   <span style={{color:SEL_COLOR,fontWeight:800}}>+{toFa((playerCount-1)*15)}٪</span> اضافه بابت {toFa(playerCount-1)} نفر اضافه
                 </div>
               ):(
-                <div style={{fontSize:'12px',color:'rgba(0,0,0,0.35)',padding:'10px 16px',background:'rgba(0,0,0,0.03)',borderRadius:'14px'}}>
+                <div style={{fontSize: '13px',color:'rgba(0,0,0,0.35)',padding:'10px 16px',background:'rgba(0,0,0,0.03)',borderRadius:'14px'}}>
                   از ۲ نفر به بالا، هر نفر ۱۵٪ اضافه می‌شود
                 </div>
               )}
@@ -542,7 +542,7 @@ function BookingContent() {
 
           {/* DATE SELECTION */}
           <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(18px,3vw,26px)',marginBottom:'14px'}}>
-            <div style={{fontSize:'12px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'18px',display:'flex',alignItems:'center',gap:'8px'}}>
+            <div style={{fontSize: '13px',fontWeight:700,color:'rgba(0,0,0,0.45)',marginBottom:'18px',display:'flex',alignItems:'center',gap:'8px'}}>
               <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#C7A66A,#A07840)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               انتخاب تاریخ
             </div>
@@ -556,7 +556,7 @@ function BookingContent() {
             {jDay&&(
               <div style={{marginTop:'14px',padding:'11px 14px',background:'rgba(199,166,106,0.07)',border:'1px solid rgba(199,166,106,0.2)',borderRadius:'11px',display:'flex',alignItems:'center',gap:'8px',animation:'fadeUp 0.3s ease both'}}>
                 <Check size={13} style={{color:'#C7A66A',flexShrink:0}}/>
-                <span style={{fontSize:'13px',color:'#C7A66A',fontWeight:600}}>{dateLabel}</span>
+                <span style={{fontSize: '14px',color:'#C7A66A',fontWeight:600}}>{dateLabel}</span>
               </div>
             )}
           </div>
@@ -565,11 +565,11 @@ function BookingContent() {
           {selectedTable&&jDay&&(
             <div ref={slotsRef} style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',padding:'clamp(18px,3vw,26px)',marginBottom:'14px',transformOrigin:'top',animation:'expand 0.4s cubic-bezier(0.22,1,0.36,1) both'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px',flexWrap:'wrap',gap:'10px'}}>
-                <div style={{fontSize:'12px',fontWeight:700,color:'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',gap:'8px'}}>
+                <div style={{fontSize: '13px',fontWeight:700,color:'rgba(0,0,0,0.45)',display:'flex',alignItems:'center',gap:'8px'}}>
                   <span style={{width:'3px',height:'13px',background:`linear-gradient(180deg,${SEL_COLOR},transparent)`,borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
                   انتخاب ساعت
                 </div>
-                <div style={{display:'flex',gap:'12px',fontSize:'10px',color:'rgba(0,0,0,0.35)'}}>
+                <div style={{display:'flex',gap:'12px',fontSize: '11px',color:'rgba(0,0,0,0.35)'}}>
                   {[
                     {bg:'rgba(0,0,0,0.05)',bc:'rgba(0,0,0,0.08)',l:'آزاد'},
                     {bg:`rgba(${SEL_RGB},0.12)`,bc:`rgba(${SEL_RGB},0.40)`,l:'انتخاب'},
@@ -583,19 +583,19 @@ function BookingContent() {
                 </div>
               </div>
 
-              <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 13px',background:'rgba(0,0,0,0.02)',border:'1px solid rgba(0,0,0,0.04)',borderRadius:'10px',marginBottom:'14px',fontSize:'11px',color:'rgba(0,0,0,0.40)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 13px',background:'rgba(0,0,0,0.02)',border:'1px solid rgba(0,0,0,0.04)',borderRadius:'10px',marginBottom:'14px',fontSize: '12px',color:'rgba(0,0,0,0.40)'}}>
                 <Info size={12} style={{color:'rgba(0,0,0,0.28)',flexShrink:0}}/>
                 {rangeStart!==null?`ساعت ${toFa(rangeStart)}:۰۰ شروع شد — حالا ساعت پایان را انتخاب کنید`:'روی ساعت شروع کلیک کنید، سپس ساعت پایان را انتخاب کنید'}
               </div>
 
               {rangeError&&(
-                <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 13px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'10px',marginBottom:'12px',fontSize:'12px',color:'#fca5a5',animation:'fadeUp 0.3s ease both'}}>
+                <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 13px',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:'10px',marginBottom:'12px',fontSize: '13px',color:'#fca5a5',animation:'fadeUp 0.3s ease both'}}>
                   <AlertCircle size={13} style={{color:'#ef4444',flexShrink:0}}/> {rangeError}
                 </div>
               )}
 
               {slotsLoad?(
-                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',padding:'36px',color:'rgba(0,0,0,0.35)',fontSize:'13px'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',padding:'36px',color:'rgba(0,0,0,0.35)',fontSize: '14px'}}>
                   <div style={{width:'18px',height:'18px',border:'2px solid rgba(199,166,106,0.15)',borderTop:'2px solid #C7A66A',borderRadius:'50%',animation:'spin 0.7s linear infinite'}}/>
                   در حال دریافت ساعات...
                 </div>
@@ -618,11 +618,11 @@ function BookingContent() {
                           color:slot.isBooked?'rgba(239,68,68,0.3)':(isStart||isSel)?SEL_COLOR:'rgba(0,0,0,0.48)',
                           boxShadow:isStart?`0 0 16px rgba(${SEL_RGB},0.35)`:isSel?`0 0 10px rgba(${SEL_RGB},0.18)`:'none',
                         }}>
-                        <span style={{fontSize:'13px'}}>{toFa(slot.hour)}:۰۰</span>
+                        <span style={{fontSize: '14px'}}>{toFa(slot.hour)}:۰۰</span>
                         {/* #22: discount or busy label */}
-                        {slot.isBooked&&<span style={{fontSize:'8px',opacity:0.6}}>مشغول</span>}
-                        {!slot.isBooked&&isMorn&&<span style={{fontSize:'8px',color:SEL_COLOR,opacity:0.9}}>−{disc}٪</span>}
-                        {!slot.isBooked&&!isMorn&&isStart&&<span style={{fontSize:'8px',opacity:0.8}}>شروع</span>}
+                        {slot.isBooked&&<span style={{fontSize: '9px',opacity:0.6}}>مشغول</span>}
+                        {!slot.isBooked&&isMorn&&<span style={{fontSize: '9px',color:SEL_COLOR,opacity:0.9}}>−{disc}٪</span>}
+                        {!slot.isBooked&&!isMorn&&isStart&&<span style={{fontSize: '9px',opacity:0.8}}>شروع</span>}
                       </button>
                     );
                   })}
@@ -631,13 +631,13 @@ function BookingContent() {
 
               {selectedSlots.length>0&&startHour!==undefined&&endHour!==undefined&&(
                 <div style={{marginTop:'14px',padding:'13px 16px',background:`rgba(${SEL_RGB},0.08)`,border:`1px solid rgba(${SEL_RGB},0.25)`,borderRadius:'13px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'10px',animation:'fadeUp 0.3s ease both'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:'8px',color:SEL_COLOR,fontSize:'14px',fontWeight:700}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px',color:SEL_COLOR,fontSize: '15px',fontWeight:700}}>
                     <Clock size={14}/> {toFa(startHour)}:۰۰ — {toFa(endHour)}:۰۰
                   </div>
                   <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
-                    <span style={{fontSize:'12px',color:'rgba(0,0,0,0.45)',background:'rgba(0,0,0,0.05)',padding:'4px 12px',borderRadius:'20px',fontWeight:600}}>{toFa(totalHours)} ساعت</span>
-                    {playerCount>1&&<span style={{fontSize:'12px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa((playerCount-1)*15)}٪</span>}
-                    <span style={{fontSize:'12px',color:SEL_COLOR,fontWeight:800,background:`rgba(${SEL_RGB},0.10)`,padding:'4px 12px',borderRadius:'20px'}}>{toFa(totalPrice.toLocaleString())} تومان</span>
+                    <span style={{fontSize: '13px',color:'rgba(0,0,0,0.45)',background:'rgba(0,0,0,0.05)',padding:'4px 12px',borderRadius:'20px',fontWeight:600}}>{toFa(totalHours)} ساعت</span>
+                    {playerCount>1&&<span style={{fontSize: '13px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa((playerCount-1)*15)}٪</span>}
+                    <span style={{fontSize: '13px',color:SEL_COLOR,fontWeight:800,background:`rgba(${SEL_RGB},0.10)`,padding:'4px 12px',borderRadius:'20px'}}>{toFa(totalPrice.toLocaleString())} تومان</span>
                   </div>
                 </div>
               )}
@@ -648,10 +648,10 @@ function BookingContent() {
           {canConfirm&&(
             <div style={{background:'#FFFFFF',border:'1px solid rgba(0,0,0,0.07)',borderRadius:'20px',overflow:'hidden',marginBottom:'16px',animation:'fadeUp 0.4s ease both'}}>
               <div style={{background:`linear-gradient(135deg,${accentColor}10,rgba(255,255,255,0.02))`,borderBottom:'1px solid rgba(0,0,0,0.04)',padding:'16px 22px',display:'flex',alignItems:'center',gap:'12px'}}>
-                <div style={{width:'40px',height:'40px',borderRadius:'12px',background:`${accentColor}14`,border:`1px solid ${accentColor}25`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'18px',flexShrink:0}}>🎱</div>
+                <div style={{width:'40px',height:'40px',borderRadius:'12px',background:`${accentColor}14`,border:`1px solid ${accentColor}25`,display:'flex',alignItems:'center',justifyContent:'center',fontSize: '20px',flexShrink:0}}>🎱</div>
                 <div>
-                  <div style={{fontSize:'15px',fontWeight:800,color:'#111111',marginBottom:'2px'}}>{selectedTable?.name}</div>
-                  <div style={{fontSize:'11px',color:'rgba(0,0,0,0.42)'}}>{club?.name} · {TYPE_LABEL[selectedTable?.type??'']??''}</div>
+                  <div style={{fontSize: '17px',fontWeight:800,color:'#111111',marginBottom:'2px'}}>{selectedTable?.name}</div>
+                  <div style={{fontSize: '12px',color:'rgba(0,0,0,0.42)'}}>{club?.name} · {TYPE_LABEL[selectedTable?.type??'']??''}</div>
                 </div>
               </div>
               <div style={{padding:'18px 22px'}}>
@@ -664,20 +664,20 @@ function BookingContent() {
                   {l:'نرخ ساعتی',      v:`${toFa((selectedTable?.pricePerHour??0).toLocaleString())} تومان`},
                 ].map((r,i)=>(
                   <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid rgba(0,0,0,0.04)'}}>
-                    <span style={{fontSize:'13px',color:'rgba(0,0,0,0.42)'}}>{r.l}</span>
-                    <span style={{fontSize:'13px',fontWeight:600,color:'#111111'}}>{r.v}</span>
+                    <span style={{fontSize: '14px',color:'rgba(0,0,0,0.42)'}}>{r.l}</span>
+                    <span style={{fontSize: '14px',fontWeight:600,color:'#111111'}}>{r.v}</span>
                   </div>
                 ))}
                 <div style={{display:'flex',justifyContent:'space-between',padding:'14px 0 0'}}>
-                  <span style={{fontSize:'15px',fontWeight:800,color:'#111111'}}>مبلغ کل</span>
-                  <span style={{fontSize:'20px',fontWeight:900,color:accentColor,letterSpacing:'-0.025em'}}>
-                    {toFa(totalPrice.toLocaleString())} <span style={{fontSize:'12px',opacity:0.7}}>تومان</span>
+                  <span style={{fontSize: '17px',fontWeight:800,color:'#111111'}}>مبلغ کل</span>
+                  <span style={{fontSize: '22px',fontWeight:900,color:accentColor,letterSpacing:'-0.025em'}}>
+                    {toFa(totalPrice.toLocaleString())} <span style={{fontSize: '13px',opacity:0.7}}>تومان</span>
                   </span>
                 </div>
               </div>
 
               {/* #14: cancellation policy */}
-              <div style={{margin:'0 22px 18px',padding:'11px 14px',background:'rgba(245,158,11,0.05)',border:'1px solid rgba(245,158,11,0.13)',borderRadius:'12px',fontSize:'11px',color:'rgba(0,0,0,0.42)',lineHeight:1.7,display:'flex',alignItems:'flex-start',gap:'7px'}}>
+              <div style={{margin:'0 22px 18px',padding:'11px 14px',background:'rgba(245,158,11,0.05)',border:'1px solid rgba(245,158,11,0.13)',borderRadius:'12px',fontSize: '12px',color:'rgba(0,0,0,0.42)',lineHeight:1.7,display:'flex',alignItems:'flex-start',gap:'7px'}}>
                 <Info size={13} style={{color:'#f59e0b',flexShrink:0,marginTop:1}}/>
                 رزروها تنها تا ۲ ساعت پیش از زمان شروع قابل لغو هستند
               </div>
@@ -689,7 +689,7 @@ function BookingContent() {
                   border:booking?'1px solid rgba(199,166,106,0.15)':'1px solid rgba(199,166,106,0.42)',
                   background:booking?'rgba(199,166,106,0.06)':'rgba(199,166,106,0.12)',
                   color:booking?'rgba(199,166,106,0.40)':'#C7A66A',
-                  fontSize:'15px',fontWeight:800,
+                  fontSize: '17px',fontWeight:800,
                   cursor:booking?'not-allowed':'pointer',
                   fontFamily:'inherit',transition:'all 0.25s',
                   display:'flex',alignItems:'center',justifyContent:'center',gap:'9px',

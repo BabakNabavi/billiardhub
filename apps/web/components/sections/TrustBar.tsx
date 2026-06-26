@@ -24,7 +24,7 @@ export function TrustBar() {
       {/* Scroll marquee */}
       <div style={{ display: 'flex', animation: 'trustScroll 24s linear infinite', gap: '0', width: 'max-content' }}>
         {[...signals, ...signals].map((s, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 36px', whiteSpace: 'nowrap', borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.05)' : 'none', color: 'rgba(0,0,0,0.42)', fontSize: '12px', fontWeight: 500 }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 36px', whiteSpace: 'nowrap', borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.05)' : 'none', color: 'rgba(0,0,0,0.42)', fontSize: '13px', fontWeight: 500 }}>
             <span style={{ color: '#C7A66A', opacity: 0.7, display: 'flex' }}>{s.icon}</span>
             {s.label}
           </div>
