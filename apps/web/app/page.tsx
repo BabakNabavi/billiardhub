@@ -430,83 +430,48 @@ export default function HomePage() {
         .he { animation:fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.78s both; }
         .hf { animation:fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.90s both; }
 
-        /* ══ Community-card-style Liquid Glass Buttons ══
-           Exact same pattern: colored rgba bg + blur(40) saturate(240)
-           + colored border + inset top sheen + text-shadow glow          */
+        /* ══ LQ (Liquid Quality) Buttons — pill style ══ */
         .btn-primary,.btn-green,.btn-outline,.btn-ghost-dark {
-          position:relative; overflow:hidden;
           display:inline-flex; align-items:center; gap:8px;
-          border-radius:14px; cursor:pointer; font-family:inherit;
-          transition:transform .32s cubic-bezier(.4,0,.2,1),background .28s ease,box-shadow .32s ease;
-        }
-        /* top glass sheen — same as community cards */
-        .btn-primary::before,.btn-green::before,.btn-outline::before,.btn-ghost-dark::before {
-          content:''; position:absolute; top:0; left:0; right:0; height:55%;
-          pointer-events:none; border-radius:inherit;
-        }
-        /* ambient bottom orb — same as community cards */
-        .btn-primary::after,.btn-green::after,.btn-ghost-dark::after {
-          content:''; position:absolute; bottom:-20px; left:50%; transform:translateX(-50%);
-          width:70%; height:60px;
-          filter:blur(14px); pointer-events:none; border-radius:50%;
+          border-radius:20px; cursor:pointer; font-family:inherit;
+          transition:background .2s ease;
         }
 
         /* ─── GOLD / Primary ─── */
         .btn-primary {
           background:rgba(199,166,106,0.10);
-          backdrop-filter:blur(40px) saturate(240%);
-          -webkit-backdrop-filter:blur(40px) saturate(240%);
           color:${GOLD};
           border:1px solid rgba(199,166,106,0.22);
-          padding:14px 32px; font-size:14px; font-weight:800;
-          box-shadow:inset 0 1px 0 rgba(199,166,106,0.32), 0 8px 32px rgba(0,0,0,0.22);
-          text-shadow:0 0 26px rgba(199,166,106,0.55);
+          padding:14px 32px; font-size:14px; font-weight:700;
         }
-        .btn-primary::before { background:linear-gradient(180deg,rgba(199,166,106,0.14) 0%,transparent 100%); }
-        .btn-primary::after  { background:radial-gradient(ellipse,rgba(199,166,106,0.24),transparent 70%); }
-        .btn-primary:hover   { transform:translateY(-2px); background:rgba(199,166,106,0.16); box-shadow:inset 0 1px 0 rgba(199,166,106,0.38),0 14px 44px rgba(0,0,0,0.28),0 0 28px rgba(199,166,106,0.08); }
+        .btn-primary:hover { background:rgba(199,166,106,0.18); }
 
         /* ─── GREEN ─── */
         .btn-green {
           background:rgba(48,197,90,0.10);
-          backdrop-filter:blur(40px) saturate(240%);
-          -webkit-backdrop-filter:blur(40px) saturate(240%);
           color:#30C55A;
           border:1px solid rgba(48,197,90,0.22);
-          padding:14px 30px; font-size:14px; font-weight:800;
-          box-shadow:inset 0 1px 0 rgba(48,197,90,0.28), 0 8px 32px rgba(0,0,0,0.22);
-          text-shadow:0 0 24px rgba(48,197,90,0.55);
+          padding:14px 30px; font-size:14px; font-weight:700;
         }
-        .btn-green::before { background:linear-gradient(180deg,rgba(48,197,90,0.14) 0%,transparent 100%); }
-        .btn-green::after  { background:radial-gradient(ellipse,rgba(48,197,90,0.24),transparent 70%); }
-        .btn-green:hover   { transform:translateY(-2px); background:rgba(48,197,90,0.16); box-shadow:inset 0 1px 0 rgba(48,197,90,0.34),0 14px 44px rgba(0,0,0,0.28); }
+        .btn-green:hover { background:rgba(48,197,90,0.18); }
 
         /* ─── OUTLINE (light backgrounds) ─── */
         .btn-outline {
           background:rgba(26,25,23,0.06);
-          backdrop-filter:blur(40px) saturate(240%);
-          -webkit-backdrop-filter:blur(40px) saturate(240%);
           color:${TEXT};
-          border:1px solid rgba(26,25,23,0.14);
+          border:1px solid rgba(26,25,23,0.22);
           padding:13px 28px; font-size:14px; font-weight:600;
-          box-shadow:inset 0 1px 0 rgba(255,255,255,0.82), 0 6px 24px rgba(0,0,0,0.06);
         }
-        .btn-outline::before { background:linear-gradient(180deg,rgba(255,255,255,0.62) 0%,transparent 100%); }
-        .btn-outline:hover   { background:rgba(26,25,23,0.10); border-color:rgba(30,102,65,0.28); color:${GRN}; transform:translateY(-2px); }
+        .btn-outline:hover { background:rgba(26,25,23,0.12); }
 
         /* ─── GHOST DARK (dark sections) ─── */
         .btn-ghost-dark {
-          background:rgba(255,255,255,0.08);
-          backdrop-filter:blur(40px) saturate(240%);
-          -webkit-backdrop-filter:blur(40px) saturate(240%);
+          background:rgba(255,255,255,0.06);
           color:rgba(255,255,255,0.88);
-          border:1px solid rgba(255,255,255,0.18);
+          border:1px solid rgba(255,255,255,0.22);
           padding:14px 28px; font-size:14px; font-weight:600;
-          box-shadow:inset 0 1px 0 rgba(255,255,255,0.30), 0 8px 32px rgba(0,0,0,0.22);
         }
-        .btn-ghost-dark::before { background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 100%); }
-        .btn-ghost-dark::after  { background:radial-gradient(ellipse,rgba(255,255,255,0.18),transparent 70%); }
-        .btn-ghost-dark:hover   { transform:translateY(-2px); background:rgba(255,255,255,0.13); border-color:rgba(199,166,106,0.32); box-shadow:inset 0 1px 0 rgba(255,255,255,0.38),0 14px 44px rgba(0,0,0,0.28); }
+        .btn-ghost-dark:hover { background:rgba(255,255,255,0.12); }
 
         .sec-label{font-size:9px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;margin-bottom:14px;display:block;}
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
@@ -673,14 +638,11 @@ export default function HomePage() {
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                   padding: '10px 24px', borderRadius: '20px', cursor: 'pointer',
-                  background: 'rgba(199,166,106,0.12)',
-                  backdropFilter: 'blur(28px) saturate(220%)',
-                  WebkitBackdropFilter: 'blur(28px) saturate(220%)',
-                  border: '1px solid rgba(199,166,106,0.28)',
-                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(199,166,106,0.12)',
+                  background: 'rgba(199,166,106,0.10)',
+                  border: '1px solid rgba(199,166,106,0.22)',
                 }}>
                   {btn.icon}
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em', textShadow: '0 0 18px rgba(199,166,106,0.50)' }}>{btn.label}</span>
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
                 </div>
               </Link>
             ))}
@@ -717,11 +679,11 @@ export default function HomePage() {
         <div className="hero-arrows" style={{ opacity: heroO }}>
           {[{ fn: prev, icon: <ArrowRight size={13} /> }, { fn: next, icon: <ArrowLeft size={13} /> }].map((b, i) => (
             <button key={i} onClick={b.fn} style={{ width: '34px', height: '34px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255,255,255,0.11)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.50)', transition: 'all 0.25s' }}
-              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.14)'; el.style.color = '#fff'; }}
-              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.07)'; el.style.color = 'rgba(255,255,255,0.50)'; }}>
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.60)', transition: 'background 0.2s' }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.12)'; el.style.color = '#fff'; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.06)'; el.style.color = 'rgba(255,255,255,0.60)'; }}>
               {b.icon}
             </button>
           ))}
@@ -731,10 +693,10 @@ export default function HomePage() {
         <button onClick={() => setPlaying(p => !p)} style={{
           position: 'absolute', bottom: '40px', left: '28px', zIndex: 10,
           width: '30px', height: '30px', borderRadius: '50%',
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',
-          cursor: 'pointer', color: 'rgba(255,255,255,0.30)',
+          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)',
+          cursor: 'pointer', color: 'rgba(255,255,255,0.50)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backdropFilter: 'blur(12px)', opacity: heroO, transition: 'opacity 0.3s',
+          opacity: heroO, transition: 'opacity 0.3s',
         }}>
           {playing ? <Pause size={10} /> : <Play size={10} />}
         </button>
@@ -769,15 +731,12 @@ export default function HomePage() {
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '13px 32px', borderRadius: '20px', cursor: 'pointer',
-                  background: 'rgba(48,197,90,0.06)',
-                  backdropFilter: 'blur(48px) saturate(260%)',
-                  WebkitBackdropFilter: 'blur(48px) saturate(260%)',
+                  background: 'rgba(48,197,90,0.10)',
                   border: '1px solid rgba(48,197,90,0.22)',
-                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(48,197,90,0.10), 0 4px 24px rgba(48,197,90,0.08)',
-                  transition: 'all 0.25s',
+                  transition: 'background 0.2s',
                 }}>
                   <MapPin size={16} color="#30C55A" />
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#30C55A', textShadow: '0 0 20px rgba(48,197,90,0.55)' }}>نزدیک‌ترین باشگاه</span>
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#30C55A' }}>نزدیک‌ترین باشگاه</span>
                 </div>
               </Link>
             </div>
@@ -818,7 +777,7 @@ export default function HomePage() {
                         <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.24)', textDecoration: 'line-through', marginBottom: '3px' }}>{PRODUCTS[0]!.price.toLocaleString('fa-IR')} ت</div>
                         <div style={{ fontSize: 'clamp(18px,2.4vw,28px)', fontWeight: 900, color: GOLD }}>{PRODUCTS[0]!.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></div>
                       </div>
-                      <div style={{ background: 'rgba(107,58,31,0.16)', backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '12px 22px', borderRadius: '12px', border: '1px solid rgba(199,140,80,0.32)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 16px rgba(107,58,31,0.16)' }}>افزودن به سبد</div>
+                      <div style={{ background: 'rgba(199,166,106,0.10)', color: '#C7A66A', fontSize: '12px', fontWeight: 700, padding: '12px 22px', borderRadius: '20px', border: '1px solid rgba(199,166,106,0.22)' }}>افزودن به سبد</div>
                     </div>
                   </div>
                 </div>
@@ -934,8 +893,8 @@ export default function HomePage() {
                 </div>
                 <div style={{ position: 'absolute', bottom: '18px', left: '18px', right: '18px', display: 'flex', gap: '8px' }}>
                   {['مبتدی','پیشرفته','حرفه‌ای'].map(l => (
-                    <div key={l} style={{ flex: 1, padding: '9px 0', textAlign: 'center', background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '10px' }}>
-                      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.58)', fontWeight: 600 }}>{l}</span>
+                    <div key={l} style={{ flex: 1, padding: '9px 0', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: '20px' }}>
+                      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.70)', fontWeight: 700 }}>{l}</span>
                     </div>
                   ))}
                 </div>
