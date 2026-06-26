@@ -62,10 +62,10 @@ function Countdown({ sec = 8 * 3600 + 32 * 60 + 51 }) {
       {[{ v: pad(h), l: 'ساعت' }, { v: pad(m), l: 'دقیقه' }, { v: pad(s), l: 'ثانیه' }].map((item, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-            <div style={{ background: '#1C1C1A', borderRadius: 8, padding: '6px 11px', fontSize: 18, fontWeight: 900, color: '#fff', minWidth: 40, textAlign: 'center' }}>{item.v}</div>
-            <span style={{ fontSize: 9, color: TEXT_MUT }}>{item.l}</span>
+            <div style={{ background: '#1C1C1A', borderRadius: 8, padding: '6px 11px', fontSize: 20, fontWeight: 900, color: '#fff', minWidth: 40, textAlign: 'center' }}>{item.v}</div>
+            <span style={{ fontSize: 10, color: TEXT_MUT }}>{item.l}</span>
           </div>
-          {i < 2 && <span style={{ color: '#C0392B', fontSize: 16, fontWeight: 900, marginBottom: 14, opacity: 0.6 }}>:</span>}
+          {i < 2 && <span style={{ color: '#C0392B', fontSize: 18, fontWeight: 900, marginBottom: 14, opacity: 0.6 }}>:</span>}
         </div>
       ))}
     </div>
@@ -123,26 +123,26 @@ function ProductCard({ product, rank }: { product: Product; rank?: number }) {
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '55%', height: '1px', background: `linear-gradient(90deg,transparent,${GOLD}45,transparent)`, opacity: hov ? 1 : 0, transition: 'opacity 0.3s' }} />
 
         {rank && (
-          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.92)', border: `1px solid ${GOLD_BOR}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: GOLD, backdropFilter: 'blur(8px)' }}>
+          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.92)', border: `1px solid ${GOLD_BOR}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: GOLD, backdropFilter: 'blur(8px)' }}>
             {toFa(rank)}
           </div>
         )}
 
         {!rank && product.discountPercent && (
-          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#C0392B,#922B21)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, color: '#fff', boxShadow: '0 4px 12px rgba(192,57,43,0.4)' }}>
+          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#C0392B,#922B21)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff', boxShadow: '0 4px 12px rgba(192,57,43,0.4)' }}>
             {toFa(product.discountPercent)}٪
           </div>
         )}
 
         <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 10, display: 'flex', flexDirection: 'column', gap: 4 }}>
           {product.isDailyDeal && (
-            <span style={{ background: 'rgba(192,57,43,0.88)', borderRadius: 20, padding: '2px 9px', fontSize: 9, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 3 }}>
-              <i className="ti ti-flame" style={{ fontSize: 10 }} /> پیشنهاد روز
+            <span style={{ background: 'rgba(192,57,43,0.88)', borderRadius: 20, padding: '2px 9px', fontSize: 10, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <i className="ti ti-flame" style={{ fontSize: 11 }} /> پیشنهاد روز
             </span>
           )}
           {product.isVerified && (
-            <span style={{ background: 'rgba(26,122,94,0.88)', borderRadius: 20, padding: '2px 9px', fontSize: 9, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 3 }}>
-              <i className="ti ti-verified" style={{ fontSize: 10 }} /> رسمی
+            <span style={{ background: 'rgba(26,122,94,0.88)', borderRadius: 20, padding: '2px 9px', fontSize: 10, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <i className="ti ti-verified" style={{ fontSize: 11 }} /> رسمی
             </span>
           )}
         </div>
@@ -155,46 +155,46 @@ function ProductCard({ product, rank }: { product: Product; rank?: number }) {
 
           <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: hov ? 1 : 0, transform: hov ? 'translateY(0)' : 'translateY(8px)', transition: 'all 0.3s' }}>
             <button onClick={handleAdd}
-              style={{ background: added ? '#1A7A5E' : GOLD, backdropFilter: 'blur(12px)', border: 'none', borderRadius: 10, padding: '7px 18px', fontSize: 11, fontWeight: 700, color: '#fff', cursor: oos ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5, transition: 'background 0.2s', boxShadow: `0 4px 16px rgba(199,166,106,0.35)` }}>
-              <i className={`ti ${added ? 'ti-check' : 'ti-shopping-cart-plus'}`} style={{ fontSize: 13 }} />
+              style={{ background: added ? '#1A7A5E' : GOLD, backdropFilter: 'blur(12px)', border: 'none', borderRadius: 10, padding: '7px 18px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: oos ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5, transition: 'background 0.2s', boxShadow: `0 4px 16px rgba(199,166,106,0.35)` }}>
+              <i className={`ti ${added ? 'ti-check' : 'ti-shopping-cart-plus'}`} style={{ fontSize: 14 }} />
               {added ? 'اضافه شد' : oos ? 'ناموجود' : 'افزودن به سبد'}
             </button>
           </div>
 
           {oos && (
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(247,247,245,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-              <span style={{ color: TEXT, fontSize: 12, fontWeight: 700, border: `1px solid ${BORDER}`, padding: '5px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.85)' }}>ناموجود</span>
+              <span style={{ color: TEXT, fontSize: 13, fontWeight: 700, border: `1px solid ${BORDER}`, padding: '5px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.85)' }}>ناموجود</span>
             </div>
           )}
         </div>
 
         <div style={{ padding: '14px 15px 0', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <p style={{ fontSize: 10, color: TEXT_MUT, margin: 0 }}>
+          <p style={{ fontSize: 11, color: TEXT_MUT, margin: 0 }}>
             {CATEGORIES.find(c => c.value === product.category)?.label ?? product.category}
             {' · '}{product.condition === 'new' ? 'نو' : product.condition === 'like_new' ? 'مثل نو' : 'دست دوم'}
           </p>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flex: 1 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flex: 1 }}>
             {product.title}
           </h3>
           <div style={{ display: 'flex', gap: 2 }}>
-            {[1,2,3,4,5].map(i => <i key={i} className={`ti ti-star${i <= 4 ? '-filled' : ''}`} style={{ fontSize: 10, color: i <= 4 ? '#C49A3C' : 'rgba(28,28,26,0.1)' }} />)}
+            {[1,2,3,4,5].map(i => <i key={i} className={`ti ti-star${i <= 4 ? '-filled' : ''}`} style={{ fontSize: 11, color: i <= 4 ? '#C49A3C' : 'rgba(28,28,26,0.1)' }} />)}
           </div>
         </div>
 
         <div style={{ padding: '10px 15px 14px', marginTop: 'auto' }}>
           <div style={{ height: 1, background: BORDER, marginBottom: 10 }} />
           {product.discountPrice && (
-            <p style={{ fontSize: 10, color: TEXT_MUT, textDecoration: 'line-through', margin: '0 0 2px', lineHeight: 1 }}>
+            <p style={{ fontSize: 11, color: TEXT_MUT, textDecoration: 'line-through', margin: '0 0 2px', lineHeight: 1 }}>
               {fmt(product.price)} تومان
             </p>
           )}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ fontSize: 16, fontWeight: 900, color: GOLD, margin: 0 }}>
-              {fmt(finalPrice)} <span style={{ fontSize: 10, fontWeight: 400, color: TEXT_MUT }}>تومان</span>
+            <p style={{ fontSize: 18, fontWeight: 900, color: GOLD, margin: 0 }}>
+              {fmt(finalPrice)} <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_MUT }}>تومان</span>
             </p>
             {product.city && (
-              <span style={{ fontSize: 10, color: TEXT_MUT, display: 'flex', alignItems: 'center', gap: 3 }}>
-                <i className="ti ti-map-pin" style={{ fontSize: 11, color: GOLD_DIM }} />{product.city}
+              <span style={{ fontSize: 11, color: TEXT_MUT, display: 'flex', alignItems: 'center', gap: 3 }}>
+                <i className="ti ti-map-pin" style={{ fontSize: 12, color: GOLD_DIM }} />{product.city}
               </span>
             )}
           </div>
@@ -271,25 +271,25 @@ export default function ShopPage() {
 
           <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '52px 20px 48px', textAlign: 'center' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GOLD_LIGHT, border: `1px solid ${GOLD_BOR}`, borderRadius: 100, padding: '6px 18px', marginBottom: 20, animation: 'fadeUp 0.6s ease both' }}>
-              <i className="ti ti-shopping-bag" style={{ fontSize: 13, color: GOLD }} />
-              <span style={{ fontSize: 10, color: GOLD, fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARDHUB — بیلیارد بازار</span>
+              <i className="ti ti-shopping-bag" style={{ fontSize: 14, color: GOLD }} />
+              <span style={{ fontSize: 11, color: GOLD, fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARDHUB — بیلیارد بازار</span>
             </div>
-            <h1 style={{ fontSize: 'clamp(28px,5vw,52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px', animation: 'fadeUp 0.6s ease 0.1s both' }}>
+            <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 57px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px', animation: 'fadeUp 0.6s ease 0.1s both' }}>
               تجهیزات حرفه‌ای بیلیارد
             </h1>
-            <p style={{ fontSize: 'clamp(13px,1.5vw,16px)', color: 'rgba(255,255,255,0.3)', margin: '0 0 36px', lineHeight: 1.7, animation: 'fadeUp 0.6s ease 0.2s both' }}>
+            <p style={{ fontSize: 'clamp(14px, 1.7vw, 18px)', color: 'rgba(255,255,255,0.3)', margin: '0 0 36px', lineHeight: 1.7, animation: 'fadeUp 0.6s ease 0.2s both' }}>
               {total > 0 ? <>{toFa(total)} محصول از فروشندگان معتبر سراسر ایران</> : 'بهترین برندهای جهانی بیلیارد'}
             </p>
 
             <form onSubmit={handleSearch} style={{ animation: 'fadeUp 0.6s ease 0.3s both' }}>
               <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto' }}>
-                <i className="ti ti-search" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 18, color: 'rgba(255,255,255,0.22)', pointerEvents: 'none', zIndex: 1 }} />
+                <i className="ti ti-search" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 20, color: 'rgba(255,255,255,0.22)', pointerEvents: 'none', zIndex: 1 }} />
                 <input value={searchInput} onChange={e => setSearchInput(e.target.value)}
                   placeholder="جستجو... چوب، گوی، میز بیلیارد"
-                  style={{ width: '100%', background: 'rgba(0,0,0,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '14px 48px 14px 110px', color: '#fff', fontSize: 14, fontFamily: 'inherit', outline: 'none', transition: 'all 0.3s' }}
+                  style={{ width: '100%', background: 'rgba(0,0,0,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '14px 48px 14px 110px', color: '#fff', fontSize: 15, fontFamily: 'inherit', outline: 'none', transition: 'all 0.3s' }}
                   onFocus={e => { e.target.style.borderColor = GOLD_BOR; e.target.style.background = 'rgba(199,166,106,0.06)' }}
                   onBlur={e => { e.target.style.borderColor = 'rgba(0,0,0,0.08)'; e.target.style.background = 'rgba(0,0,0,0.07)' }} />
-                <button type="submit" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: `linear-gradient(135deg,${GOLD},#A07840)`, border: 'none', borderRadius: 10, padding: '8px 20px', color: '#fff', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: `0 4px 16px rgba(199,166,106,0.4)` }}>
+                <button type="submit" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: `linear-gradient(135deg,${GOLD},#A07840)`, border: 'none', borderRadius: 10, padding: '8px 20px', color: '#fff', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: `0 4px 16px rgba(199,166,106,0.4)` }}>
                   جستجو
                 </button>
               </div>
@@ -297,8 +297,8 @@ export default function ShopPage() {
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginTop: 32, animation: 'fadeUp 0.6s ease 0.4s both', flexWrap: 'wrap' }}>
               {[{ icon: 'ti-shield-check', label: 'ضمانت اصالت' }, { icon: 'ti-truck', label: 'ارسال سریع' }, { icon: 'ti-rotate', label: '۷ روز مرجوعی' }, { icon: 'ti-users', label: '+۱۰٬۰۰۰ خریدار' }].map(s => (
-                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.26)' }}>
-                  <i className={`ti ${s.icon}`} style={{ fontSize: 14, color: GOLD_DIM }} />{s.label}
+                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.26)' }}>
+                  <i className={`ti ${s.icon}`} style={{ fontSize: 15, color: GOLD_DIM }} />{s.label}
                 </div>
               ))}
             </div>
@@ -314,8 +314,8 @@ export default function ShopPage() {
               const active = category === cat.value
               return (
                 <button key={cat.value} className="cat-pill" onClick={() => setCategory_(cat.value)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, flexShrink: 0, padding: '9px 18px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', border: `1px solid ${active ? GOLD_BOR : BORDER}`, background: active ? GOLD_LIGHT : SURF, backdropFilter: 'blur(16px)', color: active ? GOLD : TEXT_SEC, fontSize: 13, fontWeight: active ? 700 : 500, transition: 'all 0.25s', boxShadow: active ? `0 0 20px rgba(199,166,106,0.1)` : '0 1px 4px rgba(28,28,26,0.05)' }}>
-                  <i className={`ti ${cat.icon}`} style={{ fontSize: 15 }} />{cat.label}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, flexShrink: 0, padding: '9px 18px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', border: `1px solid ${active ? GOLD_BOR : BORDER}`, background: active ? GOLD_LIGHT : SURF, backdropFilter: 'blur(16px)', color: active ? GOLD : TEXT_SEC, fontSize: 14, fontWeight: active ? 700 : 500, transition: 'all 0.25s', boxShadow: active ? `0 0 20px rgba(199,166,106,0.1)` : '0 1px 4px rgba(28,28,26,0.05)' }}>
+                  <i className={`ti ${cat.icon}`} style={{ fontSize: 17 }} />{cat.label}
                 </button>
               )
             })}
@@ -324,12 +324,12 @@ export default function ShopPage() {
           {/* Toolbar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {search && <span style={{ fontSize: 13, color: TEXT_SEC }}>نتایج برای <span style={{ color: GOLD, fontWeight: 700 }}>«{search}»</span></span>}
-              <span style={{ fontSize: 12, color: TEXT_MUT, background: SURF, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '4px 10px', backdropFilter: 'blur(12px)' }}>{toFa(total)} محصول</span>
+              {search && <span style={{ fontSize: 14, color: TEXT_SEC }}>نتایج برای <span style={{ color: GOLD, fontWeight: 700 }}>«{search}»</span></span>}
+              <span style={{ fontSize: 13, color: TEXT_MUT, background: SURF, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '4px 10px', backdropFilter: 'blur(12px)' }}>{toFa(total)} محصول</span>
               {isFiltered && (
                 <button onClick={() => { setCategory('all'); setSearch(''); setSearchInput(''); setSort('newest'); setPage(1) }}
-                  style={{ fontSize: 11, color: '#C0392B', background: 'rgba(192,57,43,0.07)', border: '1px solid rgba(192,57,43,0.18)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <i className="ti ti-x" style={{ fontSize: 11 }} /> حذف فیلتر
+                  style={{ fontSize: 12, color: '#C0392B', background: 'rgba(192,57,43,0.07)', border: '1px solid rgba(192,57,43,0.18)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <i className="ti ti-x" style={{ fontSize: 12 }} /> حذف فیلتر
                 </button>
               )}
             </div>
@@ -338,14 +338,14 @@ export default function ShopPage() {
                 const active = sort === s.value
                 return (
                   <button key={s.value} className="sort-btn" onClick={() => setSort_(s.value)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 10, border: `1px solid ${active ? GOLD_BOR : BORDER}`, background: active ? GOLD_LIGHT : SURF, backdropFilter: 'blur(16px)', color: active ? GOLD : TEXT_SEC, fontSize: 12, fontWeight: active ? 700 : 400, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: '0 1px 4px rgba(28,28,26,0.04)' }}>
-                    <i className={`ti ${s.icon}`} style={{ fontSize: 13 }} />{s.label}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 10, border: `1px solid ${active ? GOLD_BOR : BORDER}`, background: active ? GOLD_LIGHT : SURF, backdropFilter: 'blur(16px)', color: active ? GOLD : TEXT_SEC, fontSize: 13, fontWeight: active ? 700 : 400, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: '0 1px 4px rgba(28,28,26,0.04)' }}>
+                    <i className={`ti ${s.icon}`} style={{ fontSize: 14 }} />{s.label}
                   </button>
                 )
               })}
-              <Link href="/cart" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: cartCount > 0 ? GOLD_LIGHT : SURF, border: `1px solid ${cartCount > 0 ? GOLD_BOR : BORDER}`, color: cartCount > 0 ? GOLD : TEXT_SEC, fontSize: 12, fontWeight: 700, textDecoration: 'none', backdropFilter: 'blur(16px)' }}>
-                <i className="ti ti-shopping-cart" style={{ fontSize: 14 }} />
-                سبد {cartCount > 0 && <span style={{ background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', borderRadius: '50%', width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900 }}>{toFa(cartCount)}</span>}
+              <Link href="/cart" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: cartCount > 0 ? GOLD_LIGHT : SURF, border: `1px solid ${cartCount > 0 ? GOLD_BOR : BORDER}`, color: cartCount > 0 ? GOLD : TEXT_SEC, fontSize: 13, fontWeight: 700, textDecoration: 'none', backdropFilter: 'blur(16px)' }}>
+                <i className="ti ti-shopping-cart" style={{ fontSize: 15 }} />
+                سبد {cartCount > 0 && <span style={{ background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', borderRadius: '50%', width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900 }}>{toFa(cartCount)}</span>}
               </Link>
             </div>
           </div>
@@ -357,17 +357,17 @@ export default function ShopPage() {
               <div style={{ position: 'relative', padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg,#C0392B,#922B21)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(192,57,43,0.4)', flexShrink: 0 }}>
-                    <i className="ti ti-flame" style={{ fontSize: 20, color: '#fff' }} />
+                    <i className="ti ti-flame" style={{ fontSize: 22, color: '#fff' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: '#fff', margin: '0 0 3px' }}>پیشنهاد شگفت‌انگیز</p>
-                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', margin: 0 }}>تخفیف‌های استثنایی — فقط تا پایان امروز</p>
+                    <p style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: '0 0 3px' }}>پیشنهاد شگفت‌انگیز</p>
+                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0 }}>تخفیف‌های استثنایی — فقط تا پایان امروز</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                   <Countdown />
-                  <Link href="/shop?sort=price_desc" style={{ fontSize: 12, fontWeight: 700, padding: '8px 18px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', background: 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    مشاهده همه <i className="ti ti-arrow-left" style={{ fontSize: 13 }} />
+                  <Link href="/shop?sort=price_desc" style={{ fontSize: 13, fontWeight: 700, padding: '8px 18px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', background: 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    مشاهده همه <i className="ti ti-arrow-left" style={{ fontSize: 14 }} />
                   </Link>
                 </div>
               </div>
@@ -380,12 +380,12 @@ export default function ShopPage() {
                       <div style={{ aspectRatio: '1', overflow: 'hidden', position: 'relative' }}>
                         <img src={getImg(p)} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.5) saturate(0.7)' }} onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.7)100%)' }} />
-                        {p.discountPercent && <div style={{ position: 'absolute', top: 7, right: 7, width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#C0392B,#922B21)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, color: '#fff' }}>{toFa(p.discountPercent)}٪</div>}
+                        {p.discountPercent && <div style={{ position: 'absolute', top: 7, right: 7, width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#C0392B,#922B21)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, color: '#fff' }}>{toFa(p.discountPercent)}٪</div>}
                       </div>
                       <div style={{ padding: '9px 11px 12px' }}>
-                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', margin: '0 0 5px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.title}</p>
-                        {p.discountPrice && <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)', textDecoration: 'line-through', margin: '0 0 2px' }}>{fmt(p.price)} ت</p>}
-                        <p style={{ fontSize: 14, fontWeight: 900, color: GOLD, margin: 0 }}>{fmt(p.discountPrice ?? p.price)} <span style={{ fontSize: 9, fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></p>
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '0 0 5px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.title}</p>
+                        {p.discountPrice && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', textDecoration: 'line-through', margin: '0 0 2px' }}>{fmt(p.price)} ت</p>}
+                        <p style={{ fontSize: 15, fontWeight: 900, color: GOLD, margin: 0 }}>{fmt(p.discountPrice ?? p.price)} <span style={{ fontSize: 10, fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></p>
                       </div>
                     </div>
                   </Link>
@@ -401,12 +401,12 @@ export default function ShopPage() {
               : products.length === 0
                 ? (
                   <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '70px 0' }}>
-                    <i className="ti ti-shopping-cart-off" style={{ fontSize: 52, color: 'rgba(28,28,26,0.1)', display: 'block', marginBottom: 16 }} />
-                    <h3 style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC, margin: '0 0 8px' }}>محصولی یافت نشد</h3>
-                    <p style={{ fontSize: 13, color: TEXT_MUT, margin: '0 0 20px' }}>دسته‌بندی یا عبارت دیگری را امتحان کنید</p>
+                    <i className="ti ti-shopping-cart-off" style={{ fontSize: 57, color: 'rgba(28,28,26,0.1)', display: 'block', marginBottom: 16 }} />
+                    <h3 style={{ fontSize: 19, fontWeight: 700, color: TEXT_SEC, margin: '0 0 8px' }}>محصولی یافت نشد</h3>
+                    <p style={{ fontSize: 14, color: TEXT_MUT, margin: '0 0 20px' }}>دسته‌بندی یا عبارت دیگری را امتحان کنید</p>
                     <button onClick={() => { setCategory('all'); setSearch(''); setSearchInput(''); setSort('newest') }}
-                      style={{ background: GOLD_LIGHT, border: `1px solid ${GOLD_BOR}`, borderRadius: 12, padding: '11px 22px', color: GOLD, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      <i className="ti ti-refresh" style={{ fontSize: 14 }} /> نمایش همه محصولات
+                      style={{ background: GOLD_LIGHT, border: `1px solid ${GOLD_BOR}`, borderRadius: 12, padding: '11px 22px', color: GOLD, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <i className="ti ti-refresh" style={{ fontSize: 15 }} /> نمایش همه محصولات
                     </button>
                   </div>
                 )
@@ -422,7 +422,7 @@ export default function ShopPage() {
           {totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 40 }}>
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                style={{ padding: '9px 18px', borderRadius: 11, background: SURF, border: `1px solid ${BORDER}`, color: TEXT_SEC, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', opacity: page === 1 ? 0.3 : 1, transition: 'all 0.2s', backdropFilter: 'blur(12px)' }}>
+                style={{ padding: '9px 18px', borderRadius: 11, background: SURF, border: `1px solid ${BORDER}`, color: TEXT_SEC, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', opacity: page === 1 ? 0.3 : 1, transition: 'all 0.2s', backdropFilter: 'blur(12px)' }}>
                 ‹ قبلی
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -434,12 +434,12 @@ export default function ShopPage() {
                 .map((p, i) => p === '...'
                   ? <span key={`d${i}`} style={{ color: TEXT_MUT, padding: '0 6px' }}>…</span>
                   : <button key={p} className="page-btn" onClick={() => setPage(p as number)}
-                    style={{ width: 38, height: 38, borderRadius: 10, border: `1px solid ${p === page ? GOLD_BOR : BORDER}`, background: p === page ? `linear-gradient(135deg,${GOLD},#A07840)` : SURF, backdropFilter: 'blur(12px)', color: p === page ? '#fff' : TEXT_SEC, fontSize: 13, fontWeight: p === page ? 700 : 400, cursor: 'pointer', fontFamily: 'inherit', boxShadow: p === page ? `0 4px 14px rgba(199,166,106,0.3)` : 'none', transition: 'all 0.2s' }}>
+                    style={{ width: 38, height: 38, borderRadius: 10, border: `1px solid ${p === page ? GOLD_BOR : BORDER}`, background: p === page ? `linear-gradient(135deg,${GOLD},#A07840)` : SURF, backdropFilter: 'blur(12px)', color: p === page ? '#fff' : TEXT_SEC, fontSize: 14, fontWeight: p === page ? 700 : 400, cursor: 'pointer', fontFamily: 'inherit', boxShadow: p === page ? `0 4px 14px rgba(199,166,106,0.3)` : 'none', transition: 'all 0.2s' }}>
                     {toFa(p as number)}
                   </button>
                 )}
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                style={{ padding: '9px 18px', borderRadius: 11, background: SURF, border: `1px solid ${BORDER}`, color: TEXT_SEC, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', opacity: page === totalPages ? 0.3 : 1, transition: 'all 0.2s', backdropFilter: 'blur(12px)' }}>
+                style={{ padding: '9px 18px', borderRadius: 11, background: SURF, border: `1px solid ${BORDER}`, color: TEXT_SEC, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', opacity: page === totalPages ? 0.3 : 1, transition: 'all 0.2s', backdropFilter: 'blur(12px)' }}>
                 بعدی ›
               </button>
             </div>
@@ -453,15 +453,15 @@ export default function ShopPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 24px rgba(199,166,106,0.28)`, flexShrink: 0 }}>
-                      <i className="ti ti-trophy" style={{ fontSize: 20, color: '#fff' }} />
+                      <i className="ti ti-trophy" style={{ fontSize: 22, color: '#fff' }} />
                     </div>
                     <div>
-                      <h2 style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 2px' }}>پرفروش‌ترین‌ها</h2>
-                      <p style={{ fontSize: 12, color: TEXT_MUT, margin: 0 }}>محبوب‌ترین محصولات در بین خریداران</p>
+                      <h2 style={{ fontSize: 19, fontWeight: 900, color: TEXT, margin: '0 0 2px' }}>پرفروش‌ترین‌ها</h2>
+                      <p style={{ fontSize: 13, color: TEXT_MUT, margin: 0 }}>محبوب‌ترین محصولات در بین خریداران</p>
                     </div>
                   </div>
-                  <Link href="/shop?sort=popular" style={{ fontSize: 12, fontWeight: 700, color: GOLD, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    مشاهده همه <i className="ti ti-arrow-left" style={{ fontSize: 13 }} />
+                  <Link href="/shop?sort=popular" style={{ fontSize: 13, fontWeight: 700, color: GOLD, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    مشاهده همه <i className="ti ti-arrow-left" style={{ fontSize: 14 }} />
                   </Link>
                 </div>
                 <div className="prod-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
@@ -482,19 +482,19 @@ export default function ShopPage() {
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ width: 42, height: 42, borderRadius: 12, background: GOLD_LIGHT, border: `1px solid ${GOLD_BOR}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <i className="ti ti-speakerphone" style={{ fontSize: 20, color: GOLD }} />
+                    <i className="ti ti-speakerphone" style={{ fontSize: 22, color: GOLD }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, color: GOLD_DIM, fontWeight: 700, margin: '0 0 3px' }}>فضای تبلیغاتی</p>
-                    <p style={{ fontSize: 15, fontWeight: 800, color: '#fff', margin: '0 0 2px' }}>آگهی کسب‌وکار خود را اینجا ثبت کنید</p>
-                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.26)', margin: 0 }}>به هزاران بازیکن حرفه‌ای دسترسی پیدا کنید</p>
+                    <p style={{ fontSize: 11, color: GOLD_DIM, fontWeight: 700, margin: '0 0 3px' }}>فضای تبلیغاتی</p>
+                    <p style={{ fontSize: 17, fontWeight: 800, color: '#fff', margin: '0 0 2px' }}>آگهی کسب‌وکار خود را اینجا ثبت کنید</p>
+                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.26)', margin: 0 }}>به هزاران بازیکن حرفه‌ای دسترسی پیدا کنید</p>
                   </div>
                 </div>
-                <button style={{ background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontWeight: 800, fontSize: 12, padding: '10px 20px', borderRadius: 11, border: 'none', cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 6px 20px rgba(199,166,106,0.35)`, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <button style={{ background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontWeight: 800, fontSize: 13, padding: '10px 20px', borderRadius: 11, border: 'none', cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 6px 20px rgba(199,166,106,0.35)`, whiteSpace: 'nowrap', flexShrink: 0 }}>
                   تماس بگیرید
                 </button>
               </div>
-              <div style={{ position: 'absolute', top: 8, right: 14, background: GOLD, color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 20 }}>آگهی</div>
+              <div style={{ position: 'absolute', top: 8, right: 14, background: GOLD, color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 20 }}>آگهی</div>
             </div>
           )}
 
@@ -504,11 +504,11 @@ export default function ShopPage() {
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 500, height: 300, background: `radial-gradient(ellipse,rgba(199,166,106,0.08),transparent 70%)`, pointerEvents: 'none', filter: 'blur(20px)' }} />
               <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 160, height: 1, background: `linear-gradient(90deg,transparent,${GOLD}50,transparent)` }} />
               <div style={{ position: 'relative' }}>
-                <p style={{ fontSize: 10, color: GOLD_DIM, letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>SELL ON BILLIARDHUB</p>
-                <h2 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 10px' }}>می‌خواهید بفروشید؟</h2>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.28)', margin: '0 0 24px', lineHeight: 1.7 }}>آگهی رایگان ثبت کنید و به هزاران خریدار دسترسی پیدا کنید</p>
-                <Link href="/shop/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', padding: '13px 28px', borderRadius: 13, textDecoration: 'none', fontWeight: 800, fontSize: 14, boxShadow: `0 8px 28px rgba(199,166,106,0.35)` }}>
-                  <i className="ti ti-plus" style={{ fontSize: 17 }} /> ثبت آگهی رایگان
+                <p style={{ fontSize: 11, color: GOLD_DIM, letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>SELL ON BILLIARDHUB</p>
+                <h2 style={{ fontSize: 24, fontWeight: 900, color: '#fff', margin: '0 0 10px' }}>می‌خواهید بفروشید؟</h2>
+                <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.28)', margin: '0 0 24px', lineHeight: 1.7 }}>آگهی رایگان ثبت کنید و به هزاران خریدار دسترسی پیدا کنید</p>
+                <Link href="/shop/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', padding: '13px 28px', borderRadius: 13, textDecoration: 'none', fontWeight: 800, fontSize: 15, boxShadow: `0 8px 28px rgba(199,166,106,0.35)` }}>
+                  <i className="ti ti-plus" style={{ fontSize: 19 }} /> ثبت آگهی رایگان
                 </Link>
               </div>
             </div>

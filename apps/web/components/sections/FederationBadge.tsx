@@ -31,9 +31,9 @@ export function FederationBadge() {
                 <Shield size={28} style={{ color: '#C7A66A' }} />
               </div>
               <div>
-                <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '6px' }}>VERIFIED PLATFORM</div>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: '#111111', letterSpacing: '-0.02em', marginBottom: '4px' }}>پلتفرم تأیید شده</div>
-                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>زیر نظر فدراسیون بیلیارد و اسنوکر ایران</div>
+                <div style={{ fontSize: '11px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '6px' }}>VERIFIED PLATFORM</div>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#111111', letterSpacing: '-0.02em', marginBottom: '4px' }}>پلتفرم تأیید شده</div>
+                <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>زیر نظر فدراسیون بیلیارد و اسنوکر ایران</div>
               </div>
             </div>
 
@@ -43,10 +43,10 @@ export function FederationBadge() {
                 <div key={i} style={{ padding: '12px 18px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: '14px', textAlign: 'center', minWidth: '110px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', marginBottom: '5px' }}>
                     <CheckCircle size={11} style={{ color: '#C7A66A' }} />
-                    <span style={{ fontSize: '9px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.1em' }}>{p.badge}</span>
+                    <span style={{ fontSize: '10px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.1em' }}>{p.badge}</span>
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{p.name}</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>{p.role}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{p.name}</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>{p.role}</div>
                 </div>
               ))}
             </div>

@@ -53,12 +53,12 @@ export default function LivePage() {
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, marginBottom: 16, background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)' }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: '#ef4444' }}>LIVE NOW</span>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', color: '#ef4444' }}>LIVE NOW</span>
             </div>
-            <h1 style={{ fontSize: 'clamp(28px,5vw,42px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: 'linear-gradient(135deg,#FFFFFF 40%,#ef4444)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>
+            <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 46px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: 'linear-gradient(135deg,#FFFFFF 40%,#ef4444)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>
               پخش زنده
             </h1>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.40)', margin: 0 }}>{liveNow.length} استریم فعال</p>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.40)', margin: 0 }}>{liveNow.length} استریم فعال</p>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ export default function LivePage() {
             <div style={{ marginBottom: 32 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>هم‌اکنون زنده</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#ef4444' }}>هم‌اکنون زنده</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {liveNow.map(s => (
@@ -87,22 +87,22 @@ export default function LivePage() {
                     <div style={{ padding: 18 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>LIVE</span>
-                        <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.40)' }}>· {s.discipline} · {s.tournament}</span>
-                        <span style={{ marginRight: 'auto', fontSize: 11, color: 'rgba(0,0,0,0.40)' }}>👁 {s.viewers.toLocaleString('fa')}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444' }}>LIVE</span>
+                        <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>· {s.discipline} · {s.tournament}</span>
+                        <span style={{ marginRight: 'auto', fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>👁 {s.viewers.toLocaleString('fa')}</span>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 48px 1fr', alignItems: 'center', gap: 8 }}>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 12, marginBottom: 6, color: 'rgba(0,0,0,0.45)', fontWeight: 500 }}>{s.player1}</div>
-                          <div style={{ fontSize: 38, fontWeight: 900, color: GOLD_DARK, lineHeight: 1 }}>{s.score1}</div>
+                          <div style={{ fontSize: 13, marginBottom: 6, color: 'rgba(0,0,0,0.45)', fontWeight: 500 }}>{s.player1}</div>
+                          <div style={{ fontSize: 42, fontWeight: 900, color: GOLD_DARK, lineHeight: 1 }}>{s.score1}</div>
                         </div>
-                        <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(0,0,0,0.25)' }}>VS</div>
+                        <div style={{ textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.25)' }}>VS</div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 12, marginBottom: 6, color: 'rgba(0,0,0,0.45)', fontWeight: 500 }}>{s.player2}</div>
-                          <div style={{ fontSize: 38, fontWeight: 900, color: '#8b5cf6', lineHeight: 1 }}>{s.score2}</div>
+                          <div style={{ fontSize: 13, marginBottom: 6, color: 'rgba(0,0,0,0.45)', fontWeight: 500 }}>{s.player2}</div>
+                          <div style={{ fontSize: 42, fontWeight: 900, color: '#8b5cf6', lineHeight: 1 }}>{s.score2}</div>
                         </div>
                       </div>
-                      <div style={{ marginTop: 14, padding: '10px 0', borderRadius: 12, textAlign: 'center', fontSize: 12, fontWeight: 700, background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.15)' }}>
+                      <div style={{ marginTop: 14, padding: '10px 0', borderRadius: 12, textAlign: 'center', fontSize: 13, fontWeight: 700, background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.15)' }}>
                         تماشای زنده ←
                       </div>
                     </div>
@@ -115,20 +115,20 @@ export default function LivePage() {
           {/* Upcoming */}
           {upcoming.length > 0 && (
             <div>
-              <h2 style={{ fontSize: 13, fontWeight: 700, color: GOLD_DARK, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 700, color: GOLD_DARK, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                 🕐 به زودی
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {upcoming.map(s => (
                   <div key={s.id} style={{ borderRadius: 16, padding: 18, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <span style={{ fontSize: 11, color: GOLD_DARK, fontWeight: 600 }}>{s.discipline} · {s.tournament}</span>
-                      <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 600, border: '1px solid rgba(199,166,106,0.20)' }}>{s.scheduledAt}</span>
+                      <span style={{ fontSize: 12, color: GOLD_DARK, fontWeight: 600 }}>{s.discipline} · {s.tournament}</span>
+                      <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 600, border: '1px solid rgba(199,166,106,0.20)' }}>{s.scheduledAt}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{s.player1}</span>
-                      <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.30)', fontWeight: 600 }}>VS</span>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{s.player2}</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: '#111111' }}>{s.player1}</span>
+                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.30)', fontWeight: 600 }}>VS</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: '#111111' }}>{s.player2}</span>
                     </div>
                   </div>
                 ))}

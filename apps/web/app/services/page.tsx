@@ -132,45 +132,45 @@ function ProviderCard({ p }: { p: Provider }) {
 
           {/* Badges */}
           <div style={{ position:'absolute', top:'12px', right:'12px', display:'flex', flexDirection:'column', gap:'5px' }}>
-            {p.isCertified && <div style={{ display:'flex', alignItems:'center', gap:'3px', background:'rgba(245,158,11,0.85)', backdropFilter:'blur(6px)', borderRadius:'20px', padding:'3px 9px', fontSize:'9px', color:'#fff', fontWeight:700 }}><Award size={8}/>تأییدشده</div>}
-            {p.isOnline && <div style={{ display:'flex', alignItems:'center', gap:'3px', background:'rgba(199,166,106,0.15)', backdropFilter:'blur(6px)', border:'1px solid rgba(199,166,106,0.3)', borderRadius:'20px', padding:'3px 9px', fontSize:'9px', color:'#C7A66A', fontWeight:700 }}><span style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#C7A66A', display:'inline-block', animation:'pulse 2s infinite' }}/>آنلاین</div>}
+            {p.isCertified && <div style={{ display:'flex', alignItems:'center', gap:'3px', background:'rgba(245,158,11,0.85)', backdropFilter:'blur(6px)', borderRadius:'20px', padding:'3px 9px', fontSize: '10px', color:'#fff', fontWeight:700 }}><Award size={8}/>تأییدشده</div>}
+            {p.isOnline && <div style={{ display:'flex', alignItems:'center', gap:'3px', background:'rgba(199,166,106,0.15)', backdropFilter:'blur(6px)', border:'1px solid rgba(199,166,106,0.3)', borderRadius:'20px', padding:'3px 9px', fontSize: '10px', color:'#C7A66A', fontWeight:700 }}><span style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#C7A66A', display:'inline-block', animation:'pulse 2s infinite' }}/>آنلاین</div>}
           </div>
 
           {/* City */}
-          <div style={{ position:'absolute', bottom:'12px', right:'12px', display:'flex', alignItems:'center', gap:'4px', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 11px', fontSize:'11px', color:'rgba(255,255,255,0.8)' }}>
+          <div style={{ position:'absolute', bottom:'12px', right:'12px', display:'flex', alignItems:'center', gap:'4px', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 11px', fontSize: '12px', color:'rgba(255,255,255,0.8)' }}>
             <MapPin size={9} style={{ color:p.avatarColor }}/>{p.city}
           </div>
         </div>
 
         {/* Avatar strip */}
         <div style={{ padding:'0 18px', marginTop:'-22px', display:'flex', alignItems:'flex-end', justifyContent:'space-between' }}>
-          <div style={{ width:'50px', height:'50px', borderRadius:'14px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', fontWeight:900, color:'#fff', border:'3px solid rgba(6,13,10,0.98)', boxShadow:`0 6px 18px ${p.avatarColor}40` }}>
+          <div style={{ width:'50px', height:'50px', borderRadius:'14px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '22px', fontWeight:900, color:'#fff', border:'3px solid rgba(6,13,10,0.98)', boxShadow:`0 6px 18px ${p.avatarColor}40` }}>
             {p.avatar}
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'4px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', padding:'4px 10px', marginBottom:'4px' }}>
             <Star size={11} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>
-            <span style={{ fontSize:'13px', fontWeight:800, color:'#f59e0b' }}>{p.rating}</span>
-            <span style={{ fontSize:'10px', color:'rgba(0,0,0,0.35)' }}>({toFa(p.reviewCount)})</span>
+            <span style={{ fontSize: '14px', fontWeight:800, color:'#f59e0b' }}>{p.rating}</span>
+            <span style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)' }}>({toFa(p.reviewCount)})</span>
           </div>
         </div>
 
         {/* Content */}
         <div style={{ padding:'10px 18px 0', flex:1, display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'5px', marginBottom:'3px' }}>
-            <h3 style={{ fontSize:'15px', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.015em' }}>{p.name}</h3>
+            <h3 style={{ fontSize: '17px', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.015em' }}>{p.name}</h3>
             {p.isVerified && <Check size={12} style={{ color:p.avatarColor, flexShrink:0 }}/>}
           </div>
-          <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.45)', marginBottom:'10px' }}>{p.title}</div>
+          <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.45)', marginBottom:'10px' }}>{p.title}</div>
 
           {/* Speciality */}
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap', marginBottom:'12px' }}>
             {p.speciality.slice(0,3).map(s => (
-              <span key={s} style={{ fontSize:'9px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}20`, borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>{s}</span>
+              <span key={s} style={{ fontSize: '10px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}20`, borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>{s}</span>
             ))}
           </div>
 
           {/* Quick info */}
-          <div style={{ display:'flex', gap:'12px', marginBottom:'12px', fontSize:'11px', color:'rgba(0,0,0,0.42)' }}>
+          <div style={{ display:'flex', gap:'12px', marginBottom:'12px', fontSize: '12px', color:'rgba(0,0,0,0.42)' }}>
             <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Clock size={10} style={{ color:'#C7A66A' }}/>{p.responseTime}</span>
             <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Shield size={10} style={{ color:'#06b6d4' }}/>{p.warranty}</span>
           </div>
@@ -180,12 +180,12 @@ function ProviderCard({ p }: { p: Provider }) {
         <div style={{ padding:'12px 18px 16px', marginTop:'auto', borderTop:'1px solid rgba(0,0,0,0.04)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
-              <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.35)', marginBottom:'2px' }}>از</div>
-              <div style={{ fontSize:'15px', fontWeight:900, color:p.avatarColor, letterSpacing:'-0.02em' }}>
-                {toFa(p.priceFrom.toLocaleString())} <span style={{ fontSize:'9px', opacity:0.7 }}>تومان</span>
+              <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.35)', marginBottom:'2px' }}>از</div>
+              <div style={{ fontSize: '17px', fontWeight:900, color:p.avatarColor, letterSpacing:'-0.02em' }}>
+                {toFa(p.priceFrom.toLocaleString())} <span style={{ fontSize: '10px', opacity:0.7 }}>تومان</span>
               </div>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', color:'rgba(0,0,0,0.40)' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'5px', fontSize: '12px', color:'rgba(0,0,0,0.40)' }}>
               <Wrench size={11} style={{ color:'rgba(0,0,0,0.30)' }}/>{toFa(p.jobs)} پروژه
             </div>
           </div>
@@ -244,15 +244,15 @@ export default function ServicesPage() {
 
           <div style={{ maxWidth:'1280px', margin:'0 auto' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'14px', marginBottom:'16px' }}>
-              <div style={{ width:'44px', height:'44px', borderRadius:'14px', background:'linear-gradient(135deg,#f59e0b,#d97706)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 8px 24px rgba(245,158,11,0.35)', fontSize:'20px' }}>
+              <div style={{ width:'44px', height:'44px', borderRadius:'14px', background:'linear-gradient(135deg,#f59e0b,#d97706)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 8px 24px rgba(245,158,11,0.35)', fontSize: '22px' }}>
                 🔧
               </div>
               <div>
-                <div style={{ fontSize:'9px', color:'rgba(245,158,11,0.65)', letterSpacing:'0.25em', fontWeight:700 }}>TECHNICAL SERVICES</div>
-                <h1 style={{ fontSize:'clamp(24px,4.5vw,44px)', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.03em', lineHeight:1.1 }}>خدمات فنی تخصصی</h1>
+                <div style={{ fontSize: '10px', color:'rgba(245,158,11,0.65)', letterSpacing:'0.25em', fontWeight:700 }}>TECHNICAL SERVICES</div>
+                <h1 style={{ fontSize: 'clamp(26px, 5vw, 48px)', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.03em', lineHeight:1.1 }}>خدمات فنی تخصصی</h1>
               </div>
             </div>
-            <p style={{ fontSize:'15px', color:'rgba(0,0,0,0.42)', margin:'0 0 28px', maxWidth:'460px' }}>
+            <p style={{ fontSize: '17px', color:'rgba(0,0,0,0.42)', margin:'0 0 28px', maxWidth:'460px' }}>
               نصب، تعمیر، کلاث‌کشی و نگهداری حرفه‌ای تجهیزات بیلیارد
             </p>
 
@@ -261,9 +261,9 @@ export default function ServicesPage() {
               {SERVICE_TYPES.map(s => (
                 <button key={s.key} onClick={()=>setService(s.key)}
                   style={{ padding:'14px 10px', borderRadius:'16px', background: service===s.key?`${s.color}10`:'#FFFFFF', border:`1px solid ${service===s.key?`${s.color}35`:'rgba(0,0,0,0.07)'}`, cursor:'pointer', fontFamily:'inherit', textAlign:'center', transition:'all 0.3s', boxShadow: service===s.key?`0 4px 16px ${s.color}15`:'none' }}>
-                  <div style={{ fontSize:'22px', marginBottom:'6px' }}>{s.icon}</div>
-                  <div style={{ fontSize:'10px', fontWeight:700, color: service===s.key?s.color:'rgba(0,0,0,0.45)', lineHeight:1.3 }}>{s.label}</div>
-                  <div style={{ fontSize:'9px', color:'rgba(0,0,0,0.30)', marginTop:'3px' }}>{toFa(s.count)} متخصص</div>
+                  <div style={{ fontSize: '24px', marginBottom:'6px' }}>{s.icon}</div>
+                  <div style={{ fontSize: '11px', fontWeight:700, color: service===s.key?s.color:'rgba(0,0,0,0.45)', lineHeight:1.3 }}>{s.label}</div>
+                  <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.30)', marginTop:'3px' }}>{toFa(s.count)} متخصص</div>
                 </button>
               ))}
             </div>
@@ -291,7 +291,7 @@ export default function ServicesPage() {
               <option value="jobs">بیشترین پروژه</option>
               <option value="price">ارزان‌ترین</option>
             </select>
-            <div style={{ fontSize:'12px', color:'rgba(0,0,0,0.40)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} متخصص</div>
+            <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.40)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} متخصص</div>
           </div>
         </div>
 
@@ -306,8 +306,8 @@ export default function ServicesPage() {
               { v:toFa(PROVIDERS.reduce((a,p)=>a+p.reviewCount,0)),    l:'نظر مشتری',    c:'#06b6d4' },
             ].map((s,i) => (
               <div key={i} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
-                <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
+                <div style={{ fontSize: 'clamp(22px, 3.3vw, 31px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
+                <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -315,7 +315,7 @@ export default function ServicesPage() {
           {/* How it works */}
           <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.05)', borderRadius:'22px', padding:'clamp(20px,3vw,30px)', marginBottom:'36px', overflow:'hidden', position:'relative' }}>
             <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'200px', height:'1px', background:'linear-gradient(90deg,transparent,rgba(245,158,11,0.4),transparent)' }}/>
-            <div style={{ fontSize:'9px', color:'rgba(245,158,11,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'16px', textAlign:'center' }}>HOW IT WORKS</div>
+            <div style={{ fontSize: '10px', color:'rgba(245,158,11,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'16px', textAlign:'center' }}>HOW IT WORKS</div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'20px' }}>
               {[
                 { n:'۱', icon:'🔍', title:'انتخاب متخصص',    desc:'متخصص مناسب با توجه به شهر و نوع خدمت انتخاب کنید' },
@@ -324,9 +324,9 @@ export default function ServicesPage() {
                 { n:'۴', icon:'✅', title:'تأیید و ضمانت',   desc:'پس از تأیید شما، پرداخت انجام و ضمانت فعال می‌شود' },
               ].map((s,i) => (
                 <div key={i} style={{ textAlign:'center' }}>
-                  <div style={{ fontSize:'28px', marginBottom:'8px' }}>{s.icon}</div>
-                  <div style={{ fontSize:'13px', fontWeight:700, color: '#111111', marginBottom:'5px' }}>{s.title}</div>
-                  <div style={{ fontSize:'11px', color:'rgba(0,0,0,0.42)', lineHeight:1.6 }}>{s.desc}</div>
+                  <div style={{ fontSize: '31px', marginBottom:'8px' }}>{s.icon}</div>
+                  <div style={{ fontSize: '14px', fontWeight:700, color: '#111111', marginBottom:'5px' }}>{s.title}</div>
+                  <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.42)', lineHeight:1.6 }}>{s.desc}</div>
                 </div>
               ))}
             </div>
@@ -335,9 +335,9 @@ export default function ServicesPage() {
           {/* Grid */}
           {filtered.length===0 ? (
             <div style={{ textAlign:'center', padding:'80px 24px' }}>
-              <div style={{ fontSize:'48px', opacity:0.12, marginBottom:'14px' }}>🔧</div>
-              <h3 style={{ fontSize:'18px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>متخصصی یافت نشد</h3>
-              <button onClick={()=>{setSearch('');setService('all');setCity('همه شهرها');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#f59e0b,#d97706)', border:'none', borderRadius:'12px', color:'#fff', fontSize:'13px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
+              <div style={{ fontSize: '53px', opacity:0.12, marginBottom:'14px' }}>🔧</div>
+              <h3 style={{ fontSize: '20px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>متخصصی یافت نشد</h3>
+              <button onClick={()=>{setSearch('');setService('all');setCity('همه شهرها');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#f59e0b,#d97706)', border:'none', borderRadius:'12px', color:'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
                 پاک کردن فیلترها
               </button>
             </div>
@@ -353,12 +353,12 @@ export default function ServicesPage() {
 
           {/* Register CTA */}
           <div style={{ marginTop:'56px', padding:'40px 36px', background:'rgba(245,158,11,0.03)', border:'1px dashed rgba(245,158,11,0.18)', borderRadius:'24px', textAlign:'center' }}>
-            <div style={{ fontSize:'10px', color:'rgba(245,158,11,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>JOIN AS TECHNICIAN</div>
-            <h3 style={{ fontSize:'clamp(18px,3vw,26px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>متخصص شوید</h3>
-            <p style={{ fontSize:'14px', color:'rgba(0,0,0,0.40)', margin:'0 0 22px', maxWidth:'380px', marginLeft:'auto', marginRight:'auto' }}>
+            <div style={{ fontSize: '11px', color:'rgba(245,158,11,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>JOIN AS TECHNICIAN</div>
+            <h3 style={{ fontSize: 'clamp(20px, 3.3vw, 29px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>متخصص شوید</h3>
+            <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.40)', margin:'0 0 22px', maxWidth:'380px', marginLeft:'auto', marginRight:'auto' }}>
               تخصص فنی خود را به درآمد تبدیل کنید. به صدها باشگاه در سراسر ایران خدمات ارائه دهید
             </p>
-            <Link href="/services/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'12px 28px', background:'linear-gradient(135deg,#f59e0b,#d97706)', borderRadius:'13px', color:'#fff', fontSize:'14px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 22px rgba(245,158,11,0.28)' }}>
+            <Link href="/services/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'12px 28px', background:'linear-gradient(135deg,#f59e0b,#d97706)', borderRadius:'13px', color:'#fff', fontSize: '15px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 22px rgba(245,158,11,0.28)' }}>
               ثبت‌نام متخصص ←
             </Link>
           </div>

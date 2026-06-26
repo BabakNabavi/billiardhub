@@ -77,7 +77,7 @@ export default function NewsDetailPage() {
             {/* تصویر */}
             <div className={`bg-gradient-to-br ${news.imageBg} relative overflow-hidden`} style={{ height: '360px' }}>
               <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                <span className="text-white font-black" style={{ fontSize: '200px' }}>🎱</span>
+                <span className="text-white font-black" style={{ fontSize: '220px' }}>🎱</span>
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
               <div className="absolute bottom-0 right-0 left-0 p-6">

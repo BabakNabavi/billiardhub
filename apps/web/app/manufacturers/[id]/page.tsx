@@ -133,7 +133,7 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
           <div style={{ position: 'absolute', top: '30%', right: '20%', width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,139,250,0.12), transparent 70%)', filter: 'blur(60px)' }} />
           <div style={{ position: 'absolute', bottom: '20%', left: '10%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.1), transparent 70%)', filter: 'blur(40px)' }} />
           {/* Center decorative */}
-          <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontSize: 'clamp(80px, 15vw, 150px)', opacity: 0.04 }}>🏭</div>
+          <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontSize: 'clamp(88px, 16.5vw, 165px)', opacity: 0.04 }}>🏭</div>
         </div>
         {/* Bottom gradient */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 140, background: 'linear-gradient(to top, #010604, transparent)' }} />
@@ -141,19 +141,19 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
         {/* Hero text overlay */}
         <div style={{ position: 'absolute', bottom: 40, right: 0, left: 0, padding: '0 clamp(16px, 4vw, 32px)', maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span style={{ background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa', fontSize: 11, padding: '4px 12px', borderRadius: 20, fontWeight: 600 }}>
+            <span style={{ background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 600 }}>
               🏭 تولیدکننده
             </span>
             {mfr.verified && (
-              <span style={{ background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.3)', color: '#C7A66A', fontSize: 11, padding: '4px 12px', borderRadius: 20, fontWeight: 600 }}>
+              <span style={{ background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.3)', color: '#C7A66A', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 600 }}>
                 ✓ تأیید شده
               </span>
             )}
           </div>
-          <h1 style={{ fontSize: 'clamp(20px, 4vw, 32px)', fontWeight: 900, margin: '0 0 6px', color: '#111111', textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}>
+          <h1 style={{ fontSize: 'clamp(22px, 4.4vw, 35px)', fontWeight: 900, margin: '0 0 6px', color: '#111111', textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}>
             {mfr.name}
           </h1>
-          <div style={{ color: '#a78bfa', fontSize: 'clamp(12px, 2vw, 15px)', opacity: 0.9 }}>{mfr.tagline}</div>
+          <div style={{ color: '#a78bfa', fontSize: 'clamp(13px, 2.2vw, 17px)', opacity: 0.9 }}>{mfr.tagline}</div>
         </div>
       </div>
 
@@ -174,9 +174,9 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
               borderRadius: 14, padding: '16px 14px', textAlign: 'center',
               borderTop: `2px solid ${stat.color}`,
             }}>
-              <div style={{ fontSize: 24, marginBottom: 8 }}>{stat.icon}</div>
-              <div style={{ fontSize: 'clamp(15px, 3vw, 20px)', fontWeight: 800, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
-              <div style={{ color: '#6b7280', fontSize: 12 }}>{stat.label}</div>
+              <div style={{ fontSize: 26, marginBottom: 8 }}>{stat.icon}</div>
+              <div style={{ fontSize: 'clamp(17px, 3.3vw, 22px)', fontWeight: 800, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
+              <div style={{ color: '#6b7280', fontSize: 13 }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -188,18 +188,18 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
           borderRadius: 12, padding: '12px 20px', marginBottom: 28,
           display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
         }}>
-          <span style={{ color: '#a78bfa', fontSize: 14 }}>⚙️</span>
-          <span style={{ color: 'rgba(0,0,0,0.50)', fontSize: 13 }}><strong style={{ color: '#a78bfa' }}>ظرفیت تولید:</strong> {mfr.productionCapability}</span>
+          <span style={{ color: '#a78bfa', fontSize: 15 }}>⚙️</span>
+          <span style={{ color: 'rgba(0,0,0,0.50)', fontSize: 14 }}><strong style={{ color: '#a78bfa' }}>ظرفیت تولید:</strong> {mfr.productionCapability}</span>
         </div>
 
         {/* ── Specialties ─────────────────────────────────────────────────── */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>تخصص‌های تولیدی</div>
+          <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 10 }}>تخصص‌های تولیدی</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {mfr.specialties.map((spec: string) => (
               <span key={spec} style={{
                 background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)',
-                color: '#a78bfa', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                color: '#a78bfa', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600,
               }}>{spec}</span>
             ))}
           </div>
@@ -222,7 +222,7 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
               background: activeTab === tab ? '#a78bfa' : 'transparent',
               color: activeTab === tab ? '#010604' : '#94a3b8',
               fontWeight: activeTab === tab ? 700 : 400,
-              fontSize: 'clamp(11px, 2vw, 13px)', cursor: 'pointer', transition: 'all 0.2s',
+              fontSize: 'clamp(12px, 2.2vw, 14px)', cursor: 'pointer', transition: 'all 0.2s',
               whiteSpace: 'nowrap',
             }}>{label}</button>
           ))}
@@ -245,21 +245,21 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
                       width: 'clamp(100px, 20%, 180px)', minHeight: 140,
                       background: 'linear-gradient(135deg, rgba(167,139,250,0.1), rgba(6,182,212,0.05))',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 48, opacity: 0.5, flexShrink: 0,
+                      fontSize: 53, opacity: 0.5, flexShrink: 0,
                     }}>🎱</div>
                     {/* Content */}
                     <div style={{ flex: 1, padding: 20, minWidth: 200 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
                         <div>
-                          <div style={{ color: '#a78bfa', fontSize: 11, marginBottom: 6, fontWeight: 600 }}>{product.category}</div>
-                          <h3 style={{ color: '#111111', fontSize: 'clamp(14px, 2.5vw, 17px)', fontWeight: 700, margin: '0 0 8px' }}>{product.name}</h3>
+                          <div style={{ color: '#a78bfa', fontSize: 12, marginBottom: 6, fontWeight: 600 }}>{product.category}</div>
+                          <h3 style={{ color: '#111111', fontSize: 'clamp(15px, 2.8vw, 19px)', fontWeight: 700, margin: '0 0 8px' }}>{product.name}</h3>
                         </div>
                         {product.badge && (
-                          <span style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 700, flexShrink: 0 }}>{product.badge}</span>
+                          <span style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontSize: 12, padding: '3px 10px', borderRadius: 20, fontWeight: 700, flexShrink: 0 }}>{product.badge}</span>
                         )}
                       </div>
-                      <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 12px', lineHeight: 1.6 }}>{product.description}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a78bfa', fontSize: 12 }}>
+                      <p style={{ color: '#6b7280', fontSize: 14, margin: '0 0 12px', lineHeight: 1.6 }}>{product.description}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a78bfa', fontSize: 13 }}>
                         <span>▼ مشخصات فنی</span>
                       </div>
                     </div>
@@ -270,10 +270,10 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
                       borderTop: '1px solid rgba(167,139,250,0.15)', padding: 20,
                       background: 'rgba(167,139,250,0.04)',
                     }}>
-                      <div style={{ color: '#a78bfa', fontSize: 13, fontWeight: 600, marginBottom: 12 }}>مشخصات فنی</div>
+                      <div style={{ color: '#a78bfa', fontSize: 14, fontWeight: 600, marginBottom: 12 }}>مشخصات فنی</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
                         {product.specs.map((spec: string, i: number) => (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(0,0,0,0.50)', fontSize: 13 }}>
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(0,0,0,0.50)', fontSize: 14 }}>
                             <span style={{ color: '#a78bfa', flexShrink: 0 }}>✓</span> {spec}
                           </div>
                         ))}
@@ -281,7 +281,7 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
                       <button style={{
                         marginTop: 16, background: '#a78bfa', color: '#010604',
                         border: 'none', padding: '10px 24px', borderRadius: 10,
-                        fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                        fontWeight: 700, fontSize: 15, cursor: 'pointer',
                       }}>درخواست قیمت / سفارش</button>
                     </div>
                   )}
@@ -308,16 +308,16 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
                   onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(167,139,250,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
                   >
                     {/* Project image placeholder */}
-                    <div style={{ height: 140, background: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(6,182,212,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, opacity: 0.3, position: 'relative' }}>
+                    <div style={{ height: 140, background: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(6,182,212,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 53, opacity: 0.3, position: 'relative' }}>
                       🏆
-                      <div style={{ position: 'absolute', bottom: 10, left: 12, background: 'rgba(0,0,0,0.7)', color: '#a78bfa', fontSize: 11, padding: '3px 10px', borderRadius: 20 }}>{project.year}</div>
+                      <div style={{ position: 'absolute', bottom: 10, left: 12, background: 'rgba(0,0,0,0.7)', color: '#a78bfa', fontSize: 12, padding: '3px 10px', borderRadius: 20 }}>{project.year}</div>
                     </div>
                     <div style={{ padding: 16 }}>
-                      <h4 style={{ color: '#111111', fontSize: 15, fontWeight: 700, margin: '0 0 6px' }}>{project.title}</h4>
-                      <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>{project.client} — {project.city}</div>
+                      <h4 style={{ color: '#111111', fontSize: 17, fontWeight: 700, margin: '0 0 6px' }}>{project.title}</h4>
+                      <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>{project.client} — {project.city}</div>
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <span style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa', fontSize: 11, padding: '3px 10px', borderRadius: 20 }}>{project.type}</span>
-                        <span style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: 11, padding: '3px 10px', borderRadius: 20 }}>{project.quantity} دستگاه</span>
+                        <span style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa', fontSize: 12, padding: '3px 10px', borderRadius: 20 }}>{project.type}</span>
+                        <span style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: 12, padding: '3px 10px', borderRadius: 20 }}>{project.quantity} دستگاه</span>
                       </div>
                     </div>
                   </div>
@@ -337,11 +337,11 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
                 borderTop: '2px solid #f59e0b',
                 display: 'flex', gap: 16, alignItems: 'flex-start',
               }}>
-                <div style={{ fontSize: 36, flexShrink: 0 }}>{cert.icon}</div>
+                <div style={{ fontSize: 40, flexShrink: 0 }}>{cert.icon}</div>
                 <div>
-                  <h4 style={{ color: '#111111', fontSize: 15, fontWeight: 700, margin: '0 0 6px' }}>{cert.title}</h4>
-                  <div style={{ color: '#6b7280', fontSize: 12, marginBottom: 8 }}>{cert.issuer}</div>
-                  <span style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: 11, padding: '2px 10px', borderRadius: 20 }}>صادر: {cert.year}</span>
+                  <h4 style={{ color: '#111111', fontSize: 17, fontWeight: 700, margin: '0 0 6px' }}>{cert.title}</h4>
+                  <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 8 }}>{cert.issuer}</div>
+                  <span style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: 12, padding: '2px 10px', borderRadius: 20 }}>صادر: {cert.year}</span>
                 </div>
               </div>
             ))}
@@ -352,24 +352,24 @@ export default function ManufacturerDetailPage({ params }: { params: { id: strin
         {activeTab === 'about' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 20, marginBottom: 48 }}>
             <div style={{ background: 'linear-gradient(135deg, #0f0e1a, #0a0d18)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: 16, padding: 24 }}>
-              <h3 style={{ color: '#a78bfa', fontSize: 16, fontWeight: 700, marginBottom: 14, marginTop: 0 }}>معرفی کارخانه</h3>
-              <p style={{ color: 'rgba(0,0,0,0.50)', fontSize: 14, lineHeight: 2, margin: 0 }}>{mfr.about}</p>
+              <h3 style={{ color: '#a78bfa', fontSize: 18, fontWeight: 700, marginBottom: 14, marginTop: 0 }}>معرفی کارخانه</h3>
+              <p style={{ color: 'rgba(0,0,0,0.50)', fontSize: 15, lineHeight: 2, margin: 0 }}>{mfr.about}</p>
             </div>
             <div style={{ background: 'linear-gradient(135deg, #0f0e1a, #0a0d18)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: 16, padding: 24 }}>
-              <h3 style={{ color: '#a78bfa', fontSize: 16, fontWeight: 700, marginBottom: 16, marginTop: 0 }}>اطلاعات تماس</h3>
+              <h3 style={{ color: '#a78bfa', fontSize: 18, fontWeight: 700, marginBottom: 16, marginTop: 0 }}>اطلاعات تماس</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
                   ['📞', mfr.phone], ['📧', mfr.email],
                   ['📍', mfr.address],
                   ...(mfr.website ? [['🌐', mfr.website]] : []),
                 ].map(([icon, val], i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, color: 'rgba(0,0,0,0.50)', fontSize: 13 }}>
+                  <div key={i} style={{ display: 'flex', gap: 12, color: 'rgba(0,0,0,0.50)', fontSize: 14 }}>
                     <span style={{ flexShrink: 0 }}>{icon}</span>
                     <span style={{ lineHeight: 1.5 }}>{val}</span>
                   </div>
                 ))}
               </div>
-              <button style={{ marginTop: 20, width: '100%', background: '#a78bfa', color: '#010604', border: 'none', padding: '12px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+              <button style={{ marginTop: 20, width: '100%', background: '#a78bfa', color: '#010604', border: 'none', padding: '12px', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
                 📩 ارسال استعلام قیمت
               </button>
             </div>

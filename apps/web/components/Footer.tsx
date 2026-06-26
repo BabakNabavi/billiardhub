@@ -107,23 +107,23 @@ export default function Footer() {
           <div className="ft-brand">
             {/* Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '18px' }}>
-              <div style={{ width: '38px', height: '38px', background: `linear-gradient(135deg,${GOLD},#A07840)`, borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '19px', color: '#fff', boxShadow: `0 0 22px ${GOLD}30`, flexShrink: 0 }}>B</div>
+              <div style={{ width: '38px', height: '38px', background: `linear-gradient(135deg,${GOLD},#A07840)`, borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '21px', color: '#fff', boxShadow: `0 0 22px ${GOLD}30`, flexShrink: 0 }}>B</div>
               <div>
-                <div style={{ fontWeight: 900, fontSize: '17px', color: '#fff', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                <div style={{ fontWeight: 900, fontSize: '19px', color: '#fff', letterSpacing: '-0.02em', lineHeight: 1 }}>
                   بیلیارد <span style={{ background: `linear-gradient(135deg,${GOLD},#e8c98a)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>هاب</span>
                 </div>
-                <div style={{ fontSize: '9px', color: DIM2, letterSpacing: '0.18em', marginTop: '4px' }}>BILLIARDHUB · IRAN</div>
+                <div style={{ fontSize: '10px', color: DIM2, letterSpacing: '0.18em', marginTop: '4px' }}>BILLIARDHUB · IRAN</div>
               </div>
             </div>
 
-            <p style={{ color: DIM, fontSize: '13px', lineHeight: 1.85, marginBottom: '22px', maxWidth: '270px' }}>
+            <p style={{ color: DIM, fontSize: '14px', lineHeight: 1.85, marginBottom: '22px', maxWidth: '270px' }}>
               اولین پلتفرم تخصصی بیلیارد ایران. رزرو میز، رنکینگ رسمی، فروشگاه تجهیزات و پخش زنده مسابقات.
             </p>
 
             {/* Trust badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.07)', border: `1px solid ${GOLD_BOR}`, borderRadius: '10px', padding: '8px 14px', marginBottom: '24px' }}>
               <Shield size={13} style={{ color: GOLD, flexShrink: 0 }} />
-              <span style={{ fontSize: '11px', color: GOLD_DIM, fontWeight: 600, lineHeight: 1.4 }}>تأیید شده توسط فدراسیون بیلیارد ایران</span>
+              <span style={{ fontSize: '12px', color: GOLD_DIM, fontWeight: 600, lineHeight: 1.4 }}>تأیید شده توسط فدراسیون بیلیارد ایران</span>
             </div>
 
             {/* Socials */}
@@ -142,7 +142,7 @@ export default function Footer() {
           {/* Nav columns */}
           {nav.map(col => (
             <div key={col.heading}>
-              <div style={{ fontSize: '10px', color: col.color, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '18px', opacity: 0.9 }}>{col.heading}</div>
+              <div style={{ fontSize: '11px', color: col.color, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '18px', opacity: 0.9 }}>{col.heading}</div>
               {col.links.map(item => (
                 <Link key={item.href} href={item.href} className="ft-link">
                   <ChevronLeft size={10} />
@@ -160,7 +160,7 @@ export default function Footer() {
             { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />,  text: '۰۲۱-۱۲۳۴۵۶۷۸' },
             { icon: <Mail   size={13} style={{ color: GOLD, flexShrink: 0 }} />,  text: 'info@billiardhub.net' },
           ].map((c, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: DIM, fontSize: '12px' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: DIM, fontSize: '13px' }}>
               {c.icon}{c.text}
             </div>
           ))}
@@ -168,11 +168,11 @@ export default function Footer() {
 
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ fontSize: '12px', color: DIM2 }}>© ۱۴۰۳ بیلیارد هاب — تمام حقوق محفوظ است</div>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.10)', letterSpacing: '0.12em' }}>BILLIARDHUB · IRAN · 2024</div>
+          <div style={{ fontSize: '13px', color: DIM2 }}>© ۱۴۰۳ بیلیارد هاب — تمام حقوق محفوظ است</div>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.10)', letterSpacing: '0.12em' }}>BILLIARDHUB · IRAN · 2024</div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
             {['حریم خصوصی', 'قوانین', 'تماس با ما'].map(item => (
-              <span key={item} style={{ fontSize: '12px', color: DIM2, cursor: 'pointer', transition: 'color 0.25s ease' }}
+              <span key={item} style={{ fontSize: '13px', color: DIM2, cursor: 'pointer', transition: 'color 0.25s ease' }}
                 onMouseEnter={e => { (e.target as HTMLElement).style.color = GOLD; }}
                 onMouseLeave={e => { (e.target as HTMLElement).style.color = DIM2; }}>
                 {item}

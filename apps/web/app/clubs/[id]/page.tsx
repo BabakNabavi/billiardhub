@@ -115,7 +115,7 @@ export default function ClubProfilePage() {
   const [club, setClub]               = useState<Club>(sampleClub);
   const [loading, setLoading]         = useState(true);
   const [slide, setSlide]             = useState(0);
-  const [distance, setDistance]       = useState<string | null>(null);
+  const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
   const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule'>('info');
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
 
@@ -151,7 +151,7 @@ export default function ClubProfilePage() {
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, paddingTop: 72 }}>
       <div style={{ width: 48, height: 48, border: '2px solid rgba(199,166,106,0.10)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', fontFamily: 'Vazirmatn, sans-serif' }}>در حال بارگذاری...</div>
+      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', fontFamily: 'Vazirmatn, sans-serif' }}>در حال بارگذاری...</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
@@ -231,14 +231,14 @@ export default function ClubProfilePage() {
           )}
 
           {/* Back button — top-right corner */}
-          <button onClick={() => router.push('/clubs')} style={{ position: 'absolute', top: 74, right: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.82)', fontSize: 13, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+          <button onClick={() => router.push('/clubs')} style={{ position: 'absolute', top: 72, right: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.82)', fontSize: 14, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
             <ChevronRight size={14} /> باشگاه‌ها
           </button>
 
           {/* Status badge — top-left corner */}
-          <div style={{ position: 'absolute', top: 74, left: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
+          <div style={{ position: 'absolute', top: 72, left: 'clamp(14px,3vw,28px)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 7, background: isOpen ? 'rgba(48,197,90,0.12)' : 'rgba(239,68,68,0.12)', backdropFilter: 'blur(16px)', border: `1px solid ${isOpen ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.28)'}`, borderRadius: 20, padding: '7px 14px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: isOpen ? '#30C55A' : '#ef4444', animation: 'pulse 2s infinite', display: 'inline-block' }} />
-            <span style={{ fontSize: 12, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(todayH?.close || '')}` : 'بسته است'}</span>
+            <span style={{ fontSize: 13, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(todayH?.close || '')}` : 'بسته است'}</span>
           </div>
 
           {images.length > 1 && (
@@ -255,32 +255,32 @@ export default function ClubProfilePage() {
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(14px,2.5vw,28px) clamp(16px,4vw,40px)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '4px 14px', marginBottom: 10 }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
-              <span style={{ fontSize: 10, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
+              <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 10 }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }} />}
                 {hasStory && <div style={{ position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1, border: '3px solid rgba(10,8,6,0.92)' }} />}
-                <div style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
+                <div style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
                   {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : club.name[0]}
                 </div>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
                 {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
               </div>
-              <h1 style={{ fontSize: 'clamp(20px,5vw,50px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{club.name}</h1>
+              <h1 style={{ fontSize: 'clamp(22px, 5.5vw, 55px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{club.name}</h1>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: 'rgba(255,255,255,0.82)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: 20, padding: '5px 12px', fontSize: 13, color: 'rgba(255,255,255,0.82)' }}>
                 <MapPin size={11} style={{ color: '#C7A66A' }} /> {club.city}
               </div>
               {distance && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(48,197,90,0.10)', border: '1px solid rgba(48,197,90,0.22)', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#30C55A' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(48,197,90,0.10)', border: '1px solid rgba(48,197,90,0.22)', borderRadius: 20, padding: '5px 12px', fontSize: 13, color: '#30C55A' }}>
                   <Navigation size={11} /> {distance}
                 </div>
               )}
               <div style={{ display: 'flex', gap: 2, alignItems: 'center', background: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: '5px 12px' }}>
                 {[1,2,3,4,5].map(s => <Star key={s} size={11} style={{ color: s <= 4 ? '#f59e0b' : 'rgba(255,255,255,0.2)', fill: s <= 4 ? '#f59e0b' : 'transparent' }} />)}
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginRight: 4 }}>۴.۸</span>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginRight: 4 }}>۴.۸</span>
               </div>
             </div>
           </div>
@@ -312,15 +312,15 @@ export default function ClubProfilePage() {
 
                 {/* About */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
-                  <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     درباره باشگاه
                   </h2>
-                  <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0 }}>{club.description}</p>
+                  <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0 }}>{club.description}</p>
                   {club.specialFeatures && (
                     <div style={{ marginTop: 14, padding: '12px 14px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.18)', borderRadius: 12 }}>
-                      <div style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, marginBottom: 5 }}>⭐ امکانات ویژه</div>
-                      <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.7 }}>{club.specialFeatures}</p>
+                      <div style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, marginBottom: 5 }}>⭐ امکانات ویژه</div>
+                      <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.7 }}>{club.specialFeatures}</p>
                     </div>
                   )}
                 </div>
@@ -329,7 +329,7 @@ export default function ClubProfilePage() {
 
                 {/* Amenities */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
-                  <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     امکانات
                   </h2>
@@ -344,7 +344,7 @@ export default function ClubProfilePage() {
                     ].filter(a => a.cond).map((a, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 13px', background: `${a.color}08`, border: `1px solid ${a.color}18`, borderRadius: 12 }}>
                         <Check size={13} style={{ color: a.color, flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', fontWeight: 500 }}>{a.label}</span>
+                        <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', fontWeight: 500 }}>{a.label}</span>
                       </div>
                     ))}
                   </div>
@@ -354,7 +354,7 @@ export default function ClubProfilePage() {
                 <div className="mobile-only">
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
-                    <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
+                    <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
                       {[
                         { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
@@ -362,8 +362,8 @@ export default function ClubProfilePage() {
                         { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
                       ].map((x, i) => (
                         <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
-                          <div style={{ fontSize: 26, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
-                          <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
+                          <div style={{ fontSize: 29, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
+                          <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
                         </div>
                       ))}
                     </div>
@@ -372,7 +372,7 @@ export default function ClubProfilePage() {
 
                 {/* ── #7: Coaches — clickable, popup on click/touch ── */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
-                  <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#a78bfa,#C7A66A)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                     مربیان باشگاه
                   </h2>
@@ -380,19 +380,19 @@ export default function ClubProfilePage() {
                     {coaches.map((c, i) => (
                       <div key={i} className="coach-card" onClick={() => setActiveCoach(i)}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#fff', flexShrink: 0 }}>
+                          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#fff', flexShrink: 0 }}>
                             {c.name[0]}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 14, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
-                            <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.42)' }}>{c.title} · {c.exp}</div>
+                            <div style={{ fontSize: 15, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
+                            <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)' }}>{c.title} · {c.exp}</div>
                           </div>
                           <div style={{ textAlign: 'center', flexShrink: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center', marginBottom: 3 }}>
                               <Star size={11} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                              <span style={{ fontSize: 13, fontWeight: 800, color: '#111111' }}>{c.rating}</span>
+                              <span style={{ fontSize: 14, fontWeight: 800, color: '#111111' }}>{c.rating}</span>
                             </div>
-                            <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.35)' }}>{toFa(c.matches)} مسابقه</div>
+                            <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)' }}>{toFa(c.matches)} مسابقه</div>
                           </div>
                           <ChevronLeft size={14} style={{ color: 'rgba(0,0,0,0.25)', flexShrink: 0 }} />
                         </div>
@@ -404,23 +404,23 @@ export default function ClubProfilePage() {
                 {/* mobile-only: contact + stats after coaches */}
                 <div className="mobile-only">
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
                       اطلاعات تماس
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>
                         <MapPin size={14} style={{ color: '#C7A66A', marginTop: 2, flexShrink: 0 }} />
                         <span style={{ lineHeight: 1.6 }}>{club.address}، {club.city}</span>
                       </div>
                       {club.phone && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
                           <Phone size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
                           <span style={{ color: 'rgba(0,0,0,0.45)' }}>{club.phone}</span>
                         </div>
                       )}
                       {club.website && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
                           <Globe size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
                           <a href={club.website} target="_blank" rel="noopener noreferrer" style={{ color: '#C7A66A', textDecoration: 'none' }}>{club.website.replace('https://', '')}</a>
                         </div>
@@ -428,7 +428,7 @@ export default function ClubProfilePage() {
                     </div>
                   </div>
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
                       آمار باشگاه
                     </div>
@@ -440,8 +440,8 @@ export default function ClubProfilePage() {
                         { label: 'ظرفیت روزانه', v: '۸۰ نفر', color: '#06b6d4' },
                       ].map((x, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
-                          <span style={{ fontSize: 14, fontWeight: 800, color: x.color }}>{x.v}</span>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
+                          <span style={{ fontSize: 15, fontWeight: 800, color: x.color }}>{x.v}</span>
                         </div>
                       ))}
                     </div>
@@ -451,7 +451,7 @@ export default function ClubProfilePage() {
                 {/* Location map — last */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, overflow: 'hidden' }}>
                   <div style={{ padding: '16px 18px 0' }}>
-                    <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#ef4444,#f59e0b)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
                       موقعیت مکانی
                     </h2>
@@ -460,11 +460,11 @@ export default function ClubProfilePage() {
                     <iframe src={`https://maps.google.com/maps?q=${club.latitude},${club.longitude}&z=15&output=embed`} style={{ width: '100%', height: '100%', border: 'none', filter: 'invert(0.9) hue-rotate(180deg) brightness(0.85) contrast(0.9)' }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
                   </div>
                   <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                    <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
                       <MapPin size={12} style={{ color: '#C7A66A', flexShrink: 0 }} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.address}، {club.city}</span>
                     </div>
-                    <a href={`https://www.google.com/maps?q=${club.latitude},${club.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.20)', borderRadius: 20, color: '#06b6d4', fontSize: 12, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+                    <a href={`https://www.google.com/maps?q=${club.latitude},${club.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.20)', borderRadius: 20, color: '#06b6d4', fontSize: 13, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
                       <Navigation size={12} /> مسیریابی
                     </a>
                   </div>
@@ -475,7 +475,7 @@ export default function ClubProfilePage() {
               <div className="sidebar-col">
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
-                  <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
+                  <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 16 }}>
                     {[
                       { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
@@ -483,34 +483,34 @@ export default function ClubProfilePage() {
                       { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
                     ].map((x, i) => (
                       <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
-                        <div style={{ fontSize: 26, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
-                        <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
+                        <div style={{ fontSize: 29, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
                       </div>
                     ))}
                   </div>
-                  <button className="book-btn-desktop" onClick={goBook} style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.25s' }}>
+                  <button className="book-btn-desktop" onClick={goBook} style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.25s' }}>
                     <Calendar size={15} /> رزرو آنلاین
                   </button>
                 </div>
 
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
                     اطلاعات تماس
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>
                       <MapPin size={14} style={{ color: '#C7A66A', marginTop: 2, flexShrink: 0 }} />
                       <span style={{ lineHeight: 1.6 }}>{club.address}، {club.city}</span>
                     </div>
                     {club.phone && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
                         <Phone size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
                         <span style={{ color: 'rgba(0,0,0,0.45)' }}>{club.phone}</span>
                       </div>
                     )}
                     {club.website && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
                         <Globe size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
                         <a href={club.website} target="_blank" rel="noopener noreferrer" style={{ color: '#C7A66A', textDecoration: 'none' }}>{club.website.replace('https://', '')}</a>
                       </div>
@@ -519,7 +519,7 @@ export default function ClubProfilePage() {
                 </div>
 
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: 2, display: 'inline-block' }} />
                     آمار باشگاه
                   </div>
@@ -531,8 +531,8 @@ export default function ClubProfilePage() {
                       { label: 'ظرفیت روزانه', v: '۸۰ نفر', color: '#06b6d4' },
                     ].map((x, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
-                        <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: x.color }}>{x.v}</span>
+                        <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: x.color }}>{x.v}</span>
                       </div>
                     ))}
                   </div>
@@ -553,8 +553,8 @@ export default function ClubProfilePage() {
                 ].map((x, i) => (
                   <div key={i} style={{ background: '#FFFFFF', border: `1px solid rgba(${x.rgb},0.14)`, borderRadius: 16, padding: '16px 12px', textAlign: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>{x.icon}</div>
-                    <div style={{ fontSize: 22, fontWeight: 900, color: x.c, marginBottom: 4 }}>{x.v}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.40)', fontWeight: 600 }}>{x.l}</div>
+                    <div style={{ fontSize: 24, fontWeight: 900, color: x.c, marginBottom: 4 }}>{x.v}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.40)', fontWeight: 600 }}>{x.l}</div>
                   </div>
                 ))}
               </div>
@@ -569,24 +569,24 @@ export default function ClubProfilePage() {
                       </div>
                       <div style={{ flex: 1, minWidth: 160 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                          <div style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>{t.title}</div>
-                          <span style={{ fontSize: 10, color: t.statusColor, background: `${t.statusColor}12`, border: `1px solid ${t.statusColor}25`, borderRadius: 20, padding: '2px 10px', fontWeight: 700, flexShrink: 0 }}>
+                          <div style={{ fontSize: 17, fontWeight: 800, color: '#111111' }}>{t.title}</div>
+                          <span style={{ fontSize: 11, color: t.statusColor, background: `${t.statusColor}12`, border: `1px solid ${t.statusColor}25`, borderRadius: 20, padding: '2px 10px', fontWeight: 700, flexShrink: 0 }}>
                             {t.status}
                           </span>
                         </div>
                         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 4 }}>
                             <Clock size={11} style={{ color: '#C7A66A' }} /> {t.date}
                           </span>
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 4 }}>
                             <Users size={11} style={{ color: '#C7A66A' }} /> {toFa(t.participants)} نفر
                           </span>
-                          <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 13, color: '#C7A66A', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
                             🏆 {t.prize}
                           </span>
                         </div>
                       </div>
-                      <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.32)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '4px 12px', fontWeight: 600, flexShrink: 0 }}>
+                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.32)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '4px 12px', fontWeight: 600, flexShrink: 0 }}>
                         {t.type}
                       </div>
                     </div>
@@ -595,8 +595,8 @@ export default function ClubProfilePage() {
               </div>
 
               <div style={{ marginTop: 20, padding: '14px 18px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.18)', borderRadius: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>برای شرکت در مسابقات یا برگزاری رویداد خاص با ما تماس بگیرید</div>
-                <a href={`tel:${club.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, color: '#C7A66A', fontSize: 13, fontWeight: 800, textDecoration: 'none' }}>
+                <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>برای شرکت در مسابقات یا برگزاری رویداد خاص با ما تماس بگیرید</div>
+                <a href={`tel:${club.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, color: '#C7A66A', fontSize: 14, fontWeight: 800, textDecoration: 'none' }}>
                   <Phone size={13} /> تماس با باشگاه
                 </a>
               </div>
@@ -609,7 +609,7 @@ export default function ClubProfilePage() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
-                  <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌ها</h3>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌ها</h3>
                 </div>
                 <div className="album-scroll">
                   {galleryAlbums.map((album, i) => (
@@ -618,8 +618,8 @@ export default function ClubProfilePage() {
                         <img src={album.cover} alt={album.name} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)', transition: 'transform 0.4s ease' }} onMouseEnter={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.06)'; }} onMouseLeave={e => { (e.target as HTMLImageElement).style.transform = 'scale(1)'; }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
                         <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
-                          <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
-                          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.count)} عکس</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
+                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.count)} عکس</div>
                         </div>
                       </div>
                     </div>
@@ -629,7 +629,7 @@ export default function ClubProfilePage() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
-                  <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: 0 }}>همه تصاویر</h3>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>همه تصاویر</h3>
                 </div>
                 <div className="gallery-grid">
                   {galleryImages.map((img, i) => (
@@ -646,7 +646,7 @@ export default function ClubProfilePage() {
           {tab === 'schedule' && (
             <div style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400 }}>
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px' }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 3, height: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
                   ساعات کاری هفتگی
                 </div>
@@ -658,16 +658,16 @@ export default function ClubProfilePage() {
                     return (
                       <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: 9, background: isToday ? 'rgba(199,166,106,0.06)' : 'transparent', border: `1px solid ${isToday ? 'rgba(199,166,106,0.18)' : 'transparent'}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#C7A66A' : 'rgba(0,0,0,0.50)', fontSize: 12, width: 52, flexShrink: 0 }}>{dayNames[day]}</span>
-                          {isToday && <span style={{ fontSize: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', padding: '1px 6px', borderRadius: 20, fontWeight: 700, flexShrink: 0 }}>امروز</span>}
+                          <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? '#C7A66A' : 'rgba(0,0,0,0.50)', fontSize: 13, width: 52, flexShrink: 0 }}>{dayNames[day]}</span>
+                          {isToday && <span style={{ fontSize: 9, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', padding: '1px 6px', borderRadius: 20, fontWeight: 700, flexShrink: 0 }}>امروز</span>}
                         </div>
                         {hours.isOpen ? (
-                          <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
                             <Clock size={9} style={{ color: '#C7A66A' }} />
                             {toFa(hours.open)} — {toFa(hours.close)}
                           </span>
                         ) : (
-                          <span style={{ fontSize: 10, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>تعطیل</span>
+                          <span style={{ fontSize: 11, color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>تعطیل</span>
                         )}
                       </div>
                     );
@@ -680,7 +680,7 @@ export default function ClubProfilePage() {
 
         {/* Sticky mobile reserve button */}
         <div className="book-fixed">
-          <button onClick={goBook} style={{ width: '100%', padding: '14px', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, background: 'rgba(199,166,106,0.14)', color: '#C7A66A', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <button onClick={goBook} style={{ width: '100%', padding: '14px', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, background: 'rgba(199,166,106,0.14)', color: '#C7A66A', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <Calendar size={16} /> رزرو آنلاین میز
           </button>
         </div>
@@ -713,24 +713,24 @@ export default function ClubProfilePage() {
 
             {/* Avatar */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <div style={{ width: 68, height: 68, borderRadius: 20, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#fff' }}>
+              <div style={{ width: 68, height: 68, borderRadius: 20, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 29, fontWeight: 900, color: '#fff' }}>
                 {popupCoach.name[0]}
               </div>
             </div>
 
             {/* Info */}
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
-              <div style={{ fontSize: 18, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{popupCoach.title} · {popupCoach.exp} تجربه</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
+              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{popupCoach.title} · {popupCoach.exp} تجربه</div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <Star size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                  <span style={{ fontSize: 15, fontWeight: 900, color: '#111111' }}>{popupCoach.rating}</span>
+                  <span style={{ fontSize: 17, fontWeight: 900, color: '#111111' }}>{popupCoach.rating}</span>
                 </div>
                 <span style={{ width: 1, height: 14, background: 'rgba(0,0,0,0.12)', display: 'inline-block' }} />
-                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{toFa(popupCoach.matches)} مسابقه</span>
+                <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>{toFa(popupCoach.matches)} مسابقه</span>
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', lineHeight: 1.7, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
+              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)', lineHeight: 1.7, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
                 {popupCoach.bio}
               </div>
             </div>
@@ -738,7 +738,7 @@ export default function ClubProfilePage() {
             {/* CTA — navigate to coach page on second tap/click */}
             <button
               onClick={() => { setActiveCoach(null); router.push(`/coaches/${popupCoach.id}`); }}
-              style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               مشاهده صفحه مربی <ChevronLeft size={15} />
             </button>
 

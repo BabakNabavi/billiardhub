@@ -26,7 +26,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(199,166,106,0.1)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
         <div style={{ position: 'absolute', inset: '8px', border: '2px solid rgba(6,182,212,0.1)', borderTop: '2px solid #06b6d4', borderRadius: '50%', animation: 'spin 1.2s linear infinite reverse' }} />
       </div>
-      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.30)' }}>در حال بارگذاری...</div>
+      <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.30)' }}>در حال بارگذاری...</div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

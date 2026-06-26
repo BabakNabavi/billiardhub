@@ -19,9 +19,9 @@ interface ButtonProps {
 }
 
 const sizes: Record<Size, CSSProperties> = {
-  sm: { padding: '8px 18px',  fontSize: '12px', borderRadius: radius.md },
-  md: { padding: '12px 26px', fontSize: '14px', borderRadius: radius.md },
-  lg: { padding: '15px 36px', fontSize: '15px', borderRadius: radius.md },
+  sm: { padding: '8px 18px',  fontSize: '13px', borderRadius: radius.md },
+  md: { padding: '12px 26px', fontSize: '15px', borderRadius: radius.md },
+  lg: { padding: '15px 36px', fontSize: '17px', borderRadius: radius.md },
 };
 
 export function Button({

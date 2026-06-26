@@ -65,7 +65,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
       <div style={{ position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:99999,width:'min(400px,94vw)',height:'min(700px,88vh)',borderRadius:'28px',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.4,0,.2,1)',boxShadow:`0 40px 100px rgba(0,0,0,0.8),0 0 0 1px rgba(0,0,0,0.06),0 0 80px ${currentGroup.roleColor}25` }} onClick={e => e.stopPropagation()}>
         <div style={{ position:'absolute',inset:0,background:bgGradients[currentGroup.userRole]||bgGradients.player }}>
           <div style={{ position:'absolute',top:'-100px',left:'50%',transform:'translateX(-50%)',width:'350px',height:'350px',borderRadius:'50%',background:`radial-gradient(${currentGroup.roleColor}25,transparent 65%)`,pointerEvents:'none' }} />
-          <div style={{ position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'140px',opacity:0.05,userSelect:'none',pointerEvents:'none' }}>🎱</div>
+          <div style={{ position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize: '154px',opacity:0.05,userSelect:'none',pointerEvents:'none' }}>🎱</div>
         </div>
         <div style={{ position:'absolute',inset:0,borderRadius:'28px',border:'1px solid rgba(0,0,0,0.08)',pointerEvents:'none',zIndex:55 }} />
         {/* Progress bars */}
@@ -82,14 +82,14 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         </div>
         {/* Header */}
         <div style={{ position:'absolute',top:'30px',left:'14px',right:'14px',display:'flex',alignItems:'center',gap:'10px',zIndex:50,paddingTop:'6px' }}>
-          <div style={{ width:'44px',height:'44px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}80`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize:'17px',boxShadow:`0 0 16px ${currentGroup.roleColor}50` }}>
+          <div style={{ width:'44px',height:'44px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}80`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize: '19px',boxShadow:`0 0 16px ${currentGroup.roleColor}50` }}>
             {currentGroup.userAvatar}
           </div>
           <div style={{ flex:1 }}>
-            <div style={{ color:'#fff',fontWeight:700,fontSize:'14px' }}>{currentGroup.userName}</div>
-            <div style={{ color:'rgba(255,255,255,0.4)',fontSize:'11px' }}>{currentStory.createdAt}</div>
+            <div style={{ color:'#fff',fontWeight:700,fontSize: '15px' }}>{currentGroup.userName}</div>
+            <div style={{ color:'rgba(255,255,255,0.4)',fontSize: '12px' }}>{currentStory.createdAt}</div>
           </div>
-          <span style={{ fontSize:'10px',color:currentGroup.roleColor,background:`${currentGroup.roleColor}18`,border:`1px solid ${currentGroup.roleColor}40`,borderRadius:'20px',padding:'4px 11px',fontWeight:700,backdropFilter:'blur(10px)',flexShrink:0 }}>{currentGroup.roleLabel}</span>
+          <span style={{ fontSize: '11px',color:currentGroup.roleColor,background:`${currentGroup.roleColor}18`,border:`1px solid ${currentGroup.roleColor}40`,borderRadius:'20px',padding:'4px 11px',fontWeight:700,backdropFilter:'blur(10px)',flexShrink:0 }}>{currentGroup.roleLabel}</span>
           <button onClick={onClose} style={{ width:'34px',height:'34px',borderRadius:'50%',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(0,0,0,0.09)',cursor:'pointer',color:'rgba(255,255,255,0.8)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><X size={15} /></button>
         </div>
         <button onClick={onPrev} style={{ position:'absolute',right:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
@@ -97,7 +97,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         {currentStory.caption && (
           <div style={{ position:'absolute',bottom:'130px',left:'16px',right:'16px',zIndex:20 }}>
             <div style={{ background:'rgba(0,0,0,0.5)',borderRadius:'18px',padding:'14px 18px',backdropFilter:'blur(16px)',border:'1px solid rgba(0,0,0,0.06)' }}>
-              <p style={{ color:'#fff',fontSize:'15px',margin:0,lineHeight:1.7,fontWeight:500 }}>{currentStory.caption}</p>
+              <p style={{ color:'#fff',fontSize: '17px',margin:0,lineHeight:1.7,fontWeight:500 }}>{currentStory.caption}</p>
             </div>
           </div>
         )}
@@ -110,7 +110,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         <div style={{ position:'absolute',bottom:0,left:0,right:0,zIndex:30,padding:'14px 16px 26px',background:'linear-gradient(to top,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.2) 70%,transparent 100%)' }}>
           <div style={{ display:'flex',gap:'8px',alignItems:'center' }}>
             <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onKeyDown={e => e.key==='Enter' && onSendComment()} placeholder="پیام بفرست..." />
-            <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background:showEmojis?'rgba(199,166,106,0.2)':'rgba(0,0,0,0.06)',borderColor:showEmojis?'rgba(199,166,106,0.4)':'rgba(0,0,0,0.09)',fontSize:'20px' }}>😊</button>
+            <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background:showEmojis?'rgba(199,166,106,0.2)':'rgba(0,0,0,0.06)',borderColor:showEmojis?'rgba(199,166,106,0.4)':'rgba(0,0,0,0.09)',fontSize: '22px' }}>😊</button>
             <button className="story-icon-btn" onClick={onLike} style={{ background:liked?'rgba(239,68,68,0.2)':'rgba(0,0,0,0.06)',borderColor:liked?'rgba(239,68,68,0.5)':'rgba(0,0,0,0.09)' }}>
               <Heart size={17} fill={liked?'#ef4444':'none'} style={{ color:liked?'#ef4444':'rgba(255,255,255,0.7)' }} />
             </button>

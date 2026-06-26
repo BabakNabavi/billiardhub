@@ -203,7 +203,7 @@ export default function NewClubPage() {
   };
   const labelCls = 'block text-xs font-medium mb-1 text-emerald-400/70';
   const headingStyle: React.CSSProperties = {
-    fontSize: '15px',
+    fontSize: '17px',
     fontWeight: 800,
     color: '#C7A66A',
     marginBottom: '16px',
@@ -226,12 +226,12 @@ export default function NewClubPage() {
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px clamp(16px,4vw,32px) 0' }}>
 
           <div style={{ marginBottom: '28px' }}>
-            <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: '6px' }}>REGISTER CLUB</div>
-            <h1 style={{ fontSize: 'clamp(22px,4vw,32px)', fontWeight: 900, color: '#111111', margin: 0, letterSpacing: '-0.02em' }}>ثبت باشگاه جدید</h1>
+            <div style={{ fontSize: '11px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: '6px' }}>REGISTER CLUB</div>
+            <h1 style={{ fontSize: 'clamp(24px, 4.4vw, 35px)', fontWeight: 900, color: '#111111', margin: 0, letterSpacing: '-0.02em' }}>ثبت باشگاه جدید</h1>
           </div>
 
           {error && (
-            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px' }}>
+            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>
               {error}
             </div>
           )}
@@ -277,11 +277,11 @@ export default function NewClubPage() {
             <div className="mb-4">
               <label className={labelCls} style={{ display: 'block', marginBottom: '8px' }}>موقعیت مکانی *</label>
               <button type="button" onClick={getLocation} disabled={locationLoading}
-                style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', opacity: locationLoading ? 0.5 : 1 }}>
+                style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd', padding: '8px 16px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', opacity: locationLoading ? 0.5 : 1 }}>
                 {locationLoading ? 'در حال دریافت...' : '📍 دریافت موقعیت فعلی'}
               </button>
               {form.latitude && form.longitude && (
-                <p style={{ fontSize: '12px', color: '#6ee7b7', marginTop: '8px' }}>
+                <p style={{ fontSize: '13px', color: '#6ee7b7', marginTop: '8px' }}>
                   ✅ موقعیت دریافت شد: {parseFloat(form.latitude).toFixed(4)}, {parseFloat(form.longitude).toFixed(4)}
                 </p>
               )}
@@ -340,7 +340,7 @@ export default function NewClubPage() {
                     checked={(form as any)[item.key]}
                     onChange={handleChange}
                     style={{ width: '16px', height: '16px', accentColor: '#C7A66A' }} />
-                  <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.48)' }}>{item.label}</span>
+                  <span style={{ fontSize: '14px', color: 'rgba(0,0,0,0.48)' }}>{item.label}</span>
                 </label>
               ))}
             </div>
@@ -360,7 +360,7 @@ export default function NewClubPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {days.map((day) => (
                 <div key={day.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '64px', fontSize: '13px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, flexShrink: 0 }}>{day.label}</div>
+                  <div style={{ width: '64px', fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, flexShrink: 0 }}>{day.label}</div>
                   <input type="checkbox"
                     checked={(form.workingHours as any)[day.key].isOpen}
                     onChange={(e) => handleWorkingHours(day.key, 'isOpen', e.target.checked)}
@@ -371,16 +371,16 @@ export default function NewClubPage() {
                         value={(form.workingHours as any)[day.key].open}
                         onChange={(e) => handleWorkingHours(day.key, 'open', e.target.value)}
                         className="dark-input"
-                        style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
-                      <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>تا</span>
+                        style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderRadius: '8px', padding: '4px 8px', fontSize: '14px' }} />
+                      <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)' }}>تا</span>
                       <input type="time"
                         value={(form.workingHours as any)[day.key].close}
                         onChange={(e) => handleWorkingHours(day.key, 'close', e.target.value)}
                         className="dark-input"
-                        style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderRadius: '8px', padding: '4px 8px', fontSize: '13px' }} />
+                        style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderRadius: '8px', padding: '4px 8px', fontSize: '14px' }} />
                     </>
                   ) : (
-                    <span style={{ fontSize: '12px', color: '#fca5a5' }}>تعطیل</span>
+                    <span style={{ fontSize: '13px', color: '#fca5a5' }}>تعطیل</span>
                   )}
                 </div>
               ))}
@@ -390,7 +390,7 @@ export default function NewClubPage() {
           {/* آپلود عکس */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>📸 عکس‌های باشگاه</h2>
-            <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG، PNG</p>
+            <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginBottom: '12px' }}>حداکثر ۱۰ عکس — فرمت JPG، PNG</p>
             <input type="file" accept="image/*" multiple onChange={handleImageSelect}
               className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {imagePreviews.length > 0 && (
@@ -399,7 +399,7 @@ export default function NewClubPage() {
                   <div key={i} style={{ position: 'relative' }}>
                     <img src={src} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }} />
                     <button onClick={() => removeImage(i)}
-                      style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(239,68,68,0.8)', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
+                      style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(239,68,68,0.8)', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
                       ×
                     </button>
                   </div>
@@ -411,22 +411,22 @@ export default function NewClubPage() {
           {/* آپلود ویدیو */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>🎬 ویدیوی باشگاه</h2>
-            <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت — فرمت MP4</p>
+            <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت — فرمت MP4</p>
             <input type="file" accept="video/mp4,video/*" onChange={handleVideoSelect}
               className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {videoFile && (
-              <p style={{ fontSize: '12px', color: '#6ee7b7', marginTop: '8px' }}>✅ {videoFile.name} انتخاب شد</p>
+              <p style={{ fontSize: '13px', color: '#6ee7b7', marginTop: '8px' }}>✅ {videoFile.name} انتخاب شد</p>
             )}
           </div>
 
           {uploadProgress && (
-            <div style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', color: '#93c5fd', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', textAlign: 'center' }}>
+            <div style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', color: '#93c5fd', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', textAlign: 'center' }}>
               {uploadProgress}
             </div>
           )}
 
           <button onClick={handleSubmit} disabled={loading}
-            style={{ width: '100%', background: loading ? 'rgba(199,166,106,0.3)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '16px', borderRadius: '14px', fontSize: '16px', fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 8px 24px rgba(199,166,106,0.25)' }}>
+            style={{ width: '100%', background: loading ? 'rgba(199,166,106,0.3)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '16px', borderRadius: '14px', fontSize: '18px', fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: loading ? 'none' : '0 8px 24px rgba(199,166,106,0.25)' }}>
             {loading ? uploadProgress || 'در حال ثبت...' : '✅ ثبت باشگاه'}
           </button>
         </div>

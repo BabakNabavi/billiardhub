@@ -216,10 +216,10 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               };
               const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
               return (
-                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: tc.clr }}>{club.type}</span>
+                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, color: tc.clr }}>{club.type}</span>
               );
             })()}
-            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
+            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
           </div>
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
             <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
@@ -227,20 +227,20 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         </div>
         {hov && (
           <div style={{ position: 'absolute', top: '56px', right: '14px', display: 'flex', gap: '5px', flexWrap: 'wrap', zIndex: 2, animation: 'fadeTagIn 0.3s ease both' }}>
-            {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '5px 12px', fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
+            {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '5px 12px', fontSize: '12px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
           </div>
         )}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: hov ? '22px 18px 20px' : '18px 18px 16px', background: 'rgba(10,8,6,0.42)', backdropFilter: 'blur(32px) saturate(180%)', WebkitBackdropFilter: 'blur(32px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.07)', transition: 'padding 0.35s ease' }}>
           <div style={{ fontSize: featured ? '18px' : '15px', fontWeight: 800, color: '#fff', marginBottom: '7px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.42)', fontSize: '11px' }}><MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} /><span style={{ color: '#fff', fontSize: '12px', fontWeight: 700 }}>{club.rating}</span><span style={{ color: 'rgba(255,255,255,0.26)', fontSize: '10px' }}>({club.reviews})</span></span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.42)', fontSize: '12px' }}><MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} /><span style={{ color: '#fff', fontSize: '13px', fontWeight: 700 }}>{club.rating}</span><span style={{ color: 'rgba(255,255,255,0.26)', fontSize: '11px' }}>({club.reviews})</span></span>
           </div>
           <div style={{ overflow: 'hidden', maxHeight: hov ? '90px' : '0px', transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)' }}>
             <div style={{ height: '12px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
-              <div><span style={{ fontSize: '16px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span><span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.30)', marginRight: '4px' }}>ت/ساعت</span></div>
-              <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '11px', fontWeight: 700, padding: '9px 18px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
+              <div><span style={{ fontSize: '18px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span><span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.30)', marginRight: '4px' }}>ت/ساعت</span></div>
+              <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '12px', fontWeight: 700, padding: '9px 18px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
             </div>
           </div>
         </div>
@@ -292,7 +292,7 @@ function DiscoveryPanel() {
             return (
               <button key={t.id} onClick={() => setTab(i)} style={{
                 padding: '10px 6px', border: 'none', cursor: 'pointer', borderRadius: '18px',
-                fontFamily: 'inherit', fontSize: '12px',
+                fontFamily: 'inherit', fontSize: '13px',
                 fontWeight: active ? 700 : 500,
                 color: active ? '#fff' : 'rgba(255,255,255,0.38)',
                 background: active ? 'rgba(255,255,255,0.18)' : 'transparent',
@@ -309,7 +309,7 @@ function DiscoveryPanel() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative', zIndex: 1 }}>
           <Search size={16} style={{ color: 'rgba(255,255,255,0.40)', flexShrink: 0 }} />
           <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder={cur.ph}
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: '14px', color: '#fff', fontFamily: 'inherit', direction: 'rtl' }} />
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: '15px', color: '#fff', fontFamily: 'inherit', direction: 'rtl' }} />
           {q && <button onClick={() => setQ('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', padding: 0, display: 'flex' }}><X size={14} /></button>}
         </div>
 
@@ -325,7 +325,7 @@ function DiscoveryPanel() {
                   style={{
                     background: chosen ? 'rgba(199,166,106,0.18)' : 'rgba(255,255,255,0.08)',
                     border: `1px solid ${chosen ? GOLD_BOR : 'rgba(255,255,255,0.14)'}`,
-                    borderRadius: '22px', padding: '7px 14px', fontSize: '11px', fontWeight: 600,
+                    borderRadius: '22px', padding: '7px 14px', fontSize: '12px', fontWeight: 600,
                     color: chosen ? GOLD : 'rgba(255,255,255,0.60)',
                     cursor: 'pointer', fontFamily: 'inherit',
                     display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.22s', whiteSpace: 'nowrap',
@@ -355,7 +355,7 @@ function DiscoveryPanel() {
                           border: 'none',
                           borderBottom: oi < f.opts.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                           color: selF[f.label] === opt ? GOLD : 'rgba(255,255,255,0.68)',
-                          fontSize: '12px', fontWeight: selF[f.label] === opt ? 700 : 400,
+                          fontSize: '13px', fontWeight: selF[f.label] === opt ? 700 : 400,
                           cursor: 'pointer', fontFamily: 'inherit', direction: 'rtl',
                         }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
@@ -373,7 +373,7 @@ function DiscoveryPanel() {
           <Link href={cur.href} style={{ display: 'contents' }}>
             <button className="dp-cta" style={{
               background: 'rgba(199,166,106,0.18)', color: '#fff',
-              border: '1px solid rgba(199,166,106,0.44)', borderRadius: '16px', padding: '11px 24px', fontSize: '13px', fontWeight: 800,
+              border: '1px solid rgba(199,166,106,0.44)', borderRadius: '16px', padding: '11px 24px', fontSize: '14px', fontWeight: 800,
               cursor: 'pointer', fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
               backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)',
@@ -627,14 +627,14 @@ export default function HomePage() {
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: GOLD,
               boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
               display: 'inline-block', animation: 'pulse2 3s ease-in-out infinite' }} />
-            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '11px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '12px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
               BILLIARD HUB IRAN
             </span>
           </div>
 
           {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
-            fontSize: 'clamp(26px,4.2vw,60px)', fontWeight: 900, lineHeight: 1.08,
+            fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 900, lineHeight: 1.08,
             margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
             <span style={{ color: '#ffffff' }}>پلتفرم جامع و هوشمند </span>
@@ -643,7 +643,7 @@ export default function HomePage() {
 
           {/* Subtitle — نقطه‌ی اتصال */}
           <p className="hc" style={{
-            fontSize: 'clamp(14px,1.9vw,22px)', fontWeight: 500,
+            fontSize: 'clamp(15px, 2.1vw, 24px)', fontWeight: 500,
             margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
             color: 'rgba(255,255,255,0.82)',
           }}>
@@ -665,7 +665,7 @@ export default function HomePage() {
                   whiteSpace: 'nowrap', width: '100%', boxSizing: 'border-box',
                 }}>
                   {btn.icon}
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
                 </div>
               </Link>
             ))}
@@ -689,8 +689,8 @@ export default function HomePage() {
                 borderRadius: '20px',
                 boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(${s.rgb},0.12)`,
               }}>
-                <span style={{ fontSize: '15px', fontWeight: 900, color: s.clr, letterSpacing: '-0.03em', lineHeight: 1, textShadow: `0 0 18px rgba(${s.rgb},0.50)` }}>{s.n}</span>
-                <span style={{ fontSize: '9px', color: `rgba(${s.rgb},0.72)`, fontWeight: 600 }}>{s.l}</span>
+                <span style={{ fontSize: '17px', fontWeight: 900, color: s.clr, letterSpacing: '-0.03em', lineHeight: 1, textShadow: `0 0 18px rgba(${s.rgb},0.50)` }}>{s.n}</span>
+                <span style={{ fontSize: '10px', color: `rgba(${s.rgb},0.72)`, fontWeight: 600 }}>{s.l}</span>
               </div>
             ))}
           </div>
@@ -735,7 +735,7 @@ export default function HomePage() {
                 <h2 className="sec-title" style={{ color: TEXT }}>باشگاه‌های منتخب</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
-              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '13px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
+              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '14px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#4ADE80'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#30C55A'; }}>
                 مشاهده ۵۴۸ باشگاه <ArrowLeft size={13} />
@@ -759,7 +759,7 @@ export default function HomePage() {
                   transition: 'background 0.2s',
                 }}>
                   <MapPin size={16} color="#30C55A" />
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#30C55A' }}>نزدیک‌ترین باشگاه</span>
+                  <span style={{ fontSize: '17px', fontWeight: 700, color: '#30C55A' }}>نزدیک‌ترین باشگاه</span>
                 </div>
               </Link>
             </div>
@@ -777,7 +777,7 @@ export default function HomePage() {
                 <h2 className="sec-title" style={{ color: TEXT }}>بیلیارد بازار</h2>
                 <div className="sec-rule" style={{ color: BRN }} />
               </div>
-              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '13px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
+              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '14px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#4ADE80'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#30C55A'; }}>
                 مشاهده ۱٬۸۵۰ محصول <ArrowLeft size={13} />
@@ -790,17 +790,17 @@ export default function HomePage() {
                 <div className="prod-hover" style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: '100%', minHeight: '460px', cursor: 'pointer', boxShadow: '0 4px 24px rgba(26,25,23,0.09)' }}>
                   <img src={PRODUCTS[0]!.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.42) saturate(0.60) contrast(1.06)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 10%,rgba(8,4,1,0.98) 100%)' }} />
-                  <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '10px', fontWeight: 700, padding: '5px 13px', borderRadius: '20px' }}>{PRODUCTS[0]!.pct}٪ تخفیف</div>
-                  <div style={{ position: 'absolute', top: '18px', left: '18px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{PRODUCTS[0]!.brand}</div>
+                  <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '11px', fontWeight: 700, padding: '5px 13px', borderRadius: '20px' }}>{PRODUCTS[0]!.pct}٪ تخفیف</div>
+                  <div style={{ position: 'absolute', top: '18px', left: '18px', fontSize: '11px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{PRODUCTS[0]!.brand}</div>
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '26px', background: 'rgba(10,5,1,0.40)', backdropFilter: 'blur(32px) saturate(180%)', WebkitBackdropFilter: 'blur(32px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div style={{ fontSize: 'clamp(15px,1.8vw,20px)', fontWeight: 800, color: '#fff', marginBottom: '6px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{PRODUCTS[0]!.name}</div>
-                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.32)', marginBottom: '18px' }}>{PRODUCTS[0]!.sub}</div>
+                    <div style={{ fontSize: 'clamp(17px, 2vw, 22px)', fontWeight: 800, color: '#fff', marginBottom: '6px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{PRODUCTS[0]!.name}</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.32)', marginBottom: '18px' }}>{PRODUCTS[0]!.sub}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
                       <div>
-                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.24)', textDecoration: 'line-through', marginBottom: '3px' }}>{PRODUCTS[0]!.price.toLocaleString('fa-IR')} ت</div>
-                        <div style={{ fontSize: 'clamp(18px,2.4vw,28px)', fontWeight: 900, color: GOLD }}>{PRODUCTS[0]!.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></div>
+                        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.24)', textDecoration: 'line-through', marginBottom: '3px' }}>{PRODUCTS[0]!.price.toLocaleString('fa-IR')} ت</div>
+                        <div style={{ fontSize: 'clamp(20px, 2.6vw, 31px)', fontWeight: 900, color: GOLD }}>{PRODUCTS[0]!.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '13px', fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></div>
                       </div>
-                      <div style={{ background: 'rgba(199,166,106,0.10)', color: '#C7A66A', fontSize: '12px', fontWeight: 700, padding: '12px 22px', borderRadius: '20px', border: '1px solid rgba(199,166,106,0.22)' }}>افزودن به سبد</div>
+                      <div style={{ background: 'rgba(199,166,106,0.10)', color: '#C7A66A', fontSize: '13px', fontWeight: 700, padding: '12px 22px', borderRadius: '20px', border: '1px solid rgba(199,166,106,0.22)' }}>افزودن به سبد</div>
                     </div>
                   </div>
                 </div>
@@ -814,14 +814,14 @@ export default function HomePage() {
                       <div style={{ width: '140px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                         <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(8,4,1,0.82) 0%,transparent 52%)' }} />
-                        {p.pct > 0 && <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '8px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px' }}>{p.pct}٪</div>}
-                        <div style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
+                        {p.pct > 0 && <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '9px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px' }}>{p.pct}٪</div>}
+                        <div style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '9px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
                       </div>
                       <div style={{ flex: 1, padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: TEXT, lineHeight: 1.5, marginBottom: '4px' }}>{p.name}</div>
-                        <div style={{ fontSize: '11px', color: TEXT_M, marginBottom: '10px' }}>{p.sub}</div>
-                        <div style={{ fontSize: '11px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')}</div>
-                        <div style={{ fontSize: '17px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT, lineHeight: 1.5, marginBottom: '4px' }}>{p.name}</div>
+                        <div style={{ fontSize: '12px', color: TEXT_M, marginBottom: '10px' }}>{p.sub}</div>
+                        <div style={{ fontSize: '12px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')}</div>
+                        <div style={{ fontSize: '19px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '11px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
                       </div>
                     </div>
                   </Link>
@@ -849,8 +849,8 @@ export default function HomePage() {
           <SR>
             <div style={{ textAlign: 'center', marginBottom: '56px' }}>
               <span className="sec-label" style={{ color: GOLD_DIM }}>JOIN THE COMMUNITY</span>
-              <h2 style={{ fontSize: 'clamp(28px,5vw,64px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.054em', lineHeight: 0.94, margin: '0 0 14px' }}>جامعه بیلیارد ایران</h2>
-              <p style={{ fontSize: 'clamp(13px,1.6vw,17px)', color: 'rgba(255,255,255,0.32)', lineHeight: 1.90, maxWidth: '480px', margin: '0 auto' }}>بزرگ‌ترین اکوسیستم بیلیارد خاورمیانه — از مبتدی تا قهرمان</p>
+              <h2 style={{ fontSize: 'clamp(31px, 5.5vw, 70px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.054em', lineHeight: 0.94, margin: '0 0 14px' }}>جامعه بیلیارد ایران</h2>
+              <p style={{ fontSize: 'clamp(14px, 1.8vw, 19px)', color: 'rgba(255,255,255,0.32)', lineHeight: 1.90, maxWidth: '480px', margin: '0 auto' }}>بزرگ‌ترین اکوسیستم بیلیارد خاورمیانه — از مبتدی تا قهرمان</p>
             </div>
           </SR>
           <div className="comm-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '18px', marginBottom: '52px' }}>
@@ -874,9 +874,9 @@ export default function HomePage() {
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg,rgba(${s.clrR},0.10) 0%,transparent 100%)`, pointerEvents: 'none', borderRadius: 'inherit' }} />
                   {/* ambient orb */}
                   <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '80px', background: `radial-gradient(ellipse,rgba(${s.clrR},0.22),transparent 68%)`, filter: 'blur(18px)', pointerEvents: 'none' }} />
-                  <div style={{ fontSize: 'clamp(26px,4vw,54px)', fontWeight: 900, color: s.clr, letterSpacing: '-0.055em', lineHeight: 1, marginBottom: '10px', position: 'relative', textShadow: `0 0 32px rgba(${s.clrR},0.40)` }}>{s.v}</div>
-                  <div style={{ fontSize: 'clamp(11px,1.2vw,13px)', fontWeight: 700, color: 'rgba(255,255,255,0.78)', marginBottom: '5px', position: 'relative' }}>{s.l}</div>
-                  <div style={{ fontSize: '10px', color: `rgba(${s.clrR},0.55)`, position: 'relative', fontWeight: 600 }}>{s.s}</div>
+                  <div style={{ fontSize: 'clamp(29px, 4.4vw, 59px)', fontWeight: 900, color: s.clr, letterSpacing: '-0.055em', lineHeight: 1, marginBottom: '10px', position: 'relative', textShadow: `0 0 32px rgba(${s.clrR},0.40)` }}>{s.v}</div>
+                  <div style={{ fontSize: 'clamp(12px, 1.3vw, 14px)', fontWeight: 700, color: 'rgba(255,255,255,0.78)', marginBottom: '5px', position: 'relative' }}>{s.l}</div>
+                  <div style={{ fontSize: '11px', color: `rgba(${s.clrR},0.55)`, position: 'relative', fontWeight: 600 }}>{s.s}</div>
                 </div>
               </SR>
             ))}
@@ -885,9 +885,9 @@ export default function HomePage() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '26px' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {['ب','ر','ا','ن','ک'].map((c, i) => (
-                  <div key={i} style={{ width: '46px', height: '46px', borderRadius: '50%', background: `linear-gradient(135deg,${[GRN,BLU,GOLD,PRP,BRN][i]},${['#124d30','#123d64',GOLD_D,'#361f6b','#4a2412'][i]})`, border: '2.5px solid #0B0908', marginLeft: i > 0 ? '-13px' : 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: 900, color: '#fff', zIndex: 5 - i, position: 'relative' }}>{c}</div>
+                  <div key={i} style={{ width: '46px', height: '46px', borderRadius: '50%', background: `linear-gradient(135deg,${[GRN,BLU,GOLD,PRP,BRN][i]},${['#124d30','#123d64',GOLD_D,'#361f6b','#4a2412'][i]})`, border: '2.5px solid #0B0908', marginLeft: i > 0 ? '-13px' : 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', fontWeight: 900, color: '#fff', zIndex: 5 - i, position: 'relative' }}>{c}</div>
                 ))}
-                <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)', border: '2.5px solid #0B0908', marginLeft: '-13px', zIndex: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>+۱۲K</div>
+                <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)', border: '2.5px solid #0B0908', marginLeft: '-13px', zIndex: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>+۱۲K</div>
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <Link href="/clubs"><button className="btn-primary">یافتن باشگاه</button></Link>
@@ -912,12 +912,12 @@ export default function HomePage() {
                 <img src={IMG.learn2} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(13,21,38,0.96) 0%,transparent 52%)' }} />
                 <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(44px) saturate(220%)', WebkitBackdropFilter: 'blur(44px) saturate(220%)', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '14px', padding: '10px 18px' }}>
-                  <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.72)', fontWeight: 700, letterSpacing: '0.16em' }}>BILLIARD ACADEMY</span>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.72)', fontWeight: 700, letterSpacing: '0.16em' }}>BILLIARD ACADEMY</span>
                 </div>
                 <div style={{ position: 'absolute', bottom: '18px', left: '18px', right: '18px', display: 'flex', gap: '8px' }}>
                   {['مبتدی','پیشرفته','حرفه‌ای'].map(l => (
                     <div key={l} style={{ flex: 1, padding: '9px 0', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: '20px' }}>
-                      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.70)', fontWeight: 700 }}>{l}</span>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.70)', fontWeight: 700 }}>{l}</span>
                     </div>
                   ))}
                 </div>
@@ -928,7 +928,7 @@ export default function HomePage() {
                 <span className="sec-label" style={{ color: `${PRP}CC` }}>EDUCATION & COACHING</span>
                 <h2 className="sec-title" style={{ color: '#fff', marginBottom: '14px' }}>بازی را حرفه‌ای یاد بگیر</h2>
                 <div className="sec-rule" style={{ color: PRP }} />
-                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)', margin: '20px 0 32px', lineHeight: 1.90 }}>با مربیان تأیید شده فدراسیون بیلیارد ایران — از صفر تا قهرمان</p>
+                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.35)', margin: '20px 0 32px', lineHeight: 1.90 }}>با مربیان تأیید شده فدراسیون بیلیارد ایران — از صفر تا قهرمان</p>
               </SR>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
                 {[
@@ -940,8 +940,8 @@ export default function HomePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '15px 18px', background: 'rgba(255,255,255,0.050)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px' }}>
                       <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.c, flexShrink: 0, boxShadow: `0 0 9px ${c.c}` }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '3px' }}>{c.t}</div>
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.28)' }}>{c.l} · {c.h} ساعت · {c.s} دانشجو</div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '3px' }}>{c.t}</div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)' }}>{c.l} · {c.h} ساعت · {c.s} دانشجو</div>
                       </div>
                       <ArrowLeft size={13} style={{ color: 'rgba(255,255,255,0.18)', flexShrink: 0 }} />
                     </div>
@@ -966,9 +966,9 @@ export default function HomePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <span className="sec-label" style={{ color: GOLD_DIM }}>EVENTS & TOURNAMENTS</span>
-                <h2 style={{ fontSize: 'clamp(22px,3vw,38px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.04em' }}>مسابقات پیش رو</h2>
+                <h2 style={{ fontSize: 'clamp(24px, 3.3vw, 42px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.04em' }}>مسابقات پیش رو</h2>
               </div>
-              <Link href="/events" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '13px', fontWeight: 600, transition: 'color 0.25s' }}
+              <Link href="/events" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '14px', fontWeight: 600, transition: 'color 0.25s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD_D; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_M; }}>
                 همه رویدادها <ArrowLeft size={13} />
@@ -984,13 +984,13 @@ export default function HomePage() {
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.10)', border: `1px solid ${GOLD_BOR}`, borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>
                     <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse2 1.8s infinite' }} />
                     <Trophy size={10} style={{ color: GOLD }} />
-                    <span style={{ fontSize: '8px', color: GOLD, fontWeight: 700, letterSpacing: '0.24em' }}>FEATURED TOURNAMENT</span>
+                    <span style={{ fontSize: '9px', color: GOLD, fontWeight: 700, letterSpacing: '0.24em' }}>FEATURED TOURNAMENT</span>
                   </div>
-                  <h3 style={{ fontSize: 'clamp(14px,2.4vw,26px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>مسابقات سراسری اسنوکر ایران ۱۴۰۴</h3>
-                  <p style={{ fontSize: 'clamp(11px,1.3vw,13px)', color: 'rgba(255,255,255,0.35)', marginBottom: '20px' }}>۶۴ بازیکن · جایزه ۵۰ میلیون تومانی · تهران · ۱۵ خرداد</p>
+                  <h3 style={{ fontSize: 'clamp(15px, 2.6vw, 29px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>مسابقات سراسری اسنوکر ایران ۱۴۰۴</h3>
+                  <p style={{ fontSize: 'clamp(12px, 1.4vw, 14px)', color: 'rgba(255,255,255,0.35)', marginBottom: '20px' }}>۶۴ بازیکن · جایزه ۵۰ میلیون تومانی · تهران · ۱۵ خرداد</p>
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <Link href="/events/1"><button className="btn-primary" style={{ padding: '11px 22px', fontSize: '13px' }}>ثبت‌نام</button></Link>
-                    <Link href="/events"><button className="btn-ghost-dark" style={{ padding: '11px 18px', fontSize: '13px' }}>همه رویدادها</button></Link>
+                    <Link href="/events/1"><button className="btn-primary" style={{ padding: '11px 22px', fontSize: '14px' }}>ثبت‌نام</button></Link>
+                    <Link href="/events"><button className="btn-ghost-dark" style={{ padding: '11px 18px', fontSize: '14px' }}>همه رویدادها</button></Link>
                   </div>
                 </div>
               </div>
@@ -1006,9 +1006,9 @@ export default function HomePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <span className="sec-label" style={{ color: 'rgba(107,30,58,0.70)' }}>LATEST NEWS</span>
-                <h2 style={{ fontSize: 'clamp(22px,3vw,38px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.04em' }}>آخرین اخبار</h2>
+                <h2 style={{ fontSize: 'clamp(24px, 3.3vw, 42px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.04em' }}>آخرین اخبار</h2>
               </div>
-              <Link href="/news" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '13px', fontWeight: 600 }}
+              <Link href="/news" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '14px', fontWeight: 600 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#6B1E3A'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_M; }}>
                 همه اخبار <ArrowLeft size={13} />
@@ -1022,10 +1022,10 @@ export default function HomePage() {
                   <div className="news-img" style={{ position: 'relative', height: '100%', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(26,25,23,0.08)' }}>
                     <img src={NEWS[0].img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 22%,rgba(6,3,1,0.96) 100%)' }} />
-                    <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '9px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', color: NEWS[0].clr, background: `${NEWS[0].clr}16`, border: `1px solid ${NEWS[0].clr}28` }}>{NEWS[0].cat}</div>
+                    <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', color: NEWS[0].clr, background: `${NEWS[0].clr}16`, border: `1px solid ${NEWS[0].clr}28` }}>{NEWS[0].cat}</div>
                     <div style={{ position: 'absolute', bottom: '24px', right: '22px', left: '22px' }}>
-                      <h3 style={{ fontSize: 'clamp(13px,1.7vw,18px)', fontWeight: 800, color: '#fff', marginBottom: '12px', lineHeight: 1.48 }}>{NEWS[0].title}</h3>
-                      <div style={{ display: 'flex', gap: '14px', fontSize: '10px', color: 'rgba(255,255,255,0.32)' }}>
+                      <h3 style={{ fontSize: 'clamp(14px, 1.9vw, 20px)', fontWeight: 800, color: '#fff', marginBottom: '12px', lineHeight: 1.48 }}>{NEWS[0].title}</h3>
+                      <div style={{ display: 'flex', gap: '14px', fontSize: '11px', color: 'rgba(255,255,255,0.32)' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={9} />{NEWS[0].date}</span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Eye size={9} />{NEWS[0].views.toLocaleString('fa-IR')}</span>
                       </div>
@@ -1041,10 +1041,10 @@ export default function HomePage() {
                     <div className="news-img" style={{ position: 'relative', height: 'clamp(120px,17vw,187px)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(26,25,23,0.07)' }}>
                       <img src={n.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 22%,rgba(6,3,1,0.94) 100%)' }} />
-                      <div style={{ position: 'absolute', top: '11px', right: '11px', fontSize: '8px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', color: n.clr, background: `${n.clr}16`, border: `1px solid ${n.clr}26` }}>{n.cat}</div>
+                      <div style={{ position: 'absolute', top: '11px', right: '11px', fontSize: '9px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', color: n.clr, background: `${n.clr}16`, border: `1px solid ${n.clr}26` }}>{n.cat}</div>
                       <div style={{ position: 'absolute', bottom: '14px', right: '14px', left: '14px' }}>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', lineHeight: 1.52, marginBottom: '7px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.title}</div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '9px', color: 'rgba(255,255,255,0.28)' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', lineHeight: 1.52, marginBottom: '7px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.title}</div>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '10px', color: 'rgba(255,255,255,0.28)' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Clock size={8} />{n.date}</span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Eye size={8} />{n.views.toLocaleString('fa-IR')}</span>
                         </div>
@@ -1069,13 +1069,13 @@ export default function HomePage() {
               <div style={{ position: 'relative', zIndex: 2 }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '9px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, borderRadius: '100px', padding: '7px 20px', marginBottom: '24px' }}>
                   <CheckCircle size={11} style={{ color: GOLD }} />
-                  <span style={{ fontSize: '9px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700 }}>JOIN FREE TODAY</span>
+                  <span style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700 }}>JOIN FREE TODAY</span>
                 </div>
-                <h2 style={{ fontSize: 'clamp(28px,4.8vw,60px)', fontWeight: 900, color: '#fff', marginBottom: '16px', letterSpacing: '-0.055em', lineHeight: 0.94 }}>همین الان شروع کن</h2>
-                <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '15px', lineHeight: 1.88, maxWidth: '380px', margin: '0 auto 44px' }}>باشگاه پیدا کن · تجهیزات بخر · به جامعه بپیوند</p>
+                <h2 style={{ fontSize: 'clamp(31px, 5.3vw, 66px)', fontWeight: 900, color: '#fff', marginBottom: '16px', letterSpacing: '-0.055em', lineHeight: 0.94 }}>همین الان شروع کن</h2>
+                <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '17px', lineHeight: 1.88, maxWidth: '380px', margin: '0 auto 44px' }}>باشگاه پیدا کن · تجهیزات بخر · به جامعه بپیوند</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <Link href="/register"><button className="btn-primary" style={{ padding: '16px 44px', fontSize: '15px' }}>ثبت‌نام رایگان</button></Link>
-                  <Link href="/clubs"><button className="btn-ghost-dark" style={{ padding: '16px 36px', fontSize: '15px' }}><Building2 size={15} /> یافتن باشگاه</button></Link>
+                  <Link href="/register"><button className="btn-primary" style={{ padding: '16px 44px', fontSize: '17px' }}>ثبت‌نام رایگان</button></Link>
+                  <Link href="/clubs"><button className="btn-ghost-dark" style={{ padding: '16px 36px', fontSize: '17px' }}><Building2 size={15} /> یافتن باشگاه</button></Link>
                 </div>
               </div>
             </div>

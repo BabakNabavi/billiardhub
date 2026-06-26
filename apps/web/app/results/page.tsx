@@ -52,10 +52,10 @@ export default function ResultsPage() {
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `radial-gradient(ellipse at 50% 0%,rgba(199,166,106,0.10),transparent 60%)`, pointerEvents: 'none' }} />
         <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 999, marginBottom: 16, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: GOLD }}>🏁 RESULTS</span>
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: GOLD }}>🏁 RESULTS</span>
           </div>
-          <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: `linear-gradient(135deg,#FFFFFF 40%,${GOLD})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>نتایج مسابقات</h1>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: 0 }}>آخرین نتایج و گزارش‌های کامل</p>
+          <h1 style={{ fontSize: 'clamp(31px, 4.4vw, 46px)', fontWeight: 900, margin: '0 0 10px', backgroundImage: `linear-gradient(135deg,#FFFFFF 40%,${GOLD})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em' }}>نتایج مسابقات</h1>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0 }}>آخرین نتایج و گزارش‌های کامل</p>
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export default function ResultsPage() {
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '10px 16px', display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {DISCIPLINES.map(d => (
             <button key={d} onClick={() => setDisc(d)}
-              style={{ flexShrink: 0, padding: '6px 16px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', border: 'none',
+              style={{ flexShrink: 0, padding: '6px 16px', borderRadius: 999, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', border: 'none',
                 ...(disc === d
                   ? { background: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, color: '#FFFFFF', boxShadow: `0 4px 12px rgba(199,166,106,0.30)` }
                   : { background: 'rgba(199,166,106,0.08)', color: 'rgba(0,0,0,0.50)', border: '1px solid rgba(199,166,106,0.20)' })
@@ -85,13 +85,13 @@ export default function ResultsPage() {
               onClick={() => setExpanded(e => ({ ...e, [round.id]: !e[round.id] }))}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 600 }}>{round.discipline}</span>
-                  <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 999, background: 'rgba(139,92,246,0.08)', color: '#8b5cf6', fontWeight: 600 }}>{round.round}</span>
+                  <span style={{ fontSize: 12, padding: '2px 10px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', color: GOLD_DARK, fontWeight: 600 }}>{round.discipline}</span>
+                  <span style={{ fontSize: 12, padding: '2px 10px', borderRadius: 999, background: 'rgba(139,92,246,0.08)', color: '#8b5cf6', fontWeight: 600 }}>{round.round}</span>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: '#111111' }}>{round.tournament}</div>
-                <div style={{ fontSize: 12, marginTop: 2, color: 'rgba(0,0,0,0.40)' }}>📅 {round.date} · {round.matches.length} بازی</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: '#111111' }}>{round.tournament}</div>
+                <div style={{ fontSize: 13, marginTop: 2, color: 'rgba(0,0,0,0.40)' }}>📅 {round.date} · {round.matches.length} بازی</div>
               </div>
-              <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.35)', flexShrink: 0 }}>{expanded[round.id] ? '▲' : '▼'}</span>
+              <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.35)', flexShrink: 0 }}>{expanded[round.id] ? '▲' : '▼'}</span>
             </button>
 
             {/* Matches */}
@@ -103,32 +103,32 @@ export default function ResultsPage() {
                     {/* Score row */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                       <div style={{ textAlign: 'center', opacity: m.winner === 1 ? 1 : 0.45 }}>
-                        <div style={{ fontSize: 11, marginBottom: 4, color: m.winner === 1 ? '#111111' : 'rgba(0,0,0,0.40)', fontWeight: m.winner === 1 ? 700 : 400 }}>
+                        <div style={{ fontSize: 12, marginBottom: 4, color: m.winner === 1 ? '#111111' : 'rgba(0,0,0,0.40)', fontWeight: m.winner === 1 ? 700 : 400 }}>
                           {m.winner === 1 && <span style={{ marginLeft: 4 }}>🏆</span>}
                           {m.player1}
                         </div>
-                        <div style={{ fontSize: 32, fontWeight: 900, color: m.winner === 1 ? GOLD_DARK : 'rgba(0,0,0,0.30)' }}>{m.score1}</div>
+                        <div style={{ fontSize: 35, fontWeight: 900, color: m.winner === 1 ? GOLD_DARK : 'rgba(0,0,0,0.30)' }}>{m.score1}</div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginBottom: 4 }}>فریم</div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.25)' }}>—</div>
-                        <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginTop: 4 }}>نهایی</div>
+                        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.35)', marginBottom: 4 }}>فریم</div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(0,0,0,0.25)' }}>—</div>
+                        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.35)', marginTop: 4 }}>نهایی</div>
                       </div>
                       <div style={{ textAlign: 'center', opacity: m.winner === 2 ? 1 : 0.45 }}>
-                        <div style={{ fontSize: 11, marginBottom: 4, color: m.winner === 2 ? '#111111' : 'rgba(0,0,0,0.40)', fontWeight: m.winner === 2 ? 700 : 400 }}>
+                        <div style={{ fontSize: 12, marginBottom: 4, color: m.winner === 2 ? '#111111' : 'rgba(0,0,0,0.40)', fontWeight: m.winner === 2 ? 700 : 400 }}>
                           {m.winner === 2 && <span style={{ marginLeft: 4 }}>🏆</span>}
                           {m.player2}
                         </div>
-                        <div style={{ fontSize: 32, fontWeight: 900, color: m.winner === 2 ? GOLD_DARK : 'rgba(0,0,0,0.30)' }}>{m.score2}</div>
+                        <div style={{ fontSize: 35, fontWeight: 900, color: m.winner === 2 ? GOLD_DARK : 'rgba(0,0,0,0.30)' }}>{m.score2}</div>
                       </div>
                     </div>
 
                     {/* Meta */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 10 }}>
-                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>⏱ {m.duration}</span>
-                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>🎱 {m.frames} فریم</span>
+                      <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>⏱ {m.duration}</span>
+                      <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>🎱 {m.frames} فریم</span>
                       {m.highBreak > 0 && (
-                        <span style={{ fontSize: 12, fontWeight: 700, marginRight: 'auto', color: GOLD_DARK }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, marginRight: 'auto', color: GOLD_DARK }}>
                           ⚡ بالاترین بریک: {m.highBreak}
                         </span>
                       )}
@@ -142,8 +142,8 @@ export default function ResultsPage() {
 
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '64px 20px' }}>
-            <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.15 }}>🏁</div>
-            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: 0 }}>نتیجه‌ای یافت نشد</p>
+            <div style={{ fontSize: 44, marginBottom: 12, opacity: 0.15 }}>🏁</div>
+            <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.38)', margin: 0 }}>نتیجه‌ای یافت نشد</p>
           </div>
         )}
       </div>

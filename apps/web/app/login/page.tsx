@@ -147,12 +147,12 @@ export default function LoginPage() {
           {/* Logo */}
           <div style={{ textAlign:'center', marginBottom:'32px' }}>
             <Link href="/" style={{ display:'inline-flex', alignItems:'center', gap:'10px', textDecoration:'none', marginBottom:'8px' }}>
-              <div style={{ width:'44px', height:'44px', borderRadius:'14px', background:`linear-gradient(135deg,${GOLD},#A07840)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', fontWeight:900, color:'#fff', boxShadow:`0 8px 24px rgba(199,166,106,0.35)` }}>B</div>
-              <span style={{ fontSize:'22px', fontWeight:900, color:'#1C1C1A', letterSpacing:'-0.025em' }}>
+              <div style={{ width:'44px', height:'44px', borderRadius:'14px', background:`linear-gradient(135deg,${GOLD},#A07840)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '22px', fontWeight:900, color:'#fff', boxShadow:`0 8px 24px rgba(199,166,106,0.35)` }}>B</div>
+              <span style={{ fontSize: '24px', fontWeight:900, color:'#1C1C1A', letterSpacing:'-0.025em' }}>
                 بیلیارد <span style={{ background:`linear-gradient(135deg,${GOLD},#A07840)`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>پلاس</span>
               </span>
             </Link>
-            <div style={{ fontSize:'13px', color:'rgba(28,28,26,0.45)', marginTop:'4px' }}>
+            <div style={{ fontSize: '14px', color:'rgba(28,28,26,0.45)', marginTop:'4px' }}>
               به پلتفرم تخصصی بیلیارد ایران خوش آمدید
             </div>
           </div>
@@ -163,10 +163,10 @@ export default function LoginPage() {
             {/* Top gold line */}
             <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'140px', height:'1px', background:`linear-gradient(90deg,transparent,rgba(199,166,106,0.7),transparent)`, boxShadow:`0 0 16px rgba(199,166,106,0.4)` }} />
 
-            <h1 style={{ fontSize:'22px', fontWeight:900, color:'#1C1C1A', margin:'0 0 6px', letterSpacing:'-0.025em', textAlign:'center' }}>
+            <h1 style={{ fontSize: '24px', fontWeight:900, color:'#1C1C1A', margin:'0 0 6px', letterSpacing:'-0.025em', textAlign:'center' }}>
               ورود به حساب
             </h1>
-            <p style={{ fontSize:'13px', color:'rgba(28,28,26,0.45)', textAlign:'center', margin:'0 0 28px' }}>
+            <p style={{ fontSize: '14px', color:'rgba(28,28,26,0.45)', textAlign:'center', margin:'0 0 28px' }}>
               با شماره موبایل خود وارد شوید
             </p>
 
@@ -174,13 +174,13 @@ export default function LoginPage() {
             {error && (
               <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'13px 16px', background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'12px', marginBottom:'20px' }}>
                 <AlertCircle size={15} style={{ color:'#ef4444', flexShrink:0 }} />
-                <span style={{ fontSize:'13px', color:'#dc2626', flex:1 }}>{error}</span>
+                <span style={{ fontSize: '14px', color:'#dc2626', flex:1 }}>{error}</span>
               </div>
             )}
 
             {/* Phone */}
             <div style={{ marginBottom:'14px' }}>
-              <label style={{ display:'block', fontSize:'12px', fontWeight:600, color:'rgba(28,28,26,0.48)', marginBottom:'8px', letterSpacing:'0.03em' }}>
+              <label style={{ display:'block', fontSize: '13px', fontWeight:600, color:'rgba(28,28,26,0.48)', marginBottom:'8px', letterSpacing:'0.03em' }}>
                 شماره موبایل
               </label>
               <div className={`field-wrap ${phoneFocus ? 'focused' : ''} ${error && !phone ? 'error-field' : ''}`}
@@ -203,7 +203,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div style={{ marginBottom:'24px' }}>
-              <label style={{ display:'block', fontSize:'12px', fontWeight:600, color:'rgba(28,28,26,0.48)', marginBottom:'8px', letterSpacing:'0.03em' }}>
+              <label style={{ display:'block', fontSize: '13px', fontWeight:600, color:'rgba(28,28,26,0.48)', marginBottom:'8px', letterSpacing:'0.03em' }}>
                 رمز عبور
               </label>
               <div className={`field-wrap ${passFocus ? 'focused' : ''} ${error && !password ? 'error-field' : ''}`}
@@ -244,12 +244,12 @@ export default function LoginPage() {
             {/* Divider */}
             <div style={{ display:'flex', alignItems:'center', gap:'12px', margin:'20px 0' }}>
               <div style={{ flex:1, height:'1px', background:'rgba(28,28,26,0.08)' }} />
-              <span style={{ fontSize:'11px', color:'rgba(28,28,26,0.30)' }}>یا</span>
+              <span style={{ fontSize: '12px', color:'rgba(28,28,26,0.30)' }}>یا</span>
               <div style={{ flex:1, height:'1px', background:'rgba(28,28,26,0.08)' }} />
             </div>
 
             {/* Register link */}
-            <p style={{ textAlign:'center', fontSize:'13px', color:'rgba(28,28,26,0.48)', margin:0 }}>
+            <p style={{ textAlign:'center', fontSize: '14px', color:'rgba(28,28,26,0.48)', margin:0 }}>
               حساب ندارید؟{' '}
               <Link href="/register" style={{ color:GOLD, fontWeight:700, textDecoration:'none', transition:'opacity 0.2s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.75'; }}
@@ -261,7 +261,7 @@ export default function LoginPage() {
 
           {/* Back link */}
           <div style={{ textAlign:'center', marginTop:'20px' }}>
-            <Link href="/" style={{ display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'12px', color:'rgba(28,28,26,0.38)', textDecoration:'none', transition:'color 0.2s' }}
+            <Link href="/" style={{ display:'inline-flex', alignItems:'center', gap:'6px', fontSize: '13px', color:'rgba(28,28,26,0.38)', textDecoration:'none', transition:'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(28,28,26,0.65)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(28,28,26,0.38)'; }}>
               <ArrowLeft size={12} /> بازگشت به صفحه اصلی

@@ -41,13 +41,13 @@ function Steps({ current }: { current: 1 | 2 | 3 }) {
               background: s.n < current ? '#C7A66A' : s.n === current ? 'rgba(199,166,106,0.15)' : 'rgba(0,0,0,0.04)',
               border: `2px solid ${s.n <= current ? '#C7A66A' : 'rgba(0,0,0,0.08)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 700,
+              fontSize: 14, fontWeight: 700,
               color: s.n < current ? '#FFFFFF' : s.n === current ? '#C7A66A' : '#475569',
               transition: 'all 0.3s',
             }}>
-              {s.n < current ? <i className="ti ti-check" style={{ fontSize: 14 }} /> : toFa(s.n)}
+              {s.n < current ? <i className="ti ti-check" style={{ fontSize: 15 }} /> : toFa(s.n)}
             </div>
-            <span style={{ fontSize: 10, color: s.n === current ? '#C7A66A' : '#475569' }}>{s.label}</span>
+            <span style={{ fontSize: 11, color: s.n === current ? '#C7A66A' : '#475569' }}>{s.label}</span>
           </div>
           {i < steps.length - 1 && (
             <div style={{ width: 60, height: 2, margin: '0 4px', marginBottom: 16, background: s.n < current ? '#C7A66A' : 'rgba(0,0,0,0.05)', transition: 'background 0.3s' }} />
@@ -94,7 +94,7 @@ function OtpInput({ value, onChange }: { value: string; onChange: (v: string) =>
             width: 44, height: 52, textAlign: 'center',
             background: d ? 'rgba(199,166,106,0.1)' : 'rgba(0,0,0,0.04)',
             border: `1.5px solid ${d ? 'rgba(199,166,106,0.5)' : 'rgba(0,0,0,0.08)'}`,
-            borderRadius: 12, fontSize: 22, fontWeight: 700,
+            borderRadius: 12, fontSize: 24, fontWeight: 700,
             color: '#111111', outline: 'none', fontFamily: 'inherit',
             transition: 'all 0.2s',
           }}
@@ -107,8 +107,8 @@ function OtpInput({ value, onChange }: { value: string; onChange: (v: string) =>
 // ─── Error box ────────────────────────────────────────────────
 function ErrorBox({ msg }: { msg: string }) {
   return (
-    <div style={{ marginTop: 14, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#fca5a5', display: 'flex', alignItems: 'center', gap: 8 }}>
-      <i className="ti ti-alert-circle" style={{ fontSize: 16, flexShrink: 0 }} />
+    <div style={{ marginTop: 14, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#fca5a5', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <i className="ti ti-alert-circle" style={{ fontSize: 18, flexShrink: 0 }} />
       {msg}
     </div>
   )
@@ -143,7 +143,7 @@ export default function VerifyPage() {
     width: '100%', boxSizing: 'border-box',
     background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
     borderRadius: 12, padding: '12px 14px', color: '#111111',
-    fontSize: 14, fontFamily: 'inherit', outline: 'none',
+    fontSize: 15, fontFamily: 'inherit', outline: 'none',
     transition: 'border-color 0.2s',
   }
 
@@ -151,7 +151,7 @@ export default function VerifyPage() {
     width: '100%', marginTop: 16, padding: '13px', borderRadius: 12, border: 'none',
     background: disabled ? 'rgba(0,0,0,0.04)' : '#C7A66A',
     color: disabled ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
-    fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+    fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
     cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
   })
@@ -234,14 +234,14 @@ export default function VerifyPage() {
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '4px 14px', fontSize: 11, color: '#C7A66A', marginBottom: 14 }}>
-              <i className="ti ti-shield-check" style={{ fontSize: 13 }} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '4px 14px', fontSize: 12, color: '#C7A66A', marginBottom: 14 }}>
+              <i className="ti ti-shield-check" style={{ fontSize: 14 }} />
               احراز هویت
             </div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111111', margin: '0 0 6px' }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111111', margin: '0 0 6px' }}>
               {step === 3 ? 'احراز هویت کامل شد' : 'تأیید هویت کاربر'}
             </h1>
-            <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: 0 }}>
+            <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: 0 }}>
               {step === 1 && 'کد ملی خود را با نام ثبت‌نامی تطبیق دهید'}
               {step === 2 && 'کد تأیید ارسال‌شده به موبایل را وارد کنید'}
               {step === 3 && 'اکنون به همه امکانات دسترسی دارید'}
@@ -257,7 +257,7 @@ export default function VerifyPage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
+                    <label style={{ display: 'block', fontSize: 12, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
                       نام <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <input
@@ -268,7 +268,7 @@ export default function VerifyPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
+                    <label style={{ display: 'block', fontSize: 12, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
                       نام خانوادگی <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <input
@@ -281,7 +281,7 @@ export default function VerifyPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 12, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
                     کد ملی <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <input
@@ -293,14 +293,14 @@ export default function VerifyPage() {
                     }}
                     placeholder="۰۰۰۰۰۰۰۰۰۰"
                     inputMode="numeric"
-                    style={{ ...inputStyle, letterSpacing: 6, textAlign: 'center', fontSize: 18, direction: 'ltr' }}
+                    style={{ ...inputStyle, letterSpacing: 6, textAlign: 'center', fontSize: 20, direction: 'ltr' }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
-                    <span style={{ fontSize: 16, letterSpacing: 6, color: '#C7A66A', fontWeight: 700, direction: 'ltr' }}>
+                    <span style={{ fontSize: 18, letterSpacing: 6, color: '#C7A66A', fontWeight: 700, direction: 'ltr' }}>
                       {toFa(nationalId).padEnd(10, '·')}
                     </span>
                   </div>
-                  <p style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', margin: '4px 0 0', textAlign: 'center' }}>
+                  <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', margin: '4px 0 0', textAlign: 'center' }}>
                     {toFa(nationalId.length)}/۱۰ رقم
                   </p>
                 </div>
@@ -310,8 +310,8 @@ export default function VerifyPage() {
 
               <button onClick={handleNationalId} disabled={loading} style={btnStyle(loading)}>
                 {loading
-                  ? <><i className="ti ti-loader-2" style={{ fontSize: 16 }} />در حال بررسی...</>
-                  : <><i className="ti ti-arrow-left" style={{ fontSize: 16 }} />ادامه</>
+                  ? <><i className="ti ti-loader-2" style={{ fontSize: 18 }} />در حال بررسی...</>
+                  : <><i className="ti ti-arrow-left" style={{ fontSize: 18 }} />ادامه</>
                 }
               </button>
             </div>
@@ -322,26 +322,26 @@ export default function VerifyPage() {
             <div style={{ background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '24px 20px' }}>
               <div style={{ textAlign: 'center', marginBottom: 24 }}>
                 <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                  <i className="ti ti-device-mobile-message" style={{ fontSize: 26, color: '#C7A66A' }} />
+                  <i className="ti ti-device-mobile-message" style={{ fontSize: 29, color: '#C7A66A' }} />
                 </div>
-                <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', margin: 0, lineHeight: 1.7 }}>
+                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: 0, lineHeight: 1.7 }}>
                   کد ۶ رقمی به شماره موبایل ثبت‌شده
                   <br />
                   <span style={{ color: '#C7A66A', fontWeight: 600 }}>ارسال شد</span>
                 </p>
-                {success && <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', marginTop: 6 }}>{success}</p>}
+                {success && <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginTop: 6 }}>{success}</p>}
               </div>
 
               <OtpInput value={otp} onChange={setOtp} />
 
               {countdown > 0 && (
-                <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: '14px 0 0' }}>
+                <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: '14px 0 0' }}>
                   ارسال مجدد تا <span style={{ color: '#C7A66A', fontWeight: 700 }}>{toFa(countdown)}</span> ثانیه دیگر
                 </p>
               )}
 
               {countdown === 0 && (
-                <button onClick={handleSendOtp} disabled={loading} style={{ width: '100%', marginTop: 12, padding: '10px', borderRadius: 10, border: '1px solid rgba(199,166,106,0.3)', background: 'transparent', color: '#C7A66A', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}>
+                <button onClick={handleSendOtp} disabled={loading} style={{ width: '100%', marginTop: 12, padding: '10px', borderRadius: 10, border: '1px solid rgba(199,166,106,0.3)', background: 'transparent', color: '#C7A66A', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer' }}>
                   ارسال مجدد کد
                 </button>
               )}
@@ -350,12 +350,12 @@ export default function VerifyPage() {
 
               <button onClick={handleConfirmOtp} disabled={loading || otp.length < 6} style={btnStyle(loading || otp.length < 6)}>
                 {loading
-                  ? <><i className="ti ti-loader-2" style={{ fontSize: 16 }} />در حال بررسی...</>
-                  : <><i className="ti ti-check" style={{ fontSize: 16 }} />تأیید کد</>
+                  ? <><i className="ti ti-loader-2" style={{ fontSize: 18 }} />در حال بررسی...</>
+                  : <><i className="ti ti-check" style={{ fontSize: 18 }} />تأیید کد</>
                 }
               </button>
 
-              <button onClick={() => setStep(1)} style={{ width: '100%', marginTop: 8, padding: '10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.07)', background: 'transparent', color: 'rgba(0,0,0,0.45)', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}>
+              <button onClick={() => setStep(1)} style={{ width: '100%', marginTop: 8, padding: '10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.07)', background: 'transparent', color: 'rgba(0,0,0,0.45)', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer' }}>
                 بازگشت
               </button>
             </div>
@@ -365,10 +365,10 @@ export default function VerifyPage() {
           {step === 3 && (
             <div style={{ background: '#F7F7F5', border: '1px solid rgba(199,166,106,0.2)', borderRadius: 20, padding: '40px 20px', textAlign: 'center' }}>
               <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(199,166,106,0.15)', border: '2px solid rgba(199,166,106,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 0 32px rgba(199,166,106,0.2)' }}>
-                <i className="ti ti-check" style={{ fontSize: 36, color: '#C7A66A' }} />
+                <i className="ti ti-check" style={{ fontSize: 40, color: '#C7A66A' }} />
               </div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111111', margin: '0 0 8px' }}>هویت شما تأیید شد</h2>
-              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 24px', lineHeight: 1.7 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111111', margin: '0 0 8px' }}>هویت شما تأیید شد</h2>
+              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 24px', lineHeight: 1.7 }}>
                 اکنون می‌توانید از همه امکانات بیلیارد پلاس استفاده کنید
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -378,13 +378,13 @@ export default function VerifyPage() {
                   { icon: 'ti-eye', label: 'مشاهده استوری' },
                 ].map(f => (
                   <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.15)', borderRadius: 10, padding: '10px 14px' }}>
-                    <i className={`ti ${f.icon}`} style={{ fontSize: 18, color: '#C7A66A' }} />
-                    <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', flex: 1 }}>{f.label}</span>
-                    <i className="ti ti-check" style={{ fontSize: 14, color: '#C7A66A' }} />
+                    <i className={`ti ${f.icon}`} style={{ fontSize: 20, color: '#C7A66A' }} />
+                    <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', flex: 1 }}>{f.label}</span>
+                    <i className="ti ti-check" style={{ fontSize: 15, color: '#C7A66A' }} />
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', marginTop: 20 }}>در حال انتقال به پروفایل...</p>
+              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginTop: 20 }}>در حال انتقال به پروفایل...</p>
             </div>
           )}
         </div>

@@ -60,12 +60,12 @@ export default function CoachesPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 20, padding: '5px 14px', marginBottom: 20 }}>
             <Star size={12} color={GOLD} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: GOLD, letterSpacing: '0.06em' }}>CERTIFIED COACHES</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: GOLD, letterSpacing: '0.06em' }}>CERTIFIED COACHES</span>
           </div>
-          <h1 style={{ fontSize: 'clamp(28px,4vw,44px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
+          <h1 style={{ fontSize: 'clamp(31px, 4.4vw, 48px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
             مربیان <span style={{ backgroundImage: `linear-gradient(135deg,${GOLD},${GOLD_DARK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>حرفه‌ای</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>مربیان مجاز فدراسیون بیلیارد ایران</p>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 17, margin: 0 }}>مربیان مجاز فدراسیون بیلیارد ایران</p>
         </div>
       </div>
 
@@ -80,20 +80,20 @@ export default function CoachesPage() {
               <Search size={14} color="rgba(0,0,0,0.30)" />
               <input type="text" value={search} onChange={e=>setSearch(e.target.value)} onFocus={()=>setSearchFocus(true)} onBlur={()=>setSearchFocus(false)}
                 placeholder="جستجو بر اساس نام یا شهر..."
-                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#111111', fontSize: 13, fontFamily: 'inherit' }} />
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#111111', fontSize: 14, fontFamily: 'inherit' }} />
               {search && <button onClick={()=>setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex' }}><X size={14}/></button>}
             </div>
 
             {/* Filter pills */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {[{v:'all',l:'همه'},{v:'snooker',l:'اسنوکر'},{v:'pocket',l:'پاکت'},{v:'highball',l:'هی‌بال'}].map(f=>(
-                <button key={f.v} onClick={()=>setFilter(f.v)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${filter===f.v ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.08)'}`, background: filter===f.v ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.03)', color: filter===f.v ? GOLD_DARK : 'rgba(0,0,0,0.45)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                <button key={f.v} onClick={()=>setFilter(f.v)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${filter===f.v ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.08)'}`, background: filter===f.v ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.03)', color: filter===f.v ? GOLD_DARK : 'rgba(0,0,0,0.45)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                   {f.l}
                 </button>
               ))}
             </div>
 
-            <span style={{ marginRight: 'auto', color: 'rgba(0,0,0,0.38)', fontSize: 12 }}>{filtered.length} مربی</span>
+            <span style={{ marginRight: 'auto', color: 'rgba(0,0,0,0.38)', fontSize: 13 }}>{filtered.length} مربی</span>
           </div>
 
           {/* Grid */}
@@ -108,8 +108,8 @@ export default function CoachesPage() {
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 20px' }}>
               <Star size={40} style={{ opacity: 0.15, display: 'block', margin: '0 auto 14px' }} color="#111111" />
-              <p style={{ fontSize: 15, fontWeight: 700, color: '#111111', margin: '0 0 6px' }}>مربی‌ای پیدا نشد</p>
-              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>جستجو یا فیلترها را تغییر دهید</p>
+              <p style={{ fontSize: 17, fontWeight: 700, color: '#111111', margin: '0 0 6px' }}>مربی‌ای پیدا نشد</p>
+              <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: 0 }}>جستجو یا فیلترها را تغییر دهید</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
@@ -119,28 +119,28 @@ export default function CoachesPage() {
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,rgba(199,166,106,0.40),transparent)` }} />
 
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
-                      <div style={{ width: 52, height: 52, borderRadius: 14, background: `linear-gradient(135deg,rgba(199,166,106,0.15),rgba(160,120,64,0.10))`, border: `1px solid rgba(199,166,106,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_DARK, fontWeight: 900, fontSize: 20, flexShrink: 0, overflow: 'hidden' }}>
+                      <div style={{ width: 52, height: 52, borderRadius: 14, background: `linear-gradient(135deg,rgba(199,166,106,0.15),rgba(160,120,64,0.10))`, border: `1px solid rgba(199,166,106,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_DARK, fontWeight: 900, fontSize: 22, flexShrink: 0, overflow: 'hidden' }}>
                         {coach.avatar ? <img src={coach.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : coach.firstName?.[0]}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                          <span style={{ color: '#111111', fontWeight: 700, fontSize: 15 }}>{coach.firstName} {coach.lastName}</span>
+                          <span style={{ color: '#111111', fontWeight: 700, fontSize: 17 }}>{coach.firstName} {coach.lastName}</span>
                           {coach.verificationStatus === 'verified' && <CheckCircle size={13} color={GOLD} style={{ flexShrink: 0 }} />}
                         </div>
-                        {coach.city && <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(0,0,0,0.40)', fontSize: 12 }}><MapPin size={11}/><span>{coach.city}</span></div>}
+                        {coach.city && <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(0,0,0,0.40)', fontSize: 13 }}><MapPin size={11}/><span>{coach.city}</span></div>}
                       </div>
                       <ChevronLeft size={16} color="rgba(0,0,0,0.20)" />
                     </div>
 
                     {coach.coachProfile && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-                        {coach.coachProfile.specialty && <span style={{ fontSize: 11, fontWeight: 600, color: GOLD_DARK, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 20, padding: '3px 10px' }}>{specialtyLabels[coach.coachProfile.specialty] ?? coach.coachProfile.specialty}</span>}
-                        {coach.coachProfile.experience && <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '3px 10px' }}>{coach.coachProfile.experience} سال سابقه</span>}
-                        {coach.coachProfile.sessionPrice && <span style={{ fontSize: 11, color: '#16a34a', background: 'rgba(22,163,74,0.07)', border: '1px solid rgba(22,163,74,0.15)', borderRadius: 20, padding: '3px 10px' }}>{coach.coachProfile.sessionPrice.toLocaleString('fa-IR')} ت</span>}
+                        {coach.coachProfile.specialty && <span style={{ fontSize: 12, fontWeight: 600, color: GOLD_DARK, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 20, padding: '3px 10px' }}>{specialtyLabels[coach.coachProfile.specialty] ?? coach.coachProfile.specialty}</span>}
+                        {coach.coachProfile.experience && <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '3px 10px' }}>{coach.coachProfile.experience} سال سابقه</span>}
+                        {coach.coachProfile.sessionPrice && <span style={{ fontSize: 12, color: '#16a34a', background: 'rgba(22,163,74,0.07)', border: '1px solid rgba(22,163,74,0.15)', borderRadius: 20, padding: '3px 10px' }}>{coach.coachProfile.sessionPrice.toLocaleString('fa-IR')} ت</span>}
                       </div>
                     )}
-                    {coach.coachProfile?.certifications && <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', marginBottom: 8 }}>🏅 {coach.coachProfile.certifications}</div>}
-                    {coach.bio && <div style={{ color: 'rgba(0,0,0,0.48)', fontSize: 12, lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{coach.bio}</div>}
+                    {coach.coachProfile?.certifications && <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginBottom: 8 }}>🏅 {coach.coachProfile.certifications}</div>}
+                    {coach.bio && <div style={{ color: 'rgba(0,0,0,0.48)', fontSize: 13, lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{coach.bio}</div>}
                   </div>
                 </Link>
               ))}
