@@ -219,7 +219,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: tc.clr, letterSpacing: '0.08em' }}>{club.type}</span>
               );
             })()}
-            {club.badge && <span style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#fff', boxShadow: '0 2px 10px rgba(199,166,106,0.40)' }}>{club.badge}</span>}
+            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#C7A66A', letterSpacing: '0.06em' }}>{club.badge}</span>}
           </div>
           <button onClick={e => { e.preventDefault(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
             <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
@@ -527,8 +527,10 @@ export default function HomePage() {
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
-          .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
-          .hero-actions { display:none !important; }
+          .trust-strip   { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
+          .hero-ctas     { flex-direction:column !important; }
+          .hero-cta-link { width:100% !important; max-width:260px !important; display:block !important; }
+          .hero-actions  { display:none !important; }
           .hero-arrows  { display:none !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
           .dp-cta       { width:100% !important; }
@@ -648,18 +650,18 @@ export default function HomePage() {
           </p>
 
           {/* Hero CTA buttons — exact trust-card style */}
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '4px 0 24px', flexWrap: 'wrap' }}>
+          <div className="hero-ctas" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '4px 0 24px', flexWrap: 'wrap' }}>
             {[
               { href: '/clubs', icon: <Calendar size={16} color="#C7A66A" />, label: 'رزرو آنلاین میز' },
               { href: '/shop',  icon: <ShoppingBag size={16} color="#C7A66A" />, label: 'بیلیارد بازار' },
             ].map((btn, i) => (
-              <Link key={i} href={btn.href} style={{ textDecoration: 'none' }}>
+              <Link key={i} href={btn.href} className="hero-cta-link" style={{ textDecoration: 'none' }}>
                 <div style={{
                   display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '8px',
                   padding: '10px 20px', borderRadius: '20px', cursor: 'pointer',
                   background: 'rgba(199,166,106,0.10)',
                   border: '1px solid rgba(199,166,106,0.22)',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: 'nowrap', width: '100%', boxSizing: 'border-box',
                 }}>
                   {btn.icon}
                   <span style={{ fontSize: '14px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
