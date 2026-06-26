@@ -211,7 +211,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <span style={{ background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.80)', letterSpacing: '0.08em' }}>{club.type}</span>
             {club.badge && <span style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, borderRadius: '20px', padding: '4px 12px', fontSize: '9px', fontWeight: 700, color: '#fff', boxShadow: '0 2px 10px rgba(199,166,106,0.40)' }}>{club.badge}</span>}
           </div>
-          <button onClick={e => { e.preventDefault(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
+          <button onClick={e => { e.preventDefault(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
             <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s' }} />
           </button>
         </div>
@@ -230,7 +230,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <div style={{ height: '12px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
               <div><span style={{ fontSize: '16px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span><span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.30)', marginRight: '4px' }}>ت/ساعت</span></div>
-              <div style={{ background: 'rgba(30,102,65,0.16)', backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)', color: '#fff', fontSize: '11px', fontWeight: 700, padding: '9px 18px', borderRadius: '10px', border: '1px solid rgba(48,197,90,0.30)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28), 0 4px 14px rgba(30,102,65,0.18)' }}>رزرو آنلاین</div>
+              <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '11px', fontWeight: 700, padding: '9px 18px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
             </div>
           </div>
         </div>
@@ -527,11 +527,11 @@ export default function HomePage() {
 
         /* ══ LAPTOP SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-content { padding-top:clamp(220px,28vh,270px) !important; }
+          .hero-content { padding-top:clamp(230px,38vh,340px) !important; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(215px,32vh,248px) !important; }
+          .hero-content { padding-top:clamp(225px,42vh,310px) !important; }
           .hero-sub     { display:none !important; }
         }
 
@@ -594,7 +594,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(220px,27vh,300px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(240px,37vh,380px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
@@ -651,10 +651,10 @@ export default function HomePage() {
           </div>
 
           {/* Trust strip — 4 liquid glass cards, each unique color */}
-          <div className="hd trust-strip">
+          <div className="hd trust-strip" style={{ marginTop: '5vh' }}>
             {[
               { n: '۵۴۸',   l: 'باشگاه', clr: '#C7A66A', rgb: '199,166,106' },
-              { n: '۱۲K+',  l: 'بازیکن', clr: '#30C55A', rgb: '48,197,90'   },
+              { n: '۱۲K+',  l: 'کاربر فعال', clr: '#30C55A', rgb: '48,197,90'   },
               { n: '۱٬۸۵۰', l: 'محصول',  clr: '#4A9EFF', rgb: '74,158,255'  },
               { n: '۳۱',    l: 'استان',  clr: '#B97BFF', rgb: '185,123,255' },
             ].map((s, i) => (
