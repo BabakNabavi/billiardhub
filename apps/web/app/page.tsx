@@ -60,11 +60,13 @@ const PRP = '#4A2D8A';
 ═══════════════════════════════════════════════════════════════ */
 const IMG = {
   // Hero wallpapers — now in /images/clubs/
-  wall1: '/images/clubs/wallpaper1.jpg',
-  wall2: '/images/clubs/wallpaper2.jpg',
+  wall1: '/images/clubs/wallpaper1.png',
+  wall2: '/images/clubs/wallpaper2.jpeg',
   wall3: '/images/clubs/wallpaper3.png',
   wall4: '/images/clubs/wallpaper4.png',
   wall5: '/images/clubs/wallpaper5.jfif',
+  wall6: '/images/clubs/wallpaper12.jpg',
+  wall7: '/images/clubs/wallpaper21.jpg',
 
   // Real club photos — filenames match current /public/images/clubs/
   club1: '/images/clubs/club6.jpeg',

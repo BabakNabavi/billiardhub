@@ -67,7 +67,7 @@ const CLUB_IMG_POOL = [
   '/images/clubs/club7.jpeg',
   '/images/clubs/club8.jpg',
   '/images/clubs/club9.jpeg',
-  '/images/clubs/club5.jpeg',
+  '/images/clubs/club4.png',
   '/images/clubs/club1.png',
   '/images/clubs/club2.jpg',
   '/images/clubs/club3.jpg',
@@ -259,7 +259,7 @@ const SLIDER_IMAGES = [
   { src: '/images/clubs/club2.jpg',  title: 'رزرو آنلاین میز',     sub: 'در هر زمان، از هر جا' },
   { src: '/images/clubs/club3.jpg',  title: 'مربیان',               sub: 'یادگیری با بهترین‌ها' },
   { src: '/images/clubs/club4.png',  title: '۵۴۸ باشگاه',          sub: 'در سراسر ایران' },
-  { src: '/images/clubs/club5.jpeg', title: 'جامعه بیلیارد',        sub: 'بیلیارد هاب، اتصال همه' },
+  { src: '/images/clubs/club4.png',  title: 'جامعه بیلیارد',        sub: 'بیلیارد هاب، اتصال همه' },
 ];
 
 
