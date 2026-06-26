@@ -350,6 +350,26 @@ export default function ClubProfilePage() {
                   </div>
                 </div>
 
+                {/* mobile-only: booking summary after amenities */}
+                <div className="mobile-only">
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
+                    <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+                      {[
+                        { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
+                        { v: '۳',  l: 'مشغول',    c: '#ef4444',          rgb: '239,68,68'   },
+                        { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
+                      ].map((x, i) => (
+                        <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
+                          <div style={{ fontSize: 26, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
+                          <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* ── #7: Coaches — clickable, popup on click/touch ── */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -381,45 +401,8 @@ export default function ClubProfilePage() {
                   </div>
                 </div>
 
-                {/* Location map */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, overflow: 'hidden' }}>
-                  <div style={{ padding: '16px 18px 0' }}>
-                    <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#ef4444,#f59e0b)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
-                      موقعیت مکانی
-                    </h2>
-                  </div>
-                  <div style={{ height: 180 }}>
-                    <iframe src={`https://maps.google.com/maps?q=${club.latitude},${club.longitude}&z=15&output=embed`} style={{ width: '100%', height: '100%', border: 'none', filter: 'invert(0.9) hue-rotate(180deg) brightness(0.85) contrast(0.9)' }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-                  </div>
-                  <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                    <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
-                      <MapPin size={12} style={{ color: '#C7A66A', flexShrink: 0 }} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.address}، {club.city}</span>
-                    </div>
-                    <a href={`https://www.google.com/maps?q=${club.latitude},${club.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.20)', borderRadius: 20, color: '#06b6d4', fontSize: 12, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
-                      <Navigation size={12} /> مسیریابی
-                    </a>
-                  </div>
-                </div>
-                {/* Mobile-only: booking summary + contact + stats */}
+                {/* mobile-only: contact + stats after coaches */}
                 <div className="mobile-only">
-                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
-                    <div style={{ fontSize: 10, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                      {[
-                        { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
-                        { v: '۳',  l: 'مشغول',    c: '#ef4444',          rgb: '239,68,68'   },
-                        { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
-                      ].map((x, i) => (
-                        <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
-                          <div style={{ fontSize: 26, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
-                          <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 3, height: 14, background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: 2, display: 'inline-block' }} />
@@ -462,6 +445,28 @@ export default function ClubProfilePage() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* Location map — last */}
+                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, overflow: 'hidden' }}>
+                  <div style={{ padding: '16px 18px 0' }}>
+                    <h2 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#ef4444,#f59e0b)', borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
+                      موقعیت مکانی
+                    </h2>
+                  </div>
+                  <div style={{ height: 180 }}>
+                    <iframe src={`https://maps.google.com/maps?q=${club.latitude},${club.longitude}&z=15&output=embed`} style={{ width: '100%', height: '100%', border: 'none', filter: 'invert(0.9) hue-rotate(180deg) brightness(0.85) contrast(0.9)' }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                  </div>
+                  <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                      <MapPin size={12} style={{ color: '#C7A66A', flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.address}، {club.city}</span>
+                    </div>
+                    <a href={`https://www.google.com/maps?q=${club.latitude},${club.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.20)', borderRadius: 20, color: '#06b6d4', fontSize: 12, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+                      <Navigation size={12} /> مسیریابی
+                    </a>
                   </div>
                 </div>
               </div>
