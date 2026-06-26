@@ -122,7 +122,7 @@ export default function PlayerProfilePage() {
 
   const [player, setPlayer]     = useState<Player | null>(null);
   const [loading, setLoading]   = useState(true);
-  const [tab, setTab]           = useState<'about' | 'stats' | 'gallery' | 'achievements'>('about');
+  const [tab, setTab]           = useState<'about' | 'stats' | 'gallery' | 'achievements' | 'tournaments'>('about');
   const [lightbox, setLightbox] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -322,6 +322,7 @@ export default function PlayerProfilePage() {
                   { key:'stats',        label:'آمار و عملکرد' },
                   { key:'gallery',      label:`گالری (${gallery.length})` },
                   { key:'achievements', label:'افتخارات' },
+                  { key:'tournaments',  label:'مسابقات' },
                 ].map(t => (
                   <button key={t.key} className={`tab-btn ${tab===t.key?'active':''}`} onClick={() => setTab(t.key as any)}>{t.label}</button>
                 ))}
@@ -456,6 +457,55 @@ export default function PlayerProfilePage() {
                   )) : (
                     <div style={{ textAlign:'center', padding:'48px 24px', color:'rgba(0,0,0,0.30)', fontSize:14 }}>افتخاری ثبت نشده است</div>
                   )}
+                </div>
+              )}
+
+              {/* TOURNAMENTS */}
+              {tab === 'tournaments' && (
+                <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:12 }}>
+                  {/* Summary stats */}
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:6 }}>
+                    {[
+                      { v:'۱۴', label:'شرکت در مسابقات', color:'#C7A66A', rgb:'199,166,106' },
+                      { v:'۶',  label:'عنوان قهرمانی',    color:'#f59e0b', rgb:'245,158,11'  },
+                      { v:'۸۲٪', label:'نرخ پیشرفت',      color:'#30C55A', rgb:'48,197,90'   },
+                    ].map((s,i) => (
+                      <div key={i} style={{ background:'#fff', border:`1px solid rgba(${s.rgb},0.14)`, borderRadius:14, padding:'14px 10px', textAlign:'center' }}>
+                        <div style={{ fontSize:22, fontWeight:900, color:s.color, marginBottom:4 }}>{s.v}</div>
+                        <div style={{ fontSize:11, color:'rgba(0,0,0,0.40)', fontWeight:600 }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Tournament history rows */}
+                  {[
+                    { id:'t3', title:'تور هفتگی آماتور',           date:'شهریور ۱۴۰۵', result:'قهرمان',       place:1, color:'#C7A66A', icon:'🏆', type:'اسنوکر' },
+                    { id:'t2', title:'مسابقات پاکت سری A',          date:'مرداد ۱۴۰۵',  result:'نیمه‌نهایی', place:4, color:'#8b5cf6', icon:'4️⃣', type:'پاکت ۸ توپ' },
+                    { id:'t5', title:'لیگ اسنوکر استانی ۱۴۰۴',     date:'آبان ۱۴۰۴',    result:'قهرمان',       place:1, color:'#C7A66A', icon:'🏆', type:'اسنوکر' },
+                    { id:'t1', title:'جام استعدادهای بیلیارد ۱۴۰۴', date:'مهر ۱۴۰۴',     result:'یک‌چهارم',    place:8, color:'#06b6d4', icon:'8️⃣', type:'پاکت ۹ توپ' },
+                  ].map((t,i) => (
+                    <div key={i} onClick={() => router.push(`/tournaments/${t.id}`)}
+                      style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 16px', background:'#fff', border:'1px solid rgba(0,0,0,0.07)', borderRadius:16, cursor:'pointer', transition:'box-shadow 0.15s' }}>
+                      <div style={{ width:44, height:44, borderRadius:12, background:`${t.color}12`, border:`1px solid ${t.color}22`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:20 }}>
+                        {t.icon}
+                      </div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:14, fontWeight:800, color:'#111', marginBottom:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.title}</div>
+                        <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                          <span style={{ fontSize:12, color:'rgba(0,0,0,0.40)' }}>{t.date}</span>
+                          <span style={{ fontSize:12, color:'rgba(0,0,0,0.30)' }}>•</span>
+                          <span style={{ fontSize:12, color:'rgba(0,0,0,0.40)' }}>{t.type}</span>
+                        </div>
+                      </div>
+                      <div style={{ padding:'5px 12px', borderRadius:20, background:`${t.color}12`, border:`1px solid ${t.color}25`, fontSize:12, fontWeight:700, color:t.color, flexShrink:0 }}>
+                        {t.result}
+                      </div>
+                    </div>
+                  ))}
+
+                  <button onClick={() => router.push('/tournaments')} style={{ width:'100%', padding:'12px', background:'rgba(0,0,0,0.03)', border:'1px solid rgba(0,0,0,0.07)', borderRadius:12, fontSize:13, fontWeight:700, color:'rgba(0,0,0,0.45)', cursor:'pointer', fontFamily:'inherit' }}>
+                    مشاهده همه مسابقات
+                  </button>
                 </div>
               )}
             </div>

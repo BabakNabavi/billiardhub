@@ -22,10 +22,11 @@ const exploreMenu = [
     title: 'بازیکنان و افراد',
     color: GOLD,
     items: [
-      { href: '/players',  label: 'بازیکنان',      icon: <Users size={14} />,   desc: 'بازیکنان حرفه‌ای' },
-      { href: '/coaches',  label: 'مربیان',         icon: <Star size={14} />,    desc: 'مربیان مجاز' },
-      { href: '/referees', label: 'داوران',          icon: <Trophy size={14} />,  desc: 'داوران رسمی' },
-      { href: '/ranking',  label: 'رنکینگ',          icon: <Trophy size={14} />,  desc: 'جدول رنکینگ' },
+      { href: '/players',      label: 'بازیکنان',      icon: <Users size={14} />,    desc: 'بازیکنان حرفه‌ای' },
+      { href: '/coaches',      label: 'مربیان',         icon: <Star size={14} />,     desc: 'مربیان مجاز' },
+      { href: '/referees',     label: 'داوران',          icon: <Trophy size={14} />,   desc: 'داوران رسمی' },
+      { href: '/ranking',      label: 'رنکینگ',          icon: <Trophy size={14} />,   desc: 'جدول رنکینگ' },
+      { href: '/tournaments',  label: 'مسابقات',         icon: <Calendar size={14} />, desc: 'تورنمنت‌های بیلیارد' },
     ],
   },
   {
@@ -56,6 +57,7 @@ const mobileLinks = [
   { href: '/shop',          label: 'بیلیارد بازار',         icon: <ShoppingBag size={18} />,   color: GOLD },
   { href: '/cart',          label: 'سبد خرید',              icon: <ShoppingCart size={18} />,  color: GOLD, isCart: true },
   { href: '/players',       label: 'بازیکنان',              icon: <Users size={18} />,          color: GOLD },
+  { href: '/tournaments',   label: 'مسابقات',               icon: <Trophy size={18} />,         color: GOLD },
   { href: '/live',          label: 'پخش زنده',              icon: <Radio size={18} />,          color: '#ef4444', live: true },
   { href: '/coaches',       label: 'مربیان',                icon: <Star size={18} />,           color: GOLD },
   { href: '/referees',      label: 'داوران',                icon: <Trophy size={18} />,         color: GOLD },
@@ -224,7 +226,8 @@ export default function Navbar() {
           <div className="desk" style={{ alignItems: 'center', gap: '24px', marginRight: '12px', flexShrink: 0 }}>
             <Link href="/clubs"   className={`nav-a ${pathname === '/clubs'   ? 'active' : ''}`}>باشگاه‌ها</Link>
             <Link href="/shop"    className={`nav-a ${pathname === '/shop'    ? 'active' : ''}`}>بیلیارد بازار</Link>
-            <Link href="/players" className={`nav-a ${pathname === '/players' ? 'active' : ''}`}>بازیکنان</Link>
+            <Link href="/players"     className={`nav-a ${pathname === '/players'     ? 'active' : ''}`}>بازیکنان</Link>
+            <Link href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
             <Link href="/live" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: TEXT_MUT, fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.25s', whiteSpace: 'nowrap', padding: '6px 2px' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = TEXT }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
