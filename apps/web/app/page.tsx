@@ -527,12 +527,17 @@ export default function HomePage() {
 
         /* ══ LAPTOP SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-content { padding-top:clamp(230px,38vh,340px) !important; }
+          .hero-content { padding-top:clamp(220px,28vh,270px) !important; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(225px,42vh,310px) !important; }
+          .hero-content { padding-top:clamp(215px,32vh,248px) !important; }
           .hero-sub     { display:none !important; }
+        }
+
+        /* ══ MOBILE — hero content 10vh lower ══ */
+        @media(max-width:600px){
+          .hero-content { padding-top:clamp(220px,37vh,350px) !important; }
         }
 
         /* ══ MOBILE XS ≤400px ══ */
@@ -594,7 +599,7 @@ export default function HomePage() {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(240px,37vh,380px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(220px,27vh,300px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
@@ -651,7 +656,7 @@ export default function HomePage() {
           </div>
 
           {/* Trust strip — 4 liquid glass cards, each unique color */}
-          <div className="hd trust-strip" style={{ marginTop: '5vh' }}>
+          <div className="hd trust-strip">
             {[
               { n: '۵۴۸',   l: 'باشگاه', clr: '#C7A66A', rgb: '199,166,106' },
               { n: '۱۲K+',  l: 'کاربر فعال', clr: '#30C55A', rgb: '48,197,90'   },
