@@ -789,7 +789,7 @@ export default function HomePage() {
                 <div className="prod-hover" style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: '100%', minHeight: '460px', cursor: 'pointer', boxShadow: '0 4px 24px rgba(26,25,23,0.09)' }}>
                   <img src={PRODUCTS[0]!.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.42) saturate(0.60) contrast(1.06)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 10%,rgba(8,4,1,0.98) 100%)' }} />
-                  <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(185,28,28,0.88)', backdropFilter: 'blur(12px)', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '5px 13px', borderRadius: '20px' }}>{PRODUCTS[0]!.pct}٪ تخفیف</div>
+                  <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '10px', fontWeight: 700, padding: '5px 13px', borderRadius: '20px' }}>{PRODUCTS[0]!.pct}٪ تخفیف</div>
                   <div style={{ position: 'absolute', top: '18px', left: '18px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{PRODUCTS[0]!.brand}</div>
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '26px', background: 'rgba(10,5,1,0.40)', backdropFilter: 'blur(32px) saturate(180%)', WebkitBackdropFilter: 'blur(32px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
                     <div style={{ fontSize: 'clamp(15px,1.8vw,20px)', fontWeight: 800, color: '#fff', marginBottom: '6px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{PRODUCTS[0]!.name}</div>
@@ -813,7 +813,7 @@ export default function HomePage() {
                       <div style={{ width: '140px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
                         <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(8,4,1,0.82) 0%,transparent 52%)' }} />
-                        {p.pct > 0 && <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(185,28,28,0.88)', color: '#fff', fontSize: '8px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px' }}>{p.pct}٪</div>}
+                        {p.pct > 0 && <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '8px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px' }}>{p.pct}٪</div>}
                         <div style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
                       </div>
                       <div style={{ flex: 1, padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -1021,7 +1021,7 @@ export default function HomePage() {
                   <div className="news-img" style={{ position: 'relative', height: '100%', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(26,25,23,0.08)' }}>
                     <img src={NEWS[0].img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 22%,rgba(6,3,1,0.96) 100%)' }} />
-                    <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '9px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', color: NEWS[0].clr, background: `${NEWS[0].clr}16`, border: `1px solid ${NEWS[0].clr}28`, backdropFilter: 'blur(16px)' }}>{NEWS[0].cat}</div>
+                    <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '9px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', color: NEWS[0].clr, background: `${NEWS[0].clr}16`, border: `1px solid ${NEWS[0].clr}28` }}>{NEWS[0].cat}</div>
                     <div style={{ position: 'absolute', bottom: '24px', right: '22px', left: '22px' }}>
                       <h3 style={{ fontSize: 'clamp(13px,1.7vw,18px)', fontWeight: 800, color: '#fff', marginBottom: '12px', lineHeight: 1.48 }}>{NEWS[0].title}</h3>
                       <div style={{ display: 'flex', gap: '14px', fontSize: '10px', color: 'rgba(255,255,255,0.32)' }}>
@@ -1040,7 +1040,7 @@ export default function HomePage() {
                     <div className="news-img" style={{ position: 'relative', height: 'clamp(120px,17vw,187px)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(26,25,23,0.07)' }}>
                       <img src={n.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 22%,rgba(6,3,1,0.94) 100%)' }} />
-                      <div style={{ position: 'absolute', top: '11px', right: '11px', fontSize: '8px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', color: n.clr, background: `${n.clr}16`, border: `1px solid ${n.clr}26`, backdropFilter: 'blur(14px)' }}>{n.cat}</div>
+                      <div style={{ position: 'absolute', top: '11px', right: '11px', fontSize: '8px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', color: n.clr, background: `${n.clr}16`, border: `1px solid ${n.clr}26` }}>{n.cat}</div>
                       <div style={{ position: 'absolute', bottom: '14px', right: '14px', left: '14px' }}>
                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', lineHeight: 1.52, marginBottom: '7px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.title}</div>
                         <div style={{ display: 'flex', gap: '12px', fontSize: '9px', color: 'rgba(255,255,255,0.28)' }}>

@@ -604,9 +604,9 @@ export default function ClubsPage() {
 
           {!loading && (
             <div style={{ marginTop: 40, padding: '28px 24px', background: '#111111', border: 'none', borderRadius: 20, textAlign: 'center' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px' }}>باشگاه خود را ثبت کنید</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', animation: 'gentlePulse 2.8s ease-in-out infinite' }}>باشگاه خود را ثبت کنید</h3>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.50)', margin: '0 0 16px' }}>به هزاران بازیکن دسترسی پیدا کنید</div>
-              <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+              <Link href="/clubs/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 20, color: '#C7A66A', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
                 ثبت باشگاه ←
               </Link>
             </div>
