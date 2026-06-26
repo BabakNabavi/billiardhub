@@ -400,7 +400,7 @@ export default function LivePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88 }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72 }}>
 
       {/* Header */}
       <div style={{ background: '#111', color: '#fff',

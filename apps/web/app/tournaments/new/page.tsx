@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -421,7 +421,7 @@ export default function NewTournamentPage() {
   if (submitted) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', padding: '20px', paddingTop: 100 }}>
+      justifyContent: 'center', padding: '20px', paddingTop: 88 }}>
       <div style={{ background: '#fff', borderRadius: 24, padding: '48px 40px',
         maxWidth: 440, width: '100%', textAlign: 'center',
         boxShadow: '0 8px 40px rgba(0,0,0,0.10)' }}>
@@ -450,7 +450,7 @@ export default function NewTournamentPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 88, paddingBottom: 60 }}>
+      fontFamily: 'Vazirmatn, sans-serif', paddingTop: 72, paddingBottom: 60 }}>
 
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
