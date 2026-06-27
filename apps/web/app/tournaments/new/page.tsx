@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Trophy, ChevronRight, ChevronLeft, Check, CreditCard,
-  Calendar, Clock, Users, FileText, Image, ChevronDown, Loader2, CheckCircle2,
+  Trophy, ChevronRight, ChevronLeft, Check,
+  Calendar, Clock, Users, FileText, Image, ChevronDown,
 } from 'lucide-react';
 
 type GameType = '8ball' | '9ball' | 'snooker' | 'other';
@@ -111,7 +111,7 @@ const FORMATS = [
   { key: 'bo9',  label: 'Best of 9',  wins: 5 },
   { key: 'bo11', label: 'Best of 11', wins: 6 },
 ];
-const STEPS = ['اطلاعات پایه', 'تنظیمات', 'جوایز و قوانین', 'پرداخت'];
+const STEPS = ['اطلاعات پایه', 'تنظیمات', 'جوایز و قوانین'];
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -409,7 +409,6 @@ export default function NewTournamentPage() {
   const [rules, setRules]         = useState('');
   const [matchFormat, setFormat]  = useState('bo3');
   const [formatOpen, setFormatOpen] = useState(false);
-  const [paySim, setPaySim]       = useState<null | 'loading' | 'success'>(null);
 
   const entryFeeDisplay = fmtMoney(entryFeeRaw);
 
@@ -446,7 +445,6 @@ export default function NewTournamentPage() {
     name.trim().length > 2,
     !!date && !!startTime && !!deadline && !!deadlineTime && !deadlineAfterDate && !dateBeforeToday,
     prizeInfo.trim().length > 2,
-    true,
   ][step];
 
   if (submitted) return (
@@ -665,11 +663,13 @@ export default function NewTournamentPage() {
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           transition: 'background 0.12s',
                         }}>
+                          <span style={{ width: 20, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                            {matchFormat === f.key && <Check size={15} color="#C7A66A" />}
+                          </span>
                           <span className="fmtlbl" style={{ fontSize: 15, fontWeight: 800,
                             color: matchFormat === f.key ? '#C7A66A' : '#111' }}>
                             {f.label}
                           </span>
-                          {matchFormat === f.key && <Check size={15} color="#C7A66A" />}
                         </button>
                       ))}
                     </div>
@@ -687,7 +687,6 @@ export default function NewTournamentPage() {
                         .replace(/[^0-9]/g, '');
                       setFeeRaw(raw);
                     }}
-                    placeholder="مثال: ۵۰۰٬۰۰۰"
                     style={{ ...inputStyle, paddingLeft: 60 }}
                   />
                   <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
@@ -719,145 +718,6 @@ export default function NewTournamentPage() {
             </div>
           )}
 
-          {/* ── Step 3: درگاه پرداخت ── */}
-          {step === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-              {/* Gateway card */}
-              <div style={{ background: 'linear-gradient(145deg,#0f172a 0%,#1e293b 100%)',
-                borderRadius: 24, padding: 28, color: '#fff', position: 'relative', overflow: 'hidden' }}>
-                {/* Glow */}
-                <div style={{ position: 'absolute', top: -40, left: -40, width: 200, height: 200,
-                  borderRadius: '50%', background: 'rgba(199,166,106,0.06)', filter: 'blur(50px)', pointerEvents: 'none' }} />
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
-                    <div style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-                      background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.22)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CreditCard size={24} color="#C7A66A" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.01em' }}>
-                        درگاه پرداخت آنلاین
-                      </div>
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
-                        Billiard Hub · Secure Payment Gateway
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 14,
-                    padding: '16px 20px', marginBottom: 20,
-                    border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', marginBottom: 8,
-                      letterSpacing: '0.08em' }}>حق ورودی مسابقه</div>
-                    <div style={{ fontSize: 30, fontWeight: 900, color: '#C7A66A' }}>
-                      {entryFeeRaw && parseInt(entryFeeRaw) > 0
-                        ? `${fmtMoney(entryFeeRaw)} تومان`
-                        : <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 22 }}>رایگان</span>}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    {(['🏦 ملت','🏦 ملی','🏦 سامان','🏦 پارسیان'] as const).map(b => (
-                      <div key={b} style={{ padding: '6px 12px', borderRadius: 10,
-                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-                        fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.45)' }}>{b}</div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Simulate button */}
-              <button onClick={() => {
-                setPaySim('loading');
-                setTimeout(() => setPaySim('success'), 2200);
-              }} style={{
-                padding: '14px 20px', borderRadius: 16, cursor: 'pointer',
-                background: 'rgba(199,166,106,0.10)', color: '#A07840',
-                border: '1.5px solid rgba(199,166,106,0.25)',
-                fontSize: 15, fontWeight: 800, fontFamily: 'inherit',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              }}>
-                <CreditCard size={15} /> پیش‌نمایش تجربه پرداخت بازیکن
-              </button>
-
-              {/* Info */}
-              <div style={{ background: 'rgba(48,197,90,0.05)', border: '1px solid rgba(48,197,90,0.16)',
-                borderRadius: 14, padding: '14px 18px',
-                display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <CheckCircle2 size={15} color="#30C55A" style={{ flexShrink: 0, marginTop: 1 }} />
-                <p style={{ fontSize: 14, color: '#555', margin: 0, lineHeight: 1.7 }}>
-                  بازیکنان هنگام ثبت‌نام مستقیماً از طریق درگاه امن بانکی هزینه را پرداخت می‌کنند.
-                  مبلغ پس از کسر کارمزد به حساب شما واریز می‌شود.
-                </p>
-              </div>
-
-              {/* Simulated gateway modal */}
-              {paySim && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
-                  zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 20, direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif' }}>
-                  <div style={{ background: '#fff', borderRadius: 24, width: '100%', maxWidth: 360,
-                    overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.22)' }}>
-
-                    {/* Bank header */}
-                    <div style={{ background: 'linear-gradient(135deg,#1e3a5f,#0f2240)',
-                      padding: '20px 24px', color: '#fff' }}>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)',
-                        letterSpacing: '0.1em', marginBottom: 4 }}>درگاه پرداخت امن</div>
-                      <div style={{ fontSize: 18, fontWeight: 900 }}>بیلیارد هاب</div>
-                    </div>
-
-                    <div style={{ padding: '28px 24px' }}>
-                      {paySim === 'loading' ? (
-                        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                          <div style={{ animation: 'spin 1s linear infinite', display: 'inline-block',
-                            marginBottom: 16 }}>
-                            <Loader2 size={40} color="#C7A66A" />
-                          </div>
-                          <div style={{ fontSize: 16, fontWeight: 800, color: '#111', marginBottom: 6 }}>
-                            در حال اتصال به بانک...
-                          </div>
-                          <div style={{ fontSize: 13, color: '#aaa' }}>لطفاً صبر کنید</div>
-                          <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.fmtlbl{font-family:system-ui,-apple-system,sans-serif!important}`}</style>
-                        </div>
-                      ) : (
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ width: 64, height: 64, borderRadius: '50%',
-                            background: 'rgba(48,197,90,0.10)', border: '2px solid rgba(48,197,90,0.25)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            margin: '0 auto 16px' }}>
-                            <CheckCircle2 size={32} color="#30C55A" />
-                          </div>
-                          <div style={{ fontSize: 18, fontWeight: 900, color: '#111', marginBottom: 6 }}>
-                            پرداخت موفق
-                          </div>
-                          <div style={{ fontSize: 14, color: '#888', marginBottom: 4 }}>
-                            {entryFeeRaw && parseInt(entryFeeRaw) > 0
-                              ? `${fmtMoney(entryFeeRaw)} تومان`
-                              : 'رایگان'}
-                          </div>
-                          <div style={{ fontSize: 12, color: '#bbb', marginBottom: 24 }}>
-                            کد پیگیری: {Math.floor(Math.random() * 9000000 + 1000000)}
-                          </div>
-                          <button onClick={() => setPaySim(null)} style={{
-                            width: '100%', padding: '13px', borderRadius: 14, border: 'none',
-                            background: 'linear-gradient(135deg,#30C55A,#26a249)',
-                            color: '#fff', fontSize: 15, fontWeight: 800,
-                            cursor: 'pointer', fontFamily: 'inherit',
-                          }}>
-                            بازگشت به ایجاد مسابقه
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* ── Actions ── */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             marginTop: 36, paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
@@ -875,7 +735,10 @@ export default function NewTournamentPage() {
               </button>
             ) : (
               <button onClick={() => {
-                try { localStorage.setItem('bracketMaxPlayers_t1', String(maxPlayers)); } catch {}
+                try {
+                  localStorage.setItem('bracketMaxPlayers_t1', String(maxPlayers));
+                  localStorage.setItem('matchFormat_t1', matchFormat);
+                } catch {}
                 setSubmit(true);
               }} style={lqBtn(true)}>
                 <Trophy size={16} />

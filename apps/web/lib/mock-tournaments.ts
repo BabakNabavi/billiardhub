@@ -40,6 +40,7 @@ export interface Tournament {
   cardNumber?: string;
   cardHolder?: string;
   bankName?: string;
+  matchFormat?: string;
   status: TournamentStatus;
   registeredCount: number;
   champion?: string;
@@ -126,6 +127,7 @@ export const SAMPLE_TOURNAMENTS: Tournament[] = [
     rules:'• فرمت حذفی یک‌طرفه\n• هر فریم ۱۵ قرمز\n• توپ‌های Aramith Pro\n• تاخیر بیش از ۱۵ دقیقه = باخت\n• پوشش رسمی الزامی',
     paymentMethod:'card_transfer', cardNumber:'6037-9975-1234-5678',
     cardHolder:'محمد احمدی', bankName:'ملت',
+    matchFormat: 'bo5',
     status:'registration_open', registeredCount:12,
   },
   {
