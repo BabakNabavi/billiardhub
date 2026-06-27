@@ -401,7 +401,7 @@ export default function NewTournamentPage() {
   const [deadWd, setDeadWd]       = useState('');
   const [deadlineTime, setDeadlineTime] = useState('');
   const [maxPlayers, setMax]      = useState(16);
-  const [elimType, setElimType]   = useState<'single' | 'double'>('single');
+  const [elimType, setElimType]   = useState<'single' | 'double' | 'league'>('single');
   const [entryFeeRaw, setFeeRaw]  = useState('');
   const [prizeInfo, setPrize]     = useState('');
   const [rules, setRules]         = useState('');
@@ -412,9 +412,20 @@ export default function NewTournamentPage() {
 
   const entryFeeDisplay = fmtMoney(entryFeeRaw);
 
+  const J_MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  function dateToNum(s: string): number {
+    if (!s) return 0;
+    const p = s.split(' ');
+    if (p.length !== 3) return 0;
+    const toEn = (str: string) => str.replace(/[۰-۹]/g, c => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c)));
+    const d = parseInt(toEn(p[0]!)), m = J_MONTHS.indexOf(p[1]!) + 1, y = parseInt(toEn(p[2]!));
+    return y * 10000 + m * 100 + d;
+  }
+  const deadlineAfterDate = !!(date && deadline && dateToNum(deadline) > dateToNum(date));
+
   const canNext = [
     name.trim().length > 2,
-    !!date && !!startTime && !!deadline && !!deadlineTime,
+    !!date && !!startTime && !!deadline && !!deadlineTime && !deadlineAfterDate,
     prizeInfo.trim().length > 2,
     true,
   ][step];
@@ -543,10 +554,17 @@ export default function NewTournamentPage() {
                 <TimePicker label="ساعت شروع" required value={startTime} onChange={setStart} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <DatePicker label="مهلت ثبت‌نام" required value={deadline}
-                  onChange={(v, wd) => { setDead(v); setDeadWd(wd); }} />
-                <TimePicker label="ساعت مهلت" required value={deadlineTime} onChange={setDeadlineTime} />
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <DatePicker label="مهلت ثبت‌نام" required value={deadline}
+                    onChange={(v, wd) => { setDead(v); setDeadWd(wd); }} />
+                  <TimePicker label="ساعت مهلت" required value={deadlineTime} onChange={setDeadlineTime} />
+                </div>
+                {deadlineAfterDate && (
+                  <p style={{ margin: '8px 0 0', fontSize: 12, color: '#ef4444', fontWeight: 600 }}>
+                    ⚠ مهلت ثبت‌نام نمی‌تواند بعد از تاریخ مسابقه باشد
+                  </p>
+                )}
               </div>
 
               <FormField label="حداکثر تعداد بازیکن" required>
@@ -564,25 +582,20 @@ export default function NewTournamentPage() {
                     </button>
                   ))}
                 </div>
-                <p style={{ fontSize: 12, color: '#aaa', margin: '6px 0 0' }}>نفر</p>
               </FormField>
 
               <FormField label="نوع مسابقه" required>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  {([
-                    { key: 'single' as const, label: 'تک حذفی', desc: 'یک باخت = حذف' },
-                    { key: 'double' as const, label: 'دو حذفی', desc: 'دو باخت = حذف' },
-                  ]).map(opt => (
-                    <button key={opt.key} onClick={() => setElimType(opt.key)} style={{
-                      padding: '14px 12px', borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit',
-                      textAlign: 'right', transition: 'all 0.18s',
-                      border: `1px solid rgba(199,166,106,${elimType === opt.key ? '0.35' : '0.12'})`,
-                      background: `rgba(199,166,106,${elimType === opt.key ? '0.12' : '0.03'})`,
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
+                  {(['single','double','league'] as const).map(key => (
+                    <button key={key} onClick={() => setElimType(key)} style={{
+                      padding: '16px 8px', borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit',
+                      textAlign: 'center', transition: 'all 0.18s',
+                      border: `1px solid rgba(199,166,106,${elimType === key ? '0.35' : '0.12'})`,
+                      background: `rgba(199,166,106,${elimType === key ? '0.12' : '0.03'})`,
+                      fontSize: 14, fontWeight: 900,
+                      color: elimType === key ? '#C7A66A' : '#888',
                     }}>
-                      <div style={{ fontSize: 14, fontWeight: 900,
-                        color: elimType === opt.key ? '#C7A66A' : '#888' }}>{opt.label}</div>
-                      <div style={{ fontSize: 11, color: elimType === opt.key ? '#A07840' : '#bbb',
-                        marginTop: 3 }}>{opt.desc}</div>
+                      {key === 'single' ? 'تک حذفی' : key === 'double' ? 'دو حذفی' : 'لیگ'}
                     </button>
                   ))}
                 </div>

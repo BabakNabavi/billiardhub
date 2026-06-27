@@ -368,14 +368,6 @@ export default function LivePage() {
             return (
               <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10,
                 flexDirection: i === 1 ? 'row-reverse' : 'row' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                  background: p ? `hsl(${p.name.charCodeAt(0) * 15},50%,85%)` : '#f5f5f5',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 800,
-                  color: p ? `hsl(${p.name.charCodeAt(0) * 15},50%,35%)` : '#ddd',
-                }}>
-                  {p?.name[0] ?? '?'}
-                </div>
                 <div style={{ textAlign: i === 1 ? 'right' : 'left' }}>
                   <div style={{ fontSize: 14, fontWeight: win ? 900 : 700,
                     color: win ? '#30C55A' : '#111' }}>
