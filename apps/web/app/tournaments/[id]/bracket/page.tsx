@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronRight, Shuffle, Save, FolderOpen, Check,
@@ -198,6 +198,38 @@ export default function BracketPage() {
 
   /* Mobile tap state */
   const [tapPlayer, setTapPlayer] = useState<TournamentPlayer | null>(null);
+
+  /* ── Auto-fit scale (desktop only) ── */
+  const [fitScale, setFitScale] = useState(1);
+  const [fitPos,   setFitPos]   = useState({ x: 0, y: 0 });
+  const fitContainerRef = useRef<HTMLDivElement>(null);
+  const fitContentRef   = useRef<HTMLDivElement>(null);
+
+  const refit = useCallback(() => {
+    const wrap = fitContainerRef.current;
+    const tree = fitContentRef.current;
+    if (!wrap || !tree) return;
+    const availW = wrap.clientWidth  - 32;
+    const availH = wrap.clientHeight - 32;
+    const natW   = tree.offsetWidth;
+    const natH   = tree.offsetHeight;
+    if (natW < 10 || natH < 10) return;
+    const s  = Math.min(availW / natW, availH / natH, 1);
+    const sc = Math.max(s, 0.12);
+    setFitScale(sc);
+    setFitPos({ x: Math.max((wrap.clientWidth  - natW * sc) / 2, 0),
+                y: Math.max((wrap.clientHeight - natH * sc) / 2, 0) });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isMobile) return;
+    refit();
+    const ro = new ResizeObserver(refit);
+    if (fitContainerRef.current) ro.observe(fitContainerRef.current);
+    return () => ro.disconnect();
+  }, [isMobile, refit]);
+
+  useEffect(() => { if (!isMobile) refit(); }, [matches, isMobile, refit]);
 
   useEffect(() => { if (pool.length === 0) setPoolError(false); }, [pool.length]);
 
@@ -511,84 +543,102 @@ export default function BracketPage() {
     </div>
   );
 
-  /* ── Bracket canvas (shared mobile/desktop) ── */
-  const BracketCanvas = () => (
-    <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '16px 12px',
-      flex: isMobile ? undefined : 1,
-      minWidth: 0,
-      WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
-      <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
-        minWidth: 'max-content', gap: 0 }}>
+  /* ── Shared bracket columns JSX ── */
+  const bracketTree = (ref?: React.Ref<HTMLDivElement>) => (
+    <div ref={ref} style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch', gap: 0 }}>
 
-        {/* LEFT HALF columns: R1 → QF → SF */}
-        {innerRounds.map((round, ri) => {
-          const ms = leftHalf(round);
-          const pad = Math.pow(2, ri) * 18;
-          return (
-            <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
-                letterSpacing: '0.08em', textAlign: 'center', padding: '0 8px', marginBottom: 8 }}>
-                {roundLabel(round, totalRounds)}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
-                {ms.map(m => (
-                  <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 10 }}>
-                    <MatchCard match={m} draggingOver={draggingOver}
-                      onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
-                      dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
-                      isByeMatch={isByeM(m)}
-                      onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
-                  </div>
-                ))}
-              </div>
+      {/* LEFT HALF columns: R1 → QF → SF */}
+      {innerRounds.map((round, ri) => {
+        const ms = leftHalf(round);
+        const pad = Math.pow(2, ri) * 18;
+        return (
+          <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
+              letterSpacing: '0.08em', textAlign: 'center', padding: '0 8px', marginBottom: 8 }}>
+              {roundLabel(round, totalRounds)}
             </div>
-          );
-        })}
-
-        {/* CENTER — FINAL */}
-        {finalMatch && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
-              textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
-              🏆 فینال
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              flex: 1, padding: `${Math.pow(2, innerRounds.length) * 18}px 10px` }}>
-              <MatchCard match={finalMatch} draggingOver={draggingOver}
-                onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
-                dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
-                onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+            <div style={{ display: 'flex', flexDirection: 'column',
+              justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
+              {ms.map(m => (
+                <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 10 }}>
+                  <MatchCard match={m} draggingOver={draggingOver}
+                    onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                    dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                    isByeMatch={isByeM(m)}
+                    onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+                </div>
+              ))}
             </div>
           </div>
-        )}
+        );
+      })}
 
-        {/* RIGHT HALF columns: SF → QF → R1 */}
-        {[...innerRounds].reverse().map((round, ri) => {
-          const ms = rightHalf(round);
-          const mirrorRi = innerRounds.length - 1 - ri;
-          const pad = Math.pow(2, mirrorRi) * 18;
-          return (
-            <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
-                letterSpacing: '0.08em', textAlign: 'center', padding: '0 8px', marginBottom: 8 }}>
-                {roundLabel(round, totalRounds)}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
-                {ms.map(m => (
-                  <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 10 }}>
-                    <MatchCard match={m} draggingOver={draggingOver}
-                      onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
-                      dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
-                      isByeMatch={isByeM(m)}
-                      onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
-                  </div>
-                ))}
-              </div>
+      {/* CENTER — FINAL */}
+      {finalMatch && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
+            textAlign: 'center', padding: '0 10px', marginBottom: 8 }}>
+            🏆 فینال
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            flex: 1, padding: `${Math.pow(2, innerRounds.length) * 18}px 10px` }}>
+            <MatchCard match={finalMatch} draggingOver={draggingOver}
+              onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+              dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+              onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+          </div>
+        </div>
+      )}
+
+      {/* RIGHT HALF columns: SF → QF → R1 */}
+      {[...innerRounds].reverse().map((round, ri) => {
+        const ms = rightHalf(round);
+        const mirrorRi = innerRounds.length - 1 - ri;
+        const pad = Math.pow(2, mirrorRi) * 18;
+        return (
+          <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 9, fontWeight: 800, color: '#ccc',
+              letterSpacing: '0.08em', textAlign: 'center', padding: '0 8px', marginBottom: 8 }}>
+              {roundLabel(round, totalRounds)}
             </div>
-          );
-        })}
+            <div style={{ display: 'flex', flexDirection: 'column',
+              justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
+              {ms.map(m => (
+                <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 10 }}>
+                  <MatchCard match={m} draggingOver={draggingOver}
+                    onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
+                    dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
+                    isByeMatch={isByeM(m)}
+                    onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  /* ── Bracket canvas ── */
+  /* Mobile: horizontal scroll. Desktop: auto-fit scale (Figma-style). */
+  const BracketCanvas = () => isMobile ? (
+    <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '12px',
+      WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
+      {bracketTree()}
+    </div>
+  ) : (
+    <div
+      ref={fitContainerRef}
+      style={{ flex: 1, minWidth: 0, position: 'relative', overflow: 'hidden', background: '#F7F7F5' }}
+    >
+      <div style={{
+        position: 'absolute',
+        left: fitPos.x,
+        top:  fitPos.y,
+        transform: `scale(${fitScale})`,
+        transformOrigin: 'top left',
+      }}>
+        {bracketTree(fitContentRef)}
       </div>
     </div>
   );
