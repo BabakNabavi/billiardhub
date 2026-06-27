@@ -30,15 +30,25 @@ export default function RegisterPage() {
   const isLoggedIn = !!user;
   const userName   = user ? `${user.firstName} ${user.lastName}` : '';
 
-  const [step, setStep]       = useState<Step>('confirm');
-  const [showAlert, setAlert] = useState(false);
-  const [receiptDate]         = useState(nowFa);
+  const [step, setStep]           = useState<Step>('confirm');
+  const [showAlert, setAlert]     = useState(false);
+  const [alreadyReg, setAlreadyReg] = useState(false);
+  const [receiptDate]             = useState(nowFa);
 
   const [trackingCode] = useState(
     () => toFa(14031) + '-' + toFa(Math.floor(10000 + Math.random() * 90000))
   );
 
   const registeredRef = useRef(false);
+
+  /* Check for duplicate registration on mount */
+  useEffect(() => {
+    if (!user?.phone) return;
+    try {
+      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]') as Array<{ phone?: string }>;
+      if (existing.some(r => r.phone === user.phone)) setAlreadyReg(true);
+    } catch {}
+  }, [id, user?.phone]);
 
   /* Save new registration to localStorage when receipt step is entered */
   useEffect(() => {
@@ -55,13 +65,18 @@ export default function RegisterPage() {
       registeredAt: receiptDate,
     };
     try {
-      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]');
+      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]') as Array<{ phone?: string }>;
+      if (existing.some(r => r.phone === user?.phone)) return;
       localStorage.setItem(`tournament-regs-${id}`, JSON.stringify([...existing, newReg]));
     } catch {}
   }, [step, id, userName, trackingCode, receiptDate, user?.phone]);
 
   const handlePay = () => {
     if (!isLoggedIn) { setAlert(true); return; }
+    try {
+      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]') as Array<{ phone?: string }>;
+      if (existing.some(r => r.phone === user?.phone)) { setAlreadyReg(true); return; }
+    } catch {}
     setAlert(false);
     setStep('pay-loading');
     setTimeout(() => setStep('receipt'), 2400);
@@ -137,6 +152,33 @@ export default function RegisterPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  /* ─── Already registered ─────────────────────────────────────── */
+  if (alreadyReg) return (
+    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif' }}>
+      <Header />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 62px)', padding: '20px' }}>
+        <div style={{ background: '#fff', borderRadius: 24, padding: '40px 32px', maxWidth: 420, width: '100%', textAlign: 'center', boxShadow: '0 4px 30px rgba(0,0,0,0.08)' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '2px solid rgba(199,166,106,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <CheckCircle2 size={30} color="#C7A66A" />
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#111', marginBottom: 10 }}>قبلاً ثبت‌نام کرده‌اید</div>
+          <div style={{ fontSize: 14, color: '#888', lineHeight: 1.8, marginBottom: 28 }}>
+            شماره موبایل شما قبلاً در این مسابقه ثبت‌نام شده است.<br />
+            وضعیت ثبت‌نام را در پنل کاربری دنبال کنید.
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => router.push('/dashboard')} style={{ background: '#C7A66A', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              پنل کاربری
+            </button>
+            <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{ background: 'rgba(0,0,0,0.06)', color: '#555', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              بازگشت به مسابقه
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   /* ─── Loading ─────────────────────────────────────────────────── */
   if (!_hydrated) return (
