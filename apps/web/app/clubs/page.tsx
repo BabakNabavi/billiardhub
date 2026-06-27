@@ -8,6 +8,7 @@ import {
   X, SlidersHorizontal, Users, Check, Navigation,
   ChevronDown, Grid3X3, AlignJustify, Gamepad2,
 } from 'lucide-react';
+import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
 
 interface Club {
   id: string; name: string; managerName: string; description: string;
@@ -82,6 +83,17 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
   const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
   const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
 
+  const activeTournament = SAMPLE_TOURNAMENTS.find(
+    t => t.clubId === club.id && (t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming')
+  );
+  const tournBadge = activeTournament ? ({
+    registration_open: { label: '● ثبت‌نام مسابقه باز', color: '#C7A66A', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.30)', pulse: true  },
+    live:              { label: '● مسابقه زنده',         color: '#ef4444', bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.30)',   pulse: true  },
+    upcoming:          { label: 'مسابقه به زودی',        color: '#8b5cf6', bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.28)', pulse: false },
+    bracket_ready:     { label: 'براکت آماده',           color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.28)', pulse: false },
+    finished:          { label: 'پایان یافته',           color: '#999',    bg: 'rgba(0,0,0,0.04)',      border: 'rgba(0,0,0,0.10)',      pulse: false },
+  } as const)[activeTournament.status] : null;
+
   if (view === 'list') return (
     <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
@@ -133,6 +145,13 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
               رزرو ←
             </span>
           </div>
+          {tournBadge && (
+            <div style={{ marginTop: 6, display: 'flex' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: tournBadge.color, background: tournBadge.bg, border: `1px solid ${tournBadge.border}`, borderRadius: 20, padding: '3px 10px', animation: tournBadge.pulse ? 'gentlePulse 1.8s ease-in-out infinite' : 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Trophy size={9} /> {tournBadge.label}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </Link>
@@ -233,6 +252,15 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
               </div>
             ))}
           </div>
+
+          {/* tournament badge */}
+          {tournBadge && (
+            <div style={{ paddingTop: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: tournBadge.color, background: tournBadge.bg, border: `1px solid ${tournBadge.border}`, borderRadius: 20, padding: '4px 12px', animation: tournBadge.pulse ? 'gentlePulse 1.8s ease-in-out infinite' : 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <Trophy size={9} /> {tournBadge.label}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* footer */}
