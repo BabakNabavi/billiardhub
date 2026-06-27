@@ -3,12 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Trophy, ChevronRight, ChevronLeft, Check, AlertCircle, CreditCard,
-  Calendar, Clock, Users, FileText, Image,
+  Trophy, ChevronRight, ChevronLeft, Check, CreditCard,
+  Calendar, Clock, Users, FileText, Image, ChevronDown, Loader2, CheckCircle2,
 } from 'lucide-react';
 
 type GameType = '8ball' | '9ball' | 'snooker' | 'other';
-type PayMethod = 'online' | 'card_transfer';
 
 // ── Jalali utilities ──────────────────────────────────────────────────────────
 
@@ -65,10 +64,6 @@ function fmtMoney(raw: string): string {
                 .replace(/,/g, '٬');
 }
 
-function fmtCard(raw: string): string {
-  const digits = raw.replace(/\D/g, '').slice(0, 16);
-  return digits.replace(/(.{4})/g, '$1-').replace(/-$/, '');
-}
 
 function numToWords(n: number): string {
   if (!n || n === 0) return 'صفر';
@@ -109,6 +104,13 @@ const GAME_TYPES = [
   { key: 'other'   as GameType, label: 'سایر',   color: '#8b5cf6', rgb: '139,92,246'  },
 ];
 const MAX_PLAYERS = [8, 16, 32, 64];
+const FORMATS = [
+  { key: 'bo3',  label: 'Best of 3',  wins: 2 },
+  { key: 'bo5',  label: 'Best of 5',  wins: 3 },
+  { key: 'bo7',  label: 'Best of 7',  wins: 4 },
+  { key: 'bo9',  label: 'Best of 9',  wins: 5 },
+  { key: 'bo11', label: 'Best of 11', wins: 6 },
+];
 const STEPS = ['اطلاعات پایه', 'تنظیمات', 'جوایز و قوانین', 'پرداخت'];
 
 function StepIndicator({ current }: { current: number }) {
@@ -405,10 +407,9 @@ export default function NewTournamentPage() {
   const [entryFeeRaw, setFeeRaw]  = useState('');
   const [prizeInfo, setPrize]     = useState('');
   const [rules, setRules]         = useState('');
-  const [payMethod, setPay]       = useState<PayMethod>('card_transfer');
-  const [cardNumber, setCard]     = useState('');
-  const [cardHolder, setHolder]   = useState('');
-  const [bankName, setBank]       = useState('');
+  const [matchFormat, setFormat]  = useState('bo3');
+  const [formatOpen, setFormatOpen] = useState(false);
+  const [paySim, setPaySim]       = useState<null | 'loading' | 'success'>(null);
 
   const entryFeeDisplay = fmtMoney(entryFeeRaw);
 
@@ -626,6 +627,65 @@ export default function NewTournamentPage() {
                 </div>
               </FormField>
 
+              <FormField label="فرمت مسابقه" required>
+                <div style={{ position: 'relative' }}>
+                  {/* Backdrop to close on outside click */}
+                  {formatOpen && (
+                    <div onClick={() => setFormatOpen(false)}
+                      style={{ position: 'fixed', inset: 0, zIndex: 98 }} />
+                  )}
+                  <button onClick={() => setFormatOpen(v => !v)} style={{
+                    width: '100%', padding: '14px 18px', borderRadius: 14, cursor: 'pointer',
+                    border: '1.5px solid rgba(0,0,0,0.12)', background: '#fff',
+                    fontFamily: 'inherit', display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between', textAlign: 'right',
+                  }}>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>
+                      {FORMATS.find(f => f.key === matchFormat)?.label}
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700 }}>
+                        اولین نفر با {FORMATS.find(f => f.key === matchFormat)?.wins} برد
+                      </span>
+                      <ChevronDown size={16} color="#aaa"
+                        style={{ transition: 'transform 0.2s',
+                          transform: formatOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                    </div>
+                  </button>
+
+                  {formatOpen && (
+                    <div style={{
+                      position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                      background: '#fff', borderRadius: 16, zIndex: 99,
+                      border: '1.5px solid rgba(0,0,0,0.09)',
+                      boxShadow: '0 12px 48px rgba(0,0,0,0.14)', overflow: 'hidden',
+                    }}>
+                      {FORMATS.map((f, i) => (
+                        <button key={f.key} onClick={() => { setFormat(f.key); setFormatOpen(false); }} style={{
+                          width: '100%', padding: '13px 18px',
+                          borderBottom: i < FORMATS.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+                          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                          background: matchFormat === f.key ? 'rgba(199,166,106,0.07)' : '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          transition: 'background 0.12s',
+                        }}>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: 14, fontWeight: 800,
+                              color: matchFormat === f.key ? '#C7A66A' : '#111' }}>
+                              {f.label}
+                            </div>
+                            <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
+                              اولین بازیکن با {f.wins} برد پیروز می‌شود
+                            </div>
+                          </div>
+                          {matchFormat === f.key && <Check size={15} color="#C7A66A" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </FormField>
+
               <FormField label="مبلغ ورودی (تومان)" required>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -668,79 +728,140 @@ export default function NewTournamentPage() {
             </div>
           )}
 
-          {/* ── Step 3: پرداخت ── */}
+          {/* ── Step 3: درگاه پرداخت ── */}
           {step === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {(['online', 'card_transfer'] as PayMethod[]).map(m => (
-                  <button key={m} onClick={() => setPay(m)} style={{
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '18px 20px', borderRadius: 20, cursor: 'pointer',
-                    border: `1px solid rgba(199,166,106,${payMethod === m ? '0.35' : '0.12'})`,
-                    background: payMethod === m ? 'rgba(199,166,106,0.08)' : 'rgba(0,0,0,0.01)',
-                    fontFamily: 'inherit', textAlign: 'right', transition: 'all 0.18s',
-                  }}>
-                    <div style={{
-                      width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                      border: payMethod === m ? '6px solid #C7A66A' : '2px solid rgba(0,0,0,0.18)',
-                      transition: 'all 0.18s',
-                    }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {/* Gateway card */}
+              <div style={{ background: 'linear-gradient(145deg,#0f172a 0%,#1e293b 100%)',
+                borderRadius: 24, padding: 28, color: '#fff', position: 'relative', overflow: 'hidden' }}>
+                {/* Glow */}
+                <div style={{ position: 'absolute', top: -40, left: -40, width: 200, height: 200,
+                  borderRadius: '50%', background: 'rgba(199,166,106,0.06)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+                      background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.22)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CreditCard size={24} color="#C7A66A" />
+                    </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: '#111' }}>
-                        {m === 'online' ? 'درگاه پرداخت آنلاین' : 'کارت به کارت'}
+                      <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.01em' }}>
+                        درگاه پرداخت آنلاین
                       </div>
-                      <div style={{ fontSize: 12, color: '#888', marginTop: 3 }}>
-                        {m === 'online'
-                          ? 'بازیکن از طریق درگاه بانکی پرداخت می‌کند'
-                          : 'بازیکن رسید کارت‌به‌کارت آپلود می‌کند'}
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
+                        Billiard Hub · Secure Payment Gateway
                       </div>
                     </div>
-                  </button>
-                ))}
-              </div>
-
-              {payMethod === 'card_transfer' && (
-                <div style={{ background: 'rgba(199,166,106,0.05)',
-                  border: '1px solid rgba(199,166,106,0.18)',
-                  borderRadius: 20, padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <CreditCard size={16} color="#C7A66A" />
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#C7A66A' }}>اطلاعات حساب</span>
                   </div>
 
-                  <FormField label="شماره کارت" required>
-                    <input
-                      value={cardNumber}
-                      onChange={e => setCard(fmtCard(e.target.value))}
-                      placeholder="۰۰۰۰-۰۰۰۰-۰۰۰۰-۰۰۰۰"
-                      maxLength={19}
-                      style={{ ...inputStyle, letterSpacing: '0.10em', fontFamily: 'monospace' }}
-                    />
-                  </FormField>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 14,
+                    padding: '16px 20px', marginBottom: 20,
+                    border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.40)', marginBottom: 8,
+                      letterSpacing: '0.08em' }}>حق ورودی مسابقه</div>
+                    <div style={{ fontSize: 30, fontWeight: 900, color: '#C7A66A' }}>
+                      {entryFeeRaw && parseInt(entryFeeRaw) > 0
+                        ? `${fmtMoney(entryFeeRaw)} تومان`
+                        : <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 22 }}>رایگان</span>}
+                    </div>
+                  </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <FormField label="نام صاحب حساب" required>
-                      <input value={cardHolder} onChange={e => setHolder(e.target.value)}
-                        placeholder="نام و نام خانوادگی" style={inputStyle} />
-                    </FormField>
-                    <FormField label="نام بانک" required>
-                      <input value={bankName} onChange={e => setBank(e.target.value)}
-                        placeholder="مثال: ملت، ملی..." style={inputStyle} />
-                    </FormField>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    {(['🏦 ملت','🏦 ملی','🏦 سامان','🏦 پارسیان'] as const).map(b => (
+                      <div key={b} style={{ padding: '6px 12px', borderRadius: 10,
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                        fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.45)' }}>{b}</div>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
 
-              {payMethod === 'online' && (
-                <div style={{ background: 'rgba(59,130,246,0.05)',
-                  border: '1px solid rgba(59,130,246,0.14)',
-                  borderRadius: 14, padding: '14px 18px',
-                  display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <AlertCircle size={16} color="#3b82f6" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <p style={{ fontSize: 13, color: '#555', margin: 0, lineHeight: 1.6 }}>
-                    در فاز اول، درگاه پرداخت آنلاین در حال توسعه است.
-                    برای اطلاعات بیشتر به <strong>billiardhub.net</strong> مراجعه کنید.
-                  </p>
+              {/* Simulate button */}
+              <button onClick={() => {
+                setPaySim('loading');
+                setTimeout(() => setPaySim('success'), 2200);
+              }} style={{
+                padding: '14px 20px', borderRadius: 16, cursor: 'pointer',
+                background: 'rgba(199,166,106,0.10)', color: '#A07840',
+                border: '1.5px solid rgba(199,166,106,0.25)',
+                fontSize: 14, fontWeight: 800, fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <CreditCard size={15} /> پیش‌نمایش تجربه پرداخت بازیکن
+              </button>
+
+              {/* Info */}
+              <div style={{ background: 'rgba(48,197,90,0.05)', border: '1px solid rgba(48,197,90,0.16)',
+                borderRadius: 14, padding: '14px 18px',
+                display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <CheckCircle2 size={15} color="#30C55A" style={{ flexShrink: 0, marginTop: 1 }} />
+                <p style={{ fontSize: 13, color: '#555', margin: 0, lineHeight: 1.7 }}>
+                  بازیکنان هنگام ثبت‌نام مستقیماً از طریق درگاه امن بانکی هزینه را پرداخت می‌کنند.
+                  مبلغ پس از کسر کارمزد به حساب شما واریز می‌شود.
+                </p>
+              </div>
+
+              {/* Simulated gateway modal */}
+              {paySim && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+                  zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 20, direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif' }}>
+                  <div style={{ background: '#fff', borderRadius: 24, width: '100%', maxWidth: 360,
+                    overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.22)' }}>
+
+                    {/* Bank header */}
+                    <div style={{ background: 'linear-gradient(135deg,#1e3a5f,#0f2240)',
+                      padding: '20px 24px', color: '#fff' }}>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)',
+                        letterSpacing: '0.1em', marginBottom: 4 }}>درگاه پرداخت امن</div>
+                      <div style={{ fontSize: 18, fontWeight: 900 }}>بیلیارد هاب</div>
+                    </div>
+
+                    <div style={{ padding: '28px 24px' }}>
+                      {paySim === 'loading' ? (
+                        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                          <div style={{ animation: 'spin 1s linear infinite', display: 'inline-block',
+                            marginBottom: 16 }}>
+                            <Loader2 size={40} color="#C7A66A" />
+                          </div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 6 }}>
+                            در حال اتصال به بانک...
+                          </div>
+                          <div style={{ fontSize: 12, color: '#aaa' }}>لطفاً صبر کنید</div>
+                          <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ width: 64, height: 64, borderRadius: '50%',
+                            background: 'rgba(48,197,90,0.10)', border: '2px solid rgba(48,197,90,0.25)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 16px' }}>
+                            <CheckCircle2 size={32} color="#30C55A" />
+                          </div>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: '#111', marginBottom: 6 }}>
+                            پرداخت موفق
+                          </div>
+                          <div style={{ fontSize: 13, color: '#888', marginBottom: 4 }}>
+                            {entryFeeRaw && parseInt(entryFeeRaw) > 0
+                              ? `${fmtMoney(entryFeeRaw)} تومان`
+                              : 'رایگان'}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#bbb', marginBottom: 24 }}>
+                            کد پیگیری: {Math.floor(Math.random() * 9000000 + 1000000)}
+                          </div>
+                          <button onClick={() => setPaySim(null)} style={{
+                            width: '100%', padding: '13px', borderRadius: 14, border: 'none',
+                            background: 'linear-gradient(135deg,#30C55A,#26a249)',
+                            color: '#fff', fontSize: 14, fontWeight: 800,
+                            cursor: 'pointer', fontFamily: 'inherit',
+                          }}>
+                            بازگشت به ایجاد مسابقه
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
