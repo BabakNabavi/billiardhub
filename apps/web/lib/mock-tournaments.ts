@@ -67,7 +67,7 @@ export interface BracketTemplate {
 // ── Labels & Colors ───────────────────────────────────────────────────────────
 
 export const GAME_TYPE_LABELS: Record<GameType, string> = {
-  '8ball': '۸ بال', '9ball': '۹ بال', 'snooker': 'اسنوکر', 'other': 'سایر',
+  '8ball': 'ایت بال', '9ball': 'ناین بال', 'snooker': 'اسنوکر', 'other': 'سایر',
 };
 export const GAME_TYPE_COLORS: Record<GameType, string> = {
   '8ball': '#3b82f6', '9ball': '#30C55A', 'snooker': '#C7A66A', 'other': '#8b5cf6',
