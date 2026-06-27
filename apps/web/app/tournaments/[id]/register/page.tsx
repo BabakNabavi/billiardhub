@@ -392,11 +392,11 @@ export default function RegisterPage() {
 
           {/* CTA */}
           <button onClick={handlePay} style={{
-            width: '100%', padding: '16px', borderRadius: 16, border: 'none',
-            background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-            color: '#fff', fontSize: 16, fontWeight: 800,
+            width: '100%', padding: '16px', borderRadius: 20,
+            background: 'rgba(199,166,106,0.10)',
+            border: '1px solid rgba(199,166,106,0.35)',
+            color: '#C7A66A', fontSize: 16, fontWeight: 800,
             cursor: 'pointer', fontFamily: 'inherit',
-            boxShadow: '0 4px 20px rgba(199,166,106,0.30)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
           }}>
             <CreditCard size={18} />
