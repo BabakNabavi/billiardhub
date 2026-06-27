@@ -258,17 +258,32 @@ export default function TournamentPublicPage() {
                   { label: 'مهلت ثبت‌نام', value: t.registrationDeadline },
                   { label: 'تاریخ برگزاری', value: t.date },
                   { label: 'ساعت شروع', value: toFa(t.startTime) },
-                  { label: 'فرمت', value: `حذفی · ${FORMAT_LABELS[matchFormat] ?? matchFormat} · ${toFa(t.maxPlayers)} نفره` },
                 ].map(row => (
                   <div key={row.label} style={{
                     display: 'flex', justifyContent: 'space-between',
-                    fontSize: 14, color: '#555',
-                    paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
+                    fontSize: 14, paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
                   }}>
                     <span style={{ color: '#aaa' }}>{row.label}</span>
                     <span style={{ fontWeight: 700, color: '#111' }}>{row.value}</span>
                   </div>
                 ))}
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: 14, paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
+                }}>
+                  <span style={{ color: '#aaa' }}>فرمت مسابقه</span>
+                  <span style={{ fontWeight: 500, color: '#111',
+                    fontFamily: 'system-ui,-apple-system,sans-serif' }}>
+                    {FORMAT_LABELS[matchFormat] ?? matchFormat}
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: 14, paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
+                }}>
+                  <span style={{ color: '#aaa' }}>نوع مسابقه</span>
+                  <span style={{ fontWeight: 700, color: '#111' }}>تک حذفی</span>
+                </div>
               </div>
 
               {/* CTA */}
