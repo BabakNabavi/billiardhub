@@ -642,7 +642,7 @@ export default function NewTournamentPage() {
                     <ChevronDown size={16} color="#aaa"
                       style={{ transition: 'transform 0.2s',
                         transform: formatOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-                    <span className="fmtlbl" style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>
+                    <span className="fmtlbl" style={{ fontSize: 16, fontWeight: 400, color: '#111' }}>
                       {FORMATS.find(f => f.key === matchFormat)?.label}
                     </span>
                   </button>
@@ -666,7 +666,7 @@ export default function NewTournamentPage() {
                           <span style={{ width: 20, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                             {matchFormat === f.key && <Check size={15} color="#C7A66A" />}
                           </span>
-                          <span className="fmtlbl" style={{ fontSize: 15, fontWeight: 800,
+                          <span className="fmtlbl" style={{ fontSize: 15, fontWeight: 400,
                             color: matchFormat === f.key ? '#C7A66A' : '#111' }}>
                             {f.label}
                           </span>
