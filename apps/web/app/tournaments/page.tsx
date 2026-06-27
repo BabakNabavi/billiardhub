@@ -59,20 +59,37 @@ function TournamentCard({ t }: { t: Tournament }) {
           </div>
 
           {/* Status badge */}
-          <div style={{
-            position: 'absolute', top: 12, left: 12,
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
-            borderRadius: 20, padding: '4px 12px',
-          }}>
-            {t.status === 'live' && (
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
-                animation: 'pulse 1.8s infinite', display: 'inline-block' }} />
-            )}
-            <span style={{ fontSize: 13, fontWeight: 700, color: statusColor }}>
-              {STATUS_LABELS[t.status]}
-            </span>
-          </div>
+          {t.status === 'registration_open' ? (
+            <div style={{
+              position: 'absolute', top: 12, left: 12,
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              background: 'rgba(199,166,106,0.20)', backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(199,166,106,0.42)', borderRadius: 20,
+              padding: '4px 12px',
+              animation: 'blinkBadge 2.2s ease-in-out infinite',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C7A66A',
+                display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#C7A66A' }}>
+                در حال ثبت‌نام
+              </span>
+            </div>
+          ) : (
+            <div style={{
+              position: 'absolute', top: 12, left: 12,
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
+              borderRadius: 20, padding: '4px 12px',
+            }}>
+              {t.status === 'live' && (
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
+                  animation: 'pulse 1.8s infinite', display: 'inline-block' }} />
+              )}
+              <span style={{ fontSize: 13, fontWeight: 700, color: statusColor }}>
+                {STATUS_LABELS[t.status]}
+              </span>
+            </div>
+          )}
 
           {/* Club name */}
           <div style={{
@@ -265,6 +282,10 @@ export default function TournamentsPage() {
         @keyframes pulse {
           0%,100% { opacity:1; transform:scale(1); }
           50% { opacity:0.5; transform:scale(1.4); }
+        }
+        @keyframes blinkBadge {
+          0%,100% { opacity:1; }
+          50% { opacity:0.48; }
         }
       `}</style>
     </div>
