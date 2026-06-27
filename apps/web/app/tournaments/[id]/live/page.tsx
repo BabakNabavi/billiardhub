@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Clock, Circle, CheckCircle, Trophy, Zap, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronRight, Clock, Circle, CheckCircle, Trophy, Zap, Maximize2, Minimize2, ExternalLink } from 'lucide-react';
 import {
   SAMPLE_TOURNAMENTS, SAMPLE_LIVE_BRACKET, SAMPLE_PLAYERS,
   toFa, GAME_TYPE_LABELS,
@@ -138,13 +138,29 @@ export default function LivePage() {
   const [activeTab, setActiveTab] = useState<'bracket' | 'matches'>('bracket');
   const [tick, setTick]     = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isControl, setIsControl]       = useState(false);
   const bracketRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsControl(new URLSearchParams(window.location.search).get('control') === '1');
+  }, []);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(`bracket-${id}`);
       if (saved) setMatches(JSON.parse(saved));
     } catch {}
+  }, [id]);
+
+  /* Cross-window sync: bracket window receives score updates from control panel */
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === `bracket-${id}` && e.newValue) {
+        try { setMatches(JSON.parse(e.newValue)); } catch {}
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
   }, [id]);
 
   useEffect(() => {
@@ -202,6 +218,8 @@ export default function LivePage() {
         /* Auto start if both players set */
         if (nm.player1 && nm.player2) nm.status = 'in_progress';
       }
+      /* Sync to other windows (bracket display) via storage event */
+      try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
       return next;
     });
     setScoreModal(null);
@@ -389,9 +407,10 @@ export default function LivePage() {
     </div>
   );
 
-  const MatchRow = ({ m, onScore }: { m: TournamentMatch; onScore: () => void }) => {
+  const MatchRow = ({ m, onScore, showScore }: { m: TournamentMatch; onScore: () => void; showScore?: boolean }) => {
     const isLive = m.status === 'in_progress';
     const isDone = m.status === 'completed';
+    const canScore = (isLive || showScore) && !!m.player1 && !!m.player2 && !isDone;
     return (
       <div style={{ background: '#fff', borderRadius: 16, padding: '16px',
         border: `1.5px solid ${isLive ? '#ef4444' : 'rgba(0,0,0,0.08)'}`,
@@ -405,10 +424,11 @@ export default function LivePage() {
               {roundLabel(m.round, totalRounds)} — بازی {toFa(m.matchIndex + 1)}
             </span>
           </div>
-          {isLive && (
+          {canScore && (
             <button onClick={onScore} style={{
               padding: '7px 14px', borderRadius: 10, border: 'none',
-              background: 'rgba(239,68,68,0.10)', color: '#ef4444',
+              background: isLive ? 'rgba(239,68,68,0.10)' : 'rgba(199,166,106,0.12)',
+              color: isLive ? '#ef4444' : '#A07840',
               fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             }}>
               ثبت نتیجه
@@ -444,6 +464,58 @@ export default function LivePage() {
     );
   };
 
+  /* ── Control panel popup (opened via window.open) ── */
+  if (isControl) return (
+    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
+      fontFamily: 'Vazirmatn, sans-serif' }}>
+      <div style={{ background: '#111', color: '#fff',
+        marginTop: -72, padding: '88px 20px 20px' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.40)',
+          letterSpacing: '0.12em', marginBottom: 4 }}>پنل مدیریت نتایج</div>
+        <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 12 }}>{t.name}</div>
+        <div style={{ display: 'flex', gap: 16 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Circle size={6} fill="#ef4444" /> {toFa(liveNow.length)} زنده
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b' }}>
+            {toFa(upcoming.length)} در انتظار
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#30C55A' }}>
+            {toFa(done.length)} پایان
+          </span>
+        </div>
+      </div>
+      <div style={{ padding: '20px 16px' }}>
+        {liveNow.length > 0 && (
+          <section style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#ef4444',
+              letterSpacing: '0.08em', marginBottom: 12 }}>● در حال بازی</div>
+            {liveNow.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} showScore />)}
+          </section>
+        )}
+        {upcoming.length > 0 && (
+          <section style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b',
+              letterSpacing: '0.08em', marginBottom: 12 }}>در انتظار</div>
+            {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} showScore />)}
+          </section>
+        )}
+        {done.length > 0 && (
+          <section>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#bbb',
+              letterSpacing: '0.08em', marginBottom: 12 }}>
+              پایان یافته ({toFa(done.length)})
+            </div>
+            {done.map(m => <MatchRow key={m.id} m={m} onScore={() => {}} />)}
+          </section>
+        )}
+      </div>
+      {scoreModal && (
+        <ScoreModal match={scoreModal} onClose={() => setScoreModal(null)} onSave={handleSaveScore} />
+      )}
+    </div>
+  );
+
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif' }}>
@@ -472,6 +544,20 @@ export default function LivePage() {
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', fontWeight: 600 }}>
               <Zap size={11} style={{ verticalAlign: 'middle' }} /> {GAME_TYPE_LABELS[t.gameType]}
             </div>
+            <button onClick={() => window.open(
+              `/tournaments/${t.id}/live?control=1`,
+              'scoreControl',
+              'width=520,height=780,resizable=yes,scrollbars=yes'
+            )} style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
+              border: '1px solid rgba(255,255,255,0.18)',
+              background: 'rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+            }}>
+              <ExternalLink size={11} /> پنل مدیریت
+            </button>
           </div>
         </div>
 
