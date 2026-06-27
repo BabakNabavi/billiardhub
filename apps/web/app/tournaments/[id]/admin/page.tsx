@@ -367,9 +367,8 @@ export default function TournamentAdminPage() {
               border: '1px solid rgba(0,0,0,0.06)' }}>
               {filtered.map((r, i) => (
                 <div key={r.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
+                  display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
                   borderBottom: i < filtered.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                  transition: 'background 0.15s',
                 }}>
                   {/* Avatar */}
                   <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
@@ -382,56 +381,50 @@ export default function TournamentAdminPage() {
 
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#111', fontSize: 14 }}>{r.playerName}</div>
-                    <div style={{ fontSize: 12, color: '#888', marginTop: 2, direction: 'ltr',
-                      display: 'inline-block' }}>{r.phone}</div>
+                    {/* Name + Status */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
+                      <span style={{ fontWeight: 700, color: '#111', fontSize: 14 }}>{r.playerName}</span>
+                      <StatusBadge status={r.status} />
+                    </div>
+                    {/* Phone + Date */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 12, color: '#888', direction: 'ltr' }}>{r.phone}</span>
+                      <span style={{ fontSize: 11, color: '#bbb' }}>{r.registeredAt}</span>
+                    </div>
                     {r.playerInfo && (
-                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 2,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {r.playerInfo}
-                      </div>
+                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>{r.playerInfo}</div>
                     )}
                     {r.receiptNote && (
-                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
-                        {r.receiptNote}
-                      </div>
+                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>{r.receiptNote}</div>
                     )}
-                  </div>
-
-                  {/* Time */}
-                  <div style={{ fontSize: 12, color: '#bbb', flexShrink: 0 }}>{r.registeredAt}</div>
-
-                  {/* Status */}
-                  <div style={{ flexShrink: 0 }}>
-                    <StatusBadge status={r.status} />
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flexShrink: 0 }}>
                     {r.status !== 'approved' && (
                       <button onClick={() => updateStatus(r.id, 'approved')} title="تایید" style={{
-                        width: 34, height: 34, borderRadius: 10, border: 'none',
+                        width: 32, height: 32, borderRadius: 9, border: 'none',
                         background: 'rgba(48,197,90,0.10)', color: '#30C55A',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <Check size={15} />
+                        <Check size={14} />
                       </button>
                     )}
                     {r.status !== 'rejected' && (
                       <button onClick={() => updateStatus(r.id, 'rejected')} title="رد" style={{
-                        width: 34, height: 34, borderRadius: 10, border: 'none',
+                        width: 32, height: 32, borderRadius: 9, border: 'none',
                         background: 'rgba(239,68,68,0.10)', color: '#ef4444',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <X size={15} />
+                        <X size={14} />
                       </button>
                     )}
                     <button onClick={() => remove(r.id)} title="حذف" style={{
-                      width: 34, height: 34, borderRadius: 10, border: 'none',
+                      width: 32, height: 32, borderRadius: 9, border: 'none',
                       background: 'rgba(0,0,0,0.05)', color: '#aaa',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>

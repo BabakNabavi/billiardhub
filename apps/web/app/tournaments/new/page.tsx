@@ -401,6 +401,7 @@ export default function NewTournamentPage() {
   const [deadWd, setDeadWd]       = useState('');
   const [deadlineTime, setDeadlineTime] = useState('');
   const [maxPlayers, setMax]      = useState(16);
+  const [elimType, setElimType]   = useState<'single' | 'double'>('single');
   const [entryFeeRaw, setFeeRaw]  = useState('');
   const [prizeInfo, setPrize]     = useState('');
   const [rules, setRules]         = useState('');
@@ -564,6 +565,27 @@ export default function NewTournamentPage() {
                   ))}
                 </div>
                 <p style={{ fontSize: 12, color: '#aaa', margin: '6px 0 0' }}>نفر</p>
+              </FormField>
+
+              <FormField label="نوع مسابقه" required>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {([
+                    { key: 'single' as const, label: 'تک حذفی', desc: 'یک باخت = حذف' },
+                    { key: 'double' as const, label: 'دو حذفی', desc: 'دو باخت = حذف' },
+                  ]).map(opt => (
+                    <button key={opt.key} onClick={() => setElimType(opt.key)} style={{
+                      padding: '14px 12px', borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit',
+                      textAlign: 'right', transition: 'all 0.18s',
+                      border: `1px solid rgba(199,166,106,${elimType === opt.key ? '0.35' : '0.12'})`,
+                      background: `rgba(199,166,106,${elimType === opt.key ? '0.12' : '0.03'})`,
+                    }}>
+                      <div style={{ fontSize: 14, fontWeight: 900,
+                        color: elimType === opt.key ? '#C7A66A' : '#888' }}>{opt.label}</div>
+                      <div style={{ fontSize: 11, color: elimType === opt.key ? '#A07840' : '#bbb',
+                        marginTop: 3 }}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
               </FormField>
 
               <FormField label="مبلغ ورودی (تومان)" required>
