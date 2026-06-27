@@ -125,21 +125,23 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    if (!user?.phone) return;
     const collected: MyReg[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key?.startsWith('tournament-regs-')) continue;
       const tId = key.replace('tournament-regs-', '');
       try {
-        const list = JSON.parse(localStorage.getItem(key) ?? '[]') as Array<{ id: string; status: string; registeredAt: string; }>;
+        const list = JSON.parse(localStorage.getItem(key) ?? '[]') as Array<{ id: string; status: string; registeredAt: string; phone?: string; }>;
         const t = SAMPLE_TOURNAMENTS.find(x => x.id === tId);
         for (const reg of list) {
+          if (reg.phone !== user.phone) continue;
           collected.push({ id: reg.id, tournamentId: tId, tournamentName: t?.name ?? tId, status: reg.status as MyReg['status'], registeredAt: reg.registeredAt });
         }
       } catch {}
     }
     setMyRegs(collected);
-  }, []);
+  }, [user?.phone]);
 
   useEffect(() => {
     if (user?.primaryRole === 'admin') { router.replace('/admin'); }
