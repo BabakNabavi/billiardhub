@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Clock, Circle, CheckCircle, Trophy, Zap } from 'lucide-react';
+import { ChevronRight, Clock, Circle, CheckCircle, Trophy, Zap, Maximize2, Minimize2 } from 'lucide-react';
 import {
   SAMPLE_TOURNAMENTS, SAMPLE_LIVE_BRACKET, SAMPLE_PLAYERS,
   toFa, GAME_TYPE_LABELS,
@@ -137,6 +137,8 @@ export default function LivePage() {
   const [scoreModal, setScoreModal] = useState<TournamentMatch | null>(null);
   const [activeTab, setActiveTab] = useState<'bracket' | 'matches'>('bracket');
   const [tick, setTick]     = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const bracketRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -149,6 +151,24 @@ export default function LivePage() {
     const iv = setInterval(() => setTick(t => t + 1), 30000);
     return () => clearInterval(iv);
   }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    document.addEventListener('webkitfullscreenchange', handler);
+    return () => {
+      document.removeEventListener('fullscreenchange', handler);
+      document.removeEventListener('webkitfullscreenchange', handler);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      bracketRef.current?.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
 
   const roundGroups = Array.from({ length: totalRounds }, (_, i) => i + 1)
     .map(r => ({ round: r, ms: matches.filter(m => m.round === r) }));
@@ -456,7 +476,26 @@ export default function LivePage() {
         </div>
       </div>
 
-      {activeTab === 'bracket' ? <BracketView /> : <MatchesView />}
+      {activeTab === 'bracket' ? (
+        <div ref={bracketRef} style={{ background: '#F7F7F5', position: 'relative',
+          ...(isFullscreen ? { minHeight: '100vh', overflow: 'auto', direction: 'rtl',
+            fontFamily: 'Vazirmatn, sans-serif' } : {}) }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 16px 0' }}>
+            <button onClick={toggleFullscreen} style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: 20,
+              border: '1.5px solid rgba(0,0,0,0.12)',
+              background: '#fff', cursor: 'pointer', fontFamily: 'inherit',
+              fontSize: 12, fontWeight: 700, color: '#555',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            }}>
+              {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+              {isFullscreen ? 'خروج از تمام صفحه' : 'تمام صفحه'}
+            </button>
+          </div>
+          <BracketView />
+        </div>
+      ) : <MatchesView />}
 
       {scoreModal && (
         <ScoreModal
