@@ -11,7 +11,7 @@ import {
   type TournamentPlayer, type TournamentMatch,
 } from '../../../../lib/mock-tournaments';
 
-const BYE_PLAYER: TournamentPlayer = { id: 'bye', name: 'استراحت', phone: '' };
+const BYE_PLAYER: TournamentPlayer = { id: 'bye', name: 'Bye', phone: '' };
 
 function generateEmptyBracket(totalSlots: number): TournamentMatch[] {
   const rounds = Math.log2(totalSlots);
@@ -110,7 +110,7 @@ function MatchCard({
         }}
       >
         {isBye ? (
-          <span style={{ fontSize: 10, color: '#bbb', fontWeight: 600 }}>استراحت</span>
+          <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, opacity: 0.65 }}>Bye</span>
         ) : player ? (
           <>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#111', flex: 1,
@@ -147,7 +147,7 @@ function MatchCard({
         borderBottom: '1px solid rgba(0,0,0,0.04)',
         fontSize: 9, fontWeight: 700, color: isByeMatch ? '#30C55A' : '#ccc',
         display: 'flex', alignItems: 'center', gap: 3 }}>
-        {isByeMatch ? <><Check size={8} /> پیشروی خودکار</> : `بازی ${toFa(match.matchIndex + 1)}`}
+        {isByeMatch ? <><Check size={8} /> صعود به مرحله بعد</> : `بازی ${toFa(match.matchIndex + 1)}`}
       </div>
       <div style={{ padding: '6px 7px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {renderSlot(match.player1, 1)}
@@ -366,7 +366,7 @@ export default function BracketPage() {
               <Info size={15} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
               <p style={{ fontSize: 13, color: '#78350f', margin: 0, lineHeight: 1.6 }}>
                 <strong>{toFa(approvedPlayers.length)} نفر</strong> ثبت‌نام کرده‌اند از {toFa(totalSlots)} ظرفیت.
-                {' '}{toFa(totalSlots - approvedPlayers.length)} جایگاه با «استراحت» (BYE) پر می‌شود.
+                {' '}{toFa(totalSlots - approvedPlayers.length)} جایگاه با Bye پر می‌شود.
               </p>
             </div>
           )}
@@ -453,7 +453,7 @@ export default function BracketPage() {
         <h2 style={{ fontSize: 18, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>چیدمان تصادفی</h2>
         <p style={{ fontSize: 13, color: '#777', lineHeight: 1.7, margin: '0 0 22px' }}>
           {toFa(approvedPlayers.length)} بازیکن تصادفی در جدول چیده می‌شوند.
-          {needsBye && ` ${toFa(totalSlots - approvedPlayers.length)} جایگاه استراحت (BYE) اضافه می‌شود.`}
+          {needsBye && ` ${toFa(totalSlots - approvedPlayers.length)} جایگاه Bye اضافه می‌شود.`}
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
           <button onClick={() => setShowR(false)} style={lqBtn(true, '0,0,0', '#666')}>انصراف</button>
@@ -475,8 +475,8 @@ export default function BracketPage() {
         <div style={{ fontSize: 32, marginBottom: 12 }}>🏖️</div>
         <h3 style={{ fontSize: 17, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>جایگاه‌های خالی</h3>
         <p style={{ fontSize: 13, color: '#666', lineHeight: 1.7, margin: '0 0 22px' }}>
-          برخی جایگاه‌ها بازیکن ندارند. «استراحت» (BYE) اضافه می‌شود و
-          بازیکن مقابل خودکار پیشروی می‌کند.
+          برخی جایگاه‌ها بازیکن ندارند. Bye اضافه می‌شود و
+          بازیکن مقابل صعود به مرحله بعد می‌کند.
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
           <button onClick={() => setByeDlg(false)} style={lqBtn(true, '0,0,0', '#666')}>بازگشت</button>

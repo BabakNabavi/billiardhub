@@ -370,15 +370,6 @@ export default function TournamentAdminPage() {
                   display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
                   borderBottom: i < filtered.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
                 }}>
-                  {/* Avatar */}
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                    background: `hsl(${r.playerName.charCodeAt(0) * 15},50%,85%)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 15, fontWeight: 800,
-                    color: `hsl(${r.playerName.charCodeAt(0) * 15},50%,35%)` }}>
-                    {r.playerName[0]}
-                  </div>
-
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {/* Name + Status */}
@@ -512,13 +503,6 @@ export default function TournamentAdminPage() {
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#C7A66A',
                     width: 28, textAlign: 'center' }}>
                     {toFa(i + 1)}
-                  </div>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-                    background: `hsl(${r.playerName.charCodeAt(0) * 15},50%,85%)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 800,
-                    color: `hsl(${r.playerName.charCodeAt(0) * 15},50%,35%)` }}>
-                    {r.playerName[0]}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, color: '#111', fontSize: 14 }}>{r.playerName}</div>
