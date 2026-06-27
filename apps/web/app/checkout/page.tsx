@@ -42,7 +42,7 @@ function StepIndicator({ current }: { current: Step }) {
                 : <i className={`ti ${s.icon}`} style={{ fontSize: 18 }} />
               }
             </div>
-            <span style={{ fontSize: 12, fontWeight: i === idx ? 700 : 400, color: i <= idx ? '#A07840' : 'rgba(0,0,0,0.45)' }}>{s.label}</span>
+            <span style={{ fontSize: 13, fontWeight: i === idx ? 700 : 400, color: i <= idx ? '#A07840' : 'rgba(0,0,0,0.45)' }}>{s.label}</span>
           </div>
           {i < steps.length - 1 && (
             <div style={{ width: 80, height: 2, background: i < idx ? 'linear-gradient(90deg,#C7A66A,#A07840)' : 'rgba(0,0,0,0.05)', marginBottom: 20, transition: 'all 0.4s' }} />
@@ -93,11 +93,11 @@ export default function CheckoutPage() {
     clear()
   }
 
-  const labelStyle = { fontSize: 13, fontWeight: 600, color: 'rgba(0,0,0,0.50)', marginBottom: 6, display: 'block' }
+  const labelStyle = { fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.50)', marginBottom: 6, display: 'block' }
   const inputStyle = (err?: string) => ({
     width: '100%', boxSizing: 'border-box' as const,
     background: '#F7F7F5', border: `1px solid ${err ? 'rgba(239,68,68,0.5)' : 'rgba(0,0,0,0.08)'}`,
-    borderRadius: 12, padding: '12px 14px', color: '#111111', fontSize: 15, fontFamily: 'inherit',
+    borderRadius: 12, padding: '12px 14px', color: '#111111', fontSize: 16, fontFamily: 'inherit',
     outline: 'none', transition: 'border-color 0.2s',
   })
 
@@ -110,18 +110,18 @@ export default function CheckoutPage() {
             <i className="ti ti-check" style={{ fontSize: 44, color: '#C7A66A' }} />
           </div>
           <h1 style={{ fontSize: 29, fontWeight: 900, color: '#111111', margin: '0 0 12px' }}>سفارش ثبت شد!</h1>
-          <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: '0 0 24px' }}>
+          <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: '0 0 24px' }}>
             سفارش شما با موفقیت ثبت شد.<br />
             کد پیگیری: <strong style={{ color: '#C7A66A', fontSize: 18 }}>{orderNum}</strong>
           </p>
-          <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: '0 0 32px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 12, padding: '12px 16px' }}>
+          <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.38)', margin: '0 0 32px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 12, padding: '12px 16px' }}>
             پس از تأیید پرداخت، کالا در سریع‌ترین زمان ممکن ارسال خواهد شد.
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '13px 24px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 15, boxShadow: '0 8px 24px rgba(199,166,106,0.35)' }}>
+            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '13px 24px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 16, boxShadow: '0 8px 24px rgba(199,166,106,0.35)' }}>
               <i className="ti ti-shopping-bag" style={{ fontSize: 18 }} /> ادامه خرید
             </Link>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.50)', padding: '13px 24px', borderRadius: 14, textDecoration: 'none', fontSize: 15 }}>
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.50)', padding: '13px 24px', borderRadius: 14, textDecoration: 'none', fontSize: 16 }}>
               بازگشت به خانه
             </Link>
           </div>
@@ -163,14 +163,14 @@ export default function CheckoutPage() {
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <Link href="/cart" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)', textDecoration: 'none', marginBottom: 20, transition: 'color 0.2s' }}
+            <Link href="/cart" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(0,0,0,0.45)', textDecoration: 'none', marginBottom: 20, transition: 'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.45)' }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 15 }} />
+              <i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
               بازگشت به سبد خرید
             </Link>
             <h1 style={{ fontSize: 29, fontWeight: 900, color: '#111111', margin: '0 0 8px' }}>تکمیل خرید</h1>
-            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{toFa(count)} محصول — مجموع: {fmt(grand)} تومان</p>
+            <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{toFa(count)} محصول — مجموع: {fmt(grand)} تومان</p>
           </div>
 
           <StepIndicator current={step} />
@@ -206,7 +206,7 @@ export default function CheckoutPage() {
                             placeholder={f.placeholder}
                             style={inputStyle(errors[f.key])}
                           />
-                          {errors[f.key] && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors[f.key]}</p>}
+                          {errors[f.key] && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors[f.key]}</p>}
                         </div>
                       ))}
 
@@ -216,13 +216,13 @@ export default function CheckoutPage() {
                           <option value="">انتخاب استان</option>
                           {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                         </select>
-                        {errors.province && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.province}</p>}
+                        {errors.province && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.province}</p>}
                       </div>
 
                       <div>
                         <label style={labelStyle}>شهر</label>
                         <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="شهر" style={inputStyle(errors.city)} />
-                        {errors.city && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.city}</p>}
+                        {errors.city && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.city}</p>}
                       </div>
 
                       <div style={{ gridColumn: 'span 2' }}>
@@ -234,13 +234,13 @@ export default function CheckoutPage() {
                           rows={3}
                           style={{ ...inputStyle(errors.address), resize: 'vertical', lineHeight: 1.7 }}
                         />
-                        {errors.address && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.address}</p>}
+                        {errors.address && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.address}</p>}
                       </div>
 
                       <div style={{ gridColumn: 'span 2' }}>
                         <label style={labelStyle}>کد پستی</label>
                         <input value={form.postalCode} onChange={e => set('postalCode', e.target.value)} placeholder="۱۲۳۴۵۶۷۸۹۰" maxLength={10} style={inputStyle(errors.postalCode)} />
-                        {errors.postalCode && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.postalCode}</p>}
+                        {errors.postalCode && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.postalCode}</p>}
                       </div>
                     </div>
 
@@ -279,11 +279,11 @@ export default function CheckoutPage() {
                           <i className={`ti ${pm.icon}`} style={{ fontSize: 20, color: form.payMethod === pm.key ? '#C7A66A' : 'rgba(0,0,0,0.45)' }} />
                         </div>
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontSize: 15, fontWeight: 700, color: form.payMethod === pm.key ? '#111111' : 'rgba(0,0,0,0.50)', margin: '0 0 3px' }}>{pm.label}</p>
-                          <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{pm.desc}</p>
+                          <p style={{ fontSize: 16, fontWeight: 700, color: form.payMethod === pm.key ? '#111111' : 'rgba(0,0,0,0.50)', margin: '0 0 3px' }}>{pm.label}</p>
+                          <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{pm.desc}</p>
                         </div>
                         <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${form.payMethod === pm.key ? '#C7A66A' : 'rgba(0,0,0,0.12)'}`, background: form.payMethod === pm.key ? '#C7A66A' : 'none', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {form.payMethod === pm.key && <i className="ti ti-check" style={{ fontSize: 11, color: '#fff' }} />}
+                          {form.payMethod === pm.key && <i className="ti ti-check" style={{ fontSize: 12, color: '#fff' }} />}
                         </div>
                       </div>
                     ))}
@@ -291,15 +291,15 @@ export default function CheckoutPage() {
                     {/* Card details (if card selected) */}
                     {form.payMethod === 'card' && (
                       <div style={{ marginTop: 16, padding: '16px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 14 }}>
-                        <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <i className="ti ti-info-circle" style={{ fontSize: 15, color: '#C7A66A' }} />
+                        <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <i className="ti ti-info-circle" style={{ fontSize: 16, color: '#C7A66A' }} />
                           شماره کارت فروشنده پس از تأیید سفارش برای شما ارسال می‌شود.
                         </p>
                       </div>
                     )}
 
                     <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-                      <button onClick={() => setStep('address')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: '#FFFFFF', color: 'rgba(0,0,0,0.50)', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => setStep('address')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: '#FFFFFF', color: 'rgba(0,0,0,0.50)', fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <i className="ti ti-arrow-right" style={{ fontSize: 17 }} /> برگشت
                       </button>
                       <button
@@ -326,26 +326,26 @@ export default function CheckoutPage() {
                     {/* Address summary */}
                     <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 14, padding: '16px 20px', marginBottom: 14 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.45)', margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <i className="ti ti-map-pin" style={{ fontSize: 14, color: '#C7A66A' }} /> آدرس تحویل
+                        <p style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.45)', margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <i className="ti ti-map-pin" style={{ fontSize: 15, color: '#C7A66A' }} /> آدرس تحویل
                         </p>
-                        <button onClick={() => setStep('address')} style={{ fontSize: 12, color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>ویرایش</button>
+                        <button onClick={() => setStep('address')} style={{ fontSize: 13, color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>ویرایش</button>
                       </div>
-                      <p style={{ fontSize: 15, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>{form.firstName} {form.lastName}</p>
-                      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: '0 0 2px' }}>{form.province} — {form.city}</p>
-                      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: '0 0 2px' }}>{form.address}</p>
-                      <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: 0 }}>کد پستی: {toFa(form.postalCode)}</p>
+                      <p style={{ fontSize: 16, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>{form.firstName} {form.lastName}</p>
+                      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', margin: '0 0 2px' }}>{form.province} — {form.city}</p>
+                      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', margin: '0 0 2px' }}>{form.address}</p>
+                      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>کد پستی: {toFa(form.postalCode)}</p>
                     </div>
 
                     {/* Payment summary */}
                     <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 14, padding: '16px 20px', marginBottom: 24 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.45)', margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <i className="ti ti-credit-card" style={{ fontSize: 14, color: '#C7A66A' }} /> روش پرداخت
+                        <p style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.45)', margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <i className="ti ti-credit-card" style={{ fontSize: 15, color: '#C7A66A' }} /> روش پرداخت
                         </p>
-                        <button onClick={() => setStep('payment')} style={{ fontSize: 12, color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>ویرایش</button>
+                        <button onClick={() => setStep('payment')} style={{ fontSize: 13, color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>ویرایش</button>
                       </div>
-                      <p style={{ fontSize: 15, color: '#111111', margin: 0 }}>
+                      <p style={{ fontSize: 16, color: '#111111', margin: 0 }}>
                         {{ online: 'درگاه پرداخت آنلاین', cod: 'پرداخت در محل', card: 'کارت به کارت' }[form.payMethod]}
                       </p>
                     </div>
@@ -359,17 +359,17 @@ export default function CheckoutPage() {
                             <img src={item.image || '/images/billiadr-club-3.jpg'} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }}
                               onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 14, fontWeight: 600, color: '#111111', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
-                              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{toFa(item.quantity)} عدد</p>
+                              <p style={{ fontSize: 15, fontWeight: 600, color: '#111111', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
+                              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{toFa(item.quantity)} عدد</p>
                             </div>
-                            <p style={{ fontSize: 15, fontWeight: 700, color: '#C7A66A', margin: 0, flexShrink: 0 }}>{fmt(fp * item.quantity)} ت</p>
+                            <p style={{ fontSize: 16, fontWeight: 700, color: '#C7A66A', margin: 0, flexShrink: 0 }}>{fmt(fp * item.quantity)} ت</p>
                           </div>
                         )
                       })}
                     </div>
 
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button onClick={() => setStep('payment')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: '#FFFFFF', color: 'rgba(0,0,0,0.50)', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => setStep('payment')} style={{ padding: '14px 20px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: '#FFFFFF', color: 'rgba(0,0,0,0.50)', fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <i className="ti ti-arrow-right" style={{ fontSize: 17 }} /> برگشت
                       </button>
                       <button
@@ -390,7 +390,7 @@ export default function CheckoutPage() {
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
                 <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.50),transparent)' }} />
                 <div style={{ padding: '20px' }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <i className="ti ti-receipt" style={{ fontSize: 18, color: '#C7A66A' }} />
                     خلاصه سفارش
                   </h3>
@@ -400,18 +400,18 @@ export default function CheckoutPage() {
                       <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <img src={item.image || '/images/billiadr-club-3.jpg'} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
                           onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
-                        <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
-                        <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', flexShrink: 0 }}>×{toFa(item.quantity)}</span>
+                        <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
+                        <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', flexShrink: 0 }}>×{toFa(item.quantity)}</span>
                       </div>
                     ))}
-                    {items.length > 4 && <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: 0 }}>و {toFa(items.length - 4)} محصول دیگر...</p>}
+                    {items.length > 4 && <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>و {toFa(items.length - 4)} محصول دیگر...</p>}
                   </div>
 
                   {[
                     { label: 'جمع کالاها', value: `${fmt(total)} ت` },
                     { label: 'هزینه ارسال', value: shipping === 0 ? 'رایگان' : `${fmt(shipping)} ت`, green: shipping === 0 },
                   ].map(r => (
-                    <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 10 }}>
+                    <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, marginBottom: 10 }}>
                       <span style={{ color: 'rgba(0,0,0,0.45)' }}>{r.label}</span>
                       <span style={{ color: r.green ? '#16a34a' : '#111111', fontWeight: 600 }}>{r.value}</span>
                     </div>
@@ -427,8 +427,8 @@ export default function CheckoutPage() {
               {/* Security badges */}
               <div style={{ marginTop: 16, padding: '16px', background: 'rgba(199,166,106,0.04)', border: '1px solid rgba(199,166,106,0.10)', borderRadius: 14, textAlign: 'center' }}>
                 <i className="ti ti-shield-check" style={{ fontSize: 26, color: '#C7A66A', display: 'block', marginBottom: 8 }} />
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>خرید ۱۰۰٪ امن</p>
-                <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: 0 }}>اطلاعات شما با رمزنگاری SSL محافظت می‌شود</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>خرید ۱۰۰٪ امن</p>
+                <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>اطلاعات شما با رمزنگاری SSL محافظت می‌شود</p>
               </div>
             </div>
           </div>

@@ -105,9 +105,9 @@ export default function PlayersPage() {
           <div style={{ position: 'absolute', bottom: '-20%', left: '10%', width: '35vw', height: '35vw', maxWidth: 340, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(199,166,106,0.07) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
 
           <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.70)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: 8 }}>PLAYER RANKING</div>
+            <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.70)', letterSpacing: '0.25em', fontWeight: 700, marginBottom: 8 }}>PLAYER RANKING</div>
             <h1 style={{ fontSize: 'clamp(26px, 4.4vw, 48px)', fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.03em' }}>بازیکنان رنکینگی</h1>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.40)', margin: '0 0 28px' }}>بهترین بازیکنان بیلیارد ایران</p>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.40)', margin: '0 0 28px' }}>بهترین بازیکنان بیلیارد ایران</p>
 
             {/* TOP 3 podium */}
             {!loading && top3.length > 0 && (
@@ -121,8 +121,8 @@ export default function PlayersPage() {
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '14px 20px', background: i === 0 ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.05)', border: `1px solid ${i === 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.08)'}`, borderRadius: 18, minWidth: 120, transition: 'all 0.3s', cursor: 'pointer' }}>
                         <span style={{ fontSize: 22 }}>{medals[i]}</span>
                         <Avatar player={p} color={spec.color} size={44} />
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.firstName} {p.lastName}</div>
-                        <span style={{ fontSize: 11, color: spec.color, background: `${spec.color}14`, border: `1px solid ${spec.color}22`, borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>{spec.label}</span>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', textAlign: 'center', whiteSpace: 'nowrap' }}>{p.firstName} {p.lastName}</div>
+                        <span style={{ fontSize: 12, color: spec.color, background: `${spec.color}14`, border: `1px solid ${spec.color}22`, borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>{spec.label}</span>
                       </div>
                     </Link>
                   );
@@ -152,7 +152,7 @@ export default function PlayersPage() {
                 { v: 'pocket',   l: 'پاکت' },
                 { v: 'highball', l: 'هی‌بال' },
               ].map(f => (
-                <button key={f.v} className="pill-btn" onClick={() => setSpecialty(f.v)} style={{ padding: '6px 16px', borderRadius: 20, border: `1px solid ${specialty === f.v ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.08)'}`, background: specialty === f.v ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.03)', color: specialty === f.v ? '#A07840' : 'rgba(0,0,0,0.45)', fontSize: 13, fontWeight: 600 }}>
+                <button key={f.v} className="pill-btn" onClick={() => setSpecialty(f.v)} style={{ padding: '6px 16px', borderRadius: 20, border: `1px solid ${specialty === f.v ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.08)'}`, background: specialty === f.v ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.03)', color: specialty === f.v ? '#A07840' : 'rgba(0,0,0,0.45)', fontSize: 14, fontWeight: 600 }}>
                   {f.l}
                 </button>
               ))}
@@ -163,13 +163,13 @@ export default function PlayersPage() {
                   { v: 'level', l: 'سطح' },
                   { v: 'exp',   l: 'تجربه' },
                 ].map(s => (
-                  <button key={s.v} className="pill-btn" onClick={() => setSortBy(s.v as any)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sortBy === s.v ? 'rgba(199,166,106,0.45)' : 'rgba(0,0,0,0.08)'}`, background: sortBy === s.v ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.03)', color: sortBy === s.v ? '#A07840' : 'rgba(0,0,0,0.40)', fontSize: 12, fontWeight: 600 }}>
+                  <button key={s.v} className="pill-btn" onClick={() => setSortBy(s.v as any)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sortBy === s.v ? 'rgba(199,166,106,0.45)' : 'rgba(0,0,0,0.08)'}`, background: sortBy === s.v ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.03)', color: sortBy === s.v ? '#A07840' : 'rgba(0,0,0,0.40)', fontSize: 13, fontWeight: 600 }}>
                     ↕ {s.l}
                   </button>
                 ))}
               </div>
 
-              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>{toFa(filtered.length)} بازیکن</span>
+              <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.40)' }}>{toFa(filtered.length)} بازیکن</span>
             </div>
           </div>
 
@@ -186,7 +186,7 @@ export default function PlayersPage() {
             <div style={{ textAlign: 'center', padding: '80px 20px' }}>
               <div style={{ fontSize: 44, opacity: 0.20, marginBottom: 14 }}>🎱</div>
               <div style={{ fontSize: 17, fontWeight: 700, color: '#111111', marginBottom: 6 }}>بازیکنی یافت نشد</div>
-              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.40)' }}>جستجو یا فیلترها را تغییر دهید</div>
+              <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)' }}>جستجو یا فیلترها را تغییر دهید</div>
             </div>
           ) : (
             <div className="pgrid">
@@ -205,13 +205,13 @@ export default function PlayersPage() {
                         <Avatar player={player} color={spec.color} size={50} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
-                            <span style={{ color: '#111111', fontWeight: 800, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.firstName} {player.lastName}</span>
+                            <span style={{ color: '#111111', fontWeight: 800, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.firstName} {player.lastName}</span>
                             {player.verificationStatus === 'verified' && (
                               <Shield size={12} style={{ color: spec.color, flexShrink: 0 }} />
                             )}
                           </div>
                           {player.city && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(0,0,0,0.40)', fontSize: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(0,0,0,0.40)', fontSize: 13 }}>
                               <MapPin size={10} />{player.city}
                             </div>
                           )}
@@ -221,16 +221,16 @@ export default function PlayersPage() {
 
                       {/* tags */}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: spec.color, background: `${spec.color}14`, border: `1px solid ${spec.color}22`, borderRadius: 20, padding: '3px 10px' }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: spec.color, background: `${spec.color}14`, border: `1px solid ${spec.color}22`, borderRadius: 20, padding: '3px 10px' }}>
                           {spec.label}
                         </span>
                         {lvl && (
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.50)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '3px 10px' }}>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '3px 10px' }}>
                             {lvl}
                           </span>
                         )}
                         {player.playerProfile?.experience && (
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 20, padding: '3px 10px' }}>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 20, padding: '3px 10px' }}>
                             {player.playerProfile.experience} سال
                           </span>
                         )}
@@ -238,7 +238,7 @@ export default function PlayersPage() {
 
                       {/* bio */}
                       {player.bio && (
-                        <div style={{ color: 'rgba(0,0,0,0.48)', fontSize: 13, lineHeight: 1.65, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', marginTop: 'auto' }}>
+                        <div style={{ color: 'rgba(0,0,0,0.48)', fontSize: 14, lineHeight: 1.65, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', marginTop: 'auto' }}>
                           {player.bio}
                         </div>
                       )}

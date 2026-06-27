@@ -121,14 +121,14 @@ function StepIndicator({ current }: { current: number }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             <div style={{
               width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontWeight: 800, fontSize: 14, transition: 'all 0.2s',
+              justifyContent: 'center', fontWeight: 800, fontSize: 15, transition: 'all 0.2s',
               background: i < current ? '#30C55A' : i === current ? 'linear-gradient(135deg,#C7A66A,#A07840)' : 'rgba(0,0,0,0.06)',
               color: i <= current ? '#fff' : '#aaa',
               border: i > current ? '1.5px solid rgba(0,0,0,0.10)' : 'none',
             }}>
               {i < current ? <Check size={16} /> : toFa(i + 1)}
             </div>
-            <span style={{ fontSize: 11, color: i === current ? '#111' : '#aaa',
+            <span style={{ fontSize: 12, color: i === current ? '#111' : '#aaa',
               fontWeight: i === current ? 700 : 500, whiteSpace: 'nowrap' }}>
               {label}
             </span>
@@ -148,11 +148,11 @@ function FormField({ label, required, children, hint }: {
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+      <label style={{ fontSize: 14, fontWeight: 700, color: '#444' }}>
         {label}{required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
       </label>
       {children}
-      {hint && <p style={{ fontSize: 12, color: '#999', margin: 0 }}>{hint}</p>}
+      {hint && <p style={{ fontSize: 13, color: '#999', margin: 0 }}>{hint}</p>}
     </div>
   );
 }
@@ -160,7 +160,7 @@ function FormField({ label, required, children, hint }: {
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '12px 14px', borderRadius: 12,
   border: '1.5px solid rgba(0,0,0,0.10)', background: '#fff',
-  fontSize: 14, fontFamily: 'Vazirmatn, sans-serif', color: '#111',
+  fontSize: 15, fontFamily: 'Vazirmatn, sans-serif', color: '#111',
   outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
 };
 const selectStyle: React.CSSProperties = {
@@ -177,7 +177,7 @@ function lqBtn(active: boolean, rgb = '199,166,106', color = '#C7A66A'): React.C
     border: `1px solid rgba(${rgb},${active ? '0.30' : '0.12'})`,
     background: `rgba(${rgb},${active ? '0.12' : '0.05'})`,
     color: active ? color : 'rgba(0,0,0,0.25)',
-    fontSize: 14, fontWeight: 800, cursor: active ? 'pointer' : 'not-allowed',
+    fontSize: 15, fontWeight: 800, cursor: active ? 'pointer' : 'not-allowed',
     fontFamily: 'inherit', transition: 'all 0.18s', display: 'flex',
     alignItems: 'center', gap: 8,
   };
@@ -230,7 +230,7 @@ function DatePicker({ value, onChange, label, required }: {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+      <label style={{ fontSize: 14, fontWeight: 700, color: '#444' }}>
         {label}{required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
       </label>
 
@@ -242,7 +242,7 @@ function DatePicker({ value, onChange, label, required }: {
           userSelect: 'none',
         } as React.CSSProperties}>
           <Calendar size={15} color="#C7A66A" style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1, color: selD ? '#111' : '#bbb', fontSize: 14 }}>
+          <span style={{ flex: 1, color: selD ? '#111' : '#bbb', fontSize: 15 }}>
             {displayVal || 'انتخاب تاریخ'}
           </span>
           <span style={{ fontSize: 10, color: '#ccc' }}>{open ? '▲' : '▼'}</span>
@@ -281,7 +281,7 @@ function DatePicker({ value, onChange, label, required }: {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 6 }}>
               {J_DAY_NAMES.map(d => (
                 <div key={d} style={{
-                  textAlign: 'center', fontSize: 11, color: 'rgba(0,0,0,0.35)',
+                  textAlign: 'center', fontSize: 12, color: 'rgba(0,0,0,0.35)',
                   fontWeight: 700, padding: '4px 0',
                 }}>{d}</div>
               ))}
@@ -294,7 +294,7 @@ function DatePicker({ value, onChange, label, required }: {
                 const isSel = selY === viewY && selM === viewM && selD === day;
                 return (
                   <button key={i} onClick={() => handleSelect(day as number)} style={{
-                    height: 37, borderRadius: 9, border: 'none', fontSize: 13,
+                    height: 37, borderRadius: 9, border: 'none', fontSize: 14,
                     fontWeight: isSel ? 800 : 500, cursor: 'pointer', fontFamily: 'inherit',
                     background: isSel ? 'linear-gradient(135deg,#C7A66A,#A07840)' : 'transparent',
                     color: isSel ? '#fff' : 'rgba(0,0,0,0.60)',
@@ -314,7 +314,7 @@ function DatePicker({ value, onChange, label, required }: {
       {weekday && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)',
-          borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, color: '#A07840',
+          borderRadius: 20, padding: '4px 14px', fontSize: 13, fontWeight: 700, color: '#A07840',
           alignSelf: 'flex-start' }}>
           <Calendar size={11} color="#C7A66A" />
           {displayVal} — {weekday}
@@ -342,7 +342,7 @@ function TimePicker({ value, onChange, label, required }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {label && (
-        <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+        <label style={{ fontSize: 14, fontWeight: 700, color: '#444' }}>
           {label}{required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
         </label>
       )}
@@ -353,7 +353,7 @@ function TimePicker({ value, onChange, label, required }: {
           userSelect: 'none',
         } as React.CSSProperties}>
           <Clock size={15} color="#C7A66A" style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1, color: value ? '#111' : '#bbb', fontSize: 14,
+          <span style={{ flex: 1, color: value ? '#111' : '#bbb', fontSize: 15,
             direction: 'ltr', textAlign: 'right' }}>
             {value ? toFa(value) : 'انتخاب ساعت'}
           </span>
@@ -369,7 +369,7 @@ function TimePicker({ value, onChange, label, required }: {
           }}>
             {TIME_OPTIONS.map(t => (
               <div key={t} onClick={() => { onChange(t); setOpen(false); }} style={{
-                padding: '10px 16px', cursor: 'pointer', fontSize: 14,
+                padding: '10px 16px', cursor: 'pointer', fontSize: 15,
                 fontWeight: value === t ? 800 : 500,
                 color: value === t ? '#C7A66A' : '#333',
                 background: value === t ? 'rgba(199,166,106,0.08)' : 'transparent',
@@ -464,7 +464,7 @@ export default function NewTournamentPage() {
         <h2 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>
           مسابقه با موفقیت ایجاد شد!
         </h2>
-        <p style={{ fontSize: 14, color: '#777', margin: '0 0 28px', lineHeight: 1.7 }}>
+        <p style={{ fontSize: 15, color: '#777', margin: '0 0 28px', lineHeight: 1.7 }}>
           مسابقه «{name}» ثبت شد و بازیکنان می‌توانند ثبت‌نام کنند.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -489,12 +489,12 @@ export default function NewTournamentPage() {
         <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 14 }}>
           <button onClick={() => router.push('/tournaments')} style={{
             display: 'flex', alignItems: 'center', gap: 6, background: 'none',
-            border: 'none', cursor: 'pointer', fontSize: 14, color: '#777', fontFamily: 'inherit',
+            border: 'none', cursor: 'pointer', fontSize: 15, color: '#777', fontFamily: 'inherit',
           }}>
             <ChevronRight size={16} /> مسابقات
           </button>
           <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>ایجاد مسابقه جدید</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>ایجاد مسابقه جدید</span>
         </div>
       </div>
 
@@ -510,7 +510,7 @@ export default function NewTournamentPage() {
             </div>
             <div>
               <h1 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: 0 }}>ایجاد مسابقه</h1>
-              <p style={{ fontSize: 13, color: '#888', margin: '2px 0 0' }}>اطلاعات مسابقه را وارد کنید</p>
+              <p style={{ fontSize: 14, color: '#888', margin: '2px 0 0' }}>اطلاعات مسابقه را وارد کنید</p>
             </div>
           </div>
 
@@ -530,10 +530,10 @@ export default function NewTournamentPage() {
                   padding: '32px 20px', textAlign: 'center', cursor: 'pointer',
                   background: 'rgba(199,166,106,0.03)' }}>
                   <Image size={28} color="#C7A66A" style={{ opacity: 0.55, marginBottom: 10 }} />
-                  <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
+                  <p style={{ fontSize: 14, color: '#888', margin: 0 }}>
                     کلیک کنید یا تصویر را اینجا بکشید
                   </p>
-                  <p style={{ fontSize: 11, color: '#bbb', margin: '4px 0 0' }}>
+                  <p style={{ fontSize: 12, color: '#bbb', margin: '4px 0 0' }}>
                     PNG, JPG — حداکثر ۵ مگابایت
                   </p>
                 </div>
@@ -552,7 +552,7 @@ export default function NewTournamentPage() {
                       padding: '12px 8px', borderRadius: 20, cursor: 'pointer',
                       border: `1px solid rgba(${g.rgb},${gameType === g.key ? '0.35' : '0.12'})`,
                       background: `rgba(${g.rgb},${gameType === g.key ? '0.12' : '0.04'})`,
-                      fontFamily: 'inherit', fontSize: 13, fontWeight: 800,
+                      fontFamily: 'inherit', fontSize: 14, fontWeight: 800,
                       color: gameType === g.key ? g.color : '#999',
                       transition: 'all 0.18s',
                     }}>
@@ -574,7 +574,7 @@ export default function NewTournamentPage() {
                   <TimePicker label="ساعت شروع" required value={startTime} onChange={setStart} />
                 </div>
                 {dateBeforeToday && (
-                  <p style={{ margin: '8px 0 0', fontSize: 12, color: '#ef4444', fontWeight: 600 }}>
+                  <p style={{ margin: '8px 0 0', fontSize: 13, color: '#ef4444', fontWeight: 600 }}>
                     ⚠ تاریخ مسابقه نمی‌تواند از امروز عقب‌تر باشد
                   </p>
                 )}
@@ -587,7 +587,7 @@ export default function NewTournamentPage() {
                   <TimePicker label="ساعت مهلت" required value={deadlineTime} onChange={setDeadlineTime} />
                 </div>
                 {deadlineAfterDate && (
-                  <p style={{ margin: '8px 0 0', fontSize: 12, color: '#ef4444', fontWeight: 600 }}>
+                  <p style={{ margin: '8px 0 0', fontSize: 13, color: '#ef4444', fontWeight: 600 }}>
                     ⚠ مهلت ثبت‌نام نمی‌تواند بعد از تاریخ مسابقه باشد
                   </p>
                 )}
@@ -618,7 +618,7 @@ export default function NewTournamentPage() {
                       textAlign: 'center', transition: 'all 0.18s',
                       border: `1px solid rgba(199,166,106,${elimType === key ? '0.35' : '0.12'})`,
                       background: `rgba(199,166,106,${elimType === key ? '0.12' : '0.03'})`,
-                      fontSize: 14, fontWeight: 900,
+                      fontSize: 15, fontWeight: 900,
                       color: elimType === key ? '#C7A66A' : '#888',
                     }}>
                       {key === 'single' ? 'تک حذفی' : key === 'double' ? 'دو حذفی' : 'لیگ'}
@@ -640,11 +640,11 @@ export default function NewTournamentPage() {
                     fontFamily: 'inherit', display: 'flex', alignItems: 'center',
                     justifyContent: 'space-between', textAlign: 'right',
                   }}>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>
+                    <span style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>
                       {FORMATS.find(f => f.key === matchFormat)?.label}
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700 }}>
+                      <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700 }}>
                         اولین نفر با {FORMATS.find(f => f.key === matchFormat)?.wins} برد
                       </span>
                       <ChevronDown size={16} color="#aaa"
@@ -670,11 +670,11 @@ export default function NewTournamentPage() {
                           transition: 'background 0.12s',
                         }}>
                           <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: 14, fontWeight: 800,
+                            <div style={{ fontSize: 15, fontWeight: 800,
                               color: matchFormat === f.key ? '#C7A66A' : '#111' }}>
                               {f.label}
                             </div>
-                            <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
+                            <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
                               اولین بازیکن با {f.wins} برد پیروز می‌شود
                             </div>
                           </div>
@@ -700,10 +700,10 @@ export default function NewTournamentPage() {
                     style={{ ...inputStyle, paddingLeft: 60 }}
                   />
                   <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: 12, color: '#bbb', fontWeight: 600 }}>تومان</span>
+                    fontSize: 13, color: '#bbb', fontWeight: 600 }}>تومان</span>
                 </div>
                 {entryFeeRaw && (
-                  <p style={{ fontSize: 12, color: '#A07840', margin: 0, fontWeight: 700 }}>
+                  <p style={{ fontSize: 13, color: '#A07840', margin: 0, fontWeight: 700 }}>
                     {numToWords(parseInt(entryFeeRaw, 10))} تومان
                   </p>
                 )}
@@ -749,7 +749,7 @@ export default function NewTournamentPage() {
                       <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.01em' }}>
                         درگاه پرداخت آنلاین
                       </div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
                         Billiard Hub · Secure Payment Gateway
                       </div>
                     </div>
@@ -758,7 +758,7 @@ export default function NewTournamentPage() {
                   <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 14,
                     padding: '16px 20px', marginBottom: 20,
                     border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.40)', marginBottom: 8,
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', marginBottom: 8,
                       letterSpacing: '0.08em' }}>حق ورودی مسابقه</div>
                     <div style={{ fontSize: 30, fontWeight: 900, color: '#C7A66A' }}>
                       {entryFeeRaw && parseInt(entryFeeRaw) > 0
@@ -785,7 +785,7 @@ export default function NewTournamentPage() {
                 padding: '14px 20px', borderRadius: 16, cursor: 'pointer',
                 background: 'rgba(199,166,106,0.10)', color: '#A07840',
                 border: '1.5px solid rgba(199,166,106,0.25)',
-                fontSize: 14, fontWeight: 800, fontFamily: 'inherit',
+                fontSize: 15, fontWeight: 800, fontFamily: 'inherit',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}>
                 <CreditCard size={15} /> پیش‌نمایش تجربه پرداخت بازیکن
@@ -796,7 +796,7 @@ export default function NewTournamentPage() {
                 borderRadius: 14, padding: '14px 18px',
                 display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                 <CheckCircle2 size={15} color="#30C55A" style={{ flexShrink: 0, marginTop: 1 }} />
-                <p style={{ fontSize: 13, color: '#555', margin: 0, lineHeight: 1.7 }}>
+                <p style={{ fontSize: 14, color: '#555', margin: 0, lineHeight: 1.7 }}>
                   بازیکنان هنگام ثبت‌نام مستقیماً از طریق درگاه امن بانکی هزینه را پرداخت می‌کنند.
                   مبلغ پس از کسر کارمزد به حساب شما واریز می‌شود.
                 </p>
@@ -813,7 +813,7 @@ export default function NewTournamentPage() {
                     {/* Bank header */}
                     <div style={{ background: 'linear-gradient(135deg,#1e3a5f,#0f2240)',
                       padding: '20px 24px', color: '#fff' }}>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)',
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)',
                         letterSpacing: '0.1em', marginBottom: 4 }}>درگاه پرداخت امن</div>
                       <div style={{ fontSize: 18, fontWeight: 900 }}>بیلیارد هاب</div>
                     </div>
@@ -825,10 +825,10 @@ export default function NewTournamentPage() {
                             marginBottom: 16 }}>
                             <Loader2 size={40} color="#C7A66A" />
                           </div>
-                          <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 6 }}>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: '#111', marginBottom: 6 }}>
                             در حال اتصال به بانک...
                           </div>
-                          <div style={{ fontSize: 12, color: '#aaa' }}>لطفاً صبر کنید</div>
+                          <div style={{ fontSize: 13, color: '#aaa' }}>لطفاً صبر کنید</div>
                           <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
                         </div>
                       ) : (
@@ -842,18 +842,18 @@ export default function NewTournamentPage() {
                           <div style={{ fontSize: 18, fontWeight: 900, color: '#111', marginBottom: 6 }}>
                             پرداخت موفق
                           </div>
-                          <div style={{ fontSize: 13, color: '#888', marginBottom: 4 }}>
+                          <div style={{ fontSize: 14, color: '#888', marginBottom: 4 }}>
                             {entryFeeRaw && parseInt(entryFeeRaw) > 0
                               ? `${fmtMoney(entryFeeRaw)} تومان`
                               : 'رایگان'}
                           </div>
-                          <div style={{ fontSize: 11, color: '#bbb', marginBottom: 24 }}>
+                          <div style={{ fontSize: 12, color: '#bbb', marginBottom: 24 }}>
                             کد پیگیری: {Math.floor(Math.random() * 9000000 + 1000000)}
                           </div>
                           <button onClick={() => setPaySim(null)} style={{
                             width: '100%', padding: '13px', borderRadius: 14, border: 'none',
                             background: 'linear-gradient(135deg,#30C55A,#26a249)',
-                            color: '#fff', fontSize: 14, fontWeight: 800,
+                            color: '#fff', fontSize: 15, fontWeight: 800,
                             cursor: 'pointer', fontFamily: 'inherit',
                           }}>
                             بازگشت به ایجاد مسابقه

@@ -165,7 +165,7 @@ export default function RankingsPage() {
                 }}>
                   رنکینگ ایران
                 </h1>
-                <p style={{ color: 'rgba(0,0,0,0.45)', fontSize: '14px', margin: '2px 0 0' }}>
+                <p style={{ color: 'rgba(0,0,0,0.45)', fontSize: '15px', margin: '2px 0 0' }}>
                   جدول امتیازات رسمی فدراسیون بیلیارد ایران
                 </p>
               </div>
@@ -190,7 +190,7 @@ export default function RankingsPage() {
                     ? 'rgba(199,166,106,0.12)'
                     : '#FFFFFF',
                   color: sport === s.value ? '#A07840' : s.soon ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.55)',
-                  fontSize: '14px', fontWeight: 600,
+                  fontSize: '15px', fontWeight: 600,
                   cursor: s.soon ? 'not-allowed' : 'pointer',
                   fontFamily: 'inherit',
                   opacity: s.soon ? 0.5 : 1,
@@ -232,7 +232,7 @@ export default function RankingsPage() {
                         background: gender === g ? 'rgba(199,166,106,0.10)' : 'transparent',
                         borderBottom: '1px solid rgba(0,0,0,0.05)',
                         color: gender === g ? '#A07840' : 'rgba(0,0,0,0.50)',
-                        fontSize: '14px', fontWeight: gender === g ? 700 : 500,
+                        fontSize: '15px', fontWeight: gender === g ? 700 : 500,
                         cursor: 'pointer', border: 'none', fontFamily: 'inherit',
                         borderRight: gender === g ? '2px solid #C7A66A' : '2px solid transparent',
                         transition: 'all 0.2s', display: 'block',
@@ -266,7 +266,7 @@ export default function RankingsPage() {
                         padding: '9px 12px', borderRadius: '10px',
                         background: category === cat ? 'rgba(199,166,106,0.10)' : 'transparent',
                         color: category === cat ? '#A07840' : 'rgba(0,0,0,0.48)',
-                        fontSize: '14px', fontWeight: category === cat ? 600 : 400,
+                        fontSize: '15px', fontWeight: category === cat ? 600 : 400,
                         cursor: 'pointer', border: 'none', fontFamily: 'inherit',
                         display: 'block',
                       }}>
@@ -282,7 +282,7 @@ export default function RankingsPage() {
                   borderRadius: '14px', padding: '14px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}>
-                  <div style={{ fontSize: '11px', color: 'rgba(199,166,106,0.65)', fontWeight: 700, marginBottom: '10px' }}>
+                  <div style={{ fontSize: '12px', color: 'rgba(199,166,106,0.65)', fontWeight: 700, marginBottom: '10px' }}>
                     راهنما
                   </div>
                   {[
@@ -292,17 +292,17 @@ export default function RankingsPage() {
                   ].map(item => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)' }}>{item.label}</span>
+                      <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)' }}>{item.label}</span>
                     </div>
                   ))}
                   <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                     <TrendingUp size={11} color="#16a34a" />
-                    <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>صعود رتبه</span>
+                    <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)' }}>صعود رتبه</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <TrendingDown size={11} color="#ef4444" />
-                    <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>نزول رتبه</span>
+                    <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)' }}>نزول رتبه</span>
                   </div>
                 </div>
               </div>
@@ -324,12 +324,12 @@ export default function RankingsPage() {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <Trophy size={15} color="#C7A66A" />
-                      <span style={{ color: '#111111', fontWeight: 700, fontSize: '15px' }}>
+                      <span style={{ color: '#111111', fontWeight: 700, fontSize: '16px' }}>
                         {gender} — {category}
                       </span>
                     </div>
                     <span style={{
-                      fontSize: '12px', color: '#A07840',
+                      fontSize: '13px', color: '#A07840',
                       background: 'rgba(199,166,106,0.10)',
                       border: '1px solid rgba(199,166,106,0.28)',
                       borderRadius: '20px', padding: '3px 10px',
@@ -345,7 +345,7 @@ export default function RankingsPage() {
                   }}>
                     {['رتبه', '±', '', 'نام بازیکن', 'شهر', 'امتیاز'].map((h, i) => (
                       <div key={i} className={i === 4 ? 'hide-mobile' : ''} style={{
-                        fontSize: '11px', color: 'rgba(0,0,0,0.35)',
+                        fontSize: '12px', color: 'rgba(0,0,0,0.35)',
                         fontWeight: 700,
                         textAlign: i === 0 || i >= 4 ? 'center' : 'right',
                       }}>
@@ -358,7 +358,7 @@ export default function RankingsPage() {
                   {players.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.28)' }}>
                       <Trophy size={40} style={{ opacity: 0.2, marginBottom: '12px' }} />
-                      <p style={{ fontSize: '15px' }}>رنکینگ این دسته هنوز اعلام نشده</p>
+                      <p style={{ fontSize: '16px' }}>رنکینگ این دسته هنوز اعلام نشده</p>
                     </div>
                   ) : players.map((player, index) => {
                     const diff = player.previousRank ? player.previousRank - player.rank : 0;
@@ -394,11 +394,11 @@ export default function RankingsPage() {
                               {getRankIcon(player.rank)
                                 ? <>
                                     {getRankIcon(player.rank)}
-                                    <span style={{ fontSize: '12px', fontWeight: 700, color: rankStyle.text }}>
+                                    <span style={{ fontSize: '13px', fontWeight: 700, color: rankStyle.text }}>
                                       {player.rank}
                                     </span>
                                   </>
-                                : <span style={{ fontSize: '13px', fontWeight: 700, color: rankStyle.text }}>
+                                : <span style={{ fontSize: '14px', fontWeight: 700, color: rankStyle.text }}>
                                     {player.rank}
                                   </span>
                               }
@@ -410,12 +410,12 @@ export default function RankingsPage() {
                             {diff > 0 ? (
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
                                 <TrendingUp size={11} color="#16a34a" />
-                                <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>{diff}</span>
+                                <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700 }}>{diff}</span>
                               </div>
                             ) : diff < 0 ? (
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
                                 <TrendingDown size={11} color="#ef4444" />
-                                <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 700 }}>{Math.abs(diff)}</span>
+                                <span style={{ fontSize: '12px', color: '#ef4444', fontWeight: 700 }}>{Math.abs(diff)}</span>
                               </div>
                             ) : (
                               <Minus size={11} color="rgba(0,0,0,0.18)" style={{ margin: '0 auto', display: 'block' }} />
@@ -430,7 +430,7 @@ export default function RankingsPage() {
                                 ? `linear-gradient(135deg,${rankStyle.text},${rankStyle.text}88)`
                                 : 'linear-gradient(135deg,rgba(199,166,106,0.20),rgba(199,166,106,0.10))',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              color: '#fff', fontWeight: 900, fontSize: '14px',
+                              color: '#fff', fontWeight: 900, fontSize: '15px',
                               border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(199,166,106,0.15)'}`,
                               overflow: 'hidden',
                             }}>
@@ -442,7 +442,7 @@ export default function RankingsPage() {
 
                           {/* Name */}
                           <div style={{
-                            fontSize: '15px',
+                            fontSize: '16px',
                             fontWeight: isTop3 ? 700 : 500,
                             color: isTop3 ? '#111111' : 'rgba(0,0,0,0.65)',
                             paddingRight: '8px',
@@ -456,7 +456,7 @@ export default function RankingsPage() {
                           {/* City — hidden on mobile */}
                           <div className="hide-mobile" style={{
                             textAlign: 'center',
-                            fontSize: '13px',
+                            fontSize: '14px',
                             color: 'rgba(0,0,0,0.38)',
                           }}>
                             {player.city || '—'}
@@ -465,7 +465,7 @@ export default function RankingsPage() {
                           {/* Points */}
                           <div style={{ textAlign: 'center' }}>
                             <span style={{
-                              fontSize: '14px', fontWeight: 700,
+                              fontSize: '15px', fontWeight: 700,
                               color: isTop3 ? rankStyle.text : '#A07840',
                               background: isTop3 ? rankStyle.bg : 'rgba(199,166,106,0.08)',
                               border: `1px solid ${isTop3 ? rankStyle.border : 'rgba(199,166,106,0.22)'}`,
@@ -490,7 +490,7 @@ export default function RankingsPage() {
                   display: 'flex', alignItems: 'center', gap: '10px',
                 }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C7A66A', flexShrink: 0 }} />
-                  <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)' }}>
+                  <span style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)' }}>
                     رنکینگ رسمی فدراسیون بیلیارد و اسنوکر جمهوری اسلامی ایران — به‌روزرسانی هر هفته
                   </span>
                 </div>
@@ -510,7 +510,7 @@ export default function RankingsPage() {
               <h2 style={{ color: '#111111', fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>
                 رنکینگ هی‌بال
               </h2>
-              <p style={{ color: 'rgba(0,0,0,0.40)', fontSize: '15px' }}>
+              <p style={{ color: 'rgba(0,0,0,0.40)', fontSize: '16px' }}>
                 به زودی راه‌اندازی می‌شود
               </p>
             </div>

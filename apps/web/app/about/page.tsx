@@ -66,7 +66,7 @@ export default function AboutPage() {
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '0 20px', textAlign: 'center' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 100, padding: '7px 20px', marginBottom: 24, animation: 'fadeUp 0.8s ease 0.2s both' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C7A66A', boxShadow: '0 0 12px #C7A66A', display: 'inline-block' }} />
-              <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.22em' }}>ABOUT US — درباره ما</span>
+              <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.22em' }}>ABOUT US — درباره ما</span>
             </div>
             <h1 style={{ fontSize: 'clamp(40px, 6.6vw, 79px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 20px', animation: 'fadeUp 0.8s ease 0.35s both' }}>
               اکوسیستم جامع<br />
@@ -86,8 +86,8 @@ export default function AboutPage() {
               <div key={i} style={{ padding: '28px 20px', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, textAlign: 'center', position: 'relative', overflow: 'hidden', animation: `fadeUp 0.5s ease ${i * 0.1}s both` }}>
                 <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 80, height: 1, background: `linear-gradient(90deg,transparent,${s.color}70,transparent)` }} />
                 <div style={{ fontSize: 'clamp(35px, 4.4vw, 48px)', fontWeight: 900, color: '#111111', letterSpacing: '-0.03em', lineHeight: 1, textShadow: `0 0 40px ${s.color}35`, marginBottom: 8 }}>{s.value}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: s.color, marginBottom: 4 }}>{s.label}</div>
-                <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>{s.sub}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: s.color, marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>{s.sub}</div>
               </div>
             ))}
           </div>
@@ -96,7 +96,7 @@ export default function AboutPage() {
           <section style={{ marginBottom: 100 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
               <div>
-                <p style={{ fontSize: 11, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 14, textTransform: 'uppercase' }}>OUR MISSION</p>
+                <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 14, textTransform: 'uppercase' }}>OUR MISSION</p>
                 <h2 style={{ fontSize: 'clamp(29px, 3.3vw, 42px)', fontWeight: 900, color: '#111111', lineHeight: 1.2, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
                   ما بیلیارد را از یک بازی به یک فرهنگ تبدیل می‌کنیم
                 </h2>
@@ -117,9 +117,9 @@ export default function AboutPage() {
                 <div style={{ position: 'absolute', bottom: -20, right: -20, background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 16, padding: '16px 20px', backdropFilter: 'blur(20px)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
                   <div style={{ fontSize: 31, fontWeight: 900, color: '#C7A66A', lineHeight: 1 }}>۴.۸</div>
                   <div style={{ display: 'flex', gap: 2, margin: '4px 0' }}>
-                    {[1,2,3,4,5].map(i => <i key={i} className="ti ti-star-filled" style={{ fontSize: 13, color: '#f59e0b' }} />)}
+                    {[1,2,3,4,5].map(i => <i key={i} className="ti ti-star-filled" style={{ fontSize: 14, color: '#f59e0b' }} />)}
                   </div>
-                  <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.40)' }}>۸٬۴۰۰+ نظر</div>
+                  <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.40)' }}>۸٬۴۰۰+ نظر</div>
                 </div>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function AboutPage() {
           {/* ── Values ── */}
           <section style={{ marginBottom: 100 }}>
             <div style={{ textAlign: 'center', marginBottom: 48 }}>
-              <p style={{ fontSize: 11, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>OUR VALUES</p>
+              <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>OUR VALUES</p>
               <h2 style={{ fontSize: 'clamp(26px, 3.3vw, 37px)', fontWeight: 900, color: '#111111', margin: 0, letterSpacing: '-0.025em' }}>ارزش‌های ما</h2>
             </div>
             <div className="val-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
@@ -138,7 +138,7 @@ export default function AboutPage() {
                     <i className={`ti ${v.icon}`} style={{ fontSize: 24, color: v.color }} />
                   </div>
                   <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 10px' }}>{v.title}</h3>
-                  <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: 0 }}>{v.desc}</p>
+                  <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: 0 }}>{v.desc}</p>
                 </div>
               ))}
             </div>
@@ -147,7 +147,7 @@ export default function AboutPage() {
           {/* ── Timeline ── */}
           <section style={{ marginBottom: 100 }}>
             <div style={{ textAlign: 'center', marginBottom: 48 }}>
-              <p style={{ fontSize: 11, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>OUR JOURNEY</p>
+              <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>OUR JOURNEY</p>
               <h2 style={{ fontSize: 'clamp(26px, 3.3vw, 37px)', fontWeight: 900, color: '#111111', margin: 0, letterSpacing: '-0.025em' }}>مسیر رشد ما</h2>
             </div>
             <div style={{ position: 'relative' }}>
@@ -159,9 +159,9 @@ export default function AboutPage() {
                   <div key={i} style={{ display: 'flex', gap: 24, alignItems: 'center', flexDirection: i % 2 === 0 ? 'row-reverse' : 'row' }}>
                     {/* Content */}
                     <div style={{ flex: 1, padding: '20px 24px', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, textAlign: i % 2 === 0 ? 'left' : 'right', animation: `fadeUp 0.5s ease ${i * 0.1}s both` }}>
-                      <p style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, margin: '0 0 6px' }}>{m.year}</p>
+                      <p style={{ fontSize: 13, color: '#C7A66A', fontWeight: 700, margin: '0 0 6px' }}>{m.year}</p>
                       <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 6px' }}>{m.title}</h3>
-                      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{m.desc}</p>
+                      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', margin: 0 }}>{m.desc}</p>
                     </div>
 
                     {/* Center dot */}
@@ -180,9 +180,9 @@ export default function AboutPage() {
           {/* ── Team ── */}
           <section style={{ marginBottom: 100 }}>
             <div style={{ textAlign: 'center', marginBottom: 48 }}>
-              <p style={{ fontSize: 11, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>OUR TEAM</p>
+              <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>OUR TEAM</p>
               <h2 style={{ fontSize: 'clamp(26px, 3.3vw, 37px)', fontWeight: 900, color: '#111111', margin: '0 0 12px', letterSpacing: '-0.025em' }}>تیم ما</h2>
-              <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', maxWidth: 400, margin: '0 auto', lineHeight: 1.7 }}>افرادی متعهد به رشد بیلیارد ایران</p>
+              <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', maxWidth: 400, margin: '0 auto', lineHeight: 1.7 }}>افرادی متعهد به رشد بیلیارد ایران</p>
             </div>
             <div className="team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
               {TEAM.map((member, i) => (
@@ -192,11 +192,11 @@ export default function AboutPage() {
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(2,8,6,0.9) 100%)' }} />
                     <div style={{ position: 'absolute', bottom: 16, right: 16 }}>
                       <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>{member.name}</p>
-                      <p style={{ fontSize: 12, color: '#C7A66A', margin: 0, background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 10px', display: 'inline-block' }}>{member.role}</p>
+                      <p style={{ fontSize: 13, color: '#C7A66A', margin: 0, background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 10px', display: 'inline-block' }}>{member.role}</p>
                     </div>
                   </div>
                   <div style={{ padding: '16px 18px' }}>
-                    <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: 0 }}>{member.desc}</p>
+                    <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: 0 }}>{member.desc}</p>
                   </div>
                 </div>
               ))}
@@ -206,7 +206,7 @@ export default function AboutPage() {
           {/* ── Partners ── */}
           <section style={{ marginBottom: 100 }}>
             <div style={{ textAlign: 'center', marginBottom: 40 }}>
-              <p style={{ fontSize: 11, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>PARTNERS</p>
+              <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 12, textTransform: 'uppercase' }}>PARTNERS</p>
               <h2 style={{ fontSize: 'clamp(24px, 2.8vw, 33px)', fontWeight: 900, color: '#111111', margin: 0 }}>شرکای ما</h2>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14 }}>
@@ -220,8 +220,8 @@ export default function AboutPage() {
                   <div style={{ width: 44, height: 44, borderRadius: 12, background: `${p.color}12`, border: `1px solid ${p.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                     <i className={`ti ${p.icon}`} style={{ fontSize: 22, color: p.color }} />
                   </div>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#111111', margin: '0 0 6px', lineHeight: 1.3 }}>{p.name}</p>
-                  <span style={{ fontSize: 11, color: p.color, background: `${p.color}10`, border: `1px solid ${p.color}20`, borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>{p.badge}</span>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: '#111111', margin: '0 0 6px', lineHeight: 1.3 }}>{p.name}</p>
+                  <span style={{ fontSize: 12, color: p.color, background: `${p.color}10`, border: `1px solid ${p.color}20`, borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>{p.badge}</span>
                 </div>
               ))}
             </div>

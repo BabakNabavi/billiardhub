@@ -60,10 +60,10 @@ export default function CartPage() {
 
           {/* Header */}
           <div style={{ marginBottom: 36 }}>
-            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)', textDecoration: 'none', marginBottom: 16, transition: 'color 0.2s' }}
+            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(0,0,0,0.45)', textDecoration: 'none', marginBottom: 16, transition: 'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.45)' }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 15 }} />
+              <i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
               بازگشت به فروشگاه
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -72,7 +72,7 @@ export default function CartPage() {
               </div>
               <div>
                 <h1 style={{ fontSize: 26, fontWeight: 900, color: '#111111', margin: '0 0 4px' }}>سبد خرید</h1>
-                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>
+                <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', margin: 0 }}>
                   {count > 0 ? <>{toFa(count)} محصول در سبد شما</> : 'سبد خرید خالی است'}
                 </p>
               </div>
@@ -86,7 +86,7 @@ export default function CartPage() {
                 <i className="ti ti-shopping-cart-off" style={{ fontSize: 48, color: 'rgba(0,0,0,0.30)' }} />
               </div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 10px' }}>سبد خرید خالی است</h2>
-              <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', margin: '0 0 32px', lineHeight: 1.7 }}>هنوز محصولی به سبد اضافه نکرده‌اید.<br/>به فروشگاه بروید و بهترین تجهیزات را انتخاب کنید.</p>
+              <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', margin: '0 0 32px', lineHeight: 1.7 }}>هنوز محصولی به سبد اضافه نکرده‌اید.<br/>به فروشگاه بروید و بهترین تجهیزات را انتخاب کنید.</p>
               <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '14px 28px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 17, boxShadow: '0 8px 28px rgba(199,166,106,0.35)' }}>
                 <i className="ti ti-shopping-bag" style={{ fontSize: 20 }} />
                 رفتن به فروشگاه
@@ -99,10 +99,10 @@ export default function CartPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {/* Clear all */}
                 <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 4 }}>
-                  <button onClick={clear} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.38)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8, transition: 'all 0.2s' }}
+                  <button onClick={clear} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(0,0,0,0.38)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8, transition: 'all 0.2s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444'; (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.06)' }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#475569'; (e.currentTarget as HTMLElement).style.background = 'none' }}>
-                    <i className="ti ti-trash" style={{ fontSize: 14 }} />
+                    <i className="ti ti-trash" style={{ fontSize: 15 }} />
                     حذف همه
                   </button>
                 </div>
@@ -136,12 +136,12 @@ export default function CartPage() {
                             <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111111', margin: '0 0 6px', lineHeight: 1.4 }}>{item.title}</h3>
                           </Link>
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                              <i className="ti ti-tag" style={{ fontSize: 12, color: '#A07840' }} />
+                            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                              <i className="ti ti-tag" style={{ fontSize: 13, color: '#A07840' }} />
                               {item.category}
                             </span>
-                            <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                              <i className="ti ti-map-pin" style={{ fontSize: 12, color: '#A07840' }} />
+                            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                              <i className="ti ti-map-pin" style={{ fontSize: 13, color: '#A07840' }} />
                               {item.city}
                             </span>
                           </div>
@@ -155,7 +155,7 @@ export default function CartPage() {
                               onClick={() => updateQty(item.id, item.quantity - 1)}
                               style={{ width: 34, height: 34, background: '#F3F2EF', border: 'none', cursor: 'pointer', color: '#111111', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(0,0,0,0.08)', transition: 'all 0.2s' }}
                             >−</button>
-                            <span style={{ minWidth: 36, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#111111' }}>{toFa(item.quantity)}</span>
+                            <span style={{ minWidth: 36, textAlign: 'center', fontSize: 15, fontWeight: 700, color: '#111111' }}>{toFa(item.quantity)}</span>
                             <button
                               className="qty-btn"
                               onClick={() => updateQty(item.id, item.quantity + 1)}
@@ -166,16 +166,16 @@ export default function CartPage() {
                           {/* Price */}
                           <div style={{ textAlign: 'left' }}>
                             {item.discountPrice && (
-                              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.25)', textDecoration: 'line-through', margin: '0 0 2px', textAlign: 'right' }}>
+                              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.25)', textDecoration: 'line-through', margin: '0 0 2px', textAlign: 'right' }}>
                                 {fmt(item.price * item.quantity)} تومان
                               </p>
                             )}
                             <p style={{ fontSize: 20, fontWeight: 900, color: '#A07840', margin: 0, textShadow: '0 0 20px rgba(199,166,106,0.30)', textAlign: 'right' }}>
                               {fmt(fp * item.quantity)}
-                              <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,0,0,0.45)', marginRight: 4 }}>تومان</span>
+                              <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(0,0,0,0.45)', marginRight: 4 }}>تومان</span>
                             </p>
                             {item.quantity > 1 && (
-                              <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', margin: '2px 0 0', textAlign: 'right' }}>
+                              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: '2px 0 0', textAlign: 'right' }}>
                                 {toFa(item.quantity)} × {fmt(fp)} تومان
                               </p>
                             )}
@@ -185,9 +185,9 @@ export default function CartPage() {
                           <button
                             className="rm-btn"
                             onClick={() => handleRemove(item.id)}
-                            style={{ padding: '6px 10px', borderRadius: 8, background: '#F3F2EF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.38)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontFamily: 'inherit', transition: 'all 0.2s' }}
+                            style={{ padding: '6px 10px', borderRadius: 8, background: '#F3F2EF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.38)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontFamily: 'inherit', transition: 'all 0.2s' }}
                           >
-                            <i className="ti ti-trash" style={{ fontSize: 14 }} />
+                            <i className="ti ti-trash" style={{ fontSize: 15 }} />
                             حذف
                           </button>
                         </div>
@@ -208,43 +208,43 @@ export default function CartPage() {
 
                     {/* Promo code */}
                     <div style={{ marginBottom: 20 }}>
-                      <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', marginBottom: 8 }}>کد تخفیف</p>
+                      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 8 }}>کد تخفیف</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <input
                           value={promoCode}
                           onChange={e => { setPromoCode(e.target.value); setPromoError('') }}
                           disabled={promoApplied}
                           placeholder="کد تخفیف را وارد کنید"
-                          style={{ flex: 1, background: '#F7F7F5', border: `1px solid ${promoError ? 'rgba(239,68,68,0.40)' : promoApplied ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.10)'}`, borderRadius: 10, padding: '9px 12px', color: '#111111', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
+                          style={{ flex: 1, background: '#F7F7F5', border: `1px solid ${promoError ? 'rgba(239,68,68,0.40)' : promoApplied ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.10)'}`, borderRadius: 10, padding: '9px 12px', color: '#111111', fontSize: 14, fontFamily: 'inherit', outline: 'none' }}
                         />
                         <button
                           onClick={handlePromo}
                           disabled={promoApplied}
-                          style={{ padding: '9px 14px', borderRadius: 10, background: promoApplied ? 'rgba(199,166,106,0.15)' : 'rgba(199,166,106,0.10)', border: `1px solid ${promoApplied ? 'rgba(199,166,106,0.40)' : 'rgba(199,166,106,0.25)'}`, color: '#A07840', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: promoApplied ? 'default' : 'pointer', whiteSpace: 'nowrap' }}
+                          style={{ padding: '9px 14px', borderRadius: 10, background: promoApplied ? 'rgba(199,166,106,0.15)' : 'rgba(199,166,106,0.10)', border: `1px solid ${promoApplied ? 'rgba(199,166,106,0.40)' : 'rgba(199,166,106,0.25)'}`, color: '#A07840', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: promoApplied ? 'default' : 'pointer', whiteSpace: 'nowrap' }}
                         >
                           {promoApplied ? '✓ اعمال شد' : 'اعمال'}
                         </button>
                       </div>
-                      {promoError && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 6 }}>{promoError}</p>}
-                      {promoApplied && <p style={{ fontSize: 12, color: '#A07840', marginTop: 6 }}>تخفیف ۱۰٪ اعمال شد!</p>}
+                      {promoError && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 6 }}>{promoError}</p>}
+                      {promoApplied && <p style={{ fontSize: 13, color: '#A07840', marginTop: 6 }}>تخفیف ۱۰٪ اعمال شد!</p>}
                     </div>
 
                     {/* Price breakdown */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 16, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15 }}>
                         <span style={{ color: 'rgba(0,0,0,0.45)' }}>جمع کالاها ({toFa(count)})</span>
                         <span style={{ color: '#111111', fontWeight: 600 }}>{fmt(total)} تومان</span>
                       </div>
                       {discount > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15 }}>
                           <span style={{ color: 'rgba(0,0,0,0.45)' }}>تخفیف کد</span>
                           <span style={{ color: '#A07840', fontWeight: 600 }}>− {fmt(discount)} تومان</span>
                         </div>
                       )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15 }}>
                         <span style={{ color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
                           هزینه ارسال
-                          {shipping === 0 && <span style={{ fontSize: 11, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', color: '#A07840', borderRadius: 20, padding: '1px 7px', fontWeight: 700 }}>رایگان</span>}
+                          {shipping === 0 && <span style={{ fontSize: 12, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', color: '#A07840', borderRadius: 20, padding: '1px 7px', fontWeight: 700 }}>رایگان</span>}
                         </span>
                         <span style={{ color: shipping === 0 ? '#C7A66A' : '#e2e8f0', fontWeight: 600 }}>
                           {shipping === 0 ? 'رایگان' : `${fmt(shipping)} تومان`}
@@ -257,13 +257,13 @@ export default function CartPage() {
                       <span style={{ fontSize: 17, fontWeight: 700, color: '#111111' }}>مجموع نهایی</span>
                       <div style={{ textAlign: 'left' }}>
                         <p style={{ fontSize: 24, fontWeight: 900, color: '#A07840', margin: 0, textShadow: '0 0 24px rgba(199,166,106,0.30)' }}>{fmt(grand)}</p>
-                        <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '2px 0 0', textAlign: 'right' }}>تومان</p>
+                        <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '2px 0 0', textAlign: 'right' }}>تومان</p>
                       </div>
                     </div>
 
                     {/* Free shipping threshold */}
                     {shipping > 0 && (
-                      <div style={{ background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 10, padding: '10px 12px', marginBottom: 16, fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>
+                      <div style={{ background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 10, padding: '10px 12px', marginBottom: 16, fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>
                         <span style={{ color: '#A07840', fontWeight: 700 }}>{fmt(5000000 - total)} تومان</span> تا ارسال رایگان
                       </div>
                     )}
@@ -293,10 +293,10 @@ export default function CartPage() {
                 </div>
 
                 {/* Continue shopping */}
-                <Link href="/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, padding: '12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', textDecoration: 'none', fontSize: 14, transition: 'all 0.2s' }}
+                <Link href="/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, padding: '12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', textDecoration: 'none', fontSize: 15, transition: 'all 0.2s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#111111'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.09)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.45)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.05)' }}>
-                  <i className="ti ti-arrow-right" style={{ fontSize: 15 }} />
+                  <i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
                   ادامه خرید
                 </Link>
               </div>

@@ -94,7 +94,7 @@ function Ring({ value, size = 64, stroke = 5, color = '#C7A66A', label }: { valu
       </svg>
       {label && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
-          <div style={{ fontSize: '13px', fontWeight: 900, color, lineHeight: 1 }}>{toFa(value)}٪</div>
+          <div style={{ fontSize: '14px', fontWeight: 900, color, lineHeight: 1 }}>{toFa(value)}٪</div>
         </div>
       )}
     </div>
@@ -247,10 +247,10 @@ export default function DashboardPage() {
         <div style={{ background: 'rgba(245,158,11,0.08)', borderBottom: '1px solid rgba(245,158,11,0.2)', padding: '10px clamp(16px,4vw,40px)', direction: 'rtl' }}>
           <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <ShieldCheck size={32} color="#f59e0b" style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: '14px', color: 'rgba(245,158,11,0.9)', flex: 1, minWidth: '200px' }}>
+            <span style={{ fontSize: '15px', color: 'rgba(245,158,11,0.9)', flex: 1, minWidth: '200px' }}>
               برای دسترسی کامل به تمام امکانات سایت، سطح کاربری و نقش خود را تعیین نمایید
             </span>
-            <a href="/profile/role" style={{ fontSize: '13px', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px', padding: '6px 14px', textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            <a href="/profile/role" style={{ fontSize: '14px', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px', padding: '6px 14px', textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
               تعیین سطح کاربری
             </a>
           </div>
@@ -269,7 +269,7 @@ export default function DashboardPage() {
                 {user.firstName?.[0] ?? 'U'}
               </div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginBottom: '1px' }}>{greeting}،</div>
+                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginBottom: '1px' }}>{greeting}،</div>
                 <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
               </div>
             </div>
@@ -287,8 +287,8 @@ export default function DashboardPage() {
                 {notifOpen && (
                   <div className="notif-panel">
                     <div style={{ padding: '16px 18px 12px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontSize: '15px', fontWeight: 800, color: '#111111' }}>اعلان‌ها</div>
-                      {unread > 0 && <span style={{ fontSize: '11px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 9px', fontWeight: 700 }}>{toFa(unread)} جدید</span>}
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#111111' }}>اعلان‌ها</div>
+                      {unread > 0 && <span style={{ fontSize: '12px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 9px', fontWeight: 700 }}>{toFa(unread)} جدید</span>}
                     </div>
                     <div style={{ maxHeight: '320px', overflowY: 'auto', padding: '8px' }}>
                       {notifications.map((n, i) => (
@@ -297,8 +297,8 @@ export default function DashboardPage() {
                             {{ 'booking': <Calendar size={14} style={{ color: '#C7A66A' }} />, 'tournament': <Trophy size={14} style={{ color: '#f59e0b' }} />, 'achievement': <Award size={14} style={{ color: '#a78bfa' }} />, 'system': <Shield size={14} style={{ color: 'rgba(0,0,0,0.42)' }} /> }[n.type]}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '13px', color: n.read ? 'rgba(0,0,0,0.45)' : '#111111', fontWeight: n.read ? 400 : 600, lineHeight: 1.5, marginBottom: '3px' }}>{n.msg}</div>
-                            <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)' }}>{n.time}</div>
+                            <div style={{ fontSize: '14px', color: n.read ? 'rgba(0,0,0,0.45)' : '#111111', fontWeight: n.read ? 400 : 600, lineHeight: 1.5, marginBottom: '3px' }}>{n.msg}</div>
+                            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{n.time}</div>
                           </div>
                           {!n.read && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C7A66A', flexShrink: 0, marginTop: '6px', boxShadow: '0 0 6px rgba(199,166,106,0.60)' }} />}
                         </div>
@@ -326,11 +326,11 @@ export default function DashboardPage() {
                 <div style={{ fontSize: '17px', fontWeight: 700, color: '#111111', marginBottom: '8px' }}>
                   برای دسترسی کامل به تمام امکانات سایت، سطح کاربری و نقش خود را تعیین نمایید
                 </div>
-                <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7 }}>
+                <div style={{ fontSize: '15px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7 }}>
                   با تعیین سطح کاربری به آمار کامل، رنکینگ ملی و تاریخچه مسابقات دسترسی خواهید داشت
                 </div>
               </div>
-              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', color: '#f59e0b', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
+              <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', color: '#f59e0b', fontSize: '16px', fontWeight: 700, textDecoration: 'none' }}>
                 تعیین سطح کاربری ←
               </Link>
             </div>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
                       {s.icon}
                     </div>
                     {s.trend !== undefined && s.trend !== 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: s.trend > 0 ? '#C7A66A' : '#ef4444', fontWeight: 700 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '13px', color: s.trend > 0 ? '#C7A66A' : '#ef4444', fontWeight: 700 }}>
                         {s.trend > 0 ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         {toFa(Math.abs(s.trend))}
                       </div>
@@ -353,8 +353,8 @@ export default function DashboardPage() {
                   <div style={{ fontSize: 'clamp(24px, 3.3vw, 33px)', fontWeight: 900, color: '#111111', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: '6px', textShadow: `0 0 24px ${s.color}30` }}>
                     {s.value}
                   </div>
-                  <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, marginBottom: '3px' }}>{s.label}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
+                  <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, marginBottom: '3px' }}>{s.label}</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
                 </div>
               ))}
             </div>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
                         <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: `${a.color}12`, border: `1px solid ${a.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: a.color }}>
                           {a.icon}
                         </div>
-                        <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.50)', fontWeight: 600, textAlign: 'center', lineHeight: 1.3 }}>{a.label}</span>
+                        <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.50)', fontWeight: 600, textAlign: 'center', lineHeight: 1.3 }}>{a.label}</span>
                       </Link>
                     ))}
                   </div>
@@ -400,13 +400,13 @@ export default function DashboardPage() {
                       <span style={{ width: '3px', height: '12px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                       رزروهای شما
                     </div>
-                    <Link href="/booking" style={{ fontSize: '13px', color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7, transition: 'opacity 0.2s' }}>
+                    <Link href="/booking" style={{ fontSize: '14px', color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7, transition: 'opacity 0.2s' }}>
                       همه <ArrowLeft size={12} />
                     </Link>
                   </div>
 
                   {bookings.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(0,0,0,0.35)', fontSize: '15px' }}>
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(0,0,0,0.35)', fontSize: '16px' }}>
                       <Calendar size={32} style={{ margin: '0 auto 12px', opacity: 0.2 }} />
                       رزروی ندارید
                     </div>
@@ -425,8 +425,8 @@ export default function DashboardPage() {
 
                             {/* Info */}
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.club}</div>
-                              <div style={{ display: 'flex', gap: '10px', fontSize: '12px', color: 'rgba(0,0,0,0.42)', flexWrap: 'wrap' }}>
+                              <div style={{ fontSize: '16px', fontWeight: 700, color: '#111111', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.club}</div>
+                              <div style={{ display: 'flex', gap: '10px', fontSize: '13px', color: 'rgba(0,0,0,0.42)', flexWrap: 'wrap' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Clock size={9} /> {b.time}</span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Calendar size={9} /> {b.date}</span>
                                 <span>{b.table}</span>
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                               <div style={{ fontSize: '10px', color: statusConfig.color, background: statusConfig.bg, border: `1px solid ${statusConfig.border}`, borderRadius: '20px', padding: '3px 10px', fontWeight: 700, marginBottom: '4px', textAlign: 'center', letterSpacing: '0.04em' }}>
                                 {statusConfig.label}
                               </div>
-                              <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', textAlign: 'left' }}>
+                              <div style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', textAlign: 'left' }}>
                                 {toFa(b.price.toLocaleString())} ت
                               </div>
                             </div>
@@ -449,7 +449,7 @@ export default function DashboardPage() {
                   )}
 
                   {/* Add booking CTA */}
-                  <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '14px', padding: '12px', background: 'rgba(199,166,106,0.06)', border: '1px dashed rgba(199,166,106,0.20)', borderRadius: '12px', color: '#A07840', fontSize: '14px', fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}
+                  <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '14px', padding: '12px', background: 'rgba(199,166,106,0.06)', border: '1px dashed rgba(199,166,106,0.20)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.12)'; (e.currentTarget as HTMLElement).style.color = '#A07840'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.06)'; (e.currentTarget as HTMLElement).style.color = '#A07840'; }}>
                     <Plus size={14} /> رزرو جدید
@@ -465,7 +465,7 @@ export default function DashboardPage() {
                       <span style={{ width: '3px', height: '12px', background: 'linear-gradient(180deg,#a78bfa,#06b6d4)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                       فعالیت هفتگی
                     </div>
-                    <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>
+                    <div style={{ display: 'flex', gap: '14px', fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'rgba(199,166,106,0.60)', display: 'inline-block' }} />جلسات</span>
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export default function DashboardPage() {
                     {weeklyActivity.map((d, i) => (
                       <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                         <ActivityBar sessions={d.sessions} max={maxAct} />
-                        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)', letterSpacing: '0.03em' }}>{d.day}</div>
+                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)', letterSpacing: '0.03em' }}>{d.day}</div>
                       </div>
                     ))}
                   </div>
@@ -488,7 +488,7 @@ export default function DashboardPage() {
                     ].map((s, i) => (
                       <div key={i} style={{ textAlign: 'center', padding: '10px', background: 'rgba(0,0,0,0.02)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
                         <div style={{ fontSize: '22px', fontWeight: 900, color: s.c, letterSpacing: '-0.02em' }}>{s.v}</div>
-                        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)', marginTop: '3px' }}>{s.l}</div>
+                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)', marginTop: '3px' }}>{s.l}</div>
                       </div>
                     ))}
                   </div>
@@ -503,7 +503,7 @@ export default function DashboardPage() {
                       <span style={{ width: '3px', height: '12px', background: 'linear-gradient(180deg,#f59e0b,#ef4444)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
                       آخرین مسابقات
                     </div>
-                    <Link href="/players/1" style={{ fontSize: '13px', color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7 }}>
+                    <Link href="/players/1" style={{ fontSize: '14px', color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7 }}>
                       پروفایل <ArrowLeft size={12} />
                     </Link>
                   </div>
@@ -511,12 +511,12 @@ export default function DashboardPage() {
                     {recentMatches.map((m, i) => (
                       <div key={i} className="match-pill">
                         {/* W/L */}
-                        <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: m.result === 'W' ? 'rgba(199,166,106,0.12)' : 'rgba(239,68,68,0.1)', border: `1px solid ${m.result === 'W' ? 'rgba(199,166,106,0.30)' : 'rgba(239,68,68,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 900, color: m.result === 'W' ? '#A07840' : '#ef4444', flexShrink: 0 }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: m.result === 'W' ? 'rgba(199,166,106,0.12)' : 'rgba(239,68,68,0.1)', border: `1px solid ${m.result === 'W' ? 'rgba(199,166,106,0.30)' : 'rgba(239,68,68,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, color: m.result === 'W' ? '#A07840' : '#ef4444', flexShrink: 0 }}>
                           {m.result}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '2px' }}>{m.opp}</div>
-                          <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>{m.tournament} · {m.date}</div>
+                          <div style={{ fontSize: '15px', fontWeight: 600, color: '#111111', marginBottom: '2px' }}>{m.opp}</div>
+                          <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>{m.tournament} · {m.date}</div>
                         </div>
                         <div style={{ fontSize: '18px', fontWeight: 900, color: m.result === 'W' ? '#A07840' : 'rgba(0,0,0,0.30)', letterSpacing: '-0.01em', flexShrink: 0, textShadow: m.result === 'W' ? '0 0 12px rgba(199,166,106,0.40)' : 'none' }}>
                           {m.score}
@@ -537,11 +537,11 @@ export default function DashboardPage() {
                   <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(245,158,11,0.6),transparent)', boxShadow: '0 0 14px rgba(245,158,11,0.3)' }} />
 
                   <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-                    <div style={{ fontSize: '11px', color: 'rgba(245,158,11,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '10px' }}>NATIONAL RANK</div>
+                    <div style={{ fontSize: '12px', color: 'rgba(245,158,11,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '10px' }}>NATIONAL RANK</div>
                     <div style={{ fontSize: '57px', fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-0.04em', textShadow: '0 0 40px rgba(245,158,11,0.4)', marginBottom: '4px' }}>
                       #۳
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', color: '#C7A66A', fontSize: '13px', fontWeight: 700 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', color: '#C7A66A', fontSize: '14px', fontWeight: 700 }}>
                       <ChevronUp size={14} /> ۲ رتبه این ماه
                     </div>
                   </div>
@@ -576,7 +576,7 @@ export default function DashboardPage() {
                         <div style={{ fontSize: '10px', color: a.earned ? a.color : 'rgba(0,0,0,0.30)', fontWeight: 700, lineHeight: 1.3 }}>{a.title}</div>
                         {!a.earned && (
                           <div style={{ position: 'absolute', inset: 0, background: 'rgba(247,247,245,0.85)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '15px', opacity: 0.4 }}>🔒</div>
+                            <div style={{ fontSize: '16px', opacity: 0.4 }}>🔒</div>
                           </div>
                         )}
                       </div>
@@ -595,15 +595,15 @@ export default function DashboardPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>🏆</div>
                     <div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>لیگ برتر اسنوکر</div>
-                      <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)' }}>۱۵ خرداد ۱۴۰۴</div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>لیگ برتر اسنوکر</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>۱۵ خرداد ۱۴۰۴</div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
                     <span style={{ color: 'rgba(0,0,0,0.42)' }}>جایزه</span>
                     <span style={{ color: '#f59e0b', fontWeight: 700 }}>۵۰ میلیون تومان</span>
                   </div>
-                  <Link href="/events/1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', color: '#f59e0b', fontSize: '14px', fontWeight: 700, textDecoration: 'none', transition: 'all 0.2s' }}>
+                  <Link href="/events/1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', color: '#f59e0b', fontSize: '15px', fontWeight: 700, textDecoration: 'none', transition: 'all 0.2s' }}>
                     <Play size={13} /> مشاهده مسابقه
                   </Link>
                 </div>
@@ -620,7 +620,7 @@ export default function DashboardPage() {
                     <Ring value={72} size={52} stroke={5} color="#06b6d4" label />
                     <div>
                       <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', marginBottom: '4px' }}>۷۲٪ تکمیل شده</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>پروفایل کامل‌تر = رتبه بهتر</div>
+                      <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>پروفایل کامل‌تر = رتبه بهتر</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -631,7 +631,7 @@ export default function DashboardPage() {
                       { label: 'ویدیوی هایلایت', done: false },
                       { label: 'تأیید فدراسیون', done: false },
                     ].map((r, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: r.done ? '#111111' : 'rgba(0,0,0,0.40)' }}>
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: r.done ? '#111111' : 'rgba(0,0,0,0.40)' }}>
                         {r.done
                           ? <CheckCircle size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
                           : <Circle size={14} style={{ color: 'rgba(0,0,0,0.25)', flexShrink: 0 }} />
@@ -640,7 +640,7 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
-                  <Link href="/profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '14px', padding: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '12px', color: '#06b6d4', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                  <Link href="/profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '14px', padding: '10px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '12px', color: '#06b6d4', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                     تکمیل پروفایل ←
                   </Link>
                 </div>

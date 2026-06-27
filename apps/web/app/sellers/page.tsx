@@ -45,7 +45,7 @@ export default function SellersPage() {
       <div style={{ background: 'linear-gradient(135deg, #051a10 0%, #030d08 100%)', padding: 'clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(28px, 5vw, 48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(199,166,106,0.06) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 13, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 14, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
             🏪 فروشندگان تجهیزات
           </div>
           <h1 style={{ fontSize: 'clamp(24px, 5.5vw, 40px)', fontWeight: 900, margin: '0 0 12px', background: 'linear-gradient(135deg, #f0faf5, #C7A66A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -68,7 +68,7 @@ export default function SellersPage() {
                 background: activeCity === city ? '#C7A66A' : 'rgba(0,0,0,0.04)',
                 border: `1px solid ${activeCity === city ? '#C7A66A' : 'rgba(0,0,0,0.06)'}`,
                 color: activeCity === city ? '#010604' : '#94a3b8',
-                padding: '7px 14px', borderRadius: 20, fontSize: 13,
+                padding: '7px 14px', borderRadius: 20, fontSize: 14,
                 fontWeight: activeCity === city ? 700 : 400,
                 cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s',
               }}>{city}</button>
@@ -79,12 +79,12 @@ export default function SellersPage() {
             background: onlyVerified ? 'rgba(199,166,106,0.15)' : 'rgba(0,0,0,0.04)',
             border: `1px solid ${onlyVerified ? 'rgba(199,166,106,0.4)' : 'rgba(0,0,0,0.06)'}`,
             color: onlyVerified ? '#C7A66A' : '#94a3b8',
-            padding: '7px 14px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
+            padding: '7px 14px', borderRadius: 20, fontSize: 14, cursor: 'pointer',
           }}>✓ تأیید شده</button>
           {/* Sort */}
           <select value={sort} onChange={e => setSort(e.target.value as any)} style={{
             background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)',
-            color: 'rgba(0,0,0,0.50)', padding: '7px 14px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
+            color: 'rgba(0,0,0,0.50)', padding: '7px 14px', borderRadius: 20, fontSize: 14, cursor: 'pointer',
             marginRight: 'auto',
           }}>
             <option value="rating">مرتب: بهترین امتیاز</option>
@@ -94,7 +94,7 @@ export default function SellersPage() {
         </div>
 
         {/* Results count */}
-        <div style={{ color: '#4b5563', fontSize: 14, marginBottom: 20 }}>
+        <div style={{ color: '#4b5563', fontSize: 15, marginBottom: 20 }}>
           {filtered.length} فروشگاه یافت شد
         </div>
 
@@ -114,7 +114,7 @@ export default function SellersPage() {
                 <div style={{ height: 90, background: 'linear-gradient(135deg, rgba(199,166,106,0.06), rgba(6,182,212,0.04))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 53, position: 'relative', opacity: 0.7 }}>
                   {seller.emoji}
                   {seller.elite && (
-                    <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#f59e0b', fontSize: 11, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
+                    <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#f59e0b', fontSize: 12, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
                       ⭐ نماینده رسمی
                     </div>
                   )}
@@ -124,27 +124,27 @@ export default function SellersPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                     <h3 style={{ color: '#111111', fontSize: 17, fontWeight: 700, margin: 0, lineHeight: 1.4, flex: 1 }}>{seller.name}</h3>
                     {seller.verified && (
-                      <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 11, padding: '2px 7px', borderRadius: 10, fontWeight: 600, flexShrink: 0, marginRight: 8 }}>✓</span>
+                      <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 12, padding: '2px 7px', borderRadius: 10, fontWeight: 600, flexShrink: 0, marginRight: 8 }}>✓</span>
                     )}
                   </div>
-                  <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>📍 {seller.city} | از {seller.since}</div>
+                  <div style={{ color: '#6b7280', fontSize: 14, marginBottom: 12 }}>📍 {seller.city} | از {seller.since}</div>
                   {/* Rating row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                     <StarRating rating={seller.rating} />
-                    <span style={{ color: '#111111', fontSize: 14, fontWeight: 700 }}>{seller.rating}</span>
-                    <span style={{ color: '#6b7280', fontSize: 13 }}>({seller.reviewCount} نظر)</span>
-                    <span style={{ color: '#6b7280', fontSize: 13, marginRight: 'auto' }}>📦 {seller.productCount} محصول</span>
+                    <span style={{ color: '#111111', fontSize: 15, fontWeight: 700 }}>{seller.rating}</span>
+                    <span style={{ color: '#6b7280', fontSize: 14 }}>({seller.reviewCount} نظر)</span>
+                    <span style={{ color: '#6b7280', fontSize: 14, marginRight: 'auto' }}>📦 {seller.productCount} محصول</span>
                   </div>
                   {/* Brands */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
                     {seller.brands.slice(0, 3).map(b => (
-                      <span key={b} style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.15)', color: '#C7A66A', fontSize: 11, padding: '2px 8px', borderRadius: 10 }}>{b}</span>
+                      <span key={b} style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.15)', color: '#C7A66A', fontSize: 12, padding: '2px 8px', borderRadius: 10 }}>{b}</span>
                     ))}
                   </div>
                   {/* Footer */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.04)' }}>
-                    <span style={{ color: '#4b5563', fontSize: 12 }}>⚡ پاسخ در {seller.responseTime}</span>
-                    <span style={{ color: '#C7A66A', fontSize: 13, fontWeight: 600 }}>مشاهده فروشگاه ←</span>
+                    <span style={{ color: '#4b5563', fontSize: 13 }}>⚡ پاسخ در {seller.responseTime}</span>
+                    <span style={{ color: '#C7A66A', fontSize: 14, fontWeight: 600 }}>مشاهده فروشگاه ←</span>
                   </div>
                 </div>
               </div>

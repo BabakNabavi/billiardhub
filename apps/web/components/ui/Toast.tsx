@@ -57,7 +57,7 @@ export function Toast({ message, type = 'success', duration = 4000, onClose }: T
       </div>
 
       <span style={{ color: c.color, flexShrink: 0 }}>{c.icon}</span>
-      <span style={{ fontSize: '14px', color: '#111111', fontWeight: 500, flex: 1, lineHeight: 1.5 }}>{message}</span>
+      <span style={{ fontSize: '15px', color: '#111111', fontWeight: 500, flex: 1, lineHeight: 1.5 }}>{message}</span>
       <button onClick={() => { setLeaving(true); setTimeout(onClose, 400); }}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: '2px', display: 'flex', flexShrink: 0, transition: 'color 0.2s' }}
         onMouseEnter={e => { (e.currentTarget).style.color = 'rgba(255,255,255,0.7)'; }}

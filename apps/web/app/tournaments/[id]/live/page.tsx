@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: TournamentMatch['status'] }) {
   };
   const c = cfg[status];
   return (
-    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
       background: c.bg, color: c.color }}>
       {c.label}
     </span>
@@ -54,7 +54,7 @@ function ScoreModal({ match, onClose, onSave }: {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
           {/* P1 */}
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#333', marginBottom: 10 }}>
               {match.player1?.name ?? '—'}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
@@ -76,7 +76,7 @@ function ScoreModal({ match, onClose, onSave }: {
 
           {/* P2 */}
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#333', marginBottom: 10 }}>
               {match.player2?.name ?? '—'}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
@@ -97,7 +97,7 @@ function ScoreModal({ match, onClose, onSave }: {
 
         {s1 === s2 && s1 > 0 && (
           <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.20)',
-            borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#f59e0b',
+            borderRadius: 10, padding: '10px 14px', fontSize: 14, color: '#f59e0b',
             fontWeight: 700, textAlign: 'center', marginBottom: 20 }}>
             تساوی مجاز نیست — یک برنده باید داشته باشیم
           </div>
@@ -106,14 +106,14 @@ function ScoreModal({ match, onClose, onSave }: {
         <div style={{ display: 'flex', gap: 10 }}>
           <button onClick={onClose} style={{
             flex: 1, padding: '13px', borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.10)',
-            background: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            background: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
             color: '#555', fontFamily: 'inherit',
           }}>انصراف</button>
           <button onClick={() => s1 !== s2 && onSave(s1, s2)} style={{
             flex: 1, padding: '13px', borderRadius: 14, border: 'none',
             background: s1 === s2 ? 'rgba(0,0,0,0.08)' : 'linear-gradient(135deg,#30C55A,#26a249)',
             color: s1 === s2 ? '#999' : '#fff',
-            fontSize: 14, fontWeight: 700, cursor: s1 === s2 ? 'not-allowed' : 'pointer',
+            fontSize: 15, fontWeight: 700, cursor: s1 === s2 ? 'not-allowed' : 'pointer',
             fontFamily: 'inherit',
           }}>
             <CheckCircle size={14} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
@@ -379,7 +379,7 @@ export default function LivePage() {
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
       {liveNow.length > 0 && (
         <section style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#ef4444',
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#ef4444',
             letterSpacing: '0.08em', marginBottom: 14 }}>
             ● در حال بازی
           </div>
@@ -388,7 +388,7 @@ export default function LivePage() {
       )}
       {upcoming.length > 0 && (
         <section style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#aaa',
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
             letterSpacing: '0.08em', marginBottom: 14 }}>
             به زودی
           </div>
@@ -397,7 +397,7 @@ export default function LivePage() {
       )}
       {done.length > 0 && (
         <section>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#aaa',
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
             letterSpacing: '0.08em', marginBottom: 14 }}>
             پایان یافته ({toFa(done.length)})
           </div>
@@ -420,7 +420,7 @@ export default function LivePage() {
           marginBottom: 14 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <StatusBadge status={m.status} />
-            <span style={{ fontSize: 11, color: '#bbb', fontWeight: 600 }}>
+            <span style={{ fontSize: 12, color: '#bbb', fontWeight: 600 }}>
               {roundLabel(m.round, totalRounds)} — بازی {toFa(m.matchIndex + 1)}
             </span>
           </div>
@@ -429,7 +429,7 @@ export default function LivePage() {
               padding: '7px 14px', borderRadius: 10, border: 'none',
               background: isLive ? 'rgba(239,68,68,0.10)' : 'rgba(199,166,106,0.12)',
               color: isLive ? '#ef4444' : '#A07840',
-              fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             }}>
               ثبت نتیجه
             </button>
@@ -443,12 +443,12 @@ export default function LivePage() {
               <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10,
                 flexDirection: i === 1 ? 'row-reverse' : 'row' }}>
                 <div style={{ textAlign: i === 1 ? 'right' : 'left' }}>
-                  <div style={{ fontSize: 14, fontWeight: win ? 900 : 700,
+                  <div style={{ fontSize: 15, fontWeight: win ? 900 : 700,
                     color: win ? '#30C55A' : '#111' }}>
                     {p?.name ?? (i === 0 ? 'بازیکن ۱' : 'بازیکن ۲')}
                     {win && <Trophy size={12} color="#30C55A" style={{ verticalAlign: 'middle', marginRight: 4 }} />}
                   </div>
-                  {p?.rank && <div style={{ fontSize: 11, color: '#C7A66A' }}>رتبه #{toFa(p.rank)}</div>}
+                  {p?.rank && <div style={{ fontSize: 12, color: '#C7A66A' }}>رتبه #{toFa(p.rank)}</div>}
                 </div>
                 {s != null && (
                   <div style={{ fontSize: 28, fontWeight: 900, color: win ? '#30C55A' : '#ccc' }}>
@@ -458,7 +458,7 @@ export default function LivePage() {
               </div>
             );
           })}
-          <div style={{ fontSize: 14, fontWeight: 900, color: '#ddd', padding: '0 8px' }}>:</div>
+          <div style={{ fontSize: 15, fontWeight: 900, color: '#ddd', padding: '0 8px' }}>:</div>
         </div>
       </div>
     );
@@ -470,17 +470,17 @@ export default function LivePage() {
       fontFamily: 'Vazirmatn, sans-serif' }}>
       <div style={{ background: '#111', color: '#fff',
         marginTop: -72, padding: '88px 20px 20px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.40)',
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.40)',
           letterSpacing: '0.12em', marginBottom: 4 }}>پنل مدیریت نتایج</div>
         <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 12 }}>{t.name}</div>
         <div style={{ display: 'flex', gap: 16 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
             <Circle size={6} fill="#ef4444" /> {toFa(liveNow.length)} زنده
           </span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>
             {toFa(upcoming.length)} در انتظار
           </span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#30C55A' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#30C55A' }}>
             {toFa(done.length)} پایان
           </span>
         </div>
@@ -488,21 +488,21 @@ export default function LivePage() {
       <div style={{ padding: '20px 16px' }}>
         {liveNow.length > 0 && (
           <section style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#ef4444',
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#ef4444',
               letterSpacing: '0.08em', marginBottom: 12 }}>● در حال بازی</div>
             {liveNow.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} showScore />)}
           </section>
         )}
         {upcoming.length > 0 && (
           <section style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b',
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#f59e0b',
               letterSpacing: '0.08em', marginBottom: 12 }}>در انتظار</div>
             {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} showScore />)}
           </section>
         )}
         {done.length > 0 && (
           <section>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#bbb',
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#bbb',
               letterSpacing: '0.08em', marginBottom: 12 }}>
               پایان یافته ({toFa(done.length)})
             </div>
@@ -528,7 +528,7 @@ export default function LivePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
               display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.55)',
+              cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.55)',
               fontFamily: 'inherit',
             }}>
               <ChevronRight size={15} /> {t.name}
@@ -537,11 +537,11 @@ export default function LivePage() {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <div style={{ padding: '5px 12px', borderRadius: 20,
               background: 'rgba(239,68,68,0.20)', border: '1px solid rgba(239,68,68,0.35)',
-              fontSize: 12, fontWeight: 700, color: '#ef4444',
+              fontSize: 13, fontWeight: 700, color: '#ef4444',
               display: 'flex', alignItems: 'center', gap: 5 }}>
               <Circle size={6} fill="#ef4444" /> زنده
             </div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', fontWeight: 600 }}>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.40)', fontWeight: 600 }}>
               <Zap size={11} style={{ verticalAlign: 'middle' }} /> {GAME_TYPE_LABELS[t.gameType]}
             </div>
             <button onClick={() => window.open(
@@ -554,7 +554,7 @@ export default function LivePage() {
               border: '1px solid rgba(255,255,255,0.18)',
               background: 'rgba(255,255,255,0.08)',
               color: 'rgba(255,255,255,0.75)',
-              fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+              fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
             }}>
               <ExternalLink size={11} /> پنل مدیریت
             </button>
@@ -562,7 +562,7 @@ export default function LivePage() {
         </div>
 
         <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 4px' }}>{t.name}</h1>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 20px' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: '0 0 20px' }}>
           {toFa(done.length)} بازی پایان یافته • {toFa(liveNow.length)} در حال بازی • {toFa(upcoming.length)} در انتظار
         </p>
 
@@ -575,7 +575,7 @@ export default function LivePage() {
           ].map(s => (
             <div key={s.label} style={{ flexShrink: 0, paddingBottom: 16 }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: s.color }}>{s.val}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.40)', marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -585,7 +585,7 @@ export default function LivePage() {
           {(['bracket', 'matches'] as const).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{
               padding: '12px 20px', border: 'none', background: 'none', cursor: 'pointer',
-              fontFamily: 'inherit', fontSize: 13, fontWeight: 700,
+              fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
               color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.40)',
               borderBottom: `2px solid ${activeTab === tab ? '#C7A66A' : 'transparent'}`,
               transition: 'all 0.2s',
@@ -615,7 +615,7 @@ export default function LivePage() {
               padding: '7px 14px', borderRadius: 20,
               border: '1.5px solid rgba(0,0,0,0.12)',
               background: '#fff', cursor: 'pointer', fontFamily: 'inherit',
-              fontSize: 12, fontWeight: 700, color: '#555',
+              fontSize: 13, fontWeight: 700, color: '#555',
               boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
             }}>
               {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}

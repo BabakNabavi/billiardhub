@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: RegistrationStatus }) {
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
       background: s.bg, borderRadius: 20, padding: '5px 10px',
-      fontSize: 11, fontWeight: 700, color: s.color,
+      fontSize: 12, fontWeight: 700, color: s.color,
       animation: status === 'pending' ? 'pendingPulse 1.5s ease-in-out infinite' : undefined,
     }}>
       {s.icon} {s.label}
@@ -56,7 +56,7 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
           display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Trophy size={14} color="#C7A66A" />
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#C7A66A', letterSpacing: '0.08em' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#C7A66A', letterSpacing: '0.08em' }}>
               BILLIARD HUB
             </span>
           </div>
@@ -65,7 +65,7 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
 
         {type === 'registration' && (
           <>
-            <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.80)',
+            <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.80)',
               letterSpacing: '0.16em', marginBottom: 8 }}>TOURNAMENT</div>
             <div style={{ fontSize: 22, fontWeight: 900, color: '#fff',
               textAlign: 'center', lineHeight: 1.2, padding: '0 16px' }}>
@@ -73,14 +73,14 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
             </div>
             <div style={{ marginTop: 12, background: 'rgba(199,166,106,0.20)',
               border: '1px solid rgba(199,166,106,0.40)', borderRadius: 20,
-              padding: '6px 16px', fontSize: 12, fontWeight: 700, color: '#C7A66A' }}>
+              padding: '6px 16px', fontSize: 13, fontWeight: 700, color: '#C7A66A' }}>
               ثبت‌نام آنلاین
             </div>
           </>
         )}
         {type === 'bracket' && (
           <>
-            <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.80)',
+            <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.80)',
               letterSpacing: '0.16em', marginBottom: 8 }}>BRACKET</div>
             <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', textAlign: 'center' }}>
               جدول مسابقات
@@ -96,26 +96,26 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
         )}
         {type === 'semifinal' && (
           <>
-            <div style={{ fontSize: 11, color: '#ef4444', letterSpacing: '0.16em', marginBottom: 8 }}>SEMI-FINAL</div>
+            <div style={{ fontSize: 12, color: '#ef4444', letterSpacing: '0.16em', marginBottom: 8 }}>SEMI-FINAL</div>
             <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', textAlign: 'center' }}>
               نیمه‌نهایی
             </div>
             <div style={{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>علی رضایی</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>علی رضایی</span>
               <div style={{ width: 30, height: 30, borderRadius: '50%',
                 background: 'rgba(239,68,68,0.20)', border: '1px solid rgba(239,68,68,0.40)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 700, color: '#ef4444' }}>vs</div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>رضا کاظمی</span>
+                fontSize: 12, fontWeight: 700, color: '#ef4444' }}>vs</div>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>رضا کاظمی</span>
             </div>
           </>
         )}
         {type === 'champion' && (
           <>
             <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
-            <div style={{ fontSize: 11, color: '#C7A66A', letterSpacing: '0.16em', marginBottom: 6 }}>CHAMPION</div>
+            <div style={{ fontSize: 12, color: '#C7A66A', letterSpacing: '0.16em', marginBottom: 6 }}>CHAMPION</div>
             <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>علی رضایی</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.60)', marginTop: 4 }}>قهرمان مسابقه</div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.60)', marginTop: 4 }}>قهرمان مسابقه</div>
           </>
         )}
 
@@ -124,14 +124,14 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
       </div>
 
       <div style={{ padding: '16px 18px' }}>
-        <div style={{ fontSize: 14, fontWeight: 800, color: '#111', marginBottom: 4 }}>{label}</div>
-        <div style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>{desc}</div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 4 }}>{label}</div>
+        <div style={{ fontSize: 13, color: '#888', marginBottom: 14 }}>{desc}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button onClick={() => setGen(true)} style={{
             width: '100%', padding: '10px', borderRadius: 20,
             border: `1px solid rgba(199,166,106,${gen ? '0' : '0.30'})`,
             background: gen ? 'rgba(48,197,90,0.10)' : 'rgba(199,166,106,0.12)',
-            color: gen ? '#30C55A' : '#C7A66A', fontSize: 13, fontWeight: 800,
+            color: gen ? '#30C55A' : '#C7A66A', fontSize: 14, fontWeight: 800,
             cursor: 'pointer', fontFamily: 'inherit',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
           }}>
@@ -142,7 +142,7 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
               width: '100%', padding: '10px', borderRadius: 20,
               border: `1px solid rgba(${published ? '48,197,90' : '139,92,246'},0.30)`,
               background: `rgba(${published ? '48,197,90' : '139,92,246'},0.10)`,
-              color: published ? '#30C55A' : '#8b5cf6', fontSize: 13, fontWeight: 800,
+              color: published ? '#30C55A' : '#8b5cf6', fontSize: 14, fontWeight: 800,
               cursor: published ? 'default' : 'pointer', fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}>
@@ -154,7 +154,7 @@ function StoryCard({ type, label, desc }: { type: string; label: string; desc: s
           {published && (
             <div style={{ padding: '8px 12px', borderRadius: 12,
               background: 'rgba(48,197,90,0.06)', border: '1px solid rgba(48,197,90,0.18)',
-              fontSize: 11, color: '#065f46', fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>
+              fontSize: 12, color: '#065f46', fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>
               این استوری در بخش استوری‌های سایت <strong>billiardhub.net</strong> منتشر شد
               و بازدیدکنندگان می‌توانند آن را ببینند.
             </div>
@@ -198,7 +198,7 @@ export default function TournamentAdminPage() {
 
   const inputStyle: React.CSSProperties = {
     padding: '10px 14px', borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.09)',
-    background: '#fff', fontSize: 14, fontFamily: 'Vazirmatn, sans-serif',
+    background: '#fff', fontSize: 15, fontFamily: 'Vazirmatn, sans-serif',
     color: '#111', outline: 'none',
   };
 
@@ -214,19 +214,19 @@ export default function TournamentAdminPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '20px 0 0' }}>
             <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
               display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 13, color: '#888', fontFamily: 'inherit',
+              cursor: 'pointer', fontSize: 14, color: '#888', fontFamily: 'inherit',
             }}>
               <ChevronRight size={15} /> {t.name}
             </button>
             <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>پنل مدیریت</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>پنل مدیریت</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '16px 0 0', flexWrap: 'wrap', gap: 12 }}>
             <div>
               <h1 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: 0 }}>{t.name}</h1>
-              <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+              <p style={{ fontSize: 14, color: '#888', margin: '4px 0 0' }}>
                 {t.date} • {STATUS_LABELS[t.status]}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function TournamentAdminPage() {
                   padding: '10px 18px', borderRadius: 12,
                   border: '1.5px solid rgba(199,166,106,0.30)',
                   background: 'rgba(199,166,106,0.07)', color: '#A07840',
-                  fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}>
                   <GitBranch size={14} /> براکت
                 </button>
@@ -247,7 +247,7 @@ export default function TournamentAdminPage() {
                   display: 'flex', alignItems: 'center', gap: 7,
                   padding: '10px 18px', borderRadius: 12, border: 'none',
                   background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-                  color: '#fff', fontSize: 13, fontWeight: 700,
+                  color: '#fff', fontSize: 14, fontWeight: 700,
                   cursor: 'pointer', fontFamily: 'inherit',
                 }}>
                   <Radio size={14} /> نمای زنده
@@ -268,7 +268,7 @@ export default function TournamentAdminPage() {
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '10px 16px', borderRadius: '10px 10px 0 0',
                 border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+                fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
                 background: tab === key ? '#F7F7F5' : 'transparent',
                 color: tab === key ? '#111' : '#888',
                 borderBottom: tab === key ? '2px solid #C7A66A' : '2px solid transparent',
@@ -299,7 +299,7 @@ export default function TournamentAdminPage() {
                 }}>
                   <div style={{ color: s.color, marginBottom: 12 }}>{s.icon}</div>
                   <div style={{ fontSize: 32, fontWeight: 900, color: '#111' }}>{toFa(s.value)}</div>
-                  <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -329,7 +329,7 @@ export default function TournamentAdminPage() {
                       color: a.color, flexShrink: 0 }}>
                       {a.icon}
                     </div>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>{a.label}</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{a.label}</span>
                   </button>
                 ))}
               </div>
@@ -353,7 +353,7 @@ export default function TournamentAdminPage() {
                 {(['all','pending','approved','rejected'] as const).map(s => (
                   <button key={s} onClick={() => setSF(s)} style={{
                     padding: '8px 14px', borderRadius: 10, border: 'none',
-                    cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700,
+                    cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700,
                     background: statusFilter === s ? '#111' : 'rgba(0,0,0,0.05)',
                     color: statusFilter === s ? '#fff' : '#666',
                   }}>
@@ -374,16 +374,16 @@ export default function TournamentAdminPage() {
                 }}>
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#111', fontSize: 14, marginBottom: 3 }}>{r.playerName}</div>
+                    <div style={{ fontWeight: 700, color: '#111', fontSize: 15, marginBottom: 3 }}>{r.playerName}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 12, color: '#888', direction: 'ltr' }}>{r.phone}</span>
-                      <span style={{ fontSize: 11, color: '#bbb' }}>{r.registeredAt}</span>
+                      <span style={{ fontSize: 13, color: '#888', direction: 'ltr' }}>{r.phone}</span>
+                      <span style={{ fontSize: 12, color: '#bbb' }}>{r.registeredAt}</span>
                     </div>
                     {r.playerInfo && (
-                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>{r.playerInfo}</div>
+                      <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>{r.playerInfo}</div>
                     )}
                     {r.receiptNote && (
-                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>{r.receiptNote}</div>
+                      <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>{r.receiptNote}</div>
                     )}
                   </div>
 
@@ -396,7 +396,7 @@ export default function TournamentAdminPage() {
                           display: 'flex', alignItems: 'center', gap: 4,
                           padding: '5px 10px', borderRadius: 8, border: 'none',
                           background: 'rgba(48,197,90,0.10)', color: '#30C55A',
-                          cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+                          cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
                         }}>
                           <Check size={12} /> تایید
                         </button>
@@ -406,7 +406,7 @@ export default function TournamentAdminPage() {
                           display: 'flex', alignItems: 'center', gap: 4,
                           padding: '5px 10px', borderRadius: 8, border: 'none',
                           background: 'rgba(239,68,68,0.10)', color: '#ef4444',
-                          cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+                          cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
                         }}>
                           <X size={12} /> رد
                         </button>
@@ -426,7 +426,7 @@ export default function TournamentAdminPage() {
               {filtered.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: '#bbb' }}>
                   <Users size={32} style={{ opacity: 0.3, marginBottom: 10 }} />
-                  <p style={{ margin: 0, fontSize: 14 }}>ثبت‌نامی یافت نشد</p>
+                  <p style={{ margin: 0, fontSize: 15 }}>ثبت‌نامی یافت نشد</p>
                 </div>
               )}
             </div>
@@ -439,7 +439,7 @@ export default function TournamentAdminPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ fontSize: 18, fontWeight: 900, color: '#111', margin: 0 }}>
                 شرکت‌کنندگان تایید شده
-                <span style={{ fontSize: 14, color: '#C7A66A', marginRight: 8 }}>
+                <span style={{ fontSize: 15, color: '#C7A66A', marginRight: 8 }}>
                   {toFa(approved.length)} / {toFa(t.maxPlayers)}
                 </span>
               </h2>
@@ -447,7 +447,7 @@ export default function TournamentAdminPage() {
                 display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px',
                 borderRadius: 12, border: 'none',
                 background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-                color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
               }}>
                 <UserPlus size={14} /> افزودن دستی
               </button>
@@ -457,18 +457,18 @@ export default function TournamentAdminPage() {
               <div style={{ background: '#fff', borderRadius: 20, padding: '20px 24px',
                 border: '1px solid rgba(199,166,106,0.25)',
                 boxShadow: '0 4px 20px rgba(199,166,106,0.12)' }}>
-                <h3 style={{ fontSize: 15, fontWeight: 800, color: '#111', margin: '0 0 16px' }}>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 16px' }}>
                   افزودن بازیکن دستی
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 12, alignItems: 'end' }}>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 700, color: '#666',
+                    <label style={{ fontSize: 13, fontWeight: 700, color: '#666',
                       display: 'block', marginBottom: 6 }}>نام و نام خانوادگی</label>
                     <input value={manualName} onChange={e => setMN(e.target.value)}
                       placeholder="نام کامل" style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
                   </div>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 700, color: '#666',
+                    <label style={{ fontSize: 13, fontWeight: 700, color: '#666',
                       display: 'block', marginBottom: 6 }}>شماره موبایل</label>
                     <input value={manualPhone} onChange={e => setMP(e.target.value)}
                       placeholder="09xx" dir="ltr" style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
@@ -487,7 +487,7 @@ export default function TournamentAdminPage() {
                     }
                   }} style={{
                     padding: '11px 20px', borderRadius: 12, border: 'none',
-                    background: '#111', color: '#fff', fontSize: 13, fontWeight: 700,
+                    background: '#111', color: '#fff', fontSize: 14, fontWeight: 700,
                     cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                   }}>
                     <Plus size={14} style={{ verticalAlign: 'middle' }} /> افزودن
@@ -503,17 +503,17 @@ export default function TournamentAdminPage() {
                   display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
                   borderBottom: i < approved.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
                 }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: '#C7A66A',
+                  <div style={{ fontSize: 15, fontWeight: 800, color: '#C7A66A',
                     width: 28, textAlign: 'center' }}>
                     {toFa(i + 1)}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: '#111', fontSize: 14 }}>{r.playerName}</div>
-                    <div style={{ fontSize: 12, color: '#aaa', direction: 'ltr', display: 'inline-block' }}>
+                    <div style={{ fontWeight: 700, color: '#111', fontSize: 15 }}>{r.playerName}</div>
+                    <div style={{ fontSize: 13, color: '#aaa', direction: 'ltr', display: 'inline-block' }}>
                       {r.phone}
                     </div>
                   </div>
-                  <div style={{ fontSize: 12, color: '#bbb' }}>{r.registeredAt}</div>
+                  <div style={{ fontSize: 13, color: '#bbb' }}>{r.registeredAt}</div>
                   <button onClick={() => updateStatus(r.id, 'rejected')} style={{
                     width: 32, height: 32, borderRadius: 9, border: 'none',
                     background: 'rgba(239,68,68,0.08)', color: '#ef4444',
@@ -534,7 +534,7 @@ export default function TournamentAdminPage() {
               <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: '0 0 6px' }}>
                 استوری‌ساز اینستاگرام
               </h2>
-              <p style={{ fontSize: 14, color: '#777', margin: 0 }}>
+              <p style={{ fontSize: 15, color: '#777', margin: 0 }}>
                 استوری‌های حرفه‌ای با برندینگ بیلیارد هاب برای مسابقات شما
               </p>
             </div>

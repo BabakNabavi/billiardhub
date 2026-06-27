@@ -27,7 +27,7 @@ export default function RegisterPage() {
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '13px 16px', borderRadius: 14,
     border: '1.5px solid rgba(0,0,0,0.10)', background: '#fff',
-    fontSize: 14, fontFamily: 'Vazirmatn, sans-serif', color: '#111',
+    fontSize: 15, fontFamily: 'Vazirmatn, sans-serif', color: '#111',
     outline: 'none', boxSizing: 'border-box',
   };
 
@@ -55,10 +55,10 @@ export default function RegisterPage() {
         <h2 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>
           ثبت‌نام در انتظار تایید
         </h2>
-        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.8, margin: '0 0 10px' }}>
+        <p style={{ fontSize: 15, color: '#777', lineHeight: 1.8, margin: '0 0 10px' }}>
           درخواست ثبت‌نام <strong style={{ color: '#111' }}>{name}</strong> دریافت شد.
         </p>
-        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.8, margin: '0 0 28px' }}>
+        <p style={{ fontSize: 15, color: '#777', lineHeight: 1.8, margin: '0 0 28px' }}>
           مدیر باشگاه رسید پرداخت شما را بررسی کرده و در اسرع وقت تایید خواهد کرد.
         </p>
 
@@ -69,10 +69,10 @@ export default function RegisterPage() {
         }}>
           <AlertCircle size={18} color="#f59e0b" style={{ flexShrink: 0 }} />
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 3 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#111', marginBottom: 3 }}>
               لطفا صبر کنید
             </div>
-            <div style={{ fontSize: 12, color: '#777' }}>
+            <div style={{ fontSize: 13, color: '#777' }}>
               پس از تایید، اطلاعات بیشتری دریافت خواهید کرد
             </div>
           </div>
@@ -81,14 +81,14 @@ export default function RegisterPage() {
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
             flex: 1, padding: '13px', borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.10)',
-            background: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            background: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
             color: '#555', fontFamily: 'inherit',
           }}>
             بازگشت به مسابقه
           </button>
           <button onClick={() => setState('approved')} style={{
             flex: 1, padding: '13px', borderRadius: 14, border: 'none',
-            background: 'rgba(245,158,11,0.10)', fontSize: 12, fontWeight: 700,
+            background: 'rgba(245,158,11,0.10)', fontSize: 13, fontWeight: 700,
             cursor: 'pointer', color: '#f59e0b', fontFamily: 'inherit',
           }}>
             دمو: تایید شد ✓
@@ -118,7 +118,7 @@ export default function RegisterPage() {
         <h2 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>
           ثبت‌نام تایید شد! 🎉
         </h2>
-        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.8, margin: '0 0 24px' }}>
+        <p style={{ fontSize: 15, color: '#777', lineHeight: 1.8, margin: '0 0 24px' }}>
           تبریک! ثبت‌نام شما در مسابقه <strong style={{ color: '#111' }}>{t.name}</strong> تایید شد.
         </p>
 
@@ -133,7 +133,7 @@ export default function RegisterPage() {
             <div key={row.label} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.05)',
-              fontSize: 13,
+              fontSize: 14,
             }}>
               <span style={{ color: '#aaa' }}>{row.label}</span>
               <span style={{ fontWeight: 700, color: '#111' }}>{row.value}</span>
@@ -144,7 +144,7 @@ export default function RegisterPage() {
         <button onClick={() => router.push(`/tournaments/${t.id}/live`)} style={{
           width: '100%', padding: '14px', borderRadius: 14, border: 'none',
           background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-          color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+          color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer',
           fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(199,166,106,0.28)',
         }}>
           مشاهده براکت مسابقه
@@ -172,14 +172,14 @@ export default function RegisterPage() {
         <h2 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>
           ثبت‌نام رد شد
         </h2>
-        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.8, margin: '0 0 24px' }}>
+        <p style={{ fontSize: 15, color: '#777', lineHeight: 1.8, margin: '0 0 24px' }}>
           متاسفانه ثبت‌نام شما تایید نشد. لطفا با باشگاه تماس بگیرید.
         </p>
 
         <button onClick={() => setState('form')} style={{
           width: '100%', padding: '14px', borderRadius: 14, border: 'none',
           background: 'rgba(239,68,68,0.10)', color: '#ef4444',
-          fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+          fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
         }}>
           ثبت‌نام مجدد
         </button>
@@ -198,12 +198,12 @@ export default function RegisterPage() {
         <div style={{ maxWidth: 600, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
             display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-            cursor: 'pointer', fontSize: 14, color: '#777', fontFamily: 'inherit',
+            cursor: 'pointer', fontSize: 15, color: '#777', fontFamily: 'inherit',
           }}>
             <ChevronRight size={16} /> بازگشت
           </button>
           <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#111', flex: 1,
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#111', flex: 1,
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             ثبت‌نام در {t.name}
           </span>
@@ -221,11 +221,11 @@ export default function RegisterPage() {
           <img src={t.banner} alt="" style={{ width: 60, height: 60, objectFit: 'cover',
             borderRadius: 12, flexShrink: 0 }} />
           <div style={{ flex: 1, overflow: 'hidden' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#111', lineHeight: 1.3,
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#111', lineHeight: 1.3,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {t.name}
             </div>
-            <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>
+            <div style={{ fontSize: 14, color: '#888', marginTop: 4 }}>
               {t.date} • {GAME_TYPE_LABELS[t.gameType]}
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function RegisterPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 700, color: '#444',
+              <label style={{ fontSize: 14, fontWeight: 700, color: '#444',
                 display: 'block', marginBottom: 8 }}>
                 نام و نام خانوادگی <span style={{ color: '#ef4444' }}>*</span>
               </label>
@@ -257,7 +257,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: 13, fontWeight: 700, color: '#444',
+              <label style={{ fontSize: 14, fontWeight: 700, color: '#444',
                 display: 'block', marginBottom: 8 }}>
                 شماره موبایل <span style={{ color: '#ef4444' }}>*</span>
               </label>
@@ -271,7 +271,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: 13, fontWeight: 700, color: '#444',
+              <label style={{ fontSize: 14, fontWeight: 700, color: '#444',
                 display: 'block', marginBottom: 8 }}>
                 اطلاعات بازیکن (اختیاری)
               </label>
@@ -294,7 +294,7 @@ export default function RegisterPage() {
                 marginBottom: 20, border: '1px solid rgba(199,166,106,0.18)',
                 display: 'flex', flexDirection: 'column', gap: 8,
               }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#C7A66A', marginBottom: 4 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#C7A66A', marginBottom: 4 }}>
                   مبلغ را به کارت زیر انتقال دهید:
                 </div>
                 {[
@@ -304,7 +304,7 @@ export default function RegisterPage() {
                   { label: 'بانک', value: t.bankName ?? '' },
                 ].map(row => (
                   <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between',
-                    alignItems: 'center', fontSize: 13 }}>
+                    alignItems: 'center', fontSize: 14 }}>
                     <span style={{ color: '#888' }}>{row.label}</span>
                     <span style={{ fontWeight: 700, color: '#111',
                       direction: row.ltr ? 'ltr' : 'inherit' }}>
@@ -316,7 +316,7 @@ export default function RegisterPage() {
 
               {/* Receipt upload */}
               <div>
-                <label style={{ fontSize: 13, fontWeight: 700, color: '#444',
+                <label style={{ fontSize: 14, fontWeight: 700, color: '#444',
                   display: 'block', marginBottom: 10 }}>
                   آپلود تصویر رسید
                 </label>
@@ -340,24 +340,24 @@ export default function RegisterPage() {
                         <Check size={18} color="#30C55A" />
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>رسید آپلود شد</div>
-                        <div style={{ fontSize: 12, color: '#30C55A' }}>{receiptFile}</div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>رسید آپلود شد</div>
+                        <div style={{ fontSize: 13, color: '#30C55A' }}>{receiptFile}</div>
                       </div>
                     </div>
                   ) : (
                     <>
                       <Upload size={28} color="#C7A66A" style={{ opacity: 0.6, marginBottom: 10 }} />
-                      <p style={{ fontSize: 14, color: '#777', margin: '0 0 4px', fontWeight: 600 }}>
+                      <p style={{ fontSize: 15, color: '#777', margin: '0 0 4px', fontWeight: 600 }}>
                         کلیک کنید یا بکشید
                       </p>
-                      <p style={{ fontSize: 12, color: '#bbb', margin: 0 }}>PNG, JPG, PDF</p>
+                      <p style={{ fontSize: 13, color: '#bbb', margin: 0 }}>PNG, JPG, PDF</p>
                     </>
                   )}
                 </div>
               </div>
 
               <div style={{ marginTop: 14 }}>
-                <label style={{ fontSize: 13, fontWeight: 700, color: '#444',
+                <label style={{ fontSize: 14, fontWeight: 700, color: '#444',
                   display: 'block', marginBottom: 8 }}>
                   توضیحات (اختیاری)
                 </label>
@@ -384,7 +384,7 @@ export default function RegisterPage() {
             ثبت‌نام در مسابقه
           </button>
 
-          <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center',
+          <p style={{ fontSize: 13, color: '#bbb', textAlign: 'center',
             margin: '12px 0 0', lineHeight: 1.6 }}>
             با ثبت‌نام، قوانین مسابقه را پذیرفته‌اید
           </p>

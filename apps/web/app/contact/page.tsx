@@ -42,11 +42,11 @@ export default function ContactPage() {
     setLoading(false)
   }
 
-  const labelStyle: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: 'rgba(0,0,0,0.50)', marginBottom: 6, display: 'block' }
+  const labelStyle: React.CSSProperties = { fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.50)', marginBottom: 6, display: 'block' }
   const inputStyle = (err?: string): React.CSSProperties => ({
     width: '100%', boxSizing: 'border-box',
     background: '#F7F7F5', border: `1px solid ${err ? 'rgba(239,68,68,0.50)' : 'rgba(0,0,0,0.10)'}`,
-    borderRadius: 12, padding: '12px 14px', color: '#111111', fontSize: 15, fontFamily: 'inherit',
+    borderRadius: 12, padding: '12px 14px', color: '#111111', fontSize: 16, fontFamily: 'inherit',
     outline: 'none', transition: 'border-color 0.2s',
   })
 
@@ -74,10 +74,10 @@ export default function ContactPage() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(1,6,4,0.4), rgba(2,8,6,0.98))' }} />
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 100, padding: '6px 18px', animation: 'fadeUp 0.6s ease both' }}>
-              <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.22em' }}>CONTACT US</span>
+              <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.22em' }}>CONTACT US</span>
             </div>
             <h1 style={{ fontSize: 'clamp(31px, 4.4vw, 51px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.035em', animation: 'fadeUp 0.6s ease 0.15s both' }}>تماس با ما</h1>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.35)', margin: 0, animation: 'fadeUp 0.6s ease 0.3s both' }}>همیشه در کنار شما هستیم</p>
+            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.35)', margin: 0, animation: 'fadeUp 0.6s ease 0.3s both' }}>همیشه در کنار شما هستیم</p>
           </div>
         </div>
 
@@ -94,9 +94,9 @@ export default function ContactPage() {
                 <div style={{ width: 44, height: 44, borderRadius: 13, background: `${c.color}12`, border: `1px solid ${c.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                   <i className={`ti ${c.icon}`} style={{ fontSize: 22, color: c.color }} />
                 </div>
-                <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 6px', fontWeight: 700 }}>{c.title}</p>
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>{c.value}</p>
-                <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{c.sub}</p>
+                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 6px', fontWeight: 700 }}>{c.title}</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>{c.value}</p>
+                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{c.sub}</p>
               </div>
             ))}
           </div>
@@ -114,11 +114,11 @@ export default function ContactPage() {
                       <i className="ti ti-check" style={{ fontSize: 40, color: '#C7A66A' }} />
                     </div>
                     <h2 style={{ fontSize: 24, fontWeight: 900, color: '#111111', margin: '0 0 12px' }}>پیام ارسال شد!</h2>
-                    <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: '0 0 28px' }}>
+                    <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: '0 0 28px' }}>
                       تیم پشتیبانی ما در اسرع وقت با شما تماس خواهد گرفت.
                     </p>
                     <button onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
-                      style={{ padding: '12px 24px', borderRadius: 12, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+                      style={{ padding: '12px 24px', borderRadius: 12, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 16, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
                       ارسال پیام جدید
                     </button>
                   </div>
@@ -136,7 +136,7 @@ export default function ContactPage() {
                         <div>
                           <label style={labelStyle}>نام و نام خانوادگی *</label>
                           <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="نام خود را وارد کنید" style={inputStyle(errors.name)} />
-                          {errors.name && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.name}</p>}
+                          {errors.name && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.name}</p>}
                         </div>
                         <div>
                           <label style={labelStyle}>شماره موبایل</label>
@@ -145,7 +145,7 @@ export default function ContactPage() {
                         <div style={{ gridColumn: 'span 2' }}>
                           <label style={labelStyle}>ایمیل *</label>
                           <input value={form.email} onChange={e => set('email', e.target.value)} placeholder="example@email.com" type="email" style={inputStyle(errors.email)} />
-                          {errors.email && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.email}</p>}
+                          {errors.email && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.email}</p>}
                         </div>
                         <div style={{ gridColumn: 'span 2' }}>
                           <label style={labelStyle}>موضوع *</label>
@@ -158,14 +158,14 @@ export default function ContactPage() {
                             <option>همکاری و شراکت</option>
                             <option>سایر</option>
                           </select>
-                          {errors.subject && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{errors.subject}</p>}
+                          {errors.subject && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.subject}</p>}
                         </div>
                         <div style={{ gridColumn: 'span 2' }}>
                           <label style={labelStyle}>پیام *</label>
                           <textarea value={form.message} onChange={e => set('message', e.target.value)} placeholder="پیام خود را اینجا بنویسید..." rows={5} style={{ ...inputStyle(errors.message), resize: 'vertical', lineHeight: 1.7 }} />
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                            {errors.message && <p style={{ fontSize: 12, color: '#ef4444', margin: 0 }}>{errors.message}</p>}
-                            <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginRight: 'auto' }}>{toFa(form.message.length)} کاراکتر</span>
+                            {errors.message && <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{errors.message}</p>}
+                            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginRight: 'auto' }}>{toFa(form.message.length)} کاراکتر</span>
                           </div>
                         </div>
                       </div>
@@ -193,7 +193,7 @@ export default function ContactPage() {
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, overflow: 'hidden' }}>
                 <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.40),transparent)' }} />
                 <div style={{ padding: '20px' }}>
-                  <p style={{ fontSize: 14, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <i className="ti ti-clock" style={{ fontSize: 17, color: '#C7A66A' }} />
                     ساعت پشتیبانی
                   </p>
@@ -202,13 +202,13 @@ export default function ContactPage() {
                     { day: 'پنج‌شنبه', hours: '۹:۰۰ — ۱۴:۰۰', active: true },
                     { day: 'جمعه', hours: 'تعطیل', active: false },
                   ].map((r, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '10px 0', borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, padding: '10px 0', borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
                       <span style={{ color: 'rgba(0,0,0,0.45)' }}>{r.day}</span>
                       <span style={{ color: r.active ? '#C7A66A' : '#ef4444', fontWeight: 600 }}>{r.hours}</span>
                     </div>
                   ))}
-                  <div style={{ marginTop: 14, padding: '10px 12px', background: 'rgba(199,166,106,0.06)', borderRadius: 10, border: '1px solid rgba(199,166,106,0.12)', fontSize: 13, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <i className="ti ti-info-circle" style={{ fontSize: 14, color: '#C7A66A', flexShrink: 0 }} />
+                  <div style={{ marginTop: 14, padding: '10px 12px', background: 'rgba(199,166,106,0.06)', borderRadius: 10, border: '1px solid rgba(199,166,106,0.12)', fontSize: 14, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <i className="ti ti-info-circle" style={{ fontSize: 15, color: '#C7A66A', flexShrink: 0 }} />
                     پشتیبانی اضطراری از طریق تلگرام ۲۴ ساعته فعال است
                   </div>
                 </div>
@@ -216,7 +216,7 @@ export default function ContactPage() {
 
               {/* Social media */}
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '20px' }}>
-                <p style={{ fontSize: 14, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <i className="ti ti-share" style={{ fontSize: 17, color: '#C7A66A' }} />
                   شبکه‌های اجتماعی
                 </p>
@@ -232,8 +232,8 @@ export default function ContactPage() {
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}>
                       <i className={`ti ${s.icon}`} style={{ fontSize: 20, color: s.color, flexShrink: 0 }} />
                       <div>
-                        <p style={{ fontSize: 12, fontWeight: 700, color: '#111111', margin: '0 0 1px' }}>{s.label}</p>
-                        <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{s.handle}</p>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#111111', margin: '0 0 1px' }}>{s.label}</p>
+                        <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{s.handle}</p>
                       </div>
                     </div>
                   ))}
@@ -242,7 +242,7 @@ export default function ContactPage() {
 
               {/* Quick links */}
               <div style={{ background: 'rgba(199,166,106,0.04)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 20, padding: '20px' }}>
-                <p style={{ fontSize: 14, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <i className="ti ti-link" style={{ fontSize: 17, color: '#C7A66A' }} />
                   لینک‌های مفید
                 </p>
@@ -252,12 +252,12 @@ export default function ContactPage() {
                   { href: '/clubs', label: 'باشگاه‌ها', icon: 'ti-building' },
                   { href: '/events', label: 'مسابقات', icon: 'ti-trophy' },
                 ].map(l => (
-                  <Link key={l.href} href={l.href} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.50)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
+                  <Link key={l.href} href={l.href} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.50)', textDecoration: 'none', fontSize: 15, transition: 'color 0.2s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A' }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.50)' }}>
-                    <i className={`ti ${l.icon}`} style={{ fontSize: 15, color: '#C7A66A', opacity: 0.7 }} />
+                    <i className={`ti ${l.icon}`} style={{ fontSize: 16, color: '#C7A66A', opacity: 0.7 }} />
                     {l.label}
-                    <i className="ti ti-arrow-left" style={{ fontSize: 13, marginRight: 'auto' }} />
+                    <i className="ti ti-arrow-left" style={{ fontSize: 14, marginRight: 'auto' }} />
                   </Link>
                 ))}
               </div>
@@ -267,7 +267,7 @@ export default function ContactPage() {
           {/* ── FAQ ── */}
           <section>
             <div style={{ textAlign: 'center', marginBottom: 36 }}>
-              <p style={{ fontSize: 11, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 10, textTransform: 'uppercase' }}>FAQ</p>
+              <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 10, textTransform: 'uppercase' }}>FAQ</p>
               <h2 style={{ fontSize: 'clamp(24px, 2.8vw, 33px)', fontWeight: 900, color: '#111111', margin: 0 }}>سوالات متداول</h2>
             </div>
             <div style={{ maxWidth: 720, margin: '0 auto', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, overflow: 'hidden' }}>
@@ -279,11 +279,11 @@ export default function ContactPage() {
                       onClick={() => setFaqOpen(faqOpen === i ? null : i)}
                       style={{ width: '100%', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '18px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
                     >
-                      <span style={{ fontSize: 15, fontWeight: 700, color: faqOpen === i ? '#C7A66A' : '#111111', transition: 'color 0.2s' }}>{item.q}</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: faqOpen === i ? '#C7A66A' : '#111111', transition: 'color 0.2s' }}>{item.q}</span>
                       <span style={{ fontSize: 22, color: '#C7A66A', transition: 'transform 0.3s', transform: faqOpen === i ? 'rotate(45deg)' : 'rotate(0)', flexShrink: 0, lineHeight: 1 }}>+</span>
                     </button>
                     {faqOpen === i && (
-                      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', lineHeight: 1.8, margin: '0 0 16px', paddingRight: 4 }}>{item.a}</p>
+                      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.8, margin: '0 0 16px', paddingRight: 4 }}>{item.a}</p>
                     )}
                   </div>
                 ))}

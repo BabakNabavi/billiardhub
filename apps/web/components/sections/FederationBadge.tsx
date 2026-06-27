@@ -31,9 +31,9 @@ export function FederationBadge() {
                 <Shield size={28} style={{ color: '#C7A66A' }} />
               </div>
               <div>
-                <div style={{ fontSize: '11px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '6px' }}>VERIFIED PLATFORM</div>
+                <div style={{ fontSize: '12px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '6px' }}>VERIFIED PLATFORM</div>
                 <div style={{ fontSize: '20px', fontWeight: 900, color: '#111111', letterSpacing: '-0.02em', marginBottom: '4px' }}>پلتفرم تأیید شده</div>
-                <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>زیر نظر فدراسیون بیلیارد و اسنوکر ایران</div>
+                <div style={{ fontSize: '15px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.5 }}>زیر نظر فدراسیون بیلیارد و اسنوکر ایران</div>
               </div>
             </div>
 
@@ -45,8 +45,8 @@ export function FederationBadge() {
                     <CheckCircle size={11} style={{ color: '#C7A66A' }} />
                     <span style={{ fontSize: '10px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.1em' }}>{p.badge}</span>
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{p.name}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>{p.role}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{p.name}</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>{p.role}</div>
                 </div>
               ))}
             </div>

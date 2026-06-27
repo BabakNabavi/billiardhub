@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"fix: hero CTA buttons gold trust-card style\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"fix: hero spacing between headline, subtitle and buttons\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"fix: hero buttons deeper liquid glass - lower opacity higher blur\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"fix: nearest club button liquid glass green card style\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"fix: hero CTA buttons exact same style as trust cards\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"fix: stories size 74px to 78px \\(5% larger\\)\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" add apps/web/app/page.tsx apps/web/app/clubs/page.tsx)",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit -m \"feat: remove hero text/buttons + clubs image slider + responsive fix\")",
+      "PowerShell(git -C \"i:\\\\Billiard Plus\\\\billiard-plus\" commit --allow-empty -m \"chore: trigger redeploy\")",
+      "Bash(vercel --version)",
+      "Bash(vercel ls *)",
+      "Bash(xargs grep -l \"position.*fixed\")"
+    ]
+  }
+}

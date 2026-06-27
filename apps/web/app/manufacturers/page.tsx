@@ -25,7 +25,7 @@ export default function ManufacturersPage() {
       <div style={{ background: 'linear-gradient(135deg, #05081a 0%, #030512 100%)', padding: 'clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(28px, 5vw, 48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(167,139,250,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.04) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
         <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 13, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 14, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
             🏭 تولیدکنندگان
           </div>
           <h1 style={{ fontSize: 'clamp(24px, 5.5vw, 40px)', fontWeight: 900, margin: '0 0 12px', background: 'linear-gradient(135deg, #f0faf5, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -45,7 +45,7 @@ export default function ManufacturersPage() {
               background: activeCity === city ? '#a78bfa' : 'rgba(0,0,0,0.04)',
               border: `1px solid ${activeCity === city ? '#a78bfa' : 'rgba(0,0,0,0.06)'}`,
               color: activeCity === city ? '#010604' : '#94a3b8',
-              padding: '7px 14px', borderRadius: 20, fontSize: 13,
+              padding: '7px 14px', borderRadius: 20, fontSize: 14,
               fontWeight: activeCity === city ? 700 : 400,
               cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s',
             }}>{city}</button>
@@ -70,9 +70,9 @@ export default function ManufacturersPage() {
                 <div style={{ padding: '16px 18px 18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                     <h3 style={{ color: '#111111', fontSize: 17, fontWeight: 700, margin: 0, lineHeight: 1.4, flex: 1 }}>{mfr.name}</h3>
-                    {mfr.verified && <span style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 11, padding: '2px 7px', borderRadius: 10, fontWeight: 600, marginRight: 8, flexShrink: 0 }}>✓</span>}
+                    {mfr.verified && <span style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 12, padding: '2px 7px', borderRadius: 10, fontWeight: 600, marginRight: 8, flexShrink: 0 }}>✓</span>}
                   </div>
-                  <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>📍 {mfr.city} | از {mfr.since}</div>
+                  <div style={{ color: '#6b7280', fontSize: 14, marginBottom: 12 }}>📍 {mfr.city} | از {mfr.since}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                     {[
                       ['🏭', mfr.totalProduced + ' تولید', '#a78bfa'],
@@ -82,17 +82,17 @@ export default function ManufacturersPage() {
                     ].map(([icon, label, color], i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>{icon}</span>
-                        <span style={{ color: color as string, fontSize: 12, fontWeight: 600 }}>{label}</span>
+                        <span style={{ color: color as string, fontSize: 13, fontWeight: 600 }}>{label}</span>
                       </div>
                     ))}
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
                     {mfr.specialties.slice(0, 2).map(s => (
-                      <span key={s} style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: 11, padding: '2px 8px', borderRadius: 10 }}>{s}</span>
+                      <span key={s} style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: 12, padding: '2px 8px', borderRadius: 10 }}>{s}</span>
                     ))}
                   </div>
                   <div style={{ textAlign: 'left', borderTop: '1px solid rgba(0,0,0,0.04)', paddingTop: 12 }}>
-                    <span style={{ color: '#a78bfa', fontSize: 13, fontWeight: 600 }}>مشاهده پروفایل ←</span>
+                    <span style={{ color: '#a78bfa', fontSize: 14, fontWeight: 600 }}>مشاهده پروفایل ←</span>
                   </div>
                 </div>
               </div>

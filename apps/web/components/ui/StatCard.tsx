@@ -53,12 +53,12 @@ export function StatCard({ value, label, sub, color = '#C7A66A', icon, delay = 0
         {value}
       </div>
 
-      <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>
+      <div style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>
         {label}
       </div>
 
       {sub && (
-        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)', marginTop: '5px' }}>
+        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.30)', marginTop: '5px' }}>
           {sub}
         </div>
       )}

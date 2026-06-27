@@ -162,14 +162,14 @@ function Field({
   const base: React.CSSProperties = {
     width: '100%', background: '#F7F7F5',
     border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10,
-    padding: '10px 12px', color: '#111111', fontSize: 14,
+    padding: '10px 12px', color: '#111111', fontSize: 15,
     fontFamily: 'Vazirmatn, Tahoma, sans-serif', outline: 'none',
     transition: 'border-color 0.2s', boxSizing: 'border-box',
   }
 
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 12, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
+      <label style={{ display: 'block', fontSize: 13, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>
         {field.label}
         {field.required && <span style={{ color: '#ef4444', marginRight: 4 }}>*</span>}
       </label>
@@ -236,7 +236,7 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
   }
 
   if (loading) return (
-    <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(0,0,0,0.38)', fontSize: 13 }}>
+    <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(0,0,0,0.38)', fontSize: 14 }}>
       در حال بارگذاری...
     </div>
   )
@@ -248,8 +248,8 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
     <div>
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>تکمیل پروفایل</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: role.color }}>{toFarsiDigits(pct)}٪</span>
+          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>تکمیل پروفایل</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: role.color }}>{toFarsiDigits(pct)}٪</span>
         </div>
         <div style={{ height: 4, background: 'rgba(0,0,0,0.05)', borderRadius: 4 }}>
           <div style={{ height: '100%', borderRadius: 4, background: role.color, width: `${pct}%`, transition: 'width 0.3s' }} />
@@ -271,7 +271,7 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
         style={{
           width: '100%', padding: '13px', borderRadius: 12, border: 'none',
           background: saved ? '#C7A66A' : saving ? 'rgba(0,0,0,0.04)' : role.color,
-          color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+          color: '#FFFFFF', fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
           cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}
@@ -322,7 +322,7 @@ function ProfileSetupInner() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
-      <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.45)', fontSize: 14 }}>
+      <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.45)', fontSize: 15 }}>
         <i className="ti ti-loader-2" style={{ fontSize: 31, color: '#C7A66A', display: 'block', marginBottom: 12 }} />
         در حال بارگذاری...
       </div>
@@ -334,8 +334,8 @@ function ProfileSetupInner() {
       <div style={{ textAlign: 'center', padding: 32 }}>
         <i className="ti ti-lock" style={{ fontSize: 44, color: 'rgba(0,0,0,0.35)', display: 'block', marginBottom: 16 }} />
         <div style={{ color: '#111111', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>هنوز نقشی تأیید نشده</div>
-        <div style={{ color: 'rgba(0,0,0,0.45)', fontSize: 14, marginBottom: 24, lineHeight: 1.7 }}>ابتدا نقش درخواست بدید و منتظر تأیید ادمین بمانید.</div>
-        <button onClick={() => router.push('/profile/role')} style={{ background: '#C7A66A', color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+        <div style={{ color: 'rgba(0,0,0,0.45)', fontSize: 15, marginBottom: 24, lineHeight: 1.7 }}>ابتدا نقش درخواست بدید و منتظر تأیید ادمین بمانید.</div>
+        <button onClick={() => router.push('/profile/role')} style={{ background: '#C7A66A', color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
           درخواست نقش
         </button>
       </div>
@@ -359,7 +359,7 @@ function ProfileSetupInner() {
             </button>
             <div>
               <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>پروفایل کاری</div>
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{toFarsiDigits(userRoles.length)} نقش تأیید‌شده</div>
+              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>{toFarsiDigits(userRoles.length)} نقش تأیید‌شده</div>
             </div>
           </div>
 
@@ -370,7 +370,7 @@ function ProfileSetupInner() {
               if (!m) return null
               const isActive = activeTab === ur.role
               return (
-                <button key={ur.role} onClick={() => setActiveTab(ur.role)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, flexShrink: 0, border: `1px solid ${isActive ? hexToRgba(m.color, 0.5) : 'rgba(0,0,0,0.07)'}`, background: isActive ? hexToRgba(m.color, 0.12) : 'rgba(0,0,0,0.04)', color: isActive ? m.color : '#64748b', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <button key={ur.role} onClick={() => setActiveTab(ur.role)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, flexShrink: 0, border: `1px solid ${isActive ? hexToRgba(m.color, 0.5) : 'rgba(0,0,0,0.07)'}`, background: isActive ? hexToRgba(m.color, 0.12) : 'rgba(0,0,0,0.04)', color: isActive ? m.color : '#64748b', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s' }}>
                   <i className={`ti ${m.icon}`} style={{ fontSize: 17 }} aria-hidden="true" />
                   {m.label}
                 </button>
@@ -386,11 +386,11 @@ function ProfileSetupInner() {
                   <i className={`ti ${activeMeta.icon}`} style={{ fontSize: 20, color: activeMeta.color }} aria-hidden="true" />
                 </span>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#111111' }}>{activeMeta.label}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>{activeMeta.description}</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#111111' }}>{activeMeta.label}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{activeMeta.description}</div>
                 </div>
-                <button onClick={() => router.push(`/profile/${activeTab}`)} style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: activeMeta.color, background: hexToRgba(activeMeta.color, 0.1), border: `1px solid ${hexToRgba(activeMeta.color, 0.3)}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  <i className="ti ti-eye" style={{ fontSize: 13 }} aria-hidden="true" />
+                <button onClick={() => router.push(`/profile/${activeTab}`)} style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: activeMeta.color, background: hexToRgba(activeMeta.color, 0.1), border: `1px solid ${hexToRgba(activeMeta.color, 0.3)}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  <i className="ti ti-eye" style={{ fontSize: 14 }} aria-hidden="true" />
                   مشاهده صفحه
                 </button>
               </div>
@@ -400,7 +400,7 @@ function ProfileSetupInner() {
         </div>
 
         {toast && (
-          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: '#C7A66A', color: '#FFFFFF', fontSize: 13, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap' }}>
+          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: '#C7A66A', color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap' }}>
             ✓ {toast}
           </div>
         )}
