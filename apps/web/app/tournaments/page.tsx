@@ -28,7 +28,7 @@ function TournamentCard({ t }: { t: Tournament }) {
   const full        = t.registeredCount >= t.maxPlayers;
 
   return (
-    <Link href={`/tournaments/${t.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={`/tournaments/${t.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{
@@ -38,6 +38,7 @@ function TournamentCard({ t }: { t: Tournament }) {
           boxShadow: hov ? '0 12px 32px rgba(0,0,0,0.10)' : '0 2px 8px rgba(0,0,0,0.05)',
           transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)',
           transform: hov ? 'translateY(-3px)' : 'none',
+          height: '100%', display: 'flex', flexDirection: 'column',
         }}
       >
         {/* Banner */}
@@ -104,7 +105,7 @@ function TournamentCard({ t }: { t: Tournament }) {
         </div>
 
         {/* Body */}
-        <div style={{ padding: '16px 18px 18px' }}>
+        <div style={{ padding: '16px 18px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 12px',
             lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -146,7 +147,7 @@ function TournamentCard({ t }: { t: Tournament }) {
           )}
 
           {/* Footer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 14 }}>
             <div style={{
               fontSize: 16, fontWeight: 800, color: '#C7A66A',
             }}>
