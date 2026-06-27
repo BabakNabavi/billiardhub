@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -18,6 +18,19 @@ export default function TournamentPublicPage() {
   const t = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
   const [copied, setCopied] = useState(false);
+  const [matchFormat, setMatchFormat] = useState(t.matchFormat ?? 'bo3');
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`matchFormat_${id}`);
+      if (stored) setMatchFormat(stored);
+    } catch {}
+  }, [id]);
+
+  const FORMAT_LABELS: Record<string, string> = {
+    bo3: 'Best of 3', bo5: 'Best of 5', bo7: 'Best of 7', bo9: 'Best of 9', bo11: 'Best of 11',
+  };
+
   const pct  = Math.round((t.registeredCount / t.maxPlayers) * 100);
   const full = t.registeredCount >= t.maxPlayers;
   const gameColor   = GAME_TYPE_COLORS[t.gameType];
@@ -245,7 +258,7 @@ export default function TournamentPublicPage() {
                   { label: 'مهلت ثبت‌نام', value: t.registrationDeadline },
                   { label: 'تاریخ برگزاری', value: t.date },
                   { label: 'ساعت شروع', value: toFa(t.startTime) },
-                  { label: 'فرمت', value: `حذفی — ${toFa(t.maxPlayers)} نفره` },
+                  { label: 'فرمت', value: `حذفی · ${FORMAT_LABELS[matchFormat] ?? matchFormat} · ${toFa(t.maxPlayers)} نفره` },
                 ].map(row => (
                   <div key={row.label} style={{
                     display: 'flex', justifyContent: 'space-between',
