@@ -8,11 +8,9 @@ import {
   User, CreditCard, Loader2, CheckCircle2,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, formatFee, toFa, GAME_TYPE_LABELS,
+  SAMPLE_TOURNAMENTS, formatFee, toFa,
 } from '../../../../lib/mock-tournaments';
-
-// Phase 1 mock auth — flip isLoggedIn to test both flows
-const MOCK_AUTH = { name: 'علی محمدی', isLoggedIn: true };
+import { useAuthStore } from '../../../../store/auth.store';
 
 type Step = 'confirm' | 'pay-loading' | 'pay-success' | 'upload' | 'pending';
 
@@ -21,12 +19,15 @@ export default function RegisterPage() {
   const router  = useRouter();
   const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
-  const [isLoggedIn, setIsLoggedIn] = useState(MOCK_AUTH.isLoggedIn);
-  const [step, setStep]             = useState<Step>('confirm');
-  const [showAlert, setShowAlert]   = useState(false);
-  const [receiptFile, setReceipt]   = useState<string | null>(null);
-  const [dragging, setDragging]     = useState(false);
-  const [trackingCode]              = useState(
+  const { user, _hydrated } = useAuthStore();
+  const isLoggedIn = !!user;
+  const userName   = user ? `${user.firstName} ${user.lastName}` : '';
+
+  const [step, setStep]           = useState<Step>('confirm');
+  const [showAlert, setShowAlert] = useState(false);
+  const [receiptFile, setReceipt] = useState<string | null>(null);
+  const [dragging, setDragging]   = useState(false);
+  const [trackingCode]            = useState(
     () => toFa(14031) + '-' + toFa(Math.floor(10000 + Math.random() * 90000))
   );
 
@@ -36,6 +37,17 @@ export default function RegisterPage() {
     setStep('pay-loading');
     setTimeout(() => setStep('pay-success'), 2400);
   };
+
+  /* ─── Loading (store not hydrated yet) ─────────────────────── */
+  if (!_hydrated) return (
+    <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex',
+      alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%',
+        border: '2px solid rgba(199,166,106,0.15)',
+        borderTop: '2px solid #C7A66A', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
 
   /* ─── Shared: sticky header ─────────────────────────────────── */
   const Header = () => (
@@ -105,7 +117,7 @@ export default function RegisterPage() {
           </h2>
           <p style={{ fontSize: 15, color: '#777', lineHeight: 1.85, margin: '0 0 28px' }}>
             فیش پرداخت شما دریافت شد.<br />
-            <strong style={{ color: '#111' }}>{MOCK_AUTH.name}</strong> عزیز،
+            <strong style={{ color: '#111' }}>{userName}</strong> عزیز،
             مدیر باشگاه در اسرع وقت بررسی و تایید خواهد کرد.
           </p>
 
@@ -348,7 +360,7 @@ export default function RegisterPage() {
                 <User size={20} color="#C7A66A" />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>{MOCK_AUTH.name}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>{userName}</div>
                 <div style={{ fontSize: 13, color: '#888', marginTop: 2 }}>ثبت‌نام‌کننده</div>
               </div>
               <div style={{ fontSize: 12, color: '#30C55A', fontWeight: 700,
@@ -397,16 +409,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Demo toggle */}
-        <button
-          onClick={() => { setIsLoggedIn(v => !v); setShowAlert(false); }}
-          style={{
-            marginTop: 16, width: '100%', padding: '10px', borderRadius: 12,
-            border: '1px dashed rgba(0,0,0,0.12)', background: 'transparent',
-            fontSize: 13, color: '#bbb', cursor: 'pointer', fontFamily: 'inherit',
-          }}>
-          🔧 دمو: {isLoggedIn ? 'تست حالت بدون لاگین' : 'تست حالت لاگین‌شده'}
-        </button>
       </div>
     </div>
   );
