@@ -421,11 +421,29 @@ export default function NewTournamentPage() {
     const d = parseInt(toEn(p[0]!)), m = J_MONTHS.indexOf(p[1]!) + 1, y = parseInt(toEn(p[2]!));
     return y * 10000 + m * 100 + d;
   }
+  function getTodayJalali(): number {
+    const now = new Date();
+    const gy = now.getFullYear(), gm = now.getMonth() + 1, gd = now.getDate();
+    const g_y = gy - 1600, g_m = gm - 1, g_d = gd - 1;
+    let g_day_no = 365*g_y + Math.floor((g_y+3)/4) - Math.floor((g_y+99)/100) + Math.floor((g_y+399)/400);
+    const gmd = [31, 28 + ((gy%4===0 && (gy%100!==0 || gy%400===0)) ? 1 : 0), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    for (let i=0;i<g_m;i++) g_day_no += gmd[i]!;
+    g_day_no += g_d;
+    let j_day_no = g_day_no - 79;
+    const j_np = Math.floor(j_day_no/12053); j_day_no %= 12053;
+    let jy = 979 + 33*j_np + 4*Math.floor(j_day_no/1461); j_day_no %= 1461;
+    if (j_day_no >= 366) { jy += Math.floor((j_day_no-1)/365); j_day_no = (j_day_no-1)%365; }
+    const jmd = [31,31,31,31,31,31,30,30,30,30,30,29]; let jm=0, jd=0;
+    for (let i=0;i<12;i++) { if (j_day_no < jmd[i]!) { jm=i+1; jd=j_day_no+1; break; } j_day_no -= jmd[i]!; }
+    return jy*10000 + jm*100 + jd;
+  }
+
   const deadlineAfterDate = !!(date && deadline && dateToNum(deadline) > dateToNum(date));
+  const dateBeforeToday   = !!(date && dateToNum(date) < getTodayJalali());
 
   const canNext = [
     name.trim().length > 2,
-    !!date && !!startTime && !!deadline && !!deadlineTime && !deadlineAfterDate,
+    !!date && !!startTime && !!deadline && !!deadlineTime && !deadlineAfterDate && !dateBeforeToday,
     prizeInfo.trim().length > 2,
     true,
   ][step];
@@ -548,10 +566,17 @@ export default function NewTournamentPage() {
           {/* ── Step 1: تنظیمات ── */}
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <DatePicker label="تاریخ مسابقه" required value={date}
-                  onChange={(v, wd) => { setDate(v); setDateWd(wd); }} />
-                <TimePicker label="ساعت شروع" required value={startTime} onChange={setStart} />
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <DatePicker label="تاریخ مسابقه" required value={date}
+                    onChange={(v, wd) => { setDate(v); setDateWd(wd); }} />
+                  <TimePicker label="ساعت شروع" required value={startTime} onChange={setStart} />
+                </div>
+                {dateBeforeToday && (
+                  <p style={{ margin: '8px 0 0', fontSize: 12, color: '#ef4444', fontWeight: 600 }}>
+                    ⚠ تاریخ مسابقه نمی‌تواند از امروز عقب‌تر باشد
+                  </p>
+                )}
               </div>
 
               <div>
@@ -737,7 +762,10 @@ export default function NewTournamentPage() {
                 مرحله بعد
               </button>
             ) : (
-              <button onClick={() => setSubmit(true)} style={lqBtn(true)}>
+              <button onClick={() => {
+                try { localStorage.setItem('bracketMaxPlayers_t1', String(maxPlayers)); } catch {}
+                setSubmit(true);
+              }} style={lqBtn(true)}>
                 <Trophy size={16} />
                 ایجاد مسابقه
               </button>

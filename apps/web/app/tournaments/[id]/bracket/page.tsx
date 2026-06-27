@@ -164,8 +164,11 @@ export default function BracketPage() {
   const router  = useRouter();
   const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
-  const approvedPlayers = SAMPLE_PLAYERS.slice(0, Math.min(t.registeredCount, t.maxPlayers));
-  const totalSlots  = t.maxPlayers;
+  const [overrideMax, setOverrideMax] = useState(0);
+
+  const effectiveMax    = overrideMax >= 8 ? overrideMax : t.maxPlayers;
+  const approvedPlayers = SAMPLE_PLAYERS.slice(0, Math.min(t.registeredCount, effectiveMax));
+  const totalSlots  = effectiveMax;
   const totalRounds = Math.log2(totalSlots);
   const needsBye    = approvedPlayers.length < totalSlots;
 
@@ -194,6 +197,18 @@ export default function BracketPage() {
 
   /* Mobile tap state */
   const [tapPlayer, setTapPlayer] = useState<TournamentPlayer | null>(null);
+
+  useEffect(() => {
+    try {
+      const s = parseInt(localStorage.getItem(`bracketMaxPlayers_${id}`) || '0');
+      if (s >= 8) {
+        setOverrideMax(s);
+        const ap = SAMPLE_PLAYERS.slice(0, Math.min(t.registeredCount, s));
+        setMatches(generateEmptyBracket(s));
+        setPool(ap);
+      }
+    } catch {}
+  }, [id]);
 
   /* ── Desktop Drag handlers ── */
   const handlePoolDragStart = (e: React.DragEvent, player: TournamentPlayer) => {
