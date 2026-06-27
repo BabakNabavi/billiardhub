@@ -62,7 +62,7 @@ export default function TournamentPublicPage() {
           </button>
 
           {/* Second (swapped): registration badge (above) + share (below) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end', marginTop: -7 }}>
             {canRegister ? (
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
