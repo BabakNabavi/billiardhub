@@ -207,8 +207,8 @@ export default function ClubProfilePage() {
         .tourn-card { background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:18px;transition:all 0.3s }
         .tourn-card:hover { transform:translateY(-2px); }
 
-        .hero-top-btn { top: 58px }
-        @media(min-width:961px){ .hero-top-btn { top: 65px } }
+        .hero-top-btn { top: 52px }
+        @media(min-width:961px){ .hero-top-btn { top: 58px } }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
@@ -242,18 +242,8 @@ export default function ClubProfilePage() {
             <span style={{ fontSize: 14, color: isOpen ? '#30C55A' : '#ef4444', fontWeight: 700 }}>{isOpen ? `باز تا ${toFa(todayH?.close || '')}` : 'بسته است'}</span>
           </div>
 
-          {images.length > 1 && (
-            <>
-              <button onClick={() => setSlide(s => (s - 1 + images.length) % images.length)} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.16)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ChevronRight size={17} />
-              </button>
-              <button onClick={() => setSlide(s => (s + 1) % images.length)} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.16)', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ChevronLeft size={17} />
-              </button>
-            </>
-          )}
 
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(14px,2.5vw,28px) clamp(16px,4vw,40px)' }}>
+          <div style={{ position: 'absolute', bottom: '10%', left: 0, right: 0, zIndex: 10, padding: 'clamp(14px,2.5vw,28px) clamp(16px,4vw,40px)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '4px 14px', marginBottom: 10 }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
               <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
