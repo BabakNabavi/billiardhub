@@ -639,12 +639,12 @@ export default function NewTournamentPage() {
                     fontFamily: 'inherit', display: 'flex', alignItems: 'center',
                     justifyContent: 'space-between', textAlign: 'right',
                   }}>
-                    <span className="fmtlbl" style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>
-                      {FORMATS.find(f => f.key === matchFormat)?.label}
-                    </span>
                     <ChevronDown size={16} color="#aaa"
                       style={{ transition: 'transform 0.2s',
                         transform: formatOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                    <span className="fmtlbl" style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>
+                      {FORMATS.find(f => f.key === matchFormat)?.label}
+                    </span>
                   </button>
 
                   {formatOpen && (
