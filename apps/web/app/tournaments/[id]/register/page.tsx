@@ -122,7 +122,7 @@ export default function RegisterPage() {
       <div class="row"><span class="lbl">تاریخ پرداخت</span><span class="val">${receiptDate}</span></div>
       <div class="row"><span class="lbl">وضعیت</span><span class="val g">ثبت‌نام تأیید شد ✓</span></div>
     </div>
-    <div class="ft">billiardhub.ir</div>
+    <div class="ft">billiardhub.net</div>
   </div>
 </body>
 </html>`;
@@ -311,7 +311,7 @@ export default function RegisterPage() {
           <div style={{ padding: '12px 28px', background: '#fafafa',
             textAlign: 'center', fontSize: 12, color: '#bbb',
             borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-            billiardhub.ir
+            billiardhub.net
           </div>
         </div>
 
