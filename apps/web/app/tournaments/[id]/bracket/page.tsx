@@ -165,7 +165,7 @@ export default function BracketPage() {
   const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
   const approvedPlayers = SAMPLE_PLAYERS.slice(0, Math.min(t.registeredCount, t.maxPlayers));
-  const totalSlots  = t.maxPlayers <= 16 ? t.maxPlayers : 16;
+  const totalSlots  = t.maxPlayers;
   const totalRounds = Math.log2(totalSlots);
   const needsBye    = approvedPlayers.length < totalSlots;
 
