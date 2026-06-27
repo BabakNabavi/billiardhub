@@ -187,11 +187,11 @@ export default function TournamentsPage() {
             <Link href="/tournaments/new" style={{ textDecoration: 'none' }}>
               <button style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-                color: '#fff', border: 'none', borderRadius: 14,
-                padding: '12px 22px', fontSize: 14, fontWeight: 700,
+                background: 'rgba(199,166,106,0.10)',
+                color: '#C7A66A', border: '1px solid rgba(199,166,106,0.30)',
+                borderRadius: 20, padding: '10px 20px',
+                fontSize: 14, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 4px 16px rgba(199,166,106,0.28)',
               }}>
                 <Plus size={16} />
                 ایجاد مسابقه
