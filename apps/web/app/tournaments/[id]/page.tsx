@@ -55,7 +55,7 @@ export default function TournamentPublicPage() {
             background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
             padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-            cursor: 'pointer', fontFamily: 'inherit', marginTop: -7,
+            cursor: 'pointer', fontFamily: 'inherit', marginTop: -14,
           }}>
             <ChevronRight size={14} />
             مسابقات
