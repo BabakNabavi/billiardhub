@@ -544,7 +544,7 @@ export default function ClubProfilePage() {
 
           {/* ── #8: TOURNAMENTS TAB ── */}
           {tab === 'tournaments' && (() => {
-            const clubTournaments = SAMPLE_TOURNAMENTS.filter(t => t.clubId === id || SAMPLE_TOURNAMENTS.indexOf(t) < 3);
+            const clubTournaments = SAMPLE_TOURNAMENTS.filter(t => t.clubId === id);
             return (
             <div style={{ animation: 'fadeUp 0.4s ease both' }}>
               {/* Stats row */}
@@ -577,9 +577,23 @@ export default function ClubProfilePage() {
                       <div style={{ flex: 1, minWidth: 160 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                           <div style={{ fontSize: 17, fontWeight: 800, color: '#111111' }}>{t.name}</div>
-                          <span style={{ fontSize: 12, color: statusColor, background: `${statusColor}12`, border: `1px solid ${statusColor}25`, borderRadius: 20, padding: '2px 10px', fontWeight: 700, flexShrink: 0 }}>
-                            {statusLabel}
-                          </span>
+                          {t.status === 'registration_open' ? (
+                            <span style={{
+                              fontSize: 12, color: '#C7A66A',
+                              background: 'rgba(199,166,106,0.10)',
+                              border: '1px solid rgba(199,166,106,0.38)',
+                              borderRadius: 20, padding: '3px 12px', fontWeight: 800, flexShrink: 0,
+                              display: 'inline-flex', alignItems: 'center', gap: 5,
+                              animation: 'pulse 1.6s ease-in-out infinite',
+                            }}>
+                              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
+                              در حال ثبت‌نام
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: 12, color: statusColor, background: `${statusColor}12`, border: `1px solid ${statusColor}25`, borderRadius: 20, padding: '2px 10px', fontWeight: 700, flexShrink: 0 }}>
+                              {statusLabel}
+                            </span>
+                          )}
                         </div>
                         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 4 }}>
