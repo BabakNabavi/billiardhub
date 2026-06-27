@@ -186,6 +186,7 @@ export default function BracketPage() {
   const [byeDlg, setByeDlg]     = useState(false);
   const [saved, setSaved]       = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [poolError, setPoolError] = useState(false);
 
   const [matches, setMatches]   = useState<TournamentMatch[]>(generateEmptyBracket(totalSlots));
   const [pool, setPool]         = useState<TournamentPlayer[]>(approvedPlayers);
@@ -197,6 +198,8 @@ export default function BracketPage() {
 
   /* Mobile tap state */
   const [tapPlayer, setTapPlayer] = useState<TournamentPlayer | null>(null);
+
+  useEffect(() => { if (pool.length === 0) setPoolError(false); }, [pool.length]);
 
   useEffect(() => {
     try {
@@ -321,6 +324,11 @@ export default function BracketPage() {
   };
 
   const handleStart = () => {
+    if (pool.length > 0) {
+      setPoolError(true);
+      return;
+    }
+    setPoolError(false);
     const hasEmpty = matches.filter(m => m.round === 1).some(m => !m.player1 || !m.player2);
     if (hasEmpty) {
       setByeDlg(true);
@@ -608,6 +616,11 @@ export default function BracketPage() {
                 border: '1px solid rgba(245,158,11,0.20)', borderRadius: 20,
                 padding: '2px 10px', fontWeight: 700 }}>
                 {toFa(pool.length)} باقی‌مانده
+              </span>
+            )}
+            {poolError && pool.length > 0 && (
+              <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 700 }}>
+                ⚠ همه بازیکنان باید در جدول قرار گیرند
               </span>
             )}
           </div>
