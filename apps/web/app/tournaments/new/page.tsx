@@ -627,6 +627,7 @@ export default function NewTournamentPage() {
                 </div>
               </FormField>
 
+              <style>{`.fmtlbl{font-family:system-ui,-apple-system,sans-serif!important}`}</style>
               <FormField label="فرمت مسابقه" required>
                 <div style={{ position: 'relative' }}>
                   {/* Backdrop to close on outside click */}
@@ -640,17 +641,12 @@ export default function NewTournamentPage() {
                     fontFamily: 'inherit', display: 'flex', alignItems: 'center',
                     justifyContent: 'space-between', textAlign: 'right',
                   }}>
-                    <span style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>
+                    <span className="fmtlbl" style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>
                       {FORMATS.find(f => f.key === matchFormat)?.label}
                     </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700 }}>
-                        اولین نفر با {FORMATS.find(f => f.key === matchFormat)?.wins} برد
-                      </span>
-                      <ChevronDown size={16} color="#aaa"
-                        style={{ transition: 'transform 0.2s',
-                          transform: formatOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-                    </div>
+                    <ChevronDown size={16} color="#aaa"
+                      style={{ transition: 'transform 0.2s',
+                        transform: formatOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
                   </button>
 
                   {formatOpen && (
@@ -669,15 +665,10 @@ export default function NewTournamentPage() {
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           transition: 'background 0.12s',
                         }}>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: 15, fontWeight: 800,
-                              color: matchFormat === f.key ? '#C7A66A' : '#111' }}>
-                              {f.label}
-                            </div>
-                            <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
-                              اولین بازیکن با {f.wins} برد پیروز می‌شود
-                            </div>
-                          </div>
+                          <span className="fmtlbl" style={{ fontSize: 15, fontWeight: 800,
+                            color: matchFormat === f.key ? '#C7A66A' : '#111' }}>
+                            {f.label}
+                          </span>
                           {matchFormat === f.key && <Check size={15} color="#C7A66A" />}
                         </button>
                       ))}
@@ -829,7 +820,7 @@ export default function NewTournamentPage() {
                             در حال اتصال به بانک...
                           </div>
                           <div style={{ fontSize: 13, color: '#aaa' }}>لطفاً صبر کنید</div>
-                          <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+                          <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.fmtlbl{font-family:system-ui,-apple-system,sans-serif!important}`}</style>
                         </div>
                       ) : (
                         <div style={{ textAlign: 'center' }}>
