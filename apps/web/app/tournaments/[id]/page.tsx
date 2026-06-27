@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Trophy, Calendar, Clock, Users, ChevronRight, MapPin,
-  CreditCard, CheckCircle, Share2, ChevronLeft, Star,
+  CheckCircle, Share2, ChevronLeft, Star,
 } from 'lucide-react';
 import {
   SAMPLE_TOURNAMENTS, GAME_TYPE_LABELS, GAME_TYPE_COLORS,
@@ -43,45 +43,64 @@ export default function TournamentPublicPage() {
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.80) 100%)',
         }} />
 
-        {/* Back button */}
-        <button onClick={() => router.push('/tournaments')} style={{
-          position: 'absolute', top: 80, right: 'clamp(14px,3vw,28px)', zIndex: 10,
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-          padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-          cursor: 'pointer', fontFamily: 'inherit',
+        {/* Top bar: spans full width, right=back btn, left=badges+share */}
+        <div style={{
+          position: 'absolute', top: 80, zIndex: 10,
+          left: 'clamp(14px,3vw,28px)', right: 'clamp(14px,3vw,28px)',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         }}>
-          <ChevronRight size={14} />
-          مسابقات
-        </button>
-
-        {/* Status & share */}
-        <div style={{ position: 'absolute', top: 80, left: 'clamp(14px,3vw,28px)',
-          display: 'flex', gap: 10, alignItems: 'center' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(10px)',
-            borderRadius: 20, padding: '7px 14px',
-          }}>
-            {t.status === 'live' && (
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
-                animation: 'lp 1.8s infinite', display: 'inline-block' }} />
+          {/* Left: registration badge (above) + share (below) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+            {canRegister ? (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(199,166,106,0.45)', borderRadius: 20,
+                padding: '7px 14px', fontSize: 13, fontWeight: 800, color: '#C7A66A',
+                animation: 'blinkReg 1.6s ease-in-out infinite',
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C7A66A',
+                  display: 'inline-block' }} />
+                در حال ثبت‌نام
+              </div>
+            ) : (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(10px)',
+                borderRadius: 20, padding: '7px 14px',
+              }}>
+                {t.status === 'live' && (
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
+                    animation: 'lp 1.8s infinite', display: 'inline-block' }} />
+                )}
+                <span style={{ fontSize: 13, fontWeight: 700, color: statusColor }}>
+                  {STATUS_LABELS[t.status]}
+                </span>
+              </div>
             )}
-            <span style={{ fontSize: 13, fontWeight: 700, color: statusColor }}>
-              {STATUS_LABELS[t.status]}
-            </span>
+            <button onClick={handleShare} style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
+              padding: '7px 14px', fontSize: 13, fontWeight: 700,
+              color: copied ? '#30C55A' : 'rgba(255,255,255,0.85)',
+              cursor: 'pointer', fontFamily: 'inherit', transition: 'color 0.2s',
+            }}>
+              {copied ? <CheckCircle size={13} /> : <Share2 size={13} />}
+              {copied ? 'کپی شد' : 'اشتراک'}
+            </button>
           </div>
-          <button onClick={handleShare} style={{
+
+          {/* Right: back button with arrow on the right */}
+          <button onClick={() => router.push('/tournaments')} style={{
             display: 'flex', alignItems: 'center', gap: 6,
             background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-            padding: '7px 14px', fontSize: 13, fontWeight: 700,
-            color: copied ? '#30C55A' : 'rgba(255,255,255,0.85)',
-            cursor: 'pointer', fontFamily: 'inherit', transition: 'color 0.2s',
+            padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
+            cursor: 'pointer', fontFamily: 'inherit',
           }}>
-            {copied ? <CheckCircle size={13} /> : <Share2 size={13} />}
-            {copied ? 'کپی شد' : 'اشتراک'}
+            مسابقات
+            <ChevronRight size={14} />
           </button>
         </div>
 
@@ -179,39 +198,6 @@ export default function TournamentPublicPage() {
               </div>
             </div>
 
-            {/* Payment info */}
-            {t.paymentMethod === 'card_transfer' && (
-              <div style={{
-                background: 'rgba(199,166,106,0.05)', borderRadius: 20, padding: '22px 24px',
-                border: '1px solid rgba(199,166,106,0.18)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <CreditCard size={18} color="#C7A66A" />
-                  <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: 0 }}>
-                    روش پرداخت حق ثبت‌نام
-                  </h2>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {[
-                    { label: 'شماره کارت', value: t.cardNumber ?? '' },
-                    { label: 'صاحب حساب', value: t.cardHolder ?? '' },
-                    { label: 'بانک', value: t.bankName ?? '' },
-                  ].map(item => (
-                    <div key={item.label} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '10px 14px', background: 'rgba(255,255,255,0.60)',
-                      borderRadius: 10, border: '1px solid rgba(199,166,106,0.12)',
-                    }}>
-                      <span style={{ fontSize: 12, color: '#888' }}>{item.label}</span>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#111',
-                        fontVariantNumeric: 'tabular-nums', direction: 'ltr' }}>
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ── Right: registration card ── */}
@@ -226,7 +212,7 @@ export default function TournamentPublicPage() {
                 <div style={{ fontSize: 28, fontWeight: 900, color: '#C7A66A' }}>
                   {formatFee(t.entryFee)}
                 </div>
-                <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>حق ثبت‌نام</div>
+                <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>مبلغ ورودی</div>
               </div>
 
               {/* Capacity progress */}
@@ -302,15 +288,13 @@ export default function TournamentPublicPage() {
                 <Link href={canRegister ? `/tournaments/${t.id}/register` : '#'}
                   style={{ textDecoration: 'none' }}>
                   <button disabled={!canRegister} style={{
-                    width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-                    background: canRegister
-                      ? 'linear-gradient(135deg,#C7A66A,#A07840)'
-                      : 'rgba(0,0,0,0.08)',
-                    color: canRegister ? '#fff' : '#bbb',
+                    width: '100%', padding: '14px', borderRadius: 20,
+                    background: canRegister ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.05)',
+                    border: `1px solid ${canRegister ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.10)'}`,
+                    color: canRegister ? '#C7A66A' : '#bbb',
                     fontSize: 15, fontWeight: 800,
                     cursor: canRegister ? 'pointer' : 'not-allowed',
                     fontFamily: 'inherit',
-                    boxShadow: canRegister ? '0 4px 16px rgba(199,166,106,0.28)' : 'none',
                   }}>
                     {full ? 'ظرفیت تکمیل' : t.status === 'upcoming' ? 'ثبت‌نام هنوز باز نشده' : 'ثبت‌نام آنلاین'}
                   </button>
@@ -320,7 +304,7 @@ export default function TournamentPublicPage() {
               {canRegister && (
                 <p style={{ fontSize: 12, color: '#aaa', margin: '10px 0 0',
                   textAlign: 'center', lineHeight: 1.6 }}>
-                  پس از ثبت‌نام و ارسال رسید، مدیر باشگاه تایید خواهد کرد
+                  پس از ثبت‌نام آنلاین، مدیر باشگاه درخواست را تایید خواهد کرد
                 </p>
               )}
             </div>
@@ -346,6 +330,10 @@ export default function TournamentPublicPage() {
         @keyframes lp {
           0%,100% { opacity:1; transform:scale(1); }
           50% { opacity:0.4; transform:scale(1.5); }
+        }
+        @keyframes blinkReg {
+          0%,100% { opacity:1; }
+          50% { opacity:0.45; }
         }
         @media (max-width: 767px) {
           .tdgrid { grid-template-columns: 1fr !important; }
