@@ -49,16 +49,16 @@ export default function TournamentPublicPage() {
           left: 'clamp(14px,3vw,28px)', right: 'clamp(14px,3vw,28px)',
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         }}>
-          {/* First (swapped): back button */}
+          {/* First (swapped): back button — ChevronRight first in DOM → appears on the right in RTL */}
           <button onClick={() => router.push('/tournaments')} style={{
             display: 'flex', alignItems: 'center', gap: 6,
             background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
             padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-            cursor: 'pointer', fontFamily: 'inherit',
+            cursor: 'pointer', fontFamily: 'inherit', marginTop: -7,
           }}>
-            مسابقات
             <ChevronRight size={14} />
+            مسابقات
           </button>
 
           {/* Second (swapped): registration badge (above) + share (below) */}
