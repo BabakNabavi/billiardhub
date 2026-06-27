@@ -43,14 +43,26 @@ export default function TournamentPublicPage() {
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.80) 100%)',
         }} />
 
-        {/* Top bar: spans full width, right=back btn, left=badges+share */}
+        {/* Top bar: spans full width */}
         <div style={{
-          position: 'absolute', top: 80, zIndex: 10,
+          position: 'absolute', top: 72, zIndex: 10,
           left: 'clamp(14px,3vw,28px)', right: 'clamp(14px,3vw,28px)',
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         }}>
-          {/* Left: registration badge (above) + share (below) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+          {/* First (swapped): back button */}
+          <button onClick={() => router.push('/tournaments')} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
+            padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
+            cursor: 'pointer', fontFamily: 'inherit',
+          }}>
+            مسابقات
+            <ChevronRight size={14} />
+          </button>
+
+          {/* Second (swapped): registration badge (above) + share (below) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
             {canRegister ? (
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -90,18 +102,6 @@ export default function TournamentPublicPage() {
               {copied ? 'کپی شد' : 'اشتراک'}
             </button>
           </div>
-
-          {/* Right: back button with arrow on the right */}
-          <button onClick={() => router.push('/tournaments')} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-            padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-            cursor: 'pointer', fontFamily: 'inherit',
-          }}>
-            مسابقات
-            <ChevronRight size={14} />
-          </button>
         </div>
 
         {/* Hero content */}
