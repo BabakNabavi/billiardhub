@@ -256,9 +256,10 @@ export default function LivePage() {
 
   /* ── Double-sided bracket view ── */
   const BracketView = () => (
-    <div style={{ overflowX: 'auto', padding: '20px 0', WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
-      <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
-        minWidth: 'max-content', padding: '0 16px', gap: 0 }}>
+    <div style={{ overflowX: 'auto', padding: '20px 0',
+      WebkitOverflowScrolling: 'touch' as unknown as undefined, textAlign: 'center' }}>
+      <div style={{ display: 'inline-flex', direction: 'ltr', alignItems: 'stretch',
+        padding: '0 16px', gap: 0 }}>
 
         {/* LEFT HALF: R1 → SF */}
         {innerRounds.map((round, ri) => {
@@ -477,10 +478,19 @@ export default function LivePage() {
       </div>
 
       {activeTab === 'bracket' ? (
-        <div ref={bracketRef} style={{ background: '#F7F7F5', position: 'relative',
-          ...(isFullscreen ? { minHeight: '100vh', overflow: 'auto', direction: 'rtl',
-            fontFamily: 'Vazirmatn, sans-serif' } : {}) }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 16px 0' }}>
+        <div ref={bracketRef} style={{
+          background: '#F7F7F5', position: 'relative',
+          ...(isFullscreen ? {
+            overflow: 'auto', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif',
+            display: 'flex', flexDirection: 'column',
+          } : {}),
+        }}>
+          {/* Fullscreen button — sticky so it stays visible when scrolling in fullscreen */}
+          <div style={{
+            display: 'flex', justifyContent: 'flex-end', padding: '10px 16px 0',
+            ...(isFullscreen ? { position: 'sticky', top: 0, zIndex: 10,
+              background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(6px)' } : {}),
+          }}>
             <button onClick={toggleFullscreen} style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '7px 14px', borderRadius: 20,
@@ -493,7 +503,12 @@ export default function LivePage() {
               {isFullscreen ? 'خروج از تمام صفحه' : 'تمام صفحه'}
             </button>
           </div>
-          <BracketView />
+          {/* In fullscreen: a flex-grow wrapper that vertically centers the bracket */}
+          <div style={isFullscreen ? { flex: 1, display: 'flex', alignItems: 'center' } : {}}>
+            <div style={isFullscreen ? { width: '100%' } : {}}>
+              <BracketView />
+            </div>
+          </div>
         </div>
       ) : <MatchesView />}
 
