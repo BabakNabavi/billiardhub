@@ -55,14 +55,14 @@ export default function TournamentPublicPage() {
             background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
             padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-            cursor: 'pointer', fontFamily: 'inherit', marginTop: -14,
+            cursor: 'pointer', fontFamily: 'inherit', marginTop: -18,
           }}>
             <ChevronRight size={14} />
             مسابقات
           </button>
 
           {/* Second (swapped): registration badge (above) + share (below) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end', marginTop: -7 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end', marginTop: -14 }}>
             {canRegister ? (
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
