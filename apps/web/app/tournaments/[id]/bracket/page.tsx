@@ -515,6 +515,7 @@ export default function BracketPage() {
   const BracketCanvas = () => (
     <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '16px 12px',
       flex: isMobile ? undefined : 1,
+      minWidth: 0,
       WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
       <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
         minWidth: 'max-content', gap: 0 }}>
@@ -700,7 +701,7 @@ export default function BracketPage() {
         </div>
       ) : (
         /* ── DESKTOP LAYOUT ── */
-        <div style={{ display: 'flex', height: 'calc(100vh - 165px)', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', height: 'calc(100vh - 165px)', overflow: 'hidden', minWidth: 0 }}>
 
           {/* Player pool sidebar */}
           <div style={{ width: 185, flexShrink: 0, background: '#fff',
