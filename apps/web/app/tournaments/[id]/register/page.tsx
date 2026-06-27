@@ -296,13 +296,13 @@ export default function RegisterPage() {
             }}>
               <span style={{ color: '#aaa' }}>وضعیت ثبت‌نام</span>
               <span style={{
-                fontWeight: 700, color: '#30C55A',
-                background: 'rgba(48,197,90,0.08)',
+                fontWeight: 700, color: '#f59e0b',
+                background: 'rgba(245,158,11,0.08)',
                 padding: '4px 10px', borderRadius: 20,
-                border: '1px solid rgba(48,197,90,0.20)',
+                border: '1px solid rgba(245,158,11,0.25)',
                 fontSize: 13,
               }}>
-                ✓ تأیید شد
+                ⏳ در انتظار تأیید
               </span>
             </div>
           </div>
@@ -337,9 +337,12 @@ export default function RegisterPage() {
           بازگشت به مسابقه
         </button>
 
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#bbb', marginTop: 14, lineHeight: 1.7 }}>
-          درخواست شما در لیست انتظار ادمین باشگاه قرار گرفت و
-          به‌زودی بررسی می‌شود
+        <p style={{ textAlign: 'center', fontSize: 14, color: '#555', marginTop: 14, lineHeight: 1.8 }}>
+          جهت مشاهده وضعیت ثبت‌نام به{' '}
+          <Link href="/dashboard" style={{ color: '#C7A66A', fontWeight: 700 }}>
+            پنل کاربری
+          </Link>
+          {' '}خود مراجعه کنید
         </p>
       </div>
     </div>
@@ -441,7 +444,7 @@ export default function RegisterPage() {
             borderRadius: 14, padding: '14px 16px', marginBottom: 22,
             fontSize: 13, color: '#555', lineHeight: 1.7,
           }}>
-            ✓ پس از پرداخت آنلاین، ثبت‌نام شما <strong>فوری</strong> تأیید می‌شود و فیش قابل دانلود خواهد بود.
+            ✓ پس از پرداخت آنلاین، فیش واریزی قابل دانلود خواهد بود. جهت مشاهده وضعیت ثبت‌نام به پنل کاربری خود مراجعه کنید.
           </div>
 
           {/* CTA */}

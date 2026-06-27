@@ -9,7 +9,9 @@ import {
   Target, Activity, Award, Clock, MapPin, Zap, Star,
   CheckCircle, Circle, ArrowLeft, BarChart2, Users,
   ShoppingBag, Play, Plus, Shield, ChevronUp, ChevronDown, ShieldCheck,
+  ClipboardList,
 } from 'lucide-react';
+import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
 
@@ -17,6 +19,7 @@ import AuthGuard from '../../components/AuthGuard';
 interface Booking { id: string; club: string; table: string; date: string; time: string; status: 'confirmed' | 'pending' | 'completed'; price: number; }
 interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
 interface QuickStat { label: string; value: string; sub: string; color: string; icon: React.ReactNode; trend?: number; }
+interface MyReg { id: string; tournamentId: string; tournamentName: string; status: 'pending' | 'approved' | 'rejected'; registeredAt: string; }
 
 /* ══ sample data ══ */
 const bookings: Booking[] = [
@@ -107,13 +110,35 @@ export default function DashboardPage() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [greeting, setGreeting] = useState('');
+  const [myRegs, setMyRegs] = useState<MyReg[]>([]);
   const rafRef = useRef<number>(0);
   const unread = notifications.filter(n => !n.read).length;
   const maxAct = Math.max(...weeklyActivity.map(d => d.sessions));
 
+  const upcomingTournament = SAMPLE_TOURNAMENTS.find(
+    t => t.status === 'registration_open' || t.status === 'upcoming'
+  ) ?? SAMPLE_TOURNAMENTS[0]!;
+
   useEffect(() => {
     const h = new Date().getHours();
     setGreeting(h < 12 ? 'صبح بخیر' : h < 18 ? 'عصر بخیر' : 'شب بخیر');
+  }, []);
+
+  useEffect(() => {
+    const collected: MyReg[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith('tournament-regs-')) continue;
+      const tId = key.replace('tournament-regs-', '');
+      try {
+        const list = JSON.parse(localStorage.getItem(key) ?? '[]') as Array<{ id: string; status: string; registeredAt: string; }>;
+        const t = SAMPLE_TOURNAMENTS.find(x => x.id === tId);
+        for (const reg of list) {
+          collected.push({ id: reg.id, tournamentId: tId, tournamentName: t?.name ?? tId, status: reg.status as MyReg['status'], registeredAt: reg.registeredAt });
+        }
+      } catch {}
+    }
+    setMyRegs(collected);
   }, []);
 
   useEffect(() => {
@@ -241,21 +266,6 @@ export default function DashboardPage() {
           .actions-row  { grid-template-columns: repeat(2,1fr) !important; }
         }
       `}</style>
-
-      {/* ══ Role activation banner ══ */}
-      {user.primaryRole === 'user' && (
-        <div style={{ background: 'rgba(245,158,11,0.08)', borderBottom: '1px solid rgba(245,158,11,0.2)', padding: '10px clamp(16px,4vw,40px)', direction: 'rtl' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <ShieldCheck size={32} color="#f59e0b" style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: '15px', color: 'rgba(245,158,11,0.9)', flex: 1, minWidth: '200px' }}>
-              برای دسترسی کامل به تمام امکانات سایت، سطح کاربری و نقش خود را تعیین نمایید
-            </span>
-            <a href="/profile/role" style={{ fontSize: '14px', fontWeight: 700, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px', padding: '6px 14px', textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              تعیین سطح کاربری
-            </a>
-          </div>
-        </div>
-      )}
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: '80px' }}>
 
@@ -391,6 +401,42 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </ScrollReveal>
+
+              {/* Registration Status */}
+              {myRegs.length > 0 && (
+                <ScrollReveal>
+                  <div className="dash-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+                      <div className="card-label" style={{ margin: 0 }}>
+                        <span style={{ width: '3px', height: '12px', background: 'linear-gradient(135deg,#f59e0b,#C7A66A)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
+                        وضعیت ثبت‌نام مسابقات
+                      </div>
+                      <ClipboardList size={14} style={{ color: '#f59e0b', opacity: 0.7 }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {myRegs.map(reg => {
+                        const statusCfg = {
+                          pending:  { label: 'در انتظار تأیید', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.22)' },
+                          approved: { label: 'تأیید شده',      color: '#30C55A', bg: 'rgba(48,197,90,0.08)',  border: 'rgba(48,197,90,0.22)'  },
+                          rejected: { label: 'رد شده',         color: '#ef4444', bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.22)'  },
+                        }[reg.status];
+                        return (
+                          <div key={reg.id} className="booking-row">
+                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: statusCfg.bg, border: `1px solid ${statusCfg.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>🏆</div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.tournamentName}</div>
+                              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.38)' }}>{reg.registeredAt}</div>
+                            </div>
+                            <div style={{ fontSize: '12px', color: statusCfg.color, background: statusCfg.bg, border: `1px solid ${statusCfg.border}`, borderRadius: '20px', padding: '4px 12px', fontWeight: 700, flexShrink: 0 }}>
+                              {statusCfg.label}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </ScrollReveal>
+              )}
 
               {/* Upcoming Bookings */}
               <ScrollReveal>
@@ -585,7 +631,7 @@ export default function DashboardPage() {
                 </div>
               </ScrollReveal>}
 
-              {/* Upcoming tournament */}
+              {/* Upcoming tournament — synced with SAMPLE_TOURNAMENTS */}
               <ScrollReveal>
                 <div className="dash-card" style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)' }}>
                   <div className="card-label">
@@ -594,16 +640,16 @@ export default function DashboardPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>🏆</div>
-                    <div>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>لیگ برتر اسنوکر</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>۱۵ خرداد ۱۴۰۴</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{upcomingTournament.name}</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>{upcomingTournament.date} · {upcomingTournament.clubName}</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
                     <span style={{ color: 'rgba(0,0,0,0.42)' }}>جایزه</span>
-                    <span style={{ color: '#f59e0b', fontWeight: 700 }}>۵۰ میلیون تومان</span>
+                    <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '13px', maxWidth: '60%', textAlign: 'left' }}>{(upcomingTournament.prizeInfo.split('|')[0] ?? '').trim()}</span>
                   </div>
-                  <Link href="/events/1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', color: '#f59e0b', fontSize: '15px', fontWeight: 700, textDecoration: 'none', transition: 'all 0.2s' }}>
+                  <Link href={`/tournaments/${upcomingTournament.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '11px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', color: '#f59e0b', fontSize: '15px', fontWeight: 700, textDecoration: 'none', transition: 'all 0.2s' }}>
                     <Play size={13} /> مشاهده مسابقه
                   </Link>
                 </div>
