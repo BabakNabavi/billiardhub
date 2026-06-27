@@ -27,8 +27,9 @@ function StatusBadge({ status }: { status: RegistrationStatus }) {
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
-      background: s.bg, borderRadius: 20, padding: '4px 10px',
+      background: s.bg, borderRadius: 20, padding: '5px 10px',
       fontSize: 11, fontWeight: 700, color: s.color,
+      animation: status === 'pending' ? 'pendingPulse 1.5s ease-in-out infinite' : undefined,
     }}>
       {s.icon} {s.label}
     </div>
@@ -204,6 +205,7 @@ export default function TournamentAdminPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
+      <style>{`@keyframes pendingPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
 
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -372,12 +374,7 @@ export default function TournamentAdminPage() {
                 }}>
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* Name + Status */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
-                      <span style={{ fontWeight: 700, color: '#111', fontSize: 14 }}>{r.playerName}</span>
-                      <StatusBadge status={r.status} />
-                    </div>
-                    {/* Phone + Date */}
+                    <div style={{ fontWeight: 700, color: '#111', fontSize: 14, marginBottom: 3 }}>{r.playerName}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 12, color: '#888', direction: 'ltr' }}>{r.phone}</span>
                       <span style={{ fontSize: 11, color: '#bbb' }}>{r.registeredAt}</span>
@@ -390,8 +387,9 @@ export default function TournamentAdminPage() {
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flexShrink: 0 }}>
+                  {/* Status + Actions — همه زیر هم */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0, alignItems: 'flex-start' }}>
+                    <StatusBadge status={r.status} />
                     {r.status !== 'approved' && (
                       <button onClick={() => updateStatus(r.id, 'approved')} title="تایید" style={{
                         width: 32, height: 32, borderRadius: 9, border: 'none',
