@@ -19,6 +19,7 @@ export interface TournamentMatch {
   score2?: number;
   winner?: TournamentPlayer;
   status: 'waiting' | 'in_progress' | 'completed';
+  frames?: Array<1 | 2>;
 }
 
 export interface Tournament {

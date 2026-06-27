@@ -2,16 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Clock, Circle, CheckCircle, Trophy, Zap, Maximize2, Minimize2, ExternalLink } from 'lucide-react';
+import { ChevronRight, Circle, Trophy, Zap, Maximize2, Minimize2, ExternalLink, RotateCcw, X, Star } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, SAMPLE_LIVE_BRACKET, SAMPLE_PLAYERS,
+  SAMPLE_TOURNAMENTS, SAMPLE_LIVE_BRACKET,
   toFa, GAME_TYPE_LABELS,
   type TournamentMatch,
 } from '../../../../lib/mock-tournaments';
 
-const ROUND_LABELS: Record<number, string> = {
-  1: 'مرحله اول', 2: 'یک‌چهارم', 3: 'نیمه‌نهایی', 4: 'فینال',
-};
+const FORMAT_TO_BEST: Record<string, number> = { bo3:3, bo5:5, bo7:7, bo9:9, bo11:11 };
+
 function roundLabel(r: number, total: number) {
   const fe = total - r + 1;
   if (fe === 1) return 'فینال';
@@ -35,91 +34,137 @@ function StatusBadge({ status }: { status: TournamentMatch['status'] }) {
   );
 }
 
-/* Score entry dialog */
-function ScoreModal({ match, onClose, onSave }: {
+/* ── Frame-by-frame scoring modal ── */
+function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, onEndMatch }: {
   match: TournamentMatch;
+  bestOf: number;
   onClose: () => void;
-  onSave: (s1: number, s2: number) => void;
+  onAddFrame: (w: 1 | 2) => void;
+  onUndoFrame: () => void;
+  onEndMatch: () => void;
 }) {
-  const [s1, setS1] = useState(match.score1 ?? 0);
-  const [s2, setS2] = useState(match.score2 ?? 0);
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.50)', zIndex: 1000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-      direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif' }}>
-      <div style={{ background: '#fff', borderRadius: 24, padding: '32px 28px',
-        width: '100%', maxWidth: 400, boxShadow: '0 24px 80px rgba(0,0,0,0.20)' }}>
-        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#111', margin: '0 0 24px' }}>ثبت نتیجه</h3>
+  const frames = match.frames ?? [];
+  const s1 = frames.filter(f => f === 1).length;
+  const s2 = frames.filter(f => f === 2).length;
+  const winsNeeded = Math.ceil(bestOf / 2);
+  const canEnd = frames.length > 0 && s1 !== s2;
+  const potWinner = canEnd ? (s1 > s2 ? match.player1 : match.player2) : null;
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+      direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif',
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: 24, padding: '28px 24px',
+        width: '100%', maxWidth: 420, boxShadow: '0 24px 80px rgba(0,0,0,0.22)',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <h3 style={{ fontSize: 17, fontWeight: 900, color: '#111', margin: 0 }}>ثبت نتیجه فریم به فریم</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer',
+            color: '#ccc', padding: 4, display: 'flex', alignItems: 'center' }}>
+            <X size={18} />
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: '#aaa', marginBottom: 22,
+          fontFamily: 'system-ui,-apple-system,sans-serif' }}>
+          Best of {bestOf} • {toFa(winsNeeded)} فریم برای برد
+        </div>
+
+        {/* Score display */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
           {/* P1 */}
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#333', marginBottom: 10 }}>
-              {match.player1?.name ?? '—'}
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#555', marginBottom: 10,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {match.player1?.name ?? 'بازیکن ۱'}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-              <button onClick={() => setS1(s => Math.max(0, s - 1))} style={{
-                width: 36, height: 36, borderRadius: '50%', border: '1.5px solid rgba(0,0,0,0.12)',
-                background: '#fff', fontSize: 20, cursor: 'pointer', fontFamily: 'inherit',
-              }}>−</button>
-              <span style={{ fontSize: 36, fontWeight: 900, color: '#111', minWidth: 48,
-                textAlign: 'center' }}>{toFa(s1)}</span>
-              <button onClick={() => setS1(s => s + 1)} style={{
-                width: 36, height: 36, borderRadius: '50%', border: 'none',
-                background: 'rgba(199,166,106,0.15)', fontSize: 20, cursor: 'pointer',
-                color: '#A07840', fontFamily: 'inherit', fontWeight: 700,
-              }}>+</button>
+            <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+              {Array.from({ length: bestOf }, (_, i) => (
+                <div key={i} style={{
+                  width: 12, height: 12, borderRadius: '50%',
+                  background: i < s1 ? '#30C55A' : 'rgba(0,0,0,0.07)',
+                  border: `1.5px solid ${i < s1 ? '#26a249' : 'rgba(0,0,0,0.12)'}`,
+                }} />
+              ))}
             </div>
+            <div style={{ fontSize: 44, fontWeight: 900, color: '#111', lineHeight: 1 }}>{toFa(s1)}</div>
           </div>
 
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#ddd' }}>:</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#ddd', flexShrink: 0 }}>:</div>
 
           {/* P2 */}
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#333', marginBottom: 10 }}>
-              {match.player2?.name ?? '—'}
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#555', marginBottom: 10,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {match.player2?.name ?? 'بازیکن ۲'}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-              <button onClick={() => setS2(s => Math.max(0, s - 1))} style={{
-                width: 36, height: 36, borderRadius: '50%', border: '1.5px solid rgba(0,0,0,0.12)',
-                background: '#fff', fontSize: 20, cursor: 'pointer', fontFamily: 'inherit',
-              }}>−</button>
-              <span style={{ fontSize: 36, fontWeight: 900, color: '#111', minWidth: 48,
-                textAlign: 'center' }}>{toFa(s2)}</span>
-              <button onClick={() => setS2(s => s + 1)} style={{
-                width: 36, height: 36, borderRadius: '50%', border: 'none',
-                background: 'rgba(199,166,106,0.15)', fontSize: 20, cursor: 'pointer',
-                color: '#A07840', fontFamily: 'inherit', fontWeight: 700,
-              }}>+</button>
+            <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+              {Array.from({ length: bestOf }, (_, i) => (
+                <div key={i} style={{
+                  width: 12, height: 12, borderRadius: '50%',
+                  background: i < s2 ? '#ef4444' : 'rgba(0,0,0,0.07)',
+                  border: `1.5px solid ${i < s2 ? '#dc2626' : 'rgba(0,0,0,0.12)'}`,
+                }} />
+              ))}
             </div>
+            <div style={{ fontSize: 44, fontWeight: 900, color: '#111', lineHeight: 1 }}>{toFa(s2)}</div>
           </div>
         </div>
 
-        {s1 === s2 && s1 > 0 && (
-          <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.20)',
-            borderRadius: 10, padding: '10px 14px', fontSize: 14, color: '#f59e0b',
-            fontWeight: 700, textAlign: 'center', marginBottom: 20 }}>
-            تساوی مجاز نیست — یک برنده باید داشته باشیم
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={onClose} style={{
-            flex: 1, padding: '13px', borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.10)',
-            background: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
-            color: '#555', fontFamily: 'inherit',
-          }}>انصراف</button>
-          <button onClick={() => s1 !== s2 && onSave(s1, s2)} style={{
-            flex: 1, padding: '13px', borderRadius: 14, border: 'none',
-            background: s1 === s2 ? 'rgba(0,0,0,0.08)' : 'linear-gradient(135deg,#30C55A,#26a249)',
-            color: s1 === s2 ? '#999' : '#fff',
-            fontSize: 15, fontWeight: 700, cursor: s1 === s2 ? 'not-allowed' : 'pointer',
-            fontFamily: 'inherit',
+        {/* Frame winner buttons */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+          <button onClick={() => onAddFrame(1)} style={{
+            flex: 1, padding: '14px 8px', borderRadius: 14, border: 'none',
+            background: 'rgba(48,197,90,0.12)', color: '#26a249',
+            fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.5,
           }}>
-            <CheckCircle size={14} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
-            ثبت نتیجه
+            فریم برنده<br />
+            <span style={{ fontSize: 11, fontWeight: 600 }}>
+              {match.player1?.name?.split(' ')[0] ?? 'بازیکن ۱'}
+            </span>
+          </button>
+          <button onClick={() => onAddFrame(2)} style={{
+            flex: 1, padding: '14px 8px', borderRadius: 14, border: 'none',
+            background: 'rgba(239,68,68,0.09)', color: '#dc2626',
+            fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.5,
+          }}>
+            فریم برنده<br />
+            <span style={{ fontSize: 11, fontWeight: 600 }}>
+              {match.player2?.name?.split(' ')[0] ?? 'بازیکن ۲'}
+            </span>
           </button>
         </div>
+
+        {/* Undo last frame */}
+        {frames.length > 0 && (
+          <button onClick={onUndoFrame} style={{
+            width: '100%', padding: '9px', borderRadius: 10,
+            border: '1.5px solid rgba(0,0,0,0.08)', background: '#fafafa',
+            color: '#999', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+            fontFamily: 'inherit', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: 5, marginBottom: 12,
+          }}>
+            <RotateCcw size={12} /> بازگشت آخرین فریم
+          </button>
+        )}
+
+        {/* End match */}
+        <button
+          onClick={() => canEnd && onEndMatch()}
+          style={{
+            width: '100%', padding: '14px', borderRadius: 14, border: 'none',
+            background: canEnd ? 'linear-gradient(135deg,#1a1a1a,#333)' : 'rgba(0,0,0,0.06)',
+            color: canEnd ? '#fff' : '#bbb',
+            fontSize: 14, fontWeight: 800,
+            cursor: canEnd ? 'pointer' : 'not-allowed',
+            fontFamily: 'inherit',
+          }}
+        >
+          {canEnd ? `پایان مسابقه — برنده: ${potWinner?.name ?? ''}` : 'پایان مسابقه'}
+        </button>
       </div>
     </div>
   );
@@ -134,39 +179,53 @@ export default function LivePage() {
   const [matches, setMatches] = useState<TournamentMatch[]>(
     SAMPLE_LIVE_BRACKET.map(m => ({ ...m }))
   );
-  const [scoreModal, setScoreModal] = useState<TournamentMatch | null>(null);
-  const [activeTab, setActiveTab] = useState<'bracket' | 'matches'>('bracket');
-  const [tick, setTick]     = useState(0);
+  const [scoreModal, setScoreModal] = useState<string | null>(null);
+  const [activeTab, setActiveTab]   = useState<'bracket' | 'matches'>('bracket');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isControl, setIsControl]       = useState(false);
+  const [matchFormat, setMatchFormat]   = useState('bo5');
+  const [highestBreak, setHighestBreak] = useState<{ playerName: string; value: number } | null>(null);
+  const [hbName, setHbName]   = useState('');
+  const [hbValue, setHbValue] = useState('');
   const bracketRef = useRef<HTMLDivElement>(null);
+
+  const bestOf = FORMAT_TO_BEST[matchFormat] ?? 5;
 
   useEffect(() => {
     setIsControl(new URLSearchParams(window.location.search).get('control') === '1');
   }, []);
 
   useEffect(() => {
+    const fmt = localStorage.getItem(`matchFormat_${id}`);
+    if (fmt) setMatchFormat(fmt);
     try {
       const saved = localStorage.getItem(`bracket-${id}`);
       if (saved) setMatches(JSON.parse(saved));
     } catch {}
+    try {
+      const hb = localStorage.getItem(`highestBreak-${id}`);
+      if (hb) {
+        const parsed = JSON.parse(hb);
+        setHighestBreak(parsed);
+        setHbName(parsed.playerName ?? '');
+        setHbValue(String(parsed.value ?? ''));
+      }
+    } catch {}
   }, [id]);
 
-  /* Cross-window sync: bracket window receives score updates from control panel */
+  /* Cross-window sync */
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === `bracket-${id}` && e.newValue) {
         try { setMatches(JSON.parse(e.newValue)); } catch {}
       }
+      if (e.key === `highestBreak-${id}` && e.newValue) {
+        try { setHighestBreak(JSON.parse(e.newValue)); } catch {}
+      }
     };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   }, [id]);
-
-  useEffect(() => {
-    const iv = setInterval(() => setTick(t => t + 1), 30000);
-    return () => clearInterval(iv);
-  }, []);
 
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
@@ -179,18 +238,11 @@ export default function LivePage() {
   }, []);
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      bracketRef.current?.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
-    }
+    if (!document.fullscreenElement) bracketRef.current?.requestFullscreen?.();
+    else document.exitFullscreen?.();
   };
 
-  const roundGroups = Array.from({ length: totalRounds }, (_, i) => i + 1)
-    .map(r => ({ round: r, ms: matches.filter(m => m.round === r) }));
-
-  /* Double-sided bracket helpers */
-  const innerRounds = Array.from({ length: totalRounds - 1 }, (_, i) => i + 1);
+  const innerRounds  = Array.from({ length: totalRounds - 1 }, (_, i) => i + 1);
   const bracketFinal = matches.find(m => m.round === totalRounds);
   const lhalf = (r: number) => { const all = matches.filter(m => m.round === r); return all.filter(m => m.matchIndex < all.length / 2); };
   const rhalf = (r: number) => { const all = matches.filter(m => m.round === r); return all.filter(m => m.matchIndex >= all.length / 2); };
@@ -199,51 +251,106 @@ export default function LivePage() {
   const upcoming = matches.filter(m => m.status === 'waiting' && m.player1 && m.player2);
   const done     = matches.filter(m => m.status === 'completed');
 
-  const handleSaveScore = (s1: number, s2: number) => {
-    if (!scoreModal) return;
-    const winner = s1 > s2 ? scoreModal.player1 : scoreModal.player2;
+  /* ── Frame handlers ── */
+  const handleAddFrame = (matchId: string, winner: 1 | 2) => {
     setMatches(prev => {
-      const next = prev.map(m => m.id === scoreModal.id
+      const next = prev.map(m => {
+        if (m.id !== matchId) return m;
+        const frames: Array<1 | 2> = [...(m.frames ?? []), winner];
+        return {
+          ...m,
+          frames,
+          score1: frames.filter(f => f === 1).length,
+          score2: frames.filter(f => f === 2).length,
+          status: 'in_progress' as const,
+        };
+      });
+      try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const handleUndoFrame = (matchId: string) => {
+    setMatches(prev => {
+      const next = prev.map(m => {
+        if (m.id !== matchId) return m;
+        const frames = (m.frames ?? []).slice(0, -1) as Array<1 | 2>;
+        const s1 = frames.filter(f => f === 1).length;
+        const s2 = frames.filter(f => f === 2).length;
+        return {
+          ...m, frames,
+          score1: frames.length > 0 ? s1 : undefined,
+          score2: frames.length > 0 ? s2 : undefined,
+          status: (frames.length > 0 ? 'in_progress' : 'waiting') as TournamentMatch['status'],
+        };
+      });
+      try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const handleEndMatch = (matchId: string) => {
+    setMatches(prev => {
+      const current = prev.find(m => m.id === matchId);
+      if (!current) return prev;
+      const frames = current.frames ?? [];
+      const s1 = frames.filter(f => f === 1).length;
+      const s2 = frames.filter(f => f === 2).length;
+      if (s1 === s2) return prev;
+      const winner = s1 > s2 ? current.player1 : current.player2;
+      const next = prev.map(m => m.id === matchId
         ? { ...m, score1: s1, score2: s2, status: 'completed' as const, winner }
-        : m);
+        : m
+      );
       /* Advance winner to next round */
-      const thisMatch = next.find(m => m.id === scoreModal.id)!;
-      const nextRound = thisMatch.round + 1;
+      const thisMatch = next.find(m => m.id === matchId)!;
+      const nextRound    = thisMatch.round + 1;
       const nextMatchIdx = Math.floor(thisMatch.matchIndex / 2);
-      const nextSlot = thisMatch.matchIndex % 2 === 0 ? 1 : 2;
+      const nextSlot     = thisMatch.matchIndex % 2 === 0 ? 1 : 2;
       const nm = next.find(m => m.round === nextRound && m.matchIndex === nextMatchIdx);
       if (nm) {
         if (nextSlot === 1) nm.player1 = winner;
         else nm.player2 = winner;
-        /* Auto start if both players set */
         if (nm.player1 && nm.player2) nm.status = 'in_progress';
       }
-      /* Sync to other windows (bracket display) via storage event */
       try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
       return next;
     });
     setScoreModal(null);
   };
 
-  /* ── Single match card — sizes scale in fullscreen ── */
+  const handleSaveHighestBreak = () => {
+    const val = parseInt(hbValue, 10);
+    if (!hbName.trim() || isNaN(val) || val <= 0) return;
+    const hb = { playerName: hbName.trim(), value: val };
+    setHighestBreak(hb);
+    try { localStorage.setItem(`highestBreak-${id}`, JSON.stringify(hb)); } catch {}
+  };
+
+  const activeMatch = scoreModal ? matches.find(m => m.id === scoreModal) ?? null : null;
+
+  /* ── LiveCard — bracket card with red glow for in-progress ── */
   const LiveCard = ({ m }: { m: TournamentMatch }) => {
     const isLive = m.status === 'in_progress';
     const isDone = m.status === 'completed';
     const clickable = !isDone && !!m.player1 && !!m.player2;
     const fs = isFullscreen;
     return (
-      <div onClick={() => clickable && setScoreModal(m)} style={{
+      <div onClick={() => clickable && setScoreModal(m.id)} style={{
         width: fs ? '100%' : 158,
         borderRadius: fs ? 'clamp(10px,0.8vw,20px)' : 9,
         overflow: 'hidden',
         border: `${fs ? 3 : 2}px solid ${isLive ? '#ef4444' : isDone ? 'rgba(48,197,90,0.28)' : 'rgba(0,0,0,0.08)'}`,
-        background: '#fff', cursor: clickable ? 'pointer' : 'default',
-        boxShadow: isLive ? '0 4px 16px rgba(239,68,68,0.14)' : '0 1px 6px rgba(0,0,0,0.05)',
+        background: isLive ? 'rgba(254,242,242,1)' : '#fff',
+        cursor: clickable ? 'pointer' : 'default',
+        boxShadow: isLive
+          ? '0 0 0 3px rgba(239,68,68,0.16), 0 8px 24px rgba(239,68,68,0.22)'
+          : '0 1px 6px rgba(0,0,0,0.05)',
         transition: 'all 0.18s',
       }}>
         {isLive && (
           <div style={{
-            padding: fs ? 'clamp(4px,0.35vw,10px) clamp(10px,0.8vw,20px)' : '3px 9px',
+            padding: fs ? 'clamp(4px,0.35vw,10px) clamp(10px,0.8vw,20px)' : '4px 9px',
             background: '#ef4444',
             fontSize: fs ? 'clamp(10px,0.75vw,18px)' : 9,
             fontWeight: 800, color: '#fff',
@@ -288,13 +395,39 @@ export default function LivePage() {
     );
   };
 
+  /* ── Highest Break Panel ── */
+  const HighestBreakPanel = ({ small }: { small?: boolean }) => (
+    <div style={{
+      background: 'linear-gradient(135deg,rgba(199,166,106,0.13),rgba(199,166,106,0.06))',
+      border: '1.5px solid rgba(199,166,106,0.32)',
+      borderRadius: small ? 14 : 18,
+      padding: small ? '12px 18px' : '16px 22px',
+      display: 'inline-flex', flexDirection: 'column', gap: 3,
+      backdropFilter: 'blur(8px)',
+      boxShadow: '0 4px 16px rgba(199,166,106,0.14)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5,
+        fontSize: small ? 10 : 11, fontWeight: 800, color: '#A07840', letterSpacing: '0.06em' }}>
+        <Star size={small ? 9 : 10} fill="#C7A66A" color="#C7A66A" />
+        بالاترین برک
+      </div>
+      <div style={{ fontSize: small ? 12 : 14, fontWeight: 700, color: '#444' }}>
+        {highestBreak?.playerName}
+      </div>
+      <div style={{
+        fontSize: small ? 28 : 36, fontWeight: 900, color: '#C7A66A',
+        fontFamily: 'system-ui,-apple-system,sans-serif', lineHeight: 1,
+      }}>
+        {highestBreak?.value}
+      </div>
+    </div>
+  );
+
   /* ── Double-sided bracket view ── */
   const BracketView = () => {
     const fs = isFullscreen;
-    /* In fullscreen: columns expand to fill screen (flex:1); normal: fixed-width inline-flex */
     const colBase: React.CSSProperties = { display: 'flex', flexDirection: 'column',
       ...(fs ? { flex: '1 1 0px', minWidth: 0 } : {}) };
-    /* Vertical padding for each round tier — scales with vh in fullscreen */
     const vpad = (exp: number) => fs
       ? `${Math.pow(2, exp)}vh clamp(4px,0.4vw,10px)`
       : `${Math.pow(2, exp) * 20}px 8px`;
@@ -306,118 +439,99 @@ export default function LivePage() {
     };
 
     return (
-      <div style={fs
-        ? { width: '100%', padding: 'clamp(12px,1.5vh,32px) 0' }
-        : { overflowX: 'auto', padding: '20px 0',
-            WebkitOverflowScrolling: 'touch' as unknown as undefined, textAlign: 'center' }}>
+      <div style={{ position: 'relative' }}>
         <div style={fs
-          ? { display: 'flex', direction: 'ltr', alignItems: 'stretch',
-              width: '100%', padding: '0 clamp(12px,1.5vw,40px)' }
-          : { display: 'inline-flex', direction: 'ltr', alignItems: 'stretch',
-              padding: '0 16px' }}>
+          ? { width: '100%', padding: 'clamp(12px,1.5vh,32px) 0' }
+          : { overflowX: 'auto', padding: '20px 0',
+              WebkitOverflowScrolling: 'touch' as unknown as undefined, textAlign: 'center' }}>
+          <div style={fs
+            ? { display: 'flex', direction: 'ltr', alignItems: 'stretch',
+                width: '100%', padding: '0 clamp(12px,1.5vw,40px)' }
+            : { display: 'inline-flex', direction: 'ltr', alignItems: 'stretch',
+                padding: '0 16px' }}>
 
-          {/* LEFT HALF: R1 → SF */}
-          {innerRounds.map((round, ri) => {
-            const ms = lhalf(round);
-            return (
-              <div key={`L${round}`} style={colBase}>
-                <div style={lbl}>{roundLabel(round, totalRounds)}</div>
-                <div style={{ display: 'flex', flexDirection: 'column',
-                  justifyContent: fs ? 'space-evenly' : 'space-around',
-                  flex: 1, padding: vpad(ri) }}>
-                  {ms.map(m => (
-                    <div key={m.id} style={{ marginBottom: mb(ri) }}>
-                      <LiveCard m={m} />
-                    </div>
-                  ))}
+            {/* LEFT HALF: R1 → SF */}
+            {innerRounds.map((round, ri) => {
+              const ms = lhalf(round);
+              return (
+                <div key={`L${round}`} style={colBase}>
+                  <div style={lbl}>{roundLabel(round, totalRounds)}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column',
+                    justifyContent: fs ? 'space-evenly' : 'space-around',
+                    flex: 1, padding: vpad(ri) }}>
+                    {ms.map(m => (
+                      <div key={m.id} style={{ marginBottom: mb(ri) }}>
+                        <LiveCard m={m} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* FINAL in center */}
+            {bracketFinal && (
+              <div style={{ ...colBase, alignItems: 'center' }}>
+                <div style={{ ...lbl,
+                  fontSize: fs ? 'clamp(12px,1vw,24px)' : 10,
+                  color: '#C7A66A', padding: '0 10px' }}>
+                  🏆 فینال
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                  flex: 1, padding: vpad(innerRounds.length), width: '100%' }}>
+                  <LiveCard m={bracketFinal} />
                 </div>
               </div>
-            );
-          })}
+            )}
 
-          {/* FINAL in center */}
-          {bracketFinal && (
-            <div style={{ ...colBase, alignItems: 'center' }}>
-              <div style={{ ...lbl,
-                fontSize: fs ? 'clamp(12px,1vw,24px)' : 10,
-                color: '#C7A66A', padding: '0 10px' }}>
-                🏆 فینال
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                flex: 1, padding: vpad(innerRounds.length), width: '100%' }}>
-                <LiveCard m={bracketFinal} />
-              </div>
-            </div>
-          )}
-
-          {/* RIGHT HALF: SF → R1 (reversed) */}
-          {[...innerRounds].reverse().map((round, ri) => {
-            const ms = rhalf(round);
-            const mri = innerRounds.length - 1 - ri;
-            return (
-              <div key={`R${round}`} style={colBase}>
-                <div style={lbl}>{roundLabel(round, totalRounds)}</div>
-                <div style={{ display: 'flex', flexDirection: 'column',
-                  justifyContent: fs ? 'space-evenly' : 'space-around',
-                  flex: 1, padding: vpad(mri) }}>
-                  {ms.map(m => (
-                    <div key={m.id} style={{ marginBottom: mb(mri) }}>
-                      <LiveCard m={m} />
-                    </div>
-                  ))}
+            {/* RIGHT HALF: SF → R1 (reversed) */}
+            {[...innerRounds].reverse().map((round, ri) => {
+              const ms = rhalf(round);
+              const mri = innerRounds.length - 1 - ri;
+              return (
+                <div key={`R${round}`} style={colBase}>
+                  <div style={lbl}>{roundLabel(round, totalRounds)}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column',
+                    justifyContent: fs ? 'space-evenly' : 'space-around',
+                    flex: 1, padding: vpad(mri) }}>
+                    {ms.map(m => (
+                      <div key={m.id} style={{ marginBottom: mb(mri) }}>
+                        <LiveCard m={m} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+
+        {/* Highest break overlay in fullscreen */}
+        {highestBreak && fs && (
+          <div style={{ position: 'absolute', bottom: 20, left: 20 }}>
+            <HighestBreakPanel />
+          </div>
+        )}
       </div>
     );
   };
 
-  /* ── Matches list ── */
-  const MatchesView = () => (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
-      {liveNow.length > 0 && (
-        <section style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#ef4444',
-            letterSpacing: '0.08em', marginBottom: 14 }}>
-            ● در حال بازی
-          </div>
-          {liveNow.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} />)}
-        </section>
-      )}
-      {upcoming.length > 0 && (
-        <section style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
-            letterSpacing: '0.08em', marginBottom: 14 }}>
-            به زودی
-          </div>
-          {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} />)}
-        </section>
-      )}
-      {done.length > 0 && (
-        <section>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
-            letterSpacing: '0.08em', marginBottom: 14 }}>
-            پایان یافته ({toFa(done.length)})
-          </div>
-          {done.map(m => <MatchRow key={m.id} m={m} onScore={() => {}} />)}
-        </section>
-      )}
-    </div>
-  );
-
+  /* ── Match row (shared between list and control panel) ── */
   const MatchRow = ({ m, onScore, showScore }: { m: TournamentMatch; onScore: () => void; showScore?: boolean }) => {
     const isLive = m.status === 'in_progress';
     const isDone = m.status === 'completed';
     const canScore = (isLive || showScore) && !!m.player1 && !!m.player2 && !isDone;
     return (
-      <div style={{ background: '#fff', borderRadius: 16, padding: '16px',
+      <div style={{
+        background: isLive ? 'rgba(254,242,242,1)' : '#fff',
+        borderRadius: 16, padding: '16px',
         border: `1.5px solid ${isLive ? '#ef4444' : 'rgba(0,0,0,0.08)'}`,
-        marginBottom: 10, boxShadow: isLive ? '0 4px 20px rgba(239,68,68,0.08)' : '0 2px 8px rgba(0,0,0,0.04)',
+        marginBottom: 10,
+        boxShadow: isLive
+          ? '0 0 0 2px rgba(239,68,68,0.12), 0 4px 20px rgba(239,68,68,0.14)'
+          : '0 2px 8px rgba(0,0,0,0.04)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <StatusBadge status={m.status} />
             <span style={{ fontSize: 12, color: '#bbb', fontWeight: 600 }}>
@@ -443,8 +557,7 @@ export default function LivePage() {
               <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10,
                 flexDirection: i === 1 ? 'row-reverse' : 'row' }}>
                 <div style={{ textAlign: i === 1 ? 'right' : 'left' }}>
-                  <div style={{ fontSize: 15, fontWeight: win ? 900 : 700,
-                    color: win ? '#30C55A' : '#111' }}>
+                  <div style={{ fontSize: 15, fontWeight: win ? 900 : 700, color: win ? '#30C55A' : '#111' }}>
                     {p?.name ?? (i === 0 ? 'بازیکن ۱' : 'بازیکن ۲')}
                     {win && <Trophy size={12} color="#30C55A" style={{ verticalAlign: 'middle', marginRight: 4 }} />}
                   </div>
@@ -463,6 +576,35 @@ export default function LivePage() {
       </div>
     );
   };
+
+  /* ── Matches list tab ── */
+  const MatchesView = () => (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
+      {liveNow.length > 0 && (
+        <section style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#ef4444',
+            letterSpacing: '0.08em', marginBottom: 14 }}>● در حال بازی</div>
+          {liveNow.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m.id)} />)}
+        </section>
+      )}
+      {upcoming.length > 0 && (
+        <section style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
+            letterSpacing: '0.08em', marginBottom: 14 }}>به زودی</div>
+          {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m.id)} />)}
+        </section>
+      )}
+      {done.length > 0 && (
+        <section>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
+            letterSpacing: '0.08em', marginBottom: 14 }}>
+            پایان یافته ({toFa(done.length)})
+          </div>
+          {done.map(m => <MatchRow key={m.id} m={m} onScore={() => {}} />)}
+        </section>
+      )}
+    </div>
+  );
 
   /* ── Control panel popup (opened via window.open) ── */
   if (isControl) return (
@@ -485,19 +627,64 @@ export default function LivePage() {
           </span>
         </div>
       </div>
+
       <div style={{ padding: '20px 16px' }}>
+        {/* Highest break editor */}
+        <div style={{ background: '#fff', borderRadius: 16, padding: '16px 18px', marginBottom: 24,
+          border: '1.5px solid rgba(199,166,106,0.28)',
+          boxShadow: '0 2px 10px rgba(199,166,106,0.10)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14,
+            fontSize: 13, fontWeight: 800, color: '#A07840' }}>
+            <Star size={11} fill="#C7A66A" color="#C7A66A" />
+            بالاترین برک
+          </div>
+          {highestBreak && (
+            <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 10,
+              background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)',
+              fontSize: 13, color: '#A07840', fontWeight: 700 }}>
+              ثبت شده: {highestBreak.playerName} — {highestBreak.value}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+            <input
+              value={hbName}
+              onChange={e => setHbName(e.target.value)}
+              placeholder="نام بازیکن"
+              style={{ flex: 1, padding: '9px 12px', borderRadius: 10,
+                border: '1.5px solid rgba(0,0,0,0.10)', background: '#fafafa',
+                fontSize: 14, fontFamily: 'inherit', outline: 'none' }}
+            />
+            <input
+              value={hbValue}
+              onChange={e => setHbValue(e.target.value)}
+              placeholder="امتیاز"
+              type="number"
+              style={{ width: 80, padding: '9px 10px', borderRadius: 10,
+                border: '1.5px solid rgba(0,0,0,0.10)', background: '#fafafa',
+                fontSize: 14, fontFamily: 'inherit', outline: 'none' }}
+            />
+          </div>
+          <button onClick={handleSaveHighestBreak} style={{
+            width: '100%', padding: '10px', borderRadius: 10, border: 'none',
+            background: 'rgba(199,166,106,0.15)', color: '#A07840',
+            fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+          }}>
+            ثبت بالاترین برک
+          </button>
+        </div>
+
         {liveNow.length > 0 && (
           <section style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: '#ef4444',
               letterSpacing: '0.08em', marginBottom: 12 }}>● در حال بازی</div>
-            {liveNow.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} showScore />)}
+            {liveNow.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m.id)} showScore />)}
           </section>
         )}
         {upcoming.length > 0 && (
           <section style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: '#f59e0b',
               letterSpacing: '0.08em', marginBottom: 12 }}>در انتظار</div>
-            {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m)} showScore />)}
+            {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m.id)} showScore />)}
           </section>
         )}
         {done.length > 0 && (
@@ -510,12 +697,21 @@ export default function LivePage() {
           </section>
         )}
       </div>
-      {scoreModal && (
-        <ScoreModal match={scoreModal} onClose={() => setScoreModal(null)} onSave={handleSaveScore} />
+
+      {activeMatch && (
+        <FrameScoringModal
+          match={activeMatch}
+          bestOf={bestOf}
+          onClose={() => setScoreModal(null)}
+          onAddFrame={w => handleAddFrame(activeMatch.id, w)}
+          onUndoFrame={() => handleUndoFrame(activeMatch.id)}
+          onEndMatch={() => handleEndMatch(activeMatch.id)}
+        />
       )}
     </div>
   );
 
+  /* ── Main bracket display page ── */
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif' }}>
@@ -528,8 +724,7 @@ export default function LivePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
               display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.55)',
-              fontFamily: 'inherit',
+              cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.55)', fontFamily: 'inherit',
             }}>
               <ChevronRight size={15} /> {t.name}
             </button>
@@ -547,7 +742,7 @@ export default function LivePage() {
             <button onClick={() => window.open(
               `/tournaments/${t.id}/live?control=1`,
               'scoreControl',
-              'width=520,height=780,resizable=yes,scrollbars=yes'
+              'width=520,height=800,resizable=yes,scrollbars=yes'
             )} style={{
               display: 'flex', alignItems: 'center', gap: 5,
               padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
@@ -567,11 +762,11 @@ export default function LivePage() {
         </p>
 
         {/* Stats row */}
-        <div style={{ display: 'flex', gap: 24, paddingBottom: 0, overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: 24, overflowX: 'auto' }}>
           {[
             { label: 'بازی‌های پایان یافته', val: toFa(done.length), color: '#30C55A' },
-            { label: 'در حال بازی', val: toFa(liveNow.length), color: '#ef4444' },
-            { label: 'بازیکنان باقی‌مانده', val: toFa(matches.filter(m => !m.winner).length * 2), color: '#C7A66A' },
+            { label: 'در حال بازی',           val: toFa(liveNow.length), color: '#ef4444' },
+            { label: 'بازیکنان باقی‌مانده',   val: toFa(matches.filter(m => !m.winner).length * 2), color: '#C7A66A' },
           ].map(s => (
             <div key={s.label} style={{ flexShrink: 0, paddingBottom: 16 }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: s.color }}>{s.val}</div>
@@ -604,7 +799,7 @@ export default function LivePage() {
             display: 'flex', flexDirection: 'column',
           } : {}),
         }}>
-          {/* Fullscreen button — sticky so it stays visible when scrolling in fullscreen */}
+          {/* Fullscreen button */}
           <div style={{
             display: 'flex', justifyContent: 'flex-end', padding: '10px 16px 0',
             ...(isFullscreen ? { position: 'sticky', top: 0, zIndex: 10,
@@ -622,20 +817,30 @@ export default function LivePage() {
               {isFullscreen ? 'خروج از تمام صفحه' : 'تمام صفحه'}
             </button>
           </div>
-          {/* In fullscreen: a flex-grow wrapper that vertically centers the bracket */}
+
           <div style={isFullscreen ? { flex: 1, display: 'flex', alignItems: 'center' } : {}}>
             <div style={isFullscreen ? { width: '100%' } : {}}>
               <BracketView />
             </div>
           </div>
+
+          {/* Highest break below bracket in normal view */}
+          {highestBreak && !isFullscreen && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 20px 28px' }}>
+              <HighestBreakPanel small />
+            </div>
+          )}
         </div>
       ) : <MatchesView />}
 
-      {scoreModal && (
-        <ScoreModal
-          match={scoreModal}
+      {activeMatch && (
+        <FrameScoringModal
+          match={activeMatch}
+          bestOf={bestOf}
           onClose={() => setScoreModal(null)}
-          onSave={handleSaveScore}
+          onAddFrame={w => handleAddFrame(activeMatch.id, w)}
+          onUndoFrame={() => handleUndoFrame(activeMatch.id)}
+          onEndMatch={() => handleEndMatch(activeMatch.id)}
         />
       )}
     </div>
