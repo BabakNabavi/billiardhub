@@ -207,24 +207,31 @@ export default function LivePage() {
     setScoreModal(null);
   };
 
-  /* ── Single match card for live bracket ── */
+  /* ── Single match card — sizes scale in fullscreen ── */
   const LiveCard = ({ m }: { m: TournamentMatch }) => {
     const isLive = m.status === 'in_progress';
     const isDone = m.status === 'completed';
     const clickable = !isDone && !!m.player1 && !!m.player2;
+    const fs = isFullscreen;
     return (
       <div onClick={() => clickable && setScoreModal(m)} style={{
-        width: 158, borderRadius: 9, overflow: 'hidden',
-        border: `2px solid ${isLive ? '#ef4444' : isDone ? 'rgba(48,197,90,0.28)' : 'rgba(0,0,0,0.08)'}`,
+        width: fs ? '100%' : 158,
+        borderRadius: fs ? 'clamp(10px,0.8vw,20px)' : 9,
+        overflow: 'hidden',
+        border: `${fs ? 3 : 2}px solid ${isLive ? '#ef4444' : isDone ? 'rgba(48,197,90,0.28)' : 'rgba(0,0,0,0.08)'}`,
         background: '#fff', cursor: clickable ? 'pointer' : 'default',
         boxShadow: isLive ? '0 4px 16px rgba(239,68,68,0.14)' : '0 1px 6px rgba(0,0,0,0.05)',
         transition: 'all 0.18s',
       }}>
         {isLive && (
-          <div style={{ padding: '3px 9px', background: '#ef4444',
-            fontSize: 9, fontWeight: 800, color: '#fff',
-            display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Circle size={5} fill="#fff" /> زنده
+          <div style={{
+            padding: fs ? 'clamp(4px,0.35vw,10px) clamp(10px,0.8vw,20px)' : '3px 9px',
+            background: '#ef4444',
+            fontSize: fs ? 'clamp(10px,0.75vw,18px)' : 9,
+            fontWeight: 800, color: '#fff',
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <Circle size={fs ? 8 : 5} fill="#fff" /> زنده
           </div>
         )}
         {([m.player1, m.player2] as (TournamentMatch['player1'])[]).map((p, si) => {
@@ -232,21 +239,30 @@ export default function LivePage() {
           const isWinner = isDone && m.winner?.id === p?.id;
           return (
             <div key={si} style={{
-              padding: '7px 9px', display: 'flex', alignItems: 'center', gap: 6,
+              padding: fs ? 'clamp(10px,0.7vw,20px) clamp(12px,0.9vw,22px)' : '7px 9px',
+              display: 'flex', alignItems: 'center',
+              gap: fs ? 'clamp(6px,0.5vw,14px)' : 6,
               borderBottom: si === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
               background: isWinner ? 'rgba(48,197,90,0.05)' : 'transparent',
             }}>
-              <span style={{ flex: 1, fontSize: 11, fontWeight: isWinner ? 800 : 600,
+              <span style={{
+                flex: 1,
+                fontSize: fs ? 'clamp(14px,1.15vw,26px)' : 11,
+                fontWeight: isWinner ? 800 : 600,
                 color: p ? (isWinner ? '#30C55A' : '#111') : '#ccc',
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
                 {p?.name ?? '—'}
               </span>
               {score != null && (
-                <span style={{ fontSize: 15, fontWeight: 900, color: isWinner ? '#30C55A' : '#bbb' }}>
+                <span style={{
+                  fontSize: fs ? 'clamp(20px,1.8vw,42px)' : 15,
+                  fontWeight: 900, color: isWinner ? '#30C55A' : '#bbb',
+                }}>
                   {toFa(score)}
                 </span>
               )}
-              {isWinner && <Trophy size={10} color="#30C55A" style={{ flexShrink: 0 }} />}
+              {isWinner && <Trophy size={fs ? 18 : 10} color="#30C55A" style={{ flexShrink: 0 }} />}
             </div>
           );
         })}
@@ -255,73 +271,90 @@ export default function LivePage() {
   };
 
   /* ── Double-sided bracket view ── */
-  const BracketView = () => (
-    <div style={{ overflowX: 'auto', padding: '20px 0',
-      WebkitOverflowScrolling: 'touch' as unknown as undefined, textAlign: 'center' }}>
-      <div style={{ display: 'inline-flex', direction: 'ltr', alignItems: 'stretch',
-        padding: '0 16px', gap: 0 }}>
+  const BracketView = () => {
+    const fs = isFullscreen;
+    /* In fullscreen: columns expand to fill screen (flex:1); normal: fixed-width inline-flex */
+    const colBase: React.CSSProperties = { display: 'flex', flexDirection: 'column',
+      ...(fs ? { flex: '1 1 0px', minWidth: 0 } : {}) };
+    /* Vertical padding for each round tier — scales with vh in fullscreen */
+    const vpad = (exp: number) => fs
+      ? `${Math.pow(2, exp)}vh clamp(4px,0.4vw,10px)`
+      : `${Math.pow(2, exp) * 20}px 8px`;
+    const mb   = (exp: number) => fs ? 0 : Math.pow(2, exp) * 12;
+    const lbl  : React.CSSProperties = {
+      textAlign: 'center', fontWeight: 800, color: '#ccc', letterSpacing: '0.08em',
+      marginBottom: fs ? 'clamp(8px,0.8vh,20px)' : 10, padding: '0 8px',
+      fontSize: fs ? 'clamp(11px,0.85vw,20px)' : 9,
+    };
 
-        {/* LEFT HALF: R1 → SF */}
-        {innerRounds.map((round, ri) => {
-          const ms = lhalf(round);
-          const pad = Math.pow(2, ri) * 20;
-          return (
-            <div key={`L${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ textAlign: 'center', fontSize: 9, fontWeight: 800, color: '#ccc',
-                letterSpacing: '0.08em', marginBottom: 10, padding: '0 8px' }}>
-                {roundLabel(round, totalRounds)}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
-                {ms.map(m => (
-                  <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 12 }}>
-                    <LiveCard m={m} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
+    return (
+      <div style={fs
+        ? { width: '100%', padding: 'clamp(12px,1.5vh,32px) 0' }
+        : { overflowX: 'auto', padding: '20px 0',
+            WebkitOverflowScrolling: 'touch' as unknown as undefined, textAlign: 'center' }}>
+        <div style={fs
+          ? { display: 'flex', direction: 'ltr', alignItems: 'stretch',
+              width: '100%', padding: '0 clamp(12px,1.5vw,40px)' }
+          : { display: 'inline-flex', direction: 'ltr', alignItems: 'stretch',
+              padding: '0 16px' }}>
 
-        {/* FINAL in center */}
-        {bracketFinal && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ fontSize: 10, fontWeight: 900, color: '#C7A66A',
-              textAlign: 'center', padding: '0 10px', marginBottom: 10 }}>
-              🏆 فینال
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              flex: 1, padding: `${Math.pow(2, innerRounds.length) * 20}px 10px` }}>
-              <LiveCard m={bracketFinal} />
-            </div>
-          </div>
-        )}
+          {/* LEFT HALF: R1 → SF */}
+          {innerRounds.map((round, ri) => {
+            const ms = lhalf(round);
+            return (
+              <div key={`L${round}`} style={colBase}>
+                <div style={lbl}>{roundLabel(round, totalRounds)}</div>
+                <div style={{ display: 'flex', flexDirection: 'column',
+                  justifyContent: fs ? 'space-evenly' : 'space-around',
+                  flex: 1, padding: vpad(ri) }}>
+                  {ms.map(m => (
+                    <div key={m.id} style={{ marginBottom: mb(ri) }}>
+                      <LiveCard m={m} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
 
-        {/* RIGHT HALF: SF → R1 (reversed) */}
-        {[...innerRounds].reverse().map((round, ri) => {
-          const ms = rhalf(round);
-          const mirrorRi = innerRounds.length - 1 - ri;
-          const pad = Math.pow(2, mirrorRi) * 20;
-          return (
-            <div key={`R${round}`} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ textAlign: 'center', fontSize: 9, fontWeight: 800, color: '#ccc',
-                letterSpacing: '0.08em', marginBottom: 10, padding: '0 8px' }}>
-                {roundLabel(round, totalRounds)}
+          {/* FINAL in center */}
+          {bracketFinal && (
+            <div style={{ ...colBase, alignItems: 'center' }}>
+              <div style={{ ...lbl,
+                fontSize: fs ? 'clamp(12px,1vw,24px)' : 10,
+                color: '#C7A66A', padding: '0 10px' }}>
+                🏆 فینال
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
-                {ms.map(m => (
-                  <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 12 }}>
-                    <LiveCard m={m} />
-                  </div>
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                flex: 1, padding: vpad(innerRounds.length), width: '100%' }}>
+                <LiveCard m={bracketFinal} />
               </div>
             </div>
-          );
-        })}
+          )}
+
+          {/* RIGHT HALF: SF → R1 (reversed) */}
+          {[...innerRounds].reverse().map((round, ri) => {
+            const ms = rhalf(round);
+            const mri = innerRounds.length - 1 - ri;
+            return (
+              <div key={`R${round}`} style={colBase}>
+                <div style={lbl}>{roundLabel(round, totalRounds)}</div>
+                <div style={{ display: 'flex', flexDirection: 'column',
+                  justifyContent: fs ? 'space-evenly' : 'space-around',
+                  flex: 1, padding: vpad(mri) }}>
+                  {ms.map(m => (
+                    <div key={m.id} style={{ marginBottom: mb(mri) }}>
+                      <LiveCard m={m} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   /* ── Matches list ── */
   const MatchesView = () => (
