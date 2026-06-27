@@ -516,10 +516,9 @@ export default function BracketPage() {
     <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '16px 12px',
       flex: isMobile ? undefined : 1,
       minWidth: 0,
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'safe center',
       WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
       <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
-        flexShrink: 0, gap: 0 }}>
+        minWidth: 'max-content', gap: 0 }}>
 
         {/* LEFT HALF columns: R1 → QF → SF */}
         {innerRounds.map((round, ri) => {
