@@ -24,7 +24,7 @@ export function EmptyState({ icon = '🎱', title, desc, action }: EmptyStatePro
       </h3>
 
       {desc && (
-        <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.40)', margin: 0, lineHeight: 1.7, maxWidth: '320px' }}>
+        <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.40)', margin: 0, lineHeight: 1.7, maxWidth: '320px' }}>
           {desc}
         </p>
       )}
@@ -35,7 +35,7 @@ export function EmptyState({ icon = '🎱', title, desc, action }: EmptyStatePro
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             marginTop: '8px', padding: '11px 24px', borderRadius: '12px',
             background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-            color: '#fff', fontSize: '14px', fontWeight: 700,
+            color: '#fff', fontSize: '15px', fontWeight: 700,
             textDecoration: 'none',
             boxShadow: '0 8px 24px rgba(199,166,106,0.25)',
           }}>
@@ -45,7 +45,7 @@ export function EmptyState({ icon = '🎱', title, desc, action }: EmptyStatePro
           <button onClick={action.onClick} style={{
             marginTop: '8px', padding: '11px 24px', borderRadius: '12px',
             background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-            color: '#fff', fontSize: '14px', fontWeight: 700,
+            color: '#fff', fontSize: '15px', fontWeight: 700,
             border: 'none', cursor: 'pointer', fontFamily: 'inherit',
             boxShadow: '0 8px 24px rgba(199,166,106,0.25)',
           }}>

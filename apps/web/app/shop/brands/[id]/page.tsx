@@ -116,10 +116,10 @@ export default function BrandProfilePage() {
 
           {/* Nav */}
           <div style={{ position:'absolute', top:'24px', left:0, right:0, padding:'0 clamp(16px,4vw,48px)', display:'flex', justifyContent:'space-between', zIndex:10 }}>
-            <Link href="/brands" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px' }}>
+            <Link href="/brands" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '14px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px' }}>
               <ChevronRight size={13}/> برندها
             </Link>
-            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '13px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
+            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '14px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
               <Share2 size={12}/> اشتراک
             </button>
           </div>
@@ -145,23 +145,23 @@ export default function BrandProfilePage() {
                     </div>
                   )}
                   <div style={{ display:'inline-flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.05)', borderRadius:'20px', padding:'4px 12px' }}>
-                    <span style={{ fontSize: '15px' }}>{brand.flag}</span><span style={{ fontSize: '10px', color:'rgba(255,255,255,0.5)', fontWeight:600 }}>{brand.country}</span>
+                    <span style={{ fontSize: '16px' }}>{brand.flag}</span><span style={{ fontSize: '10px', color:'rgba(255,255,255,0.5)', fontWeight:600 }}>{brand.country}</span>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '11px', color:`${brand.accentColor}80`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'6px' }}>{brand.taglineEn}</div>
+                <div style={{ fontSize: '12px', color:`${brand.accentColor}80`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'6px' }}>{brand.taglineEn}</div>
                 <h1 style={{ fontSize: 'clamp(31px, 6.6vw, 64px)', fontWeight:900, color:'#fff', margin:'0 0 6px', letterSpacing:'-0.04em', lineHeight:1.0, textShadow:`0 0 60px ${brand.accentColor}20` }}>
                   {brand.name} <span style={{ color:`${brand.accentColor}` }}>·</span> {brand.nameEn}
                 </h1>
-                <div style={{ fontSize: '15px', color:'rgba(255,255,255,0.45)' }}>{brand.tagline} · از {toFa(brand.founded)}</div>
+                <div style={{ fontSize: '16px', color:'rgba(255,255,255,0.45)' }}>{brand.tagline} · از {toFa(brand.founded)}</div>
               </div>
 
               {/* Actions */}
               <div style={{ display:'flex', gap:'10px', flexShrink:0, flexWrap:'wrap' }}>
-                <button onClick={()=>setFollowed(f=>!f)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 22px', borderRadius:'12px', border:'none', background: followed?'rgba(199,166,106,0.15)':'linear-gradient(135deg,#C7A66A,#A07840)', color: followed?'#C7A66A':'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: followed?'none':'0 8px 24px rgba(199,166,106,0.3)', ...(followed?{border:'1px solid rgba(199,166,106,0.3)'}:{}) }}>
+                <button onClick={()=>setFollowed(f=>!f)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 22px', borderRadius:'12px', border:'none', background: followed?'rgba(199,166,106,0.15)':'linear-gradient(135deg,#C7A66A,#A07840)', color: followed?'#C7A66A':'#fff', fontSize: '15px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: followed?'none':'0 8px 24px rgba(199,166,106,0.3)', ...(followed?{border:'1px solid rgba(199,166,106,0.3)'}:{}) }}>
                   {followed?<><Check size={14}/>دنبال می‌کنید</>:<><Heart size={14}/>دنبال کردن</>}
                 </button>
-                <a href={`https://${brand.website}`} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '14px', fontWeight:600, textDecoration:'none', transition:'all 0.3s' }}>
+                <a href={`https://${brand.website}`} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'11px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight:600, textDecoration:'none', transition:'all 0.3s' }}>
                   <ExternalLink size={14}/>
                 </a>
               </div>
@@ -213,7 +213,7 @@ export default function BrandProfilePage() {
                       <span style={{ width:'3px', height:'16px', background:`linear-gradient(180deg,${brand.accentColor},#06b6d4)`, borderRadius:'2px', display:'inline-block' }}/>
                       درباره {brand.name}
                     </h3>
-                    <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.50)', lineHeight:1.9, margin:0 }}>{brand.description}</p>
+                    <p style={{ fontSize: '16px', color:'rgba(0,0,0,0.50)', lineHeight:1.9, margin:0 }}>{brand.description}</p>
                   </div>
 
                   {/* Collections */}
@@ -227,9 +227,9 @@ export default function BrandProfilePage() {
                         <div key={i} style={{ padding:'16px 14px', background:`${c.color}07`, border:`1px solid ${c.color}18`, borderRadius:'16px', cursor:'pointer', transition:'all 0.3s' }}
                           onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.transform='translateY(-4px)';(e.currentTarget as HTMLElement).style.background=`${c.color}12`;}}
                           onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform='none';(e.currentTarget as HTMLElement).style.background=`${c.color}07`;}}>
-                          <div style={{ fontSize: '14px', fontWeight:800, color: '#111111', marginBottom:'6px', letterSpacing:'-0.01em', lineHeight:1.3 }}>{c.name}</div>
-                          <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.42)', marginBottom:'10px', lineHeight:1.5 }}>{c.desc}</div>
-                          <div style={{ fontSize: '11px', color:c.color, fontWeight:700 }}>{toFa(c.items)} محصول</div>
+                          <div style={{ fontSize: '15px', fontWeight:800, color: '#111111', marginBottom:'6px', letterSpacing:'-0.01em', lineHeight:1.3 }}>{c.name}</div>
+                          <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)', marginBottom:'10px', lineHeight:1.5 }}>{c.desc}</div>
+                          <div style={{ fontSize: '12px', color:c.color, fontWeight:700 }}>{toFa(c.items)} محصول</div>
                         </div>
                       ))}
                     </div>
@@ -250,8 +250,8 @@ export default function BrandProfilePage() {
                             {a.name[0]}
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontSize: '15px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{a.name}</div>
-                            <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.42)' }}>{a.title}</div>
+                            <div style={{ fontSize: '16px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{a.name}</div>
+                            <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>{a.title}</div>
                           </div>
                           <div style={{ fontSize: '22px', flexShrink:0 }}>{a.country}</div>
                         </div>
@@ -269,7 +269,7 @@ export default function BrandProfilePage() {
                       {brand.certifications.map((cert: string, i: number) => (
                         <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(199,166,106,0.04)', border:'1px solid rgba(199,166,106,0.12)', borderRadius:'13px' }}>
                           <Shield size={13} style={{ color:'#C7A66A', flexShrink:0 }}/>
-                          <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.48)', fontWeight:500 }}>{cert}</span>
+                          <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.48)', fontWeight:500 }}>{cert}</span>
                         </div>
                       ))}
                     </div>
@@ -311,12 +311,12 @@ export default function BrandProfilePage() {
                             {p.tag && <div style={{ position:'absolute', top:'8px', right:'8px', background:`${brand.accentColor}85`, backdropFilter:'blur(6px)', color:'#fff', fontSize: '10px', fontWeight:700, padding:'2px 8px', borderRadius:'20px' }}>{p.tag}</div>}
                           </div>
                           <div style={{ padding:'12px' }}>
-                            <div style={{ fontSize: '13px', fontWeight:700, color: '#111111', marginBottom:'6px', lineHeight:1.4 }}>{p.name}</div>
+                            <div style={{ fontSize: '14px', fontWeight:700, color: '#111111', marginBottom:'6px', lineHeight:1.4 }}>{p.name}</div>
                             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                              <div style={{ fontSize: '15px', fontWeight:900, color:brand.accentColor }}>{toFa((p.price/1000000).toFixed(1))}م</div>
+                              <div style={{ fontSize: '16px', fontWeight:900, color:brand.accentColor }}>{toFa((p.price/1000000).toFixed(1))}م</div>
                               <div style={{ display:'flex', alignItems:'center', gap:'3px' }}>
                                 <Star size={10} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>
-                                <span style={{ fontSize: '12px', fontWeight:700, color:'#f59e0b' }}>{p.rating}</span>
+                                <span style={{ fontSize: '13px', fontWeight:700, color:'#f59e0b' }}>{p.rating}</span>
                               </div>
                             </div>
                           </div>
@@ -335,16 +335,16 @@ export default function BrandProfilePage() {
                       <div style={{ width:'44px', height:'44px', borderRadius:'13px', background:`${brand.accentColor}10`, border:`1px solid ${brand.accentColor}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '22px', flexShrink:0 }}>🏪</div>
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'3px' }}>
-                          <span style={{ fontSize: '15px', fontWeight:700, color: '#111111' }}>{d.name}</span>
+                          <span style={{ fontSize: '16px', fontWeight:700, color: '#111111' }}>{d.name}</span>
                           {d.verified && <Check size={12} style={{ color:brand.accentColor }}/>}
                         </div>
-                        <div style={{ display:'flex', gap:'10px', fontSize: '12px', color:'rgba(0,0,0,0.42)' }}>
+                        <div style={{ display:'flex', gap:'10px', fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>
                           <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><MapPin size={9} style={{ color:brand.accentColor }}/>{d.city}</span>
                           <span>·</span>
                           <span>{d.type}</span>
                         </div>
                       </div>
-                      <div style={{ fontSize: '11px', padding:'4px 12px', borderRadius:'20px', background: d.verified?`${brand.accentColor}10`:'rgba(0,0,0,0.04)', color: d.verified?brand.accentColor:'rgba(0,0,0,0.35)', border:`1px solid ${d.verified?`${brand.accentColor}25`:'rgba(0,0,0,0.07)'}`, fontWeight:700, flexShrink:0 }}>
+                      <div style={{ fontSize: '12px', padding:'4px 12px', borderRadius:'20px', background: d.verified?`${brand.accentColor}10`:'rgba(0,0,0,0.04)', color: d.verified?brand.accentColor:'rgba(0,0,0,0.35)', border:`1px solid ${d.verified?`${brand.accentColor}25`:'rgba(0,0,0,0.07)'}`, fontWeight:700, flexShrink:0 }}>
                         {d.verified?'تأیید شده':'ثبت‌نشده'}
                       </div>
                     </div>
@@ -373,10 +373,10 @@ export default function BrandProfilePage() {
 
                           <div style={{ padding:'16px 18px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'14px' }}>
                             <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
-                              <span style={{ fontSize: '11px', color:brand.accentColor, background:`${brand.accentColor}12`, border:`1px solid ${brand.accentColor}22`, borderRadius:'20px', padding:'2px 10px', fontWeight:700 }}>{m.year}</span>
-                              <span style={{ fontSize: '15px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>{m.title}</span>
+                              <span style={{ fontSize: '12px', color:brand.accentColor, background:`${brand.accentColor}12`, border:`1px solid ${brand.accentColor}22`, borderRadius:'20px', padding:'2px 10px', fontWeight:700 }}>{m.year}</span>
+                              <span style={{ fontSize: '16px', fontWeight:800, color: '#111111', letterSpacing:'-0.01em' }}>{m.title}</span>
                             </div>
-                            <p style={{ fontSize: '14px', color:'rgba(0,0,0,0.45)', margin:0, lineHeight:1.6 }}>{m.desc}</p>
+                            <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.45)', margin:0, lineHeight:1.6 }}>{m.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -392,7 +392,7 @@ export default function BrandProfilePage() {
               {/* Brand info card */}
               <div style={{ background:'#FFFFFF', border:`1px solid ${brand.accentColor}22`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:`linear-gradient(90deg,transparent,${brand.accentColor}55,transparent)`, boxShadow:`0 0 14px ${brand.accentColor}35` }}/>
-                <div style={{ fontSize: '11px', color:`${brand.accentColor}70`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'16px', textAlign:'center' }}>BRAND INFO</div>
+                <div style={{ fontSize: '12px', color:`${brand.accentColor}70`, letterSpacing:'0.2em', fontWeight:700, marginBottom:'16px', textAlign:'center' }}>BRAND INFO</div>
 
                 {[
                   { l:'کشور مبدأ', v:`${brand.flag} ${brand.country}`  },
@@ -401,19 +401,19 @@ export default function BrandProfilePage() {
                   { l:'شهر',       v:brand.city                         },
                 ].map((r,i) => (
                   <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom: i<3?'1px solid rgba(0,0,0,0.04)':'none' }}>
-                    <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>{r.l}</span>
-                    <span style={{ fontSize: '13px', fontWeight:600, color: '#111111' }}>{r.v}</span>
+                    <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>{r.l}</span>
+                    <span style={{ fontSize: '14px', fontWeight:600, color: '#111111' }}>{r.v}</span>
                   </div>
                 ))}
 
-                <Link href={`/shop?brand=${brand.nameEn}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', marginTop:'16px', padding:'12px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}cc)`, borderRadius:'12px', color:'#fff', fontSize: '14px', fontWeight:700, textDecoration:'none', boxShadow:`0 6px 18px ${brand.accentColor}30` }}>
+                <Link href={`/shop?brand=${brand.nameEn}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', marginTop:'16px', padding:'12px', background:`linear-gradient(135deg,${brand.accentColor},${brand.accentColor}cc)`, borderRadius:'12px', color:'#fff', fontSize: '15px', fontWeight:700, textDecoration:'none', boxShadow:`0 6px 18px ${brand.accentColor}30` }}>
                   <Package size={14}/> مشاهده محصولات
                 </Link>
               </div>
 
               {/* Quick stats */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار سریع</div>
+                <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار سریع</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                   {[
                     { l:'محصولات فعال',   v:toFa(brand.stats.products),   c:brand.accentColor },
@@ -422,8 +422,8 @@ export default function BrandProfilePage() {
                     { l:'بازیکن حرفه‌ای',v:toFa(brand.stats.players),    c:'#06b6d4'         },
                   ].map((s,i) => (
                     <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                      <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>{s.l}</span>
-                      <span style={{ fontSize: '15px', fontWeight:800, color:s.c }}>{s.v}</span>
+                      <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>{s.l}</span>
+                      <span style={{ fontSize: '16px', fontWeight:800, color:s.c }}>{s.v}</span>
                     </div>
                   ))}
                 </div>
@@ -431,15 +431,15 @@ export default function BrandProfilePage() {
 
               {/* Related brands */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>برندهای مشابه</div>
+                <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>برندهای مشابه</div>
                 {[{n:'RILEY',c:'#a78bfa',id:'riley'},{n:'MEZZ',c:'#ef4444',id:'mezz'}].map((b,i) => (
                   <Link key={i} href={`/brands/${b.id}`} style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'10px', padding:'10px', borderRadius:'12px', transition:'background 0.2s', marginBottom: i<1?'6px':'0' }}
                     onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='rgba(0,0,0,0.04)';}}
                     onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background='transparent';}}>
-                    <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:`${b.c}12`, border:`1px solid ${b.c}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '15px', fontWeight:900, color:b.c, flexShrink:0 }}>{b.n[0]}</div>
+                    <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:`${b.c}12`, border:`1px solid ${b.c}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '16px', fontWeight:900, color:b.c, flexShrink:0 }}>{b.n[0]}</div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight:700, color: '#111111' }}>{b.n}</div>
-                      <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.40)' }}>مشاهده برند ←</div>
+                      <div style={{ fontSize: '15px', fontWeight:700, color: '#111111' }}>{b.n}</div>
+                      <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)' }}>مشاهده برند ←</div>
                     </div>
                   </Link>
                 ))}

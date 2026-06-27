@@ -228,7 +228,7 @@ export default function Navbar() {
             <Link href="/shop"    className={`nav-a ${pathname === '/shop'    ? 'active' : ''}`}>بیلیارد بازار</Link>
             <Link href="/players"     className={`nav-a ${pathname === '/players'     ? 'active' : ''}`}>بازیکنان</Link>
             <Link href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
-            <Link href="/live" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: TEXT_MUT, fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.25s', whiteSpace: 'nowrap', padding: '6px 2px' }}
+            <Link href="/live" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: TEXT_MUT, fontSize: '15px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.25s', whiteSpace: 'nowrap', padding: '6px 2px' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = TEXT }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'glowPulse 2s infinite', flexShrink: 0 }} />
@@ -280,8 +280,8 @@ export default function Navbar() {
                   </div>
 
                   <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(28,28,26,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', color: 'rgba(28,28,26,0.25)' }}>پلتفرم تخصصی بیلیارد ایران</span>
-                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '12px', color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '20px', padding: '5px 12px' }}>
+                    <span style={{ fontSize: '13px', color: 'rgba(28,28,26,0.25)' }}>پلتفرم تخصصی بیلیارد ایران</span>
+                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '20px', padding: '5px 12px' }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
                     </Link>
                   </div>
@@ -295,7 +295,7 @@ export default function Navbar() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '10px', padding: '8px 12px', transition: 'all 0.3s' }}>
               <Search size={13} color={TEXT_MUT} />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="جستجو..."
-                style={{ background: 'none', border: 'none', outline: 'none', color: TEXT, fontSize: '14px', width: '100%', fontFamily: 'inherit' }} />
+                style={{ background: 'none', border: 'none', outline: 'none', color: TEXT, fontSize: '15px', width: '100%', fontFamily: 'inherit' }} />
               {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_MUT, padding: 0, display: 'flex' }}><X size={11} /></button>}
             </div>
           </div>
@@ -333,7 +333,7 @@ export default function Navbar() {
 
             {!user ? (
               <Link href="/login">
-                <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '10px 18px', color: GOLD, fontSize: '15px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}
+                <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '10px 18px', color: GOLD, fontSize: '16px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(184,147,58,0.15)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = GOLD_LIGHT }}>
                   <User size={18} /> ورود
@@ -341,8 +341,8 @@ export default function Navbar() {
               </Link>
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
-                <button onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
-                  <div style={{ width: '30px', height: '30px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '14px', flexShrink: 0 }}>
+                <button onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
+                  <div style={{ width: '30px', height: '30px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '15px', flexShrink: 0 }}>
                     {user.firstName?.[0]}
                   </div>
                   <span className="desk" style={{ alignItems: 'center', color: TEXT }}>{user.firstName}</span>
@@ -352,8 +352,8 @@ export default function Navbar() {
                 {profileOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '200px', background: 'rgba(247,247,245,0.97)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '18px', boxShadow: '0 24px 60px rgba(28,28,26,0.14)', backdropFilter: 'blur(40px)', padding: '8px', zIndex: 300, animation: 'fadeDown 0.2s ease both' }}>
                     <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '6px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1C1C1A' }}>{user.firstName} {user.lastName}</div>
-                      <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.35)', marginTop: '2px' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#1C1C1A' }}>{user.firstName} {user.lastName}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(28,28,26,0.35)', marginTop: '2px' }}>
                         {({'admin':'ادمین سیستم','user':'کاربر','player':'بازیکن رنکینگی','coach':'مربی','referee':'داور','club_owner':'باشگاه‌دار','seller':'فروشنده','manufacturer':'تولیدکننده','installer':'متخصص نصب'} as Record<string,string>)[user.primaryRole] ?? user.primaryRole}
                       </div>
                     </div>
@@ -365,7 +365,7 @@ export default function Navbar() {
                       { href: '/profile',         label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
                     ].map((item, i) => (
                       <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 12px', borderRadius: '10px', fontSize: '14px', color: 'rgba(28,28,26,0.55)', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 12px', borderRadius: '10px', fontSize: '15px', color: 'rgba(28,28,26,0.55)', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(28,28,26,0.05)'; (e.currentTarget as HTMLElement).style.color = '#1C1C1A' }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(28,28,26,0.55)' }}>
                         <span style={{ color: GOLD }}>{item.icon}</span>
@@ -374,7 +374,7 @@ export default function Navbar() {
                     ))}
                     <div style={{ height: '1px', background: 'rgba(28,28,26,0.06)', margin: '6px 0' }} />
                     <button onClick={() => { logout(); setProfileOpen(false); router.push('/'); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'right', padding: '9px 12px', borderRadius: '10px', fontSize: '14px', color: 'rgba(239,68,68,0.7)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'right', padding: '9px 12px', borderRadius: '10px', fontSize: '15px', color: 'rgba(239,68,68,0.7)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.06)'; (e.currentTarget as HTMLElement).style.color = '#ef4444' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(239,68,68,0.7)' }}>
                       <LogOut size={13} /> خروج
@@ -415,7 +415,7 @@ export default function Navbar() {
             <Search size={15} color="rgba(255,255,255,0.38)" style={{ flexShrink: 0 }} />
             <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="جستجو باشگاه، بازیکن، مربی..."
-              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontSize: '15px', fontFamily: 'inherit' }} />
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontSize: '16px', fontFamily: 'inherit' }} />
             {search && (
               <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
                 <X size={13} />
@@ -452,11 +452,11 @@ export default function Navbar() {
                   {user.firstName?.[0]}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#1C1C1A', fontWeight: 700, fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
-                  <div style={{ color: 'rgba(28,28,26,0.4)', fontSize: '12px', marginTop: '2px' }}>{user.primaryRole}</div>
+                  <div style={{ color: '#1C1C1A', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
+                  <div style={{ color: 'rgba(28,28,26,0.4)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>
                 </div>
                 <button onClick={() => { logout(); router.push('/'); setMobileOpen(false); }}
-                  style={{ padding: '7px 12px', borderRadius: '10px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  style={{ padding: '7px 12px', borderRadius: '10px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <LogOut size={12} /> خروج
                 </button>
               </div>
@@ -473,7 +473,7 @@ export default function Navbar() {
                   display: 'flex', alignItems: 'center', gap: '12px',
                   padding: '10px 12px', borderRadius: '12px',
                   color: item.isHome ? '#1C1C1A' : 'rgba(28,28,26,0.55)',
-                  fontSize: '15px', fontWeight: item.isHome ? 600 : 500,
+                  fontSize: '16px', fontWeight: item.isHome ? 600 : 500,
                   textDecoration: 'none',
                   ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '4px', paddingBottom: '12px' } : {}),
                 }}>
@@ -485,7 +485,7 @@ export default function Navbar() {
                   <span style={{ marginRight: 'auto', fontSize: '10px', color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '20px', padding: '2px 8px', fontWeight: 700 }}>LIVE</span>
                 )}
                 {(item as { isCart?: boolean }).isCart && cartCount > 0 && (
-                  <span style={{ marginRight: 'auto', fontSize: '11px', color: '#fff', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '1px 8px', fontWeight: 800, minWidth: 20, textAlign: 'center' }}>
+                  <span style={{ marginRight: 'auto', fontSize: '12px', color: '#fff', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '1px 8px', fontWeight: 800, minWidth: 20, textAlign: 'center' }}>
                     {cartCount}
                   </span>
                 )}
@@ -495,7 +495,7 @@ export default function Navbar() {
 
           <div style={{ margin: '20px 20px 40px', padding: '16px', background: GOLD_LIGHT, borderRadius: '16px', border: `1px solid ${GOLD_BORDER}`, textAlign: 'center' }}>
             <div style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700, marginBottom: '5px', opacity: 0.7 }}>BILLIARDHUB</div>
-            <div style={{ fontSize: '13px', color: 'rgba(28,28,26,0.4)' }}>اکوسیستم جامع و هوشمند بیلیارد ایران</div>
+            <div style={{ fontSize: '14px', color: 'rgba(28,28,26,0.4)' }}>اکوسیستم جامع و هوشمند بیلیارد ایران</div>
           </div>
         </div>
       )}

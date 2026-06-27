@@ -33,7 +33,7 @@ export function SectionHeader({
       </div>
 
       {href && (
-        <Link href={href} style={{ display:'flex', alignItems:'center', gap:'6px', fontSize: '13px', color:'rgba(255,255,255,0.3)', textDecoration:'none', fontWeight:500, transition:'color 0.25s' }}
+        <Link href={href} style={{ display:'flex', alignItems:'center', gap:'6px', fontSize: '14px', color:'rgba(255,255,255,0.3)', textDecoration:'none', fontWeight:500, transition:'color 0.25s' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = labelColor; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)'; }}>
           {linkLabel} <ArrowLeft size={13} />

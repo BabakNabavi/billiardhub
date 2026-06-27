@@ -36,7 +36,7 @@ export function RecentActivity() {
           {/* Live dot */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '4px 12px', marginTop: '18px' }}>
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 700 }}>زنده</span>
+            <span style={{ fontSize: '12px', color: '#ef4444', fontWeight: 700 }}>زنده</span>
           </div>
         </div>
 
@@ -59,15 +59,15 @@ export function RecentActivity() {
 
               {/* Content */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '14px', color: '#111111', fontWeight: 600, marginBottom: '3px' }}>
+                <div style={{ fontSize: '15px', color: '#111111', fontWeight: 600, marginBottom: '3px' }}>
                   <span style={{ color: a.color }}>{a.user}</span>
                   {' '}{a.action}
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>{a.club}</div>
+                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>{a.club}</div>
               </div>
 
               {/* Time */}
-              <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', flexShrink: 0 }}>
+              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)', flexShrink: 0 }}>
                 {a.time}
               </div>
             </div>

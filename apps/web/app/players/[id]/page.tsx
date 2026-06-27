@@ -149,7 +149,7 @@ export default function PlayerProfilePage() {
     <div style={{ minHeight:'100vh', background:'#F7F7F5', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16, fontFamily:'Vazirmatn, sans-serif', direction:'rtl' }}>
       <div style={{ fontSize:53, opacity:0.1 }}>🎱</div>
       <p style={{ fontSize:18, fontWeight:700, color:'#111111' }}>بازیکن یافت نشد</p>
-      <Link href="/players" style={{ color:GOLD, textDecoration:'none', fontSize:14 }}>بازگشت به بازیکنان ←</Link>
+      <Link href="/players" style={{ color:GOLD, textDecoration:'none', fontSize:15 }}>بازگشت به بازیکنان ←</Link>
     </div>
   );
 
@@ -209,12 +209,12 @@ export default function PlayerProfilePage() {
             }
             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(2,8,6,0.3) 0%,rgba(2,8,6,0.95) 100%)' }} />
 
-            <button onClick={() => router.push('/players')} style={{ position:'absolute', top:'clamp(12px,3vw,20px)', right:'clamp(12px,4vw,32px)', display:'inline-flex', alignItems:'center', gap:6, color:'rgba(0,0,0,0.45)', fontSize:14, background:'rgba(0,0,0,0.4)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:10, padding:'7px 14px', cursor:'pointer', fontFamily:'inherit', backdropFilter:'blur(12px)' }}>
+            <button onClick={() => router.push('/players')} style={{ position:'absolute', top:'clamp(12px,3vw,20px)', right:'clamp(12px,4vw,32px)', display:'inline-flex', alignItems:'center', gap:6, color:'rgba(0,0,0,0.45)', fontSize:15, background:'rgba(0,0,0,0.4)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:10, padding:'7px 14px', cursor:'pointer', fontFamily:'inherit', backdropFilter:'blur(12px)' }}>
               <ChevronRight size={14} /> بازیکنان
             </button>
 
             {isOwn && (
-              <button style={{ position:'absolute', top:'clamp(12px,3vw,20px)', left:'clamp(12px,4vw,32px)', display:'inline-flex', alignItems:'center', gap:6, color:'rgba(0,0,0,0.45)', fontSize:13, background:'rgba(0,0,0,0.4)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:10, padding:'7px 14px', cursor:'pointer', fontFamily:'inherit', backdropFilter:'blur(12px)' }}>
+              <button style={{ position:'absolute', top:'clamp(12px,3vw,20px)', left:'clamp(12px,4vw,32px)', display:'inline-flex', alignItems:'center', gap:6, color:'rgba(0,0,0,0.45)', fontSize:14, background:'rgba(0,0,0,0.4)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:10, padding:'7px 14px', cursor:'pointer', fontFamily:'inherit', backdropFilter:'blur(12px)' }}>
                 <Camera size={13} /> تغییر کاور
               </button>
             )}
@@ -249,18 +249,18 @@ export default function PlayerProfilePage() {
                 <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap', marginBottom:6 }}>
                   <h1 style={{ fontSize: 'clamp(22px, 4.4vw, 33px)', fontWeight:900, color:'#111111', margin:0, letterSpacing:'-0.03em', lineHeight:1.15 }}>{displayName}</h1>
                   {player.level && (
-                    <span style={{ background:`${lvlMeta.bg}0.18)`, border:`1px solid ${lvlMeta.bg}0.4)`, color:lvlMeta.color, borderRadius:20, padding:'4px 14px', fontSize:12, fontWeight:700 }}>{player.level}</span>
+                    <span style={{ background:`${lvlMeta.bg}0.18)`, border:`1px solid ${lvlMeta.bg}0.4)`, color:lvlMeta.color, borderRadius:20, padding:'4px 14px', fontSize:13, fontWeight:700 }}>{player.level}</span>
                   )}
                   {player.nationalRank && (
-                    <span style={{ background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', color:'#f59e0b', borderRadius:20, padding:'4px 14px', fontSize:12, fontWeight:700, display:'flex', alignItems:'center', gap:5 }}>
+                    <span style={{ background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', color:'#f59e0b', borderRadius:20, padding:'4px 14px', fontSize:13, fontWeight:700, display:'flex', alignItems:'center', gap:5 }}>
                       <Trophy size={11} /> رنک #{toFa(player.nationalRank)}
                     </span>
                   )}
                 </div>
                 <div style={{ display:'flex', gap:14, flexWrap:'wrap' }}>
-                  {player.city && <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:13, color:'rgba(0,0,0,0.45)' }}><MapPin size={12} style={{ color:GOLD }} />{player.city}</div>}
-                  {player.club && <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:13, color:'rgba(0,0,0,0.45)' }}><Shield size={12} style={{ color:'#06b6d4' }} />{player.club}</div>}
-                  {player.experience && <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:13, color:'rgba(0,0,0,0.45)' }}><Calendar size={12} style={{ color:'#a78bfa' }} />{player.experience} سال سابقه</div>}
+                  {player.city && <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:14, color:'rgba(0,0,0,0.45)' }}><MapPin size={12} style={{ color:GOLD }} />{player.city}</div>}
+                  {player.club && <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:14, color:'rgba(0,0,0,0.45)' }}><Shield size={12} style={{ color:'#06b6d4' }} />{player.club}</div>}
+                  {player.experience && <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:14, color:'rgba(0,0,0,0.45)' }}><Calendar size={12} style={{ color:'#a78bfa' }} />{player.experience} سال سابقه</div>}
                 </div>
               </div>
 
@@ -272,12 +272,12 @@ export default function PlayerProfilePage() {
                   </a>
                 )}
                 {player.phone && (
-                  <a href={`tel:${player.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 16px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.25)', borderRadius:11, color:'#C7A66A', fontSize:14, fontWeight:600, textDecoration:'none' }}>
+                  <a href={`tel:${player.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 16px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.25)', borderRadius:11, color:'#C7A66A', fontSize:15, fontWeight:600, textDecoration:'none' }}>
                     <Phone size={14} /> تماس
                   </a>
                 )}
                 {isOwn && (
-                  <button style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 16px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:11, color:'rgba(0,0,0,0.50)', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+                  <button style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 16px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:11, color:'rgba(0,0,0,0.50)', fontSize:15, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
                     <IconEdit size={14} color="rgba(0,0,0,0.50)" /> ویرایش
                   </button>
                 )}
@@ -287,7 +287,7 @@ export default function PlayerProfilePage() {
             {player.specialties && player.specialties.length > 0 && (
               <div style={{ display:'flex', gap:6, flexWrap:'wrap', paddingBottom:4, marginTop:-8 }}>
                 {player.specialties.map((s, i) => (
-                  <span key={i} style={{ fontSize:12, color:lvlMeta.color, background:`${lvlMeta.bg}0.1)`, border:`1px solid ${lvlMeta.bg}0.22)`, borderRadius:20, padding:'4px 12px', fontWeight:700 }}>{s}</span>
+                  <span key={i} style={{ fontSize:13, color:lvlMeta.color, background:`${lvlMeta.bg}0.1)`, border:`1px solid ${lvlMeta.bg}0.22)`, borderRadius:20, padding:'4px 12px', fontWeight:700 }}>{s}</span>
                 ))}
               </div>
             )}
@@ -308,7 +308,7 @@ export default function PlayerProfilePage() {
               <div key={i} className="stat-card" style={{ '--accent': s.color + '0.4)' } as any}>
                 <div style={{ color:s.color, display:'flex', justifyContent:'center', marginBottom:10, opacity:0.8 }}>{s.icon}</div>
                 <div style={{ fontSize: 'clamp(20px, 4.4vw, 29px)', fontWeight:900, color:s.color, marginBottom:4, letterSpacing:'-0.02em' }}>{toFa(String(s.value))}</div>
-                <div style={{ fontSize:12, color:'rgba(0,0,0,0.40)' }}>{s.label}</div>
+                <div style={{ fontSize:13, color:'rgba(0,0,0,0.40)' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -333,11 +333,11 @@ export default function PlayerProfilePage() {
                 <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:16 }}>
                   <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:'clamp(16px,3vw,24px)', position:'relative', overflow:'hidden' }}>
                     <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:'50%', height:1, background:`linear-gradient(90deg,transparent,${lvlMeta.color}40,transparent)` }} />
-                    <h2 style={{ fontSize:15, fontWeight:800, color:'#111111', margin:'0 0 14px', display:'flex', alignItems:'center', gap:10 }}>
+                    <h2 style={{ fontSize:16, fontWeight:800, color:'#111111', margin:'0 0 14px', display:'flex', alignItems:'center', gap:10 }}>
                       <span style={{ width:3, height:16, background:`linear-gradient(180deg,${lvlMeta.color},transparent)`, borderRadius:2, display:'inline-block' }} />
                       بیوگرافی
                     </h2>
-                    <p style={{ fontSize:15, color:'rgba(0,0,0,0.50)', lineHeight:2, margin:0 }}>{player.bio ?? 'اطلاعاتی ثبت نشده است.'}</p>
+                    <p style={{ fontSize:16, color:'rgba(0,0,0,0.50)', lineHeight:2, margin:0 }}>{player.bio ?? 'اطلاعاتی ثبت نشده است.'}</p>
                   </div>
 
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:10 }}>
@@ -351,8 +351,8 @@ export default function PlayerProfilePage() {
                       <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'13px 16px', background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.05)', borderRadius:13 }}>
                         <div style={{ color:r.color, flexShrink:0 }}>{r.icon}</div>
                         <div>
-                          <div style={{ fontSize:11, color:'rgba(0,0,0,0.35)', marginBottom:2 }}>{r.label}</div>
-                          <div style={{ fontSize:14, fontWeight:600, color:'#111111' }}>{r.value}</div>
+                          <div style={{ fontSize:12, color:'rgba(0,0,0,0.35)', marginBottom:2 }}>{r.label}</div>
+                          <div style={{ fontSize:15, fontWeight:600, color:'#111111' }}>{r.value}</div>
                         </div>
                       </div>
                     ))}
@@ -365,7 +365,7 @@ export default function PlayerProfilePage() {
                 <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:16 }}>
                   {player.wins !== undefined && player.losses !== undefined && (
                     <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:'clamp(16px,3vw,24px)' }}>
-                      <h3 style={{ fontSize:15, fontWeight:800, color:'#111111', margin:'0 0 18px', display:'flex', alignItems:'center', gap:10 }}>
+                      <h3 style={{ fontSize:16, fontWeight:800, color:'#111111', margin:'0 0 18px', display:'flex', alignItems:'center', gap:10 }}>
                         <span style={{ width:3, height:16, background:'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius:2, display:'inline-block' }} />
                         نتایج مسابقات
                       </h3>
@@ -377,15 +377,15 @@ export default function PlayerProfilePage() {
                         ].map((x, i) => (
                           <div key={i} style={{ textAlign:'center', padding:'16px 10px', background:'#FFFFFF', borderRadius:14, border:`1px solid ${x.color}18` }}>
                             <div style={{ fontSize: 'clamp(22px, 4.4vw, 31px)', fontWeight:900, color:x.color }}>{toFa(x.v ?? 0)}</div>
-                            <div style={{ fontSize:12, color:'rgba(0,0,0,0.40)', marginTop:4 }}>{x.label}</div>
+                            <div style={{ fontSize:13, color:'rgba(0,0,0,0.40)', marginTop:4 }}>{x.label}</div>
                           </div>
                         ))}
                       </div>
                       {player.winRate && (
                         <>
                           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
-                            <span style={{ fontSize:13, color:'rgba(0,0,0,0.45)' }}>نرخ برد</span>
-                            <span style={{ fontSize:15, fontWeight:900, color:'#C7A66A' }}>{toFa(player.winRate)}٪</span>
+                            <span style={{ fontSize:14, color:'rgba(0,0,0,0.45)' }}>نرخ برد</span>
+                            <span style={{ fontSize:16, fontWeight:900, color:'#C7A66A' }}>{toFa(player.winRate)}٪</span>
                           </div>
                           <div style={{ height:10, background:'rgba(0,0,0,0.04)', borderRadius:5, overflow:'hidden' }}>
                             <div style={{ height:'100%', width:`${player.winRate}%`, background:'linear-gradient(90deg,#C7A66A,#A07840)', borderRadius:5 }} />
@@ -396,7 +396,7 @@ export default function PlayerProfilePage() {
                   )}
 
                   <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:'clamp(16px,3vw,24px)' }}>
-                    <h3 style={{ fontSize:15, fontWeight:800, color:'#111111', margin:'0 0 16px', display:'flex', alignItems:'center', gap:10 }}>
+                    <h3 style={{ fontSize:16, fontWeight:800, color:'#111111', margin:'0 0 16px', display:'flex', alignItems:'center', gap:10 }}>
                       <span style={{ width:3, height:16, background:'linear-gradient(180deg,#f59e0b,#ef4444)', borderRadius:2, display:'inline-block' }} />
                       رنکینگ
                     </h3>
@@ -407,7 +407,7 @@ export default function PlayerProfilePage() {
                         { label:'سطح',            v:player.level ?? '—',                                     color:lvlMeta.color },
                       ].map((x, i) => (
                         <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 14px', background:'rgba(0,0,0,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:11 }}>
-                          <span style={{ fontSize:14, color:'rgba(0,0,0,0.45)' }}>{x.label}</span>
+                          <span style={{ fontSize:15, color:'rgba(0,0,0,0.45)' }}>{x.label}</span>
                           <span style={{ fontSize:17, fontWeight:900, color:x.color }}>{x.v}</span>
                         </div>
                       ))}
@@ -422,7 +422,7 @@ export default function PlayerProfilePage() {
                   {isOwn && (
                     <div style={{ padding:'16px', background:'rgba(199,166,106,0.04)', border:'1px dashed rgba(199,166,106,0.25)', borderRadius:14, marginBottom:16, textAlign:'center', cursor:'pointer' }}>
                       <Camera size={20} style={{ color:'rgba(199,166,106,0.5)', display:'block', margin:'0 auto 8px' }} />
-                      <p style={{ fontSize:14, color:'rgba(199,166,106,0.6)', margin:0 }}>افزودن عکس یا ویدیو</p>
+                      <p style={{ fontSize:15, color:'rgba(199,166,106,0.6)', margin:0 }}>افزودن عکس یا ویدیو</p>
                     </div>
                   )}
                   <div className="gallery-grid">
@@ -438,7 +438,7 @@ export default function PlayerProfilePage() {
                       </div>
                     ))}
                   </div>
-                  {gallery.length === 0 && <div style={{ textAlign:'center', padding:'48px 24px', color:'rgba(0,0,0,0.30)', fontSize:14 }}>گالری خالی است</div>}
+                  {gallery.length === 0 && <div style={{ textAlign:'center', padding:'48px 24px', color:'rgba(0,0,0,0.30)', fontSize:15 }}>گالری خالی است</div>}
                 </div>
               )}
 
@@ -449,13 +449,13 @@ export default function PlayerProfilePage() {
                     <div key={i} className="ach-item">
                       <div style={{ width:42, height:42, borderRadius:12, background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.22)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:20 }}>🏆</div>
                       <div style={{ flex:1 }}>
-                        <div style={{ fontSize:15, fontWeight:700, color:'#111111', marginBottom:3 }}>{a}</div>
-                        <div style={{ fontSize:12, color:'rgba(0,0,0,0.35)' }}>افتخار رسمی — تأیید فدراسیون</div>
+                        <div style={{ fontSize:16, fontWeight:700, color:'#111111', marginBottom:3 }}>{a}</div>
+                        <div style={{ fontSize:13, color:'rgba(0,0,0,0.35)' }}>افتخار رسمی — تأیید فدراسیون</div>
                       </div>
                       <div style={{ width:8, height:8, borderRadius:'50%', background:'#f59e0b', flexShrink:0, marginTop:6 }} />
                     </div>
                   )) : (
-                    <div style={{ textAlign:'center', padding:'48px 24px', color:'rgba(0,0,0,0.30)', fontSize:14 }}>افتخاری ثبت نشده است</div>
+                    <div style={{ textAlign:'center', padding:'48px 24px', color:'rgba(0,0,0,0.30)', fontSize:15 }}>افتخاری ثبت نشده است</div>
                   )}
                 </div>
               )}
@@ -472,7 +472,7 @@ export default function PlayerProfilePage() {
                     ].map((s,i) => (
                       <div key={i} style={{ background:'#fff', border:`1px solid rgba(${s.rgb},0.14)`, borderRadius:14, padding:'14px 10px', textAlign:'center' }}>
                         <div style={{ fontSize:22, fontWeight:900, color:s.color, marginBottom:4 }}>{s.v}</div>
-                        <div style={{ fontSize:11, color:'rgba(0,0,0,0.40)', fontWeight:600 }}>{s.label}</div>
+                        <div style={{ fontSize:12, color:'rgba(0,0,0,0.40)', fontWeight:600 }}>{s.label}</div>
                       </div>
                     ))}
                   </div>
@@ -490,20 +490,20 @@ export default function PlayerProfilePage() {
                         {t.icon}
                       </div>
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:14, fontWeight:800, color:'#111', marginBottom:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.title}</div>
+                        <div style={{ fontSize:15, fontWeight:800, color:'#111', marginBottom:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.title}</div>
                         <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
-                          <span style={{ fontSize:12, color:'rgba(0,0,0,0.40)' }}>{t.date}</span>
-                          <span style={{ fontSize:12, color:'rgba(0,0,0,0.30)' }}>•</span>
-                          <span style={{ fontSize:12, color:'rgba(0,0,0,0.40)' }}>{t.type}</span>
+                          <span style={{ fontSize:13, color:'rgba(0,0,0,0.40)' }}>{t.date}</span>
+                          <span style={{ fontSize:13, color:'rgba(0,0,0,0.30)' }}>•</span>
+                          <span style={{ fontSize:13, color:'rgba(0,0,0,0.40)' }}>{t.type}</span>
                         </div>
                       </div>
-                      <div style={{ padding:'5px 12px', borderRadius:20, background:`${t.color}12`, border:`1px solid ${t.color}25`, fontSize:12, fontWeight:700, color:t.color, flexShrink:0 }}>
+                      <div style={{ padding:'5px 12px', borderRadius:20, background:`${t.color}12`, border:`1px solid ${t.color}25`, fontSize:13, fontWeight:700, color:t.color, flexShrink:0 }}>
                         {t.result}
                       </div>
                     </div>
                   ))}
 
-                  <button onClick={() => router.push('/tournaments')} style={{ width:'100%', padding:'12px', background:'rgba(0,0,0,0.03)', border:'1px solid rgba(0,0,0,0.07)', borderRadius:12, fontSize:13, fontWeight:700, color:'rgba(0,0,0,0.45)', cursor:'pointer', fontFamily:'inherit' }}>
+                  <button onClick={() => router.push('/tournaments')} style={{ width:'100%', padding:'12px', background:'rgba(0,0,0,0.03)', border:'1px solid rgba(0,0,0,0.07)', borderRadius:12, fontSize:14, fontWeight:700, color:'rgba(0,0,0,0.45)', cursor:'pointer', fontFamily:'inherit' }}>
                     مشاهده همه مسابقات
                   </button>
                 </div>
@@ -514,34 +514,34 @@ export default function PlayerProfilePage() {
             <div className="player-sidebar">
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:18, position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:-1, left:'50%', transform:'translateX(-50%)', width:'70%', height:1, background:`linear-gradient(90deg,transparent,${lvlMeta.color}50,transparent)` }} />
-                <p style={{ fontSize:12, fontWeight:700, color:'rgba(0,0,0,0.40)', margin:'0 0 14px' }}>ارتباط با بازیکن</p>
+                <p style={{ fontSize:13, fontWeight:700, color:'rgba(0,0,0,0.40)', margin:'0 0 14px' }}>ارتباط با بازیکن</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                   {player.phone && (
                     <a href={`tel:${player.phone}`} style={{ display:'flex', alignItems:'center', gap:10, padding:'11px 14px', background:'rgba(199,166,106,0.07)', border:'1px solid rgba(199,166,106,0.18)', borderRadius:12, textDecoration:'none' }}>
                       <Phone size={15} style={{ color:'#C7A66A', flexShrink:0 }} />
-                      <span style={{ fontSize:14, color:'#6ee7b7', fontWeight:600 }}>{player.phone}</span>
+                      <span style={{ fontSize:15, color:'#6ee7b7', fontWeight:600 }}>{player.phone}</span>
                     </a>
                   )}
                   {player.instagram && (
                     <a href={`https://instagram.com/${player.instagram}`} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:10, padding:'11px 14px', background:'rgba(167,139,250,0.07)', border:'1px solid rgba(167,139,250,0.18)', borderRadius:12, textDecoration:'none' }}>
                       <IconInstagram size={15} color="#a78bfa" />
-                      <span style={{ fontSize:14, color:'#c4b5fd', fontWeight:600 }}>@{player.instagram}</span>
+                      <span style={{ fontSize:15, color:'#c4b5fd', fontWeight:600 }}>@{player.instagram}</span>
                     </a>
                   )}
                   {player.website && (
                     <a href={player.website} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:10, padding:'11px 14px', background:'rgba(6,182,212,0.07)', border:'1px solid rgba(6,182,212,0.18)', borderRadius:12, textDecoration:'none' }}>
                       <Globe size={15} style={{ color:'#06b6d4', flexShrink:0 }} />
-                      <span style={{ fontSize:14, color:'#67e8f9', fontWeight:600 }}>{player.website.replace('https://','')}</span>
+                      <span style={{ fontSize:15, color:'#67e8f9', fontWeight:600 }}>{player.website.replace('https://','')}</span>
                     </a>
                   )}
                   {!player.phone && !player.instagram && !player.website && (
-                    <p style={{ fontSize:13, color:'rgba(0,0,0,0.30)', textAlign:'center', padding:'12px 0', margin:0 }}>اطلاعات تماسی ثبت نشده</p>
+                    <p style={{ fontSize:14, color:'rgba(0,0,0,0.30)', textAlign:'center', padding:'12px 0', margin:0 }}>اطلاعات تماسی ثبت نشده</p>
                   )}
                 </div>
               </div>
 
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:18, padding:18 }}>
-                <p style={{ fontSize:12, fontWeight:700, color:'rgba(0,0,0,0.40)', margin:'0 0 14px' }}>خلاصه آمار</p>
+                <p style={{ fontSize:13, fontWeight:700, color:'rgba(0,0,0,0.40)', margin:'0 0 14px' }}>خلاصه آمار</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                   {[
                     { label:'رنک ملی',       v:player.nationalRank  ? `#${toFa(player.nationalRank)}`  : '—', color:'#f59e0b' },
@@ -550,14 +550,14 @@ export default function PlayerProfilePage() {
                     { label:'نرخ برد',       v:player.winRate       ? `${toFa(player.winRate)}٪`        : '—', color:'#06b6d4' },
                   ].map((x, i) => (
                     <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px', borderRadius:9 }}>
-                      <span style={{ fontSize:13, color:'rgba(0,0,0,0.42)' }}>{x.label}</span>
-                      <span style={{ fontSize:15, fontWeight:800, color:x.color }}>{x.v}</span>
+                      <span style={{ fontSize:14, color:'rgba(0,0,0,0.42)' }}>{x.label}</span>
+                      <span style={{ fontSize:16, fontWeight:800, color:x.color }}>{x.v}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <button onClick={() => router.push('/players')} style={{ width:'100%', padding:'12px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.07)', borderRadius:12, color:'rgba(0,0,0,0.45)', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+              <button onClick={() => router.push('/players')} style={{ width:'100%', padding:'12px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.07)', borderRadius:12, color:'rgba(0,0,0,0.45)', fontSize:15, fontWeight:600, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
                 <ChevronRight size={14} /> بازگشت به لیست
               </button>
             </div>

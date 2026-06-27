@@ -80,7 +80,7 @@ function Section({ title, icon, color = '#C7A66A', children }: {
         <span style={{ width: 34, height: 34, borderRadius: 10, background: hexToRgba(color, 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <i className={`ti ${icon}`} style={{ fontSize: 19, color }} />
         </span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#111111' }}>{title}</span>
+        <span style={{ fontSize: 16, fontWeight: 700, color: '#111111' }}>{title}</span>
       </div>
       {children}
     </div>
@@ -91,7 +91,7 @@ function Section({ title, icon, color = '#C7A66A', children }: {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 12, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>{label}</label>
+      <label style={{ display: 'block', fontSize: 13, color: 'rgba(0,0,0,0.50)', marginBottom: 6 }}>{label}</label>
       {children}
     </div>
   )
@@ -101,7 +101,7 @@ const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
   background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
   borderRadius: 10, padding: '10px 12px', color: '#111111',
-  fontSize: 14, fontFamily: 'inherit', outline: 'none',
+  fontSize: 15, fontFamily: 'inherit', outline: 'none',
 }
 
 // ─── Club Search ──────────────────────────────────────────────
@@ -149,10 +149,10 @@ function ClubSearch({
         style={inputStyle}
       />
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button onClick={() => { onManual(manual); setUseManual(false) }} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#FFFFFF', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+        <button onClick={() => { onManual(manual); setUseManual(false) }} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
           ثبت
         </button>
-        <button onClick={() => setUseManual(false)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.45)', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}>
+        <button onClick={() => setUseManual(false)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.45)', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer' }}>
           انصراف
         </button>
       </div>
@@ -175,16 +175,16 @@ function ClubSearch({
       {open && (
         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: 12, marginTop: 4, maxHeight: 220, overflowY: 'auto' }}>
           {loading && (
-            <div style={{ padding: '12px 14px', fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>در حال جستجو...</div>
+            <div style={{ padding: '12px 14px', fontSize: 14, color: 'rgba(0,0,0,0.38)' }}>در حال جستجو...</div>
           )}
           {!loading && clubs.map(c => (
-            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(c.name); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111111', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(c.name); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111111', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span>{c.name}</span>
-              <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.38)' }}>{c.city} · {toFa(c.memberCount ?? 0)} عضو</span>
+              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>{c.city} · {toFa(c.memberCount ?? 0)} عضو</span>
             </button>
           ))}
-          <button onClick={() => { setOpen(false); setUseManual(true) }} style={{ width: '100%', padding: '10px 14px', background: 'rgba(199,166,106,0.05)', border: 'none', color: '#A07840', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right' }}>
-            <i className="ti ti-plus" style={{ marginLeft: 6, fontSize: 14 }} />
+          <button onClick={() => { setOpen(false); setUseManual(true) }} style={{ width: '100%', padding: '10px 14px', background: 'rgba(199,166,106,0.05)', border: 'none', color: '#A07840', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right' }}>
+            <i className="ti ti-plus" style={{ marginLeft: 6, fontSize: 15 }} />
             باشگاه من در لیست نیست
           </button>
         </div>
@@ -343,7 +343,7 @@ export default function ProfileMePage() {
                   }
                 </div>
                 <button onClick={() => fileRef.current?.click()} style={{ position: 'absolute', bottom: 2, left: 2, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                  <i className="ti ti-camera" style={{ fontSize: 12, color: '#FFFFFF' }} />
+                  <i className="ti ti-camera" style={{ fontSize: 13, color: '#FFFFFF' }} />
                 </button>
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
               </div>
@@ -351,13 +351,13 @@ export default function ProfileMePage() {
               <div style={{ paddingBottom: 4, flex: 1 }}>
                 <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>{fullName}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>{profile.phone}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{profile.phone}</span>
                   {isVerified
                     ? <span style={{ fontSize: 10, color: '#C7A66A', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <i className="ti ti-shield-check" style={{ fontSize: 11 }} />احراز شده
+                        <i className="ti ti-shield-check" style={{ fontSize: 12 }} />احراز شده
                       </span>
                     : <button onClick={() => router.push('/profile/verify')} style={{ fontSize: 10, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 20, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <i className="ti ti-alert-triangle" style={{ fontSize: 11 }} />احراز هویت کنید
+                        <i className="ti ti-alert-triangle" style={{ fontSize: 12 }} />احراز هویت کنید
                       </button>
                   }
                 </div>
@@ -369,10 +369,10 @@ export default function ProfileMePage() {
               <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
                 <i className="ti ti-shield-off" style={{ fontSize: 26, color: '#f59e0b', flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fbbf24', marginBottom: 4 }}>هویت تأیید نشده</div>
-                  <div style={{ fontSize: 12, color: '#92400e', lineHeight: 1.6 }}>برای رزرو میز و خرید و فروش باید احراز هویت کنید</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#fbbf24', marginBottom: 4 }}>هویت تأیید نشده</div>
+                  <div style={{ fontSize: 13, color: '#92400e', lineHeight: 1.6 }}>برای رزرو میز و خرید و فروش باید احراز هویت کنید</div>
                 </div>
-                <button onClick={() => router.push('/profile/verify')} style={{ background: '#f59e0b', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 13, fontWeight: 700, color: '#000', fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0 }}>
+                <button onClick={() => router.push('/profile/verify')} style={{ background: '#f59e0b', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 14, fontWeight: 700, color: '#000', fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0 }}>
                   احراز هویت
                 </button>
               </div>
@@ -425,12 +425,12 @@ export default function ProfileMePage() {
 
             {/* ── باشگاه ── */}
             <Section title="باشگاه" icon="ti-building-store" color="#a78bfa">
-              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 باشگاهی که در آن بازی می‌کنید را انتخاب کنید
               </p>
               {clubName && (
-                <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 14, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="ti ti-check" style={{ fontSize: 15 }} />
+                <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 15, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <i className="ti ti-check" style={{ fontSize: 16 }} />
                   {clubName}
                 </div>
               )}
@@ -444,11 +444,11 @@ export default function ProfileMePage() {
 
             {/* ── کارت بانکی ── */}
             <Section title="کارت بانکی" icon="ti-credit-card" color="#f59e0b">
-              <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 برای لغو رزرو و تسویه حساب — کارت باید به نام خودتان باشد
               </p>
               {profile.bankCard && (
-                <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: '8px 14px', marginBottom: 12, fontSize: 14, color: '#fbbf24', fontFamily: 'monospace', letterSpacing: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: '8px 14px', marginBottom: 12, fontSize: 15, color: '#fbbf24', fontFamily: 'monospace', letterSpacing: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <i className="ti ti-credit-card" style={{ fontSize: 18 }} />
                   {profile.bankCard}
                 </div>
@@ -465,7 +465,7 @@ export default function ProfileMePage() {
               <Field label="نام صاحب کارت">
                 <input value={bankOwner} onChange={e => setBankOwner(e.target.value)} placeholder="نام و نام خانوادگی" style={inputStyle} />
               </Field>
-              <button onClick={handleBankCard} style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+              <button onClick={handleBankCard} style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
                 ثبت کارت
               </button>
             </Section>
@@ -481,10 +481,10 @@ export default function ProfileMePage() {
               ].map(f => (
                 <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
                   <i className={`ti ${f.icon}`} style={{ fontSize: 18, color: f.ok ? '#C7A66A' : 'rgba(0,0,0,0.35)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 14, color: f.ok ? '#111111' : 'rgba(0,0,0,0.35)', flex: 1 }}>{f.label}</span>
+                  <span style={{ fontSize: 15, color: f.ok ? '#111111' : 'rgba(0,0,0,0.35)', flex: 1 }}>{f.label}</span>
                   {f.ok
-                    ? <i className="ti ti-check" style={{ fontSize: 15, color: '#C7A66A' }} />
-                    : <span style={{ fontSize: 11, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', borderRadius: 20, padding: '2px 8px' }}>نیاز به احراز</span>
+                    ? <i className="ti ti-check" style={{ fontSize: 16, color: '#C7A66A' }} />
+                    : <span style={{ fontSize: 12, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', borderRadius: 20, padding: '2px 8px' }}>نیاز به احراز</span>
                   }
                 </div>
               ))}
@@ -494,7 +494,7 @@ export default function ProfileMePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: saving ? 'rgba(199,166,106,0.10)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: saving ? 'rgba(0,0,0,0.35)' : '#FFFFFF', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: saving ? 'none' : '0 4px 16px rgba(199,166,106,0.3)' }}>
+              style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: saving ? 'rgba(199,166,106,0.10)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: saving ? 'rgba(0,0,0,0.35)' : '#FFFFFF', fontSize: 16, fontWeight: 700, fontFamily: 'inherit', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: saving ? 'none' : '0 4px 16px rgba(199,166,106,0.3)' }}>
               {saving
                 ? <><i className="ti ti-loader-2" style={{ fontSize: 18 }} />در حال ذخیره...</>
                 : <><i className="ti ti-device-floppy" style={{ fontSize: 18 }} />ذخیره پروفایل</>
@@ -505,7 +505,7 @@ export default function ProfileMePage() {
 
         {/* Toast */}
         {toast && (
-          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#C7A66A' : '#ef4444', color: '#FFFFFF', fontSize: 13, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
+          <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: toast.type === 'success' ? '#C7A66A' : '#ef4444', color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px', borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
             {toast.type === 'success' ? '✓' : '✕'} {toast.msg}
           </div>
         )}

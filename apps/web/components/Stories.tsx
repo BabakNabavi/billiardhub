@@ -86,10 +86,10 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
             {currentGroup.userAvatar}
           </div>
           <div style={{ flex:1 }}>
-            <div style={{ color:'#fff',fontWeight:700,fontSize: '15px' }}>{currentGroup.userName}</div>
-            <div style={{ color:'rgba(255,255,255,0.4)',fontSize: '12px' }}>{currentStory.createdAt}</div>
+            <div style={{ color:'#fff',fontWeight:700,fontSize: '16px' }}>{currentGroup.userName}</div>
+            <div style={{ color:'rgba(255,255,255,0.4)',fontSize: '13px' }}>{currentStory.createdAt}</div>
           </div>
-          <span style={{ fontSize: '11px',color:currentGroup.roleColor,background:`${currentGroup.roleColor}18`,border:`1px solid ${currentGroup.roleColor}40`,borderRadius:'20px',padding:'4px 11px',fontWeight:700,backdropFilter:'blur(10px)',flexShrink:0 }}>{currentGroup.roleLabel}</span>
+          <span style={{ fontSize: '12px',color:currentGroup.roleColor,background:`${currentGroup.roleColor}18`,border:`1px solid ${currentGroup.roleColor}40`,borderRadius:'20px',padding:'4px 11px',fontWeight:700,backdropFilter:'blur(10px)',flexShrink:0 }}>{currentGroup.roleLabel}</span>
           <button onClick={onClose} style={{ width:'34px',height:'34px',borderRadius:'50%',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(0,0,0,0.09)',cursor:'pointer',color:'rgba(255,255,255,0.8)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><X size={15} /></button>
         </div>
         <button onClick={onPrev} style={{ position:'absolute',right:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />

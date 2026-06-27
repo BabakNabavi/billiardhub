@@ -71,8 +71,8 @@ function StarRow({ score = 4.3, count = 128 }: { score?: number; count?: number 
           </svg>
         ))}
       </div>
-      <span style={{ fontSize: 14, color: '#f59e0b', fontWeight: 700 }}>{toFa(score.toFixed(1))}</span>
-      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)' }}>({toFa(count)} نظر)</span>
+      <span style={{ fontSize: 15, color: '#f59e0b', fontWeight: 700 }}>{toFa(score.toFixed(1))}</span>
+      <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.25)' }}>({toFa(count)} نظر)</span>
     </div>
   )
 }
@@ -82,8 +82,8 @@ function TrustBadge({ icon, title, sub }: { icon: string; title: string; sub: st
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: 14 }}>
       <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{icon}</div>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#111111' }}>{title}</div>
-        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginTop: 1 }}>{sub}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{title}</div>
+        <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', marginTop: 1 }}>{sub}</div>
       </div>
     </div>
   )
@@ -97,11 +97,11 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         onClick={() => setOpen(v => !v)}
         style={{ width: '100%', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
       >
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#111111' }}>{q}</span>
+        <span style={{ fontSize: 16, fontWeight: 600, color: '#111111' }}>{q}</span>
         <span style={{ fontSize: 22, color: '#C7A66A', transition: 'transform 0.3s', transform: open ? 'rotate(45deg)' : 'rotate(0)', flexShrink: 0, lineHeight: 1 }}>+</span>
       </button>
       {open && (
-        <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', lineHeight: 1.8, margin: '0 0 4px', paddingRight: 4 }}>{a}</p>
+        <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.8, margin: '0 0 4px', paddingRight: 4 }}>{a}</p>
       )}
     </div>
   )
@@ -112,11 +112,11 @@ function ReviewCard({ name, score, text, date }: { name: string; score: number; 
     <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 15, flexShrink: 0 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 16, flexShrink: 0 }}>
             {name.charAt(0)}
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{name}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#111111' }}>{name}</div>
             <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
               {[1,2,3,4,5].map(i => (
                 <svg key={i} width="10" height="10" viewBox="0 0 20 20" fill={i <= score ? '#f59e0b' : 'rgba(0,0,0,0.08)'}>
@@ -126,9 +126,9 @@ function ReviewCard({ name, score, text, date }: { name: string; score: number; 
             </div>
           </div>
         </div>
-        <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>{date}</span>
+        <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>{date}</span>
       </div>
-      <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', lineHeight: 1.75, margin: 0 }}>{text}</p>
+      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.75, margin: 0 }}>{text}</p>
     </div>
   )
 }
@@ -213,7 +213,7 @@ export default function ProductDetailPage() {
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 70, marginBottom: 16 }}>🎱</div>
         <p style={{ fontSize: 20, color: '#111111', marginBottom: 8 }}>{error || 'محصول پیدا نشد'}</p>
-        <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '12px 24px', borderRadius: 12, textDecoration: 'none', fontWeight: 700, fontSize: 15 }}>
+        <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '12px 24px', borderRadius: 12, textDecoration: 'none', fontWeight: 700, fontSize: 16 }}>
           بازگشت به فروشگاه
         </Link>
       </div>
@@ -260,13 +260,13 @@ export default function ProductDetailPage() {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', padding: '24px 20px 80px' }}>
 
           {/* ── Breadcrumb ── */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 32, flexWrap: 'wrap' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(0,0,0,0.38)', marginBottom: 32, flexWrap: 'wrap' }}>
             <Link href="/" style={{ color: 'rgba(0,0,0,0.45)', textDecoration: 'none' }}>خانه</Link>
-            <i className="ti ti-chevron-left" style={{ fontSize: 13 }} />
+            <i className="ti ti-chevron-left" style={{ fontSize: 14 }} />
             <Link href="/shop" style={{ color: 'rgba(0,0,0,0.45)', textDecoration: 'none' }}>فروشگاه</Link>
-            <i className="ti ti-chevron-left" style={{ fontSize: 13 }} />
+            <i className="ti ti-chevron-left" style={{ fontSize: 14 }} />
             <Link href={`/shop?category=${product.category}`} style={{ color: 'rgba(0,0,0,0.45)', textDecoration: 'none' }}>{CATEGORY_LABELS[product.category] ?? product.category}</Link>
-            <i className="ti ti-chevron-left" style={{ fontSize: 13 }} />
+            <i className="ti ti-chevron-left" style={{ fontSize: 14 }} />
             <span style={{ color: 'rgba(0,0,0,0.50)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.title}</span>
           </nav>
 
@@ -293,18 +293,18 @@ export default function ProductDetailPage() {
 
                 {/* badges */}
                 {product.discountPercent && (
-                  <div style={{ position: 'absolute', top: 16, right: 16, width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#ea580c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#fff', boxShadow: '0 8px 24px rgba(220,38,38,0.5)' }}>
+                  <div style={{ position: 'absolute', top: 16, right: 16, width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#ea580c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 900, color: '#fff', boxShadow: '0 8px 24px rgba(220,38,38,0.5)' }}>
                     {toFa(product.discountPercent)}٪
                   </div>
                 )}
                 {product.isDailyDeal && (
-                  <div style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(239,68,68,0.9)', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)' }}>
+                  <div style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(239,68,68,0.9)', borderRadius: 20, padding: '4px 12px', fontSize: 13, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)' }}>
                     🔥 پیشنهاد روز
                   </div>
                 )}
                 {product.isOfficialStore && (
-                  <div style={{ position: 'absolute', bottom: 16, right: 16, background: 'rgba(199,166,106,0.85)', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <i className="ti ti-verified" style={{ fontSize: 14 }} /> فروشگاه رسمی
+                  <div style={{ position: 'absolute', bottom: 16, right: 16, background: 'rgba(199,166,106,0.85)', borderRadius: 20, padding: '4px 12px', fontSize: 13, fontWeight: 700, color: '#fff', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <i className="ti ti-verified" style={{ fontSize: 15 }} /> فروشگاه رسمی
                   </div>
                 )}
 
@@ -341,7 +341,7 @@ export default function ProductDetailPage() {
                 ].map(b => (
                   <div key={b.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <i className={`ti ${b.icon}`} style={{ fontSize: 20, color: '#C7A66A' }} />
-                    <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', whiteSpace: 'nowrap' }}>{b.label}</span>
+                    <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', whiteSpace: 'nowrap' }}>{b.label}</span>
                   </div>
                 ))}
               </div>
@@ -352,14 +352,14 @@ export default function ProductDetailPage() {
 
               {/* category + condition tags */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A' }}>
                   {CATEGORY_LABELS[product.category] ?? product.category}
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: product.condition === 'new' ? 'rgba(59,130,246,0.1)' : 'rgba(245,158,11,0.1)', border: `1px solid ${product.condition === 'new' ? 'rgba(59,130,246,0.3)' : 'rgba(245,158,11,0.3)'}`, color: product.condition === 'new' ? '#60a5fa' : '#f59e0b' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: product.condition === 'new' ? 'rgba(59,130,246,0.1)' : 'rgba(245,158,11,0.1)', border: `1px solid ${product.condition === 'new' ? 'rgba(59,130,246,0.3)' : 'rgba(245,158,11,0.3)'}`, color: product.condition === 'new' ? '#60a5fa' : '#f59e0b' }}>
                   {CONDITION_LABELS[product.condition] ?? product.condition}
                 </span>
-                <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <i className="ti ti-map-pin" style={{ fontSize: 12, color: '#C7A66A' }} />
+                <span style={{ fontSize: 13, padding: '4px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <i className="ti ti-map-pin" style={{ fontSize: 13, color: '#C7A66A' }} />
                   {product.city}
                 </span>
               </div>
@@ -373,8 +373,8 @@ export default function ProductDetailPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                 <StarRow score={4.3} count={128} />
                 <span style={{ color: 'rgba(0,0,0,0.09)' }}>|</span>
-                <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <i className="ti ti-eye" style={{ fontSize: 14 }} />
+                <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <i className="ti ti-eye" style={{ fontSize: 15 }} />
                   {toFa(product.views)} بازدید
                 </span>
               </div>
@@ -389,24 +389,24 @@ export default function ProductDetailPage() {
                 {product.discountPrice ? (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                      <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.40)', textDecoration: 'line-through' }}>{fmt(product.price)} تومان</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)', color: '#f87171', borderRadius: 20, padding: '2px 8px' }}>
+                      <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', textDecoration: 'line-through' }}>{fmt(product.price)} تومان</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)', color: '#f87171', borderRadius: 20, padding: '2px 8px' }}>
                         {toFa(product.discountPercent ?? 0)}٪ تخفیف
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                       <span style={{ fontSize: 'clamp(31px, 3.3vw, 42px)', fontWeight: 900, color: '#C7A66A', lineHeight: 1, textShadow: '0 0 30px rgba(199,166,106,0.3)' }}>{fmt(finalPrice)}</span>
-                      <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', fontWeight: 400 }}>تومان</span>
+                      <span style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', fontWeight: 400 }}>تومان</span>
                     </div>
-                    <div style={{ marginTop: 10, fontSize: 13, color: '#C7A66A', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.06)', borderRadius: 10, padding: '6px 12px', width: 'fit-content' }}>
-                      <i className="ti ti-coin" style={{ fontSize: 15 }} />
+                    <div style={{ marginTop: 10, fontSize: 14, color: '#C7A66A', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.06)', borderRadius: 10, padding: '6px 12px', width: 'fit-content' }}>
+                      <i className="ti ti-coin" style={{ fontSize: 16 }} />
                       سود شما: <strong>{fmt(savings)}</strong> تومان
                     </div>
                   </>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                     <span style={{ fontSize: 'clamp(31px, 3.3vw, 42px)', fontWeight: 900, color: '#C7A66A', lineHeight: 1, textShadow: '0 0 30px rgba(199,166,106,0.3)' }}>{fmt(finalPrice)}</span>
-                    <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)' }}>تومان</span>
+                    <span style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)' }}>تومان</span>
                   </div>
                 )}
 
@@ -415,14 +415,14 @@ export default function ProductDetailPage() {
                   {product.stock > 0 ? (
                     <>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#C7A66A', boxShadow: '0 0 8px rgba(199,166,106,0.8)', flexShrink: 0 }} />
-                      <span style={{ fontSize: 14, color: '#C7A66A', fontWeight: 600 }}>
+                      <span style={{ fontSize: 15, color: '#C7A66A', fontWeight: 600 }}>
                         موجود — {toFa(product.stock)} عدد باقی‌مانده
                       </span>
                     </>
                   ) : (
                     <>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />
-                      <span style={{ fontSize: 14, color: '#ef4444', fontWeight: 600 }}>ناموجود</span>
+                      <span style={{ fontSize: 15, color: '#ef4444', fontWeight: 600 }}>ناموجود</span>
                     </>
                   )}
                 </div>
@@ -431,21 +431,21 @@ export default function ProductDetailPage() {
               {/* Quantity selector */}
               {product.stock > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>تعداد:</span>
+                  <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)' }}>تعداد:</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 0, border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, overflow: 'hidden' }}>
                     <button
                       className="qty-btn"
                       onClick={() => setQty(q => Math.max(1, q - 1))}
                       style={{ width: 38, height: 38, background: 'rgba(0,0,0,0.03)', border: 'none', cursor: 'pointer', color: '#111111', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(0,0,0,0.06)' }}
                     >−</button>
-                    <span style={{ minWidth: 48, textAlign: 'center', fontSize: 15, fontWeight: 700, color: '#111111' }}>{toFa(qty)}</span>
+                    <span style={{ minWidth: 48, textAlign: 'center', fontSize: 16, fontWeight: 700, color: '#111111' }}>{toFa(qty)}</span>
                     <button
                       className="qty-btn"
                       onClick={() => setQty(q => Math.min(product.stock, q + 1))}
                       style={{ width: 38, height: 38, background: 'rgba(0,0,0,0.03)', border: 'none', cursor: 'pointer', color: '#111111', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(0,0,0,0.06)' }}
                     >+</button>
                   </div>
-                  <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>حداکثر {toFa(product.stock)} عدد</span>
+                  <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>حداکثر {toFa(product.stock)} عدد</span>
                 </div>
               )}
 
@@ -474,7 +474,7 @@ export default function ProductDetailPage() {
                       style={{
                         width: '100%', padding: '14px', borderRadius: 14,
                         background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.25)',
-                        color: '#C7A66A', fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
+                        color: '#C7A66A', fontSize: 16, fontWeight: 700, fontFamily: 'inherit',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                         textDecoration: 'none', transition: 'all 0.3s', boxSizing: 'border-box',
                       }}
@@ -484,7 +484,7 @@ export default function ProductDetailPage() {
                     </Link>
                     <button
                       onClick={() => setShowContact(v => !v)}
-                      style={{ width: '100%', padding: '12px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(255,255,255,0.02)', color: 'rgba(0,0,0,0.50)', fontSize: 14, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.3s' }}
+                      style={{ width: '100%', padding: '12px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(255,255,255,0.02)', color: 'rgba(0,0,0,0.50)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.3s' }}
                     >
                       <i className="ti ti-phone" style={{ fontSize: 17 }} />
                       تماس با فروشنده
@@ -500,12 +500,12 @@ export default function ProductDetailPage() {
               {/* Contact reveal */}
               {showContact && (
                 <div style={{ background: 'rgba(199,166,106,0.05)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: 14, padding: '16px', animation: 'fadeUp 0.3s ease both' }}>
-                  <p style={{ fontSize: 13, color: '#C7A66A', fontWeight: 700, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <i className="ti ti-info-circle" style={{ fontSize: 15 }} />
+                  <p style={{ fontSize: 14, color: '#C7A66A', fontWeight: 700, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <i className="ti ti-info-circle" style={{ fontSize: 16 }} />
                     اطلاعات فروشنده
                   </p>
-                  <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', margin: '0 0 6px' }}>شناسه فروشنده: <code style={{ color: '#111111', fontSize: 12 }}>{product.sellerId.slice(0, 8)}…</code></p>
-                  <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: 0 }}>⚠️ قبل از واریز وجه، کالا را تحویل بگیرید.</p>
+                  <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: '0 0 6px' }}>شناسه فروشنده: <code style={{ color: '#111111', fontSize: 13 }}>{product.sellerId.slice(0, 8)}…</code></p>
+                  <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>⚠️ قبل از واریز وجه، کالا را تحویل بگیرید.</p>
                 </div>
               )}
 
@@ -519,7 +519,7 @@ export default function ProductDetailPage() {
 
               {/* Share */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 4 }}>
-                <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>اشتراک‌گذاری:</span>
+                <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)' }}>اشتراک‌گذاری:</span>
                 {['ti-brand-instagram', 'ti-brand-telegram', 'ti-link'].map(icon => (
                   <button key={icon} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(199,166,106,0.3)' }}
@@ -545,7 +545,7 @@ export default function ProductDetailPage() {
                   onClick={() => setActiveTab(tab.key as typeof activeTab)}
                   style={{
                     flex: 1, minWidth: 120, padding: '18px 20px', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                    fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, whiteSpace: 'nowrap',
+                    fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, whiteSpace: 'nowrap',
                     color: activeTab === tab.key ? '#C7A66A' : '#64748b',
                     borderBottom: `2px solid ${activeTab === tab.key ? '#C7A66A' : 'transparent'}`,
                     transition: 'all 0.25s',
@@ -571,14 +571,14 @@ export default function ProductDetailPage() {
                     ['تاریخ ثبت', new Date(product.createdAt).toLocaleDateString('fa-IR')],
                   ].map(([k, v], i) => (
                     <div key={k} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < 5 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
-                      <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>{k}</span>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#111111' }}>{v}</span>
+                      <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)' }}>{k}</span>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: '#111111' }}>{v}</span>
                     </div>
                   ))}
                   {product.description && (
                     <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(0,0,0,0.04)' }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>توضیحات</p>
-                      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0, whiteSpace: 'pre-line' }}>{product.description}</p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>توضیحات</p>
+                      <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.50)', lineHeight: 1.9, margin: 0, whiteSpace: 'pre-line' }}>{product.description}</p>
                     </div>
                   )}
                 </div>
@@ -592,17 +592,17 @@ export default function ProductDetailPage() {
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 57, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{toFa('4.3')}</div>
                       <StarRow score={4.3} count={128} />
-                      <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginTop: 6 }}>از ۵ — بر اساس ۱۲۸ نظر</p>
+                      <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginTop: 6 }}>از ۵ — بر اساس ۱۲۸ نظر</p>
                     </div>
                     <div style={{ flex: 1, minWidth: 200 }}>
                       {[5,4,3,2,1].map(s => (
                         <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', width: 12 }}>{toFa(s)}</span>
-                          <i className="ti ti-star-filled" style={{ fontSize: 12, color: '#f59e0b' }} />
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', width: 12 }}>{toFa(s)}</span>
+                          <i className="ti ti-star-filled" style={{ fontSize: 13, color: '#f59e0b' }} />
                           <div style={{ flex: 1, height: 6, background: 'rgba(0,0,0,0.05)', borderRadius: 3, overflow: 'hidden' }}>
                             <div style={{ height: '100%', background: '#f59e0b', borderRadius: 3, width: `${([72,18,6,3,1][5-s] ?? 0)}%`, opacity: 0.8 }} />
                           </div>
-                          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', width: 28 }}>{toFa([72,18,6,3,1][5-s] ?? 0)}٪</span>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', width: 28 }}>{toFa([72,18,6,3,1][5-s] ?? 0)}٪</span>
                         </div>
                       ))}
                     </div>
@@ -616,7 +616,7 @@ export default function ProductDetailPage() {
                     ].map((r, i) => <ReviewCard key={i} {...r} />)}
                   </div>
 
-                  <button style={{ width: '100%', marginTop: 20, padding: '12px', borderRadius: 12, background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer' }}>
+                  <button style={{ width: '100%', marginTop: 20, padding: '12px', borderRadius: 12, background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}>
                     مشاهده همه نظرات
                   </button>
                 </div>
@@ -642,11 +642,11 @@ export default function ProductDetailPage() {
             <section>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
                 <div>
-                  <p style={{ fontSize: 11, color: 'rgba(199,166,106,0.7)', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 6, textTransform: 'uppercase' }}>RELATED PRODUCTS</p>
+                  <p style={{ fontSize: 12, color: 'rgba(199,166,106,0.7)', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 6, textTransform: 'uppercase' }}>RELATED PRODUCTS</p>
                   <h2 style={{ fontSize: 24, fontWeight: 900, color: '#111111', margin: 0 }}>محصولات مشابه</h2>
                 </div>
-                <Link href={`/shop?category=${product.category}`} style={{ fontSize: 14, color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                  مشاهده همه <i className="ti ti-arrow-left" style={{ fontSize: 15 }} />
+                <Link href={`/shop?category=${product.category}`} style={{ fontSize: 15, color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                  مشاهده همه <i className="ti ti-arrow-left" style={{ fontSize: 16 }} />
                 </Link>
               </div>
 
@@ -664,9 +664,9 @@ export default function ProductDetailPage() {
                             onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
                         </div>
                         <div style={{ padding: '12px 14px 14px' }}>
-                          <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)', margin: '0 0 6px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.title}</p>
-                          {p.discountPrice && <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.30)', textDecoration: 'line-through', margin: '0 0 2px' }}>{fmt(p.price)} ت</p>}
-                          <p style={{ fontSize: 17, fontWeight: 900, color: '#C7A66A', margin: 0 }}>{fmt(fp)} <span style={{ fontSize: 11, fontWeight: 400, color: 'rgba(0,0,0,0.45)' }}>تومان</span></p>
+                          <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: '0 0 6px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.title}</p>
+                          {p.discountPrice && <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.30)', textDecoration: 'line-through', margin: '0 0 2px' }}>{fmt(p.price)} ت</p>}
+                          <p style={{ fontSize: 17, fontWeight: 900, color: '#C7A66A', margin: 0 }}>{fmt(fp)} <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,0,0,0.45)' }}>تومان</span></p>
                         </div>
                       </div>
                     </Link>
@@ -697,10 +697,10 @@ export default function ProductDetailPage() {
         {product.stock > 0 && (
           <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(2,8,6,0.97)', borderTop: '1px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(24px)', padding: '12px 20px', display: 'none' }} className="mobile-sticky-bar">
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={handleAddToCart} style={{ flex: 1, padding: '14px', borderRadius: 12, background: addedToCart ? '#059669' : 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#fff', fontSize: 15, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>
+              <button onClick={handleAddToCart} style={{ flex: 1, padding: '14px', borderRadius: 12, background: addedToCart ? '#059669' : 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#fff', fontSize: 16, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>
                 {addedToCart ? 'اضافه شد ✓' : 'افزودن به سبد'}
               </button>
-              <Link href="/checkout" onClick={handleAddToCart} style={{ flex: 1, padding: '14px', borderRadius: 12, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)', color: '#C7A66A', fontSize: 15, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Link href="/checkout" onClick={handleAddToCart} style={{ flex: 1, padding: '14px', borderRadius: 12, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)', color: '#C7A66A', fontSize: 16, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 خرید سریع
               </Link>
             </div>

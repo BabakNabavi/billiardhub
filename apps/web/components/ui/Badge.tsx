@@ -25,7 +25,7 @@ export function Badge({ children, color = 'green', dot, style }: BadgeProps) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: '6px',
       padding: '3px 11px', borderRadius: radius.full,
-      fontSize: '11px', fontWeight: 700,
+      fontSize: '12px', fontWeight: 700,
       color: p.text, background: p.bg,
       border: `1px solid ${p.border}`,
       backdropFilter: 'blur(10px)',

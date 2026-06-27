@@ -56,7 +56,7 @@ export default function TournamentPublicPage() {
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(199,166,106,0.45)', borderRadius: 20,
-                padding: '7px 14px', fontSize: 13, fontWeight: 800, color: '#C7A66A',
+                padding: '7px 14px', fontSize: 14, fontWeight: 800, color: '#C7A66A',
                 animation: 'blinkReg 1.6s ease-in-out infinite',
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C7A66A',
@@ -73,7 +73,7 @@ export default function TournamentPublicPage() {
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
                     animation: 'lp 1.8s infinite', display: 'inline-block' }} />
                 )}
-                <span style={{ fontSize: 13, fontWeight: 700, color: statusColor }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: statusColor }}>
                   {STATUS_LABELS[t.status]}
                 </span>
               </div>
@@ -82,7 +82,7 @@ export default function TournamentPublicPage() {
               display: 'flex', alignItems: 'center', gap: 6,
               background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
               border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-              padding: '7px 14px', fontSize: 13, fontWeight: 700,
+              padding: '7px 14px', fontSize: 14, fontWeight: 700,
               color: copied ? '#30C55A' : 'rgba(255,255,255,0.85)',
               cursor: 'pointer', fontFamily: 'inherit', transition: 'color 0.2s',
             }}>
@@ -96,7 +96,7 @@ export default function TournamentPublicPage() {
             display: 'flex', alignItems: 'center', gap: 6,
             background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-            padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
+            padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
             cursor: 'pointer', fontFamily: 'inherit',
           }}>
             مسابقات
@@ -112,13 +112,13 @@ export default function TournamentPublicPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <div style={{
               background: `${gameColor}22`, border: `1px solid ${gameColor}44`,
-              borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700,
+              borderRadius: 20, padding: '4px 12px', fontSize: 13, fontWeight: 700,
               color: gameColor,
             }}>
               {GAME_TYPE_LABELS[t.gameType]}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5,
-              fontSize: 13, color: 'rgba(255,255,255,0.70)' }}>
+              fontSize: 14, color: 'rgba(255,255,255,0.70)' }}>
               <MapPin size={12} />
               {t.clubName}
             </div>
@@ -152,8 +152,8 @@ export default function TournamentPublicPage() {
                   border: '1px solid rgba(0,0,0,0.06)',
                 }}>
                   <div style={{ marginBottom: 8 }}>{item.icon}</div>
-                  <div style={{ fontSize: 11, color: '#aaa', marginBottom: 4 }}>{item.label}</div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>{item.value}</div>
+                  <div style={{ fontSize: 12, color: '#aaa', marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -164,7 +164,7 @@ export default function TournamentPublicPage() {
               <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 12px' }}>
                 درباره مسابقه
               </h2>
-              <p style={{ fontSize: 14, color: '#555', margin: 0, lineHeight: 1.85 }}>
+              <p style={{ fontSize: 15, color: '#555', margin: 0, lineHeight: 1.85 }}>
                 {t.description}
               </p>
             </div>
@@ -175,7 +175,7 @@ export default function TournamentPublicPage() {
               <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 14px' }}>
                 🏆 جوایز
               </h2>
-              <p style={{ fontSize: 14, color: '#555', margin: 0, lineHeight: 2.2,
+              <p style={{ fontSize: 15, color: '#555', margin: 0, lineHeight: 2.2,
                 whiteSpace: 'pre-line' }}>
                 {t.prizeInfo}
               </p>
@@ -190,7 +190,7 @@ export default function TournamentPublicPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {t.rules.split('\n').map((rule, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10,
-                    fontSize: 14, color: '#555', lineHeight: 1.6 }}>
+                    fontSize: 15, color: '#555', lineHeight: 1.6 }}>
                     <span style={{ color: '#C7A66A', fontWeight: 800, flexShrink: 0 }}>•</span>
                     <span>{rule.replace(/^•\s*/, '')}</span>
                   </div>
@@ -212,12 +212,12 @@ export default function TournamentPublicPage() {
                 <div style={{ fontSize: 28, fontWeight: 900, color: '#C7A66A' }}>
                   {formatFee(t.entryFee)}
                 </div>
-                <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>مبلغ ورودی</div>
+                <div style={{ fontSize: 14, color: '#aaa', marginTop: 4 }}>مبلغ ورودی</div>
               </div>
 
               {/* Capacity progress */}
               <div style={{ marginBottom: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13,
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14,
                   marginBottom: 8 }}>
                   <span style={{ color: '#777' }}>تعداد ثبت‌نام‌شده</span>
                   <span style={{ fontWeight: 800, color: full ? '#ef4444' : '#111' }}>
@@ -232,7 +232,7 @@ export default function TournamentPublicPage() {
                   }} />
                 </div>
                 {full && (
-                  <p style={{ fontSize: 12, color: '#ef4444', margin: '6px 0 0',
+                  <p style={{ fontSize: 13, color: '#ef4444', margin: '6px 0 0',
                     textAlign: 'center', fontWeight: 700 }}>
                     ظرفیت تکمیل شد
                   </p>
@@ -249,7 +249,7 @@ export default function TournamentPublicPage() {
                 ].map(row => (
                   <div key={row.label} style={{
                     display: 'flex', justifyContent: 'space-between',
-                    fontSize: 13, color: '#555',
+                    fontSize: 14, color: '#555',
                     paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
                   }}>
                     <span style={{ color: '#aaa' }}>{row.label}</span>
@@ -264,7 +264,7 @@ export default function TournamentPublicPage() {
                   <button style={{
                     width: '100%', padding: '14px', borderRadius: 14, border: 'none',
                     background: 'rgba(199,166,106,0.10)', color: '#C7A66A',
-                    fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+                    fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
                   }}>
                     مشاهده نتایج 🏆
                   </button>
@@ -274,7 +274,7 @@ export default function TournamentPublicPage() {
                   <button style={{
                     width: '100%', padding: '14px', borderRadius: 14, border: 'none',
                     background: 'linear-gradient(135deg,#ef4444,#dc2626)',
-                    color: '#fff', fontSize: 15, fontWeight: 800,
+                    color: '#fff', fontSize: 16, fontWeight: 800,
                     cursor: 'pointer', fontFamily: 'inherit',
                     boxShadow: '0 4px 16px rgba(239,68,68,0.28)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -292,7 +292,7 @@ export default function TournamentPublicPage() {
                     background: canRegister ? 'rgba(199,166,106,0.10)' : 'rgba(0,0,0,0.05)',
                     border: `1px solid ${canRegister ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.10)'}`,
                     color: canRegister ? '#C7A66A' : '#bbb',
-                    fontSize: 15, fontWeight: 800,
+                    fontSize: 16, fontWeight: 800,
                     cursor: canRegister ? 'pointer' : 'not-allowed',
                     fontFamily: 'inherit',
                   }}>
@@ -302,7 +302,7 @@ export default function TournamentPublicPage() {
               )}
 
               {canRegister && (
-                <p style={{ fontSize: 12, color: '#aaa', margin: '10px 0 0',
+                <p style={{ fontSize: 13, color: '#aaa', margin: '10px 0 0',
                   textAlign: 'center', lineHeight: 1.6 }}>
                   پس از ثبت‌نام آنلاین، مدیر باشگاه درخواست را تایید خواهد کرد
                 </p>
@@ -313,7 +313,7 @@ export default function TournamentPublicPage() {
             <div style={{ marginTop: 12 }}>
               <Link href={`/tournaments/${t.id}/admin`} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                fontSize: 13, color: '#999', textDecoration: 'none',
+                fontSize: 14, color: '#999', textDecoration: 'none',
                 padding: '10px', borderRadius: 12,
                 border: '1px solid rgba(0,0,0,0.07)',
                 background: '#fff', transition: 'all 0.18s',

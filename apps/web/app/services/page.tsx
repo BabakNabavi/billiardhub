@@ -137,7 +137,7 @@ function ProviderCard({ p }: { p: Provider }) {
           </div>
 
           {/* City */}
-          <div style={{ position:'absolute', bottom:'12px', right:'12px', display:'flex', alignItems:'center', gap:'4px', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 11px', fontSize: '12px', color:'rgba(255,255,255,0.8)' }}>
+          <div style={{ position:'absolute', bottom:'12px', right:'12px', display:'flex', alignItems:'center', gap:'4px', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 11px', fontSize: '13px', color:'rgba(255,255,255,0.8)' }}>
             <MapPin size={9} style={{ color:p.avatarColor }}/>{p.city}
           </div>
         </div>
@@ -149,8 +149,8 @@ function ProviderCard({ p }: { p: Provider }) {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'4px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', padding:'4px 10px', marginBottom:'4px' }}>
             <Star size={11} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>
-            <span style={{ fontSize: '14px', fontWeight:800, color:'#f59e0b' }}>{p.rating}</span>
-            <span style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)' }}>({toFa(p.reviewCount)})</span>
+            <span style={{ fontSize: '15px', fontWeight:800, color:'#f59e0b' }}>{p.rating}</span>
+            <span style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)' }}>({toFa(p.reviewCount)})</span>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ function ProviderCard({ p }: { p: Provider }) {
             <h3 style={{ fontSize: '17px', fontWeight:900, color: '#111111', margin:0, letterSpacing:'-0.015em' }}>{p.name}</h3>
             {p.isVerified && <Check size={12} style={{ color:p.avatarColor, flexShrink:0 }}/>}
           </div>
-          <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.45)', marginBottom:'10px' }}>{p.title}</div>
+          <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.45)', marginBottom:'10px' }}>{p.title}</div>
 
           {/* Speciality */}
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap', marginBottom:'12px' }}>
@@ -170,7 +170,7 @@ function ProviderCard({ p }: { p: Provider }) {
           </div>
 
           {/* Quick info */}
-          <div style={{ display:'flex', gap:'12px', marginBottom:'12px', fontSize: '12px', color:'rgba(0,0,0,0.42)' }}>
+          <div style={{ display:'flex', gap:'12px', marginBottom:'12px', fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>
             <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Clock size={10} style={{ color:'#C7A66A' }}/>{p.responseTime}</span>
             <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Shield size={10} style={{ color:'#06b6d4' }}/>{p.warranty}</span>
           </div>
@@ -185,7 +185,7 @@ function ProviderCard({ p }: { p: Provider }) {
                 {toFa(p.priceFrom.toLocaleString())} <span style={{ fontSize: '10px', opacity:0.7 }}>تومان</span>
               </div>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'5px', fontSize: '12px', color:'rgba(0,0,0,0.40)' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'5px', fontSize: '13px', color:'rgba(0,0,0,0.40)' }}>
               <Wrench size={11} style={{ color:'rgba(0,0,0,0.30)' }}/>{toFa(p.jobs)} پروژه
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function ServicesPage() {
                 <button key={s.key} onClick={()=>setService(s.key)}
                   style={{ padding:'14px 10px', borderRadius:'16px', background: service===s.key?`${s.color}10`:'#FFFFFF', border:`1px solid ${service===s.key?`${s.color}35`:'rgba(0,0,0,0.07)'}`, cursor:'pointer', fontFamily:'inherit', textAlign:'center', transition:'all 0.3s', boxShadow: service===s.key?`0 4px 16px ${s.color}15`:'none' }}>
                   <div style={{ fontSize: '24px', marginBottom:'6px' }}>{s.icon}</div>
-                  <div style={{ fontSize: '11px', fontWeight:700, color: service===s.key?s.color:'rgba(0,0,0,0.45)', lineHeight:1.3 }}>{s.label}</div>
+                  <div style={{ fontSize: '12px', fontWeight:700, color: service===s.key?s.color:'rgba(0,0,0,0.45)', lineHeight:1.3 }}>{s.label}</div>
                   <div style={{ fontSize: '10px', color:'rgba(0,0,0,0.30)', marginTop:'3px' }}>{toFa(s.count)} متخصص</div>
                 </button>
               ))}
@@ -291,7 +291,7 @@ export default function ServicesPage() {
               <option value="jobs">بیشترین پروژه</option>
               <option value="price">ارزان‌ترین</option>
             </select>
-            <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.40)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} متخصص</div>
+            <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.40)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} متخصص</div>
           </div>
         </div>
 
@@ -307,7 +307,7 @@ export default function ServicesPage() {
             ].map((s,i) => (
               <div key={i} style={{ textAlign:'center' }}>
                 <div style={{ fontSize: 'clamp(22px, 3.3vw, 31px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
-                <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
+                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', marginTop:'2px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -325,8 +325,8 @@ export default function ServicesPage() {
               ].map((s,i) => (
                 <div key={i} style={{ textAlign:'center' }}>
                   <div style={{ fontSize: '31px', marginBottom:'8px' }}>{s.icon}</div>
-                  <div style={{ fontSize: '14px', fontWeight:700, color: '#111111', marginBottom:'5px' }}>{s.title}</div>
-                  <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.42)', lineHeight:1.6 }}>{s.desc}</div>
+                  <div style={{ fontSize: '15px', fontWeight:700, color: '#111111', marginBottom:'5px' }}>{s.title}</div>
+                  <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)', lineHeight:1.6 }}>{s.desc}</div>
                 </div>
               ))}
             </div>
@@ -337,7 +337,7 @@ export default function ServicesPage() {
             <div style={{ textAlign:'center', padding:'80px 24px' }}>
               <div style={{ fontSize: '53px', opacity:0.12, marginBottom:'14px' }}>🔧</div>
               <h3 style={{ fontSize: '20px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>متخصصی یافت نشد</h3>
-              <button onClick={()=>{setSearch('');setService('all');setCity('همه شهرها');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#f59e0b,#d97706)', border:'none', borderRadius:'12px', color:'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
+              <button onClick={()=>{setSearch('');setService('all');setCity('همه شهرها');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#f59e0b,#d97706)', border:'none', borderRadius:'12px', color:'#fff', fontSize: '15px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
                 پاک کردن فیلترها
               </button>
             </div>
@@ -353,12 +353,12 @@ export default function ServicesPage() {
 
           {/* Register CTA */}
           <div style={{ marginTop:'56px', padding:'40px 36px', background:'rgba(245,158,11,0.03)', border:'1px dashed rgba(245,158,11,0.18)', borderRadius:'24px', textAlign:'center' }}>
-            <div style={{ fontSize: '11px', color:'rgba(245,158,11,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>JOIN AS TECHNICIAN</div>
+            <div style={{ fontSize: '12px', color:'rgba(245,158,11,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>JOIN AS TECHNICIAN</div>
             <h3 style={{ fontSize: 'clamp(20px, 3.3vw, 29px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>متخصص شوید</h3>
-            <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.40)', margin:'0 0 22px', maxWidth:'380px', marginLeft:'auto', marginRight:'auto' }}>
+            <p style={{ fontSize: '16px', color:'rgba(0,0,0,0.40)', margin:'0 0 22px', maxWidth:'380px', marginLeft:'auto', marginRight:'auto' }}>
               تخصص فنی خود را به درآمد تبدیل کنید. به صدها باشگاه در سراسر ایران خدمات ارائه دهید
             </p>
-            <Link href="/services/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'12px 28px', background:'linear-gradient(135deg,#f59e0b,#d97706)', borderRadius:'13px', color:'#fff', fontSize: '15px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 22px rgba(245,158,11,0.28)' }}>
+            <Link href="/services/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'12px 28px', background:'linear-gradient(135deg,#f59e0b,#d97706)', borderRadius:'13px', color:'#fff', fontSize: '16px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 22px rgba(245,158,11,0.28)' }}>
               ثبت‌نام متخصص ←
             </Link>
           </div>

@@ -157,7 +157,7 @@ function RoleCard({
 
       {/* label */}
       <span style={{
-        fontSize: 11, color: isActive ? '#e2e8f0' : '#64748b',
+        fontSize: 12, color: isActive ? '#e2e8f0' : '#64748b',
         textAlign: 'center', lineHeight: 1.3,
         position: 'relative', zIndex: 1,
         transition: 'color 0.2s', whiteSpace: 'nowrap',
@@ -245,7 +245,7 @@ function DocUploadStep({
         style={{
           display: 'flex', alignItems: 'center', gap: 6,
           background: 'none', border: 'none', color: 'rgba(0,0,0,0.45)',
-          fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+          fontSize: 15, cursor: 'pointer', fontFamily: 'inherit',
           marginBottom: 24, padding: 0,
         }}
       >
@@ -257,15 +257,15 @@ function DocUploadStep({
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)',
-          borderRadius: 20, padding: '4px 14px', fontSize: 12, color: '#C7A66A', marginBottom: 14,
+          borderRadius: 20, padding: '4px 14px', fontSize: 13, color: '#C7A66A', marginBottom: 14,
         }}>
-          <i className="ti ti-upload" style={{ fontSize: 14 }} aria-hidden="true" />
+          <i className="ti ti-upload" style={{ fontSize: 15 }} aria-hidden="true" />
           آپلود مدرک تأیید هویت
         </div>
-        <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
+        <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
           برای نقش‌هایی که نیاز به مدرک دارند، فایل خود را آپلود کنید.
           <br />
-          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>
+          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>
             مدارک توسط ادمین بررسی و تأیید خواهند شد.
           </span>
         </p>
@@ -291,8 +291,8 @@ function DocUploadStep({
                   <i className={`ti ${meta.icon}`} style={{ fontSize: 19, color: meta.color }} aria-hidden="true" />
                 </span>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111111' }}>{meta.label}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', marginTop: 2 }}>{meta.docHint}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111111' }}>{meta.label}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginTop: 2 }}>{meta.docHint}</div>
                 </div>
               </div>
 
@@ -302,11 +302,11 @@ function DocUploadStep({
                 borderRadius: 10, padding: '10px 14px', cursor: 'pointer',
               }}>
                 <i className="ti ti-file-upload" style={{ fontSize: 20, color: file ? meta.color : '#475569' }} aria-hidden="true" />
-                <span style={{ fontSize: 12, color: file ? meta.color : '#475569', flex: 1 }}>
+                <span style={{ fontSize: 13, color: file ? meta.color : '#475569', flex: 1 }}>
                   {file ? file.name : 'انتخاب فایل (JPG / PNG / PDF)'}
                 </span>
-                {st === 'done'  && <i className="ti ti-check" style={{ fontSize: 15, color: '#C7A66A' }} aria-hidden="true" />}
-                {st === 'error' && <i className="ti ti-x"     style={{ fontSize: 15, color: '#ef4444' }} aria-hidden="true" />}
+                {st === 'done'  && <i className="ti ti-check" style={{ fontSize: 16, color: '#C7A66A' }} aria-hidden="true" />}
+                {st === 'error' && <i className="ti ti-x"     style={{ fontSize: 16, color: '#ef4444' }} aria-hidden="true" />}
                 <input
                   type="file"
                   accept=".jpg,.jpeg,.png,.pdf"
@@ -325,7 +325,7 @@ function DocUploadStep({
             display: 'flex', alignItems: 'center', gap: 10,
           }}>
             <i className="ti ti-info-circle" style={{ fontSize: 20, color: '#C7A66A' }} aria-hidden="true" />
-            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.50)' }}>
+            <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)' }}>
               {rolesNoDoc.map(r => ROLE_MAP[r].label).join('، ')} نیازی به مدرک ندارند و سریع‌تر تأیید می‌شوند.
             </span>
           </div>
@@ -339,7 +339,7 @@ function DocUploadStep({
           width: '100%', padding: '14px', borderRadius: 12, border: 'none',
           background: uploading ? 'rgba(0,0,0,0.04)' : '#C7A66A',
           color: uploading ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
-          fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
+          fontSize: 16, fontWeight: 700, fontFamily: 'inherit',
           cursor: uploading ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}
@@ -427,15 +427,15 @@ export default function RolePage() {
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)',
-                  borderRadius: 20, padding: '4px 14px', fontSize: 12, color: '#C7A66A', marginBottom: 14,
+                  borderRadius: 20, padding: '4px 14px', fontSize: 13, color: '#C7A66A', marginBottom: 14,
                 }}>
-                  <i className="ti ti-shield-check" style={{ fontSize: 14 }} aria-hidden="true" />
+                  <i className="ti ti-shield-check" style={{ fontSize: 15 }} aria-hidden="true" />
                   هویت حرفه‌ای شما
                 </div>
                 <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111111', marginBottom: 8, lineHeight: 1.5 }}>
                   {requests.length === 0 ? 'نقش‌های خود را انتخاب کنید' : 'مدیریت نقش‌ها'}
                 </h1>
-                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
+                <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
                   می‌توانید همزمان چند نقش داشته باشید
                 </p>
               </div>
@@ -453,7 +453,7 @@ export default function RolePage() {
                       borderRadius: 12, padding: '10px 12px', textAlign: 'center',
                     }}>
                       <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.val}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)', marginTop: 2 }}>{s.label}</div>
+                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', marginTop: 2 }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
@@ -478,7 +478,7 @@ export default function RolePage() {
                   background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.07)',
                   borderRadius: 14, padding: '14px 16px', marginBottom: 16,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
                     {toFarsiDigits(queued.size)} نقش جدید برای درخواست
                   </div>
@@ -488,14 +488,14 @@ export default function RolePage() {
                       return (
                         <button key={val} onClick={() => toggle(val)} style={{
                           display: 'inline-flex', alignItems: 'center', gap: 5,
-                          padding: '4px 10px 4px 6px', borderRadius: 20, fontSize: 11,
+                          padding: '4px 10px 4px 6px', borderRadius: 20, fontSize: 12,
                           border: `1px solid ${hexToRgba(r.color, 0.35)}`,
                           background: hexToRgba(r.color, 0.1), color: r.color,
                           cursor: 'pointer', fontFamily: 'inherit',
                         }}>
                           <span style={{ width: 6, height: 6, borderRadius: '50%', background: r.color }} />
                           {r.label}
-                          <i className="ti ti-x" style={{ fontSize: 11, marginRight: 2 }} aria-hidden="true" />
+                          <i className="ti ti-x" style={{ fontSize: 12, marginRight: 2 }} aria-hidden="true" />
                         </button>
                       )
                     })}
@@ -509,7 +509,7 @@ export default function RolePage() {
                   background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.2)',
                   borderRadius: 14, padding: '14px 16px', marginBottom: 16,
                 }}>
-                  <div style={{ fontSize: 12, color: '#C7A66A', marginBottom: 10, fontWeight: 600 }}>
+                  <div style={{ fontSize: 13, color: '#C7A66A', marginBottom: 10, fontWeight: 600 }}>
                     نقش‌های تأیید‌شده — تکمیل پروفایل
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -521,11 +521,11 @@ export default function RolePage() {
                           padding: '6px 12px', borderRadius: 20,
                           border: `1px solid ${hexToRgba(m.color, 0.4)}`,
                           background: hexToRgba(m.color, 0.1), color: m.color,
-                          fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                          fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
                         }}>
-                          <i className={`ti ${m.icon}`} style={{ fontSize: 14 }} aria-hidden="true" />
+                          <i className={`ti ${m.icon}`} style={{ fontSize: 15 }} aria-hidden="true" />
                           {m.label}
-                          <i className="ti ti-arrow-left" style={{ fontSize: 12 }} aria-hidden="true" />
+                          <i className="ti ti-arrow-left" style={{ fontSize: 13 }} aria-hidden="true" />
                         </button>
                       )
                     })}
@@ -542,7 +542,7 @@ export default function RolePage() {
                     width: '100%', padding: '14px', borderRadius: 12, border: 'none',
                     background: queued.size === 0 ? 'rgba(0,0,0,0.04)' : '#C7A66A',
                     color: queued.size === 0 ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
-                    fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
+                    fontSize: 16, fontWeight: 700, fontFamily: 'inherit',
                     cursor: queued.size === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   }}
@@ -555,7 +555,7 @@ export default function RolePage() {
                 <button onClick={() => router.push('/dashboard')} style={{
                   width: '100%', padding: 12, borderRadius: 12,
                   border: '1px solid rgba(0,0,0,0.07)', background: 'transparent',
-                  color: 'rgba(0,0,0,0.45)', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
+                  color: 'rgba(0,0,0,0.45)', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer',
                 }}>
                   بازگشت به داشبورد
                 </button>
@@ -576,7 +576,7 @@ export default function RolePage() {
         {toast && (
           <div style={{
             position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-            background: '#C7A66A', color: '#FFFFFF', fontSize: 13, fontWeight: 700,
+            background: '#C7A66A', color: '#FFFFFF', fontSize: 14, fontWeight: 700,
             fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px',
             borderRadius: 24, boxShadow: '0 4px 24px rgba(199,166,106,0.35)',
             zIndex: 100, whiteSpace: 'nowrap', maxWidth: '90vw', textAlign: 'center',

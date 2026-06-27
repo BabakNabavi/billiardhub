@@ -100,10 +100,10 @@ export default function ServiceProviderPage() {
 
           {/* Nav */}
           <div style={{ position:'absolute', top:'24px', left:0, right:0, padding:'0 clamp(16px,4vw,48px)', display:'flex', justifyContent:'space-between', zIndex:10 }}>
-            <Link href="/services" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '13px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px' }}>
+            <Link href="/services" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '14px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px' }}>
               <ChevronRight size={13}/> خدمات فنی
             </Link>
-            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '13px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
+            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '14px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
               <Share2 size={12}/> اشتراک
             </button>
           </div>
@@ -136,18 +136,18 @@ export default function ServiceProviderPage() {
                 <h1 style={{ fontSize: 'clamp(26px, 5.5vw, 53px)', fontWeight:900, color:'#fff', margin:'0 0 6px', letterSpacing:'-0.035em', lineHeight:1.0, textShadow:`0 0 60px ${p.avatarColor}20` }}>
                   {p.name}
                 </h1>
-                <div style={{ fontSize: '15px', color:'rgba(255,255,255,0.5)', marginBottom:'10px' }}>{p.title}</div>
+                <div style={{ fontSize: '16px', color:'rgba(255,255,255,0.5)', marginBottom:'10px' }}>{p.title}</div>
 
                 <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px', fontSize: '13px', color:'rgba(255,255,255,0.8)' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px', fontSize: '14px', color:'rgba(255,255,255,0.8)' }}>
                     <MapPin size={10} style={{ color:p.avatarColor }}/>{p.city}
                   </div>
                   <div style={{ display:'flex', gap:'3px', alignItems:'center', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px' }}>
                     {[1,2,3,4,5].map(s=><Star key={s} size={11} style={{ color:'#f59e0b', fill: s<=Math.floor(p.rating)?'#f59e0b':'transparent' }}/>)}
-                    <span style={{ fontSize: '13px', color:'rgba(255,255,255,0.7)', marginRight:'5px' }}>{p.rating}</span>
-                    <span style={{ fontSize: '11px', color:'rgba(255,255,255,0.35)', marginRight:'3px' }}>({toFa(p.reviewCount)})</span>
+                    <span style={{ fontSize: '14px', color:'rgba(255,255,255,0.7)', marginRight:'5px' }}>{p.rating}</span>
+                    <span style={{ fontSize: '12px', color:'rgba(255,255,255,0.35)', marginRight:'3px' }}>({toFa(p.reviewCount)})</span>
                   </div>
-                  <div style={{ display:'flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px', fontSize: '13px', color:'rgba(255,255,255,0.8)' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px', fontSize: '14px', color:'rgba(255,255,255,0.8)' }}>
                     <Clock size={10} style={{ color:'#C7A66A' }}/>{p.responseTime}
                   </div>
                 </div>
@@ -155,10 +155,10 @@ export default function ServiceProviderPage() {
 
               {/* Actions */}
               <div style={{ display:'flex', gap:'10px', flexShrink:0, flexWrap:'wrap' }}>
-                <button onClick={()=>setReq(true)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'12px 24px', borderRadius:'12px', border:'none', background:'linear-gradient(135deg,#f59e0b,#d97706)', color:'#fff', fontSize: '14px', fontWeight:800, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 8px 24px rgba(245,158,11,0.35)', transition:'all 0.3s' }}>
+                <button onClick={()=>setReq(true)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'12px 24px', borderRadius:'12px', border:'none', background:'linear-gradient(135deg,#f59e0b,#d97706)', color:'#fff', fontSize: '15px', fontWeight:800, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 8px 24px rgba(245,158,11,0.35)', transition:'all 0.3s' }}>
                   <Wrench size={15}/>{requested?'درخواست ارسال شد':'درخواست خدمت'}
                 </button>
-                <button style={{ display:'flex', alignItems:'center', gap:'7px', padding:'12px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '14px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+                <button style={{ display:'flex', alignItems:'center', gap:'7px', padding:'12px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
                   <MessageCircle size={14}/>
                 </button>
               </div>
@@ -177,7 +177,7 @@ export default function ServiceProviderPage() {
             ].map((s,i) => (
               <div key={i} style={{ padding:'18px 10px', textAlign:'center', borderLeft: i>0?'1px solid rgba(0,0,0,0.04)':'none' }}>
                 <div style={{ fontSize: 'clamp(18px, 2.8vw, 24px)', fontWeight:900, color: '#111111', letterSpacing:'-0.02em', textShadow:`0 0 14px ${s.c}25` }}>{s.v}</div>
-                <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
+                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -208,7 +208,7 @@ export default function ServiceProviderPage() {
                       <span style={{ width:'3px', height:'16px', background:`linear-gradient(180deg,${p.avatarColor},#06b6d4)`, borderRadius:'2px', display:'inline-block' }}/>
                       درباره متخصص
                     </h3>
-                    <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.50)', lineHeight:1.9, margin:'0 0 20px' }}>{p.bio}</p>
+                    <p style={{ fontSize: '16px', color:'rgba(0,0,0,0.50)', lineHeight:1.9, margin:'0 0 20px' }}>{p.bio}</p>
 
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'10px' }}>
                       {[
@@ -220,8 +220,8 @@ export default function ServiceProviderPage() {
                         <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'12px' }}>
                           <span style={{ flexShrink:0 }}>{r.icon}</span>
                           <div style={{ minWidth:0 }}>
-                            <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)', marginBottom:'2px' }}>{r.l}</div>
-                            <div style={{ fontSize: '14px', fontWeight:600, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.v}</div>
+                            <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', marginBottom:'2px' }}>{r.l}</div>
+                            <div style={{ fontSize: '15px', fontWeight:600, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.v}</div>
                           </div>
                         </div>
                       ))}
@@ -238,7 +238,7 @@ export default function ServiceProviderPage() {
                       {p.certifications.map((cert: string, i: number) => (
                         <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(245,158,11,0.04)', border:'1px solid rgba(245,158,11,0.12)', borderRadius:'13px' }}>
                           <Award size={13} style={{ color:'#f59e0b', flexShrink:0 }}/>
-                          <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.48)', fontWeight:500 }}>{cert}</span>
+                          <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.48)', fontWeight:500 }}>{cert}</span>
                         </div>
                       ))}
                     </div>
@@ -252,7 +252,7 @@ export default function ServiceProviderPage() {
                     </h3>
                     <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
                       {p.brands.map((b: string) => (
-                        <span key={b} style={{ fontSize: '13px', fontWeight:700, color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'6px 14px' }}>{b}</span>
+                        <span key={b} style={{ fontSize: '14px', fontWeight:700, color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'6px 14px' }}>{b}</span>
                       ))}
                     </div>
                   </div>
@@ -277,11 +277,11 @@ export default function ServiceProviderPage() {
                             {[{img: p.beforeAfter[baIdx].before, label:'قبل'},{img: p.beforeAfter[baIdx].after, label:'بعد'}].map((side,i) => (
                               <div key={i} style={{ position:'relative', borderRadius:'14px', overflow:'hidden', aspectRatio:'16/9' }}>
                                 <img src={side.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:`brightness(${i===0?0.3:0.55})` }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
-                                <div style={{ position:'absolute', bottom:'8px', right:'8px', background:'rgba(0,0,0,0.7)', backdropFilter:'blur(6px)', borderRadius:'20px', padding:'3px 10px', fontSize: '11px', color:'rgba(255,255,255,0.8)', fontWeight:700 }}>{side.label}</div>
+                                <div style={{ position:'absolute', bottom:'8px', right:'8px', background:'rgba(0,0,0,0.7)', backdropFilter:'blur(6px)', borderRadius:'20px', padding:'3px 10px', fontSize: '12px', color:'rgba(255,255,255,0.8)', fontWeight:700 }}>{side.label}</div>
                               </div>
                             ))}
                           </div>
-                          <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.45)', textAlign:'center' }}>{p.beforeAfter[baIdx].title}</div>
+                          <div style={{ fontSize: '15px', color:'rgba(0,0,0,0.45)', textAlign:'center' }}>{p.beforeAfter[baIdx].title}</div>
                         </div>
                       )}
                     </div>
@@ -298,10 +298,10 @@ export default function ServiceProviderPage() {
                       <div style={{ width:'42px', height:'42px', borderRadius:'12px', background:`${p.avatarColor}12`, border:`1px solid ${p.avatarColor}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '20px', flexShrink:0 }}>🔧</div>
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' }}>
-                          <span style={{ fontSize: '15px', fontWeight:700, color: '#111111' }}>{svc.title}</span>
+                          <span style={{ fontSize: '16px', fontWeight:700, color: '#111111' }}>{svc.title}</span>
                           {svc.popular && <span style={{ fontSize: '10px', color:'#ef4444', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>پرطرفدار</span>}
                         </div>
-                        <div style={{ display:'flex', gap:'10px', fontSize: '12px', color:'rgba(0,0,0,0.42)' }}>
+                        <div style={{ display:'flex', gap:'10px', fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>
                           <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Clock size={10} style={{ color:'rgba(0,0,0,0.30)' }}/>{svc.duration}</span>
                           <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Shield size={10} style={{ color:'rgba(0,0,0,0.30)' }}/>{p.warranty} ضمانت</span>
                         </div>
@@ -310,7 +310,7 @@ export default function ServiceProviderPage() {
                         <div style={{ fontSize: '18px', fontWeight:900, color:p.avatarColor, letterSpacing:'-0.02em', textShadow: selSvc===i?`0 0 14px ${p.avatarColor}50`:'none' }}>
                           {toFa(svc.price.toLocaleString())}
                         </div>
-                        <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)' }}>تومان</div>
+                        <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)' }}>تومان</div>
                       </div>
                       {selSvc===i && <Check size={16} style={{ color:p.avatarColor, flexShrink:0 }}/>}
                     </div>
@@ -319,10 +319,10 @@ export default function ServiceProviderPage() {
                   {selSvc !== null && (
                     <div style={{ padding:'16px 18px', background:`${p.avatarColor}08`, border:`1px solid ${p.avatarColor}22`, borderRadius:'16px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px', animation:'fadeUp 0.3s ease both' }}>
                       <div>
-                        <div style={{ fontSize: '15px', fontWeight:800, color: '#111111', marginBottom:'3px' }}>{p.services[selSvc]?.title}</div>
-                        <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>هزینه: {toFa(p.services[selSvc]?.price.toLocaleString())} تومان</div>
+                        <div style={{ fontSize: '16px', fontWeight:800, color: '#111111', marginBottom:'3px' }}>{p.services[selSvc]?.title}</div>
+                        <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>هزینه: {toFa(p.services[selSvc]?.price.toLocaleString())} تومان</div>
                       </div>
-                      <button onClick={()=>setReq(true)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'12px 24px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}cc)`, border:'none', borderRadius:'12px', color:'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:`0 6px 18px ${p.avatarColor}30` }}>
+                      <button onClick={()=>setReq(true)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'12px 24px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}cc)`, border:'none', borderRadius:'12px', color:'#fff', fontSize: '15px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:`0 6px 18px ${p.avatarColor}30` }}>
                         <Calendar size={14}/> درخواست خدمت →
                       </button>
                     </div>
@@ -359,17 +359,17 @@ export default function ServiceProviderPage() {
                       <div style={{ display:'flex', gap:'3px', justifyContent:'center', margin:'7px 0 4px' }}>
                         {[1,2,3,4,5].map(s=><Star key={s} size={14} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>)}
                       </div>
-                      <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)' }}>{toFa(p.reviewCount)} نظر</div>
+                      <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.40)' }}>{toFa(p.reviewCount)} نظر</div>
                     </div>
                     <div style={{ flex:1, minWidth:'160px', display:'flex', flexDirection:'column', gap:'6px' }}>
                       {[{s:5,pct:88},{s:4,pct:9},{s:3,pct:2},{s:2,pct:1},{s:1,pct:0}].map(r => (
                         <div key={r.s} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                          <span style={{ fontSize: '11px', color:'rgba(0,0,0,0.40)', width:'12px' }}>{toFa(r.s)}</span>
+                          <span style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)', width:'12px' }}>{toFa(r.s)}</span>
                           <Star size={9} style={{ color:'#f59e0b', fill:'#f59e0b', flexShrink:0 }}/>
                           <div style={{ flex:1, height:'5px', background:'rgba(0,0,0,0.05)', borderRadius:'3px', overflow:'hidden' }}>
                             <div style={{ height:'100%', width:`${r.pct}%`, background:'linear-gradient(90deg,#f59e0b,#f59e0b70)', borderRadius:'3px' }}/>
                           </div>
-                          <span style={{ fontSize: '11px', color:'rgba(0,0,0,0.30)', width:'26px', textAlign:'left' }}>{toFa(r.pct)}٪</span>
+                          <span style={{ fontSize: '12px', color:'rgba(0,0,0,0.30)', width:'26px', textAlign:'left' }}>{toFa(r.pct)}٪</span>
                         </div>
                       ))}
                     </div>
@@ -384,19 +384,19 @@ export default function ServiceProviderPage() {
                           </div>
                           <div>
                             <div style={{ display:'flex', alignItems:'center', gap:'7px', marginBottom:'3px' }}>
-                              <span style={{ fontSize: '15px', fontWeight:700, color: '#111111' }}>{r.name}</span>
+                              <span style={{ fontSize: '16px', fontWeight:700, color: '#111111' }}>{r.name}</span>
                               {r.verified && <span style={{ fontSize: '10px', color:'#C7A66A', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', padding:'1px 7px', fontWeight:700, display:'flex', alignItems:'center', gap:'2px' }}><Check size={8}/>تأیید</span>}
                               <span style={{ fontSize: '10px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}20`, borderRadius:'20px', padding:'1px 7px', fontWeight:700 }}>{r.project}</span>
                             </div>
-                            <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)' }}>{r.date}</div>
+                            <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)' }}>{r.date}</div>
                           </div>
                         </div>
                         <div style={{ display:'flex', gap:'2px', flexShrink:0 }}>
                           {[1,2,3,4,5].map(s=><Star key={s} size={12} style={{ color: s<=r.rating?'#f59e0b':'rgba(0,0,0,0.08)', fill: s<=r.rating?'#f59e0b':'transparent' }}/>)}
                         </div>
                       </div>
-                      <p style={{ fontSize: '14px', color:'rgba(0,0,0,0.50)', margin:'0 0 12px', lineHeight:1.75 }}>{r.text}</p>
-                      <button style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 12px', borderRadius:'20px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.07)', fontSize: '12px', color:'rgba(0,0,0,0.45)', cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}>
+                      <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.50)', margin:'0 0 12px', lineHeight:1.75 }}>{r.text}</p>
+                      <button style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 12px', borderRadius:'20px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.07)', fontSize: '13px', color:'rgba(0,0,0,0.45)', cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}>
                         <ThumbsUp size={10}/> مفید بود
                       </button>
                     </div>
@@ -411,8 +411,8 @@ export default function ServiceProviderPage() {
               {/* Book CTA */}
               <div style={{ background:'#FFFFFF', border:`1px solid ${p.avatarColor}22`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
                 <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:`linear-gradient(90deg,transparent,${p.avatarColor}55,transparent)`, boxShadow:`0 0 14px ${p.avatarColor}35` }}/>
-                <div style={{ fontSize: '11px', color:`${p.avatarColor}70`, fontWeight:700, marginBottom:'14px', textAlign:'center' }}>درخواست خدمت</div>
-                <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.45)', marginBottom:'16px', textAlign:'center', lineHeight:1.6 }}>
+                <div style={{ fontSize: '12px', color:`${p.avatarColor}70`, fontWeight:700, marginBottom:'14px', textAlign:'center' }}>درخواست خدمت</div>
+                <div style={{ fontSize: '15px', color:'rgba(0,0,0,0.45)', marginBottom:'16px', textAlign:'center', lineHeight:1.6 }}>
                   از {toFa(p.priceFrom.toLocaleString())} تومان
                 </div>
 
@@ -423,29 +423,29 @@ export default function ServiceProviderPage() {
                 ].map((x,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 12px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'11px', marginBottom:'8px' }}>
                     <span style={{ color:x.c, flexShrink:0 }}>{x.icon}</span>
-                    <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>{x.label}:</span>
-                    <span style={{ fontSize: '13px', fontWeight:600, color: '#111111', marginRight:'auto' }}>{x.v}</span>
+                    <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>{x.label}:</span>
+                    <span style={{ fontSize: '14px', fontWeight:600, color: '#111111', marginRight:'auto' }}>{x.v}</span>
                   </div>
                 ))}
 
-                <button onClick={()=>setReq(true)} style={{ width:'100%', padding:'14px', marginTop:'8px', borderRadius:'13px', border:'none', background: requested?'rgba(199,166,106,0.2)':`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}cc)`, color: requested?'#C7A66A':'#fff', fontSize: '15px', fontWeight:800, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: requested?'none':`0 8px 24px ${p.avatarColor}30`, display:'flex', alignItems:'center', justifyContent:'center', gap:'9px' }}>
+                <button onClick={()=>setReq(true)} style={{ width:'100%', padding:'14px', marginTop:'8px', borderRadius:'13px', border:'none', background: requested?'rgba(199,166,106,0.2)':`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}cc)`, color: requested?'#C7A66A':'#fff', fontSize: '16px', fontWeight:800, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: requested?'none':`0 8px 24px ${p.avatarColor}30`, display:'flex', alignItems:'center', justifyContent:'center', gap:'9px' }}>
                   {requested ? <><Check size={16}/>درخواست ارسال شد</> : <><Wrench size={16}/>درخواست خدمت</>}
                 </button>
               </div>
 
               {/* Specialities */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'12px' }}>تخصص‌ها</div>
+                <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'12px' }}>تخصص‌ها</div>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'7px' }}>
                   {p.speciality.map((s: string) => (
-                    <span key={s} style={{ fontSize: '12px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'5px 12px', fontWeight:600 }}>{s}</span>
+                    <span key={s} style={{ fontSize: '13px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'5px 12px', fontWeight:600 }}>{s}</span>
                   ))}
                 </div>
               </div>
 
               {/* Stats */}
               <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار کاری</div>
+                <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار کاری</div>
                 {[
                   { l:'پروژه تکمیل‌شده', v:toFa(p.jobs),          c:p.avatarColor },
                   { l:'سال‌های تجربه',   v:toFa(p.experience),    c:'#a78bfa'     },
@@ -453,8 +453,8 @@ export default function ServiceProviderPage() {
                   { l:'گواهینامه',        v:toFa(p.certifications.length), c:'#C7A66A' },
                 ].map((s,i) => (
                   <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'9px 0', borderBottom: i<3?'1px solid rgba(0,0,0,0.04)':'none' }}>
-                    <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>{s.l}</span>
-                    <span style={{ fontSize: '14px', fontWeight:800, color:s.c }}>{s.v}</span>
+                    <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>{s.l}</span>
+                    <span style={{ fontSize: '15px', fontWeight:800, color:s.c }}>{s.v}</span>
                   </div>
                 ))}
               </div>

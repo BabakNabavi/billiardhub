@@ -139,7 +139,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
           </div>
 
           {/* Country */}
-          <div style={{ position:'absolute', top:'12px', left:'12px', background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 10px', fontSize: '12px' }}>
+          <div style={{ position:'absolute', top:'12px', left:'12px', background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', borderRadius:'20px', padding:'4px 10px', fontSize: '13px' }}>
             {brand.flag}
           </div>
         </div>
@@ -147,11 +147,11 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         {/* Content */}
         <div style={{ padding:'32px 20px 18px', flex:1, display:'flex', flexDirection:'column' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'4px' }}>
-            <span style={{ fontSize: '11px', color:brand.accentColor, letterSpacing:'0.15em', fontWeight:700 }}>{brand.nameEn}</span>
+            <span style={{ fontSize: '12px', color:brand.accentColor, letterSpacing:'0.15em', fontWeight:700 }}>{brand.nameEn}</span>
             {brand.isVerified && <Check size={11} style={{ color:brand.accentColor }}/>}
           </div>
           <h3 style={{ fontSize: '20px', fontWeight:900, color: '#111111', margin:'0 0 8px', letterSpacing:'-0.02em' }}>{brand.name}</h3>
-          <p style={{ fontSize: '13px', color:'rgba(0,0,0,0.45)', lineHeight:1.7, margin:'0 0 14px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brand.description}</p>
+          <p style={{ fontSize: '14px', color:'rgba(0,0,0,0.45)', lineHeight:1.7, margin:'0 0 14px', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brand.description}</p>
 
           {/* Tags */}
           <div style={{ display:'flex', gap:'5px', flexWrap:'wrap', marginBottom:'14px' }}>
@@ -197,7 +197,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
             {brand.isVerified && <Check size={11} style={{ color:brand.accentColor }}/>}
             <span style={{ fontSize: '10px', padding:'2px 8px', borderRadius:'20px', background:tier.bg, border:`1px solid ${tier.border}`, color:tier.color, fontWeight:700 }}>{tier.label}</span>
           </div>
-          <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brand.description}</div>
+          <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brand.description}</div>
         </div>
 
         {/* Country */}
@@ -216,7 +216,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
         {/* Rating */}
         <div style={{ display:'flex', alignItems:'center', gap:'4px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', padding:'5px 10px', flexShrink:0 }}>
           <Star size={11} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>
-          <span style={{ fontSize: '13px', fontWeight:800, color:'#f59e0b' }}>{brand.rating}</span>
+          <span style={{ fontSize: '14px', fontWeight:800, color:'#f59e0b' }}>{brand.rating}</span>
         </div>
       </div>
     </Link>
@@ -276,7 +276,7 @@ export default function BrandsPage() {
           <div style={{ position:'absolute', top:'-20%', right:'-5%', width:'50vw', height:'50vw', maxWidth:'560px', borderRadius:'50%', background:'radial-gradient(rgba(6,182,212,0.06),transparent 65%)', filter:'blur(40px)', animation:'ambient 16s ease-in-out infinite', pointerEvents:'none' }}/>
 
           <div style={{ maxWidth:'1280px', margin:'0 auto' }}>
-            <div style={{ fontSize: '11px', color:'rgba(6,182,212,0.65)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'10px' }}>BRAND ECOSYSTEM</div>
+            <div style={{ fontSize: '12px', color:'rgba(6,182,212,0.65)', letterSpacing:'0.25em', fontWeight:700, marginBottom:'10px' }}>BRAND ECOSYSTEM</div>
             <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 57px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.035em', lineHeight:1.05 }}>
               برندهای صنعت بیلیارد
             </h1>
@@ -321,13 +321,13 @@ export default function BrandsPage() {
 
             <div style={{ display:'flex', gap:'4px' }}>
               {[{k:'grid',icon:'⊞'},{k:'list',icon:'☰'}].map(v => (
-                <button key={v.k} className={`view-btn ${view===v.k?'active':''}`} onClick={()=>setView(v.k as any)} style={{ fontSize: '15px' }}>
+                <button key={v.k} className={`view-btn ${view===v.k?'active':''}`} onClick={()=>setView(v.k as any)} style={{ fontSize: '16px' }}>
                   {v.icon}
                 </button>
               ))}
             </div>
 
-            <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} برند</div>
+            <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>{toFa(filtered.length)} برند</div>
           </div>
         </div>
 
@@ -344,7 +344,7 @@ export default function BrandsPage() {
             ].map((s,i) => (
               <div key={i} style={{ textAlign:'center', animation:`fadeUp 0.5s ease ${i*0.08}s both` }}>
                 <div style={{ fontSize: 'clamp(22px, 3.3vw, 31px)', fontWeight:900, color:s.c, letterSpacing:'-0.03em', textShadow:`0 0 20px ${s.c}30` }}>{s.v}</div>
-                <div style={{ fontSize: '11px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
+                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -381,7 +381,7 @@ export default function BrandsPage() {
               <div style={{ textAlign:'center', padding:'80px 24px' }}>
                 <div style={{ fontSize: '53px', opacity:0.1, marginBottom:'14px' }}>🏭</div>
                 <h3 style={{ fontSize: '20px', fontWeight:800, color: '#111111', margin:'0 0 8px' }}>برندی یافت نشد</h3>
-                <button onClick={()=>{setSearch('');setCategory('all');setTier('all');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'12px', color:'#fff', fontSize: '14px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
+                <button onClick={()=>{setSearch('');setCategory('all');setTier('all');}} style={{ padding:'11px 24px', background:'linear-gradient(135deg,#C7A66A,#A07840)', border:'none', borderRadius:'12px', color:'#fff', fontSize: '15px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', marginTop:'14px' }}>
                   پاک کردن فیلترها
                 </button>
               </div>
@@ -406,12 +406,12 @@ export default function BrandsPage() {
 
           {/* Register brand CTA */}
           <div style={{ marginTop:'60px', padding:'44px 40px', background:'rgba(6,182,212,0.03)', border:'1px dashed rgba(6,182,212,0.2)', borderRadius:'28px', textAlign:'center' }}>
-            <div style={{ fontSize: '11px', color:'rgba(6,182,212,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>FOR MANUFACTURERS</div>
+            <div style={{ fontSize: '12px', color:'rgba(6,182,212,0.5)', letterSpacing:'0.22em', fontWeight:700, marginBottom:'12px' }}>FOR MANUFACTURERS</div>
             <h3 style={{ fontSize: 'clamp(22px, 3.3vw, 31px)', fontWeight:900, color: '#111111', margin:'0 0 10px', letterSpacing:'-0.025em' }}>برند خود را ثبت کنید</h3>
-            <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.40)', margin:'0 0 24px', maxWidth:'420px', marginLeft:'auto', marginRight:'auto' }}>
+            <p style={{ fontSize: '16px', color:'rgba(0,0,0,0.40)', margin:'0 0 24px', maxWidth:'420px', marginLeft:'auto', marginRight:'auto' }}>
               به اکوسیستم صنعت بیلیارد ایران بپیوندید و با هزاران باشگاه، مربی و بازیکن در ارتباط باشید
             </p>
-            <Link href="/brands/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'13px 30px', background:'linear-gradient(135deg,#06b6d4,#0891b2)', borderRadius:'13px', color:'#fff', fontSize: '15px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 24px rgba(6,182,212,0.25)' }}>
+            <Link href="/brands/register" style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'13px 30px', background:'linear-gradient(135deg,#06b6d4,#0891b2)', borderRadius:'13px', color:'#fff', fontSize: '16px', fontWeight:700, textDecoration:'none', boxShadow:'0 8px 24px rgba(6,182,212,0.25)' }}>
               ثبت برند ←
             </Link>
           </div>

@@ -117,15 +117,15 @@ function LiveControl({ match }: { match: LiveMatch }) {
             {/* Header */}
             <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                    <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.40)', letterSpacing: '0.12em', marginBottom: '3px' }}>{match.tournament} · {match.round}</div>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', letterSpacing: '0.12em', marginBottom: '3px' }}>{match.tournament} · {match.round}</div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {match.table}
                         <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 9px', borderRadius: '20px', background: `${accent}12`, border: `1px solid ${accent}25`, color: accent }}>
                             {status === 'live' ? 'LIVE' : status === 'break' ? 'BREAK' : status === 'completed' ? 'FINAL' : '—'}
                         </span>
                     </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', fontVariantNumeric: 'tabular-nums' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', fontVariantNumeric: 'tabular-nums' }}>
                     <Clock size={13} style={{ color: accent }} />
                     {status === 'live' ? <ElapsedTimer seconds={match.elapsed} /> : toFa(pad(Math.floor(match.elapsed / 60))) + ':' + toFa(pad(match.elapsed % 60))}
                 </div>
@@ -151,15 +151,15 @@ function LiveControl({ match }: { match: LiveMatch }) {
                             <ChevronUp size={13} />
                         </button>
                     </div>
-                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginTop: '6px' }}>بالاترین بریک: {toFa(match.p1Break)}</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginTop: '6px' }}>بالاترین بریک: {toFa(match.p1Break)}</div>
                 </div>
 
                 {/* Center */}
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.30)', marginBottom: '4px' }}>فریم {toFa(score1 + score2)} از {toFa(match.totalFrames)}</div>
+                    <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.30)', marginBottom: '4px' }}>فریم {toFa(score1 + score2)} از {toFa(match.totalFrames)}</div>
                     <div style={{ fontSize: '18px', fontWeight: 900, color: 'rgba(0,0,0,0.30)', letterSpacing: '-0.02em' }}>:</div>
                     <div style={{ marginTop: '8px' }}>
-                        <div style={{ fontSize: '12px', color: curBreak > 0 ? '#f59e0b' : 'rgba(0,0,0,0.30)', fontWeight: 700 }}>
+                        <div style={{ fontSize: '13px', color: curBreak > 0 ? '#f59e0b' : 'rgba(0,0,0,0.30)', fontWeight: 700 }}>
                             {curBreak > 0 ? `بریک: ${toFa(curBreak)}` : '—'}
                         </div>
                     </div>
@@ -181,7 +181,7 @@ function LiveControl({ match }: { match: LiveMatch }) {
                             <ChevronUp size={13} />
                         </button>
                     </div>
-                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', marginTop: '6px' }}>بالاترین بریک: {toFa(match.p2Break)}</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginTop: '6px' }}>بالاترین بریک: {toFa(match.p2Break)}</div>
                 </div>
             </div>
 
@@ -204,7 +204,7 @@ function LiveControl({ match }: { match: LiveMatch }) {
                         { icon: <Square size={13} />, label: 'پایان', color: '#ef4444', action: () => setStatus('completed'), show: status === 'live' || status === 'break' },
                         { icon: <RotateCcw size={13} />, label: 'ریست', color: '#06b6d4', action: () => setCurBreak(0), show: true },
                     ].filter(c => c.show).map((c, i) => (
-                        <button key={i} onClick={c.action} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: `${c.color}10`, border: `1px solid ${c.color}25`, borderRadius: '10px', color: c.color, fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                        <button key={i} onClick={c.action} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: `${c.color}10`, border: `1px solid ${c.color}25`, borderRadius: '10px', color: c.color, fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                             {c.icon}{c.label}
                         </button>
                     ))}
@@ -212,10 +212,10 @@ function LiveControl({ match }: { match: LiveMatch }) {
 
                 {/* Foul + Timeout */}
                 <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => setFoul(f => f + 1)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#ef4444', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    <button onClick={() => setFoul(f => f + 1)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#ef4444', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                         <Flag size={12} /> فاول ({toFa(foul)})
                     </button>
-                    <button onClick={() => setFoulModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '10px', color: '#a78bfa', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    <button onClick={() => setFoulModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '10px', color: '#a78bfa', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                         <AlertCircle size={12} /> اعتراض
                     </button>
                 </div>
@@ -223,14 +223,14 @@ function LiveControl({ match }: { match: LiveMatch }) {
 
             {/* Break counter row */}
             <div style={{ padding: '0 20px 16px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)' }}>بریک جاری:</div>
+                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)' }}>بریک جاری:</div>
                 {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(v => (
-                    <button key={v} onClick={() => setCurBreak(p => p + v)} style={{ padding: '4px 10px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '8px', color: '#f59e0b', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                    <button key={v} onClick={() => setCurBreak(p => p + v)} style={{ padding: '4px 10px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '8px', color: '#f59e0b', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                         +{toFa(v)}
                     </button>
                 ))}
                 {curBreak > 0 && (
-                    <div style={{ marginRight: 'auto', fontSize: '15px', fontWeight: 900, color: '#f59e0b', letterSpacing: '-0.01em' }}>
+                    <div style={{ marginRight: 'auto', fontSize: '16px', fontWeight: 900, color: '#f59e0b', letterSpacing: '-0.01em' }}>
                         = {toFa(curBreak)}
                     </div>
                 )}
@@ -248,7 +248,7 @@ function LiveControl({ match }: { match: LiveMatch }) {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
                             {['خطای تکنیکی', 'خروج توپ', 'مشکل تجهیزات', 'رفتار نامناسب', 'سایر'].map(opt => (
-                                <button key={opt} onClick={() => setFoulModal(false)} style={{ padding: '12px 16px', background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: '12px', color: 'rgba(0,0,0,0.48)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right', transition: 'all 0.2s' }}
+                                <button key={opt} onClick={() => setFoulModal(false)} style={{ padding: '12px 16px', background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: '12px', color: 'rgba(0,0,0,0.48)', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right', transition: 'all 0.2s' }}
                                     onMouseEnter={e => { (e.currentTarget).style.background = 'rgba(167,139,250,0.12)'; (e.currentTarget).style.color = '#a78bfa'; }}
                                     onMouseLeave={e => { (e.currentTarget).style.background = 'rgba(167,139,250,0.06)'; (e.currentTarget).style.color = 'rgba(0,0,0,0.48)'; }}>
                                     {opt}
@@ -315,13 +315,13 @@ function DashboardContent() {
                         {/* Live clock */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '8px 16px', flexShrink: 0 }}>
                             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', boxShadow: '0 0 8px #ef4444', animation: 'livePulse 1.5s infinite' }} />
-                            <span style={{ fontSize: '15px', fontWeight: 900, color: '#ef4444', fontVariantNumeric: 'tabular-nums' }}>{timeStr}</span>
+                            <span style={{ fontSize: '16px', fontWeight: 900, color: '#ef4444', fontVariantNumeric: 'tabular-nums' }}>{timeStr}</span>
                         </div>
 
                         {/* Live matches badge */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '20px', flexShrink: 0 }}>
                             <Activity size={13} style={{ color: '#ef4444' }} />
-                            <span style={{ fontSize: '13px', color: '#ef4444', fontWeight: 700 }}>{toFa(LIVE_MATCHES.filter(m => m.status === 'live').length)} مسابقه زنده</span>
+                            <span style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>{toFa(LIVE_MATCHES.filter(m => m.status === 'live').length)} مسابقه زنده</span>
                         </div>
                     </div>
                 </div>
@@ -366,8 +366,8 @@ function DashboardContent() {
                                             </div>
                                         </div>
                                         <div style={{ fontSize: 'clamp(24px, 3.3vw, 31px)', fontWeight: 900, color: '#111111', letterSpacing: '-0.03em', marginBottom: '4px', textShadow: `0 0 20px ${s.c}25` }}>{s.v}</div>
-                                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, marginBottom: '2px' }}>{s.l}</div>
-                                        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
+                                        <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, marginBottom: '2px' }}>{s.l}</div>
+                                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
                                     </div>
                                 ))}
                             </div>
@@ -379,7 +379,7 @@ function DashboardContent() {
                                     <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', boxShadow: '0 0 8px #ef4444', animation: 'livePulse 1.5s infinite' }} />
                                         مسابقات در حال برگزاری
-                                        <button onClick={() => setTab('live')} style={{ marginRight: 'auto', fontSize: '12px', color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>مدیریت →</button>
+                                        <button onClick={() => setTab('live')} style={{ marginRight: 'auto', fontSize: '13px', color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>مدیریت →</button>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         {LIVE_MATCHES.map(m => (
@@ -387,12 +387,12 @@ function DashboardContent() {
                                                 onClick={() => setTab('live')}>
                                                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.status === 'live' ? '#ef4444' : '#f59e0b', flexShrink: 0, animation: 'pulse 2s infinite', boxShadow: `0 0 8px ${m.status === 'live' ? '#ef4444' : '#f59e0b'}` }} />
                                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '2px' }}>
+                                                    <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '2px' }}>
                                                         {m.player1.split(' ').pop()} {toFa(m.score1)}:{toFa(m.score2)} {m.player2.split(' ').pop()}
                                                     </div>
-                                                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)' }}>{m.round} · {m.table}</div>
+                                                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>{m.round} · {m.table}</div>
                                                 </div>
-                                                <div style={{ fontSize: '12px', color: m.status === 'live' ? '#ef4444' : '#f59e0b', fontWeight: 700, flexShrink: 0 }}>
+                                                <div style={{ fontSize: '13px', color: m.status === 'live' ? '#ef4444' : '#f59e0b', fontWeight: 700, flexShrink: 0 }}>
                                                     {m.status === 'live' ? 'LIVE' : 'BREAK'}
                                                 </div>
                                             </div>
@@ -410,7 +410,7 @@ function DashboardContent() {
                                             {user?.firstName?.[0] ?? 'D'}
                                         </div>
                                         <div style={{ fontSize: '18px', fontWeight: 800, color: '#111111', marginBottom: '4px' }}>{user?.firstName} {user?.lastName}</div>
-                                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '12px' }}>داور بین‌المللی اسنوکر</div>
+                                        <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', marginBottom: '12px' }}>داور بین‌المللی اسنوکر</div>
                                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
                                             <span style={{ fontSize: '10px', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '20px', padding: '3px 10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
                                                 <Award size={9} />WPBSA Level 4
@@ -423,15 +423,15 @@ function DashboardContent() {
 
                                     {/* Today schedule */}
                                     <div className="r-card">
-                                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ width: '3px', height: '13px', background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: '2px', display: 'inline-block' }} />
                                             برنامه امروز
                                         </div>
                                         {SCHEDULED.filter(m => m.date === 'امروز').map((m, i) => (
                                             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderBottom: i < SCHEDULED.filter(m => m.date === 'امروز').length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
-                                                <div style={{ fontSize: '13px', fontWeight: 800, color: '#C7A66A', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{m.time}</div>
+                                                <div style={{ fontSize: '14px', fontWeight: 800, color: '#C7A66A', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{m.time}</div>
                                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '12px', color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    <div style={{ fontSize: '13px', color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                         {m.player1.split(' ').pop()} vs {m.player2.split(' ').pop()}
                                                     </div>
                                                     <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>{m.table} · {m.round}</div>
@@ -443,23 +443,23 @@ function DashboardContent() {
                                     {/* Open disputes */}
                                     {DISPUTES.filter(d => d.status === 'open').length > 0 && (
                                         <div className="r-card" style={{ border: '1px solid rgba(239,68,68,0.15)' }}>
-                                            <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     <span style={{ width: '3px', height: '13px', background: 'linear-gradient(180deg,#ef4444,transparent)', borderRadius: '2px', display: 'inline-block' }} />
                                                     اعتراضات باز
                                                 </div>
-                                                <span style={{ fontSize: '11px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 8px', fontWeight: 700 }}>
+                                                <span style={{ fontSize: '12px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 8px', fontWeight: 700 }}>
                                                     {toFa(DISPUTES.filter(d => d.status === 'open').length)}
                                                 </span>
                                             </div>
                                             {DISPUTES.filter(d => d.status === 'open').map(d => (
                                                 <div key={d.id} style={{ padding: '10px 12px', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)', borderRadius: '12px', cursor: 'pointer', marginBottom: '6px' }}
                                                     onClick={() => setTab('disputes')}>
-                                                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#111111', marginBottom: '3px' }}>{d.issue}</div>
-                                                    <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.42)' }}>{d.match} · {d.time}</div>
+                                                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '3px' }}>{d.issue}</div>
+                                                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)' }}>{d.match} · {d.time}</div>
                                                 </div>
                                             ))}
-                                            <button onClick={() => setTab('disputes')} style={{ width: '100%', marginTop: '6px', padding: '8px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '10px', color: '#ef4444', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                                            <button onClick={() => setTab('disputes')} style={{ width: '100%', marginTop: '6px', padding: '8px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '10px', color: '#ef4444', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                                                 مشاهده همه →
                                             </button>
                                         </div>
@@ -474,7 +474,7 @@ function DashboardContent() {
                         <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'livePulse 1.5s infinite', boxShadow: '0 0 10px #ef4444' }} />
-                                <span style={{ fontSize: '15px', fontWeight: 700, color: '#ef4444' }}>مدیریت مسابقات زنده</span>
+                                <span style={{ fontSize: '16px', fontWeight: 700, color: '#ef4444' }}>مدیریت مسابقات زنده</span>
                             </div>
                             {LIVE_MATCHES.map(m => <LiveControl key={m.id} match={m} />)}
                         </div>
@@ -491,7 +491,7 @@ function DashboardContent() {
                                     </div>
                                     <div style={{ display: 'flex', gap: '6px' }}>
                                         {['امروز', 'فردا', 'این هفته'].map((d, i) => (
-                                            <button key={i} style={{ padding: '6px 13px', borderRadius: '20px', background: i === 0 ? 'rgba(199,166,106,0.1)' : 'rgba(0,0,0,0.03)', border: `1px solid ${i === 0 ? 'rgba(199,166,106,0.3)' : 'rgba(0,0,0,0.07)'}`, color: i === 0 ? '#C7A66A' : 'rgba(0,0,0,0.45)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                                            <button key={i} style={{ padding: '6px 13px', borderRadius: '20px', background: i === 0 ? 'rgba(199,166,106,0.1)' : 'rgba(0,0,0,0.03)', border: `1px solid ${i === 0 ? 'rgba(199,166,106,0.3)' : 'rgba(0,0,0,0.07)'}`, color: i === 0 ? '#C7A66A' : 'rgba(0,0,0,0.45)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                                                 {d}
                                             </button>
                                         ))}
@@ -503,18 +503,18 @@ function DashboardContent() {
                                         return (
                                             <div key={m.id} className="sch-row">
                                                 <div style={{ textAlign: 'center', flexShrink: 0, minWidth: '52px' }}>
-                                                    <div style={{ fontSize: '15px', fontWeight: 900, color: '#C7A66A', fontVariantNumeric: 'tabular-nums' }}>{m.time}</div>
-                                                    <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)' }}>{m.date}</div>
+                                                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#C7A66A', fontVariantNumeric: 'tabular-nums' }}>{m.time}</div>
+                                                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>{m.date}</div>
                                                 </div>
                                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>
+                                                    <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>
                                                         {m.player1} vs {m.player2}
                                                     </div>
-                                                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                                         <span>{m.tournament}</span><span>·</span><span>{m.round}</span><span>·</span><span>{m.table}</span>
                                                     </div>
                                                 </div>
-                                                <div style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: `${statusCfg.color}10`, border: `1px solid ${statusCfg.color}25`, color: statusCfg.color, fontWeight: 700, flexShrink: 0 }}>
+                                                <div style={{ fontSize: '12px', padding: '3px 10px', borderRadius: '20px', background: `${statusCfg.color}10`, border: `1px solid ${statusCfg.color}25`, color: statusCfg.color, fontWeight: 700, flexShrink: 0 }}>
                                                     {statusCfg.label}
                                                 </div>
                                             </div>
@@ -534,7 +534,7 @@ function DashboardContent() {
                                         <span style={{ width: '3px', height: '15px', background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: '2px', display: 'inline-block' }} />
                                         گزارش مسابقات
                                     </div>
-                                    <button style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', borderRadius: '10px', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                                    <button style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', borderRadius: '10px', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                                         <Plus size={13} /> گزارش جدید
                                     </button>
                                 </div>
@@ -542,17 +542,17 @@ function DashboardContent() {
                                     {REPORTS.map((r, i) => (
                                         <div key={i} className="sch-row" style={{ flexWrap: 'wrap', gap: '10px' }}>
                                             <div style={{ flex: 1, minWidth: '160px' }}>
-                                                <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{r.match}</div>
-                                                <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{r.match}</div>
+                                                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                                     <span>{r.tournament}</span><span>·</span><span>{r.date}</span><span>·</span><span>{r.duration}</span>
                                                     {r.incidents > 0 && <span style={{ color: '#f59e0b' }}>⚠ {toFa(r.incidents)} حادثه</span>}
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
-                                                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: r.submitted ? 'rgba(199,166,106,0.1)' : 'rgba(245,158,11,0.1)', border: `1px solid ${r.submitted ? 'rgba(199,166,106,0.25)' : 'rgba(245,158,11,0.25)'}`, color: r.submitted ? '#C7A66A' : '#f59e0b', fontWeight: 700 }}>
+                                                <span style={{ fontSize: '12px', padding: '3px 10px', borderRadius: '20px', background: r.submitted ? 'rgba(199,166,106,0.1)' : 'rgba(245,158,11,0.1)', border: `1px solid ${r.submitted ? 'rgba(199,166,106,0.25)' : 'rgba(245,158,11,0.25)'}`, color: r.submitted ? '#C7A66A' : '#f59e0b', fontWeight: 700 }}>
                                                     {r.submitted ? 'ارسال شده' : 'در انتظار'}
                                                 </span>
-                                                <button style={{ padding: '6px 12px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '9px', color: 'rgba(0,0,0,0.45)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                <button style={{ padding: '6px 12px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '9px', color: 'rgba(0,0,0,0.45)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                     <Eye size={11} />{r.submitted ? 'مشاهده' : 'ویرایش'}
                                                 </button>
                                             </div>
@@ -576,20 +576,20 @@ function DashboardContent() {
                                                     {d.status === 'open' ? 'باز' : d.status === 'resolved' ? 'حل‌شده' : 'ارجاع داده‌شده'}
                                                 </span>
                                             </div>
-                                            <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)' }}>{d.match} · {d.player} · {d.time}</div>
+                                            <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)' }}>{d.match} · {d.player} · {d.time}</div>
                                         </div>
                                         {d.status === 'open' && (
                                             <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                                                <button style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: '10px', color: '#C7A66A', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                                                <button style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: '10px', color: '#C7A66A', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                                                     <Check size={12} /> حل کردن
                                                 </button>
-                                                <button style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '10px', color: '#a78bfa', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                                                <button style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '10px', color: '#a78bfa', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                                                     <ChevronUp size={12} /> ارجاع
                                                 </button>
                                             </div>
                                         )}
                                     </div>
-                                    <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.6, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '12px' }}>
+                                    <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.6, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '12px' }}>
                                         {d.description}
                                     </p>
                                 </div>

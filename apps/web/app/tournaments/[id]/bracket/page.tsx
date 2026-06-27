@@ -49,7 +49,7 @@ function lqBtn(active: boolean, rgb = '199,166,106', color = '#C7A66A'): React.C
     border: `1px solid rgba(${rgb},${active ? '0.30' : '0.10'})`,
     background: `rgba(${rgb},${active ? '0.12' : '0.04'})`,
     color: active ? color : 'rgba(0,0,0,0.22)',
-    fontSize: 12, fontWeight: 800, cursor: active ? 'pointer' : 'not-allowed',
+    fontSize: 13, fontWeight: 800, cursor: active ? 'pointer' : 'not-allowed',
     fontFamily: 'inherit', transition: 'all 0.18s', display: 'inline-flex',
     alignItems: 'center', gap: 5,
   };
@@ -113,7 +113,7 @@ function MatchCard({
           <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, opacity: 0.65 }}>Bye</span>
         ) : player ? (
           <>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#111', flex: 1,
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#111', flex: 1,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.name}
             </span>
@@ -371,11 +371,11 @@ export default function BracketPage() {
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={() => router.push(`/tournaments/${t.id}/admin`)} style={{
             display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-            cursor: 'pointer', fontSize: 13, color: '#777', fontFamily: 'inherit' }}>
+            cursor: 'pointer', fontSize: 14, color: '#777', fontFamily: 'inherit' }}>
             <ChevronRight size={14} /> مدیریت
           </button>
           <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>ایجاد براکت دو طرفه</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>ایجاد براکت دو طرفه</span>
         </div>
       </div>
 
@@ -387,7 +387,7 @@ export default function BracketPage() {
               background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.22)',
               borderRadius: 16, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
               <Info size={15} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
-              <p style={{ fontSize: 13, color: '#78350f', margin: 0, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 14, color: '#78350f', margin: 0, lineHeight: 1.6 }}>
                 <strong>{toFa(approvedPlayers.length)} نفر</strong> ثبت‌نام کرده‌اند از {toFa(totalSlots)} ظرفیت.
                 {' '}{toFa(totalSlots - approvedPlayers.length)} جایگاه با Bye پر می‌شود.
               </p>
@@ -397,7 +397,7 @@ export default function BracketPage() {
           <h1 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 6px', textAlign: 'center' }}>
             روش چیدمان براکت
           </h1>
-          <p style={{ fontSize: 13, color: '#888', textAlign: 'center', margin: '0 0 28px' }}>
+          <p style={{ fontSize: 14, color: '#888', textAlign: 'center', margin: '0 0 28px' }}>
             جدول دو طرفه — نیمی از بازیکنان در هر طرف
           </p>
 
@@ -421,12 +421,12 @@ export default function BracketPage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {opt.icon}
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 900, color: '#111', marginBottom: 5 }}>{opt.label}</div>
-                <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5 }}>{opt.desc}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#111', marginBottom: 5 }}>{opt.label}</div>
+                <div style={{ fontSize: 13, color: '#888', lineHeight: 1.5 }}>{opt.desc}</div>
                 {opt.badge && (
                   <div style={{ marginTop: 12, display: 'inline-flex', background: `rgba(${opt.rgb},0.10)`,
                     border: `1px solid rgba(${opt.rgb},0.22)`, borderRadius: 20,
-                    padding: '4px 12px', fontSize: 11, fontWeight: 800, color: opt.color }}>
+                    padding: '4px 12px', fontSize: 12, fontWeight: 800, color: opt.color }}>
                     {opt.badge}
                   </div>
                 )}
@@ -437,7 +437,7 @@ export default function BracketPage() {
           <button onClick={() => setShowT(v => !v)} style={{
             width: '100%', padding: '11px', borderRadius: 20,
             border: '1px solid rgba(0,0,0,0.10)', background: 'rgba(0,0,0,0.03)',
-            cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, color: '#666',
+            cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: '#666',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
           }}>
             <FolderOpen size={14} /> بارگذاری قالب
@@ -452,10 +452,10 @@ export default function BracketPage() {
                   background: 'rgba(0,0,0,0.02)', cursor: 'pointer', fontFamily: 'inherit', marginBottom: 6,
                 }}>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{tpl.name}</div>
-                    <div style={{ fontSize: 11, color: '#aaa' }}>{tpl.date} • {toFa(tpl.players)} نفر</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>{tpl.name}</div>
+                    <div style={{ fontSize: 12, color: '#aaa' }}>{tpl.date} • {toFa(tpl.players)} نفر</div>
                   </div>
-                  <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 800 }}>بارگذاری</span>
+                  <span style={{ fontSize: 13, color: '#C7A66A', fontWeight: 800 }}>بارگذاری</span>
                 </button>
               ))}
             </div>
@@ -474,7 +474,7 @@ export default function BracketPage() {
         maxWidth: 380, width: '100%', textAlign: 'center' }}>
         <Shuffle size={28} color="#8b5cf6" style={{ marginBottom: 14 }} />
         <h2 style={{ fontSize: 18, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>چیدمان تصادفی</h2>
-        <p style={{ fontSize: 13, color: '#777', lineHeight: 1.7, margin: '0 0 22px' }}>
+        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, margin: '0 0 22px' }}>
           {toFa(approvedPlayers.length)} بازیکن تصادفی در جدول چیده می‌شوند.
           {needsBye && ` ${toFa(totalSlots - approvedPlayers.length)} جایگاه Bye اضافه می‌شود.`}
         </p>
@@ -497,7 +497,7 @@ export default function BracketPage() {
         maxWidth: 380, width: '100%', textAlign: 'center', boxShadow: '0 24px 80px rgba(0,0,0,0.20)' }}>
         <div style={{ fontSize: 32, marginBottom: 12 }}>🏖️</div>
         <h3 style={{ fontSize: 17, fontWeight: 900, color: '#111', margin: '0 0 10px' }}>جایگاه‌های خالی</h3>
-        <p style={{ fontSize: 13, color: '#666', lineHeight: 1.7, margin: '0 0 22px' }}>
+        <p style={{ fontSize: 14, color: '#666', lineHeight: 1.7, margin: '0 0 22px' }}>
           برخی جایگاه‌ها بازیکن ندارند. Bye اضافه می‌شود و
           بازیکن مقابل صعود به مرحله بعد می‌کند.
         </p>
@@ -605,21 +605,21 @@ export default function BracketPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 4,
-              background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#999', fontFamily: 'inherit' }}>
+              background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#999', fontFamily: 'inherit' }}>
               <ChevronRight size={13} /> براکت
             </button>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#111' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>
               {method === 'manual' ? 'دستی' : 'تصادفی'} — دو طرفه
             </span>
             {pool.length > 0 && (
-              <span style={{ fontSize: 11, color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
+              <span style={{ fontSize: 12, color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
                 border: '1px solid rgba(245,158,11,0.20)', borderRadius: 20,
                 padding: '2px 10px', fontWeight: 700 }}>
                 {toFa(pool.length)} باقی‌مانده
               </span>
             )}
             {poolError && pool.length > 0 && (
-              <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 700 }}>
+              <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>
                 ⚠ همه بازیکنان باید در جدول قرار گیرند
               </span>
             )}
@@ -656,20 +656,20 @@ export default function BracketPage() {
             flexShrink: 0 }}>
             {tapPlayer ? (
               <div style={{ padding: '8px 14px 6px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ flex: 1, fontSize: 12, color: '#C7A66A', fontWeight: 700 }}>
+                <div style={{ flex: 1, fontSize: 13, color: '#C7A66A', fontWeight: 700 }}>
                   «{tapPlayer.name}» انتخاب شد — روی جایگاه خالی بزنید
                 </div>
                 <button onClick={() => setTapPlayer(null)} style={{
                   display: 'flex', alignItems: 'center', gap: 4,
                   background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)',
                   borderRadius: 20, padding: '4px 10px', cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: 11, color: '#ef4444', fontWeight: 700,
+                  fontSize: 12, color: '#ef4444', fontWeight: 700,
                 }}>
                   <X size={10} /> لغو
                 </button>
               </div>
             ) : (
-              <div style={{ padding: '8px 14px 4px', fontSize: 11, color: '#bbb', fontWeight: 700 }}>
+              <div style={{ padding: '8px 14px 4px', fontSize: 12, color: '#bbb', fontWeight: 700 }}>
                 {pool.length > 0 ? 'روی بازیکن بزنید تا انتخاب شود' : '✓ همه بازیکنان تخصیص یافتند'}
               </div>
             )}
@@ -684,7 +684,7 @@ export default function BracketPage() {
                     border: `1px solid ${tapPlayer?.id === p.id ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.08)'}`,
                     cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.14s',
                   }}>
-                  <span style={{ fontSize: 12, fontWeight: 700,
+                  <span style={{ fontSize: 13, fontWeight: 700,
                     color: tapPlayer?.id === p.id ? '#C7A66A' : '#333' }}>
                     {p.name}
                   </span>
@@ -709,7 +709,7 @@ export default function BracketPage() {
             <div style={{ fontSize: 10, fontWeight: 800, color: '#ccc',
               letterSpacing: '0.10em', marginBottom: 10 }}>بازیکنان</div>
             {pool.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '18px 0', color: '#ddd', fontSize: 11 }}>
+              <div style={{ textAlign: 'center', padding: '18px 0', color: '#ddd', fontSize: 12 }}>
                 <Check size={18} style={{ marginBottom: 5 }} /><br />همه تخصیص یافتند
               </div>
             ) : pool.map(p => (
@@ -718,7 +718,7 @@ export default function BracketPage() {
                   borderRadius: 9, marginBottom: 5, background: 'rgba(0,0,0,0.02)',
                   border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#111',
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#111',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
                   {p.rank && <div style={{ fontSize: 9, color: '#C7A66A' }}>#{toFa(p.rank)}</div>}
                 </div>

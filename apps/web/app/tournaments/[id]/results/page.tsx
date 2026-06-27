@@ -89,7 +89,7 @@ export default function ResultsPage() {
             marginBottom: 32 }}>
             <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
               display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.50)',
+              cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.50)',
               fontFamily: 'inherit',
             }}>
               <ChevronRight size={15} /> بازگشت
@@ -98,7 +98,7 @@ export default function ResultsPage() {
               display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
               borderRadius: 20, border: '1px solid rgba(255,255,255,0.15)',
               background: 'rgba(255,255,255,0.06)', color: '#fff',
-              fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             }}>
               <Share2 size={14} /> اشتراک‌گذاری
             </button>
@@ -107,14 +107,14 @@ export default function ResultsPage() {
           {/* Title */}
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ fontSize: 44, marginBottom: 12 }}>🏆</div>
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#C7A66A',
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#C7A66A',
               letterSpacing: '0.16em', marginBottom: 8 }}>
               نتایج نهایی
             </div>
             <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', margin: '0 0 6px' }}>
               {t.name}
             </h1>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.40)', margin: 0 }}>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.40)', margin: 0 }}>
               {t.date} • {GAME_TYPE_LABELS[t.gameType]} • {toFa(t.registeredCount)} شرکت‌کننده
             </p>
           </div>
@@ -147,7 +147,7 @@ export default function ResultsPage() {
                     <div style={{ position: 'absolute', bottom: 4, right: 4,
                       width: 26, height: 26, borderRadius: '50%',
                       background: '#111', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', fontSize: 14 }}>
+                      justifyContent: 'center', fontSize: 15 }}>
                       {entry.icon}
                     </div>
                   </div>
@@ -158,7 +158,7 @@ export default function ResultsPage() {
                       color: '#fff', marginBottom: 3 }}>
                       {entry.player?.name ?? '—'}
                     </div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: entry.borderColor }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: entry.borderColor }}>
                       {entry.label}
                     </div>
                   </div>
@@ -196,7 +196,7 @@ export default function ResultsPage() {
               display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
               {s.icon}
               <div style={{ fontSize: 22, fontWeight: 900, color: '#111' }}>{s.val}</div>
-              <div style={{ fontSize: 11, color: '#aaa', fontWeight: 600 }}>{s.label}</div>
+              <div style={{ fontSize: 12, color: '#aaa', fontWeight: 600 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -210,7 +210,7 @@ export default function ResultsPage() {
 
         {[...roundGroups].reverse().map(({ round, label, ms }) => (
           <div key={round} style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#C7A66A',
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#C7A66A',
               letterSpacing: '0.08em', marginBottom: 14 }}>
               {label}
             </div>
@@ -229,7 +229,7 @@ export default function ResultsPage() {
                         <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center',
                           gap: 10, flexDirection: i === 1 ? 'row-reverse' : 'row' }}>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 14, fontWeight: win ? 900 : 700,
+                            <div style={{ fontSize: 15, fontWeight: win ? 900 : 700,
                               color: win ? '#111' : '#666' }}>
                               {p?.name ?? '—'}
                               {win && <Trophy size={12} color="#C7A66A" style={{
@@ -258,12 +258,12 @@ export default function ResultsPage() {
         <div style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 24,
           padding: '28px', color: '#fff', textAlign: 'center', marginTop: 12 }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🏆</div>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.15em', opacity: 0.75,
+          <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '0.15em', opacity: 0.75,
             marginBottom: 6 }}>قهرمان مسابقه</div>
           <div style={{ fontSize: 28, fontWeight: 900, marginBottom: 4 }}>
             {champion?.name}
           </div>
-          <div style={{ fontSize: 13, opacity: 0.75 }}>
+          <div style={{ fontSize: 14, opacity: 0.75 }}>
             {t.name} — {t.date}
           </div>
         </div>
