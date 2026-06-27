@@ -516,9 +516,10 @@ export default function BracketPage() {
     <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '16px 12px',
       flex: isMobile ? undefined : 1,
       minWidth: 0,
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'safe center',
       WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
       <div style={{ display: 'flex', direction: 'ltr', alignItems: 'stretch',
-        minWidth: 'max-content', gap: 0 }}>
+        flexShrink: 0, gap: 0 }}>
 
         {/* LEFT HALF columns: R1 → QF → SF */}
         {innerRounds.map((round, ri) => {
@@ -595,14 +596,15 @@ export default function BracketPage() {
 
   /* ── Main bracket builder ── */
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif' }}>
+    <div style={{ height: 'calc(100vh - 72px)', display: 'flex', flexDirection: 'column',
+      background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif',
+      overflow: 'hidden' }}>
 
       {byeDlg && <ByeDialog />}
 
-      {/* Sticky header */}
+      {/* Header bar */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '10px clamp(12px,3vw,28px)', position: 'sticky', top: 72, zIndex: 50 }}>
+        padding: '10px clamp(12px,3vw,28px)', flexShrink: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 4,
@@ -651,7 +653,7 @@ export default function BracketPage() {
 
       {/* ── MOBILE LAYOUT ── */}
       {isMobile ? (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 130px)' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Player chips strip */}
           <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
             flexShrink: 0 }}>
@@ -701,7 +703,7 @@ export default function BracketPage() {
         </div>
       ) : (
         /* ── DESKTOP LAYOUT ── */
-        <div style={{ display: 'flex', height: 'calc(100vh - 165px)', overflow: 'hidden', minWidth: 0 }}>
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minWidth: 0 }}>
 
           {/* Player pool sidebar */}
           <div style={{ width: 185, flexShrink: 0, background: '#fff',
