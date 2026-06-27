@@ -1,18 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import {
-  ChevronRight, Upload, Check, Clock, AlertCircle,
-  User, CreditCard, Loader2, CheckCircle2,
+  ChevronRight, CheckCircle2, AlertCircle, User, CreditCard, Loader2, Download,
 } from 'lucide-react';
 import {
   SAMPLE_TOURNAMENTS, formatFee, toFa,
 } from '../../../../lib/mock-tournaments';
 import { useAuthStore } from '../../../../store/auth.store';
+import Link from 'next/link';
 
-type Step = 'confirm' | 'pay-loading' | 'pay-success' | 'upload' | 'pending';
+type Step = 'confirm' | 'pay-loading' | 'receipt';
+
+function nowFa(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return toFa(
+    `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} — ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
+}
 
 export default function RegisterPage() {
   const { id }  = useParams() as { id: string };
@@ -23,22 +30,115 @@ export default function RegisterPage() {
   const isLoggedIn = !!user;
   const userName   = user ? `${user.firstName} ${user.lastName}` : '';
 
-  const [step, setStep]           = useState<Step>('confirm');
-  const [showAlert, setShowAlert] = useState(false);
-  const [receiptFile, setReceipt] = useState<string | null>(null);
-  const [dragging, setDragging]   = useState(false);
-  const [trackingCode]            = useState(
+  const [step, setStep]       = useState<Step>('confirm');
+  const [showAlert, setAlert] = useState(false);
+  const [receiptDate]         = useState(nowFa);
+
+  const [trackingCode] = useState(
     () => toFa(14031) + '-' + toFa(Math.floor(10000 + Math.random() * 90000))
   );
 
+  const registeredRef = useRef(false);
+
+  /* Save new registration to localStorage when receipt step is entered */
+  useEffect(() => {
+    if (step !== 'receipt' || registeredRef.current) return;
+    registeredRef.current = true;
+    const newReg = {
+      id: `reg-${Date.now()}`,
+      tournamentId: id,
+      playerName: userName || 'بازیکن مهمان',
+      phone: user?.phone ?? '',
+      playerInfo: '',
+      receiptNote: `کد پیگیری: ${trackingCode}`,
+      status: 'pending' as const,
+      registeredAt: receiptDate,
+    };
+    try {
+      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]');
+      localStorage.setItem(`tournament-regs-${id}`, JSON.stringify([...existing, newReg]));
+    } catch {}
+  }, [step, id, userName, trackingCode, receiptDate, user?.phone]);
+
   const handlePay = () => {
-    if (!isLoggedIn) { setShowAlert(true); return; }
-    setShowAlert(false);
+    if (!isLoggedIn) { setAlert(true); return; }
+    setAlert(false);
     setStep('pay-loading');
-    setTimeout(() => setStep('pay-success'), 2400);
+    setTimeout(() => setStep('receipt'), 2400);
   };
 
-  /* ─── Loading (store not hydrated yet) ─────────────────────── */
+  const downloadReceipt = () => {
+    const html = `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>فیش واریزی — بیلیارد هاب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Vazirmatn',Tahoma,Arial,sans-serif;background:#F7F7F5;min-height:100vh;
+         display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{background:#fff;border-radius:20px;overflow:hidden;max-width:400px;width:100%;
+          box-shadow:0 8px 40px rgba(0,0,0,0.12)}
+    .hd{background:linear-gradient(135deg,#1a1a1a,#2a2a2a);padding:24px;text-align:center}
+    .logo{font-size:16px;font-weight:900;color:#C7A66A;letter-spacing:.12em;margin-bottom:4px}
+    .sub{font-size:12px;color:rgba(255,255,255,.45)}
+    .amt{text-align:center;padding:28px 24px 20px;border-bottom:1px solid #f0f0f0}
+    .ic{width:56px;height:56px;border-radius:50%;background:rgba(48,197,90,.10);
+        border:2px solid rgba(48,197,90,.25);display:flex;align-items:center;
+        justify-content:center;margin:0 auto 14px;font-size:26px;color:#30C55A}
+    .ok{font-size:20px;font-weight:900;color:#111;margin-bottom:6px}
+    .price{font-size:34px;font-weight:900;color:#C7A66A}
+    .rows{padding:16px 24px}
+    .row{display:flex;justify-content:space-between;padding:11px 0;
+         border-bottom:1px solid #f5f5f5;font-size:14px}
+    .row:last-child{border-bottom:none}
+    .lbl{color:#aaa}
+    .val{font-weight:700;color:#111}
+    .val.g{color:#30C55A}
+    .ft{text-align:center;padding:14px;background:#fafafa;font-size:12px;
+        color:#bbb;border-top:1px solid #f0f0f0}
+    @media print{body{background:#fff}.card{box-shadow:none}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hd">
+      <div class="logo">BILLIARD HUB</div>
+      <div class="sub">فیش پرداخت آنلاین</div>
+    </div>
+    <div class="amt">
+      <div class="ic">✓</div>
+      <div class="ok">پرداخت موفق</div>
+      <div class="price">${formatFee(t.entryFee)}</div>
+    </div>
+    <div class="rows">
+      <div class="row"><span class="lbl">نام بازیکن</span><span class="val">${userName}</span></div>
+      <div class="row"><span class="lbl">مسابقه</span><span class="val">${t.name}</span></div>
+      <div class="row"><span class="lbl">باشگاه</span><span class="val">${t.clubName}</span></div>
+      <div class="row"><span class="lbl">کد پیگیری</span><span class="val">${trackingCode}</span></div>
+      <div class="row"><span class="lbl">تاریخ پرداخت</span><span class="val">${receiptDate}</span></div>
+      <div class="row"><span class="lbl">وضعیت</span><span class="val g">ثبت‌نام تأیید شد ✓</span></div>
+    </div>
+    <div class="ft">billiardhub.ir</div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'فیش_واریزی_بیلیارد_هاب.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  /* ─── Loading ─────────────────────────────────────────────────── */
   if (!_hydrated) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex',
       alignItems: 'center', justifyContent: 'center' }}>
@@ -49,7 +149,7 @@ export default function RegisterPage() {
     </div>
   );
 
-  /* ─── Shared: sticky header ─────────────────────────────────── */
+  /* ─── Shared header ───────────────────────────────────────────── */
   const Header = () => (
     <div style={{
       background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -69,7 +169,7 @@ export default function RegisterPage() {
     </div>
   );
 
-  /* ─── Shared: tournament mini-card ─────────────────────────── */
+  /* ─── Shared tournament mini-card ──────────────────────────────── */
   const TCard = () => (
     <div style={{
       background: '#fff', borderRadius: 20, padding: '14px 16px',
@@ -94,148 +194,8 @@ export default function RegisterPage() {
     </div>
   );
 
-  /* ─── State: pending ─────────────────────────────────────────── */
-  if (step === 'pending') return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif' }}>
-      <Header />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '40px 20px', minHeight: 'calc(100vh - 62px)' }}>
-        <div style={{ background: '#fff', borderRadius: 28, padding: '48px 32px',
-          maxWidth: 440, width: '100%', textAlign: 'center',
-          boxShadow: '0 8px 48px rgba(0,0,0,0.10)' }}>
-
-          <div style={{ width: 80, height: 80, borderRadius: '50%',
-            background: 'rgba(245,158,11,0.10)', border: '2px solid rgba(245,158,11,0.22)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 24px', animation: 'softp 2.5s ease-in-out infinite' }}>
-            <Clock size={34} color="#f59e0b" />
-          </div>
-
-          <h2 style={{ fontSize: 22, fontWeight: 900, color: '#111', margin: '0 0 12px' }}>
-            در انتظار تایید مدیر
-          </h2>
-          <p style={{ fontSize: 15, color: '#777', lineHeight: 1.85, margin: '0 0 28px' }}>
-            فیش پرداخت شما دریافت شد.<br />
-            <strong style={{ color: '#111' }}>{userName}</strong> عزیز،
-            مدیر باشگاه در اسرع وقت بررسی و تایید خواهد کرد.
-          </p>
-
-          <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.18)',
-            borderRadius: 14, padding: '14px 18px', marginBottom: 28,
-            display: 'flex', alignItems: 'center', gap: 12, textAlign: 'right' }}>
-            <AlertCircle size={17} color="#f59e0b" style={{ flexShrink: 0 }} />
-            <div style={{ fontSize: 13, color: '#777', lineHeight: 1.6 }}>
-              پس از تایید، اطلاع‌رسانی خواهید شد
-            </div>
-          </div>
-
-          <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
-            width: '100%', padding: '14px', borderRadius: 14,
-            border: '1.5px solid rgba(0,0,0,0.10)', background: '#fff',
-            fontSize: 15, fontWeight: 700, cursor: 'pointer',
-            color: '#555', fontFamily: 'inherit',
-          }}>
-            بازگشت به مسابقه
-          </button>
-        </div>
-      </div>
-      <style>{`@keyframes softp{0%,100%{opacity:1}50%{opacity:0.55}}`}</style>
-    </div>
-  );
-
-  /* ─── State: upload receipt ──────────────────────────────────── */
-  if (step === 'upload') return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
-      <Header />
-      <div style={{ maxWidth: 560, margin: '0 auto', padding: '24px clamp(16px,4vw,32px)' }}>
-        <TCard />
-
-        <div style={{ background: '#fff', borderRadius: 24, padding: '28px 24px',
-          boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
-
-          {/* Payment confirmed row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24,
-            padding: '14px 16px', background: 'rgba(48,197,90,0.05)',
-            borderRadius: 14, border: '1px solid rgba(48,197,90,0.18)' }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(48,197,90,0.12)', border: '1px solid rgba(48,197,90,0.25)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Check size={18} color="#30C55A" />
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#111' }}>پرداخت موفق — {formatFee(t.entryFee)}</div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>کد پیگیری: {trackingCode}</div>
-            </div>
-          </div>
-
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>
-            آپلود فیش پرداخت
-          </h3>
-          <p style={{ fontSize: 14, color: '#888', margin: '0 0 20px', lineHeight: 1.7 }}>
-            تصویر رسید یا اسکرین‌شات پرداخت را برای باشگاه ارسال کنید.
-          </p>
-
-          {/* Drop zone */}
-          <div
-            onDragOver={e => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={e => { e.preventDefault(); setDragging(false); setReceipt('receipt.jpg'); }}
-            onClick={() => setReceipt('receipt.jpg')}
-            style={{
-              border: `2px dashed ${dragging ? '#C7A66A' : receiptFile ? '#30C55A' : 'rgba(0,0,0,0.12)'}`,
-              borderRadius: 16, padding: '36px 20px', textAlign: 'center',
-              cursor: 'pointer', transition: 'all 0.2s', marginBottom: 20,
-              background: receiptFile
-                ? 'rgba(48,197,90,0.04)'
-                : dragging ? 'rgba(199,166,106,0.04)' : '#fafafa',
-            }}
-          >
-            {receiptFile ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: 12,
-                  background: 'rgba(48,197,90,0.12)', border: '1px solid rgba(48,197,90,0.25)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Check size={22} color="#30C55A" />
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>فیش آپلود شد ✓</div>
-                  <div style={{ fontSize: 13, color: '#30C55A', marginTop: 2 }}>{receiptFile}</div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Upload size={32} color="#C7A66A" style={{ opacity: 0.55, marginBottom: 12 }} />
-                <p style={{ fontSize: 15, color: '#777', margin: '0 0 4px', fontWeight: 600 }}>
-                  کلیک کنید یا فایل را بکشید
-                </p>
-                <p style={{ fontSize: 13, color: '#bbb', margin: 0 }}>PNG · JPG · PDF</p>
-              </>
-            )}
-          </div>
-
-          <button
-            onClick={() => receiptFile && setStep('pending')}
-            disabled={!receiptFile}
-            style={{
-              width: '100%', padding: '15px', borderRadius: 16, border: 'none',
-              fontSize: 16, fontWeight: 800, fontFamily: 'inherit',
-              cursor: receiptFile ? 'pointer' : 'not-allowed', transition: 'all 0.2s',
-              background: receiptFile
-                ? 'linear-gradient(135deg,#C7A66A,#A07840)' : 'rgba(0,0,0,0.07)',
-              color: receiptFile ? '#fff' : '#bbb',
-              boxShadow: receiptFile ? '0 4px 16px rgba(199,166,106,0.28)' : 'none',
-            }}>
-            ارسال فیش و تکمیل ثبت‌نام
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  /* ─── State: gateway (loading / success) ────────────────────── */
-  if (step === 'pay-loading' || step === 'pay-success') return (
+  /* ─── Gateway loading / success ────────────────────────────────── */
+  if (step === 'pay-loading') return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif' }}>
       <Header />
@@ -246,7 +206,7 @@ export default function RegisterPage() {
           borderRadius: 28, padding: '44px 36px', maxWidth: 400, width: '100%',
           textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.28)',
         }}>
-          {/* Bank logos */}
+          {/* Bank name chips */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
             {['ملت', 'صادرات', 'پاسارگاد', 'ملی'].map(b => (
               <div key={b} style={{
@@ -256,51 +216,136 @@ export default function RegisterPage() {
               }}>{b}</div>
             ))}
           </div>
-
-          {step === 'pay-loading' ? (
-            <>
-              <Loader2 size={52} color="#C7A66A"
-                style={{ animation: 'spin 1s linear infinite', marginBottom: 20 }} />
-              <div style={{ fontSize: 17, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
-                در حال اتصال به درگاه…
-              </div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>لطفاً صبر کنید</div>
-            </>
-          ) : (
-            <>
-              <div style={{ width: 76, height: 76, borderRadius: '50%',
-                background: 'rgba(48,197,90,0.12)', border: '2px solid rgba(48,197,90,0.35)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 20px' }}>
-                <CheckCircle2 size={38} color="#30C55A" />
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', marginBottom: 8 }}>
-                پرداخت موفق
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 900, color: '#C7A66A', marginBottom: 6 }}>
-                {formatFee(t.entryFee)}
-              </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.30)', marginBottom: 32 }}>
-                کد پیگیری: {trackingCode}
-              </div>
-              <button onClick={() => setStep('upload')} style={{
-                width: '100%', padding: '14px', borderRadius: 14,
-                background: 'rgba(199,166,106,0.14)',
-                border: '1px solid rgba(199,166,106,0.35)',
-                color: '#C7A66A', fontSize: 15, fontWeight: 800,
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}>
-                آپلود فیش پرداخت ←
-              </button>
-            </>
-          )}
+          <Loader2 size={52} color="#C7A66A"
+            style={{ animation: 'spin 1s linear infinite', marginBottom: 20 }} />
+          <div style={{ fontSize: 17, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
+            در حال اتصال به درگاه…
+          </div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>لطفاً صبر کنید</div>
         </div>
       </div>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 
-  /* ─── State: confirm (default) ───────────────────────────────── */
+  /* ─── Receipt ───────────────────────────────────────────────────── */
+  if (step === 'receipt') return (
+    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
+      fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
+      <Header />
+      <div style={{ maxWidth: 560, margin: '0 auto', padding: '24px clamp(16px,4vw,32px)' }}>
+
+        {/* Receipt card */}
+        <div style={{
+          background: '#fff', borderRadius: 24, overflow: 'hidden',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.12)', marginBottom: 14,
+        }}>
+          {/* Dark header */}
+          <div style={{ background: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)',
+            padding: '22px 28px', textAlign: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#C7A66A',
+              letterSpacing: '0.12em', marginBottom: 4 }}>BILLIARD HUB</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)' }}>فیش پرداخت آنلاین</div>
+          </div>
+
+          {/* Amount + success */}
+          <div style={{ textAlign: 'center', padding: '28px 24px 20px',
+            borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%',
+              background: 'rgba(48,197,90,0.10)', border: '2px solid rgba(48,197,90,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}>
+              <CheckCircle2 size={32} color="#30C55A" />
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: '#111', marginBottom: 8 }}>
+              پرداخت موفق
+            </div>
+            <div style={{ fontSize: 36, fontWeight: 900, color: '#C7A66A' }}>
+              {formatFee(t.entryFee)}
+            </div>
+          </div>
+
+          {/* Details rows */}
+          <div style={{ padding: '16px 28px' }}>
+            {[
+              { label: 'نام بازیکن', value: userName, mono: false },
+              { label: 'مسابقه', value: t.name, mono: false },
+              { label: 'باشگاه', value: t.clubName, mono: false },
+              { label: 'کد پیگیری', value: trackingCode, mono: true },
+              { label: 'تاریخ پرداخت', value: receiptDate, mono: true },
+            ].map(row => (
+              <div key={row.label} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.05)', fontSize: 14,
+              }}>
+                <span style={{ color: '#aaa' }}>{row.label}</span>
+                <span style={{
+                  fontWeight: 700, color: '#111',
+                  fontFamily: row.mono ? 'system-ui,-apple-system,sans-serif' : 'inherit',
+                  maxWidth: '60%', textAlign: 'left', overflow: 'hidden',
+                  textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>{row.value}</span>
+              </div>
+            ))}
+            {/* Status row */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '12px 0', fontSize: 14,
+            }}>
+              <span style={{ color: '#aaa' }}>وضعیت ثبت‌نام</span>
+              <span style={{
+                fontWeight: 700, color: '#30C55A',
+                background: 'rgba(48,197,90,0.08)',
+                padding: '4px 10px', borderRadius: 20,
+                border: '1px solid rgba(48,197,90,0.20)',
+                fontSize: 13,
+              }}>
+                ✓ تأیید شد
+              </span>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{ padding: '12px 28px', background: '#fafafa',
+            textAlign: 'center', fontSize: 12, color: '#bbb',
+            borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+            billiardhub.ir
+          </div>
+        </div>
+
+        {/* Download button */}
+        <button onClick={downloadReceipt} style={{
+          width: '100%', padding: '15px', borderRadius: 16, border: 'none',
+          background: 'linear-gradient(135deg,#C7A66A,#A07840)',
+          color: '#fff', fontSize: 16, fontWeight: 800,
+          cursor: 'pointer', fontFamily: 'inherit',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+          boxShadow: '0 4px 16px rgba(199,166,106,0.28)', marginBottom: 10,
+        }}>
+          <Download size={18} />
+          دانلود فیش واریزی
+        </button>
+
+        <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
+          width: '100%', padding: '14px', borderRadius: 16,
+          border: '1.5px solid rgba(0,0,0,0.10)', background: '#fff',
+          fontSize: 15, fontWeight: 700, cursor: 'pointer',
+          color: '#555', fontFamily: 'inherit',
+        }}>
+          بازگشت به مسابقه
+        </button>
+
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#bbb', marginTop: 14, lineHeight: 1.7 }}>
+          درخواست شما در لیست انتظار ادمین باشگاه قرار گرفت و
+          به‌زودی بررسی می‌شود
+        </p>
+      </div>
+    </div>
+  );
+
+  /* ─── Confirm (default) ─────────────────────────────────────────── */
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
@@ -371,7 +416,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Fee */}
+          {/* Amount */}
           <div style={{ display: 'flex', justifyContent: 'space-between',
             alignItems: 'center', marginBottom: 24 }}>
             <div>
@@ -390,6 +435,15 @@ export default function RegisterPage() {
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 24 }} />
 
+          {/* Info box */}
+          <div style={{
+            background: 'rgba(48,197,90,0.04)', border: '1px solid rgba(48,197,90,0.16)',
+            borderRadius: 14, padding: '14px 16px', marginBottom: 22,
+            fontSize: 13, color: '#555', lineHeight: 1.7,
+          }}>
+            ✓ پس از پرداخت آنلاین، ثبت‌نام شما <strong>فوری</strong> تأیید می‌شود و فیش قابل دانلود خواهد بود.
+          </div>
+
           {/* CTA */}
           <button onClick={handlePay} style={{
             width: '100%', padding: '16px', borderRadius: 20,
@@ -405,10 +459,9 @@ export default function RegisterPage() {
 
           <p style={{ fontSize: 13, color: '#bbb', textAlign: 'center',
             margin: '12px 0 0', lineHeight: 1.6 }}>
-            پس از پرداخت، فیش را آپلود می‌کنید — مدیر باشگاه تایید خواهد کرد
+            پرداخت از طریق درگاه آنلاین — بدون نیاز به آپلود فیش
           </p>
         </div>
-
       </div>
     </div>
   );

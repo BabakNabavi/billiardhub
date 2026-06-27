@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -176,6 +176,20 @@ export default function TournamentAdminPage() {
   const [statusFilter, setSF]  = useState<RegistrationStatus | 'all'>('all');
   const [regsState, setRegs]   = useState<Registration[]>(regs);
   const [addingPlayer, setAP]  = useState(false);
+
+  /* Merge registrations submitted via the online payment flow */
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`tournament-regs-${id}`);
+      if (!saved) return;
+      const newRegs = JSON.parse(saved) as Registration[];
+      setRegs(prev => {
+        const existing = new Set(prev.map(r => r.id));
+        const fresh = newRegs.filter(r => !existing.has(r.id));
+        return fresh.length > 0 ? [...fresh, ...prev] : prev;
+      });
+    } catch {}
+  }, [id]);
   const [manualName, setMN]    = useState('');
   const [manualPhone, setMP]   = useState('');
 
