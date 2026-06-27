@@ -84,7 +84,8 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
   const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
 
   const activeTournament = SAMPLE_TOURNAMENTS.find(
-    t => t.clubId === club.id && (t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming')
+    t => (t.clubId === club.id || t.clubName === club.name) &&
+         (t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming')
   );
   const tournBadge = activeTournament ? ({
     registration_open: { label: '● ثبت‌نام مسابقه باز', color: '#C7A66A', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.30)', pulse: true  },
@@ -400,8 +401,18 @@ export default function ClubsPage() {
   const sortRef   = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    /* SAMPLE_CLUBS always leads — their ids ('1'–'6') match SAMPLE_TOURNAMENTS.
+       Real Supabase clubs have UUIDs that don't match mock tournament data,
+       so we keep them separate and always show mock clubs first. */
     api.get('/clubs')
-      .then(r => { setClubs(Array.isArray(r.data) && r.data.length > 0 ? r.data : SAMPLE_CLUBS); setLoading(false); })
+      .then(r => {
+        const apiClubs: Club[] = Array.isArray(r.data) ? r.data : [];
+        const mockNames = new Set(SAMPLE_CLUBS.map(c => c.name));
+        // Only append real API clubs whose names aren't already in mock data
+        const extras = apiClubs.filter((c: Club) => !mockNames.has(c.name));
+        setClubs([...SAMPLE_CLUBS, ...extras]);
+        setLoading(false);
+      })
       .catch(() => { setClubs(SAMPLE_CLUBS); setLoading(false); });
   }, []);
 
