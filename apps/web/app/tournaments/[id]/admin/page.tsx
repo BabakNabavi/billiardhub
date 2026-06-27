@@ -197,11 +197,28 @@ export default function TournamentAdminPage() {
   const pending   = regsState.filter(r => r.status === 'pending');
   const rejected  = regsState.filter(r => r.status === 'rejected');
 
-  const updateStatus = (id: string, status: RegistrationStatus) => {
-    setRegs(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+  const updateStatus = (regId: string, status: RegistrationStatus) => {
+    setRegs(prev => prev.map(r => r.id === regId ? { ...r, status } : r));
+    /* Write status change back to localStorage so user dashboard reflects it */
+    try {
+      const key = `tournament-regs-${id}`;
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const list: Registration[] = JSON.parse(raw);
+      const updated = list.map(r => r.id === regId ? { ...r, status } : r);
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch {}
   };
-  const remove = (id: string) => {
-    setRegs(prev => prev.filter(r => r.id !== id));
+  const remove = (regId: string) => {
+    setRegs(prev => prev.filter(r => r.id !== regId));
+    /* Remove from localStorage as well */
+    try {
+      const key = `tournament-regs-${id}`;
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const list: Registration[] = JSON.parse(raw);
+      localStorage.setItem(key, JSON.stringify(list.filter(r => r.id !== regId)));
+    } catch {}
   };
 
   const filtered = regsState.filter(r => {

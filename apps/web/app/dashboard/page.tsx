@@ -386,7 +386,7 @@ export default function DashboardPage() {
                   <div className="actions-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '10px' }}>
                     {[
                       { href: '/clubs', icon: <MapPin size={20} />, label: 'رزرو میز', color: '#C7A66A' },
-                      { href: '/events', icon: <Trophy size={20} />, label: 'مسابقات', color: '#f59e0b' },
+                      { href: '/tournaments', icon: <Trophy size={20} />, label: 'مسابقات', color: '#f59e0b' },
                       { href: '/shop', icon: <ShoppingBag size={20} />, label: 'فروشگاه', color: '#a78bfa' },
                       { href: '/players', icon: <Users size={20} />, label: 'بازیکنان', color: '#06b6d4' },
                       { href: '/rankings', icon: <BarChart2 size={20} />, label: 'رنکینگ', color: '#ef4444' },
