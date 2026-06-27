@@ -544,7 +544,11 @@ export default function ClubProfilePage() {
 
           {/* ── #8: TOURNAMENTS TAB ── */}
           {tab === 'tournaments' && (() => {
-            const clubTournaments = SAMPLE_TOURNAMENTS.filter(t => t.clubId === id);
+            /* Match by URL id first (works for mock clubs '1'–'6').
+               Fall back to clubName match for real Supabase clubs with UUIDs. */
+            const clubTournaments = SAMPLE_TOURNAMENTS.filter(
+              t => t.clubId === id || t.clubName === club.name
+            );
             return (
             <div style={{ animation: 'fadeUp 0.4s ease both' }}>
               {/* Stats row */}
