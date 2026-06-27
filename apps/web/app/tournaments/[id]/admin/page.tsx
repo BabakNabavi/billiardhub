@@ -387,34 +387,39 @@ export default function TournamentAdminPage() {
                     )}
                   </div>
 
-                  {/* Status + Actions — همه زیر هم */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0, alignItems: 'flex-start' }}>
+                  {/* Status + Actions */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0, alignItems: 'flex-end' }}>
                     <StatusBadge status={r.status} />
-                    {r.status !== 'approved' && (
-                      <button onClick={() => updateStatus(r.id, 'approved')} title="تایید" style={{
-                        width: 32, height: 32, borderRadius: 9, border: 'none',
-                        background: 'rgba(48,197,90,0.10)', color: '#30C55A',
+                    <div style={{ display: 'flex', gap: 5 }}>
+                      {r.status !== 'approved' && (
+                        <button onClick={() => updateStatus(r.id, 'approved')} title="تایید" style={{
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          padding: '5px 10px', borderRadius: 8, border: 'none',
+                          background: 'rgba(48,197,90,0.10)', color: '#30C55A',
+                          cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+                        }}>
+                          <Check size={12} /> تایید
+                        </button>
+                      )}
+                      {r.status !== 'rejected' && (
+                        <button onClick={() => updateStatus(r.id, 'rejected')} title="رد" style={{
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          padding: '5px 10px', borderRadius: 8, border: 'none',
+                          background: 'rgba(239,68,68,0.10)', color: '#ef4444',
+                          cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+                        }}>
+                          <X size={12} /> رد
+                        </button>
+                      )}
+                      <button onClick={() => remove(r.id)} title="حذف" style={{
+                        width: 28, height: 28, borderRadius: 8, border: 'none',
+                        background: 'rgba(0,0,0,0.05)', color: '#bbb',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
                       }}>
-                        <Check size={14} />
+                        <Trash2 size={12} />
                       </button>
-                    )}
-                    {r.status !== 'rejected' && (
-                      <button onClick={() => updateStatus(r.id, 'rejected')} title="رد" style={{
-                        width: 32, height: 32, borderRadius: 9, border: 'none',
-                        background: 'rgba(239,68,68,0.10)', color: '#ef4444',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <X size={14} />
-                      </button>
-                    )}
-                    <button onClick={() => remove(r.id)} title="حذف" style={{
-                      width: 32, height: 32, borderRadius: 9, border: 'none',
-                      background: 'rgba(0,0,0,0.05)', color: '#aaa',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Trash2 size={13} />
-                    </button>
+                    </div>
                   </div>
                 </div>
               ))}
