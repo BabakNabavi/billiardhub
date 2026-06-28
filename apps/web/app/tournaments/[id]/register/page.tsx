@@ -13,12 +13,25 @@ import Link from 'next/link';
 
 type Step = 'confirm' | 'pay-loading' | 'receipt';
 
-function nowFa(): string {
-  const d = new Date();
+function nowShamsi(): string {
+  const now = new Date();
+  const gy = now.getFullYear(), gm = now.getMonth() + 1, gd = now.getDate();
+  const gMD = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+  let gDN = 365 * (gy - 1600) + Math.floor((gy - 1597) / 4) - Math.floor((gy - 1601) / 100) + Math.floor((gy - 1601) / 400);
+  gDN += (gMD[gm - 1] ?? 0);
+  if (gm > 2 && gy % 4 === 0 && (gy % 100 !== 0 || gy % 400 === 0)) gDN++;
+  gDN += gd - 1;
+  let jDN = gDN - 79;
+  const jNp = Math.floor(jDN / 12053);
+  jDN %= 12053;
+  let jy = 979 + 33 * jNp + 4 * Math.floor(jDN / 1461);
+  jDN %= 1461;
+  if (jDN >= 366) { jy += Math.floor((jDN - 1) / 365); jDN = (jDN - 1) % 365; }
+  const jMD = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  let jm = 0;
+  for (; jm < 11; jm++) { const dm = jMD[jm] ?? 30; if (jDN < dm) break; jDN -= dm; }
   const pad = (n: number) => String(n).padStart(2, '0');
-  return toFa(
-    `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} — ${pad(d.getHours())}:${pad(d.getMinutes())}`
-  );
+  return toFa(`${jy}/${pad(jm + 1)}/${pad(jDN + 1)} — ${pad(now.getHours())}:${pad(now.getMinutes())}`);
 }
 
 export default function RegisterPage() {
@@ -30,10 +43,12 @@ export default function RegisterPage() {
   const isLoggedIn = !!user;
   const userName   = user ? `${user.firstName} ${user.lastName}` : '';
 
+  const full = t.registeredCount >= t.maxPlayers;
+
   const [step, setStep]           = useState<Step>('confirm');
   const [showAlert, setAlert]     = useState(false);
   const [alreadyReg, setAlreadyReg] = useState(false);
-  const [receiptDate]             = useState(nowFa);
+  const [receiptDate]             = useState(nowShamsi);
 
   const [trackingCode] = useState(
     () => toFa(14031) + '-' + toFa(Math.floor(10000 + Math.random() * 90000))
@@ -100,6 +115,7 @@ export default function RegisterPage() {
     .hd{background:linear-gradient(135deg,#1a1a1a,#2a2a2a);padding:24px;text-align:center}
     .logo{font-size:16px;font-weight:900;color:#C7A66A;letter-spacing:.12em;margin-bottom:4px}
     .sub{font-size:12px;color:rgba(255,255,255,.45)}
+    .tname{font-size:13px;color:rgba(255,255,255,.65);margin-top:6px;font-weight:700}
     .amt{text-align:center;padding:28px 24px 20px;border-bottom:1px solid #f0f0f0}
     .ic{width:56px;height:56px;border-radius:50%;background:rgba(48,197,90,.10);
         border:2px solid rgba(48,197,90,.25);display:flex;align-items:center;
@@ -123,6 +139,7 @@ export default function RegisterPage() {
     <div class="hd">
       <div class="logo">BILLIARD HUB</div>
       <div class="sub">فیش پرداخت آنلاین</div>
+      <div class="tname">${t.name}</div>
     </div>
     <div class="amt">
       <div class="ic">✓</div>
@@ -130,9 +147,9 @@ export default function RegisterPage() {
       <div class="price">${formatFee(t.entryFee)}</div>
     </div>
     <div class="rows">
-      <div class="row"><span class="lbl">نام بازیکن</span><span class="val">${userName}</span></div>
+      <div class="row"><span class="lbl">پرداخت‌کننده</span><span class="val">${userName}</span></div>
+      <div class="row"><span class="lbl">دریافت‌کننده</span><span class="val">${t.clubName}</span></div>
       <div class="row"><span class="lbl">مسابقه</span><span class="val">${t.name}</span></div>
-      <div class="row"><span class="lbl">باشگاه</span><span class="val">${t.clubName}</span></div>
       <div class="row"><span class="lbl">کد پیگیری</span><span class="val">${trackingCode}</span></div>
       <div class="row"><span class="lbl">تاریخ پرداخت</span><span class="val">${receiptDate}</span></div>
       <div class="row"><span class="lbl">وضعیت</span><span class="val g">ثبت‌نام تأیید شد ✓</span></div>
@@ -287,7 +304,8 @@ export default function RegisterPage() {
             padding: '22px 28px', textAlign: 'center' }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: '#C7A66A',
               letterSpacing: '0.12em', marginBottom: 4 }}>BILLIARD HUB</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)' }}>فیش پرداخت آنلاین</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)', marginBottom: 6 }}>فیش پرداخت آنلاین</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', fontWeight: 700 }}>{t.name}</div>
           </div>
 
           {/* Amount + success */}
@@ -312,9 +330,9 @@ export default function RegisterPage() {
           {/* Details rows */}
           <div style={{ padding: '16px 28px' }}>
             {[
-              { label: 'نام بازیکن', value: userName, mono: false },
+              { label: 'پرداخت‌کننده', value: userName, mono: false },
+              { label: 'دریافت‌کننده', value: t.clubName, mono: false },
               { label: 'مسابقه', value: t.name, mono: false },
-              { label: 'باشگاه', value: t.clubName, mono: false },
               { label: 'کد پیگیری', value: trackingCode, mono: true },
               { label: 'تاریخ پرداخت', value: receiptDate, mono: true },
             ].map(row => (
@@ -370,13 +388,13 @@ export default function RegisterPage() {
           دانلود فیش واریزی
         </button>
 
-        <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
+        <button onClick={() => router.push('/tournaments')} style={{
           width: '100%', padding: '14px', borderRadius: 16,
           border: '1.5px solid rgba(0,0,0,0.10)', background: '#fff',
           fontSize: 15, fontWeight: 700, cursor: 'pointer',
           color: '#555', fontFamily: 'inherit',
         }}>
-          بازگشت به مسابقه
+          بازگشت به مسابقات
         </button>
 
         <p style={{ textAlign: 'center', fontSize: 14, color: '#555', marginTop: 14, lineHeight: 1.8 }}>
@@ -396,7 +414,6 @@ export default function RegisterPage() {
       fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
       <Header />
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '24px clamp(16px,4vw,32px)' }}>
-        <TCard />
 
         {/* Not-logged-in alert */}
         {showAlert && (
@@ -453,11 +470,6 @@ export default function RegisterPage() {
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>{userName}</div>
                 <div style={{ fontSize: 13, color: '#888', marginTop: 2 }}>ثبت‌نام‌کننده</div>
               </div>
-              <div style={{ fontSize: 12, color: '#30C55A', fontWeight: 700,
-                background: 'rgba(48,197,90,0.08)', padding: '4px 10px',
-                borderRadius: 20, border: '1px solid rgba(48,197,90,0.18)' }}>
-                احراز هویت شده ✓
-              </div>
             </div>
           )}
 
@@ -471,41 +483,46 @@ export default function RegisterPage() {
               </div>
             </div>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 13, color: '#aaa', marginBottom: 3 }}>
-                {toFa(t.registeredCount)} / {toFa(t.maxPlayers)} ثبت‌نام
-              </div>
               <div style={{ fontSize: 13, color: '#aaa' }}>مهلت: {t.registrationDeadline}</div>
             </div>
           </div>
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', marginBottom: 24 }} />
 
-          {/* Info box */}
-          <div style={{
-            background: 'rgba(48,197,90,0.04)', border: '1px solid rgba(48,197,90,0.16)',
-            borderRadius: 14, padding: '14px 16px', marginBottom: 22,
-            fontSize: 13, color: '#555', lineHeight: 1.7,
-          }}>
-            ✓ پس از پرداخت آنلاین، فیش واریزی قابل دانلود خواهد بود. جهت مشاهده وضعیت ثبت‌نام به پنل کاربری خود مراجعه کنید.
-          </div>
-
           {/* CTA */}
-          <button onClick={handlePay} style={{
-            width: '100%', padding: '16px', borderRadius: 20,
-            background: 'rgba(199,166,106,0.10)',
-            border: '1px solid rgba(199,166,106,0.35)',
-            color: '#C7A66A', fontSize: 16, fontWeight: 800,
-            cursor: 'pointer', fontFamily: 'inherit',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-          }}>
-            <CreditCard size={18} />
-            واریز مبلغ ورودی
-          </button>
-
-          <p style={{ fontSize: 13, color: '#bbb', textAlign: 'center',
-            margin: '12px 0 0', lineHeight: 1.6 }}>
-            پرداخت از طریق درگاه آنلاین — بدون نیاز به آپلود فیش
-          </p>
+          {full ? (
+            <div style={{
+              background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.18)',
+              borderRadius: 16, padding: '20px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 8, lineHeight: 1.7 }}>
+                {userName ? `${userName} گرامی` : 'کاربر گرامی'} متاسفانه لیست {toFa(t.maxPlayers)} نفر بازیکنان تکمیل شد
+              </div>
+              <div style={{ fontSize: 14, color: '#777', marginBottom: 18, lineHeight: 1.8 }}>
+                در مسابقات آینده منتظر حضور با ارزشتان هستیم
+              </div>
+              <button onClick={() => router.push('/tournaments')} style={{
+                padding: '11px 28px', borderRadius: 12,
+                background: 'rgba(199,166,106,0.10)', color: '#C7A66A',
+                border: '1px solid rgba(199,166,106,0.35)',
+                fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                مسابقات
+              </button>
+            </div>
+          ) : (
+            <button onClick={handlePay} style={{
+              width: '100%', padding: '16px', borderRadius: 20,
+              background: 'rgba(199,166,106,0.10)',
+              border: '1px solid rgba(199,166,106,0.35)',
+              color: '#C7A66A', fontSize: 16, fontWeight: 800,
+              cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            }}>
+              <CreditCard size={18} />
+              واریز مبلغ ورودی
+            </button>
+          )}
         </div>
       </div>
     </div>
