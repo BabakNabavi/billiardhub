@@ -520,8 +520,8 @@ export default function HomePage() {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* navbar(72) + stories(116) + 56px spacing = 244px */
-          .hero-content { padding-top:244px !important; padding-bottom:60px !important; }
+          /* navbar(72) + stories(116) + 56px spacing = 244px → ×0.8 = 195px */
+          .hero-content { padding-top:195px !important; padding-bottom:60px !important; }
           .hero-h1      { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
@@ -551,7 +551,7 @@ export default function HomePage() {
 
         /* ══ MOBILE — hero content 10vh lower ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:clamp(220px,37vh,350px) !important; }
+          .hero-content { padding-top:clamp(176px,30vh,280px) !important; }
           .trust-strip  { margin-top:10vh !important; }
         }
 
