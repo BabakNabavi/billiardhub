@@ -328,7 +328,7 @@ function HeroSliderFull({ city, setCity, cities }: { city: string; setCity: (c: 
           100% { transform: scale(1.14) translate(-2%, 1.5%); }
         }
       `}</style>
-    <div style={{ position: 'relative', height: 'clamp(280px,40vw,500px)', overflow: 'hidden', background: '#0a0a0a' }}>
+    <div style={{ position: 'relative', height: 'clamp(160px,17vw,200px)', overflow: 'hidden', background: '#0a0a0a' }}>
       {SLIDER_IMAGES.map((s, i) => (
         <div key={i} style={{
           position: 'absolute', inset: 0,
@@ -344,18 +344,18 @@ function HeroSliderFull({ city, setCity, cities }: { city: string; setCity: (c: 
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', zIndex: 3, background: 'linear-gradient(to top, rgba(0,0,0,0.82), transparent)' }} />
 
       {/* text */}
-      <div style={{ position: 'absolute', top: 0, bottom: 52, left: 0, right: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(24px,4vw,64px)', direction: 'rtl' }}>
-        <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.85)', letterSpacing: '0.26em', fontWeight: 700, marginBottom: 12 }}>DISCOVER CLUBS</div>
-        <h1 style={{ fontSize: 'clamp(26px, 4.6vw, 57px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
+      <div style={{ position: 'absolute', top: 0, bottom: 38, left: 0, right: 0, zIndex: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(14px,2.5vw,36px)', direction: 'rtl' }}>
+        <div style={{ fontSize: 11, color: 'rgba(199,166,106,0.85)', letterSpacing: '0.26em', fontWeight: 700, marginBottom: 8 }}>DISCOVER CLUBS</div>
+        <h1 style={{ fontSize: 'clamp(23px, 4.1vw, 51px)', fontWeight: 900, color: '#fff', margin: '0 0 9px', letterSpacing: '-0.03em', lineHeight: 1.08 }}>
           {SLIDER_IMAGES[active]?.title}
         </h1>
-        <p style={{ fontSize: 'clamp(14px, 1.5vw, 20px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
+        <p style={{ fontSize: 'clamp(13px, 1.35vw, 18px)', color: '#D4A843', margin: 0, fontWeight: 600, textShadow: '0 0 22px rgba(212,168,67,0.55)' }}>
           {SLIDER_IMAGES[active]?.sub}
         </p>
       </div>
 
       {/* dots */}
-      <div style={{ position: 'absolute', bottom: 62, right: 'clamp(24px,4vw,64px)', zIndex: 6, display: 'flex', gap: 7 }}>
+      <div style={{ position: 'absolute', bottom: 46, right: 'clamp(14px,2.5vw,36px)', zIndex: 6, display: 'flex', gap: 7 }}>
         {SLIDER_IMAGES.map((_, i) => (
           <button key={i} onClick={() => advance(i)} style={{
             width: i === active ? 24 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
