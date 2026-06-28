@@ -544,16 +544,16 @@ export default function LivePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                   flex: 1, padding: vpad(innerRounds.length), width: '100%', gap: fs ? 'clamp(8px,1vh,20px)' : 10 }}>
                   {bracketFinal.winner && (
-                    <div style={{ textAlign: 'center', animation: 'champGlow 1.8s ease-in-out infinite' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', animation: 'champGlow 1.8s ease-in-out infinite' }}>
                       <div style={{
                         fontSize: fs ? 'clamp(26px,2.2vw,52px)' : 22,
                         fontWeight: 900, color: '#C7A66A', letterSpacing: '0.1em',
-                        fontFamily: 'Vazirmatn, sans-serif',
+                        fontFamily: 'Vazirmatn, sans-serif', whiteSpace: 'nowrap',
                       }}>🏆 قهرمان</div>
                       <div style={{
                         fontSize: fs ? 'clamp(32px,2.8vw,64px)' : 28,
                         fontWeight: 900, color: '#C7A66A',
-                        fontFamily: 'Vazirmatn, sans-serif',
+                        fontFamily: 'Vazirmatn, sans-serif', whiteSpace: 'nowrap',
                       }}>{bracketFinal.winner.name}</div>
                     </div>
                   )}
