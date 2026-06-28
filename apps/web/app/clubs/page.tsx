@@ -185,14 +185,22 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             {club.isVerified && (
               <div style={{
-                background: 'linear-gradient(135deg,#22c55e,#16a34a)',
+                position: 'relative', overflow: 'hidden',
+                background: 'rgba(48,197,90,0.13)',
+                backdropFilter: 'blur(20px) saturate(220%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(220%)',
+                border: '1px solid rgba(48,197,90,0.30)',
                 borderRadius: 20, padding: '3px 9px',
-                fontSize: 10, fontWeight: 900, color: '#fff',
+                fontSize: 10, fontWeight: 900, color: '#30C55A',
                 display: 'flex', alignItems: 'center', gap: 4,
-                boxShadow: '0 2px 8px rgba(34,197,94,0.45)',
-                letterSpacing: '0.03em',
+                boxShadow: 'inset 0 1px 0 rgba(48,197,90,0.28), 0 4px 12px rgba(0,0,0,0.22)',
+                textShadow: '0 0 10px rgba(48,197,90,0.55)',
+                letterSpacing: '0.04em',
               }}>
-                <span style={{ fontSize: 9, opacity: 0.85 }}>★</span> LQ
+                {/* top sheen */}
+                <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(48,197,90,0.18) 0%,transparent 60%)', pointerEvents: 'none', borderRadius: 'inherit' }} />
+                <span style={{ fontSize: 9, position: 'relative' }}>★</span>
+                <span style={{ position: 'relative' }}>LQ</span>
               </div>
             )}
           </div>
