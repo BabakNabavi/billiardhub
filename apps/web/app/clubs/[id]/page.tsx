@@ -272,8 +272,8 @@ export default function ClubProfilePage() {
         .tourn-card { background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:18px;transition:all 0.3s }
         .tourn-card:hover { transform:translateY(-2px); }
 
-        .hero-top-btn { top: 52px }
-        @media(min-width:961px){ .hero-top-btn { top: 58px } }
+        .hero-top-btn { top: 47px }
+        @media(min-width:961px){ .hero-top-btn { top: 52px } }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
@@ -309,9 +309,9 @@ export default function ClubProfilePage() {
 
 
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 20px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '4px 14px', marginBottom: 10 }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
-              <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '3px 12px', marginBottom: 10 }}>
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
+              <span style={{ fontSize: 11, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginBottom: 10 }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
