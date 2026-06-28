@@ -184,8 +184,15 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* top badges */}
           <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             {club.isVerified && (
-              <div style={{ background: 'rgba(199,166,106,0.90)', borderRadius: 20, padding: '3px 8px', fontSize: 10, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Check size={8} /> تأیید
+              <div style={{
+                background: 'linear-gradient(135deg,#22c55e,#16a34a)',
+                borderRadius: 20, padding: '3px 9px',
+                fontSize: 10, fontWeight: 900, color: '#fff',
+                display: 'flex', alignItems: 'center', gap: 4,
+                boxShadow: '0 2px 8px rgba(34,197,94,0.45)',
+                letterSpacing: '0.03em',
+              }}>
+                <span style={{ fontSize: 9, opacity: 0.85 }}>★</span> LQ
               </div>
             )}
           </div>
