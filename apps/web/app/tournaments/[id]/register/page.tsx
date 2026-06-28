@@ -179,7 +179,7 @@ export default function RegisterPage() {
           <ChevronRight size={16} /> بازگشت
         </button>
         <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>ثبت‌نام آنلاین</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>ثبت‌نام</span>
       </div>
     </div>
   );
