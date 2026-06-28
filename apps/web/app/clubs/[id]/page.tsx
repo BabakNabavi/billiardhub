@@ -272,8 +272,8 @@ export default function ClubProfilePage() {
         .tourn-card { background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:18px;transition:all 0.3s }
         .tourn-card:hover { transform:translateY(-2px); }
 
-        .hero-top-btn { top: 42px }
-        @media(min-width:961px){ .hero-top-btn { top: 47px } }
+        .hero-top-btn { top: 36px }
+        @media(min-width:961px){ .hero-top-btn { top: 40px } }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
@@ -308,7 +308,7 @@ export default function ClubProfilePage() {
           </div>
 
 
-          <div style={{ position: 'absolute', bottom: 'clamp(20px,4%,36px)', left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 0' }}>
+          <div style={{ position: 'absolute', bottom: 'clamp(48px,8%,70px)', left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 0' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '2px 10px', marginBottom: 10 }}>
               <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#C7A66A', display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
               <span style={{ fontSize: 10, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
