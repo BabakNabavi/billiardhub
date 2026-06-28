@@ -445,8 +445,9 @@ export default function Navbar() {
           <div style={{ padding: '20px 20px 0' }}>
             {!user ? (
               <Link href="/login" onClick={() => setMobileOpen(false)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, color: '#fff', fontSize: '17px', fontWeight: 800, textDecoration: 'none', boxShadow: `0 8px 28px rgba(184,147,58,0.3)` }}>
-                <User size={17} /> ورود / ثبت‌نام رایگان
+                style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'rgba(184,147,58,0.06)', backdropFilter: 'blur(40px) saturate(240%)', WebkitBackdropFilter: 'blur(40px) saturate(240%)', border: '1px solid rgba(184,147,58,0.22)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(184,147,58,0.16)', color: GOLD, fontSize: '17px', fontWeight: 800, textDecoration: 'none' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)', pointerEvents: 'none' }} />
+                <User size={17} /> ورود | ثبت نام
               </Link>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: '1px solid rgba(28,28,26,0.07)', backdropFilter: 'blur(16px)' }}>
