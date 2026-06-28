@@ -505,7 +505,7 @@ export default function LivePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                   flex: 1, padding: vpad(innerRounds.length), width: '100%', gap: fs ? 'clamp(8px,1vh,20px)' : 10 }}>
                   <LiveCard m={bracketFinal} />
-                  {highestBreak && <HighestBreakPanel small />}
+                  {highestBreak && <div style={{ marginTop: '20%' }}><HighestBreakPanel small /></div>}
                 </div>
               </div>
             )}
