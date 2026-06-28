@@ -173,6 +173,8 @@ export default function BracketPage() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(true);
+  const [fsGranted, setFsGranted] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   useEffect(() => {
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const checkOri = () => {
@@ -244,22 +246,38 @@ export default function BracketPage() {
 
   useEffect(() => { if (pool.length === 0) setPoolError(false); }, [pool.length]);
 
-  /* Fullscreen in landscape */
+  /* Detect PWA standalone mode */
+  useEffect(() => {
+    setIsStandalone(
+      (window.navigator as any).standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches
+    );
+  }, []);
+
+  /* Sync fsGranted when browser exits fullscreen (Escape / back button) */
+  useEffect(() => {
+    const onFsChange = () => {
+      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+        setFsGranted(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
+    };
+  }, []);
+
+  /* Landscape: lock body overflow; exit fullscreen + reset on portrait return */
   useEffect(() => {
     if (!isMobile || isPortrait) {
       try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
       document.body.style.overflow = '';
+      setFsGranted(false);
       return;
     }
     document.body.style.overflow = 'hidden';
-    try {
-      const el = document.documentElement;
-      if (el.requestFullscreen) {
-        el.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
-      } else if ((el as any).webkitRequestFullscreen) {
-        (el as any).webkitRequestFullscreen();
-      }
-    } catch {}
     return () => { document.body.style.overflow = ''; };
   }, [isMobile, isPortrait]);
 
@@ -460,6 +478,24 @@ export default function BracketPage() {
     setMatches(generateEmptyBracket(totalSlots));
     setPool(approvedPlayers); setMethod(null); setSaved(false); setConfirmed(false);
     setTapPlayer(null);
+  };
+
+  /* Enter fullscreen — must be called from a user interaction handler */
+  const enterFullscreen = async () => {
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        await el.requestFullscreen({ navigationUI: 'hide' });
+      } else if ((el as any).webkitRequestFullscreen) {
+        (el as any).webkitRequestFullscreen();
+      }
+    } catch { /* iOS Safari: not supported — best-effort */ }
+    try {
+      if (screen.orientation && (screen.orientation as any).lock) {
+        await (screen.orientation as any).lock('landscape');
+      }
+    } catch {}
+    setFsGranted(true);
   };
 
   /* Bracket split helpers */
@@ -747,6 +783,52 @@ export default function BracketPage() {
       }}>
 
       {byeDlg && <ByeDialog />}
+
+      {/* Landscape fullscreen entry overlay — user must tap to grant fullscreen */}
+      {isMobile && !isPortrait && !fsGranted && !isStandalone && (
+        <div
+          onClick={enterFullscreen}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9200,
+            background: 'rgba(8,8,8,0.97)',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', direction: 'rtl',
+          }}
+        >
+          <div style={{
+            width: 68, height: 68, borderRadius: 20, marginBottom: 22,
+            background: 'rgba(199,166,106,0.10)', border: '1.5px solid rgba(199,166,106,0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 32,
+          }}>⛶</div>
+          <p style={{
+            fontSize: 18, fontWeight: 800, color: '#ffffff',
+            textAlign: 'center', lineHeight: 1.8, margin: '0 0 4px', maxWidth: 300,
+            fontFamily: 'inherit',
+          }}>
+            برای ورود به حالت مسابقه<br />
+            <span style={{ color: '#C7A66A' }}>لمس کنید</span>
+          </p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', margin: '8px 0 24px', fontFamily: 'inherit' }}>
+            Tap anywhere · Fullscreen mode
+          </p>
+          <div style={{
+            padding: '10px 30px', borderRadius: 30,
+            background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)',
+            fontSize: 13, color: '#C7A66A', fontWeight: 700, fontFamily: 'inherit',
+            animation: 'ls-pulse 2s ease-in-out infinite',
+          }}>
+            ورود به مسابقه ›
+          </div>
+          <style>{`
+            @keyframes ls-pulse {
+              0%,100% { opacity:0.4; transform:scale(1); }
+              50%      { opacity:1;   transform:scale(1.04); }
+            }
+          `}</style>
+        </div>
+      )}
 
       {/* Portrait rotation overlay */}
       {isMobile && isPortrait && (
