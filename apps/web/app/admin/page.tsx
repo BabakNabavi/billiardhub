@@ -50,11 +50,11 @@ export default function AdminPage() {
 ];
 
   return (
-    <div className="max-w-6xl mx-auto pb-10">
+    <div className="max-w-6xl mx-auto pb-10 pt-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">پنل مدیریت</h1>
-          <p className="text-gray-500 text-sm mt-1">بیلیارد پلاس — داشبورد ادمین</p>
+          <p className="text-gray-500 text-sm mt-1">بیلیارد هاب — داشبورد ادمین</p>
         </div>
         <div className="bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
           <Settings size={16} />
