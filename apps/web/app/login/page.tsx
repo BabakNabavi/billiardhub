@@ -138,7 +138,7 @@ export default function LoginPage() {
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
       `}</style>
 
-      <div style={{ minHeight:'100vh', backgroundColor:'#F7F7F5', background:'linear-gradient(180deg,#F0EDE4 0%,#F7F7F5 100%)', display:'flex', alignItems:'center', justifyContent:'center', padding:'24px', position:'relative', overflow:'hidden' }}>
+      <div style={{ minHeight:'100vh', backgroundColor:'#F7F7F5', background:'linear-gradient(180deg,#F0EDE4 0%,#F7F7F5 100%)', display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'clamp(16px,4vh,40px) 24px', position:'relative', overflow:'hidden' }}>
 
         {/* Ambient orbs */}
         <div style={{ position:'fixed', top:'-10%', left:'-10%', width:'55vw', height:'55vw', maxWidth:'600px', maxHeight:'600px', borderRadius:'50%', background:`radial-gradient(ellipse,rgba(199,166,106,0.08) 0%,transparent 65%)`, filter:'blur(40px)', pointerEvents:'none', animation:'ambient 14s ease-in-out infinite' }} />
