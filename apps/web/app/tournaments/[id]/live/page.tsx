@@ -70,10 +70,7 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
             <X size={18} />
           </button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <span style={{ fontSize: 12, color: '#aaa', fontFamily: 'system-ui,-apple-system,sans-serif' }}>
-            Best of {bestOf} • {toFa(winsNeeded)} فریم برای برد
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginBottom: 18 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, direction: 'rtl' }}>
             <span style={{ fontSize: 12, color: '#888', fontWeight: 700, whiteSpace: 'nowrap' }}>شماره میز</span>
             <input
@@ -99,7 +96,7 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
               {match.player1?.name ?? 'بازیکن ۱'}
             </div>
             <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
-              {Array.from({ length: bestOf }, (_, i) => (
+              {Array.from({ length: winsNeeded }, (_, i) => (
                 <div key={i} style={{
                   width: 12, height: 12, borderRadius: '50%',
                   background: i < s1 ? '#30C55A' : 'rgba(0,0,0,0.07)',
@@ -119,7 +116,7 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
               {match.player2?.name ?? 'بازیکن ۲'}
             </div>
             <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
-              {Array.from({ length: bestOf }, (_, i) => (
+              {Array.from({ length: winsNeeded }, (_, i) => (
                 <div key={i} style={{
                   width: 12, height: 12, borderRadius: '50%',
                   background: i < s2 ? '#ef4444' : 'rgba(0,0,0,0.07)',
@@ -142,7 +139,7 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
           }}>
             فریم برنده<br />
             <span style={{ fontSize: 11, fontWeight: 600 }}>
-              {match.player1?.name?.split(' ')[0] ?? 'بازیکن ۱'}
+              {match.player1?.name ?? 'بازیکن ۱'}
             </span>
           </button>
           <button onClick={() => !isOver && onAddFrame(2)} disabled={isOver} style={{
@@ -154,7 +151,7 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
           }}>
             فریم برنده<br />
             <span style={{ fontSize: 11, fontWeight: 600 }}>
-              {match.player2?.name?.split(' ')[0] ?? 'بازیکن ۲'}
+              {match.player2?.name ?? 'بازیکن ۲'}
             </span>
           </button>
         </div>
