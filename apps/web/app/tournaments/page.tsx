@@ -12,10 +12,10 @@ import {
   type Tournament, type TournamentStatus,
 } from '../../lib/mock-tournaments';
 
-const TABS: { key: TournamentStatus | 'all'; label: string }[] = [
+const TABS: { key: TournamentStatus | 'all'; label: string; pulse?: boolean }[] = [
   { key: 'all',               label: 'همه' },
-  { key: 'registration_open', label: 'ثبت‌نام باز' },
-  { key: 'live',              label: 'زنده' },
+  { key: 'registration_open', label: 'در حال ثبت‌نام', pulse: true },
+  { key: 'live',              label: 'در حال برگزاری', pulse: true },
   { key: 'upcoming',          label: 'به زودی' },
   { key: 'finished',          label: 'پایان یافته' },
 ];
@@ -230,7 +230,16 @@ export default function TournamentsPage() {
                   borderBottom: tab === t.key ? '2px solid #C7A66A' : '2px solid transparent',
                   transition: 'all 0.18s',
                 }}>
-                {t.label}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  {t.pulse && (
+                    <span style={{
+                      width: 6, height: 6, borderRadius: '50%', display: 'inline-block', flexShrink: 0,
+                      background: t.key === 'live' ? '#ef4444' : '#30C55A',
+                      animation: 'gentlePulse 1.8s ease-in-out infinite',
+                    }} />
+                  )}
+                  {t.label}
+                </span>
                 {t.key !== 'all' && (
                   <span style={{ marginRight: 6, fontSize: 12,
                     color: tab === t.key ? '#C7A66A' : '#aaa' }}>
@@ -287,6 +296,10 @@ export default function TournamentsPage() {
         @keyframes blinkBadge {
           0%,100% { opacity:1; }
           50% { opacity:0.48; }
+        }
+        @keyframes gentlePulse {
+          0%,100% { opacity:1; transform:scale(1); }
+          50% { opacity:0.4; transform:scale(1.3); }
         }
       `}</style>
     </div>
