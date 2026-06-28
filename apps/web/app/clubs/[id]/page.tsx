@@ -410,7 +410,7 @@ export default function ClubProfilePage() {
                 <div className="mobile-only">
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
-                    <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
+                    <div style={{ fontSize: 15, color: 'rgba(199,166,106,0.85)', fontWeight: 800, marginBottom: 14, textAlign: 'center' }}>آمار میزها</div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
                       {[
                         { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
