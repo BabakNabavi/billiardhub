@@ -175,7 +175,11 @@ export default function BracketPage() {
   const [isPortrait, setIsPortrait] = useState(true);
   const [fsGranted, setFsGranted] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   useEffect(() => {
+    const ua = window.navigator.userAgent;
+    const detectedIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+    setIsIOS(detectedIOS);
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const checkOri = () => {
       setIsMobile(isTouch || window.innerWidth < 700);
@@ -269,16 +273,29 @@ export default function BracketPage() {
     };
   }, []);
 
-  /* Landscape: lock body overflow; exit fullscreen + reset on portrait return */
+  /* Landscape: lock scroll on both html+body, prevent iOS bounce, exit FS on portrait */
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
     if (!isMobile || isPortrait) {
       try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
-      document.body.style.overflow = '';
+      html.style.overflow = '';
+      body.style.overflow = '';
+      (html.style as any).overscrollBehavior = '';
+      (body.style as any).overscrollBehavior = '';
       setFsGranted(false);
       return;
     }
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    (html.style as any).overscrollBehavior = 'none';
+    (body.style as any).overscrollBehavior = 'none';
+    return () => {
+      html.style.overflow = '';
+      body.style.overflow = '';
+      (html.style as any).overscrollBehavior = '';
+      (body.style as any).overscrollBehavior = '';
+    };
   }, [isMobile, isPortrait]);
 
   /* Mobile touch-drag — global handlers */
@@ -480,8 +497,16 @@ export default function BracketPage() {
     setTapPlayer(null);
   };
 
-  /* Enter fullscreen — must be called from a user interaction handler */
+  /* Enter game mode — called from user tap (required by browser security policy) */
   const enterFullscreen = async () => {
+    if (isIOS) {
+      /* iOS Safari: Fullscreen API is not supported.
+         position:fixed + 100dvh already fills the viewport below the address bar.
+         Dismiss overlay immediately so the bracket fills all available space. */
+      setFsGranted(true);
+      return;
+    }
+    /* Chrome / Android: attempt real fullscreen */
     try {
       const el = document.documentElement;
       if (el.requestFullscreen) {
@@ -489,7 +514,8 @@ export default function BracketPage() {
       } else if ((el as any).webkitRequestFullscreen) {
         (el as any).webkitRequestFullscreen();
       }
-    } catch { /* iOS Safari: not supported — best-effort */ }
+    } catch { /* ignore — we still enter game mode */ }
+    /* Lock orientation to landscape so rotating back requires intent */
     try {
       if (screen.orientation && (screen.orientation as any).lock) {
         await (screen.orientation as any).lock('landscape');
@@ -784,7 +810,7 @@ export default function BracketPage() {
 
       {byeDlg && <ByeDialog />}
 
-      {/* Landscape fullscreen entry overlay — user must tap to grant fullscreen */}
+      {/* Landscape game-mode entry overlay */}
       {isMobile && !isPortrait && !fsGranted && !isStandalone && (
         <div
           onClick={enterFullscreen}
@@ -796,12 +822,16 @@ export default function BracketPage() {
             cursor: 'pointer', direction: 'rtl',
           }}
         >
+          {/* Icon */}
           <div style={{
-            width: 68, height: 68, borderRadius: 20, marginBottom: 22,
+            width: 64, height: 64, borderRadius: 18, marginBottom: 20,
             background: 'rgba(199,166,106,0.10)', border: '1.5px solid rgba(199,166,106,0.35)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 32,
-          }}>⛶</div>
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30,
+          }}>
+            {isIOS ? '🎱' : '⛶'}
+          </div>
+
+          {/* Title */}
           <p style={{
             fontSize: 18, fontWeight: 800, color: '#ffffff',
             textAlign: 'center', lineHeight: 1.8, margin: '0 0 4px', maxWidth: 300,
@@ -810,9 +840,15 @@ export default function BracketPage() {
             برای ورود به حالت مسابقه<br />
             <span style={{ color: '#C7A66A' }}>لمس کنید</span>
           </p>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', margin: '8px 0 24px', fontFamily: 'inherit' }}>
-            Tap anywhere · Fullscreen mode
+
+          {/* Platform-specific subtitle */}
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', margin: '6px 0 22px', fontFamily: 'inherit', textAlign: 'center' }}>
+            {isIOS
+              ? 'Safari · حالت‌نما پر می‌شود — نوار آدرس قابل پنهان نیست'
+              : 'Chrome · تمام‌صفحه فعال می‌شود'}
           </p>
+
+          {/* CTA button */}
           <div style={{
             padding: '10px 30px', borderRadius: 30,
             background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)',
@@ -821,6 +857,18 @@ export default function BracketPage() {
           }}>
             ورود به مسابقه ›
           </div>
+
+          {/* iOS: Add to Home Screen tip */}
+          {isIOS && (
+            <p style={{
+              position: 'absolute', bottom: 20,
+              fontSize: 11, color: 'rgba(255,255,255,0.22)',
+              textAlign: 'center', margin: 0, padding: '0 24px', fontFamily: 'inherit',
+            }}>
+              برای تجربه تمام‌صفحه واقعی: Safari → ↑ → «افزودن به صفحه اصلی»
+            </p>
+          )}
+
           <style>{`
             @keyframes ls-pulse {
               0%,100% { opacity:0.4; transform:scale(1); }
@@ -857,7 +905,7 @@ export default function BracketPage() {
         </div>
       )}
 
-      {/* Safe area + landscape body lock */}
+      {/* Landscape layout: safe area, scroll lock, iOS app-like feel */}
       <style>{`
         @supports (height: 100dvh) {
           .bracket-landscape { height: 100dvh !important; }
@@ -867,6 +915,17 @@ export default function BracketPage() {
           padding-bottom: env(safe-area-inset-bottom, 0px);
           padding-left: env(safe-area-inset-left, 0px);
           padding-right: env(safe-area-inset-right, 0px);
+          overscroll-behavior: none;
+          -webkit-overflow-scrolling: auto;
+          touch-action: pan-x pan-y;
+        }
+        .bracket-landscape * {
+          -webkit-tap-highlight-color: transparent;
+          -webkit-touch-callout: none;
+        }
+        .bracket-landscape button,
+        .bracket-landscape [role="button"] {
+          touch-action: manipulation;
         }
       `}</style>
 
