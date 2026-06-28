@@ -738,6 +738,18 @@ export default function NewTournamentPage() {
                 try {
                   localStorage.setItem('bracketMaxPlayers_t1', String(maxPlayers));
                   localStorage.setItem('matchFormat_t1', matchFormat);
+                  // auto-create gallery album for this tournament
+                  const album = {
+                    tournamentId: 't1',
+                    tournamentName: name.trim(),
+                    gameType,
+                    date,
+                    maxPlayers,
+                    createdAt: new Date().toISOString(),
+                    items: [] as { id: string; type: 'image' | 'video'; dataUrl: string; name: string; caption: string; uploadedAt: string }[],
+                    bracketResult: null as null | { matches: unknown[]; winner: string; savedAt: string },
+                  };
+                  localStorage.setItem('tournament-album-t1', JSON.stringify(album));
                 } catch {}
                 setSubmit(true);
               }} style={lqBtn(true)}>
