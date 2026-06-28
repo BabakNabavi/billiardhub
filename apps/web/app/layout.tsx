@@ -25,15 +25,15 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <head>
         <style>{`
-          @font-face { font-family:'Vazir'; src:url('/fonts/Vazir/Vazir-Thin-FD.woff2') format('woff2'),url('/fonts/Vazir/Vazir-Thin-FD.woff') format('woff'); font-weight:100; font-style:normal; font-display:swap; }
-          @font-face { font-family:'Vazir'; src:url('/fonts/Vazir/Vazir-Light-FD.woff2') format('woff2'),url('/fonts/Vazir/Vazir-Light-FD.woff') format('woff'); font-weight:300; font-style:normal; font-display:swap; }
-          @font-face { font-family:'Vazir'; src:url('/fonts/Vazir/Vazir-Regular-FD.woff2') format('woff2'),url('/fonts/Vazir/Vazir-Regular-FD.woff') format('woff'); font-weight:400; font-style:normal; font-display:swap; }
-          @font-face { font-family:'Vazir'; src:url('/fonts/Vazir/Vazir-Medium-FD.woff2') format('woff2'),url('/fonts/Vazir/Vazir-Medium-FD.woff') format('woff'); font-weight:500; font-style:normal; font-display:swap; }
-          @font-face { font-family:'Vazir'; src:url('/fonts/Vazir/Vazir-Bold-FD.woff2') format('woff2'),url('/fonts/Vazir/Vazir-Bold-FD.woff') format('woff'); font-weight:700; font-style:normal; font-display:swap; }
-          @font-face { font-family:'Vazir'; src:url('/fonts/Vazir/Vazir-Black-FD.woff2') format('woff2'),url('/fonts/Vazir/Vazir-Black-FD.woff') format('woff'); font-weight:900; font-style:normal; font-display:swap; }
-          * { font-family:'Vazir', system-ui, sans-serif !important; box-sizing:border-box; }
-          input, select, textarea, button { font-family:'Vazir', system-ui, sans-serif !important; }
-          body { margin: 0; padding: 0; }
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Light.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Medium.woff2') format('woff2'); font-weight:500; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-DemiBold.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
+          * { font-family: var(--font-base) !important; box-sizing:border-box; }
+          input, select, textarea, button { font-family: var(--font-base) !important; }
+          body { margin: 0; padding: 0; direction: rtl; }
           @media (max-width: 900px) {
             input, textarea, select { font-size: 16px !important; }
           }
