@@ -462,11 +462,13 @@ export default function LivePage() {
       display: 'inline-flex', flexDirection: 'column', gap: 3,
       backdropFilter: 'blur(8px)',
       boxShadow: '0 4px 16px rgba(199,166,106,0.14)',
+      alignItems: 'center', textAlign: 'center',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5,
         fontSize: small ? 10 : 11, fontWeight: 800, color: '#A07840', letterSpacing: '0.06em' }}>
         <Star size={small ? 9 : 10} fill="#C7A66A" color="#C7A66A" />
         بالاترین برک
+        <Star size={small ? 9 : 10} fill="#C7A66A" color="#C7A66A" />
       </div>
       <div style={{ fontSize: small ? 12 : 14, fontWeight: 700, color: '#444' }}>
         {highestBreak?.playerName}
@@ -537,7 +539,7 @@ export default function LivePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                   flex: 1, padding: vpad(innerRounds.length), width: '100%', gap: fs ? 'clamp(8px,1vh,20px)' : 10 }}>
                   <LiveCard m={bracketFinal} />
-                  {highestBreak && <div style={{ marginTop: '20%' }}><HighestBreakPanel small /></div>}
+                  {highestBreak && <div style={{ marginTop: '40%' }}><HighestBreakPanel small /></div>}
                 </div>
               </div>
             )}
