@@ -165,8 +165,8 @@ export default function TournamentPublicPage() {
                   fontSize: 14, paddingBottom: 10, borderBottom: '1px solid rgba(0,0,0,0.05)',
                 }}>
                   <span style={{ color: '#aaa' }}>فرمت مسابقه</span>
-                  <span style={{ fontWeight: 500, color: '#111',
-                    fontFamily: 'system-ui,-apple-system,sans-serif', direction: 'ltr', unicodeBidi: 'embed' }}>
+                  <span className="lat" style={{ fontWeight: 500, color: '#111',
+                    direction: 'ltr', unicodeBidi: 'isolate' }}>
                     {FORMAT_LABELS[matchFormat] ?? matchFormat}
                   </span>
                 </div>
@@ -245,6 +245,7 @@ export default function TournamentPublicPage() {
       </div>
 
       <style>{`
+        .lat { font-family: system-ui,-apple-system,Arial,sans-serif !important; }
         @keyframes lp {
           0%,100% { opacity:1; transform:scale(1); }
           50% { opacity:0.4; transform:scale(1.5); }
