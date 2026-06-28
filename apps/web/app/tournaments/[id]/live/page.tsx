@@ -379,6 +379,13 @@ export default function LivePage() {
     try { localStorage.setItem(`highestBreak-${id}`, JSON.stringify(hb)); } catch {}
   };
 
+  const handleClearHighestBreak = () => {
+    setHighestBreak(null);
+    setHbName('');
+    setHbValue('');
+    try { localStorage.removeItem(`highestBreak-${id}`); } catch {}
+  };
+
   const activeMatch = scoreModal ? matches.find(m => m.id === scoreModal) ?? null : null;
 
   /* ── LiveCard — bracket card with red glow for in-progress ── */
@@ -714,8 +721,15 @@ export default function LivePage() {
           {highestBreak && (
             <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 10,
               background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)',
-              fontSize: 13, color: '#A07840', fontWeight: 700 }}>
-              ثبت شده: {highestBreak.playerName} — {highestBreak.value}
+              fontSize: 13, color: '#A07840', fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <span>ثبت شده: {highestBreak.playerName} — {highestBreak.value}</span>
+              <button onClick={handleClearHighestBreak} style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 2,
+                color: '#ef4444', display: 'flex', alignItems: 'center', flexShrink: 0,
+              }} title="پاک کردن بالاترین برک">
+                <X size={14} />
+              </button>
             </div>
           )}
           <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
