@@ -83,6 +83,7 @@ function MatchCard({
 
     return (
       <div
+        data-slotid={isMobile && isR1 ? `${match.id}:${slot}` : undefined}
         draggable={!isMobile && !!player && !isBye && isR1}
         onDragStart={!isMobile && player && !isBye && isR1 ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
         onDragOver={!isMobile ? e => onDragOver(e, match.id, slot) : undefined}
@@ -197,6 +198,13 @@ export default function BracketPage() {
   /* Mobile tap state */
   const [tapPlayer, setTapPlayer] = useState<TournamentPlayer | null>(null);
 
+  /* Mobile touch-drag state */
+  const touchDragRef = useRef<{
+    player: TournamentPlayer; startX: number; startY: number; dragging: boolean;
+  } | null>(null);
+  const [touchGhost, setTouchGhost] = useState<{ player: TournamentPlayer; x: number; y: number } | null>(null);
+  const [touchOverSlot, setTouchOverSlot] = useState<string | null>(null);
+
   /* ── Auto-fit scale (desktop only) ── */
   const [fitScale, setFitScale] = useState(1);
   const [fitPos,   setFitPos]   = useState({ x: 0, y: 0 });
@@ -230,6 +238,62 @@ export default function BracketPage() {
   useEffect(() => { if (!isMobile) refit(); }, [matches, isMobile, refit]);
 
   useEffect(() => { if (pool.length === 0) setPoolError(false); }, [pool.length]);
+
+  /* Mobile touch-drag — global handlers */
+  useEffect(() => {
+    const onMove = (e: TouchEvent) => {
+      const ref = touchDragRef.current;
+      if (!ref) return;
+      const t = e.touches[0];
+      if (!t) return;
+      const dx = t.clientX - ref.startX;
+      const dy = t.clientY - ref.startY;
+      if (!ref.dragging && Math.sqrt(dx * dx + dy * dy) > 8) ref.dragging = true;
+      if (!ref.dragging) return;
+      e.preventDefault();
+      setTouchGhost({ player: ref.player, x: t.clientX, y: t.clientY });
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const slotEl = (el as Element | null)?.closest('[data-slotid]') as HTMLElement | null;
+      setTouchOverSlot(slotEl?.getAttribute('data-slotid') ?? null);
+    };
+
+    const onEnd = (e: TouchEvent) => {
+      const ref = touchDragRef.current;
+      if (!ref) { setTouchGhost(null); setTouchOverSlot(null); return; }
+      const wasDragging = ref.dragging;
+      const player = ref.player;
+      touchDragRef.current = null;
+      setTouchGhost(null);
+      setTouchOverSlot(null);
+      if (!wasDragging) return; // short tap → let onClick handle it
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const slotEl = (el as Element | null)?.closest('[data-slotid]') as HTMLElement | null;
+      if (!slotEl) return;
+      const parts = (slotEl.getAttribute('data-slotid') ?? '').split(':');
+      const matchId = parts[0] ?? '';
+      const slot = parseInt(parts[1] ?? '') as 1 | 2;
+      if (!matchId || (slot !== 1 && slot !== 2)) return;
+      setMatches(prev => {
+        const next = prev.map(m => ({ ...m }));
+        const tm = next.find(m => m.id === matchId);
+        if (!tm || tm.round !== 1) return prev;
+        const current = slot === 1 ? tm.player1 : tm.player2;
+        if (current && current.id !== 'bye') setPool(p => [...p.filter(x => x.id !== player.id), current]);
+        else setPool(p => p.filter(x => x.id !== player.id));
+        if (slot === 1) tm.player1 = player; else tm.player2 = player;
+        return next;
+      });
+    };
+
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+    return () => {
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -391,6 +455,7 @@ export default function BracketPage() {
     m.status === 'completed' && (m.player1?.id === 'bye' || m.player2?.id === 'bye');
 
   const slotRef = null; // drag state now in refs, no re-render needed
+  const effectiveDraggingOver = (isMobile && touchOverSlot) ? touchOverSlot : draggingOver;
 
   /* ── Method selection ── */
   if (!method && !showRandom) return (
@@ -559,7 +624,7 @@ export default function BracketPage() {
               justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
               {ms.map(m => (
                 <div key={m.id} style={{ marginBottom: Math.pow(2, ri) * 10 }}>
-                  <MatchCard match={m} draggingOver={draggingOver}
+                  <MatchCard match={m} draggingOver={effectiveDraggingOver}
                     onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
                     dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
                     isByeMatch={isByeM(m)}
@@ -580,7 +645,7 @@ export default function BracketPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
             flex: 1, padding: `${Math.pow(2, innerRounds.length) * 18}px 10px` }}>
-            <MatchCard match={finalMatch} draggingOver={draggingOver}
+            <MatchCard match={finalMatch} draggingOver={effectiveDraggingOver}
               onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
               dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
               onSlotTap={handleSlotTap} tapPlayerActive={!!tapPlayer} isMobile={isMobile} />
@@ -603,7 +668,7 @@ export default function BracketPage() {
               justifyContent: 'space-around', flex: 1, padding: `${pad}px 8px` }}>
               {ms.map(m => (
                 <div key={m.id} style={{ marginBottom: Math.pow(2, mirrorRi) * 10 }}>
-                  <MatchCard match={m} draggingOver={draggingOver}
+                  <MatchCard match={m} draggingOver={effectiveDraggingOver}
                     onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
                     dragFromSlot={slotRef} onSlotDragStart={handleSlotDragStart}
                     isByeMatch={isByeM(m)}
@@ -648,6 +713,24 @@ export default function BracketPage() {
       overflow: 'hidden' }}>
 
       {byeDlg && <ByeDialog />}
+
+      {/* Touch drag ghost */}
+      {touchGhost && (
+        <div style={{
+          position: 'fixed',
+          left: touchGhost.x - 60, top: touchGhost.y - 22,
+          zIndex: 9999, pointerEvents: 'none',
+          background: 'rgba(199,166,106,0.18)',
+          border: '1px solid rgba(199,166,106,0.60)',
+          borderRadius: 20, padding: '7px 16px',
+          fontSize: 13, fontWeight: 800, color: '#C7A66A',
+          backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.20)',
+        }}>
+          {touchGhost.player.name}
+        </div>
+      )}
 
       {/* Header bar */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -726,7 +809,13 @@ export default function BracketPage() {
             <div style={{ overflowX: 'auto', display: 'flex', gap: 7, padding: '4px 14px 10px',
               WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
               {pool.map(p => (
-                <button key={p.id} onClick={() => setTapPlayer(tapPlayer?.id === p.id ? null : p)}
+                <button key={p.id}
+                  onClick={() => setTapPlayer(tapPlayer?.id === p.id ? null : p)}
+                  onTouchStart={(e) => {
+                    const t = e.touches[0];
+                    if (!t) return;
+                    touchDragRef.current = { player: p, startX: t.clientX, startY: t.clientY, dragging: false };
+                  }}
                   style={{
                     flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
                     padding: '6px 11px', borderRadius: 20,
