@@ -539,7 +539,7 @@ export default function LivePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                   flex: 1, padding: vpad(innerRounds.length), width: '100%', gap: fs ? 'clamp(8px,1vh,20px)' : 10 }}>
                   <LiveCard m={bracketFinal} />
-                  {highestBreak && <div style={{ marginTop: '40%' }}><HighestBreakPanel small /></div>}
+                  {highestBreak && <div style={{ marginTop: '70%' }}><HighestBreakPanel /></div>}
                 </div>
               </div>
             )}
