@@ -377,23 +377,43 @@ export default function RegisterPage() {
 
         {/* Download button */}
         <button onClick={downloadReceipt} style={{
-          width: '100%', padding: '15px', borderRadius: 16, border: 'none',
-          background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-          color: '#fff', fontSize: 16, fontWeight: 800,
+          position: 'relative', overflow: 'hidden',
+          width: '100%', padding: '15px', borderRadius: 16,
+          background: 'rgba(199,166,106,0.06)',
+          backdropFilter: 'blur(40px) saturate(240%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+          border: '1px solid rgba(199,166,106,0.22)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16)',
+          color: '#C7A66A', fontSize: 16, fontWeight: 800,
           cursor: 'pointer', fontFamily: 'inherit',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-          boxShadow: '0 4px 16px rgba(199,166,106,0.28)', marginBottom: 10,
+          marginBottom: 10,
         }}>
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)',
+            pointerEvents: 'none',
+          }} />
           <Download size={18} />
           دانلود فیش واریزی
         </button>
 
         <button onClick={() => router.push('/tournaments')} style={{
+          position: 'relative', overflow: 'hidden',
           width: '100%', padding: '14px', borderRadius: 16,
-          border: '1.5px solid rgba(0,0,0,0.10)', background: '#fff',
-          fontSize: 15, fontWeight: 700, cursor: 'pointer',
-          color: '#555', fontFamily: 'inherit',
+          background: 'rgba(199,166,106,0.06)',
+          backdropFilter: 'blur(40px) saturate(240%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+          border: '1px solid rgba(199,166,106,0.22)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16)',
+          color: '#C7A66A', fontSize: 15, fontWeight: 800,
+          cursor: 'pointer', fontFamily: 'inherit',
         }}>
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)',
+            pointerEvents: 'none',
+          }} />
           بازگشت به مسابقات
         </button>
 
