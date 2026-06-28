@@ -83,7 +83,7 @@ function MatchCard({
 
     return (
       <div
-        data-slotid={isMobile && isR1 ? `${match.id}:${slot}` : undefined}
+        data-slotid={isR1 ? `${match.id}:${slot}` : undefined}
         draggable={!isMobile && !!player && !isBye && isR1}
         onDragStart={!isMobile && player && !isBye && isR1 ? e => onSlotDragStart(e, match.id, slot, player) : undefined}
         onDragOver={!isMobile ? e => onDragOver(e, match.id, slot) : undefined}
@@ -172,11 +172,16 @@ export default function BracketPage() {
   const needsBye    = approvedPlayers.length < totalSlots;
 
   const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(true);
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 700);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const checkOri = () => {
+      setIsMobile(isTouch || window.innerWidth < 700);
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    checkOri();
+    window.addEventListener('resize', checkOri);
+    return () => window.removeEventListener('resize', checkOri);
   }, []);
 
   const [method, setMethod]     = useState<'manual' | 'random' | null>(null);
@@ -238,6 +243,25 @@ export default function BracketPage() {
   useEffect(() => { if (!isMobile) refit(); }, [matches, isMobile, refit]);
 
   useEffect(() => { if (pool.length === 0) setPoolError(false); }, [pool.length]);
+
+  /* Fullscreen in landscape */
+  useEffect(() => {
+    if (!isMobile || isPortrait) {
+      try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
+      document.body.style.overflow = '';
+      return;
+    }
+    document.body.style.overflow = 'hidden';
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+      } else if ((el as any).webkitRequestFullscreen) {
+        (el as any).webkitRequestFullscreen();
+      }
+    } catch {}
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobile, isPortrait]);
 
   /* Mobile touch-drag — global handlers */
   useEffect(() => {
@@ -708,11 +732,61 @@ export default function BracketPage() {
 
   /* ── Main bracket builder ── */
   return (
-    <div style={{ height: 'calc(100vh - 72px)', display: 'flex', flexDirection: 'column',
-      background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif',
-      overflow: 'hidden' }}>
+    <div
+      className={isMobile && !isPortrait ? 'bracket-landscape' : undefined}
+      style={isMobile && !isPortrait ? {
+        position: 'fixed', inset: 0, zIndex: 9000,
+        height: '100dvh', width: '100vw',
+        display: 'flex', flexDirection: 'column',
+        background: '#F7F7F5', direction: 'rtl',
+        overflow: 'hidden',
+      } : {
+        height: 'calc(100vh - 72px)', display: 'flex', flexDirection: 'column',
+        background: '#F7F7F5', direction: 'rtl',
+        overflow: 'hidden',
+      }}>
 
       {byeDlg && <ByeDialog />}
+
+      {/* Portrait rotation overlay */}
+      {isMobile && isPortrait && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9100,
+          background: 'rgba(10,10,10,0.97)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          direction: 'rtl',
+        }}>
+          <div style={{ fontSize: 64, marginBottom: 24, display: 'inline-block',
+            animation: 'rotatePhone 2.4s ease-in-out infinite' }}>📱</div>
+          <p style={{ fontSize: 17, fontWeight: 800, color: '#ffffff',
+            textAlign: 'center', maxWidth: 280, lineHeight: 1.75,
+            margin: '0 0 8px', fontFamily: 'inherit' }}>
+            برای تجربه بهتر، لطفاً گوشی<br />خود را به حالت افقی بچرخانید
+          </p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>Landscape mode</p>
+          <style>{`
+            @keyframes rotatePhone {
+              0%,20%  { transform: rotate(0deg); }
+              60%,80% { transform: rotate(90deg); }
+              100%    { transform: rotate(0deg); }
+            }
+          `}</style>
+        </div>
+      )}
+
+      {/* Safe area + landscape body lock */}
+      <style>{`
+        @supports (height: 100dvh) {
+          .bracket-landscape { height: 100dvh !important; }
+        }
+        .bracket-landscape {
+          padding-top: env(safe-area-inset-top, 0px);
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+          padding-left: env(safe-area-inset-left, 0px);
+          padding-right: env(safe-area-inset-right, 0px);
+        }
+      `}</style>
 
       {/* Touch drag ghost */}
       {touchGhost && (
@@ -853,6 +927,10 @@ export default function BracketPage() {
               </div>
             ) : pool.map(p => (
               <div key={p.id} draggable onDragStart={e => handlePoolDragStart(e, p)}
+                onTouchStart={(e) => {
+                  const t = e.touches[0]; if (!t) return;
+                  touchDragRef.current = { player: p, startX: t.clientX, startY: t.clientY, dragging: false };
+                }}
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 8px',
                   borderRadius: 9, marginBottom: 5, background: 'rgba(0,0,0,0.02)',
                   border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
