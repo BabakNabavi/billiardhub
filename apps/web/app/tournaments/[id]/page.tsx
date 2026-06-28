@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Trophy, Calendar, Clock, Users, ChevronRight, MapPin,
-  CheckCircle, Share2, ChevronLeft, Star, ClipboardList,
+  ChevronRight, Star, ClipboardList,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, GAME_TYPE_LABELS, GAME_TYPE_COLORS,
-  STATUS_LABELS, STATUS_COLORS, formatFee, toFa,
+  SAMPLE_TOURNAMENTS, formatFee, toFa,
 } from '../../../lib/mock-tournaments';
 
 export default function TournamentPublicPage() {
@@ -17,7 +15,6 @@ export default function TournamentPublicPage() {
   const router = useRouter();
   const t = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
-  const [copied, setCopied] = useState(false);
   const [matchFormat, setMatchFormat] = useState(t.matchFormat ?? 'bo3');
 
   useEffect(() => {
@@ -33,13 +30,6 @@ export default function TournamentPublicPage() {
 
   const pct  = Math.round((t.registeredCount / t.maxPlayers) * 100);
   const full = t.registeredCount >= t.maxPlayers;
-  const gameColor   = GAME_TYPE_COLORS[t.gameType];
-  const statusColor = STATUS_COLORS[t.status];
-
-  const handleShare = () => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const canRegister = t.status === 'registration_open' && !full;
 
@@ -47,99 +37,23 @@ export default function TournamentPublicPage() {
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
 
-      {/* Hero */}
-      <div style={{ position: 'relative', height: 'clamp(260px,40vw,420px)', overflow: 'hidden' }}>
-        <img src={t.banner} alt={t.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55)' }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.80) 100%)',
-        }} />
-
-        {/* Top bar: spans full width */}
-        <div style={{
-          position: 'absolute', top: 72, zIndex: 10,
-          left: 'clamp(14px,3vw,28px)', right: 'clamp(14px,3vw,28px)',
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-        }}>
-          {/* First (swapped): back button — ChevronRight first in DOM → appears on the right in RTL */}
+      {/* Header */}
+      <div style={{
+        background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
+        padding: '18px clamp(16px,4vw,48px)',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={() => router.push('/tournaments')} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-            padding: '8px 16px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-            cursor: 'pointer', fontFamily: 'inherit', marginTop: -22,
+            display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
+            cursor: 'pointer', fontSize: 15, color: '#777', fontFamily: 'inherit', padding: 0,
           }}>
-            <ChevronRight size={14} />
-            مسابقات
+            <ChevronRight size={16} /> مسابقات
           </button>
-
-          {/* Second (swapped): registration badge (above) + share (below) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end', marginTop: -21 }}>
-            {canRegister ? (
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(199,166,106,0.45)', borderRadius: 20,
-                padding: '7px 14px', fontSize: 14, fontWeight: 800, color: '#C7A66A',
-                animation: 'blinkReg 1.6s ease-in-out infinite',
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C7A66A',
-                  display: 'inline-block' }} />
-                در حال ثبت‌نام
-              </div>
-            ) : (
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(10px)',
-                borderRadius: 20, padding: '7px 14px',
-              }}>
-                {t.status === 'live' && (
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
-                    animation: 'lp 1.8s infinite', display: 'inline-block' }} />
-                )}
-                <span style={{ fontSize: 14, fontWeight: 700, color: statusColor }}>
-                  {STATUS_LABELS[t.status]}
-                </span>
-              </div>
-            )}
-            <button onClick={handleShare} style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-              padding: '7px 14px', fontSize: 14, fontWeight: 700,
-              color: copied ? '#30C55A' : 'rgba(255,255,255,0.85)',
-              cursor: 'pointer', fontFamily: 'inherit', transition: 'color 0.2s',
-            }}>
-              {copied ? <CheckCircle size={13} /> : <Share2 size={13} />}
-              {copied ? 'کپی شد' : 'اشتراک'}
-            </button>
-          </div>
-        </div>
-
-        {/* Hero content */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          padding: 'clamp(16px,4vw,32px)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <div style={{
-              background: `${gameColor}22`, border: `1px solid ${gameColor}44`,
-              borderRadius: 20, padding: '4px 12px', fontSize: 13, fontWeight: 700,
-              color: gameColor,
-            }}>
-              {GAME_TYPE_LABELS[t.gameType]}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5,
-              fontSize: 14, color: 'rgba(255,255,255,0.70)' }}>
-              <MapPin size={12} />
-              {t.clubName}
-            </div>
-          </div>
-          <h1 style={{ fontSize: 'clamp(18px,3.5vw,32px)', fontWeight: 900,
-            color: '#fff', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.3 }}>
+          <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#111',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {t.name}
-          </h1>
+          </span>
         </div>
       </div>
 
@@ -149,27 +63,6 @@ export default function TournamentPublicPage() {
 
           {/* ── Left: details ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-            {/* Quick stats */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: 12,
-            }}>
-              {[
-                { icon: <Calendar size={16} color="#C7A66A" />, label: 'تاریخ', value: t.date },
-                { icon: <Clock size={16} color="#C7A66A" />, label: 'ساعت شروع', value: `${toFa(t.startTime)}` },
-                { icon: <Users size={16} color="#C7A66A" />, label: 'ظرفیت', value: `${toFa(t.registeredCount)} / ${toFa(t.maxPlayers)}` },
-                { icon: <Trophy size={16} color="#C7A66A" />, label: 'نوع بازی', value: GAME_TYPE_LABELS[t.gameType] },
-              ].map((item, i) => (
-                <div key={i} style={{
-                  background: '#fff', borderRadius: 16, padding: '16px 18px',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                }}>
-                  <div style={{ marginBottom: 8 }}>{item.icon}</div>
-                  <div style={{ fontSize: 12, color: '#aaa', marginBottom: 4 }}>{item.label}</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>{item.value}</div>
-                </div>
-              ))}
-            </div>
 
             {/* Description */}
             <div style={{ background: '#fff', borderRadius: 20, padding: '22px 24px',
@@ -326,7 +219,7 @@ export default function TournamentPublicPage() {
                   }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                       {!full && t.status === 'registration_open' && <ClipboardList size={16} />}
-                      {full ? 'ظرفیت تکمیل' : t.status === 'upcoming' ? 'ثبت‌نام هنوز باز نشده' : 'ثبت‌نام'}
+                      {full ? 'ظرفیت تکمیل' : t.status === 'upcoming' ? 'ثبت نام هنوز باز نشده' : 'ثبت نام'}
                     </span>
                   </button>
                 </Link>
@@ -362,7 +255,7 @@ export default function TournamentPublicPage() {
         }
         @media (max-width: 767px) {
           .tdgrid { grid-template-columns: 1fr !important; }
-          .treg { position: static !important; top: auto !important; order: -1; }
+          .treg { position: static !important; top: auto !important; }
         }
       `}</style>
     </div>
