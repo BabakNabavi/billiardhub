@@ -192,8 +192,26 @@ export default function RegisterPage() {
               />
             </div>
 
-            <button className="btn-primary" onClick={handleRegister} disabled={loading}>
-              {loading ? <span className="spinner" /> : 'ثبت‌نام'}
+            <button onClick={handleRegister} disabled={loading} style={{
+              position: 'relative', overflow: 'hidden',
+              width: '100%', padding: '14px', borderRadius: 10,
+              background: 'rgba(199,166,106,0.06)',
+              backdropFilter: 'blur(40px) saturate(240%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+              border: '1px solid rgba(199,166,106,0.22)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16)',
+              color: loading ? 'rgba(199,166,106,0.5)' : '#C7A66A',
+              fontSize: 16, fontWeight: 700,
+              cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              marginTop: '0.25rem', opacity: loading ? 0.6 : 1,
+            }}>
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+                background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)',
+                pointerEvents: 'none',
+              }} />
+              {loading ? <span className="spinner" /> : 'ثبت نام'}
             </button>
           </div>
         )}
@@ -320,7 +338,7 @@ export default function RegisterPage() {
           border-radius: 8px; color: #dc2626; font-size: 0.83rem; text-align: center;
         }
         .footer-note { text-align: center; font-size: 0.83rem; color: rgba(0,0,0,0.40); margin: 1.2rem 0 0; }
-        .link-green  { color: #C7A66A; text-decoration: none; font-weight: 700; }
+        .link-green  { color: #F5C518; text-decoration: none; font-weight: 700; }
         .link-green:hover { text-decoration: underline; }
         @media (max-width: 480px) {
           .register-card { padding: 2rem 1.25rem; }
