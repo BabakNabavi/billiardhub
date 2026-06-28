@@ -197,9 +197,15 @@ export default function LivePage() {
   const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[1]!;
   const totalRounds = Math.log2(t.maxPlayers <= 16 ? t.maxPlayers : 16);
 
-  const [matches, setMatches] = useState<TournamentMatch[]>(
-    SAMPLE_LIVE_BRACKET.map(m => ({ ...m }))
-  );
+  const [matches, setMatches] = useState<TournamentMatch[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`bracket-${id}`);
+        if (saved) return JSON.parse(saved) as TournamentMatch[];
+      } catch {}
+    }
+    return SAMPLE_LIVE_BRACKET.map(m => ({ ...m }));
+  });
   const [scoreModal, setScoreModal] = useState<string | null>(null);
   const [activeTab, setActiveTab]   = useState<'bracket' | 'matches'>('bracket');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -379,7 +385,7 @@ export default function LivePage() {
   const activeMatch = scoreModal ? matches.find(m => m.id === scoreModal) ?? null : null;
 
   /* ── LiveCard — bracket card with red glow for in-progress ── */
-  const LiveCard = ({ m }: { m: TournamentMatch }) => {
+  const LiveCard = ({ m, mirror }: { m: TournamentMatch; mirror?: boolean }) => {
     const isLive = m.status === 'in_progress';
     const isDone = m.status === 'completed';
     const clickable = !isDone && !!m.player1 && !!m.player2;
@@ -423,6 +429,7 @@ export default function LivePage() {
             <div key={si} style={{
               padding: fs ? 'clamp(10px,0.7vw,20px) clamp(12px,0.9vw,22px)' : '7px 9px',
               display: 'flex', alignItems: 'center',
+              flexDirection: mirror ? 'row-reverse' : 'row',
               gap: fs ? 'clamp(6px,0.5vw,14px)' : 6,
               borderBottom: si === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
               background: isWinner ? 'rgba(48,197,90,0.05)' : 'transparent',
@@ -433,6 +440,7 @@ export default function LivePage() {
                 fontWeight: isWinner ? 800 : 600,
                 color: p ? (isWinner ? '#30C55A' : '#111') : '#ccc',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                textAlign: mirror ? 'right' : 'left',
               }}>
                 {p?.name ?? '—'}
               </span>
@@ -538,6 +546,20 @@ export default function LivePage() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                   flex: 1, padding: vpad(innerRounds.length), width: '100%', gap: fs ? 'clamp(8px,1vh,20px)' : 10 }}>
+                  {bracketFinal.winner && (
+                    <div style={{ textAlign: 'center', animation: 'champGlow 1.8s ease-in-out infinite' }}>
+                      <div style={{
+                        fontSize: fs ? 'clamp(13px,1.1vw,26px)' : 11,
+                        fontWeight: 900, color: '#C7A66A', letterSpacing: '0.1em',
+                        fontFamily: 'Vazirmatn, sans-serif',
+                      }}>🏆 قهرمان</div>
+                      <div style={{
+                        fontSize: fs ? 'clamp(16px,1.4vw,32px)' : 14,
+                        fontWeight: 900, color: '#C7A66A',
+                        fontFamily: 'Vazirmatn, sans-serif',
+                      }}>{bracketFinal.winner.name}</div>
+                    </div>
+                  )}
                   <LiveCard m={bracketFinal} />
                   {highestBreak && <div style={{ marginTop: '70%' }}><HighestBreakPanel /></div>}
                 </div>
@@ -556,7 +578,7 @@ export default function LivePage() {
                     flex: 1, padding: vpad(mri) }}>
                     {ms.map(m => (
                       <div key={m.id} style={{ marginBottom: mb(mri) }}>
-                        <LiveCard m={m} />
+                        <LiveCard m={m} mirror />
                       </div>
                     ))}
                   </div>
@@ -770,7 +792,10 @@ export default function LivePage() {
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif' }}>
-      <style>{`@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.7)}}`}</style>
+      <style>{`
+        @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.7)}}
+        @keyframes champGlow{0%,100%{opacity:1;text-shadow:0 0 18px rgba(199,166,106,0.9),0 0 36px rgba(199,166,106,0.5)}50%{opacity:0.72;text-shadow:0 0 6px rgba(199,166,106,0.4)}}
+      `}</style>
 
       {/* Header */}
       <div style={{ background: '#111', color: '#fff',
