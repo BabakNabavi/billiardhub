@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Trophy, Calendar, Clock, Users, ChevronRight, MapPin,
-  CheckCircle, Share2, ChevronLeft, Star,
+  CheckCircle, Share2, ChevronLeft, Star, ClipboardList,
 } from 'lucide-react';
 import {
   SAMPLE_TOURNAMENTS, GAME_TYPE_LABELS, GAME_TYPE_COLORS,
@@ -273,7 +273,7 @@ export default function TournamentPublicPage() {
                 }}>
                   <span style={{ color: '#aaa' }}>فرمت مسابقه</span>
                   <span style={{ fontWeight: 500, color: '#111',
-                    fontFamily: 'system-ui,-apple-system,sans-serif' }}>
+                    fontFamily: 'system-ui,-apple-system,sans-serif', direction: 'ltr', unicodeBidi: 'embed' }}>
                     {FORMAT_LABELS[matchFormat] ?? matchFormat}
                   </span>
                 </div>
@@ -324,17 +324,14 @@ export default function TournamentPublicPage() {
                     cursor: canRegister ? 'pointer' : 'not-allowed',
                     fontFamily: 'inherit',
                   }}>
-                    {full ? 'ظرفیت تکمیل' : t.status === 'upcoming' ? 'ثبت‌نام هنوز باز نشده' : 'ثبت‌نام آنلاین'}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      {!full && t.status === 'registration_open' && <ClipboardList size={16} />}
+                      {full ? 'ظرفیت تکمیل' : t.status === 'upcoming' ? 'ثبت‌نام هنوز باز نشده' : 'ثبت‌نام'}
+                    </span>
                   </button>
                 </Link>
               )}
 
-              {canRegister && (
-                <p style={{ fontSize: 13, color: '#aaa', margin: '10px 0 0',
-                  textAlign: 'center', lineHeight: 1.6 }}>
-                  پس از ثبت‌نام آنلاین، مدیر باشگاه درخواست را تایید خواهد کرد
-                </p>
-              )}
             </div>
 
             {/* Admin link */}
