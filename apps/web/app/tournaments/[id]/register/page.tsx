@@ -216,10 +216,32 @@ export default function RegisterPage() {
             وضعیت ثبت‌نام را در پنل کاربری دنبال کنید.
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => router.push('/dashboard')} style={{ background: '#C7A66A', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => router.push('/dashboard')} style={{
+              position: 'relative', overflow: 'hidden',
+              padding: '12px 24px', borderRadius: 12,
+              background: 'rgba(199,166,106,0.06)',
+              backdropFilter: 'blur(40px) saturate(240%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+              border: '1px solid rgba(199,166,106,0.22)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16)',
+              color: '#C7A66A', fontSize: 15, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)', pointerEvents: 'none' }} />
               پنل کاربری
             </button>
-            <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{ background: 'rgba(0,0,0,0.06)', color: '#555', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
+              position: 'relative', overflow: 'hidden',
+              padding: '12px 24px', borderRadius: 12,
+              background: 'rgba(199,166,106,0.06)',
+              backdropFilter: 'blur(40px) saturate(240%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+              border: '1px solid rgba(199,166,106,0.22)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16)',
+              color: '#C7A66A', fontSize: 15, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)', pointerEvents: 'none' }} />
               بازگشت به مسابقه
             </button>
           </div>
