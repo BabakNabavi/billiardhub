@@ -462,24 +462,24 @@ export default function LivePage() {
     <div style={{
       background: 'linear-gradient(135deg,rgba(199,166,106,0.13),rgba(199,166,106,0.06))',
       border: '1.5px solid rgba(199,166,106,0.32)',
-      borderRadius: small ? 14 : 18,
-      padding: small ? '12px 18px' : '16px 22px',
+      borderRadius: small ? 14 : 22,
+      padding: small ? '12px 18px' : '19px 26px',
       display: 'inline-flex', flexDirection: 'column', gap: 3,
       backdropFilter: 'blur(8px)',
       boxShadow: '0 4px 16px rgba(199,166,106,0.14)',
       alignItems: 'center', textAlign: 'center',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5,
-        fontSize: small ? 10 : 11, fontWeight: 800, color: '#A07840', letterSpacing: '0.06em' }}>
-        <Star size={small ? 9 : 10} fill="#C7A66A" color="#C7A66A" />
+        fontSize: small ? 10 : 13, fontWeight: 800, color: '#A07840', letterSpacing: '0.06em' }}>
+        <Star size={small ? 9 : 12} fill="#C7A66A" color="#C7A66A" />
         بالاترین برک
-        <Star size={small ? 9 : 10} fill="#C7A66A" color="#C7A66A" />
+        <Star size={small ? 9 : 12} fill="#C7A66A" color="#C7A66A" />
       </div>
-      <div style={{ fontSize: small ? 12 : 14, fontWeight: 700, color: '#444' }}>
+      <div style={{ fontSize: small ? 12 : 17, fontWeight: 700, color: '#444' }}>
         {highestBreak?.playerName}
       </div>
       <div style={{
-        fontSize: small ? 28 : 36, fontWeight: 900, color: '#C7A66A',
+        fontSize: small ? 28 : 43, fontWeight: 900, color: '#C7A66A',
         fontFamily: 'system-ui,-apple-system,sans-serif', lineHeight: 1,
       }}>
         {highestBreak?.value}
@@ -546,19 +546,19 @@ export default function LivePage() {
                   {bracketFinal.winner && (
                     <div style={{ textAlign: 'center', animation: 'champGlow 1.8s ease-in-out infinite' }}>
                       <div style={{
-                        fontSize: fs ? 'clamp(13px,1.1vw,26px)' : 11,
+                        fontSize: fs ? 'clamp(26px,2.2vw,52px)' : 22,
                         fontWeight: 900, color: '#C7A66A', letterSpacing: '0.1em',
                         fontFamily: 'Vazirmatn, sans-serif',
                       }}>🏆 قهرمان</div>
                       <div style={{
-                        fontSize: fs ? 'clamp(16px,1.4vw,32px)' : 14,
+                        fontSize: fs ? 'clamp(32px,2.8vw,64px)' : 28,
                         fontWeight: 900, color: '#C7A66A',
                         fontFamily: 'Vazirmatn, sans-serif',
                       }}>{bracketFinal.winner.name}</div>
                     </div>
                   )}
                   <LiveCard m={bracketFinal} />
-                  {highestBreak && <div style={{ marginTop: '70%' }}><HighestBreakPanel /></div>}
+                  {highestBreak && <div style={{ marginTop: '80%' }}><HighestBreakPanel /></div>}
                 </div>
               </div>
             )}
