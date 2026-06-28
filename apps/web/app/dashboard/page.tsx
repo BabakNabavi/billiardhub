@@ -127,14 +127,26 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user?.phone) return;
     const collected: MyReg[] = [];
+    const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key?.startsWith('tournament-regs-')) continue;
+      const k = localStorage.key(i);
+      if (k?.startsWith('tournament-regs-')) keys.push(k);
+    }
+    for (const key of keys) {
       const tId = key.replace('tournament-regs-', '');
       try {
         const list = JSON.parse(localStorage.getItem(key) ?? '[]') as Array<{ id: string; status: string; registeredAt: string; phone?: string; }>;
-        const t = SAMPLE_TOURNAMENTS.find(x => x.id === tId);
+        // deduplicate: keep only one entry per phone (the last one saved)
+        const seen = new Map<string, typeof list[0]>();
         for (const reg of list) {
+          seen.set(reg.phone ?? '', reg);
+        }
+        const deduped = Array.from(seen.values());
+        if (deduped.length !== list.length) {
+          localStorage.setItem(key, JSON.stringify(deduped));
+        }
+        const t = SAMPLE_TOURNAMENTS.find(x => x.id === tId);
+        for (const reg of deduped) {
           if (reg.phone !== user.phone) continue;
           collected.push({ id: reg.id, tournamentId: tId, tournamentName: t?.name ?? tId, status: reg.status as MyReg['status'], registeredAt: reg.registeredAt });
         }
