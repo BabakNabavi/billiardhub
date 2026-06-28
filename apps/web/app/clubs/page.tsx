@@ -112,7 +112,13 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           <img src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           {club.isVerified && (
-            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(199,166,106,0.88)', borderRadius: 20, padding: '2px 7px', fontSize: 10, fontWeight: 700, color: '#fff' }}>✓</div>
+            <div style={{
+              position: 'absolute', top: 8, right: 8,
+              background: 'rgba(48,197,90,0.10)',
+              border: '1px solid rgba(48,197,90,0.22)',
+              borderRadius: 20, padding: '2px 7px',
+              fontSize: 11, fontWeight: 900, color: '#30C55A',
+            }}>✓</div>
           )}
           {/* open badge روی تصویر — same pill style as table type badges */}
           <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
@@ -142,8 +148,8 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
               </span>
             ))}
             {/* دکمه رزرو — same pill style as table type badges */}
-            <span style={{ fontSize: 12, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0 }}>
-              رزرو ←
+            <span style={{ fontSize: 12, color: '#C7A66A', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 8px', fontWeight: 700, marginRight: 'auto', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              رزرو <span style={{ lineHeight: 1 }}>←</span>
             </span>
           </div>
           {tournBadge && (
@@ -407,8 +413,9 @@ export default function ClubsPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedTypes, setTypes]   = useState<string[]>([]);
   const [selectedAmens, setAmens]   = useState<string[]>([]);
-  const [onlyOpen, setOnlyOpen]     = useState(false);
-  const [onlyVerified, setOnlyVer]  = useState(false);
+  const [onlyOpen, setOnlyOpen]         = useState(false);
+  const [onlyVerified, setOnlyVer]      = useState(false);
+  const [onlyTournament, setOnlyTourn]  = useState(false);
   const [userLoc, setUserLoc]       = useState<{ lat: number; lon: number } | null>(null);
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError]     = useState(false);
@@ -453,8 +460,8 @@ export default function ClubsPage() {
 
   const toggleType = (k: string) => setTypes(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
   const toggleAmen = (k: string) => setAmens(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
-  const activeFilters = selectedTypes.length + selectedAmens.length + (onlyOpen ? 1 : 0) + (onlyVerified ? 1 : 0);
-  const clearFilters  = () => { setTypes([]); setAmens([]); setOnlyOpen(false); setOnlyVer(false); setCity('همه شهرها'); setSearch(''); };
+  const activeFilters = selectedTypes.length + selectedAmens.length + (onlyOpen ? 1 : 0) + (onlyVerified ? 1 : 0) + (onlyTournament ? 1 : 0);
+  const clearFilters  = () => { setTypes([]); setAmens([]); setOnlyOpen(false); setOnlyVer(false); setOnlyTourn(false); setCity('همه شهرها'); setSearch(''); };
 
   const withDist = clubs.map(c => userLoc && c.latitude && c.longitude
     ? { ...c, distance: calcDistance(userLoc.lat, userLoc.lon, c.latitude, c.longitude) }
@@ -466,6 +473,7 @@ export default function ClubsPage() {
     if (city !== 'همه شهرها' && c.city !== city) return false;
     if (onlyOpen && !c.isOpen) return false;
     if (onlyVerified && !c.isVerified) return false;
+    if (onlyTournament && !SAMPLE_TOURNAMENTS.some(t => (t.clubId === c.id || t.clubName === c.name) && t.status === 'registration_open')) return false;
     if (selectedTypes.length > 0 && !selectedTypes.every(t => (c as any)[t] > 0)) return false;
     if (selectedAmens.length > 0 && !selectedAmens.every(a => (c as any)[a])) return false;
     return true;
@@ -572,8 +580,9 @@ export default function ClubsPage() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                       {[
-                        { label: 'فقط باشگاه‌های باز', val: onlyOpen, set: setOnlyOpen },
-                        { label: 'فقط تأیید شده‌ها',   val: onlyVerified, set: setOnlyVer },
+                        { label: 'باشگاه‌های باز',                   val: onlyOpen,       set: setOnlyOpen    },
+                        { label: 'تأیید شده‌ها',                     val: onlyVerified,   set: setOnlyVer     },
+                        { label: 'در حال ثبت‌نام مسابقه',            val: onlyTournament, set: setOnlyTourn   },
                       ].map((tog, i) => (
                         <div key={i} onClick={() => tog.set((p: boolean) => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '6px 0' }}>
                           <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.60)', fontWeight: 500 }}>{tog.label}</span>

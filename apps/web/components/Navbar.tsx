@@ -216,7 +216,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', boxShadow: `0 4px 18px rgba(184,147,58,0.38)`, flexShrink: 0 }}>
-                <img src="/images/Logo/logo1.jpeg?v=2" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/images/Logo/logo1.jpeg?v=3" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             <span style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#1C1C1A' : '#ffffff' }}>بیلیارد</span>{' '}
