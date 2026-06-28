@@ -219,7 +219,7 @@ export default function Navbar() {
                 <img src="/images/Logo/logo1.jpeg?v=3" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             <span style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
-              <span style={{ color: isLight ? '#1C1C1A' : '#ffffff' }}>بیلیارد</span>{' '}
+              <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
             </span>
           </Link>

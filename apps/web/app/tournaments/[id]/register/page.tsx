@@ -196,7 +196,7 @@ export default function RegisterPage() {
           <ChevronRight size={16} /> بازگشت
         </button>
         <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>ثبت‌نام</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>ثبت نام</span>
       </div>
     </div>
   );
@@ -511,17 +511,36 @@ export default function RegisterPage() {
               </button>
             </div>
           ) : (
-            <button onClick={handlePay} style={{
-              width: '100%', padding: '16px', borderRadius: 20,
-              background: 'rgba(199,166,106,0.10)',
-              border: '1px solid rgba(199,166,106,0.35)',
-              color: '#C7A66A', fontSize: 16, fontWeight: 800,
-              cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            }}>
-              <CreditCard size={18} />
-              واریز مبلغ ورودی
-            </button>
+            <>
+              <button onClick={handlePay} style={{
+                position: 'relative', overflow: 'hidden',
+                width: '100%', padding: '16px', borderRadius: 20,
+                background: 'rgba(199,166,106,0.06)',
+                backdropFilter: 'blur(40px) saturate(240%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+                border: '1px solid rgba(199,166,106,0.22)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16)',
+                color: '#C7A66A', fontSize: 16, fontWeight: 800,
+                cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              }}>
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+                  background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)',
+                  pointerEvents: 'none',
+                }} />
+                <CreditCard size={18} />
+                واریز مبلغ ورودی
+              </button>
+              {!isLoggedIn && (
+                <p style={{ fontSize: 13, color: '#888', textAlign: 'center', margin: '12px 0 0', lineHeight: 1.7 }}>
+                  حساب کاربری دارید؟{' '}
+                  <Link href="/login" style={{ color: '#C7A66A', fontWeight: 800, textDecoration: 'none' }}>
+                    وارد شوید
+                  </Link>
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
