@@ -230,7 +230,7 @@ export default function ClubProfilePage() {
         .tab-btn { padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid transparent;cursor:pointer;font-family:inherit;transition:all 0.25s;white-space:nowrap;flex-shrink:0 }
         .tab-btn.active { background:rgba(199,166,106,0.12);border-color:rgba(199,166,106,0.35);color:#C7A66A }
         .tab-btn:not(.active) { background:rgba(0,0,0,0.04);color:rgba(0,0,0,0.42);border-color:rgba(0,0,0,0.06) }
-        .tab-btn:not(.active):hover { background:rgba(0,0,0,0.07);color:rgba(0,0,0,0.65) }
+        .tab-btn:not(.active):hover { background:rgba(199,166,106,0.08);color:#C7A66A;border-color:rgba(199,166,106,0.25);box-shadow:0 4px 14px rgba(199,166,106,0.15) }
 
         .coach-card { padding:16px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;transition:all 0.3s;cursor:pointer }
         .coach-card:hover { background:rgba(199,166,106,0.03);border-color:rgba(199,166,106,0.28);transform:translateY(-3px) }
@@ -349,8 +349,8 @@ export default function ClubProfilePage() {
           <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
             {([
               { key: 'info',        label: 'اطلاعات' },
-              { key: 'tournaments', label: 'مسابقات' },
               { key: 'gallery',     label: 'گالری' },
+              { key: 'tournaments', label: 'مسابقات' },
               { key: 'schedule',    label: 'ساعت کاری' },
             ] as const).map(t => (
               <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
@@ -666,7 +666,7 @@ export default function ClubProfilePage() {
                           </span>
                         </div>
                       </div>
-                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.32)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '4px 12px', fontWeight: 600, flexShrink: 0 }}>
+                      <div style={{ fontSize: 13, color: '#30C55A', background: 'rgba(48,197,90,0.10)', border: '1px solid rgba(48,197,90,0.22)', borderRadius: 20, padding: '4px 12px', fontWeight: 700, flexShrink: 0 }}>
                         {GAME_TYPE_LABELS[t.gameType]}
                       </div>
                     </div>
@@ -678,12 +678,6 @@ export default function ClubProfilePage() {
                 <Trophy size={13} /> مشاهده همه مسابقات
               </button>
 
-              <div style={{ marginTop: 20, padding: '14px 18px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.18)', borderRadius: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>برای شرکت در مسابقات یا برگزاری رویداد خاص با ما تماس بگیرید</div>
-                <a href={`tel:${club.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, color: '#C7A66A', fontSize: 15, fontWeight: 800, textDecoration: 'none' }}>
-                  <Phone size={13} /> تماس با باشگاه
-                </a>
-              </div>
             </div>
           );})()}
 
@@ -851,7 +845,7 @@ export default function ClubProfilePage() {
 
           {/* ── SCHEDULE TAB ── */}
           {tab === 'schedule' && (
-            <div style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400 }}>
+            <div style={{ animation: 'fadeUp 0.4s ease both', maxWidth: 400, margin: '0 auto' }}>
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px' }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#111111', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 3, height: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
