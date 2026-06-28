@@ -214,7 +214,7 @@ export default function ClubProfilePage() {
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 90 }}>
 
         {/* ══ HERO ══ */}
-        <div style={{ position: 'relative', height: 'min(clamp(255px,44vw,510px),58vh)', overflow: 'hidden', background: '#0A0806' }}>
+        <div style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
           {images.map((img, i) => (
             <img key={i} src={img} alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -243,7 +243,7 @@ export default function ClubProfilePage() {
           </div>
 
 
-          <div style={{ position: 'absolute', bottom: '10%', left: 0, right: 0, zIndex: 10, padding: 'clamp(14px,2.5vw,28px) clamp(16px,4vw,40px)' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: 'clamp(12px,2vw,24px) clamp(16px,4vw,40px) 20px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 100, padding: '4px 14px', marginBottom: 10 }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#C7A66A', display: 'inline-block' }} />
               <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.15em' }}>BILLIARD CLUB</span>
