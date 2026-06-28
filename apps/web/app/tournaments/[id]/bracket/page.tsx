@@ -233,14 +233,14 @@ export default function BracketPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (isMobile) return;
+    if (isMobile && isPortrait) return;
     refit();
     const ro = new ResizeObserver(refit);
     if (fitContainerRef.current) ro.observe(fitContainerRef.current);
     return () => ro.disconnect();
-  }, [isMobile, refit]);
+  }, [isMobile, isPortrait, refit]);
 
-  useEffect(() => { if (!isMobile) refit(); }, [matches, isMobile, refit]);
+  useEffect(() => { if (isMobile && isPortrait) return; refit(); }, [matches, isMobile, isPortrait, refit]);
 
   useEffect(() => { if (pool.length === 0) setPoolError(false); }, [pool.length]);
 
@@ -707,8 +707,8 @@ export default function BracketPage() {
   );
 
   /* ── Bracket canvas ── */
-  /* Mobile: horizontal scroll. Desktop: auto-fit scale (Figma-style). */
-  const BracketCanvas = () => isMobile ? (
+  /* Portrait mobile: scroll (covered by overlay). Landscape + desktop: auto-fit scale. */
+  const BracketCanvas = () => (isMobile && isPortrait) ? (
     <div style={{ overflowX: 'auto', overflowY: 'auto', padding: '12px',
       WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
       {bracketTree()}
@@ -716,7 +716,7 @@ export default function BracketPage() {
   ) : (
     <div
       ref={fitContainerRef}
-      style={{ flex: 1, minWidth: 0, position: 'relative', overflow: 'hidden', background: '#F7F7F5' }}
+      style={{ flex: 1, minWidth: 0, minHeight: 0, position: 'relative', overflow: 'hidden', background: '#F7F7F5' }}
     >
       <div style={{
         position: 'absolute',
@@ -808,7 +808,8 @@ export default function BracketPage() {
 
       {/* Header bar */}
       <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '10px clamp(12px,3vw,28px)', flexShrink: 0, zIndex: 50 }}>
+        padding: (isMobile && !isPortrait) ? '5px clamp(8px,2vw,16px)' : '10px clamp(12px,3vw,28px)',
+        flexShrink: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 4,
@@ -857,13 +858,14 @@ export default function BracketPage() {
 
       {/* ── MOBILE LAYOUT ── */}
       {isMobile ? (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Player chips strip */}
           <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
             flexShrink: 0 }}>
             {tapPlayer ? (
-              <div style={{ padding: '8px 14px 6px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ flex: 1, fontSize: 13, color: '#C7A66A', fontWeight: 700 }}>
+              <div style={{ padding: isPortrait ? '8px 14px 6px' : '4px 10px 4px',
+                display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, fontSize: isPortrait ? 13 : 11, color: '#C7A66A', fontWeight: 700 }}>
                   «{tapPlayer.name}» انتخاب شد — روی جایگاه خالی بزنید
                 </div>
                 <button onClick={() => setTapPlayer(null)} style={{
@@ -876,11 +878,13 @@ export default function BracketPage() {
                 </button>
               </div>
             ) : (
-              <div style={{ padding: '8px 14px 4px', fontSize: 12, color: '#bbb', fontWeight: 700 }}>
-                {pool.length > 0 ? 'روی بازیکن بزنید تا انتخاب شود' : '✓ همه بازیکنان تخصیص یافتند'}
+              <div style={{ padding: isPortrait ? '8px 14px 4px' : '3px 10px 2px',
+                fontSize: 11, color: '#bbb', fontWeight: 700 }}>
+                {pool.length > 0 ? 'روی بازیکن بزنید' : '✓ همه تخصیص یافتند'}
               </div>
             )}
-            <div style={{ overflowX: 'auto', display: 'flex', gap: 7, padding: '4px 14px 10px',
+            <div style={{ overflowX: 'auto', display: 'flex', gap: 6,
+              padding: isPortrait ? '4px 14px 10px' : '2px 10px 5px',
               WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
               {pool.map(p => (
                 <button key={p.id}
@@ -892,12 +896,12 @@ export default function BracketPage() {
                   }}
                   style={{
                     flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '6px 11px', borderRadius: 20,
+                    padding: isPortrait ? '6px 11px' : '4px 9px', borderRadius: 20,
                     background: tapPlayer?.id === p.id ? 'rgba(199,166,106,0.13)' : 'rgba(0,0,0,0.03)',
                     border: `1px solid ${tapPlayer?.id === p.id ? 'rgba(199,166,106,0.55)' : 'rgba(0,0,0,0.08)'}`,
                     cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.14s',
                   }}>
-                  <span style={{ fontSize: 13, fontWeight: 700,
+                  <span style={{ fontSize: isPortrait ? 13 : 11, fontWeight: 700,
                     color: tapPlayer?.id === p.id ? '#C7A66A' : '#333' }}>
                     {p.name}
                   </span>
@@ -906,8 +910,8 @@ export default function BracketPage() {
             </div>
           </div>
 
-          {/* Bracket scrollable area */}
-          <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch' as unknown as undefined }}>
+          {/* Bracket area — fit-scale in landscape, scroll in portrait */}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <BracketCanvas />
           </div>
         </div>
