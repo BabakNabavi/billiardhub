@@ -345,6 +345,21 @@ export default function LivePage() {
         // do NOT auto-start next match — admin must click to start it
       }
       try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
+      // auto-save bracket result to album when the final match ends
+      if (thisMatch.round === totalRounds && winner) {
+        try {
+          const albumRaw = localStorage.getItem(`tournament-album-${id}`);
+          if (albumRaw) {
+            const album = JSON.parse(albumRaw);
+            album.bracketResult = {
+              matches: next,
+              winner: winner.name ?? '',
+              savedAt: new Date().toISOString(),
+            };
+            localStorage.setItem(`tournament-album-${id}`, JSON.stringify(album));
+          }
+        } catch {}
+      }
       return next;
     });
     setScoreModal(null);

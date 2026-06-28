@@ -119,6 +119,71 @@ export default function ClubProfilePage() {
 
   const isAdmin = false;
 
+  /* ── Tournament Gallery Albums ── */
+  type AlbumItem = { id: string; type: 'image' | 'video'; dataUrl: string; name: string; caption: string; uploadedAt: string };
+  type TournAlbum = {
+    tournamentId: string; tournamentName: string; gameType: string; date: string;
+    createdAt: string; items: AlbumItem[];
+    bracketResult: { matches: any[]; winner: string; savedAt: string } | null;
+  };
+
+  const [tournAlbums, setTournAlbums] = useState<TournAlbum[]>([]);
+  const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const albums: TournAlbum[] = [];
+    for (let i = 1; i <= 20; i++) {
+      try {
+        const raw = localStorage.getItem(`tournament-album-t${i}`);
+        if (raw) albums.push(JSON.parse(raw));
+      } catch {}
+    }
+    setTournAlbums(albums);
+  }, [tab]);
+
+  const compressImage = (file: File): Promise<string> =>
+    new Promise(resolve => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const MAX = 800;
+        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.src = url;
+    });
+
+  const handleAlbumUpload = async (tId: string, files: FileList) => {
+    const key = `tournament-album-${tId}`;
+    let album: TournAlbum;
+    try { album = JSON.parse(localStorage.getItem(key) ?? 'null'); } catch { return; }
+    if (!album) return;
+    for (const file of Array.from(files)) {
+      const isImg = file.type.startsWith('image/');
+      const isVid = file.type.startsWith('video/');
+      if (!isImg && !isVid) continue;
+      const dataUrl = isImg ? await compressImage(file) : '';
+      const item: AlbumItem = {
+        id: `item-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        type: isImg ? 'image' : 'video',
+        dataUrl,
+        name: file.name,
+        caption: '',
+        uploadedAt: new Date().toISOString(),
+      };
+      album.items.push(item);
+    }
+    try { localStorage.setItem(key, JSON.stringify(album)); } catch {}
+    setTournAlbums(prev => prev.map(a => a.tournamentId === tId ? album : a));
+  };
+
+  const isOwner = !!(user?.primaryRole === 'admin' || user?.primaryRole === 'club_owner');
+
   useEffect(() => {
     api.get(`/clubs/${id}`)
       .then(r => { if (r.data) setClub(r.data); })
@@ -625,6 +690,127 @@ export default function ClubProfilePage() {
           {/* ── GALLERY TAB ── */}
           {tab === 'gallery' && (
             <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: 28 }}>
+
+              {/* ── Tournament albums ── */}
+              {tournAlbums.length > 0 && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                    <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
+                    <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌های مسابقات</h3>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {tournAlbums.map(album => {
+                      const isOpen = openAlbumId === album.tournamentId;
+                      const cover = album.items.find(i => i.type === 'image')?.dataUrl ?? '/images/clubs/club6.jpeg';
+                      const createdDate = album.createdAt ? new Date(album.createdAt).toLocaleDateString('fa-IR') : '';
+                      return (
+                        <div key={album.tournamentId} style={{ background: '#fff', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+                          {/* Album header */}
+                          <div onClick={() => setOpenAlbumId(isOpen ? null : album.tournamentId)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}>
+                            <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', flexShrink: 0, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+                              {album.items.find(i => i.type === 'image')
+                                ? <img src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                : '🏆'}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {album.tournamentName}
+                              </div>
+                              <div style={{ fontSize: 12, color: '#999', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                <span>📅 {toFa(album.date || createdDate)}</span>
+                                <span>🖼 {toFa(album.items.filter(i => i.type === 'image').length)} عکس</span>
+                                <span>🎬 {toFa(album.items.filter(i => i.type === 'video').length)} ویدیو</span>
+                                {album.bracketResult && <span style={{ color: '#30C55A', fontWeight: 700 }}>✓ نتایج ثبت شده</span>}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: 18, color: '#ccc', flexShrink: 0, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+                          </div>
+
+                          {/* Expanded album content */}
+                          {isOpen && (
+                            <div style={{ padding: '0 18px 18px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+
+                              {/* Upload button (club owner only) */}
+                              {isOwner && (
+                                <div style={{ paddingTop: 14, marginBottom: 14 }}>
+                                  <label style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                                    padding: '9px 18px', borderRadius: 20, cursor: 'pointer',
+                                    background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.35)',
+                                    fontSize: 13, fontWeight: 700, color: '#A07840',
+                                  }}>
+                                    <Camera size={14} />
+                                    بارگذاری عکس / ویدیو
+                                    <input
+                                      type="file" accept="image/*,video/*" multiple style={{ display: 'none' }}
+                                      onChange={e => { if (e.target.files?.length) handleAlbumUpload(album.tournamentId, e.target.files); e.target.value = ''; }}
+                                    />
+                                  </label>
+                                  <span style={{ fontSize: 11, color: '#bbb', marginRight: 10 }}>عکس و ویدیو پشتیبانی می‌شود</span>
+                                </div>
+                              )}
+
+                              {/* Media grid */}
+                              {album.items.length > 0 && (
+                                <div className="gallery-grid" style={{ marginBottom: 16 }}>
+                                  {album.items.map(item => (
+                                    <div key={item.id} style={{ aspectRatio: '1', borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#f5f5f5', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                                      {item.type === 'image' ? (
+                                        <img src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      ) : (
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.06)', gap: 6 }}>
+                                          <div style={{ fontSize: 28 }}>🎬</div>
+                                          <div style={{ fontSize: 10, color: '#888', textAlign: 'center', padding: '0 6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>{item.name}</div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {album.items.length === 0 && !album.bracketResult && (
+                                <div style={{ padding: '24px 0', textAlign: 'center', color: '#ccc', fontSize: 13 }}>
+                                  {isOwner ? 'عکس یا ویدیوی مسابقه را بارگذاری کنید' : 'هنوز محتوایی بارگذاری نشده'}
+                                </div>
+                              )}
+
+                              {/* Bracket Result */}
+                              {album.bracketResult && (
+                                <div style={{ marginTop: 12, padding: '16px', background: 'linear-gradient(135deg,rgba(199,166,106,0.08),rgba(199,166,106,0.03))', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 16 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                                    <Trophy size={15} color="#C7A66A" />
+                                    <span style={{ fontSize: 14, fontWeight: 800, color: '#A07840' }}>جدول نهایی مسابقات</span>
+                                  </div>
+                                  <div style={{ fontSize: 15, fontWeight: 900, color: '#C7A66A', marginBottom: 8 }}>
+                                    🏆 قهرمان: {album.bracketResult.winner}
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    {album.bracketResult.matches
+                                      .filter((m: any) => m.status === 'completed' && m.player1 && m.player2)
+                                      .map((m: any, i: number) => (
+                                        <div key={i} style={{ fontSize: 12, color: '#666', display: 'flex', gap: 6, alignItems: 'center', padding: '4px 8px', background: 'rgba(255,255,255,0.7)', borderRadius: 8 }}>
+                                          <span style={{ color: m.winner?.id === m.player1?.id ? '#30C55A' : '#bbb', fontWeight: 700, flex: 1 }}>{m.player1?.name}</span>
+                                          <span style={{ fontWeight: 900, color: '#999', flexShrink: 0 }}>{toFa(m.score1 ?? 0)} – {toFa(m.score2 ?? 0)}</span>
+                                          <span style={{ color: m.winner?.id === m.player2?.id ? '#30C55A' : '#bbb', fontWeight: 700, flex: 1, textAlign: 'left' }}>{m.player2?.name}</span>
+                                        </div>
+                                      ))}
+                                  </div>
+                                  <div style={{ marginTop: 8, fontSize: 11, color: '#bbb' }}>
+                                    ثبت شده: {new Date(album.bracketResult.savedAt).toLocaleDateString('fa-IR')}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Static albums */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 2, display: 'inline-block' }} />
@@ -634,7 +820,7 @@ export default function ClubProfilePage() {
                   {galleryAlbums.map((album, i) => (
                     <div key={i} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}>
                       <div style={{ width: 110, height: 110, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)' }}>
-                        <img src={album.cover} alt={album.name} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)', transition: 'transform 0.4s ease' }} onMouseEnter={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.06)'; }} onMouseLeave={e => { (e.target as HTMLImageElement).style.transform = 'scale(1)'; }} />
+                        <img src={album.cover} alt={album.name} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
                         <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
                           <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
@@ -645,6 +831,8 @@ export default function ClubProfilePage() {
                   ))}
                 </div>
               </div>
+
+              {/* All images grid */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
@@ -653,7 +841,7 @@ export default function ClubProfilePage() {
                 <div className="gallery-grid">
                   {galleryImages.map((img, i) => (
                     <div key={i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-                      <img src={img} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)', transition: 'transform 0.4s ease, filter 0.3s' }} onMouseEnter={e => { const el = e.target as HTMLImageElement; el.style.transform = 'scale(1.06)'; el.style.filter = 'brightness(1) saturate(1)'; }} onMouseLeave={e => { const el = e.target as HTMLImageElement; el.style.transform = 'scale(1)'; el.style.filter = 'brightness(0.82) saturate(0.78)'; }} />
+                      <img src={img} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
                     </div>
                   ))}
                 </div>
