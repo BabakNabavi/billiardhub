@@ -35,13 +35,14 @@ function StatusBadge({ status }: { status: TournamentMatch['status'] }) {
 }
 
 /* ── Frame-by-frame scoring modal ── */
-function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, onEndMatch }: {
+function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, onEndMatch, onSetTableNumber }: {
   match: TournamentMatch;
   bestOf: number;
   onClose: () => void;
   onAddFrame: (w: 1 | 2) => void;
   onUndoFrame: () => void;
   onEndMatch: () => void;
+  onSetTableNumber: (n: number | undefined) => void;
 }) {
   const frames = match.frames ?? [];
   const s1 = frames.filter(f => f === 1).length;
@@ -69,9 +70,24 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
             <X size={18} />
           </button>
         </div>
-        <div style={{ fontSize: 12, color: '#aaa', marginBottom: 22,
-          fontFamily: 'system-ui,-apple-system,sans-serif' }}>
-          Best of {bestOf} • {toFa(winsNeeded)} فریم برای برد
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <span style={{ fontSize: 12, color: '#aaa', fontFamily: 'system-ui,-apple-system,sans-serif' }}>
+            Best of {bestOf} • {toFa(winsNeeded)} فریم برای برد
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, direction: 'rtl' }}>
+            <span style={{ fontSize: 12, color: '#888', fontWeight: 700, whiteSpace: 'nowrap' }}>شماره میز</span>
+            <input
+              type="number"
+              min={1}
+              defaultValue={match.tableNumber ?? ''}
+              onChange={e => onSetTableNumber(e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="—"
+              style={{ width: 52, padding: '5px 8px', borderRadius: 8,
+                border: '1.5px solid rgba(199,166,106,0.45)', background: 'rgba(199,166,106,0.07)',
+                fontSize: 15, fontWeight: 800, color: '#C7A66A', textAlign: 'center',
+                fontFamily: 'inherit', outline: 'none' }}
+            />
+          </div>
         </div>
 
         {/* Score display */}
@@ -323,7 +339,7 @@ export default function LivePage() {
       if (nm) {
         if (nextSlot === 1) nm.player1 = winner;
         else nm.player2 = winner;
-        if (nm.player1 && nm.player2) nm.status = 'in_progress';
+        // do NOT auto-start next match — admin must click to start it
       }
       try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
       return next;
@@ -342,6 +358,14 @@ export default function LivePage() {
       return next;
     });
     setScoreModal(matchId);
+  };
+
+  const handleSetTableNumber = (matchId: string, n: number | undefined) => {
+    setMatches(prev => {
+      const next = prev.map(m => m.id === matchId ? { ...m, tableNumber: n } : m);
+      try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
 
   const handleSaveHighestBreak = () => {
@@ -379,9 +403,17 @@ export default function LivePage() {
             background: '#ef4444',
             fontSize: fs ? 'clamp(10px,0.75vw,18px)' : 9,
             fontWeight: 800, color: '#fff',
-            display: 'flex', alignItems: 'center', gap: 4,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4,
+            direction: 'ltr',
           }}>
-            <span style={{ width: fs ? 8 : 5, height: fs ? 8 : 5, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'livePulse 1.2s ease-in-out infinite', flexShrink: 0 }} /> زنده
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              زنده <span style={{ width: fs ? 8 : 5, height: fs ? 8 : 5, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'livePulse 1.2s ease-in-out infinite', flexShrink: 0 }} />
+            </span>
+            {m.tableNumber && (
+              <span style={{ fontSize: fs ? 'clamp(9px,0.7vw,16px)' : 8, fontWeight: 700, opacity: 0.9 }}>
+                میز {toFa(m.tableNumber)}
+              </span>
+            )}
           </div>
         )}
         {([m.player1, m.player2] as (TournamentMatch['player1'])[]).map((p, si) => {
@@ -726,6 +758,7 @@ export default function LivePage() {
           onAddFrame={w => handleAddFrame(activeMatch.id, w)}
           onUndoFrame={() => handleUndoFrame(activeMatch.id)}
           onEndMatch={() => handleEndMatch(activeMatch.id)}
+          onSetTableNumber={n => handleSetTableNumber(activeMatch.id, n)}
         />
       )}
     </div>
@@ -755,7 +788,7 @@ export default function LivePage() {
               background: 'rgba(239,68,68,0.20)', border: '1px solid rgba(239,68,68,0.35)',
               fontSize: 13, fontWeight: 700, color: '#ef4444',
               display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'livePulse 1.2s ease-in-out infinite', flexShrink: 0 }} /> زنده
+              زنده <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'livePulse 1.2s ease-in-out infinite', flexShrink: 0 }} />
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.40)', fontWeight: 600 }}>
               <Zap size={11} style={{ verticalAlign: 'middle' }} /> {GAME_TYPE_LABELS[t.gameType]}
@@ -856,6 +889,7 @@ export default function LivePage() {
           onAddFrame={w => handleAddFrame(activeMatch.id, w)}
           onUndoFrame={() => handleUndoFrame(activeMatch.id)}
           onEndMatch={() => handleEndMatch(activeMatch.id)}
+          onSetTableNumber={n => handleSetTableNumber(activeMatch.id, n)}
         />
       )}
     </div>
