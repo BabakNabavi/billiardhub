@@ -102,16 +102,18 @@ export default function LoginPage() {
           width: 100%;
           padding: 16px;
           border-radius: 14px;
-          border: none;
-          background: linear-gradient(135deg, ${GOLD}, #A07840);
-          color: #fff;
+          background: rgba(199,166,106,0.06);
+          backdrop-filter: blur(40px) saturate(240%);
+          -webkit-backdrop-filter: blur(40px) saturate(240%);
+          border: 1px solid rgba(199,166,106,0.22);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(199,166,106,0.16);
+          color: ${GOLD};
           font-size: 16px;
           font-weight: 800;
           cursor: pointer;
           font-family: inherit;
           letter-spacing: 0.02em;
           transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-          box-shadow: 0 8px 28px rgba(199,166,106,0.30);
           position: relative;
           overflow: hidden;
           display: flex;
@@ -119,20 +121,21 @@ export default function LoginPage() {
           justify-content: center;
           gap: 10px;
         }
+        .login-btn::after {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+          pointer-events: none;
+        }
         .login-btn:not(:disabled):hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 36px rgba(199,166,106,0.45);
+          background: rgba(199,166,106,0.10);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 40px rgba(199,166,106,0.24);
         }
         .login-btn:not(:disabled):active { transform: scale(0.98); }
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .login-btn::before {
-          content: '';
-          position: absolute; inset: 0;
-          background: linear-gradient(135deg, rgba(0,0,0,0.10), transparent 50%);
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-        .login-btn:not(:disabled):hover::before { opacity: 1; }
       `}</style>
 
       <div style={{ minHeight:'100vh', backgroundColor:'#F7F7F5', background:'linear-gradient(180deg,#F0EDE4 0%,#F7F7F5 100%)', display:'flex', alignItems:'center', justifyContent:'center', padding:'24px', position:'relative', overflow:'hidden' }}>
@@ -147,9 +150,11 @@ export default function LoginPage() {
           {/* Logo */}
           <div style={{ textAlign:'center', marginBottom:'32px' }}>
             <Link href="/" style={{ display:'inline-flex', alignItems:'center', gap:'10px', textDecoration:'none', marginBottom:'8px' }}>
-              <div style={{ width:'44px', height:'44px', borderRadius:'14px', background:`linear-gradient(135deg,${GOLD},#A07840)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '22px', fontWeight:900, color:'#fff', boxShadow:`0 8px 24px rgba(199,166,106,0.35)` }}>B</div>
+              <div style={{ width:'44px', height:'44px', borderRadius:'14px', overflow:'hidden', boxShadow:`0 8px 24px rgba(199,166,106,0.35)`, flexShrink:0 }}>
+                <img src="/images/Logo/logo1.jpeg?v=3" alt="بیلیارد هاب" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              </div>
               <span style={{ fontSize: '24px', fontWeight:900, color:'#1C1C1A', letterSpacing:'-0.025em' }}>
-                بیلیارد <span style={{ background:`linear-gradient(135deg,${GOLD},#A07840)`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>پلاس</span>
+                بیلیارد <span style={{ background:`linear-gradient(135deg,${GOLD},#A07840)`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>هاب</span>
               </span>
             </Link>
             <div style={{ fontSize: '15px', color:'rgba(28,28,26,0.45)', marginTop:'4px' }}>
@@ -254,7 +259,7 @@ export default function LoginPage() {
               <Link href="/register" style={{ color:GOLD, fontWeight:700, textDecoration:'none', transition:'opacity 0.2s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.75'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}>
-                ثبت‌نام رایگان
+                ثبت نام کنید
               </Link>
             </p>
           </div>
