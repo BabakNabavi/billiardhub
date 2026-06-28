@@ -180,12 +180,18 @@ export default function TournamentAdminPage() {
   /* Merge registrations submitted via the online payment flow */
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`tournament-regs-${id}`);
+      const key = `tournament-regs-${id}`;
+      const saved = localStorage.getItem(key);
       if (!saved) return;
-      const newRegs = JSON.parse(saved) as Registration[];
+      const raw = JSON.parse(saved) as Registration[];
+      // deduplicate by phone — keep last entry per phone
+      const seen = new Map<string, Registration>();
+      for (const r of raw) seen.set(r.phone ?? r.id, r);
+      const deduped = Array.from(seen.values());
+      if (deduped.length !== raw.length) localStorage.setItem(key, JSON.stringify(deduped));
       setRegs(prev => {
         const existing = new Set(prev.map(r => r.id));
-        const fresh = newRegs.filter(r => !existing.has(r.id));
+        const fresh = deduped.filter(r => !existing.has(r.id));
         return fresh.length > 0 ? [...fresh, ...prev] : prev;
       });
     } catch {}
