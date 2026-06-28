@@ -47,7 +47,8 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
   const s1 = frames.filter(f => f === 1).length;
   const s2 = frames.filter(f => f === 2).length;
   const winsNeeded = Math.ceil(bestOf / 2);
-  const canEnd = frames.length > 0 && s1 !== s2;
+  const isOver = s1 >= winsNeeded || s2 >= winsNeeded;
+  const canEnd = isOver && s1 !== s2;
   const potWinner = canEnd ? (s1 > s2 ? match.player1 : match.player2) : null;
 
   return (
@@ -116,20 +117,24 @@ function FrameScoringModal({ match, bestOf, onClose, onAddFrame, onUndoFrame, on
 
         {/* Frame winner buttons */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-          <button onClick={() => onAddFrame(1)} style={{
+          <button onClick={() => !isOver && onAddFrame(1)} disabled={isOver} style={{
             flex: 1, padding: '14px 8px', borderRadius: 14, border: 'none',
-            background: 'rgba(48,197,90,0.12)', color: '#26a249',
-            fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.5,
+            background: isOver ? 'rgba(0,0,0,0.04)' : 'rgba(48,197,90,0.12)',
+            color: isOver ? '#ccc' : '#26a249',
+            fontSize: 13, fontWeight: 800, cursor: isOver ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit', lineHeight: 1.5,
           }}>
             فریم برنده<br />
             <span style={{ fontSize: 11, fontWeight: 600 }}>
               {match.player1?.name?.split(' ')[0] ?? 'بازیکن ۱'}
             </span>
           </button>
-          <button onClick={() => onAddFrame(2)} style={{
+          <button onClick={() => !isOver && onAddFrame(2)} disabled={isOver} style={{
             flex: 1, padding: '14px 8px', borderRadius: 14, border: 'none',
-            background: 'rgba(239,68,68,0.09)', color: '#dc2626',
-            fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.5,
+            background: isOver ? 'rgba(0,0,0,0.04)' : 'rgba(239,68,68,0.09)',
+            color: isOver ? '#ccc' : '#dc2626',
+            fontSize: 13, fontWeight: 800, cursor: isOver ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit', lineHeight: 1.5,
           }}>
             فریم برنده<br />
             <span style={{ fontSize: 11, fontWeight: 600 }}>
@@ -253,15 +258,22 @@ export default function LivePage() {
 
   /* ── Frame handlers ── */
   const handleAddFrame = (matchId: string, winner: 1 | 2) => {
+    const wn = Math.ceil(bestOf / 2);
     setMatches(prev => {
       const next = prev.map(m => {
         if (m.id !== matchId) return m;
-        const frames: Array<1 | 2> = [...(m.frames ?? []), winner];
+        const curFrames = m.frames ?? [];
+        const cs1 = curFrames.filter(f => f === 1).length;
+        const cs2 = curFrames.filter(f => f === 2).length;
+        if (cs1 >= wn || cs2 >= wn) return m; // already decided
+        const frames: Array<1 | 2> = [...curFrames, winner];
+        const s1 = frames.filter(f => f === 1).length;
+        const s2 = frames.filter(f => f === 2).length;
         return {
           ...m,
           frames,
-          score1: frames.filter(f => f === 1).length,
-          score2: frames.filter(f => f === 2).length,
+          score1: s1,
+          score2: s2,
           status: 'in_progress' as const,
         };
       });
@@ -319,6 +331,19 @@ export default function LivePage() {
     setScoreModal(null);
   };
 
+  const handleStartMatch = (matchId: string) => {
+    setMatches(prev => {
+      const next = prev.map(m =>
+        m.id === matchId && m.status === 'waiting'
+          ? { ...m, status: 'in_progress' as const }
+          : m
+      );
+      try { localStorage.setItem(`bracket-${id}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+    setScoreModal(matchId);
+  };
+
   const handleSaveHighestBreak = () => {
     const val = parseInt(hbValue, 10);
     if (!hbName.trim() || isNaN(val) || val <= 0) return;
@@ -336,7 +361,7 @@ export default function LivePage() {
     const clickable = !isDone && !!m.player1 && !!m.player2;
     const fs = isFullscreen;
     return (
-      <div onClick={() => clickable && setScoreModal(m.id)} style={{
+      <div onClick={() => { if (!clickable) return; if (m.status === 'waiting') handleStartMatch(m.id); else setScoreModal(m.id); }} style={{
         width: fs ? '100%' : 158,
         borderRadius: fs ? 'clamp(10px,0.8vw,20px)' : 9,
         overflow: 'hidden',
@@ -356,7 +381,7 @@ export default function LivePage() {
             fontWeight: 800, color: '#fff',
             display: 'flex', alignItems: 'center', gap: 4,
           }}>
-            <Circle size={fs ? 8 : 5} fill="#fff" /> زنده
+            <span style={{ width: fs ? 8 : 5, height: fs ? 8 : 5, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'livePulse 1.2s ease-in-out infinite', flexShrink: 0 }} /> زنده
           </div>
         )}
         {([m.player1, m.player2] as (TournamentMatch['player1'])[]).map((p, si) => {
@@ -477,9 +502,10 @@ export default function LivePage() {
                   color: '#C7A66A', padding: '0 10px' }}>
                   🏆 فینال
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                  flex: 1, padding: vpad(innerRounds.length), width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                  flex: 1, padding: vpad(innerRounds.length), width: '100%', gap: fs ? 'clamp(8px,1vh,20px)' : 10 }}>
                   <LiveCard m={bracketFinal} />
+                  {highestBreak && <HighestBreakPanel small />}
                 </div>
               </div>
             )}
@@ -506,12 +532,6 @@ export default function LivePage() {
           </div>
         </div>
 
-        {/* Highest break overlay in fullscreen */}
-        {highestBreak && fs && (
-          <div style={{ position: 'absolute', bottom: 20, left: 20 }}>
-            <HighestBreakPanel />
-          </div>
-        )}
       </div>
     );
   };
@@ -591,7 +611,7 @@ export default function LivePage() {
         <section style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: '#aaa',
             letterSpacing: '0.08em', marginBottom: 14 }}>به زودی</div>
-          {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m.id)} />)}
+          {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => handleStartMatch(m.id)} />)}
         </section>
       )}
       {done.length > 0 && (
@@ -684,7 +704,7 @@ export default function LivePage() {
           <section style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: '#f59e0b',
               letterSpacing: '0.08em', marginBottom: 12 }}>در انتظار</div>
-            {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => setScoreModal(m.id)} showScore />)}
+            {upcoming.map(m => <MatchRow key={m.id} m={m} onScore={() => handleStartMatch(m.id)} showScore />)}
           </section>
         )}
         {done.length > 0 && (
@@ -715,6 +735,7 @@ export default function LivePage() {
   return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
       fontFamily: 'Vazirmatn, sans-serif' }}>
+      <style>{`@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.7)}}`}</style>
 
       {/* Header */}
       <div style={{ background: '#111', color: '#fff',
@@ -734,7 +755,7 @@ export default function LivePage() {
               background: 'rgba(239,68,68,0.20)', border: '1px solid rgba(239,68,68,0.35)',
               fontSize: 13, fontWeight: 700, color: '#ef4444',
               display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Circle size={6} fill="#ef4444" /> زنده
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'livePulse 1.2s ease-in-out infinite', flexShrink: 0 }} /> زنده
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.40)', fontWeight: 600 }}>
               <Zap size={11} style={{ verticalAlign: 'middle' }} /> {GAME_TYPE_LABELS[t.gameType]}
@@ -824,12 +845,6 @@ export default function LivePage() {
             </div>
           </div>
 
-          {/* Highest break below bracket in normal view */}
-          {highestBreak && !isFullscreen && (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 20px 28px' }}>
-              <HighestBreakPanel small />
-            </div>
-          )}
         </div>
       ) : <MatchesView />}
 
