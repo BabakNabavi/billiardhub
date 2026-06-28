@@ -115,11 +115,8 @@ function MatchCard({
           <>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#111', flex: 1,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {player.name}
+              {player.rank ? `${toFa(player.rank)}- ${player.name}` : player.name}
             </span>
-            {player.rank && (
-              <span style={{ fontSize: 9, color: '#C7A66A', fontWeight: 700 }}>#{toFa(player.rank)}</span>
-            )}
             {isMobile && (
               <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 900, flexShrink: 0 }}>×</span>
             )}
@@ -771,8 +768,9 @@ export default function BracketPage() {
                   border: '1px solid rgba(0,0,0,0.06)', cursor: 'grab' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#111',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                  {p.rank && <div style={{ fontSize: 9, color: '#C7A66A' }}>#{toFa(p.rank)}</div>}
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {p.rank ? `${toFa(p.rank)}- ${p.name}` : p.name}
+                  </div>
                 </div>
               </div>
             ))}
