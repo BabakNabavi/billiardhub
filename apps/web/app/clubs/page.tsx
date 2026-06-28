@@ -199,8 +199,8 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
               }}>
                 {/* top sheen */}
                 <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(48,197,90,0.18) 0%,transparent 60%)', pointerEvents: 'none', borderRadius: 'inherit' }} />
-                <span style={{ fontSize: 9, position: 'relative' }}>★</span>
-                <span style={{ position: 'relative' }}>LQ</span>
+                <span style={{ fontSize: 10, position: 'relative' }}>✓</span>
+                <span style={{ position: 'relative' }}>تایید</span>
               </div>
             )}
           </div>
