@@ -499,7 +499,7 @@ export default function RegisterPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
           }}>
             <CreditCard size={18} />
-            پرداخت مبلغ ورودی و ثبت‌نام
+            واریز مبلغ ورودی
           </button>
 
           <p style={{ fontSize: 13, color: '#bbb', textAlign: 'center',
