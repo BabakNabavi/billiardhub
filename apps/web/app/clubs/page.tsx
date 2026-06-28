@@ -88,7 +88,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
          (t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming')
   );
   const tournBadge = activeTournament ? ({
-    registration_open: { label: '● ثبت‌نام مسابقه باز', color: '#C7A66A', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.30)', pulse: true  },
+    registration_open: { label: '● در حال ثبت‌نام مسابقه', color: '#C7A66A', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.30)', pulse: true  },
     live:              { label: '● مسابقه زنده',         color: '#ef4444', bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.30)',   pulse: true  },
     upcoming:          { label: 'مسابقه به زودی',        color: '#8b5cf6', bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.28)', pulse: false },
     bracket_ready:     { label: 'براکت آماده',           color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.28)', pulse: false },
