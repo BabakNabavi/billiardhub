@@ -222,7 +222,7 @@ export default function RegisterPage() {
         {/* footer */}
         <p className="footer-note">
           حساب کاربری دارید؟{' '}
-          <Link href="/login" className="link-green">
+          <Link href="/login" style={{ color: '#F5C518', textDecoration: 'none', fontWeight: 700 }}>
             وارد شوید
           </Link>
         </p>
