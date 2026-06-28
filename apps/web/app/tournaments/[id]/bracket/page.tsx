@@ -114,7 +114,8 @@ function MatchCard({
         ) : player ? (
           <>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#111', flex: 1,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              direction: 'rtl', textAlign: 'right' }}>
               {player.rank ? `${toFa(player.rank)}- ${player.name}` : player.name}
             </span>
             {isMobile && (
