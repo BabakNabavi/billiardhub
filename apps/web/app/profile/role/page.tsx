@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuthStore } from '../../../store/auth.store'
 
 // ─── Types (inline — نیاز به import از lib نیست) ──────────────
 type RoleValue =
@@ -356,6 +357,7 @@ function DocUploadStep({
 // ─── Main Page ────────────────────────────────────────────────
 export default function RolePage() {
   const router = useRouter()
+  const { user, updateUser } = useAuthStore()
   const [requests, setRequests] = useState<RoleRequest[]>([])
   const [queued, setQueued]     = useState<Set<RoleValue>>(new Set())
   const [step, setStep]         = useState<'select' | 'upload'>('select')
@@ -386,14 +388,24 @@ export default function RolePage() {
   }
 
   const handleDone = () => {
-    showToast('درخواست‌های شما ارسال شد و در انتظار تأیید ادمین است')
+    showToast('نقش‌های شما فعال شد')
+
+    // بلافاصله auth store را آپدیت کن تا داشبورد واکنش نشان دهد
+    const currentSecondary = user?.secondaryRoles ?? []
+    const newRoles = queuedArr.filter(r => !currentSecondary.includes(r))
+    if (newRoles.length > 0) {
+      updateUser({ secondaryRoles: [...currentSecondary, ...newRoles] })
+    }
+
     setQueued(new Set())
     setStep('select')
-    // reload
     fetch(`${API}/roles/my`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch(() => {})
+
+    // برگشت به داشبورد
+    setTimeout(() => router.push('/dashboard'), 1200)
   }
 
   const showToast = (msg: string) => {
