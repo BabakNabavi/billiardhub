@@ -541,7 +541,7 @@ useEffect(() => {
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
           /* navbar(72) + stories(~116) + 24px gap = ~212px */
-          .hero-content { padding-top:189px !important; padding-bottom:60px !important; }
+          .hero-content { padding-top:208px !important; padding-bottom:60px !important; }
           .hero-h1      { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
@@ -561,10 +561,10 @@ useEffect(() => {
           .feat-slider  { justify-content:flex-start !important; }
         }
 
-        /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
+        /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-stories-bar { zoom:0.95; }
-          .hero-content { padding-top:clamp(157px,19vh,195px) !important; zoom:0.95; }
+          .hero-stories-bar { zoom:0.90; }
+          .hero-content { padding-top:clamp(157px,19vh,195px) !important; zoom:0.90; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
@@ -574,7 +574,7 @@ useEffect(() => {
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:189px !important; }
+          .hero-content { padding-top:208px !important; }
           .trust-strip  { margin-top:16px !important; }
         }
 
@@ -640,7 +640,7 @@ useEffect(() => {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(157px,18vh,195px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(181px,21vh,224px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
