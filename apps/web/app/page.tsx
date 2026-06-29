@@ -552,8 +552,10 @@ useEffect(() => {
           .hero-actions { display:none !important; }
           .hero-arrows  { display:none !important; }
           .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
-          .trust-box    { margin-top:35px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; }
-          .trust-grid   { zoom:0.54 !important; }
+          .trust-box    { margin-top:35px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; overflow:visible !important; }
+          .trust-grid   { zoom:0.43 !important; }
+          .trust-label  { font-size:9.9px !important; }
+          .trust-sub    { font-size:8.1px !important; }
           .feat-slider  { justify-content:flex-start !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
           .dp-cta       { width:100% !important; }
@@ -779,8 +781,8 @@ useEffect(() => {
                       style={{ filter: `drop-shadow(0 0 4px rgba(${item.rgb},0.65))` }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
-                    <span style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                    <span className="trust-label" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
+                    <span className="trust-sub" style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
                   </div>
                 </div>
               ))}
