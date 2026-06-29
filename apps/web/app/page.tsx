@@ -738,9 +738,10 @@ useEffect(() => {
           </div>
 
           {/* Trust items — unified box with 4 cells divided by thin lines */}
-          <div className="he" style={{ marginTop: '12px' }}>
+          <div className="he" style={{ marginTop: '36px' }}>
             <div style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              zoom: 0.8,
               background: 'rgba(6,4,12,0.82)',
               backdropFilter: 'blur(32px) saturate(200%)',
               WebkitBackdropFilter: 'blur(32px) saturate(200%)',
