@@ -260,14 +260,14 @@ export default function Stories() {
     <>
       <style>{`
         .st-strip {
-          display: flex; gap: 14px; overflow-x: auto;
-          padding: 6px 2px 10px; scrollbar-width: none;
+          display: flex; gap: 13px; overflow-x: auto;
+          padding: 6px 2px 9px; scrollbar-width: none;
           -ms-overflow-style: none; direction: ltr;
         }
         .st-strip::-webkit-scrollbar { display: none; }
         .st-item {
           display: flex; flex-direction: column; align-items: center;
-          gap: 6px; cursor: pointer; flex-shrink: 0;
+          gap: 5px; cursor: pointer; flex-shrink: 0;
           transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
           background: none; border: none; padding: 0;
         }
@@ -278,14 +278,14 @@ export default function Stories() {
         }
         .st-item:hover .st-ring { box-shadow: 0 6px 20px rgba(0,0,0,0.36); }
         .st-inner {
-          width: 78px; height: 78px; border-radius: 50%;
+          width: 67px; height: 67px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 28px; color: #fff;
+          font-weight: 900; font-size: 24px; color: #fff;
           border: 2px solid rgba(4,2,10,0.55); overflow: hidden;
         }
         .st-name {
-          font-size: 11px; font-weight: 600; white-space: nowrap;
-          overflow: hidden; text-overflow: ellipsis; max-width: 88px;
+          font-size: 10px; font-weight: 600; white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis; max-width: 79px;
           line-height: 1.2;
         }
       `}</style>
@@ -296,7 +296,7 @@ export default function Stories() {
           <div className="st-item">
             <div className="st-ring" style={{ background: 'rgba(199,166,106,0.16)', border: '1.5px dashed rgba(199,166,106,0.45)' }}>
               <div className="st-inner" style={{ background: 'rgba(199,166,106,0.08)', border: 'none' }}>
-                <Plus size={20} style={{ color: '#C7A66A' }} />
+                <Plus size={18} style={{ color: '#C7A66A' }} />
               </div>
             </div>
             <span className="st-name" style={{ color: 'rgba(199,166,106,0.80)' }}>جدید</span>
