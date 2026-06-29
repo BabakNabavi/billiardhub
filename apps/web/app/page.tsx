@@ -827,7 +827,7 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
+      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(65px,7.2vw,97px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
@@ -843,16 +843,16 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="clubs-desk"><SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(336px,58vw,624px)" featured /></div></SR></div>
+          <div className="clubs-desk"><SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(370px,64vw,686px)" featured /></div></SR></div>
           <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
             {CLUBS.slice(1).map((c, i) => (
-              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(288px,38vw,408px)" /></SR>
+              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(317px,42vw,449px)" /></SR>
             ))}
           </div>
           <div className="clubs-mobile-slider">
             {CLUBS.map((c) => (
               <div key={c.id} style={{ width: 'calc(31vw)', minWidth: '100px', flexShrink: 0 }}>
-                <ClubCard club={c} h="clamp(168px,50vw,228px)" />
+                <ClubCard club={c} h="clamp(185px,55vw,251px)" />
               </div>
             ))}
           </div>
