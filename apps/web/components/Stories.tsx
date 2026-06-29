@@ -311,8 +311,8 @@ export default function Stories() {
               <div className="st-ring" style={{
                 background: isSeen
                   ? 'rgba(255,255,255,0.08)'
-                  : `conic-gradient(from 135deg, ${g.roleColor} 0%, #06b6d4 50%, ${g.roleColor} 100%)`,
-                boxShadow: isSeen ? 'none' : `0 0 14px ${g.roleColor}30`,
+                  : 'linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)',
+                boxShadow: isSeen ? 'none' : '0 0 14px rgba(214,41,118,0.45)',
               }}>
                 <div className="st-inner" style={{ background: `linear-gradient(135deg,${g.roleColor}28,${g.roleColor}0E)` }}>
                   {g.logoUrl
