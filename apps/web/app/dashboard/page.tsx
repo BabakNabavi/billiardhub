@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/api';
 import {
-  Calendar, Trophy, TrendingUp, Bell, Settings, ChevronRight,
-  Target, Activity, Award, Clock, MapPin, Zap, Star,
+  Calendar, Trophy, Bell, Settings,
+  Award, Clock, MapPin,
   CheckCircle, Circle, ArrowLeft, BarChart2, Users,
-  ShoppingBag, Play, Plus, Shield, ChevronUp, ChevronDown, ShieldCheck,
+  ShoppingBag, Play, Plus, Shield, ShieldCheck,
   ClipboardList,
 } from 'lucide-react';
 import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
@@ -19,7 +19,6 @@ import AuthGuard from '../../components/AuthGuard';
 /* ══ types ══ */
 interface Booking { id: string; club: string; table: string; date: string; time: string; status: 'confirmed' | 'pending' | 'completed'; price: number; }
 interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
-interface QuickStat { label: string; value: string; sub: string; color: string; icon: React.ReactNode; trend?: number; }
 interface MyReg { id: string; tournamentId: string; tournamentName: string; status: 'pending' | 'approved' | 'rejected'; registeredAt: string; }
 
 /* ══ sample data ══ */
@@ -36,51 +35,9 @@ const notifications: Notif[] = [
   { id: 'n4', type: 'system', msg: 'پروفایل شما توسط فدراسیون تأیید شد', time: 'دیروز', read: true },
 ];
 
-const achievements = [
-  { icon: '🏆', title: 'قهرمان منطقه', desc: 'اولین قهرمانی', color: '#f59e0b', earned: true },
-  { icon: '🎯', title: '۵۰ مسابقه', desc: 'پنجاهمین مسابقه', color: '#C7A66A', earned: true },
-  { icon: '⭐', title: 'بازیکن ماه', desc: 'بهترین ماه', color: '#a78bfa', earned: true },
-  { icon: '🔥', title: '۱۰ پیروزی پشت‌سرهم', desc: 'ده پیروزی متوالی', color: '#ef4444', earned: false },
-  { icon: '💎', title: 'نخبه', desc: 'رنک زیر ۱۰', color: '#06b6d4', earned: false },
-  { icon: '🚀', title: 'صعود سریع', desc: '۱۰ رنک در یک ماه', color: '#f59e0b', earned: false },
-];
-
-const recentMatches = [
-  { opp: 'رضا کریمی', result: 'W', score: '6-2', date: '۱۴۰۴/۰۳/۱۵', tournament: 'لیگ برتر' },
-  { opp: 'نیما موسوی', result: 'W', score: '6-4', date: '۱۴۰۴/۰۳/۱۲', tournament: 'لیگ برتر' },
-  { opp: 'علی احمدی', result: 'L', score: '3-6', date: '۱۴۰۴/۰۳/۰۸', tournament: 'جام تهران' },
-  { opp: 'کاوه رستمی', result: 'W', score: '6-3', date: '۱۴۰۴/۰۳/۰۵', tournament: 'لیگ برتر' },
-];
-
-const weeklyActivity = [
-  { day: 'ش', sessions: 2, wins: 2, losses: 0 },
-  { day: 'ی', sessions: 0, wins: 0, losses: 0 },
-  { day: 'د', sessions: 3, wins: 2, losses: 1 },
-  { day: 'س', sessions: 1, wins: 1, losses: 0 },
-  { day: 'چ', sessions: 2, wins: 1, losses: 1 },
-  { day: 'پ', sessions: 4, wins: 3, losses: 1 },
-  { day: 'ج', sessions: 1, wins: 1, losses: 0 },
-];
-
-const quickStats: QuickStat[] = [
-  { label: 'رنک ملی', value: '#۳', sub: '↑۲ این ماه', color: '#f59e0b', icon: <TrendingUp size={16} />, trend: 2 },
-  { label: 'نرخ پیروزی', value: '۷۴٪', sub: 'از ۲۸۴ مسابقه', color: '#C7A66A', icon: <Target size={16} />, trend: 3 },
-  { label: 'امتیاز کل', value: '۸,۴۲۰', sub: '+۴۵۰ این ماه', color: '#a78bfa', icon: <Zap size={16} />, trend: 12 },
-  { label: 'رزروهای فعال', value: '۲', sub: 'هفته جاری', color: '#06b6d4', icon: <Calendar size={16} />, trend: 0 },
-];
 
 function toFa(v: string | number) {
   return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d)));
-}
-
-/* ── mini heatmap bar ── */
-function ActivityBar({ sessions, max }: { sessions: number; max: number }) {
-  const h = max > 0 ? Math.max(4, (sessions / max) * 44) : 4;
-  return (
-    <div style={{ width: '100%', height: '44px', display: 'flex', alignItems: 'flex-end' }}>
-      <div style={{ width: '100%', height: `${h}px`, borderRadius: '3px', background: sessions > 0 ? `rgba(199,166,106,${0.3 + (sessions / max) * 0.7})` : 'rgba(0,0,0,0.06)', boxShadow: 'none', transition: 'height 0.6s ease' }} />
-    </div>
-  );
 }
 
 /* ── radial progress ── */
@@ -116,7 +73,6 @@ export default function DashboardPage() {
   const [clubLoading, setClubLoading] = useState(false);
   const rafRef = useRef<number>(0);
   const unread = notifications.filter(n => !n.read).length;
-  const maxAct = Math.max(...weeklyActivity.map(d => d.sessions));
 
   const upcomingTournament = SAMPLE_TOURNAMENTS.find(
     t => t.status === 'registration_open' || t.status === 'upcoming'
@@ -363,45 +319,21 @@ export default function DashboardPage() {
         {/* ══════════ MAIN CONTENT ══════════ */}
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(24px,4vw,40px) clamp(16px,3vw,32px)' }}>
 
-          {/* ── Quick Stats ── */}
-          {isBasicUser ? (
+          {/* ── هشدار انتخاب نقش ── */}
+          {isBasicUser && (
             <div style={{ marginBottom: '28px', padding: '28px 24px', background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', animation: 'fadeUp 0.5s ease both' }}>
               <ShieldCheck size={32} color="#f59e0b" />
               <div>
                 <div style={{ fontSize: '17px', fontWeight: 700, color: '#111111', marginBottom: '8px' }}>
-                  برای دسترسی کامل به تمام امکانات سایت، سطح کاربری و نقش خود را تعیین نمایید
+                  برای دسترسی کامل به تمام امکانات سایت، نقش خود را تعیین کنید
                 </div>
                 <div style={{ fontSize: '15px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.7 }}>
-                  با تعیین سطح کاربری به آمار کامل، رنکینگ ملی و تاریخچه مسابقات دسترسی خواهید داشت
+                  باشگاه‌دار، بازیکن، مربی یا سایر نقش‌ها را انتخاب کنید
                 </div>
               </div>
               <Link href="/profile/role" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 28px', background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', color: '#f59e0b', fontSize: '16px', fontWeight: 700, textDecoration: 'none' }}>
-                تعیین سطح کاربری ←
+                انتخاب نقش ←
               </Link>
-            </div>
-          ) : (
-            <div className="stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', marginBottom: '28px' }}>
-              {quickStats.map((s, i) => (
-                <div key={i} className="stat-card" style={{ animationDelay: `${i * 0.08}s`, animation: 'fadeUp 0.5s ease both' }}>
-                  <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '60px', height: '1px', background: `linear-gradient(90deg,transparent,${s.color}50,transparent)` }} />
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${s.color}12`, border: `1px solid ${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color }}>
-                      {s.icon}
-                    </div>
-                    {s.trend !== undefined && s.trend !== 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '13px', color: s.trend > 0 ? '#C7A66A' : '#ef4444', fontWeight: 700 }}>
-                        {s.trend > 0 ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                        {toFa(Math.abs(s.trend))}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ fontSize: 'clamp(24px, 3.3vw, 33px)', fontWeight: 900, color: '#111111', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: '6px', textShadow: `0 0 24px ${s.color}30` }}>
-                    {s.value}
-                  </div>
-                  <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, marginBottom: '3px' }}>{s.label}</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
-                </div>
-              ))}
             </div>
           )}
 
@@ -638,133 +570,10 @@ export default function DashboardPage() {
                 </div>
               </ScrollReveal>
 
-              {/* Weekly Activity */}
-              {!isBasicUser && <ScrollReveal>
-                <div className="dash-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <div className="card-label" style={{ margin: 0 }}>
-                      <span style={{ width: '3px', height: '12px', background: 'linear-gradient(180deg,#a78bfa,#06b6d4)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
-                      فعالیت هفتگی
-                    </div>
-                    <div style={{ display: 'flex', gap: '14px', fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'rgba(199,166,106,0.60)', display: 'inline-block' }} />جلسات</span>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                    {weeklyActivity.map((d, i) => (
-                      <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                        <ActivityBar sessions={d.sessions} max={maxAct} />
-                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)', letterSpacing: '0.03em' }}>{d.day}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Weekly summary */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginTop: '18px', paddingTop: '18px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                    {[
-                      { v: toFa(weeklyActivity.reduce((a, d) => a + d.sessions, 0)), l: 'جلسه', c: '#06b6d4' },
-                      { v: toFa(weeklyActivity.reduce((a, d) => a + d.wins, 0)), l: 'پیروزی', c: '#C7A66A' },
-                      { v: toFa(weeklyActivity.reduce((a, d) => a + d.losses, 0)), l: 'شکست', c: '#ef4444' },
-                    ].map((s, i) => (
-                      <div key={i} style={{ textAlign: 'center', padding: '10px', background: 'rgba(0,0,0,0.02)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                        <div style={{ fontSize: '22px', fontWeight: 900, color: s.c, letterSpacing: '-0.02em' }}>{s.v}</div>
-                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)', marginTop: '3px' }}>{s.l}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>}
-
-              {/* Recent Matches */}
-              {!isBasicUser && <ScrollReveal>
-                <div className="dash-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-                    <div className="card-label" style={{ margin: 0 }}>
-                      <span style={{ width: '3px', height: '12px', background: 'linear-gradient(180deg,#f59e0b,#ef4444)', borderRadius: '2px', display: 'inline-block', flexShrink: 0 }} />
-                      آخرین مسابقات
-                    </div>
-                    <Link href="/players/1" style={{ fontSize: '14px', color: '#C7A66A', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.7 }}>
-                      پروفایل <ArrowLeft size={12} />
-                    </Link>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {recentMatches.map((m, i) => (
-                      <div key={i} className="match-pill">
-                        {/* W/L */}
-                        <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: m.result === 'W' ? 'rgba(199,166,106,0.12)' : 'rgba(239,68,68,0.1)', border: `1px solid ${m.result === 'W' ? 'rgba(199,166,106,0.30)' : 'rgba(239,68,68,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, color: m.result === 'W' ? '#A07840' : '#ef4444', flexShrink: 0 }}>
-                          {m.result}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '15px', fontWeight: 600, color: '#111111', marginBottom: '2px' }}>{m.opp}</div>
-                          <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>{m.tournament} · {m.date}</div>
-                        </div>
-                        <div style={{ fontSize: '18px', fontWeight: 900, color: m.result === 'W' ? '#A07840' : 'rgba(0,0,0,0.30)', letterSpacing: '-0.01em', flexShrink: 0, textShadow: m.result === 'W' ? '0 0 12px rgba(199,166,106,0.40)' : 'none' }}>
-                          {m.score}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>}
             </div>
 
             {/* ── RIGHT COLUMN ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '130px' }}>
-
-              {/* Player rank card */}
-              {!isBasicUser && <ScrollReveal>
-                <div className="dash-card" style={{ background: '#FFFFFF', border: '1px solid rgba(245,158,11,0.2)' }}>
-                  <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(245,158,11,0.6),transparent)', boxShadow: '0 0 14px rgba(245,158,11,0.3)' }} />
-
-                  <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-                    <div style={{ fontSize: '12px', color: 'rgba(245,158,11,0.6)', letterSpacing: '0.2em', fontWeight: 700, marginBottom: '10px' }}>NATIONAL RANK</div>
-                    <div style={{ fontSize: '57px', fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-0.04em', textShadow: '0 0 40px rgba(245,158,11,0.4)', marginBottom: '4px' }}>
-                      #۳
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', color: '#C7A66A', fontSize: '14px', fontWeight: 700 }}>
-                      <ChevronUp size={14} /> ۲ رتبه این ماه
-                    </div>
-                  </div>
-
-                  {/* Rings */}
-                  <div style={{ display: 'flex', justifyContent: 'space-around', paddingTop: '16px', borderTop: '1px solid rgba(0,0,0,0.07)' }}>
-                    {[
-                      { v: 74, color: '#C7A66A', label: 'Win Rate' },
-                      { v: 88, color: '#06b6d4', label: 'Consistency' },
-                      { v: 92, color: '#a78bfa', label: 'Technique' },
-                    ].map((r, i) => (
-                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                        <Ring value={r.v} size={56} stroke={5} color={r.color} label />
-                        <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)', letterSpacing: '0.06em' }}>{r.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>}
-
-              {/* Achievements */}
-              {!isBasicUser && <ScrollReveal>
-                <div className="dash-card">
-                  <div className="card-label">
-                    <span style={{ background: 'linear-gradient(180deg,#a78bfa,#f59e0b)' }} />
-                    افتخارات
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
-                    {achievements.map((a, i) => (
-                      <div key={i} style={{ textAlign: 'center', padding: '12px 6px', background: a.earned ? `${a.color}08` : 'rgba(0,0,0,0.02)', border: `1px solid ${a.earned ? `${a.color}20` : 'rgba(0,0,0,0.05)'}`, borderRadius: '14px', opacity: a.earned ? 1 : 0.4, transition: 'all 0.3s', cursor: 'default', position: 'relative', overflow: 'hidden' }}>
-                        <div style={{ fontSize: '26px', marginBottom: '6px', filter: a.earned ? `drop-shadow(0 0 8px ${a.color}60)` : 'grayscale(1)', transition: 'filter 0.3s' }}>{a.icon}</div>
-                        <div style={{ fontSize: '10px', color: a.earned ? a.color : 'rgba(0,0,0,0.30)', fontWeight: 700, lineHeight: 1.3 }}>{a.title}</div>
-                        {!a.earned && (
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(247,247,245,0.85)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '16px', opacity: 0.4 }}>🔒</div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>}
 
               {/* Upcoming tournament — synced with SAMPLE_TOURNAMENTS */}
               <ScrollReveal>
