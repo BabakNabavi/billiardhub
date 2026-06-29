@@ -106,7 +106,7 @@ export default function AdminClubsPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {filtered.map(club => {
-            const st = STATUS_LABEL[club.verificationStatus] ?? STATUS_LABEL.unverified;
+            const st = STATUS_LABEL[club.verificationStatus] ?? STATUS_LABEL['unverified'] ?? { label: club.verificationStatus, color: '#6b7280', bg: 'rgba(156,163,175,0.1)', icon: null };
             return (
               <div key={club.id} style={{ background: '#fff', border: '1px solid #f0ede8', borderRadius: 16, padding: '16px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
