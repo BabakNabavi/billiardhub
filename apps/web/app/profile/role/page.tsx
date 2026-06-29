@@ -389,23 +389,29 @@ export default function RolePage() {
 
   const handleDone = () => {
     showToast('نقش‌های شما فعال شد')
-
-    // بلافاصله auth store را آپدیت کن تا داشبورد واکنش نشان دهد
     const currentSecondary = user?.secondaryRoles ?? []
     const newRoles = queuedArr.filter(r => !currentSecondary.includes(r))
     if (newRoles.length > 0) {
       updateUser({ secondaryRoles: [...currentSecondary, ...newRoles] })
     }
-
     setQueued(new Set())
     setStep('select')
     fetch(`${API}/roles/my`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch(() => {})
-
-    // برگشت به داشبورد
     setTimeout(() => router.push('/dashboard'), 1200)
+  }
+
+  const handleSubmitRoles = async () => {
+    for (const roleVal of queuedArr) {
+      await fetch(`${API}/roles/request`, {
+        method: 'POST',
+        headers: { ...authHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: roleVal }),
+      })
+    }
+    handleDone()
   }
 
   const showToast = (msg: string) => {
@@ -548,7 +554,7 @@ export default function RolePage() {
               {/* دکمه‌ها */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <button
-                  onClick={() => setStep('upload')}
+                  onClick={handleSubmitRoles}
                   disabled={queued.size === 0}
                   style={{
                     width: '100%', padding: '14px', borderRadius: 12, border: 'none',
@@ -559,10 +565,10 @@ export default function RolePage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   }}
                 >
-                  <i className="ti ti-arrow-left" style={{ fontSize: 18 }} aria-hidden="true" />
+                  <i className="ti ti-check" style={{ fontSize: 18 }} aria-hidden="true" />
                   {queued.size === 0
                     ? 'نقش جدیدی انتخاب کنید'
-                    : `ادامه — درخواست ${toFarsiDigits(queued.size)} نقش`}
+                    : `تأیید — فعال‌سازی ${toFarsiDigits(queued.size)} نقش`}
                 </button>
                 <button onClick={() => router.push('/dashboard')} style={{
                   width: '100%', padding: 12, borderRadius: 12,
@@ -575,13 +581,6 @@ export default function RolePage() {
             </>
           )}
 
-          {step === 'upload' && (
-            <DocUploadStep
-              queued={queuedArr}
-              onBack={() => setStep('select')}
-              onDone={handleDone}
-            />
-          )}
         </div>
 
         {/* Toast */}
