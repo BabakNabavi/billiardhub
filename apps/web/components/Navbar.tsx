@@ -362,7 +362,7 @@ export default function Navbar() {
                     {[
                       { href: '/dashboard',       label: 'داشبورد',         icon: <LayoutDashboard size={13} /> },
                       { href: '/dashboard/shop',  label: 'فروشگاه من',      icon: <ShoppingBag size={13} /> },
-                      ...(user.primaryRole === 'club_owner' ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
+                      ...(user.primaryRole === 'club_owner' || user.primaryRole === 'admin' ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
                       ...(user.primaryRole === 'admin'      ? [{ href: '/admin',           label: 'پنل ادمین',      icon: <Crown size={13} /> }] : []),
                       { href: '/profile',         label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
                     ].map((item, i) => (
