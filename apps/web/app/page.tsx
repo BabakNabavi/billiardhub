@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
   MapPin, Star, Heart, Trophy, Users,
-  ShoppingBag, Building2, Play, Pause,
+  ShoppingBag, Building2, Wrench, Play, Pause,
   Clock, Eye, CheckCircle, X, Calendar,
 } from 'lucide-react';
 
@@ -125,6 +125,22 @@ const HERO_SLIDES = [
   { bg: IMG.wall3, accent: GOLD, label: 'تجهیزات'   },
   { bg: IMG.wall4, accent: PRP,  label: 'رقابت'     },
   { bg: IMG.wall5, accent: BRN,  label: 'آموزش'     },
+];
+
+const FEATURE_CARDS = [
+  { Icon: Calendar,    title: 'رزرو میز',          caption: 'جستجو و رزرو آنلاین میز در بهترین باشگاهها',          href: '/clubs',         clr: '#4A9EFF', rgb: '74,158,255'   },
+  { Icon: Trophy,      title: 'مسابقات',            caption: 'شرکت در مسابقات و مشاهده نتایج زنده',                 href: '/tournaments',   clr: '#30C55A', rgb: '48,197,90'    },
+  { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
+  { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
+  { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
+  { Icon: Wrench,      title: 'خدمات فنی بیلیارد',  caption: 'مونتاژ و نصب و تعمیر تجهیزات بیلیاردی',              href: '/services',      clr: '#C7A66A', rgb: '199,166,106'  },
+];
+
+const TRUST_ITEMS = [
+  { Icon: Users,       label: 'جامعه فعال',       sub: 'در حال رشد',          clr: '#B97BFF', rgb: '185,123,255' },
+  { Icon: CheckCircle, label: 'پرداخت امن',        sub: 'سریع و مطمئن',        clr: '#4A9EFF', rgb: '74,158,255'  },
+  { Icon: Clock,       label: 'پشتیبانی ۲۴/۷',   sub: 'همیشه در کنار شما',   clr: '#30C55A', rgb: '48,197,90'   },
+  { Icon: Star,        label: 'تجربه‌ای متفاوت',  sub: 'برای عاشقان بیلیارد', clr: '#C7A66A', rgb: '199,166,106' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -562,6 +578,7 @@ useEffect(() => {
         @media(max-width:400px){
           .comm-grid { grid-template-columns:1fr !important; }
         }
+        .feat-slider::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
@@ -676,26 +693,64 @@ useEffect(() => {
             ))}
           </div>
 
-          {/* Trust strip — 4 liquid glass cards, each unique color */}
-          <div className="hd trust-strip">
-            {[
-              { n: '۵۴۸',   l: 'باشگاه', clr: '#C7A66A', rgb: '199,166,106' },
-              { n: '۱۲K+',  l: 'کاربر فعال', clr: '#30C55A', rgb: '48,197,90'   },
-              { n: '۱٬۸۵۰', l: 'محصول',  clr: '#4A9EFF', rgb: '74,158,255'  },
-              { n: '۳۱',    l: 'استان',  clr: '#B97BFF', rgb: '185,123,255' },
-            ].map((s, i) => (
+          {/* Feature card slider — 6 cards */}
+          <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
+            <div className="feat-slider" style={{
+              display: 'flex', gap: '10px', overflowX: 'auto',
+              scrollbarWidth: 'none', padding: '4px 2px 8px', direction: 'ltr',
+            }}>
+              {FEATURE_CARDS.map((card, i) => (
+                <Link key={i} href={card.href} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                  <div style={{
+                    width: '138px', padding: '18px 14px 16px', direction: 'rtl',
+                    background: `rgba(${card.rgb},0.09)`,
+                    backdropFilter: 'blur(28px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(28px) saturate(200%)',
+                    border: `1px solid rgba(${card.rgb},0.26)`,
+                    borderRadius: '20px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px',
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(${card.rgb},0.12)`,
+                    cursor: 'pointer',
+                  }}>
+                    <div style={{
+                      width: '46px', height: '46px', borderRadius: '14px',
+                      background: `rgba(${card.rgb},0.14)`,
+                      border: `1px solid rgba(${card.rgb},0.32)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
+                    }}>
+                      <card.Icon size={22} color={card.clr}
+                        style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
+                      {card.title}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65 }}>
+                      {card.caption}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Trust items — 4 elements */}
+          <div className="he trust-strip" style={{ marginTop: '12px' }}>
+            {TRUST_ITEMS.map((item, i) => (
               <div key={i} style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                gap: '3px', padding: '10px 18px',
-                background: `rgba(${s.rgb},0.12)`,
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: '3px', padding: '9px 14px',
+                background: `rgba(${item.rgb},0.10)`,
                 backdropFilter: 'blur(28px) saturate(220%)',
                 WebkitBackdropFilter: 'blur(28px) saturate(220%)',
-                border: `1px solid rgba(${s.rgb},0.28)`,
-                borderRadius: '20px',
-                boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 18px rgba(${s.rgb},0.12)`,
+                border: `1px solid rgba(${item.rgb},0.22)`,
+                borderRadius: '18px',
+                boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.22), 0 4px 14px rgba(${item.rgb},0.10)`,
               }}>
-                <span style={{ fontSize: '17px', fontWeight: 900, color: s.clr, letterSpacing: '-0.03em', lineHeight: 1, textShadow: `0 0 18px rgba(${s.rgb},0.50)` }}>{s.n}</span>
-                <span style={{ fontSize: '10px', color: `rgba(${s.rgb},0.72)`, fontWeight: 600 }}>{s.l}</span>
+                <item.Icon size={16} color={item.clr}
+                  style={{ filter: `drop-shadow(0 0 5px rgba(${item.rgb},0.65))` }} />
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
+                <span style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 600, whiteSpace: 'nowrap' }}>{item.sub}</span>
               </div>
             ))}
           </div>
