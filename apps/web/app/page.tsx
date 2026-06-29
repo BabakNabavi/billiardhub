@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
   MapPin, Star, Heart, Trophy, Users,
-  ShoppingBag, Building2, Wrench,
+  ShoppingBag, Building2, Wrench, GraduationCap,
   Clock, Eye, CheckCircle, X, Calendar,
 } from 'lucide-react';
 
@@ -133,7 +133,8 @@ const FEATURE_CARDS = [
   { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
   { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
   { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
-  { Icon: Wrench,      title: 'خدمات فنی',           caption: 'مونتاژ و نصب و تعمیر تجهیزات بیلیاردی',              href: '/services',      clr: '#C7A66A', rgb: '199,166,106'  },
+  { Icon: Wrench,         title: 'خدمات فنی',    caption: 'مونتاژ و نصب و تعمیر تجهیزات بیلیاردی',                   href: '/services', clr: '#C7A66A', rgb: '199,166,106' },
+  { Icon: GraduationCap, title: 'آموزش',         caption: 'آموزش آکادمیک با برترین مربیان و بالاترین سطح',            href: '/coaches',  clr: '#F472B6', rgb: '244,114,182' },
 ];
 
 const TRUST_ITEMS = [
