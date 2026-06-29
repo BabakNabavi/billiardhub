@@ -133,7 +133,7 @@ const FEATURE_CARDS = [
   { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
   { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
   { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
-  { Icon: Wrench,      title: 'خدمات فنی بیلیارد',  caption: 'مونتاژ و نصب و تعمیر تجهیزات بیلیاردی',              href: '/services',      clr: '#C7A66A', rgb: '199,166,106'  },
+  { Icon: Wrench,      title: 'خدمات فنی',           caption: 'مونتاژ و نصب و تعمیر تجهیزات بیلیاردی',              href: '/services',      clr: '#C7A66A', rgb: '199,166,106'  },
 ];
 
 const TRUST_ITEMS = [
@@ -556,6 +556,7 @@ useEffect(() => {
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
           .mkt-sub      { grid-template-columns:1fr !important; }
           .trust-box    { margin-top:20px !important; }
+          .feat-card    { width:124px !important; }
         }
 
         /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
@@ -702,7 +703,7 @@ useEffect(() => {
               justifyContent: 'center', alignItems: 'stretch',
             }}>
               {FEATURE_CARDS.map((card, i) => (
-                <Link key={i} href={card.href} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex' }}>
+                <Link key={i} href={card.href} className="feat-card" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex' }}>
                   <div style={{
                     width: '138px', padding: '18px 12px 16px',
                     background: `rgba(${card.rgb},0.09)`,
