@@ -271,6 +271,8 @@ export default function ClubDashboardPage() {
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
+  const [editDiscounts, setEditDiscounts] = useState<DiscountRule[]>([]);
+  const [editDiscountForm, setEditDiscountForm] = useState({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
 
   // Club info
   const [clubInfo, setClubInfo] = useState({
@@ -534,7 +536,25 @@ export default function ClubDashboardPage() {
       pricePerHour: String(t.pricePerHour),
       photoDataUrl: t.photoDataUrl || '',
     });
+    setEditDiscounts(t.discountRules ? [...t.discountRules] : []);
+    setEditDiscountForm({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
   };
+
+  const addEditDiscount = () => {
+    const pct = parseInt(editDiscountForm.percent);
+    if (!editDiscountForm.startTime || !editDiscountForm.endTime || !pct) return;
+    const rule: DiscountRule = {
+      id: `d-${Date.now()}`,
+      startTime: editDiscountForm.startTime,
+      endTime: editDiscountForm.endTime,
+      percent: pct,
+      label: editDiscountForm.label || `${editDiscountForm.startTime}–${editDiscountForm.endTime}`,
+    };
+    setEditDiscounts(prev => [...prev, rule]);
+    setEditDiscountForm({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
+  };
+
+  const removeEditDiscount = (id: string) => setEditDiscounts(prev => prev.filter(d => d.id !== id));
 
   const saveEditTable = () => {
     if (!editingTableId) return;
@@ -546,6 +566,7 @@ export default function ClubDashboardPage() {
       model: editForm.model,
       pricePerHour: parseFloat(editForm.pricePerHour.replace(/,/g, '')) || 0,
       photoDataUrl: editForm.photoDataUrl || undefined,
+      discountRules: editDiscounts.length > 0 ? editDiscounts : undefined,
     } : t));
     setEditingTableId(null);
   };
@@ -1504,6 +1525,64 @@ export default function ClubDashboardPage() {
                           )}
                         </label>
                       </div>
+                      {/* Discount rules in edit form */}
+                      <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 14, marginBottom: 14 }}>
+                        <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 700, marginBottom: 10 }}>تخفیف‌های زمانی</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10, alignItems: 'flex-end' }}>
+                          <div style={{ flex: '1 1 100px', minWidth: 90 }}>
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>از ساعت</div>
+                            <input type="time" value={editDiscountForm.startTime}
+                              onChange={e => setEditDiscountForm(p => ({ ...p, startTime: e.target.value }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                          </div>
+                          <div style={{ flex: '1 1 100px', minWidth: 90 }}>
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>تا ساعت</div>
+                            <input type="time" value={editDiscountForm.endTime}
+                              onChange={e => setEditDiscountForm(p => ({ ...p, endTime: e.target.value }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                          </div>
+                          <div style={{ flex: '0 0 60px', minWidth: 55 }}>
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>٪</div>
+                            <input type="number" min="1" max="99" value={editDiscountForm.percent}
+                              onChange={e => setEditDiscountForm(p => ({ ...p, percent: e.target.value }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                          </div>
+                          <div style={{ flex: '1 1 100px', minWidth: 90 }}>
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>برچسب</div>
+                            <input type="text" value={editDiscountForm.label} placeholder="تخفیف صبحگاهی"
+                              onChange={e => setEditDiscountForm(p => ({ ...p, label: e.target.value }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                          </div>
+                          <button onClick={addEditDiscount} style={{
+                            padding: '7px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+                            border: '1px solid rgba(48,197,90,0.35)', background: 'rgba(48,197,90,0.08)',
+                            color: '#166534', cursor: 'pointer', fontFamily: 'var(--font-base)', whiteSpace: 'nowrap',
+                          }}>+ افزودن</button>
+                        </div>
+                        {editDiscounts.length === 0 ? (
+                          <div style={{ fontSize: 12, color: '#9CA3AF', padding: '6px 0' }}>بدون تخفیف زمانی</div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {editDiscounts.map(d => (
+                              <div key={d.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(48,197,90,0.06)', border: '1px solid rgba(48,197,90,0.18)', borderRadius: 10 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                  <span style={{ fontSize: 16, fontWeight: 900, color: '#16a34a' }}>٪{d.percent}</span>
+                                  <div>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: DARK }}>{d.label}</div>
+                                    <div style={{ fontSize: 11, color: '#6B7280' }}>{d.startTime} تا {d.endTime}</div>
+                                  </div>
+                                </div>
+                                <button onClick={() => removeEditDiscount(d.id)} style={{
+                                  padding: '3px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600,
+                                  border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)',
+                                  color: '#991B1B', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                                }}>حذف</button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={saveEditTable} style={{
                           flex: 1, padding: '10px 0', borderRadius: 12, fontSize: 14, fontWeight: 700,
