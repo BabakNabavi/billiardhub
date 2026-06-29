@@ -391,6 +391,7 @@ function DiscoveryPanel() {
 /* ═══════════════════════════════════════════════════════════════
    PAGE
 ═══════════════════════════════════════════════════════════════ */
+
 export default function HomePage() {
   const [slide, setSlide]     = useState(0);
   const [scrollY, setScrollY] = useState(0);
@@ -398,6 +399,7 @@ export default function HomePage() {
   const rafRef   = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
 
   const next = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
   const prev = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
@@ -411,7 +413,8 @@ export default function HomePage() {
     return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  useEffect(() => {
+
+useEffect(() => {
     if (!playing) { if (timerRef.current) clearInterval(timerRef.current); return; }
     timerRef.current = setInterval(next, 7000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
@@ -609,6 +612,8 @@ export default function HomePage() {
           transition: 'background 3.2s ease',
           animation: 'floatOrb 28s ease-in-out infinite',
         }} />
+
+        {/* Story bar is handled by Navbar → Stories.tsx */}
 
         {/* ── CONTENT — no key prop → animates exactly ONCE on page load ── */}
         <div className="hero-content" style={{
@@ -1082,6 +1087,7 @@ export default function HomePage() {
           </div>
         </SR>
       </section>
+
     </>
   );
 }

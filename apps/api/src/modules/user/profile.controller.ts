@@ -11,6 +11,17 @@ import { extname, join } from 'path';
 import { JwtGuard } from '../auth/jwt/jwt.guard';
 import { ProfileService } from './profile.service';
 
+// ─── DTO ──────────────────────────────────────────────────────
+class UpdateProfileDto {
+  bio?: string;
+  province?: string;
+  city?: string;
+  birthDate?: string;
+  gender?: string;
+  instagram?: string;
+  telegram?: string;
+}
+
 @Controller('user/profile')
 export class ProfileController {
   constructor(private profileService: ProfileService) {}
@@ -97,15 +108,4 @@ export class ProfileController {
       body.bankCardOwner,
     );
   }
-}
-
-// ─── DTO ──────────────────────────────────────────────────────
-class UpdateProfileDto {
-  bio?: string;
-  province?: string;
-  city?: string;
-  birthDate?: string;
-  gender?: string;
-  instagram?: string;
-  telegram?: string;
 }

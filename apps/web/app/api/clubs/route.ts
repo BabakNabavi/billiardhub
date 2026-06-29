@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
         ...body,
         ownerId: payload.sub,
         isActive: true,
+        verificationStatus: body.licenseDocumentUrl ? 'pending' : 'unverified',
       })
       .select()
       .single();

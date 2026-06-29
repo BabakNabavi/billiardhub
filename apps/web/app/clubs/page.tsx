@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import api from '../../lib/api';
+import ClubStoryModal from '../../components/ClubStoryModal';
 import {
   Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
   X, SlidersHorizontal, Users, Check, Navigation,
@@ -22,6 +23,7 @@ interface Club {
   images: string[]; rating?: number; reviewCount?: number;
   isVerified?: boolean; isOpen?: boolean; closeTime?: string;
   memberCount?: number; totalTables?: number; distance?: number;
+  hasActiveStory?: boolean; storyMediaUrl?: string; storyType?: string; storyText?: string; logo?: string;
 }
 
 const SAMPLE_CLUBS: Club[] = [
@@ -78,6 +80,7 @@ const CLUB_IMG_POOL = [
 /* ── CARD ── */
 function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; idx?: number }) {
   const [hov, setHov] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
   const poolImg = CLUB_IMG_POOL[idx % CLUB_IMG_POOL.length]!;
   const apiImg  = club.images?.[0];
   const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
@@ -121,9 +124,19 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
             }}>✓</div>
           )}
           {/* open badge روی تصویر — same pill style as table type badges */}
-          <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
+          <div style={{ position: 'absolute', bottom: 8, left: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
             {club.isOpen ? 'باز' : 'بسته'}
           </div>
+          {/* story ring */}
+          {club.hasActiveStory && club.storyMediaUrl && (
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
+              <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
+                <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.7)', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
+                  {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>{club.name[0]}</span>}
+                </div>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* content */}
@@ -161,6 +174,9 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           )}
         </div>
       </div>
+      {storyOpen && club.hasActiveStory && club.storyMediaUrl && (
+        <ClubStoryModal club={{ name: club.name, logo: club.logo, storyMediaUrl: club.storyMediaUrl, storyType: club.storyType, storyText: club.storyText }} onClose={() => setStoryOpen(false)} />
+      )}
     </Link>
   );
 
@@ -239,6 +255,16 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.50)', borderRadius: 20, padding: '3px 9px', fontSize: 13, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 3 }}>
             <MapPin size={9} color="#C7A66A" />{club.city}
           </div>
+          {/* story ring */}
+          {club.hasActiveStory && club.storyMediaUrl && (
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
+                <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.75)', background: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
+                  {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>{club.name[0]}</span>}
+                </div>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* body */}
@@ -298,6 +324,9 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           </div>
         </div>
       </div>
+      {storyOpen && club.hasActiveStory && club.storyMediaUrl && (
+        <ClubStoryModal club={{ name: club.name, logo: club.logo, storyMediaUrl: club.storyMediaUrl, storyType: club.storyType, storyText: club.storyText }} onClose={() => setStoryOpen(false)} />
+      )}
     </Link>
   );
 }

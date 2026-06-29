@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ClubService } from './club.service';
 import { JwtGuard } from '../auth/jwt/jwt.guard';
 
@@ -66,5 +66,12 @@ export class ClubController {
   @UseGuards(JwtGuard)
   update(@Param('id') id: string, @Body() body: Partial<CreateClubDto>, @Request() req: any) {
     return this.clubService.update(id, req.user.id, body);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtGuard)
+  remove(@Param('id') id: string, @Request() req: any) {
+    const isAdmin = req.user.primaryRole === 'admin';
+    return this.clubService.remove(id, req.user.id, isAdmin);
   }
 }

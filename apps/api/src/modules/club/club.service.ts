@@ -81,4 +81,12 @@ export class ClubService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  async remove(id: string, requesterId: string, isAdmin: boolean): Promise<void> {
+    const club = await this.findById(id);
+    if (!isAdmin && club.ownerId !== requesterId) {
+      throw new ForbiddenException('شما مجاز به حذف این باشگاه نیستید');
+    }
+    await this.clubRepository.remove(club);
+  }
 }
