@@ -540,7 +540,7 @@ useEffect(() => {
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
           /* navbar(72) + stories(~116) + 24px gap = ~212px */
-          .hero-content { padding-top:180px !important; padding-bottom:60px !important; }
+          .hero-content { padding-top:189px !important; padding-bottom:60px !important; }
           .hero-h1      { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
@@ -555,7 +555,7 @@ useEffect(() => {
           .dp-cta       { width:100% !important; }
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
           .mkt-sub      { grid-template-columns:1fr !important; }
-          .trust-box    { margin-top:32px !important; zoom:0.8 !important; }
+          .trust-box    { margin-top:32px !important; zoom:0.64 !important; }
           .feat-card    { width:124px !important; }
         }
 
@@ -572,7 +572,7 @@ useEffect(() => {
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:180px !important; }
+          .hero-content { padding-top:189px !important; }
           .trust-strip  { margin-top:16px !important; }
         }
 
@@ -740,10 +740,9 @@ useEffect(() => {
           </div>
 
           {/* Trust items — unified box with 4 cells divided by thin lines */}
-          <div className="he trust-box" style={{ marginTop: '36px' }}>
+          <div className="he trust-box" style={{ marginTop: '36px', zoom: 0.8 }}>
             <div style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
-              zoom: 0.8,
               background: 'rgba(6,4,12,0.82)',
               backdropFilter: 'blur(32px) saturate(200%)',
               WebkitBackdropFilter: 'blur(32px) saturate(200%)',
