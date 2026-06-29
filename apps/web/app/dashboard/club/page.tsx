@@ -269,6 +269,8 @@ export default function ClubDashboardPage() {
   const [tableLoading, setTableLoading] = useState(false);
   const [tableFormError, setTableFormError] = useState('');
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
+  const [editingTableId, setEditingTableId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
 
   // Club info
   const [clubInfo, setClubInfo] = useState({
@@ -520,6 +522,32 @@ export default function ClubDashboardPage() {
 
   const deleteTable = (id: string) => {
     saveTables(tables.filter(t => t.id !== id));
+  };
+
+  const startEditTable = (t: Table) => {
+    setEditingTableId(t.id);
+    setEditForm({
+      number: String(t.number),
+      type: t.type,
+      brand: t.brand,
+      model: t.model,
+      pricePerHour: String(t.pricePerHour),
+      photoDataUrl: t.photoDataUrl || '',
+    });
+  };
+
+  const saveEditTable = () => {
+    if (!editingTableId) return;
+    saveTables(tables.map(t => t.id === editingTableId ? {
+      ...t,
+      number: parseInt(editForm.number) || t.number,
+      type: editForm.type,
+      brand: editForm.brand,
+      model: editForm.model,
+      pricePerHour: parseFloat(editForm.pricePerHour.replace(/,/g, '')) || 0,
+      photoDataUrl: editForm.photoDataUrl || undefined,
+    } : t));
+    setEditingTableId(null);
   };
 
   const saveInfo = async () => {
@@ -1394,31 +1422,102 @@ export default function ClubDashboardPage() {
             ) : tables.map(t => {
               const cs = TYPE_CHIP_STYLE[t.type] ?? { bg: 'rgba(0,0,0,0.04)', border: 'rgba(0,0,0,0.10)', color: '#374151' };
               return (
-                <Card key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 16 }}>
-                  {/* table photo or type badge */}
-                  {t.photoDataUrl ? (
-                    <img src={t.photoDataUrl} alt="" style={{ width: 72, height: 52, objectFit: 'cover', borderRadius: 10, flexShrink: 0, border: `1.5px solid ${cs.border}` }} />
-                  ) : (
-                    <div style={{ width: 52, height: 52, borderRadius: 12, background: cs.bg, border: `1.5px solid ${cs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>🎱</div>
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2 }}>
-                      {TABLE_TYPE_LABELS[t.type] || t.type}
-                      {t.number ? ` — میز ${t.number}` : ''}
-                    </div>
-                    {(t.brand || t.model) && (
-                      <div style={{ fontSize: 12, color: '#9CA3AF' }}>{t.brand} {t.model}</div>
+                <Card key={t.id} style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    {t.photoDataUrl ? (
+                      <img src={t.photoDataUrl} alt="" style={{ width: 72, height: 52, objectFit: 'cover', borderRadius: 10, flexShrink: 0, border: `1.5px solid ${cs.border}` }} />
+                    ) : (
+                      <div style={{ width: 52, height: 52, borderRadius: 12, background: cs.bg, border: `1.5px solid ${cs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>🎱</div>
                     )}
-                    <div style={{ fontSize: 13, fontWeight: 700, color: GOLD, marginTop: 4 }}>
-                      {t.pricePerHour > 0 ? `${t.pricePerHour.toLocaleString('fa-IR')} تومان/ساعت` : 'رایگان'}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2 }}>
+                        {TABLE_TYPE_LABELS[t.type] || t.type}
+                        {t.number ? ` — میز ${t.number}` : ''}
+                      </div>
+                      {(t.brand || t.model) && (
+                        <div style={{ fontSize: 12, color: '#9CA3AF' }}>{t.brand} {t.model}</div>
+                      )}
+                      <div style={{ fontSize: 13, fontWeight: 700, color: GOLD, marginTop: 4 }}>
+                        {t.pricePerHour > 0 ? `${t.pricePerHour.toLocaleString('fa-IR')} تومان/ساعت` : 'رایگان'}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => editingTableId === t.id ? setEditingTableId(null) : startEditTable(t)} style={{
+                        padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 600,
+                        border: `1px solid ${editingTableId === t.id ? GOLD : GOLD + '55'}`,
+                        background: editingTableId === t.id ? GOLD : `${GOLD}11`,
+                        color: editingTableId === t.id ? '#fff' : GOLD,
+                        cursor: 'pointer', fontFamily: 'var(--font-base)',
+                      }}>ویرایش</button>
+                      <button onClick={() => deleteTable(t.id)} style={{
+                        padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 600,
+                        border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)',
+                        color: '#991B1B', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                        boxShadow: 'inset 0 1px 0 rgba(239,68,68,0.08)',
+                      }}>حذف</button>
                     </div>
                   </div>
-                  <button onClick={() => deleteTable(t.id)} style={{
-                    flexShrink: 0, padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-                    border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)',
-                    color: '#991B1B', cursor: 'pointer', fontFamily: 'var(--font-base)',
-                    boxShadow: 'inset 0 1px 0 rgba(239,68,68,0.08)',
-                  }}>حذف</button>
+
+                  {editingTableId === t.id && (
+                    <div style={{ marginTop: 16, borderTop: '1px solid #F0EDE8', paddingTop: 16 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 14 }}>
+                        <InputField label="شماره میز" type="number" value={editForm.number}
+                          onChange={v => setEditForm(p => ({...p, number: v}))} placeholder="1" />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
+                          <input
+                            type="text" inputMode="numeric"
+                            value={editForm.pricePerHour ? Number(editForm.pricePerHour).toLocaleString('en-US') : ''}
+                            placeholder="50,000"
+                            onChange={e => {
+                              const raw = e.target.value.replace(/[^0-9]/g, '');
+                              setEditForm(p => ({...p, pricePerHour: raw}));
+                            }}
+                            style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)' }}
+                          />
+                        </div>
+                        <InputField label="برند" value={editForm.brand} ltr
+                          onChange={v => setEditForm(p => ({...p, brand: v}))} placeholder="Viraka" />
+                        <InputField label="مدل" value={editForm.model} ltr
+                          onChange={v => setEditForm(p => ({...p, model: v}))} placeholder="M1 Gold" />
+                      </div>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 8 }}>عکس میز</div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                          <input type="file" accept="image/*" style={{ display: 'none' }}
+                            onChange={async e => {
+                              const f = e.target.files?.[0]; if (!f) return;
+                              const d = await compressImage(f);
+                              setEditForm(p => ({...p, photoDataUrl: d}));
+                            }} />
+                          {editForm.photoDataUrl ? (
+                            <div style={{ position: 'relative', display: 'inline-block' }}>
+                              <img src={editForm.photoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
+                              <button onClick={e => { e.preventDefault(); setEditForm(p => ({...p, photoDataUrl: ''})); }}
+                                style={{ position: 'absolute', top: -6, left: -6, width: 20, height: 20, borderRadius: '50%', background: '#ef4444', border: 'none', color: '#fff', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                            </div>
+                          ) : (
+                            <div style={{ width: 120, height: 80, borderRadius: 10, border: '1.5px dashed #D1D5DB', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'rgba(0,0,0,0.02)' }}>
+                              <span style={{ fontSize: 20 }}>📷</span>
+                              <span style={{ fontSize: 11, color: '#9CA3AF' }}>عوض کردن عکس</span>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={saveEditTable} style={{
+                          flex: 1, padding: '10px 0', borderRadius: 12, fontSize: 14, fontWeight: 700,
+                          border: `1px solid ${GOLD}55`, background: `${GOLD}18`,
+                          color: GOLD, cursor: 'pointer', fontFamily: 'var(--font-base)',
+                        }}>ذخیره تغییرات</button>
+                        <button onClick={() => setEditingTableId(null)} style={{
+                          padding: '10px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                          border: '1px solid rgba(0,0,0,0.10)', background: 'rgba(0,0,0,0.03)',
+                          color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                        }}>انصراف</button>
+                      </div>
+                    </div>
+                  )}
                 </Card>
               );
             })}
