@@ -544,7 +544,7 @@ useEffect(() => {
           .hero-h1      { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
-          .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
+          .hero-eyebrow { display:none !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
           .trust-strip   { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
           .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; }
