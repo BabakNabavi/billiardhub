@@ -307,8 +307,8 @@ export default function Navbar() {
 
             {/* Search — mobile only */}
             <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)}
-              style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: searchOpen ? GOLD_LIGHT : SURF, border: `1px solid ${searchOpen ? GOLD_BORDER : BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: searchOpen ? GOLD : TEXT_MUT, flexShrink: 0, transition: 'all 0.3s' }}>
-              <Search size={22} />
+              style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: searchOpen ? GOLD_LIGHT : SURF, border: `1px solid ${searchOpen ? GOLD_BORDER : BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: searchOpen ? GOLD : TEXT_MUT, flexShrink: 0, transition: 'all 0.3s' }}>
+              <Search size={20} />
             </button>
 
             {/* Bell — desktop only */}
@@ -335,10 +335,10 @@ export default function Navbar() {
 
             {!user ? (
               <Link href="/login">
-                <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '10px 18px', color: GOLD, fontSize: '16px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}
+                <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '9px 16px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(184,147,58,0.15)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = GOLD_LIGHT }}>
-                  <User size={18} /> ورود
+                  <User size={16} /> ورود
                 </button>
               </Link>
             ) : (
@@ -389,7 +389,7 @@ export default function Navbar() {
             {/* Hamburger */}
             <button className="mob" onClick={() => setMobileOpen(p => !p)}
               style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', flexShrink: 0, transition: 'all 0.3s' }}>
-              {mobileOpen ? <X size={32} /> : <Menu size={32} />}
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>

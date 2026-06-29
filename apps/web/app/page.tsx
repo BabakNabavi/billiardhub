@@ -552,8 +552,8 @@ useEffect(() => {
           .hero-actions { display:none !important; }
           .hero-arrows  { display:none !important; }
           .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
-          .trust-box    { margin-top:32px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; }
-          .trust-grid   { zoom:0.64 !important; }
+          .trust-box    { margin-top:35px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; }
+          .trust-grid   { zoom:0.54 !important; }
           .feat-slider  { justify-content:flex-start !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
           .dp-cta       { width:100% !important; }
