@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
   MapPin, Star, Heart, Trophy, Users,
-  ShoppingBag, Building2, Wrench, Play, Pause,
+  ShoppingBag, Building2, Wrench,
   Clock, Eye, CheckCircle, X, Calendar,
 } from 'lucide-react';
 
@@ -740,8 +740,8 @@ useEffect(() => {
           <div className="he trust-strip" style={{ marginTop: '12px' }}>
             {TRUST_ITEMS.map((item, i) => (
               <div key={i} style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: '3px', padding: '9px 14px',
+                display: 'flex', flexDirection: 'row', alignItems: 'center',
+                gap: '10px', padding: '10px 16px',
                 background: `rgba(${item.rgb},0.10)`,
                 backdropFilter: 'blur(28px) saturate(220%)',
                 WebkitBackdropFilter: 'blur(28px) saturate(220%)',
@@ -749,10 +749,20 @@ useEffect(() => {
                 borderRadius: '18px',
                 boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.22), 0 4px 14px rgba(${item.rgb},0.10)`,
               }}>
-                <item.Icon size={16} color={item.clr}
-                  style={{ filter: `drop-shadow(0 0 5px rgba(${item.rgb},0.65))` }} />
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
-                <span style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 600, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  background: `rgba(${item.rgb},0.18)`,
+                  border: `1px solid rgba(${item.rgb},0.32)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  boxShadow: `0 0 14px rgba(${item.rgb},0.35)`,
+                }}>
+                  <item.Icon size={18} color={item.clr}
+                    style={{ filter: `drop-shadow(0 0 5px rgba(${item.rgb},0.65))` }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
+                  <span style={{ fontSize: '10px', color: `rgba(${item.rgb},0.75)`, fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -774,17 +784,6 @@ useEffect(() => {
           ))}
         </div>
 
-        {/* Play/pause */}
-        <button onClick={() => setPlaying(p => !p)} style={{
-          position: 'absolute', bottom: '40px', left: '28px', zIndex: 10,
-          width: '30px', height: '30px', borderRadius: '50%',
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)',
-          cursor: 'pointer', color: 'rgba(255,255,255,0.50)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          opacity: heroO, transition: 'opacity 0.3s',
-        }}>
-          {playing ? <Pause size={10} /> : <Play size={10} />}
-        </button>
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
