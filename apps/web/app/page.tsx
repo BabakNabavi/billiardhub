@@ -555,6 +555,7 @@ useEffect(() => {
           .dp-cta       { width:100% !important; }
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
           .mkt-sub      { grid-template-columns:1fr !important; }
+          .trust-box    { margin-top:56px !important; }
         }
 
         /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
@@ -738,7 +739,7 @@ useEffect(() => {
           </div>
 
           {/* Trust items — unified box with 4 cells divided by thin lines */}
-          <div className="he" style={{ marginTop: '36px' }}>
+          <div className="he trust-box" style={{ marginTop: '36px' }}>
             <div style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
               zoom: 0.8,
