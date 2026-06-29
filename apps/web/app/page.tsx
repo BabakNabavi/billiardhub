@@ -583,6 +583,14 @@ useEffect(() => {
           .comm-grid { grid-template-columns:1fr !important; }
         }
         .feat-slider::-webkit-scrollbar { display: none; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding-bottom:8px; }
+        .clubs-mobile-slider::-webkit-scrollbar { display:none; }
+        @media(max-width:600px){
+          .clubs-section { padding-top:58px !important; }
+          .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:24px !important; }
+          .clubs-desk { display:none !important; }
+          .clubs-mobile-slider { display:flex !important; }
+        }
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
@@ -799,26 +807,33 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section style={{ background: '#F2F0EC', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
+      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
                 <h2 className="sec-title" style={{ color: TEXT }}>باشگاه‌های منتخب</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
-              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#30C55A', fontSize: '15px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(48,197,90,0.35)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#4ADE80'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#30C55A'; }}>
-                مشاهده ۵۴۸ باشگاه <ArrowLeft size={13} />
+              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#C7A66A', fontSize: '15px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4B97D'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A'; }}>
+                مشاهده همه <ArrowLeft size={13} />
               </Link>
             </div>
           </SR>
-          <SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(280px,48vw,520px)" featured /></div></SR>
-          <div className="clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div className="clubs-desk"><SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(280px,48vw,520px)" featured /></div></SR></div>
+          <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
             {CLUBS.slice(1).map((c, i) => (
               <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(240px,32vw,340px)" /></SR>
+            ))}
+          </div>
+          <div className="clubs-mobile-slider">
+            {CLUBS.map((c) => (
+              <div key={c.id} style={{ width: 'calc(31vw)', minWidth: '100px', flexShrink: 0 }}>
+                <ClubCard club={c} h="clamp(140px,42vw,190px)" />
+              </div>
             ))}
           </div>
           <SR delay={200}>
