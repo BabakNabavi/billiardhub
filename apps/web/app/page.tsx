@@ -694,21 +694,23 @@ useEffect(() => {
           </div>
 
           {/* Feature card slider — 6 cards */}
-          <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
+          <div className="hd" style={{ width: '100%', marginTop: '16px', overflow: 'hidden' }}>
             <div className="feat-slider" style={{
               display: 'flex', gap: '10px', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '4px 2px 8px', direction: 'ltr',
+              scrollbarWidth: 'none', padding: '4px 8px 8px',
+              justifyContent: 'center',
             }}>
               {FEATURE_CARDS.map((card, i) => (
                 <Link key={i} href={card.href} style={{ textDecoration: 'none', flexShrink: 0 }}>
                   <div style={{
-                    width: '138px', padding: '18px 14px 16px', direction: 'rtl',
+                    width: '138px', padding: '18px 12px 16px',
                     background: `rgba(${card.rgb},0.09)`,
                     backdropFilter: 'blur(28px) saturate(200%)',
                     WebkitBackdropFilter: 'blur(28px) saturate(200%)',
                     border: `1px solid rgba(${card.rgb},0.26)`,
                     borderRadius: '20px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+                    textAlign: 'center',
                     boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(${card.rgb},0.12)`,
                     cursor: 'pointer',
                   }}>
