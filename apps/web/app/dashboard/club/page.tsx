@@ -174,11 +174,12 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{
       fontSize: 13, fontWeight: 700, color: GOLD,
       borderRight: `3px solid ${GOLD}`, paddingRight: 10, marginBottom: 16, marginTop: 8,
+      ...style,
     }}>
       {children}
     </div>
