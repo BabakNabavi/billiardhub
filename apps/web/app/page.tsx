@@ -209,55 +209,73 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
-          position: 'relative', borderRadius: featured ? '26px' : '20px',
+          borderRadius: featured ? '16px' : '12px',
           overflow: 'hidden', height: '100%', cursor: 'pointer',
+          display: 'flex', flexDirection: 'column',
           transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
           transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
           boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
         }}
       >
-        <img src={hov ? club.img2 : club.img} alt={club.name}
-          onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-            filter: hov ? 'brightness(0.62) saturate(0.80)' : 'brightness(0.52) saturate(0.70)',
-            transition: 'filter 0.6s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
-            transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,transparent 30%,rgba(0,0,0,0.80) 80%,rgba(0,0,0,0.96) 100%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '14px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {(() => {
-              const typeColor: Record<string, { clr: string; rgb: string }> = {
-                'اسنوکر': { clr: '#30C55A', rgb: '48,197,90'   },
-                'پاکت':   { clr: '#3b82f6', rgb: '59,130,246'  },
-                'هی‌بال': { clr: '#8b5cf6', rgb: '139,92,246'  },
-              };
-              const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
-              return (
-                <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '6px 14px', fontSize: '13px', fontWeight: 700, color: tc.clr }}>{club.type}</span>
-              );
-            })()}
-            {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '6px 14px', fontSize: '13px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
+        {/* ── Image: top 60% ── */}
+        <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden' }}>
+          <img src={hov ? club.img2 : club.img} alt={club.name}
+            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover',
+              filter: hov ? 'brightness(0.65) saturate(0.82)' : 'brightness(0.82) saturate(0.88)',
+              transition: 'filter 0.6s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
+              transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {(() => {
+                const typeColor: Record<string, { clr: string; rgb: string }> = {
+                  'اسنوکر': { clr: '#30C55A', rgb: '48,197,90'   },
+                  'پاکت':   { clr: '#3b82f6', rgb: '59,130,246'  },
+                  'هی‌بال': { clr: '#8b5cf6', rgb: '139,92,246'  },
+                };
+                const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
+                return <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '5px 12px', fontSize: '12px', fontWeight: 700, color: tc.clr }}>{club.type}</span>;
+              })()}
+              {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '5px 12px', fontSize: '12px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
+            </div>
+            <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }}
+              style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
+              <Heart size={13} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
+            </button>
           </div>
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
-            <Heart size={14} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
-          </button>
+          {hov && (
+            <div style={{ position: 'absolute', top: '48px', right: '10px', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2, animation: 'fadeTagIn 0.3s ease both' }}>
+              {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
+            </div>
+          )}
         </div>
-        {hov && (
-          <div style={{ position: 'absolute', top: '56px', right: '14px', display: 'flex', gap: '5px', flexWrap: 'wrap', zIndex: 2, animation: 'fadeTagIn 0.3s ease both' }}>
-            {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '5px 12px', fontSize: '13px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
-          </div>
-        )}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: hov ? '22px 18px 20px' : '18px 18px 16px', background: 'rgba(10,8,6,0.42)', backdropFilter: 'blur(32px) saturate(180%)', WebkitBackdropFilter: 'blur(32px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.07)', transition: 'padding 0.35s ease' }}>
-          <div style={{ fontSize: featured ? '18px' : '15px', fontWeight: 800, color: '#fff', marginBottom: '7px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
+
+        {/* ── White info panel: bottom 40% ── */}
+        <div style={{
+          flex: '0 0 40%', background: '#fff',
+          padding: featured ? '13px 16px' : '10px 13px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          overflow: 'hidden', gap: '4px',
+        }}>
+          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.42)', fontSize: '13px' }}><MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} /><span style={{ color: '#fff', fontSize: '14px', fontWeight: 700 }}>{club.rating}</span><span style={{ color: 'rgba(255,255,255,0.26)', fontSize: '12px' }}>({club.reviews})</span></span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
+              <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <Star size={9} style={{ color: '#F5A623', fill: '#F5A623' }} />
+              <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 700 }}>{club.rating}</span>
+              <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
+            </span>
           </div>
-          <div style={{ overflow: 'hidden', maxHeight: hov ? '90px' : '0px', transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)' }}>
-            <div style={{ height: '12px' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
-              <div><span style={{ fontSize: '18px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span><span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.30)', marginRight: '4px' }}>ت/ساعت</span></div>
-              <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '13px', fontWeight: 700, padding: '9px 18px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
+          <div style={{ overflow: 'hidden', maxHeight: hov ? '56px' : '0px', transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: '4px' }}>
+              <div>
+                <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
+                <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
+              </div>
+              <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
             </div>
           </div>
         </div>
@@ -815,7 +833,7 @@ useEffect(() => {
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
-                <h2 className="sec-title" style={{ color: TEXT }}>باشگاه‌های منتخب</h2>
+                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های منتخب</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
               <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#C7A66A', fontSize: '15px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
@@ -825,16 +843,16 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="clubs-desk"><SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(280px,48vw,520px)" featured /></div></SR></div>
+          <div className="clubs-desk"><SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(336px,58vw,624px)" featured /></div></SR></div>
           <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
             {CLUBS.slice(1).map((c, i) => (
-              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(240px,32vw,340px)" /></SR>
+              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(288px,38vw,408px)" /></SR>
             ))}
           </div>
           <div className="clubs-mobile-slider">
             {CLUBS.map((c) => (
               <div key={c.id} style={{ width: 'calc(31vw)', minWidth: '100px', flexShrink: 0 }}>
-                <ClubCard club={c} h="clamp(140px,42vw,190px)" />
+                <ClubCard club={c} h="clamp(168px,50vw,228px)" />
               </div>
             ))}
           </div>
