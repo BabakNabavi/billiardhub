@@ -555,7 +555,7 @@ useEffect(() => {
           .dp-cta       { width:100% !important; }
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
           .mkt-sub      { grid-template-columns:1fr !important; }
-          .trust-box    { display:none !important; }
+          .trust-box    { margin-top:56px !important; zoom:0.8 !important; }
         }
 
         /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
