@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ChevronDown, Check } from 'lucide-react';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
 import { useAuthStore } from '../../../store/auth.store';
@@ -255,6 +256,7 @@ export default function ClubDashboardPage() {
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
+  const [clubDropdownOpen, setClubDropdownOpen] = useState(false);
 
   // Bookings
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -784,20 +786,97 @@ export default function ClubDashboardPage() {
         </Link>
       </div>
 
-      {/* Club selector */}
-      {clubs.length > 1 && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-          {clubs.map(c => (
-            <button key={c.id} onClick={() => setSelectedClub(c)} style={{
-              padding: '7px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: `1px solid ${selectedClub?.id === c.id ? GOLD : '#E5E7EB'}`,
-              background: selectedClub?.id === c.id ? GOLD : '#fff',
-              color: selectedClub?.id === c.id ? '#fff' : '#374151',
-              fontFamily: 'var(--font-base)',
-            }}>
-              {c.name}
-            </button>
-          ))}
+      {/* Club selector dropdown */}
+      {clubs.length > 0 && (
+        <div style={{ position: 'relative', marginBottom: 16 }}>
+          <button
+            onClick={() => setClubDropdownOpen(v => !v)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', borderRadius: 14, cursor: 'pointer',
+              border: `1.5px solid ${clubDropdownOpen ? GOLD : '#E5E7EB'}`,
+              background: '#fff', fontFamily: 'var(--font-base)',
+              boxShadow: clubDropdownOpen ? `0 0 0 3px ${GOLD}22, 0 1px 4px rgba(0,0,0,0.06)` : '0 1px 4px rgba(0,0,0,0.06)',
+              transition: 'all 0.18s',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 38, height: 38, borderRadius: 10, background: `${GOLD}18`,
+                border: `1.5px solid ${GOLD}44`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 18, flexShrink: 0,
+              }}>🏢</div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500, marginBottom: 1 }}>باشگاه انتخابی</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: DARK }}>{selectedClub?.name ?? 'انتخاب باشگاه'}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                fontSize: 11, background: `${GOLD}1A`, color: GOLD,
+                borderRadius: 20, padding: '3px 9px', fontWeight: 700,
+              }}>
+                {clubs.length} باشگاه
+              </span>
+              <ChevronDown
+                size={16} color="#6B7280"
+                style={{ transform: clubDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }}
+              />
+            </div>
+          </button>
+
+          {clubDropdownOpen && (
+            <>
+              <div
+                onClick={() => setClubDropdownOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 998 }}
+              />
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 6px)', right: 0, left: 0, zIndex: 999,
+                background: '#fff', borderRadius: 14,
+                border: '1px solid #F0EDE8',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06)',
+                overflow: 'hidden', maxHeight: 320, overflowY: 'auto',
+              }}>
+                {clubs.map((c, i) => (
+                  <button
+                    key={c.id}
+                    onClick={() => { setSelectedClub(c); setClubDropdownOpen(false); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '13px 16px', border: 'none', cursor: 'pointer',
+                      fontFamily: 'var(--font-base)',
+                      borderBottom: i < clubs.length - 1 ? '1px solid #F9F7F4' : 'none',
+                      background: selectedClub?.id === c.id ? `${GOLD}0F` : '#fff',
+                      transition: 'background 0.12s',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{
+                        width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: selectedClub?.id === c.id ? GOLD : '#F3F4F6',
+                        fontSize: 13, fontWeight: 800,
+                        color: selectedClub?.id === c.id ? '#fff' : '#6B7280',
+                      }}>
+                        {c.name.charAt(0)}
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: selectedClub?.id === c.id ? GOLD : DARK }}>
+                          {c.name}
+                        </div>
+                        {c.city && (
+                          <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 1 }}>{c.city}</div>
+                        )}
+                      </div>
+                    </div>
+                    {selectedClub?.id === c.id && <Check size={16} color={GOLD} />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
