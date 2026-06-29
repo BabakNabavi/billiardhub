@@ -115,13 +115,9 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           <img src={img} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.75)' }}
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = poolImg; }} />
           {club.isVerified && (
-            <div style={{
-              position: 'absolute', top: 8, right: 8,
-              background: 'rgba(48,197,90,0.10)',
-              border: '1px solid rgba(48,197,90,0.22)',
-              borderRadius: 20, padding: '2px 7px',
-              fontSize: 11, fontWeight: 900, color: '#30C55A',
-            }}>✓</div>
+            <div title="باشگاه تأیید شده" style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg,#1d9bf0,#0d6efd)', boxShadow: '0 2px 8px rgba(29,155,240,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Check size={12} color="#fff" strokeWidth={3} />
+            </div>
           )}
           {/* open badge روی تصویر — same pill style as table type badges */}
           <div style={{ position: 'absolute', bottom: 8, left: 8, fontSize: 10, fontWeight: 700, color: club.isOpen ? '#30C55A' : '#ef4444', background: club.isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${club.isOpen ? 'rgba(48,197,90,0.22)' : 'rgba(239,68,68,0.22)'}`, borderRadius: 20, padding: '2px 7px' }}>
@@ -130,7 +126,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* story ring */}
           {club.hasActiveStory && club.storyMediaUrl && (
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
-              <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
+              <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.7)', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
                   {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>{club.name[0]}</span>}
                 </div>
@@ -206,23 +202,8 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* top badges */}
           <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             {club.isVerified && (
-              <div style={{
-                position: 'relative', overflow: 'hidden',
-                background: 'rgba(48,197,90,0.13)',
-                backdropFilter: 'blur(20px) saturate(220%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(220%)',
-                border: '1px solid rgba(48,197,90,0.30)',
-                borderRadius: 20, padding: '3px 9px',
-                fontSize: 10, fontWeight: 900, color: '#30C55A',
-                display: 'flex', alignItems: 'center', gap: 4,
-                boxShadow: 'inset 0 1px 0 rgba(48,197,90,0.28), 0 4px 12px rgba(0,0,0,0.22)',
-                textShadow: '0 0 10px rgba(48,197,90,0.55)',
-                letterSpacing: '0.04em',
-              }}>
-                {/* top sheen */}
-                <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(48,197,90,0.18) 0%,transparent 60%)', pointerEvents: 'none', borderRadius: 'inherit' }} />
-                <span style={{ fontSize: 10, position: 'relative' }}>✓</span>
-                <span style={{ position: 'relative' }}>تایید</span>
+              <div title="باشگاه تأیید شده" style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg,#1d9bf0,#0d6efd)', boxShadow: '0 2px 10px rgba(29,155,240,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Check size={13} color="#fff" strokeWidth={3} />
               </div>
             )}
           </div>
@@ -258,7 +239,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
           {/* story ring */}
           {club.hasActiveStory && club.storyMediaUrl && (
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.75)', background: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
                   {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>{club.name[0]}</span>}
                 </div>
