@@ -144,10 +144,7 @@ export default function NewClubPage() {
     if (!form.province) { setError('لطفاً استان را انتخاب کنید'); return; }
     if (!form.city.trim()) { setError('شهر الزامی است'); return; }
     if (!form.address.trim()) { setError('آدرس الزامی است'); return; }
-    if (!form.latitude || !form.longitude) {
-      setError('لطفاً موقعیت مکانی باشگاه را دریافت کنید');
-      return;
-    }
+    // موقعیت مکانی اختیاری است
     setLoading(true);
     setError('');
 
@@ -190,7 +187,7 @@ export default function NewClubPage() {
         licenseDocumentUrl: licenseDocumentUrl || undefined,
       });
 
-      router.push('/clubs');
+      router.push('/dashboard/club');
     } catch (err: any) {
       setError(err.response?.data?.message || 'خطا در ثبت باشگاه');
     } finally {
