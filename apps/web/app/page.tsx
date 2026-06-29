@@ -720,7 +720,7 @@ useEffect(() => {
                       border: `1px solid rgba(${card.rgb},0.32)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                       boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
-                      marginBottom: '14px',
+                      marginBottom: '22px',
                     }}>
                       <card.Icon size={22} color={card.clr}
                         style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
