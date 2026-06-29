@@ -559,6 +559,7 @@ useEffect(() => {
           .trust-box    { margin-top:32px !important; }
           .trust-grid   { zoom:0.64 !important; }
           .feat-slider  { justify-content:flex-start !important; }
+          .hd           { width:100vw !important; margin-left:calc(-1 * clamp(16px,5vw,80px)) !important; }
         }
 
         /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
@@ -741,6 +742,43 @@ useEffect(() => {
             </div>
           </div>
 
+          {/* Trust items — unified box with 4 cells divided by thin lines */}
+          <div className="he trust-box" style={{ marginTop: '36px' }}>
+            <div className="trust-grid" style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              zoom: 0.8,
+              background: 'rgba(6,4,12,0.82)',
+              backdropFilter: 'blur(32px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+              borderRadius: '18px',
+              border: '1px solid rgba(255,255,255,0.10)',
+              boxShadow: '0 0 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+              overflow: 'hidden',
+            }}>
+              {TRUST_ITEMS.map((item, i) => (
+                <div key={i} style={{
+                  display: 'flex', flexDirection: 'row', alignItems: 'center',
+                  gap: '9px', padding: '10px 14px',
+                  borderLeft: i < 3 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                }}>
+                  <div style={{
+                    width: '30px', height: '30px', borderRadius: '50%',
+                    background: `rgba(${item.rgb},0.16)`,
+                    border: `1px solid rgba(${item.rgb},0.28)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    boxShadow: `0 0 10px rgba(${item.rgb},0.30)`,
+                  }}>
+                    <item.Icon size={14} color={item.clr}
+                      style={{ filter: `drop-shadow(0 0 4px rgba(${item.rgb},0.65))` }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
+                    <span style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
         </div>
 
