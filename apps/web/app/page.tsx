@@ -555,8 +555,9 @@ useEffect(() => {
           .dp-cta       { width:100% !important; }
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
           .mkt-sub      { grid-template-columns:1fr !important; }
-          .trust-box    { margin-top:32px !important; zoom:0.64 !important; }
-          .feat-card    { width:124px !important; }
+          .trust-box    { margin-top:32px !important; }
+          .trust-grid   { zoom:0.64 !important; }
+          .feat-slider  { justify-content:flex-start !important; }
         }
 
         /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
@@ -696,7 +697,7 @@ useEffect(() => {
           </div>
 
           {/* Feature card slider — 6 cards */}
-          <div className="hd" style={{ width: '100%', marginTop: '16px', overflow: 'hidden' }}>
+          <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
             <div className="feat-slider" style={{
               display: 'flex', gap: '10px', overflowX: 'auto',
               scrollbarWidth: 'none', padding: '4px 8px 8px',
@@ -740,9 +741,10 @@ useEffect(() => {
           </div>
 
           {/* Trust items — unified box with 4 cells divided by thin lines */}
-          <div className="he trust-box" style={{ marginTop: '36px', zoom: 0.8 }}>
-            <div style={{
+          <div className="he trust-box" style={{ marginTop: '36px' }}>
+            <div className="trust-grid" style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              zoom: 0.8,
               background: 'rgba(6,4,12,0.82)',
               backdropFilter: 'blur(32px) saturate(200%)',
               WebkitBackdropFilter: 'blur(32px) saturate(200%)',
