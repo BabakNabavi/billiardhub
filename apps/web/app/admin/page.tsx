@@ -40,6 +40,8 @@ export default function AdminPage() {
   ];
 
   const menuItems = [
+  { title: 'پنل مدیریت باشگاه', desc: 'مدیریت باشگاه‌ها، میزها، رزروها و مسابقات', icon: <Building2 size={28} />, color: 'bg-yellow-600', link: '/dashboard/club' },
+  { title: 'تأیید باشگاه‌ها', desc: 'بررسی جواز کسب و صدور تیک تأیید رسمی', icon: <CheckCircle size={28} />, color: 'bg-emerald-600', link: '/admin/clubs' },
   { title: 'مدیریت کاربران', desc: 'تأیید، ویرایش و مدیریت کاربران', icon: <Users size={28} />, color: 'bg-blue-600', link: '/admin/users' },
   { title: 'رنکینگ', desc: 'ورود و ویرایش رنکینگ بازیکنان', icon: <TrendingUp size={28} />, color: 'bg-green-600', link: '/admin/rankings' },
   { title: 'تأیید محصولات', desc: 'بررسی و تأیید محصولات فروشگاه', icon: <ShoppingBag size={28} />, color: 'bg-purple-600', link: '/admin/products' },

@@ -63,6 +63,7 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       phone: user.phone,
+      primaryRole: user.primaryRole,
       roles: [user.primaryRole, ...(user.secondaryRoles || [])],
     });
 

@@ -12,18 +12,19 @@ import {
 import {
   SAMPLE_TOURNAMENTS, STATUS_LABELS, STATUS_COLORS, GAME_TYPE_LABELS,
 } from '../../../lib/mock-tournaments';
+import ClubStoryModal from '../../../components/ClubStoryModal';
 
 interface Club {
   id: string; name: string; managerName: string; description: string;
-  address: string; city: string; country: string;
+  address: string; city: string; province?: string; country: string;
   latitude: number; longitude: number; phone: string; website: string;
   snookerTables: number; pocketTables: number; highballTables: number;
   vipSnookerTables: number; vipPocketTables: number; airHockeyTables: number;
   dartBoards: number; playstations: number;
   hasCafe: boolean; hasParking: boolean; hasWifi: boolean; hasProfessionalCoach: boolean;
   specialFeatures: string; workingHours: any; images: string[]; videos: string[];
-  logo?: string;
-  hasActiveStory?: boolean;
+  logo?: string; hasActiveStory?: boolean; storyMediaUrl?: string; storyType?: string; storyText?: string;
+  verificationStatus?: string;
 }
 
 const sampleClub: Club = {
@@ -50,11 +51,10 @@ const sampleClub: Club = {
   hasActiveStory: true,
 };
 
-const coaches = [
-  { id: 1, name: 'امیر رضایی', title: 'مربی ارشد اسنوکر',  exp: '۱۲ سال', rating: 4.9, matches: 340, bio: 'قهرمان چندین دوره لیگ داخلی و مربی مجاز فدراسیون' },
-  { id: 2, name: 'سارا محمدی', title: 'مربی پاکت بیلیارد', exp: '۸ سال',  rating: 4.7, matches: 210, bio: 'تخصص در آموزش مقدماتی و پیشرفته پاکت بیلیارد' },
-  { id: 3, name: 'کاوه نوری',  title: 'مربی VIP',           exp: '۱۵ سال', rating: 5.0, matches: 520, bio: 'مربی منتخب سال ۱۴۰۳ فدراسیون بیلیارد ایران' },
-];
+interface CoachEntry { id: string; name: string; title: string; exp: string; rating: string; bio: string; }
+interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
+interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
+interface ClubStats { members: string; tournaments: string; yearsActive: string; dailyCapacity: string; }
 
 /* #10: model field = what admin enters when registering tables. #11: isVip → gold color */
 const tableTypes = [
@@ -68,17 +68,7 @@ const tableTypes = [
 
 // Tournaments are loaded dynamically from SAMPLE_TOURNAMENTS in the component
 
-const galleryAlbums = [
-  { name: 'مسابقات کشوری ۱۴۰۵', cover: '/images/clubs/club6.jpeg', count: 24 },
-  { name: 'مهمانان ویژه',         cover: '/images/clubs/club7.jpeg', count: 12 },
-  { name: 'تجهیزات و داخلی',      cover: '/images/clubs/club8.jpg',  count: 15 },
-  { name: 'رویدادهای هفتگی',      cover: '/images/clubs/club9.jpeg', count: 18 },
-];
-const galleryImages = [
-  '/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg',
-  '/images/clubs/club9.jpeg', '/images/clubs/club4.png',  '/images/clubs/club1.png',
-  '/images/clubs/club2.jpg',  '/images/clubs/club3.jpg',  '/images/clubs/club9.jpeg',
-];
+const DEFAULT_STATS: ClubStats = { members: '', tournaments: '', yearsActive: '', dailyCapacity: '' };
 
 const dayNames: Record<string, string> = {
   saturday: 'شنبه', sunday: 'یکشنبه', monday: 'دوشنبه',
@@ -116,6 +106,10 @@ export default function ClubProfilePage() {
   const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
   const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule'>('info');
   const [activeCoach, setActiveCoach] = useState<number | null>(null);
+  const [coaches, setCoaches]         = useState<CoachEntry[]>([]);
+  const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
+  const [clubStats, setClubStats]     = useState<ClubStats>(DEFAULT_STATS);
+  const [storyViewer, setStoryViewer] = useState(false);
 
   const isAdmin = false;
 
@@ -140,6 +134,13 @@ export default function ClubProfilePage() {
     }
     setTournAlbums(albums);
   }, [tab]);
+
+  useEffect(() => {
+    if (!id) return;
+    try { const c = localStorage.getItem(`club-coaches-${id}`); if (c) setCoaches(JSON.parse(c)); } catch {}
+    try { const s = localStorage.getItem(`club-stats-${id}`);   if (s) setClubStats(JSON.parse(s)); } catch {}
+    try { const a = localStorage.getItem(`club-albums-${id}`);  if (a) setClubAlbums(JSON.parse(a)); } catch {}
+  }, [id]);
 
   const compressImage = (file: File): Promise<string> =>
     new Promise(resolve => {
@@ -210,6 +211,13 @@ export default function ClubProfilePage() {
 
   const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
+
+  const statsRows = [
+    { label: 'اعضای فعال',  v: clubStats.members       || null, color: '#C7A66A' },
+    { label: 'مسابقات',      v: clubStats.tournaments   || null, color: '#f59e0b' },
+    { label: 'سال‌ها سابقه', v: clubStats.yearsActive   || null, color: '#a78bfa' },
+    { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || null, color: '#06b6d4' },
+  ];
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, paddingTop: 72 }}>
@@ -317,17 +325,32 @@ export default function ClubProfilePage() {
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }} />}
                 {hasStory && <div style={{ position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1, border: '3px solid rgba(10,8,6,0.92)' }} />}
-                <div style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
+                <div onClick={() => { if (hasStory) setStoryViewer(true); }} style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
                   {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : club.name[0]}
                 </div>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
                 {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
               </div>
-              <h1 style={{ fontSize: 'clamp(22px, 5.5vw, 55px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{club.name}</h1>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <h1 style={{ fontSize: 'clamp(22px, 5.5vw, 55px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{club.name}</h1>
+                  {club.verificationStatus === 'verified' && (
+                    <div title="باشگاه تأیید شده" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#1d9bf0,#0d6efd)', boxShadow: '0 2px 8px rgba(29,155,240,0.5)', flexShrink: 0 }}>
+                      <Check size={15} color="#fff" strokeWidth={3} />
+                    </div>
+                  )}
+                </div>
+                {club.managerName && (
+                  <div style={{ fontSize: 'clamp(13px, 2vw, 16px)', color: 'rgba(255,255,255,0.55)', marginTop: 4, fontWeight: 500 }}>
+                    مدیر: {club.managerName}
+                  </div>
+                )}
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderRadius: 20, padding: '5px 12px', fontSize: 14, color: 'rgba(255,255,255,0.82)' }}>
-                <MapPin size={11} style={{ color: '#C7A66A' }} /> {club.city}
+                <MapPin size={11} style={{ color: '#C7A66A' }} />
+                {club.province ? `${club.province} / ` : ''}{club.city}
               </div>
               {distance && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(48,197,90,0.10)', border: '1px solid rgba(48,197,90,0.22)', borderRadius: 20, padding: '5px 12px', fontSize: 14, color: '#30C55A' }}>
@@ -411,18 +434,37 @@ export default function ClubProfilePage() {
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
                     <div style={{ fontSize: 15, color: 'rgba(199,166,106,0.85)', fontWeight: 800, marginBottom: 14, textAlign: 'center' }}>آمار میزها</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                      {[
-                        { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
-                        { v: '۳',  l: 'مشغول',    c: '#ef4444',          rgb: '239,68,68'   },
-                        { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
-                      ].map((x, i) => (
-                        <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
-                          <div style={{ fontSize: 29, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
-                          <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
+                    {(() => {
+                      const types = [
+                        { key: 'snookerTables',    label: 'اسنوکر',       color: '#30C55A', rgb: '48,197,90'   },
+                        { key: 'pocketTables',     label: 'پاکت بیلیارد', color: '#3b82f6', rgb: '59,130,246'  },
+                        { key: 'highballTables',   label: 'هی‌بال',         color: '#8b5cf6', rgb: '139,92,246'  },
+                        { key: 'vipSnookerTables', label: 'اسنوکر VIP',    color: '#C7A66A', rgb: '199,166,106' },
+                        { key: 'vipPocketTables',  label: 'پاکت VIP',      color: '#C7A66A', rgb: '199,166,106' },
+                        { key: 'airHockeyTables',  label: 'ایرهاکی',       color: '#ef4444', rgb: '239,68,68'   },
+                        { key: 'dartBoards',       label: 'دارت',           color: '#f59e0b', rgb: '245,158,11'  },
+                        { key: 'playstations',     label: 'پلی‌استیشن',     color: '#a78bfa', rgb: '167,139,250' },
+                      ];
+                      const active = types.filter(t => ((club as any)[t.key] || 0) > 0);
+                      const total  = types.reduce((s, t) => s + ((club as any)[t.key] || 0), 0);
+                      if (active.length === 0) return (
+                        <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.30)', textAlign: 'center', padding: '8px 0' }}>اطلاعات میز ثبت نشده</div>
+                      );
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {active.map(t => (
+                            <div key={t.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: `rgba(${t.rgb},0.06)`, border: `1px solid rgba(${t.rgb},0.14)`, borderRadius: 10 }}>
+                              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>{t.label}</span>
+                              <span style={{ fontSize: 17, fontWeight: 900, color: t.color }}>{toFa((club as any)[t.key])}</span>
+                            </div>
+                          ))}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: 'rgba(0,0,0,0.03)', borderRadius: 10, marginTop: 2 }}>
+                            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>مجموع</span>
+                            <span style={{ fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.55)' }}>{toFa(total)}</span>
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -433,8 +475,11 @@ export default function ClubProfilePage() {
                     مربیان باشگاه
                   </h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {coaches.length === 0 && (
+                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز مربی‌ای معرفی نشده</div>
+                    )}
                     {coaches.map((c, i) => (
-                      <div key={i} className="coach-card" onClick={() => setActiveCoach(i)}>
+                      <div key={c.id || i} className="coach-card" onClick={() => setActiveCoach(i)}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                           <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#fff', flexShrink: 0 }}>
                             {c.name[0]}
@@ -443,13 +488,12 @@ export default function ClubProfilePage() {
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#111111', marginBottom: 3 }}>{c.name}</div>
                             <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.42)' }}>{c.title} · {c.exp}</div>
                           </div>
-                          <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center', marginBottom: 3 }}>
+                          {c.rating && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
                               <Star size={11} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
                               <span style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>{c.rating}</span>
                             </div>
-                            <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.35)' }}>{toFa(c.matches)} مسابقه</div>
-                          </div>
+                          )}
                           <ChevronLeft size={14} style={{ color: 'rgba(0,0,0,0.25)', flexShrink: 0 }} />
                         </div>
                       </div>
@@ -489,17 +533,15 @@ export default function ClubProfilePage() {
                       آمار باشگاه
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                      {[
-                        { label: 'اعضای فعال',  v: '۱,۲۰۰+', color: '#C7A66A' },
-                        { label: 'مسابقات',      v: '۴۸',     color: '#f59e0b' },
-                        { label: 'سال‌ها سابقه', v: '۱۵',     color: '#a78bfa' },
-                        { label: 'ظرفیت روزانه', v: '۸۰ نفر', color: '#06b6d4' },
-                      ].map((x, i) => (
+                      {statsRows.filter(x => x.v).map((x, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
                           <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
                           <span style={{ fontSize: 16, fontWeight: 800, color: x.color }}>{x.v}</span>
                         </div>
                       ))}
+                      {statsRows.every(x => !x.v) && (
+                        <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.3)', textAlign: 'center', padding: '8px 0' }}>هنوز آماری ثبت نشده</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -531,19 +573,38 @@ export default function ClubProfilePage() {
               <div className="sidebar-col">
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 120, height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.6),transparent)' }} />
-                  <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>رزرو آنلاین</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 16 }}>
-                    {[
-                      { v: '۸',  l: 'میز آزاد', c: '#30C55A',          rgb: '48,197,90'   },
-                      { v: '۳',  l: 'مشغول',    c: '#ef4444',          rgb: '239,68,68'   },
-                      { v: '۱۱', l: 'کل',       c: 'rgba(0,0,0,0.55)', rgb: '0,0,0'       },
-                    ].map((x, i) => (
-                      <div key={i} style={{ textAlign: 'center', padding: '12px 4px', background: `rgba(${x.rgb},0.06)`, borderRadius: 14, border: `1px solid rgba(${x.rgb},0.14)` }}>
-                        <div style={{ fontSize: 29, fontWeight: 900, color: x.c, lineHeight: 1 }}>{x.v}</div>
-                        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', marginTop: 4, fontWeight: 600 }}>{x.l}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.70)', fontWeight: 700, marginBottom: 14, textAlign: 'center' }}>آمار میزها</div>
+                  {(() => {
+                    const types = [
+                      { key: 'snookerTables',    label: 'اسنوکر',       color: '#30C55A', rgb: '48,197,90'   },
+                      { key: 'pocketTables',     label: 'پاکت بیلیارد', color: '#3b82f6', rgb: '59,130,246'  },
+                      { key: 'highballTables',   label: 'هی‌بال',         color: '#8b5cf6', rgb: '139,92,246'  },
+                      { key: 'vipSnookerTables', label: 'اسنوکر VIP',    color: '#C7A66A', rgb: '199,166,106' },
+                      { key: 'vipPocketTables',  label: 'پاکت VIP',      color: '#C7A66A', rgb: '199,166,106' },
+                      { key: 'airHockeyTables',  label: 'ایرهاکی',       color: '#ef4444', rgb: '239,68,68'   },
+                      { key: 'dartBoards',       label: 'دارت',           color: '#f59e0b', rgb: '245,158,11'  },
+                      { key: 'playstations',     label: 'پلی‌استیشن',     color: '#a78bfa', rgb: '167,139,250' },
+                    ];
+                    const active = types.filter(t => ((club as any)[t.key] || 0) > 0);
+                    const total  = types.reduce((s, t) => s + ((club as any)[t.key] || 0), 0);
+                    if (active.length === 0) return (
+                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.30)', textAlign: 'center', padding: '12px 0 16px' }}>اطلاعات میز ثبت نشده</div>
+                    );
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+                        {active.map(t => (
+                          <div key={t.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: `rgba(${t.rgb},0.06)`, border: `1px solid rgba(${t.rgb},0.14)`, borderRadius: 10 }}>
+                            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>{t.label}</span>
+                            <span style={{ fontSize: 17, fontWeight: 900, color: t.color }}>{toFa((club as any)[t.key])}</span>
+                          </div>
+                        ))}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: 'rgba(0,0,0,0.03)', borderRadius: 10, borderTop: '1px dashed rgba(0,0,0,0.07)', marginTop: 2 }}>
+                          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>مجموع</span>
+                          <span style={{ fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.55)' }}>{toFa(total)}</span>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
                   <button className="book-btn-desktop" onClick={goBook} style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.25s' }}>
                     <Calendar size={15} /> رزرو آنلاین
                   </button>
@@ -580,17 +641,15 @@ export default function ClubProfilePage() {
                     آمار باشگاه
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                    {[
-                      { label: 'اعضای فعال',  v: '۱,۲۰۰+', color: '#C7A66A' },
-                      { label: 'مسابقات',      v: '۴۸',     color: '#f59e0b' },
-                      { label: 'سال‌ها سابقه', v: '۱۵',     color: '#a78bfa' },
-                      { label: 'ظرفیت روزانه', v: '۸۰ نفر', color: '#06b6d4' },
-                    ].map((x, i) => (
+                    {statsRows.filter(x => x.v).map((x, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
                         <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>{x.label}</span>
                         <span style={{ fontSize: 16, fontWeight: 800, color: x.color }}>{x.v}</span>
                       </div>
                     ))}
+                    {statsRows.every(x => !x.v) && (
+                      <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.3)', textAlign: 'center', padding: '8px 0' }}>هنوز آماری ثبت نشده</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -811,35 +870,45 @@ export default function ClubProfilePage() {
                   <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>آلبوم‌ها</h3>
                 </div>
                 <div className="album-scroll">
-                  {galleryAlbums.map((album, i) => (
-                    <div key={i} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}>
-                      <div style={{ width: 110, height: 110, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)' }}>
-                        <img src={album.cover} alt={album.name} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
-                        <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
-                          <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
-                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.count)} عکس</div>
+                  {clubAlbums.length === 0 ? (
+                    <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '8px 4px' }}>هنوز آلبومی ایجاد نشده</div>
+                  ) : clubAlbums.map(album => {
+                    const cover = album.items[0]?.dataUrl;
+                    return (
+                      <div key={album.id} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}>
+                        <div style={{ width: 110, height: 110, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)', background: 'rgba(199,166,106,0.12)' }}>
+                          {cover
+                            ? <img src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)' }} />
+                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>🖼</div>
+                          }
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
+                          <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, padding: 10 }}>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, marginBottom: 3 }}>📁 {album.name}</div>
+                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{toFa(album.items.length)} عکس</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* All images grid */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
-                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>همه تصاویر</h3>
+              {/* All images grid — flattened from club albums */}
+              {clubAlbums.some(a => a.items.length > 0) && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                    <span style={{ width: 3, height: 16, background: 'linear-gradient(180deg,#06b6d4,#a78bfa)', borderRadius: 2, display: 'inline-block' }} />
+                    <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: 0 }}>همه تصاویر</h3>
+                  </div>
+                  <div className="gallery-grid">
+                    {clubAlbums.flatMap(a => a.items).map((item, i) => (
+                      <div key={item.id || i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+                        <img src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="gallery-grid">
-                  {galleryImages.map((img, i) => (
-                    <div key={i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-                      <img src={img} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -923,14 +992,12 @@ export default function ClubProfilePage() {
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#111111', marginBottom: 5 }}>{popupCoach.name}</div>
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', marginBottom: 10 }}>{popupCoach.title} · {popupCoach.exp} تجربه</div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {popupCoach.rating && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12 }}>
                   <Star size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
                   <span style={{ fontSize: 17, fontWeight: 900, color: '#111111' }}>{popupCoach.rating}</span>
                 </div>
-                <span style={{ width: 1, height: 14, background: 'rgba(0,0,0,0.12)', display: 'inline-block' }} />
-                <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)' }}>{toFa(popupCoach.matches)} مسابقه</span>
-              </div>
+              )}
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.42)', lineHeight: 1.7, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
                 {popupCoach.bio}
               </div>
@@ -945,6 +1012,13 @@ export default function ClubProfilePage() {
 
           </div>
         </>
+      )}
+
+      {storyViewer && club.storyMediaUrl && (
+        <ClubStoryModal
+          club={{ name: club.name, logo: club.logo, storyMediaUrl: club.storyMediaUrl, storyType: club.storyType, storyText: club.storyText }}
+          onClose={() => setStoryViewer(false)}
+        />
       )}
     </>
   );

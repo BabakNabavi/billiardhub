@@ -103,6 +103,45 @@ export class Club {
   @Column({ type: 'text', array: true, default: [] })
   videos: string[];
 
+  @Column({ nullable: true })
+  province: string;
+
+  @Column({ nullable: true })
+  licenseDocumentUrl: string;
+
+  @Column({ default: 'pending' })
+  verificationStatus: string;
+
+  @Column({ nullable: true })
+  bankCard: string;
+
+  @Column({ nullable: true })
+  bankCardOwner: string;
+
+  @Column({ nullable: true })
+  bankName: string;
+
+  @Column({ nullable: true })
+  logo: string;
+
+  @Column({ nullable: true })
+  storyMediaUrl: string;
+
+  @Column({ default: 'image' })
+  storyType: string;
+
+  @Column({ nullable: true, type: 'timestamptz' })
+  storyExpiresAt: Date;
+
+  @Column({ default: false })
+  hasActiveStory: boolean;
+
+  @Column({ type: 'jsonb', nullable: true, default: [] })
+  discountRules: object[];
+
+  @Column({ nullable: true })
+  storyText: string;
+
   @Column()
   ownerId: string;
 
