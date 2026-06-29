@@ -698,10 +698,10 @@ useEffect(() => {
             <div className="feat-slider" style={{
               display: 'flex', gap: '10px', overflowX: 'auto',
               scrollbarWidth: 'none', padding: '4px 8px 8px',
-              justifyContent: 'center',
+              justifyContent: 'center', alignItems: 'stretch',
             }}>
               {FEATURE_CARDS.map((card, i) => (
-                <Link key={i} href={card.href} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                <Link key={i} href={card.href} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex' }}>
                   <div style={{
                     width: '138px', padding: '18px 12px 16px',
                     background: `rgba(${card.rgb},0.09)`,
@@ -709,8 +709,8 @@ useEffect(() => {
                     WebkitBackdropFilter: 'blur(28px) saturate(200%)',
                     border: `1px solid rgba(${card.rgb},0.26)`,
                     borderRadius: '20px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                    textAlign: 'center',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                    textAlign: 'center', flex: 1,
                     boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(${card.rgb},0.12)`,
                     cursor: 'pointer',
                   }}>
@@ -720,6 +720,7 @@ useEffect(() => {
                       border: `1px solid rgba(${card.rgb},0.32)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                       boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
+                      marginBottom: '6px',
                     }}>
                       <card.Icon size={22} color={card.clr}
                         style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
@@ -727,7 +728,7 @@ useEffect(() => {
                     <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
                       {card.title}
                     </div>
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65 }}>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, flex: 1 }}>
                       {card.caption}
                     </div>
                   </div>
