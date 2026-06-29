@@ -190,12 +190,13 @@ function InputField({ label, value, onChange, type = 'text', placeholder = '', l
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; ltr?: boolean;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
       <input type={type} value={value} placeholder={placeholder}
         dir={ltr ? 'ltr' : undefined} lang={ltr ? 'en' : undefined}
         onChange={e => onChange(e.target.value)}
         style={{
+          width: '100%', boxSizing: 'border-box',
           border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px',
           fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none',
           fontFamily: ltr ? '"Courier New", Courier, monospace' : 'var(--font-base)',
@@ -211,10 +212,11 @@ function SelectField({ label, value, onChange, options }: {
   options: { value: string; label: string; disabled?: boolean }[];
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
         style={{
+          width: '100%', boxSizing: 'border-box',
           border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px',
           fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none',
           fontFamily: 'var(--font-base)',
@@ -959,7 +961,7 @@ export default function ClubDashboardPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card>
             <SectionTitle>اطلاعات پایه</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <InputField label="نام باشگاه"   value={clubInfo.name}        onChange={v => setClubInfo(p => ({...p, name: v}))} />
               <InputField label="نام مدیر"     value={clubInfo.managerName} onChange={v => setClubInfo(p => ({...p, managerName: v}))} />
               <InputField label="شهر"          value={clubInfo.city}        onChange={v => setClubInfo(p => ({...p, city: v}))} />
@@ -1043,7 +1045,7 @@ export default function ClubDashboardPage() {
             <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 16px', lineHeight: 1.7 }}>
               کاربران از طریق <strong>درگاه بانکی امن</strong> پرداخت می‌کنند. درآمد رزروها پس از کسر کارمزد سیستم، در دوره‌های تسویه به حساب بانکی شما واریز می‌شود.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>شماره کارت</label>
                 <input
@@ -1057,7 +1059,7 @@ export default function ClubDashboardPage() {
                     setClubInfo(p => ({ ...p, bankCard: formatted }));
                   }}
                   placeholder="1234-5678-9012-3456"
-                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em', fontSize: 16, width: '100%', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
+                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em', fontSize: 16, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
                 />
               </div>
               <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner}
@@ -1081,7 +1083,7 @@ export default function ClubDashboardPage() {
             <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 16px' }}>
               این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <InputField label="اعضای فعال"   value={clubStats.members}       onChange={v => setClubStats(p => ({...p, members: v}))}       placeholder="مثال: ۱,۲۰۰+" />
               <InputField label="مسابقات"       value={clubStats.tournaments}   onChange={v => setClubStats(p => ({...p, tournaments: v}))}   placeholder="مثال: ۴۸" />
               <InputField label="سال‌ها سابقه"  value={clubStats.yearsActive}   onChange={v => setClubStats(p => ({...p, yearsActive: v}))}   placeholder="مثال: ۱۵" />
@@ -1159,7 +1161,7 @@ export default function ClubDashboardPage() {
               })()}
 
               {/* fields grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 16 }}>
                 <InputField label="شماره میز" type="number" value={tableForm.number}
                   onChange={v => setTableForm(p => ({...p, number: v}))} placeholder="1" />
 
@@ -1225,30 +1227,30 @@ export default function ClubDashboardPage() {
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
                   تخفیف زمانی روی قیمت همه میزها اعمال می‌شود (مثلاً صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 70px 1fr auto', gap: 10, marginBottom: 14, alignItems: 'flex-end' }}>
-                  <div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14, alignItems: 'flex-end' }}>
+                  <div style={{ flex: '1 1 110px', minWidth: 100 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از ساعت</div>
                     <input type="time" value={discountForm.startTime}
                       onChange={e => setDiscountForm(p => ({ ...p, startTime: e.target.value }))}
-                      style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
                   </div>
-                  <div>
+                  <div style={{ flex: '1 1 110px', minWidth: 100 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>تا ساعت</div>
                     <input type="time" value={discountForm.endTime}
                       onChange={e => setDiscountForm(p => ({ ...p, endTime: e.target.value }))}
-                      style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
                   </div>
-                  <div>
+                  <div style={{ flex: '0 0 70px', minWidth: 60 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>٪</div>
                     <input type="number" min="1" max="99" value={discountForm.percent}
                       onChange={e => setDiscountForm(p => ({ ...p, percent: e.target.value }))}
-                      style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
                   </div>
-                  <div>
+                  <div style={{ flex: '1 1 110px', minWidth: 100 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>برچسب (اختیاری)</div>
                     <input type="text" value={discountForm.label} placeholder="تخفیف صبحگاهی"
                       onChange={e => setDiscountForm(p => ({ ...p, label: e.target.value }))}
-                      style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
                   </div>
                   <button onClick={addDiscount} style={{
                     padding: '9px 16px', borderRadius: 12, fontSize: 13, fontWeight: 700,
