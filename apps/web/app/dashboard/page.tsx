@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
+import api from '../../lib/api';
 import {
   Calendar, Trophy, TrendingUp, Bell, Settings, ChevronRight,
   Target, Activity, Award, Clock, MapPin, Zap, Star,
@@ -111,6 +112,8 @@ export default function DashboardPage() {
   const [scrollY, setScrollY] = useState(0);
   const [greeting, setGreeting] = useState('');
   const [myRegs, setMyRegs] = useState<MyReg[]>([]);
+  const [myClub, setMyClub] = useState<{ id: string; name: string; city: string } | null>(null);
+  const [clubLoading, setClubLoading] = useState(false);
   const rafRef = useRef<number>(0);
   const unread = notifications.filter(n => !n.read).length;
   const maxAct = Math.max(...weeklyActivity.map(d => d.sessions));
@@ -160,6 +163,20 @@ export default function DashboardPage() {
   }, [user, router]);
 
   useEffect(() => {
+    if (!user) return;
+    const roles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
+    if (!roles.includes('club_owner')) return;
+    setClubLoading(true);
+    api.get('/clubs/my-clubs')
+      .then(r => {
+        const list = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
+        setMyClub(list.length > 0 ? list[0] : null);
+      })
+      .catch(() => setMyClub(null))
+      .finally(() => setClubLoading(false));
+  }, [user]);
+
+  useEffect(() => {
     const fn = () => {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => setScrollY(window.scrollY));
@@ -170,7 +187,11 @@ export default function DashboardPage() {
 
   if (!user) return null;
   if (user.primaryRole === 'admin') return null;
-  const isBasicUser = user.primaryRole === 'user';
+  const isBasicUser = user.primaryRole === 'user' && (user.secondaryRoles ?? []).length === 0;
+  const userRoles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
+  const isClubOwner = userRoles.includes('club_owner');
+  const isPlayer    = userRoles.includes('player');
+  const isCoach     = userRoles.includes('coach');
 
   return (
     <AuthGuard>
@@ -381,6 +402,106 @@ export default function DashboardPage() {
                   <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* ── Role Action Cards ── */}
+          {!isBasicUser && (isClubOwner || isPlayer || isCoach) && (
+            <div style={{ marginBottom: '28px', animation: 'fadeUp 0.5s ease both 0.1s', animationFillMode: 'both' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(0,0,0,0.35)', letterSpacing: '0.18em', marginBottom: '12px' }}>
+                نقش‌های شما
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+
+                {/* Club Owner Card */}
+                {isClubOwner && !clubLoading && (
+                  myClub ? (
+                    <Link href="/dashboard/club" style={{ textDecoration: 'none' }}>
+                      <div style={{
+                        padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                        background: 'linear-gradient(135deg, rgba(199,166,106,0.12), rgba(199,166,106,0.04))',
+                        border: '1.5px solid rgba(199,166,106,0.35)',
+                        transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                        boxShadow: '0 2px 12px rgba(199,166,106,0.10)',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
+                          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(199,166,106,0.15)', border: '1px solid rgba(199,166,106,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>🏢</div>
+                          <span style={{ fontSize: '10px', background: 'rgba(48,197,90,0.12)', color: '#166534', border: '1px solid rgba(48,197,90,0.25)', borderRadius: '20px', padding: '3px 9px', fontWeight: 700 }}>فعال</span>
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>مدیریت باشگاه</div>
+                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px' }}>{myClub.name} — {myClub.city}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#C7A66A', fontWeight: 700 }}>
+                          ورود به پنل <span style={{ fontSize: '16px' }}>←</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href="/clubs/new" style={{ textDecoration: 'none' }}>
+                      <div style={{
+                        padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                        background: 'linear-gradient(135deg, rgba(199,166,106,0.08), rgba(199,166,106,0.02))',
+                        border: '1.5px dashed rgba(199,166,106,0.40)',
+                        transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
+                          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(199,166,106,0.10)', border: '1px dashed rgba(199,166,106,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>🏢</div>
+                          <span style={{ fontSize: '10px', background: 'rgba(245,158,11,0.10)', color: '#92600A', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '20px', padding: '3px 9px', fontWeight: 700 }}>ثبت نشده</span>
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>ایجاد باشگاه</div>
+                        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                          باشگاه خود را ثبت کنید و پنل مدیریت را فعال کنید
+                        </div>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#C7A66A', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                          + ایجاد باشگاه
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                )}
+
+                {/* Player Card */}
+                {isPlayer && (
+                  <Link href="/profile/setup?role=player" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(6,182,212,0.02))',
+                      border: '1.5px solid rgba(6,182,212,0.25)',
+                      transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                    }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(6,182,212,0.10)', border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🎱</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل بازیکن</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                        اطلاعات بازیکنی خود را تکمیل کنید و در رنکینگ ملی قرار بگیرید
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
+                        تکمیل پروفایل <span style={{ fontSize: '16px' }}>←</span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
+                {/* Coach Card */}
+                {isCoach && (
+                  <Link href="/profile/setup?role=coach" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(167,139,250,0.02))',
+                      border: '1.5px solid rgba(167,139,250,0.25)',
+                      transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                    }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(167,139,250,0.10)', border: '1px solid rgba(167,139,250,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>👨‍🏫</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل مربی</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                        پروفایل مربیگری خود را بسازید و شاگردان را به خود جذب کنید
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#7c3aed', fontWeight: 700 }}>
+                        ساخت پروفایل <span style={{ fontSize: '16px' }}>←</span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
+              </div>
             </div>
           )}
 
