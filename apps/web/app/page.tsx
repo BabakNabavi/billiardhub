@@ -523,16 +523,16 @@ useEffect(() => {
 
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          /* navbar(72) + stories(116) + 56px spacing = 244px → ×0.8×1.05 = 205px */
-          .hero-content { padding-top:205px !important; padding-bottom:60px !important; }
+          /* navbar(72) + stories(~116) + 24px gap = ~212px */
+          .hero-content { padding-top:212px !important; padding-bottom:60px !important; }
           .hero-h1      { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; }
           .hero-desc    { display:none !important; }
           .hero-sub     { display:none !important; }
           .hero-eyebrow { margin-bottom:16px !important; padding:5px 16px !important; }
           .eyebrow-text { font-size:8px !important; letter-spacing:0.14em !important; }
           .trust-strip   { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
-          .hero-ctas     { flex-direction:column !important; }
-          .hero-cta-link { width:100% !important; max-width:260px !important; display:block !important; }
+          .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; }
+          .hero-cta-link { width:auto !important; }
           .hero-actions  { display:none !important; }
           .hero-arrows  { display:none !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
@@ -544,18 +544,18 @@ useEffect(() => {
         /* ══ 14-INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
           .hero-stories-bar { zoom:0.95; }
-          .hero-content { padding-top:clamp(300px,38vh,350px) !important; zoom:0.95; }
+          .hero-content { padding-top:clamp(185px,22vh,230px) !important; zoom:0.95; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(215px,32vh,248px) !important; zoom:0.90; }
+          .hero-content { padding-top:clamp(175px,26vh,210px) !important; zoom:0.90; }
           .hero-sub     { display:none !important; }
         }
 
-        /* ══ MOBILE — hero content 10vh lower ══ */
+        /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:clamp(185px,31.5vh,294px) !important; }
-          .trust-strip  { margin-top:10vh !important; }
+          .hero-content { padding-top:212px !important; }
+          .trust-strip  { margin-top:16px !important; }
         }
 
         /* ══ MOBILE XS ≤400px ══ */
@@ -619,7 +619,7 @@ useEffect(() => {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(290px,34vh,400px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(185px,21vh,230px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
