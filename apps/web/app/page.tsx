@@ -319,40 +319,47 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
 function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) {
   const [hov, setHov] = useState(false);
   return (
-    <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: h }}>
-      <div
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        style={{
-          borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
-          display: 'flex', flexDirection: 'column',
-          transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
-          transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
-          boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
-          willChange: 'transform',
-        }}>
-        <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', background: '#111' }}>
-          <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)', transition: 'transform 0.6s ease', transform: hov ? 'scale(1.06)' : 'scale(1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.70) 100%)' }} />
-          {p.pct > 0 && (
-            <div style={{ position: 'absolute', top: '12px', right: '12px',
-              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)',
-              color: '#ef4444', fontSize: '11px', fontWeight: 700, padding: '4px 11px', borderRadius: '20px' }}>
-              {p.pct}٪ تخفیف
-            </div>
-          )}
-          <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{p.brand}</div>
+    <div style={{ position: 'relative', height: h }}>
+      {p.pct > 0 && (
+        <div style={{ position: 'absolute', top: '-3px', right: '12px', zIndex: 4,
+          background: 'rgba(239,68,68,0.10)',
+          backdropFilter: 'blur(16px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(200%)',
+          border: '1px solid rgba(239,68,68,0.32)',
+          boxShadow: 'inset 0 1px 0 rgba(239,68,68,0.28), 0 3px 10px rgba(0,0,0,0.22)',
+          color: '#ef4444', fontSize: '11px', fontWeight: 700,
+          padding: '4px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
+          {p.pct}٪ تخفیف
         </div>
-        <div style={{ flex: '0 0 40%', background: '#fff', padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '5px' }}>
-          <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.25, letterSpacing: '-0.01em' }}>{p.name}</div>
-          <div style={{ fontSize: '12px', color: TEXT_M }}>{p.sub}</div>
-          <div style={{ marginTop: '6px' }}>
-            {p.pct > 0 && <div style={{ fontSize: '12px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')} تومان</div>}
-            <div style={{ fontSize: '20px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
+      )}
+      <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+        <div
+          onMouseEnter={() => setHov(true)}
+          onMouseLeave={() => setHov(false)}
+          style={{
+            borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column',
+            transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
+            transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
+            boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
+            willChange: 'transform',
+          }}>
+          <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', background: '#111' }}>
+            <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)', transition: 'transform 0.6s ease', transform: hov ? 'scale(1.06)' : 'scale(1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.70) 100%)' }} />
+            <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{p.brand}</div>
+          </div>
+          <div style={{ flex: '0 0 40%', background: '#fff', padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '5px' }}>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.25, letterSpacing: '-0.01em' }}>{p.name}</div>
+            <div style={{ fontSize: '12px', color: TEXT_M }}>{p.sub}</div>
+            <div style={{ marginTop: '6px' }}>
+              {p.pct > 0 && <div style={{ fontSize: '12px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')} تومان</div>}
+              <div style={{ fontSize: '20px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
+            </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
