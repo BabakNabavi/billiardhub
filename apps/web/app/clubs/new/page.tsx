@@ -212,8 +212,8 @@ export default function NewClubPage() {
 
       await api.post('/clubs', {
         ...form,
-        latitude: parseFloat(form.latitude),
-        longitude: parseFloat(form.longitude),
+        latitude: parseFloat(form.latitude) || 0,
+        longitude: parseFloat(form.longitude) || 0,
         images: imageUrls,
         videos: videoUrl ? [videoUrl] : [],
         licenseDocumentUrl: licenseDocumentUrl || undefined,
