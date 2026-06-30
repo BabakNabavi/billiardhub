@@ -33,36 +33,38 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const all = await readIndex(params.id);
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const all = await readIndex(id);
   const now = new Date();
   const active = all.filter((s: any) => new Date(s.expiresAt) > now);
-  // Prune expired stories asynchronously (don't await — keep response fast)
   if (active.length !== all.length) {
-    writeIndex(params.id, active).catch(() => {});
+    writeIndex(id, active).catch(() => {});
   }
   return NextResponse.json(active, { headers: CORS });
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const story = await req.json();
-  const current = await readIndex(params.id);
+  const current = await readIndex(id);
   const now = new Date();
   const active = current.filter((s: any) => new Date(s.expiresAt) > now);
   if (active.length >= 10)
     return NextResponse.json({ message: 'حداکثر ۱۰ استوری مجاز است' }, { status: 400, headers: CORS });
   const updated = [...active, story];
-  await writeIndex(params.id, updated);
+  await writeIndex(id, updated);
   return NextResponse.json(story, { status: 201, headers: CORS });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const storyId = req.nextUrl.searchParams.get('storyId');
-  const current = await readIndex(params.id);
+  const current = await readIndex(id);
   const now = new Date();
   const updated = current.filter(
     (s: any) => s.id !== storyId && new Date(s.expiresAt) > now
   );
-  await writeIndex(params.id, updated);
+  await writeIndex(id, updated);
   return NextResponse.json({ ok: true }, { headers: CORS });
 }
