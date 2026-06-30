@@ -1975,7 +1975,7 @@ export default function ClubDashboardPage() {
             <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.6 }}>
               فرمت استاندارد ۹:۱۶ (مثل اینستاگرام) — عکس یا ویدیو — پس از ۲۴ ساعت به‌صورت خودکار حذف می‌شود
             </div>
-            {storyDraft ? null : activeStory ? (
+            {storyDraft ? null : activeStory ? (/* ── active story ── */
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr' }}>
                 {/* Previous story — dimmed, shifted to the left */}
                 {previousStory && (
@@ -2122,7 +2122,11 @@ export default function ClubDashboardPage() {
                   </div>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0', color: '#9CA3AF', fontSize: 13 }}>
+                استوری فعالی وجود ندارد — از دکمه بالا استوری جدید اضافه کنید
+              </div>
+            )}
             {storyDraft ? (
               /* Draft preview — image selected but not yet uploaded */
               <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr' }}>
@@ -2229,11 +2233,7 @@ export default function ClubDashboardPage() {
                   </div>
                 </div>
               </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px 0', color: '#9CA3AF', fontSize: 13 }}>
-                استوری فعالی وجود ندارد — از دکمه بالا استوری جدید اضافه کنید
-              </div>
-            )}
+            ) : null}
           </Card>
 
           {/* ── Single photos ── */}
