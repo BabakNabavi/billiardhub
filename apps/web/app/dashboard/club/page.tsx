@@ -793,7 +793,8 @@ export default function ClubDashboardPage() {
       { id: '3', firstName: 'مریم', lastName: 'کاظمی', verificationStatus: 'verified', city: 'اصفهان', bio: 'مربی بانوان و متخصص پاکت بیلیارد', coachProfile: { specialty: 'pocket', experience: '۸' } },
       { id: '4', firstName: 'سینا', lastName: 'محمدی', verificationStatus: 'pending', city: 'شیراز', bio: 'مربی جوان و قهرمان لیگ برتر', coachProfile: { specialty: 'pocket', experience: '۵' } },
     ];
-    fetch('/api/users/by-role?role=coach')
+    const excludeId = user?.id ? `&excludeId=${user.id}` : '';
+    fetch(`/api/users/by-role?role=coach${excludeId}`)
       .then(r => r.json())
       .then(data => { setAvailableCoaches(Array.isArray(data) && data.length > 0 ? data : MOCK_COACHES); })
       .catch(() => setAvailableCoaches(MOCK_COACHES))

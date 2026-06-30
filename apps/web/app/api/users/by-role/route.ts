@@ -14,15 +14,20 @@ export async function OPTIONS() {
 
 export async function GET(req: NextRequest) {
   const role = req.nextUrl.searchParams.get('role');
+  const excludeId = req.nextUrl.searchParams.get('excludeId');
   if (!role) {
     return NextResponse.json({ message: 'role param required' }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const { data, error } = await getSupabaseServer()
+  let query = getSupabaseServer()
     .from('users')
     .select('id, firstName, lastName, city, bio, verificationStatus, primaryRole, secondaryRoles, coachProfile, avatar')
     .eq('isActive', true)
     .or(`primaryRole.eq.${role},secondaryRoles.cs.{${role}}`);
+
+  if (excludeId) query = query.neq('id', excludeId);
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ message: error.message }, { status: 500, headers: CORS_HEADERS });
