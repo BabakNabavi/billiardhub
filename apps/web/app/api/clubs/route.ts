@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, address, city } = body;
+    const { name, address, city, slug, ...rest } = body;
 
     if (!name || !address || !city) {
       return NextResponse.json(
@@ -68,16 +68,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: club, error } = await getSupabaseServer()
+    const insertData: Record<string, any> = {
+      ...rest,
+      name, address, city,
+      ownerId: payload.sub,
+      isActive: true,
+      verificationStatus: body.licenseDocumentUrl ? 'pending' : 'unverified',
+    };
+    if (slug) insertData.slug = slug;
+
+    let { data: club, error } = await getSupabaseServer()
       .from('clubs')
-      .insert({
-        ...body,
-        ownerId: payload.sub,
-        isActive: true,
-        verificationStatus: body.licenseDocumentUrl ? 'pending' : 'unverified',
-      })
+      .insert(insertData)
       .select()
       .single();
+
+    // اگر ستون slug هنوز در دیتابیس نیست، بدون slug دوباره تلاش کن
+    if (error?.message?.includes('slug')) {
+      delete insertData.slug;
+      ({ data: club, error } = await getSupabaseServer()
+        .from('clubs')
+        .insert(insertData)
+        .select()
+        .single());
+    }
 
     if (error || !club) {
       return NextResponse.json(
