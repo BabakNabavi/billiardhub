@@ -261,7 +261,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
             {[{ label: 'اسنوکر', n: snookerTables, clr: '#30C55A' }, { label: 'پاکت', n: pocketTables, clr: '#3b82f6' }, { label: 'هی‌بال', n: hiballTables, clr: '#8b5cf6' }].map(t => (
               <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr, background: `${t.clr}14`, border: `1px solid ${t.clr}28`, borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
             ))}
@@ -271,7 +271,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
             </div>
-            <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
+            <div style={{ background: 'rgba(199,166,106,0.12)', color: GOLD, fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: `1px solid ${GOLD_BOR}` }}>رزرو آنلاین</div>
           </div>
         </div>
 
