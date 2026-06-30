@@ -283,7 +283,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: '6px' }}>
             <div>
               <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
-              <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
+              <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
             </div>
             <div style={{ background: 'rgba(199,166,106,0.12)', color: GOLD, fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: `1px solid ${GOLD_BOR}` }}>رزرو آنلاین</div>
           </div>
@@ -347,8 +347,8 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
           <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.25, letterSpacing: '-0.01em' }}>{p.name}</div>
           <div style={{ fontSize: '12px', color: TEXT_M }}>{p.sub}</div>
           <div style={{ marginTop: '6px' }}>
-            {p.pct > 0 && <div style={{ fontSize: '12px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')} ت</div>}
-            <div style={{ fontSize: '20px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
+            {p.pct > 0 && <div style={{ fontSize: '12px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')} تومان</div>}
+            <div style={{ fontSize: '20px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
           </div>
         </div>
       </div>
@@ -1135,7 +1135,7 @@ useEffect(() => {
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', overflow: 'hidden' }}>
                       <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
                       <div style={{ fontSize: '11px', color: TEXT_M }}>{p.sub}</div>
-                      <div style={{ fontSize: '15px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
+                      <div style={{ fontSize: '15px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
                     </div>
                   </div>
                 </Link>
