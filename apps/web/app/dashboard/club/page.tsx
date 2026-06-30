@@ -3,7 +3,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown, Check } from 'lucide-react';
+import {
+  ChevronDown, Check,
+  LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
+  Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
+  Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon,
+  Loader2,
+} from 'lucide-react';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
 import { useAuthStore } from '../../../store/auth.store';
@@ -252,11 +258,14 @@ function SaveBtn({ onClick, loading, label = 'ذخیره تغییرات' }: {
 }) {
   return (
     <button onClick={onClick} disabled={loading} style={{
-      background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
-      padding: '11px 28px', fontSize: 14, fontWeight: 700,
-      cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-      fontFamily: 'var(--font-base)',
+      display: 'inline-flex', alignItems: 'center', gap: 7,
+      background: 'rgba(199,166,106,0.14)', color: '#A07840',
+      border: '1px solid rgba(199,166,106,0.42)', borderRadius: 20,
+      padding: '10px 26px', fontSize: 14, fontWeight: 700,
+      cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.65 : 1,
+      fontFamily: 'var(--font-base)', transition: 'all 0.15s',
     }}>
+      {loading ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />}
       {loading ? 'در حال ذخیره...' : label}
     </button>
   );
@@ -831,14 +840,16 @@ export default function ClubDashboardPage() {
   if (clubs.length === 0) return (
     <div style={{ maxWidth: 440, margin: '60px auto', padding: '0 16px', textAlign: 'center', fontFamily: 'var(--font-base)' }}>
       <Card>
-        <div style={{ fontSize: 56, marginBottom: 12 }}>🏢</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><Building2 size={52} color="#D1D5DB" strokeWidth={1.1} /></div>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: DARK, margin: '0 0 8px' }}>هنوز باشگاهی ثبت نکردی</h2>
         <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24 }}>برای مدیریت باشگاه، ابتدا یک باشگاه ثبت کن.</p>
         <Link href="/clubs/new" style={{
-          display: 'inline-block', background: GOLD, color: '#fff',
-          padding: '12px 32px', borderRadius: 12, fontWeight: 700, textDecoration: 'none', fontSize: 15,
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: 'rgba(199,166,106,0.14)', color: '#A07840',
+          border: '1px solid rgba(199,166,106,0.42)',
+          padding: '12px 32px', borderRadius: 20, fontWeight: 700, textDecoration: 'none', fontSize: 15,
         }}>
-          ثبت باشگاه جدید
+          <Plus size={15} /> ثبت باشگاه جدید
         </Link>
       </Card>
     </div>
@@ -849,15 +860,15 @@ export default function ClubDashboardPage() {
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const filteredBookings = bookingFilter === 'all' ? bookings : bookings.filter(b => b.status === bookingFilter);
 
-  const TABS: { key: TabKey; label: string; icon: string; badge?: number }[] = [
-    { key: 'dashboard',   label: 'داشبورد',       icon: '📊' },
-    { key: 'info',        label: 'اطلاعات',        icon: '📋' },
-    { key: 'tables',      label: 'میزها',          icon: '🎱' },
-    { key: 'hours',       label: 'ساعات کاری',     icon: '🕐' },
-    { key: 'bookings',    label: 'رزروها',          icon: '📅', badge: pendingBookings.length || undefined },
-    { key: 'tournaments', label: 'مسابقات',         icon: '🏆' },
-    { key: 'gallery',     label: 'گالری',           icon: '📸' },
-    { key: 'coaches',     label: 'مربیان',          icon: '👨‍🏫' },
+  const TABS: { key: TabKey; label: string; Icon: React.ComponentType<{size?: number; strokeWidth?: number}>; badge?: number }[] = [
+    { key: 'dashboard',   label: 'داشبورد',    Icon: LayoutDashboard },
+    { key: 'info',        label: 'اطلاعات',    Icon: FileText },
+    { key: 'tables',      label: 'میزها',      Icon: Grid3X3 },
+    { key: 'hours',       label: 'ساعات کاری', Icon: Clock },
+    { key: 'bookings',    label: 'رزروها',     Icon: CalendarDays, badge: pendingBookings.length || undefined },
+    { key: 'tournaments', label: 'مسابقات',    Icon: Trophy },
+    { key: 'gallery',     label: 'گالری',      Icon: ImageIcon },
+    { key: 'coaches',     label: 'مربیان',     Icon: GraduationCap },
   ];
 
   const inputStyle: React.CSSProperties = {
@@ -880,10 +891,14 @@ export default function ClubDashboardPage() {
           </p>
         </div>
         <Link href="/clubs/new" style={{
-          background: GOLD, color: '#fff', padding: '9px 18px', borderRadius: 10,
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: 'rgba(199,166,106,0.14)', color: '#A07840',
+          border: '1px solid rgba(199,166,106,0.42)',
+          padding: '9px 18px', borderRadius: 20,
           fontWeight: 700, textDecoration: 'none', fontSize: 13,
         }}>
-          + باشگاه جدید
+          <Plus size={14} />
+          باشگاه جدید
         </Link>
       </div>
 
@@ -906,8 +921,8 @@ export default function ClubDashboardPage() {
                 width: 38, height: 38, borderRadius: 10, background: `${GOLD}18`,
                 border: `1.5px solid ${GOLD}44`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, flexShrink: 0,
-              }}>🏢</div>
+                flexShrink: 0,
+              }}><Building2 size={19} color={GOLD} /></div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500, marginBottom: 1 }}>باشگاه انتخابی</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: DARK }}>{selectedClub?.name ?? 'انتخاب باشگاه'}</div>
@@ -988,28 +1003,32 @@ export default function ClubDashboardPage() {
         boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #F0EDE8',
         scrollbarWidth: 'none',
       }}>
-        {TABS.map(tab => (
-          <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-            flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 5,
-            padding: '8px 13px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', border: 'none', whiteSpace: 'nowrap',
-            background: activeTab === tab.key ? GOLD : 'transparent',
-            color: activeTab === tab.key ? '#fff' : '#6B7280',
-            fontFamily: 'var(--font-base)',
-          }}>
-            <span>{tab.icon}</span>
-            <span>{tab.label}</span>
-            {tab.badge && (
-              <span style={{
-                background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 800,
-                width: 18, height: 18, borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {tab.badge}
-              </span>
-            )}
-          </button>
-        ))}
+        {TABS.map(tab => {
+          const active = activeTab === tab.key;
+          return (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
+              flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s',
+              border: active ? `1px solid rgba(199,166,106,0.50)` : '1px solid transparent',
+              background: active ? 'rgba(199,166,106,0.14)' : 'transparent',
+              color: active ? '#A07840' : '#6B7280',
+              fontFamily: 'var(--font-base)',
+            }}>
+              <tab.Icon size={15} strokeWidth={active ? 2.2 : 1.8} />
+              <span>{tab.label}</span>
+              {tab.badge && (
+                <span style={{
+                  background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 800,
+                  width: 17, height: 17, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ════ Tab: Dashboard ════ */}
@@ -1070,13 +1089,17 @@ export default function ClubDashboardPage() {
                     </div>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button onClick={() => updateBookingStatus(b.id, 'confirmed')} style={{
-                        background: '#059669', color: '#fff', border: 'none', borderRadius: 8,
-                        padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                      }}>تأیید</button>
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        background: 'rgba(48,197,90,0.10)', color: '#16a34a',
+                        border: '1px solid rgba(48,197,90,0.28)', borderRadius: 20,
+                        padding: '6px 13px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
+                      }}><CheckCircle size={12} /> تأیید</button>
                       <button onClick={() => updateBookingStatus(b.id, 'cancelled')} style={{
-                        background: '#EF4444', color: '#fff', border: 'none', borderRadius: 8,
-                        padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                      }}>رد</button>
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        background: 'rgba(239,68,68,0.09)', color: '#dc2626',
+                        border: '1px solid rgba(239,68,68,0.28)', borderRadius: 20,
+                        padding: '6px 13px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
+                      }}><XCircle size={12} /> رد</button>
                     </div>
                   </div>
                 ))}
@@ -1093,9 +1116,9 @@ export default function ClubDashboardPage() {
           )}
 
           {/* Danger zone */}
-          <Card style={{ border: '1px solid #FCA5A5' }}>
+          <Card style={{ border: '1px solid rgba(239,68,68,0.30)', background: 'rgba(239,68,68,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 16 }}>⚠️</span>
+              <AlertTriangle size={16} color="#dc2626" />
               <span style={{ fontSize: 14, fontWeight: 700, color: '#991B1B' }}>منطقه خطرناک</span>
             </div>
             <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6B7280', lineHeight: 1.7 }}>
@@ -1104,29 +1127,35 @@ export default function ClubDashboardPage() {
             </p>
             {!deleteConfirm ? (
               <button onClick={() => setDeleteConfirm(true)} style={{
-                background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5',
-                borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 700,
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                background: 'rgba(239,68,68,0.08)', color: '#dc2626',
+                border: '1px solid rgba(239,68,68,0.30)', borderRadius: 20,
+                padding: '10px 20px', fontSize: 13, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'var(--font-base)',
               }}>
-                🗑 حذف این باشگاه
+                <Trash2 size={14} /> حذف این باشگاه
               </button>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ padding: '12px 16px', background: '#FEF2F2', borderRadius: 10, border: '1px solid #FCA5A5', fontSize: 13, color: '#991B1B', fontWeight: 600 }}>
+                <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.06)', borderRadius: 12, border: '1px solid rgba(239,68,68,0.25)', fontSize: 13, color: '#991B1B', fontWeight: 600 }}>
                   آیا مطمئن هستید؟ این عمل قابل بازگشت نیست.
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={deleteClub} disabled={deleteLoading} style={{
-                    background: '#DC2626', color: '#fff', border: 'none', borderRadius: 10,
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: 'rgba(239,68,68,0.12)', color: '#dc2626',
+                    border: '1px solid rgba(239,68,68,0.35)', borderRadius: 20,
                     padding: '10px 20px', fontSize: 13, fontWeight: 700,
                     cursor: deleteLoading ? 'not-allowed' : 'pointer',
-                    opacity: deleteLoading ? 0.7 : 1, fontFamily: 'var(--font-base)',
+                    opacity: deleteLoading ? 0.65 : 1, fontFamily: 'var(--font-base)',
                   }}>
+                    {deleteLoading ? <Loader2 size={13} /> : <Trash2 size={13} />}
                     {deleteLoading ? 'در حال حذف...' : 'بله، حذف کن'}
                   </button>
                   <button onClick={() => setDeleteConfirm(false)} style={{
-                    background: '#fff', color: DARK, border: '1px solid #E5E7EB',
-                    borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600,
+                    background: 'rgba(0,0,0,0.04)', color: '#6B7280',
+                    border: '1px solid rgba(0,0,0,0.12)', borderRadius: 20,
+                    padding: '10px 20px', fontSize: 13, fontWeight: 600,
                     cursor: 'pointer', fontFamily: 'var(--font-base)',
                   }}>انصراف</button>
                 </div>
@@ -1213,9 +1242,11 @@ export default function ClubDashboardPage() {
             <div style={{ display: 'flex', gap: 10 }}>
               <SaveBtn onClick={saveInfo} loading={infoSaving} />
               <button onClick={() => router.push(`/clubs/${selectedClub?.id}`)} style={{
-                padding: '11px 20px', borderRadius: 10, border: '1px solid #E5E7EB',
-                background: '#fff', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-base)', color: DARK,
-              }}>مشاهده پروفایل</button>
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 20px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.12)',
+                background: 'rgba(0,0,0,0.04)', fontSize: 14, cursor: 'pointer',
+                fontFamily: 'var(--font-base)', color: '#6B7280',
+              }}><Eye size={14} /> مشاهده پروفایل</button>
             </div>
           </Card>
 
@@ -1281,9 +1312,12 @@ export default function ClubDashboardPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DARK }}>میزهای باشگاه</h2>
             <button onClick={() => setShowTableForm(v => !v)} style={{
-              background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
-              padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)',
-            }}>+ میز جدید</button>
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(199,166,106,0.14)', color: '#A07840',
+              border: '1px solid rgba(199,166,106,0.42)', borderRadius: 20,
+              padding: '9px 18px', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'var(--font-base)',
+            }}><Plus size={14} /> میز جدید</button>
           </div>
 
           {showTableForm && (
@@ -1388,7 +1422,7 @@ export default function ClubDashboardPage() {
                     </div>
                   ) : (
                     <div style={{ width: 120, height: 80, borderRadius: 10, border: '1.5px dashed #D1D5DB', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'rgba(0,0,0,0.02)' }}>
-                      <span style={{ fontSize: 20 }}>📷</span>
+                      <Camera size={20} color="#9CA3AF" />
                       <span style={{ fontSize: 11, color: '#9CA3AF' }}>انتخاب عکس</span>
                     </div>
                   )}
@@ -1489,7 +1523,7 @@ export default function ClubDashboardPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {tables.length === 0 ? (
               <Card style={{ textAlign: 'center', padding: 40 }}>
-                <div style={{ fontSize: 40, marginBottom: 8 }}>🎱</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Grid3X3 size={40} color="#D1D5DB" strokeWidth={1.2} /></div>
                 <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز میزی ثبت نشده</p>
               </Card>
             ) : tables.map(t => {
@@ -1500,7 +1534,7 @@ export default function ClubDashboardPage() {
                     {t.photoDataUrl ? (
                       <img src={t.photoDataUrl} alt="" style={{ width: 72, height: 52, objectFit: 'cover', borderRadius: 10, flexShrink: 0, border: `1.5px solid ${cs.border}` }} />
                     ) : (
-                      <div style={{ width: 52, height: 52, borderRadius: 12, background: cs.bg, border: `1.5px solid ${cs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>🎱</div>
+                      <div style={{ width: 52, height: 52, borderRadius: 12, background: cs.bg, border: `1.5px solid ${cs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Grid3X3 size={22} color={cs.color} strokeWidth={1.5} /></div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2 }}>
@@ -1516,18 +1550,18 @@ export default function ClubDashboardPage() {
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                       <button onClick={() => editingTableId === t.id ? setEditingTableId(null) : startEditTable(t)} style={{
-                        padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-                        border: `1px solid ${editingTableId === t.id ? GOLD : GOLD + '55'}`,
-                        background: editingTableId === t.id ? GOLD : `${GOLD}11`,
-                        color: editingTableId === t.id ? '#fff' : GOLD,
-                        cursor: 'pointer', fontFamily: 'var(--font-base)',
-                      }}>ویرایش</button>
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                        padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                        border: `1px solid rgba(199,166,106,${editingTableId === t.id ? '0.55' : '0.32'})`,
+                        background: editingTableId === t.id ? 'rgba(199,166,106,0.22)' : 'rgba(199,166,106,0.08)',
+                        color: '#A07840', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                      }}><Pencil size={12} /> ویرایش</button>
                       <button onClick={() => deleteTable(t.id)} style={{
-                        padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-                        border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)',
-                        color: '#991B1B', cursor: 'pointer', fontFamily: 'var(--font-base)',
-                        boxShadow: 'inset 0 1px 0 rgba(239,68,68,0.08)',
-                      }}>حذف</button>
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                        padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                        border: '1px solid rgba(239,68,68,0.28)', background: 'rgba(239,68,68,0.07)',
+                        color: '#dc2626', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                      }}><Trash2 size={12} /> حذف</button>
                     </div>
                   </div>
 
@@ -1571,7 +1605,7 @@ export default function ClubDashboardPage() {
                             </div>
                           ) : (
                             <div style={{ width: 120, height: 80, borderRadius: 10, border: '1.5px dashed #D1D5DB', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'rgba(0,0,0,0.02)' }}>
-                              <span style={{ fontSize: 20 }}>📷</span>
+                              <Camera size={20} color="#9CA3AF" />
                               <span style={{ fontSize: 11, color: '#9CA3AF' }}>عوض کردن عکس</span>
                             </div>
                           )}
@@ -1637,13 +1671,15 @@ export default function ClubDashboardPage() {
 
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={saveEditTable} style={{
-                          flex: 1, padding: '10px 0', borderRadius: 12, fontSize: 14, fontWeight: 700,
-                          border: `1px solid ${GOLD}55`, background: `${GOLD}18`,
-                          color: GOLD, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                        }}>ذخیره تغییرات</button>
+                          flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          padding: '10px 0', borderRadius: 20, fontSize: 14, fontWeight: 700,
+                          border: 'rgba(199,166,106,0.42)', background: 'rgba(199,166,106,0.14)',
+                          color: '#A07840', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                        }}><Check size={14} /> ذخیره تغییرات</button>
                         <button onClick={() => setEditingTableId(null)} style={{
-                          padding: '10px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                          border: '1px solid rgba(0,0,0,0.10)', background: 'rgba(0,0,0,0.03)',
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          padding: '10px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+                          border: '1px solid rgba(0,0,0,0.11)', background: 'rgba(0,0,0,0.04)',
                           color: '#6B7280', cursor: 'pointer', fontFamily: 'var(--font-base)',
                         }}>انصراف</button>
                       </div>
@@ -1714,9 +1750,9 @@ export default function ClubDashboardPage() {
             ].map(f => (
               <button key={f.key} onClick={() => setBookingFilter(f.key)} style={{
                 padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: `1px solid ${bookingFilter === f.key ? GOLD : '#E5E7EB'}`,
-                background: bookingFilter === f.key ? GOLD : '#fff',
-                color: bookingFilter === f.key ? '#fff' : '#6B7280',
+                border: `1px solid ${bookingFilter === f.key ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.12)'}`,
+                background: bookingFilter === f.key ? 'rgba(199,166,106,0.14)' : 'rgba(0,0,0,0.04)',
+                color: bookingFilter === f.key ? '#A07840' : '#6B7280',
                 fontFamily: 'var(--font-base)',
               }}>{f.label}</button>
             ))}
@@ -1739,7 +1775,7 @@ export default function ClubDashboardPage() {
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
                         {toPersianDate(b.startTime)} تا {toPersianDate(b.endTime)}
                       </div>
-                      {b.user?.phone && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>📞 {b.user.phone}</div>}
+                      {b.user?.phone && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}><Phone size={11} /> {b.user.phone}</div>}
                       {b.totalPrice > 0 && (
                         <div style={{ fontSize: 13, color: '#059669', fontWeight: 700, marginTop: 4 }}>
                           {b.totalPrice.toLocaleString('fa-IR')} تومان
@@ -1754,13 +1790,17 @@ export default function ClubDashboardPage() {
                   {b.status === 'pending' && (
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button onClick={() => updateBookingStatus(b.id, 'confirmed')} style={{
-                        flex: 1, background: '#059669', color: '#fff', border: 'none', borderRadius: 8,
-                        padding: '9px 0', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 600,
-                      }}>✅ تأیید</button>
+                        flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        background: 'rgba(48,197,90,0.10)', color: '#16a34a',
+                        border: '1px solid rgba(48,197,90,0.28)', borderRadius: 20,
+                        padding: '9px 0', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
+                      }}><CheckCircle size={14} /> تأیید</button>
                       <button onClick={() => updateBookingStatus(b.id, 'cancelled')} style={{
-                        flex: 1, background: '#EF4444', color: '#fff', border: 'none', borderRadius: 8,
-                        padding: '9px 0', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 600,
-                      }}>❌ رد</button>
+                        flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        background: 'rgba(239,68,68,0.09)', color: '#dc2626',
+                        border: '1px solid rgba(239,68,68,0.28)', borderRadius: 20,
+                        padding: '9px 0', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
+                      }}><XCircle size={14} /> رد</button>
                     </div>
                   )}
                 </Card>
@@ -1774,14 +1814,17 @@ export default function ClubDashboardPage() {
       {activeTab === 'tournaments' && (
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-            {([['list', 'مسابقات من'], ['create', '+ ثبت مسابقه جدید']] as const).map(([k, l]) => (
+            {([['list', 'مسابقات من', false], ['create', 'ثبت مسابقه جدید', true]] as const).map(([k, l, isCreate]) => (
               <button key={k} onClick={() => setTournamentTab(k)} style={{
-                padding: '9px 18px', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                border: `1px solid ${tournamentTab === k ? GOLD : '#E5E7EB'}`,
-                background: tournamentTab === k ? GOLD : '#fff',
-                color: tournamentTab === k ? '#fff' : '#6B7280',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '9px 18px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                border: `1px solid ${tournamentTab === k ? 'rgba(199,166,106,0.50)' : 'rgba(0,0,0,0.12)'}`,
+                background: tournamentTab === k ? 'rgba(199,166,106,0.14)' : 'rgba(0,0,0,0.04)',
+                color: tournamentTab === k ? '#A07840' : '#6B7280',
                 fontFamily: 'var(--font-base)',
-              }}>{l}</button>
+              }}>
+                {isCreate && <Plus size={13} />}{l}
+              </button>
             ))}
           </div>
 
@@ -1789,12 +1832,15 @@ export default function ClubDashboardPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {myTournaments.length === 0 ? (
                 <Card style={{ textAlign: 'center', padding: 40 }}>
-                  <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Trophy size={40} color="#D1D5DB" strokeWidth={1.2} /></div>
                   <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز مسابقه‌ای ثبت نشده</p>
                   <button onClick={() => setTournamentTab('create')} style={{
-                    background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
-                    padding: '10px 24px', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700, marginTop: 12,
-                  }}>ثبت اولین مسابقه</button>
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: 'rgba(199,166,106,0.14)', color: '#A07840',
+                    border: '1px solid rgba(199,166,106,0.42)', borderRadius: 20,
+                    padding: '10px 24px', fontSize: 14, cursor: 'pointer',
+                    fontFamily: 'var(--font-base)', fontWeight: 700, marginTop: 12,
+                  }}><Plus size={14} /> ثبت اولین مسابقه</button>
                 </Card>
               ) : myTournaments.map(t => (
                 <Card key={t.id}>
@@ -1813,20 +1859,22 @@ export default function ClubDashboardPage() {
                       background: `${STATUS_COLORS[t.status]}22`, color: STATUS_COLORS[t.status],
                     }}>{STATUS_LABELS[t.status]}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <Link href={`/tournaments/${t.id}`} style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: '#F3F4F6', color: DARK }}>مشاهده</Link>
-                    <Link href={`/tournaments/${t.id}/bracket`} style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: '#EDE8DF', color: DARK }}>براکت</Link>
+                  <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                    <Link href={`/tournaments/${t.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.11)', color: '#374151' }}><Eye size={12} /> مشاهده</Link>
+                    <Link href={`/tournaments/${t.id}/bracket`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.28)', color: '#A07840' }}>براکت</Link>
                     {t.status === 'live' && (
-                      <Link href={`/tournaments/${t.id}/live`} style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: '#FEE2E2', color: '#991B1B' }}>🔴 لایو</Link>
+                      <Link href={`/tournaments/${t.id}/live`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.28)', color: '#dc2626' }}>● لایو</Link>
                     )}
                     <button style={{
-                      padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                      border: 'none', background: `${GOLD}22`, color: GOLD, cursor: 'pointer', fontFamily: 'var(--font-base)',
-                    }}>ویرایش</button>
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                      border: '1px solid rgba(199,166,106,0.32)', background: 'rgba(199,166,106,0.08)', color: '#A07840', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                    }}><Pencil size={12} /> ویرایش</button>
                     <button onClick={() => { if (confirm(`مسابقه «${t.name}» حذف شود؟`)) deleteTournament(t.id); }} style={{
-                      padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                      border: 'none', background: '#FEE2E2', color: '#991B1B', cursor: 'pointer', fontFamily: 'var(--font-base)',
-                    }}>حذف</button>
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                      border: '1px solid rgba(239,68,68,0.28)', background: 'rgba(239,68,68,0.08)', color: '#dc2626', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                    }}><Trash2 size={12} /> حذف</button>
                   </div>
                 </Card>
               ))}
@@ -1893,8 +1941,10 @@ export default function ClubDashboardPage() {
               <div style={{ display: 'flex', gap: 10 }}>
                 <SaveBtn onClick={createTournament} loading={tLoading} label="ثبت مسابقه" />
                 <button onClick={() => setTournamentTab('list')} style={{
-                  padding: '11px 20px', borderRadius: 10, border: '1px solid #E5E7EB',
-                  background: '#fff', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-base)', color: DARK,
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '10px 20px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.12)',
+                  background: 'rgba(0,0,0,0.04)', fontSize: 14, cursor: 'pointer',
+                  fontFamily: 'var(--font-base)', color: '#6B7280',
                 }}>انصراف</button>
               </div>
             </Card>
@@ -1926,9 +1976,9 @@ export default function ClubDashboardPage() {
                   width: 26, height: 26, borderRadius: '50%',
                   background: GOLD, border: '2px solid #fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', fontSize: 13,
+                  cursor: 'pointer',
                 }}>
-                  📷
+                  <Camera size={12} color="#fff" />
                   <input type="file" accept="image/*" style={{ display: 'none' }}
                     onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ''; }} />
                 </label>
@@ -1938,7 +1988,7 @@ export default function ClubDashboardPage() {
                 <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 10 }}>
                   روی آیکون دوربین کلیک کنید تا لوگو یا تصویر پروفایل باشگاه را آپلود کنید
                 </div>
-                {logoUploading && <div style={{ fontSize: 12, color: GOLD }}>⏳ در حال آپلود...</div>}
+                {logoUploading && <div style={{ fontSize: 12, color: GOLD, display: 'flex', alignItems: 'center', gap: 5 }}><Loader2 size={12} /> در حال آپلود...</div>}
               </div>
             </div>
           </Card>
@@ -1955,7 +2005,7 @@ export default function ClubDashboardPage() {
                   fontSize: 13, fontWeight: 700, color: '#A07840',
                   opacity: storyUploading ? 0.5 : 1,
                 }}>
-                  {storyUploading ? '⏳ آپلود...' : '📲 استوری جدید'}
+                  {storyUploading ? <><Loader2 size={13} /> آپلود...</> : <><Upload size={13} /> استوری جدید</>}
                   <input type="file" accept="image/*,video/*" style={{ display: 'none' }} disabled={storyUploading}
                     onChange={e => {
                       const f = e.target.files?.[0];
@@ -2017,8 +2067,8 @@ export default function ClubDashboardPage() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => uploadStory(storyDraft.file, storyDraft.text)} disabled={storyUploading} style={{ padding: '8px 20px', borderRadius: 20, border: 'none', background: `linear-gradient(135deg,${GOLD},#8B6914)`, color: '#fff', fontSize: 13, fontWeight: 700, cursor: storyUploading ? 'not-allowed' : 'pointer', opacity: storyUploading ? 0.6 : 1, fontFamily: 'var(--font-base)' }}>{storyUploading ? '⏳ آپلود...' : '🚀 اشتراک‌گذاری'}</button>
-                    <button onClick={() => { URL.revokeObjectURL(storyDraft.previewUrl); setStoryDraft(null); }} disabled={storyUploading} style={{ padding: '8px 16px', borderRadius: 20, border: `1px solid #E5E7EB`, background: '#F9FAFB', color: '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-base)' }}>انصراف</button>
+                    <button onClick={() => uploadStory(storyDraft.file, storyDraft.text)} disabled={storyUploading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', borderRadius: 20, border: '1px solid rgba(199,166,106,0.50)', background: 'rgba(199,166,106,0.16)', color: '#A07840', fontSize: 13, fontWeight: 700, cursor: storyUploading ? 'not-allowed' : 'pointer', opacity: storyUploading ? 0.6 : 1, fontFamily: 'var(--font-base)' }}>{storyUploading ? <><Loader2 size={13} /> آپلود...</> : <><Upload size={13} /> اشتراک‌گذاری</>}</button>
+                    <button onClick={() => { URL.revokeObjectURL(storyDraft.previewUrl); setStoryDraft(null); }} disabled={storyUploading} style={{ padding: '8px 16px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.11)', background: 'rgba(0,0,0,0.04)', color: '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-base)' }}>انصراف</button>
                   </div>
                 </div>
               </div>
@@ -2054,11 +2104,10 @@ export default function ClubDashboardPage() {
               <label style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer',
                 padding: '8px 16px', borderRadius: 20,
-                background: `${GOLD}12`, border: `1px solid ${GOLD}44`,
+                background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.38)',
                 fontSize: 13, fontWeight: 700, color: '#A07840',
-                boxShadow: `inset 0 1px 0 rgba(199,166,106,0.15)`,
               }}>
-                {uploadingSingle ? '⏳ در حال آپلود...' : '📷 آپلود عکس'}
+                {uploadingSingle ? <><Loader2 size={13} /> آپلود...</> : <><Camera size={13} /> آپلود عکس</>}
                 <input type="file" accept="image/*" multiple style={{ display: 'none' }}
                   onChange={e => { if (e.target.files?.length) uploadSinglePhotos(e.target.files); e.target.value = ''; }} />
               </label>
@@ -2110,7 +2159,7 @@ export default function ClubDashboardPage() {
           {/* Albums list */}
           {albums.length === 0 ? (
             <Card style={{ textAlign: 'center', padding: 48 }}>
-              <div style={{ fontSize: 44, marginBottom: 10 }}>📸</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><ImageIcon size={44} color="#D1D5DB" strokeWidth={1.2} /></div>
               <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز آلبومی ایجاد نشده</p>
             </Card>
           ) : (
@@ -2160,7 +2209,7 @@ export default function ClubDashboardPage() {
                             background: `${GOLD}12`, border: `1px solid ${GOLD}44`,
                             fontSize: 13, fontWeight: 700, color: '#A07840',
                           }}>
-                            {uploadingAlbum === album.id ? '⏳ در حال آپلود...' : '📷 افزودن تصویر'}
+                            {uploadingAlbum === album.id ? <><Loader2 size={12} /> آپلود...</> : <><Camera size={12} /> افزودن تصویر</>}
                             <input type="file" accept="image/*" multiple style={{ display: 'none' }}
                               onChange={e => { if (e.target.files?.length) uploadToAlbum(album.id, e.target.files); e.target.value = ''; }} />
                           </label>
@@ -2285,7 +2334,7 @@ export default function ClubDashboardPage() {
 
           {coaches.length === 0 ? (
             <Card style={{ textAlign: 'center', padding: 48 }}>
-              <div style={{ fontSize: 44, marginBottom: 10 }}>👨‍🏫</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><GraduationCap size={44} color="#D1D5DB" strokeWidth={1.2} /></div>
               <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز مربی‌ای اضافه نشده</p>
             </Card>
           ) : (
