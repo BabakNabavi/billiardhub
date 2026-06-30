@@ -437,7 +437,7 @@ export default function Navbar() {
           position: 'fixed', inset: 0, zIndex: 9999,
           background: '#F7F7F5',
           overflowY: 'auto',
-          paddingTop: '72px',
+          paddingTop: '56px',
           animation: 'fadeIn 0.25s ease both',
         }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px 0' }}>
