@@ -336,6 +336,11 @@ export default function ClubDashboardPage() {
   const [storyText, setStoryText] = useState('');
   const [savingStoryText, setSavingStoryText] = useState(false);
   const [showStoryTextEditor, setShowStoryTextEditor] = useState(false);
+  const [storyTextColor, setStoryTextColor] = useState('#ffffff');
+  const [storyTextSize, setStoryTextSize] = useState(15);
+  const [storyTextBold, setStoryTextBold] = useState(false);
+  const [storyTextAlign, setStoryTextAlign] = useState<'right'|'center'|'left'>('center');
+  const [storyTextPos, setStoryTextPos] = useState<'top'|'center'|'bottom'>('bottom');
 
   // Coaches
   const [coaches, setCoaches] = useState<CoachEntry[]>([]);
@@ -744,6 +749,11 @@ export default function ClubDashboardPage() {
         setStoryText(text);
         setStoryDraft(null);
         setShowStoryTextEditor(false);
+        setStoryTextColor('#ffffff');
+        setStoryTextSize(15);
+        setStoryTextBold(false);
+        setStoryTextAlign('center');
+        setStoryTextPos('bottom');
         setSelectedClub(prev => prev ? { ...prev, storyMediaUrl: url, storyType: type, storyExpiresAt: expiresAt, hasActiveStory: true } : prev);
       }
     } catch {}
@@ -1966,45 +1976,97 @@ export default function ClubDashboardPage() {
                     : <img src={activeStory.url} alt="story" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   {storyText && (
                     <div style={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)',
-                      padding: '28px 10px 12px', textAlign: 'center',
-                    }}>
-                      <span style={{ color: '#fff', fontSize: 11, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', lineHeight: 1.4, display: 'block', wordBreak: 'break-word', direction: 'rtl' }}>{storyText}</span>
-                    </div>
+                      position: 'absolute',
+                      ...(storyTextPos === 'top' ? { top: 14 } : storyTextPos === 'center' ? { top: '50%', transform: 'translateY(-50%)' } : { bottom: 14 }),
+                      left: 8, right: 8,
+                      background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+                      borderRadius: 8, padding: '6px 8px',
+                      color: storyTextColor, fontSize: Math.round(storyTextSize * 0.72),
+                      fontWeight: storyTextBold ? 700 : 400,
+                      textAlign: storyTextAlign, direction: 'rtl', lineHeight: 1.5,
+                    }}>{storyText}</div>
                   )}
                 </div>
                 {/* Controls */}
-                <div style={{ flex: 1, minWidth: 170, direction: 'rtl' }}>
+                <div style={{ flex: 1, minWidth: 200, direction: 'rtl' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#30C55A', display: 'inline-block' }} />
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#166534' }}>استوری فعال</span>
                   </div>
-                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 14 }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
                     انقضا: {new Date(activeStory.expiresAt).toLocaleString('fa-IR')}
                   </div>
-                  {/* Text editor — hidden by default, toggled by edit button */}
+                  {/* Text editor panel */}
                   {showStoryTextEditor && (
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 6 }}>متن روی استوری</div>
+                    <div style={{ marginBottom: 14, padding: '12px', borderRadius: 12, border: `1px solid ${GOLD}33`, background: `${GOLD}04` }}>
                       <textarea
                         value={storyText}
                         onChange={e => setStoryText(e.target.value)}
                         placeholder="متن دلخواه را اینجا بنویسید..."
-                        rows={3}
+                        rows={2}
                         style={{
-                          width: '100%', boxSizing: 'border-box',
-                          padding: '8px 10px', borderRadius: 10,
+                          width: '100%', boxSizing: 'border-box', marginBottom: 10,
+                          padding: '8px 10px', borderRadius: 8,
                           border: `1px solid ${GOLD}44`, background: `${GOLD}06`,
                           fontSize: 13, fontFamily: 'var(--font-base)',
                           color: DARK, resize: 'none', outline: 'none',
                           lineHeight: 1.6, direction: 'rtl',
                         }}
                       />
+                      {/* Color palette */}
+                      <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 5 }}>رنگ متن</div>
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 10 }}>
+                        {['#ffffff','#000000','#FFD700','#ef4444','#3b82f6','#22c55e','#f97316','#ec4899','#a855f7','#06b6d4'].map(c => (
+                          <button key={c} onClick={() => setStoryTextColor(c)} style={{
+                            width: 22, height: 22, borderRadius: '50%', background: c, cursor: 'pointer', flexShrink: 0,
+                            border: storyTextColor === c ? `2.5px solid ${GOLD}` : '1.5px solid #D1D5DB',
+                            boxShadow: storyTextColor === c ? `0 0 0 1px #fff inset` : 'none',
+                          }} />
+                        ))}
+                      </div>
+                      {/* Size + Bold + Align */}
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
+                        <span style={{ fontSize: 11, color: '#6B7280' }}>اندازه:</span>
+                        {([['S',11],['M',15],['L',20],['XL',28]] as [string,number][]).map(([lbl,sz]) => (
+                          <button key={lbl} onClick={() => setStoryTextSize(sz)} style={{
+                            padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            border: `1px solid ${storyTextSize === sz ? GOLD : '#E5E7EB'}`,
+                            background: storyTextSize === sz ? `${GOLD}20` : '#fff',
+                            color: storyTextSize === sz ? '#A07840' : '#6B7280',
+                          }}>{lbl}</button>
+                        ))}
+                        <button onClick={() => setStoryTextBold(v => !v)} style={{
+                          padding: '2px 10px', borderRadius: 6, fontSize: 13, fontWeight: 900, cursor: 'pointer',
+                          border: `1px solid ${storyTextBold ? GOLD : '#E5E7EB'}`,
+                          background: storyTextBold ? `${GOLD}20` : '#fff',
+                          color: storyTextBold ? '#A07840' : '#6B7280',
+                        }}>B</button>
+                      </div>
+                      {/* Align + Position */}
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12, alignItems: 'center' }}>
+                        <span style={{ fontSize: 11, color: '#6B7280' }}>چینش:</span>
+                        {([['راست','right'],['وسط','center'],['چپ','left']] as [string,'right'|'center'|'left'][]).map(([lbl,al]) => (
+                          <button key={al} onClick={() => setStoryTextAlign(al)} style={{
+                            padding: '2px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
+                            border: `1px solid ${storyTextAlign === al ? GOLD : '#E5E7EB'}`,
+                            background: storyTextAlign === al ? `${GOLD}20` : '#fff',
+                            color: storyTextAlign === al ? '#A07840' : '#6B7280',
+                          }}>{lbl}</button>
+                        ))}
+                        <span style={{ fontSize: 11, color: '#6B7280', marginRight: 4 }}>جایگاه:</span>
+                        {([['↑ بالا','top'],['↕ وسط','center'],['↓ پایین','bottom']] as [string,'top'|'center'|'bottom'][]).map(([lbl,pos]) => (
+                          <button key={pos} onClick={() => setStoryTextPos(pos)} style={{
+                            padding: '2px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
+                            border: `1px solid ${storyTextPos === pos ? GOLD : '#E5E7EB'}`,
+                            background: storyTextPos === pos ? `${GOLD}20` : '#fff',
+                            color: storyTextPos === pos ? '#A07840' : '#6B7280',
+                          }}>{lbl}</button>
+                        ))}
+                      </div>
                       <button onClick={async () => { await saveStoryText(); setShowStoryTextEditor(false); }} disabled={savingStoryText} style={{
-                        marginTop: 8, padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        padding: '6px 18px', borderRadius: 20, fontSize: 12, fontWeight: 700,
                         cursor: savingStoryText ? 'wait' : 'pointer', border: 'none',
-                        background: `linear-gradient(135deg, ${GOLD} 0%, #D4A855 100%)`,
+                        background: `linear-gradient(135deg, ${GOLD}, #D4A855)`,
                         color: '#fff', fontFamily: 'var(--font-base)',
                       }}>
                         {savingStoryText ? '⏳ در حال ذخیره...' : '✓ ذخیره'}
@@ -2013,17 +2075,31 @@ export default function ClubDashboardPage() {
                   )}
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <button onClick={() => setShowStoryTextEditor(v => !v)} style={{
-                      padding: '7px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                      padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
                       cursor: 'pointer', border: `1px solid ${GOLD}55`,
                       background: showStoryTextEditor ? `${GOLD}18` : '#fff',
                       color: '#A07840', fontFamily: 'var(--font-base)',
-                    }}>✏️ ادیت استوری</button>
+                    }}>✏️ ادیت متن</button>
+                    <label style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'pointer',
+                      padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                      background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#166534',
+                      fontFamily: 'var(--font-base)',
+                    }}>
+                      📲 استوری جدید
+                      <input type="file" accept="image/*,video/*" style={{ display: 'none' }}
+                        onChange={e => {
+                          const f = e.target.files?.[0];
+                          if (f) setStoryDraft({ file: f, previewUrl: URL.createObjectURL(f), text: '' });
+                          e.target.value = '';
+                        }} />
+                    </label>
                     <button onClick={removeStory} style={{
                       background: '#FEE2E2', color: '#991B1B',
                       border: '1px solid #FECACA', borderRadius: 20,
                       padding: '7px 14px', fontSize: 12, fontWeight: 600,
                       cursor: 'pointer', fontFamily: 'var(--font-base)',
-                    }}>حذف استوری</button>
+                    }}>حذف</button>
                   </div>
                 </div>
               </div>
@@ -2035,60 +2111,101 @@ export default function ClubDashboardPage() {
                   <img src={storyDraft.previewUrl} alt="پیش‌نمایش استوری" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   {storyDraft.text && (
                     <div style={{
-                      position: 'absolute', bottom: 18, left: 8, right: 8,
+                      position: 'absolute',
+                      ...(storyTextPos === 'top' ? { top: 14 } : storyTextPos === 'center' ? { top: '50%', transform: 'translateY(-50%)' } : { bottom: 14 }),
+                      left: 8, right: 8,
                       background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
                       borderRadius: 8, padding: '6px 8px',
-                      color: '#fff', fontSize: 11, fontWeight: 600,
-                      textAlign: 'center', direction: 'rtl', lineHeight: 1.5,
+                      color: storyTextColor, fontSize: Math.round(storyTextSize * 0.72),
+                      fontWeight: storyTextBold ? 700 : 400,
+                      textAlign: storyTextAlign, direction: 'rtl', lineHeight: 1.5,
                     }}>{storyDraft.text}</div>
                   )}
                 </div>
-                {/* Controls — RIGHT side (ltr container reverses visual order) */}
-                <div style={{ flex: 1, minWidth: 180, direction: 'rtl' }}>
+                {/* Controls — RIGHT side */}
+                <div style={{ flex: 1, minWidth: 200, direction: 'rtl' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, display: 'inline-block' }} />
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#A07840' }}>پیش‌نمایش استوری</span>
                   </div>
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 6 }}>متن روی استوری (اختیاری)</div>
+                  <div style={{ padding: '12px', borderRadius: 12, border: `1px solid ${GOLD}33`, background: `${GOLD}04`, marginBottom: 12 }}>
                     <textarea
                       value={storyDraft.text}
                       onChange={e => setStoryDraft(prev => prev ? { ...prev, text: e.target.value } : null)}
-                      placeholder="متنی که روی استوری نمایش داده می‌شود..."
-                      rows={3}
+                      placeholder="متن روی استوری (اختیاری)..."
+                      rows={2}
                       style={{
-                        width: '100%', borderRadius: 8, border: `1px solid ${GOLD}44`,
+                        width: '100%', boxSizing: 'border-box', marginBottom: 10,
+                        borderRadius: 8, border: `1px solid ${GOLD}44`,
                         background: `${GOLD}06`, padding: '8px 10px',
                         fontSize: 12, color: DARK, fontFamily: 'var(--font-base)',
-                        resize: 'vertical', direction: 'rtl', outline: 'none',
+                        resize: 'none', direction: 'rtl', outline: 'none',
                       }}
                     />
+                    {/* Color palette */}
+                    <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 5 }}>رنگ متن</div>
+                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 10 }}>
+                      {['#ffffff','#000000','#FFD700','#ef4444','#3b82f6','#22c55e','#f97316','#ec4899','#a855f7','#06b6d4'].map(c => (
+                        <button key={c} onClick={() => setStoryTextColor(c)} style={{
+                          width: 22, height: 22, borderRadius: '50%', background: c, cursor: 'pointer', flexShrink: 0,
+                          border: storyTextColor === c ? `2.5px solid ${GOLD}` : '1.5px solid #D1D5DB',
+                          boxShadow: storyTextColor === c ? `0 0 0 1px #fff inset` : 'none',
+                        }} />
+                      ))}
+                    </div>
+                    {/* Size + Bold */}
+                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: '#6B7280' }}>اندازه:</span>
+                      {([['S',11],['M',15],['L',20],['XL',28]] as [string,number][]).map(([lbl,sz]) => (
+                        <button key={lbl} onClick={() => setStoryTextSize(sz)} style={{
+                          padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                          border: `1px solid ${storyTextSize === sz ? GOLD : '#E5E7EB'}`,
+                          background: storyTextSize === sz ? `${GOLD}20` : '#fff',
+                          color: storyTextSize === sz ? '#A07840' : '#6B7280',
+                        }}>{lbl}</button>
+                      ))}
+                      <button onClick={() => setStoryTextBold(v => !v)} style={{
+                        padding: '2px 10px', borderRadius: 6, fontSize: 13, fontWeight: 900, cursor: 'pointer',
+                        border: `1px solid ${storyTextBold ? GOLD : '#E5E7EB'}`,
+                        background: storyTextBold ? `${GOLD}20` : '#fff',
+                        color: storyTextBold ? '#A07840' : '#6B7280',
+                      }}>B</button>
+                    </div>
+                    {/* Align + Position */}
+                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: '#6B7280' }}>چینش:</span>
+                      {([['راست','right'],['وسط','center'],['چپ','left']] as [string,'right'|'center'|'left'][]).map(([lbl,al]) => (
+                        <button key={al} onClick={() => setStoryTextAlign(al)} style={{
+                          padding: '2px 7px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
+                          border: `1px solid ${storyTextAlign === al ? GOLD : '#E5E7EB'}`,
+                          background: storyTextAlign === al ? `${GOLD}20` : '#fff',
+                          color: storyTextAlign === al ? '#A07840' : '#6B7280',
+                        }}>{lbl}</button>
+                      ))}
+                      <span style={{ fontSize: 11, color: '#6B7280' }}>جایگاه:</span>
+                      {([['↑','top'],['↕','center'],['↓','bottom']] as [string,'top'|'center'|'bottom'][]).map(([lbl,pos]) => (
+                        <button key={pos} onClick={() => setStoryTextPos(pos)} style={{
+                          padding: '2px 8px', borderRadius: 6, fontSize: 13, cursor: 'pointer',
+                          border: `1px solid ${storyTextPos === pos ? GOLD : '#E5E7EB'}`,
+                          background: storyTextPos === pos ? `${GOLD}20` : '#fff',
+                          color: storyTextPos === pos ? '#A07840' : '#6B7280',
+                        }}>{lbl}</button>
+                      ))}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => uploadStory(storyDraft.file, storyDraft.text)}
-                      disabled={storyUploading}
-                      style={{
-                        padding: '8px 20px', borderRadius: 20, border: 'none',
-                        background: `linear-gradient(135deg,${GOLD},#8B6914)`,
-                        color: '#fff', fontSize: 13, fontWeight: 700,
-                        cursor: storyUploading ? 'not-allowed' : 'pointer',
-                        opacity: storyUploading ? 0.6 : 1,
-                        fontFamily: 'var(--font-base)',
-                      }}>
-                      {storyUploading ? '⏳ در حال آپلود...' : '🚀 اشتراک‌گذاری'}
-                    </button>
-                    <button
-                      onClick={() => { URL.revokeObjectURL(storyDraft.previewUrl); setStoryDraft(null); }}
-                      disabled={storyUploading}
-                      style={{
-                        padding: '8px 16px', borderRadius: 20,
-                        border: `1px solid #E5E7EB`, background: '#F9FAFB',
-                        color: '#6B7280', fontSize: 13, fontWeight: 600,
-                        cursor: 'pointer', fontFamily: 'var(--font-base)',
-                      }}>
-                      انصراف
-                    </button>
+                    <button onClick={() => uploadStory(storyDraft.file, storyDraft.text)} disabled={storyUploading} style={{
+                      padding: '8px 20px', borderRadius: 20, border: 'none',
+                      background: `linear-gradient(135deg,${GOLD},#8B6914)`,
+                      color: '#fff', fontSize: 13, fontWeight: 700,
+                      cursor: storyUploading ? 'not-allowed' : 'pointer',
+                      opacity: storyUploading ? 0.6 : 1, fontFamily: 'var(--font-base)',
+                    }}>{storyUploading ? '⏳ در حال آپلود...' : '🚀 اشتراک‌گذاری'}</button>
+                    <button onClick={() => { URL.revokeObjectURL(storyDraft.previewUrl); setStoryDraft(null); }} disabled={storyUploading} style={{
+                      padding: '8px 16px', borderRadius: 20, border: `1px solid #E5E7EB`,
+                      background: '#F9FAFB', color: '#6B7280', fontSize: 13, fontWeight: 600,
+                      cursor: 'pointer', fontFamily: 'var(--font-base)',
+                    }}>انصراف</button>
                   </div>
                 </div>
               </div>
