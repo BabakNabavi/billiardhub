@@ -201,8 +201,7 @@ const NEWS = [
    CLUB CARD
 ═══════════════════════════════════════════════════════════════ */
 function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[0]; h?: string; featured?: boolean }) {
-  const [hov, setHov]     = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [hov, setHov] = useState(false);
   return (
     <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block', height: h }}>
       <div
@@ -215,6 +214,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
           transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
           boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
+          willChange: 'transform',
         }}
       >
         {/* ── Image: top 60% ── */}
@@ -226,29 +226,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               transition: 'filter 0.6s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
               transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {(() => {
-                const typeColor: Record<string, { clr: string; rgb: string }> = {
-                  'اسنوکر': { clr: '#30C55A', rgb: '48,197,90'   },
-                  'پاکت':   { clr: '#3b82f6', rgb: '59,130,246'  },
-                  'هی‌بال': { clr: '#8b5cf6', rgb: '139,92,246'  },
-                };
-                const tc = typeColor[club.type] ?? { clr: 'rgba(255,255,255,0.80)', rgb: '255,255,255' };
-                return <span style={{ background: `rgba(${tc.rgb},0.12)`, border: `1px solid rgba(${tc.rgb},0.28)`, borderRadius: '20px', padding: '5px 12px', fontSize: '12px', fontWeight: 700, color: tc.clr }}>{club.type}</span>;
-              })()}
-              {club.badge && <span style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '5px 12px', fontSize: '12px', fontWeight: 700, color: '#C7A66A' }}>{club.badge}</span>}
-            </div>
-            <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }}
-              style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}>
-              <Heart size={13} style={{ color: saved ? '#ff4455' : 'rgba(255,255,255,0.70)', fill: saved ? '#ff4455' : 'transparent', transition: 'all 0.25s', animation: saved ? 'none' : 'gentlePulse 2.8s ease-in-out infinite' }} />
-            </button>
-          </div>
-          {hov && (
-            <div style={{ position: 'absolute', top: '48px', right: '10px', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2, animation: 'fadeTagIn 0.3s ease both' }}>
-              {club.tags.map(t => <span key={t} style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '4px 10px', fontSize: '12px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{t}</span>)}
-            </div>
-          )}
         </div>
 
         {/* ── White info panel: bottom 40% ── */}
@@ -272,7 +249,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
             </span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: '4px' }}>
+          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: '4px' }}>
             <div>
               <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
@@ -675,15 +652,17 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:14px 0 32px; scroll-snap-type:x mandatory; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:22px 10px 48px; scroll-snap-type:x mandatory; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; transition:transform 0.22s ease, box-shadow 0.3s ease; position:relative; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
+        .club-card-price-row { display:flex; }
         .club-name-short { display:none; }
         @media(max-width:600px){
           .club-name-full { display:none !important; }
           .club-name-short { display:inline !important; }
           .clubs-dots { display:flex !important; }
+          .club-card-price-row { display:none !important; }
           .clubs-section { padding-top:55px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:24px !important; }
           .clubs-desk { display:none !important; }
