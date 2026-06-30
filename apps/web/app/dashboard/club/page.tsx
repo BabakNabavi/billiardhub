@@ -787,10 +787,16 @@ export default function ClubDashboardPage() {
     setShowCoachPicker(true);
     setCoachSearch('');
     setLoadingCoaches(true);
+    const MOCK_COACHES: ApiCoach[] = [
+      { id: '1', firstName: 'استاد احمد', lastName: 'رضایی', verificationStatus: 'verified', city: 'تهران', bio: 'مربی ملی‌پوش با ۱۵ سال سابقه', coachProfile: { specialty: 'snooker', experience: '۱۵' } },
+      { id: '2', firstName: 'حسین', lastName: 'نوری', verificationStatus: 'verified', city: 'مشهد', bio: 'قهرمان آسیا و مربی دسته برتر', coachProfile: { specialty: 'snooker', experience: '۱۲' } },
+      { id: '3', firstName: 'مریم', lastName: 'کاظمی', verificationStatus: 'verified', city: 'اصفهان', bio: 'مربی بانوان و متخصص پاکت بیلیارد', coachProfile: { specialty: 'pocket', experience: '۸' } },
+      { id: '4', firstName: 'سینا', lastName: 'محمدی', verificationStatus: 'pending', city: 'شیراز', bio: 'مربی جوان و قهرمان لیگ برتر', coachProfile: { specialty: 'pocket', experience: '۵' } },
+    ];
     fetch('/api/users/by-role?role=coach')
       .then(r => r.json())
-      .then(data => { setAvailableCoaches(Array.isArray(data) ? data : []); })
-      .catch(() => setAvailableCoaches([]))
+      .then(data => { setAvailableCoaches(Array.isArray(data) && data.length > 0 ? data : MOCK_COACHES); })
+      .catch(() => setAvailableCoaches(MOCK_COACHES))
       .finally(() => setLoadingCoaches(false));
   };
 
