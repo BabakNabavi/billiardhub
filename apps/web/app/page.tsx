@@ -983,7 +983,7 @@ useEffect(() => {
       </section>
 
       {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
-      <section style={{ background: '#FFFFFF', padding: 'clamp(26px,2.8vw,40px) clamp(16px,5%,80px)' }}>
+      <section style={{ background: '#FFFFFF', padding: 'clamp(12px,1.4vw,20px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '18px', flexWrap: 'wrap', gap: '20px' }}>
