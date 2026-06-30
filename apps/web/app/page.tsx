@@ -789,7 +789,7 @@ useEffect(() => {
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
-        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 44px; scroll-snap-type:x proximity; }
+        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 44px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-mob-card { transform-origin:center; position:relative; }
         .mkt-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
@@ -1100,8 +1100,20 @@ useEffect(() => {
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
-              <div key={p.id} className="mkt-mob-card" style={{ width: '44vw', minWidth: '148px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(200px,62vw,270px)' }}>
+              <div key={p.id} className="mkt-mob-card" style={{ width: '36vw', minWidth: '126px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                {p.pct > 0 && (
+                  <div style={{ position: 'absolute', top: '-13px', right: '8px', zIndex: 4,
+                    background: 'rgba(239,68,68,0.10)',
+                    backdropFilter: 'blur(12px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                    border: '1px solid rgba(239,68,68,0.32)',
+                    boxShadow: 'inset 0 1px 0 rgba(239,68,68,0.22), 0 2px 8px rgba(0,0,0,0.18)',
+                    color: '#ef4444', fontSize: '10px', fontWeight: 700,
+                    padding: '3px 9px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
+                    {p.pct}٪ تخفیف
+                  </div>
+                )}
+                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(190px,56vw,255px)' }}>
                   <div style={{
                     borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
                     display: 'flex', flexDirection: 'column',
@@ -1110,20 +1122,13 @@ useEffect(() => {
                     <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
                       <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.65) 100%)' }} />
-                      {p.pct > 0 && (
-                        <div style={{ position: 'absolute', top: '7px', right: '7px',
-                          background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)',
-                          color: '#ef4444', fontSize: '9px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>
-                          {p.pct}٪
-                        </div>
-                      )}
                       <div style={{ position: 'absolute', bottom: '6px', left: '7px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
                     </div>
-                    <div style={{ flex: '0 0 38%', background: '#fff', padding: '7px 8px 6px',
+                    <div style={{ flex: '0 0 38%', background: '#fff', padding: '8px 8px 7px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', overflow: 'hidden' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
-                      <div style={{ fontSize: '9px', color: TEXT_M }}>{p.sub}</div>
-                      <div style={{ fontSize: '14px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
+                      <div style={{ fontSize: '11px', color: TEXT_M }}>{p.sub}</div>
+                      <div style={{ fontSize: '15px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
                     </div>
                   </div>
                 </Link>
