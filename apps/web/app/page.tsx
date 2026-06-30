@@ -239,10 +239,16 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <button className="club-open-btn"
             onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
             style={{ position: 'absolute', top: '8px', right: '8px', height: '22px', borderRadius: '20px',
-              background: isOpen ? 'rgba(30,200,90,0.92)' : 'rgba(200,60,60,0.88)',
-              border: 'none', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', zIndex: 3, padding: '0 8px', boxShadow: '0 1px 6px rgba(0,0,0,0.18)' }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff' }}>{isOpen ? 'باز' : 'بسته'}</span>
+              background: isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)',
+              backdropFilter: 'blur(12px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+              border: isOpen ? '1px solid rgba(48,197,90,0.32)' : '1px solid rgba(239,68,68,0.32)',
+              boxShadow: isOpen
+                ? 'inset 0 1px 0 rgba(48,197,90,0.22), 0 2px 8px rgba(0,0,0,0.18)'
+                : 'inset 0 1px 0 rgba(239,68,68,0.22), 0 2px 8px rgba(0,0,0,0.18)',
+              alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', zIndex: 3, padding: '0 9px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: isOpen ? '#30C55A' : '#ef4444', letterSpacing: '0.01em' }}>{isOpen ? 'باز' : 'بسته'}</span>
           </button>
         </div>
 
@@ -696,7 +702,7 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:14px; overflow-x:auto; scrollbar-width:none; padding:22px 14px 48px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 14px 44px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
@@ -957,7 +963,7 @@ useEffect(() => {
           </div>
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '38vw', minWidth: '130px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={c.id} className="club-mob-card" style={{ width: '33vw', minWidth: '120px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(185px,55vw,251px)" />
               </div>
             ))}
