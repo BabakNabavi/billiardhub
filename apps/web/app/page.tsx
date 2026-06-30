@@ -715,7 +715,7 @@ useEffect(() => {
           .club-mob-panel  { display:flex !important; }
           .club-open-btn   { display:flex !important; }
           .clubs-section { padding-top:10px !important; }
-          .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:14px !important; }
+          .clubs-hd { flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:14px !important; }
           .clubs-desk { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
         }
