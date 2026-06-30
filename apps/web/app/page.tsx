@@ -811,21 +811,18 @@ useEffect(() => {
         @keyframes open-dot-blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.25;transform:scale(0.55)} }
         .open-dot { animation:open-dot-blink 3.5s ease-in-out infinite; }
         @media(max-width:600px){
-          .clubs-dots { display:flex !important; }
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
           .club-open-btn   { display:flex !important; }
+          .clubs-desk      { display:none !important; }
+          .clubs-mobile-slider { display:flex !important; }
           .clubs-section { padding-top:10px !important; padding-left:0 !important; padding-right:0 !important; }
-          .clubs-hd { padding-left:14px !important; padding-right:14px !important; }
+          .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:14px !important; }
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; }
           .mkt-split { display:none !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
-          .mkt-dots { display:flex !important; }
-          .clubs-hd { flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:14px !important; }
-          .clubs-desk { display:none !important; }
-          .clubs-mobile-slider { display:flex !important; }
         }
       `}</style>
 
