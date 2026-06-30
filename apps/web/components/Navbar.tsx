@@ -52,22 +52,22 @@ const exploreMenu = [
 ];
 
 const mobileLinks = [
-  { href: '/',              label: 'صفحه اصلی',              icon: <Home size={15} />,          color: GOLD, isHome: true },
-  { href: '/clubs',         label: 'باشگاه‌ها',               icon: <Building2 size={15} />,     color: GOLD },
-  { href: '/shop',          label: 'بیلیارد بازار',           icon: <ShoppingBag size={15} />,   color: GOLD },
-  { href: '/sellers',       label: 'فروشندگان تجهیزات',       icon: <ShoppingBag size={15} />,   color: GOLD },
-  { href: '/manufacturers', label: 'تولیدکنندگان تجهیزات',    icon: <Factory size={15} />,       color: GOLD },
-  { href: '/coaches',       label: 'مربیان',                  icon: <Star size={15} />,          color: GOLD },
-  { href: '/referees',      label: 'داوران',                  icon: <Trophy size={15} />,        color: GOLD },
-  { href: '/players',       label: 'بازیکنان',                icon: <Users size={15} />,         color: GOLD },
-  { href: '/tournaments',   label: 'مسابقات',                 icon: <Trophy size={15} />,        color: GOLD },
-  { href: '/installers',    label: 'خدمات فنی',               icon: <Wrench size={15} />,        color: GOLD },
-  { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={15} />,        color: GOLD },
-  { href: '/education',     label: 'آموزش',                   icon: <GraduationCap size={15} />, color: GOLD },
-  { href: '/live',          label: 'پخش زنده',                icon: <Radio size={15} />,         color: '#ef4444', live: true },
-  { href: '/news',          label: 'اخبار',                   icon: <Newspaper size={15} />,     color: GOLD },
-  { href: '/about',         label: 'درباره ما',               icon: <Users size={15} />,         color: '#8C7A5E' },
-  { href: '/contact',       label: 'تماس با ما',              icon: <Bell size={15} />,          color: '#8C7A5E' },
+  { href: '/',              label: 'صفحه اصلی',              icon: <Home size={18} />,          color: GOLD, isHome: true },
+  { href: '/clubs',         label: 'باشگاه‌ها',               icon: <Building2 size={18} />,     color: GOLD },
+  { href: '/shop',          label: 'بیلیارد بازار',           icon: <ShoppingBag size={18} />,   color: GOLD },
+  { href: '/sellers',       label: 'فروشندگان تجهیزات',       icon: <ShoppingBag size={18} />,   color: GOLD },
+  { href: '/manufacturers', label: 'تولیدکنندگان تجهیزات',    icon: <Factory size={18} />,       color: GOLD },
+  { href: '/coaches',       label: 'مربیان',                  icon: <Star size={18} />,          color: GOLD },
+  { href: '/referees',      label: 'داوران',                  icon: <Trophy size={18} />,        color: GOLD },
+  { href: '/players',       label: 'بازیکنان',                icon: <Users size={18} />,         color: GOLD },
+  { href: '/tournaments',   label: 'مسابقات',                 icon: <Trophy size={18} />,        color: GOLD },
+  { href: '/installers',    label: 'خدمات فنی',               icon: <Wrench size={18} />,        color: GOLD },
+  { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={18} />,        color: GOLD },
+  { href: '/education',     label: 'آموزش',                   icon: <GraduationCap size={18} />, color: GOLD },
+  { href: '/live',          label: 'پخش زنده',                icon: <Radio size={18} />,         color: '#ef4444', live: true },
+  { href: '/news',          label: 'اخبار',                   icon: <Newspaper size={18} />,     color: GOLD },
+  { href: '/about',         label: 'درباره ما',               icon: <Users size={18} />,         color: '#8C7A5E' },
+  { href: '/contact',       label: 'تماس با ما',              icon: <Bell size={18} />,          color: '#8C7A5E' },
 ];
 
 export default function Navbar() {
@@ -412,7 +412,7 @@ export default function Navbar() {
             backdropFilter: 'blur(48px) saturate(200%)',
             WebkitBackdropFilter: 'blur(48px) saturate(200%)',
           }}>
-            <Search size={15} color="rgba(255,255,255,0.38)" style={{ flexShrink: 0 }} />
+            <Search size={18} color="rgba(255,255,255,0.38)" style={{ flexShrink: 0 }} />
             <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="جستجو باشگاه، بازیکن، مربی..."
               style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontSize: '16px', fontFamily: 'inherit' }} />
@@ -478,11 +478,11 @@ export default function Navbar() {
                   display: 'flex', alignItems: 'center', gap: '10px',
                   padding: '6px 10px', borderRadius: '10px',
                   color: item.isHome ? '#1C1C1A' : 'rgba(28,28,26,0.55)',
-                  fontSize: '14px', fontWeight: item.isHome ? 600 : 500,
+                  fontSize: '16px', fontWeight: item.isHome ? 600 : 500,
                   textDecoration: 'none',
                   ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '4px', paddingBottom: '12px' } : {}),
                 }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
                   {item.icon}
                 </div>
                 <span>{item.label}</span>
