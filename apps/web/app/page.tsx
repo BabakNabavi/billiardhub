@@ -202,7 +202,7 @@ const NEWS = [
 ═══════════════════════════════════════════════════════════════ */
 function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[0]; h?: string; featured?: boolean }) {
   const [hov, setHov]       = useState(false);
-  const [saved, setSaved]   = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [isMob, setIsMob]   = useState(false);
   useEffect(() => {
     const check = () => setIsMob(window.innerWidth <= 600);
@@ -245,9 +245,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
           {isMob && (
-            <button onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }}
-              style={{ position: 'absolute', top: '8px', left: '8px', width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(255,255,255,0.90)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 1px 6px rgba(0,0,0,0.12)' }}>
-              <Heart size={13} style={{ color: saved ? '#ff4455' : '#1a1a1a', fill: saved ? '#ff4455' : 'transparent' }} />
+            <button onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
+              style={{ position: 'absolute', top: '8px', right: '8px', height: '22px', borderRadius: '20px', background: isOpen ? 'rgba(30,200,90,0.92)' : 'rgba(200,60,60,0.88)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, padding: '0 8px', boxShadow: '0 1px 6px rgba(0,0,0,0.18)' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', letterSpacing: '0.01em' }}>{isOpen ? 'باز' : 'بسته'}</span>
             </button>
           )}
         </div>
@@ -516,10 +516,10 @@ export default function HomePage() {
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const dist = Math.abs(cardCenter - sliderCenter);
         const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.50));
-        const sy = (1 + t * 0.13).toFixed(3);
+        const sy = (1 + t * 0.05).toFixed(3);
         card.style.transform = `scaleY(${sy})`;
         card.style.filter = t > 0.3
-          ? `drop-shadow(0 ${(t * 6).toFixed(1)}px ${(t * 14).toFixed(1)}px rgba(0,220,80,${(t * 0.20).toFixed(2)}))`
+          ? `drop-shadow(0 ${(t * 5).toFixed(1)}px ${(t * 12).toFixed(1)}px rgba(0,0,0,${(t * 0.13).toFixed(2)}))`
           : 'none';
         if (dist < minDist) { minDist = dist; newActive = i; }
       });
@@ -967,7 +967,7 @@ useEffect(() => {
           </div>
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '43vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={c.id} className="club-mob-card" style={{ width: '38vw', minWidth: '130px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(185px,55vw,251px)" />
               </div>
             ))}
