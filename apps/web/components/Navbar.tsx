@@ -440,9 +440,8 @@ export default function Navbar() {
           paddingTop: '72px',
           animation: 'fadeIn 0.25s ease both',
         }}>
-          {/* لوگو بالای خط طلایی */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px 0 18px', background: '#111' }}>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '72px' }}>
+            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '32px', width: 'auto' }} />
           </div>
 
           <div style={{ height: '1px', background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
