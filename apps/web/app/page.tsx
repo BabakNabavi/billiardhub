@@ -743,7 +743,7 @@ useEffect(() => {
           <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
             <div ref={sliderRef} className="feat-slider" style={{
               display: 'flex', gap: '18px', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '18px 12px 18px',
+              scrollbarWidth: 'none', padding: '18px 12px 36px',
               justifyContent: 'center', alignItems: 'stretch',
               scrollSnapType: 'x mandatory',
             }}>
@@ -759,8 +759,8 @@ useEffect(() => {
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                     textAlign: 'center', flex: 1,
                     boxShadow: i === activeCard
-                      ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 40px rgba(${card.rgb},0.40), 0 0 0 1px rgba(${card.rgb},0.18)`
-                      : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(${card.rgb},0.12)`,
+                      ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 18px rgba(${card.rgb},0.50), 0 0 0 1px rgba(${card.rgb},0.18)`
+                      : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(${card.rgb},0.12)`,
                     cursor: 'pointer',
                     transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                   }}>
