@@ -743,7 +743,7 @@ useEffect(() => {
           <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
             <div ref={sliderRef} className="feat-slider" style={{
               display: 'flex', gap: '18px', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '18px 12px 36px',
+              scrollbarWidth: 'none', padding: '20px 22px 38px',
               justifyContent: 'center', alignItems: 'stretch',
               scrollSnapType: 'x mandatory',
             }}>
