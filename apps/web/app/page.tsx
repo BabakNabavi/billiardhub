@@ -261,12 +261,12 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto' }}>
             {[{ label: 'اسنوکر', n: snookerTables, clr: '#30C55A' }, { label: 'پاکت', n: pocketTables, clr: '#3b82f6' }, { label: 'هی‌بال', n: hiballTables, clr: '#8b5cf6' }].map(t => (
               <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr, background: `${t.clr}14`, border: `1px solid ${t.clr}28`, borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
             ))}
           </div>
-          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: 'auto' }}>
+          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: '6px' }}>
             <div>
               <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
@@ -704,7 +704,7 @@ useEffect(() => {
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
           .club-heart-mob  { display:flex !important; }
-          .clubs-section { padding-top:55px !important; }
+          .clubs-section { padding-top:38px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:24px !important; }
           .clubs-desk { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
@@ -930,7 +930,7 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(62px,6.84vw,92px) clamp(16px,5%,80px)' }}>
+      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(44px,4.8vw,65px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
