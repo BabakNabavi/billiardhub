@@ -442,7 +442,14 @@ export default function Navbar() {
         }}>
           <div style={{ height: '1px', background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
 
-          <div style={{ padding: '20px 20px 0' }}>
+          {/* لوگو در منوی موبایل */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '22px 0 16px' }}>
+            <div style={{ width: '72px', height: '72px', borderRadius: '20px', overflow: 'hidden', boxShadow: `0 6px 24px rgba(184,147,58,0.30)` }}>
+              <img src="/images/Logo/logo1.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          </div>
+
+          <div style={{ padding: '0 20px 0' }}>
             {!user ? (
               <Link href="/login" onClick={() => setMobileOpen(false)}
                 style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'rgba(184,147,58,0.06)', backdropFilter: 'blur(40px) saturate(240%)', WebkitBackdropFilter: 'blur(40px) saturate(240%)', border: '1px solid rgba(184,147,58,0.22)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(184,147,58,0.16)', color: GOLD, fontSize: '17px', fontWeight: 800, textDecoration: 'none' }}>
