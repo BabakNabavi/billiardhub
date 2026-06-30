@@ -293,8 +293,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
             {club.name.replace(/^باشگاه\s+/, '')}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a', marginLeft: '5px' }}>{club.rating}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', direction: 'ltr' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a', marginRight: '4px' }}>{club.rating}</span>
             {[1,2,3,4,5].map(i => (
               <Star key={i} size={11} style={{ color: '#F5A623', fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent', opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
             ))}
