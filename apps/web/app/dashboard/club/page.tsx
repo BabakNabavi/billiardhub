@@ -332,8 +332,10 @@ export default function ClubDashboardPage() {
   const [logoUploading, setLogoUploading] = useState(false);
   const [storyUploading, setStoryUploading] = useState(false);
   const [activeStory, setActiveStory] = useState<{ url: string; type: string; expiresAt: string; text?: string } | null>(null);
+  const [previousStory, setPreviousStory] = useState<{ url: string; type: string; expiresAt: string; text?: string } | null>(null);
   const [storyText, setStoryText] = useState('');
   const [savingStoryText, setSavingStoryText] = useState(false);
+  const [showStoryTextEditor, setShowStoryTextEditor] = useState(false);
 
   // Coaches
   const [coaches, setCoaches] = useState<CoachEntry[]>([]);
@@ -737,9 +739,11 @@ export default function ClubDashboardPage() {
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
         const type = file.type.startsWith('video/') ? 'video' : 'image';
         await api.put(`/clubs/${selectedClub.id}`, { storyMediaUrl: url, storyType: type, storyExpiresAt: expiresAt, hasActiveStory: true, storyText: text });
+        if (activeStory) setPreviousStory(activeStory);
         setActiveStory({ url, type, expiresAt, text });
         setStoryText(text);
         setStoryDraft(null);
+        setShowStoryTextEditor(false);
         setSelectedClub(prev => prev ? { ...prev, storyMediaUrl: url, storyType: type, storyExpiresAt: expiresAt, hasActiveStory: true } : prev);
       }
     } catch {}
@@ -759,6 +763,8 @@ export default function ClubDashboardPage() {
   const removeStory = async () => {
     if (!selectedClub) return;
     setActiveStory(null);
+    setPreviousStory(null);
+    setShowStoryTextEditor(false);
     setStoryText('');
     setSelectedClub(prev => prev ? { ...prev, storyMediaUrl: undefined, storyExpiresAt: undefined, hasActiveStory: false } : prev);
     try {
@@ -1941,9 +1947,19 @@ export default function ClubDashboardPage() {
               فرمت استاندارد ۹:۱۶ (مثل اینستاگرام) — عکس یا ویدیو — پس از ۲۴ ساعت به‌صورت خودکار حذف می‌شود
             </div>
             {activeStory ? (
-              /* direction:ltr forces preview on left, controls on right regardless of RTL page */
-              <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr' }}>
-                {/* 9:16 Story preview with text overlay — stays on LEFT */}
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr' }}>
+                {/* Previous story — dimmed, shifted to the left */}
+                {previousStory && (
+                  <div style={{ position: 'relative', width: 88, flexShrink: 0, aspectRatio: '9/16', borderRadius: 10, overflow: 'hidden', border: `1px solid ${GOLD}33`, background: '#111', opacity: 0.45, filter: 'grayscale(20%)' }}>
+                    {previousStory.type === 'video'
+                      ? <video src={previousStory.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline />
+                      : <img src={previousStory.url} alt="استوری قبلی" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.55)', padding: '4px 6px', textAlign: 'center' }}>
+                      <span style={{ color: '#fff', fontSize: 9, fontWeight: 600 }}>استوری قبلی</span>
+                    </div>
+                  </div>
+                )}
+                {/* Active story preview */}
                 <div style={{ position: 'relative', width: 140, flexShrink: 0, aspectRatio: '9/16', borderRadius: 14, overflow: 'hidden', border: `2px solid ${GOLD}55`, background: '#111', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
                   {activeStory.type === 'video'
                     ? <video src={activeStory.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline />
@@ -1954,52 +1970,54 @@ export default function ClubDashboardPage() {
                       background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)',
                       padding: '28px 10px 12px', textAlign: 'center',
                     }}>
-                      <span style={{
-                        color: '#fff', fontSize: 11, fontWeight: 700,
-                        textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-                        lineHeight: 1.4, display: 'block', wordBreak: 'break-word',
-                        direction: 'rtl',
-                      }}>{storyText}</span>
+                      <span style={{ color: '#fff', fontSize: 11, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', lineHeight: 1.4, display: 'block', wordBreak: 'break-word', direction: 'rtl' }}>{storyText}</span>
                     </div>
                   )}
                 </div>
-                {/* Controls — on RIGHT in ltr container, text still reads RTL */}
-                <div style={{ flex: 1, minWidth: 180, direction: 'rtl' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                {/* Controls */}
+                <div style={{ flex: 1, minWidth: 170, direction: 'rtl' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#30C55A', display: 'inline-block' }} />
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#166534' }}>استوری فعال</span>
                   </div>
                   <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 14 }}>
                     انقضا: {new Date(activeStory.expiresAt).toLocaleString('fa-IR')}
                   </div>
-                  <div style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 6 }}>متن روی استوری</div>
-                    <textarea
-                      value={storyText}
-                      onChange={e => setStoryText(e.target.value)}
-                      placeholder="متن دلخواه را اینجا بنویسید..."
-                      rows={3}
-                      style={{
-                        width: '100%', boxSizing: 'border-box',
-                        padding: '8px 10px', borderRadius: 10,
-                        border: `1px solid ${GOLD}44`,
-                        background: `${GOLD}06`,
-                        fontSize: 13, fontFamily: 'var(--font-base)',
-                        color: DARK, resize: 'none', outline: 'none',
-                        lineHeight: 1.6, direction: 'rtl',
-                      }}
-                    />
-                  </div>
+                  {/* Text editor — hidden by default, toggled by edit button */}
+                  {showStoryTextEditor && (
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 6 }}>متن روی استوری</div>
+                      <textarea
+                        value={storyText}
+                        onChange={e => setStoryText(e.target.value)}
+                        placeholder="متن دلخواه را اینجا بنویسید..."
+                        rows={3}
+                        style={{
+                          width: '100%', boxSizing: 'border-box',
+                          padding: '8px 10px', borderRadius: 10,
+                          border: `1px solid ${GOLD}44`, background: `${GOLD}06`,
+                          fontSize: 13, fontFamily: 'var(--font-base)',
+                          color: DARK, resize: 'none', outline: 'none',
+                          lineHeight: 1.6, direction: 'rtl',
+                        }}
+                      />
+                      <button onClick={async () => { await saveStoryText(); setShowStoryTextEditor(false); }} disabled={savingStoryText} style={{
+                        marginTop: 8, padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        cursor: savingStoryText ? 'wait' : 'pointer', border: 'none',
+                        background: `linear-gradient(135deg, ${GOLD} 0%, #D4A855 100%)`,
+                        color: '#fff', fontFamily: 'var(--font-base)',
+                      }}>
+                        {savingStoryText ? '⏳ در حال ذخیره...' : '✓ ذخیره'}
+                      </button>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <button onClick={saveStoryText} disabled={savingStoryText} style={{
+                    <button onClick={() => setShowStoryTextEditor(v => !v)} style={{
                       padding: '7px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      cursor: savingStoryText ? 'wait' : 'pointer', border: 'none',
-                      background: `linear-gradient(135deg, ${GOLD} 0%, #D4A855 100%)`,
-                      color: '#fff', boxShadow: `0 2px 8px ${GOLD}44`,
-                      fontFamily: 'var(--font-base)',
-                    }}>
-                      {savingStoryText ? '⏳ در حال ذخیره...' : '✓ ذخیره متن'}
-                    </button>
+                      cursor: 'pointer', border: `1px solid ${GOLD}55`,
+                      background: showStoryTextEditor ? `${GOLD}18` : '#fff',
+                      color: '#A07840', fontFamily: 'var(--font-base)',
+                    }}>✏️ ادیت استوری</button>
                     <button onClick={removeStory} style={{
                       background: '#FEE2E2', color: '#991B1B',
                       border: '1px solid #FECACA', borderRadius: 20,
