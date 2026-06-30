@@ -52,6 +52,11 @@ interface ClubAlbum {
 interface CoachEntry {
   id: string; name: string; title: string; exp: string; rating: string; bio: string;
 }
+interface ApiCoach {
+  id: string; firstName: string; lastName: string;
+  city?: string; bio?: string; verificationStatus?: string;
+  coachProfile?: { specialty?: string; experience?: string; sessionPrice?: number; };
+}
 
 interface ClubStats {
   members: string; tournaments: string; yearsActive: string; dailyCapacity: string;
@@ -331,8 +336,10 @@ export default function ClubDashboardPage() {
 
   // Coaches
   const [coaches, setCoaches] = useState<CoachEntry[]>([]);
-  const [showCoachForm, setShowCoachForm] = useState(false);
-  const [coachForm, setCoachForm] = useState({ name: '', title: '', exp: '', rating: '', bio: '' });
+  const [showCoachPicker, setShowCoachPicker] = useState(false);
+  const [availableCoaches, setAvailableCoaches] = useState<ApiCoach[]>([]);
+  const [coachSearch, setCoachSearch] = useState('');
+  const [loadingCoaches, setLoadingCoaches] = useState(false);
 
   // ── LocalStorage helpers ───────────────────────────────────────────────────
 
@@ -758,12 +765,29 @@ export default function ClubDashboardPage() {
   };
 
   // Coach actions
-  const addCoach = () => {
-    if (!coachForm.name.trim()) return;
-    const entry: CoachEntry = { id: uid(), ...coachForm };
+  const openCoachPicker = () => {
+    setShowCoachPicker(true);
+    setCoachSearch('');
+    setLoadingCoaches(true);
+    api.get('/user/by-role/coach')
+      .then(res => { setAvailableCoaches(Array.isArray(res.data) ? res.data : []); })
+      .catch(() => setAvailableCoaches([]))
+      .finally(() => setLoadingCoaches(false));
+  };
+
+  const selectCoach = (c: ApiCoach) => {
+    if (coaches.find(e => e.id === c.id)) return;
+    const specialtyMap: Record<string, string> = { snooker: 'اسنوکر', pocket: 'پاکت بیلیارد', highball: 'هی‌بال' };
+    const entry: CoachEntry = {
+      id: c.id,
+      name: `${c.firstName} ${c.lastName}`,
+      title: specialtyMap[c.coachProfile?.specialty ?? ''] ?? 'مربی بیلیارد',
+      exp: c.coachProfile?.experience ? `${c.coachProfile.experience} سال` : '',
+      rating: '',
+      bio: c.bio ?? '',
+    };
     saveCoaches([...coaches, entry]);
-    setCoachForm({ name: '', title: '', exp: '', rating: '', bio: '' });
-    setShowCoachForm(false);
+    setShowCoachPicker(false);
   };
 
   const deleteCoach = (id: string) => saveCoaches(coaches.filter(c => c.id !== id));
@@ -2140,35 +2164,68 @@ export default function ClubDashboardPage() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DARK }}>مربیان باشگاه</h2>
-            <button onClick={() => setShowCoachForm(v => !v)} style={{
+            <button onClick={openCoachPicker} style={{
               background: GOLD, color: '#fff', border: 'none', borderRadius: 10,
               padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)',
             }}>+ مربی جدید</button>
           </div>
 
-          {showCoachForm && (
+          {/* Coach Picker Modal */}
+          {showCoachPicker && (
             <Card style={{ marginBottom: 16, border: `1px solid ${GOLD}44` }}>
-              <SectionTitle>افزودن مربی جدید</SectionTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                <InputField label="نام و نام خانوادگی" value={coachForm.name}   onChange={v => setCoachForm(p => ({...p, name: v}))} placeholder="امیر رضایی" />
-                <InputField label="عنوان"              value={coachForm.title}  onChange={v => setCoachForm(p => ({...p, title: v}))} placeholder="مربی ارشد اسنوکر" />
-                <InputField label="سال‌های تجربه"      value={coachForm.exp}    onChange={v => setCoachForm(p => ({...p, exp: v}))} placeholder="۱۰ سال" />
-                <InputField label="امتیاز (از ۵)"      value={coachForm.rating} onChange={v => setCoachForm(p => ({...p, rating: v}))} placeholder="4.8" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <SectionTitle>انتخاب مربی از لیست</SectionTitle>
+                <button onClick={() => setShowCoachPicker(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', fontSize: 20, lineHeight: 1 }}>×</button>
               </div>
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>بیوگرافی کوتاه</label>
-                <textarea value={coachForm.bio} rows={3}
-                  placeholder="توضیح کوتاه درباره سابقه و تخصص مربی..."
-                  onChange={e => setCoachForm(p => ({...p, bio: e.target.value}))}
-                  style={inputStyle} />
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <SaveBtn onClick={addCoach} loading={false} label="افزودن مربی" />
-                <button onClick={() => setShowCoachForm(false)} style={{
-                  padding: '10px 18px', border: '1px solid #E5E7EB', borderRadius: 10,
-                  background: '#fff', cursor: 'pointer', fontFamily: 'var(--font-base)', fontSize: 14, color: DARK,
-                }}>انصراف</button>
-              </div>
+              <input
+                type="text" value={coachSearch}
+                onChange={e => setCoachSearch(e.target.value)}
+                placeholder="جستجو بر اساس نام یا شهر..."
+                style={{ ...inputStyle, marginBottom: 12 }}
+              />
+              {loadingCoaches ? (
+                <div style={{ textAlign: 'center', padding: 24, color: '#6B7280' }}>در حال بارگذاری...</div>
+              ) : availableCoaches.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 24, color: '#6B7280' }}>مربی‌ای یافت نشد</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 340, overflowY: 'auto' }}>
+                  {availableCoaches
+                    .filter(c => `${c.firstName} ${c.lastName} ${c.city ?? ''}`.toLowerCase().includes(coachSearch.toLowerCase()))
+                    .map(c => {
+                      const alreadyAdded = !!coaches.find(e => e.id === c.id);
+                      return (
+                        <div key={c.id} style={{
+                          display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+                          borderRadius: 10, border: '1px solid #E5E7EB',
+                          background: alreadyAdded ? '#F9FAFB' : '#fff',
+                          opacity: alreadyAdded ? 0.6 : 1,
+                        }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 16, flexShrink: 0 }}>
+                            {c.firstName[0]}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 700, fontSize: 14, color: DARK }}>{c.firstName} {c.lastName}</div>
+                            <div style={{ fontSize: 12, color: '#6B7280' }}>
+                              {c.coachProfile?.specialty === 'snooker' ? 'اسنوکر' : c.coachProfile?.specialty === 'pocket' ? 'پاکت بیلیارد' : 'مربی بیلیارد'}
+                              {c.city ? ` · ${c.city}` : ''}
+                              {c.coachProfile?.experience ? ` · ${c.coachProfile.experience} سال تجربه` : ''}
+                            </div>
+                          </div>
+                          {c.verificationStatus === 'verified' && (
+                            <span style={{ fontSize: 11, color: '#1d9bf0', background: 'rgba(29,155,240,0.08)', border: '1px solid rgba(29,155,240,0.20)', borderRadius: 20, padding: '2px 8px', flexShrink: 0 }}>تأیید شده</span>
+                          )}
+                          <button onClick={() => selectCoach(c)} disabled={alreadyAdded} style={{
+                            background: alreadyAdded ? '#E5E7EB' : GOLD, color: alreadyAdded ? '#9CA3AF' : '#fff',
+                            border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700,
+                            cursor: alreadyAdded ? 'default' : 'pointer', fontFamily: 'var(--font-base)', flexShrink: 0,
+                          }}>
+                            {alreadyAdded ? 'افزوده شده' : 'انتخاب'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </Card>
           )}
 
