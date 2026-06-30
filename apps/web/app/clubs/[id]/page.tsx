@@ -423,8 +423,6 @@ export default function ClubProfilePage() {
                       { cond: club.hasParking,           label: 'پارکینگ اختصاصی', color: '#06b6d4' },
                       { cond: club.hasWifi,              label: 'اینترنت رایگان',   color: '#a78bfa' },
                       { cond: club.hasProfessionalCoach, label: 'مربی حرفه‌ای',     color: '#C7A66A' },
-                      { cond: true,                      label: 'دوربین مداربسته',  color: '#ef4444' },
-                      { cond: true,                      label: 'تهویه مطبوع',      color: '#30C55A' },
                     ].filter(a => a.cond).map((a, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 13px', background: `${a.color}08`, border: `1px solid ${a.color}18`, borderRadius: 12 }}>
                         <Check size={13} style={{ color: a.color, flexShrink: 0 }} />
