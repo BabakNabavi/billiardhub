@@ -453,7 +453,9 @@ export default function HomePage() {
       const cardCenter = card.offsetLeft + card.offsetWidth / 2;
       const dist = Math.abs(cardCenter - sliderCenter);
       const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
-      card.style.transform = `scale(${(1 + t * 0.12).toFixed(3)})`;
+      const sx = (1 + t * 0.12).toFixed(3);
+      const sy = (1 + t * 0.17).toFixed(3);
+      card.style.transform = `scaleX(${sx}) scaleY(${sy})`;
       if (dist < minDist) { minDist = dist; newActive = i; }
     });
     if (newActive !== activeCardRef.current) {
@@ -741,7 +743,7 @@ useEffect(() => {
           <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
             <div ref={sliderRef} className="feat-slider" style={{
               display: 'flex', gap: '18px', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '18px 12px 12px',
+              scrollbarWidth: 'none', padding: '18px 12px 18px',
               justifyContent: 'center', alignItems: 'stretch',
               scrollSnapType: 'x mandatory',
             }}>
@@ -783,17 +785,27 @@ useEffect(() => {
                 </Link>
               ))}
             </div>
-            {/* Carousel dots */}
+            {/* Carousel dots — sliding window of 5 */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '18px' }}>
-              {FEATURE_CARDS.map((card, i) => (
-                <div key={i} style={{
-                  height: '5px',
-                  width: i === activeCard ? '18px' : '5px',
-                  borderRadius: '3px',
-                  background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
-                  transition: 'all 0.3s ease',
-                }} />
-              ))}
+              {(() => {
+                const total = FEATURE_CARDS.length;
+                const half = 2;
+                const start = Math.max(0, Math.min(activeCard - half, total - 5));
+                return FEATURE_CARDS.map((card, i) => {
+                  if (i < start || i >= start + 5) return null;
+                  const dist = Math.abs(i - activeCard);
+                  return (
+                    <div key={i} style={{
+                      height: '5px',
+                      width: i === activeCard ? '18px' : '5px',
+                      borderRadius: '3px',
+                      opacity: dist === 2 ? 0.45 : 1,
+                      background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
+                      transition: 'all 0.3s ease',
+                    }} />
+                  );
+                });
+              })()}
             </div>
           </div>
 
