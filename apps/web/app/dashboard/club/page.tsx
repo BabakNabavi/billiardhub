@@ -328,6 +328,7 @@ export default function ClubDashboardPage() {
   const [discountForm, setDiscountForm] = useState({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
 
   // Logo & Story
+  const [storyDraft, setStoryDraft] = useState<{ file: File; previewUrl: string; text: string } | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [storyUploading, setStoryUploading] = useState(false);
   const [activeStory, setActiveStory] = useState<{ url: string; type: string; expiresAt: string; text?: string } | null>(null);
@@ -727,7 +728,7 @@ export default function ClubDashboardPage() {
     setLogoUploading(false);
   };
 
-  const uploadStory = async (file: File) => {
+  const uploadStory = async (file: File, text: string) => {
     if (!selectedClub) return;
     setStoryUploading(true);
     try {
@@ -735,9 +736,10 @@ export default function ClubDashboardPage() {
       if (url) {
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
         const type = file.type.startsWith('video/') ? 'video' : 'image';
-        await api.put(`/clubs/${selectedClub.id}`, { storyMediaUrl: url, storyType: type, storyExpiresAt: expiresAt, hasActiveStory: true, storyText: '' });
-        setActiveStory({ url, type, expiresAt, text: '' });
-        setStoryText('');
+        await api.put(`/clubs/${selectedClub.id}`, { storyMediaUrl: url, storyType: type, storyExpiresAt: expiresAt, hasActiveStory: true, storyText: text });
+        setActiveStory({ url, type, expiresAt, text });
+        setStoryText(text);
+        setStoryDraft(null);
         setSelectedClub(prev => prev ? { ...prev, storyMediaUrl: url, storyType: type, storyExpiresAt: expiresAt, hasActiveStory: true } : prev);
       }
     } catch {}
@@ -1923,9 +1925,16 @@ export default function ClubDashboardPage() {
                 boxShadow: `inset 0 1px 0 rgba(199,166,106,0.15)`,
                 opacity: storyUploading ? 0.5 : 1,
               }}>
-                {storyUploading ? '⏳ در حال آپلود...' : '📲 آپلود استوری'}
+                {storyUploading ? '⏳ در حال آپلود...' : '📲 انتخاب تصویر'}
                 <input type="file" accept="image/*,video/*" style={{ display: 'none' }} disabled={storyUploading}
-                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadStory(f); e.target.value = ''; }} />
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      const previewUrl = URL.createObjectURL(f);
+                      setStoryDraft({ file: f, previewUrl, text: '' });
+                    }
+                    e.target.value = '';
+                  }} />
               </label>
             </div>
             <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.6 }}>
@@ -1997,6 +2006,71 @@ export default function ClubDashboardPage() {
                       padding: '7px 14px', fontSize: 12, fontWeight: 600,
                       cursor: 'pointer', fontFamily: 'var(--font-base)',
                     }}>حذف استوری</button>
+                  </div>
+                </div>
+              </div>
+            ) : storyDraft ? (
+              /* Draft preview — image selected but not yet uploaded */
+              <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr' }}>
+                {/* 9:16 preview */}
+                <div style={{ position: 'relative', width: 140, flexShrink: 0, aspectRatio: '9/16', borderRadius: 14, overflow: 'hidden', border: `2px solid ${GOLD}55`, background: '#111', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                  <img src={storyDraft.previewUrl} alt="پیش‌نمایش استوری" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {storyDraft.text && (
+                    <div style={{
+                      position: 'absolute', bottom: 18, left: 8, right: 8,
+                      background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+                      borderRadius: 8, padding: '6px 8px',
+                      color: '#fff', fontSize: 11, fontWeight: 600,
+                      textAlign: 'center', direction: 'rtl', lineHeight: 1.5,
+                    }}>{storyDraft.text}</div>
+                  )}
+                </div>
+                {/* Controls — RIGHT side (ltr container reverses visual order) */}
+                <div style={{ flex: 1, minWidth: 180, direction: 'rtl' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, display: 'inline-block' }} />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#A07840' }}>پیش‌نمایش استوری</span>
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 6 }}>متن روی استوری (اختیاری)</div>
+                    <textarea
+                      value={storyDraft.text}
+                      onChange={e => setStoryDraft(prev => prev ? { ...prev, text: e.target.value } : null)}
+                      placeholder="متنی که روی استوری نمایش داده می‌شود..."
+                      rows={3}
+                      style={{
+                        width: '100%', borderRadius: 8, border: `1px solid ${GOLD}44`,
+                        background: `${GOLD}06`, padding: '8px 10px',
+                        fontSize: 12, color: DARK, fontFamily: 'var(--font-base)',
+                        resize: 'vertical', direction: 'rtl', outline: 'none',
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => uploadStory(storyDraft.file, storyDraft.text)}
+                      disabled={storyUploading}
+                      style={{
+                        padding: '8px 20px', borderRadius: 20, border: 'none',
+                        background: `linear-gradient(135deg,${GOLD},#8B6914)`,
+                        color: '#fff', fontSize: 13, fontWeight: 700,
+                        cursor: storyUploading ? 'not-allowed' : 'pointer',
+                        opacity: storyUploading ? 0.6 : 1,
+                        fontFamily: 'var(--font-base)',
+                      }}>
+                      {storyUploading ? '⏳ در حال آپلود...' : '🚀 اشتراک‌گذاری'}
+                    </button>
+                    <button
+                      onClick={() => { URL.revokeObjectURL(storyDraft.previewUrl); setStoryDraft(null); }}
+                      disabled={storyUploading}
+                      style={{
+                        padding: '8px 16px', borderRadius: 20,
+                        border: `1px solid #E5E7EB`, background: '#F9FAFB',
+                        color: '#6B7280', fontSize: 13, fontWeight: 600,
+                        cursor: 'pointer', fontFamily: 'var(--font-base)',
+                      }}>
+                      انصراف
+                    </button>
                   </div>
                 </div>
               </div>
