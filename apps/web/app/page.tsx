@@ -349,7 +349,7 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.70) 100%)' }} />
             <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{p.brand}</div>
           </div>
-          <div style={{ flex: '0 0 40%', background: '#fff', padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '5px' }}>
+          <div style={{ flex: '0 0 40%', background: '#fff', padding: '16px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', textAlign: 'center' }}>
             <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.25, letterSpacing: '-0.01em' }}>{p.name}</div>
             <div style={{ fontSize: '12px', color: TEXT_M }}>{p.sub}</div>
             <div style={{ marginTop: '6px' }}>
