@@ -203,31 +203,22 @@ const NEWS = [
 function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[0]; h?: string; featured?: boolean }) {
   const [hov, setHov]       = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-  const [isMob, setIsMob]   = useState(false);
-  useEffect(() => {
-    const check = () => setIsMob(window.innerWidth <= 600);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
   const snookerTables = Math.floor(club.tables * 0.5);
   const pocketTables  = Math.floor(club.tables * 0.3);
   const hiballTables  = club.tables - snookerTables - pocketTables;
   return (
     <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block', height: h }}>
       <div
-        onMouseEnter={() => { if (!isMob) setHov(true); }}
-        onMouseLeave={() => { if (!isMob) setHov(false); }}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
         style={{
-          borderRadius: isMob ? '12px' : (featured ? '16px' : '12px'),
+          borderRadius: featured ? '16px' : '12px',
           overflow: 'hidden', height: '100%', cursor: 'pointer',
           display: 'flex', flexDirection: 'column',
-          ...(isMob ? {} : {
-            transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
-            transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
-            boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
-            willChange: 'transform',
-          }),
+          transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
+          transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
+          boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
+          willChange: 'transform',
         }}
       >
         {/* ── Image: top 60% ── */}
@@ -244,67 +235,68 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
               transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
-          {isMob && (
-            <button onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
-              style={{ position: 'absolute', top: '8px', right: '8px', height: '22px', borderRadius: '20px', background: isOpen ? 'rgba(30,200,90,0.92)' : 'rgba(200,60,60,0.88)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, padding: '0 8px', boxShadow: '0 1px 6px rgba(0,0,0,0.18)' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', letterSpacing: '0.01em' }}>{isOpen ? 'باز' : 'بسته'}</span>
-            </button>
-          )}
+          {/* باز/بسته badge — mobile only via CSS */}
+          <button className="club-open-btn"
+            onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
+            style={{ position: 'absolute', top: '8px', right: '8px', height: '22px', borderRadius: '20px',
+              background: isOpen ? 'rgba(30,200,90,0.92)' : 'rgba(200,60,60,0.88)',
+              border: 'none', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', zIndex: 3, padding: '0 8px', boxShadow: '0 1px 6px rgba(0,0,0,0.18)' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff' }}>{isOpen ? 'باز' : 'بسته'}</span>
+          </button>
         </div>
 
-        {isMob ? (
-          /* ── Mobile info panel ── */
-          <div style={{
-            flex: '0 0 40%', background: '#fff', padding: '7px 8px 6px',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden', gap: '4px',
-          }}>
-            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
-              {club.name.replace(/^باشگاه\s+/, '')}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a', marginLeft: '5px' }}>{club.rating}</span>
-              {[1,2,3,4,5].map(i => (
-                <Star key={i} size={11} style={{ color: '#F5A623', fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent', opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
-              ))}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
-              <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}، {club.dist}
-            </div>
+        {/* ── Desktop info panel — CSS hides on mobile ── */}
+        <div className="club-desk-panel" style={{
+          flex: '0 0 40%', background: '#fff',
+          padding: featured ? '12px 16px 10px' : '9px 13px 8px',
+          flexDirection: 'column', justifyContent: 'flex-start',
+          overflow: 'hidden', gap: '3px',
+        }}>
+          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
+              <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <Star size={9} style={{ color: '#F5A623', fill: '#F5A623' }} />
+              <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 700 }}>{club.rating}</span>
+              <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
+            </span>
           </div>
-        ) : (
-          /* ── Desktop info panel ── */
-          <div style={{
-            flex: '0 0 40%', background: '#fff',
-            padding: featured ? '12px 16px 10px' : '9px 13px 8px',
-            display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '3px',
-          }}>
-            <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
-                <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <Star size={9} style={{ color: '#F5A623', fill: '#F5A623' }} />
-                <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 700 }}>{club.rating}</span>
-                <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto' }}>
-              {[{ label: 'اسنوکر', n: snookerTables, clr: '#30C55A' }, { label: 'پاکت', n: pocketTables, clr: '#3b82f6' }, { label: 'هی‌بال', n: hiballTables, clr: '#8b5cf6' }].map(t => (
-                <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr, background: `${t.clr}14`, border: `1px solid ${t.clr}28`, borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
-              ))}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: '6px' }}>
-              <div>
-                <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
-                <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
-              </div>
-              <div style={{ background: 'rgba(199,166,106,0.12)', color: GOLD, fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: `1px solid ${GOLD_BOR}` }}>رزرو آنلاین</div>
-            </div>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto' }}>
+            {[{ label: 'اسنوکر', n: snookerTables, clr: '#30C55A' }, { label: 'پاکت', n: pocketTables, clr: '#3b82f6' }, { label: 'هی‌بال', n: hiballTables, clr: '#8b5cf6' }].map(t => (
+              <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr, background: `${t.clr}14`, border: `1px solid ${t.clr}28`, borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
+            ))}
           </div>
-        )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: '6px' }}>
+            <div>
+              <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
+              <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
+            </div>
+            <div style={{ background: 'rgba(199,166,106,0.12)', color: GOLD, fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: `1px solid ${GOLD_BOR}` }}>رزرو آنلاین</div>
+          </div>
+        </div>
+
+        {/* ── Mobile info panel — CSS shows on mobile ── */}
+        <div className="club-mob-panel" style={{
+          flex: '0 0 40%', background: '#fff', padding: '7px 8px 6px',
+          flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          overflow: 'hidden', gap: '4px',
+        }}>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
+            {club.name.replace(/^باشگاه\s+/, '')}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a', marginLeft: '5px' }}>{club.rating}</span>
+            {[1,2,3,4,5].map(i => (
+              <Star key={i} size={11} style={{ color: '#F5A623', fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent', opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
+            <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}، {club.dist}
+          </div>
+        </div>
       </div>
     </Link>
   );
@@ -708,16 +700,14 @@ useEffect(() => {
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
-        .club-card-price-row { display:flex; }
         .club-desk-panel { display:flex; }
         .club-mob-panel  { display:none; }
-        .club-heart-mob  { display:none; }
+        .club-open-btn   { display:none; }
         @media(max-width:600px){
           .clubs-dots { display:flex !important; }
-          .club-card-price-row { display:none !important; }
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
-          .club-heart-mob  { display:flex !important; }
+          .club-open-btn   { display:flex !important; }
           .clubs-section { padding-top:10px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:14px !important; }
           .clubs-desk { display:none !important; }
