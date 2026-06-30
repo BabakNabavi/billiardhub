@@ -604,7 +604,7 @@ useEffect(() => {
           .hero-actions { display:none !important; }
           .hero-arrows  { display:none !important; }
           .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
-          .trust-box    { margin-top:39px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; overflow:visible !important; }
+          .trust-box    { margin-top:43px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; overflow:visible !important; }
           .trust-grid   { zoom:0.43 !important; }
           .trust-label  { font-size:9.9px !important; }
           .trust-sub    { font-size:8.1px !important; }
@@ -810,7 +810,7 @@ useEffect(() => {
           </div>
 
           {/* Trust items — unified box with 4 cells divided by thin lines */}
-          <div className="he trust-box" style={{ marginTop: '40px' }}>
+          <div className="he trust-box" style={{ marginTop: '44px' }}>
             <div className="trust-grid" style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
               zoom: 0.8,
