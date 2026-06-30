@@ -44,6 +44,9 @@ export class Club {
   @Column({ nullable: true })
   website: string;
 
+  @Column({ nullable: true, unique: true })
+  slug: string;
+
   @Column({ default: true })
   isActive: boolean;
 

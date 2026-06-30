@@ -1,11 +1,12 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
 import { useAuthStore } from '../../../store/auth.store';
+import { persianToSlug, isValidSlug } from '../../../lib/slug';
 
 const IRAN_PROVINCES = [
   'آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز','ایلام','بوشهر','تهران',
@@ -21,6 +22,12 @@ export default function NewClubPage() {
   const [error, setError] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+
+  // Slug state
+  const [slug, setSlug] = useState('');
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'ok' | 'taken' | 'invalid'>('idle');
+  const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Media
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -82,6 +89,31 @@ export default function NewClubPage() {
   ];
 
   const set = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
+
+  // Auto-generate slug from name (only when user hasn't manually edited)
+  useEffect(() => {
+    if (!slugEdited && form.name) {
+      setSlug(persianToSlug(form.name));
+    }
+  }, [form.name, slugEdited]);
+
+  // Debounced slug availability check
+  useEffect(() => {
+    if (!slug) { setSlugStatus('idle'); return; }
+    if (!isValidSlug(slug)) { setSlugStatus('invalid'); return; }
+    setSlugStatus('checking');
+    if (slugTimer.current) clearTimeout(slugTimer.current);
+    slugTimer.current = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/clubs/slug-check?slug=${encodeURIComponent(slug)}`);
+        const d = await r.json();
+        setSlugStatus(d.available ? 'ok' : 'taken');
+      } catch {
+        setSlugStatus('idle');
+      }
+    }, 500);
+    return () => { if (slugTimer.current) clearTimeout(slugTimer.current); };
+  }, [slug]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -185,6 +217,7 @@ export default function NewClubPage() {
         images: imageUrls,
         videos: videoUrl ? [videoUrl] : [],
         licenseDocumentUrl: licenseDocumentUrl || undefined,
+        slug: (slug && slugStatus === 'ok') ? slug : undefined,
       });
 
       router.push('/dashboard/club');
@@ -259,6 +292,45 @@ export default function NewClubPage() {
                 <label className={labelCls}>وبسایت</label>
                 <input type="url" name="website" value={form.website} onChange={handleChange}
                   className={`${inputCls} dark-input`} style={inputStyle} placeholder="https://..." />
+              </div>
+            </div>
+
+            {/* Slug — آدرس اختصاصی */}
+            <div>
+              <label className={labelCls}>آدرس اختصاصی باشگاه (slug)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', whiteSpace: 'nowrap', flexShrink: 0, direction: 'ltr' }}>billiardhub.net/clubs/</span>
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={e => {
+                      setSlugEdited(true);
+                      setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''));
+                    }}
+                    className={`${inputCls} dark-input`}
+                    style={{
+                      ...inputStyle, direction: 'ltr',
+                      borderColor: slugStatus === 'ok' ? 'rgba(48,197,90,0.45)'
+                        : slugStatus === 'taken' || slugStatus === 'invalid' ? 'rgba(239,68,68,0.45)'
+                        : undefined,
+                    }}
+                    placeholder="hafez-shiraz"
+                  />
+                </div>
+                {slug && slugEdited && (
+                  <button type="button" onClick={() => { setSlug(persianToSlug(form.name)); setSlugEdited(false); }}
+                    style={{ fontSize: 12, color: '#A07840', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 8, padding: '6px 10px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit' }}>
+                    بازنشانی
+                  </button>
+                )}
+              </div>
+              <div style={{ marginTop: 5, fontSize: 12, height: 16 }}>
+                {slugStatus === 'checking' && <span style={{ color: 'rgba(0,0,0,0.40)' }}>در حال بررسی...</span>}
+                {slugStatus === 'ok'       && <span style={{ color: '#30C55A' }}>✓ این آدرس در دسترس است</span>}
+                {slugStatus === 'taken'    && <span style={{ color: '#ef4444' }}>✗ این آدرس قبلاً رزرو شده</span>}
+                {slugStatus === 'invalid'  && <span style={{ color: '#ef4444' }}>فقط حروف انگلیسی کوچک، اعداد و خط تیره مجاز است</span>}
+                {slugStatus === 'idle' && slug && <span style={{ color: 'rgba(0,0,0,0.35)' }}>حروف انگلیسی، اعداد و خط تیره — مثلاً: hafez-shiraz</span>}
               </div>
             </div>
           </div>
