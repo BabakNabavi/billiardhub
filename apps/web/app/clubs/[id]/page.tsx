@@ -129,11 +129,16 @@ export default function ClubProfilePage() {
     for (let i = 1; i <= 20; i++) {
       try {
         const raw = localStorage.getItem(`tournament-album-t${i}`);
-        if (raw) albums.push(JSON.parse(raw));
+        if (!raw) continue;
+        const album = JSON.parse(raw) as TournAlbum;
+        const tournament = SAMPLE_TOURNAMENTS.find(t => t.id === album.tournamentId);
+        if (tournament && (tournament.clubId === id || tournament.clubName === club.name)) {
+          albums.push(album);
+        }
       } catch {}
     }
     setTournAlbums(albums);
-  }, [tab]);
+  }, [tab, id, club.name]);
 
   useEffect(() => {
     if (!id) return;
