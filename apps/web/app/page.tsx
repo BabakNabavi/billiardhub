@@ -702,7 +702,7 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 14px 44px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 44px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
@@ -714,7 +714,10 @@ useEffect(() => {
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
           .club-open-btn   { display:flex !important; }
-          .clubs-section { padding-top:10px !important; }
+          .clubs-section { padding-top:10px !important; padding-left:0 !important; padding-right:0 !important; }
+          .clubs-hd { padding-left:14px !important; padding-right:14px !important; }
+          .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
+          .marketplace-hd { padding-left:14px !important; padding-right:14px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:14px !important; }
           .clubs-desk { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
@@ -983,10 +986,10 @@ useEffect(() => {
       </section>
 
       {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
-      <section style={{ background: '#FFFFFF', padding: 'clamp(12px,1.4vw,20px) clamp(16px,5%,80px)' }}>
+      <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(12px,1.4vw,20px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '18px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '18px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
                 <h2 className="sec-title" style={{ color: TEXT }}>بیلیارد بازار</h2>
