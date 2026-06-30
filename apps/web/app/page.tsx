@@ -201,7 +201,11 @@ const NEWS = [
    CLUB CARD
 ═══════════════════════════════════════════════════════════════ */
 function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[0]; h?: string; featured?: boolean }) {
-  const [hov, setHov] = useState(false);
+  const [hov, setHov]     = useState(false);
+  const [saved, setSaved] = useState(false);
+  const snookerTables = Math.floor(club.tables * 0.5);
+  const pocketTables  = Math.floor(club.tables * 0.3);
+  const hiballTables  = club.tables - snookerTables - pocketTables;
   return (
     <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block', height: h }}>
       <div
@@ -232,19 +236,21 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
               transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
+          <button className="club-heart-mob"
+            onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }}
+            style={{ position: 'absolute', top: '8px', left: '8px', width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(255,255,255,0.90)', border: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 1px 6px rgba(0,0,0,0.12)', display: 'none' }}>
+            <Heart size={13} style={{ color: saved ? '#ff4455' : '#1a1a1a', fill: saved ? '#ff4455' : 'transparent' }} />
+          </button>
         </div>
 
-        {/* ── White info panel: bottom 40% ── */}
-        <div style={{
+        {/* ── Desktop info panel ── */}
+        <div className="club-desk-panel" style={{
           flex: '0 0 40%', background: '#fff',
           padding: featured ? '12px 16px 10px' : '9px 13px 8px',
           display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
-          overflow: 'hidden', gap: '4px',
+          overflow: 'hidden', gap: '3px',
         }}>
-          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-              <span className="club-name-full">{club.name}</span>
-              <span className="club-name-short">{club.name.replace(/^باشگاه\s+/, '')}</span>
-            </div>
+          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
               <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
@@ -255,12 +261,38 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
             </span>
           </div>
-          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: 'auto' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {[{ label: 'اسنوکر', n: snookerTables, clr: '#30C55A' }, { label: 'پاکت', n: pocketTables, clr: '#3b82f6' }, { label: 'هی‌بال', n: hiballTables, clr: '#8b5cf6' }].map(t => (
+              <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr, background: `${t.clr}14`, border: `1px solid ${t.clr}28`, borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
+            ))}
+          </div>
+          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: 'auto' }}>
             <div>
               <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
             </div>
             <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
+          </div>
+        </div>
+
+        {/* ── Mobile info panel ── */}
+        <div className="club-mob-panel" style={{
+          flex: '0 0 40%', background: '#fff',
+          padding: '7px 8px 6px',
+          display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          overflow: 'hidden', gap: '4px',
+        }}>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
+            {club.name.replace(/^باشگاه\s+/, '')}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a', marginLeft: '5px' }}>{club.rating}</span>
+            {[1,2,3,4,5].map(i => (
+              <Star key={i} size={11} style={{ color: '#F5A623', fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent', opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
+            <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}، {club.dist}
           </div>
         </div>
       </div>
@@ -473,8 +505,8 @@ export default function HomePage() {
       const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
       const sy = (1 + t * 0.15).toFixed(3);
       card.style.transform = `scaleY(${sy})`;
-      card.style.boxShadow = t > 0.3
-        ? `0 ${Math.round(4 + t * 16)}px ${Math.round(8 + t * 28)}px rgba(0,0,0,${(t * 0.28).toFixed(2)})`
+      card.style.filter = t > 0.25
+        ? `drop-shadow(0 ${(t * 10).toFixed(1)}px ${(t * 18).toFixed(1)}px rgba(48,197,90,${(t * 0.38).toFixed(2)}))`
         : 'none';
       if (dist < minDist) { minDist = dist; newActive = i; }
     });
@@ -658,17 +690,20 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:22px 10px 48px; scroll-snap-type:x mandatory; }
+        .clubs-mobile-slider { display:none; gap:14px; overflow-x:auto; scrollbar-width:none; padding:22px 14px 48px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
-        .club-mob-card { transform-origin:center; transition:transform 0.22s ease, box-shadow 0.3s ease; position:relative; }
+        .club-mob-card { transform-origin:center; position:relative; border-radius:12px; overflow:hidden; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
         .club-card-price-row { display:flex; }
-        .club-name-short { display:none; }
+        .club-desk-panel { display:flex; }
+        .club-mob-panel  { display:none; }
+        .club-heart-mob  { display:none; }
         @media(max-width:600px){
-          .club-name-full { display:none !important; }
-          .club-name-short { display:inline !important; }
           .clubs-dots { display:flex !important; }
           .club-card-price-row { display:none !important; }
+          .club-desk-panel { display:none !important; }
+          .club-mob-panel  { display:flex !important; }
+          .club-heart-mob  { display:flex !important; }
           .clubs-section { padding-top:55px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:24px !important; }
           .clubs-desk { display:none !important; }
@@ -918,7 +953,7 @@ useEffect(() => {
           </div>
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: 'calc(31vw)', minWidth: '100px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={c.id} className="club-mob-card" style={{ width: '43vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(185px,55vw,251px)" />
               </div>
             ))}
