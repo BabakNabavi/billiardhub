@@ -2254,7 +2254,7 @@ export default function ClubDashboardPage() {
               <input
                 type="text" value={coachSearch}
                 onChange={e => setCoachSearch(e.target.value)}
-                placeholder="جستجو بر اساس نام یا شهر..."
+                placeholder="جستجو بر اساس نام..."
                 style={{ ...inputStyle, marginBottom: 12 }}
               />
               {loadingCoaches ? (
@@ -2264,7 +2264,7 @@ export default function ClubDashboardPage() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 340, overflowY: 'auto' }}>
                   {availableCoaches
-                    .filter(c => `${c.firstName} ${c.lastName} ${c.city ?? ''}`.toLowerCase().includes(coachSearch.toLowerCase()))
+                    .filter(c => `${c.firstName} ${c.lastName}`.toLowerCase().includes(coachSearch.toLowerCase()))
                     .map(c => {
                       const alreadyAdded = !!coaches.find(e => e.id === c.id);
                       return (
