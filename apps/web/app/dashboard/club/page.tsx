@@ -629,8 +629,15 @@ export default function ClubDashboardPage() {
     finally { setHoursSaving(false); }
   };
 
+  const deleteTournament = (id: string) => {
+    setMyTournaments(ts => ts.filter(t => t.id !== id));
+  };
+
   const createTournament = async () => {
     if (!selectedClub) return;
+    if (!tForm.name.trim()) { alert('نام مسابقه الزامی است'); return; }
+    if (!tForm.date) { alert('تاریخ مسابقه الزامی است'); return; }
+    if (!tForm.startTime) { alert('ساعت شروع الزامی است'); return; }
     setTLoading(true);
     try {
       const newT: Tournament = {
@@ -1821,6 +1828,10 @@ export default function ClubDashboardPage() {
                       padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                       border: 'none', background: `${GOLD}22`, color: GOLD, cursor: 'pointer', fontFamily: 'var(--font-base)',
                     }}>ویرایش</button>
+                    <button onClick={() => { if (confirm(`مسابقه «${t.name}» حذف شود؟`)) deleteTournament(t.id); }} style={{
+                      padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                      border: 'none', background: '#FEE2E2', color: '#991B1B', cursor: 'pointer', fontFamily: 'var(--font-base)',
+                    }}>حذف</button>
                   </div>
                 </Card>
               ))}
