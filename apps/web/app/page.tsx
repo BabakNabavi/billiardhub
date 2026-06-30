@@ -471,6 +471,10 @@ export default function HomePage() {
   const [activeClub, setActiveClub] = useState(0);
   const activeClubRef  = useRef(0);
 
+  const mktSliderRef  = useRef<HTMLDivElement>(null);
+  const [activeMkt, setActiveMkt] = useState(0);
+  const activeMktRef  = useRef(0);
+
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return;
@@ -536,6 +540,42 @@ export default function HomePage() {
     handleClubsScroll();
     return () => slider.removeEventListener('scroll', handleClubsScroll);
   }, [handleClubsScroll]);
+
+  const mktRafRef = useRef<number>(0);
+  const handleMktScroll = useCallback(() => {
+    cancelAnimationFrame(mktRafRef.current);
+    mktRafRef.current = requestAnimationFrame(() => {
+      const slider = mktSliderRef.current;
+      if (!slider) return;
+      const sliderCenter = slider.scrollLeft + slider.offsetWidth / 2;
+      const cards = Array.from(slider.querySelectorAll<HTMLElement>('.mkt-mob-card'));
+      let minDist = Infinity, newActive = 0;
+      cards.forEach((card, i) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(cardCenter - sliderCenter);
+        const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.50));
+        const sy = (1 + t * 0.05).toFixed(3);
+        card.style.transform = `scaleY(${sy})`;
+        card.style.filter = t > 0.3
+          ? `drop-shadow(0 ${(t * 5).toFixed(1)}px ${(t * 12).toFixed(1)}px rgba(0,0,0,${(t * 0.13).toFixed(2)}))`
+          : 'none';
+        if (dist < minDist) { minDist = dist; newActive = i; }
+      });
+      if (newActive !== activeMktRef.current) {
+        activeMktRef.current = newActive;
+        setActiveMkt(newActive);
+        try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8); } catch(_) {}
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const slider = mktSliderRef.current;
+    if (!slider) return;
+    slider.addEventListener('scroll', handleMktScroll, { passive: true });
+    handleMktScroll();
+    return () => slider.removeEventListener('scroll', handleMktScroll);
+  }, [handleMktScroll]);
 
   useEffect(() => {
     const fn = () => {
@@ -706,6 +746,10 @@ useEffect(() => {
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
+        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 44px; scroll-snap-type:x proximity; }
+        .mkt-mobile-slider::-webkit-scrollbar { display:none; }
+        .mkt-mob-card { transform-origin:center; position:relative; }
+        .mkt-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
         .club-desk-panel { display:flex; }
         .club-mob-panel  { display:none; }
         .club-open-btn   { display:none; }
@@ -718,6 +762,10 @@ useEffect(() => {
           .clubs-hd { padding-left:14px !important; padding-right:14px !important; }
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; }
+          .mkt-split { display:none !important; }
+          .mkt-desk-btns { display:none !important; }
+          .mkt-mobile-slider { display:flex !important; }
+          .mkt-dots { display:flex !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:14px !important; }
           .clubs-desk { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
@@ -1047,8 +1095,51 @@ useEffect(() => {
               ))}
             </div>
           </div>
+          <div ref={mktSliderRef} className="mkt-mobile-slider">
+            {PRODUCTS.map((p) => (
+              <div key={p.id} className="mkt-mob-card" style={{ width: '44vw', minWidth: '148px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(200px,62vw,270px)' }}>
+                  <div style={{
+                    borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                  }}>
+                    <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
+                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.65) 100%)' }} />
+                      {p.pct > 0 && (
+                        <div style={{ position: 'absolute', top: '7px', right: '7px',
+                          background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)',
+                          color: '#ef4444', fontSize: '9px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>
+                          {p.pct}٪
+                        </div>
+                      )}
+                      <div style={{ position: 'absolute', bottom: '6px', left: '7px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
+                    </div>
+                    <div style={{ flex: '0 0 38%', background: '#fff', padding: '7px 8px 6px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
+                      <div style={{ fontSize: '9px', color: TEXT_M }}>{p.sub}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+          <div className="mkt-dots">
+            {PRODUCTS.map((_, i) => (
+              <div key={i} style={{
+                height: '5px',
+                width: i === activeMkt ? '18px' : '5px',
+                borderRadius: '3px',
+                background: i === activeMkt ? GOLD : 'rgba(26,25,23,0.22)',
+                transition: 'all 0.3s ease',
+              }} />
+            ))}
+          </div>
           <SR delay={180}>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '38px', flexWrap: 'wrap' }}>
+            <div className="mkt-desk-btns" style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '38px', flexWrap: 'wrap' }}>
               <Link href="/shop"><button className="btn-primary"><ShoppingBag size={14} /> ورود به بازار</button></Link>
               <Link href="/sellers"><button className="btn-outline">فروش تجهیزات</button></Link>
             </div>
