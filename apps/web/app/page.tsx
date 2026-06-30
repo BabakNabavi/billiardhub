@@ -258,7 +258,10 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
           overflow: 'hidden', gap: '4px',
         }}>
-          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
+          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              <span className="club-name-full">{club.name}</span>
+              <span className="club-name-short">{club.name.replace(/^باشگاه\s+/, '')}</span>
+            </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
               <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
@@ -269,14 +272,12 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
             </span>
           </div>
-          <div style={{ overflow: 'hidden', maxHeight: hov ? '56px' : '0px', transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: '4px' }}>
-              <div>
-                <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
-                <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
-              </div>
-              <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: '4px' }}>
+            <div>
+              <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
+              <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
             </div>
+            <div style={{ background: 'rgba(48,197,90,0.10)', color: '#30C55A', fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: '1px solid rgba(48,197,90,0.22)' }}>رزرو آنلاین</div>
           </div>
         </div>
       </div>
@@ -640,8 +641,11 @@ useEffect(() => {
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
         .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding-bottom:8px; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
+        .club-name-short { display:none; }
         @media(max-width:600px){
-          .clubs-section { padding-top:58px !important; }
+          .club-name-full { display:none !important; }
+          .club-name-short { display:inline !important; }
+          .clubs-section { padding-top:55px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:24px !important; }
           .clubs-desk { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
@@ -867,7 +871,7 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(65px,7.2vw,97px) clamp(16px,5%,80px)' }}>
+      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(62px,6.84vw,92px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }}>
@@ -883,10 +887,9 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="clubs-desk"><SR delay={80}><div style={{ marginBottom: '16px' }}><ClubCard club={CLUBS[0]!} h="clamp(370px,64vw,686px)" featured /></div></SR></div>
-          <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-            {CLUBS.slice(1).map((c, i) => (
-              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(317px,42vw,449px)" /></SR>
+          <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+            {CLUBS.map((c, i) => (
+              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(310px,30vw,400px)" /></SR>
             ))}
           </div>
           <div className="clubs-mobile-slider">
