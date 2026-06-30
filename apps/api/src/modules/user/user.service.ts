@@ -72,7 +72,6 @@ export class UserService {
       .createQueryBuilder('user')
       .where('user.primaryRole = :role OR :role = ANY(user.secondaryRoles)', { role })
       .andWhere('user.isActive = true')
-      .andWhere('user.isProfileComplete = true')
       .getMany();
 
     return users.map(u => ({

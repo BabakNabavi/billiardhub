@@ -788,7 +788,7 @@ export default function ClubDashboardPage() {
     const specialtyMap: Record<string, string> = { snooker: 'اسنوکر', pocket: 'پاکت بیلیارد', highball: 'هی‌بال' };
     const entry: CoachEntry = {
       id: c.id,
-      name: `${c.firstName} ${c.lastName}`,
+      name: `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام',
       title: specialtyMap[c.coachProfile?.specialty ?? ''] ?? 'مربی بیلیارد',
       exp: c.coachProfile?.experience ? `${c.coachProfile.experience} سال` : '',
       rating: '',
@@ -2262,63 +2262,77 @@ export default function ClubDashboardPage() {
             }}>+ مربی جدید</button>
           </div>
 
-          {/* Coach Picker Modal */}
+          {/* Coach Picker — inline dropdown */}
           {showCoachPicker && (
-            <Card style={{ marginBottom: 16, border: `1px solid ${GOLD}44` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <SectionTitle>انتخاب مربی از لیست</SectionTitle>
-                <button onClick={() => setShowCoachPicker(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', fontSize: 20, lineHeight: 1 }}>×</button>
-              </div>
+            <div style={{ position: 'relative', marginBottom: 16 }}>
               <input
+                autoFocus
                 type="text" value={coachSearch}
                 onChange={e => setCoachSearch(e.target.value)}
-                placeholder="جستجو بر اساس نام..."
-                style={{ ...inputStyle, marginBottom: 12 }}
+                placeholder="نام مربی را تایپ کنید..."
+                style={{
+                  ...inputStyle, width: '100%', boxSizing: 'border-box',
+                  border: `1.5px solid ${GOLD}66`, borderRadius: 10,
+                  paddingLeft: 36,
+                }}
               />
-              {loadingCoaches ? (
-                <div style={{ textAlign: 'center', padding: 24, color: '#6B7280' }}>در حال بارگذاری...</div>
-              ) : availableCoaches.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 24, color: '#6B7280' }}>مربی‌ای یافت نشد</div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 340, overflowY: 'auto' }}>
-                  {availableCoaches
-                    .filter(c => `${c.firstName} ${c.lastName}`.toLowerCase().includes(coachSearch.toLowerCase()))
-                    .map(c => {
-                      const alreadyAdded = !!coaches.find(e => e.id === c.id);
-                      return (
-                        <div key={c.id} style={{
-                          display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-                          borderRadius: 10, border: '1px solid #E5E7EB',
-                          background: alreadyAdded ? '#F9FAFB' : '#fff',
-                          opacity: alreadyAdded ? 0.6 : 1,
-                        }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 16, flexShrink: 0 }}>
-                            {c.firstName[0]}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: 14, color: DARK }}>{c.firstName} {c.lastName}</div>
-                            <div style={{ fontSize: 12, color: '#6B7280' }}>
-                              {c.coachProfile?.specialty === 'snooker' ? 'اسنوکر' : c.coachProfile?.specialty === 'pocket' ? 'پاکت بیلیارد' : 'مربی بیلیارد'}
-                              {c.city ? ` · ${c.city}` : ''}
-                              {c.coachProfile?.experience ? ` · ${c.coachProfile.experience} سال تجربه` : ''}
-                            </div>
-                          </div>
-                          {c.verificationStatus === 'verified' && (
-                            <span style={{ fontSize: 11, color: '#1d9bf0', background: 'rgba(29,155,240,0.08)', border: '1px solid rgba(29,155,240,0.20)', borderRadius: 20, padding: '2px 8px', flexShrink: 0 }}>تأیید شده</span>
-                          )}
-                          <button onClick={() => selectCoach(c)} disabled={alreadyAdded} style={{
-                            background: alreadyAdded ? '#E5E7EB' : GOLD, color: alreadyAdded ? '#9CA3AF' : '#fff',
-                            border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700,
-                            cursor: alreadyAdded ? 'default' : 'pointer', fontFamily: 'var(--font-base)', flexShrink: 0,
-                          }}>
-                            {alreadyAdded ? 'افزوده شده' : 'انتخاب'}
-                          </button>
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: 16 }}>🔍</span>
+              {/* Dropdown list */}
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50,
+                background: '#fff', border: `1px solid ${GOLD}44`,
+                borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                overflow: 'hidden',
+              }}>
+                {loadingCoaches ? (
+                  <div style={{ padding: '14px 16px', color: '#6B7280', fontSize: 13, textAlign: 'center' }}>در حال بارگذاری...</div>
+                ) : (() => {
+                  const filtered = availableCoaches
+                    .filter(c => {
+                      const fullName = `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim();
+                      return !coachSearch || fullName.toLowerCase().includes(coachSearch.toLowerCase());
+                    })
+                    .slice(0, 5);
+                  if (filtered.length === 0) return (
+                    <div style={{ padding: '14px 16px', color: '#6B7280', fontSize: 13, textAlign: 'center' }}>مربی‌ای یافت نشد</div>
+                  );
+                  return filtered.map(c => {
+                    const fullName = `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || 'بدون نام';
+                    const alreadyAdded = !!coaches.find(e => e.id === c.id);
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => !alreadyAdded && selectCoach(c)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',
+                          cursor: alreadyAdded ? 'default' : 'pointer',
+                          opacity: alreadyAdded ? 0.5 : 1,
+                          borderBottom: `1px solid #F3F4F6`,
+                          transition: 'background 0.15s',
+                        }}
+                        onMouseEnter={e => { if (!alreadyAdded) (e.currentTarget as HTMLDivElement).style.background = `${GOLD}0A`; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = ''; }}
+                      >
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 15, flexShrink: 0 }}>
+                          {(c.firstName?.[0] ?? '?')}
                         </div>
-                      );
-                    })}
-                </div>
-              )}
-            </Card>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: 14, color: DARK }}>{fullName}</div>
+                          <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                            {c.coachProfile?.specialty === 'snooker' ? 'اسنوکر' : c.coachProfile?.specialty === 'pocket' ? 'پاکت بیلیارد' : 'مربی بیلیارد'}
+                            {c.city ? ` · ${c.city}` : ''}
+                          </div>
+                        </div>
+                        {c.verificationStatus === 'verified' && (
+                          <span style={{ fontSize: 10, color: '#1d9bf0', background: 'rgba(29,155,240,0.08)', border: '1px solid rgba(29,155,240,0.20)', borderRadius: 20, padding: '2px 7px', flexShrink: 0 }}>✓ تأیید</span>
+                        )}
+                        {alreadyAdded && <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>افزوده شده</span>}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
           )}
 
           {coaches.length === 0 ? (
