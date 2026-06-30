@@ -238,7 +238,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
           <button className="club-heart-mob"
             onClick={e => { e.preventDefault(); e.stopPropagation(); setSaved(s => !s); }}
-            style={{ position: 'absolute', top: '8px', left: '8px', width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(255,255,255,0.90)', border: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 1px 6px rgba(0,0,0,0.12)', display: 'none' }}>
+            style={{ position: 'absolute', top: '8px', left: '8px', width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(255,255,255,0.90)', border: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 1px 6px rgba(0,0,0,0.12)' }}>
             <Heart size={13} style={{ color: saved ? '#ff4455' : '#1a1a1a', fill: saved ? '#ff4455' : 'transparent' }} />
           </button>
         </div>
@@ -247,7 +247,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         <div className="club-desk-panel" style={{
           flex: '0 0 40%', background: '#fff',
           padding: featured ? '12px 16px 10px' : '9px 13px 8px',
-          display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
+          flexDirection: 'column', justifyContent: 'flex-start',
           overflow: 'hidden', gap: '3px',
         }}>
           <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
@@ -279,7 +279,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         <div className="club-mob-panel" style={{
           flex: '0 0 40%', background: '#fff',
           padding: '7px 8px 6px',
-          display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           overflow: 'hidden', gap: '4px',
         }}>
           <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
