@@ -566,8 +566,8 @@ export default function HomePage() {
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const dist = Math.abs(cardCenter - sliderCenter);
         const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.50));
-        const sy = (1 + t * 0.05).toFixed(3);
-        card.style.transform = `scaleY(${sy})`;
+        const sx = (1 - t * 0.05).toFixed(3);
+        card.style.transform = `scaleX(${sx})`;
         card.style.filter = t > 0.3
           ? `drop-shadow(0 ${(t * 5).toFixed(1)}px ${(t * 12).toFixed(1)}px rgba(0,0,0,${(t * 0.13).toFixed(2)}))`
           : 'none';
@@ -602,8 +602,8 @@ export default function HomePage() {
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const dist = Math.abs(cardCenter - sliderCenter);
         const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.50));
-        const sy = (1 + t * 0.05).toFixed(3);
-        card.style.transform = `scaleY(${sy})`;
+        const sx = (1 - t * 0.05).toFixed(3);
+        card.style.transform = `scaleX(${sx})`;
         card.style.filter = t > 0.3
           ? `drop-shadow(0 ${(t * 5).toFixed(1)}px ${(t * 12).toFixed(1)}px rgba(0,0,0,${(t * 0.13).toFixed(2)}))`
           : 'none';
@@ -793,16 +793,16 @@ useEffect(() => {
         .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 24px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
-        .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:6px; }
+        .clubs-dots { display:none !important; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 24px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-mob-card { transform-origin:center; position:relative; }
-        .mkt-dots { display:none; justify-content:center; gap:5px; margin-top:6px; }
+        .mkt-dots { display:none !important; }
         .club-desk-panel { display:flex; }
         .club-mob-panel  { display:none; }
         .club-open-btn   { display:flex; }
         @keyframes open-dot-blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.25;transform:scale(0.55)} }
-        .open-dot { animation:open-dot-blink 1.5s ease-in-out infinite; }
+        .open-dot { animation:open-dot-blink 3.5s ease-in-out infinite; }
         @media(max-width:600px){
           .clubs-dots { display:flex !important; }
           .club-desk-panel { display:none !important; }
