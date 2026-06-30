@@ -439,6 +439,38 @@ export default function HomePage() {
   const next = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
   const prev = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
 
+  const sliderRef      = useRef<HTMLDivElement>(null);
+  const [activeCard, setActiveCard] = useState(0);
+  const activeCardRef  = useRef(0);
+
+  const handleSliderScroll = useCallback(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+    const sliderCenter = slider.scrollLeft + slider.offsetWidth / 2;
+    const cards = Array.from(slider.querySelectorAll<HTMLElement>('.feat-card'));
+    let minDist = Infinity, newActive = 0;
+    cards.forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - sliderCenter);
+      const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
+      card.style.transform = `scale(${(1 + t * 0.16).toFixed(3)})`;
+      if (dist < minDist) { minDist = dist; newActive = i; }
+    });
+    if (newActive !== activeCardRef.current) {
+      activeCardRef.current = newActive;
+      setActiveCard(newActive);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(6);
+    }
+  }, []);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+    slider.addEventListener('scroll', handleSliderScroll, { passive: true });
+    handleSliderScroll();
+    return () => slider.removeEventListener('scroll', handleSliderScroll);
+  }, [handleSliderScroll]);
+
   useEffect(() => {
     const fn = () => {
       cancelAnimationFrame(rafRef.current);
@@ -603,6 +635,7 @@ useEffect(() => {
           .comm-grid { grid-template-columns:1fr !important; }
         }
         .feat-slider::-webkit-scrollbar { display: none; }
+        .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
         .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding-bottom:8px; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         @media(max-width:600px){
@@ -704,47 +737,30 @@ useEffect(() => {
             اتصال بی‌واسطه بازیکنان، باشگاه‌ها و برترین تولیدکنندگان و فروشندگان در ایران و جهان
           </p>
 
-          {/* Hero CTA buttons — exact trust-card style */}
-          <div className="hero-ctas" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '4px 0 24px', flexWrap: 'wrap' }}>
-            {[
-              { href: '/clubs', icon: <Calendar size={16} color="#C7A66A" />, label: 'رزرو آنلاین میز' },
-              { href: '/shop',  icon: <ShoppingBag size={16} color="#C7A66A" />, label: 'بیلیارد بازار' },
-            ].map((btn, i) => (
-              <Link key={i} href={btn.href} className="hero-cta-link" style={{ textDecoration: 'none' }}>
-                <div style={{
-                  display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  padding: '10px 20px', borderRadius: '20px', cursor: 'pointer',
-                  background: 'rgba(199,166,106,0.10)',
-                  border: '1px solid rgba(199,166,106,0.22)',
-                  whiteSpace: 'nowrap', width: '100%', boxSizing: 'border-box',
-                }}>
-                  {btn.icon}
-                  <span style={{ fontSize: '16px', fontWeight: 700, color: '#C7A66A', letterSpacing: '-0.01em' }}>{btn.label}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Feature card slider — 6 cards */}
+          {/* Feature card slider — 7 cards */}
           <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
-            <div className="feat-slider" style={{
+            <div ref={sliderRef} className="feat-slider" style={{
               display: 'flex', gap: '10px', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '4px 8px 8px',
+              scrollbarWidth: 'none', padding: '4px 8px 16px',
               justifyContent: 'center', alignItems: 'stretch',
+              scrollSnapType: 'x mandatory',
             }}>
               {FEATURE_CARDS.map((card, i) => (
-                <Link key={i} href={card.href} className="feat-card" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex' }}>
+                <Link key={i} href={card.href} className="feat-card" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
                   <div style={{
                     width: '118px', padding: '18px 10px 16px',
                     background: `rgba(${card.rgb},0.09)`,
                     backdropFilter: 'blur(28px) saturate(200%)',
                     WebkitBackdropFilter: 'blur(28px) saturate(200%)',
-                    border: `1px solid rgba(${card.rgb},0.26)`,
+                    border: `1px solid rgba(${card.rgb},${i === activeCard ? '0.45' : '0.26'})`,
                     borderRadius: '20px',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                     textAlign: 'center', flex: 1,
-                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(${card.rgb},0.12)`,
+                    boxShadow: i === activeCard
+                      ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 40px rgba(${card.rgb},0.40), 0 0 0 1px rgba(${card.rgb},0.18)`
+                      : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(${card.rgb},0.12)`,
                     cursor: 'pointer',
+                    transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                   }}>
                     <div style={{
                       width: '46px', height: '46px', borderRadius: '14px',
@@ -765,6 +781,18 @@ useEffect(() => {
                     </div>
                   </div>
                 </Link>
+              ))}
+            </div>
+            {/* Carousel dots */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '2px' }}>
+              {FEATURE_CARDS.map((card, i) => (
+                <div key={i} style={{
+                  height: '5px',
+                  width: i === activeCard ? '18px' : '5px',
+                  borderRadius: '3px',
+                  background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
+                  transition: 'all 0.3s ease',
+                }} />
               ))}
             </div>
           </div>
