@@ -309,6 +309,49 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   PRODUCT CARD
+═══════════════════════════════════════════════════════════════ */
+function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: h }}>
+      <div
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
+          display: 'flex', flexDirection: 'column',
+          transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
+          transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
+          boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
+          willChange: 'transform',
+        }}>
+        <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', background: '#111' }}>
+          <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)', transition: 'transform 0.6s ease', transform: hov ? 'scale(1.06)' : 'scale(1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.70) 100%)' }} />
+          {p.pct > 0 && (
+            <div style={{ position: 'absolute', top: '12px', right: '12px',
+              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)',
+              color: '#ef4444', fontSize: '11px', fontWeight: 700, padding: '4px 11px', borderRadius: '20px' }}>
+              {p.pct}٪ تخفیف
+            </div>
+          )}
+          <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{p.brand}</div>
+        </div>
+        <div style={{ flex: '0 0 40%', background: '#fff', padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '5px' }}>
+          <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.25, letterSpacing: '-0.01em' }}>{p.name}</div>
+          <div style={{ fontSize: '12px', color: TEXT_M }}>{p.sub}</div>
+          <div style={{ marginTop: '6px' }}>
+            {p.pct > 0 && <div style={{ fontSize: '12px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')} ت</div>}
+            <div style={{ fontSize: '20px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    DISCOVERY PANEL  — iOS 26 Liquid Glass + real dropdowns
 ═══════════════════════════════════════════════════════════════ */
 function DiscoveryPanel() {
@@ -1050,50 +1093,10 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="mkt-split" style={{ display: 'grid', gridTemplateColumns: '55fr 45fr', gap: '16px', alignItems: 'stretch' }}>
-            <SR direction="left">
-              <Link href={`/shop/${PRODUCTS[0]!.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-                <div className="prod-hover" style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: '100%', minHeight: '460px', cursor: 'pointer', boxShadow: '0 4px 24px rgba(26,25,23,0.09)' }}>
-                  <img src={PRODUCTS[0]!.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.42) saturate(0.60) contrast(1.06)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 10%,rgba(8,4,1,0.98) 100%)' }} />
-                  <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '12px', fontWeight: 700, padding: '5px 13px', borderRadius: '20px' }}>{PRODUCTS[0]!.pct}٪ تخفیف</div>
-                  <div style={{ position: 'absolute', top: '18px', left: '18px', fontSize: '12px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{PRODUCTS[0]!.brand}</div>
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '26px', background: 'rgba(10,5,1,0.40)', backdropFilter: 'blur(32px) saturate(180%)', WebkitBackdropFilter: 'blur(32px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div style={{ fontSize: 'clamp(17px, 2vw, 22px)', fontWeight: 800, color: '#fff', marginBottom: '6px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{PRODUCTS[0]!.name}</div>
-                    <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.32)', marginBottom: '18px' }}>{PRODUCTS[0]!.sub}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
-                      <div>
-                        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.24)', textDecoration: 'line-through', marginBottom: '3px' }}>{PRODUCTS[0]!.price.toLocaleString('fa-IR')} ت</div>
-                        <div style={{ fontSize: 'clamp(20px, 2.6vw, 31px)', fontWeight: 900, color: GOLD }}>{PRODUCTS[0]!.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(255,255,255,0.28)' }}>ت</span></div>
-                      </div>
-                      <div style={{ background: 'rgba(199,166,106,0.10)', color: '#C7A66A', fontSize: '14px', fontWeight: 700, padding: '12px 22px', borderRadius: '20px', border: '1px solid rgba(199,166,106,0.22)' }}>افزودن به سبد</div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </SR>
-            <div className="mkt-sub" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-              {PRODUCTS.slice(1).map((p, i) => (
-                <SR key={p.id} delay={i * 70} direction="right">
-                  <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                    <div className="prod-hover" style={{ display: 'flex', borderRadius: '18px', overflow: 'hidden', background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(32px) saturate(200%)', WebkitBackdropFilter: 'blur(32px) saturate(200%)', border: '1px solid rgba(255,255,255,0.90)', boxShadow: '0 4px 20px rgba(26,25,23,0.07), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                      <div style={{ width: '140px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-                        <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(8,4,1,0.82) 0%,transparent 52%)' }} />
-                        {p.pct > 0 && <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)', color: '#ef4444', fontSize: '9px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px' }}>{p.pct}٪</div>}
-                        <div style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '9px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
-                      </div>
-                      <div style={{ flex: 1, padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <div style={{ fontSize: '15px', fontWeight: 700, color: TEXT, lineHeight: 1.5, marginBottom: '4px' }}>{p.name}</div>
-                        <div style={{ fontSize: '13px', color: TEXT_M, marginBottom: '10px' }}>{p.sub}</div>
-                        <div style={{ fontSize: '13px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')}</div>
-                        <div style={{ fontSize: '19px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '12px', fontWeight: 400, color: TEXT_M }}>ت</span></div>
-                      </div>
-                    </div>
-                  </Link>
-                </SR>
-              ))}
-            </div>
+          <div className="mkt-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+            {PRODUCTS.map((p, i) => (
+              <SR key={p.id} delay={i * 60}><ProductCard p={p} h="clamp(310px,30vw,400px)" /></SR>
+            ))}
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
