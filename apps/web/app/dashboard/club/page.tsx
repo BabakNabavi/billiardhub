@@ -803,7 +803,12 @@ export default function ClubDashboardPage() {
     const excludeId = user?.id ? `&excludeId=${user.id}` : '';
     fetch(`/api/users/by-role?role=coach${excludeId}`)
       .then(r => r.json())
-      .then(data => { setAvailableCoaches(Array.isArray(data) && data.length > 0 ? data : MOCK_COACHES); })
+      .then(data => {
+        const list: ApiCoach[] = Array.isArray(data)
+          ? data.filter((c: ApiCoach) => c.id !== user?.id)
+          : [];
+        setAvailableCoaches(list.length > 0 ? list : MOCK_COACHES);
+      })
       .catch(() => setAvailableCoaches(MOCK_COACHES))
       .finally(() => setLoadingCoaches(false));
   };
