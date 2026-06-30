@@ -219,20 +219,26 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
       >
         {/* ── Image: top 60% ── */}
         <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden' }}>
-          <img src={hov ? club.img2 : club.img} alt={club.name}
+          <img src={club.img} alt={club.name}
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
-            style={{ width: '100%', height: '100%', objectFit: 'cover',
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
               filter: hov ? 'brightness(0.65) saturate(0.82)' : 'brightness(0.82) saturate(0.88)',
-              transition: 'filter 0.6s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
+              transition: 'filter 0.7s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
               transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none' }} />
+          <img src={club.img2} alt=""
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+              opacity: hov ? 1 : 0,
+              filter: 'brightness(0.65) saturate(0.82)',
+              transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
+              transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
         </div>
 
         {/* ── White info panel: bottom 40% ── */}
         <div style={{
           flex: '0 0 40%', background: '#fff',
-          padding: featured ? '13px 16px' : '10px 13px',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          padding: featured ? '12px 16px 10px' : '9px 13px 8px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
           overflow: 'hidden', gap: '4px',
         }}>
           <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
@@ -249,7 +255,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
             </span>
           </div>
-          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: '4px' }}>
+          <div className="club-card-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '8px', marginTop: 'auto' }}>
             <div>
               <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>ت/ساعت</span>
@@ -928,22 +934,6 @@ useEffect(() => {
               }} />
             ))}
           </div>
-          <SR delay={200}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '36px' }}>
-              <Link href="/clubs" style={{ textDecoration: 'none' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '13px 32px', borderRadius: '20px', cursor: 'pointer',
-                  background: 'rgba(48,197,90,0.10)',
-                  border: '1px solid rgba(48,197,90,0.22)',
-                  transition: 'background 0.2s',
-                }}>
-                  <MapPin size={16} color="#30C55A" />
-                  <span style={{ fontSize: '17px', fontWeight: 700, color: '#30C55A' }}>نزدیک‌ترین باشگاه</span>
-                </div>
-              </Link>
-            </div>
-          </SR>
         </div>
       </section>
 
