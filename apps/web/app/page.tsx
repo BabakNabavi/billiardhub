@@ -444,6 +444,10 @@ export default function HomePage() {
   const [activeCard, setActiveCard] = useState(0);
   const activeCardRef  = useRef(0);
 
+  const clubsSliderRef = useRef<HTMLDivElement>(null);
+  const [activeClub, setActiveClub] = useState(0);
+  const activeClubRef  = useRef(0);
+
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return;
@@ -473,6 +477,38 @@ export default function HomePage() {
     handleSliderScroll();
     return () => slider.removeEventListener('scroll', handleSliderScroll);
   }, [handleSliderScroll]);
+
+  const handleClubsScroll = useCallback(() => {
+    const slider = clubsSliderRef.current;
+    if (!slider) return;
+    const sliderCenter = slider.scrollLeft + slider.offsetWidth / 2;
+    const cards = Array.from(slider.querySelectorAll<HTMLElement>('.club-mob-card'));
+    let minDist = Infinity, newActive = 0;
+    cards.forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - sliderCenter);
+      const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
+      const sy = (1 + t * 0.15).toFixed(3);
+      card.style.transform = `scaleY(${sy})`;
+      card.style.boxShadow = t > 0.3
+        ? `0 ${Math.round(4 + t * 16)}px ${Math.round(8 + t * 28)}px rgba(0,0,0,${(t * 0.28).toFixed(2)})`
+        : 'none';
+      if (dist < minDist) { minDist = dist; newActive = i; }
+    });
+    if (newActive !== activeClubRef.current) {
+      activeClubRef.current = newActive;
+      setActiveClub(newActive);
+      try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(12); } catch(_) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    const slider = clubsSliderRef.current;
+    if (!slider) return;
+    slider.addEventListener('scroll', handleClubsScroll, { passive: true });
+    handleClubsScroll();
+    return () => slider.removeEventListener('scroll', handleClubsScroll);
+  }, [handleClubsScroll]);
 
   useEffect(() => {
     const fn = () => {
@@ -639,12 +675,15 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding-bottom:8px; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:14px 0 32px; scroll-snap-type:x mandatory; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
+        .club-mob-card { transform-origin:center; transition:transform 0.22s ease, box-shadow 0.3s ease; position:relative; }
+        .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
         .club-name-short { display:none; }
         @media(max-width:600px){
           .club-name-full { display:none !important; }
           .club-name-short { display:inline !important; }
+          .clubs-dots { display:flex !important; }
           .clubs-section { padding-top:55px !important; }
           .clubs-hd { flex-wrap:nowrap !important; align-items:center !important; margin-bottom:24px !important; }
           .clubs-desk { display:none !important; }
@@ -892,11 +931,22 @@ useEffect(() => {
               <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(310px,30vw,400px)" /></SR>
             ))}
           </div>
-          <div className="clubs-mobile-slider">
+          <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} style={{ width: 'calc(31vw)', minWidth: '100px', flexShrink: 0 }}>
+              <div key={c.id} className="club-mob-card" style={{ width: 'calc(31vw)', minWidth: '100px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(185px,55vw,251px)" />
               </div>
+            ))}
+          </div>
+          <div className="clubs-dots">
+            {CLUBS.map((_, i) => (
+              <div key={i} style={{
+                height: '5px',
+                width: i === activeClub ? '18px' : '5px',
+                borderRadius: '3px',
+                background: i === activeClub ? GOLD : 'rgba(26,25,23,0.22)',
+                transition: 'all 0.3s ease',
+              }} />
             ))}
           </div>
           <SR delay={200}>
