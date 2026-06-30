@@ -15,7 +15,7 @@ interface Club {
   id: string; name: string; managerName: string; description: string;
   address: string; city: string; province: string;
   latitude?: number; longitude?: number;
-  phone: string; website: string;
+  phone: string; website: string; slug?: string;
   snookerTables: number; pocketTables: number; highballTables: number;
   vipSnookerTables: number; vipPocketTables: number; airHockeyTables: number;
   dartBoards: number; playstations: number;
@@ -99,7 +99,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
   } as const)[activeTournament.status] : null;
 
   if (view === 'list') return (
-    <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{
@@ -178,7 +178,7 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
 
   /* GRID CARD */
   return (
-    <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+    <Link href={`/clubs/${club.slug || club.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{

@@ -17,7 +17,7 @@ import ClubStoryModal from '../../../components/ClubStoryModal';
 interface Club {
   id: string; name: string; managerName: string; description: string;
   address: string; city: string; province?: string; country: string;
-  latitude: number; longitude: number; phone: string; website: string;
+  latitude: number; longitude: number; phone: string; website: string; slug?: string;
   snookerTables: number; pocketTables: number; highballTables: number;
   vipSnookerTables: number; vipPocketTables: number; airHockeyTables: number;
   dartBoards: number; playstations: number;
@@ -525,6 +525,17 @@ export default function ClubProfilePage() {
                           <a href={club.website} target="_blank" rel="noopener noreferrer" style={{ color: '#C7A66A', textDecoration: 'none' }}>{club.website.replace('https://', '')}</a>
                         </div>
                       )}
+                      {club.slug && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                          <Globe size={14} style={{ color: '#8b5cf6', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginBottom: 1 }}>آدرس اختصاصی باشگاه</div>
+                            <a href={`/clubs/${club.slug}`} style={{ color: '#8b5cf6', textDecoration: 'none', direction: 'ltr', display: 'inline-block', fontWeight: 600 }}>
+                              billiardhub.net/clubs/{club.slug}
+                            </a>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
@@ -630,6 +641,17 @@ export default function ClubProfilePage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
                         <Globe size={14} style={{ color: '#C7A66A', flexShrink: 0 }} />
                         <a href={club.website} target="_blank" rel="noopener noreferrer" style={{ color: '#C7A66A', textDecoration: 'none' }}>{club.website.replace('https://', '')}</a>
+                      </div>
+                    )}
+                    {club.slug && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                        <Globe size={14} style={{ color: '#8b5cf6', flexShrink: 0 }} />
+                        <div>
+                          <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', marginBottom: 1 }}>آدرس اختصاصی باشگاه</div>
+                          <a href={`/clubs/${club.slug}`} style={{ color: '#8b5cf6', textDecoration: 'none', direction: 'ltr', display: 'inline-block', fontWeight: 600 }}>
+                            billiardhub.net/clubs/{club.slug}
+                          </a>
+                        </div>
                       </div>
                     )}
                   </div>
