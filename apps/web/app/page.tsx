@@ -453,7 +453,7 @@ export default function HomePage() {
       const cardCenter = card.offsetLeft + card.offsetWidth / 2;
       const dist = Math.abs(cardCenter - sliderCenter);
       const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
-      card.style.transform = `scale(${(1 + t * 0.16).toFixed(3)})`;
+      card.style.transform = `scale(${(1 + t * 0.12).toFixed(3)})`;
       if (dist < minDist) { minDist = dist; newActive = i; }
     });
     if (newActive !== activeCardRef.current) {
@@ -740,8 +740,8 @@ useEffect(() => {
           {/* Feature card slider — 7 cards */}
           <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
             <div ref={sliderRef} className="feat-slider" style={{
-              display: 'flex', gap: '10px', overflowX: 'auto',
-              scrollbarWidth: 'none', padding: '4px 8px 16px',
+              display: 'flex', gap: '18px', overflowX: 'auto',
+              scrollbarWidth: 'none', padding: '18px 12px 12px',
               justifyContent: 'center', alignItems: 'stretch',
               scrollSnapType: 'x mandatory',
             }}>
@@ -784,7 +784,7 @@ useEffect(() => {
               ))}
             </div>
             {/* Carousel dots */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '2px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '18px' }}>
               {FEATURE_CARDS.map((card, i) => (
                 <div key={i} style={{
                   height: '5px',
