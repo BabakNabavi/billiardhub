@@ -461,7 +461,7 @@ export default function HomePage() {
     if (newActive !== activeCardRef.current) {
       activeCardRef.current = newActive;
       setActiveCard(newActive);
-      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(6);
+      try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(12); } catch(_) {}
     }
   }, []);
 
