@@ -186,37 +186,50 @@ export default function Stories() {
 
   // Fetch real clubs with active stories and prepend to groups
   useEffect(() => {
-    fetch('/api/clubs').then(r => r.json()).then((clubs: any[]) => {
-      const now = new Date();
-      const apiGroups: StoryGroup[] = (clubs || [])
-        .map((c: any) => {
-          const activeStories = Array.isArray(c.clubStories)
-            ? c.clubStories.filter((s: any) => s.mediaUrl && new Date(s.expiresAt) > now)
-            : [];
-          return { c, activeStories };
-        })
-        .filter(({ activeStories }) => activeStories.length > 0)
-        .map(({ c, activeStories }): StoryGroup => ({
-          userId: `api-${c.id}`,
-          userName: c.name,
-          userAvatar: c.name?.[0] ?? '؟',
-          logoUrl: c.logo || undefined,
-          userRole: 'club',
-          roleColor: '#C7A66A',
-          roleLabel: 'باشگاه',
-          allSeen: false,
-          stories: activeStories.map((s: any) => ({
-            id: s.id,
-            caption: s.text || undefined,
-            createdAt: relativeTime(s.expiresAt),
-            mediaUrl: s.mediaUrl,
-            mediaType: s.mediaType || 'image',
-          })),
-        }));
-      if (apiGroups.length > 0) {
-        setGroups([...apiGroups, ...sampleGroups]);
-      }
-    }).catch(() => {});
+    fetch('/api/clubs')
+      .then(r => r.json())
+      .then(async (clubs: any[]) => {
+        const list = (clubs || []).filter((c: any) => c.id);
+        if (list.length === 0) return;
+
+        // Fetch stories for all clubs in parallel; empty clubs resolve to []
+        const results = await Promise.all(
+          list.map((c: any) =>
+            fetch(`/api/clubs/${c.id}/stories`)
+              .then(r => r.json())
+              .then((stories: any[]) => ({ c, stories: Array.isArray(stories) ? stories : [] }))
+              .catch(() => ({ c, stories: [] as any[] }))
+          )
+        );
+
+        const apiGroups: StoryGroup[] = results
+          .filter(({ stories }) => stories.length > 0)
+          .map(({ c, stories }): StoryGroup => ({
+            userId: `api-${c.id}`,
+            userName: c.name,
+            userAvatar: c.name?.[0] ?? '؟',
+            logoUrl: c.logo || undefined,
+            userRole: 'club',
+            roleColor: '#C7A66A',
+            roleLabel: 'باشگاه',
+            allSeen: false,
+            stories: stories.map((s: any) => ({
+              id: s.id,
+              caption: s.text || undefined,
+              createdAt: relativeTime(s.expiresAt),
+              mediaUrl: s.mediaUrl,
+              mediaType: s.mediaType || 'image',
+            })),
+          }));
+
+        if (apiGroups.length > 0) {
+          setGroups(prev => [
+            ...apiGroups,
+            ...prev.filter(g => !g.userId.startsWith('api-')),
+          ]);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const closeStory = () => { setActiveGroup(null); setShowEmojis(false); setComment(''); };
