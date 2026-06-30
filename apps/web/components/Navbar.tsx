@@ -440,7 +440,7 @@ export default function Navbar() {
           paddingTop: '72px',
           animation: 'fadeIn 0.25s ease both',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '72px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px 0' }}>
             <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '32px', width: 'auto' }} />
           </div>
 
