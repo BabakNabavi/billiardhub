@@ -787,8 +787,9 @@ export default function ClubDashboardPage() {
     setShowCoachPicker(true);
     setCoachSearch('');
     setLoadingCoaches(true);
-    api.get('/user/by-role/coach')
-      .then(res => { setAvailableCoaches(Array.isArray(res.data) ? res.data : []); })
+    fetch('/api/users/by-role?role=coach')
+      .then(r => r.json())
+      .then(data => { setAvailableCoaches(Array.isArray(data) ? data : []); })
       .catch(() => setAvailableCoaches([]))
       .finally(() => setLoadingCoaches(false));
   };
