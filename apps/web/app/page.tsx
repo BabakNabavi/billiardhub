@@ -919,10 +919,10 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های منتخب</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
-              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: '#C7A66A', fontSize: '15px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
+              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: '#C7A66A', fontSize: '13.5px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4B97D'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A'; }}>
-                مشاهده همه <ArrowLeft size={13} />
+                مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
           </SR>
