@@ -235,19 +235,24 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
               transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
-          {/* باز/بسته badge — mobile only via CSS */}
+          {/* باز/بسته badge */}
           <button className="club-open-btn"
             onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
-            style={{ position: 'absolute', top: '8px', right: '8px', height: '22px', borderRadius: '20px',
-              background: isOpen ? 'rgba(48,197,90,0.10)' : 'rgba(239,68,68,0.10)',
-              backdropFilter: 'blur(12px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+            style={{ position: 'absolute', top: '8px', left: '8px', height: '24px', borderRadius: '20px',
+              background: isOpen ? 'rgba(48,197,90,0.08)' : 'rgba(239,68,68,0.08)',
+              backdropFilter: 'blur(16px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(200%)',
               border: isOpen ? '1px solid rgba(48,197,90,0.32)' : '1px solid rgba(239,68,68,0.32)',
               boxShadow: isOpen
-                ? 'inset 0 1px 0 rgba(48,197,90,0.22), 0 2px 8px rgba(0,0,0,0.18)'
-                : 'inset 0 1px 0 rgba(239,68,68,0.22), 0 2px 8px rgba(0,0,0,0.18)',
-              alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', zIndex: 3, padding: '0 9px' }}>
+                ? 'inset 0 1px 0 rgba(48,197,90,0.28), 0 3px 10px rgba(0,0,0,0.22)'
+                : 'inset 0 1px 0 rgba(239,68,68,0.28), 0 3px 10px rgba(0,0,0,0.22)',
+              alignItems: 'center', justifyContent: 'center', gap: '5px',
+              cursor: 'pointer', zIndex: 3, padding: '0 9px 0 7px' }}>
+            <span className="open-dot" style={{
+              width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0,
+              background: isOpen ? '#30C55A' : '#ef4444',
+              boxShadow: isOpen ? '0 0 5px rgba(48,197,90,0.8)' : '0 0 5px rgba(239,68,68,0.8)',
+            }} />
             <span style={{ fontSize: '10px', fontWeight: 700, color: isOpen ? '#30C55A' : '#ef4444', letterSpacing: '0.01em' }}>{isOpen ? 'باز' : 'بسته'}</span>
           </button>
         </div>
@@ -785,17 +790,19 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 44px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 24px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
-        .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
-        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 44px; scroll-snap-type:x proximity; }
+        .clubs-dots { display:none; justify-content:center; gap:5px; margin-top:6px; }
+        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 24px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-mob-card { transform-origin:center; position:relative; }
-        .mkt-dots { display:none; justify-content:center; gap:5px; margin-top:10px; }
+        .mkt-dots { display:none; justify-content:center; gap:5px; margin-top:6px; }
         .club-desk-panel { display:flex; }
         .club-mob-panel  { display:none; }
-        .club-open-btn   { display:none; }
+        .club-open-btn   { display:flex; }
+        @keyframes open-dot-blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.25;transform:scale(0.55)} }
+        .open-dot { animation:open-dot-blink 1.5s ease-in-out infinite; }
         @media(max-width:600px){
           .clubs-dots { display:flex !important; }
           .club-desk-panel { display:none !important; }
