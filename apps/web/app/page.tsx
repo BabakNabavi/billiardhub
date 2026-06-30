@@ -454,7 +454,7 @@ export default function HomePage() {
       const dist = Math.abs(cardCenter - sliderCenter);
       const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
       const sx = (1 + t * 0.12).toFixed(3);
-      const sy = (1 + t * 0.05).toFixed(3);
+      const sy = (1 + t * 0.10).toFixed(3);
       card.style.transform = `scaleX(${sx}) scaleY(${sy})`;
       if (dist < minDist) { minDist = dist; newActive = i; }
     });
