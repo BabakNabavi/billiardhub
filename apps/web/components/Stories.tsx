@@ -186,11 +186,17 @@ export default function Stories() {
 
   // Fetch real clubs with active stories and prepend to groups
   useEffect(() => {
-    api.get('/clubs').then(r => {
+    fetch('/api/clubs').then(r => r.json()).then((clubs: any[]) => {
       const now = new Date();
-      const apiGroups: StoryGroup[] = (r.data || [])
-        .filter((c: any) => c.storyMediaUrl && c.storyExpiresAt && new Date(c.storyExpiresAt) > now)
-        .map((c: any): StoryGroup => ({
+      const apiGroups: StoryGroup[] = (clubs || [])
+        .map((c: any) => {
+          const activeStories = Array.isArray(c.clubStories)
+            ? c.clubStories.filter((s: any) => s.mediaUrl && new Date(s.expiresAt) > now)
+            : [];
+          return { c, activeStories };
+        })
+        .filter(({ activeStories }) => activeStories.length > 0)
+        .map(({ c, activeStories }): StoryGroup => ({
           userId: `api-${c.id}`,
           userName: c.name,
           userAvatar: c.name?.[0] ?? '؟',
@@ -199,13 +205,13 @@ export default function Stories() {
           roleColor: '#C7A66A',
           roleLabel: 'باشگاه',
           allSeen: false,
-          stories: [{
-            id: `api-${c.id}-story`,
-            caption: c.storyText || undefined,
-            createdAt: relativeTime(c.storyExpiresAt),
-            mediaUrl: c.storyMediaUrl,
-            mediaType: c.storyType || 'image',
-          }],
+          stories: activeStories.map((s: any) => ({
+            id: s.id,
+            caption: s.text || undefined,
+            createdAt: relativeTime(s.expiresAt),
+            mediaUrl: s.mediaUrl,
+            mediaType: s.mediaType || 'image',
+          })),
         }));
       if (apiGroups.length > 0) {
         setGroups([...apiGroups, ...sampleGroups]);
