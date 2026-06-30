@@ -1109,7 +1109,7 @@ useEffect(() => {
             {PRODUCTS.map((p) => (
               <div key={p.id} className="mkt-mob-card" style={{ width: '36vw', minWidth: '126px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 {p.pct > 0 && (
-                  <div style={{ position: 'absolute', top: '-13px', right: '8px', zIndex: 4,
+                  <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4,
                     background: 'rgba(239,68,68,0.10)',
                     backdropFilter: 'blur(12px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(12px) saturate(180%)',
