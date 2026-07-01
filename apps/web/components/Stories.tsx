@@ -131,8 +131,8 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           <button onClick={onClose} style={{ width:'34px',height:'34px',borderRadius:'50%',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(0,0,0,0.09)',cursor:'pointer',color:'rgba(255,255,255,0.8)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><X size={15} /></button>
         </div>
 
-        <button onClick={onPrev} style={{ position:'absolute',right:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
-        <button onClick={onNext} style={{ position:'absolute',left:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
+        <button onClick={onNext} style={{ position:'absolute',right:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
+        <button onClick={onPrev} style={{ position:'absolute',left:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
 
         {currentStory.caption && (
           <div style={{ position:'absolute',bottom:'130px',left:'16px',right:'16px',zIndex:20 }}>
