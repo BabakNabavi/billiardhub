@@ -386,7 +386,7 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
           style={{
             borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
             display: 'flex', flexDirection: 'column',
-            border: '1px solid rgba(199,166,106,0.22)',
+            border: '1px solid rgba(0,0,0,0.12)',
             transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
             transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
             boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
@@ -1176,7 +1176,7 @@ useEffect(() => {
                   <div style={{
                     borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
                     display: 'flex', flexDirection: 'column',
-                    border: '1px solid rgba(199,166,106,0.22)',
+                    border: '1px solid rgba(0,0,0,0.12)',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
                   }}>
                     <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
