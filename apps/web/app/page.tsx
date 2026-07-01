@@ -783,7 +783,7 @@ useEffect(() => {
         /* ══ TABLET ≤1100px ══ */
         @media(max-width:1100px){
           .clubs-grid  { grid-template-columns:1fr 1fr !important; }
-          .mkt-split   { grid-template-columns:1fr !important; }
+          .mkt-split   { grid-template-columns:repeat(3,1fr) !important; }
           .news-grid   { grid-template-columns:1fr !important; }
         }
 
@@ -1154,9 +1154,9 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="mkt-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+          <div className="mkt-split" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '14px' }}>
             {PRODUCTS.map((p, i) => (
-              <SR key={p.id} delay={i * 60}><ProductCard p={p} h="clamp(374px,36vw,495px)" /></SR>
+              <SR key={p.id} delay={i * 60}><ProductCard p={p} h="clamp(240px,22vw,320px)" /></SR>
             ))}
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
