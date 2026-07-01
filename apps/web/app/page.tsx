@@ -381,9 +381,9 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
           background: 'rgba(239,68,68,0.10)',
           backdropFilter: 'blur(16px) saturate(200%)',
           WebkitBackdropFilter: 'blur(16px) saturate(200%)',
-          background: 'rgba(239,68,68,0.10)',
-          border: '1px solid rgba(239,68,68,0.38)',
-          color: '#ef4444', fontSize: '11px', fontWeight: 700,
+          background: '#ef4444',
+          border: 'none',
+          color: '#fff', fontSize: '11px', fontWeight: 700,
           padding: '4px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
           {p.pct}٪ تخفیف
         </div>
@@ -1171,9 +1171,9 @@ useEffect(() => {
               <div key={p.id} className="mkt-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 {p.pct > 0 && (
                   <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4,
-                    background: 'rgba(239,68,68,0.10)',
-                    border: '1px solid rgba(239,68,68,0.38)',
-                    color: '#ef4444', fontSize: '10px', fontWeight: 700,
+                    background: '#ef4444',
+                    border: 'none',
+                    color: '#fff', fontSize: '10px', fontWeight: 700,
                     padding: '3px 9px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
                     {p.pct}٪ تخفیف
                   </div>
