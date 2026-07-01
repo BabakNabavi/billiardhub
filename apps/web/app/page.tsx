@@ -178,10 +178,10 @@ const FILTER_DATA: Record<string, { label: string; opts: string[] }[]> = {
    CONTENT DATA
 ═══════════════════════════════════════════════════════════════ */
 const CLUBS = [
-  { id:'1', name:'باشگاه ستاره تهران',   city:'تهران',  dist:'ونک',        tables:12, rating:4.9, reviews:284, type:'اسنوکر', img:IMG.club2, img2:IMG.club3, price:80000, badge:'برترین', tags:['VIP','پارکینگ','کافه'] },
-  { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.clubB, img2:IMG.club1, price:65000, badge:null,      tags:['مربی','مسابقه'] },
-  { id:'3', name:'باشگاه پیروزی اصفهان', city:'اصفهان', dist:'چهارباغ',    tables:10, rating:4.8, reviews:198, type:'هی‌بال', img:IMG.club6, img2:IMG.club2, price:75000, badge:'جدید',    tags:['آموزش','مبتدی'] },
-  { id:'4', name:'باشگاه حافظ شیراز',    city:'شیراز',  dist:'لطفعلی‌خان', tables:6,  rating:4.6, reviews:89,  type:'اسنوکر', img:IMG.club1, img2:IMG.snooker, price:55000, badge:null,   tags:['هفت روز'] },
+  { id:'1', name:'باشگاه ستاره تهران',   city:'تهران',  dist:'ونک',        tables:12, rating:4.9, reviews:284, type:'اسنوکر', img:IMG.club2, img2:IMG.club3,   price:80000, badge:'برترین', tags:['VIP','پارکینگ','کافه'], hasStory:true  },
+  { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.clubB, img2:IMG.club1,   price:65000, badge:null,      tags:['مربی','مسابقه'],        hasStory:true  },
+  { id:'3', name:'باشگاه پیروزی اصفهان', city:'اصفهان', dist:'چهارباغ',    tables:10, rating:4.8, reviews:198, type:'هی‌بال', img:IMG.club6, img2:IMG.club2,   price:75000, badge:'جدید',    tags:['آموزش','مبتدی'],        hasStory:false },
+  { id:'4', name:'باشگاه حافظ شیراز',    city:'شیراز',  dist:'لطفعلی‌خان', tables:6,  rating:4.6, reviews:89,  type:'اسنوکر', img:IMG.club1, img2:IMG.snooker, price:55000, badge:null,      tags:['هفت روز'],              hasStory:false },
 ];
 
 const PRODUCTS = [
@@ -206,110 +206,174 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
   const snookerTables = Math.floor(club.tables * 0.5);
   const pocketTables  = Math.floor(club.tables * 0.3);
   const hiballTables  = club.tables - snookerTables - pocketTables;
-  return (
-    <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block', height: h }}>
-      <div
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        style={{
-          borderRadius: featured ? '16px' : '12px',
-          overflow: 'hidden', height: '100%', cursor: 'pointer',
-          display: 'flex', flexDirection: 'column',
-          transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
-          transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
-          boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
-          willChange: 'transform',
-        }}
-      >
-        {/* ── Image: top 60% ── */}
-        <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden' }}>
-          <img src={club.img} alt={club.name}
-            onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-              filter: hov ? 'brightness(0.65) saturate(0.82)' : 'brightness(0.82) saturate(0.88)',
-              transition: 'filter 0.7s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
-              transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
-          <img src={club.img2} alt=""
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-              opacity: hov ? 1 : 0, filter: 'brightness(0.65) saturate(0.82)',
-              transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
-              transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '32%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.20))', pointerEvents: 'none', zIndex: 1 }} />
-          {/* باز/بسته badge */}
-          <button className="club-open-btn"
-            onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
-            style={{ position: 'absolute', top: '8px', left: '8px', height: '24px', borderRadius: '20px',
-              background: isOpen ? 'rgba(48,197,90,0.08)' : 'rgba(239,68,68,0.08)',
-              backdropFilter: 'blur(16px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(16px) saturate(200%)',
-              border: isOpen ? '1px solid rgba(48,197,90,0.32)' : '1px solid rgba(239,68,68,0.32)',
-              boxShadow: isOpen
-                ? 'inset 0 1px 0 rgba(48,197,90,0.28), 0 3px 10px rgba(0,0,0,0.22)'
-                : 'inset 0 1px 0 rgba(239,68,68,0.28), 0 3px 10px rgba(0,0,0,0.22)',
-              alignItems: 'center', justifyContent: 'center', gap: '5px',
-              cursor: 'pointer', zIndex: 3, padding: '0 9px 0 7px' }}>
-            <span className="open-dot" style={{
-              width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0,
-              background: isOpen ? '#30C55A' : '#ef4444',
-              boxShadow: isOpen ? '0 0 5px rgba(48,197,90,0.8)' : '0 0 5px rgba(239,68,68,0.8)',
-            }} />
-            <span style={{ fontSize: '10px', fontWeight: 700, color: isOpen ? '#30C55A' : '#ef4444', letterSpacing: '0.01em' }}>{isOpen ? 'باز' : 'بسته'}</span>
-          </button>
-        </div>
+  const hasStory = club.hasStory ?? false;
+  const rad = featured ? '16px' : '12px';
 
-        {/* ── Desktop info panel — CSS hides on mobile ── */}
-        <div className="club-desk-panel" style={{
-          flex: '0 0 40%', background: '#fff',
-          padding: featured ? '12px 16px 10px' : '9px 13px 8px',
-          flexDirection: 'column', justifyContent: 'flex-start',
-          overflow: 'hidden', gap: '3px',
-        }}>
-          <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
-              <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <Star size={9} style={{ color: '#F5A623', fill: '#F5A623' }} />
-              <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 700 }}>{club.rating}</span>
-              <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
-            </span>
+  return (
+    <div style={{ position: 'relative', paddingTop: '6px' }}>
+      <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+        <div
+          onMouseEnter={() => setHov(true)}
+          onMouseLeave={() => setHov(false)}
+          style={{
+            borderRadius: rad,
+            overflow: 'visible',
+            height: h,
+            cursor: 'pointer',
+            display: 'flex', flexDirection: 'column',
+            position: 'relative',
+            transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
+            transform: hov ? 'translateY(-10px) scale(1.015)' : 'translateY(-4px)',
+            boxShadow: hov
+              ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)'
+              : '0 8px 26px rgba(0,0,0,0.13)',
+            willChange: 'transform',
+          }}
+        >
+          {/* ── Image: top 40% ── */}
+          <div style={{ flex: '0 0 40%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
+            <img src={club.img} alt={club.name}
+              onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                filter: hov ? 'brightness(0.65) saturate(0.82)' : 'brightness(0.82) saturate(0.88)',
+                transition: 'filter 0.7s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
+                transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
+            <img src={club.img2} alt=""
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                opacity: hov ? 1 : 0, filter: 'brightness(0.65) saturate(0.82)',
+                transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
+                transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
+              background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.28))',
+              pointerEvents: 'none', zIndex: 1 }} />
+            {/* باز/بسته badge */}
+            <button className="club-open-btn"
+              onClick={e => { e.preventDefault(); e.stopPropagation(); setIsOpen(s => !s); }}
+              style={{ position: 'absolute', top: '8px', left: '8px', height: '24px', borderRadius: '20px',
+                background: isOpen ? 'rgba(48,197,90,0.08)' : 'rgba(239,68,68,0.08)',
+                backdropFilter: 'blur(16px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(200%)',
+                border: isOpen ? '1px solid rgba(48,197,90,0.32)' : '1px solid rgba(239,68,68,0.32)',
+                boxShadow: isOpen
+                  ? 'inset 0 1px 0 rgba(48,197,90,0.28), 0 3px 10px rgba(0,0,0,0.22)'
+                  : 'inset 0 1px 0 rgba(239,68,68,0.28), 0 3px 10px rgba(0,0,0,0.22)',
+                alignItems: 'center', justifyContent: 'center', gap: '5px',
+                cursor: 'pointer', zIndex: 3, padding: '0 9px 0 7px' }}>
+              <span className="open-dot" style={{
+                width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0,
+                background: isOpen ? '#30C55A' : '#ef4444',
+                boxShadow: isOpen ? '0 0 5px rgba(48,197,90,0.8)' : '0 0 5px rgba(239,68,68,0.8)',
+              }} />
+              <span style={{ fontSize: '10px', fontWeight: 700, color: isOpen ? '#30C55A' : '#ef4444', letterSpacing: '0.01em' }}>
+                {isOpen ? 'باز' : 'بسته'}
+              </span>
+            </button>
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto' }}>
-            {[{ label: 'اسنوکر', n: snookerTables, clr: '#30C55A' }, { label: 'پاکت', n: pocketTables, clr: '#3b82f6' }, { label: 'هی‌بال', n: hiballTables, clr: '#8b5cf6' }].map(t => (
-              <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr, background: `${t.clr}14`, border: `1px solid ${t.clr}28`, borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
-            ))}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '7px', marginTop: '6px' }}>
-            <div>
-              <span style={{ fontSize: featured ? '16px' : '14px', fontWeight: 900, color: GOLD }}>{club.price.toLocaleString('fa-IR')}</span>
+
+          {/* ── Desktop info panel ── */}
+          <div className="club-desk-panel" style={{
+            flex: '0 0 60%', background: '#fff',
+            borderRadius: `0 0 ${rad} ${rad}`,
+            padding: '46px 14px 10px',
+            flexDirection: 'column', justifyContent: 'flex-start',
+            overflow: 'hidden', gap: '2px',
+          }}>
+            <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '11px' }}>
+                <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <Star size={9} style={{ color: '#F5A623', fill: '#F5A623' }} />
+                <span style={{ color: '#1a1a1a', fontSize: '12px', fontWeight: 500 }}>{club.rating}</span>
+                <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '10px' }}>({club.reviews})</span>
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: 'auto' }}>
+              {[
+                { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
+                { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
+                { label: 'هی‌بال', n: hiballTables,  clr: '#8b5cf6' },
+              ].map(t => (
+                <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr,
+                  background: `${t.clr}14`, border: `1px solid ${t.clr}28`,
+                  borderRadius: '20px', padding: '2px 7px' }}>{t.n} {t.label}</span>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '6px', marginTop: '5px' }}>
+              <span style={{ fontSize: featured ? '15px' : '13px', fontWeight: 900, color: GOLD }}>
+                {club.price.toLocaleString('fa-IR')}
+              </span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
             </div>
-            <div style={{ background: 'rgba(199,166,106,0.12)', color: GOLD, fontSize: '12px', fontWeight: 700, padding: '7px 14px', borderRadius: '20px', border: `1px solid ${GOLD_BOR}` }}>رزرو آنلاین</div>
           </div>
-        </div>
 
-        {/* ── Mobile info panel — CSS shows on mobile ── */}
-        <div className="club-mob-panel" style={{
-          flex: '0 0 40%', background: '#fff', padding: '7px 8px 6px',
-          flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          overflow: 'hidden', gap: '4px',
-        }}>
-          <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
-            {club.name.replace(/^باشگاه\s+/, '')}
+          {/* ── Mobile info panel ── */}
+          <div className="club-mob-panel" style={{
+            flex: '0 0 60%', background: '#fff',
+            borderRadius: `0 0 ${rad} ${rad}`,
+            padding: '22px 8px 6px',
+            flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+            overflow: 'hidden', gap: '3px',
+          }}>
+            <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a1a1a',
+              letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
+              {club.name.replace(/^باشگاه\s+/, '')}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', direction: 'ltr' }}>
+              <span style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', marginRight: '3px' }}>{club.rating}</span>
+              {[1,2,3,4,5].map(i => (
+                <Star key={i} size={9} style={{ color: '#F5A623',
+                  fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent',
+                  opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
+              <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', direction: 'ltr' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a', marginRight: '4px' }}>{club.rating}</span>
-            {[1,2,3,4,5].map(i => (
-              <Star key={i} size={11} style={{ color: '#F5A623', fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent', opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
-            ))}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
-            <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}، {club.dist}
+
+          {/* ── Logo avatar at image/info boundary (30% width, half on each section) ── */}
+          <div style={{
+            position: 'absolute',
+            top: '40%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '30%',
+            aspectRatio: '1 / 1',
+            borderRadius: '50%',
+            background: hasStory
+              ? 'linear-gradient(#fff,#fff) padding-box, linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5) border-box'
+              : `linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,${GOLD},rgba(199,166,106,0.45)) border-box`,
+            border: '3px solid transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 900, zIndex: 10,
+            boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
+            overflow: 'hidden',
+          }}>
+            <span style={{ fontSize: '16px', fontWeight: 900, color: '#444' }}>{club.name[0]}</span>
           </div>
         </div>
+      </Link>
+
+      {/* ── Reserve button below card ── */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+        <Link href={`/clubs/${club.id}`} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          width: '90%', textDecoration: 'none',
+          background: 'rgba(199,166,106,0.12)',
+          border: `1px solid ${GOLD_BOR}`,
+          borderRadius: 20,
+          padding: '10px 0',
+          color: GOLD,
+          fontSize: '13px', fontWeight: 700,
+          fontFamily: 'var(--font-base)',
+          transition: 'background 0.2s',
+        }}>
+          مشاهده و رزرو
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -1063,13 +1127,13 @@ useEffect(() => {
           </SR>
           <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
             {CLUBS.map((c, i) => (
-              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(310px,30vw,400px)" /></SR>
+              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(340px,33vw,450px)" /></SR>
             ))}
           </div>
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '33vw', minWidth: '120px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                <ClubCard club={c} h="clamp(185px,55vw,251px)" />
+              <div key={c.id} className="club-mob-card" style={{ width: '36vw', minWidth: '130px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                <ClubCard club={c} h="clamp(200px,58vw,270px)" />
               </div>
             ))}
           </div>
