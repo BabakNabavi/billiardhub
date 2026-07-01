@@ -809,7 +809,7 @@ useEffect(() => {
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
           /* horizontal padding removed from hero-content; applied per-element below */
-          .hero-content  { padding-top:208px !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:60px !important; }
+          .hero-content  { padding-top:220px !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:60px !important; }
           .hero-h1       { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
           .hero-subtitle { padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
           .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
@@ -834,17 +834,17 @@ useEffect(() => {
         /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
           .hero-stories-bar { zoom:0.90; }
-          .hero-content { padding-top:clamp(157px,19vh,195px) !important; zoom:0.90; }
+          .hero-content { padding-top:clamp(161px,21vh,200px) !important; zoom:0.90; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(149px,22vh,178px) !important; zoom:0.90; }
+          .hero-content { padding-top:clamp(153px,24vh,183px) !important; zoom:0.90; }
           .hero-sub     { display:none !important; }
         }
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:208px !important; }
+          .hero-content { padding-top:220px !important; }
           .trust-strip  { margin-top:16px !important; }
         }
 
@@ -938,7 +938,7 @@ useEffect(() => {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(181px,21vh,224px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(185px,23vh,230px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
