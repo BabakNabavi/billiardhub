@@ -274,7 +274,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-desk-panel" style={{
             flex: '0 0 60%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '46px 14px 10px',
+            padding: '56px 14px 12px',
             flexDirection: 'column', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
@@ -289,7 +289,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '10px' }}>({club.reviews})</span>
               </span>
             </div>
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: 'auto' }}>
+            {/* push chips + price + button to bottom */}
+            <div style={{ flex: 1 }} />
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
               {[
                 { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
                 { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
@@ -300,11 +302,26 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                   borderRadius: '20px', padding: '2px 7px' }}>{t.n} {t.label}</span>
               ))}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '6px', marginTop: '5px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '5px', marginTop: '4px' }}>
               <span style={{ fontSize: featured ? '15px' : '13px', fontWeight: 900, color: GOLD }}>
                 {club.price.toLocaleString('fa-IR')}
               </span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
+            </div>
+            {/* ── Reserve button inside card ── */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '7px' }}>
+              <div style={{
+                width: '80%', textAlign: 'center',
+                background: 'rgba(199,166,106,0.12)',
+                border: `1px solid ${GOLD_BOR}`,
+                borderRadius: rad,
+                padding: '8px 0',
+                color: GOLD,
+                fontSize: '12px', fontWeight: 700,
+                fontFamily: 'var(--font-base)',
+              }}>
+                مشاهده و رزرو
+              </div>
             </div>
           </div>
 
@@ -312,24 +329,39 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 60%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '22px 8px 6px',
+            padding: '28px 6px 8px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '3px',
+            overflow: 'hidden', gap: '2px',
           }}>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a1a1a',
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', direction: 'ltr' }}>
-              <span style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', marginRight: '3px' }}>{club.rating}</span>
+              <span style={{ fontSize: '10px', fontWeight: 500, color: '#1a1a1a', marginRight: '2px' }}>{club.rating}</span>
               {[1,2,3,4,5].map(i => (
-                <Star key={i} size={9} style={{ color: '#F5A623',
+                <Star key={i} size={8} style={{ color: '#F5A623',
                   fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent',
                   opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
               ))}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
-              <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '9px' }}>
+              <MapPin size={7} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
+            </div>
+            <div style={{ flex: 1 }} />
+            {/* ── Reserve button inside mobile card ── */}
+            <div style={{
+              width: '80%', textAlign: 'center',
+              background: 'rgba(199,166,106,0.12)',
+              border: `1px solid ${GOLD_BOR}`,
+              borderRadius: rad,
+              padding: '5px 0',
+              color: GOLD,
+              fontSize: '9px', fontWeight: 700,
+              fontFamily: 'var(--font-base)',
+              marginBottom: '2px',
+            }}>
+              مشاهده و رزرو
             </div>
           </div>
 
@@ -355,24 +387,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           </div>
         </div>
       </Link>
-
-      {/* ── Reserve button below card ── */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
-        <Link href={`/clubs/${club.id}`} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          width: '90%', textDecoration: 'none',
-          background: 'rgba(199,166,106,0.12)',
-          border: `1px solid ${GOLD_BOR}`,
-          borderRadius: 20,
-          padding: '10px 0',
-          color: GOLD,
-          fontSize: '13px', fontWeight: 700,
-          fontFamily: 'var(--font-base)',
-          transition: 'background 0.2s',
-        }}>
-          مشاهده و رزرو
-        </Link>
-      </div>
     </div>
   );
 }
@@ -863,7 +877,7 @@ useEffect(() => {
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
         .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 24px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
-        .club-mob-card { transform-origin:center; position:relative; }
+        .club-mob-card { transform-origin:center; position:relative; padding-top:10px; }
         .clubs-dots { display:none !important; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 24px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
