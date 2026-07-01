@@ -273,12 +273,12 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-desk-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '11px 15px 13px',
+            padding: '14px 15px 13px',
             flexDirection: 'column', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '2px',
+            overflow: 'hidden', gap: '3px',
           }}>
             <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
                 <MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}
               </span>
@@ -288,8 +288,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
               </span>
             </div>
-            <div style={{ flex: 1 }} />
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '4px' }}>
               {[
                 { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
                 { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
@@ -300,7 +299,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                   borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
               ))}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '7px' }}>
+            <div style={{ flex: 1 }} />
+            <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '6px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{
                 width: '90%', textAlign: 'center',
                 background: 'rgba(199,166,106,0.12)',
@@ -320,7 +321,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '9px 7px 9px',
+            padding: '10px 7px 9px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
@@ -340,6 +341,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
+            <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '4px 0' }} />
             <div style={{
               width: '90%', textAlign: 'center',
               background: 'rgba(199,166,106,0.12)',
