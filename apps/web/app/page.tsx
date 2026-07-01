@@ -273,19 +273,19 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-desk-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '10px 14px 12px',
+            padding: '11px 15px 13px',
             flexDirection: 'column', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
-            <div style={{ fontSize: featured ? '15px' : '13px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
+            <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '11px' }}>
-                <MapPin size={9} style={{ color: GOLD }} />{club.city}، {club.dist}
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
+                <MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <Star size={9} style={{ color: '#F5A623', fill: '#F5A623' }} />
-                <span style={{ color: '#1a1a1a', fontSize: '12px', fontWeight: 500 }}>{club.rating}</span>
-                <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '10px' }}>({club.reviews})</span>
+                <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
+                <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 500 }}>{club.rating}</span>
+                <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
               </span>
             </div>
             <div style={{ flex: 1 }} />
@@ -295,16 +295,16 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
                 { label: 'هی‌بال', n: hiballTables,  clr: '#8b5cf6' },
               ].map(t => (
-                <span key={t.label} style={{ fontSize: '10px', fontWeight: 600, color: t.clr,
+                <span key={t.label} style={{ fontSize: '11px', fontWeight: 600, color: t.clr,
                   background: `${t.clr}14`, border: `1px solid ${t.clr}28`,
-                  borderRadius: '20px', padding: '2px 7px' }}>{t.n} {t.label}</span>
+                  borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
               ))}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '5px', marginTop: '4px' }}>
-              <span style={{ fontSize: featured ? '15px' : '13px', fontWeight: 900, color: GOLD }}>
+              <span style={{ fontSize: featured ? '17px' : '14px', fontWeight: 900, color: GOLD }}>
                 {club.price.toLocaleString('fa-IR')}
               </span>
-              <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
+              <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '7px' }}>
               <div style={{
@@ -312,9 +312,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 background: 'rgba(199,166,106,0.12)',
                 border: `1px solid ${GOLD_BOR}`,
                 borderRadius: rad,
-                padding: '8px 0',
+                padding: '9px 0',
                 color: GOLD,
-                fontSize: '12px', fontWeight: 700,
+                fontSize: '13px', fontWeight: 700,
                 fontFamily: 'var(--font-base)',
               }}>
                 مشاهده و رزرو
@@ -326,24 +326,24 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '8px 6px 8px',
+            padding: '9px 7px 9px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#1a1a1a',
+            <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', direction: 'ltr' }}>
-              <span style={{ fontSize: '10px', fontWeight: 500, color: '#1a1a1a', marginRight: '2px' }}>{club.rating}</span>
+              <span style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', marginRight: '2px' }}>{club.rating}</span>
               {[1,2,3,4,5].map(i => (
-                <Star key={i} size={8} style={{ color: '#F5A623',
+                <Star key={i} size={9} style={{ color: '#F5A623',
                   fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent',
                   opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
               ))}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '9px' }}>
-              <MapPin size={7} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
+              <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
             <div style={{
@@ -351,9 +351,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               background: 'rgba(199,166,106,0.12)',
               border: `1px solid ${GOLD_BOR}`,
               borderRadius: rad,
-              padding: '5px 0',
+              padding: '6px 0',
               color: GOLD,
-              fontSize: '9px', fontWeight: 700,
+              fontSize: '10px', fontWeight: 700,
               fontFamily: 'var(--font-base)',
               marginBottom: '2px',
             }}>
@@ -1116,13 +1116,13 @@ useEffect(() => {
           </SR>
           <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
             {CLUBS.map((c, i) => (
-              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(340px,33vw,450px)" /></SR>
+              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(374px,36vw,495px)" /></SR>
             ))}
           </div>
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '36vw', minWidth: '130px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                <ClubCard club={c} h="clamp(200px,58vw,270px)" />
+              <div key={c.id} className="club-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                <ClubCard club={c} h="clamp(220px,64vw,297px)" />
               </div>
             ))}
           </div>
