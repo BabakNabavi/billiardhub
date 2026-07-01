@@ -834,17 +834,17 @@ useEffect(() => {
         /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
           .hero-stories-bar { zoom:0.90; }
-          .hero-content { padding-top:clamp(161px,21vh,200px) !important; zoom:0.90; }
+          .hero-content { padding-top:clamp(165px,23vh,205px) !important; zoom:0.90; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(153px,24vh,183px) !important; zoom:0.90; }
+          .hero-content { padding-top:clamp(157px,26vh,188px) !important; zoom:0.90; }
           .hero-sub     { display:none !important; }
         }
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:220px !important; }
+          .hero-content { padding-top:232px !important; }
           .trust-strip  { margin-top:16px !important; }
         }
 
@@ -938,7 +938,7 @@ useEffect(() => {
         <div className="hero-content" style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(185px,23vh,230px) clamp(16px,5%,80px) 0',
+          padding: 'clamp(189px,25vh,236px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
