@@ -509,7 +509,7 @@ export default function Navbar() {
       {isHomePage && (
         <div className="hero-stories-bar" style={{
           position: 'fixed',
-          top: searchOpen ? 'calc(130px + 2vh)' : 'calc(72px + 2vh)',
+          top: searchOpen ? '130px' : '72px',
           left: 0, right: 0, zIndex: 49,
           padding: '6px clamp(16px,3vw,32px) 4px',
           background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
