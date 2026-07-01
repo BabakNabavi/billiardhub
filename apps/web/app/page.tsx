@@ -321,11 +321,11 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '10px 7px 20px',
+            padding: '8px 7px 11px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '2px',
+            overflow: 'hidden', gap: '1px',
           }}>
-            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a',
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
@@ -341,7 +341,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
-            <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '4px 0' }} />
             <div style={{
               width: '90%', textAlign: 'center',
               background: 'rgba(199,166,106,0.12)',
@@ -351,7 +350,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               color: GOLD,
               fontSize: '10px', fontWeight: 700,
               fontFamily: 'var(--font-base)',
-              marginBottom: '2px',
             }}>
               مشاهده و رزرو
             </div>
