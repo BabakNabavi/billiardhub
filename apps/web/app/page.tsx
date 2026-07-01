@@ -1155,12 +1155,12 @@ useEffect(() => {
           </SR>
           <div className="mkt-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
             {PRODUCTS.map((p, i) => (
-              <SR key={p.id} delay={i * 60}><ProductCard p={p} h="clamp(310px,30vw,400px)" /></SR>
+              <SR key={p.id} delay={i * 60}><ProductCard p={p} h="clamp(374px,36vw,495px)" /></SR>
             ))}
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
-              <div key={p.id} className="mkt-mob-card" style={{ width: '36vw', minWidth: '126px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={p.id} className="mkt-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 {p.pct > 0 && (
                   <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4,
                     background: 'rgba(239,68,68,0.10)',
@@ -1173,7 +1173,7 @@ useEffect(() => {
                     {p.pct}٪ تخفیف
                   </div>
                 )}
-                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(190px,56vw,255px)' }}>
+                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(220px,64vw,297px)' }}>
                   <div style={{
                     borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
                     display: 'flex', flexDirection: 'column',
