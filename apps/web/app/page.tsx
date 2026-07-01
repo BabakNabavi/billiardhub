@@ -844,11 +844,11 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:6px 14px 16px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 14px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none !important; }
-        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 24px; scroll-snap-type:x proximity; }
+        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 14px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-mob-card { transform-origin:center; position:relative; }
         .mkt-dots { display:none !important; }
@@ -864,9 +864,9 @@ useEffect(() => {
           .clubs-desk      { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
           .clubs-section { padding-top:10px !important; padding-left:0 !important; padding-right:0 !important; }
-          .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:14px !important; }
+          .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:6px !important; }
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
-          .marketplace-hd { padding-left:14px !important; padding-right:14px !important; }
+          .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
           .mkt-split { display:none !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
