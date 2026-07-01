@@ -1050,23 +1050,26 @@ export default function ClubDashboardPage() {
 
           <Card style={{ marginBottom: 16 }}>
             <SectionTitle>دسترسی سریع</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
               {[
-                { label: 'ثبت مسابقه',    icon: '🏆', action: () => { setActiveTab('tournaments'); setTournamentTab('create'); } },
-                { label: 'افزودن میز',    icon: '🎱', action: () => { setActiveTab('tables'); setShowTableForm(true); } },
-                { label: 'رزروهای جدید',  icon: '📅', action: () => { setActiveTab('bookings'); setBookingFilter('pending'); } },
-                { label: 'ویرایش اطلاعات', icon: '📋', action: () => setActiveTab('info') },
-                { label: 'گالری',          icon: '📸', action: () => setActiveTab('gallery') },
-                { label: 'مربیان',         icon: '👨‍🏫', action: () => setActiveTab('coaches') },
-                { label: 'پروفایل باشگاه', icon: '👁', action: () => router.push(`/clubs/${selectedClub?.id}`) },
-              ].map(a => (
-                <button key={a.label} onClick={a.action} style={{
-                  background: '#F9F7F4', border: '1px solid #EDE8DF', borderRadius: 12,
-                  padding: '14px 10px', cursor: 'pointer', textAlign: 'center',
-                  fontFamily: 'var(--font-base)',
+                { label: 'ثبت مسابقه',    Icon: Trophy,       action: () => { setActiveTab('tournaments'); setTournamentTab('create'); } },
+                { label: 'افزودن میز',    Icon: Grid3X3,      action: () => { setActiveTab('tables'); setShowTableForm(true); } },
+                { label: 'رزروهای جدید',  Icon: CalendarDays, action: () => { setActiveTab('bookings'); setBookingFilter('pending'); } },
+                { label: 'ویرایش اطلاعات', Icon: FileText,    action: () => setActiveTab('info') },
+                { label: 'گالری',          Icon: ImageIcon,   action: () => setActiveTab('gallery') },
+                { label: 'مربیان',         Icon: GraduationCap, action: () => setActiveTab('coaches') },
+                { label: 'پروفایل باشگاه', Icon: Eye,         action: () => router.push(`/clubs/${selectedClub?.id}`) },
+              ].map(({ label, Icon, action }) => (
+                <button key={label} onClick={action} style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                  background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.22)',
+                  borderRadius: 14, padding: '14px 10px', cursor: 'pointer',
+                  fontFamily: 'var(--font-base)', transition: 'all 0.15s',
                 }}>
-                  <div style={{ fontSize: 22, marginBottom: 6 }}>{a.icon}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: DARK }}>{a.label}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.28)' }}>
+                    <Icon size={18} strokeWidth={1.8} style={{ color: '#A07840' }} />
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: DARK }}>{label}</div>
                 </button>
               ))}
             </div>
