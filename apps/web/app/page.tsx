@@ -308,7 +308,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '7px' }}>
               <div style={{
-                width: '85%', textAlign: 'center',
+                width: '90%', textAlign: 'center',
                 background: 'rgba(199,166,106,0.12)',
                 border: `1px solid ${GOLD_BOR}`,
                 borderRadius: rad,
@@ -347,7 +347,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             </div>
             <div style={{ flex: 1 }} />
             <div style={{
-              width: '85%', textAlign: 'center',
+              width: '90%', textAlign: 'center',
               background: 'rgba(199,166,106,0.12)',
               border: `1px solid ${GOLD_BOR}`,
               borderRadius: rad,
