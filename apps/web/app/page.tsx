@@ -206,32 +206,31 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
   const snookerTables = Math.floor(club.tables * 0.5);
   const pocketTables  = Math.floor(club.tables * 0.3);
   const hiballTables  = club.tables - snookerTables - pocketTables;
-  const hasStory = club.hasStory ?? false;
   const rad = featured ? '16px' : '12px';
 
   return (
-    <div style={{ position: 'relative', paddingTop: '6px' }}>
+    <div style={{ position: 'relative', paddingTop: '10px' }}>
       <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div
           onMouseEnter={() => setHov(true)}
           onMouseLeave={() => setHov(false)}
           style={{
             borderRadius: rad,
-            overflow: 'visible',
+            overflow: 'hidden',
             height: h,
             cursor: 'pointer',
             display: 'flex', flexDirection: 'column',
             position: 'relative',
             transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
-            transform: hov ? 'translateY(-10px) scale(1.015)' : 'translateY(-4px)',
+            transform: hov ? 'translateY(-10px) scale(1.015)' : 'translateY(-8px)',
             boxShadow: hov
               ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)'
-              : '0 8px 26px rgba(0,0,0,0.13)',
+              : '0 10px 28px rgba(0,0,0,0.14)',
             willChange: 'transform',
           }}
         >
-          {/* ── Image: top 40% ── */}
-          <div style={{ flex: '0 0 40%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
+          {/* ── Image: top 60% ── */}
+          <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
             <img src={club.img} alt={club.name}
               onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
@@ -272,9 +271,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
 
           {/* ── Desktop info panel ── */}
           <div className="club-desk-panel" style={{
-            flex: '0 0 60%', background: '#fff',
+            flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '56px 14px 12px',
+            padding: '10px 14px 12px',
             flexDirection: 'column', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
@@ -289,7 +288,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '10px' }}>({club.reviews})</span>
               </span>
             </div>
-            {/* push chips + price + button to bottom */}
             <div style={{ flex: 1 }} />
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
               {[
@@ -308,10 +306,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               </span>
               <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
             </div>
-            {/* ── Reserve button inside card ── */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '7px' }}>
               <div style={{
-                width: '80%', textAlign: 'center',
+                width: '85%', textAlign: 'center',
                 background: 'rgba(199,166,106,0.12)',
                 border: `1px solid ${GOLD_BOR}`,
                 borderRadius: rad,
@@ -327,9 +324,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
 
           {/* ── Mobile info panel ── */}
           <div className="club-mob-panel" style={{
-            flex: '0 0 60%', background: '#fff',
+            flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '28px 6px 8px',
+            padding: '8px 6px 8px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
@@ -349,9 +346,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <MapPin size={7} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
-            {/* ── Reserve button inside mobile card ── */}
             <div style={{
-              width: '80%', textAlign: 'center',
+              width: '85%', textAlign: 'center',
               background: 'rgba(199,166,106,0.12)',
               border: `1px solid ${GOLD_BOR}`,
               borderRadius: rad,
@@ -363,27 +359,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             }}>
               مشاهده و رزرو
             </div>
-          </div>
-
-          {/* ── Logo avatar at image/info boundary (30% width, half on each section) ── */}
-          <div style={{
-            position: 'absolute',
-            top: '40%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '30%',
-            aspectRatio: '1 / 1',
-            borderRadius: '50%',
-            background: hasStory
-              ? 'linear-gradient(#fff,#fff) padding-box, linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5) border-box'
-              : `linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,${GOLD},rgba(199,166,106,0.45)) border-box`,
-            border: '3px solid transparent',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, zIndex: 10,
-            boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
-            overflow: 'hidden',
-          }}>
-            <span style={{ fontSize: '16px', fontWeight: 900, color: '#444' }}>{club.name[0]}</span>
           </div>
         </div>
       </Link>
@@ -875,9 +850,9 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:8px 0 24px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:18px 14px 24px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
-        .club-mob-card { transform-origin:center; position:relative; padding-top:10px; }
+        .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none !important; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:20px 0 24px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
