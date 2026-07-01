@@ -300,12 +300,6 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                   borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
               ))}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '5px', marginTop: '4px' }}>
-              <span style={{ fontSize: featured ? '17px' : '14px', fontWeight: 900, color: GOLD }}>
-                {club.price.toLocaleString('fa-IR')}
-              </span>
-              <span style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)', marginRight: '3px' }}>تومان/ساعت</span>
-            </div>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '7px' }}>
               <div style={{
                 width: '90%', textAlign: 'center',
