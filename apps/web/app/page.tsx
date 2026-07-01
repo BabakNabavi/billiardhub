@@ -221,6 +221,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             cursor: 'pointer',
             display: 'flex', flexDirection: 'column',
             position: 'relative',
+            border: '1px solid rgba(0,0,0,0.22)',
             transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
             transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
             boxShadow: hov
