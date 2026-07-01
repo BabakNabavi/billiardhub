@@ -209,7 +209,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
   const rad = featured ? '16px' : '12px';
 
   return (
-    <div style={{ position: 'relative', paddingTop: '10px' }}>
+    <div style={{ position: 'relative', paddingTop: '22px' }}>
       <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div
           onMouseEnter={() => setHov(true)}
@@ -222,10 +222,10 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             display: 'flex', flexDirection: 'column',
             position: 'relative',
             transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
-            transform: hov ? 'translateY(-10px) scale(1.015)' : 'translateY(-8px)',
+            transform: hov ? 'translateY(-6px) scale(1.015)' : 'translateY(-18px)',
             boxShadow: hov
               ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)'
-              : '0 10px 28px rgba(0,0,0,0.14)',
+              : '0 18px 40px rgba(0,0,0,0.18)',
             willChange: 'transform',
           }}
         >
@@ -850,7 +850,7 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:18px 14px 24px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:28px 14px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none !important; }
