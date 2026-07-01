@@ -185,10 +185,18 @@ const CLUBS = [
 ];
 
 const PRODUCTS = [
-  { id:'1', name:'Predator 314-3',      sub:'چوب حرفه‌ای',   img:IMG.cue,   brand:'PREDATOR', price:12000000, sale:9600000, pct:20 },
-  { id:'2', name:'Aramith Pro Cup',     sub:'ست توپ اسنوکر', img:IMG.ball,  brand:'ARAMITH',  price:4500000,  sale:3825000, pct:15 },
-  { id:'3', name:'Longoni Elite',       sub:'نگهدارنده کربن', img:IMG.rest,  brand:'LONGONI',  price:2200000,  sale:1980000, pct:10 },
-  { id:'4', name:'Master Blue Diamond', sub:'گچ حرفه‌ای',     img:IMG.chalk, brand:'MASTER',   price:850000,   sale:680000,  pct:20 },
+  { id:'1',  name:'Predator 314-3',      sub:'چوب حرفه‌ای',     img:IMG.cue,      brand:'PREDATOR', price:12000000, sale:9600000,  pct:20 },
+  { id:'2',  name:'Aramith Pro Cup',     sub:'ست توپ اسنوکر',   img:IMG.ball,     brand:'ARAMITH',  price:4500000,  sale:3825000,  pct:15 },
+  { id:'3',  name:'Longoni Elite',       sub:'نگهدارنده کربن',  img:IMG.rest,     brand:'LONGONI',  price:2200000,  sale:1980000,  pct:10 },
+  { id:'4',  name:'Master Blue Diamond', sub:'گچ حرفه‌ای',       img:IMG.chalk,    brand:'MASTER',   price:850000,   sale:680000,   pct:20 },
+  { id:'5',  name:'Riley Renaissance',   sub:'چوب کلاسیک',      img:IMG.cue2,     brand:'RILEY',    price:6800000,  sale:6800000,  pct:0  },
+  { id:'6',  name:'Aramith Super Pro',   sub:'توپ پاکت',        img:IMG.ball,     brand:'ARAMITH',  price:3200000,  sale:2720000,  pct:15 },
+  { id:'7',  name:'Predator Revo',       sub:'شفت کربن',        img:IMG.cue,      brand:'PREDATOR', price:8500000,  sale:8500000,  pct:0  },
+  { id:'8',  name:'Longoni Laser',       sub:'نگهدارنده حرفه‌ای', img:IMG.rest,   brand:'LONGONI',  price:1900000,  sale:1615000,  pct:15 },
+  { id:'9',  name:'Silver Cup Chalk',    sub:'گچ نقره‌ای',      img:IMG.chalk,    brand:'SILVER',   price:420000,   sale:378000,   pct:10 },
+  { id:'10', name:'Predator BK Rush',    sub:'چوب بریک',        img:IMG.cue2,     brand:'PREDATOR', price:5400000,  sale:4320000,  pct:20 },
+  { id:'11', name:'Aramith Tournament',  sub:'ست توپ هی‌بال',   img:IMG.ball,     brand:'ARAMITH',  price:5800000,  sale:5800000,  pct:0  },
+  { id:'12', name:'Master Chalk Set',    sub:'بسته ۱۲ عددی',   img:IMG.chalk,    brand:'MASTER',   price:980000,   sale:784000,   pct:20 },
 ];
 
 const NEWS = [
