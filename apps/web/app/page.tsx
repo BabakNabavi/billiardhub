@@ -321,11 +321,11 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '10px 7px 9px',
+            padding: '10px 7px 13px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '2px',
           }}>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a1a1a',
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
