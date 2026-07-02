@@ -1126,11 +1126,11 @@ useEffect(() => {
           .sellers-section { padding-left:0 !important; padding-right:0 !important; }
           .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .svc-section { padding-left:14px !important; padding-right:14px !important; }
-          .banner-slider { height:200px !important; margin-top:40px !important; margin-bottom:40px !important; }
+          .banner-slider { height:200px !important; margin-top:0 !important; margin-bottom:0 !important; }
           .stats-grid { grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
           .cta-split  { grid-template-columns:1fr !important; }
-          .cta-float-area { height:300px !important; }
-          .cta-float-area > div { transform:scale(0.82) !important; transform-origin:top center !important; }
+          .cta-float-area { height:260px !important; }
+          .cta-float-area > div { zoom:0.74; }
         }
         @media(max-width:900px){
           .stats-grid { grid-template-columns:repeat(4,1fr) !important; gap:10px !important; }
