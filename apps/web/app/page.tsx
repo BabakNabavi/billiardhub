@@ -260,7 +260,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
             boxShadow: hov
               ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)'
-              : '0 8px 32px rgba(0,0,0,0.16)',
+              : '0 4px 16px rgba(0,0,0,0.09)',
             willChange: 'transform',
           }}
         >
@@ -463,7 +463,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
       }}
     >
       {/* Image area — curved bottom via border-radius clip */}
-      <div style={{ position: 'relative', height: '143px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
+      <div style={{ position: 'relative', height: '136px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
         <img src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -1098,10 +1098,10 @@ useEffect(() => {
           .club-open-btn   { display:flex !important; }
           .clubs-desk      { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
-          .clubs-section { padding-top:10px !important; padding-left:0 !important; padding-right:0 !important; }
-          .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:6px !important; }
+          .clubs-section { padding-top:36px !important; padding-left:0 !important; padding-right:0 !important; }
+          .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:22px !important; }
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
-          .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
+          .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .mkt-split { display:none !important; }
           .mkt-banners { grid-template-columns:1fr !important; margin:12px 14px 0 !important; }
           .mkt-desk-btns { display:none !important; }
@@ -1124,7 +1124,7 @@ useEffect(() => {
           .sellers-mob  { display:flex !important; }
           .services-grid { grid-template-columns:repeat(3,1fr) !important; gap:10px !important; }
           .sellers-section { padding-left:0 !important; padding-right:0 !important; }
-          .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
+          .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .svc-section { padding-left:14px !important; padding-right:14px !important; }
           .banner-slider { height:200px !important; margin-top:40px !important; margin-bottom:40px !important; }
         }
@@ -1372,7 +1372,7 @@ useEffect(() => {
           </div>
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={c.id} className="club-mob-card" style={{ width: '42vw', minWidth: '154px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(220px,64vw,297px)" />
               </div>
             ))}
@@ -1481,8 +1481,8 @@ useEffect(() => {
           <SR>
             <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
-                <span className="sec-label" style={{ color: `${GOLD}CC` }}>SELECTED SELLERS</span>
-                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان منتخب</h2>
+                <span className="sec-label" style={{ color: `${GOLD}CC` }}>EQUIPMENT SELLERS</span>
+                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان تجهیزات</h2>
                 <div className="sec-rule" style={{ color: GOLD }} />
               </div>
               <Link href="/sellers" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
