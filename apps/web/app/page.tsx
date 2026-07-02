@@ -1359,7 +1359,100 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* §3 SELLERS ═════════════════════════════════════════════ */}
+      {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
+      <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+          <SR>
+            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+              <div>
+                <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
+                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
+                <div className="sec-rule" style={{ color: BRN }} />
+              </div>
+              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4B97D'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = GOLD; }}>
+                مشاهده همه <ArrowLeft size={12} />
+              </Link>
+            </div>
+          </SR>
+          <div
+            ref={mktDeskRef}
+            className="mkt-split"
+            style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
+            onMouseDown={onMktMouseDown}
+            onMouseEnter={() => { mktPausedRef.current = true; }}
+            onMouseLeave={() => { mktPausedRef.current = false; }}
+          >
+            {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
+              <div key={`${p.id}-${i}`} style={{ width: '200px', flexShrink: 0 }}>
+                <ProductCard p={p} h="320px" />
+              </div>
+            ))}
+          </div>
+          <div ref={mktSliderRef} className="mkt-mobile-slider">
+            {PRODUCTS.map((p) => (
+              <div key={p.id} className="mkt-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                {p.pct > 0 && (
+                  <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4, background: '#ef4444', border: 'none', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
+                    {p.pct}٪ تخفیف
+                  </div>
+                )}
+                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(220px,64vw,297px)' }}>
+                  <div style={{ borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer', display: 'flex', flexDirection: 'column', border: '1px solid rgba(0,0,0,0.22)', boxShadow: '0 4px 20px rgba(0,0,0,0.10)' }}>
+                    <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
+                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 55%,rgba(8,4,1,0.30) 100%)' }} />
+                      <div style={{ position: 'absolute', bottom: '6px', left: '7px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
+                    </div>
+                    <div style={{ flex: '0 0 38%', background: '#fff', padding: '8px 8px 7px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
+                      <div style={{ fontSize: '11px', color: TEXT_M }}>{p.sub}</div>
+                      <div style={{ fontSize: '15px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+          {/* ── Ad banners ── */}
+          <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
+            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ویژه تابستان ۱۴۰۴</div>
+                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
+                </div>
+              </div>
+            </Link>
+            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ارسال رایگان</div>
+                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="mkt-dots">
+            {PRODUCTS.map((_, i) => (
+              <div key={i} style={{ height: '5px', width: i === activeMkt ? '18px' : '5px', borderRadius: '3px', background: i === activeMkt ? GOLD : 'rgba(26,25,23,0.22)', transition: 'all 0.3s ease' }} />
+            ))}
+          </div>
+          <SR delay={180}>
+            <div className="mkt-desk-btns" style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '38px', flexWrap: 'wrap' }}>
+              <Link href="/shop"><button className="btn-primary"><ShoppingBag size={14} /> ورود به بازار</button></Link>
+              <Link href="/sellers"><button className="btn-outline">فروش تجهیزات</button></Link>
+            </div>
+          </SR>
+        </div>
+      </section>
+
+      {/* §4 SELLERS ═════════════════════════════════════════════ */}
       <section className="sellers-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
