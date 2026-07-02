@@ -281,22 +281,12 @@ export default function Navbar() {
                           </div>
                           {section.items.map((item, ii) => (
                             <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'background 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease', border: '1px solid transparent' }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'filter 0.28s ease', border: 'none' }}
                               onMouseEnter={e => {
-                                const el = e.currentTarget as HTMLElement;
-                                el.style.background = `linear-gradient(135deg,${colColor}14 0%,${colColor}07 100%)`;
-                                el.style.backdropFilter = 'none';
-                                (el.style as any).WebkitBackdropFilter = 'none';
-                                el.style.boxShadow = `0 0 24px ${colColor}50, 0 4px 16px ${colColor}28, inset 0 1px 0 ${colColor}28`;
-                                el.style.borderColor = `${colColor}44`;
+                                (e.currentTarget as HTMLElement).style.filter = `drop-shadow(0 0 8px ${colColor}AA) drop-shadow(0 0 20px ${colColor}55)`;
                               }}
                               onMouseLeave={e => {
-                                const el = e.currentTarget as HTMLElement;
-                                el.style.background = 'transparent';
-                                el.style.backdropFilter = 'none';
-                                (el.style as any).WebkitBackdropFilter = 'none';
-                                el.style.boxShadow = 'none';
-                                el.style.borderColor = 'transparent';
+                                (e.currentTarget as HTMLElement).style.filter = 'none';
                               }}>
                               <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `linear-gradient(135deg,${colColorLight}22,${colColor}10)`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0, transition: 'all 0.2s' }}>
                                 {item.icon}
