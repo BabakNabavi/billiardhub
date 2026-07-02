@@ -281,14 +281,15 @@ export default function Navbar() {
                           </div>
                           {section.items.map((item, ii) => (
                             <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'all 0.38s ease', border: '1px solid transparent' }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'background 0.30s ease, box-shadow 0.30s ease, border-color 0.30s ease, transform 0.30s ease', border: '1px solid transparent' }}
                               onMouseEnter={e => {
                                 const el = e.currentTarget as HTMLElement;
-                                el.style.background = 'rgba(255,255,255,0.70)';
-                                el.style.backdropFilter = 'blur(24px) saturate(220%)';
-                                (el.style as any).WebkitBackdropFilter = 'blur(24px) saturate(220%)';
-                                el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(255,255,255,0.68), 0 2px 16px rgba(255,255,255,0.60), 0 4px 18px rgba(0,0,0,0.04), 0 0 26px ${colColor}18`;
-                                el.style.borderColor = `rgba(255,255,255,0.78)`;
+                                el.style.background = 'rgba(255,255,255,0.96)';
+                                el.style.backdropFilter = 'blur(20px)';
+                                (el.style as any).WebkitBackdropFilter = 'blur(20px)';
+                                el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,1), inset 0 0 0 1px ${colColor}38, 0 6px 24px rgba(0,0,0,0.11), 0 0 18px ${colColor}22`;
+                                el.style.borderColor = `${colColor}44`;
+                                el.style.transform = 'translateY(-1px)';
                               }}
                               onMouseLeave={e => {
                                 const el = e.currentTarget as HTMLElement;
@@ -297,6 +298,7 @@ export default function Navbar() {
                                 (el.style as any).WebkitBackdropFilter = 'none';
                                 el.style.boxShadow = 'none';
                                 el.style.borderColor = 'transparent';
+                                el.style.transform = 'none';
                               }}>
                               <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `linear-gradient(135deg,${colColorLight}22,${colColor}10)`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0, transition: 'all 0.2s' }}>
                                 {item.icon}
