@@ -281,15 +281,14 @@ export default function Navbar() {
                           </div>
                           {section.items.map((item, ii) => (
                             <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'all 0.22s cubic-bezier(0.22,1,0.36,1)', border: '1px solid transparent' }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'all 0.38s ease', border: '1px solid transparent' }}
                               onMouseEnter={e => {
                                 const el = e.currentTarget as HTMLElement;
-                                el.style.background = 'rgba(255,255,255,0.75)';
-                                el.style.backdropFilter = 'blur(16px)';
-                                (el.style as any).WebkitBackdropFilter = 'blur(16px)';
-                                el.style.boxShadow = `0 4px 20px rgba(0,0,0,0.07), 0 0 0 1px rgba(255,255,255,0.85) inset, 0 8px 24px ${colColor}18`;
-                                el.style.borderColor = `rgba(255,255,255,0.6)`;
-                                el.style.transform = 'translateY(-1px)';
+                                el.style.background = 'rgba(255,255,255,0.70)';
+                                el.style.backdropFilter = 'blur(24px) saturate(220%)';
+                                (el.style as any).WebkitBackdropFilter = 'blur(24px) saturate(220%)';
+                                el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(255,255,255,0.68), 0 2px 16px rgba(255,255,255,0.60), 0 4px 18px rgba(0,0,0,0.04), 0 0 26px ${colColor}18`;
+                                el.style.borderColor = `rgba(255,255,255,0.78)`;
                               }}
                               onMouseLeave={e => {
                                 const el = e.currentTarget as HTMLElement;
@@ -298,7 +297,6 @@ export default function Navbar() {
                                 (el.style as any).WebkitBackdropFilter = 'none';
                                 el.style.boxShadow = 'none';
                                 el.style.borderColor = 'transparent';
-                                el.style.transform = 'none';
                               }}>
                               <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `linear-gradient(135deg,${colColorLight}22,${colColor}10)`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0, transition: 'all 0.2s' }}>
                                 {item.icon}
@@ -317,8 +315,8 @@ export default function Navbar() {
                   {/* Bottom strip */}
                   <div style={{ margin: '4px 20px 18px', padding: '12px 18px', background: 'linear-gradient(135deg,rgba(184,147,58,0.07),rgba(184,147,58,0.03))', border: '1px solid rgba(184,147,58,0.16)', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
                     <div>
-                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>پلتفرم تخصصی بیلیارد ایران</div>
-                      <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اکوسیستم جامع هوشمند بیلیارد</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
                     </div>
                     <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '7px 16px', boxShadow: `0 4px 16px rgba(184,147,58,0.32)`, whiteSpace: 'nowrap' }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
