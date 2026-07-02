@@ -687,6 +687,7 @@ export default function HomePage() {
   const [slide, setSlide]     = useState(0);
   const [scrollY, setScrollY] = useState(0);
   const [playing, setPlaying] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const rafRef   = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -711,6 +712,14 @@ export default function HomePage() {
   const mktDragRef   = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const mktPausedRef = useRef(false);
   const mktTickerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const el = mktDeskRef.current;
@@ -972,6 +981,7 @@ useEffect(() => {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&display=swap" rel="stylesheet" />
       <style>{`
+        :root { --hero-bottom-gap: 40px; }
         @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
         @keyframes fadeTagIn   { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
         @keyframes pulse2      { 0%,100%{opacity:1;}50%{opacity:0.20;} }
@@ -1186,7 +1196,7 @@ useEffect(() => {
       {/* ╔══════════════════════════════════════════════════════╗
           ║  HERO — cinematic  video + wallpaper crossfade      ║
           ╚══════════════════════════════════════════════════════╝ */}
-      <div style={{ position: 'relative', height: '100dvh', minHeight: '640px', overflow: 'hidden', background: '#04020A' }}>
+      <div style={{ position: 'relative', height: isMobile ? 'auto' : '100dvh', minHeight: isMobile ? 'auto' : '640px', overflow: 'hidden', background: '#04020A', paddingBottom: isMobile ? 'var(--hero-bottom-gap)' : undefined }}>
 
         {/* ── Layer 1: video (continuous motion background) ── */}
         <video ref={videoRef} autoPlay muted loop playsInline preload="auto"
@@ -1236,7 +1246,9 @@ useEffect(() => {
 
         {/* ── CONTENT — no key prop → animates exactly ONCE on page load ── */}
         <div className="hero-content" style={{
-          position: 'absolute', inset: 0, zIndex: 10,
+          position: isMobile ? 'relative' : 'absolute',
+          inset: isMobile ? undefined : 0,
+          zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
           padding: 'clamp(189px,25vh,236px) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
