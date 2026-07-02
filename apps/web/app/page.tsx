@@ -196,6 +196,34 @@ const PRODUCTS = [
   { id:'9',  name:'Silver Cup Chalk',    sub:'گچ نقره‌ای',          img:IMG.chalk, brand:'SILVER',   price:420000,   sale:378000,   pct:10 },
   { id:'10', name:'Predator BK Rush',    sub:'چوب بریک',            img:IMG.cue2,  brand:'PREDATOR', price:5400000,  sale:4320000,  pct:20 },
 ];
+const SELLERS = [
+  { id:'1', name:'فروشگاه ستاره تهران',    city:'تهران',   specialty:'چوب و لوازم',     rating:4.9, reviews:312, img:IMG.store1,   badge:'برتر' },
+  { id:'2', name:'بیلیارد کاسپین مشهد',    city:'مشهد',    specialty:'میز و تجهیزات',   rating:4.7, reviews:189, img:IMG.store2,   badge:null   },
+  { id:'3', name:'لوازم اسنوکر پارسیان',   city:'اصفهان',  specialty:'توپ و گچ',         rating:4.8, reviews:241, img:IMG.snooker2, badge:'تأیید شده' },
+  { id:'4', name:'مرکز بیلیارد آریا',      city:'شیراز',   specialty:'تجهیزات حرفه‌ای', rating:4.6, reviews:98,  img:IMG.proTable, badge:null   },
+  { id:'5', name:'فروشگاه چمپیون تبریز',   city:'تبریز',   specialty:'چوب برند',         rating:4.9, reviews:178, img:IMG.cue,      badge:'برتر' },
+  { id:'6', name:'گالری بیلیارد نوین',     city:'کرج',     specialty:'میز اسنوکر',       rating:4.7, reviews:134, img:IMG.table,    badge:null   },
+  { id:'7', name:'لوازم بیلیارد پرشین',    city:'تهران',   specialty:'توپ آرامیث',       rating:4.8, reviews:267, img:IMG.ball,     badge:'تأیید شده' },
+  { id:'8', name:'مرکز چوب و گچ ایران',    city:'اهواز',   specialty:'گچ حرفه‌ای',       rating:4.5, reviews:76,  img:IMG.chalk,    badge:null   },
+];
+
+const SERVICES_LIST = [
+  { id:'1', icon: Wrench,        title:'نصب میز',          desc:'نصب حرفه‌ای انواع میز بیلیارد، اسنوکر و پاکت در محل شما', color:'#C7A66A' },
+  { id:'2', icon: CheckCircle,   title:'تعمیر و بازسازی',  desc:'تعمیر تخصصی چوب، تعویض ضربه‌گیر و مقره با متریال اصل',    color:'#4A9EFF' },
+  { id:'3', icon: Users,         title:'کشیدن ابر میز',    desc:'تعویض ابر و روکش میز با پارچه‌های اصل اسنوکر و پاکت',     color:'#30C55A' },
+  { id:'4', icon: Star,          title:'تنظیم کوشن',       desc:'تنظیم و تعویض کوشن‌های حرفه‌ای برای انواع میزهای بیلیارد', color:'#B97BFF' },
+  { id:'5', icon: ShoppingBag,   title:'حمل و نقل',        desc:'جابجایی تخصصی تجهیزات بیلیارد با بیمه کامل بار',           color:'#FF6B9D' },
+  { id:'6', icon: GraduationCap, title:'آموزش نگهداری',   desc:'آموزش سرویس دوره‌ای و نگهداری صحیح از تجهیزات بیلیارد',   color:'#06b6d4' },
+];
+
+const BANNER_SLIDES = [
+  { img:IMG.wall1,    title:'بزرگترین پلتفرم بیلیارد ایران', sub:'بهترین باشگاه‌ها را کشف و رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
+  { img:IMG.snooker,  title:'تخفیف ویژه تجهیزات تابستان',   sub:'تا ۳۰٪ تخفیف روی محصولات برند اصل', link:'/shop',        cta:'خرید کن',        accent:GOLD },
+  { img:IMG.wall3,    title:'مسابقات سراسری بیلیارد ۱۴۰۴',  sub:'ثبت‌نام و شرکت در رقابت‌های ملی',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
+  { img:IMG.bg1,      title:'آکادمی آموزش بیلیارد هاب',     sub:'با بهترین مربیان یاد بگیر',           link:'/coaches',     cta:'شروع یادگیری',  accent:PRP  },
+  { img:IMG.proTable, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
+];
+
 const NEWS = [
   { id:'1', title:'برگزاری اولین مسابقات بین‌المللی بیلیارد در تهران', date:'۵ خرداد', views:2341, cat:'مسابقات', clr:'#1A6641', img:IMG.snooker2 },
   { id:'2', title:'معرفی جدیدترین میزهای اسنوکر وارداتی',              date:'۳ خرداد', views:1876, cat:'تجهیزات', clr:BLU,       img:IMG.cue2    },
@@ -410,6 +438,64 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
           </div>
         </div>
       </Link>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SELLER CARD
+═══════════════════════════════════════════════════════════════ */
+function SellerCard({ s }: { s: typeof SELLERS[0] }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        position: 'relative', width: '100%', background: '#fff',
+        borderRadius: '16px', overflow: 'hidden',
+        border: '1px solid rgba(0,0,0,0.10)',
+        boxShadow: hov ? '0 24px 60px rgba(0,0,0,0.18)' : '0 4px 20px rgba(0,0,0,0.08)',
+        transition: 'transform 0.4s ease, box-shadow 0.4s ease',
+        transform: hov ? 'translateY(-6px)' : 'none',
+        cursor: 'pointer',
+      }}
+    >
+      {/* Image area */}
+      <div style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
+        <img src={s.img} alt={s.name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        {/* gradient overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.22) 100%)' }} />
+        {/* arch cutout at bottom — white ellipse overlapping info area */}
+        <div style={{
+          position: 'absolute', bottom: '-1px', left: '-10%',
+          width: '120%', height: '44px',
+          background: '#fff', borderRadius: '50% 50% 0 0',
+        }} />
+        {s.badge && (
+          <div style={{ position: 'absolute', top: '10px', right: '10px', background: GOLD, color: '#1a1a1a', fontSize: '9px', fontWeight: 800, padding: '3px 10px', borderRadius: '20px', letterSpacing: '0.05em' }}>
+            {s.badge}
+          </div>
+        )}
+      </div>
+      {/* Info */}
+      <div style={{ padding: '2px 14px 16px', textAlign: 'center' }}>
+        <div style={{ fontSize: '14px', fontWeight: 800, color: TEXT, lineHeight: 1.3 }}>{s.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginTop: '3px', fontSize: '11px', color: TEXT_M }}>
+          <MapPin size={9} style={{ color: GOLD }} />{s.city}
+        </div>
+        <div style={{ fontSize: '11px', color: TEXT_M, marginTop: '1px' }}>{s.specialty}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '6px' }}>
+          <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
+          <span style={{ fontSize: '12px', fontWeight: 700, color: TEXT }}>{s.rating}</span>
+          <span style={{ fontSize: '10px', color: TEXT_M }}>({s.reviews})</span>
+        </div>
+        <div style={{ marginTop: '12px', padding: '8px 0', borderRadius: '10px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, color: GOLD, fontSize: '12px', fontWeight: 700 }}>
+          مشاهده فروشگاه
+        </div>
+      </div>
     </div>
   );
 }
@@ -631,6 +717,66 @@ export default function HomePage() {
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   };
+
+  // ── Sellers auto-scroll ──
+  const sellersRef      = useRef<HTMLDivElement>(null);
+  const sellersDragRef  = useRef({ startX: 0, scrollLeft: 0, moved: false });
+  const sellersPaused   = useRef(false);
+  const sellersTickerR  = useRef<number | null>(null);
+
+  useEffect(() => {
+    const el = sellersRef.current;
+    if (!el) return;
+    const SPEED = 45;
+    let last = 0;
+    const tick = (t: number) => {
+      if (last && !sellersPaused.current) {
+        const half = el.scrollWidth / 2;
+        el.scrollLeft += (SPEED * (t - last)) / 1000;
+        if (el.scrollLeft >= half) el.scrollLeft -= half;
+      }
+      last = t;
+      sellersTickerR.current = requestAnimationFrame(tick);
+    };
+    sellersTickerR.current = requestAnimationFrame(tick);
+    return () => { if (sellersTickerR.current) cancelAnimationFrame(sellersTickerR.current); };
+  }, []);
+
+  const onSellersMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    sellersPaused.current = true;
+    sellersDragRef.current = { startX: e.pageX, scrollLeft: sellersRef.current?.scrollLeft ?? 0, moved: false };
+    if (sellersRef.current) sellersRef.current.style.cursor = 'grabbing';
+    const onMove = (ev: MouseEvent) => {
+      const dx = ev.pageX - sellersDragRef.current.startX;
+      if (Math.abs(dx) > 4) sellersDragRef.current.moved = true;
+      if (sellersRef.current) sellersRef.current.scrollLeft = sellersDragRef.current.scrollLeft - dx;
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      if (sellersRef.current) sellersRef.current.style.cursor = 'grab';
+      if (!(sellersRef.current?.matches(':hover') ?? false)) sellersPaused.current = false;
+      if (sellersDragRef.current.moved) {
+        const el = sellersRef.current;
+        if (el) {
+          const block = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); el.removeEventListener('click', block, true); };
+          el.addEventListener('click', block, true);
+        }
+      }
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  };
+
+  // ── Banner slider ──
+  const [activeBanner, setActiveBanner] = useState(0);
+  const bannerTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startBannerTimer = () => {
+    if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
+    bannerTimerRef.current = setInterval(() => setActiveBanner(p => (p + 1) % BANNER_SLIDES.length), 4500);
+  };
+  useEffect(() => { startBannerTimer(); return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); }; }, []);
 
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
@@ -930,6 +1076,26 @@ useEffect(() => {
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
         }
+
+        /* ── Sellers ── */
+        .sellers-desk { display:flex; flex-wrap:nowrap; gap:14px; overflow-x:auto; scrollbar-width:none; padding:4px 2px 16px; cursor:grab; user-select:none; }
+        .sellers-desk::-webkit-scrollbar { display:none; }
+        .sellers-mob  { display:none; gap:12px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
+        .sellers-mob::-webkit-scrollbar  { display:none; }
+        /* ── Services ── */
+        .services-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        /* ── Responsive ── */
+        @media(max-width:900px){
+          .services-grid { grid-template-columns:repeat(2,1fr) !important; }
+        }
+        @media(max-width:600px){
+          .sellers-desk { display:none !important; }
+          .sellers-mob  { display:flex !important; }
+          .services-grid { grid-template-columns:1fr 1fr !important; gap:12px !important; }
+          .sellers-section { padding-left:0 !important; padding-right:0 !important; }
+          .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
+          .svc-section { padding-left:14px !important; padding-right:14px !important; }
+        }
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
@@ -1193,361 +1359,141 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
-      <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      {/* §3 SELLERS ═════════════════════════════════════════════ */}
+      <section className="sellers-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
-                <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
-                <h2 className="sec-title" style={{ color: TEXT }}>بیلیارد بازار</h2>
-                <div className="sec-rule" style={{ color: BRN }} />
+                <div style={{ fontSize: '10px', fontWeight: 700, color: GOLD, letterSpacing: '0.24em', marginBottom: '8px' }}>SELECTED SELLERS</div>
+                <h2 style={{ fontSize: 'clamp(22px,2.8vw,38px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 0.96 }}>فروشندگان منتخب</h2>
               </div>
-              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4B97D'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = GOLD; }}>
+              <Link href="/sellers" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
           </SR>
+
+          {/* Desktop auto-scroll row */}
           <div
-            ref={mktDeskRef}
-            className="mkt-split"
-            style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
-            onMouseDown={onMktMouseDown}
-            onMouseEnter={() => { mktPausedRef.current = true; }}
-            onMouseLeave={() => { mktPausedRef.current = false; }}
+            ref={sellersRef}
+            className="sellers-desk"
+            onMouseDown={onSellersMouseDown}
+            onMouseEnter={() => { sellersPaused.current = true; }}
+            onMouseLeave={() => { sellersPaused.current = false; }}
           >
-            {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
-              <div key={`${p.id}-${i}`} style={{ width: '200px', flexShrink: 0 }}>
-                <ProductCard p={p} h="320px" />
+            {[...SELLERS, ...SELLERS].map((s, i) => (
+              <div key={`${s.id}-${i}`} style={{ width: '200px', flexShrink: 0 }}>
+                <SellerCard s={s} />
               </div>
             ))}
           </div>
-          <div ref={mktSliderRef} className="mkt-mobile-slider">
-            {PRODUCTS.map((p) => (
-              <div key={p.id} className="mkt-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                {p.pct > 0 && (
-                  <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4,
-                    background: '#ef4444',
-                    border: 'none',
-                    color: '#fff', fontSize: '10px', fontWeight: 700,
-                    padding: '3px 9px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
-                    {p.pct}٪ تخفیف
-                  </div>
-                )}
-                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(220px,64vw,297px)' }}>
+
+          {/* Mobile slider */}
+          <div className="sellers-mob">
+            {SELLERS.map((s) => (
+              <div key={s.id} style={{ width: '48vw', minWidth: '160px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                <SellerCard s={s} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* §4 SERVICES ════════════════════════════════════════════ */}
+      <section className="svc-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+          <SR>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+              <div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: GOLD, letterSpacing: '0.24em', marginBottom: '8px' }}>TECHNICAL SERVICES</div>
+                <h2 style={{ fontSize: 'clamp(22px,2.8vw,38px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 0.96 }}>خدمات فنی و تخصصی</h2>
+              </div>
+              <Link href="/services" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
+                مشاهده همه <ArrowLeft size={12} />
+              </Link>
+            </div>
+          </SR>
+
+          <div className="services-grid">
+            {SERVICES_LIST.map((svc, i) => {
+              const Icon = svc.icon;
+              return (
+                <SR key={svc.id} delay={i * 60}>
                   <div style={{
-                    borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column',
-                    border: '1px solid rgba(0,0,0,0.22)',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
-                  }}>
-                    <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
-                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 55%,rgba(8,4,1,0.30) 100%)' }} />
-                      <div style={{ position: 'absolute', bottom: '6px', left: '7px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
+                    background: '#fff', borderRadius: '16px', padding: '28px 22px 24px',
+                    border: '1px solid rgba(0,0,0,0.08)',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+                    display: 'flex', flexDirection: 'column', gap: '14px',
+                    transition: 'transform 0.35s ease, box-shadow 0.35s ease',
+                    cursor: 'pointer',
+                  }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-5px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.14)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.06)'; }}
+                  >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${svc.color}14`, border: `1px solid ${svc.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon size={22} style={{ color: svc.color }} />
                     </div>
-                    <div style={{ flex: '0 0 38%', background: '#fff', padding: '8px 8px 7px',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', overflow: 'hidden' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
-                      <div style={{ fontSize: '11px', color: TEXT_M }}>{p.sub}</div>
-                      <div style={{ fontSize: '15px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: TEXT, marginBottom: '6px' }}>{svc.title}</div>
+                      <div style={{ fontSize: '13px', color: TEXT_M, lineHeight: 1.7 }}>{svc.desc}</div>
                     </div>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Ad banners ── */}
-          <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
-            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ویژه تابستان ۱۴۰۴</div>
-                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
-                </div>
-              </div>
-            </Link>
-            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ارسال رایگان</div>
-                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          <div className="mkt-dots">
-            {PRODUCTS.map((_, i) => (
-              <div key={i} style={{
-                height: '5px',
-                width: i === activeMkt ? '18px' : '5px',
-                borderRadius: '3px',
-                background: i === activeMkt ? GOLD : 'rgba(26,25,23,0.22)',
-                transition: 'all 0.3s ease',
-              }} />
-            ))}
-          </div>
-          <SR delay={180}>
-            <div className="mkt-desk-btns" style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '38px', flexWrap: 'wrap' }}>
-              <Link href="/shop"><button className="btn-primary"><ShoppingBag size={14} /> ورود به بازار</button></Link>
-              <Link href="/sellers"><button className="btn-outline">فروش تجهیزات</button></Link>
-            </div>
-          </SR>
-        </div>
-      </section>
-
-      {/* §4 COMMUNITY ═══════════════════════════════════════════ */}
-      <section style={{ position: 'relative', background: 'linear-gradient(to bottom,#0E0515 0%,#100818 60%,#1A0A22 100%)', overflow: 'hidden',
-        padding: 'clamp(80px,8vw,120px) clamp(16px,5%,80px) clamp(140px,16vw,220px)' }}>
-        {/* background image */}
-        <img src={IMG.bg1} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, filter: 'saturate(0.35) contrast(1.12) hue-rotate(260deg)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        {/* gradient overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(14,5,21,0.80) 0%,rgba(14,5,21,0.04) 30%,rgba(14,5,21,0.04) 58%,rgba(14,5,21,0.96) 100%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
-          <SR>
-            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-              <span className="sec-label" style={{ color: GOLD_DIM }}>JOIN THE COMMUNITY</span>
-              <h2 style={{ fontSize: 'clamp(31px, 5.5vw, 70px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.054em', lineHeight: 0.94, margin: '0 0 14px' }}>جامعه بیلیارد ایران</h2>
-              <p style={{ fontSize: 'clamp(14px, 1.8vw, 19px)', color: 'rgba(255,255,255,0.32)', lineHeight: 1.90, maxWidth: '480px', margin: '0 auto' }}>بزرگ‌ترین اکوسیستم بیلیارد خاورمیانه — از مبتدی تا قهرمان</p>
-            </div>
-          </SR>
-          <div className="comm-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '18px', marginBottom: '52px' }}>
-            {[
-              { v: '۱۲٬۴۰۰', l: 'بازیکن ثبت‌شده', s: 'از سراسر ایران',   clr: GOLD,  clrR:'199,166,106' },
-              { v: '۵۴۸',    l: 'باشگاه فعال',     s: 'در ۳۱ استان',      clr: '#30C55A', clrR:'48,197,90' },
-              { v: '۲۱۸',    l: 'مسابقه سالانه',   s: 'ملی و بین‌المللی', clr: '#4A9EFF', clrR:'74,158,255' },
-              { v: '۳۱',     l: 'استان',            s: 'حضور سراسری',      clr: '#B97BFF', clrR:'185,123,255' },
-            ].map((s, i) => (
-              <SR key={i} delay={i * 70}>
-                <div style={{
-                  padding: 'clamp(20px,3vw,34px) clamp(12px,2vw,20px)', textAlign: 'center',
-                  background: `rgba(${s.clrR},0.06)`,
-                  backdropFilter: 'blur(40px) saturate(240%)', WebkitBackdropFilter: 'blur(40px) saturate(240%)',
-                  border: `1px solid rgba(${s.clrR},0.18)`,
-                  borderRadius: '24px', position: 'relative', overflow: 'hidden',
-                  boxShadow: `inset 0 1px 0 rgba(${s.clrR},0.22), 0 8px 32px rgba(0,0,0,0.22)`,
-                  transition: 'transform 0.35s ease, box-shadow 0.35s ease',
-                }}>
-                  {/* top glass sheen */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg,rgba(${s.clrR},0.10) 0%,transparent 100%)`, pointerEvents: 'none', borderRadius: 'inherit' }} />
-                  {/* ambient orb */}
-                  <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '80px', background: `radial-gradient(ellipse,rgba(${s.clrR},0.22),transparent 68%)`, filter: 'blur(18px)', pointerEvents: 'none' }} />
-                  <div style={{ fontSize: 'clamp(29px, 4.4vw, 59px)', fontWeight: 900, color: s.clr, letterSpacing: '-0.055em', lineHeight: 1, marginBottom: '10px', position: 'relative', textShadow: `0 0 32px rgba(${s.clrR},0.40)` }}>{s.v}</div>
-                  <div style={{ fontSize: 'clamp(12px, 1.3vw, 14px)', fontWeight: 700, color: 'rgba(255,255,255,0.78)', marginBottom: '5px', position: 'relative' }}>{s.l}</div>
-                  <div style={{ fontSize: '12px', color: `rgba(${s.clrR},0.55)`, position: 'relative', fontWeight: 600 }}>{s.s}</div>
-                </div>
-              </SR>
-            ))}
-          </div>
-          <SR>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '26px' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {['ب','ر','ا','ن','ک'].map((c, i) => (
-                  <div key={i} style={{ width: '46px', height: '46px', borderRadius: '50%', background: `linear-gradient(135deg,${[GRN,BLU,GOLD,PRP,BRN][i]},${['#124d30','#123d64',GOLD_D,'#361f6b','#4a2412'][i]})`, border: '2.5px solid #0B0908', marginLeft: i > 0 ? '-13px' : 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', fontWeight: 900, color: '#fff', zIndex: 5 - i, position: 'relative' }}>{c}</div>
-                ))}
-                <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)', border: '2.5px solid #0B0908', marginLeft: '-13px', zIndex: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>+۱۲K</div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Link href="/clubs"><button className="btn-primary">یافتن باشگاه</button></Link>
-                <Link href="/tournaments"><button className="btn-ghost-dark">مشاهده مسابقات</button></Link>
-              </div>
-            </div>
-          </SR>
-        </div>
-      </section>
-
-      {/* ── Section divider ─────────────────────────────────────── */}
-      <div style={{ position: 'relative', height: '3px', background: 'linear-gradient(90deg,transparent 0%,rgba(185,123,255,0.55) 25%,rgba(199,166,106,0.70) 50%,rgba(74,158,255,0.55) 75%,transparent 100%)', boxShadow: '0 0 24px rgba(185,123,255,0.30)' }} />
-
-      {/* §5 EDUCATION ═══════════════════════════════════════════ */}
-      <section style={{ position: 'relative', background: '#0D1526', overflow: 'hidden', padding: 'clamp(72px,8vw,108px) clamp(16px,5%,80px)' }}>
-        <img src={IMG.learn1} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.08, filter: 'saturate(0.3) contrast(1.1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(13,21,38,0) 0%,rgba(13,21,38,0.98) 54%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
-          <div className="edu-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(32px,6vw,80px)', alignItems: 'center' }}>
-            <SR direction="right">
-              <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: 'clamp(260px,40vw,480px)' }}>
-                <img src={IMG.learn2} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.62)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(13,21,38,0.96) 0%,transparent 52%)' }} />
-                <div style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(44px) saturate(220%)', WebkitBackdropFilter: 'blur(44px) saturate(220%)', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '14px', padding: '10px 18px' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.72)', fontWeight: 700, letterSpacing: '0.16em' }}>BILLIARD ACADEMY</span>
-                </div>
-                <div style={{ position: 'absolute', bottom: '18px', left: '18px', right: '18px', display: 'flex', gap: '8px' }}>
-                  {['مبتدی','پیشرفته','حرفه‌ای'].map(l => (
-                    <div key={l} style={{ flex: 1, padding: '9px 0', textAlign: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: '20px' }}>
-                      <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.70)', fontWeight: 700 }}>{l}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </SR>
-            <div>
-              <SR>
-                <span className="sec-label" style={{ color: `${PRP}CC` }}>EDUCATION & COACHING</span>
-                <h2 className="sec-title" style={{ color: '#fff', marginBottom: '14px' }}>بازی را حرفه‌ای یاد بگیر</h2>
-                <div className="sec-rule" style={{ color: PRP }} />
-                <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.35)', margin: '20px 0 32px', lineHeight: 1.90 }}>با مربیان تأیید شده فدراسیون بیلیارد ایران — از صفر تا قهرمان</p>
-              </SR>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
-                {[
-                  { t: 'مبانی بیلیارد برای مبتدیان', l: 'مقدماتی', h: '۱۸', s: '۲٬۴۰۰', c: '#30C55A' },
-                  { t: 'تکنیک‌های پیشرفته اسنوکر',   l: 'پیشرفته',  h: '۲۴', s: '۸۶۰',   c: '#4A9EFF' },
-                  { t: 'استراتژی و روان‌شناسی بازی',  l: 'حرفه‌ای',  h: '۱۲', s: '۴۵۰',   c: GOLD      },
-                ].map((c, i) => (
-                  <SR key={i} delay={i * 60}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '15px 18px', background: 'rgba(255,255,255,0.050)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px' }}>
-                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.c, flexShrink: 0, boxShadow: `0 0 9px ${c.c}` }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '3px' }}>{c.t}</div>
-                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.28)' }}>{c.l} · {c.h} ساعت · {c.s} دانشجو</div>
-                      </div>
-                      <ArrowLeft size={13} style={{ color: 'rgba(255,255,255,0.18)', flexShrink: 0 }} />
-                    </div>
-                  </SR>
-                ))}
-              </div>
-              <SR delay={160}>
-                <div style={{ display: 'flex', gap: '11px', flexWrap: 'wrap' }}>
-                  <Link href="/education"><button className="btn-primary">شروع یادگیری</button></Link>
-                  <Link href="/coaches"><button className="btn-ghost-dark">پیدا کردن مربی</button></Link>
-                </div>
-              </SR>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* §6 TOURNAMENT ══════════════════════════════════════════ */}
-      <section style={{ background: '#FFFFFF', padding: 'clamp(64px,6vw,88px) clamp(16px,5%,80px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
-          <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <span className="sec-label" style={{ color: GOLD_DIM }}>EVENTS & TOURNAMENTS</span>
-                <h2 style={{ fontSize: 'clamp(24px, 3.3vw, 42px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.04em' }}>مسابقات پیش رو</h2>
-              </div>
-              <Link href="/events" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '15px', fontWeight: 600, transition: 'color 0.25s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD_D; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_M; }}>
-                همه رویدادها <ArrowLeft size={13} />
-              </Link>
-            </div>
-          </SR>
-          <SR delay={80}>
-            <div style={{ position: 'relative', borderRadius: '22px', overflow: 'hidden', height: 'clamp(220px,35vw,320px)' }}>
-              <img src={IMG.snooker2} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.36) saturate(0.58)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right,rgba(6,3,1,0.97) 0%,rgba(6,3,1,0.50) 55%,rgba(6,3,1,0.08) 100%)' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 clamp(20px,4vw,44px)' }}>
-                <div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.10)', border: `1px solid ${GOLD_BOR}`, borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>
-                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse2 1.8s infinite' }} />
-                    <Trophy size={10} style={{ color: GOLD }} />
-                    <span style={{ fontSize: '9px', color: GOLD, fontWeight: 700, letterSpacing: '0.24em' }}>FEATURED TOURNAMENT</span>
-                  </div>
-                  <h3 style={{ fontSize: 'clamp(15px, 2.6vw, 29px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>مسابقات سراسری اسنوکر ایران ۱۴۰۴</h3>
-                  <p style={{ fontSize: 'clamp(12px, 1.4vw, 14px)', color: 'rgba(255,255,255,0.35)', marginBottom: '20px' }}>۶۴ بازیکن · جایزه ۵۰ میلیون تومانی · تهران · ۱۵ خرداد</p>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <Link href="/events/1"><button className="btn-primary" style={{ padding: '11px 22px', fontSize: '15px' }}>ثبت‌نام</button></Link>
-                    <Link href="/events"><button className="btn-ghost-dark" style={{ padding: '11px 18px', fontSize: '15px' }}>همه رویدادها</button></Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </SR>
-        </div>
-      </section>
-
-      {/* §7 NEWS ════════════════════════════════════════════════ */}
-      <section style={{ background: '#F2F0EC', padding: 'clamp(64px,6vw,88px) clamp(16px,5%,80px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
-          <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <span className="sec-label" style={{ color: 'rgba(107,30,58,0.70)' }}>LATEST NEWS</span>
-                <h2 style={{ fontSize: 'clamp(24px, 3.3vw, 42px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.04em' }}>آخرین اخبار</h2>
-              </div>
-              <Link href="/news" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: TEXT_M, fontSize: '15px', fontWeight: 600 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#6B1E3A'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_M; }}>
-                همه اخبار <ArrowLeft size={13} />
-              </Link>
-            </div>
-          </SR>
-          <div className="news-grid" style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '16px' }}>
-            {NEWS[0] && (
-              <SR direction="left">
-                <Link href={`/news/${NEWS[0].id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(260px,38vw,390px)' }}>
-                  <div className="news-img" style={{ position: 'relative', height: '100%', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(26,25,23,0.08)' }}>
-                    <img src={NEWS[0].img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 22%,rgba(6,3,1,0.96) 100%)' }} />
-                    <div style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', color: NEWS[0].clr, background: `${NEWS[0].clr}16`, border: `1px solid ${NEWS[0].clr}28` }}>{NEWS[0].cat}</div>
-                    <div style={{ position: 'absolute', bottom: '24px', right: '22px', left: '22px' }}>
-                      <h3 style={{ fontSize: 'clamp(14px, 1.9vw, 20px)', fontWeight: 800, color: '#fff', marginBottom: '12px', lineHeight: 1.48 }}>{NEWS[0].title}</h3>
-                      <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'rgba(255,255,255,0.32)' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={9} />{NEWS[0].date}</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Eye size={9} />{NEWS[0].views.toLocaleString('fa-IR')}</span>
-                      </div>
+                    <div style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', color: svc.color, fontSize: '12px', fontWeight: 700 }}>
+                      درخواست خدمت <ArrowLeft size={10} />
                     </div>
                   </div>
-                </Link>
-              </SR>
-            )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {NEWS.slice(1).map((n, i) => (
-                <SR key={n.id} delay={i * 80} direction="right">
-                  <Link href={`/news/${n.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                    <div className="news-img" style={{ position: 'relative', height: 'clamp(120px,17vw,187px)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(26,25,23,0.07)' }}>
-                      <img src={n.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 22%,rgba(6,3,1,0.94) 100%)' }} />
-                      <div style={{ position: 'absolute', top: '11px', right: '11px', fontSize: '9px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', color: n.clr, background: `${n.clr}16`, border: `1px solid ${n.clr}26` }}>{n.cat}</div>
-                      <div style={{ position: 'absolute', bottom: '14px', right: '14px', left: '14px' }}>
-                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1.52, marginBottom: '7px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.title}</div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '10px', color: 'rgba(255,255,255,0.28)' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Clock size={8} />{n.date}</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Eye size={8} />{n.views.toLocaleString('fa-IR')}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
                 </SR>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* §8 FINAL CTA ═══════════════════════════════════════════ */}
-      <section style={{ padding: '0 clamp(16px,5%,80px) clamp(64px,6vw,88px)', background: '#F2F0EC' }}>
-        <SR>
-          <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
-            <div style={{ position: 'relative', borderRadius: '32px', overflow: 'hidden', padding: 'clamp(56px,7vw,96px) clamp(24px,4vw,64px)', textAlign: 'center', background: '#1A1917' }}>
-              <img src={IMG.table} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.06 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '700px', height: '500px', background: `radial-gradient(ellipse,rgba(199,166,106,0.07),transparent 68%)`, filter: 'blur(20px)', pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '240px', height: '1px', background: `linear-gradient(90deg,transparent,${GOLD}58,transparent)`, boxShadow: `0 0 24px ${GOLD}38` }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '9px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, borderRadius: '100px', padding: '7px 20px', marginBottom: '24px' }}>
-                  <CheckCircle size={11} style={{ color: GOLD }} />
-                  <span style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700 }}>JOIN FREE TODAY</span>
-                </div>
-                <h2 style={{ fontSize: 'clamp(31px, 5.3vw, 66px)', fontWeight: 900, color: '#fff', marginBottom: '16px', letterSpacing: '-0.055em', lineHeight: 0.94 }}>همین الان شروع کن</h2>
-                <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '17px', lineHeight: 1.88, maxWidth: '380px', margin: '0 auto 44px' }}>باشگاه پیدا کن · تجهیزات بخر · به جامعه بپیوند</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <Link href="/register"><button className="btn-primary" style={{ padding: '16px 44px', fontSize: '17px' }}>ثبت‌نام رایگان</button></Link>
-                  <Link href="/clubs"><button className="btn-ghost-dark" style={{ padding: '16px 36px', fontSize: '17px' }}><Building2 size={15} /> یافتن باشگاه</button></Link>
-                </div>
+      {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
+      <div style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>
+        {BANNER_SLIDES.map((slide, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute', inset: 0,
+              opacity: i === activeBanner ? 1 : 0,
+              transition: 'opacity 0.85s cubic-bezier(0.4,0,0.2,1)',
+              pointerEvents: i === activeBanner ? 'auto' : 'none',
+            }}
+          >
+            <img src={slide.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === activeBanner ? 'scale(1.03)' : 'scale(1)', transition: 'transform 5s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 clamp(20px,5%,80px)' }}>
+              <div style={{ maxWidth: '420px', textAlign: 'right' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: slide.accent, letterSpacing: '0.22em', marginBottom: '10px', opacity: 0.9 }}>BILLIARD PLUS</div>
+                <h3 style={{ fontSize: 'clamp(22px,3.2vw,42px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '10px' }}>{slide.title}</h3>
+                <p style={{ fontSize: 'clamp(13px,1.4vw,17px)', color: 'rgba(255,255,255,0.65)', marginBottom: '22px', lineHeight: 1.6 }}>{slide.sub}</p>
+                <Link href={slide.link} style={{ textDecoration: 'none' }}>
+                  <button style={{ background: slide.accent, color: slide.accent === GOLD ? '#1a1a1a' : '#fff', border: 'none', borderRadius: '100px', padding: '11px 28px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {slide.cta} <ArrowLeft size={12} />
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
-        </SR>
-      </section>
+        ))}
+        {/* Dots */}
+        <div style={{ position: 'absolute', bottom: '18px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
+          {BANNER_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => { setActiveBanner(i); startBannerTimer(); }}
+              style={{ width: i === activeBanner ? '22px' : '7px', height: '7px', borderRadius: '4px', border: 'none', cursor: 'pointer', padding: 0, background: i === activeBanner ? '#fff' : 'rgba(255,255,255,0.35)', transition: 'all 0.3s ease' }} />
+          ))}
+        </div>
+        {/* Arrow prev/next */}
+        <button onClick={() => { setActiveBanner(p => (p - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length); startBannerTimer(); }}
+          style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          <ArrowRight size={16} />
+        </button>
+        <button onClick={() => { setActiveBanner(p => (p + 1) % BANNER_SLIDES.length); startBannerTimer(); }}
+          style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          <ArrowLeft size={16} />
+        </button>
+      </div>
 
     </>
   );
