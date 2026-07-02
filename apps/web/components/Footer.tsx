@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD    = '#C7A66A';
@@ -172,13 +171,10 @@ export default function Footer() {
           <div className="ft-brand">
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-              <Image
+              <img
                 src="/images/Logo/logo1.png"
                 alt="بیلیارد هاب"
-                width={52}
-                height={52}
-                style={{ objectFit: 'contain', flexShrink: 0, borderRadius: '12px' }}
-                priority
+                style={{ width: '52px', height: '52px', objectFit: 'contain', flexShrink: 0, borderRadius: '12px' }}
               />
               <div>
                 <div style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
