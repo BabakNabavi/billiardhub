@@ -1127,6 +1127,7 @@ useEffect(() => {
           .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .svc-section { padding-left:14px !important; padding-right:14px !important; }
           .banner-slider { height:200px !important; margin-top:40px !important; margin-bottom:40px !important; }
+          .stats-grid { grid-template-columns:1fr 1fr !important; gap:1px !important; }
         }
       `}</style>
 
@@ -1585,8 +1586,29 @@ useEffect(() => {
         </div>
       </section>
 
+      {/* §5 STATS STRIP ═══════════════════════════════════════ */}
+      <section style={{ background: 'linear-gradient(180deg,#091422 0%,#070C14 100%)', padding: 'clamp(40px,4vw,60px) clamp(16px,5%,80px)' }}>
+        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1px', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', overflow: 'hidden' }}>
+            {[
+              { num: '۱,۲۰۰+', label: 'باشگاه فعال', sub: 'در سراسر ایران', color: '#C7A66A' },
+              { num: '۸۵,۰۰۰+', label: 'عضو فعال', sub: 'بازیکن و مربی', color: '#4A9EFF' },
+              { num: '۳۵۰+', label: 'فروشنده', sub: 'تجهیزات تخصصی', color: '#30C55A' },
+              { num: '۴۵۰+', label: 'مسابقه', sub: 'برگزار شده', color: '#B97BFF' },
+            ].map((stat, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: 'clamp(24px,3vw,40px) clamp(16px,2vw,28px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 0%, ${stat.color}12, transparent 70%)`, pointerEvents: 'none' }} />
+                <div style={{ fontSize: 'clamp(28px,3.5vw,46px)', fontWeight: 900, color: stat.color, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '8px' }}>{stat.num}</div>
+                <div style={{ fontSize: 'clamp(13px,1.2vw,16px)', fontWeight: 700, color: 'rgba(255,255,255,0.82)', marginBottom: '4px' }}>{stat.label}</div>
+                <div style={{ fontSize: 'clamp(10px,0.9vw,12px)', color: 'rgba(255,255,255,0.32)' }}>{stat.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
-      <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111', margin: 'clamp(48px,5vw,72px) 0' }}>
+      <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>
         {BANNER_SLIDES.map((slide, i) => (
           <div
             key={i}
@@ -1630,6 +1652,23 @@ useEffect(() => {
           <ArrowLeft size={16} />
         </button>
       </div>
+
+      {/* §6 CTA ═════════════════════════════════════════════════ */}
+      <section style={{ background: '#F2F0EC', padding: 'clamp(52px,5.5vw,80px) clamp(16px,5%,80px)' }}>
+        <div style={{ maxWidth: '920px', margin: '0 auto', textAlign: 'center' }}>
+          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.32em', color: 'rgba(199,166,106,0.8)', display: 'block', marginBottom: '16px' }}>JOIN THE COMMUNITY</span>
+          <h2 style={{ fontSize: 'clamp(28px,4.5vw,58px)', fontWeight: 900, color: '#1A1917', letterSpacing: '-0.048em', lineHeight: 0.96, marginBottom: '16px' }}>همین حالا بخشی از<br/>بزرگ‌ترین خانواده بیلیارد ایران شو</h2>
+          <p style={{ fontSize: 'clamp(14px,1.4vw,18px)', color: 'rgba(26,25,23,0.48)', lineHeight: 1.7, maxWidth: '560px', margin: '0 auto 32px' }}>بیلیارد هاب، اکوسیستم جامعی برای بازیکنان، مربیان، باشگاه‌داران، فروشندگان و تمام دوستداران ورزش بیلیارد</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#C7A66A', color: '#1a1a1a', fontWeight: 800, fontSize: '15px', padding: '14px 28px', borderRadius: '100px', boxShadow: '0 8px 32px rgba(199,166,106,0.38)' }}>
+              ثبت‌نام رایگان <ArrowLeft size={14} />
+            </Link>
+            <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'transparent', color: '#1A1917', fontWeight: 700, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1.5px solid rgba(26,25,23,0.18)' }}>
+              مشاهده باشگاه‌ها <ArrowLeft size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </>
   );
