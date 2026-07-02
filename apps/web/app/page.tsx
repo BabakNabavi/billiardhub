@@ -475,7 +475,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
         )}
       </div>
       {/* Info */}
-      <div style={{ padding: '2px 14px 16px', textAlign: 'center' }}>
+      <div style={{ padding: '14px 14px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: '14px', fontWeight: 800, color: TEXT, lineHeight: 1.3 }}>{s.name}</div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginTop: '3px', fontSize: '11px', color: TEXT_M }}>
           <MapPin size={9} style={{ color: GOLD }} />{s.city}
