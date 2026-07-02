@@ -286,7 +286,7 @@ export default function Navbar() {
                                 const el = e.currentTarget as HTMLElement;
                                 el.style.background = 'rgba(255,255,255,0.75)';
                                 el.style.backdropFilter = 'blur(16px)';
-                                el.style.WebkitBackdropFilter = 'blur(16px)';
+                                (el.style as any).WebkitBackdropFilter = 'blur(16px)';
                                 el.style.boxShadow = `0 4px 20px rgba(0,0,0,0.07), 0 0 0 1px rgba(255,255,255,0.85) inset, 0 8px 24px ${colColor}18`;
                                 el.style.borderColor = `rgba(255,255,255,0.6)`;
                                 el.style.transform = 'translateY(-1px)';
@@ -295,7 +295,7 @@ export default function Navbar() {
                                 const el = e.currentTarget as HTMLElement;
                                 el.style.background = 'transparent';
                                 el.style.backdropFilter = 'none';
-                                el.style.WebkitBackdropFilter = 'none';
+                                (el.style as any).WebkitBackdropFilter = 'none';
                                 el.style.boxShadow = 'none';
                                 el.style.borderColor = 'transparent';
                                 el.style.transform = 'none';
