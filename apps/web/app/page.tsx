@@ -1165,8 +1165,13 @@ useEffect(() => {
           .banner-cta-btn { font-size:11px !important; padding:7px 16px !important; gap:4px !important; }
           .stats-grid { grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
           .cta-split  { grid-template-columns:1fr !important; }
-          .cta-float-area { height:300px !important; }
+          .cta-float-area { height:300px !important; overflow:visible !important; }
           .cta-float-area > div { zoom:0.62 !important; }
+          .cta-card-1 { top:-71% !important; left:8% !important; bottom:auto !important; right:auto !important; }
+          .cta-card-2 { top:-15% !important; left:10% !important; bottom:auto !important; right:auto !important; }
+          .cta-card-3 { top:31% !important; left:43% !important; bottom:auto !important; right:auto !important; }
+          .cta-card-4 { display:none !important; }
+          .cta-card-5 { top:68% !important; left:27% !important; bottom:auto !important; right:auto !important; }
         }
         @media(max-width:900px){
           .stats-grid { grid-template-columns:repeat(4,1fr) !important; gap:10px !important; }
