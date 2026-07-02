@@ -584,7 +584,7 @@ export default function HomePage() {
   const mktDeskRef   = useRef<HTMLDivElement>(null);
   const mktDragRef   = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const mktPausedRef = useRef(false);
-  const mktRafRef    = useRef<number | null>(null);
+  const mktTickerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const el = mktDeskRef.current;
@@ -598,10 +598,10 @@ export default function HomePage() {
         if (el.scrollLeft >= half) el.scrollLeft -= half;
       }
       last = t;
-      mktRafRef.current = requestAnimationFrame(tick);
+      mktTickerRef.current = requestAnimationFrame(tick);
     };
-    mktRafRef.current = requestAnimationFrame(tick);
-    return () => { if (mktRafRef.current) cancelAnimationFrame(mktRafRef.current); };
+    mktTickerRef.current = requestAnimationFrame(tick);
+    return () => { if (mktTickerRef.current) cancelAnimationFrame(mktTickerRef.current); };
   }, []);
 
   const onMktMouseDown = (e: React.MouseEvent) => {
