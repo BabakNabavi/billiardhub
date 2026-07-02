@@ -518,17 +518,38 @@ export default function Navbar() {
 
           {/* Navigation section */}
           <div style={{ padding: '0 16px 8px' }}>
-            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.28em', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '12px', paddingRight: '4px' }}>ناوبری</span>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
               {mobileLinks.map((item, i) => (
                 <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', borderRadius: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', textDecoration: 'none', position: 'relative', transition: 'background 0.15s, border-color 0.15s' }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = `${item.color}18`; el.style.borderColor = `${item.color}30`; }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.04)'; el.style.borderColor = 'rgba(255,255,255,0.07)'; }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${item.color}18`, border: `1px solid ${item.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                    padding: '14px 8px', borderRadius: '16px',
+                    background: 'rgba(255,255,255,0.06)',
+                    backdropFilter: 'blur(32px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+                    border: '1px solid rgba(255,255,255,0.10)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 18px rgba(0,0,0,0.18)',
+                    textDecoration: 'none', position: 'relative', overflow: 'hidden',
+                    transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.background = `${item.color}20`;
+                    el.style.borderColor = `${item.color}40`;
+                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.18), 0 0 22px ${item.color}38, 0 4px 18px rgba(0,0,0,0.22)`;
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.background = 'rgba(255,255,255,0.06)';
+                    el.style.borderColor = 'rgba(255,255,255,0.10)';
+                    el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 18px rgba(0,0,0,0.18)';
+                  }}>
+                  {/* top sheen */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0) 100%)', pointerEvents: 'none' }} />
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${item.color}18`, border: `1px solid ${item.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0, boxShadow: `0 0 12px ${item.color}28` }}>
                     {item.icon}
                   </div>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.72)', textAlign: 'center', lineHeight: 1.3 }}>{item.label}</span>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.75)', textAlign: 'center', lineHeight: 1.3 }}>{item.label}</span>
                   {item.live && (
                     <span style={{ position: 'absolute', top: '6px', left: '6px', fontSize: '9px', color: '#ef4444', background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '20px', padding: '1px 6px', fontWeight: 700 }}>LIVE</span>
                   )}
@@ -540,8 +561,8 @@ export default function Navbar() {
           {/* Bottom promo */}
           <div style={{ margin: '20px', padding: '18px 20px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: GOLD, letterSpacing: '0.04em' }}>بیلیارد هاب</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>اکوسیستم جامع بیلیارد ایران</div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.80)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
             </div>
             <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
               ثبت‌نام <ArrowLeft size={10} />
