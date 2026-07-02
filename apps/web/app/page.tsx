@@ -226,15 +226,6 @@ const BANNER_SLIDES = [
   { img:IMG.wall12, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
 ];
 
-const CTA_ITEMS = [
-  { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',    color: '#F472B6', rgb: '244,114,182' },
-  { Icon: Trophy,        label: 'مسابقات',         desc: 'تورنمنت‌های بیلیارد',  color: '#4A9EFF', rgb: '74,158,255'  },
-  { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',    color: '#C7A66A', rgb: '199,166,106' },
-  { Icon: Eye,           label: 'آموزش',           desc: 'ویدیوهای آموزشی',       color: '#30C55A', rgb: '48,197,90'   },
-  { Icon: Star,          label: 'رنکینگ',          desc: 'جدول رتبه‌بندی ملی',   color: '#B97BFF', rgb: '185,123,255' },
-  { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',         color: '#ef4444', rgb: '239,68,68'   },
-  { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',      color: '#06b6d4', rgb: '6,182,212'   },
-];
 
 const NEWS = [
   { id:'1', title:'برگزاری اولین مسابقات بین‌المللی بیلیارد در تهران', date:'۵ خرداد', views:2341, cat:'مسابقات', clr:'#1A6641', img:IMG.snooker2 },
@@ -829,29 +820,6 @@ export default function HomePage() {
   };
   useEffect(() => { startBannerTimer(); return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); }; }, []);
 
-  // ── CTA rotating cards — independent staggered cycles ──
-  const [ctaIdxs, setCtaIdxs] = useState<[number,number,number,number,number]>([1, 0, 6, 3, 5]);
-  const [ctaVis,  setCtaVis]  = useState<[boolean,boolean,boolean,boolean,boolean]>([true, true, true, true, true]);
-  useEffect(() => {
-    const cycle = (pos: 0|1|2|3|4) => {
-      setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean,boolean,boolean]; v[pos] = false; return v; });
-      setTimeout(() => {
-        setCtaIdxs(p => {
-          const opts = Array.from({length: CTA_ITEMS.length}, (_,i) => i).filter(x => x !== p[0] && x !== p[1] && x !== p[2] && x !== p[3] && x !== p[4]);
-          const next = opts.length ? opts[Math.floor(Math.random() * opts.length)]! : p[pos];
-          const u = [...p] as [number,number,number,number,number]; u[pos] = next; return u;
-        });
-        setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean,boolean,boolean]; v[pos] = true; return v; });
-      }, 550);
-    };
-    const timers: ReturnType<typeof setInterval>[] = [];
-    timers.push(setInterval(() => cycle(0), 2000));
-    const d1 = setTimeout(() => { timers.push(setInterval(() => cycle(1), 2000)); }, 700);
-    const d2 = setTimeout(() => { timers.push(setInterval(() => cycle(2), 2000)); }, 1400);
-    const d3 = setTimeout(() => { timers.push(setInterval(() => cycle(3), 2000)); }, 2100);
-    const d4 = setTimeout(() => { timers.push(setInterval(() => cycle(4), 2000)); }, 2800);
-    return () => { timers.forEach(clearInterval); clearTimeout(d1); clearTimeout(d2); clearTimeout(d3); clearTimeout(d4); };
-  }, []);
 
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
@@ -1174,23 +1142,10 @@ useEffect(() => {
           .banner-slider { height:200px !important; margin-top:0 !important; margin-bottom:0 !important; }
           .banner-cta-btn { font-size:11px !important; padding:7px 16px !important; gap:4px !important; }
           .stats-grid { grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
-          .cta-split  { grid-template-columns:1fr !important; }
-          .cta-float-area { height:300px !important; overflow:visible !important; }
-          .cta-float-area > div { zoom:0.62 !important; }
-          .cta-card-1 { top:-71% !important; left:8% !important; bottom:auto !important; right:auto !important; }
-          .cta-card-2 { top:-15% !important; left:10% !important; bottom:auto !important; right:auto !important; }
-          .cta-card-3 { top:31% !important; left:43% !important; bottom:auto !important; right:auto !important; }
-          .cta-card-4 { display:none !important; }
-          .cta-card-5 { top:68% !important; left:27% !important; bottom:auto !important; right:auto !important; }
         }
         @media(max-width:900px){
           .stats-grid { grid-template-columns:repeat(4,1fr) !important; gap:10px !important; }
         }
-        @keyframes ctaFloat1 { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-14px) rotate(-1.5deg)} }
-        @keyframes ctaFloat2 { 0%,100%{transform:translateY(0) rotate(2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
-        @keyframes ctaFloat3 { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-16px) rotate(-1deg)} }
-        @keyframes ctaFloat4 { 0%,100%{transform:translateY(0) rotate(1.5deg)} 50%{transform:translateY(-12px) rotate(1.5deg)} }
-        @keyframes ctaFloat5 { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-13px) rotate(-2deg)} }
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
@@ -1756,118 +1711,6 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* §6 CTA ═════════════════════════════════════════════════ */}
-      <section style={{ position: 'relative', background: '#FFFFFF', padding: 'clamp(60px,6vw,100px) clamp(16px,5%,80px)', overflow: 'hidden' }}>
-        {/* BG glow orbs */}
-        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.14) 0%,transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(74,158,255,0.10) 0%,transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '50%', left: '40%', width: '300px', height: '300px', borderRadius: '50%', transform: 'translateY(-50%)', background: 'radial-gradient(circle,rgba(185,123,255,0.08) 0%,transparent 65%)', pointerEvents: 'none' }} />
-
-        <div className="cta-inner" style={{ maxWidth: '1340px', margin: '0 auto' }}>
-          <div className="cta-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(40px,5vw,80px)', alignItems: 'center' }}>
-
-            {/* Right — text + CTA (RTL leading side) */}
-            <div className="cta-right">
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: '100px', padding: '5px 16px', marginBottom: '24px' }}>
-                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C7A66A', boxShadow: '0 0 7px #C7A66A' }} />
-                <span style={{ fontSize: '10px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARD HUB</span>
-              </div>
-              <h2 className="cta-heading" style={{ fontSize: 'clamp(30px,4.5vw,62px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.048em', lineHeight: 0.96, marginBottom: '20px' }}>
-                بیلیارد هاب را<br />
-                <span style={{ background: 'linear-gradient(135deg,#C7A66A 0%,#A07840 40%,#C7A66A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>همین حالا</span><br />
-                تجربه کن
-              </h2>
-              <p style={{ fontSize: 'clamp(14px,1.3vw,17px)', lineHeight: 1.85, marginBottom: '32px', maxWidth: '420px' }}>
-                با{' '}
-                <span style={{ color: TEXT, fontWeight: 800 }}>بیلیارد</span>{' '}
-                <span style={{ color: GOLD, fontWeight: 800 }}>هاب</span>
-                <br />
-                <span style={{ color: 'rgba(26,25,23,0.52)' }}>به جمع هزاران عاشق بیلیارد بپیوندید</span>
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.13)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', color: GOLD, fontWeight: 700, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', border: '1px solid rgba(199,166,106,0.40)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.80), 0 6px 24px rgba(199,166,106,0.20)' }}>
-                  ثبت نام <ArrowLeft size={13} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Left — floating glass cards */}
-            <div className="cta-float-area" style={{ position: 'relative', height: '420px' }}>
-              {/* Card 1 — top-left */}
-              {(() => { const it = CTA_ITEMS[ctaIdxs[0]]!; return (
-              <div className="cta-card-1" style={{ position: 'absolute', top: '4%', left: '2%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '190px', animation: 'ctaFloat1 4.2s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ opacity: ctaVis[0] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <it.Icon size={17} color={it.color} />
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
-                </div>
-              </div>
-              ); })()}
-              {/* Card 2 — top-right */}
-              {(() => { const it = CTA_ITEMS[ctaIdxs[1]]!; return (
-              <div className="cta-card-2" style={{ position: 'absolute', top: '12%', right: '3%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '185px', animation: 'ctaFloat2 5.1s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ opacity: ctaVis[1] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <it.Icon size={17} color={it.color} />
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
-                </div>
-              </div>
-              ); })()}
-              {/* Card 3 — center */}
-              {(() => { const it = CTA_ITEMS[ctaIdxs[2]]!; return (
-              <div className="cta-card-3" style={{ position: 'absolute', top: '36%', left: '30%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '178px', animation: 'ctaFloat3 3.7s ease-in-out infinite', boxShadow: '0 20px 44px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ opacity: ctaVis[2] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <it.Icon size={17} color={it.color} />
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
-                </div>
-              </div>
-              ); })()}
-              {/* Card 4 — lower-left */}
-              {(() => { const it = CTA_ITEMS[ctaIdxs[3]]!; return (
-              <div className="cta-card-4" style={{ position: 'absolute', top: '62%', left: '3%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '182px', animation: 'ctaFloat4 4.6s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ opacity: ctaVis[3] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <it.Icon size={17} color={it.color} />
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
-                </div>
-              </div>
-              ); })()}
-              {/* Card 5 — lower-right */}
-              {(() => { const it = CTA_ITEMS[ctaIdxs[4]]!; return (
-              <div className="cta-card-5" style={{ position: 'absolute', top: '68%', left: '52%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '188px', animation: 'ctaFloat5 4.9s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ opacity: ctaVis[4] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <it.Icon size={17} color={it.color} />
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
-                </div>
-              </div>
-              ); })()}
-            </div>
-
-          </div>
-        </div>
-      </section>
 
     </>
   );
