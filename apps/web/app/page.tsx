@@ -1183,7 +1183,7 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="mkt-split" style={{ display: 'flex', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 0 12px' }}>
+          <div className="mkt-split" style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 0 12px' }}>
             {PRODUCTS.map((p, i) => (
               <div key={p.id} style={{ flex: '0 0 calc((100% - 70px) / 6)', minWidth: '150px' }}>
                 <SR delay={i * 40}><ProductCard p={p} h="clamp(240px,22vw,320px)" /></SR>
