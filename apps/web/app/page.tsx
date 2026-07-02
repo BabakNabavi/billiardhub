@@ -461,19 +461,13 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
         cursor: 'pointer',
       }}
     >
-      {/* Image area */}
-      <div style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
+      {/* Image area — curved bottom via border-radius clip */}
+      <div style={{ position: 'relative', height: '185px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
         <img src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         {/* gradient overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.22) 100%)' }} />
-        {/* arch cutout at bottom — white ellipse overlapping info area */}
-        <div style={{
-          position: 'absolute', bottom: '-1px', left: '-10%',
-          width: '120%', height: '44px',
-          background: '#fff', borderRadius: '50% 50% 0 0',
-        }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.28) 100%)' }} />
         {s.badge && (
           <div style={{ position: 'absolute', top: '10px', right: '10px', background: GOLD, color: '#1a1a1a', fontSize: '9px', fontWeight: 800, padding: '3px 10px', borderRadius: '20px', letterSpacing: '0.05em' }}>
             {s.badge}
@@ -1091,10 +1085,11 @@ useEffect(() => {
         @media(max-width:600px){
           .sellers-desk { display:none !important; }
           .sellers-mob  { display:flex !important; }
-          .services-grid { grid-template-columns:1fr 1fr !important; gap:12px !important; }
+          .services-grid { grid-template-columns:repeat(3,1fr) !important; gap:10px !important; }
           .sellers-section { padding-left:0 !important; padding-right:0 !important; }
           .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
           .svc-section { padding-left:14px !important; padding-right:14px !important; }
+          .banner-slider { height:200px !important; margin-bottom:40px !important; }
         }
       `}</style>
 
@@ -1317,10 +1312,10 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های منتخب</h2>
@@ -1363,7 +1358,7 @@ useEffect(() => {
       <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
@@ -1443,12 +1438,6 @@ useEffect(() => {
               <div key={i} style={{ height: '5px', width: i === activeMkt ? '18px' : '5px', borderRadius: '3px', background: i === activeMkt ? GOLD : 'rgba(26,25,23,0.22)', transition: 'all 0.3s ease' }} />
             ))}
           </div>
-          <SR delay={180}>
-            <div className="mkt-desk-btns" style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '38px', flexWrap: 'wrap' }}>
-              <Link href="/shop"><button className="btn-primary"><ShoppingBag size={14} /> ورود به بازار</button></Link>
-              <Link href="/sellers"><button className="btn-outline">فروش تجهیزات</button></Link>
-            </div>
-          </SR>
         </div>
       </section>
 
@@ -1456,10 +1445,11 @@ useEffect(() => {
       <section className="sellers-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: GOLD, letterSpacing: '0.24em', marginBottom: '8px' }}>SELECTED SELLERS</div>
-                <h2 style={{ fontSize: 'clamp(22px,2.8vw,38px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 0.96 }}>فروشندگان منتخب</h2>
+                <span className="sec-label" style={{ color: `${GOLD}CC` }}>SELECTED SELLERS</span>
+                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان منتخب</h2>
+                <div className="sec-rule" style={{ color: GOLD }} />
               </div>
               <Link href="/sellers" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
                 مشاهده همه <ArrowLeft size={12} />
@@ -1497,10 +1487,11 @@ useEffect(() => {
       <section className="svc-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: GOLD, letterSpacing: '0.24em', marginBottom: '8px' }}>TECHNICAL SERVICES</div>
-                <h2 style={{ fontSize: 'clamp(22px,2.8vw,38px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 0.96 }}>خدمات فنی و تخصصی</h2>
+                <span className="sec-label" style={{ color: `${BLU}CC` }}>TECHNICAL SERVICES</span>
+                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات فنی و تخصصی</h2>
+                <div className="sec-rule" style={{ color: BLU }} />
               </div>
               <Link href="/services" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
                 مشاهده همه <ArrowLeft size={12} />
@@ -1543,7 +1534,7 @@ useEffect(() => {
       </section>
 
       {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
-      <div style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>
+      <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>
         {BANNER_SLIDES.map((slide, i) => (
           <div
             key={i}
