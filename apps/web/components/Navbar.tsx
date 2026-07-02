@@ -283,7 +283,7 @@ export default function Navbar() {
                             <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
                               style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'filter 0.28s ease', border: 'none' }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.filter = `drop-shadow(0 0 8px ${colColor}AA) drop-shadow(0 0 20px ${colColor}55)`;
+                                (e.currentTarget as HTMLElement).style.filter = `drop-shadow(0 0 14px ${colColor}EE) drop-shadow(0 0 38px ${colColor}99) drop-shadow(0 0 66px ${colColor}55)`;
                               }}
                               onMouseLeave={e => {
                                 (e.currentTarget as HTMLElement).style.filter = 'none';
