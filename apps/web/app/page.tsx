@@ -194,9 +194,15 @@ const PRODUCTS = [
   { id:'7',  name:'Predator Revo',       sub:'شفت کربن',        img:IMG.cue,      brand:'PREDATOR', price:8500000,  sale:8500000,  pct:0  },
   { id:'8',  name:'Longoni Laser',       sub:'نگهدارنده حرفه‌ای', img:IMG.rest,   brand:'LONGONI',  price:1900000,  sale:1615000,  pct:15 },
   { id:'9',  name:'Silver Cup Chalk',    sub:'گچ نقره‌ای',      img:IMG.chalk,    brand:'SILVER',   price:420000,   sale:378000,   pct:10 },
-  { id:'10', name:'Predator BK Rush',    sub:'چوب بریک',        img:IMG.cue2,     brand:'PREDATOR', price:5400000,  sale:4320000,  pct:20 },
-  { id:'11', name:'Aramith Tournament',  sub:'ست توپ هی‌بال',   img:IMG.ball,     brand:'ARAMITH',  price:5800000,  sale:5800000,  pct:0  },
-  { id:'12', name:'Master Chalk Set',    sub:'بسته ۱۲ عددی',   img:IMG.chalk,    brand:'MASTER',   price:980000,   sale:784000,   pct:20 },
+  { id:'10', name:'Predator BK Rush',    sub:'چوب بریک',         img:IMG.cue2,  brand:'PREDATOR', price:5400000,  sale:4320000,  pct:20 },
+  { id:'11', name:'Aramith Tournament',  sub:'ست توپ هی‌بال',    img:IMG.ball,  brand:'ARAMITH',  price:5800000,  sale:5800000,  pct:0  },
+  { id:'12', name:'Master Chalk Set',    sub:'بسته ۱۲ عددی',    img:IMG.chalk, brand:'MASTER',   price:980000,   sale:784000,   pct:20 },
+  { id:'13', name:'Riley Club Supreme',  sub:'چوب کلوپ حرفه‌ای', img:IMG.cue,   brand:'RILEY',    price:7200000,  sale:6480000,  pct:10 },
+  { id:'14', name:'Aramith Crown',       sub:'ست توپ طلایی',    img:IMG.ball,  brand:'ARAMITH',  price:8900000,  sale:7120000,  pct:20 },
+  { id:'15', name:'Longoni Spyder',      sub:'نگهدارنده مکانیکی', img:IMG.rest, brand:'LONGONI',  price:3100000,  sale:3100000,  pct:0  },
+  { id:'16', name:'Predator 314-2',      sub:'شفت نسل دوم',     img:IMG.cue2,  brand:'PREDATOR', price:4800000,  sale:3840000,  pct:20 },
+  { id:'17', name:'Silver Cup Pro',      sub:'گچ ۵ ستاره',      img:IMG.chalk, brand:'SILVER',   price:560000,   sale:504000,   pct:10 },
+  { id:'18', name:'Aramith Snooker Set', sub:'ست کامل اسنوکر',  img:IMG.ball,  brand:'ARAMITH',  price:11500000, sale:9775000,  pct:15 },
 ];
 
 const NEWS = [
@@ -1175,24 +1181,22 @@ useEffect(() => {
           {/* ── Ad banners ── */}
           <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
             <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48)' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, transparent 0%, rgba(0,0,0,0.72) 55%)' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px' }}>
-                <div>
-                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '5px' }}>ویژه تابستان ۱۴۰۴</div>
-                  <div style={{ fontSize: 'clamp(16px,1.6vw,22px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: '10px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '5px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
+              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ویژه تابستان ۱۴۰۴</div>
+                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
                 </div>
               </div>
             </Link>
             <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48)' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, transparent 0%, rgba(0,0,0,0.72) 55%)' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px' }}>
-                <div>
-                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '5px' }}>ارسال رایگان</div>
-                  <div style={{ fontSize: 'clamp(16px,1.6vw,22px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: '10px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '5px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
+              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ارسال رایگان</div>
+                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
                 </div>
               </div>
             </Link>
