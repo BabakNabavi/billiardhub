@@ -402,8 +402,8 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
             willChange: 'transform',
           }}>
           <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', background: '#111' }}>
-            <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)', transition: 'transform 0.6s ease', transform: hov ? 'scale(1.06)' : 'scale(1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.70) 100%)' }} />
+            <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease', transform: hov ? 'scale(1.06)' : 'scale(1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 55%,rgba(8,4,1,0.30) 100%)' }} />
             <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{p.brand}</div>
           </div>
           <div style={{ flex: '0 0 40%', background: '#fff', padding: '16px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', textAlign: 'center' }}>
@@ -1217,8 +1217,8 @@ useEffect(() => {
                     boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
                   }}>
                     <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
-                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.60)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(8,4,1,0.65) 100%)' }} />
+                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 55%,rgba(8,4,1,0.30) 100%)' }} />
                       <div style={{ position: 'absolute', bottom: '6px', left: '7px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
                     </div>
                     <div style={{ flex: '0 0 38%', background: '#fff', padding: '8px 8px 7px',
