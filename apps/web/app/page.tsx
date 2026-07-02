@@ -7,6 +7,7 @@ import {
   MapPin, Star, Heart, Trophy, Users,
   ShoppingBag, Building2, Wrench, GraduationCap,
   Clock, Eye, CheckCircle, X, Calendar,
+  Hammer, Scissors, Settings, Truck,
 } from 'lucide-react';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -208,11 +209,11 @@ const SELLERS = [
 ];
 
 const SERVICES_LIST = [
-  { id:'1', icon: Wrench,        title:'نصب میز',          desc:'نصب حرفه‌ای انواع میز بیلیارد، اسنوکر و پاکت در محل شما', color:'#C7A66A' },
-  { id:'2', icon: CheckCircle,   title:'تعمیر و بازسازی',  desc:'تعمیر تخصصی چوب، تعویض ضربه‌گیر و مقره با متریال اصل',    color:'#4A9EFF' },
-  { id:'3', icon: Users,         title:'کشیدن ابر میز',    desc:'تعویض ابر و روکش میز با پارچه‌های اصل اسنوکر و پاکت',     color:'#30C55A' },
-  { id:'4', icon: Star,          title:'تنظیم کوشن',       desc:'تنظیم و تعویض کوشن‌های حرفه‌ای برای انواع میزهای بیلیارد', color:'#B97BFF' },
-  { id:'5', icon: ShoppingBag,   title:'حمل و نقل',        desc:'جابجایی تخصصی تجهیزات بیلیارد با بیمه کامل بار',           color:'#FF6B9D' },
+  { id:'1', icon: Wrench,    title:'نصب میز',          desc:'نصب حرفه‌ای انواع میز بیلیارد، اسنوکر و پاکت در محل شما', color:'#C7A66A' },
+  { id:'2', icon: Hammer,    title:'تعمیر و بازسازی',  desc:'تعمیر تخصصی چوب، تعویض ضربه‌گیر و مقره با متریال اصل',    color:'#4A9EFF' },
+  { id:'3', icon: Scissors,  title:'کشیدن ابر میز',    desc:'تعویض ابر و روکش میز با پارچه‌های اصل اسنوکر و پاکت',     color:'#30C55A' },
+  { id:'4', icon: Settings,  title:'تنظیم کوشن',       desc:'تنظیم و تعویض کوشن‌های حرفه‌ای برای انواع میزهای بیلیارد', color:'#B97BFF' },
+  { id:'5', icon: Truck,     title:'حمل و نقل',        desc:'جابجایی تخصصی تجهیزات بیلیارد با بیمه کامل بار',           color:'#FF6B9D' },
   { id:'6', icon: GraduationCap, title:'آموزش نگهداری',   desc:'آموزش سرویس دوره‌ای و نگهداری صحیح از تجهیزات بیلیارد',   color:'#06b6d4' },
 ];
 
@@ -462,7 +463,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
       }}
     >
       {/* Image area — curved bottom via border-radius clip */}
-      <div style={{ position: 'relative', height: '167px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
+      <div style={{ position: 'relative', height: '159px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
         <img src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -702,13 +703,14 @@ export default function HomePage() {
   useEffect(() => {
     const el = mktDeskRef.current;
     if (!el) return;
-    const SPEED = 50; // px per second
+    const SPEED = 50;
+    el.scrollLeft = el.scrollWidth / 2;
     let last = 0;
     const tick = (t: number) => {
       if (last && !mktPausedRef.current) {
         const half = el.scrollWidth / 2;
-        el.scrollLeft += (SPEED * (t - last)) / 1000;
-        if (el.scrollLeft >= half) el.scrollLeft -= half;
+        el.scrollLeft -= (SPEED * (t - last)) / 1000;
+        if (el.scrollLeft <= 0) el.scrollLeft += half;
       }
       last = t;
       mktTickerRef.current = requestAnimationFrame(tick);
@@ -755,12 +757,13 @@ export default function HomePage() {
     const el = sellersRef.current;
     if (!el) return;
     const SPEED = 45;
+    el.scrollLeft = el.scrollWidth / 2;
     let last = 0;
     const tick = (t: number) => {
       if (last && !sellersPaused.current) {
         const half = el.scrollWidth / 2;
-        el.scrollLeft += (SPEED * (t - last)) / 1000;
-        if (el.scrollLeft >= half) el.scrollLeft -= half;
+        el.scrollLeft -= (SPEED * (t - last)) / 1000;
+        if (el.scrollLeft <= 0) el.scrollLeft += half;
       }
       last = t;
       sellersTickerR.current = requestAnimationFrame(tick);
@@ -1513,14 +1516,14 @@ useEffect(() => {
       </section>
 
       {/* §4 SERVICES ════════════════════════════════════════════ */}
-      <section className="svc-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="svc-section" style={{ background: 'linear-gradient(145deg, #08101E 0%, #0D1A2D 55%, #091422 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(40px,4vw,64px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '52px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
-                <span className="sec-label" style={{ color: `${BLU}CC` }}>TECHNICAL SERVICES</span>
-                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات فنی و تخصصی</h2>
-                <div className="sec-rule" style={{ color: BLU }} />
+                <span className="sec-label" style={{ color: 'rgba(199,166,106,0.70)' }}>TECHNICAL SERVICES</span>
+                <h2 className="sec-title" style={{ color: '#FFFFFF', fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات فنی و تخصصی</h2>
+                <div className="sec-rule" style={{ color: 'rgba(199,166,106,0.60)' }} />
               </div>
               <Link href="/services" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
                 مشاهده همه <ArrowLeft size={12} />
@@ -1534,26 +1537,44 @@ useEffect(() => {
               return (
                 <SR key={svc.id} delay={i * 60}>
                   <div style={{
-                    background: '#fff', borderRadius: '16px', padding: '28px 22px 24px',
-                    border: '1px solid rgba(0,0,0,0.08)',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-                    display: 'flex', flexDirection: 'column', gap: '14px',
-                    transition: 'transform 0.35s ease, box-shadow 0.35s ease',
+                    position: 'relative', overflow: 'hidden',
+                    background: 'rgba(255,255,255,0.04)',
+                    borderRadius: '20px', padding: 'clamp(20px,2vw,32px) clamp(16px,1.8vw,26px)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    display: 'flex', flexDirection: 'column', gap: '16px',
+                    transition: 'transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
                     cursor: 'pointer',
                   }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-5px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.14)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.06)'; }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.transform = 'translateY(-6px)';
+                      el.style.boxShadow = `0 24px 60px ${svc.color}30`;
+                      el.style.borderColor = `${svc.color}50`;
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.transform = 'none';
+                      el.style.boxShadow = 'none';
+                      el.style.borderColor = 'rgba(255,255,255,0.09)';
+                    }}
                   >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${svc.color}14`, border: `1px solid ${svc.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Icon size={22} style={{ color: svc.color }} />
+                    {/* decorative step number */}
+                    <div style={{ position: 'absolute', top: '-8px', left: '10px', fontSize: 'clamp(56px,6vw,80px)', fontWeight: 900, color: 'rgba(255,255,255,0.04)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none' }}>
+                      {String(i + 1).padStart(2, '0')}
                     </div>
-                    <div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: TEXT, marginBottom: '6px' }}>{svc.title}</div>
-                      <div style={{ fontSize: '13px', color: TEXT_M, lineHeight: 1.7 }}>{svc.desc}</div>
+                    {/* icon */}
+                    <div style={{ width: '54px', height: '54px', borderRadius: '16px', background: `linear-gradient(135deg, ${svc.color}35 0%, ${svc.color}10 100%)`, border: `1px solid ${svc.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon size={24} color={svc.color} />
                     </div>
-                    <div style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', color: svc.color, fontSize: '12px', fontWeight: 700 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 'clamp(13px,1.3vw,17px)', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px', letterSpacing: '-0.02em' }}>{svc.title}</div>
+                      <div style={{ fontSize: 'clamp(11px,1vw,13px)', color: 'rgba(255,255,255,0.52)', lineHeight: 1.75 }}>{svc.desc}</div>
+                    </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: svc.color, fontSize: '12px', fontWeight: 700 }}>
                       درخواست خدمت <ArrowLeft size={10} />
                     </div>
+                    {/* bottom accent */}
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, height: '2px', background: `linear-gradient(90deg, transparent, ${svc.color}60, transparent)` }} />
                   </div>
                 </SR>
               );
