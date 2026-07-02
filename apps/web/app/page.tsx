@@ -584,6 +584,22 @@ export default function HomePage() {
   const [activeMkt, setActiveMkt] = useState(0);
   const activeMktRef  = useRef(0);
 
+  const mktDeskRef   = useRef<HTMLDivElement>(null);
+  const mktDragRef   = useRef({ dragging: false, startX: 0, scrollLeft: 0 });
+  const onMktMouseDown = (e: React.MouseEvent) => {
+    mktDragRef.current = { dragging: true, startX: e.pageX, scrollLeft: mktDeskRef.current?.scrollLeft ?? 0 };
+    if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grabbing';
+  };
+  const onMktMouseMove = (e: React.MouseEvent) => {
+    if (!mktDragRef.current.dragging) return;
+    e.preventDefault();
+    if (mktDeskRef.current) mktDeskRef.current.scrollLeft = mktDragRef.current.scrollLeft - (e.pageX - mktDragRef.current.startX);
+  };
+  const onMktMouseUp = () => {
+    mktDragRef.current.dragging = false;
+    if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grab';
+  };
+
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return;
@@ -856,7 +872,7 @@ useEffect(() => {
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none !important; }
-        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 14px 16px; scroll-snap-type:x proximity; }
+        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-split::-webkit-scrollbar { display:none; }
         .mkt-banners { margin-bottom:8px; }
@@ -878,7 +894,7 @@ useEffect(() => {
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
           .mkt-split { display:none !important; }
-          .mkt-banners { grid-template-columns:1fr !important; margin:8px 14px 0 !important; }
+          .mkt-banners { grid-template-columns:1fr !important; margin:12px 14px 0 !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
         }
@@ -1162,35 +1178,20 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="mkt-split" style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'scroll', scrollbarWidth: 'thin', scrollbarColor: 'rgba(199,166,106,0.4) transparent', padding: '4px 0 16px' }}>
+          <div
+            ref={mktDeskRef}
+            className="mkt-split"
+            style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
+            onMouseDown={onMktMouseDown}
+            onMouseMove={onMktMouseMove}
+            onMouseUp={onMktMouseUp}
+            onMouseLeave={onMktMouseUp}
+          >
             {PRODUCTS.map((p) => (
               <div key={p.id} style={{ width: '200px', flexShrink: 0 }}>
                 <ProductCard p={p} h="280px" />
               </div>
             ))}
-          </div>
-          {/* ── Ad banners ── */}
-          <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
-            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ویژه تابستان ۱۴۰۴</div>
-                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
-                </div>
-              </div>
-            </Link>
-            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ارسال رایگان</div>
-                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
-                </div>
-              </div>
-            </Link>
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
@@ -1227,6 +1228,31 @@ useEffect(() => {
               </div>
             ))}
           </div>
+
+          {/* ── Ad banners ── */}
+          <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
+            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ویژه تابستان ۱۴۰۴</div>
+                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
+                </div>
+              </div>
+            </Link>
+            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ارسال رایگان</div>
+                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
+                </div>
+              </div>
+            </Link>
+          </div>
+
           <div className="mkt-dots">
             {PRODUCTS.map((_, i) => (
               <div key={i} style={{
