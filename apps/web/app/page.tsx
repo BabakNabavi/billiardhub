@@ -1129,8 +1129,8 @@ useEffect(() => {
           .banner-slider { height:200px !important; margin-top:40px !important; margin-bottom:40px !important; }
           .stats-grid { grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
           .cta-split  { grid-template-columns:1fr !important; }
-          .cta-float-area { display:none !important; }
-          .cta-mini-stats { flex-wrap:wrap !important; gap:16px !important; }
+          .cta-float-area { height:300px !important; }
+          .cta-float-area > div { transform:scale(0.82) !important; transform-origin:top center !important; }
         }
         @media(max-width:900px){
           .stats-grid { grid-template-columns:repeat(4,1fr) !important; gap:10px !important; }
@@ -1727,29 +1727,19 @@ useEffect(() => {
                 <span style={{ background: 'linear-gradient(135deg,#C7A66A 0%,#A07840 40%,#C7A66A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>همین حالا</span><br />
                 تجربه کن
               </h2>
-              <p style={{ fontSize: 'clamp(13px,1.3vw,16px)', color: 'rgba(26,25,23,0.50)', lineHeight: 1.85, marginBottom: '32px', maxWidth: '420px' }}>
-                اکوسیستم جامع بیلیارد ایران — از رزرو باشگاه تا خرید تجهیزات، آموزش، مسابقات و همه چیز در یک پلتفرم
+              <p style={{ fontSize: 'clamp(14px,1.3vw,17px)', lineHeight: 1.85, marginBottom: '32px', maxWidth: '420px' }}>
+                با{' '}
+                <span style={{ color: TEXT, fontWeight: 800 }}>بیلیارد</span>{' '}
+                <span style={{ color: GOLD, fontWeight: 800 }}>هاب</span>{' '}
+                <span style={{ color: 'rgba(26,25,23,0.52)' }}>به جمع هزاران عاشق بیلیارد بپیوندید</span>
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg,#C7A66A,#9A6F30)', color: '#1a1a1a', fontWeight: 800, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', boxShadow: '0 8px 36px rgba(199,166,106,0.30)' }}>
+                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.10)', color: GOLD, fontWeight: 700, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', border: '1px solid rgba(199,166,106,0.28)', boxShadow: '0 4px 20px rgba(199,166,106,0.14)' }}>
                   ثبت‌نام رایگان <ArrowLeft size={13} />
                 </Link>
-                <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(26,25,23,0.06)', color: 'rgba(26,25,23,0.65)', fontWeight: 600, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1px solid rgba(26,25,23,0.14)' }}>
-                  کشف باشگاه‌ها <ArrowLeft size={13} />
+                <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(26,25,23,0.05)', color: 'rgba(26,25,23,0.62)', fontWeight: 600, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1px solid rgba(26,25,23,0.13)' }}>
+                  بریم باشگاه <ArrowLeft size={13} />
                 </Link>
-              </div>
-              {/* Mini stats */}
-              <div className="cta-mini-stats" style={{ display: 'flex', gap: '28px', marginTop: '36px', paddingTop: '24px', borderTop: '1px solid rgba(26,25,23,0.08)' }}>
-                {[
-                  { num: '۱۲۰۰+', label: 'باشگاه فعال' },
-                  { num: '۸۵k+',  label: 'کاربر ثبت‌شده' },
-                  { num: 'رایگان', label: 'ثبت‌نام' },
-                ].map((s, i) => (
-                  <div key={i}>
-                    <div style={{ fontSize: 'clamp(18px,2vw,26px)', fontWeight: 900, color: GOLD, letterSpacing: '-0.03em' }}>{s.num}</div>
-                    <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.38)', marginTop: '3px' }}>{s.label}</div>
-                  </div>
-                ))}
               </div>
             </div>
 
