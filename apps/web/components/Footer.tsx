@@ -185,15 +185,14 @@ export default function Footer() {
                   <span style={{ color: TEXT }}>بیلیارد </span>
                   <span style={{ color: GOLD }}>هاب</span>
                 </div>
-                <div style={{ fontSize: '10px', color: DIM2, letterSpacing: '0.16em', marginTop: '4px', fontWeight: 600 }}>
+                <div style={{ fontSize: '10px', color: DIM2, letterSpacing: '0.16em', marginTop: '8px', fontWeight: 600 }}>
                   BILLIARD HUB | IRAN
+                </div>
+                <div style={{ fontSize: '12.5px', color: DIM, marginTop: '8px', lineHeight: 1.6 }}>
+                  اولین پلتفرم تخصصی بیلیارد ایران.
                 </div>
               </div>
             </div>
-
-            <p style={{ color: DIM, fontSize: '14px', lineHeight: 1.8, marginBottom: '24px', maxWidth: '260px' }}>
-              اولین پلتفرم تخصصی بیلیارد ایران.
-            </p>
 
             {/* Socials */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
