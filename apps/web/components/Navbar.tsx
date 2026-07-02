@@ -33,9 +33,9 @@ const exploreMenu = [
     title: 'تجهیزات و خدمات',
     color: GOLD,
     items: [
-      { href: '/sellers',       label: 'فروشندگان تجهیزات', icon: <ShoppingBag size={14} />, desc: 'فروشندگان تجهیزات' },
-      { href: '/manufacturers', label: 'تولیدکنندگان',       icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
-      { href: '/installers',    label: 'متخصصین نصب و تعمیر', icon: <Wrench size={14} />,  desc: 'نصب و راه‌اندازی' },
+      { href: '/sellers',       label: 'فروشندگان',   icon: <ShoppingBag size={14} />, desc: 'فروشندگان تجهیزات' },
+      { href: '/manufacturers', label: 'تولیدکنندگان', icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
+      { href: '/installers',    label: 'خدمات فنی',   icon: <Wrench size={14} />,     desc: 'نصب و راه‌اندازی'  },
     ],
   },
   {
@@ -55,7 +55,7 @@ const mobileLinks = [
   { href: '/',              label: 'صفحه اصلی',              icon: <Home size={18} />,          color: GOLD, isHome: true },
   { href: '/clubs',         label: 'باشگاه‌ها',               icon: <Building2 size={18} />,     color: GOLD },
   { href: '/shop',          label: 'بیلیارد بازار',           icon: <ShoppingBag size={18} />,   color: GOLD },
-  { href: '/sellers',       label: 'فروشندگان تجهیزات',       icon: <ShoppingBag size={18} />,   color: GOLD },
+  { href: '/sellers',       label: 'فروشندگان',                icon: <ShoppingBag size={18} />,   color: GOLD },
   { href: '/manufacturers', label: 'تولیدکنندگان تجهیزات',    icon: <Factory size={18} />,       color: GOLD },
   { href: '/coaches',       label: 'مربیان',                  icon: <Star size={18} />,          color: GOLD },
   { href: '/referees',      label: 'داوران',                  icon: <Trophy size={18} />,        color: GOLD },
@@ -281,12 +281,18 @@ export default function Navbar() {
                           </div>
                           {section.items.map((item, ii) => (
                             <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'filter 0.28s ease', border: 'none' }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', border: '1px solid transparent', transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease' }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.filter = `drop-shadow(0 0 22px ${colColor}) drop-shadow(0 0 55px ${colColor}EE) drop-shadow(0 0 100px ${colColor}BB) drop-shadow(0 0 160px ${colColor}77) brightness(1.12)`;
+                                const el = e.currentTarget as HTMLElement;
+                                el.style.background = `linear-gradient(135deg,${colColor}0C 0%,${colColor}06 100%)`;
+                                el.style.borderColor = `${colColor}1D`;
+                                el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,0.27), inset 0 0 0 1px ${colColor}13, 0 6px 28px ${colColor}0E, 0 0 44px ${colColor}0A`;
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.filter = 'none';
+                                const el = e.currentTarget as HTMLElement;
+                                el.style.background = 'transparent';
+                                el.style.borderColor = 'transparent';
+                                el.style.boxShadow = 'none';
                               }}>
                               <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `linear-gradient(135deg,${colColorLight}22,${colColor}10)`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0, transition: 'all 0.2s' }}>
                                 {item.icon}
