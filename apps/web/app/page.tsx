@@ -790,7 +790,8 @@ useEffect(() => {
         /* ══ TABLET ≤1100px ══ */
         @media(max-width:1100px){
           .clubs-grid  { grid-template-columns:1fr 1fr !important; }
-          .mkt-split   { grid-template-columns:repeat(3,1fr) !important; }
+          .mkt-split   { padding-bottom:8px !important; }
+          .mkt-banners { grid-template-columns:1fr !important; }
           .news-grid   { grid-template-columns:1fr !important; }
         }
 
@@ -860,6 +861,8 @@ useEffect(() => {
         .clubs-dots { display:none !important; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 14px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
+        .mkt-split::-webkit-scrollbar { display:none; }
+        .mkt-banners { margin-bottom:8px; }
         .mkt-mob-card { transform-origin:center; position:relative; }
         .mkt-dots { display:none !important; }
         .club-desk-panel { display:flex; }
@@ -878,6 +881,7 @@ useEffect(() => {
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
           .mkt-split { display:none !important; }
+          .mkt-banners { display:none !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
         }
@@ -1161,10 +1165,37 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="mkt-split" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '14px' }}>
+          <div className="mkt-split" style={{ display: 'flex', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 0 12px' }}>
             {PRODUCTS.map((p, i) => (
-              <SR key={p.id} delay={i * 60}><ProductCard p={p} h="clamp(240px,22vw,320px)" /></SR>
+              <div key={p.id} style={{ flex: '0 0 calc((100% - 70px) / 6)', minWidth: '150px' }}>
+                <SR delay={i * 40}><ProductCard p={p} h="clamp(240px,22vw,320px)" /></SR>
+              </div>
             ))}
+          </div>
+          {/* ── Ad banners ── */}
+          <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
+            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48)' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, transparent 0%, rgba(0,0,0,0.72) 55%)' }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px' }}>
+                <div>
+                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '5px' }}>ویژه تابستان ۱۴۰۴</div>
+                  <div style={{ fontSize: 'clamp(16px,1.6vw,22px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: '10px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '5px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
+                </div>
+              </div>
+            </Link>
+            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48)' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, transparent 0%, rgba(0,0,0,0.72) 55%)' }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 28px' }}>
+                <div>
+                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '5px' }}>ارسال رایگان</div>
+                  <div style={{ fontSize: 'clamp(16px,1.6vw,22px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: '10px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '5px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
+                </div>
+              </div>
+            </Link>
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
