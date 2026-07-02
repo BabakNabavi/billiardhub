@@ -495,6 +495,39 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   MKT BANNER  — mini 3-image auto-slider
+═══════════════════════════════════════════════════════════════ */
+function MktBanner({ slides, label, body, cta, accent, href }: {
+  slides: string[]; label: string; body: string; cta: string; accent: string; href: string;
+}) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx(p => (p + 1) % slides.length), 3200);
+    return () => clearInterval(t);
+  }, [slides.length]);
+  const isDark = accent === GOLD;
+  return (
+    <Link href={href} style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
+      {slides.map((img, i) => (
+        <img key={i} src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: i === idx ? 1 : 0, transition: 'opacity 0.85s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+      ))}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+        <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
+          <div style={{ fontSize: '10px', color: accent, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>{label}</div>
+          <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }} dangerouslySetInnerHTML={{ __html: body }} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }}>{cta} <ArrowLeft size={9} /></div>
+        </div>
+      </div>
+      <div style={{ position: 'absolute', bottom: '8px', right: '12px', display: 'flex', gap: '4px' }}>
+        {slides.map((_, i) => (
+          <div key={i} style={{ width: i === idx ? '14px' : '5px', height: '5px', borderRadius: '3px', background: i === idx ? '#fff' : 'rgba(255,255,255,0.4)', transition: 'all 0.3s ease' }} />
+        ))}
+      </div>
+    </Link>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    DISCOVERY PANEL  — iOS 26 Liquid Glass + real dropdowns
 ═══════════════════════════════════════════════════════════════ */
 function DiscoveryPanel() {
@@ -1412,26 +1445,22 @@ useEffect(() => {
           </div>
           {/* ── Ad banners ── */}
           <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
-            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.snooker} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-                  <div style={{ fontSize: '10px', color: GOLD, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ویژه تابستان ۱۴۰۴</div>
-                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#1a1a1a' }}>خرید کن <ArrowLeft size={9} /></div>
-                </div>
-              </div>
-            </Link>
-            <Link href="/shop" style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
-              <img src={IMG.proTable} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-                  <div style={{ fontSize: '10px', color: GRN, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>ارسال رایگان</div>
-                  <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }}>چوب و لوازم<br/>اسنوکر حرفه‌ای</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GRN, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>مشاهده <ArrowLeft size={9} /></div>
-                </div>
-              </div>
-            </Link>
+            <MktBanner
+              slides={[IMG.snooker, IMG.cue, IMG.ball]}
+              label="ویژه تابستان ۱۴۰۴"
+              body="تا ۳۰٪ تخفیف روی<br/>میزهای حرفه‌ای"
+              cta="خرید کن"
+              accent={GOLD}
+              href="/shop"
+            />
+            <MktBanner
+              slides={[IMG.proTable, IMG.table, IMG.rest]}
+              label="ارسال رایگان"
+              body="چوب و لوازم<br/>اسنوکر حرفه‌ای"
+              cta="مشاهده"
+              accent={GRN}
+              href="/shop"
+            />
           </div>
           <div className="mkt-dots">
             {PRODUCTS.map((_, i) => (
