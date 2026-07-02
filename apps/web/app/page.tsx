@@ -1184,9 +1184,9 @@ useEffect(() => {
             </div>
           </SR>
           <div className="mkt-split" style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 0 16px' }}>
-            {PRODUCTS.map((p, i) => (
+            {PRODUCTS.map((p) => (
               <div key={p.id} style={{ flex: '0 0 clamp(160px,16vw,220px)' }}>
-                <SR delay={i * 40}><ProductCard p={p} h="clamp(240px,30vw,320px)" /></SR>
+                <ProductCard p={p} h="clamp(240px,30vw,320px)" />
               </div>
             ))}
           </div>
