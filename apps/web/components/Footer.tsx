@@ -177,7 +177,7 @@ export default function Footer() {
                 alt="بیلیارد هاب"
                 width={52}
                 height={52}
-                style={{ objectFit: 'contain', flexShrink: 0 }}
+                style={{ objectFit: 'contain', flexShrink: 0, borderRadius: '12px' }}
                 priority
               />
               <div>
