@@ -1596,11 +1596,11 @@ useEffect(() => {
       </section>
 
       {/* §5 EXPLORE STRIP ══════════════════════════════════════ */}
-      <section style={{ background: 'linear-gradient(180deg,#091422 0%,#060B12 100%)', padding: 'clamp(36px,3.8vw,56px) clamp(16px,5%,80px)' }}>
+      <section style={{ background: '#F2F0EC', padding: 'clamp(36px,3.8vw,56px) clamp(16px,5%,80px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(20px,2.4vw,32px)' }}>
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.34em', color: 'rgba(199,166,106,0.60)', display: 'block', marginBottom: '8px' }}>DISCOVER MORE</span>
-            <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: 'rgba(255,255,255,0.86)', letterSpacing: '-0.03em', margin: 0 }}>بیشتر در بیلیارد هاب کاوش کن</h3>
+            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.34em', color: `${GOLD}CC`, display: 'block', marginBottom: '8px' }}>DISCOVER MORE</span>
+            <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>بیشتر در بیلیارد هاب کاوش کن</h3>
           </div>
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '12px' }}>
             {([
@@ -1612,14 +1612,14 @@ useEffect(() => {
               { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',          href: '/live',          color: '#ef4444' },
               { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',       href: '/manufacturers', color: '#06b6d4' },
             ] as { Icon: React.ElementType; label: string; desc: string; href: string; color: string }[]).map(({ Icon, label, desc, href, color }, i) => (
-              <Link key={i} href={href} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: 'clamp(14px,1.6vw,22px) clamp(10px,1vw,14px)', borderRadius: '18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', textAlign: 'center', transition: 'all 0.28s ease', cursor: 'pointer' }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = `${color}14`; el.style.borderColor = `${color}38`; el.style.transform = 'translateY(-5px)'; el.style.boxShadow = `0 16px 40px ${color}1E`; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.04)'; el.style.borderColor = 'rgba(255,255,255,0.07)'; el.style.transform = 'none'; el.style.boxShadow = 'none'; }}>
-                <div style={{ width: '46px', height: '46px', borderRadius: '13px', background: `linear-gradient(135deg,${color}28,${color}0D)`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Link key={i} href={href} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: 'clamp(14px,1.6vw,22px) clamp(10px,1vw,14px)', borderRadius: '18px', background: '#FFFFFF', border: '1px solid rgba(26,25,23,0.08)', textAlign: 'center', transition: 'all 0.28s ease', cursor: 'pointer', boxShadow: '0 2px 8px rgba(26,25,23,0.05)' }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = `${color}12`; el.style.borderColor = `${color}44`; el.style.transform = 'translateY(-5px)'; el.style.boxShadow = `0 16px 40px ${color}22`; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#FFFFFF'; el.style.borderColor = 'rgba(26,25,23,0.08)'; el.style.transform = 'none'; el.style.boxShadow = '0 2px 8px rgba(26,25,23,0.05)'; }}>
+                <div style={{ width: '46px', height: '46px', borderRadius: '13px', background: `linear-gradient(135deg,${color}22,${color}0A)`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Icon size={20} color={color} />
                 </div>
-                <div style={{ fontSize: 'clamp(10px,0.95vw,13px)', fontWeight: 700, color: 'rgba(255,255,255,0.80)', lineHeight: 1.3 }}>{label}</div>
-                <div style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: 'rgba(255,255,255,0.30)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>{desc}</div>
+                <div style={{ fontSize: 'clamp(10px,0.95vw,13px)', fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>{label}</div>
+                <div style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: TEXT_M, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>{desc}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: color, fontSize: '11px', fontWeight: 700, marginTop: 'auto' }}>
                   مشاهده <ArrowLeft size={9} />
                 </div>
@@ -1676,47 +1676,47 @@ useEffect(() => {
       </div>
 
       {/* §6 CTA ═════════════════════════════════════════════════ */}
-      <section style={{ position: 'relative', background: 'linear-gradient(135deg,#060910 0%,#0B1420 55%,#08101C 100%)', padding: 'clamp(60px,6vw,100px) clamp(16px,5%,80px)', overflow: 'hidden' }}>
+      <section style={{ position: 'relative', background: '#FFFFFF', padding: 'clamp(60px,6vw,100px) clamp(16px,5%,80px)', overflow: 'hidden' }}>
         {/* BG glow orbs */}
-        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.11) 0%,transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(74,158,255,0.09) 0%,transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '50%', left: '40%', width: '300px', height: '300px', borderRadius: '50%', transform: 'translateY(-50%)', background: 'radial-gradient(circle,rgba(185,123,255,0.06) 0%,transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.14) 0%,transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(74,158,255,0.10) 0%,transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '40%', width: '300px', height: '300px', borderRadius: '50%', transform: 'translateY(-50%)', background: 'radial-gradient(circle,rgba(185,123,255,0.08) 0%,transparent 65%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <div className="cta-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(40px,5vw,80px)', alignItems: 'center' }}>
 
             {/* Right — text + CTA (RTL leading side) */}
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: '100px', padding: '5px 16px', marginBottom: '24px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: '100px', padding: '5px 16px', marginBottom: '24px' }}>
                 <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C7A66A', boxShadow: '0 0 7px #C7A66A' }} />
                 <span style={{ fontSize: '10px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARD HUB</span>
               </div>
-              <h2 style={{ fontSize: 'clamp(30px,4.5vw,62px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.048em', lineHeight: 0.96, marginBottom: '20px' }}>
+              <h2 style={{ fontSize: 'clamp(30px,4.5vw,62px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.048em', lineHeight: 0.96, marginBottom: '20px' }}>
                 بیلیارد هاب را<br />
-                <span style={{ background: 'linear-gradient(135deg,#E8C97A 0%,#C7A66A 40%,#F0D898 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>همین حالا</span><br />
+                <span style={{ background: 'linear-gradient(135deg,#C7A66A 0%,#A07840 40%,#C7A66A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>همین حالا</span><br />
                 تجربه کن
               </h2>
-              <p style={{ fontSize: 'clamp(13px,1.3vw,16px)', color: 'rgba(255,255,255,0.42)', lineHeight: 1.85, marginBottom: '32px', maxWidth: '420px' }}>
+              <p style={{ fontSize: 'clamp(13px,1.3vw,16px)', color: 'rgba(26,25,23,0.50)', lineHeight: 1.85, marginBottom: '32px', maxWidth: '420px' }}>
                 اکوسیستم جامع بیلیارد ایران — از رزرو باشگاه تا خرید تجهیزات، آموزش، مسابقات و همه چیز در یک پلتفرم
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg,#C7A66A,#9A6F30)', color: '#1a1a1a', fontWeight: 800, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', boxShadow: '0 8px 36px rgba(199,166,106,0.35)' }}>
+                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg,#C7A66A,#9A6F30)', color: '#1a1a1a', fontWeight: 800, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', boxShadow: '0 8px 36px rgba(199,166,106,0.30)' }}>
                   ثبت‌نام رایگان <ArrowLeft size={13} />
                 </Link>
-                <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.70)', fontWeight: 600, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.13)' }}>
+                <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(26,25,23,0.06)', color: 'rgba(26,25,23,0.65)', fontWeight: 600, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1px solid rgba(26,25,23,0.14)' }}>
                   کشف باشگاه‌ها <ArrowLeft size={13} />
                 </Link>
               </div>
               {/* Mini stats */}
-              <div className="cta-mini-stats" style={{ display: 'flex', gap: '28px', marginTop: '36px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="cta-mini-stats" style={{ display: 'flex', gap: '28px', marginTop: '36px', paddingTop: '24px', borderTop: '1px solid rgba(26,25,23,0.08)' }}>
                 {[
                   { num: '۱۲۰۰+', label: 'باشگاه فعال' },
                   { num: '۸۵k+',  label: 'کاربر ثبت‌شده' },
                   { num: 'رایگان', label: 'ثبت‌نام' },
                 ].map((s, i) => (
                   <div key={i}>
-                    <div style={{ fontSize: 'clamp(18px,2vw,26px)', fontWeight: 900, color: '#C7A66A', letterSpacing: '-0.03em' }}>{s.num}</div>
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.30)', marginTop: '3px' }}>{s.label}</div>
+                    <div style={{ fontSize: 'clamp(18px,2vw,26px)', fontWeight: 900, color: GOLD, letterSpacing: '-0.03em' }}>{s.num}</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.38)', marginTop: '3px' }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -1725,33 +1725,33 @@ useEffect(() => {
             {/* Left — floating glass cards */}
             <div className="cta-float-area" style={{ position: 'relative', height: '380px' }}>
               {/* Card 1 — مسابقات */}
-              <div style={{ position: 'absolute', top: '0', right: '8%', background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '20px', padding: '18px 22px', width: '190px', animation: 'ctaFloat1 4.2s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.12)' }}>
+              <div style={{ position: 'absolute', top: '0', right: '8%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '190px', animation: 'ctaFloat1 4.2s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(74,158,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(74,158,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Trophy size={17} color="#4A9EFF" />
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.88)' }}>مسابقات</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>مسابقات</div>
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', lineHeight: 1.65 }}>رقابت در بزرگترین تورنمنت‌های بیلیارد ایران</div>
+                <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>رقابت در بزرگترین تورنمنت‌های بیلیارد ایران</div>
               </div>
               {/* Card 2 — مربیان */}
-              <div style={{ position: 'absolute', top: '32%', left: '2%', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '20px', padding: '18px 22px', width: '200px', animation: 'ctaFloat2 5.1s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.09)' }}>
+              <div style={{ position: 'absolute', top: '32%', left: '2%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '200px', animation: 'ctaFloat2 5.1s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(244,114,182,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(244,114,182,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <GraduationCap size={17} color="#F472B6" />
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.88)' }}>مربیان برتر</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>مربیان برتر</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                   {[...Array(5)].map((_, si) => <Star key={si} size={11} color="#C7A66A" fill="#C7A66A" />)}
-                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', marginRight: '5px' }}>۴.۹</span>
+                  <span style={{ fontSize: '11px', color: 'rgba(26,25,23,0.40)', marginRight: '5px' }}>۴.۹</span>
                 </div>
               </div>
               {/* Card 3 — بازار */}
-              <div style={{ position: 'absolute', bottom: '2%', right: '14%', background: 'rgba(199,166,106,0.10)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: '20px', padding: '16px 20px', width: '170px', animation: 'ctaFloat3 3.7s ease-in-out infinite', boxShadow: '0 20px 44px rgba(0,0,0,0.32), 0 0 50px rgba(199,166,106,0.10), inset 0 1px 0 rgba(255,255,255,0.12)' }}>
-                <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.75)', fontWeight: 700, letterSpacing: '0.16em', marginBottom: '8px' }}>بیلیارد بازار</div>
-                <div style={{ fontSize: '26px', fontWeight: 900, color: '#C7A66A', letterSpacing: '-0.04em', lineHeight: 1 }}>۳۵۰+</div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '4px' }}>فروشنده تجهیزات</div>
+              <div style={{ position: 'absolute', bottom: '2%', right: '14%', background: 'rgba(199,166,106,0.08)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '16px 20px', width: '170px', animation: 'ctaFloat3 3.7s ease-in-out infinite', boxShadow: '0 20px 44px rgba(0,0,0,0.08), 0 0 50px rgba(199,166,106,0.12), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <div style={{ fontSize: '10px', color: GOLD_D, fontWeight: 700, letterSpacing: '0.16em', marginBottom: '8px' }}>بیلیارد بازار</div>
+                <div style={{ fontSize: '26px', fontWeight: 900, color: GOLD, letterSpacing: '-0.04em', lineHeight: 1 }}>۳۵۰+</div>
+                <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', marginTop: '4px' }}>فروشنده تجهیزات</div>
               </div>
             </div>
 
