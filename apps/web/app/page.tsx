@@ -899,7 +899,7 @@ useEffect(() => {
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
           .mkt-split { display:none !important; }
-          .mkt-banners { display:none !important; }
+          .mkt-banners { grid-template-columns:1fr !important; margin:8px 14px 0 !important; }
           .mkt-desk-btns { display:none !important; }
           .mkt-mobile-slider { display:flex !important; }
         }
@@ -1183,10 +1183,10 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="mkt-split" style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 0 16px' }}>
+          <div className="mkt-split" style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'scroll', scrollbarWidth: 'thin', scrollbarColor: 'rgba(199,166,106,0.4) transparent', padding: '4px 0 16px' }}>
             {PRODUCTS.map((p) => (
-              <div key={p.id} style={{ flex: '0 0 clamp(160px,16vw,220px)' }}>
-                <ProductCard p={p} h="clamp(240px,30vw,320px)" />
+              <div key={p.id} style={{ width: '200px', flexShrink: 0 }}>
+                <ProductCard p={p} h="280px" />
               </div>
             ))}
           </div>
