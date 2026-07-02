@@ -375,9 +375,6 @@ function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) 
     <div style={{ position: 'relative', height: h }}>
       {p.pct > 0 && (
         <div style={{ position: 'absolute', top: '-3px', right: '12px', zIndex: 4,
-          background: 'rgba(239,68,68,0.10)',
-          backdropFilter: 'blur(16px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(16px) saturate(200%)',
           background: '#ef4444',
           border: 'none',
           color: '#fff', fontSize: '11px', fontWeight: 700,
