@@ -581,10 +581,32 @@ export default function HomePage() {
   const [activeMkt, setActiveMkt] = useState(0);
   const activeMktRef  = useRef(0);
 
-  const mktDeskRef = useRef<HTMLDivElement>(null);
-  const mktDragRef = useRef({ startX: 0, scrollLeft: 0, moved: false });
+  const mktDeskRef   = useRef<HTMLDivElement>(null);
+  const mktDragRef   = useRef({ startX: 0, scrollLeft: 0, moved: false });
+  const mktPausedRef = useRef(false);
+  const mktRafRef    = useRef<number | null>(null);
+
+  useEffect(() => {
+    const el = mktDeskRef.current;
+    if (!el) return;
+    const SPEED = 50; // px per second
+    let last = 0;
+    const tick = (t: number) => {
+      if (last && !mktPausedRef.current) {
+        const half = el.scrollWidth / 2;
+        el.scrollLeft += (SPEED * (t - last)) / 1000;
+        if (el.scrollLeft >= half) el.scrollLeft -= half;
+      }
+      last = t;
+      mktRafRef.current = requestAnimationFrame(tick);
+    };
+    mktRafRef.current = requestAnimationFrame(tick);
+    return () => { if (mktRafRef.current) cancelAnimationFrame(mktRafRef.current); };
+  }, []);
+
   const onMktMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
+    mktPausedRef.current = true;
     mktDragRef.current = { startX: e.pageX, scrollLeft: mktDeskRef.current?.scrollLeft ?? 0, moved: false };
     if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grabbing';
     const onMove = (ev: MouseEvent) => {
@@ -596,6 +618,8 @@ export default function HomePage() {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
       if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grab';
+      // resume auto-scroll only if mouse is no longer hovering
+      if (!(mktDeskRef.current?.matches(':hover') ?? false)) mktPausedRef.current = false;
       if (mktDragRef.current.moved) {
         const el = mktDeskRef.current;
         if (el) {
@@ -1191,9 +1215,11 @@ useEffect(() => {
             className="mkt-split"
             style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
             onMouseDown={onMktMouseDown}
+            onMouseEnter={() => { mktPausedRef.current = true; }}
+            onMouseLeave={() => { mktPausedRef.current = false; }}
           >
-            {PRODUCTS.map((p) => (
-              <div key={p.id} style={{ width: '200px', flexShrink: 0 }}>
+            {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
+              <div key={`${p.id}-${i}`} style={{ width: '200px', flexShrink: 0 }}>
                 <ProductCard p={p} h="320px" />
               </div>
             ))}
