@@ -1596,27 +1596,58 @@ useEffect(() => {
       </section>
 
       {/* §5 EXPLORE STRIP ══════════════════════════════════════ */}
-      <section style={{ background: '#F2F0EC', padding: 'clamp(36px,3.8vw,56px) clamp(16px,5%,80px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+      <section style={{ position: 'relative', background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 45%,#E8E4DD 100%)', padding: 'clamp(36px,3.8vw,56px) clamp(16px,5%,80px)', overflow: 'hidden' }}>
+        {/* ambient blobs — make backdrop-filter visible */}
+        <div style={{ position: 'absolute', top: '-80px', right: '8%',  width: '360px', height: '360px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.28) 0%,transparent 65%)', filter: 'blur(48px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-60px', left: '12%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(74,158,255,0.22) 0%,transparent 65%)',  filter: 'blur(44px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '30%', left: '38%',   width: '240px', height: '240px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(48,197,90,0.16) 0%,transparent 65%)',   filter: 'blur(42px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '10%', left: '22%',   width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(185,123,255,0.14) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+
+        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(20px,2.4vw,32px)' }}>
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.34em', color: `${GOLD}CC`, display: 'block', marginBottom: '8px' }}>DISCOVER MORE</span>
+            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.34em', color: GOLD_D, display: 'block', marginBottom: '8px' }}>DISCOVER MORE</span>
             <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>بیشتر در بیلیارد هاب کاوش کن</h3>
           </div>
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '12px' }}>
             {([
-              { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',     href: '/coaches',       color: '#F472B6' },
-              { Icon: Trophy,        label: 'مسابقات',         desc: 'تورنمنت‌های بیلیارد',   href: '/tournaments',   color: '#4A9EFF' },
-              { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',     href: '/shop',          color: '#C7A66A' },
-              { Icon: Eye,           label: 'آموزش',           desc: 'ویدیوهای آموزشی',        href: '/education',     color: '#30C55A' },
-              { Icon: Star,          label: 'رنکینگ',          desc: 'جدول رتبه‌بندی ملی',    href: '/ranking',       color: '#B97BFF' },
-              { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',          href: '/live',          color: '#ef4444' },
-              { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',       href: '/manufacturers', color: '#06b6d4' },
-            ] as { Icon: React.ElementType; label: string; desc: string; href: string; color: string }[]).map(({ Icon, label, desc, href, color }, i) => (
-              <Link key={i} href={href} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: 'clamp(14px,1.6vw,22px) clamp(10px,1vw,14px)', borderRadius: '18px', background: '#FFFFFF', border: '1px solid rgba(26,25,23,0.08)', textAlign: 'center', transition: 'all 0.28s ease', cursor: 'pointer', boxShadow: '0 2px 8px rgba(26,25,23,0.05)' }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = `${color}12`; el.style.borderColor = `${color}44`; el.style.transform = 'translateY(-5px)'; el.style.boxShadow = `0 16px 40px ${color}22`; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#FFFFFF'; el.style.borderColor = 'rgba(26,25,23,0.08)'; el.style.transform = 'none'; el.style.boxShadow = '0 2px 8px rgba(26,25,23,0.05)'; }}>
-                <div style={{ width: '46px', height: '46px', borderRadius: '13px', background: `linear-gradient(135deg,${color}22,${color}0A)`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon size={20} color={color} />
+              { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',     href: '/coaches',       color: '#F472B6', rgb: '244,114,182' },
+              { Icon: Trophy,        label: 'مسابقات',         desc: 'تورنمنت‌های بیلیارد',   href: '/tournaments',   color: '#4A9EFF', rgb: '74,158,255'  },
+              { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',     href: '/shop',          color: '#C7A66A', rgb: '199,166,106' },
+              { Icon: Eye,           label: 'آموزش',           desc: 'ویدیوهای آموزشی',        href: '/education',     color: '#30C55A', rgb: '48,197,90'   },
+              { Icon: Star,          label: 'رنکینگ',          desc: 'جدول رتبه‌بندی ملی',    href: '/ranking',       color: '#B97BFF', rgb: '185,123,255' },
+              { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',          href: '/live',          color: '#ef4444', rgb: '239,68,68'   },
+              { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',       href: '/manufacturers', color: '#06b6d4', rgb: '6,182,212'   },
+            ] as { Icon: React.ElementType; label: string; desc: string; href: string; color: string; rgb: string }[]).map(({ Icon, label, desc, href, color, rgb }, i) => (
+              <Link key={i} href={href} style={{
+                textDecoration: 'none', position: 'relative', overflow: 'hidden',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+                padding: 'clamp(14px,1.6vw,22px) clamp(10px,1vw,14px)',
+                borderRadius: '22px',
+                background: 'rgba(255,255,255,0.52)',
+                backdropFilter: 'blur(40px) saturate(240%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+                border: '1px solid rgba(255,255,255,0.82)',
+                boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)`,
+                textAlign: 'center', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
+              }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = 'rgba(255,255,255,0.82)';
+                  el.style.borderColor = `rgba(255,255,255,0.95)`;
+                  el.style.transform = 'translateY(-6px)';
+                  el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,1), 0 20px 52px rgba(${rgb},0.18), 0 8px 24px rgba(0,0,0,0.08)`;
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = 'rgba(255,255,255,0.52)';
+                  el.style.borderColor = 'rgba(255,255,255,0.82)';
+                  el.style.transform = 'none';
+                  el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)`;
+                }}>
+                {/* top sheen */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)', pointerEvents: 'none', borderRadius: '22px 22px 0 0' }} />
+                <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: `linear-gradient(135deg,rgba(${rgb},0.20),rgba(${rgb},0.08))`, border: `1px solid rgba(${rgb},0.32)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 14px rgba(${rgb},0.28)` }}>
+                  <Icon size={20} color={color} style={{ filter: `drop-shadow(0 0 5px rgba(${rgb},0.60))` }} />
                 </div>
                 <div style={{ fontSize: 'clamp(10px,0.95vw,13px)', fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>{label}</div>
                 <div style={{ fontSize: 'clamp(9px,0.78vw,11px)', color: TEXT_M, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>{desc}</div>
