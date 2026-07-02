@@ -585,19 +585,30 @@ export default function HomePage() {
   const activeMktRef  = useRef(0);
 
   const mktDeskRef   = useRef<HTMLDivElement>(null);
-  const mktDragRef   = useRef({ dragging: false, startX: 0, scrollLeft: 0 });
+  const mktDragRef   = useRef({ dragging: false, moved: false, startX: 0, scrollLeft: 0 });
   const onMktMouseDown = (e: React.MouseEvent) => {
-    mktDragRef.current = { dragging: true, startX: e.pageX, scrollLeft: mktDeskRef.current?.scrollLeft ?? 0 };
+    mktDragRef.current = { dragging: true, moved: false, startX: e.pageX, scrollLeft: mktDeskRef.current?.scrollLeft ?? 0 };
     if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grabbing';
   };
   const onMktMouseMove = (e: React.MouseEvent) => {
     if (!mktDragRef.current.dragging) return;
+    const dist = Math.abs(e.pageX - mktDragRef.current.startX);
+    if (dist > 5) mktDragRef.current.moved = true;
     e.preventDefault();
     if (mktDeskRef.current) mktDeskRef.current.scrollLeft = mktDragRef.current.scrollLeft - (e.pageX - mktDragRef.current.startX);
   };
   const onMktMouseUp = () => {
+    const wasDragged = mktDragRef.current.moved;
     mktDragRef.current.dragging = false;
+    mktDragRef.current.moved = false;
     if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grab';
+    if (wasDragged) {
+      const el = mktDeskRef.current;
+      if (el) {
+        const cancelClick = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); el.removeEventListener('click', cancelClick, true); };
+        el.addEventListener('click', cancelClick, true);
+      }
+    }
   };
 
   const handleSliderScroll = useCallback(() => {
