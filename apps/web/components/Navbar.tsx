@@ -244,44 +244,63 @@ export default function Navbar() {
               {exploreOpen && (
                 <div style={{
                   position: 'absolute', top: 'calc(100% + 16px)', right: '-20px',
-                  width: '580px', maxWidth: '95vw',
-                  background: 'rgba(247,247,245,0.97)',
-                  border: '1px solid rgba(28,28,26,0.08)',
+                  width: '700px', maxWidth: '95vw',
+                  background: 'rgba(10,10,12,0.97)',
+                  border: '1px solid rgba(184,147,58,0.18)',
                   borderRadius: '24px',
-                  boxShadow: '0 32px 80px rgba(28,28,26,0.16), 0 4px 16px rgba(28,28,26,0.06)',
-                  backdropFilter: 'blur(40px) saturate(1.6)',
-                  padding: '20px', zIndex: 300,
+                  boxShadow: '0 40px 100px rgba(0,0,0,0.60), 0 0 0 1px rgba(255,255,255,0.04) inset',
+                  backdropFilter: 'blur(48px)',
+                  zIndex: 300,
                   animation: 'fadeDown 0.22s cubic-bezier(0.22,1,0.36,1) both',
+                  overflow: 'hidden',
                 }}>
-                  <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '120px', height: '1px', background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
+                  {/* Top gold gradient line */}
+                  <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,#B8933A,transparent)' }} />
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-                    <span style={{ fontSize: '10px', color: `${GOLD}`, letterSpacing: '0.22em', fontWeight: 700, opacity: 0.7 }}>EXPLORE BILLIARDHUB</span>
-                    <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.4)', padding: '4px', display: 'flex' }}>
+                  {/* Header row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 14px' }}>
+                    <span style={{ fontSize: '10px', color: '#B8933A', letterSpacing: '0.28em', fontWeight: 700, fontVariant: 'small-caps' }}>EXPLORE BILLIARD PLUS</span>
+                    <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', padding: '5px', display: 'flex' }}>
                       <X size={12} />
                     </button>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                    {exploreMenu.map((section, si) => (
-                      <div key={si}>
-                        <div style={{ fontSize: '10px', color: `${GOLD}80`, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '6px', padding: '0 12px', textTransform: 'uppercase' }}>{section.title}</div>
-                        {section.items.map((item, ii) => (
-                          <Link key={ii} href={item.href} className="d-item" onClick={() => setExploreOpen(false)}>
-                            <span className="d-icon">{item.icon}</span>
-                            <div>
-                              <div className="d-label">{item.label}</div>
-                              <div className="d-desc">{item.desc}</div>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    ))}
+                  {/* 3 columns */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', padding: '0 0 4px' }}>
+                    {exploreMenu.map((section, si) => {
+                      const colColor = si === 0 ? '#C7A66A' : si === 1 ? '#4A9EFF' : '#30C55A';
+                      return (
+                        <div key={si} style={{ borderRight: si < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none', padding: '20px 24px' }}>
+                          {/* Column header */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                            <div style={{ width: '2px', height: '14px', background: colColor, borderRadius: '1px', flexShrink: 0 }} />
+                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.32)', letterSpacing: '0.18em', fontWeight: 700, textTransform: 'uppercase' }}>{section.title}</span>
+                          </div>
+                          {section.items.map((item, ii) => (
+                            <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '10px', textDecoration: 'none', transition: 'background 0.18s', marginBottom: '2px' }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${colColor}14`; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `${colColor}18`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0 }}>
+                                {item.icon}
+                              </div>
+                              <div>
+                                <div style={{ color: 'rgba(255,255,255,0.80)', fontSize: '13px', fontWeight: 600 }}>{item.label}</div>
+                                <div style={{ color: 'rgba(255,255,255,0.28)', fontSize: '11px' }}>{item.desc}</div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(28,28,26,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '13px', color: 'rgba(28,28,26,0.25)' }}>پلتفرم تخصصی بیلیارد ایران</span>
-                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '20px', padding: '5px 12px' }}>
+                  {/* Bottom strip */}
+                  <div style={{ margin: '0 20px 20px', padding: '14px 18px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>پلتفرم تخصصی بیلیارد ایران</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>اکوسیستم جامع هوشمند بیلیارد</div>
+                    </div>
+                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: '#B8933A', borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
                     </Link>
                   </div>
@@ -433,74 +452,82 @@ export default function Navbar() {
       {mobileOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
-          background: '#F7F7F5',
+          background: '#0B0E16',
           overflowY: 'auto',
-          paddingTop: '0px',
-          animation: 'fadeIn 0.25s ease both',
+          animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px 0' }}>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '32px', width: 'auto' }} />
+          {/* Header row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '32px', width: 'auto' }} />
+              <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.03em' }}>
+                <span style={{ color: '#ffffff' }}>بیلیارد</span>{' '}
+                <span style={{ color: GOLD }}>هاب</span>
+              </span>
+            </div>
+            <button onClick={() => setMobileOpen(false)}
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', padding: '8px', display: 'flex' }}>
+              <X size={20} />
+            </button>
           </div>
 
+          {/* Gold separator */}
           <div style={{ height: '1px', background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
 
-          <div style={{ padding: '20px 20px 0' }}>
+          {/* User section */}
+          <div style={{ padding: '16px 20px' }}>
             {!user ? (
               <Link href="/login" onClick={() => setMobileOpen(false)}
-                style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'rgba(184,147,58,0.06)', backdropFilter: 'blur(40px) saturate(240%)', WebkitBackdropFilter: 'blur(40px) saturate(240%)', border: '1px solid rgba(184,147,58,0.22)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 32px rgba(184,147,58,0.16)', color: GOLD, fontSize: '17px', fontWeight: 800, textDecoration: 'none' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)', pointerEvents: 'none' }} />
-                <User size={17} /> ورود | ثبت نام
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px', borderRadius: '16px', background: 'linear-gradient(135deg,rgba(184,147,58,0.15),rgba(184,147,58,0.06))', border: `1px solid ${GOLD}`, color: GOLD, fontSize: '17px', fontWeight: 800, textDecoration: 'none' }}>
+                <User size={17} /> ورود | ثبت‌نام رایگان
               </Link>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: '1px solid rgba(28,28,26,0.07)', backdropFilter: 'blur(16px)' }}>
-                <div style={{ width: '40px', height: '40px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '19px', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ width: '40px', height: '40px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '19px', flexShrink: 0 }}>
                   {user.firstName?.[0]}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#1C1C1A', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
-                  <div style={{ color: 'rgba(28,28,26,0.4)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>
+                  <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>
                 </div>
                 <button onClick={() => { logout(); router.push('/'); setMobileOpen(false); }}
-                  style={{ padding: '7px 12px', borderRadius: '10px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  style={{ padding: '7px 12px', borderRadius: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.22)', color: '#ef4444', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <LogOut size={12} /> خروج
                 </button>
               </div>
             )}
           </div>
 
-          <div style={{ height: '1px', background: 'rgba(28,28,26,0.06)', margin: '16px 20px' }} />
-
-          <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-            {mobileLinks.map((item, i) => (
-              <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
-                className="mob-link-item"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: '6px 10px', borderRadius: '10px',
-                  color: item.isHome ? '#1C1C1A' : 'rgba(28,28,26,0.55)',
-                  fontSize: '16px', fontWeight: item.isHome ? 600 : 500,
-                  textDecoration: 'none',
-                  ...(item.isHome ? { borderBottom: '1px solid rgba(28,28,26,0.06)', marginBottom: '4px', paddingBottom: '12px' } : {}),
-                }}>
-                <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: `${item.color}12`, border: `1px solid ${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
-                  {item.icon}
-                </div>
-                <span>{item.label}</span>
-                {item.live && (
-                  <span style={{ marginRight: 'auto', fontSize: '10px', color: '#ef4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '20px', padding: '2px 8px', fontWeight: 700 }}>LIVE</span>
-                )}
-                {(item as { isCart?: boolean }).isCart && cartCount > 0 && (
-                  <span style={{ marginRight: 'auto', fontSize: '12px', color: '#fff', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '1px 8px', fontWeight: 800, minWidth: 20, textAlign: 'center' }}>
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-            ))}
+          {/* Navigation section */}
+          <div style={{ padding: '0 16px 8px' }}>
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.28em', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '12px', paddingRight: '4px' }}>ناوبری</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+              {mobileLinks.map((item, i) => (
+                <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', borderRadius: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', textDecoration: 'none', position: 'relative', transition: 'background 0.15s, border-color 0.15s' }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = `${item.color}18`; el.style.borderColor = `${item.color}30`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.04)'; el.style.borderColor = 'rgba(255,255,255,0.07)'; }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${item.color}18`, border: `1px solid ${item.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
+                    {item.icon}
+                  </div>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.72)', textAlign: 'center', lineHeight: 1.3 }}>{item.label}</span>
+                  {item.live && (
+                    <span style={{ position: 'absolute', top: '6px', left: '6px', fontSize: '9px', color: '#ef4444', background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '20px', padding: '1px 6px', fontWeight: 700 }}>LIVE</span>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          <div style={{ margin: '20px 20px 40px', padding: '16px', background: GOLD_LIGHT, borderRadius: '16px', border: `1px solid ${GOLD_BORDER}`, textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.22em', fontWeight: 700, marginBottom: '5px', opacity: 0.7 }}>BILLIARDHUB</div>
-            <div style={{ fontSize: '14px', color: 'rgba(28,28,26,0.4)' }}>اکوسیستم جامع و هوشمند بیلیارد ایران</div>
+          {/* Bottom promo */}
+          <div style={{ margin: '20px', padding: '18px 20px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: GOLD, letterSpacing: '0.04em' }}>بیلیارد هاب</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>اکوسیستم جامع بیلیارد ایران</div>
+            </div>
+            <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
+              ثبت‌نام <ArrowLeft size={10} />
+            </Link>
           </div>
         </div>
       )}
