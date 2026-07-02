@@ -534,14 +534,10 @@ export default function Navbar() {
                   }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.background = `${item.color}20`;
-                    el.style.borderColor = `${item.color}40`;
-                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.18), 0 0 22px ${item.color}38, 0 4px 18px rgba(0,0,0,0.22)`;
+                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.14), 0 0 32px ${item.color}70, 0 0 60px ${item.color}35`;
                   }}
                   onMouseLeave={e => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.background = 'rgba(255,255,255,0.06)';
-                    el.style.borderColor = 'rgba(255,255,255,0.10)';
                     el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 18px rgba(0,0,0,0.18)';
                   }}>
                   {/* top sheen */}
