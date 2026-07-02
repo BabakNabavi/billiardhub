@@ -821,25 +821,26 @@ export default function HomePage() {
   useEffect(() => { startBannerTimer(); return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); }; }, []);
 
   // ── CTA rotating cards — independent staggered cycles ──
-  const [ctaIdxs, setCtaIdxs] = useState<[number,number,number]>([1, 0, 6]);
-  const [ctaVis,  setCtaVis]  = useState<[boolean,boolean,boolean]>([true, true, true]);
+  const [ctaIdxs, setCtaIdxs] = useState<[number,number,number,number]>([1, 0, 6, 3]);
+  const [ctaVis,  setCtaVis]  = useState<[boolean,boolean,boolean,boolean]>([true, true, true, true]);
   useEffect(() => {
-    const cycle = (pos: 0|1|2) => {
-      setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean]; v[pos] = false; return v; });
+    const cycle = (pos: 0|1|2|3) => {
+      setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean,boolean]; v[pos] = false; return v; });
       setTimeout(() => {
         setCtaIdxs(p => {
-          const opts = Array.from({length: CTA_ITEMS.length}, (_,i) => i).filter(x => x !== p[0] && x !== p[1] && x !== p[2]);
+          const opts = Array.from({length: CTA_ITEMS.length}, (_,i) => i).filter(x => x !== p[0] && x !== p[1] && x !== p[2] && x !== p[3]);
           const next = opts.length ? opts[Math.floor(Math.random() * opts.length)]! : p[pos];
-          const u = [...p] as [number,number,number]; u[pos] = next; return u;
+          const u = [...p] as [number,number,number,number]; u[pos] = next; return u;
         });
-        setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean]; v[pos] = true; return v; });
+        setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean,boolean]; v[pos] = true; return v; });
       }, 550);
     };
     const timers: ReturnType<typeof setInterval>[] = [];
     timers.push(setInterval(() => cycle(0), 2000));
     const d1 = setTimeout(() => { timers.push(setInterval(() => cycle(1), 2000)); }, 700);
     const d2 = setTimeout(() => { timers.push(setInterval(() => cycle(2), 2000)); }, 1400);
-    return () => { timers.forEach(clearInterval); clearTimeout(d1); clearTimeout(d2); };
+    const d3 = setTimeout(() => { timers.push(setInterval(() => cycle(3), 2000)); }, 2100);
+    return () => { timers.forEach(clearInterval); clearTimeout(d1); clearTimeout(d2); clearTimeout(d3); };
   }, []);
 
   const handleSliderScroll = useCallback(() => {
@@ -1163,14 +1164,8 @@ useEffect(() => {
           .banner-cta-btn { font-size:11px !important; padding:7px 16px !important; gap:4px !important; }
           .stats-grid { grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
           .cta-split  { grid-template-columns:1fr !important; }
-          .cta-right  { position:relative; min-height:300px; }
-          .cta-inner  { position:relative; }
-          .cta-float-area { position:absolute !important; top:0 !important; left:0 !important; right:0 !important; height:300px !important; pointer-events:none !important; z-index:2 !important; }
-          .cta-float-area > div { zoom:0.40 !important; }
-          .cta-heading { font-size:24px !important; }
-          .cta-card-1 { top:110px !important; left:252px !important; right:auto !important; bottom:auto !important; }
-          .cta-card-2 { top:138px !important; left:8px !important; right:auto !important; bottom:auto !important; }
-          .cta-card-3 { top:20px !important; left:8px !important; right:auto !important; bottom:auto !important; }
+          .cta-float-area { height:260px !important; }
+          .cta-float-area > div { zoom:0.74 !important; }
         }
         @media(max-width:900px){
           .stats-grid { grid-template-columns:repeat(4,1fr) !important; gap:10px !important; }
@@ -1178,6 +1173,7 @@ useEffect(() => {
         @keyframes ctaFloat1 { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-14px) rotate(-1.5deg)} }
         @keyframes ctaFloat2 { 0%,100%{transform:translateY(0) rotate(2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
         @keyframes ctaFloat3 { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-16px) rotate(-1deg)} }
+        @keyframes ctaFloat4 { 0%,100%{transform:translateY(0) rotate(1.5deg)} 50%{transform:translateY(-12px) rotate(1.5deg)} }
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
@@ -1770,15 +1766,13 @@ useEffect(() => {
               <p style={{ fontSize: 'clamp(14px,1.3vw,17px)', lineHeight: 1.85, marginBottom: '32px', maxWidth: '420px' }}>
                 با{' '}
                 <span style={{ color: TEXT, fontWeight: 800 }}>بیلیارد</span>{' '}
-                <span style={{ color: GOLD, fontWeight: 800 }}>هاب</span>{' '}
+                <span style={{ color: GOLD, fontWeight: 800 }}>هاب</span>
+                <br />
                 <span style={{ color: 'rgba(26,25,23,0.52)' }}>به جمع هزاران عاشق بیلیارد بپیوندید</span>
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.13)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', color: GOLD, fontWeight: 700, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', border: '1px solid rgba(199,166,106,0.40)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.80), 0 6px 24px rgba(199,166,106,0.20)' }}>
                   ثبت نام <ArrowLeft size={13} />
-                </Link>
-                <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(26,25,23,0.05)', color: 'rgba(26,25,23,0.62)', fontWeight: 600, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1px solid rgba(26,25,23,0.13)' }}>
-                  بریم باشگاه <ArrowLeft size={13} />
                 </Link>
               </div>
             </div>
@@ -1817,6 +1811,20 @@ useEffect(() => {
               {(() => { const it = CTA_ITEMS[ctaIdxs[2]]!; return (
               <div className="cta-card-3" style={{ position: 'absolute', bottom: '2%', right: '14%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '170px', animation: 'ctaFloat3 3.7s ease-in-out infinite', boxShadow: '0 20px 44px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
                 <div style={{ opacity: ctaVis[2] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <it.Icon size={17} color={it.color} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
+                </div>
+              </div>
+              ); })()}
+              {/* Card 4 */}
+              {(() => { const it = CTA_ITEMS[ctaIdxs[3]]!; return (
+              <div className="cta-card-4" style={{ position: 'absolute', top: '58%', left: '22%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '180px', animation: 'ctaFloat4 4.6s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
+                <div style={{ opacity: ctaVis[3] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <it.Icon size={17} color={it.color} />
