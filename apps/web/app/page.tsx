@@ -462,7 +462,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
       }}
     >
       {/* Image area — curved bottom via border-radius clip */}
-      <div style={{ position: 'relative', height: '185px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
+      <div style={{ position: 'relative', height: '167px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
         <img src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
