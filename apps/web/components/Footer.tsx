@@ -170,20 +170,29 @@ export default function Footer() {
 
           {/* Brand column */}
           <div className="ft-brand">
-            {/* Logo */}
-            <div style={{ marginBottom: '18px' }}>
+            {/* Logo + wordmark */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
               <Image
-                src="/images/Logo/logo_gold.png"
+                src="/images/Logo/logo1.png"
                 alt="بیلیارد هاب"
-                width={160}
+                width={52}
                 height={52}
-                style={{ objectFit: 'contain', objectPosition: 'right center' }}
+                style={{ objectFit: 'contain', flexShrink: 0 }}
                 priority
               />
+              <div>
+                <div style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                  <span style={{ color: TEXT }}>بیلیارد </span>
+                  <span style={{ color: GOLD }}>هاب</span>
+                </div>
+                <div style={{ fontSize: '10px', color: DIM2, letterSpacing: '0.16em', marginTop: '4px', fontWeight: 600 }}>
+                  BILLIARD HUB | IRAN
+                </div>
+              </div>
             </div>
 
-            <p style={{ color: DIM, fontSize: '14.5px', lineHeight: 1.85, marginBottom: '24px', maxWidth: '270px' }}>
-              اولین پلتفرم تخصصی بیلیارد ایران. رزرو میز، رنکینگ رسمی، فروشگاه تجهیزات و پخش زنده مسابقات.
+            <p style={{ color: DIM, fontSize: '14px', lineHeight: 1.8, marginBottom: '24px', maxWidth: '260px' }}>
+              اولین پلتفرم تخصصی بیلیارد ایران.
             </p>
 
             {/* Socials */}
