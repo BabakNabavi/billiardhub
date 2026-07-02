@@ -508,7 +508,7 @@ export default function Navbar() {
 
           {/* Navigation section */}
           <div style={{ padding: '0 16px 8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
               {mobileLinks.map((item, i) => (
                 <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
                   style={{
