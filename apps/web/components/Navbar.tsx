@@ -245,47 +245,67 @@ export default function Navbar() {
                 <div style={{
                   position: 'absolute', top: 'calc(100% + 16px)', right: '-20px',
                   width: '700px', maxWidth: '95vw',
-                  background: 'rgba(10,10,12,0.97)',
-                  border: '1px solid rgba(184,147,58,0.18)',
+                  background: 'rgba(252,251,249,0.88)',
+                  border: '1px solid rgba(28,28,26,0.07)',
                   borderRadius: '24px',
-                  boxShadow: '0 40px 100px rgba(0,0,0,0.60), 0 0 0 1px rgba(255,255,255,0.04) inset',
-                  backdropFilter: 'blur(48px)',
+                  boxShadow: '0 32px 80px rgba(28,28,26,0.14), 0 4px 16px rgba(28,28,26,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(48px) saturate(2)',
+                  WebkitBackdropFilter: 'blur(48px) saturate(2)',
                   zIndex: 300,
                   animation: 'fadeDown 0.22s cubic-bezier(0.22,1,0.36,1) both',
                   overflow: 'hidden',
                 }}>
-                  {/* Top gold gradient line */}
-                  <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,#B8933A,transparent)' }} />
+                  {/* Top gold sheen */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg,transparent,rgba(184,147,58,0.55),transparent)' }} />
+                  <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: '40px', background: 'linear-gradient(to bottom,rgba(184,147,58,0.06),transparent)', pointerEvents: 'none' }} />
 
                   {/* Header row */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 14px' }}>
-                    <span style={{ fontSize: '10px', color: '#B8933A', letterSpacing: '0.28em', fontWeight: 700, fontVariant: 'small-caps' }}>EXPLORE BILLIARD PLUS</span>
-                    <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', padding: '5px', display: 'flex' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
+                    <span style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD PLUS</span>
+                    <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.38)', padding: '5px', display: 'flex', transition: 'all 0.2s' }}>
                       <X size={12} />
                     </button>
                   </div>
 
                   {/* 3 columns */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', padding: '0 0 4px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', padding: '4px 0' }}>
                     {exploreMenu.map((section, si) => {
-                      const colColor = si === 0 ? '#C7A66A' : si === 1 ? '#4A9EFF' : '#30C55A';
+                      const colColor = si === 0 ? '#B8933A' : si === 1 ? '#3B82C4' : '#1E7A44';
+                      const colColorLight = si === 0 ? '#C7A66A' : si === 1 ? '#4A9EFF' : '#30C55A';
                       return (
-                        <div key={si} style={{ borderRight: si < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none', padding: '20px 24px' }}>
+                        <div key={si} style={{ borderRight: si < 2 ? '1px solid rgba(28,28,26,0.06)' : 'none', padding: '16px 20px 20px' }}>
                           {/* Column header */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                            <div style={{ width: '2px', height: '14px', background: colColor, borderRadius: '1px', flexShrink: 0 }} />
-                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.32)', letterSpacing: '0.18em', fontWeight: 700, textTransform: 'uppercase' }}>{section.title}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px', paddingBottom: '8px', borderBottom: `1px solid ${colColor}18` }}>
+                            <div style={{ width: '3px', height: '12px', borderRadius: '2px', background: `linear-gradient(180deg,${colColorLight},${colColor})`, flexShrink: 0 }} />
+                            <span style={{ fontSize: '10px', color: `${colColor}BB`, letterSpacing: '0.18em', fontWeight: 700, textTransform: 'uppercase' }}>{section.title}</span>
                           </div>
                           {section.items.map((item, ii) => (
-                            <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '10px', textDecoration: 'none', transition: 'background 0.18s', marginBottom: '2px' }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${colColor}14`; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
-                              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `${colColor}18`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0 }}>
+                            <Link key={ii} href={item.href} onClick={() => setExploreOpen(false)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', textDecoration: 'none', marginBottom: '2px', transition: 'all 0.22s cubic-bezier(0.22,1,0.36,1)', border: '1px solid transparent' }}
+                              onMouseEnter={e => {
+                                const el = e.currentTarget as HTMLElement;
+                                el.style.background = 'rgba(255,255,255,0.75)';
+                                el.style.backdropFilter = 'blur(16px)';
+                                el.style.WebkitBackdropFilter = 'blur(16px)';
+                                el.style.boxShadow = `0 4px 20px rgba(0,0,0,0.07), 0 0 0 1px rgba(255,255,255,0.85) inset, 0 8px 24px ${colColor}18`;
+                                el.style.borderColor = `rgba(255,255,255,0.6)`;
+                                el.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={e => {
+                                const el = e.currentTarget as HTMLElement;
+                                el.style.background = 'transparent';
+                                el.style.backdropFilter = 'none';
+                                el.style.WebkitBackdropFilter = 'none';
+                                el.style.boxShadow = 'none';
+                                el.style.borderColor = 'transparent';
+                                el.style.transform = 'none';
+                              }}>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: `linear-gradient(135deg,${colColorLight}22,${colColor}10)`, border: `1px solid ${colColor}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colColor, flexShrink: 0, transition: 'all 0.2s' }}>
                                 {item.icon}
                               </div>
                               <div>
-                                <div style={{ color: 'rgba(255,255,255,0.80)', fontSize: '13px', fontWeight: 600 }}>{item.label}</div>
-                                <div style={{ color: 'rgba(255,255,255,0.28)', fontSize: '11px' }}>{item.desc}</div>
+                                <div style={{ color: 'rgba(28,28,26,0.78)', fontSize: '13px', fontWeight: 600, lineHeight: 1.2 }}>{item.label}</div>
+                                <div style={{ color: 'rgba(28,28,26,0.32)', fontSize: '11px', marginTop: '1px' }}>{item.desc}</div>
                               </div>
                             </Link>
                           ))}
@@ -295,12 +315,12 @@ export default function Navbar() {
                   </div>
 
                   {/* Bottom strip */}
-                  <div style={{ margin: '0 20px 20px', padding: '14px 18px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ margin: '4px 20px 18px', padding: '12px 18px', background: 'linear-gradient(135deg,rgba(184,147,58,0.07),rgba(184,147,58,0.03))', border: '1px solid rgba(184,147,58,0.16)', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
                     <div>
-                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>پلتفرم تخصصی بیلیارد ایران</div>
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '2px' }}>اکوسیستم جامع هوشمند بیلیارد</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>پلتفرم تخصصی بیلیارد ایران</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اکوسیستم جامع هوشمند بیلیارد</div>
                     </div>
-                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: '#B8933A', borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '7px 16px', boxShadow: `0 4px 16px rgba(184,147,58,0.32)`, whiteSpace: 'nowrap' }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
                     </Link>
                   </div>
