@@ -463,7 +463,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
       }}
     >
       {/* Image area — curved bottom via border-radius clip */}
-      <div style={{ position: 'relative', height: '159px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
+      <div style={{ position: 'relative', height: '151px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
         <img src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -498,10 +498,10 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
 /* ═══════════════════════════════════════════════════════════════
    MKT BANNER  — mini 3-image auto-slider
 ═══════════════════════════════════════════════════════════════ */
-function MktBanner({ slides, label, body, cta, accent, href }: {
-  slides: string[]; label: string; body: string; cta: string; accent: string; href: string;
+function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0 }: {
+  slides: string[]; label: string; body: string; cta: string; accent: string; href: string; initialIdx?: number;
 }) {
-  const [idx, setIdx] = useState(0);
+  const [idx, setIdx] = useState(initialIdx);
   useEffect(() => {
     const t = setInterval(() => setIdx(p => (p + 1) % slides.length), 3200);
     return () => clearInterval(t);
@@ -1125,7 +1125,7 @@ useEffect(() => {
           .sellers-section { padding-left:0 !important; padding-right:0 !important; }
           .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:6px !important; }
           .svc-section { padding-left:14px !important; padding-right:14px !important; }
-          .banner-slider { height:200px !important; margin-bottom:40px !important; }
+          .banner-slider { height:200px !important; margin-top:40px !important; margin-bottom:40px !important; }
         }
       `}</style>
 
@@ -1463,6 +1463,7 @@ useEffect(() => {
               cta="مشاهده"
               accent={GRN}
               href="/shop"
+              initialIdx={1}
             />
           </div>
           <div className="mkt-dots">
@@ -1584,7 +1585,7 @@ useEffect(() => {
       </section>
 
       {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
-      <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>
+      <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111', margin: 'clamp(48px,5vw,72px) 0' }}>
         {BANNER_SLIDES.map((slide, i) => (
           <div
             key={i}
