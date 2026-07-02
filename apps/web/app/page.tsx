@@ -512,16 +512,17 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0 }: {
       {slides.map((img, i) => (
         <img key={i} src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: i === idx ? 1 : 0, transition: 'opacity 0.85s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       ))}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-        <div style={{ background: 'rgba(0,0,0,0.48)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: '12px', padding: '12px 18px' }}>
-          <div style={{ fontSize: '10px', color: accent, fontWeight: 700, letterSpacing: '0.22em', marginBottom: '4px' }}>{label}</div>
-          <div style={{ fontSize: 'clamp(14px,1.4vw,19px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '8px' }} dangerouslySetInnerHTML={{ __html: body }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.18) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 20px' }}>
+        <div>
+          <div style={{ fontSize: '9px', color: accent, fontWeight: 700, letterSpacing: '0.24em', marginBottom: '5px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{label}</div>
+          <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }}>{cta} <ArrowLeft size={9} /></div>
         </div>
       </div>
-      <div style={{ position: 'absolute', bottom: '8px', right: '12px', display: 'flex', gap: '4px' }}>
+      <div style={{ position: 'absolute', bottom: '9px', left: '12px', display: 'flex', gap: '4px' }}>
         {slides.map((_, i) => (
-          <div key={i} style={{ width: i === idx ? '14px' : '5px', height: '5px', borderRadius: '3px', background: i === idx ? '#fff' : 'rgba(255,255,255,0.4)', transition: 'all 0.3s ease' }} />
+          <div key={i} style={{ width: i === idx ? '14px' : '5px', height: '5px', borderRadius: '3px', background: i === idx ? '#fff' : 'rgba(255,255,255,0.38)', transition: 'all 0.3s ease' }} />
         ))}
       </div>
     </Link>
@@ -1076,11 +1077,11 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 14px 16px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none !important; }
-        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
+        .mkt-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-split::-webkit-scrollbar { display:none; }
         .mkt-banners { margin-bottom:8px; }
@@ -1110,7 +1111,7 @@ useEffect(() => {
         /* ── Sellers ── */
         .sellers-desk { display:flex; flex-wrap:nowrap; gap:14px; overflow-x:auto; scrollbar-width:none; padding:4px 2px 16px; cursor:grab; user-select:none; }
         .sellers-desk::-webkit-scrollbar { display:none; }
-        .sellers-mob  { display:none; gap:12px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
+        .sellers-mob  { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .sellers-mob::-webkit-scrollbar  { display:none; }
         /* ── Services ── */
         .services-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
@@ -1532,7 +1533,7 @@ useEffect(() => {
             </div>
           </SR>
 
-          <div className="services-grid">
+          <div className="services-grid" style={{ alignItems: 'stretch' }}>
             {SERVICES_LIST.map((svc, i) => {
               const Icon = svc.icon;
               return (
@@ -1540,16 +1541,18 @@ useEffect(() => {
                   <div style={{
                     position: 'relative', overflow: 'hidden',
                     background: 'rgba(255,255,255,0.04)',
-                    borderRadius: '20px', padding: 'clamp(20px,2vw,32px) clamp(16px,1.8vw,26px)',
+                    borderRadius: '18px',
+                    padding: 'clamp(14px,1.4vw,20px) clamp(12px,1.2vw,18px)',
                     border: '1px solid rgba(255,255,255,0.09)',
-                    display: 'flex', flexDirection: 'column', gap: '16px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: '10px', textAlign: 'center', height: '100%', boxSizing: 'border-box',
                     transition: 'transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
                     cursor: 'pointer',
                   }}
                     onMouseEnter={e => {
                       const el = e.currentTarget as HTMLElement;
-                      el.style.transform = 'translateY(-6px)';
-                      el.style.boxShadow = `0 24px 60px ${svc.color}30`;
+                      el.style.transform = 'translateY(-5px)';
+                      el.style.boxShadow = `0 20px 50px ${svc.color}28`;
                       el.style.borderColor = `${svc.color}50`;
                     }}
                     onMouseLeave={e => {
@@ -1560,22 +1563,20 @@ useEffect(() => {
                     }}
                   >
                     {/* decorative step number */}
-                    <div style={{ position: 'absolute', top: '-8px', left: '10px', fontSize: 'clamp(56px,6vw,80px)', fontWeight: 900, color: 'rgba(255,255,255,0.04)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none' }}>
+                    <div style={{ position: 'absolute', top: '-6px', left: '8px', fontSize: 'clamp(42px,4.5vw,58px)', fontWeight: 900, color: 'rgba(255,255,255,0.04)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none' }}>
                       {String(i + 1).padStart(2, '0')}
                     </div>
-                    {/* icon */}
-                    <div style={{ width: '54px', height: '54px', borderRadius: '16px', background: `linear-gradient(135deg, ${svc.color}35 0%, ${svc.color}10 100%)`, border: `1px solid ${svc.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon size={24} color={svc.color} />
+                    {/* icon — centered */}
+                    <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: `linear-gradient(135deg, ${svc.color}35 0%, ${svc.color}10 100%)`, border: `1px solid ${svc.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon size={20} color={svc.color} />
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 'clamp(13px,1.3vw,17px)', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px', letterSpacing: '-0.02em' }}>{svc.title}</div>
-                      <div style={{ fontSize: 'clamp(11px,1vw,13px)', color: 'rgba(255,255,255,0.52)', lineHeight: 1.75 }}>{svc.desc}</div>
-                    </div>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: svc.color, fontSize: '12px', fontWeight: 700 }}>
-                      درخواست خدمت <ArrowLeft size={10} />
+                    <div style={{ fontSize: 'clamp(12px,1.1vw,15px)', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{svc.title}</div>
+                    <div style={{ fontSize: 'clamp(10px,0.85vw,12px)', color: 'rgba(255,255,255,0.46)', lineHeight: 1.65, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>{svc.desc}</div>
+                    <div style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', gap: '4px', color: svc.color, fontSize: '11px', fontWeight: 700 }}>
+                      درخواست خدمت <ArrowLeft size={9} />
                     </div>
                     {/* bottom accent */}
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, height: '2px', background: `linear-gradient(90deg, transparent, ${svc.color}60, transparent)` }} />
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, height: '2px', background: `linear-gradient(90deg, transparent, ${svc.color}55, transparent)` }} />
                   </div>
                 </SR>
               );
