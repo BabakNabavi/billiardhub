@@ -1151,10 +1151,10 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(12px,1.4vw,20px) clamp(16px,5%,80px)' }}>
+      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '18px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های منتخب</h2>
@@ -1194,10 +1194,10 @@ useEffect(() => {
       </section>
 
       {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
-      <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(12px,1.4vw,20px) clamp(16px,5%,80px)' }}>
+      <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <SR>
-            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '18px', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${BRN}CC` }}>BILLIARD BAZAAR</span>
                 <h2 className="sec-title" style={{ color: TEXT }}>بیلیارد بازار</h2>
