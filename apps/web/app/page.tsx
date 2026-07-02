@@ -1333,27 +1333,21 @@ useEffect(() => {
                 </Link>
               ))}
             </div>
-            {/* Carousel dots — sliding window of 5 */}
+            {/* Carousel dots — all 7 always rendered, no mount/unmount jank */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '18px' }}>
-              {(() => {
-                const total = FEATURE_CARDS.length;
-                const half = 2;
-                const start = Math.max(0, Math.min(activeCard - half, total - 5));
-                return FEATURE_CARDS.map((card, i) => {
-                  if (i < start || i >= start + 5) return null;
-                  const dist = Math.abs(i - activeCard);
-                  return (
-                    <div key={i} style={{
-                      height: '5px',
-                      width: i === activeCard ? '18px' : '5px',
-                      borderRadius: '3px',
-                      opacity: dist === 2 ? 0.45 : 1,
-                      background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
-                      transition: 'all 0.3s ease',
-                    }} />
-                  );
-                });
-              })()}
+              {FEATURE_CARDS.map((card, i) => {
+                const dist = Math.abs(i - activeCard);
+                return (
+                  <div key={i} style={{
+                    height: '5px',
+                    width: i === activeCard ? '18px' : '5px',
+                    borderRadius: '3px',
+                    opacity: dist >= 3 ? 0.35 : 1,
+                    background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
+                    transition: 'all 0.3s ease',
+                  }} />
+                );
+              })}
             </div>
           </div>
 
