@@ -981,7 +981,7 @@ useEffect(() => {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&display=swap" rel="stylesheet" />
       <style>{`
-        :root { --hero-bottom-gap: 40px; }
+        :root { --hero-bottom-gap: 5px; }
         @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
         @keyframes fadeTagIn   { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
         @keyframes pulse2      { 0%,100%{opacity:1;}50%{opacity:0.20;} }
@@ -1077,7 +1077,7 @@ useEffect(() => {
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
           /* horizontal padding removed from hero-content; applied per-element below */
-          .hero-content  { padding-top:220px !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:60px !important; }
+          .hero-content  { padding-top:220px !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:var(--hero-bottom-gap) !important; }
           .hero-h1       { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
           .hero-subtitle { padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
           .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
@@ -1196,7 +1196,7 @@ useEffect(() => {
       {/* ╔══════════════════════════════════════════════════════╗
           ║  HERO — cinematic  video + wallpaper crossfade      ║
           ╚══════════════════════════════════════════════════════╝ */}
-      <div style={{ position: 'relative', height: isMobile ? 'auto' : '100dvh', minHeight: isMobile ? 'auto' : '640px', overflow: 'hidden', background: '#04020A', paddingBottom: isMobile ? 'var(--hero-bottom-gap)' : undefined }}>
+      <div style={{ position: 'relative', height: isMobile ? 'auto' : '100dvh', minHeight: isMobile ? '100dvh' : '640px', overflow: 'hidden', background: '#04020A' }}>
 
         {/* ── Layer 1: video (continuous motion background) ── */}
         <video ref={videoRef} autoPlay muted loop playsInline preload="auto"
@@ -1248,6 +1248,7 @@ useEffect(() => {
         <div className="hero-content" style={{
           position: isMobile ? 'relative' : 'absolute',
           inset: isMobile ? undefined : 0,
+          minHeight: isMobile ? '100dvh' : undefined,
           zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
           padding: 'clamp(189px,25vh,236px) clamp(16px,5%,80px) 0',
@@ -1287,7 +1288,7 @@ useEffect(() => {
           </p>
 
           {/* Feature card slider — 7 cards */}
-          <div className="hd" style={{ width: '100%', marginTop: '16px' }}>
+          <div className="hd" style={{ width: '100%', marginTop: '16px', flexGrow: isMobile ? 1 : 0 }}>
             <div ref={sliderRef} className="feat-slider" style={{
               display: 'flex', gap: '18px', overflowX: 'auto',
               scrollbarWidth: 'none', padding: '20px 22px 38px',
