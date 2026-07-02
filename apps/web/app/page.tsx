@@ -7,7 +7,7 @@ import {
   MapPin, Star, Heart, Trophy, Users,
   ShoppingBag, Building2, Wrench, GraduationCap,
   Clock, Eye, CheckCircle, X, Calendar,
-  Hammer, Scissors, Settings, Truck, Radio,
+  Hammer, Scissors, Settings, Truck, Radio, Scale,
 } from 'lucide-react';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -64,8 +64,9 @@ const IMG = {
   wall1: '/images/clubs/wallpaper1.png',
   wall2: '/images/clubs/wallpaper2.jpeg',
   wall3: '/images/clubs/wallpaper3.png',
-  wall4: '/images/clubs/wallpaper4.png',
-  wall5: '/images/clubs/wallpaper5.jfif',
+  wall4:  '/images/clubs/wallpaper4.png',
+  wall5:  '/images/clubs/wallpaper5.jfif',
+  wall12: '/images/clubs/wallpaper12.jpg',
   wall6: '/images/clubs/wallpaper12.jpg',
   wall7: '/images/clubs/wallpaper21.jpg',
 
@@ -218,11 +219,21 @@ const SERVICES_LIST = [
 ];
 
 const BANNER_SLIDES = [
-  { img:IMG.wall1,    title:'بزرگترین پلتفرم بیلیارد ایران', sub:'بهترین باشگاه‌ها را کشف و رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
-  { img:IMG.snooker,  title:'تخفیف ویژه تجهیزات تابستان',   sub:'تا ۳۰٪ تخفیف روی محصولات برند اصل', link:'/shop',        cta:'خرید کن',        accent:GOLD },
-  { img:IMG.wall3,    title:'مسابقات سراسری بیلیارد ۱۴۰۴',  sub:'ثبت‌نام و شرکت در رقابت‌های ملی',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
-  { img:IMG.bg1,      title:'آکادمی آموزش بیلیارد هاب',     sub:'با بهترین مربیان یاد بگیر',           link:'/coaches',     cta:'شروع یادگیری',  accent:PRP  },
-  { img:IMG.proTable, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
+  { img:IMG.wall1,  title:'بزرگترین پلتفرم بیلیارد ایران', sub:'بهترین باشگاه‌ها را کشف و رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
+  { img:IMG.wall3,  title:'مسابقات سراسری بیلیارد ۱۴۰۴',  sub:'ثبت‌نام و شرکت در رقابت‌های ملی',   link:'/tournaments', cta:'ثبت‌نام',        accent:BLU  },
+  { img:IMG.wall4,  title:'آکادمی آموزش بیلیارد هاب',     sub:'با بهترین مربیان یاد بگیر',           link:'/coaches',     cta:'شروع یادگیری',  accent:PRP  },
+  { img:IMG.wall5,  title:'تخفیف ویژه تجهیزات تابستان',   sub:'تا ۳۰٪ تخفیف روی محصولات برند اصل', link:'/shop',        cta:'خرید کن',        accent:GOLD },
+  { img:IMG.wall12, title:'خدمات فنی تخصصی در محل',       sub:'نصب، تعمیر و سرویس حرفه‌ای میزها',   link:'/services',    cta:'درخواست خدمت',  accent:BRN  },
+];
+
+const CTA_ITEMS = [
+  { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',    color: '#F472B6', rgb: '244,114,182' },
+  { Icon: Trophy,        label: 'مسابقات',         desc: 'تورنمنت‌های بیلیارد',  color: '#4A9EFF', rgb: '74,158,255'  },
+  { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',    color: '#C7A66A', rgb: '199,166,106' },
+  { Icon: Eye,           label: 'آموزش',           desc: 'ویدیوهای آموزشی',       color: '#30C55A', rgb: '48,197,90'   },
+  { Icon: Star,          label: 'رنکینگ',          desc: 'جدول رتبه‌بندی ملی',   color: '#B97BFF', rgb: '185,123,255' },
+  { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',         color: '#ef4444', rgb: '239,68,68'   },
+  { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',      color: '#06b6d4', rgb: '6,182,212'   },
 ];
 
 const NEWS = [
@@ -809,6 +820,28 @@ export default function HomePage() {
   };
   useEffect(() => { startBannerTimer(); return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); }; }, []);
 
+  // ── CTA rotating cards — independent staggered cycles ──
+  const [ctaIdxs, setCtaIdxs] = useState<[number,number,number]>([1, 0, 6]);
+  const [ctaVis,  setCtaVis]  = useState<[boolean,boolean,boolean]>([true, true, true]);
+  useEffect(() => {
+    const cycle = (pos: 0|1|2) => {
+      setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean]; v[pos] = false; return v; });
+      setTimeout(() => {
+        setCtaIdxs(p => {
+          const opts = Array.from({length: CTA_ITEMS.length}, (_,i) => i).filter(x => x !== p[0] && x !== p[1] && x !== p[2]);
+          const next = opts.length ? opts[Math.floor(Math.random() * opts.length)]! : p[pos];
+          const u = [...p] as [number,number,number]; u[pos] = next; return u;
+        });
+        setCtaVis(p => { const v = [...p] as [boolean,boolean,boolean]; v[pos] = true; return v; });
+      }, 550);
+    };
+    const timers: ReturnType<typeof setInterval>[] = [];
+    timers.push(setInterval(() => cycle(0), 2000));
+    const d1 = setTimeout(() => { timers.push(setInterval(() => cycle(1), 2000)); }, 700);
+    const d2 = setTimeout(() => { timers.push(setInterval(() => cycle(2), 2000)); }, 1400);
+    return () => { timers.forEach(clearInterval); clearTimeout(d1); clearTimeout(d2); };
+  }, []);
+
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return;
@@ -1127,10 +1160,17 @@ useEffect(() => {
           .sellers-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
           .svc-section { padding-left:14px !important; padding-right:14px !important; }
           .banner-slider { height:200px !important; margin-top:0 !important; margin-bottom:0 !important; }
+          .banner-cta-btn { font-size:11px !important; padding:7px 16px !important; gap:4px !important; }
           .stats-grid { grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
           .cta-split  { grid-template-columns:1fr !important; }
-          .cta-float-area { height:260px !important; }
-          .cta-float-area > div { zoom:0.74; }
+          .cta-right  { position:relative; min-height:300px; }
+          .cta-inner  { position:relative; }
+          .cta-float-area { position:absolute !important; top:0 !important; left:0 !important; right:0 !important; height:300px !important; pointer-events:none !important; z-index:2 !important; }
+          .cta-float-area > div { zoom:0.40 !important; }
+          .cta-heading { font-size:24px !important; }
+          .cta-card-1 { top:110px !important; left:252px !important; right:auto !important; bottom:auto !important; }
+          .cta-card-2 { top:138px !important; left:8px !important; right:auto !important; bottom:auto !important; }
+          .cta-card-3 { top:20px !important; left:8px !important; right:auto !important; bottom:auto !important; }
         }
         @media(max-width:900px){
           .stats-grid { grid-template-columns:repeat(4,1fr) !important; gap:10px !important; }
@@ -1608,13 +1648,14 @@ useEffect(() => {
             <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.34em', color: GOLD_D, display: 'block', marginBottom: '8px' }}>DISCOVER MORE</span>
             <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>بیشتر در بیلیارد هاب کاوش کن</h3>
           </div>
-          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '12px' }}>
+          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: '12px' }}>
             {([
               { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',     href: '/coaches',       color: '#F472B6', rgb: '244,114,182' },
               { Icon: Trophy,        label: 'مسابقات',         desc: 'تورنمنت‌های بیلیارد',   href: '/tournaments',   color: '#4A9EFF', rgb: '74,158,255'  },
               { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',     href: '/shop',          color: '#C7A66A', rgb: '199,166,106' },
               { Icon: Eye,           label: 'آموزش',           desc: 'ویدیوهای آموزشی',        href: '/education',     color: '#30C55A', rgb: '48,197,90'   },
               { Icon: Star,          label: 'رنکینگ',          desc: 'جدول رتبه‌بندی ملی',    href: '/ranking',       color: '#B97BFF', rgb: '185,123,255' },
+              { Icon: Scale,         label: 'داوران',          desc: 'داوران رسمی مسابقات',    href: '/referees',      color: '#fb923c', rgb: '251,146,60'  },
               { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',          href: '/live',          color: '#ef4444', rgb: '239,68,68'   },
               { Icon: Building2,     label: 'تولیدکنندگان',   desc: 'سازندگان تجهیزات',       href: '/manufacturers', color: '#06b6d4', rgb: '6,182,212'   },
             ] as { Icon: React.ElementType; label: string; desc: string; href: string; color: string; rgb: string }[]).map(({ Icon, label, desc, href, color, rgb }, i) => (
@@ -1628,7 +1669,7 @@ useEffect(() => {
                 WebkitBackdropFilter: 'blur(40px) saturate(240%)',
                 border: '1px solid rgba(255,255,255,0.82)',
                 boxShadow: `inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)`,
-                textAlign: 'center', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
+                textAlign: 'center', transition: 'background 0.3s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease, border-color 0.3s ease', cursor: 'pointer', transform: 'translateY(0)',
               }}
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLElement;
@@ -1641,7 +1682,7 @@ useEffect(() => {
                   const el = e.currentTarget as HTMLElement;
                   el.style.background = 'rgba(255,255,255,0.52)';
                   el.style.borderColor = 'rgba(255,255,255,0.82)';
-                  el.style.transform = 'none';
+                  el.style.transform = 'translateY(0)';
                   el.style.boxShadow = `inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)`;
                 }}>
                 {/* top sheen */}
@@ -1676,11 +1717,10 @@ useEffect(() => {
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 clamp(20px,5%,80px)' }}>
               <div style={{ maxWidth: '420px', textAlign: 'right' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: slide.accent, letterSpacing: '0.22em', marginBottom: '10px', opacity: 0.9 }}>BILLIARD PLUS</div>
                 <h3 style={{ fontSize: 'clamp(22px,3.2vw,42px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '10px' }}>{slide.title}</h3>
                 <p style={{ fontSize: 'clamp(13px,1.4vw,17px)', color: 'rgba(255,255,255,0.65)', marginBottom: '22px', lineHeight: 1.6 }}>{slide.sub}</p>
                 <Link href={slide.link} style={{ textDecoration: 'none' }}>
-                  <button style={{ background: slide.accent, color: slide.accent === GOLD ? '#1a1a1a' : '#fff', border: 'none', borderRadius: '100px', padding: '11px 28px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <button className="banner-cta-btn" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', color: '#fff', border: '1px solid rgba(255,255,255,0.32)', borderRadius: '100px', padding: '11px 28px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 20px rgba(0,0,0,0.18)' }}>
                     {slide.cta} <ArrowLeft size={12} />
                   </button>
                 </Link>
@@ -1713,16 +1753,16 @@ useEffect(() => {
         <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(74,158,255,0.10) 0%,transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '50%', left: '40%', width: '300px', height: '300px', borderRadius: '50%', transform: 'translateY(-50%)', background: 'radial-gradient(circle,rgba(185,123,255,0.08) 0%,transparent 65%)', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+        <div className="cta-inner" style={{ maxWidth: '1340px', margin: '0 auto' }}>
           <div className="cta-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(40px,5vw,80px)', alignItems: 'center' }}>
 
             {/* Right — text + CTA (RTL leading side) */}
-            <div>
+            <div className="cta-right">
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: '100px', padding: '5px 16px', marginBottom: '24px' }}>
                 <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C7A66A', boxShadow: '0 0 7px #C7A66A' }} />
                 <span style={{ fontSize: '10px', color: '#C7A66A', fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARD HUB</span>
               </div>
-              <h2 style={{ fontSize: 'clamp(30px,4.5vw,62px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.048em', lineHeight: 0.96, marginBottom: '20px' }}>
+              <h2 className="cta-heading" style={{ fontSize: 'clamp(30px,4.5vw,62px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.048em', lineHeight: 0.96, marginBottom: '20px' }}>
                 بیلیارد هاب را<br />
                 <span style={{ background: 'linear-gradient(135deg,#C7A66A 0%,#A07840 40%,#C7A66A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>همین حالا</span><br />
                 تجربه کن
@@ -1734,8 +1774,8 @@ useEffect(() => {
                 <span style={{ color: 'rgba(26,25,23,0.52)' }}>به جمع هزاران عاشق بیلیارد بپیوندید</span>
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.10)', color: GOLD, fontWeight: 700, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', border: '1px solid rgba(199,166,106,0.28)', boxShadow: '0 4px 20px rgba(199,166,106,0.14)' }}>
-                  ثبت‌نام رایگان <ArrowLeft size={13} />
+                <Link href="/register" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(199,166,106,0.13)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', color: GOLD, fontWeight: 700, fontSize: '15px', padding: '14px 30px', borderRadius: '100px', border: '1px solid rgba(199,166,106,0.40)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.80), 0 6px 24px rgba(199,166,106,0.20)' }}>
+                  ثبت نام <ArrowLeft size={13} />
                 </Link>
                 <Link href="/clubs" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(26,25,23,0.05)', color: 'rgba(26,25,23,0.62)', fontWeight: 600, fontSize: '15px', padding: '13px 24px', borderRadius: '100px', border: '1px solid rgba(26,25,23,0.13)' }}>
                   بریم باشگاه <ArrowLeft size={13} />
@@ -1745,35 +1785,48 @@ useEffect(() => {
 
             {/* Left — floating glass cards */}
             <div className="cta-float-area" style={{ position: 'relative', height: '380px' }}>
-              {/* Card 1 — مسابقات */}
-              <div style={{ position: 'absolute', top: '0', right: '8%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '190px', animation: 'ctaFloat1 4.2s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(74,158,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Trophy size={17} color="#4A9EFF" />
+              {/* Card 1 */}
+              {(() => { const it = CTA_ITEMS[ctaIdxs[0]]!; return (
+              <div className="cta-card-1" style={{ position: 'absolute', top: '0', right: '8%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '190px', animation: 'ctaFloat1 4.2s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
+                <div style={{ opacity: ctaVis[0] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <it.Icon size={17} color={it.color} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>مسابقات</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>رقابت در بزرگترین تورنمنت‌های بیلیارد ایران</div>
               </div>
-              {/* Card 2 — مربیان */}
-              <div style={{ position: 'absolute', top: '32%', left: '2%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '200px', animation: 'ctaFloat2 5.1s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'rgba(244,114,182,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <GraduationCap size={17} color="#F472B6" />
+              ); })()}
+              {/* Card 2 */}
+              {(() => { const it = CTA_ITEMS[ctaIdxs[1]]!; return (
+              <div className="cta-card-2" style={{ position: 'absolute', top: '32%', left: '2%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.07)', borderRadius: '20px', padding: '18px 22px', width: '200px', animation: 'ctaFloat2 5.1s ease-in-out infinite', boxShadow: '0 20px 52px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)' }}>
+                <div style={{ opacity: ctaVis[1] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <it.Icon size={17} color={it.color} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>مربیان برتر</div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  {[...Array(5)].map((_, si) => <Star key={si} size={11} color="#C7A66A" fill="#C7A66A" />)}
-                  <span style={{ fontSize: '11px', color: 'rgba(26,25,23,0.40)', marginRight: '5px' }}>۴.۹</span>
+                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
                 </div>
               </div>
-              {/* Card 3 — بازار */}
-              <div style={{ position: 'absolute', bottom: '2%', right: '14%', background: 'rgba(199,166,106,0.08)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(199,166,106,0.30)', borderRadius: '20px', padding: '16px 20px', width: '170px', animation: 'ctaFloat3 3.7s ease-in-out infinite', boxShadow: '0 20px 44px rgba(0,0,0,0.08), 0 0 50px rgba(199,166,106,0.12), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                <div style={{ fontSize: '10px', color: GOLD_D, fontWeight: 700, letterSpacing: '0.16em', marginBottom: '8px' }}>بیلیارد بازار</div>
-                <div style={{ fontSize: '26px', fontWeight: 900, color: GOLD, letterSpacing: '-0.04em', lineHeight: 1 }}>۳۵۰+</div>
-                <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', marginTop: '4px' }}>فروشنده تجهیزات</div>
+              ); })()}
+              {/* Card 3 */}
+              {(() => { const it = CTA_ITEMS[ctaIdxs[2]]!; return (
+              <div className="cta-card-3" style={{ position: 'absolute', bottom: '2%', right: '14%', background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(26,25,23,0.08)', borderRadius: '20px', padding: '18px 22px', width: '170px', animation: 'ctaFloat3 3.7s ease-in-out infinite', boxShadow: '0 20px 44px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1)' }}>
+                <div style={{ opacity: ctaVis[2] ? 1 : 0, transition: 'opacity 0.55s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '11px', background: `rgba(${it.rgb},0.14)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <it.Icon size={17} color={it.color} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{it.label}</div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.42)', lineHeight: 1.65 }}>{it.desc}</div>
+                </div>
               </div>
+              ); })()}
             </div>
 
           </div>
