@@ -56,23 +56,170 @@ const SLIDES = [
   },
 ]
 
-// ── Category definitions ───────────────────────────────────────
+// ── Category definitions — modern gradient-icon style ─────────
 const CATS = [
-  { id: 'cue',       label: 'چوب',     img: '/images/shop/cue_billiard_2.jpg'   },
-  { id: 'table',     label: 'میز',     img: '/images/shop/Pro_table.jpg'         },
-  { id: 'ball',      label: 'توپ',     img: '/images/shop/Ball-1.jpg'            },
-  { id: 'tip',       label: 'تیپ',     img: '/images/shop/cue_billiard.jpg'      },
-  { id: 'chalk',     label: 'گچ',      img: '/images/shop/pool_chalk_1.jpg'      },
-  { id: 'extension', label: 'اکستنشن', img: '/images/shop/cue_billiard_2.jpg'   },
-  { id: 'case',      label: 'کیس',     img: '/images/shop/accessori.png'         },
-  { id: 'bag',       label: 'کیف',     img: '/images/shop/rest-pool-2.jpg'       },
-  { id: 'rest',      label: 'رست',     img: '/images/shop/rest-pool.webp'        },
-  { id: 'cloth',     label: 'پارچه',   img: '/images/shop/snooker-table-2.jpg'   },
-  { id: 'oil',       label: 'روغن',    img: '/images/shop/pool_chalk_2.jpg'      },
-  { id: 'towel',     label: 'حوله',    img: '/images/shop/Home_table.jpg'        },
-  { id: 'clothing',  label: 'پوشاک',   img: '/images/shop/snooker-table.jpg'     },
-  { id: 'accessory', label: 'اکسسوری', img: '/images/shop/accessori.png'         },
-  { id: 'other',     label: 'سایر',    img: '/images/shop/Ball.jpg'              },
+  {
+    id: 'cue', label: 'چوب', g: ['#8B4513','#D2691E'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="white" transform="rotate(-38 3 13)"/>
+      <rect x="18" y="4" width="7" height="3" rx="1.5" fill="white" fillOpacity="0.6" transform="rotate(-38 18 4)"/>
+      <rect x="2" y="19" width="5" height="4" rx="2" fill="white" fillOpacity="0.4" transform="rotate(-38 2 19)"/>
+    </svg>,
+  },
+  {
+    id: 'table', label: 'میز', g: ['#1A6B3A','#28A860'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="3" y="7" width="22" height="14" rx="3" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.8"/>
+      <circle cx="3.5" cy="7.5" r="2.2" fill="white"/>
+      <circle cx="14" cy="7" r="2.2" fill="white"/>
+      <circle cx="24.5" cy="7.5" r="2.2" fill="white"/>
+      <circle cx="3.5" cy="20.5" r="2.2" fill="white"/>
+      <circle cx="14" cy="21" r="2.2" fill="white"/>
+      <circle cx="24.5" cy="20.5" r="2.2" fill="white"/>
+    </svg>,
+  },
+  {
+    id: 'ball', label: 'توپ', g: ['#B71C1C','#E53935'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <circle cx="14" cy="14" r="10" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
+      <path d="M6 11 Q14 7 22 11" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+      <path d="M6 17 Q14 13 22 17" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+      <circle cx="10" cy="9" r="2" fill="white" fillOpacity="0.5"/>
+    </svg>,
+  },
+  {
+    id: 'tip', label: 'تیپ', g: ['#0D47A1','#1976D2'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <ellipse cx="14" cy="12" rx="7" ry="3" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="1.8"/>
+      <line x1="7" y1="12" x2="7" y2="19" stroke="white" strokeWidth="1.8"/>
+      <line x1="21" y1="12" x2="21" y2="19" stroke="white" strokeWidth="1.8"/>
+      <ellipse cx="14" cy="19" rx="7" ry="3" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.8"/>
+      <ellipse cx="14" cy="10.5" rx="5" ry="2" fill="white" stroke="white" strokeWidth="1.2"/>
+    </svg>,
+  },
+  {
+    id: 'chalk', label: 'گچ', g: ['#4A148C','#7B1FA2'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="7" y="12" width="14" height="11" rx="2" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.8"/>
+      <path d="M7 12 L10 8 L24 8 L21 12" stroke="white" strokeWidth="1.8" strokeLinejoin="round" fill="white" fillOpacity="0.15"/>
+      <line x1="21" y1="12" x2="21" y2="23" stroke="white" strokeWidth="1.8"/>
+      <path d="M9 10 Q14 7.5 20 10" stroke="white" strokeWidth="1.2" strokeLinecap="round" fillOpacity="0"/>
+    </svg>,
+  },
+  {
+    id: 'extension', label: 'اکستنشن', g: ['#004D40','#00897B'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <line x1="3" y1="22" x2="13" y2="12" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="13" cy="12" r="2.5" fill="white"/>
+      <circle cx="18" cy="12" r="2.5" fill="white" fillOpacity="0.4" stroke="white" strokeWidth="1.5"/>
+      <line x1="18" y1="12" x2="26" y2="7" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+      <rect x="14" y="10.5" width="8" height="3" rx="1.5" stroke="white" strokeWidth="1.4" fill="none" fillOpacity="0"/>
+    </svg>,
+  },
+  {
+    id: 'case', label: 'کیس', g: ['#311B92','#5E35B1'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="3" y="11" width="22" height="7" rx="3.5" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
+      <ellipse cx="3.5" cy="14.5" rx="2" ry="3.5" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.4"/>
+      <line x1="7" y1="11" x2="7" y2="18" stroke="white" strokeWidth="1.2" opacity="0.5"/>
+      <line x1="11" y1="11" x2="11" y2="18" stroke="white" strokeWidth="1.2" opacity="0.5"/>
+      <path d="M13 10 Q14 8.5 15 10" stroke="white" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+    </svg>,
+  },
+  {
+    id: 'bag', label: 'کیف', g: ['#BF360C','#E64A19'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="4" y="11" width="20" height="14" rx="3" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
+      <path d="M10 11 L10 8 Q10 5 14 5 Q18 5 18 8 L18 11" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      <line x1="4" y1="16" x2="24" y2="16" stroke="white" strokeWidth="1.2" strokeDasharray="2 2" opacity="0.6"/>
+      <rect x="8" y="18" width="12" height="5" rx="1.5" stroke="white" strokeWidth="1.2" fill="none" opacity="0.6"/>
+    </svg>,
+  },
+  {
+    id: 'rest', label: 'رست', g: ['#1B5E20','#388E3C'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <line x1="3" y1="25" x2="18" y2="13" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="18" cy="13" r="2.2" fill="white"/>
+      <line x1="18" y1="13" x2="24" y2="7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="18" y1="13" x2="26" y2="12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="18" y1="13" x2="24" y2="18" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M22 7 L24.5 5 L27 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </svg>,
+  },
+  {
+    id: 'cloth', label: 'پارچه', g: ['#006064','#00ACC1'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="3" y="8" width="22" height="13" rx="2" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
+      <path d="M3 12 L25 12" stroke="white" strokeWidth="0.9" opacity="0.5"/>
+      <path d="M3 16 L25 16" stroke="white" strokeWidth="0.9" opacity="0.5"/>
+      <path d="M9 8 L9 21" stroke="white" strokeWidth="0.9" opacity="0.5"/>
+      <path d="M16 8 L16 21" stroke="white" strokeWidth="0.9" opacity="0.5"/>
+      <ellipse cx="3.5" cy="14.5" rx="2" ry="6.5" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="1.4"/>
+    </svg>,
+  },
+  {
+    id: 'oil', label: 'روغن', g: ['#E65100','#F57C00'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <path d="M11 7 L11 11 Q6 13 6 17 L6 22 Q6 24 8 24 L20 24 Q22 24 22 22 L22 17 Q22 13 17 11 L17 7 Z" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8" strokeLinejoin="round"/>
+      <rect x="11" y="5" width="6" height="3.5" rx="1.5" fill="white" fillOpacity="0.4" stroke="white" strokeWidth="1.4"/>
+      <path d="M14 14 Q12 17 12 19 Q12 21.5 14 21.5 Q16 21.5 16 19 Q16 17 14 14Z" fill="white" opacity="0.6"/>
+    </svg>,
+  },
+  {
+    id: 'towel', label: 'حوله', g: ['#AD1457','#D81B60'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <rect x="5" y="7" width="18" height="5" rx="2.5" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="1.7"/>
+      <rect x="5" y="14" width="18" height="5" rx="2.5" fill="white" fillOpacity="0.4" stroke="white" strokeWidth="1.7"/>
+      <rect x="5" y="21" width="18" height="4" rx="2" fill="white" fillOpacity="0.55" stroke="white" strokeWidth="1.7"/>
+      <path d="M5 9 Q14 7.5 23 9" stroke="white" strokeWidth="0.8" opacity="0.45" fill="none"/>
+    </svg>,
+  },
+  {
+    id: 'clothing', label: 'پوشاک', g: ['#1A237E','#283593'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <path d="M11 5 Q14 9 17 5 L23 9 L20 13 L20 23 L8 23 L8 13 L5 9 Z" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M11 5 Q14 8 17 5" stroke="white" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+    </svg>,
+  },
+  {
+    id: 'accessory', label: 'اکسسوری', g: ['#78550A','#B8860B'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <path d="M8 23 L8 13 Q8 11 10 11 L12 11 L12 9 Q12 7 14 7 Q16 7 16 9 L16 11 L18 11 Q20 11 20 13 L20 23 Q20 25 14 25 Q8 25 8 23Z" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8" strokeLinejoin="round"/>
+      <line x1="12" y1="15" x2="12" y2="19" stroke="white" strokeWidth="1.3" opacity="0.6"/>
+      <line x1="16" y1="14" x2="16" y2="19" stroke="white" strokeWidth="1.3" opacity="0.6"/>
+      <path d="M8 20 Q14 22 20 20" stroke="white" strokeWidth="1.3" fill="none" opacity="0.7"/>
+    </svg>,
+  },
+  {
+    id: 'other', label: 'سایر', g: ['#37474F','#546E7A'],
+    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
+      <circle cx="8"  cy="8"  r="2.8" fill="white" opacity="0.5"/>
+      <circle cx="14" cy="8"  r="2.8" fill="white"/>
+      <circle cx="20" cy="8"  r="2.8" fill="white" opacity="0.5"/>
+      <circle cx="8"  cy="14" r="2.8" fill="white" opacity="0.5"/>
+      <circle cx="14" cy="14" r="2.8" fill="white" opacity="0.9"/>
+      <circle cx="20" cy="14" r="2.8" fill="white" opacity="0.5"/>
+      <circle cx="8"  cy="20" r="2.8" fill="white" opacity="0.35"/>
+      <circle cx="14" cy="20" r="2.8" fill="white" opacity="0.5"/>
+      <circle cx="20" cy="20" r="2.8" fill="white" opacity="0.35"/>
+    </svg>,
+  },
+]
+
+// ── Mock products ──────────────────────────────────────────────
+const PRODUCTS = [
+  { id: 1,  img: '/images/shop/cue_billiard_2.jpg',   name: 'چوب حرفه‌ای Predator 314³',              price: 2800000, old: 3300000, disc: 15 },
+  { id: 2,  img: '/images/shop/snooker-table.jpg',    name: 'میز اسنوکر Dynamo Tournament',            price: 45000000,old: 50000000,disc: 10 },
+  { id: 3,  img: '/images/shop/Ball-1.jpg',           name: 'توپ Aramith Pro Cup استاندارد WPBSA',     price: 1200000, old: 1500000, disc: 20 },
+  { id: 4,  img: '/images/shop/pool_chalk_1.jpg',     name: 'گچ Master Blue Square — ۱۴۴ عددی',       price: 180000,  old: 260000,  disc: 31 },
+  { id: 5,  img: '/images/shop/rest-pool.webp',       name: 'رست اسنوکر حرفه‌ای پیچ استنلس',          price: 450000,  old: 480000,  disc: 6  },
+  { id: 6,  img: '/images/shop/accessori.png',        name: 'کیف چوب بیلیارد دو قسمتی چرم',           price: 850000,  old: 970000,  disc: 12 },
+  { id: 7,  img: '/images/shop/cue_billiard.jpg',     name: 'چوب کربن فایبر Mezz EC7-CF',             price: 6500000, old: 7100000, disc: 8  },
+  { id: 8,  img: '/images/shop/Ball.jpg',             name: 'توپ Cyclop Omega Pool Set',               price: 950000,  old: 1120000, disc: 15 },
+  { id: 9,  img: '/images/shop/Home_table.jpg',       name: 'میز بیلیارد خانگی — پایه چوب ماسیو',    price: 18000000,old: 19000000,disc: 5  },
+  { id: 10, img: '/images/shop/pool_chalk_2.jpg',     name: 'گچ Predator 1080 Pure — ۵ عددی',         price: 220000,  old: 245000,  disc: 10 },
+  { id: 11, img: '/images/shop/snooker-table-2.jpg',  name: 'میز اسنوکر Pro-Line ۱۲ فوتی',            price: 68000000,old: 75000000,disc: 9  },
+  { id: 12, img: '/images/shop/Pro_table.jpg',        name: 'میز بیلیارد حرفه‌ای پارچه ایتالیایی',   price: 32000000,old: 36000000,disc: 11 },
 ]
 
 function toFa(v: string | number) {
@@ -227,62 +374,35 @@ function CategoriesSection() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const scroll = (dir: 'next' | 'prev') => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir === 'next' ? 600 : -600, behavior: 'smooth' })
+      scrollRef.current.scrollBy({ left: dir === 'next' ? 560 : -560, behavior: 'smooth' })
     }
   }
   return (
     <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 26px', direction: 'rtl' }}>
-        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>
-            دسته‌بندی‌های بیلیارد بازار
-          </h2>
-          {/* Nav arrows — exactly like Snapp Shop */}
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>دسته‌بندی‌های بیلیارد بازار</h2>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => scroll('prev')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.14)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.2s' }}>
-              <svg viewBox="0 0 18 18" fill="none" width={16} height={16}>
-                <path d="M11 4L6 9l5 5" stroke={TEXT} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <button onClick={() => scroll('prev')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 18 18" fill="none" width={15} height={15}><path d="M11 4L6 9l5 5" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
-            <button onClick={() => scroll('next')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.14)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.2s' }}>
-              <svg viewBox="0 0 18 18" fill="none" width={16} height={16}>
-                <path d="M7 4l5 5-5 5" stroke={TEXT} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <button onClick={() => scroll('next')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 18 18" fill="none" width={15} height={15}><path d="M7 4l5 5-5 5" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           </div>
         </div>
-        {/* Scroll row */}
-        <div
-          ref={scrollRef}
-          className="cat-scroll"
-          style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}
-        >
+        <div ref={scrollRef} className="cat-scroll" style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
           {CATS.map(cat => (
-            <Link
-              key={cat.id}
-              href={`/shop/category/${cat.id}`}
-              style={{
-                textDecoration: 'none', flexShrink: 0,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9,
-                width: 112,
-              }}
-            >
-              {/* Photo card — exactly like Snapp Shop */}
+            <Link key={cat.id} href={`/shop/category/${cat.id}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9, width: 90 }}>
               <div style={{
-                width: 112, height: 104,
-                borderRadius: 16,
-                overflow: 'hidden',
-                background: '#F4F3F1',
-                border: '1px solid rgba(28,28,26,0.07)',
+                width: 80, height: 80, borderRadius: 20,
+                background: `linear-gradient(135deg,${cat.g[0]},${cat.g[1]})`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 4px 16px ${cat.g[1]}40`,
               }}>
-                <img
-                  src={cat.img}
-                  alt={cat.label}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+                {cat.icon}
               </div>
-              <span style={{ fontSize: 12.5, fontWeight: 500, color: TEXT, textAlign: 'center', lineHeight: 1.3 }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: TEXT, textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
                 {cat.label}
               </span>
             </Link>
@@ -293,116 +413,47 @@ function CategoriesSection() {
   )
 }
 
-// ── Deals Timer ───────────────────────────────────────────────
-function DealsTimer() {
-  const INIT = 8 * 3600 + 32 * 60 + 47
-  const [rem, setRem] = useState(INIT)
-  useEffect(() => {
-    const t = setInterval(() => setRem(s => Math.max(0, s - 1)), 1000)
-    return () => clearInterval(t)
-  }, [])
-
-  const pad = (n: number) => toFa(String(Math.floor(n)).padStart(2, '0'))
-  const h = Math.floor(rem / 3600)
-  const m = Math.floor((rem % 3600) / 60)
-  const s = rem % 60
-
-  const units = [
-    {
-      value: pad(h), label: 'ساعت',
-      icon: (
-        <svg viewBox="0 0 22 22" fill="none" width={20} height={20}>
-          <circle cx="11" cy="11" r="9" stroke="currentColor" strokeWidth="1.8"/>
-          <line x1="11" y1="11" x2="11" y2="5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="11" y1="11" x2="14.5" y2="13.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-          <circle cx="11" cy="11" r="1.2" fill="currentColor"/>
-        </svg>
-      ),
-    },
-    {
-      value: pad(m), label: 'دقیقه',
-      icon: (
-        <svg viewBox="0 0 22 22" fill="none" width={20} height={20}>
-          <circle cx="11" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8"/>
-          <rect x="9.5" y="2" width="3" height="4" rx="1.5" fill="currentColor" opacity="0.7"/>
-          <line x1="11" y1="12" x2="11" y2="7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="11" y1="12" x2="14" y2="14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-        </svg>
-      ),
-    },
-    {
-      value: pad(s), label: 'ثانیه',
-      icon: (
-        <svg viewBox="0 0 22 22" fill="none" width={20} height={20}>
-          <path d="M11 3 L9 10 L13 10 L11 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="11" cy="11" r="1.5" fill="currentColor"/>
-        </svg>
-      ),
-    },
-  ]
-
+// ── Products Section ──────────────────────────────────────────
+function ProductsSection() {
+  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
   return (
-    <div style={{ background: '#0F0D0A', borderBottom: '1px solid rgba(255,255,255,0.04)', overflow: 'hidden', position: 'relative' }}>
-      {/* Glow */}
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 200, background: 'radial-gradient(ellipse,rgba(199,166,106,0.08) 0%,transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '24px clamp(16px,3vw,32px)', direction: 'rtl', position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-          {/* Label */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(192,57,43,0.18)', border: '1px solid rgba(192,57,43,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg viewBox="0 0 22 22" fill="none" width={18} height={18}>
-                <path d="M11 2 C11 2 6 7 6 12 C6 14.76 8.24 17 11 17 C13.76 17 16 14.76 16 12 C16 7 11 2 11 2Z" fill="#C0392B" opacity="0.85"/>
-                <path d="M11 9 L10 13 L12 13 Z" fill="white"/>
-              </svg>
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>پیشنهاد شگفت‌انگیز</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>تخفیف‌های ویژه — فقط تا پایان امروز</div>
-            </div>
-          </div>
-
-          {/* Separator */}
-          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left,rgba(255,255,255,0.06),transparent)' }} />
-
-          {/* Timer blocks — ساعت left | دقیقه middle | ثانیه right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, direction: 'ltr' }}>
-            {units.map((u, i) => (
-              <div key={u.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                  background: 'rgba(255,255,255,0.05)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 14,
-                  padding: '10px 16px',
-                  minWidth: 68,
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
-                }}>
-                  <div style={{ color: GOLD, opacity: 0.8 }}>{u.icon}</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{u.value}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: '0.06em' }}>{u.label}</div>
-                </div>
-                {i < 2 && (
-                  <span style={{ fontSize: 22, fontWeight: 900, color: 'rgba(255,255,255,0.2)', marginBottom: 14 }}>:</span>
+    <div style={{ background: '#F7F6F4' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>پیشنهاد محصولات</h2>
+          <Link href="/shop/all" style={{ fontSize: 13, color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+            مشاهده همه
+            <ChevronLeft size={13} strokeWidth={2.5} />
+          </Link>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
+          {PRODUCTS.map(p => (
+            <Link key={p.id} href={`/shop/product/${p.id}`} style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1px solid rgba(28,28,26,0.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'box-shadow 0.2s', boxShadow: '0 1px 4px rgba(28,28,26,0.05)' }}>
+              {/* Image */}
+              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden' }}>
+                <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                {p.disc > 0 && (
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                    {toFa(p.disc)}٪
+                  </div>
                 )}
               </div>
-            ))}
-          </div>
-
-          {/* View deals button */}
-          <Link href="/shop/deals" style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'rgba(199,166,106,0.12)',
-            backdropFilter: 'blur(16px)',
-            border: `1px solid ${GOLD_BOR}`,
-            borderRadius: 11, padding: '9px 18px',
-            color: GOLD, fontSize: 13, fontWeight: 700, textDecoration: 'none',
-            boxShadow: '0 4px 16px rgba(199,166,106,0.1),inset 0 1px 0 rgba(255,255,255,0.1)',
-            whiteSpace: 'nowrap',
-          }}>
-            مشاهده همه
-            <ChevronLeft size={14} strokeWidth={2.5} />
-          </Link>
+              {/* Info */}
+              <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <div style={{ marginTop: 'auto' }}>
+                  {p.disc > 0 && (
+                    <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                      {fmt(p.old)} تومان
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
@@ -430,6 +481,9 @@ export default function ShopPage() {
         * { box-sizing: border-box; }
         .hero-slider { height: clamp(220px,38vw,420px); }
         .cat-scroll::-webkit-scrollbar { display: none; }
+        .prod-grid { grid-template-columns: repeat(6,1fr) !important; }
+        @media(max-width:1100px) { .prod-grid { grid-template-columns: repeat(4,1fr) !important; } }
+        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(2,1fr) !important; } }
         @media(max-width:600px) {
           .bb-brand   { display: none !important; }
           .bb-divider { display: none !important; }
@@ -447,7 +501,7 @@ export default function ShopPage() {
         />
         <HeroSlider />
         <CategoriesSection />
-        <DealsTimer />
+        <ProductsSection />
       </div>
     </>
   )
