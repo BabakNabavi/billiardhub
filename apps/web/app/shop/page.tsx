@@ -391,8 +391,8 @@ function CategoriesSection() {
   }
 
   return (
-    <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 26px', direction: 'rtl' }}>
+    <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', borderBottom: '1px solid rgba(28,28,26,0.07)', overflow: 'visible' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 16px', direction: 'rtl', overflow: 'visible' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>دسته‌بندی‌های بیلیارد بازار</h2>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -420,7 +420,7 @@ function CategoriesSection() {
           onMouseMove={onMove}
           onMouseUp={onUp}
           onMouseLeave={onUp}
-          style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4, cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
             const hov = hovId === cat.id
@@ -493,9 +493,9 @@ function ProductsSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
           {PRODUCTS.map(p => (
-            <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1px solid rgba(28,28,26,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {/* Image */}
-              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1px solid rgba(28,28,26,0.08)' }}>
+              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
                   <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
