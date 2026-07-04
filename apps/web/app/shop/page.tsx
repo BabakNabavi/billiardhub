@@ -58,218 +58,21 @@ const SLIDES = [
 
 // ── Category definitions ───────────────────────────────────────
 const CATS = [
-  {
-    id: 'cue', label: 'چوب', clr: '#9B6F3A', bg: 'rgba(155,111,58,0.11)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        <line x1="6" y1="30" x2="28" y2="8" stroke="#9B6F3A" strokeWidth="2.6" strokeLinecap="round"/>
-        <line x1="28" y1="8" x2="31" y2="5" stroke="#9B6F3A" strokeWidth="4.5" strokeLinecap="round"/>
-        <rect x="3" y="27" width="6" height="3" rx="1.5" fill="#9B6F3A" transform="rotate(-45 3 27)"/>
-        <line x1="13" y1="23" x2="16" y2="20" stroke="#9B6F3A" strokeWidth="1.2" strokeLinecap="round" opacity="0.45"/>
-        <line x1="17" y1="19" x2="20" y2="16" stroke="#9B6F3A" strokeWidth="1.2" strokeLinecap="round" opacity="0.45"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'table', label: 'میز', clr: '#2A7B50', bg: 'rgba(42,123,80,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        <rect x="3" y="9" width="30" height="18" rx="2.5" fill="#2A7B50" fillOpacity="0.12" stroke="#2A7B50" strokeWidth="1.9"/>
-        {/* 6 pockets */}
-        <circle cx="3.5" cy="9.5" r="2" fill="#2A7B50"/>
-        <circle cx="18" cy="9" r="2" fill="#2A7B50"/>
-        <circle cx="32.5" cy="9.5" r="2" fill="#2A7B50"/>
-        <circle cx="3.5" cy="26.5" r="2" fill="#2A7B50"/>
-        <circle cx="18" cy="27" r="2" fill="#2A7B50"/>
-        <circle cx="32.5" cy="26.5" r="2" fill="#2A7B50"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'ball', label: 'توپ', clr: '#C0392B', bg: 'rgba(192,57,43,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        <circle cx="18" cy="18" r="12" fill="#C0392B" fillOpacity="0.13" stroke="#C0392B" strokeWidth="1.9"/>
-        <path d="M10 14 Q18 10 26 14" stroke="#C0392B" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-        <path d="M10 22 Q18 18 26 22" stroke="#C0392B" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-        <circle cx="13" cy="12" r="2.5" fill="white" fillOpacity="0.45"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'tip', label: 'تیپ', clr: '#2E6DA4', bg: 'rgba(46,109,164,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Cue tip: small disc on top of ferrule */}
-        <ellipse cx="18" cy="13" rx="8" ry="3.5" fill="#2E6DA4" fillOpacity="0.15" stroke="#2E6DA4" strokeWidth="1.9"/>
-        <line x1="10" y1="13" x2="10" y2="22" stroke="#2E6DA4" strokeWidth="1.9"/>
-        <line x1="26" y1="13" x2="26" y2="22" stroke="#2E6DA4" strokeWidth="1.9"/>
-        <ellipse cx="18" cy="22" rx="8" ry="3.5" fill="#2E6DA4" fillOpacity="0.15" stroke="#2E6DA4" strokeWidth="1.9"/>
-        {/* tip cap */}
-        <ellipse cx="18" cy="11" rx="5" ry="2" fill="#2E6DA4" stroke="#2E6DA4" strokeWidth="1.4"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'chalk', label: 'گچ', clr: '#5B6FA8', bg: 'rgba(91,111,168,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Chalk cube */}
-        <rect x="9" y="14" width="16" height="13" rx="2" fill="#5B6FA8" fillOpacity="0.13" stroke="#5B6FA8" strokeWidth="1.9"/>
-        <path d="M9 14 L13 10 L29 10 L25 14" stroke="#5B6FA8" strokeWidth="1.9" strokeLinejoin="round"/>
-        <line x1="25" y1="14" x2="25" y2="27" stroke="#5B6FA8" strokeWidth="1.9"/>
-        <line x1="25" y1="10" x2="29" y2="10" stroke="#5B6FA8" strokeWidth="1.9"/>
-        {/* Worn concave top */}
-        <path d="M11 12 Q18 9 24 12" stroke="#5B6FA8" strokeWidth="1.4" strokeLinecap="round" fillOpacity="0"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'extension', label: 'اکستنشن', clr: '#2E7D80', bg: 'rgba(46,125,128,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Two cue sections connecting */}
-        <line x1="4" y1="26" x2="15" y2="15" stroke="#2E7D80" strokeWidth="2.8" strokeLinecap="round"/>
-        <circle cx="15" cy="15" r="2.5" fill="#2E7D80" stroke="#2E7D80" strokeWidth="1.5"/>
-        <circle cx="21" cy="15" r="2.5" fill="none" stroke="#2E7D80" strokeWidth="1.5"/>
-        <line x1="21" y1="15" x2="32" y2="10" stroke="#2E7D80" strokeWidth="2" strokeLinecap="round"/>
-        {/* Extension lock ring */}
-        <rect x="17" y="13" width="8" height="4" rx="2" stroke="#2E7D80" strokeWidth="1.5" fill="none"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'case', label: 'کیس', clr: '#7B52AB', bg: 'rgba(123,82,171,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Long cylindrical cue case */}
-        <rect x="5" y="14" width="26" height="9" rx="4.5" fill="#7B52AB" fillOpacity="0.13" stroke="#7B52AB" strokeWidth="1.9"/>
-        <line x1="9" y1="14" x2="9" y2="23" stroke="#7B52AB" strokeWidth="1.2" opacity="0.45"/>
-        <line x1="13" y1="14" x2="13" y2="23" stroke="#7B52AB" strokeWidth="1.2" opacity="0.45"/>
-        {/* Cap/end */}
-        <ellipse cx="5" cy="18.5" rx="2" ry="4.5" fill="#7B52AB" fillOpacity="0.25" stroke="#7B52AB" strokeWidth="1.6"/>
-        {/* Strap */}
-        <path d="M16 13 Q18 11 20 13" stroke="#7B52AB" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'bag', label: 'کیف', clr: '#C47C2A', bg: 'rgba(196,124,42,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Bag body */}
-        <rect x="5" y="14" width="26" height="17" rx="3" fill="#C47C2A" fillOpacity="0.12" stroke="#C47C2A" strokeWidth="1.9"/>
-        {/* Handle */}
-        <path d="M12 14 L12 10 Q12 7 18 7 Q24 7 24 10 L24 14" stroke="#C47C2A" strokeWidth="1.9" fill="none" strokeLinecap="round"/>
-        {/* Zipper line */}
-        <line x1="5" y1="19" x2="31" y2="19" stroke="#C47C2A" strokeWidth="1.4" strokeDasharray="2 2"/>
-        {/* Front pocket */}
-        <rect x="10" y="21" width="16" height="7" rx="2" stroke="#C47C2A" strokeWidth="1.3" fill="none" opacity="0.6"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'rest', label: 'رست', clr: '#3A7D44', bg: 'rgba(58,125,68,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Rest shaft */}
-        <line x1="4" y1="30" x2="22" y2="18" stroke="#3A7D44" strokeWidth="2.4" strokeLinecap="round"/>
-        {/* Spider/V head */}
-        <path d="M22 18 L28 12" stroke="#3A7D44" strokeWidth="2.2" strokeLinecap="round"/>
-        <path d="M22 18 L30 16" stroke="#3A7D44" strokeWidth="2.2" strokeLinecap="round"/>
-        <path d="M22 18 L28 22" stroke="#3A7D44" strokeWidth="2.2" strokeLinecap="round"/>
-        {/* V notch */}
-        <path d="M25 12 L28 10 L31 12" stroke="#3A7D44" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        <circle cx="22" cy="18" r="2.2" fill="#3A7D44"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'cloth', label: 'پارچه', clr: '#2BAA5E', bg: 'rgba(43,170,94,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Billiard cloth — table with felt texture */}
-        <rect x="4" y="11" width="28" height="16" rx="2" fill="#2BAA5E" fillOpacity="0.14" stroke="#2BAA5E" strokeWidth="1.9"/>
-        {/* Fabric weave pattern */}
-        <line x1="4" y1="16" x2="32" y2="16" stroke="#2BAA5E" strokeWidth="0.9" opacity="0.4"/>
-        <line x1="4" y1="21" x2="32" y2="21" stroke="#2BAA5E" strokeWidth="0.9" opacity="0.4"/>
-        <line x1="11" y1="11" x2="11" y2="27" stroke="#2BAA5E" strokeWidth="0.9" opacity="0.4"/>
-        <line x1="18" y1="11" x2="18" y2="27" stroke="#2BAA5E" strokeWidth="0.9" opacity="0.4"/>
-        <line x1="25" y1="11" x2="25" y2="27" stroke="#2BAA5E" strokeWidth="0.9" opacity="0.4"/>
-        {/* Roll indicator */}
-        <ellipse cx="4" cy="19" rx="2" ry="8" fill="#2BAA5E" fillOpacity="0.2" stroke="#2BAA5E" strokeWidth="1.5"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'oil', label: 'روغن', clr: '#8D7B2A', bg: 'rgba(141,123,42,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Oil bottle */}
-        <path d="M13 9 L13 13 Q8 15 8 20 L8 27 Q8 29 10 29 L26 29 Q28 29 28 27 L28 20 Q28 15 23 13 L23 9 Z" fill="#8D7B2A" fillOpacity="0.13" stroke="#8D7B2A" strokeWidth="1.9" strokeLinejoin="round"/>
-        {/* Cap */}
-        <rect x="13" y="7" width="10" height="4" rx="2" fill="#8D7B2A" fillOpacity="0.3" stroke="#8D7B2A" strokeWidth="1.6"/>
-        {/* Oil drop inside */}
-        <path d="M18 17 Q16 20 16 22 Q16 25 18 25 Q20 25 20 22 Q20 20 18 17Z" fill="#8D7B2A" opacity="0.55"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'towel', label: 'حوله', clr: '#C47A7A', bg: 'rgba(196,122,122,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Rolled/stacked towel */}
-        <rect x="7" y="10" width="22" height="5" rx="2.5" fill="#C47A7A" fillOpacity="0.18" stroke="#C47A7A" strokeWidth="1.9"/>
-        <rect x="7" y="17" width="22" height="5" rx="2.5" fill="#C47A7A" fillOpacity="0.25" stroke="#C47A7A" strokeWidth="1.9"/>
-        <rect x="7" y="24" width="22" height="5" rx="2.5" fill="#C47A7A" fillOpacity="0.35" stroke="#C47A7A" strokeWidth="1.9"/>
-        {/* Fold detail */}
-        <path d="M7 12.5 Q18 10.5 29 12.5" stroke="#C47A7A" strokeWidth="0.8" opacity="0.4" fill="none"/>
-        <path d="M7 19.5 Q18 17.5 29 19.5" stroke="#C47A7A" strokeWidth="0.8" opacity="0.4" fill="none"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'clothing', label: 'پوشاک', clr: '#2A4C8A', bg: 'rgba(42,76,138,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* T-shirt */}
-        <path d="M13 7 Q18 11 23 7 L30 12 L26 16 L26 29 L10 29 L10 16 L6 12 Z"
-          fill="#2A4C8A" fillOpacity="0.13" stroke="#2A4C8A" strokeWidth="1.9" strokeLinejoin="round"/>
-        {/* Collar */}
-        <path d="M13 7 Q18 10 23 7" stroke="#2A4C8A" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        {/* Logo area */}
-        <circle cx="18" cy="20" r="3" stroke="#2A4C8A" strokeWidth="1.2" fill="none" opacity="0.5"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'accessory', label: 'اکسسوری', clr: '#C7A66A', bg: 'rgba(199,166,106,0.12)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Billiard glove */}
-        <path d="M10 28 L10 16 Q10 14 12 14 L14 14 L14 12 Q14 10 16 10 Q18 10 18 12 L18 14 L20 14 L20 12 Q20 10 22 10 Q24 10 24 12 L24 14 Q26 14 26 16 L26 28 Q26 30 18 30 Q10 30 10 28Z"
-          fill="#C7A66A" fillOpacity="0.14" stroke="#C7A66A" strokeWidth="1.9" strokeLinejoin="round"/>
-        {/* Knuckle lines */}
-        <line x1="14" y1="18" x2="14" y2="22" stroke="#C7A66A" strokeWidth="1.2" opacity="0.5"/>
-        <line x1="18" y1="17" x2="18" y2="22" stroke="#C7A66A" strokeWidth="1.2" opacity="0.5"/>
-        <line x1="22" y1="18" x2="22" y2="22" stroke="#C7A66A" strokeWidth="1.2" opacity="0.5"/>
-        {/* Wrist strap */}
-        <path d="M10 25 Q18 27 26 25" stroke="#C7A66A" strokeWidth="1.5" fill="none" opacity="0.6"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'other', label: 'سایر', clr: '#6C7A8A', bg: 'rgba(108,122,138,0.1)',
-    icon: (
-      <svg viewBox="0 0 36 36" fill="none" width={38} height={38}>
-        {/* Modern grid of 9 dots */}
-        {[9,18,27].map(x => [9,18,27].map(y => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r="2.8" fill="#6C7A8A" opacity={x===18&&y===18?1:0.5}/>
-        )))}
-        <circle cx="18" cy="18" r="4.5" fill="none" stroke="#6C7A8A" strokeWidth="1.4"/>
-      </svg>
-    ),
-  },
+  { id: 'cue',       label: 'چوب',     img: '/images/shop/cue_billiard_2.jpg'   },
+  { id: 'table',     label: 'میز',     img: '/images/shop/Pro_table.jpg'         },
+  { id: 'ball',      label: 'توپ',     img: '/images/shop/Ball-1.jpg'            },
+  { id: 'tip',       label: 'تیپ',     img: '/images/shop/cue_billiard.jpg'      },
+  { id: 'chalk',     label: 'گچ',      img: '/images/shop/pool_chalk_1.jpg'      },
+  { id: 'extension', label: 'اکستنشن', img: '/images/shop/cue_billiard_2.jpg'   },
+  { id: 'case',      label: 'کیس',     img: '/images/shop/accessori.png'         },
+  { id: 'bag',       label: 'کیف',     img: '/images/shop/rest-pool-2.jpg'       },
+  { id: 'rest',      label: 'رست',     img: '/images/shop/rest-pool.webp'        },
+  { id: 'cloth',     label: 'پارچه',   img: '/images/shop/snooker-table-2.jpg'   },
+  { id: 'oil',       label: 'روغن',    img: '/images/shop/pool_chalk_2.jpg'      },
+  { id: 'towel',     label: 'حوله',    img: '/images/shop/Home_table.jpg'        },
+  { id: 'clothing',  label: 'پوشاک',   img: '/images/shop/snooker-table.jpg'     },
+  { id: 'accessory', label: 'اکسسوری', img: '/images/shop/accessori.png'         },
+  { id: 'other',     label: 'سایر',    img: '/images/shop/Ball.jpg'              },
 ]
 
 function toFa(v: string | number) {
@@ -421,58 +224,65 @@ function HeroSlider() {
 
 // ── Categories Section ────────────────────────────────────────
 function CategoriesSection() {
-  const [hov, setHov] = useState<string | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const scroll = (dir: 'next' | 'prev') => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: dir === 'next' ? 600 : -600, behavior: 'smooth' })
+    }
+  }
   return (
-    <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 32px', direction: 'rtl' }}>
+    <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 26px', direction: 'rtl' }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 17, fontWeight: 800, color: TEXT, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ display: 'inline-block', width: 4, height: 18, borderRadius: 2, background: GOLD }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>
             دسته‌بندی‌های بیلیارد بازار
           </h2>
-          <Link href="/shop/categories" style={{ fontSize: 13, color: GOLD, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-            مشاهده همه
-            <ChevronLeft size={14} strokeWidth={2.5} />
-          </Link>
+          {/* Nav arrows — exactly like Snapp Shop */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={() => scroll('prev')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.14)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.2s' }}>
+              <svg viewBox="0 0 18 18" fill="none" width={16} height={16}>
+                <path d="M11 4L6 9l5 5" stroke={TEXT} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <button onClick={() => scroll('next')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.14)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.2s' }}>
+              <svg viewBox="0 0 18 18" fill="none" width={16} height={16}>
+                <path d="M7 4l5 5-5 5" stroke={TEXT} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        {/* Horizontal scroll row */}
-        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}
-          className="cat-scroll">
+        {/* Scroll row */}
+        <div
+          ref={scrollRef}
+          className="cat-scroll"
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}
+        >
           {CATS.map(cat => (
             <Link
               key={cat.id}
               href={`/shop/category/${cat.id}`}
-              onMouseEnter={() => setHov(cat.id)}
-              onMouseLeave={() => setHov(null)}
               style={{
                 textDecoration: 'none', flexShrink: 0,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-                width: 84,
-                cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9,
+                width: 112,
               }}
             >
-              {/* Icon card */}
+              {/* Photo card — exactly like Snapp Shop */}
               <div style={{
-                width: 76, height: 76, borderRadius: 22,
-                background: hov === cat.id ? cat.bg.replace('0.1', '0.2').replace('0.12', '0.25').replace('0.11', '0.22') : cat.bg,
-                border: `1.5px solid ${hov === cat.id ? cat.clr + '50' : 'rgba(28,28,26,0.06)'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.25s ease',
-                transform: hov === cat.id ? 'translateY(-3px)' : 'none',
-                boxShadow: hov === cat.id
-                  ? `0 8px 24px ${cat.clr}22, inset 0 1px 0 rgba(255,255,255,0.7)`
-                  : '0 2px 8px rgba(28,28,26,0.05), inset 0 1px 0 rgba(255,255,255,0.8)',
+                width: 112, height: 104,
+                borderRadius: 16,
+                overflow: 'hidden',
+                background: '#F4F3F1',
+                border: '1px solid rgba(28,28,26,0.07)',
               }}>
-                {cat.icon}
+                <img
+                  src={cat.img}
+                  alt={cat.label}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
               </div>
-              {/* Label */}
-              <span style={{
-                fontSize: 12, fontWeight: hov === cat.id ? 700 : 500,
-                color: hov === cat.id ? cat.clr : TEXT_SEC,
-                textAlign: 'center', lineHeight: 1.3,
-                transition: 'all 0.2s',
-              }}>
+              <span style={{ fontSize: 12.5, fontWeight: 500, color: TEXT, textAlign: 'center', lineHeight: 1.3 }}>
                 {cat.label}
               </span>
             </Link>
