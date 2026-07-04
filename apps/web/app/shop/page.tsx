@@ -525,6 +525,193 @@ function ProductsSection() {
   )
 }
 
+// ── Deals Section ─────────────────────────────────────────────
+const DEAL_PRODUCTS = PRODUCTS.slice(0, 6)
+
+function DealsSection() {
+  const INIT = 9 * 3600 + 20 * 60 + 19
+  const [rem, setRem] = useState(INIT)
+  const scrollRef  = useRef<HTMLDivElement>(null)
+  const dragging   = useRef(false)
+  const startX     = useRef(0)
+  const scrollLeft = useRef(0)
+
+  useEffect(() => {
+    const t = setInterval(() => setRem(s => Math.max(0, s - 1)), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  const h  = Math.floor(rem / 3600)
+  const m  = Math.floor((rem % 3600) / 60)
+  const s  = rem % 60
+  const pad = (n: number) => toFa(String(n).padStart(2, '0'))
+  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
+
+  const scroll = (dir: 'next' | 'prev') => {
+    scrollRef.current?.scrollBy({ left: dir === 'next' ? 520 : -520, behavior: 'smooth' })
+  }
+  const onDown = (e: React.MouseEvent) => {
+    dragging.current = true
+    startX.current   = e.pageX - (scrollRef.current?.offsetLeft ?? 0)
+    scrollLeft.current = scrollRef.current?.scrollLeft ?? 0
+    if (scrollRef.current) scrollRef.current.style.cursor = 'grabbing'
+  }
+  const onMove = (e: React.MouseEvent) => {
+    if (!dragging.current || !scrollRef.current) return
+    e.preventDefault()
+    const x = e.pageX - scrollRef.current.offsetLeft
+    scrollRef.current.scrollLeft = scrollLeft.current - (x - startX.current) * 1.4
+  }
+  const onUp = () => {
+    dragging.current = false
+    if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+  }
+
+  return (
+    <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', direction: 'rtl' }}>
+        {/* ── header ── */}
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+          {/* timer */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1C1C1A', borderRadius: 8, padding: '5px 12px' }}>
+              {/* clock icon */}
+              <svg viewBox="0 0 18 18" fill="none" width={14} height={14}>
+                <circle cx="9" cy="9" r="7.5" stroke="#C7A66A" strokeWidth="1.5"/>
+                <line x1="9" y1="9" x2="9" y2="4.5" stroke="#C7A66A" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="9" y1="9" x2="12" y2="11" stroke="#C7A66A" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span style={{ fontSize: 14, fontWeight: 900, color: '#fff', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums', direction: 'ltr' }}>
+                {pad(h)}:{pad(m)}:{pad(s)}
+              </span>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC }}>:زمان باقیمانده</span>
+          </div>
+          {/* title + arrows */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>پیشنهاد ویژه بیلیارد بازار</h2>
+            <div style={{ display: 'flex', gap: 5 }}>
+              {(['prev','next'] as const).map(dir => (
+                <button key={dir} onClick={() => scroll(dir)} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg viewBox="0 0 16 16" fill="none" width={13} height={13}>
+                    <path d={dir === 'prev' ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'} stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* ── cards row ── */}
+        <div
+          ref={scrollRef}
+          className="cat-scroll"
+          onMouseDown={onDown}
+          onMouseMove={onMove}
+          onMouseUp={onUp}
+          onMouseLeave={onUp}
+          style={{ display: 'flex', gap: 0, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none' }}
+        >
+          {/* yellow promo card — first (RTL = rightmost) */}
+          <Link href="/shop/party" style={{
+            textDecoration: 'none', flexShrink: 0,
+            width: 150, alignSelf: 'stretch', minHeight: 280,
+            background: 'linear-gradient(145deg,#F5C518 0%,#F0A500 60%,#E8920A 100%)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '20px 14px', gap: 4,
+            borderLeft: '1px solid rgba(28,28,26,0.07)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* decorative circle */}
+            <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
+            <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
+            {/* % badge */}
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#1C1C1A', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, position: 'relative', zIndex: 1 }}>
+              <span style={{ fontSize: 22, fontWeight: 900, color: '#F5C518', lineHeight: 1 }}>%</span>
+            </div>
+            <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#1C1C1A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>بیلیارد</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#1C1C1A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>پارتی</div>
+            </div>
+            <div style={{ marginTop: 'auto', fontSize: 11, fontWeight: 700, color: '#1C1C1A', opacity: 0.7, display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
+              مشاهده همه
+              <ChevronLeft size={11} strokeWidth={2.5}/>
+            </div>
+          </Link>
+
+          {/* deal product cards */}
+          {DEAL_PRODUCTS.map(p => (
+            <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{
+              textDecoration: 'none', flexShrink: 0, width: 160,
+              background: '#fff', display: 'flex', flexDirection: 'column',
+              borderLeft: '1px solid rgba(28,28,26,0.07)',
+            }}>
+              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.08)' }}>
+                <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                {p.disc > 0 && (
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                    {toFa(p.disc)}٪
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: '10px 10px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <div style={{ marginTop: 'auto' }}>
+                  {p.disc > 0 && (
+                    <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 1 }}>
+                      {fmt(p.old)} تومان
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 10, fontWeight: 500 }}>تومان</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Ad Banners ─────────────────────────────────────────────────
+const AD_BANNERS = [
+  { img: '/images/shop/cue_billiard_2.jpg',  title: 'چوب‌های اصل', sub: 'اینجا پیدا میشه!',        cta: 'خرید',      href: '/shop/category/cue',       overlay: 'linear-gradient(135deg,rgba(80,35,5,0.72),rgba(160,90,20,0.52))' },
+  { img: '/images/shop/Pro_table.jpg',        title: 'به‌وقت با هم بودن', sub: 'میزهای حرفه‌ای',   cta: 'خرید',      href: '/shop/category/table',     overlay: 'linear-gradient(135deg,rgba(5,50,20,0.70),rgba(20,100,50,0.48))' },
+  { img: '/images/shop/Ball-1.jpg',           title: 'هر توپ یک قهرمانی', sub: 'Aramith · Cyclop', cta: 'خرید',      href: '/shop/category/ball',      overlay: 'linear-gradient(135deg,rgba(100,10,10,0.72),rgba(200,40,40,0.46))' },
+  { img: '/images/shop/accessori.png',        title: 'تجهیزات کامل',  sub: 'لوازم جانبی حرفه‌ای',  cta: 'مشاهده',   href: '/shop/category/accessory', overlay: 'linear-gradient(135deg,rgba(100,70,5,0.72),rgba(199,166,106,0.5))' },
+]
+
+function AdBanners() {
+  return (
+    <div style={{ background: '#F7F6F4', padding: '20px 0' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', direction: 'rtl' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }} className="banner-grid">
+          {AD_BANNERS.map((b, i) => (
+            <Link key={i} href={b.href} className="banner-card" style={{
+              textDecoration: 'none', borderRadius: 14, overflow: 'hidden',
+              height: 150, position: 'relative', display: 'block',
+              border: '1.5px solid rgba(28,28,26,0.1)',
+            }}>
+              <img src={b.img} alt={b.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: b.overlay }} />
+              <div style={{ position: 'absolute', inset: 0, padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>{b.title}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 3, fontWeight: 500 }}>{b.sub}</div>
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#fff', color: '#1C1C1A', fontSize: 12, fontWeight: 700, borderRadius: 8, padding: '5px 12px', alignSelf: 'flex-start' }}>
+                  {b.cta}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function ShopPage() {
   const [searchInput, setSearchInput] = useState('')
@@ -551,6 +738,11 @@ export default function ShopPage() {
         @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(2,1fr) !important; } }
         .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
+        .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
+        @media(max-width:900px) { .banner-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        @media(max-width:500px) { .banner-grid { grid-template-columns: repeat(1,1fr) !important; } }
+        .banner-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
+        .banner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(28,28,26,0.16) !important; }
         @media(max-width:600px) {
           .bb-brand   { display: none !important; }
           .bb-divider { display: none !important; }
@@ -568,6 +760,8 @@ export default function ShopPage() {
         />
         <HeroSlider />
         <CategoriesSection />
+        <DealsSection />
+        <AdBanners />
         <ProductsSection />
       </div>
     </>
