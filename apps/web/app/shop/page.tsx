@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, FormEvent } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Search, User, LogIn, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCartStore } from '../../store/cart.store'
@@ -110,7 +110,7 @@ function ShopTopBar({
   const [focused, setFocused] = useState(false)
   return (
     <div style={{
-      position: 'sticky', top: 72, zIndex: 150,
+      position: 'sticky', top: 0, zIndex: 150,
       background: '#fff',
       borderBottom: '1px solid rgba(28,28,26,0.08)',
       boxShadow: '0 2px 16px rgba(28,28,26,0.07)',
@@ -126,15 +126,15 @@ function ShopTopBar({
         {/* Brand */}
         <Link href="/shop" style={{
           textDecoration: 'none', flexShrink: 0,
-          display: 'flex', alignItems: 'center', gap: 8,
+          display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 8px rgba(199,166,106,0.3)' }}>
+          <div style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 8px rgba(199,166,106,0.3)' }}>
             <img src="/images/Logo/logo1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <span className="bb-brand" style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1 }}>
-            <span style={{ color: '#1C1C1A' }}>Billiard </span>
-            <span style={{ color: GOLD }}>Bazzar</span>
-          </span>
+          <div className="bb-brand" style={{ display: 'flex', flexDirection: 'column', gap: 1, lineHeight: 1 }}>
+            <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 14, fontWeight: 700, color: '#1C1C1A', letterSpacing: '0.04em' }}>Billiard</span>
+            <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 14, fontWeight: 900, color: GOLD, letterSpacing: '0.08em', fontStyle: 'italic' }}>Bazzar</span>
+          </div>
         </Link>
 
         {/* Divider */}
@@ -144,17 +144,28 @@ function ShopTopBar({
         <form onSubmit={onSearch} style={{ flex: 1, position: 'relative' }}>
           <button type="submit" style={{
             position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0, zIndex: 2,
             display: 'flex', alignItems: 'center',
           }}>
             <Search size={16} color={focused ? GOLD : 'rgba(28,28,26,0.3)'} strokeWidth={2.2} />
           </button>
+          {/* Custom styled placeholder */}
+          {!searchInput && !focused && (
+            <div style={{
+              position: 'absolute', right: 40, top: '50%', transform: 'translateY(-50%)',
+              pointerEvents: 'none', zIndex: 1, fontSize: 14, display: 'flex', alignItems: 'center', gap: 3,
+              direction: 'rtl',
+            }}>
+              <span style={{ color: 'rgba(28,28,26,0.35)' }}>جستجو در بیلیارد </span>
+              <span style={{ color: GOLD, opacity: 0.75, fontWeight: 600 }}>بازار</span>
+            </div>
+          )}
           <input
             value={searchInput}
             onChange={e => onSearchInput(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder="جستجو در بیلیارد بازار"
+            placeholder=""
             style={{
               width: '100%', height: 40,
               background: focused ? '#fff' : 'rgba(28,28,26,0.04)',
@@ -516,6 +527,12 @@ export default function ShopPage() {
   const cartCount = useCartStore(s => s.totalItems())
   const user = useAuthStore(s => s.user)
 
+  // Hide global Navbar while on shop page
+  useEffect(() => {
+    document.body.classList.add('shop-page-active')
+    return () => document.body.classList.remove('shop-page-active')
+  }, [])
+
   const isFiltered = category !== 'all' || search !== '' || sort !== 'newest'
 
   const fetchProducts = useCallback(async () => {
@@ -544,7 +561,7 @@ export default function ShopPage() {
     <>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,900&display=swap');
         @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
         @keyframes hsIn   { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
         @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.4} }
@@ -557,6 +574,8 @@ export default function ShopPage() {
         .page-btn:hover  { background:${GOLD_LIGHT} !important; border-color:${GOLD_BOR} !important; color:${GOLD} !important; }
         .slider-arrow:hover { background:rgba(199,166,106,0.25) !important; border-color:rgba(199,166,106,0.4) !important; }
         .hero-slider { height: clamp(220px,38vw,420px); }
+        /* Hide global Navbar only on shop page */
+        .shop-page-active nav { display: none !important; }
         @media(max-width:600px) {
           .bb-brand { display: none !important; }
           .bb-divider { display: none !important; }
@@ -566,7 +585,7 @@ export default function ShopPage() {
         @media(min-width:1200px) { .prod-grid{grid-template-columns:repeat(4,1fr)!important;} }
       `}</style>
 
-      <div style={{ paddingTop: 72, minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: TEXT }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: TEXT }}>
 
         {/* ── Shop Top Bar ── */}
         <ShopTopBar
