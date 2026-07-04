@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     .insert({
       userId,
       clubId,
-      ...(tableNumber ? { tableId: String(tableNumber) } : {}),
+      ...(tableNumber ? { tableNumber: parseInt(String(tableNumber)) } : {}),
       tableType:   tableType ?? null,
       bookingDate,
       timeSlots,
