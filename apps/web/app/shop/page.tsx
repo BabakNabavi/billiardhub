@@ -526,7 +526,7 @@ function ProductsSection() {
 }
 
 // ── Deals Section ─────────────────────────────────────────────
-const DEAL_PRODUCTS = PRODUCTS.slice(0, 6)
+const DEAL_PRODUCTS = [...PRODUCTS, ...PRODUCTS].slice(0, 12)
 
 function DealsSection() {
   const INIT = 9 * 3600 + 20 * 60 + 19
@@ -609,22 +609,21 @@ function DealsSection() {
           onMouseMove={onMove}
           onMouseUp={onUp}
           onMouseLeave={onUp}
-          style={{ display: 'flex', gap: 0, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none', padding: '14px 2px' }}
         >
           {/* yellow promo card — first (RTL = rightmost) */}
           <Link href="/shop/party" style={{
             textDecoration: 'none', flexShrink: 0,
-            width: 150, alignSelf: 'stretch', minHeight: 280,
+            width: 148, borderRadius: 12,
             background: 'linear-gradient(145deg,#F5C518 0%,#F0A500 60%,#E8920A 100%)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             padding: '20px 14px', gap: 4,
-            borderLeft: '1px solid rgba(28,28,26,0.07)',
             position: 'relative', overflow: 'hidden',
+            border: '1.5px solid rgba(245,197,24,0.4)',
+            boxShadow: '0 4px 18px rgba(240,165,0,0.28)',
           }}>
-            {/* decorative circle */}
             <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
             <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
-            {/* % badge */}
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#1C1C1A', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, position: 'relative', zIndex: 1 }}>
               <span style={{ fontSize: 22, fontWeight: 900, color: '#F5C518', lineHeight: 1 }}>%</span>
             </div>
@@ -632,20 +631,21 @@ function DealsSection() {
               <div style={{ fontSize: 22, fontWeight: 900, color: '#1C1C1A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>بیلیارد</div>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#1C1C1A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>پارتی</div>
             </div>
-            <div style={{ marginTop: 'auto', fontSize: 11, fontWeight: 700, color: '#1C1C1A', opacity: 0.7, display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
+            <div style={{ marginTop: 12, fontSize: 11, fontWeight: 700, color: '#1C1C1A', opacity: 0.7, display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
               مشاهده همه
               <ChevronLeft size={11} strokeWidth={2.5}/>
             </div>
           </Link>
 
           {/* deal product cards */}
-          {DEAL_PRODUCTS.map(p => (
-            <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{
-              textDecoration: 'none', flexShrink: 0, width: 160,
+          {DEAL_PRODUCTS.map((p, i) => (
+            <Link key={`${p.id}-${i}`} href={`/shop/product/${p.id}`} className="prod-card" style={{
+              textDecoration: 'none', flexShrink: 0, width: 158, borderRadius: 12,
               background: '#fff', display: 'flex', flexDirection: 'column',
-              borderLeft: '1px solid rgba(28,28,26,0.07)',
+              border: '1.5px solid rgba(28,28,26,0.13)',
+              overflow: 'hidden',
             }}>
-              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.08)' }}>
+              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.1)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
                   <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -760,9 +760,9 @@ export default function ShopPage() {
         />
         <HeroSlider />
         <CategoriesSection />
+        <ProductsSection />
         <DealsSection />
         <AdBanners />
-        <ProductsSection />
       </div>
     </>
   )
