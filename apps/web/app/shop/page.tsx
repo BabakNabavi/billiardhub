@@ -117,22 +117,14 @@ const CATS = [
     </svg>,
   },
   {
-    id: 'case', label: 'کیس', g: ['#311B92','#5E35B1'],
+    id: 'case-bag', label: 'کیس و کیف', g: ['#4527A0','#7C4DFF'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="11" width="22" height="7" rx="3.5" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
-      <ellipse cx="3.5" cy="14.5" rx="2" ry="3.5" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.4"/>
-      <line x1="7" y1="11" x2="7" y2="18" stroke="white" strokeWidth="1.2" opacity="0.5"/>
-      <line x1="11" y1="11" x2="11" y2="18" stroke="white" strokeWidth="1.2" opacity="0.5"/>
-      <path d="M13 10 Q14 8.5 15 10" stroke="white" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-    </svg>,
-  },
-  {
-    id: 'bag', label: 'کیف', g: ['#BF360C','#E64A19'],
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="4" y="11" width="20" height="14" rx="3" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
-      <path d="M10 11 L10 8 Q10 5 14 5 Q18 5 18 8 L18 11" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-      <line x1="4" y1="16" x2="24" y2="16" stroke="white" strokeWidth="1.2" strokeDasharray="2 2" opacity="0.6"/>
-      <rect x="8" y="18" width="12" height="5" rx="1.5" stroke="white" strokeWidth="1.2" fill="none" opacity="0.6"/>
+      {/* case tube */}
+      <rect x="2" y="12" width="14" height="6" rx="3" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.6"/>
+      <ellipse cx="2.5" cy="15" rx="1.6" ry="3" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.3"/>
+      {/* bag */}
+      <rect x="15" y="13" width="11" height="9" rx="2" fill="white" fillOpacity="0.22" stroke="white" strokeWidth="1.6"/>
+      <path d="M18 13 L18 11 Q18 9 20.5 9 Q23 9 23 11 L23 13" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
     </svg>,
   },
   {
@@ -254,7 +246,7 @@ function ShopTopBar({
         direction: 'rtl',
       }}>
         {/* Brand */}
-        <Link href="/shop" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Link href="/" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.28)' }}>
             <img src="/images/Logo/logo1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
@@ -371,42 +363,110 @@ function HeroSlider() {
 
 // ── Categories Section ────────────────────────────────────────
 function CategoriesSection() {
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef  = useRef<HTMLDivElement>(null)
+  const dragging   = useRef(false)
+  const startX     = useRef(0)
+  const scrollLeft = useRef(0)
+  const [hovId, setHovId] = useState<string | null>(null)
+
   const scroll = (dir: 'next' | 'prev') => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir === 'next' ? 560 : -560, behavior: 'smooth' })
-    }
+    scrollRef.current?.scrollBy({ left: dir === 'next' ? 560 : -560, behavior: 'smooth' })
   }
+  const onDown = (e: React.MouseEvent) => {
+    dragging.current  = true
+    startX.current    = e.pageX - (scrollRef.current?.offsetLeft ?? 0)
+    scrollLeft.current = scrollRef.current?.scrollLeft ?? 0
+    if (scrollRef.current) scrollRef.current.style.cursor = 'grabbing'
+  }
+  const onMove = (e: React.MouseEvent) => {
+    if (!dragging.current || !scrollRef.current) return
+    e.preventDefault()
+    const x    = e.pageX - scrollRef.current.offsetLeft
+    const walk = (x - startX.current) * 1.4
+    scrollRef.current.scrollLeft = scrollLeft.current - walk
+  }
+  const onUp = () => {
+    dragging.current = false
+    if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+  }
+
   return (
-    <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+    <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 26px', direction: 'rtl' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>دسته‌بندی‌های بیلیارد بازار</h2>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => scroll('prev')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg viewBox="0 0 18 18" fill="none" width={15} height={15}><path d="M11 4L6 9l5 5" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-            <button onClick={() => scroll('next')} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg viewBox="0 0 18 18" fill="none" width={15} height={15}><path d="M7 4l5 5-5 5" stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
+            {(['prev','next'] as const).map(dir => (
+              <button key={dir} onClick={() => scroll(dir)} style={{
+                width: 34, height: 34, borderRadius: 10,
+                background: 'rgba(255,255,255,0.55)',
+                backdropFilter: 'blur(20px) saturate(1.6)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                border: '1px solid rgba(255,255,255,0.82)',
+                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 12px rgba(0,0,0,0.07)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg viewBox="0 0 18 18" fill="none" width={14} height={14}>
+                  <path d={dir === 'prev' ? 'M11 4L6 9l5 5' : 'M7 4l5 5-5 5'} stroke={TEXT} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            ))}
           </div>
         </div>
-        <div ref={scrollRef} className="cat-scroll" style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-          {CATS.map(cat => (
-            <Link key={cat.id} href={`/shop/category/${cat.id}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9, width: 90 }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: 20,
-                background: `linear-gradient(135deg,${cat.g[0]},${cat.g[1]})`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: `0 4px 16px ${cat.g[1]}40`,
-              }}>
-                {cat.icon}
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 500, color: TEXT, textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
-                {cat.label}
-              </span>
-            </Link>
-          ))}
+        <div
+          ref={scrollRef}
+          className="cat-scroll"
+          onMouseDown={onDown}
+          onMouseMove={onMove}
+          onMouseUp={onUp}
+          onMouseLeave={onUp}
+          style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4, cursor: 'grab', userSelect: 'none' }}
+        >
+          {CATS.map(cat => {
+            const hov = hovId === cat.id
+            return (
+              <Link
+                key={cat.id}
+                href={`/shop/category/${cat.id}`}
+                onMouseEnter={() => setHovId(cat.id)}
+                onMouseLeave={() => setHovId(null)}
+                style={{
+                  textDecoration: 'none', flexShrink: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  width: 96,
+                  background: hov ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.52)',
+                  backdropFilter: 'blur(40px) saturate(2)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(2)',
+                  border: '1px solid rgba(255,255,255,0.82)',
+                  borderRadius: 22,
+                  padding: '16px 10px 12px',
+                  boxShadow: hov
+                    ? `inset 0 1.5px 0 rgba(255,255,255,1), 0 16px 40px ${cat.g[1]}28, 0 6px 18px rgba(0,0,0,0.08)`
+                    : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 6px 22px rgba(0,0,0,0.06)',
+                  transform: hov ? 'translateY(-5px)' : 'none',
+                  transition: 'background 0.3s, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
+                  cursor: 'pointer',
+                  position: 'relative', overflow: 'hidden',
+                }}
+              >
+                {/* sheen overlay */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)', borderRadius: '22px 22px 0 0', pointerEvents: 'none' }} />
+                {/* icon container — solid gradient so white icons are visible */}
+                <div style={{
+                  width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+                  background: `linear-gradient(135deg,${cat.g[0]},${cat.g[1]})`,
+                  boxShadow: `0 4px 16px ${cat.g[1]}55`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'relative', zIndex: 1,
+                }}>
+                  {cat.icon}
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                  {cat.label}
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </div>
@@ -428,9 +488,9 @@ function ProductsSection() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
           {PRODUCTS.map(p => (
-            <Link key={p.id} href={`/shop/product/${p.id}`} style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1px solid rgba(28,28,26,0.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'box-shadow 0.2s', boxShadow: '0 1px 4px rgba(28,28,26,0.05)' }}>
+            <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1px solid rgba(28,28,26,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {/* Image */}
-              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden' }}>
+              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1px solid rgba(28,28,26,0.08)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
                   <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -484,6 +544,8 @@ export default function ShopPage() {
         .prod-grid { grid-template-columns: repeat(6,1fr) !important; }
         @media(max-width:1100px) { .prod-grid { grid-template-columns: repeat(4,1fr) !important; } }
         @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
+        .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
         @media(max-width:600px) {
           .bb-brand   { display: none !important; }
           .bb-divider { display: none !important; }
