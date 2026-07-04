@@ -830,7 +830,7 @@ function BannerSlideCard({ banner }: { banner: typeof DUAL_BANNERS[0] }) {
     return () => clearInterval(t)
   }, [banner.slides.length])
 
-  const slide = banner.slides[idx]
+  const slide = banner.slides[idx] ?? banner.slides[0]
 
   return (
     <div style={{ flex: 1, minWidth: 0, borderRadius: 16, overflow: 'hidden', position: 'relative', height: 216, border: '1.5px solid rgba(28,28,26,0.10)' }}>
