@@ -572,10 +572,20 @@ function DealsSection() {
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', direction: 'rtl' }}>
         {/* ── header ── */}
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
-          {/* timer */}
+          {/* RIGHT side: arrows */}
+          <div style={{ display: 'flex', gap: 5 }}>
+            {(['prev','next'] as const).map(dir => (
+              <button key={dir} onClick={() => scroll(dir)} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg viewBox="0 0 16 16" fill="none" width={13} height={13}>
+                  <path d={dir === 'prev' ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'} stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            ))}
+          </div>
+          {/* LEFT side: زمان باقیمانده (right) + clock (left) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC }}>زمان باقیمانده</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1C1C1A', borderRadius: 8, padding: '5px 12px' }}>
-              {/* clock icon */}
               <svg viewBox="0 0 18 18" fill="none" width={14} height={14}>
                 <circle cx="9" cy="9" r="7.5" stroke="#C7A66A" strokeWidth="1.5"/>
                 <line x1="9" y1="9" x2="9" y2="4.5" stroke="#C7A66A" strokeWidth="1.5" strokeLinecap="round"/>
@@ -584,20 +594,6 @@ function DealsSection() {
               <span style={{ fontSize: 14, fontWeight: 900, color: '#fff', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums', direction: 'ltr' }}>
                 {pad(h)}:{pad(m)}:{pad(s)}
               </span>
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC }}>:زمان باقیمانده</span>
-          </div>
-          {/* title + arrows */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: 0 }}>پیشنهاد ویژه بیلیارد بازار</h2>
-            <div style={{ display: 'flex', gap: 5 }}>
-              {(['prev','next'] as const).map(dir => (
-                <button key={dir} onClick={() => scroll(dir)} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg viewBox="0 0 16 16" fill="none" width={13} height={13}>
-                    <path d={dir === 'prev' ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'} stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              ))}
             </div>
           </div>
         </div>
@@ -740,7 +736,6 @@ export default function ShopPage() {
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
         .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
         @media(max-width:900px) { .banner-grid { grid-template-columns: repeat(2,1fr) !important; } }
-        @media(max-width:500px) { .banner-grid { grid-template-columns: repeat(1,1fr) !important; } }
         .banner-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .banner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(28,28,26,0.16) !important; }
         @media(max-width:600px) {
