@@ -373,21 +373,25 @@ function CategoriesSection() {
     scrollRef.current?.scrollBy({ left: dir === 'next' ? 560 : -560, behavior: 'smooth' })
   }
   const onDown = (e: React.MouseEvent) => {
-    dragging.current  = true
-    startX.current    = e.pageX - (scrollRef.current?.offsetLeft ?? 0)
-    scrollLeft.current = scrollRef.current?.scrollLeft ?? 0
-    if (scrollRef.current) scrollRef.current.style.cursor = 'grabbing'
-  }
-  const onMove = (e: React.MouseEvent) => {
-    if (!dragging.current || !scrollRef.current) return
+    if (!scrollRef.current) return
     e.preventDefault()
-    const x    = e.pageX - scrollRef.current.offsetLeft
-    const walk = (x - startX.current) * 1.4
-    scrollRef.current.scrollLeft = scrollLeft.current - walk
-  }
-  const onUp = () => {
-    dragging.current = false
-    if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+    dragging.current   = true
+    startX.current     = e.pageX - scrollRef.current.offsetLeft
+    scrollLeft.current = scrollRef.current.scrollLeft
+    scrollRef.current.style.cursor = 'grabbing'
+    const stop = () => {
+      dragging.current = false
+      if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+      window.removeEventListener('mouseup', stop)
+      window.removeEventListener('mousemove', move)
+    }
+    const move = (ev: MouseEvent) => {
+      if (!scrollRef.current) return
+      const x = ev.pageX - scrollRef.current.offsetLeft
+      scrollRef.current.scrollLeft = scrollLeft.current - (x - startX.current) * 1.4
+    }
+    window.addEventListener('mouseup', stop)
+    window.addEventListener('mousemove', move)
   }
 
   return (
@@ -417,9 +421,6 @@ function CategoriesSection() {
           ref={scrollRef}
           className="cat-scroll"
           onMouseDown={onDown}
-          onMouseMove={onMove}
-          onMouseUp={onUp}
-          onMouseLeave={onUp}
           style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
@@ -428,6 +429,7 @@ function CategoriesSection() {
               <Link
                 key={cat.id}
                 href={`/shop/category/${cat.id}`}
+                draggable={false}
                 onMouseEnter={() => setHovId(cat.id)}
                 onMouseLeave={() => setHovId(null)}
                 style={{
@@ -532,9 +534,9 @@ function DealsSection() {
   const INIT = 9 * 3600 + 20 * 60 + 19
   const [rem, setRem] = useState(INIT)
   const scrollRef  = useRef<HTMLDivElement>(null)
-  const dragging   = useRef(false)
   const startX     = useRef(0)
   const scrollLeft = useRef(0)
+  const dragging   = useRef(false)
 
   useEffect(() => {
     const t = setInterval(() => setRem(s => Math.max(0, s - 1)), 1000)
@@ -551,20 +553,25 @@ function DealsSection() {
     scrollRef.current?.scrollBy({ left: dir === 'next' ? 520 : -520, behavior: 'smooth' })
   }
   const onDown = (e: React.MouseEvent) => {
-    dragging.current = true
-    startX.current   = e.pageX - (scrollRef.current?.offsetLeft ?? 0)
-    scrollLeft.current = scrollRef.current?.scrollLeft ?? 0
-    if (scrollRef.current) scrollRef.current.style.cursor = 'grabbing'
-  }
-  const onMove = (e: React.MouseEvent) => {
-    if (!dragging.current || !scrollRef.current) return
+    if (!scrollRef.current) return
     e.preventDefault()
-    const x = e.pageX - scrollRef.current.offsetLeft
-    scrollRef.current.scrollLeft = scrollLeft.current - (x - startX.current) * 1.4
-  }
-  const onUp = () => {
-    dragging.current = false
-    if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+    dragging.current   = true
+    startX.current     = e.pageX - scrollRef.current.offsetLeft
+    scrollLeft.current = scrollRef.current.scrollLeft
+    scrollRef.current.style.cursor = 'grabbing'
+    const stop = () => {
+      dragging.current = false
+      if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+      window.removeEventListener('mouseup', stop)
+      window.removeEventListener('mousemove', move)
+    }
+    const move = (ev: MouseEvent) => {
+      if (!scrollRef.current) return
+      const x = ev.pageX - scrollRef.current.offsetLeft
+      scrollRef.current.scrollLeft = scrollLeft.current - (x - startX.current) * 1.4
+    }
+    window.addEventListener('mouseup', stop)
+    window.addEventListener('mousemove', move)
   }
 
   return (
@@ -602,13 +609,10 @@ function DealsSection() {
           ref={scrollRef}
           className="cat-scroll"
           onMouseDown={onDown}
-          onMouseMove={onMove}
-          onMouseUp={onUp}
-          onMouseLeave={onUp}
           style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none', padding: '14px 2px' }}
         >
           {/* yellow promo card — first (RTL = rightmost) */}
-          <Link href="/shop/party" style={{
+          <Link href="/shop/party" draggable={false} style={{
             textDecoration: 'none', flexShrink: 0,
             width: 148, borderRadius: 12,
             background: 'linear-gradient(145deg,#F5C518 0%,#F0A500 60%,#E8920A 100%)',
@@ -635,7 +639,7 @@ function DealsSection() {
 
           {/* deal product cards */}
           {DEAL_PRODUCTS.map((p, i) => (
-            <Link key={`${p.id}-${i}`} href={`/shop/product/${p.id}`} className="prod-card" style={{
+            <Link key={`${p.id}-${i}`} href={`/shop/product/${p.id}`} draggable={false} className="prod-card" style={{
               textDecoration: 'none', flexShrink: 0, width: 158, borderRadius: 12,
               background: '#fff', display: 'flex', flexDirection: 'column',
               border: '1.5px solid rgba(28,28,26,0.13)',
