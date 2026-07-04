@@ -87,6 +87,7 @@ export default function Navbar() {
   const searchRef    = useRef<HTMLDivElement>(null);
   const searchBtnRef = useRef<HTMLButtonElement>(null);
   const isHomePage   = pathname === '/';
+  const isShopPage   = pathname.startsWith('/shop');
 
   useEffect(() => {
     let ticking = false;
@@ -148,6 +149,8 @@ export default function Navbar() {
   const TEXT_MUT  = isLight ? 'rgba(28,28,26,0.48)' : 'rgba(255,255,255,0.48)';
   const BORDER_C  = isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.18)';
   const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
+
+  if (isShopPage) return null;
 
   return (
     <>

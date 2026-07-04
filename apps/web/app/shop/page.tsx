@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, FormEvent } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Search, User, LogIn, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCartStore } from '../../store/cart.store'
@@ -527,12 +527,6 @@ export default function ShopPage() {
   const cartCount = useCartStore(s => s.totalItems())
   const user = useAuthStore(s => s.user)
 
-  // Hide global Navbar while on shop page
-  useEffect(() => {
-    document.body.classList.add('shop-page-active')
-    return () => document.body.classList.remove('shop-page-active')
-  }, [])
-
   const isFiltered = category !== 'all' || search !== '' || sort !== 'newest'
 
   const fetchProducts = useCallback(async () => {
@@ -574,8 +568,6 @@ export default function ShopPage() {
         .page-btn:hover  { background:${GOLD_LIGHT} !important; border-color:${GOLD_BOR} !important; color:${GOLD} !important; }
         .slider-arrow:hover { background:rgba(199,166,106,0.25) !important; border-color:rgba(199,166,106,0.4) !important; }
         .hero-slider { height: clamp(220px,38vw,420px); }
-        /* Hide global Navbar only on shop page */
-        .shop-page-active nav { display: none !important; }
         @media(max-width:600px) {
           .bb-brand { display: none !important; }
           .bb-divider { display: none !important; }
