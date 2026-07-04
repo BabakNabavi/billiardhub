@@ -61,139 +61,139 @@ const CATS = [
   {
     id: 'cue', label: 'چوب', g: ['#8B4513','#D2691E'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="white" transform="rotate(-38 3 13)"/>
-      <rect x="18" y="4" width="7" height="3" rx="1.5" fill="white" fillOpacity="0.6" transform="rotate(-38 18 4)"/>
-      <rect x="2" y="19" width="5" height="4" rx="2" fill="white" fillOpacity="0.4" transform="rotate(-38 2 19)"/>
+      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor" transform="rotate(-38 3 13)"/>
+      <rect x="18" y="4" width="7" height="3" rx="1.5" fill="currentColor" fillOpacity="0.6" transform="rotate(-38 18 4)"/>
+      <rect x="2" y="19" width="5" height="4" rx="2" fill="currentColor" fillOpacity="0.4" transform="rotate(-38 2 19)"/>
     </svg>,
   },
   {
     id: 'table', label: 'میز', g: ['#1A6B3A','#28A860'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="7" width="22" height="14" rx="3" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.8"/>
-      <circle cx="3.5" cy="7.5" r="2.2" fill="white"/>
-      <circle cx="14" cy="7" r="2.2" fill="white"/>
-      <circle cx="24.5" cy="7.5" r="2.2" fill="white"/>
-      <circle cx="3.5" cy="20.5" r="2.2" fill="white"/>
-      <circle cx="14" cy="21" r="2.2" fill="white"/>
-      <circle cx="24.5" cy="20.5" r="2.2" fill="white"/>
+      <rect x="3" y="7" width="22" height="14" rx="3" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
+      <circle cx="3.5" cy="7.5" r="2.2" fill="currentColor"/>
+      <circle cx="14" cy="7" r="2.2" fill="currentColor"/>
+      <circle cx="24.5" cy="7.5" r="2.2" fill="currentColor"/>
+      <circle cx="3.5" cy="20.5" r="2.2" fill="currentColor"/>
+      <circle cx="14" cy="21" r="2.2" fill="currentColor"/>
+      <circle cx="24.5" cy="20.5" r="2.2" fill="currentColor"/>
     </svg>,
   },
   {
     id: 'ball', label: 'توپ', g: ['#B71C1C','#E53935'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <circle cx="14" cy="14" r="10" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
-      <path d="M6 11 Q14 7 22 11" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M6 17 Q14 13 22 17" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
-      <circle cx="10" cy="9" r="2" fill="white" fillOpacity="0.5"/>
+      <circle cx="14" cy="14" r="10" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M6 11 Q14 7 22 11" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+      <path d="M6 17 Q14 13 22 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+      <circle cx="10" cy="9" r="2" fill="currentColor" fillOpacity="0.5"/>
     </svg>,
   },
   {
     id: 'tip', label: 'تیپ', g: ['#0D47A1','#1976D2'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <ellipse cx="14" cy="12" rx="7" ry="3" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="1.8"/>
-      <line x1="7" y1="12" x2="7" y2="19" stroke="white" strokeWidth="1.8"/>
-      <line x1="21" y1="12" x2="21" y2="19" stroke="white" strokeWidth="1.8"/>
-      <ellipse cx="14" cy="19" rx="7" ry="3" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.8"/>
-      <ellipse cx="14" cy="10.5" rx="5" ry="2" fill="white" stroke="white" strokeWidth="1.2"/>
+      <ellipse cx="14" cy="12" rx="7" ry="3" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.8"/>
+      <line x1="7" y1="12" x2="7" y2="19" stroke="currentColor" strokeWidth="1.8"/>
+      <line x1="21" y1="12" x2="21" y2="19" stroke="currentColor" strokeWidth="1.8"/>
+      <ellipse cx="14" cy="19" rx="7" ry="3" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.8"/>
+      <ellipse cx="14" cy="10.5" rx="5" ry="2" fill="currentColor" stroke="currentColor" strokeWidth="1.2"/>
     </svg>,
   },
   {
     id: 'chalk', label: 'گچ', g: ['#4A148C','#7B1FA2'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="7" y="12" width="14" height="11" rx="2" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.8"/>
-      <path d="M7 12 L10 8 L24 8 L21 12" stroke="white" strokeWidth="1.8" strokeLinejoin="round" fill="white" fillOpacity="0.15"/>
-      <line x1="21" y1="12" x2="21" y2="23" stroke="white" strokeWidth="1.8"/>
-      <path d="M9 10 Q14 7.5 20 10" stroke="white" strokeWidth="1.2" strokeLinecap="round" fillOpacity="0"/>
+      <rect x="7" y="12" width="14" height="11" rx="2" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M7 12 L10 8 L24 8 L21 12" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" fill="currentColor" fillOpacity="0.15"/>
+      <line x1="21" y1="12" x2="21" y2="23" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M9 10 Q14 7.5 20 10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fillOpacity="0"/>
     </svg>,
   },
   {
     id: 'extension', label: 'اکستنشن', g: ['#004D40','#00897B'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <line x1="3" y1="22" x2="13" y2="12" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="13" cy="12" r="2.5" fill="white"/>
-      <circle cx="18" cy="12" r="2.5" fill="white" fillOpacity="0.4" stroke="white" strokeWidth="1.5"/>
-      <line x1="18" y1="12" x2="26" y2="7" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
-      <rect x="14" y="10.5" width="8" height="3" rx="1.5" stroke="white" strokeWidth="1.4" fill="none" fillOpacity="0"/>
+      <line x1="3" y1="22" x2="13" y2="12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="13" cy="12" r="2.5" fill="currentColor"/>
+      <circle cx="18" cy="12" r="2.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.5"/>
+      <line x1="18" y1="12" x2="26" y2="7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+      <rect x="14" y="10.5" width="8" height="3" rx="1.5" stroke="currentColor" strokeWidth="1.4" fill="none" fillOpacity="0"/>
     </svg>,
   },
   {
     id: 'case-bag', label: 'کیس و کیف', g: ['#4527A0','#7C4DFF'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       {/* case tube */}
-      <rect x="2" y="12" width="14" height="6" rx="3" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.6"/>
-      <ellipse cx="2.5" cy="15" rx="1.6" ry="3" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.3"/>
+      <rect x="2" y="12" width="14" height="6" rx="3" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.6"/>
+      <ellipse cx="2.5" cy="15" rx="1.6" ry="3" fill="currentColor" fillOpacity="0.35" stroke="currentColor" strokeWidth="1.3"/>
       {/* bag */}
-      <rect x="15" y="13" width="11" height="9" rx="2" fill="white" fillOpacity="0.22" stroke="white" strokeWidth="1.6"/>
-      <path d="M18 13 L18 11 Q18 9 20.5 9 Q23 9 23 11 L23 13" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      <rect x="15" y="13" width="11" height="9" rx="2" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.6"/>
+      <path d="M18 13 L18 11 Q18 9 20.5 9 Q23 9 23 11 L23 13" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
     </svg>,
   },
   {
     id: 'rest', label: 'رست', g: ['#1B5E20','#388E3C'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <line x1="3" y1="25" x2="18" y2="13" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="18" cy="13" r="2.2" fill="white"/>
-      <line x1="18" y1="13" x2="24" y2="7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-      <line x1="18" y1="13" x2="26" y2="12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-      <line x1="18" y1="13" x2="24" y2="18" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M22 7 L24.5 5 L27 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <line x1="3" y1="25" x2="18" y2="13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="18" cy="13" r="2.2" fill="currentColor"/>
+      <line x1="18" y1="13" x2="24" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="18" y1="13" x2="26" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="18" y1="13" x2="24" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M22 7 L24.5 5 L27 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
     </svg>,
   },
   {
     id: 'cloth', label: 'پارچه', g: ['#006064','#00ACC1'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="8" width="22" height="13" rx="2" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8"/>
-      <path d="M3 12 L25 12" stroke="white" strokeWidth="0.9" opacity="0.5"/>
-      <path d="M3 16 L25 16" stroke="white" strokeWidth="0.9" opacity="0.5"/>
-      <path d="M9 8 L9 21" stroke="white" strokeWidth="0.9" opacity="0.5"/>
-      <path d="M16 8 L16 21" stroke="white" strokeWidth="0.9" opacity="0.5"/>
-      <ellipse cx="3.5" cy="14.5" rx="2" ry="6.5" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="1.4"/>
+      <rect x="3" y="8" width="22" height="13" rx="2" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M3 12 L25 12" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
+      <path d="M3 16 L25 16" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
+      <path d="M9 8 L9 21" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
+      <path d="M16 8 L16 21" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
+      <ellipse cx="3.5" cy="14.5" rx="2" ry="6.5" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.4"/>
     </svg>,
   },
   {
     id: 'oil', label: 'روغن', g: ['#E65100','#F57C00'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <path d="M11 7 L11 11 Q6 13 6 17 L6 22 Q6 24 8 24 L20 24 Q22 24 22 22 L22 17 Q22 13 17 11 L17 7 Z" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8" strokeLinejoin="round"/>
-      <rect x="11" y="5" width="6" height="3.5" rx="1.5" fill="white" fillOpacity="0.4" stroke="white" strokeWidth="1.4"/>
-      <path d="M14 14 Q12 17 12 19 Q12 21.5 14 21.5 Q16 21.5 16 19 Q16 17 14 14Z" fill="white" opacity="0.6"/>
+      <path d="M11 7 L11 11 Q6 13 6 17 L6 22 Q6 24 8 24 L20 24 Q22 24 22 22 L22 17 Q22 13 17 11 L17 7 Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <rect x="11" y="5" width="6" height="3.5" rx="1.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M14 14 Q12 17 12 19 Q12 21.5 14 21.5 Q16 21.5 16 19 Q16 17 14 14Z" fill="currentColor" opacity="0.6"/>
     </svg>,
   },
   {
     id: 'towel', label: 'حوله', g: ['#AD1457','#D81B60'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="5" y="7" width="18" height="5" rx="2.5" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="1.7"/>
-      <rect x="5" y="14" width="18" height="5" rx="2.5" fill="white" fillOpacity="0.4" stroke="white" strokeWidth="1.7"/>
-      <rect x="5" y="21" width="18" height="4" rx="2" fill="white" fillOpacity="0.55" stroke="white" strokeWidth="1.7"/>
-      <path d="M5 9 Q14 7.5 23 9" stroke="white" strokeWidth="0.8" opacity="0.45" fill="none"/>
+      <rect x="5" y="7" width="18" height="5" rx="2.5" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.7"/>
+      <rect x="5" y="14" width="18" height="5" rx="2.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.7"/>
+      <rect x="5" y="21" width="18" height="4" rx="2" fill="currentColor" fillOpacity="0.55" stroke="currentColor" strokeWidth="1.7"/>
+      <path d="M5 9 Q14 7.5 23 9" stroke="currentColor" strokeWidth="0.8" opacity="0.45" fill="none"/>
     </svg>,
   },
   {
     id: 'clothing', label: 'پوشاک', g: ['#1A237E','#283593'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <path d="M11 5 Q14 9 17 5 L23 9 L20 13 L20 23 L8 23 L8 13 L5 9 Z" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8" strokeLinejoin="round"/>
-      <path d="M11 5 Q14 8 17 5" stroke="white" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+      <path d="M11 5 Q14 9 17 5 L23 9 L20 13 L20 23 L8 23 L8 13 L5 9 Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M11 5 Q14 8 17 5" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
     </svg>,
   },
   {
     id: 'accessory', label: 'اکسسوری', g: ['#78550A','#B8860B'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <path d="M8 23 L8 13 Q8 11 10 11 L12 11 L12 9 Q12 7 14 7 Q16 7 16 9 L16 11 L18 11 Q20 11 20 13 L20 23 Q20 25 14 25 Q8 25 8 23Z" fill="white" fillOpacity="0.18" stroke="white" strokeWidth="1.8" strokeLinejoin="round"/>
-      <line x1="12" y1="15" x2="12" y2="19" stroke="white" strokeWidth="1.3" opacity="0.6"/>
-      <line x1="16" y1="14" x2="16" y2="19" stroke="white" strokeWidth="1.3" opacity="0.6"/>
-      <path d="M8 20 Q14 22 20 20" stroke="white" strokeWidth="1.3" fill="none" opacity="0.7"/>
+      <path d="M8 23 L8 13 Q8 11 10 11 L12 11 L12 9 Q12 7 14 7 Q16 7 16 9 L16 11 L18 11 Q20 11 20 13 L20 23 Q20 25 14 25 Q8 25 8 23Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <line x1="12" y1="15" x2="12" y2="19" stroke="currentColor" strokeWidth="1.3" opacity="0.6"/>
+      <line x1="16" y1="14" x2="16" y2="19" stroke="currentColor" strokeWidth="1.3" opacity="0.6"/>
+      <path d="M8 20 Q14 22 20 20" stroke="currentColor" strokeWidth="1.3" fill="none" opacity="0.7"/>
     </svg>,
   },
   {
     id: 'other', label: 'سایر', g: ['#37474F','#546E7A'],
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <circle cx="8"  cy="8"  r="2.8" fill="white" opacity="0.5"/>
-      <circle cx="14" cy="8"  r="2.8" fill="white"/>
-      <circle cx="20" cy="8"  r="2.8" fill="white" opacity="0.5"/>
-      <circle cx="8"  cy="14" r="2.8" fill="white" opacity="0.5"/>
-      <circle cx="14" cy="14" r="2.8" fill="white" opacity="0.9"/>
-      <circle cx="20" cy="14" r="2.8" fill="white" opacity="0.5"/>
-      <circle cx="8"  cy="20" r="2.8" fill="white" opacity="0.35"/>
-      <circle cx="14" cy="20" r="2.8" fill="white" opacity="0.5"/>
-      <circle cx="20" cy="20" r="2.8" fill="white" opacity="0.35"/>
+      <circle cx="8"  cy="8"  r="2.8" fill="currentColor" opacity="0.5"/>
+      <circle cx="14" cy="8"  r="2.8" fill="currentColor"/>
+      <circle cx="20" cy="8"  r="2.8" fill="currentColor" opacity="0.5"/>
+      <circle cx="8"  cy="14" r="2.8" fill="currentColor" opacity="0.5"/>
+      <circle cx="14" cy="14" r="2.8" fill="currentColor" opacity="0.9"/>
+      <circle cx="20" cy="14" r="2.8" fill="currentColor" opacity="0.5"/>
+      <circle cx="8"  cy="20" r="2.8" fill="currentColor" opacity="0.35"/>
+      <circle cx="14" cy="20" r="2.8" fill="currentColor" opacity="0.5"/>
+      <circle cx="20" cy="20" r="2.8" fill="currentColor" opacity="0.35"/>
     </svg>,
   },
 ]
@@ -420,7 +420,7 @@ function CategoriesSection() {
           onMouseMove={onMove}
           onMouseUp={onUp}
           onMouseLeave={onUp}
-          style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4, cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
             const hov = hovId === cat.id
@@ -432,36 +432,41 @@ function CategoriesSection() {
                 onMouseLeave={() => setHovId(null)}
                 style={{
                   textDecoration: 'none', flexShrink: 0,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-                  width: 96,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                  width: 82,
+                  /* ── exact home-page card style ── */
                   background: hov ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.52)',
-                  backdropFilter: 'blur(40px) saturate(2)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(2)',
-                  border: '1px solid rgba(255,255,255,0.82)',
+                  backdropFilter: 'blur(40px) saturate(240%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(240%)',
+                  border: `1px solid ${hov ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.82)'}`,
                   borderRadius: 22,
-                  padding: '16px 10px 12px',
+                  padding: '14px 8px 10px',
                   boxShadow: hov
-                    ? `inset 0 1.5px 0 rgba(255,255,255,1), 0 16px 40px ${cat.g[1]}28, 0 6px 18px rgba(0,0,0,0.08)`
-                    : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 6px 22px rgba(0,0,0,0.06)',
-                  transform: hov ? 'translateY(-5px)' : 'none',
-                  transition: 'background 0.3s, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
+                    ? `inset 0 1.5px 0 rgba(255,255,255,1), 0 20px 52px ${cat.g[1]}2e, 0 8px 24px rgba(0,0,0,0.08)`
+                    : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)',
+                  transform: hov ? 'translateY(-6px)' : 'none',
+                  transition: 'background 0.3s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease, border-color 0.3s ease',
                   cursor: 'pointer',
                   position: 'relative', overflow: 'hidden',
                 }}
               >
-                {/* sheen overlay */}
+                {/* top sheen — exactly like home page */}
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)', borderRadius: '22px 22px 0 0', pointerEvents: 'none' }} />
-                {/* icon container — solid gradient so white icons are visible */}
+                {/* icon container — home-page style: subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-                  background: `linear-gradient(135deg,${cat.g[0]},${cat.g[1]})`,
-                  boxShadow: `0 4px 16px ${cat.g[1]}55`,
+                  width: 46, height: 46, borderRadius: 13, flexShrink: 0,
+                  background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
+                  border: `1px solid ${cat.g[1]}52`,
+                  boxShadow: `0 4px 14px ${cat.g[1]}48`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: cat.g[1],
                   position: 'relative', zIndex: 1,
                 }}>
-                  {cat.icon}
+                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)` }}>
+                    {cat.icon}
+                  </div>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span style={{ fontSize: 10.5, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </Link>
