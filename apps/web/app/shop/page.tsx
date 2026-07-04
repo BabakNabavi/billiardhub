@@ -712,6 +712,125 @@ function AdBanners() {
   )
 }
 
+// ── Newest Section ────────────────────────────────────────────
+const NEWEST_PRODUCTS = [...PRODUCTS].reverse()
+
+function NewestSection() {
+  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
+  return (
+    <div style={{ background: '#fff' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>جدیدترین‌ها</h2>
+          <Link href="/shop/newest" style={{ fontSize: 13, color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+            مشاهده همه
+            <ChevronLeft size={13} strokeWidth={2.5} />
+          </Link>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
+          {NEWEST_PRODUCTS.map(p => (
+            <Link key={`new-${p.id}`} href={`/shop/product/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+                <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
+                {p.disc > 0 && (
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                    {toFa(p.disc)}٪
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <div style={{ marginTop: 'auto' }}>
+                  {p.disc > 0 && (
+                    <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                      {fmt(p.old)} تومان
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Dual Banner Sliders ────────────────────────────────────────
+const DUAL_BANNERS = [
+  {
+    slides: [
+      { img: '/images/shop/cue_billiard_2.jpg', title: 'چوب‌های اصل', sub: 'از کلاسیک تا کربن فایبر', overlay: 'linear-gradient(to top,rgba(50,20,0,0.88) 0%,rgba(50,20,0,0.25) 55%,transparent 100%)' },
+      { img: '/images/shop/cue_billiard.jpg',   title: 'چوب کربن فایبر', sub: 'سبک · مقاوم · دقیق',    overlay: 'linear-gradient(to top,rgba(10,25,60,0.88) 0%,rgba(10,25,60,0.25) 55%,transparent 100%)' },
+      { img: '/images/shop/pool_chalk_1.jpg',   title: 'گچ و لوازم جانبی', sub: 'کامل‌ترین انتخاب',   overlay: 'linear-gradient(to top,rgba(40,5,55,0.88) 0%,rgba(40,5,55,0.25) 55%,transparent 100%)' },
+    ],
+    href: '/shop/category/cue',
+    cta: 'مشاهده',
+  },
+  {
+    slides: [
+      { img: '/images/shop/Pro_table.jpg',      title: 'میزهای حرفه‌ای',  sub: 'برای کلاب و مسابقه',     overlay: 'linear-gradient(to top,rgba(5,40,18,0.88) 0%,rgba(5,40,18,0.25) 55%,transparent 100%)' },
+      { img: '/images/shop/Home_table.jpg',     title: 'میز خانگی',       sub: 'طراحی زیبا · قیمت مناسب', overlay: 'linear-gradient(to top,rgba(40,18,5,0.88) 0%,rgba(40,18,5,0.25) 55%,transparent 100%)' },
+      { img: '/images/shop/snooker-table.jpg',  title: 'میز اسنوکر',      sub: 'استاندارد WPBSA',          overlay: 'linear-gradient(to top,rgba(5,18,50,0.88) 0%,rgba(5,18,50,0.25) 55%,transparent 100%)' },
+    ],
+    href: '/shop/category/table',
+    cta: 'مشاهده',
+  },
+]
+
+function BannerSlideCard({ banner }: { banner: typeof DUAL_BANNERS[0] }) {
+  const [idx, setIdx] = useState(0)
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % banner.slides.length), 3500)
+    return () => clearInterval(t)
+  }, [banner.slides.length])
+
+  const slide = banner.slides[idx]
+
+  return (
+    <div style={{ flex: 1, minWidth: 0, borderRadius: 16, overflow: 'hidden', position: 'relative', height: 240, border: '1.5px solid rgba(28,28,26,0.10)' }}>
+      {/* slides */}
+      {banner.slides.map((s, i) => (
+        <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === idx ? 1 : 0, transition: 'opacity 0.7s ease' }}>
+          <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
+          <div style={{ position: 'absolute', inset: 0, background: s.overlay }} />
+        </div>
+      ))}
+      {/* text + cta */}
+      <div style={{ position: 'absolute', inset: 0, padding: '0 18px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', direction: 'rtl' }}>
+        <div style={{ fontSize: 19, fontWeight: 900, color: '#fff', lineHeight: 1.25, textShadow: '0 2px 10px rgba(0,0,0,0.5)', transition: 'opacity 0.4s', opacity: 1 }}>{slide.title}</div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.78)', marginTop: 5, marginBottom: 14, fontWeight: 500 }}>{slide.sub}</div>
+        <Link href={banner.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#fff', color: '#1C1C1A', fontSize: 12, fontWeight: 700, borderRadius: 8, padding: '6px 14px', textDecoration: 'none', alignSelf: 'flex-start' }}>
+          {banner.cta}
+          <ChevronLeft size={12} strokeWidth={2.5} />
+        </Link>
+      </div>
+      {/* dots */}
+      <div style={{ position: 'absolute', bottom: 14, right: 0, left: 0, display: 'flex', justifyContent: 'center', gap: 5, zIndex: 2 }}>
+        {banner.slides.map((_, i) => (
+          <div key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? 20 : 6, height: 6, borderRadius: 3, background: i === idx ? '#fff' : 'rgba(255,255,255,0.42)', transition: 'width 0.35s, background 0.35s', cursor: 'pointer' }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function DualBannerSection() {
+  return (
+    <div style={{ background: '#F7F6F4', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '20px clamp(16px,3vw,32px)', direction: 'rtl' }}>
+        <div style={{ display: 'flex', gap: 12 }} className="dual-banner">
+          {DUAL_BANNERS.map((b, i) => <BannerSlideCard key={i} banner={b} />)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function ShopPage() {
   const [searchInput, setSearchInput] = useState('')
@@ -742,6 +861,7 @@ export default function ShopPage() {
         @media(max-width:900px) { .banner-grid { grid-template-columns: repeat(2,1fr) !important; } }
         .banner-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .banner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(28,28,26,0.16) !important; }
+        @media(max-width:600px) { .dual-banner { flex-direction: column !important; } }
         @media(max-width:600px) {
           .bb-brand   { display: none !important; }
           .bb-divider { display: none !important; }
@@ -762,6 +882,8 @@ export default function ShopPage() {
         <ProductsSection />
         <DealsSection />
         <AdBanners />
+        <NewestSection />
+        <DualBannerSection />
       </div>
     </>
   )
