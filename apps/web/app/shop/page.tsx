@@ -1,8 +1,10 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { ShoppingCart, Search, User, LogIn, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCartStore } from '../../store/cart.store'
+import { useAuthStore } from '../../store/auth.store'
 
 interface Product {
   id: string; title: string; description: string; price: number;
@@ -12,7 +14,7 @@ interface Product {
   isVerified: boolean; views: number; createdAt: string;
 }
 
-const GOLD       = '#B8933A'
+const GOLD       = '#C7A66A'
 const GOLD_DIM   = 'rgba(199,166,106,0.65)'
 const GOLD_LIGHT = 'rgba(199,166,106,0.1)'
 const GOLD_BOR   = 'rgba(199,166,106,0.22)'
@@ -41,15 +43,311 @@ const SORT_OPTIONS = [
 ]
 
 const FALLBACK: Record<string, string> = {
-  cue: '/images/cue_billiard.jpg', ball: '/images/Ball-1.jpg',
-  table: '/images/Pro_table.jpg', accessory: '/images/pool_chalk_1.jpg',
-  clothing: '/images/photo_2026-05-25_08-57-23.jpg',
-  educational: '/images/snooker-table.jpg', default: '/images/billiadr-club-3.jpg',
+  cue: '/images/shop/cue_billiard.jpg', ball: '/images/shop/Ball-1.jpg',
+  table: '/images/shop/Pro_table.jpg', accessory: '/images/shop/pool_chalk_1.jpg',
+  clothing: '/images/clubs/photo_2026-05-25_08-57-23.jpg',
+  educational: '/images/shop/snooker-table.jpg', default: '/images/clubs/billiadr-club-3.jpg',
 }
+
+const SLIDES = [
+  {
+    img: '/images/shop/snooker-table.jpg',
+    badge: 'میز اسنوکر',
+    title: 'میزهای حرفه‌ای',
+    sub: 'بهترین برندهای جهانی — ارسال به سراسر ایران',
+    cta: 'مشاهده میزها',
+    href: '/shop?category=table',
+  },
+  {
+    img: '/images/shop/cue_billiard_2.jpg',
+    badge: 'چوب بیلیارد',
+    title: 'چوب‌های حرفه‌ای',
+    sub: 'از کلاسیک تا کربن فایبر — برای هر سبک بازی',
+    cta: 'مشاهده چوب‌ها',
+    href: '/shop?category=cue',
+  },
+  {
+    img: '/images/shop/Ball-1.jpg',
+    badge: 'گوی‌های بیلیارد',
+    title: 'گوی‌های استاندارد',
+    sub: 'گوی‌های Aramith، Cyclop و سایر برندهای معتبر',
+    cta: 'مشاهده گوی‌ها',
+    href: '/shop?category=ball',
+  },
+  {
+    img: '/images/shop/Home_table.jpg',
+    badge: 'میز خانگی',
+    title: 'بیلیارد در خانه',
+    sub: 'میزهای کمپکت و زیبا برای منزل و اداره',
+    cta: 'خرید میز خانگی',
+    href: '/shop?category=table',
+  },
+  {
+    img: '/images/shop/pool_chalk_1.jpg',
+    badge: 'لوازم جانبی',
+    title: 'اکسسوری کامل',
+    sub: 'گچ، نگهدارنده، کیف چوب و بیش از ۵۰۰ محصول',
+    cta: 'مشاهده لوازم',
+    href: '/shop?category=accessory',
+  },
+]
 
 function toFa(v: string | number) { return String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d) }
 function fmt(n: number) { return Number(n).toLocaleString('fa-IR') }
 function getImg(p: Product) { return p.images?.length ? p.images[0]! : (FALLBACK[p.category] ?? FALLBACK['default']!) }
+
+// ── Shop Top Bar ──────────────────────────────────────────────
+function ShopTopBar({
+  searchInput, onSearchInput, onSearch, cartCount,
+  user,
+}: {
+  searchInput: string
+  onSearchInput: (v: string) => void
+  onSearch: (e: React.FormEvent) => void
+  cartCount: number
+  user: { firstName: string; avatar?: string | null } | null
+}) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <div style={{
+      position: 'sticky', top: 72, zIndex: 150,
+      background: '#fff',
+      borderBottom: '1px solid rgba(28,28,26,0.08)',
+      boxShadow: '0 2px 16px rgba(28,28,26,0.07)',
+    }}>
+      <div style={{
+        maxWidth: 1300, margin: '0 auto',
+        padding: '0 clamp(12px,3vw,32px)',
+        height: 60,
+        display: 'flex', alignItems: 'center', gap: 14,
+        direction: 'rtl',
+      }}>
+
+        {/* Brand */}
+        <Link href="/shop" style={{
+          textDecoration: 'none', flexShrink: 0,
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 8px rgba(199,166,106,0.3)' }}>
+            <img src="/images/Logo/logo1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <span className="bb-brand" style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1 }}>
+            <span style={{ color: '#1C1C1A' }}>Billiard </span>
+            <span style={{ color: GOLD }}>Bazzar</span>
+          </span>
+        </Link>
+
+        {/* Divider */}
+        <div className="bb-divider" style={{ width: 1, height: 28, background: 'rgba(28,28,26,0.08)', flexShrink: 0 }} />
+
+        {/* Search */}
+        <form onSubmit={onSearch} style={{ flex: 1, position: 'relative' }}>
+          <button type="submit" style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            display: 'flex', alignItems: 'center',
+          }}>
+            <Search size={16} color={focused ? GOLD : 'rgba(28,28,26,0.3)'} strokeWidth={2.2} />
+          </button>
+          <input
+            value={searchInput}
+            onChange={e => onSearchInput(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            placeholder="جستجو در بیلیارد بازار"
+            style={{
+              width: '100%', height: 40,
+              background: focused ? '#fff' : 'rgba(28,28,26,0.04)',
+              border: `1.5px solid ${focused ? GOLD : 'rgba(28,28,26,0.09)'}`,
+              borderRadius: 10,
+              padding: '0 40px 0 14px',
+              fontSize: 14, outline: 'none',
+              transition: 'all 0.2s',
+              direction: 'rtl', fontFamily: 'inherit', color: TEXT,
+            }}
+          />
+        </form>
+
+        {/* Cart */}
+        <Link href="/cart" style={{
+          textDecoration: 'none', flexShrink: 0, position: 'relative',
+          width: 40, height: 40, borderRadius: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: cartCount > 0 ? GOLD_LIGHT : 'rgba(28,28,26,0.04)',
+          border: `1px solid ${cartCount > 0 ? GOLD_BOR : 'rgba(28,28,26,0.08)'}`,
+          transition: 'all 0.2s',
+        }}>
+          <ShoppingCart size={18} color={cartCount > 0 ? GOLD : TEXT_SEC} strokeWidth={2} />
+          {cartCount > 0 && (
+            <span style={{
+              position: 'absolute', top: -6, left: -6,
+              minWidth: 18, height: 18, borderRadius: 9,
+              background: `linear-gradient(135deg,${GOLD},#A07840)`,
+              color: '#fff', fontSize: 11, fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 4px', boxShadow: '0 2px 6px rgba(199,166,106,0.45)',
+            }}>
+              {cartCount > 9 ? '۹+' : toFa(cartCount)}
+            </span>
+          )}
+        </Link>
+
+        {/* Auth */}
+        {user ? (
+          <Link href="/dashboard" style={{
+            textDecoration: 'none', flexShrink: 0,
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: 'rgba(28,28,26,0.04)',
+            border: '1px solid rgba(28,28,26,0.08)',
+            borderRadius: 10, padding: '7px 13px',
+            transition: 'all 0.2s',
+          }}>
+            <User size={14} color={TEXT} strokeWidth={2.2} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{user.firstName}</span>
+          </Link>
+        ) : (
+          <Link href="/login" style={{
+            textDecoration: 'none', flexShrink: 0,
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: `linear-gradient(135deg,${GOLD},#A07840)`,
+            borderRadius: 10, padding: '8px 16px',
+            boxShadow: '0 3px 12px rgba(199,166,106,0.35)',
+            transition: 'all 0.2s',
+          }}>
+            <LogIn size={14} color="#fff" strokeWidth={2.5} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>ورود | عضویت</span>
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Hero Slider ───────────────────────────────────────────────
+function HeroSlider() {
+  const [active, setActive] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const next = useCallback(() => setActive(i => (i + 1) % SLIDES.length), [])
+  const prev = () => setActive(i => (i - 1 + SLIDES.length) % SLIDES.length)
+
+  useEffect(() => {
+    timerRef.current = setTimeout(next, 4500)
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [active, next])
+
+  const slide = SLIDES[active]!
+
+  return (
+    <div style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#1C1C1A' }}
+      className="hero-slider">
+      {/* Slides */}
+      {SLIDES.map((s, i) => (
+        <div key={i} style={{
+          position: 'absolute', inset: 0,
+          opacity: i === active ? 1 : 0,
+          transform: i === active ? 'scale(1)' : 'scale(1.025)',
+          transition: 'opacity 0.75s ease, transform 0.75s ease',
+          pointerEvents: i === active ? 'auto' : 'none',
+        }}>
+          <img src={s.img} alt={s.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55) saturate(0.85)' }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to left, rgba(10,8,5,0.92) 0%, rgba(10,8,5,0.45) 50%, transparent 100%)',
+          }} />
+          {/* bottom vignette */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,5,0.6) 0%, transparent 40%)' }} />
+        </div>
+      ))}
+
+      {/* Spacer (aspect ratio) */}
+      <div style={{ paddingTop: 'clamp(220px,38vw,420px)' }} />
+
+      {/* Content */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 10,
+        display: 'flex', alignItems: 'center',
+        padding: 'clamp(16px,5%,80px)',
+        direction: 'rtl',
+      }}>
+        <div key={active} style={{ maxWidth: 460, animation: 'hsIn 0.55s cubic-bezier(0.22,1,0.36,1) both' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.32)',
+            borderRadius: 100, padding: '4px 14px', marginBottom: 16,
+          }}>
+            <span style={{ fontSize: 12, color: GOLD, fontWeight: 700 }}>{slide.badge}</span>
+          </div>
+          <h2 style={{
+            fontSize: 'clamp(24px,4.5vw,46px)', fontWeight: 900, color: '#fff',
+            margin: '0 0 12px', lineHeight: 1.15, letterSpacing: '-0.03em',
+          }}>
+            {slide.title}
+          </h2>
+          <p style={{
+            fontSize: 'clamp(13px,1.6vw,16px)', color: 'rgba(255,255,255,0.55)',
+            margin: '0 0 26px', lineHeight: 1.8,
+          }}>
+            {slide.sub}
+          </p>
+          <Link href={slide.href} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            background: `linear-gradient(135deg,${GOLD},#A07840)`,
+            color: '#fff', padding: '12px 24px',
+            borderRadius: 13, textDecoration: 'none',
+            fontSize: 14, fontWeight: 700,
+            boxShadow: '0 6px 24px rgba(199,166,106,0.42)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}>
+            {slide.cta}
+            <ChevronLeft size={16} strokeWidth={2.5} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Arrows */}
+      {[
+        { onClick: prev, icon: <ChevronRight size={20} strokeWidth={2.5} />, side: { right: 16 } },
+        { onClick: next, icon: <ChevronLeft  size={20} strokeWidth={2.5} />, side: { left:  16 } },
+      ].map((btn, i) => (
+        <button key={i} onClick={btn.onClick}
+          style={{
+            position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 20,
+            ...btn.side,
+            width: 42, height: 42, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            color: '#fff', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s',
+          }}
+          className="slider-arrow"
+        >
+          {btn.icon}
+        </button>
+      ))}
+
+      {/* Dots */}
+      <div style={{
+        position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 20,
+        display: 'flex', gap: 6,
+      }}>
+        {SLIDES.map((_, i) => (
+          <button key={i} onClick={() => setActive(i)}
+            style={{
+              width: i === active ? 26 : 7, height: 7,
+              borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
+              background: i === active ? GOLD : 'rgba(255,255,255,0.38)',
+              transition: 'all 0.35s ease',
+              boxShadow: i === active ? '0 0 8px rgba(199,166,106,0.5)' : 'none',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 // ── Countdown ─────────────────────────────────────────────────
 function Countdown({ sec = 8 * 3600 + 32 * 60 + 51 }) {
@@ -150,7 +448,7 @@ function ProductCard({ product, rank }: { product: Product; rank?: number }) {
         <div style={{ aspectRatio: '1', overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'rgba(28,28,26,0.04)' }}>
           <img src={img} alt={product.title}
             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.4,0,0.2,1)', transform: hov ? 'scale(1.08)' : 'scale(1)', filter: 'brightness(0.88) saturate(0.85)' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
+            onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/billiadr-club-3.jpg' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 45%,rgba(28,28,26,0.5) 100%)', opacity: hov ? 1 : 0.35, transition: 'opacity 0.35s' }} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: hov ? 1 : 0, transform: hov ? 'translateY(0)' : 'translateY(8px)', transition: 'all 0.3s' }}>
@@ -216,6 +514,7 @@ export default function ShopPage() {
   const [totalPages, setTotalPages]   = useState(1)
   const [total, setTotal]             = useState(0)
   const cartCount = useCartStore(s => s.totalItems())
+  const user = useAuthStore(s => s.user)
 
   const isFiltered = category !== 'all' || search !== '' || sort !== 'newest'
 
@@ -247,6 +546,7 @@ export default function ShopPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap');
         @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+        @keyframes hsIn   { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
         @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.4} }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width:4px; height:4px }
@@ -255,57 +555,32 @@ export default function ShopPage() {
         .cat-pill:hover { border-color:${GOLD_BOR} !important; background:${GOLD_LIGHT} !important; color:${GOLD} !important; }
         .sort-btn:hover  { border-color:${GOLD_BOR} !important; color:${GOLD} !important; background:${GOLD_LIGHT} !important; }
         .page-btn:hover  { background:${GOLD_LIGHT} !important; border-color:${GOLD_BOR} !important; color:${GOLD} !important; }
+        .slider-arrow:hover { background:rgba(199,166,106,0.25) !important; border-color:rgba(199,166,106,0.4) !important; }
+        .hero-slider { height: clamp(220px,38vw,420px); }
+        @media(max-width:600px) {
+          .bb-brand { display: none !important; }
+          .bb-divider { display: none !important; }
+          .hero-slider { height: clamp(190px,56vw,320px) !important; }
+        }
         @media(max-width:700px)  { .prod-grid{grid-template-columns:repeat(2,1fr)!important;} }
         @media(min-width:1200px) { .prod-grid{grid-template-columns:repeat(4,1fr)!important;} }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: TEXT }}>
+      <div style={{ paddingTop: 72, minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: TEXT }}>
 
-        <div style={{ position: 'fixed', top: -120, right: -100, width: 600, height: 600, background: `radial-gradient(circle,rgba(199,166,106,0.05)0%,transparent 65%)`, filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* ── Shop Top Bar ── */}
+        <ShopTopBar
+          searchInput={searchInput}
+          onSearchInput={setSearchInput}
+          onSearch={handleSearch}
+          cartCount={cartCount}
+          user={user}
+        />
 
-        {/* ════ HERO (dark cinematic) ════ */}
-        <div style={{ position: 'relative', overflow: 'hidden', background: '#1C1C1A' }}>
-          <img src="/images/snooker-table.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.14) saturate(0.4)', transform: 'scale(1.04)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,rgba(28,28,26,0.5)0%,rgba(28,28,26,0.97)100%)' }} />
-          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '50%', height: 1, background: `linear-gradient(90deg,transparent,${GOLD}50,transparent)` }} />
+        {/* ── Hero Slider ── */}
+        <HeroSlider />
 
-          <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '52px 20px 48px', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GOLD_LIGHT, border: `1px solid ${GOLD_BOR}`, borderRadius: 100, padding: '6px 18px', marginBottom: 20, animation: 'fadeUp 0.6s ease both' }}>
-              <i className="ti ti-shopping-bag" style={{ fontSize: 15, color: GOLD }} />
-              <span style={{ fontSize: 12, color: GOLD, fontWeight: 700, letterSpacing: '0.2em' }}>BILLIARDHUB — بیلیارد بازار</span>
-            </div>
-            <h1 style={{ fontSize: 'clamp(31px, 5.5vw, 57px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px', animation: 'fadeUp 0.6s ease 0.1s both' }}>
-              تجهیزات حرفه‌ای بیلیارد
-            </h1>
-            <p style={{ fontSize: 'clamp(14px, 1.7vw, 18px)', color: 'rgba(255,255,255,0.3)', margin: '0 0 36px', lineHeight: 1.7, animation: 'fadeUp 0.6s ease 0.2s both' }}>
-              {total > 0 ? <>{toFa(total)} محصول از فروشندگان معتبر سراسر ایران</> : 'بهترین برندهای جهانی بیلیارد'}
-            </p>
-
-            <form onSubmit={handleSearch} style={{ animation: 'fadeUp 0.6s ease 0.3s both' }}>
-              <div style={{ position: 'relative', maxWidth: 560, margin: '0 auto' }}>
-                <i className="ti ti-search" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 20, color: 'rgba(255,255,255,0.22)', pointerEvents: 'none', zIndex: 1 }} />
-                <input value={searchInput} onChange={e => setSearchInput(e.target.value)}
-                  placeholder="جستجو... چوب، گوی، میز بیلیارد"
-                  style={{ width: '100%', background: 'rgba(0,0,0,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '14px 48px 14px 110px', color: '#fff', fontSize: 16, fontFamily: 'inherit', outline: 'none', transition: 'all 0.3s' }}
-                  onFocus={e => { e.target.style.borderColor = GOLD_BOR; e.target.style.background = 'rgba(199,166,106,0.06)' }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(0,0,0,0.08)'; e.target.style.background = 'rgba(0,0,0,0.07)' }} />
-                <button type="submit" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: `linear-gradient(135deg,${GOLD},#A07840)`, border: 'none', borderRadius: 10, padding: '8px 20px', color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: `0 4px 16px rgba(199,166,106,0.4)` }}>
-                  جستجو
-                </button>
-              </div>
-            </form>
-
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginTop: 32, animation: 'fadeUp 0.6s ease 0.4s both', flexWrap: 'wrap' }}>
-              {[{ icon: 'ti-shield-check', label: 'ضمانت اصالت' }, { icon: 'ti-truck', label: 'ارسال سریع' }, { icon: 'ti-rotate', label: '۷ روز مرجوعی' }, { icon: 'ti-users', label: '+۱۰٬۰۰۰ خریدار' }].map(s => (
-                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(255,255,255,0.26)' }}>
-                  <i className={`ti ${s.icon}`} style={{ fontSize: 16, color: GOLD_DIM }} />{s.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ════ LIGHT CONTENT ════ */}
+        {/* ── LIGHT CONTENT ── */}
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1300, margin: '0 auto', padding: '36px 20px 80px' }}>
 
           {/* Category pills */}
@@ -343,10 +618,6 @@ export default function ShopPage() {
                   </button>
                 )
               })}
-              <Link href="/cart" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: cartCount > 0 ? GOLD_LIGHT : SURF, border: `1px solid ${cartCount > 0 ? GOLD_BOR : BORDER}`, color: cartCount > 0 ? GOLD : TEXT_SEC, fontSize: 14, fontWeight: 700, textDecoration: 'none', backdropFilter: 'blur(16px)' }}>
-                <i className="ti ti-shopping-cart" style={{ fontSize: 16 }} />
-                سبد {cartCount > 0 && <span style={{ background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', borderRadius: '50%', width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900 }}>{toFa(cartCount)}</span>}
-              </Link>
             </div>
           </div>
 
@@ -378,7 +649,7 @@ export default function ShopPage() {
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(192,57,43,0.3)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.07)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}>
                       <div style={{ aspectRatio: '1', overflow: 'hidden', position: 'relative' }}>
-                        <img src={getImg(p)} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.5) saturate(0.7)' }} onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
+                        <img src={getImg(p)} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.5) saturate(0.7)' }} onError={e => { (e.target as HTMLImageElement).src = '/images/clubs/billiadr-club-3.jpg' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.7)100%)' }} />
                         {p.discountPercent && <div style={{ position: 'absolute', top: 7, right: 7, width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#C0392B,#922B21)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, color: '#fff' }}>{toFa(p.discountPercent)}٪</div>}
                       </div>
@@ -498,7 +769,7 @@ export default function ShopPage() {
             </div>
           )}
 
-          {/* ══ SELL CTA (dark contrast block) ══ */}
+          {/* ══ SELL CTA ══ */}
           {!isFiltered && !loading && (
             <div style={{ marginTop: 40, padding: '40px', borderRadius: 22, background: '#1C1C1A', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 500, height: 300, background: `radial-gradient(ellipse,rgba(199,166,106,0.08),transparent 70%)`, pointerEvents: 'none', filter: 'blur(20px)' }} />
