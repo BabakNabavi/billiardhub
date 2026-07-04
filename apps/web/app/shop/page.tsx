@@ -611,29 +611,70 @@ function DealsSection() {
           onMouseDown={onDown}
           style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none', padding: '14px 2px' }}
         >
-          {/* yellow promo card — first (RTL = rightmost) */}
+          {/* ── BILLIARD PARTY promo card ── */}
           <Link href="/shop/party" draggable={false} style={{
             textDecoration: 'none', flexShrink: 0,
-            width: 148, borderRadius: 12,
-            background: 'linear-gradient(145deg,#F5C518 0%,#F0A500 60%,#E8920A 100%)',
+            width: 155, borderRadius: 14,
+            background: 'linear-gradient(155deg,#1A0A30 0%,#2E1060 35%,#6B2FA0 65%,#C7690A 100%)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: '20px 14px', gap: 4,
+            padding: '22px 12px 18px', gap: 0,
             position: 'relative', overflow: 'hidden',
-            border: '1.5px solid rgba(245,197,24,0.4)',
-            boxShadow: '0 4px 18px rgba(240,165,0,0.28)',
+            border: '1.5px solid rgba(199,166,106,0.45)',
+            boxShadow: '0 6px 28px rgba(100,30,160,0.45), inset 0 1px 0 rgba(255,255,255,0.1)',
           }}>
-            <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
-            <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#1C1C1A', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, position: 'relative', zIndex: 1 }}>
-              <span style={{ fontSize: 22, fontWeight: 900, color: '#F5C518', lineHeight: 1 }}>%</span>
+            {/* rays SVG */}
+            <svg viewBox="0 0 160 160" width={160} height={160} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-54%)', opacity: 0.18, pointerEvents: 'none' }}>
+              {Array.from({ length: 12 }, (_, i) => {
+                const a = (i * 30) * Math.PI / 180
+                return <line key={i} x1={80} y1={80} x2={80 + Math.cos(a) * 90} y2={80 + Math.sin(a) * 90} stroke="#FFE566" strokeWidth="1.5" />
+              })}
+            </svg>
+            {/* top glow */}
+            <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', width: 120, height: 80, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(255,210,0,0.28) 0%,transparent 70%)', pointerEvents: 'none' }} />
+            {/* 3D % badge */}
+            <div style={{ position: 'relative', zIndex: 2, marginBottom: 10,
+              width: 60, height: 60, borderRadius: '50%',
+              background: 'linear-gradient(145deg,#2A1400 0%,#0D0D10 100%)',
+              border: '1.5px solid rgba(255,190,30,0.5)',
+              boxShadow: 'inset 0 -3px 8px rgba(255,160,0,0.35), inset 0 2px 4px rgba(255,255,255,0.08), 0 6px 20px rgba(0,0,0,0.55)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{
+                fontSize: 26, fontWeight: 900, lineHeight: 1,
+                background: 'linear-gradient(160deg,#FFE566 0%,#FFAA00 45%,#FF6500 100%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))',
+                fontFamily: "'Playfair Display', Georgia, serif",
+              }}>%</span>
             </div>
-            <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#1C1C1A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>بیلیارد</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#1C1C1A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>پارتی</div>
+            {/* text */}
+            <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', lineHeight: 1.1 }}>
+              <div style={{
+                fontSize: 16, fontWeight: 700, fontStyle: 'italic',
+                fontFamily: "'Playfair Display', Georgia, serif",
+                background: 'linear-gradient(90deg,#FFD580,#FFB347)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                letterSpacing: '0.01em', marginBottom: 3,
+              }}>بیلیارد</div>
+              <div style={{
+                fontSize: 28, fontWeight: 900, fontStyle: 'italic',
+                fontFamily: "'Playfair Display', Georgia, serif",
+                background: 'linear-gradient(150deg,#fff 0%,#FFE8A0 55%,#FFC200 100%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                filter: 'drop-shadow(0 2px 8px rgba(255,160,0,0.55))',
+                letterSpacing: '-0.01em',
+              }}>پارتی</div>
             </div>
-            <div style={{ marginTop: 12, fontSize: 11, fontWeight: 700, color: '#1C1C1A', opacity: 0.7, display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
+            {/* cta */}
+            <div style={{ position: 'relative', zIndex: 2, marginTop: 14,
+              fontSize: 10, fontWeight: 700, color: '#1C1C1A',
+              background: 'linear-gradient(90deg,#FFE566,#FFAA00)',
+              borderRadius: 20, padding: '4px 12px',
+              display: 'flex', alignItems: 'center', gap: 2,
+              boxShadow: '0 2px 8px rgba(255,160,0,0.4)',
+            }}>
               مشاهده همه
-              <ChevronLeft size={11} strokeWidth={2.5}/>
+              <ChevronLeft size={10} strokeWidth={2.5}/>
             </div>
           </Link>
 
@@ -792,7 +833,7 @@ function BannerSlideCard({ banner }: { banner: typeof DUAL_BANNERS[0] }) {
   const slide = banner.slides[idx]
 
   return (
-    <div style={{ flex: 1, minWidth: 0, borderRadius: 16, overflow: 'hidden', position: 'relative', height: 240, border: '1.5px solid rgba(28,28,26,0.10)' }}>
+    <div style={{ flex: 1, minWidth: 0, borderRadius: 16, overflow: 'hidden', position: 'relative', height: 216, border: '1.5px solid rgba(28,28,26,0.10)' }}>
       {/* slides */}
       {banner.slides.map((s, i) => (
         <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === idx ? 1 : 0, transition: 'opacity 0.7s ease' }}>
