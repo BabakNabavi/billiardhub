@@ -481,20 +481,26 @@ function CategoriesSection() {
 }
 
 // ── Products Section ──────────────────────────────────────────
-function ProductsSection() {
+function ProductsSection({ products }: { products: typeof PRODUCTS }) {
   const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
   return (
     <div style={{ background: '#F7F6F4' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>پیشنهاد محصولات</h2>
-          <Link href="/shop/all" style={{ fontSize: 13, color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
-            مشاهده همه
-            <ChevronLeft size={13} strokeWidth={2.5} />
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link href="/shop/new" style={{ fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg,${GOLD},#A07840)`, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, boxShadow: '0 3px 10px rgba(199,166,106,0.30)' }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+              ثبت محصول
+            </Link>
+            <Link href="/shop/all" style={{ fontSize: 13, color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+              مشاهده همه
+              <ChevronLeft size={13} strokeWidth={2.5} />
+            </Link>
+          </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
-          {PRODUCTS.map(p => (
+          {products.map(p => (
             <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {/* Image */}
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
@@ -754,10 +760,9 @@ function AdBanners() {
 }
 
 // ── Newest Section ────────────────────────────────────────────
-const NEWEST_PRODUCTS = [...PRODUCTS].reverse()
-
-function NewestSection() {
+function NewestSection({ products }: { products: typeof PRODUCTS }) {
   const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
+  const newestProducts = [...products].reverse()
   return (
     <div style={{ background: '#fff' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
@@ -769,7 +774,7 @@ function NewestSection() {
           </Link>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
-          {NEWEST_PRODUCTS.map(p => (
+          {newestProducts.map(p => (
             <Link key={`new-${p.id}`} href={`/shop/product/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
@@ -876,8 +881,18 @@ function DualBannerSection() {
 // ── Main Page ─────────────────────────────────────────────────
 export default function ShopPage() {
   const [searchInput, setSearchInput] = useState('')
+  const [userProds, setUserProds] = useState<typeof PRODUCTS>([])
   const cartCount = useCartStore(s => s.totalItems())
   const user      = useAuthStore(s => s.user)
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
+      if (Array.isArray(stored) && stored.length > 0) setUserProds(stored)
+    } catch { /* ignore */ }
+  }, [])
+
+  const allProducts = [...userProds, ...PRODUCTS]
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -921,10 +936,10 @@ export default function ShopPage() {
         />
         <HeroSlider />
         <CategoriesSection />
-        <ProductsSection />
+        <ProductsSection products={allProducts} />
         <DealsSection />
         <AdBanners />
-        <NewestSection />
+        <NewestSection products={allProducts} />
         <DualBannerSection />
       </div>
     </>
