@@ -33,6 +33,108 @@ const CATEGORIES = [
 
 const CITIES = ['تهران', 'اصفهان', 'مشهد', 'شیراز', 'تبریز', 'سایر']
 
+// ── Spec field definitions ─────────────────────────────────────
+interface SpecFieldDef {
+  key: string; label: string
+  type: 'dropdown' | 'number' | 'text'
+  options?: string[]; unit?: string; placeholder?: string; wide?: boolean
+}
+
+const GENERIC_SPECS: SpecFieldDef[] = [
+  { key: 'brand',     label: 'برند',   type: 'text',     placeholder: 'نام برند' },
+  { key: 'condition', label: 'وضعیت', type: 'dropdown', options: ['نو','کارکرده'] },
+]
+
+const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
+  cue: [
+    { key: 'brand',         label: 'برند',          type: 'dropdown', options: ['Predator','Mezz','McDermott','Cuetec','Lucasi','سایر'] },
+    { key: 'cueType',       label: 'نوع',           type: 'dropdown', options: ['پاکت بیلیارد','اسنوکر','هی‌بال','کارامبول','سایر'] },
+    { key: 'length',        label: 'طول',           type: 'number',   unit: 'سانتیمتر', placeholder: '147' },
+    { key: 'weight',        label: 'وزن',           type: 'number',   unit: 'اونس',      placeholder: '19' },
+    { key: 'tipDiameter',   label: 'قطر تیپ',       type: 'number',   unit: 'میلیمتر',  placeholder: '13' },
+    { key: 'buttDiameter',  label: 'قطر بات',       type: 'number',   unit: 'میلیمتر',  placeholder: '30' },
+    { key: 'shaftMaterial', label: 'جنس شفت',       type: 'dropdown', options: ['چوب افرا','کربن فایبر','ترکیبی','سایر'] },
+    { key: 'tipType',       label: 'نوع تیپ',       type: 'text',     placeholder: 'مثال: Kamui Black' },
+    { key: 'pieces',        label: 'تعداد تکه',     type: 'dropdown', options: ['یک تکه','دو تکه'] },
+    { key: 'condition',     label: 'وضعیت',         type: 'dropdown', options: ['نو','کارکرده'] },
+  ],
+  table: [
+    { key: 'tableType',      label: 'نوع',          type: 'dropdown', options: ['پاکت بیلیارد','اسنوکر','هی‌بال','کارامبول','خانگی'] },
+    { key: 'size',           label: 'اندازه',       type: 'dropdown', options: ['۷ فوت','۸ فوت','۹ فوت','۱۰ فوت','۱۲ فوت'] },
+    { key: 'bodyMaterial',   label: 'جنس بدنه',     type: 'dropdown', options: ['اسلیت','MDF','چوب ماسیو','سایر'] },
+    { key: 'slateThickness', label: 'ضخامت سنگ',   type: 'number',   unit: 'میلیمتر', placeholder: '45' },
+    { key: 'clothType',      label: 'نوع پارچه',    type: 'dropdown', options: ['وُرستد','پشم','نایلون','سایر'] },
+    { key: 'clothColor',     label: 'رنگ پارچه',    type: 'dropdown', options: ['سبز','آبی','قرمز','طوسی','سایر'] },
+    { key: 'cushionType',    label: 'نوع باند',      type: 'dropdown', options: ['گوم طبیعی','سینتتیک','سایر'] },
+    { key: 'brand',          label: 'برند',          type: 'dropdown', options: ['استار','شندر','ویراکا','لوتوس','برونزویک','دایموند','سایر'] },
+    { key: 'model',          label: 'مدل',           type: 'text',     placeholder: 'مثال: Gold Crown VI', wide: true },
+    { key: 'condition',      label: 'وضعیت',         type: 'dropdown', options: ['نو','کارکرده'] },
+  ],
+  ball: [
+    { key: 'brand',     label: 'برند',      type: 'dropdown', options: ['آرامیت','سیکلوپ','سایر'] },
+    { key: 'setType',   label: 'نوع ست',    type: 'dropdown', options: ['۱۵ تایی پاکت بیلیارد','۲۲ تایی اسنوکر','۳ تایی کارامبول','سایر'] },
+    { key: 'diameter',  label: 'قطر',       type: 'number',   unit: 'میلیمتر', placeholder: '57.2' },
+    { key: 'material',  label: 'جنس',       type: 'dropdown', options: ['فنولیک رزین','پلی‌استر','سایر'] },
+    { key: 'condition', label: 'وضعیت',     type: 'dropdown', options: ['نو','کارکرده'] },
+  ],
+  tip: [
+    { key: 'brand',        label: 'برند',          type: 'dropdown', options: ['Kamui','Taom','Moori','Elk Master','Tiger','Triangle','Le Pro','Predator','HOW Tips','Nili','سایر'] },
+    { key: 'model',        label: 'مدل',            type: 'text',     placeholder: 'مثال: Kamui Black' },
+    { key: 'diameter',     label: 'قطر',            type: 'dropdown', options: ['۹','۱۰','۱۱','۱۲','۱۲.۵','۱۳','۱۳.۵','۱۴ میلیمتر'] },
+    { key: 'hardness',     label: 'سختی',           type: 'dropdown', options: ['خیلی نرم','نرم','متوسط','سخت','خیلی سخت'] },
+    { key: 'tipType',      label: 'نوع',            type: 'dropdown', options: ['تک لایه چرم','چندلایه چرم','سینتتیک','فنولیک'] },
+    { key: 'leatherType',  label: 'جنس چرم',        type: 'dropdown', options: ['چرم خوک','چرم گاو','چرم بوفالو','سایر'] },
+    { key: 'layers',       label: 'تعداد لایه',     type: 'number',   placeholder: '1' },
+    { key: 'packageCount', label: 'تعداد در بسته',  type: 'dropdown', options: ['تک فروشی','۵ عددی','۱۰ عددی'] },
+  ],
+  chalk: [
+    { key: 'brand',        label: 'برند',          type: 'dropdown', options: ['Master','Predator','Taom','Triangle','Silver Cup','سایر'] },
+    { key: 'packageCount', label: 'تعداد در بسته', type: 'dropdown', options: ['تک فروشی','۵ عددی','۱۲ عددی','۱۴۴ عددی'] },
+    { key: 'color',        label: 'رنگ',           type: 'dropdown', options: ['آبی','سبز','سایر'] },
+  ],
+  'case-bag': [
+    { key: 'caseType',  label: 'نوع',     type: 'dropdown', options: ['کیس سخت','کیس نرم','کیف','کوله‌پشتی'] },
+    { key: 'capacity',  label: 'ظرفیت',  type: 'dropdown', options: ['۱×۱','۲×۲','۲×۴','۳×۵','۴×۸'] },
+    { key: 'material',  label: 'جنس',    type: 'dropdown', options: ['چرم طبیعی','چرم مصنوعی','نایلون','سایر'] },
+    { key: 'brand',     label: 'برند',   type: 'text',     placeholder: 'نام برند' },
+    { key: 'condition', label: 'وضعیت', type: 'dropdown', options: ['نو','کارکرده'] },
+  ],
+}
+
+function SpecField({ field, value, otherValue, onChange, onOtherChange }: {
+  field: SpecFieldDef; value: string; otherValue: string
+  onChange: (v: string) => void; onOtherChange: (v: string) => void
+}) {
+  const showOther = field.type === 'dropdown' && field.options?.includes('سایر') && value === 'سایر'
+  const labelText = field.unit ? `${field.label} (${field.unit})` : field.label
+  return (
+    <div style={{ gridColumn: field.wide ? '1 / -1' : undefined }}>
+      <Label optional>{labelText}</Label>
+      {field.type === 'dropdown' ? (
+        <select className="nf" value={value} onChange={e => onChange(e.target.value)}
+          style={{ ...inp(), cursor: 'pointer', paddingLeft: 10 }}>
+          <option value="">انتخاب...</option>
+          {field.options!.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : field.type === 'number' ? (
+        <input className="nf" type="number" placeholder={field.placeholder ?? ''} value={value}
+          onChange={e => onChange(e.target.value)}
+          style={{ ...inp(), direction: 'ltr', textAlign: 'right' }} />
+      ) : (
+        <input className="nf" type="text" placeholder={field.placeholder ?? ''} value={value}
+          onChange={e => onChange(e.target.value)} style={inp()} />
+      )}
+      {showOther && (
+        <div style={{ marginTop: 8, animation: 'fadeIn 0.25s ease both' }}>
+          <input className="nf" type="text" placeholder="لطفاً توضیح دهید..." value={otherValue}
+            onChange={e => onOtherChange(e.target.value)}
+            style={{ ...inp(), background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 // parse Persian/Arabic numerals → pure digits
 function toAsciiDigits(s: string) {
   return s.replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 0x06f0))
@@ -100,10 +202,18 @@ export default function NewProductPage() {
   const [errors,   setErrors]   = useState<Record<string, string>>({})
   const [success,  setSuccess]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [specs,     setSpecs]     = useState<Record<string, string>>({})
+  const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
   const set = (k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     setErrors(e => { const n = { ...e }; delete n[k]; return n })
+  }
+
+  const handleCategoryChange = (cat: string) => {
+    set('category', cat)
+    setSpecs({})
+    setSpecOthers({})
   }
 
   const handleFiles = useCallback((files: FileList | null) => {
@@ -157,6 +267,12 @@ export default function NewProductPage() {
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
     const imgList  = images.map(i => i.data)
 
+    const finalSpecs: Record<string, string> = {}
+    Object.entries(specs).forEach(([k, v]) => {
+      if (v === 'سایر' && specOthers[k]) finalSpecs[k] = `سایر: ${specOthers[k]}`
+      else if (v) finalSpecs[k] = v
+    })
+
     const product = {
       id: Date.now(),
       img:       imgList[0] ?? '/images/shop/cue_billiard_2.jpg',
@@ -169,6 +285,7 @@ export default function NewProductPage() {
       description:    form.description.trim(),
       brand:          form.brand.trim(),
       condition:      form.condition,
+      specs:          finalSpecs,
       sellerName:     form.shopName.trim(),
       ownerName:      form.ownerName.trim(),
       sellerPhone:    form.sellerPhone.trim(),
@@ -227,7 +344,7 @@ export default function NewProductPage() {
         .img-thumb:hover { transform: scale(1.04); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
         .cond-btn { transition: all 0.2s; cursor: pointer; }
         .cond-btn:hover { border-color: ${GOLD} !important; }
-        @media(max-width:820px) { .two-col { grid-template-columns: 1fr !important; } }
+        @media(max-width:820px) { .two-col { grid-template-columns: 1fr !important; } .spec-grid { grid-template-columns: 1fr !important; } }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
@@ -306,7 +423,7 @@ export default function NewProductPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                       <div>
                         <Label required>دسته‌بندی</Label>
-                        <select className="nf" value={form.category} onChange={e => set('category', e.target.value)} style={{ ...inp(errors.category), cursor: 'pointer', paddingLeft: 10 }}>
+                        <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={{ ...inp(errors.category), cursor: 'pointer', paddingLeft: 10 }}>
                           <option value="">انتخاب...</option>
                           {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                         </select>
@@ -367,6 +484,43 @@ export default function NewProductPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* card: category specs */}
+                {form.category && (() => {
+                  const currentSpecs = CATEGORY_SPECS[form.category] ?? GENERIC_SPECS
+                  return (
+                    <div key={form.category} style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+                      <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 12px rgba(199,166,106,0.32)`, flexShrink: 0 }}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round">
+                              <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 10.5, color: GOLD, letterSpacing: '0.18em', fontWeight: 700, margin: '0 0 1px' }}>SPECIFICATIONS</p>
+                            <h3 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>
+                              مشخصات فنی — {CATEGORIES.find(c => c.id === form.category)?.label}
+                            </h3>
+                          </div>
+                        </div>
+                        <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                          {currentSpecs.map(field => (
+                            <SpecField
+                              key={`${form.category}-${field.key}`}
+                              field={field}
+                              value={specs[field.key] ?? ''}
+                              otherValue={specOthers[field.key] ?? ''}
+                              onChange={v => setSpecs(s => ({ ...s, [field.key]: v }))}
+                              onOtherChange={v => setSpecOthers(s => ({ ...s, [field.key]: v }))}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* card: images */}
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
