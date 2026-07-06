@@ -501,7 +501,7 @@ function ProductsSection({ products }: { products: typeof PRODUCTS }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
           {products.map(p => (
-            <Link key={p.id} href={`/shop/product/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {/* Image */}
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -686,7 +686,7 @@ function DealsSection() {
 
           {/* deal product cards */}
           {DEAL_PRODUCTS.map((p, i) => (
-            <Link key={`${p.id}-${i}`} href={`/shop/product/${p.id}`} draggable={false} className="prod-card" style={{
+            <Link key={`${p.id}-${i}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{
               textDecoration: 'none', flexShrink: 0, width: 158, borderRadius: 12,
               background: '#fff', display: 'flex', flexDirection: 'column',
               border: '1.5px solid rgba(28,28,26,0.13)',
@@ -775,7 +775,7 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
           {newestProducts.map(p => (
-            <Link key={`new-${p.id}`} href={`/shop/product/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
                 {p.disc > 0 && (

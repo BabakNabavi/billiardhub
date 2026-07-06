@@ -184,52 +184,86 @@ export default function Stories() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Fetch real clubs with active stories and prepend to groups
+  // Fetch real clubs + sellers with active stories and prepend to groups
   useEffect(() => {
-    fetch('/api/clubs')
-      .then(r => r.json())
-      .then(async (clubs: any[]) => {
-        const list = (clubs || []).filter((c: any) => c.id);
-        if (list.length === 0) return;
+    const fetchAllStories = async () => {
+      const [clubsRes, sellersRes] = await Promise.allSettled([
+        fetch('/api/clubs').then(r => r.json()).catch(() => []),
+        fetch('/api/sellers').then(r => r.json()).catch(() => []),
+      ]);
 
-        // Fetch stories for all clubs in parallel; empty clubs resolve to []
-        const results = await Promise.all(
-          list.map((c: any) =>
+      const clubs: any[] = clubsRes.status === 'fulfilled' ? (clubsRes.value || []) : [];
+      const sellers: any[] = sellersRes.status === 'fulfilled' ? (sellersRes.value || []) : [];
+
+      const [clubResults, sellerResults] = await Promise.all([
+        Promise.all(
+          clubs.filter((c: any) => c.id).map((c: any) =>
             fetch(`/api/clubs/${c.id}/stories`)
               .then(r => r.json())
               .then((stories: any[]) => ({ c, stories: Array.isArray(stories) ? stories : [] }))
               .catch(() => ({ c, stories: [] as any[] }))
           )
-        );
+        ),
+        Promise.all(
+          sellers.filter((s: any) => s.id).map((s: any) =>
+            fetch(`/api/sellers/${s.id}/stories`)
+              .then(r => r.json())
+              .then((stories: any[]) => ({ s, stories: Array.isArray(stories) ? stories : [] }))
+              .catch(() => ({ s, stories: [] as any[] }))
+          )
+        ),
+      ]);
 
-        const apiGroups: StoryGroup[] = results
-          .filter(({ stories }) => stories.length > 0)
-          .map(({ c, stories }): StoryGroup => ({
-            userId: `api-${c.id}`,
-            userName: c.name,
-            userAvatar: c.name?.[0] ?? '؟',
-            logoUrl: c.logo || undefined,
-            userRole: 'club',
-            roleColor: '#C7A66A',
-            roleLabel: 'باشگاه',
-            allSeen: false,
-            stories: stories.map((s: any) => ({
-              id: s.id,
-              caption: s.text || undefined,
-              createdAt: relativeTime(s.expiresAt),
-              mediaUrl: s.mediaUrl,
-              mediaType: s.mediaType || 'image',
-            })),
-          }));
+      const clubGroups: StoryGroup[] = clubResults
+        .filter(({ stories }) => stories.length > 0)
+        .map(({ c, stories }): StoryGroup => ({
+          userId: `api-club-${c.id}`,
+          userName: c.name,
+          userAvatar: c.name?.[0] ?? '؟',
+          logoUrl: c.logo || undefined,
+          userRole: 'club',
+          roleColor: '#C7A66A',
+          roleLabel: 'باشگاه',
+          allSeen: false,
+          stories: stories.map((s: any) => ({
+            id: s.id,
+            caption: s.text || undefined,
+            createdAt: relativeTime(s.expiresAt),
+            mediaUrl: s.mediaUrl,
+            mediaType: s.mediaType || 'image',
+          })),
+        }));
 
-        if (apiGroups.length > 0) {
-          setGroups(prev => [
-            ...apiGroups,
-            ...prev.filter(g => !g.userId.startsWith('api-')),
-          ]);
-        }
-      })
-      .catch(() => {});
+      const sellerGroups: StoryGroup[] = sellerResults
+        .filter(({ stories }) => stories.length > 0)
+        .map(({ s, stories }): StoryGroup => ({
+          userId: `api-seller-${s.id}`,
+          userName: (s.sellerProfile as any)?.shopName || `${s.firstName || ''} ${s.lastName || ''}`.trim() || 'فروشگاه',
+          userAvatar: ((s.sellerProfile as any)?.shopName || s.firstName || 'ف')[0],
+          logoUrl: s.avatar || undefined,
+          userRole: 'shop',
+          roleColor: '#f59e0b',
+          roleLabel: 'فروشگاه',
+          allSeen: false,
+          stories: stories.map((st: any) => ({
+            id: st.id,
+            caption: st.text || undefined,
+            createdAt: relativeTime(st.expiresAt),
+            mediaUrl: st.mediaUrl,
+            mediaType: st.mediaType || 'image',
+          })),
+        }));
+
+      const allApiGroups = [...clubGroups, ...sellerGroups];
+      if (allApiGroups.length > 0) {
+        setGroups(prev => [
+          ...allApiGroups,
+          ...prev.filter(g => !g.userId.startsWith('api-')),
+        ]);
+      }
+    };
+
+    fetchAllStories().catch(() => {});
   }, []);
 
   const closeStory = () => { setActiveGroup(null); setShowEmojis(false); setComment(''); };
