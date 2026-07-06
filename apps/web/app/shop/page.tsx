@@ -200,18 +200,18 @@ const CATS = [
 
 // ── Mock products ──────────────────────────────────────────────
 const PRODUCTS = [
-  { id: 1,  img: '/images/shop/cue_billiard_2.jpg',   name: 'چوب حرفه‌ای Predator 314³',              price: 2800000, old: 3300000, disc: 15 },
-  { id: 2,  img: '/images/shop/snooker-table.jpg',    name: 'میز اسنوکر Dynamo Tournament',            price: 45000000,old: 50000000,disc: 10 },
-  { id: 3,  img: '/images/shop/Ball-1.jpg',           name: 'توپ Aramith Pro Cup استاندارد WPBSA',     price: 1200000, old: 1500000, disc: 20 },
-  { id: 4,  img: '/images/shop/pool_chalk_1.jpg',     name: 'گچ Master Blue Square — ۱۴۴ عددی',       price: 180000,  old: 260000,  disc: 31 },
-  { id: 5,  img: '/images/shop/rest-pool.webp',       name: 'رست اسنوکر حرفه‌ای پیچ استنلس',          price: 450000,  old: 480000,  disc: 6  },
-  { id: 6,  img: '/images/shop/accessori.png',        name: 'کیف چوب بیلیارد دو قسمتی چرم',           price: 850000,  old: 970000,  disc: 12 },
-  { id: 7,  img: '/images/shop/cue_billiard.jpg',     name: 'چوب کربن فایبر Mezz EC7-CF',             price: 6500000, old: 7100000, disc: 8  },
-  { id: 8,  img: '/images/shop/Ball.jpg',             name: 'توپ Cyclop Omega Pool Set',               price: 950000,  old: 1120000, disc: 15 },
-  { id: 9,  img: '/images/shop/Home_table.jpg',       name: 'میز بیلیارد خانگی — پایه چوب ماسیو',    price: 18000000,old: 19000000,disc: 5  },
-  { id: 10, img: '/images/shop/pool_chalk_2.jpg',     name: 'گچ Predator 1080 Pure — ۵ عددی',         price: 220000,  old: 245000,  disc: 10 },
-  { id: 11, img: '/images/shop/snooker-table-2.jpg',  name: 'میز اسنوکر Pro-Line ۱۲ فوتی',            price: 68000000,old: 75000000,disc: 9  },
-  { id: 12, img: '/images/shop/Pro_table.jpg',        name: 'میز بیلیارد حرفه‌ای پارچه ایتالیایی',   price: 32000000,old: 36000000,disc: 11 },
+  { id: 1,  img: '/images/shop/cue_billiard_2.jpg',   name: 'چوب حرفه‌ای Predator 314³',              price: 2800000, old: 3300000, disc: 15, sellerName: 'فروشگاه چوب طلایی',        sellerPhone: '09121110001', sellerWhatsapp: '989121110001' },
+  { id: 2,  img: '/images/shop/snooker-table.jpg',    name: 'میز اسنوکر Dynamo Tournament',            price: 45000000,old: 50000000,disc: 10, sellerName: 'بیلیارد حرفه‌ای ایران',    sellerPhone: '09351110002', sellerWhatsapp: '989351110002' },
+  { id: 3,  img: '/images/shop/Ball-1.jpg',           name: 'توپ Aramith Pro Cup استاندارد WPBSA',     price: 1200000, old: 1500000, disc: 20, sellerName: 'فروشگاه توپ اصل',          sellerPhone: '09011110003', sellerWhatsapp: '989011110003' },
+  { id: 4,  img: '/images/shop/pool_chalk_1.jpg',     name: 'گچ Master Blue Square — ۱۴۴ عددی',       price: 180000,  old: 260000,  disc: 31, sellerName: 'لوازم جانبی بیلیارد',      sellerPhone: '09121110004', sellerWhatsapp: '989121110004' },
+  { id: 5,  img: '/images/shop/rest-pool.webp',       name: 'رست اسنوکر حرفه‌ای پیچ استنلس',          price: 450000,  old: 480000,  disc: 6,  sellerName: 'فروشگاه اکسسوری پلاس',    sellerPhone: '09361110005', sellerWhatsapp: '989361110005' },
+  { id: 6,  img: '/images/shop/accessori.png',        name: 'کیف چوب بیلیارد دو قسمتی چرم',           price: 850000,  old: 970000,  disc: 12, sellerName: 'کیف و کیس بیلیارد',        sellerPhone: '09191110006', sellerWhatsapp: '989191110006' },
+  { id: 7,  img: '/images/shop/cue_billiard.jpg',     name: 'چوب کربن فایبر Mezz EC7-CF',             price: 6500000, old: 7100000, disc: 8,  sellerName: 'فروشگاه چوب طلایی',        sellerPhone: '09121110001', sellerWhatsapp: '989121110001' },
+  { id: 8,  img: '/images/shop/Ball.jpg',             name: 'توپ Cyclop Omega Pool Set',               price: 950000,  old: 1120000, disc: 15, sellerName: 'فروشگاه توپ اصل',          sellerPhone: '09011110003', sellerWhatsapp: '989011110003' },
+  { id: 9,  img: '/images/shop/Home_table.jpg',       name: 'میز بیلیارد خانگی — پایه چوب ماسیو',    price: 18000000,old: 19000000,disc: 5,  sellerName: 'میز ایران',                 sellerPhone: '09351110009', sellerWhatsapp: '989351110009' },
+  { id: 10, img: '/images/shop/pool_chalk_2.jpg',     name: 'گچ Predator 1080 Pure — ۵ عددی',         price: 220000,  old: 245000,  disc: 10, sellerName: 'لوازم جانبی بیلیارد',      sellerPhone: '09121110004', sellerWhatsapp: '989121110004' },
+  { id: 11, img: '/images/shop/snooker-table-2.jpg',  name: 'میز اسنوکر Pro-Line ۱۲ فوتی',            price: 68000000,old: 75000000,disc: 9,  sellerName: 'بیلیارد حرفه‌ای ایران',    sellerPhone: '09351110002', sellerWhatsapp: '989351110002' },
+  { id: 12, img: '/images/shop/Pro_table.jpg',        name: 'میز بیلیارد حرفه‌ای پارچه ایتالیایی',   price: 32000000,old: 36000000,disc: 11, sellerName: 'میز ایران',                 sellerPhone: '09351110009', sellerWhatsapp: '989351110009' },
 ]
 
 function toFa(v: string | number) {
