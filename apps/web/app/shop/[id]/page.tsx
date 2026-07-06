@@ -1,9 +1,8 @@
 ﻿'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { useCartStore } from '../../../store/cart.store'
 
 // ─── Types ─────────────────────────────────────────────────────
 interface Product {
@@ -25,6 +24,9 @@ interface Product {
   isSpecialSale: boolean
   views: number
   sellerId: string
+  sellerName?: string
+  sellerPhone?: string
+  sellerWhatsapp?: string
   createdAt: string
 }
 
@@ -133,6 +135,93 @@ function ReviewCard({ name, score, text, date }: { name: string; score: number; 
   )
 }
 
+// ─── Seller Card ────────────────────────────────────────────────
+function SellerCard({ name, phone, whatsapp }: { name: string; phone: string; whatsapp: string }) {
+  const waLink = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('سلام، در مورد محصول شما در بیلیارد بازار سوال داشتم')}`
+  const initial = name.charAt(0)
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.72)',
+      backdropFilter: 'blur(40px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+      border: '1px solid rgba(199,166,106,0.30)',
+      borderRadius: 20,
+      padding: '20px',
+      boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.9), 0 8px 32px rgba(199,166,106,0.10)',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* sheen */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', borderRadius: '20px 20px 0 0', pointerEvents: 'none' }} />
+
+      {/* seller header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, position: 'relative', zIndex: 1 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#fff', boxShadow: '0 4px 14px rgba(199,166,106,0.4)', flexShrink: 0 }}>
+          {initial}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {name}
+            <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.32)', color: '#C7A66A', borderRadius: 20, padding: '2px 8px' }}>
+              فروشنده
+            </span>
+          </div>
+          <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <i className="ti ti-star-filled" style={{ fontSize: 12, color: '#f59e0b' }} />
+            ۴.۸ · فروشنده معتبر
+          </div>
+        </div>
+      </div>
+
+      {/* phone row */}
+      <a href={`tel:${phone}`} style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '11px 14px', marginBottom: 12,
+        background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.20)',
+        borderRadius: 12, textDecoration: 'none', position: 'relative', zIndex: 1,
+        transition: 'background 0.2s',
+      }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(199,166,106,0.12)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'rgba(199,166,106,0.06)')}
+      >
+        <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(199,166,106,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <i className="ti ti-phone" style={{ fontSize: 16, color: '#C7A66A' }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.40)', marginBottom: 1 }}>شماره تماس</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#111111', direction: 'ltr', letterSpacing: '0.04em' }}>{phone}</div>
+        </div>
+        <i className="ti ti-chevron-left" style={{ fontSize: 15, color: '#C7A66A' }} />
+      </a>
+
+      {/* action buttons */}
+      <div style={{ display: 'flex', gap: 8, position: 'relative', zIndex: 1 }}>
+        <a href={`tel:${phone}`} style={{
+          flex: 1, padding: '12px 8px', borderRadius: 12,
+          background: 'linear-gradient(135deg,#C7A66A,#A07840)',
+          color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          boxShadow: '0 4px 16px rgba(199,166,106,0.35)',
+        }}>
+          <i className="ti ti-phone" style={{ fontSize: 16 }} />
+          تماس با فروشنده
+        </a>
+        <a href={waLink} target="_blank" rel="noopener noreferrer" style={{
+          flex: 1, padding: '12px 8px', borderRadius: 12,
+          background: 'linear-gradient(135deg,#25D366,#128C7E)',
+          color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          boxShadow: '0 4px 16px rgba(37,211,102,0.28)',
+        }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          پیام واتساپ
+        </a>
+      </div>
+    </div>
+  )
+}
+
 // ─── Loading Skeleton ────────────────────────────────────────────
 function ProductSkeleton() {
   return (
@@ -152,7 +241,6 @@ function ProductSkeleton() {
 // ─── Main Page ───────────────────────────────────────────────────
 export default function ProductDetailPage() {
   const params = useParams()
-  const { addItem, items } = useCartStore()
 
   const [product, setProduct] = useState<Product | null>(null)
   const [related, setRelated] = useState<Product[]>([])
@@ -160,12 +248,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState('')
   const [activeImg, setActiveImg] = useState(0)
   const [zoom, setZoom] = useState(false)
-  const [qty, setQty] = useState(1)
-  const [addedToCart, setAddedToCart] = useState(false)
   const [activeTab, setActiveTab] = useState<'specs'|'reviews'|'faq'>('specs')
-  const [showContact, setShowContact] = useState(false)
-
-  const inCart = items.some(i => i.id === String(params.id))
 
   useEffect(() => {
     async function load() {
@@ -187,24 +270,6 @@ export default function ProductDetailPage() {
     }
     load()
   }, [params.id])
-
-  const handleAddToCart = useCallback(() => {
-    if (!product) return
-    const imgs = getAllImages(product)
-    addItem({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      discountPrice: product.discountPrice,
-      image: imgs[0] ?? '',
-      category: product.category,
-      sellerId: product.sellerId,
-      city: product.city,
-      stock: product.stock,
-    })
-    setAddedToCart(true)
-    setTimeout(() => setAddedToCart(false), 2500)
-  }, [product, addItem])
 
   if (loading) return <ProductSkeleton />
 
@@ -239,8 +304,6 @@ export default function ProductDetailPage() {
         .thumb-btn:hover { border-color: rgba(199,166,106,0.6) !important; }
         .related-card { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
         .related-card:hover { transform: translateY(-4px); border-color: rgba(199,166,106,0.3) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.5) !important; }
-        .qty-btn { transition: all 0.2s; }
-        .qty-btn:hover { background: rgba(199,166,106,0.15) !important; border-color: rgba(199,166,106,0.4) !important; }
         @media(max-width:900px){
           .prod-grid { grid-template-columns: 1fr !important; }
           .trust-grid { grid-template-columns: 1fr 1fr !important; }
@@ -428,86 +491,12 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Quantity selector */}
-              {product.stock > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)' }}>تعداد:</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 0, border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, overflow: 'hidden' }}>
-                    <button
-                      className="qty-btn"
-                      onClick={() => setQty(q => Math.max(1, q - 1))}
-                      style={{ width: 38, height: 38, background: 'rgba(0,0,0,0.03)', border: 'none', cursor: 'pointer', color: '#111111', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(0,0,0,0.06)' }}
-                    >−</button>
-                    <span style={{ minWidth: 48, textAlign: 'center', fontSize: 16, fontWeight: 700, color: '#111111' }}>{toFa(qty)}</span>
-                    <button
-                      className="qty-btn"
-                      onClick={() => setQty(q => Math.min(product.stock, q + 1))}
-                      style={{ width: 38, height: 38, background: 'rgba(0,0,0,0.03)', border: 'none', cursor: 'pointer', color: '#111111', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(0,0,0,0.06)' }}
-                    >+</button>
-                  </div>
-                  <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)' }}>حداکثر {toFa(product.stock)} عدد</span>
-                </div>
-              )}
-
-              {/* CTAs */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {product.stock > 0 ? (
-                  <>
-                    <button
-                      onClick={handleAddToCart}
-                      style={{
-                        width: '100%', padding: '15px', borderRadius: 14, border: 'none', cursor: 'pointer',
-                        background: addedToCart ? 'linear-gradient(135deg,#059669,#047857)' : 'linear-gradient(135deg,#C7A66A,#A07840)',
-                        color: '#fff', fontSize: 17, fontWeight: 800, fontFamily: 'inherit',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                        boxShadow: '0 8px 28px rgba(199,166,106,0.35)',
-                        transition: 'all 0.3s',
-                        animation: addedToCart ? 'cartBounce 0.4s ease' : 'none',
-                      }}
-                    >
-                      <i className={`ti ${addedToCart ? 'ti-check' : 'ti-shopping-cart-plus'}`} style={{ fontSize: 20 }} />
-                      {addedToCart ? 'به سبد اضافه شد ✓' : inCart ? 'افزودن دوباره' : 'افزودن به سبد خرید'}
-                    </button>
-                    <Link
-                      href="/checkout"
-                      onClick={handleAddToCart}
-                      style={{
-                        width: '100%', padding: '14px', borderRadius: 14,
-                        background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.25)',
-                        color: '#C7A66A', fontSize: 16, fontWeight: 700, fontFamily: 'inherit',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                        textDecoration: 'none', transition: 'all 0.3s', boxSizing: 'border-box',
-                      }}
-                    >
-                      <i className="ti ti-bolt" style={{ fontSize: 18 }} />
-                      خرید سریع
-                    </Link>
-                    <button
-                      onClick={() => setShowContact(v => !v)}
-                      style={{ width: '100%', padding: '12px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(255,255,255,0.02)', color: 'rgba(0,0,0,0.50)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.3s' }}
-                    >
-                      <i className="ti ti-phone" style={{ fontSize: 17 }} />
-                      تماس با فروشنده
-                    </button>
-                  </>
-                ) : (
-                  <button disabled style={{ width: '100%', padding: '15px', borderRadius: 14, border: '1px solid rgba(0,0,0,0.06)', background: 'rgba(0,0,0,0.03)', color: 'rgba(0,0,0,0.38)', fontSize: 17, fontWeight: 700, fontFamily: 'inherit', cursor: 'not-allowed' }}>
-                    محصول ناموجود است
-                  </button>
-                )}
-              </div>
-
-              {/* Contact reveal */}
-              {showContact && (
-                <div style={{ background: 'rgba(199,166,106,0.05)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: 14, padding: '16px', animation: 'fadeUp 0.3s ease both' }}>
-                  <p style={{ fontSize: 14, color: '#C7A66A', fontWeight: 700, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <i className="ti ti-info-circle" style={{ fontSize: 16 }} />
-                    اطلاعات فروشنده
-                  </p>
-                  <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: '0 0 6px' }}>شناسه فروشنده: <code style={{ color: '#111111', fontSize: 13 }}>{product.sellerId.slice(0, 8)}…</code></p>
-                  <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: 0 }}>⚠️ قبل از واریز وجه، کالا را تحویل بگیرید.</p>
-                </div>
-              )}
+              {/* Seller Info */}
+              <SellerCard
+                name={product.sellerName ?? 'فروشگاه بیلیارد بازار'}
+                phone={product.sellerPhone ?? '09121234567'}
+                whatsapp={product.sellerWhatsapp ?? '989121234567'}
+              />
 
               {/* Trust badges grid */}
               <div className="trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -693,19 +682,6 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* ── Sticky bottom bar (mobile) ── */}
-        {product.stock > 0 && (
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(2,8,6,0.97)', borderTop: '1px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(24px)', padding: '12px 20px', display: 'none' }} className="mobile-sticky-bar">
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={handleAddToCart} style={{ flex: 1, padding: '14px', borderRadius: 12, background: addedToCart ? '#059669' : 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#fff', fontSize: 16, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>
-                {addedToCart ? 'اضافه شد ✓' : 'افزودن به سبد'}
-              </button>
-              <Link href="/checkout" onClick={handleAddToCart} style={{ flex: 1, padding: '14px', borderRadius: 12, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)', color: '#C7A66A', fontSize: 16, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                خرید سریع
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
     </>
   )
