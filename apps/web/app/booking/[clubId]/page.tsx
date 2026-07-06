@@ -285,7 +285,7 @@ function BookingContent() {
   useEffect(()=>{
     if(!selectedTable||!isoDate) return;
     setSlotsLoad(true); setSlots([]); setSelectedSlots([]); setRangeStart(null); setRangeError('');
-    api.get(`/bookings/slots?clubId=${clubId}&tableNumber=${selectedTable.number}&date=${isoDate}`)
+    api.get(`/bookings/slots?clubId=${clubId}&tableId=${selectedTable.id}&date=${isoDate}`)
       .then(r=>{
         const raw:Slot[] = Array.isArray(r.data)&&r.data.length>0?r.data:genFallbackSlots(isoDate);
         setSlots(applyPastHours(raw,isoDate)); setSlotsLoad(false);
@@ -320,7 +320,7 @@ function BookingContent() {
     setBooking(true); setError('');
     try {
       const res = await api.post('/bookings',{
-        clubId, tableType:selectedTable.type, tableNumber:selectedTable.number,
+        clubId, tableType:selectedTable.type, tableId:selectedTable.id,
         startTime:startTime.toISOString(), endTime:endTime.toISOString(),
         totalPrice, playerCount, currency:'IRR',
       });

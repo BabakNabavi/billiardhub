@@ -278,18 +278,20 @@ function SellerCard({ seller }: { seller: typeof SELLERS[0] }) {
             flex: 1, padding: '10px 0', borderRadius: 11, textAlign: 'center', textDecoration: 'none',
             background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff',
             fontSize: 13, fontWeight: 700,
-            boxShadow: '0 3px 10px rgba(199,166,106,0.28)',
+            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 3px 10px rgba(199,166,106,0.38)',
           }}>
             مشاهده فروشگاه
           </Link>
           <a href={`tel:${seller.phone}`} style={{
             padding: '10px 14px', borderRadius: 11, textDecoration: 'none',
-            border: '1.5px solid rgba(199,166,106,0.30)', color: GOLD,
+            border: '1px solid rgba(199,166,106,0.38)', color: GOLD,
+            background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px) saturate(180%)', WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 10px rgba(199,166,106,0.12)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'background 0.2s',
           }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(199,166,106,0.08)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.95)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.75)')}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           </a>
@@ -397,10 +399,13 @@ export default function SellersPage() {
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {CITIES.map(city => (
                 <button key={city} className="s-chip" onClick={() => setActiveCity(city)} style={{
-                  padding: '7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none',
-                  background: activeCity === city ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(28,28,26,0.06)',
+                  padding: '7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                  border: activeCity === city ? 'none' : '1px solid rgba(255,255,255,0.88)',
+                  background: activeCity === city ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.78)',
+                  backdropFilter: activeCity === city ? 'none' : 'blur(14px) saturate(190%)',
+                  WebkitBackdropFilter: activeCity === city ? 'none' : 'blur(14px) saturate(190%)',
                   color: activeCity === city ? '#fff' : TEXT_SEC,
-                  boxShadow: activeCity === city ? '0 3px 10px rgba(199,166,106,0.28)' : 'none',
+                  boxShadow: activeCity === city ? 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 3px 10px rgba(199,166,106,0.36)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)',
                   fontFamily: 'Vazirmatn,Tahoma,sans-serif',
                 }}>
                   {city}
@@ -413,10 +418,13 @@ export default function SellersPage() {
 
             {/* verified toggle */}
             <button className="s-chip" onClick={() => setOnlyVerified(!onlyVerified)} style={{
-              padding: '7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none',
-              background: onlyVerified ? 'rgba(199,166,106,0.14)' : 'rgba(28,28,26,0.06)',
+              padding: '7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              border: onlyVerified ? '1px solid rgba(199,166,106,0.42)' : '1px solid rgba(255,255,255,0.88)',
+              background: onlyVerified ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.78)',
+              backdropFilter: 'blur(14px) saturate(190%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(190%)',
               color: onlyVerified ? GOLD : TEXT_SEC,
-              outline: onlyVerified ? `1.5px solid rgba(199,166,106,0.40)` : 'none',
+              boxShadow: onlyVerified ? 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 3px 12px rgba(199,166,106,0.14)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)',
               fontFamily: 'Vazirmatn,Tahoma,sans-serif',
               display: 'flex', alignItems: 'center', gap: 6,
             }}>

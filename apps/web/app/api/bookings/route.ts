@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { clubId, tableType, tableNumber, startTime, endTime, totalPrice } = body;
+  const { clubId, tableType, tableId, startTime, endTime, totalPrice } = body;
 
   if (!clubId || !startTime || !endTime) {
     return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     .insert({
       userId,
       clubId,
-      ...(tableNumber ? { tableNumber: parseInt(String(tableNumber)) } : {}),
+      ...(tableId ? { tableId: String(tableId) } : {}),
       tableType:   tableType ?? null,
       bookingDate,
       timeSlots,

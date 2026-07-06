@@ -1,15 +1,18 @@
 'use client'
-import { useState, useRef } from 'react'
+
+import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 
-const GOLD    = '#C7A66A'
-const TEXT    = '#1C1C1A'
-const TEXT_SEC = 'rgba(28,28,26,0.50)'
-const LQ_BG   = 'rgba(255,255,255,0.72)'
-const LQ_BOR  = '1px solid rgba(255,255,255,0.82)'
-const LQ_SHAD = 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.06)'
+const GOLD     = '#C7A66A'
+const TEXT     = '#1C1C1A'
+const TEXT_SEC = 'rgba(28,28,26,0.52)'
+const TEXT_MUT = 'rgba(28,28,26,0.30)'
+const LQ_BG    = 'rgba(255,255,255,0.82)'
+const LQ_BOR   = '1px solid rgba(255,255,255,0.85)'
+const LQ_SHAD  = 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)'
+const ERR      = '#EF4444'
 
 const CATEGORIES = [
   { id: 'cue',       label: 'چوب'        },
@@ -28,46 +31,118 @@ const CATEGORIES = [
   { id: 'other',     label: 'سایر'       },
 ]
 
+const CITIES = ['تهران', 'اصفهان', 'مشهد', 'شیراز', 'تبریز', 'سایر']
+
+// parse Persian/Arabic numerals → pure digits
+function toAsciiDigits(s: string) {
+  return s.replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 0x06f0))
+         .replace(/[٠-٩]/g, c => String(c.charCodeAt(0) - 0x0660))
+}
+
 function fmtPrice(v: string) {
-  const n = v.replace(/\D/g, '')
+  const n = toAsciiDigits(v).replace(/\D/g, '')
   return n ? Number(n).toLocaleString('fa-IR') : ''
 }
 
+// ── Shared input style ─────────────────────────────────────────
+function inp(err?: string): React.CSSProperties {
+  return {
+    width: '100%', boxSizing: 'border-box',
+    padding: '12px 14px', borderRadius: 11, fontSize: 14.5,
+    border: `1.5px solid ${err ? ERR : 'rgba(28,28,26,0.13)'}`,
+    background: '#FAFAFA', color: TEXT,
+    fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+    outline: 'none', direction: 'rtl',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+  }
+}
+
+function Label({ children, required, optional }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
+  return (
+    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
+      {children}
+      {required && <span style={{ color: ERR, marginRight: 3 }}>*</span>}
+      {optional && <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_MUT, marginRight: 4 }}>(اختیاری)</span>}
+    </label>
+  )
+}
+
+function ErrMsg({ msg }: { msg?: string }) {
+  if (!msg) return null
+  return <p style={{ fontSize: 12, color: ERR, marginTop: 4, margin: '4px 0 0' }}>{msg}</p>
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 22px', display: 'flex', alignItems: 'center', gap: 9, position: 'relative', zIndex: 1 }}>
+      <span style={{ width: 3, height: 17, background: `linear-gradient(180deg,${GOLD},#A07840)`, borderRadius: 2, flexShrink: 0, display: 'inline-block' }} />
+      {children}
+    </h2>
+  )
+}
+
+// ── Image slot ────────────────────────────────────────────────
+interface ImgSlot { data: string; name: string }
+
+// ── Main Page ─────────────────────────────────────────────────
 export default function NewProductPage() {
   const router  = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     name: '', category: '', price: '', oldPrice: '',
-    description: '', sellerName: '', sellerPhone: '', sellerWhatsapp: '',
+    description: '', brand: '', condition: 'new',
+    shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
+    city: '', address: '', shopDescription: '',
   })
-  const [imgData,  setImgData]  = useState<string | null>(null)
-  const [imgName,  setImgName]  = useState('')
+  const [images,   setImages]   = useState<ImgSlot[]>([])
+  const [dragging, setDragging] = useState(false)
   const [errors,   setErrors]   = useState<Record<string, string>>({})
   const [success,  setSuccess]  = useState(false)
-  const [dragging, setDragging] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const set = (k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
-    setErrors(e => ({ ...e, [k]: '' }))
+    setErrors(e => { const n = { ...e }; delete n[k]; return n })
   }
 
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) { setErrors(e => ({ ...e, img: 'فقط فایل تصویر قابل قبول است' })); return }
-    if (file.size > 5 * 1024 * 1024)    { setErrors(e => ({ ...e, img: 'حداکثر حجم تصویر ۵ مگابایت' })); return }
-    const reader = new FileReader()
-    reader.onload = ev => { setImgData(ev.target?.result as string); setImgName(file.name); setErrors(e => ({ ...e, img: '' })) }
-    reader.readAsDataURL(file)
-  }
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files) return
+    const remaining = 5 - images.length
+    if (remaining <= 0) return
+    Array.from(files).slice(0, remaining).forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        setErrors(e => ({ ...e, images: 'فقط فایل تصویر قابل قبول است' }))
+        return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(e => ({ ...e, images: 'حداکثر حجم هر تصویر ۵ مگابایت' }))
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = ev => {
+        setImages(prev => prev.length < 5
+          ? [...prev, { data: ev.target?.result as string, name: file.name }]
+          : prev
+        )
+        setErrors(e => { const n = { ...e }; delete n.images; return n })
+      }
+      reader.readAsDataURL(file)
+    })
+  }, [images.length])
+
+  const removeImage = (i: number) => setImages(prev => prev.filter((_, idx) => idx !== i))
 
   const validate = () => {
     const e: Record<string, string> = {}
-    if (!form.name.trim())        e.name       = 'نام محصول الزامی است'
-    if (!form.category)           e.category   = 'دسته‌بندی را انتخاب کنید'
-    if (!form.price)              e.price      = 'قیمت الزامی است'
-    if (!form.sellerName.trim())  e.sellerName  = 'نام فروشنده الزامی است'
+    if (!form.name.trim())        e.name        = 'نام محصول الزامی است'
+    if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
+    if (!form.price)              e.price       = 'قیمت الزامی است'
+    if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه الزامی است'
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
-    else if (!/^(\+98|0)9\d{9}$/.test(form.sellerPhone.trim())) e.sellerPhone = 'شماره موبایل معتبر وارد کنید'
+    else if (!/^(\+98|0)9\d{9}$/.test(form.sellerPhone.trim()))
+      e.sellerPhone = 'شماره موبایل معتبر وارد کنید (09xxxxxxxxx)'
+    if (!form.city)               e.city        = 'شهر را انتخاب کنید'
     return e
   }
 
@@ -75,229 +150,387 @@ export default function NewProductPage() {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    setSubmitting(true)
 
-    const price    = Number(form.price.replace(/[,،۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d) >= 0 ? '۰۱۲۳۴۵۶۷۸۹'.indexOf(d) : d)))
-    const rawPrice = Number(form.price.replace(/\D/g, '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))))
-    const rawOld   = form.oldPrice ? Number(form.oldPrice.replace(/\D/g, '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))) : rawPrice
+    const rawPrice = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
+    const rawOld   = form.oldPrice ? Number(toAsciiDigits(form.oldPrice).replace(/\D/g, '')) : rawPrice
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
+    const imgList  = images.map(i => i.data)
 
     const product = {
       id: Date.now(),
-      img: imgData ?? '/images/shop/cue_billiard_2.jpg',
-      name: form.name.trim(),
-      category: form.category,
-      price: rawPrice,
-      old: rawOld,
+      img:       imgList[0] ?? '/images/shop/cue_billiard_2.jpg',
+      images:    imgList.length > 0 ? imgList : ['/images/shop/cue_billiard_2.jpg'],
+      name:      form.name.trim(),
+      category:  form.category,
+      price:     rawPrice,
+      old:       rawOld,
       disc,
-      description: form.description.trim(),
-      sellerName:  form.sellerName.trim(),
-      sellerPhone: form.sellerPhone.trim(),
+      description:    form.description.trim(),
+      brand:          form.brand.trim(),
+      condition:      form.condition,
+      sellerName:     form.shopName.trim(),
+      ownerName:      form.ownerName.trim(),
+      sellerPhone:    form.sellerPhone.trim(),
       sellerWhatsapp: (form.sellerWhatsapp.trim() || form.sellerPhone.trim()).replace(/^0/, '98'),
+      sellerCity:     form.city,
+      address:        form.address.trim(),
+      shopDescription: form.shopDescription.trim(),
     }
 
-    const existing = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
-    localStorage.setItem('userProducts', JSON.stringify([product, ...existing]))
+    try {
+      const existing = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
+      localStorage.setItem('userProducts', JSON.stringify([product, ...existing]))
+    } catch { /* ignore */ }
 
     setSuccess(true)
-    setTimeout(() => router.push('/shop'), 1800)
+    setTimeout(() => router.push('/shop'), 2000)
   }
 
-  const inputStyle = (err?: string): React.CSSProperties => ({
-    width: '100%', boxSizing: 'border-box',
-    padding: '11px 14px', borderRadius: 10, fontSize: 15,
-    border: `1.5px solid ${err ? '#EF4444' : 'rgba(28,28,26,0.14)'}`,
-    background: '#FAFAF9', color: TEXT,
-    fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-    outline: 'none', transition: 'border-color 0.2s',
-    direction: 'rtl',
-  })
-
+  // ── Success screen ─────────────────────────────────────────
   if (success) return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 8px 28px rgba(199,166,106,0.4)' }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#F7F7F5 0%,#F0EDE7 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+      <div style={{ textAlign: 'center', animation: 'popIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+        <div style={{ width: 88, height: 88, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: `0 12px 36px rgba(199,166,106,0.45)` }}>
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, marginBottom: 8 }}>محصول با موفقیت ثبت شد</h2>
-        <p style={{ fontSize: 15, color: TEXT_SEC }}>در حال انتقال به فروشگاه...</p>
+        <h2 style={{ fontSize: 24, fontWeight: 900, color: TEXT, marginBottom: 10 }}>محصول با موفقیت ثبت شد!</h2>
+        <p style={{ fontSize: 15, color: TEXT_SEC, marginBottom: 24 }}>در حال انتقال به فروشگاه...</p>
+        <div style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
+          {[0,1,2].map(i => (
+            <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, opacity: 0.3 + i * 0.35, animation: `pulse 1s ${i * 0.25}s infinite` }} />
+          ))}
+        </div>
       </div>
+      <style>{`
+        @keyframes popIn { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+      `}</style>
     </div>
   )
+
+  const catLabel = CATEGORIES.find(c => c.id === form.category)?.label ?? ''
 
   return (
     <>
       <style>{`
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         * { box-sizing: border-box; }
-        .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.12) !important; }
-        .drop-z { transition: border-color 0.2s, background 0.2s; }
-        .drop-z:hover { border-color: ${GOLD} !important; background: rgba(199,166,106,0.04) !important; }
-        @media(max-width:800px) { .fg { grid-template-columns: 1fr !important; } }
+        .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; }
+        .nf::placeholder { color: rgba(28,28,26,0.28); }
+        .drop-area { transition: border-color 0.2s, background 0.2s, transform 0.15s; }
+        .drop-area:hover { border-color: ${GOLD} !important; background: rgba(199,166,106,0.04) !important; }
+        .img-thumb { transition: transform 0.2s, box-shadow 0.2s; }
+        .img-thumb:hover { transform: scale(1.04); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .cond-btn { transition: all 0.2s; cursor: pointer; }
+        .cond-btn:hover { border-color: ${GOLD} !important; }
+        @media(max-width:820px) { .two-col { grid-template-columns: 1fr !important; } }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
-        <div style={{ position: 'fixed', top: -80, right: -60, width: 400, height: 400, background: 'radial-gradient(circle,rgba(199,166,106,0.09) 0%,transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* ambient blobs */}
+        <div style={{ position: 'fixed', top: -120, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.08) 0%,transparent 65%)', filter: 'blur(70px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'fixed', bottom: -100, left: -60, width: 400, height: 400, background: 'radial-gradient(circle,rgba(199,166,106,0.05) 0%,transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 960, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 64px' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 80px' }}>
 
-          {/* back */}
-          <div style={{ marginBottom: 32 }}>
-            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: TEXT_SEC, textDecoration: 'none', padding: '7px 12px', borderRadius: 10, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'color 0.2s' }}
+          {/* ── Top nav ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: TEXT_SEC, textDecoration: 'none', padding: '8px 14px', borderRadius: 11, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'color 0.2s' }}
               onMouseEnter={e => (e.currentTarget.style.color = GOLD)}
               onMouseLeave={e => (e.currentTarget.style.color = TEXT_SEC)}>
               <ChevronLeft size={15} />
               بازگشت به فروشگاه
             </Link>
+            <div style={{ fontSize: 12, color: TEXT_MUT, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              <span>ذخیره خودکار فعال</span>
+            </div>
           </div>
 
-          {/* heading */}
-          <div style={{ marginBottom: 32, animation: 'fadeUp 0.4s ease both' }}>
-            <div style={{ fontSize: 12, color: GOLD, letterSpacing: '0.18em', fontWeight: 700, marginBottom: 6 }}>NEW PRODUCT</div>
-            <h1 style={{ fontSize: 'clamp(22px,3vw,28px)', fontWeight: 900, color: TEXT, margin: 0 }}>ثبت محصول جدید</h1>
-            <p style={{ fontSize: 14, color: TEXT_SEC, marginTop: 6 }}>محصول بیلیارد خود را در بیلیارد بازار ثبت کنید</p>
+          {/* ── Page Header ── */}
+          <div style={{ marginBottom: 40, animation: 'fadeUp 0.4s ease both' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 6px 20px rgba(199,166,106,0.36)` }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 11, color: GOLD, letterSpacing: '0.2em', fontWeight: 700, margin: '0 0 2px' }}>NEW PRODUCT</p>
+                <h1 style={{ fontSize: 'clamp(21px,2.8vw,28px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ثبت محصول جدید</h1>
+              </div>
+            </div>
+            <p style={{ fontSize: 14.5, color: TEXT_SEC, margin: '0 0 0 54px', lineHeight: 1.6 }}>
+              محصول خود را در بیلیارد هاب معرفی کنید و مستقیماً با خریداران در ارتباط باشید
+            </p>
+          </div>
+
+          {/* ── Steps indicator ── */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 28, animation: 'fadeUp 0.45s ease both' }}>
+            {[{ n: '۱', t: 'اطلاعات محصول' }, { n: '۲', t: 'اطلاعات فروشنده' }, { n: '۳', t: 'ثبت نهایی' }].map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 20, background: i < 2 ? `rgba(199,166,106,0.10)` : 'rgba(28,28,26,0.05)', border: `1px solid ${i < 2 ? 'rgba(199,166,106,0.28)' : 'rgba(28,28,26,0.08)'}` }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: i < 2 ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(28,28,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: i < 2 ? '#fff' : TEXT_MUT, flexShrink: 0 }}>{s.n}</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: i < 2 ? GOLD : TEXT_MUT }}>{s.t}</span>
+              </div>
+            ))}
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
-            <div className="fg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
 
-              {/* ── product info ── */}
-              <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.45s ease both' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', borderRadius: '20px 20px 0 0', pointerEvents: 'none' }} />
+              {/* ═══════════════════════════════════════════════════
+                  RIGHT COLUMN — product info
+              ═══════════════════════════════════════════════════ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8, position: 'relative', zIndex: 1 }}>
-                  <span style={{ width: 3, height: 16, background: `linear-gradient(180deg,${GOLD},#A07840)`, borderRadius: 2, display: 'inline-block' }} />
-                  اطلاعات محصول
-                </h2>
+                {/* card: basic info */}
+                <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.46s ease both' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+                  <SectionTitle>اطلاعات محصول</SectionTitle>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>نام محصول <span style={{ color: '#EF4444' }}>*</span></label>
-                    <input className="nf" type="text" placeholder="مثال: چوب حرفه‌ای Predator 314³" value={form.name} onChange={e => set('name', e.target.value)} style={inputStyle(errors.name)} />
-                    {errors.name && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.name}</p>}
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>دسته‌بندی <span style={{ color: '#EF4444' }}>*</span></label>
-                    <select className="nf" value={form.category} onChange={e => set('category', e.target.value)} style={{ ...inputStyle(errors.category), cursor: 'pointer' }}>
-                      <option value="">انتخاب دسته‌بندی...</option>
-                      {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                    </select>
-                    {errors.category && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.category}</p>}
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {/* name */}
                     <div>
-                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>قیمت (تومان) <span style={{ color: '#EF4444' }}>*</span></label>
-                      <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.price} onChange={e => set('price', fmtPrice(e.target.value))} style={inputStyle(errors.price)} />
-                      {errors.price && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.price}</p>}
+                      <Label required>نام محصول</Label>
+                      <input className="nf" type="text" placeholder="مثال: چوب حرفه‌ای Predator 314³" value={form.name} onChange={e => set('name', e.target.value)} style={inp(errors.name)} />
+                      <ErrMsg msg={errors.name} />
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
-                        قیمت قبل از تخفیف <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_SEC }}>(اختیاری)</span>
-                      </label>
-                      <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inputStyle()} />
-                    </div>
-                  </div>
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
-                      توضیحات <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_SEC }}>(اختیاری)</span>
-                    </label>
-                    <textarea className="nf" rows={4} placeholder="ویژگی‌ها، شرایط، برند و سایر توضیحات..." value={form.description} onChange={e => set('description', e.target.value)} style={{ ...inputStyle(), resize: 'vertical', minHeight: 90 }} />
-                  </div>
-
-                  {/* image upload */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>تصویر محصول</label>
-                    <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
-
-                    {imgData ? (
-                      <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1.5px solid rgba(199,166,106,0.4)' }}>
-                        <img src={imgData} alt="" style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
-                        <button type="button" onClick={() => { setImgData(null); setImgName('') }} style={{ position: 'absolute', top: 8, left: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>×</button>
-                        <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 11, color: '#fff', background: 'rgba(0,0,0,0.5)', borderRadius: 6, padding: '2px 8px', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{imgName}</div>
+                    {/* category + brand side by side */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div>
+                        <Label required>دسته‌بندی</Label>
+                        <select className="nf" value={form.category} onChange={e => set('category', e.target.value)} style={{ ...inp(errors.category), cursor: 'pointer', paddingLeft: 10 }}>
+                          <option value="">انتخاب...</option>
+                          {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                        </select>
+                        <ErrMsg msg={errors.category} />
                       </div>
-                    ) : (
-                      <div
-                        className="drop-z"
-                        onClick={() => fileRef.current?.click()}
-                        onDragOver={e => { e.preventDefault(); setDragging(true) }}
-                        onDragLeave={() => setDragging(false)}
-                        onDrop={e => { e.preventDefault(); setDragging(false); e.dataTransfer.files[0] && handleFile(e.dataTransfer.files[0]) }}
-                        style={{ border: `2px dashed ${dragging ? GOLD : 'rgba(28,28,26,0.16)'}`, borderRadius: 12, padding: '28px 16px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                      >
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style={{ margin: '0 auto 8px', display: 'block', color: GOLD }}>
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                          <polyline points="17 8 12 3 7 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                          <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-                        </svg>
-                        <p style={{ fontSize: 13, color: TEXT_SEC, margin: 0 }}>کلیک کنید یا تصویر را اینجا رها کنید</p>
-                        <p style={{ fontSize: 12, color: 'rgba(28,28,26,0.32)', marginTop: 4 }}>PNG، JPG، WEBP — حداکثر ۵ مگابایت</p>
+                      <div>
+                        <Label optional>برند</Label>
+                        <input className="nf" type="text" placeholder="مثال: Predator" value={form.brand} onChange={e => set('brand', e.target.value)} style={inp()} />
+                      </div>
+                    </div>
+
+                    {/* condition */}
+                    <div>
+                      <Label required>وضعیت کالا</Label>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {([['new', 'نو', '🟢'], ['used', 'کارکرده', '🟡']] as const).map(([val, lbl, icon]) => (
+                          <button key={val} type="button" className="cond-btn" onClick={() => set('condition', val)} style={{ flex: 1, padding: '10px 8px', borderRadius: 11, border: form.condition === val ? 'none' : '1px solid rgba(255,255,255,0.88)', background: form.condition === val ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.80)', backdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', WebkitBackdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', boxShadow: form.condition === val ? 'inset 0 1.5px 0 rgba(255,255,255,0.30), 0 4px 14px rgba(199,166,106,0.40)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)', fontSize: 14, fontWeight: 700, color: form.condition === val ? '#fff' : TEXT_SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+                            <span style={{ fontSize: 16 }}>{icon}</span>
+                            {lbl}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* prices */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div>
+                        <Label required>قیمت (تومان)</Label>
+                        <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.price} onChange={e => set('price', fmtPrice(e.target.value))} style={inp(errors.price)} />
+                        <ErrMsg msg={errors.price} />
+                      </div>
+                      <div>
+                        <Label optional>قیمت قبل از تخفیف</Label>
+                        <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp()} />
+                      </div>
+                    </div>
+
+                    {/* live discount badge */}
+                    {form.price && form.oldPrice && (() => {
+                      const p = Number(toAsciiDigits(form.price).replace(/\D/g,''))
+                      const o = Number(toAsciiDigits(form.oldPrice).replace(/\D/g,''))
+                      if (o > p) {
+                        const d = Math.round((1 - p/o)*100)
+                        return (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.22)', borderRadius: 10 }}>
+                            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#ea580c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff' }}>{d}٪</span>
+                            <span style={{ fontSize: 13, color: '#dc2626', fontWeight: 600 }}>تخفیف {d}٪ اعمال می‌شود</span>
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
+
+                    {/* description */}
+                    <div>
+                      <Label optional>توضیحات محصول</Label>
+                      <textarea className="nf" rows={4} placeholder="ویژگی‌ها، مشخصات فنی، شرایط استفاده و سایر توضیحات..." value={form.description} onChange={e => set('description', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 100, lineHeight: 1.7 }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* card: images */}
+                <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                      <SectionTitle>تصاویر محصول</SectionTitle>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: images.length >= 5 ? GOLD : TEXT_MUT, padding: '4px 10px', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: 20 }}>
+                        {images.length}/۵ تصویر
+                      </span>
+                    </div>
+
+                    <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
+
+                    {/* image grid */}
+                    {images.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(90px,1fr))', gap: 8, marginBottom: 10 }}>
+                        {images.map((img, i) => (
+                          <div key={i} className="img-thumb" style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', aspectRatio: '1', border: i === 0 ? `2px solid ${GOLD}` : '1.5px solid rgba(28,28,26,0.1)' }}>
+                            <img src={img.data} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            {i === 0 && (
+                              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: `linear-gradient(to top,rgba(199,166,106,0.85),transparent)`, padding: '10px 4px 4px', textAlign: 'center', fontSize: 10, fontWeight: 800, color: '#fff' }}>اصلی</div>
+                            )}
+                            <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: 4, left: 4, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.65)', border: 'none', color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>×</button>
+                          </div>
+                        ))}
                       </div>
                     )}
-                    {errors.img && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.img}</p>}
+
+                    {/* drop zone */}
+                    {images.length < 5 && (
+                      <div className="drop-area" onClick={() => fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files) }} style={{ border: `2px dashed ${dragging ? GOLD : 'rgba(28,28,26,0.16)'}`, borderRadius: 12, padding: images.length > 0 ? '16px' : '28px 16px', textAlign: 'center', cursor: 'pointer', background: dragging ? 'rgba(199,166,106,0.04)' : 'transparent', transform: dragging ? 'scale(1.01)' : 'none' }}>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style={{ margin: '0 auto 8px', display: 'block', color: GOLD }}>
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                          <polyline points="17 8 12 3 7 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                          <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                        <p style={{ fontSize: 13, color: TEXT_SEC, margin: '0 0 3px', fontWeight: 600 }}>کلیک کنید یا بکشید و رها کنید</p>
+                        <p style={{ fontSize: 12, color: TEXT_MUT, margin: 0 }}>PNG، JPG، WEBP — حداکثر ۵ مگابایت | تا {5 - images.length} تصویر دیگر</p>
+                      </div>
+                    )}
+                    <ErrMsg msg={errors.images} />
+
+                    {images.length === 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 10, fontSize: 12, color: TEXT_MUT }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        اگر تصویر ندهید، از تصویر پیش‌فرض استفاده می‌شود
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* ── seller info ── */}
+              {/* ═══════════════════════════════════════════════════
+                  LEFT COLUMN — seller info
+              ═══════════════════════════════════════════════════ */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+                {/* card: shop info */}
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', borderRadius: '20px 20px 0 0', pointerEvents: 'none' }} />
-
-                  <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8, position: 'relative', zIndex: 1 }}>
-                    <span style={{ width: 3, height: 16, background: `linear-gradient(180deg,${GOLD},#A07840)`, borderRadius: 2, display: 'inline-block' }} />
-                    اطلاعات فروشنده
-                  </h2>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+                  <SectionTitle>اطلاعات فروشگاه</SectionTitle>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
+
                     <div>
-                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>نام فروشنده / فروشگاه <span style={{ color: '#EF4444' }}>*</span></label>
-                      <input className="nf" type="text" placeholder="مثال: فروشگاه بیلیارد ستاره" value={form.sellerName} onChange={e => set('sellerName', e.target.value)} style={inputStyle(errors.sellerName)} />
-                      {errors.sellerName && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.sellerName}</p>}
+                      <Label required>نام فروشگاه</Label>
+                      <input className="nf" type="text" placeholder="مثال: فروشگاه بیلیارد ستاره" value={form.shopName} onChange={e => set('shopName', e.target.value)} style={inp(errors.shopName)} />
+                      <ErrMsg msg={errors.shopName} />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>شماره تماس <span style={{ color: '#EF4444' }}>*</span></label>
-                      <input className="nf" type="tel" placeholder="09xxxxxxxxx" value={form.sellerPhone} onChange={e => set('sellerPhone', e.target.value)} style={{ ...inputStyle(errors.sellerPhone), direction: 'ltr', textAlign: 'right' }} />
-                      {errors.sellerPhone && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.sellerPhone}</p>}
+                      <Label optional>نام صاحب فروشگاه</Label>
+                      <input className="nf" type="text" placeholder="نام و نام خانوادگی" value={form.ownerName} onChange={e => set('ownerName', e.target.value)} style={inp()} />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 6 }}>
-                        شماره واتساپ <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_SEC }}>(اختیاری)</span>
-                      </label>
-                      <input className="nf" type="tel" placeholder="09xxxxxxxxx" value={form.sellerWhatsapp} onChange={e => set('sellerWhatsapp', e.target.value)} style={{ ...inputStyle(), direction: 'ltr', textAlign: 'right' }} />
+                      <Label required>شهر</Label>
+                      <select className="nf" value={form.city} onChange={e => set('city', e.target.value)} style={{ ...inp(errors.city), cursor: 'pointer' }}>
+                        <option value="">انتخاب شهر...</option>
+                        {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <ErrMsg msg={errors.city} />
+                    </div>
+
+                    <div>
+                      <Label optional>آدرس</Label>
+                      <textarea className="nf" rows={2} placeholder="خیابان، کوچه، پلاک..." value={form.address} onChange={e => set('address', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 72, lineHeight: 1.7 }} />
+                    </div>
+
+                    <div>
+                      <Label optional>توضیحات کوتاه درباره فروشگاه</Label>
+                      <textarea className="nf" rows={3} placeholder="تخصص، برندهایی که عرضه می‌کنید، سابقه فعالیت..." value={form.shopDescription} onChange={e => set('shopDescription', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 88, lineHeight: 1.7 }} />
                     </div>
                   </div>
                 </div>
 
-                {/* note */}
-                <div style={{ background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 14, padding: '14px 16px' }}>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: GOLD, flexShrink: 0, marginTop: 1 }}>
+                {/* card: contact info */}
+                <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.54s ease both' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+                  <SectionTitle>اطلاعات تماس</SectionTitle>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
+
+                    <div>
+                      <Label required>شماره تماس</Label>
+                      <div style={{ position: 'relative' }}>
+                        <input className="nf" type="tel" placeholder="09xxxxxxxxx" value={form.sellerPhone} onChange={e => set('sellerPhone', e.target.value)} style={{ ...inp(errors.sellerPhone), direction: 'ltr', textAlign: 'right', paddingRight: '42px' }} />
+                        <div style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                      </div>
+                      <ErrMsg msg={errors.sellerPhone} />
+                    </div>
+
+                    <div>
+                      <Label optional>شماره واتساپ</Label>
+                      <div style={{ position: 'relative' }}>
+                        <input className="nf" type="tel" placeholder="09xxxxxxxxx" value={form.sellerWhatsapp} onChange={e => set('sellerWhatsapp', e.target.value)} style={{ ...inp(), direction: 'ltr', textAlign: 'right', paddingRight: '42px' }} />
+                        <div style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 12, color: TEXT_MUT, marginTop: 5 }}>اگر وارد نکنید، از شماره تماس استفاده می‌شود</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* info note */}
+                <div style={{ background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 16, padding: '16px 18px' }}>
+                  <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={{ color: GOLD, flexShrink: 0, marginTop: 1 }}>
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8"/>
-                      <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
                     </svg>
-                    <p style={{ fontSize: 13, color: TEXT_SEC, lineHeight: 1.7, margin: 0 }}>
-                      اطلاعات تماس شما مستقیماً به خریداران نمایش داده می‌شود. لطفاً اطلاعات صحیح وارد کنید.
+                    <p style={{ fontSize: 13, color: TEXT_SEC, lineHeight: 1.75, margin: 0 }}>
+                      اطلاعات تماس شما مستقیماً به خریداران نمایش داده می‌شود. این سایت مثل دیوار عمل می‌کند — خریدار مستقیم با شما تماس می‌گیرد.
                     </p>
                   </div>
                 </div>
 
                 {/* live preview */}
-                {form.name && (
-                  <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 14, padding: '14px', boxShadow: LQ_SHAD }}>
-                    <p style={{ fontSize: 12, color: TEXT_SEC, marginBottom: 8, fontWeight: 600 }}>پیش‌نمایش</p>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                      {imgData && <img src={imgData} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(0,0,0,0.07)', flexShrink: 0 }} />}
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 4px', lineHeight: 1.4 }}>{form.name}</p>
-                        {form.price && <p style={{ fontSize: 14, fontWeight: 800, color: GOLD, margin: 0 }}>{form.price} <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_SEC }}>تومان</span></p>}
+                {(form.name || images.length > 0) && (
+                  <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 16, padding: '16px', boxShadow: LQ_SHAD, animation: 'fadeIn 0.3s ease both' }}>
+                    <p style={{ fontSize: 11.5, color: TEXT_MUT, marginBottom: 12, fontWeight: 700, letterSpacing: '0.1em' }}>پیش‌نمایش کارت</p>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px', background: '#fff', borderRadius: 12, border: '1.5px solid rgba(28,28,26,0.08)' }}>
+                      <div style={{ width: 64, height: 64, borderRadius: 10, overflow: 'hidden', background: '#F4F3F1', flexShrink: 0 }}>
+                        {images.length > 0 && images[0]
+                          ? <img src={images[0].data} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, opacity: 0.3 }}>🎱</div>
+                        }
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.name || 'نام محصول'}</p>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                          {catLabel && <span style={{ fontSize: 11, color: GOLD, fontWeight: 600, background: 'rgba(199,166,106,0.1)', padding: '1px 7px', borderRadius: 10 }}>{catLabel}</span>}
+                          {form.condition === 'used' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>کارکرده</span>}
+                        </div>
+                        {form.price && (
+                          <p style={{ fontSize: 14, fontWeight: 800, color: GOLD, margin: '5px 0 0' }}>
+                            {form.price} <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_MUT }}>تومان</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -305,36 +538,29 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            {/* submit row */}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button type="submit" style={{
-                flex: 1, padding: '15px 24px', borderRadius: 14, border: 'none', cursor: 'pointer',
-                background: `linear-gradient(135deg,${GOLD},#A07840)`,
-                color: '#fff', fontSize: 16, fontWeight: 800,
-                fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 6px 24px rgba(199,166,106,0.38)',
-                transition: 'opacity 0.2s',
-              }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            {/* ── Submit bar ── */}
+            <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '20px 24px', display: 'flex', gap: 12, alignItems: 'center', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+
+              <button type="submit" disabled={submitting} style={{ flex: 1, padding: '16px 24px', borderRadius: 14, border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontSize: 16, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), 0 6px 24px rgba(199,166,106,0.42)', transition: 'opacity 0.2s, transform 0.15s', opacity: submitting ? 0.75 : 1, position: 'relative', zIndex: 1 }}
+                onMouseEnter={e => !submitting && (e.currentTarget.style.transform = 'translateY(-1px)')}
+                onMouseLeave={e => (e.currentTarget.style.transform = 'none')}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 ثبت محصول در فروشگاه
               </button>
-              <Link href="/shop" style={{
-                padding: '15px 20px', borderRadius: 14,
-                border: '1.5px solid rgba(28,28,26,0.14)',
-                background: LQ_BG, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                color: TEXT_SEC, fontSize: 15, fontWeight: 600,
-                textDecoration: 'none', display: 'flex', alignItems: 'center',
-                transition: 'color 0.2s',
-              }}
+
+              <Link href="/shop" style={{ padding: '16px 20px', borderRadius: 14, border: '1px solid rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(20px) saturate(200%)', WebkitBackdropFilter: 'blur(20px) saturate(200%)', color: TEXT_SEC, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 14px rgba(0,0,0,0.06)', transition: 'color 0.2s', position: 'relative', zIndex: 1 }}
                 onMouseEnter={e => (e.currentTarget.style.color = TEXT)}
-                onMouseLeave={e => (e.currentTarget.style.color = TEXT_SEC)}
-              >
+                onMouseLeave={e => (e.currentTarget.style.color = TEXT_SEC)}>
                 انصراف
               </Link>
+
+              {/* required fields hint */}
+              <p style={{ fontSize: 12, color: TEXT_MUT, whiteSpace: 'nowrap', position: 'relative', zIndex: 1 }}>
+                <span style={{ color: ERR }}>*</span> فیلدهای الزامی
+              </p>
             </div>
           </form>
         </div>
