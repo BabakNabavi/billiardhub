@@ -38,6 +38,8 @@ interface SpecFieldDef {
   key: string; label: string
   type: 'dropdown' | 'number' | 'text'
   options?: string[]; unit?: string; placeholder?: string; wide?: boolean
+  dependsOn?: string                              // key of the field this field's options depend on
+  optionsByDependency?: Record<string, string[]>  // options for each value of dependsOn
 }
 
 const GENERIC_SPECS: SpecFieldDef[] = [
@@ -47,8 +49,17 @@ const GENERIC_SPECS: SpecFieldDef[] = [
 
 const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
   cue: [
-    { key: 'brand',         label: 'برند',          type: 'dropdown', options: ['Predator','Mezz','McDermott','Cuetec','Lucasi','سایر'] },
-    { key: 'cueType',       label: 'نوع',           type: 'dropdown', options: ['پاکت بیلیارد','اسنوکر','هی‌بال','کارامبول','سایر'] },
+    { key: 'cueType', label: 'نوع', type: 'dropdown', options: ['پاکت بیلیارد','اسنوکر','هی‌بال','کارامبول','سایر'] },
+    {
+      key: 'brand', label: 'برند', type: 'dropdown',
+      dependsOn: 'cueType',
+      optionsByDependency: {
+        'اسنوکر':         ['John Parris','Trevor White','Robert Osborne','Will Hunt','Peradon','Riley','Riley Burwat','BCE','PowerGlide','Cue Craft','Cannon','O\'Min','Phoenix','Master Cue','Dufferin','سایر'],
+        'پاکت بیلیارد':  ['Predator','Mezz','McDermott','Meucci','Pechauer','Cuetec','Lucasi','Viking','Jacoby','Schon','Joss','Players','Poison','Action','Griffin','سایر'],
+        'هی‌بال':         ['Mezz','Predator','McDermott','Lucasi','Players','سایر'],
+        'کارامبول':       ['Joosep','Longoni','Predac','Fury','سایر'],
+      },
+    },
     { key: 'length',        label: 'طول',           type: 'number',   unit: 'سانتیمتر', placeholder: '147' },
     { key: 'weight',        label: 'وزن',           type: 'number',   unit: 'اونس',      placeholder: '19' },
     { key: 'tipDiameter',   label: 'قطر تیپ',       type: 'number',   unit: 'میلیمتر',  placeholder: '13' },
@@ -101,36 +112,62 @@ const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
   ],
 }
 
-function SpecField({ field, value, otherValue, onChange, onOtherChange }: {
+function SpecField({ field, value, otherValue, onChange, onOtherChange, dependencyValue }: {
   field: SpecFieldDef; value: string; otherValue: string
   onChange: (v: string) => void; onOtherChange: (v: string) => void
+  dependencyValue?: string
 }) {
-  const showOther = field.type === 'dropdown' && field.options?.includes('سایر') && value === 'سایر'
+  const hasDep   = Boolean(field.dependsOn)
+  // cueType === 'سایر' → free-text input for brand
+  const depOther = hasDep && dependencyValue === 'سایر'
+  // no cueType selected yet → disable the brand dropdown
+  const noDepYet = hasDep && !dependencyValue
+
+  // resolve the correct options list
+  const resolvedOptions: string[] =
+    hasDep && field.optionsByDependency && dependencyValue && !depOther
+      ? field.optionsByDependency[dependencyValue] ?? []
+      : field.options ?? []
+
+  const effectiveType = depOther ? 'text' : field.type
+  const showOther = effectiveType === 'dropdown' && resolvedOptions.includes('سایر') && value === 'سایر'
   const labelText = field.unit ? `${field.label} (${field.unit})` : field.label
+
   return (
     <div style={{ gridColumn: field.wide ? '1 / -1' : undefined }}>
       <Label optional>{labelText}</Label>
-      {field.type === 'dropdown' ? (
-        <select className="nf" value={value} onChange={e => onChange(e.target.value)}
-          style={{ ...inp(), cursor: 'pointer', paddingLeft: 10 }}>
-          <option value="">انتخاب...</option>
-          {field.options!.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      ) : field.type === 'number' ? (
-        <input className="nf" type="number" placeholder={field.placeholder ?? ''} value={value}
-          onChange={e => onChange(e.target.value)}
-          style={{ ...inp(), direction: 'ltr', textAlign: 'right' }} />
-      ) : (
-        <input className="nf" type="text" placeholder={field.placeholder ?? ''} value={value}
-          onChange={e => onChange(e.target.value)} style={inp()} />
-      )}
-      {showOther && (
-        <div style={{ marginTop: 8, animation: 'fadeIn 0.25s ease both' }}>
-          <input className="nf" type="text" placeholder="لطفاً توضیح دهید..." value={otherValue}
-            onChange={e => onOtherChange(e.target.value)}
-            style={{ ...inp(), background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
-        </div>
-      )}
+
+      {/* Wrap in a keyed div so the fade-in triggers every time dependency changes */}
+      <div key={`dep-${dependencyValue ?? '__none__'}`}
+        style={{ animation: hasDep ? 'fadeIn 0.25s ease both' : undefined }}>
+
+        {effectiveType === 'dropdown' ? (
+          <select className="nf" value={value} onChange={e => onChange(e.target.value)}
+            disabled={noDepYet}
+            style={{ ...inp(), cursor: noDepYet ? 'not-allowed' : 'pointer', paddingLeft: 10, opacity: noDepYet ? 0.45 : 1 }}>
+            <option value="">{noDepYet ? 'ابتدا نوع را انتخاب کنید' : 'انتخاب...'}</option>
+            {resolvedOptions.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        ) : effectiveType === 'number' ? (
+          <input className="nf" type="number" placeholder={field.placeholder ?? ''} value={value}
+            onChange={e => onChange(e.target.value)}
+            style={{ ...inp(), direction: 'ltr', textAlign: 'right' }} />
+        ) : (
+          <input className="nf" type="text"
+            placeholder={depOther ? 'نام برند را وارد کنید...' : (field.placeholder ?? '')}
+            value={depOther ? otherValue : value}
+            onChange={e => depOther ? onOtherChange(e.target.value) : onChange(e.target.value)}
+            style={{ ...inp(), ...(depOther ? { background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' } : {}) }} />
+        )}
+
+        {showOther && (
+          <div style={{ marginTop: 8, animation: 'fadeIn 0.25s ease both' }}>
+            <input className="nf" type="text" placeholder="لطفاً توضیح دهید..." value={otherValue}
+              onChange={e => onOtherChange(e.target.value)}
+              style={{ ...inp(), background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -506,16 +543,29 @@ export default function NewProductPage() {
                           </div>
                         </div>
                         <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          {currentSpecs.map(field => (
-                            <SpecField
-                              key={`${form.category}-${field.key}`}
-                              field={field}
-                              value={specs[field.key] ?? ''}
-                              otherValue={specOthers[field.key] ?? ''}
-                              onChange={v => setSpecs(s => ({ ...s, [field.key]: v }))}
-                              onOtherChange={v => setSpecOthers(s => ({ ...s, [field.key]: v }))}
-                            />
-                          ))}
+                          {currentSpecs.map(field => {
+                            const isParent = currentSpecs.some(f => f.dependsOn === field.key)
+                            return (
+                              <SpecField
+                                key={`${form.category}-${field.key}`}
+                                field={field}
+                                value={specs[field.key] ?? ''}
+                                otherValue={specOthers[field.key] ?? ''}
+                                dependencyValue={field.dependsOn ? specs[field.dependsOn] ?? '' : undefined}
+                                onChange={v => setSpecs(s => {
+                                  const next = { ...s, [field.key]: v }
+                                  // reset all dependent fields when parent changes
+                                  if (isParent) {
+                                    currentSpecs
+                                      .filter(f => f.dependsOn === field.key)
+                                      .forEach(f => { next[f.key] = '' })
+                                  }
+                                  return next
+                                })}
+                                onOtherChange={v => setSpecOthers(s => ({ ...s, [field.key]: v }))}
+                              />
+                            )
+                          })}
                         </div>
                       </div>
                     </div>
