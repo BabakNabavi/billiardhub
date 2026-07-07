@@ -1,468 +1,452 @@
 'use client'
-
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
+import ClubStoryModal from '@/components/ClubStoryModal'
 
-// ── Tokens (light glassmorphism) ──────────────────────────────
+/* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
-const GOLD_D  = '#A07840'
-const TEXT    = '#1C1C1A'
-const TEXT_S  = 'rgba(28,28,26,0.52)'
-const TEXT_M  = 'rgba(28,28,26,0.32)'
-const LQ_BG   = 'rgba(255,255,255,0.82)'
-const LQ_BOR  = '1px solid rgba(255,255,255,0.85)'
-const LQ_SHAD = 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)'
+const GOLD_D  = '#9A6E38'
+const GOLD_G  = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
 
-const SPECS: Record<string,{label:string;color:string;bg:string}> = {
-  snooker:  {label:'اسنوکر',       color:'#7C3AED',bg:'rgba(124,58,237,0.10)'},
-  pocket:   {label:'پاکت بیلیارد', color:GOLD,     bg:'rgba(199,166,106,0.12)'},
-  highball: {label:'هی‌بال',        color:'#F59E0B', bg:'rgba(245,158,11,0.10)'},
-  carom:    {label:'کارامبول',      color:'#16A34A', bg:'rgba(22,163,74,0.10)'},
+const BG      = '#F6F4F0'
+const TEXT    = '#111110'
+const TEXT_S  = 'rgba(17,17,16,0.52)'
+const TEXT_M  = 'rgba(17,17,16,0.28)'
+
+const CARD    = '#0E0D0B'
+const CW      = '#F2EDE4'
+const CW_D    = 'rgba(242,237,228,0.52)'
+
+const SPECS: Record<string, { label: string; color: string; glow: string }> = {
+  snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
+  pocket:   { label: 'پاکت بیلیارد', color: GOLD_D,    glow: 'rgba(154,110,56,0.30)' },
+  highball: { label: 'هی‌بال',       color: '#C2410C', glow: 'rgba(194,65,12,0.30)'  },
 }
 
-const LEVELS: Record<string,{label:string;color:string;bg:string}> = {
-  international: {label:'داور بین‌المللی',color:'#7C3AED',bg:'rgba(124,58,237,0.10)'},
-  national:      {label:'داور ملی',       color:GOLD,     bg:'rgba(199,166,106,0.12)'},
-  grade1:        {label:'داور درجه یک',   color:'#2563EB', bg:'rgba(37,99,235,0.10)'},
-}
-
-const AVATAR_GRAD: [string,string][] = [
-  [GOLD,'#A07840'],['#7C3AED','#5B21B6'],['#2563EB','#1D4ED8'],
-  ['#B8936B','#8B6B3D'],['#16A34A','#15803D'],['#DC2626','#B91C1C'],
+const IMGS: string[] = [
+  '/images/shop/snooker-table.jpg',
+  '/images/shop/cue_billiard_2.jpg',
+  '/images/shop/Ball-1.jpg',
+  '/images/shop/pool_chalk_1.jpg',
 ]
-const getGrad = (id:string):[string,string] =>
-  AVATAR_GRAD[parseInt(id,10)%AVATAR_GRAD.length] ?? [GOLD,GOLD_D]
+const img = (i: number) => IMGS[i % IMGS.length] ?? IMGS[0]!
 
-const fmt = (n:number) => n.toLocaleString('fa-IR')
+const GRADS: [string, string][] = [
+  ['#C7A66A','#7A4F1E'],['#0891B2','#164E63'],['#7C3AED','#4C1D95'],
+  ['#2563EB','#1E3A8A'],['#DC2626','#7F1D1D'],['#16A34A','#14532D'],
+  ['#6D28D9','#3B0764'],['#B45309','#78350F'],['#BE185D','#831843'],
+]
+const getGrad = (id: string): [string, string] =>
+  GRADS[parseInt(id, 10) % GRADS.length] ?? ['#C7A66A', '#7A4F1E']
 
-// ── Types ──────────────────────────────────────────────────────
+/* billiard rack: 15 balls */
+const RACK: [number, number][] = [
+  [490,50],[442,133],[538,133],[394,216],[490,216],[586,216],
+  [346,299],[442,299],[538,299],[634,299],
+  [298,382],[394,382],[490,382],[586,382],[682,382],
+]
+const RACK_C = [
+  '#C7A66A','#DC2626','#7C3AED',
+  '#DC2626','#C7A66A','#DC2626',
+  '#C7A66A','#DC2626','#C7A66A','#DC2626',
+  '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
+]
+
 interface Referee {
-  id:string; name:string; specialty:string; level:string; city:string
-  experience:number; rating:number; reviewCount:number
-  matchesRefereed:number; internationalMatches:number
-  badge:string; badgeColor:string; verified:boolean
-  hasStory:boolean; storyImage:string; bio:string
+  id: string; name: string; specialty: string; city: string
+  experience: number; grade: string; gradeColor: string
+  hasStory: boolean; storyImage: string; bio: string; photo: string
 }
 
-// ── Mock data ──────────────────────────────────────────────────
 const REFEREES: Referee[] = [
-  {
-    id:'1', name:'کاوه طالبی', specialty:'snooker', level:'international', city:'تهران',
-    experience:20, rating:4.9, reviewCount:284, matchesRefereed:180, internationalMatches:45,
-    badge:'داور بین‌المللی', badgeColor:'#7C3AED', verified:true,
-    hasStory:true, storyImage:'/images/shop/snooker-table.jpg',
-    bio:'داور بین‌المللی WPBSA با ۲۰ سال سابقه در رویدادهای جهانی اسنوکر — داوری ۴۵ مسابقه بین‌المللی',
-  },
-  {
-    id:'2', name:'نیلوفر حسینی', specialty:'pocket', level:'national', city:'مشهد',
-    experience:12, rating:4.7, reviewCount:156, matchesRefereed:95, internationalMatches:0,
-    badge:'داور ملی', badgeColor:GOLD, verified:true,
-    hasStory:true, storyImage:'/images/shop/cue_billiard_2.jpg',
-    bio:'اولین داور زن ملی پاکت بیلیارد ایران — مدرس کمیته داوری فدراسیون',
-  },
-  {
-    id:'3', name:'حسن جعفری', specialty:'carom', level:'international', city:'اصفهان',
-    experience:15, rating:4.8, reviewCount:198, matchesRefereed:130, internationalMatches:28,
-    badge:'داور بین‌المللی', badgeColor:'#7C3AED', verified:true,
-    hasStory:false, storyImage:'',
-    bio:'داور بین‌المللی کارامبول UMB با حضور در رویدادهای قاره‌ای آسیا و اروپا',
-  },
-  {
-    id:'4', name:'سارا رضوی', specialty:'snooker', level:'grade1', city:'تهران',
-    experience:6, rating:4.5, reviewCount:62, matchesRefereed:42, internationalMatches:0,
-    badge:'داور درجه یک', badgeColor:'#2563EB', verified:true,
-    hasStory:true, storyImage:'/images/shop/Ball-1.jpg',
-    bio:'داور جوان درجه‌یک اسنوکر — قهرمان داوری لیگ برتر ۱۴۰۲',
-  },
-  {
-    id:'5', name:'امیر کریمی', specialty:'highball', level:'national', city:'تبریز',
-    experience:10, rating:4.6, reviewCount:88, matchesRefereed:75, internationalMatches:8,
-    badge:'داور ملی', badgeColor:GOLD, verified:true,
-    hasStory:false, storyImage:'',
-    bio:'داور ملی هی‌بال — مسئول تکنیکی داوری استان آذربایجان‌شرقی',
-  },
-  {
-    id:'6', name:'مهرداد جوادی', specialty:'pocket', level:'grade1', city:'شیراز',
-    experience:5, rating:4.4, reviewCount:43, matchesRefereed:35, internationalMatches:0,
-    badge:'داور درجه یک', badgeColor:'#2563EB', verified:false,
-    hasStory:true, storyImage:'/images/shop/pool_chalk_1.jpg',
-    bio:'داور جوان و مستعد پاکت بیلیارد — دانش‌آموخته کمیته داوری استان فارس',
-  },
+  { id:'1',  name:'کاوه طالبی',    specialty:'snooker',  city:'تهران',  experience:20, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور بین‌المللی WPBSA با ۲۰ سال سابقه — قضاوت ۴۵ مسابقه بین‌المللی اسنوکر',   photo:img(0) },
+  { id:'2',  name:'نیلوفر حسینی', specialty:'pocket',   city:'مشهد',   experience:12, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(1), bio:'داور ملی پاکت بیلیارد — پیشگام داوری بانوان با ۹۵ مسابقه ملی',               photo:img(1) },
+  { id:'3',  name:'رامین فرهادی', specialty:'highball', city:'اصفهان', experience:8,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'متخصص هی‌بال — عضو کمیته داوران فدراسیون بیلیارد و اسنوکر ایران',             photo:img(2) },
+  { id:'4',  name:'سحر محمدی',    specialty:'pocket',   city:'تهران',  experience:5,  grade:'داور درجه A',     gradeColor:'#C2410C', hasStory:true,  storyImage:img(3), bio:'داور جوان پاکت بیلیارد — قضاوت ۳۰+ مسابقه استانی و کشوری',                  photo:img(3) },
+  { id:'5',  name:'حامد موسوی',   specialty:'snooker',  city:'تبریز',  experience:15, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور ارشد IBSF — نماینده ایران در قهرمانی آسیا ۱۴۰۲ و لیگ برتر',             photo:img(0) },
+  { id:'6',  name:'علی رضایی',    specialty:'highball', city:'شیراز',  experience:7,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'داور هی‌بال — قضاوت لیگ برتر هی‌بال و مسابقات جوانان فدراسیون',               photo:img(1) },
+  { id:'7',  name:'مینا صالحی',   specialty:'pocket',   city:'کرج',    experience:3,  grade:'داور درجه B',     gradeColor:'#16A34A', hasStory:false, storyImage:'',     bio:'داور درجه B پاکت بیلیارد — فعال در مسابقات استانی البرز و تهران',             photo:img(2) },
+  { id:'8',  name:'کیان نوری',    specialty:'snooker',  city:'تهران',  experience:10, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(3), bio:'داور ملی اسنوکر — عضو هیئت داوران کنفدراسیون ACBS با تجربه ۱۰ ساله',        photo:img(3) },
 ]
 
-const CITIES = ['همه', ...Array.from(new Set(REFEREES.map(r => r.city)))]
-
-// ── Sub-components ─────────────────────────────────────────────
-function Avatar({ id, name, size, ring, onClick }: {
-  id:string; name:string; size:number; ring?:boolean; onClick?:()=>void
-}) {
-  const [c1,c2] = getGrad(id)
-  const circle = (
-    <div style={{ width:size,height:size,borderRadius:'50%',background:`linear-gradient(135deg,${c1},${c2})`,
-      display:'flex',alignItems:'center',justifyContent:'center',
-      fontSize:size*0.38,fontWeight:900,color:'#fff',flexShrink:0,userSelect:'none' }}>
-      {name.charAt(0)}
-    </div>
-  )
-  if (!ring) return <div onClick={onClick} style={{ cursor:onClick?'pointer':'default',flexShrink:0 }}>{circle}</div>
+function StoryRing({ referee, size, onOpen }: { referee: Referee; size: number; onOpen: () => void }) {
+  const [g1, g2] = getGrad(referee.id)
   return (
-    <div onClick={onClick} style={{ cursor:onClick?'pointer':'default',flexShrink:0,
-      width:size+8,height:size+8,borderRadius:'50%',
-      background:`linear-gradient(135deg,${GOLD},#FFE88A,${GOLD_D})`,
-      padding:4,display:'flex',alignItems:'center',justifyContent:'center' }}>
-      <div style={{ width:size,height:size,borderRadius:'50%',background:'rgba(4,4,3,0.35)',
-        padding:2,display:'flex',alignItems:'center',justifyContent:'center' }}>
-        {circle}
-      </div>
-    </div>
-  )
-}
-
-function Stars({ rating, size=12 }:{ rating:number; size?:number }) {
-  return (
-    <div style={{ display:'flex',gap:2 }}>
-      {[1,2,3,4,5].map(i=>(
-        <svg key={i} width={size} height={size} viewBox="0 0 24 24"
-          fill={i<=Math.floor(rating)?'#F59E0B':'none'}
-          stroke={i<=Math.floor(rating)?'none':'rgba(245,158,11,0.35)'} strokeWidth={1.5}>
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      ))}
-    </div>
-  )
-}
-
-function StoryModal({ referee, onClose }:{ referee:Referee; onClose:()=>void }) {
-  const [progress, setProgress] = useState(0)
-  const [c1,c2] = getGrad(referee.id)
-  const sp = SPECS[referee.specialty]
-  useEffect(()=>{
-    let p=0; const id=setInterval(()=>{ p+=2; setProgress(p); if(p>=100){clearInterval(id);setTimeout(onClose,200)} },100)
-    return ()=>clearInterval(id)
-  },[referee.id,onClose])
-  useEffect(()=>{
-    const fn=(e:KeyboardEvent)=>{ if(e.key==='Escape') onClose() }
-    window.addEventListener('keydown',fn); return ()=>window.removeEventListener('keydown',fn)
-  },[onClose])
-  return (
-    <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.93)',backdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.2s ease both' }}>
-      <div onClick={e=>e.stopPropagation()} style={{ width:'min(420px,92vw)',height:'min(745px,90vh)',borderRadius:24,overflow:'hidden',position:'relative',background:referee.storyImage?'transparent':`linear-gradient(160deg,${c1},${c2})`,boxShadow:'0 24px 80px rgba(0,0,0,0.6)' }}>
-        {referee.storyImage&&<div style={{ position:'absolute',inset:0,backgroundImage:`url(${referee.storyImage})`,backgroundSize:'cover',backgroundPosition:'center' }}><div style={{ position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,0.52) 0%,rgba(0,0,0,0.08) 40%,rgba(0,0,0,0.62) 100%)' }}/></div>}
-        <div style={{ position:'absolute',top:16,left:16,right:16,height:3,background:'rgba(255,255,255,0.22)',borderRadius:4,overflow:'hidden',zIndex:10 }}>
-          <div style={{ height:'100%',width:`${progress}%`,background:'#fff',borderRadius:4,transition:'width 0.08s linear' }}/>
-        </div>
-        <div style={{ position:'absolute',top:30,left:0,right:0,padding:'0 16px',display:'flex',alignItems:'center',gap:10,zIndex:10 }}>
-          <Avatar id={referee.id} name={referee.name} size={40} ring/>
-          <div>
-            <div style={{ fontSize:14,fontWeight:800,color:'#fff',textShadow:'0 1px 4px rgba(0,0,0,0.5)' }}>{referee.name}</div>
-            {sp&&<div style={{ fontSize:11,color:'rgba(255,255,255,0.70)',fontWeight:600 }}>{sp.label}</div>}
-          </div>
-          <button onClick={onClose} style={{ marginRight:'auto',width:32,height:32,borderRadius:'50%',background:'rgba(0,0,0,0.38)',backdropFilter:'blur(8px)',border:'1px solid rgba(255,255,255,0.18)',color:'#fff',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center' }}>×</button>
-        </div>
-        <div style={{ position:'absolute',bottom:0,left:0,right:0,padding:'40px 20px 28px',background:'linear-gradient(to top,rgba(0,0,0,0.65),transparent)',zIndex:10 }}>
-          <p style={{ fontSize:15,color:'#fff',margin:0,lineHeight:1.75,fontWeight:500 }}>{referee.bio}</p>
+    <button onClick={e => { e.preventDefault(); e.stopPropagation(); onOpen() }}
+      style={{ background:'none', border:'none', cursor:'pointer', padding:0 }}>
+      <div style={{
+        width:size, height:size, borderRadius:'50%',
+        background:'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
+        padding: size > 40 ? 3 : 2,
+        boxShadow:'0 0 14px rgba(214,41,118,0.50)',
+      }}>
+        <div style={{
+          width:'100%', height:'100%', borderRadius:'50%',
+          border:'2px solid rgba(7,6,4,0.60)',
+          background:`linear-gradient(135deg,${g1},${g2})`,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color:'#fff', fontWeight:900, fontSize: size > 40 ? 19 : 13,
+          overflow:'hidden',
+        }}>
+          {referee.name[0]}
         </div>
       </div>
-    </div>
+    </button>
   )
 }
 
-// ════════════════════════════════════════════════════════════
-//  Main Page
-// ════════════════════════════════════════════════════════════
+/* ════════════════ PAGE ════════════════ */
 export default function RefereesPage() {
-  const [filterSpec,  setFilterSpec]  = useState('all')
-  const [filterLevel, setFilterLevel] = useState('all')
-  const [filterCity,  setFilterCity]  = useState('همه')
-  const [sortBy,      setSortBy]      = useState('experience')
-  const [activeStory, setActiveStory] = useState<Referee|null>(null)
-  const [hoveredId,   setHoveredId]   = useState<string|null>(null)
-  const [scrollY,     setScrollY]     = useState(0)
-  const [typeText,    setTypeText]    = useState('')
-  const [cursorOn,    setCursorOn]    = useState(true)
-
-  const FULL = 'داوران بین‌المللی بیلیارد ایران'
-
-  useEffect(()=>{
-    const fn=()=>setScrollY(window.scrollY)
-    window.addEventListener('scroll',fn,{passive:true})
-    return ()=>window.removeEventListener('scroll',fn)
-  },[])
-
-  useEffect(()=>{
-    let i=0
-    const tid=setInterval(()=>{ i++; setTypeText(FULL.slice(0,i)); if(i>=FULL.length) clearInterval(tid) },75)
-    return ()=>clearInterval(tid)
-  },[])
-
-  useEffect(()=>{
-    const bid=setInterval(()=>setCursorOn(c=>!c),530)
-    return ()=>clearInterval(bid)
-  },[])
-
-  const filtered = REFEREES
-    .filter(r => filterSpec==='all' || r.specialty===filterSpec)
-    .filter(r => filterLevel==='all' || r.level===filterLevel)
-    .filter(r => filterCity==='همه' || r.city===filterCity)
-    .sort((a,b) => {
-      if(sortBy==='matches')       return b.matchesRefereed - a.matchesRefereed
-      if(sortBy==='international') return b.internationalMatches - a.internationalMatches
-      return b.experience - a.experience
-    })
-
-  const featured = filtered[0]
-  const rest     = filtered.slice(1)
+  const [filter,    setFilter]    = useState('all')
+  const [openStory, setOpenStory] = useState<Referee | null>(null)
+  const refs = REFEREES.filter(r => filter === 'all' || r.specialty === filter)
 
   return (
     <>
       <style>{`
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
-        * { box-sizing:border-box; }
-        .ref-card { transition:transform 0.28s cubic-bezier(0.22,1,0.36,1),box-shadow 0.28s ease; }
-        .ref-card:hover { transform:translateY(-5px); box-shadow:0 22px 52px rgba(0,0,0,0.11)!important; }
-        @media(max-width:900px) { .ref-grid{grid-template-columns:repeat(2,1fr)!important;} .feat-flex{flex-direction:column!important;} .feat-side{width:100%!important;min-height:200px;} }
-        @media(max-width:560px) { .ref-grid{grid-template-columns:1fr!important;} }
+        *{box-sizing:border-box;margin:0;padding:0;}
+
+        @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}25%{transform:translate(-28px,-20px) scale(1.05);}55%{transform:translate(-10px,26px) scale(0.96);}80%{transform:translate(20px,-12px) scale(1.02);}}
+        @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}20%{transform:translate(32px,20px) scale(1.04);}55%{transform:translate(44px,-26px) scale(0.92);}75%{transform:translate(10px,30px) scale(1.06);}}
+        @keyframes blob3{0%,100%{transform:translate(0,0);}50%{transform:translate(-26px,-36px) scale(1.10);}}
+        @keyframes rackCycle{0%{opacity:0;}6%{opacity:.46;}32%{opacity:.46;}40%{opacity:0;}100%{opacity:0;}}
+        @keyframes streakA{0%{opacity:0;transform:translateX(-130%) skewX(-18deg);}15%{opacity:1;}85%{opacity:1;}100%{opacity:0;transform:translateX(230%) skewX(-18deg);}}
+        @keyframes streakB{0%{opacity:0;transform:translateX(-120%) skewX(-14deg);}15%{opacity:.5;}85%{opacity:.5;}100%{opacity:0;transform:translateX(250%) skewX(-14deg);}}
+        @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
+        @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+        .fpill{transition:all .18s cubic-bezier(.4,0,.2,1);}
+        .fpill:hover{background:rgba(0,0,0,0.06)!important;}
+
+        .rcard{cursor:pointer;transition:transform .30s cubic-bezier(.4,0,.2,1),box-shadow .30s;position:relative;}
+        .rcard:hover{transform:translateY(-5px);box-shadow:0 0 0 1.5px rgba(199,166,106,0.55),0 0 24px rgba(199,166,106,0.12),0 20px 48px rgba(0,0,0,0.18)!important;}
+        .rphoto{transition:transform .60s cubic-bezier(.4,0,.2,1),filter .5s;}
+        .rcard:hover .rphoto{transform:scale(1.09);filter:brightness(1.06) saturate(1.08);}
+        .rdrawer{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1);}
+        .rcard:hover .rdrawer{max-height:130px;}
+        .rcard::before{content:'';position:absolute;inset:0;z-index:4;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,0.06) 50%,transparent 62%);opacity:0;transition:opacity .25s;}
+        .rcard:hover::before{opacity:1;}
+
+        .btnG{transition:background .18s,transform .14s,box-shadow .18s;}
+        .btnG:hover{background:${GOLD_D}!important;transform:translateY(-1px);box-shadow:0 8px 20px rgba(199,166,106,0.28)!important;}
+        .btnO{transition:background .18s,color .18s,border-color .18s;}
+        .btnO:hover{background:${TEXT}!important;color:#fff!important;border-color:${TEXT}!important;}
+        .btnGO{transition:background .18s,box-shadow .18s;}
+        .btnGO:hover{background:rgba(199,166,106,0.14)!important;box-shadow:inset 0 0 0 1px rgba(199,166,106,0.60)!important;}
+        .btnBanner{transition:background .18s,transform .14s,box-shadow .18s;}
+        .btnBanner:hover{background:${GOLD_D}!important;transform:translateY(-2px);box-shadow:0 10px 28px rgba(199,166,106,0.32)!important;}
+
+        @media(max-width:1100px){.g5{grid-template-columns:repeat(3,1fr)!important;}}
+        @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
+        @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
+
+        @media(hover:none),(max-width:700px){
+          .rdrawer{max-height:130px!important;}
+          .rcard .rphoto{transform:scale(1.06);filter:brightness(1.04) saturate(1.06);}
+        }
       `}</style>
 
-      {/* ═══ HERO ══════════════════════════════════════════════ */}
-      <section style={{ minHeight:'100vh',position:'relative',overflow:'hidden',display:'flex',alignItems:'center',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif' }}>
-        <div style={{ position:'absolute',inset:'-10% 0',backgroundImage:"url('/images/shop/snooker-table.jpg')",backgroundSize:'cover',backgroundPosition:'center',transform:`translateY(${scrollY*0.32}px)` }}>
-          <div style={{ position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(4,4,3,0.72) 0%,rgba(4,4,3,0.36) 45%,rgba(4,4,3,0.92) 100%)' }}/>
-          <div style={{ position:'absolute',inset:0,background:'radial-gradient(ellipse 65% 60% at 75% 45%,rgba(199,166,106,0.07) 0%,transparent 70%)' }}/>
-        </div>
-        <div style={{ position:'absolute',top:'18%',left:'8%',width:260,height:260,borderRadius:'50%',border:'1px solid rgba(199,166,106,0.12)',pointerEvents:'none',zIndex:1 }}/>
-        <div style={{ position:'absolute',top:'22%',left:'11%',width:190,height:190,borderRadius:'50%',border:'1px solid rgba(199,166,106,0.07)',pointerEvents:'none',zIndex:1 }}/>
+      <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
-        <div style={{ position:'relative',zIndex:5,maxWidth:1100,margin:'0 auto',padding:'0 clamp(16px,4vw,48px)',width:'100%' }}>
-          {/* eyebrow */}
-          <div style={{ display:'inline-flex',alignItems:'center',gap:8,marginBottom:20,background:'rgba(199,166,106,0.10)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:20,padding:'5px 14px',backdropFilter:'blur(12px)' }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill={GOLD}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span style={{ fontSize:11,fontWeight:700,color:GOLD,letterSpacing:'0.18em' }}>BILLIARD IRAN</span>
-          </div>
-          {/* typewriter */}
-          <h1 style={{ fontSize:'clamp(26px,5vw,58px)',fontWeight:900,color:'#fff',margin:'0 0 16px',letterSpacing:'-0.025em',lineHeight:1.2,maxWidth:700,textShadow:'0 2px 16px rgba(0,0,0,0.4)' }}>
-            {typeText}
-            <span style={{ opacity:typeText.length>=FULL.length&&cursorOn?1:0,color:GOLD,transition:'opacity 0.1s' }}>|</span>
-          </h1>
-          {/* tagline */}
-          <p style={{ fontSize:'clamp(13px,1.7vw,17px)',color:'rgba(255,255,255,0.55)',margin:'0 0 38px',fontWeight:500,maxWidth:460 }}>
-            داوران رسمی و تأیید‌شده فدراسیون بیلیارد ایران
-          </p>
-          {/* stats strip */}
-          <div style={{ display:'flex',gap:10,flexWrap:'wrap' }}>
-            {[
-              {val:'۶',   label:'داور برتر',      icon:'🎱'},
-              {val:'۲',   label:'بین‌المللی',      icon:'🌍'},
-              {val:'۵۵۷', label:'مسابقه کل',       icon:'🏆'},
-              {val:'۸۱',  label:'مسابقه خارجی',   icon:'✈️'},
-            ].map((s,i)=>(
-              <div key={i} style={{ background:'rgba(255,255,255,0.07)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',border:'1px solid rgba(255,255,255,0.10)',borderRadius:14,padding:'12px 18px',animation:`fadeUp 0.5s ${i*0.08}s ease both`,minWidth:90 }}>
-                <div style={{ fontSize:'clamp(20px,2.5vw,28px)',fontWeight:900,color:GOLD,lineHeight:1 }}>{s.val}</div>
-                <div style={{ fontSize:11.5,fontWeight:700,color:'rgba(255,255,255,0.65)',marginTop:4 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* ══════════════ HERO ══════════════ */}
+        <section style={{ position:'relative', height:'clamp(220px,30vh,340px)', overflow:'hidden', display:'flex', alignItems:'center' }}>
 
-      {/* ═══ STORY STRIP ══════════════════════════════════════ */}
-      {REFEREES.some(r=>r.hasStory) && (
-        <div style={{ position:'sticky',top:0,zIndex:50,background:'rgba(247,247,245,0.93)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',borderBottom:'1px solid rgba(28,28,26,0.08)',boxShadow:'0 2px 16px rgba(0,0,0,0.04)' }}>
-          <div style={{ maxWidth:1100,margin:'0 auto',padding:'11px clamp(16px,4vw,48px)',overflowX:'auto',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif' }}>
-            <div style={{ display:'flex',gap:18,width:'max-content' }}>
-              {REFEREES.filter(r=>r.hasStory).map(r=>(
-                <button key={r.id} onClick={()=>setActiveStory(r)}
-                  style={{ background:'none',border:'none',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:5,padding:0 }}>
-                  <Avatar id={r.id} name={r.name} size={48} ring/>
-                  <span style={{ fontSize:10,fontWeight:700,color:TEXT_M,whiteSpace:'nowrap' }}>{r.name.split(' ')[0]}</span>
-                </button>
-              ))}
+          {/* Aurora blobs */}
+          <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
+            <div style={{ position:'absolute', right:'-8%', top:'8%', width:280, height:280, borderRadius:'50%',
+              background:'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)',
+              filter:'blur(55px)', animation:'blob1 15s ease-in-out infinite' }}/>
+            <div style={{ position:'absolute', left:'-6%', top:'20%', width:240, height:240, borderRadius:'50%',
+              background:'radial-gradient(circle, rgba(8,145,178,0.22) 0%, rgba(8,145,178,0.07) 50%, transparent 72%)',
+              filter:'blur(52px)', animation:'blob2 19s ease-in-out infinite' }}/>
+            <div style={{ position:'absolute', left:'36%', top:'50%', width:140, height:140, borderRadius:'50%',
+              background:'radial-gradient(circle, rgba(199,166,106,0.22) 0%, transparent 68%)',
+              filter:'blur(40px)', animation:'blob3 12s ease-in-out infinite' }}/>
+            <div style={{ position:'absolute', left:'3%', bottom:'-4%', width:150, height:110, borderRadius:'50%',
+              background:'radial-gradient(circle, rgba(8,145,178,0.14) 0%, transparent 70%)',
+              filter:'blur(44px)' }}/>
+          </div>
+
+          {/* Rack instance 1 */}
+          <svg style={{ position:'absolute', left:'4%', top:'50%', width:220, height:205,
+            transform:'translateY(-50%)', pointerEvents:'none',
+            animation:'rackCycle 18s 0s ease-in-out infinite', transformOrigin:'center' }}
+            viewBox="0 0 760 560">
+            {RACK.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[i]} strokeWidth="1.5"/>)}
+            <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.6"/>
+          </svg>
+          {/* Rack instance 2 */}
+          <svg style={{ position:'absolute', left:'26%', top:'50%', width:196, height:186,
+            transform:'translateY(-50%) rotate(140deg)', pointerEvents:'none',
+            animation:'rackCycle 18s 6s ease-in-out infinite', transformOrigin:'center' }}
+            viewBox="0 0 760 560">
+            {RACK.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[i]} strokeWidth="1.5"/>)}
+            <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.6"/>
+          </svg>
+          {/* Rack instance 3 */}
+          <svg style={{ position:'absolute', left:'46%', top:'50%', width:166, height:158,
+            transform:'translateY(-50%) rotate(55deg)', pointerEvents:'none',
+            animation:'rackCycle 18s 12s ease-in-out infinite', transformOrigin:'center' }}
+            viewBox="0 0 760 560">
+            {RACK.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[i]} strokeWidth="1.5"/>)}
+            <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.6"/>
+          </svg>
+
+          {/* Light streaks */}
+          <div style={{ position:'absolute', top:'33%', left:0, width:'50%', height:'1.5px',
+            background:'linear-gradient(to right,transparent,rgba(154,110,56,0.45),transparent)',
+            transform:'rotate(-5deg)', pointerEvents:'none',
+            animation:'streakA 12s 1s ease-in-out infinite' }}/>
+          <div style={{ position:'absolute', top:'53%', left:0, width:'40%', height:'1px',
+            background:'linear-gradient(to right,transparent,rgba(154,110,56,0.28),transparent)',
+            transform:'rotate(-3deg)', pointerEvents:'none',
+            animation:'streakB 16s 5s ease-in-out infinite' }}/>
+
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:50,
+            background:`linear-gradient(to top, ${BG}, transparent)`, pointerEvents:'none' }}/>
+
+          {/* Content */}
+          <div style={{ position:'relative', zIndex:5, maxWidth:1280, width:'100%',
+            margin:'0 auto', padding:'0 clamp(24px,6vw,80px)' }}>
+
+            <div style={{ overflow:'hidden', paddingBottom:'0.18em' }}>
+              <h1 style={{
+                fontSize:'clamp(32px,4.5vw,56px)', fontWeight:900, lineHeight:1.0,
+                letterSpacing:'-0.05em',
+                background:GOLD_G,
+                WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+                animation:'lineReveal .72s .10s cubic-bezier(.4,0,.2,1) both',
+              }}>
+                داوران
+              </h1>
+            </div>
+
+            <div style={{ transformOrigin:'right', animation:'scaleInX .5s .34s ease both' }}>
+              <div style={{ width:60, height:2, marginTop:8, background:GOLD_G,
+                boxShadow:'0 0 10px rgba(154,110,56,0.35)' }}/>
+            </div>
+
+            <p style={{ fontSize:'clamp(11px,1.2vw,13px)', color:TEXT_S, marginTop:8, maxWidth:360,
+              animation:'lineReveal .5s .44s ease both' }}>
+              قضاوت دقیق · از ملی تا بین‌المللی
+            </p>
+
+            <div style={{ marginTop:16, display:'flex', gap:10, animation:'fadeUp .5s .56s ease both' }}>
+              <a href="#referees" className="btnG" style={{
+                textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6,
+                padding:'8px 18px', background:GOLD, color:'#ffffff',
+                borderRadius:6, fontSize:13, fontWeight:800,
+              }}>
+                مشاهده داوران
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </a>
+              <button className="btnO" style={{
+                padding:'8px 16px', border:`1px solid rgba(17,17,16,0.18)`,
+                borderRadius:6, fontSize:13, fontWeight:600, color:TEXT_S,
+                background:'transparent', cursor:'pointer',
+                fontFamily:"'Vazirmatn',Tahoma,sans-serif",
+              }}>
+                تماس با فدراسیون
+              </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* ═══ FILTER BAR ═══════════════════════════════════════ */}
-      <div style={{ background:'#F0EDE7',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif' }}>
-        <div style={{ maxWidth:1100,margin:'0 auto',padding:'16px clamp(16px,4vw,48px)' }}>
-          <div style={{ background:LQ_BG,backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',border:LQ_BOR,borderRadius:16,boxShadow:LQ_SHAD,padding:'12px 16px',display:'flex',gap:7,flexWrap:'wrap',alignItems:'center' }}>
-            {/* specialty */}
-            {[{k:'all',l:'همه'},{k:'snooker',l:'اسنوکر'},{k:'pocket',l:'پاکت'},{k:'highball',l:'هی‌بال'},{k:'carom',l:'کارامبول'}].map(({k,l})=>(
-              <button key={k} onClick={()=>setFilterSpec(k)} style={{ padding:'6px 14px',borderRadius:20,border:'none',cursor:'pointer',fontFamily:'Vazirmatn,Tahoma,sans-serif',fontSize:12.5,fontWeight:700,transition:'all 0.18s',
-                background: filterSpec===k ? `linear-gradient(135deg,${GOLD},${GOLD_D})` : 'rgba(255,255,255,0.78)',
-                color:      filterSpec===k ? '#2a1e00' : TEXT_S,
-                boxShadow:  filterSpec===k ? `inset 0 1.5px 0 rgba(255,255,255,0.30), 0 4px 14px rgba(199,166,106,0.28)` : LQ_SHAD }}>
-                {l}
-              </button>
-            ))}
-            <div style={{ width:1,height:16,background:'rgba(28,28,26,0.12)',margin:'0 1px' }}/>
-            {/* level */}
-            {[{k:'all',l:'همه سطوح'},{k:'international',l:'بین‌المللی'},{k:'national',l:'ملی'},{k:'grade1',l:'درجه یک'}].map(({k,l})=>(
-              <button key={k} onClick={()=>setFilterLevel(k)} style={{ padding:'5px 12px',borderRadius:20,cursor:'pointer',fontFamily:'Vazirmatn,Tahoma,sans-serif',fontSize:12,fontWeight:700,transition:'all 0.18s',
-                background:  filterLevel===k ? 'rgba(199,166,106,0.12)' : 'transparent',
-                color:       filterLevel===k ? GOLD_D : TEXT_M,
-                border:      filterLevel===k ? `1px solid rgba(199,166,106,0.35)` : '1px solid rgba(28,28,26,0.10)' }}>
-                {l}
-              </button>
-            ))}
-            <div style={{ width:1,height:16,background:'rgba(28,28,26,0.10)',margin:'0 1px' }}/>
-            {/* city */}
-            {CITIES.map(city=>(
-              <button key={city} onClick={()=>setFilterCity(city)} style={{ padding:'5px 11px',borderRadius:20,cursor:'pointer',fontFamily:'Vazirmatn,Tahoma,sans-serif',fontSize:11.5,fontWeight:700,transition:'all 0.18s',
-                background:  filterCity===city ? 'rgba(37,99,235,0.08)' : 'transparent',
-                color:       filterCity===city ? '#2563EB' : TEXT_M,
-                border:      filterCity===city ? `1px solid rgba(37,99,235,0.28)` : '1px solid rgba(28,28,26,0.08)' }}>
-                {city}
-              </button>
-            ))}
-            <div style={{ marginRight:'auto',display:'flex',gap:5 }}>
-              {[{k:'experience',l:'بیشترین سابقه'},{k:'matches',l:'بیشترین مسابقه'},{k:'international',l:'بین‌المللی'}].map(({k,l})=>(
-                <button key={k} onClick={()=>setSortBy(k)} style={{ padding:'5px 10px',borderRadius:14,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'Vazirmatn,Tahoma,sans-serif',transition:'all 0.18s',
-                  background: sortBy===k ? 'rgba(199,166,106,0.10)' : 'transparent',
-                  color:      sortBy===k ? GOLD_D : TEXT_M,
-                  border:     sortBy===k ? `1px solid rgba(199,166,106,0.32)` : '1px solid rgba(28,28,26,0.08)' }}>
+        </section>
+
+        {/* ══════════════ FILTER ══════════════ */}
+        <div id="referees" style={{
+          position:'sticky', top:0, zIndex:50,
+          background:'rgba(246,244,240,0.90)',
+          backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+          borderBottom:'1px solid rgba(17,17,16,0.08)',
+          boxShadow:'0 1px 8px rgba(17,17,16,0.05)',
+        }}>
+          <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
+            display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+            {([
+              { k:'all',      l:'همه داوران' },
+              { k:'pocket',   l:'پاکت بیلیارد' },
+              { k:'snooker',  l:'اسنوکر' },
+              { k:'highball', l:'هی‌بال' },
+            ] as { k:string; l:string }[]).map(({ k, l }) => {
+              const active = filter === k
+              return (
+                <button key={k} className="fpill" onClick={() => setFilter(k)} style={{
+                  padding:'7px 16px', borderRadius:100,
+                  border:`1px solid ${active ? 'transparent' : 'rgba(17,17,16,0.13)'}`,
+                  background: active ? TEXT : 'transparent',
+                  color: active ? '#ffffff' : TEXT_S,
+                  fontSize:13, fontWeight: active ? 700 : 400,
+                  cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif",
+                }}>
                   {l}
                 </button>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </div>
-      </div>
 
-      {/* ═══ CONTENT ══════════════════════════════════════════ */}
-      <div style={{ background:'#F7F7F5',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',paddingBottom:80 }}>
-        <div style={{ maxWidth:1100,margin:'0 auto',padding:'22px clamp(16px,4vw,48px)' }}>
+        {/* Divider */}
+        <div style={{ maxWidth:1280, margin:'38px auto 24px', padding:'0 clamp(24px,6vw,80px)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:18 }}>
+            <div style={{ flex:1, height:'1px', background:'linear-gradient(to left,transparent,rgba(154,110,56,0.28))' }}/>
+            <span style={{ fontSize:10, fontWeight:700, color:'rgba(154,110,56,0.60)', letterSpacing:'0.30em', whiteSpace:'nowrap' }}>
+              داوران فعال
+            </span>
+            <div style={{ flex:1, height:'1px', background:'linear-gradient(to right,transparent,rgba(154,110,56,0.28))' }}/>
+          </div>
+        </div>
 
-          {/* FEATURED CARD */}
-          {featured && (()=>{
-            const sp  = SPECS[featured.specialty]
-            const lv  = LEVELS[featured.level]
-            const [c1,c2] = getGrad(featured.id)
-            return (
-              <div className="feat-flex" style={{ marginBottom:22,borderRadius:22,overflow:'hidden',background:LQ_BG,backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',border:LQ_BOR,boxShadow:`${LQ_SHAD}, 0 20px 60px rgba(0,0,0,0.07)`,animation:'fadeUp 0.4s ease both',display:'flex',minHeight:240,position:'relative' }}>
-                <div style={{ position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(to left,${GOLD},${GOLD_D},transparent)` }}/>
-                {/* info */}
-                <div style={{ flex:1,padding:'32px 28px 28px',display:'flex',flexDirection:'column',justifyContent:'space-between' }}>
-                  <div>
-                    <div style={{ display:'inline-flex',alignItems:'center',gap:5,fontSize:10,fontWeight:700,color:GOLD,letterSpacing:'0.22em',marginBottom:14,background:'rgba(199,166,106,0.08)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:20,padding:'3px 11px' }}>✦ برترین داور</div>
-                    <h2 style={{ fontSize:'clamp(22px,3vw,34px)',fontWeight:900,color:TEXT,margin:'0 0 10px',letterSpacing:'-0.03em',lineHeight:1.1 }}>{featured.name}</h2>
-                    <div style={{ display:'flex',alignItems:'center',gap:7,flexWrap:'wrap',marginBottom:14 }}>
-                      {lv&&<span style={{ fontSize:12,fontWeight:700,color:lv.color,background:lv.bg,border:`1px solid ${lv.color}28`,borderRadius:20,padding:'3px 10px' }}>{lv.label}</span>}
-                      {sp&&<span style={{ fontSize:12,fontWeight:700,color:sp.color,background:sp.bg,border:`1px solid ${sp.color}28`,borderRadius:20,padding:'3px 10px' }}>{sp.label}</span>}
-                      {featured.verified&&<span style={{ display:'flex',alignItems:'center',gap:4,fontSize:11.5,fontWeight:700,color:GOLD,background:'rgba(199,166,106,0.08)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:20,padding:'3px 10px' }}><svg width="10" height="10" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill={GOLD}/><polyline points="7 12 10.5 15.5 17 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>تأیید شده</span>}
-                      <span style={{ fontSize:12,color:TEXT_S,display:'flex',alignItems:'center',gap:3 }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{featured.city}</span>
-                    </div>
-                    <div style={{ display:'flex',gap:12,marginBottom:12,flexWrap:'wrap' }}>
-                      <div style={{ display:'flex',alignItems:'center',gap:5 }}><Stars rating={featured.rating}/><span style={{ fontSize:14,fontWeight:900,color:GOLD }}>{featured.rating}</span><span style={{ fontSize:11,color:TEXT_M }}>({fmt(featured.reviewCount)})</span></div>
-                      <span style={{ fontSize:12,color:TEXT_S }}>{featured.experience} سال سابقه</span>
-                      <span style={{ fontSize:12,color:TEXT_S }}>{fmt(featured.matchesRefereed)} مسابقه</span>
-                      {featured.internationalMatches>0&&<span style={{ fontSize:12,color:'#7C3AED',fontWeight:700 }}>{fmt(featured.internationalMatches)} بین‌المللی</span>}
-                    </div>
-                    <p style={{ fontSize:13.5,color:TEXT_S,margin:0,lineHeight:1.8 }}>{featured.bio}</p>
-                  </div>
-                  <div style={{ marginTop:20 }}>
-                    <Link href={`/referees/${featured.id}`} style={{ textDecoration:'none',display:'inline-flex',alignItems:'center',gap:6,background:`linear-gradient(135deg,${GOLD},${GOLD_D})`,color:'#2a1e00',fontSize:12.5,fontWeight:800,padding:'10px 20px',borderRadius:11,boxShadow:`inset 0 1.5px 0 rgba(255,255,255,0.30), 0 5px 18px rgba(199,166,106,0.30)` }}>
-                      مشاهده پروفایل
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                    </Link>
-                  </div>
-                </div>
-                {/* image side */}
-                <div className="feat-side" style={{ width:'clamp(150px,32%,280px)',flexShrink:0,background:`linear-gradient(150deg,${c1}18,${c2}06)`,position:'relative',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center' }}>
-                  <div style={{ position:'absolute',inset:0,background:`radial-gradient(ellipse at 55% 50%,${c1}1E 0%,transparent 65%)` }}/>
-                  <div style={{ position:'absolute',bottom:-24,right:-24,width:88,height:88,borderRadius:'50%',border:`1.5px solid ${c1}16` }}/>
-                  <div style={{ position:'absolute',top:-16,left:-16,width:68,height:68,borderRadius:'50%',border:`1.5px solid ${c1}10` }}/>
-                  {/* referee icon */}
-                  <div style={{ position:'absolute',top:16,left:16,width:38,height:38,borderRadius:10,background:`linear-gradient(135deg,${GOLD},${GOLD_D})`,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:`0 4px 12px rgba(199,166,106,0.32)` }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                  </div>
-                  <div style={{ position:'relative',zIndex:2 }}>
-                    <Avatar id={featured.id} name={featured.name} size={90} ring={featured.hasStory} onClick={featured.hasStory?()=>setActiveStory(featured):undefined}/>
-                  </div>
-                </div>
-              </div>
-            )
-          })()}
-
-          {/* GRID */}
-          {rest.length > 0 && (
-            <div className="ref-grid" style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14 }}>
-              {rest.map((ref, idx) => {
-                const sp  = SPECS[ref.specialty]
-                const lv  = LEVELS[ref.level]
-                const [c1,c2] = getGrad(ref.id)
-                const hovered = hoveredId===ref.id
+        {/* ══════════════ GRID ══════════════ */}
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 clamp(24px,6vw,80px) 64px' }}>
+          {refs.length > 0 ? (
+            <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
+              {refs.map((referee, idx) => {
+                const sp = SPECS[referee.specialty]
                 return (
-                  <Link key={ref.id} href={`/referees/${ref.id}`} style={{ textDecoration:'none' }}>
-                    <div className="ref-card"
-                      onMouseEnter={()=>setHoveredId(ref.id)}
-                      onMouseLeave={()=>setHoveredId(null)}
-                      style={{ borderRadius:18,overflow:'hidden',background:LQ_BG,backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',border:LQ_BOR,boxShadow:LQ_SHAD,animation:`fadeUp 0.4s ${idx*0.07}s ease both` }}>
+                  <article key={referee.id} className="rcard" style={{
+                    borderRadius:12, overflow:'hidden',
+                    background:CARD,
+                    aspectRatio:'2/3',
+                    boxShadow:'0 4px 24px rgba(0,0,0,0.12)',
+                    animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
+                  }}>
+                    <img className="rphoto" src={referee.photo} alt={referee.name}
+                      style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
 
-                      {/* image zone */}
-                      <div style={{ position:'relative',aspectRatio:'4/3',background:`linear-gradient(155deg,${c1}16,${c2}06)`,overflow:'hidden' }}>
-                        <div style={{ position:'absolute',inset:0,background:`radial-gradient(ellipse at 55% 55%,${c1}18 0%,transparent 65%)` }}/>
-                        <div style={{ position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center' }}>
-                          <div style={{ transition:'transform 0.35s ease',transform:hovered?'scale(1.08)':'scale(1)' }}>
-                            <Avatar id={ref.id} name={ref.name} size={70}/>
-                          </div>
-                        </div>
-                        <div style={{ position:'absolute',inset:0,background:'rgba(255,255,255,0.62)',backdropFilter:'blur(3px)',display:'flex',alignItems:'center',justifyContent:'center',opacity:hovered?1:0,transition:'opacity 0.22s ease' }}>
-                          <div style={{ background:`linear-gradient(135deg,${GOLD},${GOLD_D})`,color:'#2a1e00',fontSize:12.5,fontWeight:800,padding:'9px 18px',borderRadius:10,boxShadow:`inset 0 1.5px 0 rgba(255,255,255,0.30), 0 4px 14px rgba(199,166,106,0.36)` }}>
-                            مشاهده پروفایل
-                          </div>
-                        </div>
-                        {ref.hasStory && (
-                          <div style={{ position:'absolute',top:10,right:10,zIndex:10 }}>
-                            <button onClick={e=>{e.preventDefault();e.stopPropagation();setActiveStory(ref)}} style={{ background:'none',border:'none',cursor:'pointer',padding:0 }}>
-                              <Avatar id={ref.id} name={ref.name} size={34} ring/>
-                            </button>
-                          </div>
-                        )}
-                        {lv&&<div style={{ position:'absolute',bottom:10,right:10 }}><span style={{ fontSize:10,fontWeight:700,color:lv.color,background:'rgba(255,255,255,0.90)',backdropFilter:'blur(8px)',border:`1px solid ${lv.color}28`,borderRadius:20,padding:'3px 9px' }}>{lv.label}</span></div>}
-                        {ref.verified&&<div style={{ position:'absolute',top:10,left:10 }}><div style={{ width:26,height:26,borderRadius:'50%',background:'rgba(255,255,255,0.92)',backdropFilter:'blur(8px)',display:'flex',alignItems:'center',justifyContent:'center' }}><svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill={GOLD}/><polyline points="7 12 10.5 15.5 17 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></div></div>}
+                    <div style={{ position:'absolute', inset:0,
+                      background:'linear-gradient(to top, rgba(7,6,4,0.97) 0%, rgba(7,6,4,0.68) 26%, rgba(7,6,4,0.08) 56%, transparent 80%)',
+                      zIndex:1 }}/>
+                    <div style={{ position:'absolute', top:0, left:0, right:0, height:62,
+                      background:'linear-gradient(to bottom, rgba(7,6,4,0.48), transparent)', zIndex:1 }}/>
+
+                    {/* Story ring */}
+                    {referee.hasStory && referee.storyImage && (
+                      <div style={{ position:'absolute', top:10, right:10, zIndex:5 }}>
+                        <StoryRing referee={referee} size={34} onOpen={() => setOpenStory(referee)}/>
+                      </div>
+                    )}
+
+                    {/* Card content */}
+                    <div style={{ position:'absolute', inset:0, zIndex:2,
+                      padding:'12px 13px 11px', display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+
+                      {/* Grade badge */}
+                      <span style={{ display:'inline-flex', alignItems:'center', gap:4,
+                        fontSize:9.5, fontWeight:700, color:referee.gradeColor, letterSpacing:'0.12em', marginBottom:5 }}>
+                        <span style={{ width:4, height:4, borderRadius:'50%', background:referee.gradeColor,
+                          boxShadow:`0 0 5px ${referee.gradeColor}60`, flexShrink:0 }}/>
+                        {referee.grade}
+                      </span>
+
+                      <h3 style={{ fontSize:16, fontWeight:900, color:CW, lineHeight:1.15, letterSpacing:'-0.02em' }}>
+                        {referee.name}
+                      </h3>
+
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:5 }}>
+                        <span style={{ fontSize:11, color:CW_D }}>{referee.city}</span>
+                        <span style={{ fontSize:11, color:CW_D, display:'flex', alignItems:'center', gap:3 }}>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          {referee.experience}س
+                        </span>
                       </div>
 
-                      {/* info */}
-                      <div style={{ padding:'13px 15px 15px' }}>
-                        <h3 style={{ fontSize:15,fontWeight:800,color:TEXT,margin:'0 0 6px',letterSpacing:'-0.015em' }}>{ref.name}</h3>
-                        <div style={{ display:'flex',alignItems:'center',gap:6,flexWrap:'wrap',marginBottom:8 }}>
-                          {sp&&<span style={{ fontSize:10.5,fontWeight:700,color:sp.color,background:sp.bg,borderRadius:20,padding:'2px 8px' }}>{sp.label}</span>}
-                          <span style={{ fontSize:11,color:TEXT_M,display:'flex',alignItems:'center',gap:3 }}><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{ref.city}</span>
+                      {/* Drawer */}
+                      <div className="rdrawer">
+                        <div style={{ height:'1px',
+                          background:'linear-gradient(to left,transparent,rgba(199,166,106,0.28),transparent)',
+                          margin:'9px 0' }}/>
+                        <div style={{ display:'flex', gap:8, fontSize:11, color:CW_D, marginBottom:8, alignItems:'center' }}>
+                          {sp && (
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:3,
+                              fontSize:10, color:sp.color, fontWeight:700 }}>
+                              <span style={{ width:4, height:4, borderRadius:'50%', background:sp.color, flexShrink:0 }}/>
+                              {sp.label}
+                            </span>
+                          )}
                         </div>
-                        <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom: ref.internationalMatches>0 ? 7 : 0 }}>
-                          <div style={{ display:'flex',alignItems:'center',gap:5 }}>
-                            <Stars rating={ref.rating} size={11}/>
-                            <span style={{ fontSize:12.5,fontWeight:800,color:GOLD }}>{ref.rating}</span>
-                            <span style={{ fontSize:11,color:TEXT_M,marginRight:2 }}>{ref.experience} سال</span>
-                          </div>
-                          <div style={{ fontSize:11.5,fontWeight:700,color:TEXT_S,display:'flex',alignItems:'center',gap:3 }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            {fmt(ref.matchesRefereed)}
-                          </div>
-                        </div>
-                        {ref.internationalMatches > 0 && (
-                          <div style={{ paddingTop:7,borderTop:'1px solid rgba(28,28,26,0.06)',display:'flex',alignItems:'center',gap:4 }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            <span style={{ fontSize:11,fontWeight:700,color:'#7C3AED' }}>{fmt(ref.internationalMatches)} بین‌المللی</span>
-                          </div>
-                        )}
+                        <Link href={`/referees/${referee.id}`} className="btnGO" style={{
+                          textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+                          padding:'8px 10px', border:'1px solid rgba(199,166,106,0.26)',
+                          borderRadius:6, fontSize:11.5, fontWeight:700, color:GOLD,
+                          background:'rgba(199,166,106,0.06)',
+                        }}>
+                          مشاهده پروفایل
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="9 18 15 12 9 6"/>
+                          </svg>
+                        </Link>
                       </div>
                     </div>
-                  </Link>
+                  </article>
                 )
               })}
             </div>
-          )}
-
-          {filtered.length===0 && (
-            <div style={{ textAlign:'center',padding:'80px 0',color:TEXT_M,fontSize:14 }}>هیچ داوری با این فیلترها پیدا نشد</div>
+          ) : (
+            <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
+              هیچ داوری با این فیلتر پیدا نشد
+            </div>
           )}
         </div>
+
+        {/* ══════════════ BANNER ══════════════ */}
+        <div style={{ position:'relative', overflow:'hidden', borderTop:`1px solid rgba(17,17,16,0.06)` }}>
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#111110 0%,#0A0908 100%)' }}/>
+          <div style={{ position:'absolute', left:'10%', top:'50%', transform:'translateY(-50%)',
+            width:480, height:240, borderRadius:'50%',
+            background:'radial-gradient(ellipse, rgba(199,166,106,0.07) 0%, transparent 70%)',
+            filter:'blur(40px)', pointerEvents:'none' }}/>
+          <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0.04, pointerEvents:'none' }}>
+            <defs>
+              <pattern id="rd" width="28" height="28" patternUnits="userSpaceOnUse">
+                <circle cx="3" cy="3" r="1.2" fill={GOLD}/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#rd)"/>
+          </svg>
+
+          <div style={{ position:'relative', zIndex:5, maxWidth:1280, margin:'0 auto',
+            padding:'48px clamp(24px,6vw,80px)',
+            display:'flex', alignItems:'center', justifyContent:'space-between', gap:24 }}>
+            <div>
+              <p style={{ fontSize:10.5, fontWeight:700, color:GOLD, letterSpacing:'0.25em', marginBottom:10, textTransform:'uppercase' }}>
+                Certified Referees
+              </p>
+              <h3 style={{ fontSize:'clamp(18px,2.8vw,28px)', fontWeight:800, color:'#F2EDE4',
+                letterSpacing:'-0.03em', lineHeight:1.2 }}>
+                به داور رسمی نیاز دارید؟
+              </h3>
+              <p style={{ fontSize:13.5, color:'rgba(242,237,228,0.50)', marginTop:8, maxWidth:360 }}>
+                داوران دارای مدرک فدراسیون برای مسابقات و رویدادهای شما
+              </p>
+            </div>
+            <Link href="/contact" className="btnBanner" style={{
+              textDecoration:'none', display:'inline-flex', alignItems:'center', gap:10,
+              padding:'14px 28px', background:GOLD, color:'#ffffff',
+              borderRadius:9, fontSize:14, fontWeight:800, whiteSpace:'nowrap', flexShrink:0,
+              boxShadow:'0 4px 18px rgba(199,166,106,0.22)',
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .64 2.57 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.05 12.05 0 0 0 2.57.64A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              درخواست داور
+            </Link>
+          </div>
+        </div>
+
       </div>
 
-      {activeStory && <StoryModal referee={activeStory} onClose={()=>setActiveStory(null)}/>}
+      {openStory && openStory.storyImage && (
+        <ClubStoryModal
+          club={{ name:openStory.name, logo:openStory.photo, storyMediaUrl:openStory.storyImage, storyText:openStory.bio, badge:'داور' }}
+          onClose={() => setOpenStory(null)}
+        />
+      )}
     </>
   )
 }
