@@ -82,6 +82,8 @@ const REFEREES: Record<string,RefereeFull> = {
       {id:'g2',url:img(1),caption:'داوری لیگ برتر'},
       {id:'g3',url:img(2),caption:'تمرین داوران'},
       {id:'g4',url:img(3),caption:'مراسم اهدای جوایز'},
+      {id:'g5',url:img(0),caption:'فینال قهرمانی'},
+      {id:'g6',url:img(1),caption:'جلسه داوران'},
     ],
   },
   '2': {
@@ -98,6 +100,9 @@ const REFEREES: Record<string,RefereeFull> = {
       {id:'g1',url:img(1),caption:'مسابقات ملی بانوان'},
       {id:'g2',url:img(2),caption:'لیگ برتر'},
       {id:'g3',url:img(0),caption:'کلاس داوری'},
+      {id:'g4',url:img(3),caption:'اهدای مدال بانوان'},
+      {id:'g5',url:img(1),caption:'رویداد ملی مشهد'},
+      {id:'g6',url:img(2),caption:'داوری فینال'},
     ],
   },
   '3': {
@@ -113,6 +118,8 @@ const REFEREES: Record<string,RefereeFull> = {
     gallery:[
       {id:'g1',url:img(2),caption:'مسابقات ملی هی‌بال'},
       {id:'g2',url:img(3),caption:'دوره آموزشی داوری'},
+      {id:'g3',url:img(0),caption:'جلسه استانی اصفهان'},
+      {id:'g4',url:img(1),caption:'قضاوت فینال'},
     ],
   },
   '4': {
@@ -129,6 +136,8 @@ const REFEREES: Record<string,RefereeFull> = {
       {id:'g1',url:img(3),caption:'مسابقات دانشجویی'},
       {id:'g2',url:img(1),caption:'داوری استانی'},
       {id:'g3',url:img(0),caption:'رویداد کشوری'},
+      {id:'g4',url:img(2),caption:'آموزش داوری'},
+      {id:'g5',url:img(3),caption:'مسابقات بانوان'},
     ],
   },
   '5': {
@@ -146,6 +155,8 @@ const REFEREES: Record<string,RefereeFull> = {
       {id:'g2',url:img(1),caption:'لیگ برتر اسنوکر'},
       {id:'g3',url:img(2),caption:'جام ACBS'},
       {id:'g4',url:img(3),caption:'تمرین و آماده‌سازی'},
+      {id:'g5',url:img(0),caption:'پانل داوران بین‌الملل'},
+      {id:'g6',url:img(1),caption:'فینال جام آسیا'},
     ],
   },
   '6': {
@@ -161,6 +172,8 @@ const REFEREES: Record<string,RefereeFull> = {
     gallery:[
       {id:'g1',url:img(1),caption:'مسابقات جوانان'},
       {id:'g2',url:img(2),caption:'لیگ برتر هی‌بال'},
+      {id:'g3',url:img(3),caption:'داوری فینال'},
+      {id:'g4',url:img(0),caption:'جلسه داوران شیراز'},
     ],
   },
   '7': {
@@ -175,6 +188,8 @@ const REFEREES: Record<string,RefereeFull> = {
     phone:'+989181234567', whatsapp:'+989181234567',
     gallery:[
       {id:'g1',url:img(2),caption:'مسابقات استانی البرز'},
+      {id:'g2',url:img(3),caption:'آموزش داوری درجه B'},
+      {id:'g3',url:img(1),caption:'رویداد پاکت بیلیارد'},
     ],
   },
   '8': {
@@ -191,6 +206,9 @@ const REFEREES: Record<string,RefereeFull> = {
       {id:'g1',url:img(3),caption:'مسابقات ملی اسنوکر'},
       {id:'g2',url:img(0),caption:'رویداد ACBS'},
       {id:'g3',url:img(1),caption:'لیگ برتر'},
+      {id:'g4',url:img(2),caption:'داوری فینال ملی'},
+      {id:'g5',url:img(3),caption:'پانل مشاوران قوانین'},
+      {id:'g6',url:img(0),caption:'کنفرانس داوران آسیا'},
     ],
   },
 }
@@ -232,7 +250,10 @@ export default function RefereeProfilePage() {
         .gphoto{transition:transform .4s ease,opacity .3s;}
         .gphoto:hover{transform:scale(1.04);opacity:.9;}
         @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
-        @media(max-width:600px){.pgal{grid-template-columns:repeat(2,1fr)!important;}}
+        @media(max-width:740px){.pgal{grid-template-columns:repeat(2,1fr)!important;}}
+        @media(max-width:480px){.pgal{grid-template-columns:repeat(2,1fr)!important;}}
+        .gphoto .gcap{opacity:0;transition:opacity .25s;}
+        .gphoto:hover .gcap{opacity:1;}
       `}</style>
 
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
@@ -367,12 +388,22 @@ export default function RefereeProfilePage() {
                   <h2 style={{ fontSize:14,fontWeight:800,color:TEXT,marginBottom:16,letterSpacing:'-0.02em' }}>
                     گالری تصاویر
                   </h2>
-                  <div className="pgal" style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8 }}>
-                    {referee.gallery.map(g => (
+                  <div className="pgal" style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10 }}>
+                    {referee.gallery.map((g,idx) => (
                       <div key={g.id} className="gphoto" onClick={() => setLightImg(g.url)}
-                        style={{ borderRadius:10,overflow:'hidden',aspectRatio:'4/3',cursor:'pointer',
-                          boxShadow:'0 2px 8px rgba(17,17,16,0.10)' }}>
+                        style={{ borderRadius:12,overflow:'hidden',
+                          aspectRatio: idx === 0 ? '16/9' : '4/3',
+                          gridColumn: idx === 0 ? 'span 2' : undefined,
+                          cursor:'pointer', position:'relative',
+                          boxShadow:'0 2px 12px rgba(17,17,16,0.12)' }}>
                         <img src={g.url} alt={g.caption||''} style={{ width:'100%',height:'100%',objectFit:'cover' }}/>
+                        {g.caption && (
+                          <div className="gcap" style={{ position:'absolute',bottom:0,left:0,right:0,
+                            background:'linear-gradient(to top,rgba(17,17,16,0.72),transparent)',
+                            padding:'18px 12px 10px',color:'#fff',fontSize:11.5,fontWeight:600 }}>
+                            {g.caption}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -468,20 +499,6 @@ export default function RefereeProfilePage() {
                   تماس
                 </h2>
                 <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
-                  <a href={`tel:${referee.phone}`} className="lq1btn" style={lq1(TEXT_S,'rgba(17,17,16,0.05)')}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .64 2.57 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.05 12.05 0 0 0 2.57.64A2 2 0 0 1 22 16.92z"/>
-                    </svg>
-                    تماس تلفنی
-                  </a>
-                  <a href={`https://wa.me/${referee.whatsapp.replace(/\D/g,'')}`}
-                    target="_blank" rel="noopener noreferrer" className="lq1btn"
-                    style={lq1('#16A34A','rgba(22,163,74,0.08)')}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                    </svg>
-                    واتساپ
-                  </a>
                   {referee.instagram && (
                     <a href={`https://instagram.com/${referee.instagram}`}
                       target="_blank" rel="noopener noreferrer" className="lq1btn"
