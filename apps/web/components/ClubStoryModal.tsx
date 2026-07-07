@@ -10,6 +10,7 @@ interface ClubStoryData {
   storyMediaUrl: string;
   storyType?: string;
   storyText?: string;
+  badge?: string;  // defaults to 'باشگاه'
 }
 
 interface Props {
@@ -104,7 +105,7 @@ export default function ClubStoryModal({ club, onClose }: Props) {
             <div style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>{club.name}</div>
           </div>
           <span style={{ fontSize: 12, color: '#C7A66A', background: 'rgba(199,166,106,0.18)', border: '1px solid rgba(199,166,106,0.4)', borderRadius: 20, padding: '4px 11px', fontWeight: 700, backdropFilter: 'blur(10px)' }}>
-            باشگاه
+            {club.badge ?? 'باشگاه'}
           </span>
           <button onClick={onClose} style={{
             width: 34, height: 34, borderRadius: '50%',
