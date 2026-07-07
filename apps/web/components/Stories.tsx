@@ -27,12 +27,14 @@ interface StoryGroup {
 }
 
 const sampleGroups: StoryGroup[] = [
-  { userId:'1', userName:'باشگاه ستاره', userAvatar:'س', userRole:'club',   roleColor:'#C7A66A', roleLabel:'باشگاه', allSeen:false, stories:[{id:'1',caption:'میز جدید اسنوکر نصب شد 🎱',createdAt:'۲ ساعت پیش'},{id:'1b',caption:'رزرو آنلاین فعال شد ✅',createdAt:'۲ ساعت پیش'}] },
-  { userId:'2', userName:'علی محمدی',    userAvatar:'ع', userRole:'player', roleColor:'#06b6d4', roleLabel:'بازیکن', allSeen:false, stories:[{id:'2a',caption:'تمرین امروز 💪',createdAt:'۳ ساعت پیش'},{id:'2b',caption:'آماده مسابقه‌ام!',createdAt:'۳ ساعت پیش'}] },
-  { userId:'3', userName:'Predator Shop', userAvatar:'P', userRole:'shop',   roleColor:'#f59e0b', roleLabel:'فروشگاه', allSeen:false, stories:[{id:'3',caption:'تخفیف ۳۰٪ چوب‌های حرفه‌ای 🔥',createdAt:'۴ ساعت پیش'}] },
-  { userId:'4', userName:'رضا احمدی',    userAvatar:'ر', userRole:'coach',  roleColor:'#a78bfa', roleLabel:'مربی',   allSeen:true,  stories:[{id:'4',caption:'کلاس آموزشی فردا ساعت ۱۰',createdAt:'۵ ساعت پیش'}] },
-  { userId:'5', userName:'باشگاه المپیک', userAvatar:'ا', userRole:'club',   roleColor:'#C7A66A', roleLabel:'باشگاه', allSeen:true,  stories:[{id:'5',caption:'مسابقات هفتگی جمعه',createdAt:'۶ ساعت پیش'}] },
-  { userId:'6', userName:'کاوه موسوی',   userAvatar:'ک', userRole:'player', roleColor:'#06b6d4', roleLabel:'بازیکن', allSeen:true,  stories:[{id:'6',caption:'قهرمان هفته 🏆',createdAt:'۸ ساعت پیش'}] },
+  { userId:'1',  userName:'باشگاه ستاره',  userAvatar:'س', userRole:'club',   roleColor:'#C7A66A', roleLabel:'باشگاه',  allSeen:false, stories:[{id:'1',caption:'میز جدید اسنوکر نصب شد 🎱',createdAt:'۲ ساعت پیش',mediaUrl:'/images/shop/snooker-table.jpg',mediaType:'image'},{id:'1b',caption:'رزرو آنلاین فعال شد ✅',createdAt:'۲ ساعت پیش'}] },
+  { userId:'2',  userName:'علی محمدی',     userAvatar:'ع', userRole:'player', roleColor:'#06b6d4', roleLabel:'بازیکن',  allSeen:false, stories:[{id:'2a',caption:'تمرین امروز 💪',createdAt:'۳ ساعت پیش'},{id:'2b',caption:'آماده مسابقه‌ام!',createdAt:'۳ ساعت پیش'}] },
+  { userId:'c1', userName:'احمد رضایی',    userAvatar:'ا', userRole:'coach',  roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c1s1',caption:'کلاس خصوصی اسنوکر فردا ساعت ۱۰ 🎱',createdAt:'۱ ساعت پیش',mediaUrl:'/images/shop/snooker-table.jpg',mediaType:'image'}] },
+  { userId:'c7', userName:'نیلوفر صادقی',  userAvatar:'ن', userRole:'coach',  roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c7s1',caption:'مسابقات بانوان این هفته 🏆',createdAt:'۲ ساعت پیش',mediaUrl:'/images/shop/Ball-1.jpg',mediaType:'image'}] },
+  { userId:'3',  userName:'Predator Shop',  userAvatar:'P', userRole:'shop',   roleColor:'#f59e0b', roleLabel:'فروشگاه', allSeen:false, stories:[{id:'3',caption:'تخفیف ۳۰٪ چوب‌های حرفه‌ای 🔥',createdAt:'۴ ساعت پیش'}] },
+  { userId:'c8', userName:'کامران یوسفی',  userAvatar:'ک', userRole:'coach',  roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:true,  stories:[{id:'c8s1',caption:'تمرین امروز عالی بود 💪',createdAt:'۵ ساعت پیش',mediaUrl:'/images/shop/cue_billiard_2.jpg',mediaType:'image'}] },
+  { userId:'5',  userName:'باشگاه المپیک', userAvatar:'ا', userRole:'club',   roleColor:'#C7A66A', roleLabel:'باشگاه',  allSeen:true,  stories:[{id:'5',caption:'مسابقات هفتگی جمعه',createdAt:'۶ ساعت پیش'}] },
+  { userId:'6',  userName:'کاوه موسوی',    userAvatar:'ک', userRole:'player', roleColor:'#06b6d4', roleLabel:'بازیکن',  allSeen:true,  stories:[{id:'6',caption:'قهرمان هفته 🏆',createdAt:'۸ ساعت پیش'}] },
 ];
 
 const emojis = ['❤️','🔥','👏','😮','😂','🎱','💪','🏆'];
