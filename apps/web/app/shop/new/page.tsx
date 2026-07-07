@@ -145,7 +145,7 @@ function SpecField({ field, value, otherValue, onChange, onOtherChange, dependen
         {effectiveType === 'dropdown' ? (
           <select className="nf" value={value} onChange={e => onChange(e.target.value)}
             disabled={noDepYet}
-            style={{ ...inp(), cursor: noDepYet ? 'not-allowed' : 'pointer', paddingLeft: 10, opacity: noDepYet ? 0.45 : 1 }}>
+            style={sel(undefined, noDepYet)}>
             <option value="">{noDepYet ? 'ابتدا نوع را انتخاب کنید' : 'انتخاب...'}</option>
             {resolvedOptions.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
@@ -185,15 +185,36 @@ function fmtPrice(v: string) {
 }
 
 // ── Shared input style ─────────────────────────────────────────
-function inp(err?: string): React.CSSProperties {
+function inp(err?: string, locked?: boolean): React.CSSProperties {
   return {
     width: '100%', boxSizing: 'border-box',
     padding: '12px 14px', borderRadius: 11, fontSize: 14.5,
-    border: `1.5px solid ${err ? ERR : 'rgba(28,28,26,0.13)'}`,
-    background: '#FAFAFA', color: TEXT,
+    border: `1.5px solid ${err ? ERR : locked ? 'rgba(199,166,106,0.32)' : 'rgba(28,28,26,0.13)'}`,
+    background: locked ? 'rgba(199,166,106,0.06)' : '#FAFAFA',
+    color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+    outline: 'none', direction: 'rtl',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    cursor: locked ? 'default' : undefined,
+  }
+}
+
+// ── Modern select style ─────────────────────────────────────────
+function sel(err?: string, disabled?: boolean): React.CSSProperties {
+  return {
+    width: '100%', boxSizing: 'border-box' as const,
+    padding: '12px 14px 12px 38px', borderRadius: 11, fontSize: 14.5,
+    border: `1.5px solid ${err ? ERR : disabled ? 'rgba(28,28,26,0.07)' : 'rgba(28,28,26,0.13)'}`,
+    background: disabled ? 'rgba(28,28,26,0.03)' : '#FAFAFA',
+    color: disabled ? 'rgba(28,28,26,0.30)' : TEXT,
     fontFamily: 'Vazirmatn,Tahoma,sans-serif',
     outline: 'none', direction: 'rtl',
     transition: 'border-color 0.2s, box-shadow 0.2s',
+    appearance: 'none' as any, WebkitAppearance: 'none' as any,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C7A66A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'left 12px center',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.55 : 1,
   }
 }
 
@@ -233,7 +254,7 @@ export default function NewProductPage() {
     name: '', category: '', price: '', oldPrice: '',
     description: '', brand: '', condition: 'new',
     shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
-    city: '', address: '', shopDescription: '',
+    city: '', address: '',
   })
   const [images,   setImages]   = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
@@ -244,12 +265,22 @@ export default function NewProductPage() {
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
   const { user } = useAuthStore()
+  const [shopNameLocked,  setShopNameLocked]  = useState(false)
+  const [ownerNameLocked, setOwnerNameLocked] = useState(false)
+
   useEffect(() => {
     if (!user) return
     const u = user as any
     const autoName = u.shopName || [u.firstName||'', u.lastName||''].filter(Boolean).join(' ') || u.name || ''
-    if (autoName) setForm(f => ({ ...f, shopName: f.shopName || autoName }))
-    if (u.ownerName) setForm(f => ({ ...f, ownerName: f.ownerName || u.ownerName }))
+    if (autoName) {
+      setForm(f => ({ ...f, shopName: autoName }))
+      setShopNameLocked(true)
+    }
+    const autoOwner = [u.firstName||'', u.lastName||''].filter(Boolean).join(' ') || u.name || u.ownerName || ''
+    if (autoOwner) {
+      setForm(f => ({ ...f, ownerName: autoOwner }))
+      setOwnerNameLocked(true)
+    }
   }, [user])
 
   const set = (k: keyof typeof form, v: string) => {
@@ -339,7 +370,6 @@ export default function NewProductPage() {
       sellerWhatsapp: (form.sellerWhatsapp.trim() || form.sellerPhone.trim()).replace(/^0/, '98'),
       sellerCity:     form.city,
       address:        form.address.trim(),
-      shopDescription: form.shopDescription.trim(),
     }
 
     try {
@@ -469,7 +499,7 @@ export default function NewProductPage() {
                     {/* category — full width */}
                     <div>
                       <Label required>دسته‌بندی</Label>
-                      <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={{ ...inp(errors.category), cursor: 'pointer', paddingLeft: 10 }}>
+                      <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={sel(errors.category)}>
                         <option value="">انتخاب...</option>
                         {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                       </select>
@@ -547,7 +577,7 @@ export default function NewProductPage() {
                               ['like-new', 'در حد نو', '🔵'],
                               ['used',     'کارکرده',  '🟡'],
                             ] as [string,string,string][]).map(([val, lbl, icon]) => (
-                              <button key={val} type="button" className="cond-btn" onClick={() => set('condition', val)} style={{ flex: 1, padding: '10px 6px', borderRadius: 11, border: form.condition === val ? 'none' : '1px solid rgba(255,255,255,0.88)', background: form.condition === val ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.80)', backdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', WebkitBackdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', boxShadow: form.condition === val ? 'inset 0 1.5px 0 rgba(255,255,255,0.30), 0 4px 14px rgba(199,166,106,0.40)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)', fontSize: 13, fontWeight: 700, color: form.condition === val ? '#fff' : TEXT_SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+                              <button key={val} type="button" className="cond-btn" onClick={() => set('condition', val)} style={{ flex: 1, padding: '10px 6px', borderRadius: 11, border: `1px solid ${form.condition === val ? GOLD : 'rgba(199,166,106,0.22)'}`, background: form.condition === val ? 'rgba(199,166,106,0.15)' : 'rgba(255,255,255,0.55)', backdropFilter: 'blur(16px) saturate(200%)', WebkitBackdropFilter: 'blur(16px) saturate(200%)', boxShadow: form.condition === val ? `0 4px 16px rgba(199,166,106,0.28), inset 0 1px 0 rgba(255,255,255,0.60)` : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.04)', fontSize: 13, fontWeight: 700, color: form.condition === val ? GOLD_D : TEXT_SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
                                 <span style={{ fontSize: 15 }}>{icon}</span>
                                 {lbl}
                               </button>
@@ -667,21 +697,33 @@ export default function NewProductPage() {
 
                     <div>
                       <Label required>نام فروشگاه | فروشنده</Label>
-                      <input className="nf" type="text" placeholder="نام فروشگاه یا نام شخص فروشنده" value={form.shopName} onChange={e => set('shopName', e.target.value)} style={inp(errors.shopName)} />
-                      {user && !form.shopName && (
-                        <p style={{ fontSize: 11.5, color: GOLD, marginTop: 5 }}>اطلاعات از حساب شما پر می‌شود</p>
-                      )}
+                      <div style={{ position: 'relative' }}>
+                        <input className="nf" type="text" value={form.shopName} onChange={e => !shopNameLocked && set('shopName', e.target.value)} readOnly={shopNameLocked} style={inp(errors.shopName, shopNameLocked)} />
+                        {shopNameLocked && (
+                          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                          </span>
+                        )}
+                      </div>
+                      {shopNameLocked && <p style={{ fontSize: 11, color: GOLD_D, marginTop: 4, opacity: 0.8 }}>از حساب شما اتومات پر شده</p>}
                       <ErrMsg msg={errors.shopName} />
                     </div>
 
                     <div>
                       <Label optional>نام مالک فروشگاه</Label>
-                      <input className="nf" type="text" placeholder="نام و نام خانوادگی مالک (در صورت فروش از طرف فروشگاه)" value={form.ownerName} onChange={e => set('ownerName', e.target.value)} style={inp()} />
+                      <div style={{ position: 'relative' }}>
+                        <input className="nf" type="text" value={form.ownerName} onChange={e => !ownerNameLocked && set('ownerName', e.target.value)} readOnly={ownerNameLocked} style={inp(undefined, ownerNameLocked)} />
+                        {ownerNameLocked && (
+                          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <Label required>شهر</Label>
-                      <select className="nf" value={form.city} onChange={e => set('city', e.target.value)} style={{ ...inp(errors.city), cursor: 'pointer' }}>
+                      <select className="nf" value={form.city} onChange={e => set('city', e.target.value)} style={sel(errors.city)}>
                         <option value="">انتخاب شهر...</option>
                         {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
@@ -693,10 +735,6 @@ export default function NewProductPage() {
                       <textarea className="nf" rows={2} placeholder="خیابان، کوچه، پلاک..." value={form.address} onChange={e => set('address', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 72, lineHeight: 1.7 }} />
                     </div>
 
-                    <div>
-                      <Label optional>توضیحات کوتاه درباره فروشگاه</Label>
-                      <textarea className="nf" rows={3} placeholder="تخصص، برندهایی که عرضه می‌کنید، سابقه فعالیت..." value={form.shopDescription} onChange={e => set('shopDescription', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 88, lineHeight: 1.7 }} />
-                    </div>
                   </div>
                 </div>
 
@@ -778,11 +816,11 @@ export default function NewProductPage() {
             <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '20px 24px', display: 'flex', gap: 12, alignItems: 'center', animation: 'fadeUp 0.6s ease both', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
 
-              <button type="submit" disabled={submitting} style={{ flex: 1, padding: '16px 24px', borderRadius: 14, border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontSize: 16, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.32), 0 6px 24px rgba(199,166,106,0.42)', transition: 'opacity 0.2s, transform 0.15s', opacity: submitting ? 0.75 : 1, position: 'relative', zIndex: 1 }}
-                onMouseEnter={e => !submitting && (e.currentTarget.style.transform = 'translateY(-1px)')}
-                onMouseLeave={e => (e.currentTarget.style.transform = 'none')}>
+              <button type="submit" disabled={submitting} style={{ flex: 1, padding: '16px 24px', borderRadius: 14, border: `1.5px solid ${GOLD}`, cursor: submitting ? 'not-allowed' : 'pointer', background: 'rgba(199,166,106,0.14)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', color: GOLD_D, fontSize: 16, fontWeight: 800, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxShadow: '0 6px 24px rgba(199,166,106,0.22), inset 0 1px 0 rgba(255,255,255,0.55)', transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s', opacity: submitting ? 0.65 : 1, position: 'relative', zIndex: 1 }}
+                onMouseEnter={e => { if (!submitting) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 8px 28px rgba(199,166,106,0.34), inset 0 1px 0 rgba(255,255,255,0.55)`; } }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(199,166,106,0.22), inset 0 1px 0 rgba(255,255,255,0.55)'; }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5 13l4 4L19 7" stroke={GOLD_D} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 ثبت محصول در فروشگاه
               </button>

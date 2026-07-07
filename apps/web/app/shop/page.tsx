@@ -354,7 +354,7 @@ function HeroSlider() {
       {/* Dots */}
       <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 20, display: 'flex', gap: 6 }}>
         {SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setActive(i)} style={{ width: i === active ? 26 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? GOLD : 'rgba(255,255,255,0.28)', backdropFilter: 'blur(8px)', boxShadow: i === active ? '0 0 10px rgba(199,166,106,0.55)' : 'none', transition: 'all 0.35s ease' }} />
+          <button key={i} onClick={() => setActive(i)} style={{ width: i === active ? 18 : 5, height: 5, borderRadius: 3, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? GOLD : 'rgba(255,255,255,0.28)', backdropFilter: 'blur(8px)', boxShadow: i === active ? '0 0 8px rgba(199,166,106,0.55)' : 'none', transition: 'all 0.35s ease' }} />
         ))}
       </div>
     </div>
@@ -369,9 +369,6 @@ function CategoriesSection() {
   const scrollLeft = useRef(0)
   const [hovId, setHovId] = useState<string | null>(null)
 
-  const scroll = (dir: 'next' | 'prev') => {
-    scrollRef.current?.scrollBy({ left: dir === 'next' ? 560 : -560, behavior: 'smooth' })
-  }
   const onDown = (e: React.MouseEvent) => {
     if (!scrollRef.current) return
     e.preventDefault()
@@ -397,26 +394,7 @@ function CategoriesSection() {
   return (
     <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', borderBottom: '1px solid rgba(28,28,26,0.07)', overflow: 'visible' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 16px', direction: 'rtl', overflow: 'visible' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>دسته‌بندی‌های بیلیارد بازار</h2>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['prev','next'] as const).map(dir => (
-              <button key={dir} onClick={() => scroll(dir)} style={{
-                width: 34, height: 34, borderRadius: 10,
-                background: 'rgba(255,255,255,0.55)',
-                backdropFilter: 'blur(20px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                border: '1px solid rgba(255,255,255,0.82)',
-                boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 4px 12px rgba(0,0,0,0.07)',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg viewBox="0 0 18 18" fill="none" width={14} height={14}>
-                  <path d={dir === 'prev' ? 'M11 4L6 9l5 5' : 'M7 4l5 5-5 5'} stroke={TEXT} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            ))}
-          </div>
-        </div>
+        <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, marginBottom: 18 }}>دسته‌بندی‌های بیلیارد بازار</h2>
         <div
           ref={scrollRef}
           className="cat-scroll"
