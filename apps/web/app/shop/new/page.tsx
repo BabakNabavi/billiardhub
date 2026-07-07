@@ -7,6 +7,7 @@ import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 
 const GOLD     = '#C7A66A'
+const GOLD_D   = '#9A6E38'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.30)'
