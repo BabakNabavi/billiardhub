@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
+import { useAuthStore } from '../../../store/auth.store'
 
 const GOLD     = '#C7A66A'
 const TEXT     = '#1C1C1A'
@@ -242,6 +243,15 @@ export default function NewProductPage() {
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
+  const { user } = useAuthStore()
+  useEffect(() => {
+    if (!user) return
+    const u = user as any
+    const autoName = u.shopName || [u.firstName||'', u.lastName||''].filter(Boolean).join(' ') || u.name || ''
+    if (autoName) setForm(f => ({ ...f, shopName: f.shopName || autoName }))
+    if (u.ownerName) setForm(f => ({ ...f, ownerName: f.ownerName || u.ownerName }))
+  }, [user])
+
   const set = (k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     setErrors(e => { const n = { ...e }; delete n[k]; return n })
@@ -285,7 +295,7 @@ export default function NewProductPage() {
     if (!form.name.trim())        e.name        = 'نام محصول الزامی است'
     if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
     if (!form.price)              e.price       = 'قیمت الزامی است'
-    if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه الزامی است'
+    if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه | فروشنده الزامی است'
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
     else if (!/^(\+98|0)9\d{9}$/.test(form.sellerPhone.trim()))
       e.sellerPhone = 'شماره موبایل معتبر وارد کنید (09xxxxxxxxx)'
@@ -456,79 +466,29 @@ export default function NewProductPage() {
                       <ErrMsg msg={errors.name} />
                     </div>
 
-                    {/* category + brand side by side */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                      <div>
-                        <Label required>دسته‌بندی</Label>
-                        <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={{ ...inp(errors.category), cursor: 'pointer', paddingLeft: 10 }}>
-                          <option value="">انتخاب...</option>
-                          {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                        </select>
-                        <ErrMsg msg={errors.category} />
-                      </div>
-                      <div>
-                        <Label optional>برند</Label>
-                        <input className="nf" type="text" placeholder="مثال: Predator" value={form.brand} onChange={e => set('brand', e.target.value)} style={inp()} />
-                      </div>
-                    </div>
-
-                    {/* condition */}
+                    {/* category — full width */}
                     <div>
-                      <Label required>وضعیت کالا</Label>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        {([['new', 'نو', '🟢'], ['used', 'کارکرده', '🟡']] as const).map(([val, lbl, icon]) => (
-                          <button key={val} type="button" className="cond-btn" onClick={() => set('condition', val)} style={{ flex: 1, padding: '10px 8px', borderRadius: 11, border: form.condition === val ? 'none' : '1px solid rgba(255,255,255,0.88)', background: form.condition === val ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.80)', backdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', WebkitBackdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', boxShadow: form.condition === val ? 'inset 0 1.5px 0 rgba(255,255,255,0.30), 0 4px 14px rgba(199,166,106,0.40)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)', fontSize: 14, fontWeight: 700, color: form.condition === val ? '#fff' : TEXT_SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-                            <span style={{ fontSize: 16 }}>{icon}</span>
-                            {lbl}
-                          </button>
-                        ))}
-                      </div>
+                      <Label required>دسته‌بندی</Label>
+                      <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={{ ...inp(errors.category), cursor: 'pointer', paddingLeft: 10 }}>
+                        <option value="">انتخاب...</option>
+                        {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                      </select>
+                      <ErrMsg msg={errors.category} />
                     </div>
 
-                    {/* prices */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                      <div>
-                        <Label required>قیمت (تومان)</Label>
-                        <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.price} onChange={e => set('price', fmtPrice(e.target.value))} style={inp(errors.price)} />
-                        <ErrMsg msg={errors.price} />
-                      </div>
-                      <div>
-                        <Label optional>قیمت قبل از تخفیف</Label>
-                        <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp()} />
-                      </div>
-                    </div>
-
-                    {/* live discount badge */}
-                    {form.price && form.oldPrice && (() => {
-                      const p = Number(toAsciiDigits(form.price).replace(/\D/g,''))
-                      const o = Number(toAsciiDigits(form.oldPrice).replace(/\D/g,''))
-                      if (o > p) {
-                        const d = Math.round((1 - p/o)*100)
-                        return (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.22)', borderRadius: 10 }}>
-                            <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#ea580c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff' }}>{d}٪</span>
-                            <span style={{ fontSize: 13, color: '#dc2626', fontWeight: 600 }}>تخفیف {d}٪ اعمال می‌شود</span>
-                          </div>
-                        )
-                      }
-                      return null
-                    })()}
-
-                    {/* description */}
-                    <div>
-                      <Label optional>توضیحات محصول</Label>
-                      <textarea className="nf" rows={4} placeholder="ویژگی‌ها، مشخصات فنی، شرایط استفاده و سایر توضیحات..." value={form.description} onChange={e => set('description', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 100, lineHeight: 1.7 }} />
-                    </div>
                   </div>
                 </div>
 
-                {/* card: category specs */}
-                {form.category && (() => {
-                  const currentSpecs = CATEGORY_SPECS[form.category] ?? GENERIC_SPECS
+                {/* card: specs + condition + description — always visible */}
+                {(() => {
+                  const currentSpecs = form.category ? (CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) : []
+                  const specFields = currentSpecs.filter(f => f.key !== 'condition')
                   return (
-                    <div key={form.category} style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
+                    <div key={form.category || 'no-cat'} style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
                       <div style={{ position: 'relative', zIndex: 1 }}>
+
+                        {/* header */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
                           <div style={{ width: 32, height: 32, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 12px rgba(199,166,106,0.32)`, flexShrink: 0 }}>
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round">
@@ -538,35 +498,69 @@ export default function NewProductPage() {
                           <div>
                             <p style={{ fontSize: 10.5, color: GOLD, letterSpacing: '0.18em', fontWeight: 700, margin: '0 0 1px' }}>SPECIFICATIONS</p>
                             <h3 style={{ fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>
-                              مشخصات فنی — {CATEGORIES.find(c => c.id === form.category)?.label}
+                              {form.category ? `مشخصات فنی — ${catLabel}` : 'مشخصات و وضعیت محصول'}
                             </h3>
                           </div>
                         </div>
-                        <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          {currentSpecs.map(field => {
-                            const isParent = currentSpecs.some(f => f.dependsOn === field.key)
-                            return (
-                              <SpecField
-                                key={`${form.category}-${field.key}`}
-                                field={field}
-                                value={specs[field.key] ?? ''}
-                                otherValue={specOthers[field.key] ?? ''}
-                                dependencyValue={field.dependsOn ? specs[field.dependsOn] ?? '' : undefined}
-                                onChange={v => setSpecs(s => {
-                                  const next = { ...s, [field.key]: v }
-                                  // reset all dependent fields when parent changes
-                                  if (isParent) {
-                                    currentSpecs
-                                      .filter(f => f.dependsOn === field.key)
-                                      .forEach(f => { next[f.key] = '' })
-                                  }
-                                  return next
-                                })}
-                                onOtherChange={v => setSpecOthers(s => ({ ...s, [field.key]: v }))}
-                              />
-                            )
-                          })}
+
+                        {/* category-specific specs OR placeholder */}
+                        {form.category ? (
+                          <div className="spec-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+                            {specFields.map(field => {
+                              const isParent = specFields.some(f => f.dependsOn === field.key)
+                              return (
+                                <SpecField
+                                  key={`${form.category}-${field.key}`}
+                                  field={field}
+                                  value={specs[field.key] ?? ''}
+                                  otherValue={specOthers[field.key] ?? ''}
+                                  dependencyValue={field.dependsOn ? specs[field.dependsOn] ?? '' : undefined}
+                                  onChange={v => setSpecs(s => {
+                                    const next = { ...s, [field.key]: v }
+                                    if (isParent) {
+                                      specFields
+                                        .filter(f => f.dependsOn === field.key)
+                                        .forEach(f => { next[f.key] = '' })
+                                    }
+                                    return next
+                                  })}
+                                  onOtherChange={v => setSpecOthers(s => ({ ...s, [field.key]: v }))}
+                                />
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <div style={{ padding: '11px 14px', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 10, marginBottom: 18 }}>
+                            <p style={{ fontSize: 13, color: TEXT_MUT, margin: 0 }}>⬆ ابتدا دسته‌بندی را انتخاب کنید تا مشخصات فنی نمایش یابد</p>
+                          </div>
+                        )}
+
+                        {/* divider */}
+                        <div style={{ height: 1, background: 'rgba(28,28,26,0.08)', margin: '4px 0 18px' }} />
+
+                        {/* condition */}
+                        <div style={{ marginBottom: 16 }}>
+                          <Label required>وضعیت کالا</Label>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            {([
+                              ['new',      'نو',       '🟢'],
+                              ['like-new', 'در حد نو', '🔵'],
+                              ['used',     'کارکرده',  '🟡'],
+                            ] as [string,string,string][]).map(([val, lbl, icon]) => (
+                              <button key={val} type="button" className="cond-btn" onClick={() => set('condition', val)} style={{ flex: 1, padding: '10px 6px', borderRadius: 11, border: form.condition === val ? 'none' : '1px solid rgba(255,255,255,0.88)', background: form.condition === val ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.80)', backdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', WebkitBackdropFilter: form.condition === val ? 'none' : 'blur(16px) saturate(200%)', boxShadow: form.condition === val ? 'inset 0 1.5px 0 rgba(255,255,255,0.30), 0 4px 14px rgba(199,166,106,0.40)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)', fontSize: 13, fontWeight: 700, color: form.condition === val ? '#fff' : TEXT_SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+                                <span style={{ fontSize: 15 }}>{icon}</span>
+                                {lbl}
+                              </button>
+                            ))}
+                          </div>
                         </div>
+
+                        {/* description */}
+                        <div>
+                          <Label optional>توضیحات محصول</Label>
+                          <textarea className="nf" rows={4} placeholder="ویژگی‌ها، مشخصات فنی، شرایط استفاده و سایر توضیحات..." value={form.description} onChange={e => set('description', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 100, lineHeight: 1.7 }} />
+                        </div>
+
                       </div>
                     </div>
                   )
@@ -622,6 +616,41 @@ export default function NewProductPage() {
                     )}
                   </div>
                 </div>
+
+                {/* card: pricing — after images */}
+                <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.52s ease both' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <SectionTitle>قیمت‌گذاری</SectionTitle>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div>
+                          <Label required>قیمت (تومان)</Label>
+                          <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.price} onChange={e => set('price', fmtPrice(e.target.value))} style={inp(errors.price)} />
+                          <ErrMsg msg={errors.price} />
+                        </div>
+                        <div>
+                          <Label optional>قیمت قبل از تخفیف</Label>
+                          <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp()} />
+                        </div>
+                      </div>
+                      {form.price && form.oldPrice && (() => {
+                        const p = Number(toAsciiDigits(form.price).replace(/\D/g,''))
+                        const o = Number(toAsciiDigits(form.oldPrice).replace(/\D/g,''))
+                        if (o > p) {
+                          const d = Math.round((1 - p/o)*100)
+                          return (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.22)', borderRadius: 10 }}>
+                              <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#ea580c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff' }}>{d}٪</span>
+                              <span style={{ fontSize: 13, color: '#dc2626', fontWeight: 600 }}>تخفیف {d}٪ اعمال می‌شود</span>
+                            </div>
+                          )
+                        }
+                        return null
+                      })()}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* ═══════════════════════════════════════════════════
@@ -632,19 +661,22 @@ export default function NewProductPage() {
                 {/* card: shop info */}
                 <div style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeUp 0.5s ease both' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
-                  <SectionTitle>اطلاعات فروشگاه</SectionTitle>
+                  <SectionTitle>اطلاعات فروشنده</SectionTitle>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
 
                     <div>
-                      <Label required>نام فروشگاه</Label>
-                      <input className="nf" type="text" placeholder="مثال: فروشگاه بیلیارد ستاره" value={form.shopName} onChange={e => set('shopName', e.target.value)} style={inp(errors.shopName)} />
+                      <Label required>نام فروشگاه | فروشنده</Label>
+                      <input className="nf" type="text" placeholder="نام فروشگاه یا نام شخص فروشنده" value={form.shopName} onChange={e => set('shopName', e.target.value)} style={inp(errors.shopName)} />
+                      {user && !form.shopName && (
+                        <p style={{ fontSize: 11.5, color: GOLD, marginTop: 5 }}>اطلاعات از حساب شما پر می‌شود</p>
+                      )}
                       <ErrMsg msg={errors.shopName} />
                     </div>
 
                     <div>
-                      <Label optional>نام صاحب فروشگاه</Label>
-                      <input className="nf" type="text" placeholder="نام و نام خانوادگی" value={form.ownerName} onChange={e => set('ownerName', e.target.value)} style={inp()} />
+                      <Label optional>نام مالک فروشگاه</Label>
+                      <input className="nf" type="text" placeholder="نام و نام خانوادگی مالک (در صورت فروش از طرف فروشگاه)" value={form.ownerName} onChange={e => set('ownerName', e.target.value)} style={inp()} />
                     </div>
 
                     <div>
@@ -728,7 +760,7 @@ export default function NewProductPage() {
                         <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.name || 'نام محصول'}</p>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                           {catLabel && <span style={{ fontSize: 11, color: GOLD, fontWeight: 600, background: 'rgba(199,166,106,0.1)', padding: '1px 7px', borderRadius: 10 }}>{catLabel}</span>}
-                          {form.condition === 'used' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>کارکرده</span>}
+                          {form.condition !== 'new' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>{form.condition === 'like-new' ? 'در حد نو' : 'کارکرده'}</span>}
                         </div>
                         {form.price && (
                           <p style={{ fontSize: 14, fontWeight: 800, color: GOLD, margin: '5px 0 0' }}>
