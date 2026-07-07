@@ -52,16 +52,16 @@ interface Coach {
 }
 
 const COACHES: Coach[] = [
-  { id:'1',  name:'احمد رضایی',    specialty:'snooker',  city:'تهران',  experience:15, rating:4.9, students:240, medals:8,  sessionPrice:500000, hasStory:true,  storyImage:img(0), bio:'مربی ملی‌پوش با ۱۵ سال سابقه — پرورش‌دهنده ۳ قهرمان ملی',      photo:img(0) },
-  { id:'2',  name:'حسین نوری',     specialty:'snooker',  city:'مشهد',   experience:12, rating:4.7, students:180, medals:5,  sessionPrice:350000, hasStory:true,  storyImage:img(1), bio:'قهرمان آسیا ۱۳۹۸ — تکنیک‌های پیشرفته اسنوکر',               photo:img(1) },
-  { id:'3',  name:'مریم کاظمی',    specialty:'pocket',   city:'اصفهان', experience:8,  rating:4.8, students:95,  medals:4,  sessionPrice:280000, hasStory:false, storyImage:'',     bio:'قهرمان کشوری بانوان ۱۴۰۱ — متخصص پاکت بیلیارد',            photo:img(2) },
-  { id:'4',  name:'سینا محمدی',    specialty:'pocket',   city:'شیراز',  experience:5,  rating:4.5, students:52,  medals:2,  sessionPrice:200000, hasStory:true,  storyImage:img(3), bio:'قهرمان لیگ برتر جوانان — آموزش با آنالیز ویدیویی',           photo:img(3) },
-  { id:'5',  name:'علی حسینی',     specialty:'highball', city:'تهران',  experience:10, rating:4.6, students:120, medals:3,  sessionPrice:320000, hasStory:false, storyImage:'',     bio:'مربی تیم ملی جوانان هی‌بال — متخصص تکنیک ضربات',            photo:img(0) },
-  { id:'6',  name:'رضا ابراهیمی',  specialty:'carom',    city:'تبریز',  experience:18, rating:4.9, students:310, medals:12, sessionPrice:450000, hasStory:true,  storyImage:img(1), bio:'پیشکسوت کارامبول — استاد اول ایران با ۱۸ سال تجربه',         photo:img(1) },
-  { id:'7',  name:'نیلوفر صادقی',  specialty:'snooker',  city:'تهران',  experience:7,  rating:4.6, students:74,  medals:3,  sessionPrice:260000, hasStory:true,  storyImage:img(2), bio:'مربی تیم بانوان فدراسیون اسنوکر — قهرمان کشوری ۱۴۰۲',       photo:img(2) },
-  { id:'8',  name:'کامران یوسفی',  specialty:'carom',    city:'تهران',  experience:14, rating:4.8, students:195, medals:7,  sessionPrice:400000, hasStory:true,  storyImage:img(3), bio:'نائب‌قهرمان آسیا کارامبول — مدرس سیستم‌های ضربه‌ای',        photo:img(3) },
-  { id:'9',  name:'زهرا شریفی',    specialty:'pocket',   city:'کرج',    experience:6,  rating:4.5, students:63,  medals:2,  sessionPrice:220000, hasStory:false, storyImage:'',     bio:'متخصص پاکت بیلیارد بانوان — سیستم آموزشی گام به گام',        photo:img(0) },
-  { id:'10', name:'محسن طاهری',    specialty:'highball', city:'تهران',  experience:9,  rating:4.7, students:108, medals:4,  sessionPrice:290000, hasStory:true,  storyImage:img(1), bio:'مربی تیم ملی هی‌بال ۱۴۰۳ — متخصص آنالیز بازی',             photo:img(1) },
+  { id:'1',  name:'احمد رضایی',    specialty:'snooker',  city:'تهران',  experience:15, rating:4.9, students:240, medals:8,  sessionPrice:500000, hasStory:true,  storyImage:img(0), bio:'مربی ملی‌پوش با ۱۵ سال سابقه — پرورش‌دهنده ۳ قهرمان ملی',      photo:'' },
+  { id:'2',  name:'حسین نوری',     specialty:'snooker',  city:'مشهد',   experience:12, rating:4.7, students:180, medals:5,  sessionPrice:350000, hasStory:true,  storyImage:img(1), bio:'قهرمان آسیا ۱۳۹۸ — تکنیک‌های پیشرفته اسنوکر',               photo:'' },
+  { id:'3',  name:'مریم کاظمی',    specialty:'pocket',   city:'اصفهان', experience:8,  rating:4.8, students:95,  medals:4,  sessionPrice:280000, hasStory:false, storyImage:'',     bio:'قهرمان کشوری بانوان ۱۴۰۱ — متخصص پاکت بیلیارد',            photo:'' },
+  { id:'4',  name:'سینا محمدی',    specialty:'pocket',   city:'شیراز',  experience:5,  rating:4.5, students:52,  medals:2,  sessionPrice:200000, hasStory:true,  storyImage:img(3), bio:'قهرمان لیگ برتر جوانان — آموزش با آنالیز ویدیویی',           photo:'' },
+  { id:'5',  name:'علی حسینی',     specialty:'highball', city:'تهران',  experience:10, rating:4.6, students:120, medals:3,  sessionPrice:320000, hasStory:false, storyImage:'',     bio:'مربی تیم ملی جوانان هی‌بال — متخصص تکنیک ضربات',            photo:'' },
+  { id:'6',  name:'رضا ابراهیمی',  specialty:'carom',    city:'تبریز',  experience:18, rating:4.9, students:310, medals:12, sessionPrice:450000, hasStory:true,  storyImage:img(1), bio:'پیشکسوت کارامبول — استاد اول ایران با ۱۸ سال تجربه',         photo:'' },
+  { id:'7',  name:'نیلوفر صادقی',  specialty:'snooker',  city:'تهران',  experience:7,  rating:4.6, students:74,  medals:3,  sessionPrice:260000, hasStory:true,  storyImage:img(2), bio:'مربی تیم بانوان فدراسیون اسنوکر — قهرمان کشوری ۱۴۰۲',       photo:'' },
+  { id:'8',  name:'کامران یوسفی',  specialty:'carom',    city:'تهران',  experience:14, rating:4.8, students:195, medals:7,  sessionPrice:400000, hasStory:true,  storyImage:img(3), bio:'نائب‌قهرمان آسیا کارامبول — مدرس سیستم‌های ضربه‌ای',        photo:'' },
+  { id:'9',  name:'زهرا شریفی',    specialty:'pocket',   city:'کرج',    experience:6,  rating:4.5, students:63,  medals:2,  sessionPrice:220000, hasStory:false, storyImage:'',     bio:'متخصص پاکت بیلیارد بانوان — سیستم آموزشی گام به گام',        photo:'' },
+  { id:'10', name:'محسن طاهری',    specialty:'highball', city:'تهران',  experience:9,  rating:4.7, students:108, medals:4,  sessionPrice:290000, hasStory:true,  storyImage:img(1), bio:'مربی تیم ملی هی‌بال ۱۴۰۳ — متخصص آنالیز بازی',             photo:'' },
 ]
 
 /* billiard rack: 15 balls */
@@ -191,6 +191,8 @@ export default function CoachesPage() {
         }
         .cphoto{transition:transform .60s cubic-bezier(.4,0,.2,1),filter .5s;}
         .ccard:hover .cphoto{transform:scale(1.09);filter:brightness(1.06) saturate(1.08);}
+        .cavatar{transition:transform .40s cubic-bezier(.4,0,.2,1);}
+        .ccard:hover .cavatar{transform:scale(1.04);}
         .cdrawer{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1);}
         .ccard:hover .cdrawer{max-height:130px;}
         .ccard::before{
@@ -219,7 +221,6 @@ export default function CoachesPage() {
         /* mobile: no hover — always show drawer + photo zoom */
         @media(hover:none),(max-width:700px){
           .cdrawer{max-height:130px!important;}
-          .ccard .cphoto{transform:scale(1.06);filter:brightness(1.04) saturate(1.06);}
         }
       `}</style>
 
@@ -405,36 +406,66 @@ export default function CoachesPage() {
             <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
               {coaches.map((coach, idx) => {
                 const sp = SPECS[coach.specialty]
+                const [g1, g2] = getGrad(coach.id)
                 return (
                   <article key={coach.id} className="ccard" style={{
-                    borderRadius:12, overflow:'hidden',
+                    borderRadius:14, overflow:'hidden',
                     background:CARD,
-                    aspectRatio:'2/3',
-                    boxShadow:'0 4px 24px rgba(0,0,0,0.12)',
+                    boxShadow:'0 4px 24px rgba(0,0,0,0.14)',
                     animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
+                    display:'flex', flexDirection:'column',
                   }}>
-                    {/* Full-bleed photo */}
-                    <img className="cphoto" src={coach.photo} alt={coach.name}
-                      style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
 
-                    {/* Gradient overlays */}
-                    <div style={{ position:'absolute', inset:0,
-                      background:'linear-gradient(to top, rgba(7,6,4,0.97) 0%, rgba(7,6,4,0.68) 26%, rgba(7,6,4,0.08) 56%, transparent 80%)',
-                      zIndex:1 }}/>
-                    <div style={{ position:'absolute', top:0, left:0, right:0, height:62,
-                      background:'linear-gradient(to bottom, rgba(7,6,4,0.48), transparent)', zIndex:1 }}/>
+                    {/* ── Photo zone ── */}
+                    <div style={{ position:'relative', paddingTop:'115%', flexShrink:0, overflow:'hidden' }}>
+                      {/* Gradient background */}
+                      <div style={{ position:'absolute', inset:0,
+                        background:`linear-gradient(145deg,${g1}55 0%,${g2}CC 100%)` }}/>
+                      {/* Dot pattern overlay */}
+                      <div style={{ position:'absolute', inset:0,
+                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+                        backgroundSize:'22px 22px' }}/>
 
-                    {/* Story ring */}
-                    {coach.hasStory && coach.storyImage && (
-                      <div style={{ position:'absolute', top:10, right:10, zIndex:5 }}>
-                        <StoryRing coach={coach} size={34} onOpen={() => setOpenStory(coach)}/>
-                      </div>
-                    )}
+                      {/* Real photo */}
+                      {coach.photo ? (
+                        <img className="cphoto" src={coach.photo} alt={coach.name}
+                          style={{ position:'absolute', inset:0, width:'100%', height:'100%',
+                            objectFit:'cover', objectPosition:'center top' }}/>
+                      ) : (
+                        /* Avatar placeholder */
+                        <div className="cavatar" style={{ position:'absolute', inset:0,
+                          display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <div style={{ position:'absolute', width:88, height:88, borderRadius:'50%',
+                            border:'1px solid rgba(255,255,255,0.12)' }}/>
+                          <div style={{
+                            width:70, height:70, borderRadius:'50%',
+                            background:'rgba(255,255,255,0.10)',
+                            border:'2px solid rgba(255,255,255,0.22)',
+                            backdropFilter:'blur(8px)',
+                            display:'flex', alignItems:'center', justifyContent:'center',
+                            fontSize:26, fontWeight:900, color:'rgba(255,255,255,0.88)',
+                            boxShadow:'0 8px 28px rgba(0,0,0,0.30)',
+                            letterSpacing:'-0.02em', lineHeight:1,
+                          }}>
+                            {coach.name[0]}
+                          </div>
+                        </div>
+                      )}
 
-                    {/* Card content */}
-                    <div style={{ position:'absolute', inset:0, zIndex:2,
-                      padding:'12px 13px 11px', display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+                      {/* Story ring */}
+                      {coach.hasStory && coach.storyImage && (
+                        <div style={{ position:'absolute', top:10, right:10, zIndex:5 }}>
+                          <StoryRing coach={coach} size={34} onOpen={() => setOpenStory(coach)}/>
+                        </div>
+                      )}
 
+                      {/* Bottom blend into card */}
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:52,
+                        background:`linear-gradient(to bottom,transparent,${CARD})`, zIndex:2 }}/>
+                    </div>
+
+                    {/* ── Info zone ── */}
+                    <div style={{ padding:'12px 14px 13px', flex:1, display:'flex', flexDirection:'column' }}>
                       {sp && (
                         <span style={{ display:'inline-flex', alignItems:'center', gap:4,
                           fontSize:9.5, fontWeight:700, color:sp.color, letterSpacing:'0.12em', marginBottom:5 }}>
@@ -444,11 +475,12 @@ export default function CoachesPage() {
                         </span>
                       )}
 
-                      <h3 style={{ fontSize:16, fontWeight:900, color:CW, lineHeight:1.15, letterSpacing:'-0.02em' }}>
+                      <h3 style={{ fontSize:15.5, fontWeight:900, color:CW, lineHeight:1.15,
+                        letterSpacing:'-0.02em', marginBottom:5 }}>
                         {coach.name}
                       </h3>
 
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:5 }}>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                         <span style={{ fontSize:11, color:CW_D }}>{coach.city}</span>
                         <div style={{ display:'flex', alignItems:'center', gap:3 }}>
                           <Stars r={coach.rating} size={8}/>
@@ -491,6 +523,7 @@ export default function CoachesPage() {
                         </Link>
                       </div>
                     </div>
+
                   </article>
                 )
               })}

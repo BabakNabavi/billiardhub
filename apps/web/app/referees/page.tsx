@@ -59,14 +59,14 @@ interface Referee {
 }
 
 const REFEREES: Referee[] = [
-  { id:'1',  name:'کاوه طالبی',    specialty:'snooker',  city:'تهران',  experience:20, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور بین‌المللی WPBSA با ۲۰ سال سابقه — قضاوت ۴۵ مسابقه بین‌المللی اسنوکر',   photo:img(0) },
-  { id:'2',  name:'نیلوفر حسینی', specialty:'pocket',   city:'مشهد',   experience:12, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(1), bio:'داور ملی پاکت بیلیارد — پیشگام داوری بانوان با ۹۵ مسابقه ملی',               photo:img(1) },
-  { id:'3',  name:'رامین فرهادی', specialty:'highball', city:'اصفهان', experience:8,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'متخصص هی‌بال — عضو کمیته داوران فدراسیون بیلیارد و اسنوکر ایران',             photo:img(2) },
-  { id:'4',  name:'سحر محمدی',    specialty:'pocket',   city:'تهران',  experience:5,  grade:'داور درجه A',     gradeColor:'#C2410C', hasStory:true,  storyImage:img(3), bio:'داور جوان پاکت بیلیارد — قضاوت ۳۰+ مسابقه استانی و کشوری',                  photo:img(3) },
-  { id:'5',  name:'حامد موسوی',   specialty:'snooker',  city:'تبریز',  experience:15, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور ارشد IBSF — نماینده ایران در قهرمانی آسیا ۱۴۰۲ و لیگ برتر',             photo:img(0) },
-  { id:'6',  name:'علی رضایی',    specialty:'highball', city:'شیراز',  experience:7,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'داور هی‌بال — قضاوت لیگ برتر هی‌بال و مسابقات جوانان فدراسیون',               photo:img(1) },
-  { id:'7',  name:'مینا صالحی',   specialty:'pocket',   city:'کرج',    experience:3,  grade:'داور درجه B',     gradeColor:'#16A34A', hasStory:false, storyImage:'',     bio:'داور درجه B پاکت بیلیارد — فعال در مسابقات استانی البرز و تهران',             photo:img(2) },
-  { id:'8',  name:'کیان نوری',    specialty:'snooker',  city:'تهران',  experience:10, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(3), bio:'داور ملی اسنوکر — عضو هیئت داوران کنفدراسیون ACBS با تجربه ۱۰ ساله',        photo:img(3) },
+  { id:'1',  name:'کاوه طالبی',    specialty:'snooker',  city:'تهران',  experience:20, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور بین‌المللی WPBSA با ۲۰ سال سابقه — قضاوت ۴۵ مسابقه بین‌المللی اسنوکر',   photo:'' },
+  { id:'2',  name:'نیلوفر حسینی', specialty:'pocket',   city:'مشهد',   experience:12, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(1), bio:'داور ملی پاکت بیلیارد — پیشگام داوری بانوان با ۹۵ مسابقه ملی',               photo:'' },
+  { id:'3',  name:'رامین فرهادی', specialty:'highball', city:'اصفهان', experience:8,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'متخصص هی‌بال — عضو کمیته داوران فدراسیون بیلیارد و اسنوکر ایران',             photo:'' },
+  { id:'4',  name:'سحر محمدی',    specialty:'pocket',   city:'تهران',  experience:5,  grade:'داور درجه A',     gradeColor:'#C2410C', hasStory:true,  storyImage:img(3), bio:'داور جوان پاکت بیلیارد — قضاوت ۳۰+ مسابقه استانی و کشوری',                  photo:'' },
+  { id:'5',  name:'حامد موسوی',   specialty:'snooker',  city:'تبریز',  experience:15, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور ارشد IBSF — نماینده ایران در قهرمانی آسیا ۱۴۰۲ و لیگ برتر',             photo:'' },
+  { id:'6',  name:'علی رضایی',    specialty:'highball', city:'شیراز',  experience:7,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'داور هی‌بال — قضاوت لیگ برتر هی‌بال و مسابقات جوانان فدراسیون',               photo:'' },
+  { id:'7',  name:'مینا صالحی',   specialty:'pocket',   city:'کرج',    experience:3,  grade:'داور درجه B',     gradeColor:'#16A34A', hasStory:false, storyImage:'',     bio:'داور درجه B پاکت بیلیارد — فعال در مسابقات استانی البرز و تهران',             photo:'' },
+  { id:'8',  name:'کیان نوری',    specialty:'snooker',  city:'تهران',  experience:10, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(3), bio:'داور ملی اسنوکر — عضو هیئت داوران کنفدراسیون ACBS با تجربه ۱۰ ساله',        photo:'' },
 ]
 
 function StoryRing({ referee, size, onOpen }: { referee: Referee; size: number; onOpen: () => void }) {
@@ -123,6 +123,8 @@ export default function RefereesPage() {
         .rcard:hover{transform:translateY(-5px);box-shadow:0 0 0 1.5px rgba(199,166,106,0.55),0 0 24px rgba(199,166,106,0.12),0 20px 48px rgba(0,0,0,0.18)!important;}
         .rphoto{transition:transform .60s cubic-bezier(.4,0,.2,1),filter .5s;}
         .rcard:hover .rphoto{transform:scale(1.09);filter:brightness(1.06) saturate(1.08);}
+        .ravatar{transition:transform .40s cubic-bezier(.4,0,.2,1);}
+        .rcard:hover .ravatar{transform:scale(1.04);}
         .rdrawer{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1);}
         .rcard:hover .rdrawer{max-height:130px;}
         .rcard::before{content:'';position:absolute;inset:0;z-index:4;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,0.06) 50%,transparent 62%);opacity:0;transition:opacity .25s;}
@@ -143,7 +145,6 @@ export default function RefereesPage() {
 
         @media(hover:none),(max-width:700px){
           .rdrawer{max-height:130px!important;}
-          .rcard .rphoto{transform:scale(1.06);filter:brightness(1.04) saturate(1.06);}
         }
       `}</style>
 
@@ -306,34 +307,66 @@ export default function RefereesPage() {
             <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
               {refs.map((referee, idx) => {
                 const sp = SPECS[referee.specialty]
+                const [g1, g2] = getGrad(referee.id)
                 return (
                   <article key={referee.id} className="rcard" style={{
-                    borderRadius:12, overflow:'hidden',
+                    borderRadius:14, overflow:'hidden',
                     background:CARD,
-                    aspectRatio:'2/3',
-                    boxShadow:'0 4px 24px rgba(0,0,0,0.12)',
+                    boxShadow:'0 4px 24px rgba(0,0,0,0.14)',
                     animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
+                    display:'flex', flexDirection:'column',
                   }}>
-                    <img className="rphoto" src={referee.photo} alt={referee.name}
-                      style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
 
-                    <div style={{ position:'absolute', inset:0,
-                      background:'linear-gradient(to top, rgba(7,6,4,0.97) 0%, rgba(7,6,4,0.68) 26%, rgba(7,6,4,0.08) 56%, transparent 80%)',
-                      zIndex:1 }}/>
-                    <div style={{ position:'absolute', top:0, left:0, right:0, height:62,
-                      background:'linear-gradient(to bottom, rgba(7,6,4,0.48), transparent)', zIndex:1 }}/>
+                    {/* ── Photo zone ── */}
+                    <div style={{ position:'relative', paddingTop:'115%', flexShrink:0, overflow:'hidden' }}>
+                      {/* Gradient background */}
+                      <div style={{ position:'absolute', inset:0,
+                        background:`linear-gradient(145deg,${g1}55 0%,${g2}CC 100%)` }}/>
+                      {/* Dot pattern overlay */}
+                      <div style={{ position:'absolute', inset:0,
+                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+                        backgroundSize:'22px 22px' }}/>
 
-                    {/* Story ring */}
-                    {referee.hasStory && referee.storyImage && (
-                      <div style={{ position:'absolute', top:10, right:10, zIndex:5 }}>
-                        <StoryRing referee={referee} size={34} onOpen={() => setOpenStory(referee)}/>
-                      </div>
-                    )}
+                      {/* Real photo */}
+                      {referee.photo ? (
+                        <img className="rphoto" src={referee.photo} alt={referee.name}
+                          style={{ position:'absolute', inset:0, width:'100%', height:'100%',
+                            objectFit:'cover', objectPosition:'center top' }}/>
+                      ) : (
+                        /* Avatar placeholder */
+                        <div className="ravatar" style={{ position:'absolute', inset:0,
+                          display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <div style={{ position:'absolute', width:88, height:88, borderRadius:'50%',
+                            border:'1px solid rgba(255,255,255,0.12)' }}/>
+                          <div style={{
+                            width:70, height:70, borderRadius:'50%',
+                            background:'rgba(255,255,255,0.10)',
+                            border:'2px solid rgba(255,255,255,0.22)',
+                            backdropFilter:'blur(8px)',
+                            display:'flex', alignItems:'center', justifyContent:'center',
+                            fontSize:26, fontWeight:900, color:'rgba(255,255,255,0.88)',
+                            boxShadow:'0 8px 28px rgba(0,0,0,0.30)',
+                            letterSpacing:'-0.02em', lineHeight:1,
+                          }}>
+                            {referee.name[0]}
+                          </div>
+                        </div>
+                      )}
 
-                    {/* Card content */}
-                    <div style={{ position:'absolute', inset:0, zIndex:2,
-                      padding:'12px 13px 11px', display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+                      {/* Story ring */}
+                      {referee.hasStory && referee.storyImage && (
+                        <div style={{ position:'absolute', top:10, right:10, zIndex:5 }}>
+                          <StoryRing referee={referee} size={34} onOpen={() => setOpenStory(referee)}/>
+                        </div>
+                      )}
 
+                      {/* Bottom blend into card */}
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:52,
+                        background:`linear-gradient(to bottom,transparent,${CARD})`, zIndex:2 }}/>
+                    </div>
+
+                    {/* ── Info zone ── */}
+                    <div style={{ padding:'12px 14px 13px', flex:1, display:'flex', flexDirection:'column' }}>
                       {/* Grade badge */}
                       <span style={{ display:'inline-flex', alignItems:'center', gap:4,
                         fontSize:9.5, fontWeight:700, color:referee.gradeColor, letterSpacing:'0.12em', marginBottom:5 }}>
@@ -342,11 +375,12 @@ export default function RefereesPage() {
                         {referee.grade}
                       </span>
 
-                      <h3 style={{ fontSize:16, fontWeight:900, color:CW, lineHeight:1.15, letterSpacing:'-0.02em' }}>
+                      <h3 style={{ fontSize:15.5, fontWeight:900, color:CW, lineHeight:1.15,
+                        letterSpacing:'-0.02em', marginBottom:5 }}>
                         {referee.name}
                       </h3>
 
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:5 }}>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                         <span style={{ fontSize:11, color:CW_D }}>{referee.city}</span>
                         <span style={{ fontSize:11, color:CW_D, display:'flex', alignItems:'center', gap:3 }}>
                           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2">
@@ -383,6 +417,7 @@ export default function RefereesPage() {
                         </Link>
                       </div>
                     </div>
+
                   </article>
                 )
               })}
