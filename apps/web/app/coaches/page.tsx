@@ -370,7 +370,6 @@ export default function CoachesPage() {
               { k:'pocket',   l:'پاکت بیلیارد' },
               { k:'snooker',  l:'اسنوکر' },
               { k:'highball', l:'هی‌بال' },
-              { k:'carom',    l:'کارامبول' },
             ] as { k:string; l:string }[]).map(({ k, l }) => {
               const active = filter === k
               return (
