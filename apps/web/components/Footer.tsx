@@ -159,7 +159,7 @@ export default function Footer() {
           .ft-bottom { flex-direction: column !important; gap: 4px !important; text-align: center; margin-top: 4px !important; }
           .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
           .ft-dev-desk { display: none !important; }
-          .ft-dev-mob { display: block !important; margin-top: 2px; }
+          .ft-dev-mob { display: block !important; margin-top: 12px; }
           .ft-link { font-size: 12px !important; padding: 2.5px 0 !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
@@ -233,8 +233,17 @@ export default function Footer() {
             </div>
           ))}
           {/* اعتبار توسعه‌دهنده — دسکتاپ: سمت چپ روبروی ایمیل */}
-          <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
-            DEVELOPED BY&nbsp;<span style={{ color: GOLD }}>BABAK NABAVI</span>
+          <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center' }}>
+            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
+              <span>DEVELOPED BY <span style={{ color: GOLD }}>BABAK NABAVI</span></span>
+              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4.5"/>
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                </svg>
+              </a>
+            </span>
           </div>
         </div>
 
@@ -252,8 +261,17 @@ export default function Footer() {
             ))}
           </div>
           {/* اعتبار توسعه‌دهنده — موبایل: زیر لینک‌ها */}
-          <div className="ft-dev-mob" style={{ fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
-            DEVELOPED BY <span style={{ color: GOLD }}>BABAK NABAVI</span>
+          <div className="ft-dev-mob">
+            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
+              <span>DEVELOPED BY <span style={{ color: GOLD }}>BABAK NABAVI</span></span>
+              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4.5"/>
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                </svg>
+              </a>
+            </span>
           </div>
         </div>
       </div>
