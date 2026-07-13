@@ -448,13 +448,14 @@ export default function Navbar() {
           position: 'fixed', inset: 0, zIndex: 9999,
           background: '#F7F5F0',
           overflowY: 'auto',
+          display: 'flex', flexDirection: 'column',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
           {/* Header row — centered brand */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
             <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', marginBottom: '8px' }} />
             <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
-              <span style={{ color: '#FFFFFF', WebkitTextStroke: '0.4px rgba(28,28,26,0.22)', textShadow: '1px 1px 1px rgba(0,0,0,0.18), -1px -1px 0 rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.15)' }}>بیلیارد</span>{' '}
+              <span style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.28), 0 -1px 0 rgba(255,255,255,0.45)' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
             </span>
             <button onClick={() => setMobileOpen(false)}
@@ -528,8 +529,8 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Bottom promo */}
-          <div style={{ margin: '24px 20px 40px', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Bottom promo — pinned to bottom */}
+          <div style={{ margin: '24px 20px 28px', marginTop: 'auto', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.78)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
               <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
