@@ -228,7 +228,7 @@ function SellerLogo({ name, size = 62 }: { name: string; size?: number }) {
 // ── Verified pill (inline, not overlapping banner) ────────────
 function VerifiedPill() {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 11, fontWeight: 700, borderRadius: 20, padding: '2px 8px', flexShrink: 0 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'rgba(22,163,74,0.12)', border: '1px solid rgba(22,163,74,0.34)', color: '#15803D', fontSize: 11, fontWeight: 700, borderRadius: 20, padding: '2px 8px', flexShrink: 0 }}>
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2"><polyline points="20 6 9 17 4 12"/></svg>
       تأیید شده
     </span>
@@ -314,7 +314,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         </div>
         {/* info */}
         <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
             {seller.verified && <VerifiedPill />}
           </div>
@@ -357,8 +357,8 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <SellerLogo name={seller.name} size={62} />
         </div>
 
-        {/* name + verified inline (fix: badge no longer stuck to image) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 5px', flexWrap: 'wrap' }}>
+        {/* name + verified (verified pushed to the left so they align across cards) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, margin: '0 0 5px' }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{seller.name}</h3>
           {seller.verified && <VerifiedPill />}
         </div>
@@ -408,13 +408,14 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
+        className="dd-btn"
         style={{
           display: 'flex', alignItems: 'center', gap: 8, minWidth, padding: '9px 13px', borderRadius: 12,
           background: open ? '#fff' : 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
           border: open ? `1.5px solid ${GOLD}` : '1px solid rgba(28,28,26,0.1)', fontSize: 12.5, color: TEXT,
           boxShadow: open ? '0 4px 14px rgba(199,166,106,0.12)' : 'none', transition: 'all .18s',
         }}>
-        {label && <span style={{ color: TEXT_MUT, fontWeight: 500 }}>{label}</span>}
+        {label && <span className="dd-label" style={{ color: TEXT_MUT, fontWeight: 500 }}>{label}</span>}
         <span style={{ fontWeight: 700 }}>{current.label}</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ marginRight: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
       </button>
@@ -523,6 +524,11 @@ export default function SellersPage() {
         }
         .filt-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
         .filt-scroll::-webkit-scrollbar { display: none; }
+        /* موبایل: حذف لیبل دراپ‌داون‌ها و جمع‌تر شدن باکس */
+        @media(max-width:640px){
+          .dd-label { display: none !important; }
+          .dd-btn { min-width: 0 !important; padding: 9px 11px !important; }
+        }
         /* more-filters drawer / sheet */
         @keyframes ovIn { from{opacity:0} to{opacity:1} }
         @keyframes drwX { from{transform:translateX(-100%)} to{transform:none} }
@@ -574,7 +580,7 @@ export default function SellersPage() {
           {/* content */}
           <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 10.5, fontWeight: 800, borderRadius: 24, padding: '5px 13px', marginBottom: 14, letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both' }}>
-Market Place . BILLIARD HUB
+MARKET PLACE . BILLIARD HUB
             </div>
 
             <div style={{ overflow: 'hidden', paddingBottom: '0.14em' }}>
@@ -590,9 +596,17 @@ Market Place . BILLIARD HUB
             <p style={{ fontSize: 'clamp(12.5px,1.4vw,15px)', color: TEXT_SEC, marginTop: 10, maxWidth: 440, animation: 'lineReveal .5s .46s ease both' }}>
               معتبرترین فروشندگان چوب، میز، توپ و لوازم جانبی — همه در یک جا
             </p>
+          </div>
+        </section>
 
-            {/* search */}
-            <div style={{ width: '100%', maxWidth: 480, position: 'relative', marginTop: 18, animation: 'fadeUp .5s .58s ease both' }}>
+        {/* ─────── BODY ─────── */}
+        <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
+
+          {/* ─── STICKY: search + filter, stacked under the navbar ─── */}
+          <div style={{ position: 'sticky', top: 72, zIndex: 50, background: BG, paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+            {/* search box */}
+            <div style={{ position: 'relative' }}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -600,20 +614,15 @@ Market Place . BILLIARD HUB
                 className="search-inp" type="text" placeholder="جستجوی فروشنده، شهر یا برند..."
                 value={search} onChange={e => setSearch(e.target.value)}
                 style={{ width: '100%', padding: '13px 48px 13px 16px', borderRadius: 14, fontSize: 14.5,
-                  background: 'rgba(255,255,255,0.72)', border: '1.5px solid rgba(28,28,26,0.1)',
+                  background: 'rgba(255,255,255,0.86)', border: '1.5px solid rgba(28,28,26,0.1)',
                   backdropFilter: 'blur(18px) saturate(190%)', WebkitBackdropFilter: 'blur(18px) saturate(190%)',
-                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.9), 0 6px 20px rgba(28,28,26,0.06)',
+                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 6px 20px rgba(28,28,26,0.07)',
                   color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'border-color 0.2s, box-shadow 0.2s', direction: 'rtl' }}
               />
             </div>
-          </div>
-        </section>
 
-        {/* ─────── BODY ─────── */}
-        <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
-
-          {/* ─── FILTER BAR — Apple-minimal ─── */}
-          <div className="sel-filterbar" style={{ position: 'sticky', top: 12, zIndex: 50, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: 10, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            {/* filter box */}
+            <div className="sel-filterbar" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 16, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 26px rgba(28,28,26,0.08)', padding: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
 
             <Dropdown label="دسته‌بندی:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
             <Dropdown label="وضعیت:"     options={STATUS_OPTIONS}   value={status}   onChange={setStatus}   minWidth={140} />
@@ -645,6 +654,7 @@ Market Place . BILLIARD HUB
                   }}>{icon}</button>
                 ))}
               </div>
+            </div>
             </div>
           </div>
 
