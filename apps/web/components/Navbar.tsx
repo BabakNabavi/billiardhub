@@ -530,7 +530,7 @@ export default function Navbar() {
           </div>
 
           {/* Bottom promo — pinned to bottom */}
-          <div style={{ margin: '24px 20px 28px', marginTop: 'auto', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <div style={{ margin: '20px 20px calc(14px + env(safe-area-inset-bottom))', marginTop: 'auto', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.78)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
               <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
