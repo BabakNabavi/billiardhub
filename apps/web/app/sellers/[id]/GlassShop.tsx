@@ -319,7 +319,7 @@ export default function GlassShop() {
       {/* ═══ FOOTER — سایت اختصاصی فروشگاه (تم شیشه‌ای) ═══ */}
       <footer className="px-4 pb-8 sm:px-6">
         <div className={`${CARD} mx-auto max-w-[1240px] overflow-hidden`}>
-          <div className="grid grid-cols-1 gap-8 px-6 py-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-9 px-6 py-8 sm:grid-cols-2 lg:grid-cols-4">
 
             {/* برند */}
             <div>
@@ -340,8 +340,8 @@ export default function GlassShop() {
 
             {/* دسته‌بندی‌ها */}
             <div>
-              <h4 className="mb-4 text-[13.5px] font-bold">دسته‌بندی‌ها</h4>
-              <ul className="space-y-2.5 text-[13px] text-[#5B564B]">
+              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">دسته‌بندی‌ها</h4>
+              <ul className="space-y-3 text-[13px] text-[#5B564B]">
                 {NAV.filter(n => n.k !== 'all').map(n => (
                   <li key={n.k}>
                     <button
@@ -365,37 +365,39 @@ export default function GlassShop() {
 
             {/* راه‌های ارتباطی */}
             <div>
-              <h4 className="mb-4 text-[13.5px] font-bold">راه‌های ارتباطی</h4>
-              <ul className="space-y-2.5 text-[13px] text-[#5B564B]">
+              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">راه‌های ارتباطی</h4>
+              <ul className="space-y-3 text-[13px] text-[#5B564B]">
                 <li>
-                  <a href="tel:02188221100" className={`flex items-center gap-2 transition-colors hover:text-[#14532D] ${MONO}`}>
+                  <a href="tel:02188221100" className={`flex items-center gap-2.5 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
                     <span className="text-[#14532D]">{Icon.phone}</span>۰۲۱-۸۸۲۲۱۱۰۰
                   </a>
                 </li>
                 <li>
-                  <a href="tel:09121234567" className={`flex items-center gap-2 transition-colors hover:text-[#14532D] ${MONO}`}>
+                  <a href="tel:09121234567" className={`flex items-center gap-2.5 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
                     <span className="text-[#14532D]">{Icon.phone}</span>۰۹۱۲-۱۲۳-۴۵۶۷
                   </a>
                 </li>
-                <li>
-                  <a href="https://wa.me/989121234567" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 transition-colors hover:text-[#14532D]">
-                    <span className="text-[#14532D]">{Icon.wa}</span>واتساپ فروشگاه
-                  </a>
-                </li>
-                <li>
-                  <a href="https://instagram.com/procue.ir" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 transition-colors hover:text-[#14532D]">
-                    <span className="text-[#14532D]">{Icon.insta}</span>procue.ir@
-                  </a>
-                </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-2.5 py-0.5">
                   <span className="text-[#14532D]">{Icon.clock}</span>شنبه تا پنج‌شنبه، ۹ تا ۲۰
+                </li>
+                {/* آیکون‌های شبکه اجتماعی — با فاصله بیشتر از لینک‌ها */}
+                <li className="flex items-center gap-2.5 pt-3">
+                  <a href="https://wa.me/989121234567" target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#0E7A38] transition-transform hover:scale-105">
+                    {Icon.wa}
+                  </a>
+                  <a href="https://instagram.com/procue.ir" target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:scale-105"
+                    style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}>
+                    {Icon.insta}
+                  </a>
                 </li>
               </ul>
             </div>
 
             {/* موقعیت فروشگاه */}
             <div>
-              <h4 className="mb-4 text-[13.5px] font-bold">موقعیت فروشگاه</h4>
+              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">موقعیت فروشگاه</h4>
               <p className="mb-3 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B]">
                 <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
                 تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵
