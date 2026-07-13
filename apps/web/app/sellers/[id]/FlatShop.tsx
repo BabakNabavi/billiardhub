@@ -475,113 +475,117 @@ export default function FlatShop() {
         </main>
       </div>
 
-      {/* ═══ FOOTER — سایت اختصاصی فروشگاه ═══ */}
-      <footer className="border-t border-[#E7E2D6] bg-white">
-        <div className="mx-auto grid max-w-[1240px] grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+      {/* ═══ FOOTER — کارت اختصاصی فروشگاه (سبک sellers/2) ═══ */}
+      <footer className="px-4 pb-8 pt-2 sm:px-6">
+        <div className="mx-auto max-w-[1240px] overflow-hidden rounded-2xl border border-[#E8E3D6] bg-[#FAFAF7] shadow-[0_4px_20px_rgba(28,27,23,0.05)]">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-9 p-6 sm:grid-cols-2 sm:p-8 lg:grid-cols-4">
 
-          {/* برند */}
-          <div>
-            <div className="flex items-center gap-2.5 text-[16px] font-bold">
-              <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_30%,#2b2b2b,#0a0a0a_70%)]">
-                <span className="flex h-[13px] w-[13px] items-center justify-center rounded-full bg-white text-[8px] font-bold text-[#111]">۸</span>
-              </span>
-              {store.brand}
+            {/* برند */}
+            <div>
+              <div className="flex items-center gap-2.5 text-[16px] font-bold">
+                <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_30%,#2b2b2b,#0a0a0a_70%)]">
+                  <span className="flex h-[13px] w-[13px] items-center justify-center rounded-full bg-white text-[8px] font-bold text-[#111]">۸</span>
+                </span>
+                {store.brand}
+              </div>
+              <p className="mt-3 max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B]">
+                فروشگاه تخصصی تجهیزات بیلیارد — عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای.
+              </p>
+              <div className="mt-4 flex items-center gap-2 text-[11.5px] text-[#8A8474]">
+                <span className="rounded-full bg-[#DCEEE4] px-2.5 py-1 font-semibold text-[#14532D]">فروشگاه تایید شده</span>
+                عضو از {toFa(store.memberSince)}
+              </div>
             </div>
-            <p className="mt-3 max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B]">
-              فروشگاه تخصصی تجهیزات بیلیارد — عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای.
-            </p>
-            <div className="mt-3 flex items-center gap-2 text-[11.5px] text-[#8A8474]">
-              <span className="rounded-full bg-[#DCEEE4] px-2.5 py-1 font-semibold text-[#14532D]">فروشگاه تایید شده</span>
-              عضو از {toFa(store.memberSince)}
-            </div>
-          </div>
 
-          {/* دسته‌بندی‌ها */}
-          <div>
-            <h4 className="mb-4 text-[13.5px] font-bold">دسته‌بندی‌ها</h4>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px] text-[#5B564B]">
-              {BAZAAR_CATS.slice(0, 8).map(c => (
-                <li key={c.id}>
+            {/* دسته‌بندی‌ها */}
+            <div>
+              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">دسته‌بندی‌ها</h4>
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] text-[#5B564B]">
+                {BAZAAR_CATS.slice(0, 8).map(c => (
+                  <li key={c.id}>
+                    <button
+                      onClick={() => { setNavCat(c.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      className="py-0.5 transition-colors hover:text-[#14532D]"
+                    >
+                      {c.label}
+                    </button>
+                  </li>
+                ))}
+                <li>
                   <button
-                    onClick={() => { setNavCat(c.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                    className="transition-colors hover:text-[#14532D]"
+                    onClick={() => { setNavCat('all'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                    className="py-0.5 font-medium text-[#14532D] transition-opacity hover:opacity-70"
                   >
-                    {c.label}
+                    مشاهده همه ←
                   </button>
                 </li>
-              ))}
-              <li>
-                <button
-                  onClick={() => { setNavCat('all'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                  className="font-medium text-[#14532D] transition-opacity hover:opacity-70"
-                >
-                  مشاهده همه ←
-                </button>
-              </li>
-            </ul>
-          </div>
+              </ul>
+            </div>
 
-          {/* راه‌های ارتباطی */}
-          <div>
-            <h4 className="mb-4 text-[13.5px] font-bold">راه‌های ارتباطی</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#5B564B]">
-              {store.phones.map(ph => (
-                <li key={ph}>
-                  <a href={`tel:${ph.replace(/-/g, '')}`} className={`flex items-center gap-2 transition-colors hover:text-[#14532D] ${MONO}`}>
-                    <span className="text-[#14532D]">{Icon.phone}</span>{toFa(ph)}
+            {/* راه‌های ارتباطی */}
+            <div>
+              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">راه‌های ارتباطی</h4>
+              <ul className="space-y-3 text-[13px] text-[#5B564B]">
+                {store.phones.map(ph => (
+                  <li key={ph}>
+                    <a href={`tel:${ph.replace(/-/g, '')}`} className={`flex items-center gap-2.5 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
+                      <span className="text-[#14532D]">{Icon.phone}</span>{toFa(ph)}
+                    </a>
+                  </li>
+                ))}
+                <li className="flex items-center gap-2.5 py-0.5">
+                  <span className="text-[#14532D]">{Icon.clock}</span>{store.hours}
+                </li>
+                {/* آیکون‌های شبکه اجتماعی — با فاصله بیشتر از لینک‌ها */}
+                <li className="flex items-center gap-2.5 pt-3">
+                  <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#0E7A38] transition-transform hover:scale-105">
+                    {Icon.wa}
+                  </a>
+                  <a href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:scale-105"
+                    style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}>
+                    {Icon.insta}
                   </a>
                 </li>
-              ))}
-              <li>
-                <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 transition-colors hover:text-[#14532D]">
-                  <span className="text-[#14532D]">{Icon.wa}</span>واتساپ فروشگاه
-                </a>
-              </li>
-              <li>
-                <a href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 transition-colors hover:text-[#14532D]">
-                  <span className="text-[#14532D]">{Icon.insta}</span>{store.instagram}@
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-[#14532D]">{Icon.clock}</span>{store.hours}
-              </li>
-            </ul>
+              </ul>
+            </div>
+
+            {/* موقعیت فروشگاه */}
+            <div>
+              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">موقعیت فروشگاه</h4>
+              <p className="mb-3 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B]">
+                <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
+                {store.address}
+              </p>
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(store.address)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="group relative block h-28 overflow-hidden rounded-xl border border-[#E8E3D6] bg-[#F4F1EA]"
+                aria-label="مشاهده روی نقشه"
+              >
+                <svg viewBox="0 0 300 120" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+                  {[0,1,2,3].map(i => <line key={`h${i}`} x1="0" y1={i * 40} x2="300" y2={i * 40} stroke="#1C1B17" strokeWidth="0.5" opacity="0.07"/>)}
+                  {[0,1,2,3,4,5,6].map(i => <line key={`v${i}`} x1={i * 50} y1="0" x2={i * 50} y2="120" stroke="#1C1B17" strokeWidth="0.5" opacity="0.07"/>)}
+                  <line x1="0" y1="82" x2="300" y2="82" stroke="#1C1B17" strokeWidth="2" opacity="0.08"/>
+                  <line x1="105" y1="0" x2="105" y2="120" stroke="#1C1B17" strokeWidth="2" opacity="0.08"/>
+                </svg>
+                <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-[70%] items-center justify-center rounded-full bg-[#14532D] text-white shadow-md transition-transform group-hover:scale-110">
+                  {Icon.pin}
+                </span>
+                <span className="absolute bottom-2 right-2 rounded-md bg-white px-2.5 py-1 text-[11px] font-semibold text-[#14532D] shadow-sm">
+                  مشاهده روی نقشه
+                </span>
+              </a>
+            </div>
           </div>
 
-          {/* موقعیت فروشگاه */}
-          <div>
-            <h4 className="mb-4 text-[13.5px] font-bold">موقعیت فروشگاه</h4>
-            <p className="mb-3 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B]">
-              <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
-              {store.address}
-            </p>
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(store.address)}`}
-              target="_blank" rel="noopener noreferrer"
-              className="group relative block h-28 overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]"
-              aria-label="مشاهده روی نقشه"
-            >
-              <svg viewBox="0 0 300 120" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-                {[0,1,2,3].map(i => <line key={`h${i}`} x1="0" y1={i * 40} x2="300" y2={i * 40} stroke="#1C1B17" strokeWidth="0.5" opacity="0.07"/>)}
-                {[0,1,2,3,4,5,6].map(i => <line key={`v${i}`} x1={i * 50} y1="0" x2={i * 50} y2="120" stroke="#1C1B17" strokeWidth="0.5" opacity="0.07"/>)}
-                <line x1="0" y1="82" x2="300" y2="82" stroke="#1C1B17" strokeWidth="2" opacity="0.08"/>
-                <line x1="105" y1="0" x2="105" y2="120" stroke="#1C1B17" strokeWidth="2" opacity="0.08"/>
-              </svg>
-              <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-[70%] items-center justify-center rounded-full bg-[#14532D] text-white shadow-md transition-transform group-hover:scale-110">
-                {Icon.pin}
-              </span>
-              <span className="absolute bottom-2 right-2 rounded-md bg-white px-2.5 py-1 text-[11px] font-semibold text-[#14532D] shadow-sm">
-                مشاهده روی نقشه
-              </span>
-            </a>
-          </div>
-        </div>
-
-        {/* نوار پایین */}
-        <div className="border-t border-[#E7E2D6] bg-[#F7F5F0]">
-          <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-2 px-4 py-4 text-[11.5px] text-[#8A8474] sm:px-6">
-            <span>© {toFa(1405)} {store.brand} — تمام حقوق محفوظ است</span>
-            <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
+          {/* نوار پایین */}
+          <div className="border-t border-[#E8E3D6] px-6 py-4 sm:px-8">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[#8A8474]">
+              <span>© {toFa(1405)} {store.brand} — تمام حقوق محفوظ است</span>
+              <Link href="/" className="transition-colors hover:opacity-80">قدرت‌گرفته از بیلیارد <span className="font-bold text-[#C7A66A]">هاب</span></Link>
+            </div>
           </div>
         </div>
       </footer>
