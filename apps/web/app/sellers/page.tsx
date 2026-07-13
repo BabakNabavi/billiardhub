@@ -1,14 +1,28 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
+const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
+const BG       = '#F7F7F5'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
+
+/* billiard rack — 15 balls in triangle formation (coaches-style hero graphic) */
+const RACK: [number, number][] = [
+  [490,50],[442,133],[538,133],[394,216],[490,216],[586,216],
+  [346,299],[442,299],[538,299],[634,299],
+  [298,382],[394,382],[490,382],[586,382],[682,382],
+]
+const RACK_C = [
+  '#C7A66A','#DC2626','#7C3AED','#DC2626','#C7A66A','#DC2626',
+  '#C7A66A','#DC2626','#C7A66A','#DC2626',
+  '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
+]
 
 // ── Mock Data ─────────────────────────────────────────────────
 const SELLERS = [
@@ -125,10 +139,13 @@ const SELLERS = [
 const CITIES = ['همه', 'تهران', 'اصفهان', 'مشهد', 'شیراز']
 const SPECIALTIES = ['همه', 'چوب', 'میز', 'توپ', 'لوازم جانبی', 'اسنوکر', 'پارچه میز']
 const SORT_OPTIONS = [
-  { value: 'rating',   label: 'بهترین امتیاز' },
-  { value: 'products', label: 'بیشترین محصول' },
-  { value: 'newest',   label: 'جدیدترین'       },
+  { value: 'rating',   label: 'بهترین امتیاز'     },
+  { value: 'products', label: 'بیشترین محصول'     },
+  { value: 'reviews',  label: 'بیشترین نظر'       },
+  { value: 'response', label: 'سریع‌ترین پاسخ‌گویی' },
+  { value: 'newest',   label: 'جدیدترین'          },
 ] as const
+type SortKey = typeof SORT_OPTIONS[number]['value']
 
 // ── Stars ─────────────────────────────────────────────────────
 function Stars({ rating }: { rating: number }) {
@@ -282,7 +299,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <div className="sel-list-brands">{brandsRow}</div>
         </div>
         {/* actions */}
-        <div className="sel-list-actions" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, padding: '16px 18px 16px 0', flexShrink: 0 }}>
+        <div className="sel-list-actions" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, padding: '16px 20px', flexShrink: 0, borderInlineStart: '1px solid rgba(28,28,26,0.06)' }}>
           {viewBtn}{callBtn}
         </div>
       </div>
@@ -346,14 +363,76 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   )
 }
 
+// ── Professional dropdown ─────────────────────────────────────
+function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
+  label?: string
+  options: readonly { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
+  minWidth?: number
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+  }, [])
+  const current = options.find(o => o.value === value) ?? options[0]!
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, minWidth, padding: '9px 13px', borderRadius: 12,
+          background: open ? '#fff' : 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+          border: open ? `1.5px solid ${GOLD}` : '1px solid rgba(28,28,26,0.1)', fontSize: 12.5, color: TEXT,
+          boxShadow: open ? '0 4px 14px rgba(199,166,106,0.12)' : 'none', transition: 'all .18s',
+        }}>
+        {label && <span style={{ color: TEXT_MUT, fontWeight: 500 }}>{label}</span>}
+        <span style={{ fontWeight: 700 }}>{current.label}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ marginRight: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div role="listbox" style={{
+        position: 'absolute', insetInlineStart: 0, top: '100%', marginTop: 8, minWidth: minWidth + 20, zIndex: 60,
+        background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+        border: '1px solid rgba(28,28,26,0.08)', borderRadius: 14, overflow: 'hidden',
+        boxShadow: '0 16px 40px rgba(28,28,26,0.16)', transformOrigin: 'top', transition: 'all .15s',
+        opacity: open ? 1 : 0, transform: open ? 'scale(1)' : 'scale(0.96)', pointerEvents: open ? 'auto' : 'none',
+      }}>
+        {options.map(o => {
+          const sel = o.value === value
+          return (
+            <button key={o.value} type="button" role="option" aria-selected={sel}
+              onClick={() => { onChange(o.value); setOpen(false) }}
+              style={{
+                display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                padding: '10px 14px', border: 'none', cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, textAlign: 'right',
+                background: sel ? 'rgba(199,166,106,0.14)' : 'transparent', color: sel ? GOLD_D : TEXT_SEC, fontWeight: sel ? 800 : 500,
+              }}>
+              {o.label}
+              {sel && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.6"><path d="M20 6L9 17l-5-5"/></svg>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function SellersPage() {
   const [search,      setSearch]      = useState('')
   const [activeCity,  setActiveCity]  = useState('همه')
   const [activeSpec,  setActiveSpec]  = useState('همه')
   const [onlyVerified,setOnlyVerified]= useState(false)
-  const [sort,        setSort]        = useState<'rating'|'products'|'newest'>('rating')
+  const [onlyElite,   setOnlyElite]   = useState(false)
+  const [sort,        setSort]        = useState<SortKey>('rating')
   const [view,        setView]        = useState<'grid'|'list'>('grid')
+
+  const respHours = (s: typeof SELLERS[0]) =>
+    parseInt(s.responseTime.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, ''), 10) || 99
 
   const filtered = useMemo(() => {
     return SELLERS
@@ -361,21 +440,31 @@ export default function SellersPage() {
       .filter(s => activeCity === 'همه' || s.city === activeCity)
       .filter(s => activeSpec === 'همه' || s.specialties.some(sp => sp.includes(activeSpec) || activeSpec.includes(sp)))
       .filter(s => !onlyVerified || s.verified)
+      .filter(s => !onlyElite || s.elite)
       .sort((a, b) => {
         if (sort === 'rating')   return b.rating - a.rating
         if (sort === 'products') return b.productCount - a.productCount
+        if (sort === 'reviews')  return b.reviewCount - a.reviewCount
+        if (sort === 'response') return respHours(a) - respHours(b)
         return b.sinceYear - a.sinceYear
       })
-  }, [search, activeCity, activeSpec, onlyVerified, sort])
+  }, [search, activeCity, activeSpec, onlyVerified, onlyElite, sort])
 
-  const totalProducts = SELLERS.reduce((sum, s) => sum + s.productCount, 0)
-  const cities = [...new Set(SELLERS.map(s => s.city))].length
-  const verifiedCount = SELLERS.filter(s => s.verified).length
+  const cityOptions = [{ value: 'همه', label: 'همه شهرها' }, ...CITIES.filter(c => c !== 'همه').map(c => ({ value: c, label: c }))]
+  const specOptions = [{ value: 'همه', label: 'همه تخصص‌ها' }, ...SPECIALTIES.filter(c => c !== 'همه').map(c => ({ value: c, label: c }))]
 
   return (
     <>
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}25%{transform:translate(-28px,-20px) scale(1.05);}55%{transform:translate(-10px,26px) scale(0.96);}80%{transform:translate(20px,-12px) scale(1.02);}}
+        @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}20%{transform:translate(32px,20px) scale(1.04);}55%{transform:translate(44px,-26px) scale(0.92);}75%{transform:translate(10px,30px) scale(1.06);}}
+        @keyframes blob3{0%,100%{transform:translate(0,0);}50%{transform:translate(-26px,-36px) scale(1.10);}}
+        @keyframes rackCycle{0%{opacity:0;}6%{opacity:.42;}32%{opacity:.42;}40%{opacity:0;}100%{opacity:0;}}
+        @keyframes streakA{0%{opacity:0;transform:translateX(-130%) skewX(-18deg);}15%{opacity:1;}85%{opacity:1;}100%{opacity:0;transform:translateX(230%) skewX(-18deg);}}
+        @keyframes streakB{0%{opacity:0;transform:translateX(-120%) skewX(-14deg);}15%{opacity:.5;}85%{opacity:.5;}100%{opacity:0;transform:translateX(250%) skewX(-14deg);}}
+        @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
+        @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
         * { box-sizing: border-box; }
         .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
         @media(max-width:1000px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
@@ -387,7 +476,7 @@ export default function SellersPage() {
         @media(max-width:640px){
           .sel-list-card { flex-direction: column !important; }
           .sel-list-img { width: 100% !important; height: 150px; }
-          .sel-list-actions { flex-direction: row !important; padding: 0 18px 16px !important; }
+          .sel-list-actions { flex-direction: row !important; padding: 0 18px 16px !important; border-inline-start: none !important; }
           .sel-list-actions > a:first-child { flex: 1; }
           .sel-list-brands { display: none; }
         }
@@ -397,141 +486,124 @@ export default function SellersPage() {
 
       <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
-        {/* ─────── HERO — luxury ─────── */}
-        <div style={{ position: 'relative', minHeight: 'clamp(300px,40vw,400px)', overflow: 'hidden' }}>
-          <img src="/images/shop/snooker-table.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(2px) brightness(0.38) saturate(0.75)', transform: 'scale(1.06)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 80% at 50% 0%, rgba(199,166,106,0.16) 0%, transparent 55%), linear-gradient(to bottom, rgba(8,7,5,0.62) 0%, rgba(14,11,7,0.86) 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E")', opacity: 0.5 }} />
-          {/* thin gold top rule */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
+        {/* ─────── HERO — coaches-style animated (light) ─────── */}
+        <section style={{ position: 'relative', minHeight: 'clamp(280px,34vw,360px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+          {/* aurora blobs */}
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', right: '-8%', top: '6%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)', filter: 'blur(58px)', animation: 'blob1 15s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', left: '-6%', top: '18%', width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0.06) 50%, transparent 72%)', filter: 'blur(54px)', animation: 'blob2 19s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', left: '38%', top: '48%', width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.22) 0%, transparent 68%)', filter: 'blur(42px)', animation: 'blob3 12s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', left: '4%', bottom: '-6%', width: 160, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.13) 0%, transparent 70%)', filter: 'blur(46px)' }} />
+          </div>
 
-          <div style={{ position: 'relative', zIndex: 2, maxWidth: 760, margin: '0 auto', padding: 'clamp(48px,7vw,72px) clamp(20px,4vw,40px)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', animation: 'fadeUp 0.6s ease both' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD, fontSize: 11.5, fontWeight: 700, borderRadius: 24, padding: '6px 16px', marginBottom: 20, backdropFilter: 'blur(10px)', letterSpacing: '0.16em' }}>
+          {/* animated billiard racks */}
+          {([
+            { left: '3%',  size: 224, rot: 0,   delay: '0s'  },
+            { left: '25%', size: 198, rot: 140, delay: '6s'  },
+            { left: '45%', size: 168, rot: 55,  delay: '12s' },
+          ] as { left: string; size: number; rot: number; delay: string }[]).map((r, i) => (
+            <svg key={i} style={{ position: 'absolute', left: r.left, top: '50%', width: r.size, height: r.size * 0.93, transform: `translateY(-50%) rotate(${r.rot}deg)`, pointerEvents: 'none', animation: `rackCycle 18s ${r.delay} ease-in-out infinite`, transformOrigin: 'center' }} viewBox="0 0 760 560">
+              {RACK.map(([cx, cy], j) => <circle key={j} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[j]} strokeWidth="1.5" />)}
+              <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.55" />
+            </svg>
+          ))}
+
+          {/* light streaks */}
+          <div style={{ position: 'absolute', top: '32%', left: 0, width: '50%', height: '1.5px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.42),transparent)', transform: 'rotate(-5deg)', animation: 'streakA 12s 1s ease-in-out infinite', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '56%', left: 0, width: '40%', height: '1px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.28),transparent)', transform: 'rotate(-3deg)', animation: 'streakB 16s 5s ease-in-out infinite', pointerEvents: 'none' }} />
+
+          {/* bottom fade */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: `linear-gradient(to top, ${BG}, transparent)`, pointerEvents: 'none' }} />
+
+          {/* content */}
+          <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 10.5, fontWeight: 800, borderRadius: 24, padding: '5px 13px', marginBottom: 14, letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both' }}>
               BILLIARD HUB · مارکت‌پلیس رسمی
             </div>
-            <h1 style={{ fontSize: 'clamp(26px,4.6vw,46px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-              فروشگاه‌های تجهیزات بیلیارد
-            </h1>
-            <p style={{ fontSize: 'clamp(13.5px,2vw,16px)', color: 'rgba(255,255,255,0.6)', margin: '0 0 26px', lineHeight: 1.8, maxWidth: 460 }}>
+
+            <div style={{ overflow: 'hidden', paddingBottom: '0.14em' }}>
+              <h1 style={{ fontSize: 'clamp(30px,4.6vw,52px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.045em', margin: 0, background: GOLD_G, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', animation: 'lineReveal .72s .1s cubic-bezier(.4,0,.2,1) both' }}>
+                فروشگاه‌های تجهیزات بیلیارد
+              </h1>
+            </div>
+
+            <div style={{ transformOrigin: 'right', animation: 'scaleInX .5s .36s ease both' }}>
+              <div style={{ width: 66, height: 2.5, marginTop: 9, borderRadius: 2, background: GOLD_G, boxShadow: '0 0 10px rgba(154,110,56,0.35)' }} />
+            </div>
+
+            <p style={{ fontSize: 'clamp(12.5px,1.4vw,15px)', color: TEXT_SEC, marginTop: 10, maxWidth: 440, animation: 'lineReveal .5s .46s ease both' }}>
               معتبرترین فروشندگان چوب، میز، توپ و لوازم جانبی — همه در یک جا
             </p>
 
             {/* search */}
-            <div style={{ width: '100%', maxWidth: 520, position: 'relative', marginBottom: 22 }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(199,166,106,0.75)" strokeWidth="2.2" style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <div style={{ width: '100%', maxWidth: 480, position: 'relative', marginTop: 18, animation: 'fadeUp .5s .58s ease both' }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
                 className="search-inp" type="text" placeholder="جستجوی فروشنده، شهر یا برند..."
                 value={search} onChange={e => setSearch(e.target.value)}
-                style={{ width: '100%', padding: '15px 50px 15px 18px', borderRadius: 16, fontSize: 15,
-                  background: 'rgba(255,255,255,0.09)', border: '1.5px solid rgba(255,255,255,0.18)',
-                  backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', color: '#fff',
-                  fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'border-color 0.2s, box-shadow 0.2s', direction: 'rtl' }}
+                style={{ width: '100%', padding: '13px 48px 13px 16px', borderRadius: 14, fontSize: 14.5,
+                  background: 'rgba(255,255,255,0.72)', border: '1.5px solid rgba(28,28,26,0.1)',
+                  backdropFilter: 'blur(18px) saturate(190%)', WebkitBackdropFilter: 'blur(18px) saturate(190%)',
+                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.9), 0 6px 20px rgba(28,28,26,0.06)',
+                  color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'border-color 0.2s, box-shadow 0.2s', direction: 'rtl' }}
               />
             </div>
-
-            {/* premium stats row */}
-            <div style={{ display: 'flex', gap: 'clamp(18px,4vw,44px)', alignItems: 'center' }}>
-              {[
-                { v: SELLERS.length,   l: 'فروشگاه فعال' },
-                { v: totalProducts,    l: 'محصول موجود' },
-                { v: verifiedCount,    l: 'تأییدشده' },
-              ].map((st, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'clamp(18px,4vw,44px)' }}>
-                  {i > 0 && <div style={{ width: 1, height: 26, background: 'rgba(255,255,255,0.14)' }} />}
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 'clamp(18px,2.6vw,24px)', fontWeight: 900, color: GOLD, lineHeight: 1 }}>{st.v.toLocaleString('fa-IR')}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 5 }}>{st.l}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
-        </div>
+        </section>
 
         {/* ─────── BODY ─────── */}
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
 
-          {/* ─── FILTER BAR (sticky, luxury glass) ─── */}
-          <div style={{ position: 'sticky', top: 12, zIndex: 30, background: 'rgba(255,255,255,0.86)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: 12, marginTop: -34, marginBottom: 24 }}>
+          {/* ─── FILTER BAR (sticky glass, practical filters) ─── */}
+          <div style={{ position: 'sticky', top: 12, zIndex: 30, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 18, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: '11px 14px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
 
-            {/* row 1: city + specialty chips (scrollable on mobile) */}
-            <div className="filt-scroll" style={{ paddingBottom: 4 }}>
-              {CITIES.map(city => {
-                const on = activeCity === city
-                return (
-                  <button key={city} className="s-chip" onClick={() => setActiveCity(city)} style={{
-                    flexShrink: 0, padding: '7px 15px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-                    border: on ? 'none' : '1px solid rgba(28,28,26,0.10)',
-                    background: on ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.7)',
-                    color: on ? '#fff' : TEXT_SEC,
-                    boxShadow: on ? '0 3px 10px rgba(199,166,106,0.36)' : 'none',
-                    fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                  }}>{city}</button>
-                )
-              })}
-              <div style={{ width: 1, alignSelf: 'stretch', margin: '2px 4px', background: 'rgba(28,28,26,0.10)', flexShrink: 0 }} />
-              {SPECIALTIES.map(sp => {
-                const on = activeSpec === sp
-                return (
-                  <button key={sp} className="s-chip" onClick={() => setActiveSpec(sp)} style={{
-                    flexShrink: 0, padding: '7px 15px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-                    border: on ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.10)',
-                    background: on ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
-                    color: on ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                  }}>{sp}</button>
-                )
-              })}
-            </div>
+            <Dropdown label="شهر:"   options={cityOptions} value={activeCity} onChange={setActiveCity} minWidth={120} />
+            <Dropdown label="تخصص:" options={specOptions} value={activeSpec} onChange={setActiveSpec} minWidth={130} />
 
-            {/* row 2: verified + sort + view toggle */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(28,28,26,0.07)', flexWrap: 'wrap' }}>
-              <button className="s-chip" onClick={() => setOnlyVerified(!onlyVerified)} style={{
-                padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                border: onlyVerified ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.10)',
-                background: onlyVerified ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
-                color: onlyVerified ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                فقط تأیید شده
-              </button>
+            <button className="s-chip" onClick={() => setOnlyVerified(!onlyVerified)} style={{
+              padding: '8px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              border: onlyVerified ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.1)',
+              background: onlyVerified ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
+              color: onlyVerified ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+              تأیید شده
+            </button>
+            <button className="s-chip" onClick={() => setOnlyElite(!onlyElite)} style={{
+              padding: '8px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              border: onlyElite ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.1)',
+              background: onlyElite ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
+              color: onlyElite ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              نماینده رسمی
+            </button>
 
-              <span style={{ fontSize: 12.5, color: TEXT_MUT, marginRight: 4 }}>
+            {/* left cluster */}
+            <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 12.5, color: TEXT_MUT, whiteSpace: 'nowrap' }}>
                 <b style={{ color: TEXT, fontWeight: 800 }}>{filtered.length.toLocaleString('fa-IR')}</b> فروشگاه
               </span>
-
-              {/* left cluster */}
-              <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ position: 'relative' }}>
-                  <select value={sort} onChange={e => setSort(e.target.value as typeof sort)} style={{
-                    padding: '8px 34px 8px 14px', borderRadius: 12, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-                    background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', color: TEXT_SEC,
-                    fontFamily: 'Vazirmatn,Tahoma,sans-serif', appearance: 'none', WebkitAppearance: 'none',
-                  }}>
-                    {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>مرتب: {o.label}</option>)}
-                  </select>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
-                </div>
-
-                {/* view toggle (grid / list) */}
-                <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 12, background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)' }}>
-                  {([['grid','⊞'],['list','☰']] as [ 'grid'|'list', string ][]).map(([v]) => {
-                    const on = view === v
-                    return (
-                      <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
-                        width: 34, height: 30, borderRadius: 9, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: on ? '#fff' : 'transparent', color: on ? GOLD_D : TEXT_MUT,
-                        boxShadow: on ? '0 2px 6px rgba(28,28,26,0.12)' : 'none', transition: 'all 0.18s',
-                      }}>
-                        {v === 'grid'
-                          ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-                          : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>}
-                      </button>
-                    )
-                  })}
-                </div>
+              <Dropdown label="مرتب:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={140} />
+              <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 12, background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)' }}>
+                {(['grid', 'list'] as const).map(v => {
+                  const on = view === v
+                  return (
+                    <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
+                      width: 34, height: 30, borderRadius: 9, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: on ? '#fff' : 'transparent', color: on ? GOLD_D : TEXT_MUT,
+                      boxShadow: on ? '0 2px 6px rgba(28,28,26,0.12)' : 'none', transition: 'all 0.18s',
+                    }}>
+                      {v === 'grid'
+                        ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                        : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -552,36 +624,6 @@ export default function SellersPage() {
               <p style={{ fontSize: 14 }}>فیلترها را تغییر دهید یا جستجو را پاک کنید</p>
             </div>
           )}
-
-          {/* ─── STATS ─── */}
-          <div style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(32px) saturate(200%)', WebkitBackdropFilter: 'blur(32px) saturate(200%)', border: '1px solid rgba(255,255,255,0.80)', borderRadius: 24, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.06)', padding: 'clamp(20px,3vw,32px)', position: 'relative', overflow: 'hidden' }}>
-            {/* sheen */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', borderRadius: '24px 24px 0 0', pointerEvents: 'none' }} />
-            {/* ambient */}
-            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle,rgba(199,166,106,0.07) 0%,transparent 65%)', filter: 'blur(30px)', pointerEvents: 'none' }} />
-
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                <p style={{ fontSize: 12, color: GOLD, fontWeight: 700, letterSpacing: '0.18em', marginBottom: 4 }}>BILLIARD HUB</p>
-                <h2 style={{ fontSize: 'clamp(18px,2.5vw,22px)', fontWeight: 900, color: TEXT, margin: 0 }}>بیلیارد هاب در یک نگاه</h2>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'clamp(12px,2vw,20px)' }}>
-                {[
-                  { value: SELLERS.length, label: 'فروشگاه فعال', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-                  { value: totalProducts, label: 'محصول موجود', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> },
-                  { value: cities, label: 'شهر پوشش‌داده‌شده', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> },
-                ].map((stat, i) => (
-                  <div key={i} style={{ textAlign: 'center', padding: 'clamp(16px,2vw,24px) 12px', background: 'rgba(199,166,106,0.06)', border: '1px solid rgba(199,166,106,0.14)', borderRadius: 16 }}>
-                    <div style={{ color: GOLD, display: 'flex', justifyContent: 'center', marginBottom: 10 }}>{stat.icon}</div>
-                    <div style={{ fontSize: 'clamp(26px,3.5vw,36px)', fontWeight: 900, color: TEXT, lineHeight: 1, marginBottom: 6 }}>
-                      {stat.value.toLocaleString('fa-IR')}
-                    </div>
-                    <div style={{ fontSize: 13, color: TEXT_SEC, fontWeight: 500 }}>{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </>
