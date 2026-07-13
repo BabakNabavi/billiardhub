@@ -155,8 +155,8 @@ export default function Footer() {
           .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 16px 14px !important; }
           .ft-brand { grid-column: 1 / -1 !important; }
           .ft-inner { padding: 26px 18px 18px !important; }
-          .ft-bottom { flex-direction: column !important; gap: 10px !important; text-align: center; }
-          .ft-bottom-links { justify-content: center !important; }
+          .ft-bottom { flex-direction: column !important; gap: 4px !important; text-align: center; margin-top: 4px !important; }
+          .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
           .ft-link { font-size: 12px !important; padding: 2.5px 0 !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
