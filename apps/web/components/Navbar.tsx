@@ -36,6 +36,7 @@ const exploreMenu = [
       { href: '/sellers',       label: 'فروشندگان',   icon: <ShoppingBag size={14} />, desc: 'فروشندگان تجهیزات' },
       { href: '/manufacturers', label: 'تولیدکنندگان', icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
       { href: '/installers',    label: 'خدمات فنی',   icon: <Wrench size={14} />,     desc: 'نصب و راه‌اندازی'  },
+      { href: '/live',          label: 'پخش زنده',    icon: <Radio size={14} />,      desc: 'پخش زنده مسابقات' },
     ],
   },
   {
@@ -231,12 +232,6 @@ export default function Navbar() {
             <Link href="/shop"    className={`nav-a ${pathname === '/shop'    ? 'active' : ''}`}>بیلیارد بازار</Link>
             <Link href="/players"     className={`nav-a ${pathname === '/players'     ? 'active' : ''}`}>بازیکنان</Link>
             <Link href="/tournaments" className={`nav-a ${pathname.startsWith('/tournaments') ? 'active' : ''}`}>مسابقات</Link>
-            <Link href="/live" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: TEXT_MUT, fontSize: '15px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.25s', whiteSpace: 'nowrap', padding: '6px 2px' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = TEXT }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'glowPulse 2s infinite', flexShrink: 0 }} />
-              پخش زنده
-            </Link>
 
             <div ref={exploreRef} style={{ position: 'relative' }}>
               <button className="exp-btn" onClick={() => setExploreOpen(p => !p)}>
@@ -314,7 +309,7 @@ export default function Navbar() {
                   {/* Bottom strip */}
                   <div style={{ margin: '4px 20px 18px', padding: '12px 18px', background: 'linear-gradient(135deg,rgba(184,147,58,0.07),rgba(184,147,58,0.03))', border: '1px solid rgba(184,147,58,0.16)', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
                     <div>
-                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
                       <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
                     </div>
                     <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '7px 16px', boxShadow: `0 4px 16px rgba(184,147,58,0.32)`, whiteSpace: 'nowrap' }}>
@@ -556,7 +551,7 @@ export default function Navbar() {
           {/* Bottom promo */}
           <div style={{ margin: '20px', padding: '18px 20px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.80)' }}>اولین پلتفرم تخصصی بیلیارد ایران</div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.80)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
             </div>
             <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>

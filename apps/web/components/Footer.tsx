@@ -190,7 +190,7 @@ export default function Footer() {
             </div>
 
             <p style={{ color: DIM, fontSize: '14px', lineHeight: 1.8, marginBottom: '24px', maxWidth: '260px', marginTop: '-6px' }}>
-              اولین پلتفرم تخصصی بیلیارد ایران
+              اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران
             </p>
 
             {/* Socials */}
