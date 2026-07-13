@@ -528,7 +528,6 @@ export default function SellersPage() {
         @media(max-width:640px){
           .dd-label { display: none !important; }
           .dd-btn { min-width: 0 !important; padding: 9px 11px !important; }
-          .sel-count { display: none !important; }
         }
         /* more-filters drawer / sheet */
         @keyframes ovIn { from{opacity:0} to{opacity:1} }
@@ -629,22 +628,10 @@ MARKET PLACE . BILLIARD HUB
             <Dropdown label="دسته‌بندی:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
             {/* ۲ مرتب‌سازی (بهترین امتیاز) */}
             <Dropdown label="نمایش بر اساس:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={160} />
-
-            {/* ۳ نمای لیست / معمولی */}
-            <div style={{ display: 'flex', gap: 4 }}>
-              {([['grid', <svg key="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => (
-                <button key={v} onClick={() => setView(v as 'grid'|'list')} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
-                  width: 36, height: 36, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
-                  border: `1px solid ${view === v ? 'rgba(199,166,106,0.4)' : 'rgba(28,28,26,0.1)'}`,
-                  background: view === v ? 'rgba(199,166,106,0.12)' : '#fff', color: view === v ? GOLD_D : TEXT_MUT,
-                }}>{icon}</button>
-              ))}
-            </div>
-
-            {/* ۴ وضعیت (همه فروشگاه‌ها) */}
+            {/* ۳ وضعیت (همه فروشگاه‌ها) */}
             <Dropdown label="وضعیت:" options={STATUS_OPTIONS} value={status} onChange={setStatus} minWidth={140} />
 
-            {/* ۵ نزدیک من */}
+            {/* ۴ نزدیک من */}
             <button onClick={getLocation} title={locError ? 'دسترسی به موقعیت رد شد' : 'نزدیک‌ترین فروشگاه‌ها'} style={{
               display: 'flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, fontWeight: 700,
               border: nearMe ? `1.5px solid ${GOLD}` : locError ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(28,28,26,0.1)',
@@ -656,10 +643,16 @@ MARKET PLACE . BILLIARD HUB
               نزدیک من
             </button>
 
-            {/* شمارش نتایج — روی موبایل حذف */}
-            <span className="sel-count" style={{ marginRight: 'auto', fontSize: 12.5, color: TEXT_MUT, whiteSpace: 'nowrap' }}>
-              <b style={{ color: TEXT, fontWeight: 800 }}>{filtered.length.toLocaleString('fa-IR')}</b> فروشگاه
-            </span>
+            {/* ۵ نمای لیست / معمولی — کنار نزدیک من */}
+            <div style={{ display: 'flex', gap: 4 }}>
+              {([['grid', <svg key="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => (
+                <button key={v} onClick={() => setView(v as 'grid'|'list')} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
+                  width: 36, height: 36, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
+                  border: `1px solid ${view === v ? 'rgba(199,166,106,0.4)' : 'rgba(28,28,26,0.1)'}`,
+                  background: view === v ? 'rgba(199,166,106,0.12)' : '#fff', color: view === v ? GOLD_D : TEXT_MUT,
+                }}>{icon}</button>
+              ))}
+            </div>
             </div>
           </div>
 
