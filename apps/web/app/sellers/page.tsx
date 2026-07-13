@@ -549,7 +549,7 @@ export default function SellersPage() {
       <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
         {/* ─────── HERO — coaches-style animated (light) ─────── */}
-        <section style={{ position: 'relative', minHeight: 'clamp(280px,34vw,360px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+        <section style={{ position: 'relative', minHeight: 'clamp(150px,20vw,210px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
           {/* aurora blobs */}
           <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
             <div style={{ position: 'absolute', right: '-8%', top: '6%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)', filter: 'blur(58px)', animation: 'blob1 15s ease-in-out infinite' }} />

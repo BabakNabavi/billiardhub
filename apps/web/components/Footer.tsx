@@ -123,9 +123,9 @@ export default function Footer() {
           display: flex;
           align-items: center;
           gap: 5px;
-          padding: 5px 0;
+          padding: 3px 0;
           transition: color 0.22s ease;
-          line-height: 1.5;
+          line-height: 1.45;
         }
         .ft-link:hover { color: ${GOLD}; }
         .ft-link svg { opacity: 0; transition: opacity 0.22s ease; flex-shrink: 0; }
@@ -148,29 +148,30 @@ export default function Footer() {
           box-shadow: 0 4px 14px rgba(199,166,106,0.18);
         }
         @media (max-width: 900px) {
-          .ft-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
+          .ft-grid { grid-template-columns: 1fr 1fr !important; gap: 20px 28px !important; margin-bottom: 30px !important; }
           .ft-brand { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
-          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 20px !important; }
+          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 16px 14px !important; }
           .ft-brand { grid-column: 1 / -1 !important; }
-          .ft-inner { padding: 36px 20px 24px !important; }
-          .ft-bottom { flex-direction: column !important; gap: 14px !important; text-align: center; }
+          .ft-inner { padding: 26px 18px 18px !important; }
+          .ft-bottom { flex-direction: column !important; gap: 10px !important; text-align: center; }
           .ft-bottom-links { justify-content: center !important; }
-          .ft-link { font-size: 12px !important; padding: 4px 0 !important; }
+          .ft-link { font-size: 12px !important; padding: 2.5px 0 !important; }
           .ft-link svg { display: none; }
+          .ft-heading { margin-bottom: 10px !important; }
         }
       `}</style>
 
-      <div className="ft-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '60px 7% 28px' }}>
+      <div className="ft-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 7% 22px' }}>
 
         {/* ── Main grid ─────────────────────────────── */}
-        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr', gap: '52px', marginBottom: '52px' }}>
+        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr', gap: '36px', marginBottom: '32px' }}>
 
           {/* Brand column */}
           <div className="ft-brand">
             {/* Logo + wordmark */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
                 src="/images/Logo/logo1.png"
                 alt="بیلیارد هاب"
@@ -189,7 +190,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <p style={{ color: DIM, fontSize: '14px', lineHeight: 1.8, marginBottom: '24px', maxWidth: '260px', marginTop: '-6px' }}>
+            <p style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.7, marginBottom: '16px', maxWidth: '260px', marginTop: '-2px' }}>
               اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران
             </p>
 
@@ -206,7 +207,7 @@ export default function Footer() {
           {/* Nav columns */}
           {nav.map(col => (
             <div key={col.heading}>
-              <div style={{ fontSize: '11px', color: col.color, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '18px' }}>{col.heading}</div>
+              <div className="ft-heading" style={{ fontSize: '11px', color: col.color, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '13px' }}>{col.heading}</div>
               {col.links.map(item => (
                 <Link key={item.href} href={item.href} className="ft-link">
                   <ChevronLeft size={10} />
@@ -218,7 +219,7 @@ export default function Footer() {
         </div>
 
         {/* ── Contact strip ─────────────────────────── */}
-        <div style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '18px 0', marginBottom: '22px', display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+        <div style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '13px 0', marginBottom: '16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           {[
             { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، ایران' },
             { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: '۰۲۱-۱۲۳۴۵۶۷۸' },
@@ -232,8 +233,8 @@ export default function Footer() {
 
         {/* ── Bottom bar ────────────────────────────── */}
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: DIM2 }}>© ۱۴۰۳ بیلیارد هاب — تمام حقوق محفوظ است</div>
-          <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.22)', letterSpacing: '0.12em' }}>BILLIARDHUB · IRAN · 2024</div>
+          <div style={{ fontSize: '13px', color: DIM2 }}>© ۱۴۰۵ بیلیارد هاب — تمام حقوق محفوظ است</div>
+          <div style={{ fontSize: '11px', color: 'rgba(26,25,23,0.22)', letterSpacing: '0.12em' }}>BILLIARDHUB · IRAN · 2026</div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
             {['حریم خصوصی', 'قوانین', 'تماس با ما'].map(item => (
               <span key={item} style={{ fontSize: '13px', color: DIM2, cursor: 'pointer', transition: 'color 0.22s ease' }}

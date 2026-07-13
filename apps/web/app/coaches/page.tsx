@@ -14,12 +14,6 @@ const TEXT    = '#111110'
 const TEXT_S  = 'rgba(17,17,16,0.52)'
 const TEXT_M  = 'rgba(17,17,16,0.28)'
 
-/* card colors (photo cards stay dark) */
-const CARD    = '#0E0D0B'
-const CW      = '#F2EDE4'
-const CW_D    = 'rgba(242,237,228,0.52)'
-const CW_M    = 'rgba(242,237,228,0.26)'
-
 const SPECS: Record<string, { label: string; color: string; glow: string }> = {
   snooker:  { label: 'اسنوکر',       color: '#7C3AED', glow: 'rgba(124,58,237,0.30)' },
   pocket:   { label: 'پاکت بیلیارد', color: GOLD_D,    glow: 'rgba(154,110,56,0.30)' },
@@ -104,7 +98,7 @@ function StoryRing({ coach, size, onOpen }: { coach: Coach; size: number; onOpen
       }}>
         <div style={{
           width:'100%', height:'100%', borderRadius:'50%',
-          border:'2px solid rgba(7,6,4,0.60)',
+          border:'2px solid #FFFFFF',
           background:`linear-gradient(135deg,${g1},${g2})`,
           display:'flex', alignItems:'center', justifyContent:'center',
           color:'#fff', fontWeight:900, fontSize: size > 40 ? 19 : 13,
@@ -180,28 +174,20 @@ export default function CoachesPage() {
         .fpill{transition:all .18s cubic-bezier(.4,0,.2,1);}
         .fpill:hover{background:rgba(0,0,0,0.06)!important;}
 
-        /* cards */
-        .ccard{cursor:pointer;transition:transform .30s cubic-bezier(.4,0,.2,1),box-shadow .30s;position:relative;}
+        /* cards — light, explore-menu inspired */
+        .ccard{cursor:pointer;transition:transform .30s cubic-bezier(.4,0,.2,1),box-shadow .30s,border-color .30s;position:relative;}
         .ccard:hover{
-          transform:translateY(-5px);
+          transform:translateY(-6px);
+          border-color:rgba(199,166,106,0.42)!important;
           box-shadow:
-            0 0 0 1.5px rgba(199,166,106,0.55),
-            0 0 24px rgba(199,166,106,0.12),
-            0 20px 48px rgba(0,0,0,0.18) !important;
+            0 0 0 3px rgba(199,166,106,0.10),
+            0 16px 44px rgba(199,166,106,0.15),
+            0 6px 18px rgba(0,0,0,0.08) !important;
         }
-        .cphoto{transition:transform .60s cubic-bezier(.4,0,.2,1),filter .5s;}
-        .ccard:hover .cphoto{transform:scale(1.09);filter:brightness(1.06) saturate(1.08);}
+        .cphoto{transition:transform .60s cubic-bezier(.4,0,.2,1);}
+        .ccard:hover .cphoto{transform:scale(1.06);}
         .cavatar{transition:transform .40s cubic-bezier(.4,0,.2,1);}
-        .ccard:hover .cavatar{transform:scale(1.04);}
-        .cdrawer{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1);}
-        .ccard:hover .cdrawer{max-height:130px;}
-        .ccard::before{
-          content:'';position:absolute;inset:0;z-index:4;border-radius:inherit;pointer-events:none;
-          background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,0.06) 50%,transparent 62%);
-          opacity:0;transition:opacity .25s;
-        }
-        .ccard:hover::before{opacity:1;animation:shimmerSweep .65s ease;}
-        @keyframes shimmerSweep{0%{background-position:-200% 0}100%{background-position:400% 0}}
+        .ccard:hover .cavatar{transform:scale(1.05);}
 
         /* buttons */
         .btnG{transition:background .18s,transform .14s,box-shadow .18s;}
@@ -218,10 +204,6 @@ export default function CoachesPage() {
         @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
 
-        /* mobile: no hover — always show drawer + photo zoom */
-        @media(hover:none),(max-width:700px){
-          .cdrawer{max-height:130px!important;}
-        }
       `}</style>
 
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
@@ -409,106 +391,104 @@ export default function CoachesPage() {
                 const [g1, g2] = getGrad(coach.id)
                 return (
                   <article key={coach.id} className="ccard" style={{
-                    borderRadius:14, overflow:'hidden',
-                    background:CARD,
-                    boxShadow:'0 4px 24px rgba(0,0,0,0.14)',
+                    borderRadius:18, overflow:'hidden',
+                    background:'#FFFFFF',
+                    border:'1px solid rgba(0,0,0,0.06)',
+                    boxShadow:'0 2px 12px rgba(0,0,0,0.05)',
                     animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
                     display:'flex', flexDirection:'column',
                   }}>
 
-                    {/* ── Banner (decorative) ── */}
-                    <div style={{ position:'relative', paddingTop:'46%', flexShrink:0, overflow:'hidden' }}>
+                    {/* ── Cover (specialty-tinted) ── */}
+                    <div style={{ position:'relative', paddingTop:'40%', flexShrink:0, overflow:'hidden' }}>
+                      <div className="cphoto" style={{ position:'absolute', inset:0,
+                        background:`linear-gradient(145deg,${g1} 0%,${g2} 100%)` }}/>
                       <div style={{ position:'absolute', inset:0,
-                        background:`linear-gradient(145deg,${g1}55 0%,${g2}CC 100%)` }}/>
-                      <div style={{ position:'absolute', inset:0,
-                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
-                        backgroundSize:'22px 22px' }}/>
+                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)',
+                        backgroundSize:'18px 18px' }}/>
                       {coach.photo && (
                         <img className="cphoto" src={coach.photo} alt={coach.name}
                           style={{ position:'absolute', inset:0, width:'100%', height:'100%',
                             objectFit:'cover', objectPosition:'center top' }}/>
                       )}
-                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:40,
-                        background:`linear-gradient(to bottom,transparent,${CARD})`, zIndex:2 }}/>
+                      {/* specialty pill */}
+                      {sp && (
+                        <span style={{ position:'absolute', top:9, insetInlineEnd:9, display:'inline-flex', alignItems:'center', gap:5,
+                          fontSize:9.5, fontWeight:800, color:'#fff', letterSpacing:'0.04em',
+                          background:'rgba(0,0,0,0.30)', backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)',
+                          borderRadius:20, padding:'3px 9px', zIndex:3 }}>
+                          <span style={{ width:4, height:4, borderRadius:'50%', background:sp.color,
+                            boxShadow:`0 0 6px ${sp.color}` }}/>
+                          {sp.label}
+                        </span>
+                      )}
+                      {/* fade to white */}
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:44,
+                        background:'linear-gradient(to bottom,transparent,#FFFFFF)', zIndex:2 }}/>
                     </div>
 
                     {/* ── Info zone ── */}
-                    <div style={{ padding:'0 14px 13px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+                    <div style={{ padding:'0 13px 13px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
 
-                      {/* Avatar above name — story trigger (moved from top-right) */}
-                      <div style={{ marginTop:-32, marginBottom:11, position:'relative', zIndex:5 }}>
+                      {/* Avatar above name — story trigger */}
+                      <div style={{ marginTop:-34, marginBottom:9, position:'relative', zIndex:5 }}>
                         {coach.hasStory && coach.storyImage ? (
-                          <StoryRing coach={coach} size={62} onOpen={() => setOpenStory(coach)}/>
+                          <StoryRing coach={coach} size={64} onOpen={() => setOpenStory(coach)}/>
                         ) : (
-                          <div className="cavatar" style={{ width:62, height:62, borderRadius:'50%', padding:2.5,
-                            background:'rgba(255,255,255,0.16)', boxShadow:'0 8px 24px rgba(0,0,0,0.28)' }}>
+                          <div className="cavatar" style={{ width:64, height:64, borderRadius:'50%', padding:2.5,
+                            background:'#FFFFFF', boxShadow:'0 6px 20px rgba(0,0,0,0.14)' }}>
                             <div style={{ width:'100%', height:'100%', borderRadius:'50%',
-                              border:'2px solid rgba(7,6,4,0.55)', background:`linear-gradient(135deg,${g1},${g2})`,
+                              background:`linear-gradient(135deg,${g1},${g2})`,
                               display:'flex', alignItems:'center', justifyContent:'center',
-                              fontSize:22, fontWeight:900, color:'#fff', lineHeight:1 }}>
+                              fontSize:23, fontWeight:900, color:'#fff', lineHeight:1 }}>
                               {coach.name[0]}
                             </div>
                           </div>
                         )}
                       </div>
 
-                      <h3 style={{ fontSize:15.5, fontWeight:900, color:CW, lineHeight:1.15,
-                        letterSpacing:'-0.02em', marginBottom:5 }}>
+                      <h3 style={{ fontSize:15.5, fontWeight:900, color:TEXT, lineHeight:1.15,
+                        letterSpacing:'-0.02em', marginBottom:6 }}>
                         {coach.name}
                       </h3>
 
-                      {sp && (
-                        <span style={{ display:'inline-flex', alignItems:'center', gap:4,
-                          fontSize:9.5, fontWeight:700, color:sp.color, letterSpacing:'0.12em', marginBottom:6 }}>
-                          <span style={{ width:4, height:4, borderRadius:'50%', background:sp.color,
-                            boxShadow:`0 0 5px ${sp.glow}`, flexShrink:0 }}/>
-                          {sp.label}
-                        </span>
-                      )}
-
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, alignSelf:'stretch' }}>
-                        <span style={{ fontSize:11, color:CW_D }}>{coach.city}</span>
-                        <span style={{ width:3, height:3, borderRadius:'50%', background:CW_M }}/>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginBottom:11 }}>
+                        <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
+                        <span style={{ width:3, height:3, borderRadius:'50%', background:'rgba(17,17,16,0.18)' }}/>
                         <div style={{ display:'flex', alignItems:'center', gap:3 }}>
-                          <Stars r={coach.rating} size={8}/>
-                          <span style={{ fontSize:11, fontWeight:700, color:CW }}>{coach.rating}</span>
+                          <Stars r={coach.rating} size={9}/>
+                          <span style={{ fontSize:11.5, fontWeight:800, color:'#D97706' }}>{coach.rating}</span>
                         </div>
                       </div>
 
-                      {/* Drawer */}
-                      <div className="cdrawer" style={{ alignSelf:'stretch' }}>
-                        <div style={{ height:'1px',
-                          background:'linear-gradient(to left,transparent,rgba(199,166,106,0.28),transparent)',
-                          margin:'9px 0' }}/>
-                        <div style={{ display:'flex', gap:10, fontSize:11, color:CW_D, marginBottom:8 }}>
-                          <span style={{ display:'flex', alignItems:'center', gap:3 }}>
-                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2">
-                              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            {coach.experience}س
-                          </span>
-                          <span style={{ display:'flex', alignItems:'center', gap:3 }}>
-                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2">
-                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                            </svg>
-                            {fmt(coach.students)}
-                          </span>
-                          <span style={{ fontSize:11, color:'#4ADE80', fontWeight:700, marginRight:'auto' }}>
-                            {fmt(Math.round(coach.sessionPrice / 1000))}K
-                          </span>
+                      {/* Stats — always visible */}
+                      <div style={{ alignSelf:'stretch', display:'flex', gap:6, marginBottom:11 }}>
+                        <div style={{ flex:1, background:'rgba(17,17,16,0.04)', borderRadius:10, padding:'7px 3px' }}>
+                          <div style={{ fontSize:13.5, fontWeight:900, color:TEXT, lineHeight:1 }}>{coach.experience}</div>
+                          <div style={{ fontSize:8.5, color:TEXT_M, marginTop:3 }}>سال سابقه</div>
                         </div>
-                        <Link href={`/coaches/${coach.id}`} className="btnGO" style={{
-                          textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:5,
-                          padding:'8px 10px', border:'1px solid rgba(199,166,106,0.26)',
-                          borderRadius:6, fontSize:11.5, fontWeight:700, color:GOLD,
-                          background:'rgba(199,166,106,0.06)',
-                        }}>
-                          مشاهده پروفایل
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <polyline points="9 18 15 12 9 6"/>
-                          </svg>
-                        </Link>
+                        <div style={{ flex:1, background:'rgba(17,17,16,0.04)', borderRadius:10, padding:'7px 3px' }}>
+                          <div style={{ fontSize:13.5, fontWeight:900, color:TEXT, lineHeight:1 }}>{fmt(coach.students)}</div>
+                          <div style={{ fontSize:8.5, color:TEXT_M, marginTop:3 }}>هنرجو</div>
+                        </div>
+                        <div style={{ flex:1, background:'rgba(21,128,61,0.07)', borderRadius:10, padding:'7px 3px' }}>
+                          <div style={{ fontSize:13.5, fontWeight:900, color:'#15803D', lineHeight:1 }}>{fmt(Math.round(coach.sessionPrice / 1000))}K</div>
+                          <div style={{ fontSize:8.5, color:'rgba(21,128,61,0.60)', marginTop:3 }}>هر جلسه</div>
+                        </div>
                       </div>
+
+                      <Link href={`/coaches/${coach.id}`} className="btnGO" style={{
+                        alignSelf:'stretch',
+                        textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+                        padding:'9px 10px', border:'1px solid rgba(199,166,106,0.30)',
+                        borderRadius:9, fontSize:12, fontWeight:800, color:GOLD_D,
+                        background:'rgba(199,166,106,0.07)',
+                      }}>
+                        مشاهده پروفایل
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                      </Link>
                     </div>
 
                   </article>

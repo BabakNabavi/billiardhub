@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Search, User, LogIn, ChevronLeft } from 'lucide-react'
-import { useCartStore } from '../../store/cart.store'
+import { Search, User, LogIn, ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { SHOP_PRODUCTS } from './products'
 
@@ -229,12 +228,11 @@ function toFa(v: string | number) {
 
 // ── Shop Top Bar ──────────────────────────────────────────────
 function ShopTopBar({
-  searchInput, onSearchInput, onSearch, cartCount, user,
+  searchInput, onSearchInput, onSearch, user,
 }: {
   searchInput: string
   onSearchInput: (v: string) => void
   onSearch: (e: React.FormEvent) => void
-  cartCount: number
   user: { firstName: string; avatar?: string | null } | null
 }) {
   const [focused, setFocused] = useState(false)
@@ -293,24 +291,6 @@ function ShopTopBar({
             }}
           />
         </form>
-        {/* Cart */}
-        <Link href="/cart" style={{
-          textDecoration: 'none', flexShrink: 0, position: 'relative',
-          width: 40, height: 40, borderRadius: 10,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: cartCount > 0 ? LQ.bgGold : LQ.bg,
-          backdropFilter: LQ.blur, WebkitBackdropFilter: LQ.blur,
-          border: cartCount > 0 ? LQ.borderGold : LQ.border,
-          boxShadow: cartCount > 0 ? LQ.shadowGold : LQ.shadow,
-          transition: 'all 0.25s',
-        }}>
-          <ShoppingCart size={18} color={cartCount > 0 ? GOLD : TEXT_SEC} strokeWidth={2} />
-          {cartCount > 0 && (
-            <span style={{ position: 'absolute', top: -6, left: -6, minWidth: 18, height: 18, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', boxShadow: '0 2px 6px rgba(199,166,106,0.45)' }}>
-              {cartCount > 9 ? '۹+' : toFa(cartCount)}
-            </span>
-          )}
-        </Link>
         {/* Auth */}
         {user ? (
           <Link href="/dashboard" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, background: LQ.bg, backdropFilter: LQ.blur, WebkitBackdropFilter: LQ.blur, border: LQ.border, borderRadius: 10, padding: '7px 13px', boxShadow: LQ.shadow, transition: 'all 0.25s' }}>
@@ -1193,7 +1173,6 @@ function DualBannerSection() {
 export default function ShopPage() {
   const [searchInput, setSearchInput] = useState('')
   const [userProds, setUserProds] = useState<typeof PRODUCTS>([])
-  const cartCount = useCartStore(s => s.totalItems())
   const user      = useAuthStore(s => s.user)
 
   /* فیلترهای کاتالوگ اصلی */
@@ -1285,7 +1264,6 @@ export default function ShopPage() {
           searchInput={searchInput}
           onSearchInput={setSearchInput}
           onSearch={handleSearch}
-          cartCount={cartCount}
           user={user}
         />
         <HeroSlider />

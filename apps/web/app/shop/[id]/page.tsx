@@ -3,8 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ShoppingCart, Store, Phone, Heart, ShieldCheck, Truck, ArrowLeftRight } from 'lucide-react'
-import { useCartStore } from '../../../store/cart.store'
+import { ChevronLeft, Store, Phone, Heart, ShieldCheck, Truck, ArrowLeftRight } from 'lucide-react'
 import { SHOP_PRODUCTS, CAT_LABELS, type ShopProduct } from '../products'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
@@ -63,7 +62,6 @@ export default function ProductDetailPage() {
     [id]
   )
 
-  const cartCount = useCartStore(s => s.totalItems())
   const [wished, setWished] = useState(false)
 
   const related = useMemo(
@@ -114,14 +112,6 @@ export default function ProductDetailPage() {
           <Link href="/shop" className="lq-lift" style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 12, ...lqWhite, fontSize: 12.5, fontWeight: 700, color: TEXT, textDecoration: 'none' }}>
             <ChevronLeft size={15} strokeWidth={2.4} />
             بازگشت
-          </Link>
-          <Link href="/cart" className="lq-lift" style={{ position: 'relative', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', ...lqWhite, textDecoration: 'none', color: TEXT }}>
-            <ShoppingCart size={18} strokeWidth={2} />
-            {cartCount > 0 && (
-              <span style={{ position: 'absolute', top: -6, insetInlineStart: -6, minWidth: 18, height: 18, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},${GOLDD})`, color: '#fff', fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
-                {cartCount > 9 ? '۹+' : toFa(cartCount)}
-              </span>
-            )}
           </Link>
         </div>
       </header>
