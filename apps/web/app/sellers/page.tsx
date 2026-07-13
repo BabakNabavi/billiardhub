@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const GOLD     = '#C7A66A'
+const GOLD_D   = '#9A6E38'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.52)'
 const TEXT_MUT = 'rgba(28,28,26,0.32)'
@@ -154,102 +156,95 @@ function Stars({ rating }: { rating: number }) {
   )
 }
 
-// ── Avatar ────────────────────────────────────────────────────
-function SellerAvatar({ name, size = 56 }: { name: string; size?: number }) {
-  const initials = name.charAt(0)
+// ── Logo with gold story ring (fully visible) ─────────────────
+function SellerLogo({ name, size = 62 }: { name: string; size?: number }) {
   const hues = [
-    ['#C7A66A','#A07840'],
-    ['#6A9EC7','#4070A0'],
-    ['#9EC76A','#70A040'],
-    ['#C76A9E','#A04070'],
-    ['#6AC79E','#40A070'],
-    ['#C79E6A','#A07040'],
+    ['#C7A66A','#A07840'], ['#6A9EC7','#4070A0'], ['#9EC76A','#70A040'],
+    ['#C76A9E','#A04070'], ['#6AC79E','#40A070'], ['#C79E6A','#A07040'],
   ]
   const idx = name.charCodeAt(0) % hues.length
   const [c1, c2] = hues[idx] ?? ['#C7A66A','#A07840']
   return (
     <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: `linear-gradient(135deg,${c1},${c2})`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.38, fontWeight: 900, color: '#fff',
-      boxShadow: `0 4px 16px ${c1}55`,
-      flexShrink: 0,
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      padding: 2.5, background: `linear-gradient(135deg,${GOLD},${GOLD_D})`,
+      boxShadow: `0 6px 18px rgba(199,166,106,0.45)`,
     }}>
-      {initials}
+      <div style={{
+        width: '100%', height: '100%', borderRadius: '50%',
+        border: '2.5px solid #fff',
+        background: `linear-gradient(135deg,${c1},${c2})`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: size * 0.36, fontWeight: 900, color: '#fff',
+      }}>
+        {name.charAt(0)}
+      </div>
     </div>
   )
 }
 
-// ── Seller Card ───────────────────────────────────────────────
+// ── Seller Card — modern, gold theme ──────────────────────────
 function SellerCard({ seller }: { seller: typeof SELLERS[0] }) {
   const [hov, setHov] = useState(false)
+  const router = useRouter()
   return (
     <div
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      onClick={() => router.push(`/sellers/${seller.id}`)}
       style={{
         background: '#fff',
-        borderRadius: 20,
+        borderRadius: 22,
         overflow: 'hidden',
-        border: `1.5px solid ${hov ? 'rgba(199,166,106,0.45)' : 'rgba(28,28,26,0.09)'}`,
-        boxShadow: hov ? '0 16px 44px rgba(28,28,26,0.12), 0 4px 14px rgba(199,166,106,0.10)' : '0 2px 12px rgba(28,28,26,0.06)',
+        border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
+        boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
         transform: hov ? 'translateY(-5px)' : 'none',
         transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
-        display: 'flex', flexDirection: 'column',
+        display: 'flex', flexDirection: 'column', cursor: 'pointer',
       }}
     >
       {/* banner */}
-      <div style={{ height: 132, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      <div style={{ height: 116, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <img
           src={seller.bannerImage}
           alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.04)' : 'scale(1)' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }}
         />
-        {/* gradient overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.62) 100%)' }} />
-        {/* elite badge */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
         {seller.elite && (
-          <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(199,166,106,0.92)', backdropFilter: 'blur(8px)', color: '#3a2800', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(199,166,106,0.94)', backdropFilter: 'blur(8px)', color: '#3a2800', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             نماینده رسمی
           </div>
         )}
-        {/* response time badge */}
-        <div style={{ position: 'absolute', top: 10, left: 12, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.9)', fontSize: 11, fontWeight: 600, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ position: 'absolute', top: 10, left: 12, background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.92)', fontSize: 11, fontWeight: 600, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           {seller.responseTime}
         </div>
       </div>
 
-      {/* avatar overlapping banner */}
+      {/* body */}
       <div style={{ padding: '0 18px 18px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: -28, marginBottom: 12 }}>
-          <div style={{ border: '3px solid #fff', borderRadius: '50%', boxShadow: '0 4px 14px rgba(0,0,0,0.14)' }}>
-            <SellerAvatar name={seller.name} size={56} />
-          </div>
+        {/* logo (fully visible, gold ring) + verified */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
+          <SellerLogo name={seller.name} size={62} />
           {seller.verified && (
-            <div style={{ background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)', color: GOLD, fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '4px 10px', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '4px 10px', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
               تأیید شده
             </div>
           )}
         </div>
 
-        {/* name */}
         <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: '0 0 5px', lineHeight: 1.35 }}>{seller.name}</h3>
-
-        {/* description */}
         <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
 
-        {/* rating row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
           <Stars rating={seller.rating} />
           <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>{seller.rating}</span>
           <span style={{ fontSize: 12.5, color: TEXT_MUT }}>({seller.reviewCount} نظر)</span>
         </div>
 
-        {/* meta row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12, fontSize: 13, color: TEXT_SEC }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -265,34 +260,27 @@ function SellerCard({ seller }: { seller: typeof SELLERS[0] }) {
           </span>
         </div>
 
-        {/* brands */}
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 16 }}>
           {seller.brands.map(b => (
-            <span key={b} style={{ fontSize: 11.5, fontWeight: 600, color: GOLD, background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 20, padding: '2px 9px' }}>{b}</span>
+            <span key={b} style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 20, padding: '2px 9px' }}>{b}</span>
           ))}
         </div>
 
-        {/* action buttons */}
+        {/* action buttons — LQ (طرح مشاهده و رزرو) */}
         <div style={{ display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
-          <Link href={`/sellers/${seller.id}`} style={{
-            flex: 1, padding: '10px 0', borderRadius: 11, textAlign: 'center', textDecoration: 'none',
-            background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff',
+          <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
+            flex: 1, padding: '10px 0', borderRadius: 12, textAlign: 'center', textDecoration: 'none',
+            background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
             fontSize: 13, fontWeight: 700,
-            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 3px 10px rgba(199,166,106,0.38)',
           }}>
             مشاهده فروشگاه
           </Link>
-          <a href={`tel:${seller.phone}`} style={{
-            padding: '10px 14px', borderRadius: 11, textDecoration: 'none',
-            border: '1px solid rgba(199,166,106,0.38)', color: GOLD,
-            background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px) saturate(180%)', WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 10px rgba(199,166,106,0.12)',
+          <a href={`tel:${seller.phone}`} onClick={e => e.stopPropagation()} style={{
+            padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
+            border: '1px solid rgba(28,28,26,0.12)', color: TEXT,
+            background: 'rgba(28,28,26,0.04)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background 0.2s',
-          }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.95)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.75)')}
-          >
+          }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           </a>
         </div>
