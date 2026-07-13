@@ -136,16 +136,36 @@ const SELLERS = [
   },
 ]
 
-const CITIES = ['همه', 'تهران', 'اصفهان', 'مشهد', 'شیراز']
-const SPECIALTIES = ['همه', 'چوب', 'میز', 'توپ', 'لوازم جانبی', 'اسنوکر', 'پارچه میز']
+const CATEGORY_OPTIONS = [
+  { value: 'همه',          label: 'همه دسته‌ها' },
+  { value: 'میز بیلیارد',  label: 'میز بیلیارد' },
+  { value: 'چوب',          label: 'چوب (Cue)'   },
+  { value: 'توپ',          label: 'توپ'         },
+  { value: 'لوازم جانبی',  label: 'لوازم جانبی' },
+  { value: 'پارچه میز',    label: 'پارچه میز'   },
+  { value: 'تعمیرات',      label: 'تعمیرات'     },
+  { value: 'نصب میز',      label: 'نصب میز'     },
+] as const
+const STATUS_OPTIONS = [
+  { value: 'همه',          label: 'همه فروشگاه‌ها' },
+  { value: 'verified',     label: 'تأیید شده'      },
+  { value: 'elite',        label: 'نماینده رسمی'   },
+  { value: 'top',          label: 'فروشگاه برتر'   },
+] as const
 const SORT_OPTIONS = [
   { value: 'rating',   label: 'بهترین امتیاز'     },
-  { value: 'products', label: 'بیشترین محصول'     },
-  { value: 'reviews',  label: 'بیشترین نظر'       },
-  { value: 'response', label: 'سریع‌ترین پاسخ‌گویی' },
+  { value: 'popular',  label: 'محبوب‌ترین'        },
+  { value: 'products', label: 'بیشترین محصولات'   },
   { value: 'newest',   label: 'جدیدترین'          },
+  { value: 'response', label: 'سریع‌ترین پاسخگویی' },
 ] as const
 type SortKey = typeof SORT_OPTIONS[number]['value']
+
+const ALL_BRANDS = Array.from(new Set(SELLERS.flatMap(s => s.brands)))
+const SERVICE_OPTIONS  = ['نصب میز', 'تعمیرات', 'مشاوره خرید', 'فروش حضوری']
+const DELIVERY_OPTIONS = ['ارسال سراسر ایران', 'ارسال رایگان', 'ارسال فوری']
+const RATING_OPTIONS   = [{ v: 4, l: '۴ و بالاتر' }, { v: 4.5, l: '۴٫۵ و بالاتر' }, { v: 5, l: '۵' }]
+const RESPONSE_OPTIONS = [{ v: 1, l: 'کمتر از ۱ ساعت' }, { v: 24, l: 'کمتر از ۲۴ ساعت' }]
 
 // ── Stars ─────────────────────────────────────────────────────
 function Stars({ rating }: { rating: number }) {
@@ -423,35 +443,54 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function SellersPage() {
-  const [search,      setSearch]      = useState('')
-  const [activeCity,  setActiveCity]  = useState('همه')
-  const [activeSpec,  setActiveSpec]  = useState('همه')
-  const [onlyVerified,setOnlyVerified]= useState(false)
-  const [onlyElite,   setOnlyElite]   = useState(false)
-  const [sort,        setSort]        = useState<SortKey>('rating')
-  const [view,        setView]        = useState<'grid'|'list'>('grid')
+  const [search,   setSearch]   = useState('')
+  const [category, setCategory] = useState('همه')
+  const [status,   setStatus]   = useState('همه')
+  const [sort,     setSort]     = useState<SortKey>('rating')
+  const [view,     setView]     = useState<'grid'|'list'>('grid')
+
+  /* فیلترهای پیشرفته (کشوی «فیلترهای بیشتر») */
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [brands,     setBrands]     = useState<Set<string>>(new Set())
+  const [services,   setServices]   = useState<Set<string>>(new Set())
+  const [delivery,   setDelivery]   = useState<Set<string>>(new Set())
+  const [minRating,  setMinRating]  = useState<number | null>(null)
+  const [respMax,    setRespMax]    = useState<number | null>(null)
+  const [availOnly,  setAvailOnly]  = useState(false)
+  const [priceMin,   setPriceMin]   = useState('')
+  const [priceMax,   setPriceMax]   = useState('')
 
   const respHours = (s: typeof SELLERS[0]) =>
     parseInt(s.responseTime.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, ''), 10) || 99
+  const matchSpec = (s: typeof SELLERS[0], term: string) =>
+    s.specialties.some(sp => sp.includes(term) || term.includes(sp)) || s.description.includes(term)
 
   const filtered = useMemo(() => {
     return SELLERS
-      .filter(s => !search.trim() || s.name.includes(search.trim()) || s.city.includes(search.trim()) || s.brands.some(b => b.toLowerCase().includes(search.toLowerCase())))
-      .filter(s => activeCity === 'همه' || s.city === activeCity)
-      .filter(s => activeSpec === 'همه' || s.specialties.some(sp => sp.includes(activeSpec) || activeSpec.includes(sp)))
-      .filter(s => !onlyVerified || s.verified)
-      .filter(s => !onlyElite || s.elite)
+      .filter(s => !search.trim() || s.name.includes(search.trim()) || s.city.includes(search.trim()) || s.brands.some(b => b.toLowerCase().includes(search.toLowerCase())) || s.specialties.some(sp => sp.includes(search.trim())))
+      .filter(s => category === 'همه' || matchSpec(s, category))
+      .filter(s => status === 'همه' || (status === 'verified' && s.verified) || (status === 'elite' && s.elite) || (status === 'top' && s.rating >= 4.7))
+      .filter(s => brands.size === 0 || s.brands.some(b => brands.has(b)))
+      .filter(s => services.size === 0 || [...services].some(sv => matchSpec(s, sv)))
+      .filter(s => minRating === null || s.rating >= minRating)
+      .filter(s => respMax === null || respHours(s) <= respMax)
       .sort((a, b) => {
         if (sort === 'rating')   return b.rating - a.rating
+        if (sort === 'popular')  return b.reviewCount - a.reviewCount
         if (sort === 'products') return b.productCount - a.productCount
-        if (sort === 'reviews')  return b.reviewCount - a.reviewCount
         if (sort === 'response') return respHours(a) - respHours(b)
         return b.sinceYear - a.sinceYear
       })
-  }, [search, activeCity, activeSpec, onlyVerified, onlyElite, sort])
+  }, [search, category, status, brands, services, minRating, respMax, sort])
 
-  const cityOptions = [{ value: 'همه', label: 'همه شهرها' }, ...CITIES.filter(c => c !== 'همه').map(c => ({ value: c, label: c }))]
-  const specOptions = [{ value: 'همه', label: 'همه تخصص‌ها' }, ...SPECIALTIES.filter(c => c !== 'همه').map(c => ({ value: c, label: c }))]
+  const advCount = brands.size + services.size + delivery.size + (minRating !== null ? 1 : 0) + (respMax !== null ? 1 : 0) + (availOnly ? 1 : 0) + (priceMin ? 1 : 0) + (priceMax ? 1 : 0)
+  const toggle = <T,>(set: Set<T>, setFn: (s: Set<T>) => void, v: T) => { const n = new Set(set); if (n.has(v)) n.delete(v); else n.add(v); setFn(n) }
+  const clearAdvanced = () => { setBrands(new Set()); setServices(new Set()); setDelivery(new Set()); setMinRating(null); setRespMax(null); setAvailOnly(false); setPriceMin(''); setPriceMax('') }
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [drawerOpen])
 
   return (
     <>
@@ -482,6 +521,22 @@ export default function SellersPage() {
         }
         .filt-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
         .filt-scroll::-webkit-scrollbar { display: none; }
+        /* more-filters drawer / sheet */
+        @keyframes ovIn { from{opacity:0} to{opacity:1} }
+        @keyframes drwX { from{transform:translateX(-100%)} to{transform:none} }
+        @keyframes drwY { from{transform:translateY(100%)} to{transform:none} }
+        .sel-drawer {
+          position: absolute; z-index: 1; top: 0; bottom: 0; left: 0;
+          width: min(420px, 92vw); display: flex; flex-direction: column;
+          background: #FBFAF8; border-radius: 0 22px 22px 0;
+          box-shadow: 0 0 60px rgba(20,18,14,0.28);
+          animation: drwX .28s cubic-bezier(.22,1,.36,1);
+        }
+        @media(max-width:640px){
+          .sel-drawer { top: auto; left: 0; right: 0; width: auto; max-height: 86vh;
+            border-radius: 22px 22px 0 0; animation: drwY .3s cubic-bezier(.22,1,.36,1); }
+          .sel-filterbar { position: static !important; }
+        }
       `}</style>
 
       <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
@@ -556,31 +611,22 @@ export default function SellersPage() {
         {/* ─────── BODY ─────── */}
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
 
-          {/* ─── FILTER BAR (sticky glass, practical filters) ─── */}
-          <div style={{ position: 'sticky', top: 12, zIndex: 30, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 18, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: '11px 14px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* ─── FILTER BAR — Apple-minimal ─── */}
+          <div className="sel-filterbar" style={{ position: 'sticky', top: 12, zIndex: 30, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: 10, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
 
-            <Dropdown label="شهر:"   options={cityOptions} value={activeCity} onChange={setActiveCity} minWidth={120} />
-            <Dropdown label="تخصص:" options={specOptions} value={activeSpec} onChange={setActiveSpec} minWidth={130} />
+            <Dropdown label="دسته‌بندی:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
+            <Dropdown label="وضعیت:"     options={STATUS_OPTIONS}   value={status}   onChange={setStatus}   minWidth={140} />
+            <Dropdown label="نمایش بر اساس:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={160} />
 
-            <button className="s-chip" onClick={() => setOnlyVerified(!onlyVerified)} style={{
-              padding: '8px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              border: onlyVerified ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.1)',
-              background: onlyVerified ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
-              color: onlyVerified ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-              display: 'flex', alignItems: 'center', gap: 6,
+            {/* More filters */}
+            <button onClick={() => setDrawerOpen(true)} style={{
+              display: 'flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, fontWeight: 700,
+              border: advCount > 0 ? `1.5px solid ${GOLD}` : '1px solid rgba(28,28,26,0.1)',
+              background: advCount > 0 ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.7)', color: advCount > 0 ? GOLD_D : TEXT_SEC, transition: 'all .2s',
             }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-              تأیید شده
-            </button>
-            <button className="s-chip" onClick={() => setOnlyElite(!onlyElite)} style={{
-              padding: '8px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              border: onlyElite ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.1)',
-              background: onlyElite ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
-              color: onlyElite ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-              نماینده رسمی
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+              فیلترها
+              {advCount > 0 && <span style={{ minWidth: 17, height: 17, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{advCount.toLocaleString('fa-IR')}</span>}
             </button>
 
             {/* left cluster */}
@@ -588,44 +634,168 @@ export default function SellersPage() {
               <span style={{ fontSize: 12.5, color: TEXT_MUT, whiteSpace: 'nowrap' }}>
                 <b style={{ color: TEXT, fontWeight: 800 }}>{filtered.length.toLocaleString('fa-IR')}</b> فروشگاه
               </span>
-              <Dropdown label="مرتب:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={140} />
-              <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 12, background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)' }}>
-                {(['grid', 'list'] as const).map(v => {
-                  const on = view === v
-                  return (
-                    <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
-                      width: 34, height: 30, borderRadius: 9, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: on ? '#fff' : 'transparent', color: on ? GOLD_D : TEXT_MUT,
-                      boxShadow: on ? '0 2px 6px rgba(28,28,26,0.12)' : 'none', transition: 'all 0.18s',
-                    }}>
-                      {v === 'grid'
-                        ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-                        : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>}
-                    </button>
-                  )
-                })}
+              <div style={{ display: 'flex', gap: 4 }}>
+                {([['grid', <svg key="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => (
+                  <button key={v} onClick={() => setView(v as 'grid'|'list')} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
+                    width: 36, height: 36, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
+                    border: `1px solid ${view === v ? 'rgba(199,166,106,0.4)' : 'rgba(28,28,26,0.1)'}`,
+                    background: view === v ? 'rgba(199,166,106,0.12)' : '#fff', color: view === v ? GOLD_D : TEXT_MUT,
+                  }}>{icon}</button>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* ─── GRID / LIST ─── */}
-          {filtered.length > 0 ? (
-            <div className={view === 'grid' ? 'sel-grid' : 'sel-list'} style={{ marginBottom: 56 }}>
-              {filtered.map((s, i) => (
-                <div key={s.id} style={{ animation: `fadeUp ${0.3 + i * 0.05}s ease both` }}>
-                  <SellerCard seller={s} view={view} />
-                </div>
-              ))}
-            </div>
-          ) : (
+          {/* ─── GRID / LIST (like clubs page) ─── */}
+          {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
               <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ margin: '0 auto 16px', display: 'block', opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>فروشگاهی یافت نشد</p>
               <p style={{ fontSize: 14 }}>فیلترها را تغییر دهید یا جستجو را پاک کنید</p>
             </div>
+          ) : view === 'grid' ? (
+            <div className="sel-grid" style={{ marginBottom: 56 }}>
+              {filtered.map((s, i) => (
+                <div key={s.id} style={{ animation: `fadeUp ${0.3 + i * 0.05}s ease both` }}>
+                  <SellerCard seller={s} view="grid" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 56 }}>
+              {filtered.map((s, i) => (
+                <div key={s.id} style={{ animation: `fadeUp ${0.28 + i * 0.04}s ease both` }}>
+                  <SellerCard seller={s} view="list" />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
+
+      {/* ═══ MORE FILTERS — side drawer (desktop) / bottom sheet (mobile) ═══ */}
+      {drawerOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
+          <div onClick={() => setDrawerOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(3px)', animation: 'ovIn .2s ease' }} />
+          <div className="sel-drawer">
+            {/* header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid rgba(28,28,26,0.07)', flexShrink: 0 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: TEXT, margin: 0 }}>فیلترهای بیشتر</h3>
+              <button aria-label="بستن" onClick={() => setDrawerOpen(false)} style={{ width: 36, height: 36, borderRadius: 11, border: '1px solid rgba(28,28,26,0.1)', background: 'rgba(28,28,26,0.04)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: TEXT_SEC }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            {/* body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: 22, display: 'flex', flexDirection: 'column', gap: 26 }}>
+              {/* Brands */}
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>برندها</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {ALL_BRANDS.map(b => {
+                    const on = brands.has(b)
+                    return (
+                      <button key={b} onClick={() => toggle(brands, setBrands, b)} style={{
+                        padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'all .18s',
+                        border: on ? `1px solid ${GOLD}` : '1px solid rgba(28,28,26,0.12)', background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_SEC,
+                      }}>{b}</button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Price range */}
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>محدوده قیمت (تومان)</div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <input value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="حداقل" inputMode="numeric"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 12, fontSize: 13, background: 'rgba(28,28,26,0.03)', border: '1px solid rgba(28,28,26,0.1)', outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, direction: 'rtl' }} />
+                  <input value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="حداکثر" inputMode="numeric"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 12, fontSize: 13, background: 'rgba(28,28,26,0.03)', border: '1px solid rgba(28,28,26,0.1)', outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, direction: 'rtl' }} />
+                </div>
+              </div>
+
+              {/* Services */}
+              <FilterCheckGroup title="خدمات" options={SERVICE_OPTIONS} selected={services} onToggle={v => toggle(services, setServices, v)} />
+              {/* Delivery */}
+              <FilterCheckGroup title="ارسال" options={DELIVERY_OPTIONS} selected={delivery} onToggle={v => toggle(delivery, setDelivery, v)} />
+
+              {/* Rating */}
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>امتیاز</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {RATING_OPTIONS.map(r => {
+                    const on = minRating === r.v
+                    return (
+                      <button key={r.v} onClick={() => setMinRating(on ? null : r.v)} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 12, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'all .18s',
+                        border: on ? `1px solid ${GOLD}` : '1px solid rgba(28,28,26,0.12)', background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_SEC,
+                      }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        {r.l}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Response time */}
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>زمان پاسخگویی</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {RESPONSE_OPTIONS.map(r => {
+                    const on = respMax === r.v
+                    return (
+                      <button key={r.v} onClick={() => setRespMax(on ? null : r.v)} style={{
+                        padding: '8px 14px', borderRadius: 12, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'all .18s',
+                        border: on ? `1px solid ${GOLD}` : '1px solid rgba(28,28,26,0.12)', background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_SEC,
+                      }}>{r.l}</button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Availability */}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: TEXT_SEC, fontWeight: 600 }}>
+                <input type="checkbox" checked={availOnly} onChange={() => setAvailOnly(v => !v)} style={{ width: 17, height: 17, accentColor: GOLD_D, cursor: 'pointer' }} />
+                فقط کالاهای موجود
+              </label>
+            </div>
+
+            {/* footer */}
+            <div style={{ display: 'flex', gap: 10, padding: '14px 22px', borderTop: '1px solid rgba(28,28,26,0.07)', flexShrink: 0 }}>
+              <button onClick={clearAdvanced} style={{ padding: '12px 18px', borderRadius: 13, border: '1px solid rgba(28,28,26,0.12)', background: '#fff', color: TEXT_SEC, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+                پاک کردن
+              </button>
+              <button onClick={() => setDrawerOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: 13, border: 'none', background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, color: '#fff', fontSize: 13.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', boxShadow: '0 6px 18px rgba(199,166,106,0.35)' }}>
+                نمایش {filtered.length.toLocaleString('fa-IR')} فروشگاه
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
+  )
+}
+
+/* ── checkbox group for the drawer ── */
+function FilterCheckGroup({ title, options, selected, onToggle }: { title: string; options: string[]; selected: Set<string>; onToggle: (v: string) => void }) {
+  return (
+    <div>
+      <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>{title}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+        {options.map(o => {
+          const on = selected.has(o)
+          return (
+            <label key={o} onClick={() => onToggle(o)} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: on ? TEXT : TEXT_SEC, fontWeight: on ? 700 : 500 }}>
+              <span style={{ width: 18, height: 18, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s', background: on ? GOLD_D : 'transparent', border: on ? 'none' : '1.5px solid rgba(28,28,26,0.22)' }}>
+                {on && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
+              </span>
+              {o}
+            </label>
+          )
+        })}
+      </div>
+    </div>
   )
 }
