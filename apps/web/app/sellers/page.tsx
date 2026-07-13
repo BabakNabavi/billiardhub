@@ -309,12 +309,12 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           )}
         </div>
         {/* info */}
-        <div style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
             {seller.verified && <VerifiedPill />}
           </div>
-          <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
+          <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{ratingRow}{metaRow}</div>
           <div className="sel-list-brands">{brandsRow}</div>
         </div>
@@ -415,7 +415,7 @@ function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ marginRight: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div role="listbox" style={{
-        position: 'absolute', insetInlineStart: 0, top: '100%', marginTop: 8, minWidth: minWidth + 20, zIndex: 60,
+        position: 'absolute', insetInlineStart: 0, top: '100%', marginTop: 8, minWidth: minWidth + 20, zIndex: 90,
         background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
         border: '1px solid rgba(28,28,26,0.08)', borderRadius: 14, overflow: 'hidden',
         boxShadow: '0 16px 40px rgba(28,28,26,0.16)', transformOrigin: 'top', transition: 'all .15s',
@@ -513,11 +513,12 @@ export default function SellersPage() {
         .s-chip:hover { opacity: 0.85; }
         .search-inp:focus { border-color: rgba(199,166,106,0.7) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; outline: none; }
         @media(max-width:640px){
-          .sel-list-card { flex-direction: column !important; }
-          .sel-list-img { width: 100% !important; height: 150px; }
-          .sel-list-actions { flex-direction: row !important; padding: 0 18px 16px !important; border-inline-start: none !important; }
-          .sel-list-actions > a:first-child { flex: 1; }
-          .sel-list-brands { display: none; }
+          /* لیست موبایل: افقی و جمع‌وجور مثل باشگاه‌ها (نه ستونی) */
+          .sel-list-img { width: clamp(96px,28vw,128px) !important; }
+          .sel-list-actions { display: none !important; }
+          .sel-list-brands { display: none !important; }
+          .sel-list-desc { display: none !important; }
+          .sel-list-body { padding: 12px 14px !important; gap: 7px !important; }
         }
         .filt-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
         .filt-scroll::-webkit-scrollbar { display: none; }
@@ -535,7 +536,6 @@ export default function SellersPage() {
         @media(max-width:640px){
           .sel-drawer { top: auto; left: 0; right: 0; width: auto; max-height: 86vh;
             border-radius: 22px 22px 0 0; animation: drwY .3s cubic-bezier(.22,1,.36,1); }
-          .sel-filterbar { position: static !important; }
         }
       `}</style>
 
@@ -612,7 +612,7 @@ export default function SellersPage() {
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
 
           {/* ─── FILTER BAR — Apple-minimal ─── */}
-          <div className="sel-filterbar" style={{ position: 'sticky', top: 12, zIndex: 30, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: 10, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div className="sel-filterbar" style={{ position: 'sticky', top: 12, zIndex: 50, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: 10, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
 
             <Dropdown label="دسته‌بندی:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
             <Dropdown label="وضعیت:"     options={STATUS_OPTIONS}   value={status}   onChange={setStatus}   minWidth={140} />
