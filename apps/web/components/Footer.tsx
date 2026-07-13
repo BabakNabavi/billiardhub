@@ -147,6 +147,7 @@ export default function Footer() {
           transform: translateY(-2px);
           box-shadow: 0 4px 14px rgba(199,166,106,0.18);
         }
+        .ft-dev-mob { display: none; }
         @media (max-width: 900px) {
           .ft-grid { grid-template-columns: 1fr 1fr !important; gap: 20px 28px !important; margin-bottom: 30px !important; }
           .ft-brand { grid-column: 1 / -1; }
@@ -157,6 +158,8 @@ export default function Footer() {
           .ft-inner { padding: 26px 18px 18px !important; }
           .ft-bottom { flex-direction: column !important; gap: 4px !important; text-align: center; margin-top: 4px !important; }
           .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
+          .ft-dev-desk { display: none !important; }
+          .ft-dev-mob { display: block !important; margin-top: 2px; }
           .ft-link { font-size: 12px !important; padding: 2.5px 0 !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
@@ -229,6 +232,10 @@ export default function Footer() {
               {c.icon}{c.text}
             </div>
           ))}
+          {/* اعتبار توسعه‌دهنده — دسکتاپ: سمت چپ روبروی ایمیل */}
+          <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
+            DEVELOPED BY&nbsp;<span style={{ color: GOLD }}>BABAK NABAVI</span>
+          </div>
         </div>
 
         {/* ── Bottom bar ────────────────────────────── */}
@@ -243,6 +250,10 @@ export default function Footer() {
                 {item}
               </span>
             ))}
+          </div>
+          {/* اعتبار توسعه‌دهنده — موبایل: زیر لینک‌ها */}
+          <div className="ft-dev-mob" style={{ fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
+            DEVELOPED BY <span style={{ color: GOLD }}>BABAK NABAVI</span>
           </div>
         </div>
       </div>
