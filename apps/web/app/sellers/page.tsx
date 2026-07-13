@@ -143,8 +143,6 @@ const CATEGORY_OPTIONS = [
   { value: 'توپ',          label: 'توپ'         },
   { value: 'لوازم جانبی',  label: 'لوازم جانبی' },
   { value: 'پارچه میز',    label: 'پارچه میز'   },
-  { value: 'تعمیرات',      label: 'تعمیرات'     },
-  { value: 'نصب میز',      label: 'نصب میز'     },
 ] as const
 const STATUS_OPTIONS = [
   { value: 'همه',          label: 'همه فروشگاه‌ها' },
@@ -153,19 +151,25 @@ const STATUS_OPTIONS = [
   { value: 'top',          label: 'فروشگاه برتر'   },
 ] as const
 const SORT_OPTIONS = [
-  { value: 'rating',   label: 'بهترین امتیاز'     },
-  { value: 'popular',  label: 'محبوب‌ترین'        },
-  { value: 'products', label: 'بیشترین محصولات'   },
-  { value: 'newest',   label: 'جدیدترین'          },
-  { value: 'response', label: 'سریع‌ترین پاسخگویی' },
+  { value: 'rating',   label: 'بهترین امتیاز'   },
+  { value: 'popular',  label: 'محبوب‌ترین'      },
+  { value: 'products', label: 'بیشترین محصولات' },
+  { value: 'newest',   label: 'جدیدترین'        },
 ] as const
 type SortKey = typeof SORT_OPTIONS[number]['value']
 
-const ALL_BRANDS = Array.from(new Set(SELLERS.flatMap(s => s.brands)))
-const SERVICE_OPTIONS  = ['نصب میز', 'تعمیرات', 'مشاوره خرید', 'فروش حضوری']
-const DELIVERY_OPTIONS = ['ارسال سراسر ایران', 'ارسال رایگان', 'ارسال فوری']
-const RATING_OPTIONS   = [{ v: 4, l: '۴ و بالاتر' }, { v: 4.5, l: '۴٫۵ و بالاتر' }, { v: 5, l: '۵' }]
-const RESPONSE_OPTIONS = [{ v: 1, l: 'کمتر از ۱ ساعت' }, { v: 24, l: 'کمتر از ۲۴ ساعت' }]
+/* مختصات تقریبی مرکز شهرها برای محاسبه‌ی نزدیک‌ترین فروشگاه */
+const CITY_COORDS: Record<string, [number, number]> = {
+  'تهران':  [35.6892, 51.3890],
+  'اصفهان': [32.6539, 51.6660],
+  'مشهد':   [36.2605, 59.6168],
+  'شیراز':  [29.5918, 52.5837],
+}
+const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
 // ── Stars ─────────────────────────────────────────────────────
 function Stars({ rating }: { rating: number }) {
@@ -449,53 +453,50 @@ export default function SellersPage() {
   const [sort,     setSort]     = useState<SortKey>('rating')
   const [view,     setView]     = useState<'grid'|'list'>('grid')
 
-  /* فیلترهای پیشرفته (کشوی «فیلترهای بیشتر») */
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [brands,     setBrands]     = useState<Set<string>>(new Set())
-  const [services,   setServices]   = useState<Set<string>>(new Set())
-  const [delivery,   setDelivery]   = useState<Set<string>>(new Set())
-  const [minRating,  setMinRating]  = useState<number | null>(null)
-  const [respMax,    setRespMax]    = useState<number | null>(null)
-  const [availOnly,  setAvailOnly]  = useState(false)
-  const [priceMin,   setPriceMin]   = useState('')
-  const [priceMax,   setPriceMax]   = useState('')
+  /* نزدیک من */
+  const [userLoc,   setUserLoc]   = useState<{ lat: number; lon: number } | null>(null)
+  const [nearMe,    setNearMe]    = useState(false)
+  const [locLoading, setLocLoading] = useState(false)
+  const [locError,  setLocError]  = useState(false)
 
-  const respHours = (s: typeof SELLERS[0]) =>
-    parseInt(s.responseTime.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, ''), 10) || 99
+  const getLocation = () => {
+    if (nearMe) { setNearMe(false); return }
+    if (!navigator.geolocation) { setLocError(true); return }
+    setLocLoading(true); setLocError(false)
+    navigator.geolocation.getCurrentPosition(
+      pos => { setUserLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setNearMe(true); setLocLoading(false) },
+      () => { setLocLoading(false); setLocError(true) },
+      { timeout: 8000, enableHighAccuracy: false },
+    )
+  }
+
   const matchSpec = (s: typeof SELLERS[0], term: string) =>
     s.specialties.some(sp => sp.includes(term) || term.includes(sp)) || s.description.includes(term)
+  const distOf = (s: typeof SELLERS[0]) => {
+    const c = CITY_COORDS[s.city.split('،')[0]!.trim()]
+    return userLoc && c ? calcDistance(userLoc.lat, userLoc.lon, c[0], c[1]) : undefined
+  }
 
   const filtered = useMemo(() => {
-    return SELLERS
+    const list = SELLERS
       .filter(s => !search.trim() || s.name.includes(search.trim()) || s.city.includes(search.trim()) || s.brands.some(b => b.toLowerCase().includes(search.toLowerCase())) || s.specialties.some(sp => sp.includes(search.trim())))
       .filter(s => category === 'همه' || matchSpec(s, category))
       .filter(s => status === 'همه' || (status === 'verified' && s.verified) || (status === 'elite' && s.elite) || (status === 'top' && s.rating >= 4.7))
-      .filter(s => brands.size === 0 || s.brands.some(b => brands.has(b)))
-      .filter(s => services.size === 0 || [...services].some(sv => matchSpec(s, sv)))
-      .filter(s => minRating === null || s.rating >= minRating)
-      .filter(s => respMax === null || respHours(s) <= respMax)
-      .sort((a, b) => {
-        if (sort === 'rating')   return b.rating - a.rating
-        if (sort === 'popular')  return b.reviewCount - a.reviewCount
-        if (sort === 'products') return b.productCount - a.productCount
-        if (sort === 'response') return respHours(a) - respHours(b)
-        return b.sinceYear - a.sinceYear
-      })
-  }, [search, category, status, brands, services, minRating, respMax, sort])
-
-  const advCount = brands.size + services.size + delivery.size + (minRating !== null ? 1 : 0) + (respMax !== null ? 1 : 0) + (availOnly ? 1 : 0) + (priceMin ? 1 : 0) + (priceMax ? 1 : 0)
-  const toggle = <T,>(set: Set<T>, setFn: (s: Set<T>) => void, v: T) => { const n = new Set(set); if (n.has(v)) n.delete(v); else n.add(v); setFn(n) }
-  const clearAdvanced = () => { setBrands(new Set()); setServices(new Set()); setDelivery(new Set()); setMinRating(null); setRespMax(null); setAvailOnly(false); setPriceMin(''); setPriceMax('') }
-
-  useEffect(() => {
-    document.body.style.overflow = drawerOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [drawerOpen])
+    return list.sort((a, b) => {
+      if (nearMe && userLoc) { const da = distOf(a) ?? 9e9, db = distOf(b) ?? 9e9; if (da !== db) return da - db }
+      if (sort === 'rating')   return b.rating - a.rating
+      if (sort === 'popular')  return b.reviewCount - a.reviewCount
+      if (sort === 'products') return b.productCount - a.productCount
+      return b.sinceYear - a.sinceYear
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, category, status, sort, nearMe, userLoc])
 
   return (
     <>
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}25%{transform:translate(-28px,-20px) scale(1.05);}55%{transform:translate(-10px,26px) scale(0.96);}80%{transform:translate(20px,-12px) scale(1.02);}}
         @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}20%{transform:translate(32px,20px) scale(1.04);}55%{transform:translate(44px,-26px) scale(0.92);}75%{transform:translate(10px,30px) scale(1.06);}}
         @keyframes blob3{0%,100%{transform:translate(0,0);}50%{transform:translate(-26px,-36px) scale(1.10);}}
@@ -573,7 +574,7 @@ export default function SellersPage() {
           {/* content */}
           <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 10.5, fontWeight: 800, borderRadius: 24, padding: '5px 13px', marginBottom: 14, letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both' }}>
-              BILLIARD HUB · مارکت‌پلیس رسمی
+Market Place . BILLIARD HUB
             </div>
 
             <div style={{ overflow: 'hidden', paddingBottom: '0.14em' }}>
@@ -618,15 +619,16 @@ export default function SellersPage() {
             <Dropdown label="وضعیت:"     options={STATUS_OPTIONS}   value={status}   onChange={setStatus}   minWidth={140} />
             <Dropdown label="نمایش بر اساس:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={160} />
 
-            {/* More filters */}
-            <button onClick={() => setDrawerOpen(true)} style={{
+            {/* نزدیک من */}
+            <button onClick={getLocation} title={locError ? 'دسترسی به موقعیت رد شد' : 'نزدیک‌ترین فروشگاه‌ها'} style={{
               display: 'flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, fontWeight: 700,
-              border: advCount > 0 ? `1.5px solid ${GOLD}` : '1px solid rgba(28,28,26,0.1)',
-              background: advCount > 0 ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.7)', color: advCount > 0 ? GOLD_D : TEXT_SEC, transition: 'all .2s',
+              border: nearMe ? `1.5px solid ${GOLD}` : locError ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(28,28,26,0.1)',
+              background: nearMe ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)', color: nearMe ? GOLD_D : locError ? '#ef4444' : TEXT_SEC, transition: 'all .2s',
             }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-              فیلترها
-              {advCount > 0 && <span style={{ minWidth: 17, height: 17, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{advCount.toLocaleString('fa-IR')}</span>}
+              {locLoading
+                ? <span style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: `2px solid ${GOLD}`, borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
+                : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>}
+              نزدیک من
             </button>
 
             {/* left cluster */}
@@ -672,130 +674,6 @@ export default function SellersPage() {
           )}
         </div>
       </div>
-
-      {/* ═══ MORE FILTERS — side drawer (desktop) / bottom sheet (mobile) ═══ */}
-      {drawerOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
-          <div onClick={() => setDrawerOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(3px)', animation: 'ovIn .2s ease' }} />
-          <div className="sel-drawer">
-            {/* header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid rgba(28,28,26,0.07)', flexShrink: 0 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: TEXT, margin: 0 }}>فیلترهای بیشتر</h3>
-              <button aria-label="بستن" onClick={() => setDrawerOpen(false)} style={{ width: 36, height: 36, borderRadius: 11, border: '1px solid rgba(28,28,26,0.1)', background: 'rgba(28,28,26,0.04)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: TEXT_SEC }}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
-            </div>
-
-            {/* body */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: 22, display: 'flex', flexDirection: 'column', gap: 26 }}>
-              {/* Brands */}
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>برندها</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {ALL_BRANDS.map(b => {
-                    const on = brands.has(b)
-                    return (
-                      <button key={b} onClick={() => toggle(brands, setBrands, b)} style={{
-                        padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'all .18s',
-                        border: on ? `1px solid ${GOLD}` : '1px solid rgba(28,28,26,0.12)', background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_SEC,
-                      }}>{b}</button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Price range */}
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>محدوده قیمت (تومان)</div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <input value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="حداقل" inputMode="numeric"
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 12, fontSize: 13, background: 'rgba(28,28,26,0.03)', border: '1px solid rgba(28,28,26,0.1)', outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, direction: 'rtl' }} />
-                  <input value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="حداکثر" inputMode="numeric"
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 12, fontSize: 13, background: 'rgba(28,28,26,0.03)', border: '1px solid rgba(28,28,26,0.1)', outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, direction: 'rtl' }} />
-                </div>
-              </div>
-
-              {/* Services */}
-              <FilterCheckGroup title="خدمات" options={SERVICE_OPTIONS} selected={services} onToggle={v => toggle(services, setServices, v)} />
-              {/* Delivery */}
-              <FilterCheckGroup title="ارسال" options={DELIVERY_OPTIONS} selected={delivery} onToggle={v => toggle(delivery, setDelivery, v)} />
-
-              {/* Rating */}
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>امتیاز</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {RATING_OPTIONS.map(r => {
-                    const on = minRating === r.v
-                    return (
-                      <button key={r.v} onClick={() => setMinRating(on ? null : r.v)} style={{
-                        display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 12, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'all .18s',
-                        border: on ? `1px solid ${GOLD}` : '1px solid rgba(28,28,26,0.12)', background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_SEC,
-                      }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        {r.l}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Response time */}
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>زمان پاسخگویی</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {RESPONSE_OPTIONS.map(r => {
-                    const on = respMax === r.v
-                    return (
-                      <button key={r.v} onClick={() => setRespMax(on ? null : r.v)} style={{
-                        padding: '8px 14px', borderRadius: 12, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'all .18s',
-                        border: on ? `1px solid ${GOLD}` : '1px solid rgba(28,28,26,0.12)', background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_SEC,
-                      }}>{r.l}</button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Availability */}
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: TEXT_SEC, fontWeight: 600 }}>
-                <input type="checkbox" checked={availOnly} onChange={() => setAvailOnly(v => !v)} style={{ width: 17, height: 17, accentColor: GOLD_D, cursor: 'pointer' }} />
-                فقط کالاهای موجود
-              </label>
-            </div>
-
-            {/* footer */}
-            <div style={{ display: 'flex', gap: 10, padding: '14px 22px', borderTop: '1px solid rgba(28,28,26,0.07)', flexShrink: 0 }}>
-              <button onClick={clearAdvanced} style={{ padding: '12px 18px', borderRadius: 13, border: '1px solid rgba(28,28,26,0.12)', background: '#fff', color: TEXT_SEC, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-                پاک کردن
-              </button>
-              <button onClick={() => setDrawerOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: 13, border: 'none', background: `linear-gradient(135deg,${GOLD},${GOLD_D})`, color: '#fff', fontSize: 13.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', boxShadow: '0 6px 18px rgba(199,166,106,0.35)' }}>
-                نمایش {filtered.length.toLocaleString('fa-IR')} فروشگاه
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
-  )
-}
-
-/* ── checkbox group for the drawer ── */
-function FilterCheckGroup({ title, options, selected, onToggle }: { title: string; options: string[]; selected: Set<string>; onToggle: (v: string) => void }) {
-  return (
-    <div>
-      <div style={{ fontSize: 12.5, fontWeight: 800, color: TEXT, marginBottom: 12 }}>{title}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-        {options.map(o => {
-          const on = selected.has(o)
-          return (
-            <label key={o} onClick={() => onToggle(o)} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: on ? TEXT : TEXT_SEC, fontWeight: on ? 700 : 500 }}>
-              <span style={{ width: 18, height: 18, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s', background: on ? GOLD_D : 'transparent', border: on ? 'none' : '1.5px solid rgba(28,28,26,0.22)' }}>
-                {on && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
-              </span>
-              {o}
-            </label>
-          )
-        })}
-      </div>
-    </div>
   )
 }

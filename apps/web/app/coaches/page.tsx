@@ -416,72 +416,59 @@ export default function CoachesPage() {
                     display:'flex', flexDirection:'column',
                   }}>
 
-                    {/* ── Photo zone ── */}
-                    <div style={{ position:'relative', paddingTop:'115%', flexShrink:0, overflow:'hidden' }}>
-                      {/* Gradient background */}
+                    {/* ── Banner (decorative) ── */}
+                    <div style={{ position:'relative', paddingTop:'46%', flexShrink:0, overflow:'hidden' }}>
                       <div style={{ position:'absolute', inset:0,
                         background:`linear-gradient(145deg,${g1}55 0%,${g2}CC 100%)` }}/>
-                      {/* Dot pattern overlay */}
                       <div style={{ position:'absolute', inset:0,
                         backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
                         backgroundSize:'22px 22px' }}/>
-
-                      {/* Real photo */}
-                      {coach.photo ? (
+                      {coach.photo && (
                         <img className="cphoto" src={coach.photo} alt={coach.name}
                           style={{ position:'absolute', inset:0, width:'100%', height:'100%',
                             objectFit:'cover', objectPosition:'center top' }}/>
-                      ) : (
-                        /* Avatar placeholder */
-                        <div className="cavatar" style={{ position:'absolute', inset:0,
-                          display:'flex', alignItems:'center', justifyContent:'center' }}>
-                          <div style={{ position:'absolute', width:88, height:88, borderRadius:'50%',
-                            border:'1px solid rgba(255,255,255,0.12)' }}/>
-                          <div style={{
-                            width:70, height:70, borderRadius:'50%',
-                            background:'rgba(255,255,255,0.10)',
-                            border:'2px solid rgba(255,255,255,0.22)',
-                            backdropFilter:'blur(8px)',
-                            display:'flex', alignItems:'center', justifyContent:'center',
-                            fontSize:26, fontWeight:900, color:'rgba(255,255,255,0.88)',
-                            boxShadow:'0 8px 28px rgba(0,0,0,0.30)',
-                            letterSpacing:'-0.02em', lineHeight:1,
-                          }}>
-                            {coach.name[0]}
-                          </div>
-                        </div>
                       )}
-
-                      {/* Story ring */}
-                      {coach.hasStory && coach.storyImage && (
-                        <div style={{ position:'absolute', top:10, right:10, zIndex:5 }}>
-                          <StoryRing coach={coach} size={34} onOpen={() => setOpenStory(coach)}/>
-                        </div>
-                      )}
-
-                      {/* Bottom blend into card */}
-                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:52,
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:40,
                         background:`linear-gradient(to bottom,transparent,${CARD})`, zIndex:2 }}/>
                     </div>
 
                     {/* ── Info zone ── */}
-                    <div style={{ padding:'12px 14px 13px', flex:1, display:'flex', flexDirection:'column' }}>
-                      {sp && (
-                        <span style={{ display:'inline-flex', alignItems:'center', gap:4,
-                          fontSize:9.5, fontWeight:700, color:sp.color, letterSpacing:'0.12em', marginBottom:5 }}>
-                          <span style={{ width:4, height:4, borderRadius:'50%', background:sp.color,
-                            boxShadow:`0 0 5px ${sp.glow}`, flexShrink:0 }}/>
-                          {sp.label}
-                        </span>
-                      )}
+                    <div style={{ padding:'0 14px 13px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+
+                      {/* Avatar above name — story trigger (moved from top-right) */}
+                      <div style={{ marginTop:-32, marginBottom:11, position:'relative', zIndex:5 }}>
+                        {coach.hasStory && coach.storyImage ? (
+                          <StoryRing coach={coach} size={62} onOpen={() => setOpenStory(coach)}/>
+                        ) : (
+                          <div className="cavatar" style={{ width:62, height:62, borderRadius:'50%', padding:2.5,
+                            background:'rgba(255,255,255,0.16)', boxShadow:'0 8px 24px rgba(0,0,0,0.28)' }}>
+                            <div style={{ width:'100%', height:'100%', borderRadius:'50%',
+                              border:'2px solid rgba(7,6,4,0.55)', background:`linear-gradient(135deg,${g1},${g2})`,
+                              display:'flex', alignItems:'center', justifyContent:'center',
+                              fontSize:22, fontWeight:900, color:'#fff', lineHeight:1 }}>
+                              {coach.name[0]}
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       <h3 style={{ fontSize:15.5, fontWeight:900, color:CW, lineHeight:1.15,
                         letterSpacing:'-0.02em', marginBottom:5 }}>
                         {coach.name}
                       </h3>
 
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      {sp && (
+                        <span style={{ display:'inline-flex', alignItems:'center', gap:4,
+                          fontSize:9.5, fontWeight:700, color:sp.color, letterSpacing:'0.12em', marginBottom:6 }}>
+                          <span style={{ width:4, height:4, borderRadius:'50%', background:sp.color,
+                            boxShadow:`0 0 5px ${sp.glow}`, flexShrink:0 }}/>
+                          {sp.label}
+                        </span>
+                      )}
+
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, alignSelf:'stretch' }}>
                         <span style={{ fontSize:11, color:CW_D }}>{coach.city}</span>
+                        <span style={{ width:3, height:3, borderRadius:'50%', background:CW_M }}/>
                         <div style={{ display:'flex', alignItems:'center', gap:3 }}>
                           <Stars r={coach.rating} size={8}/>
                           <span style={{ fontSize:11, fontWeight:700, color:CW }}>{coach.rating}</span>
@@ -489,7 +476,7 @@ export default function CoachesPage() {
                       </div>
 
                       {/* Drawer */}
-                      <div className="cdrawer">
+                      <div className="cdrawer" style={{ alignSelf:'stretch' }}>
                         <div style={{ height:'1px',
                           background:'linear-gradient(to left,transparent,rgba(199,166,106,0.28),transparent)',
                           margin:'9px 0' }}/>
