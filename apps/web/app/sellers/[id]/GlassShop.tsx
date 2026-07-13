@@ -161,13 +161,6 @@ export default function GlassShop() {
               <a href="tel:09121234567" className={`${BTN} flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-[#14532D]`}>
                 {Icon.phone} تماس
               </a>
-              <a
-                href="https://instagram.com/procue.ir" target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-[0_4px_12px_rgba(214,41,118,0.35)] transition-transform duration-200 hover:scale-105 active:scale-95"
-                style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}
-              >
-                {Icon.insta}
-              </a>
             </div>
 
           </div>
@@ -380,15 +373,14 @@ export default function GlassShop() {
                 <li className="flex items-center gap-2.5 py-0.5">
                   <span className="text-[#14532D]">{Icon.clock}</span>شنبه تا پنج‌شنبه، ۹ تا ۲۰
                 </li>
-                {/* آیکون‌های شبکه اجتماعی — با فاصله بیشتر از لینک‌ها */}
+                {/* آیکون‌های شبکه اجتماعی — مثل فوتر اصلی سایت (مربع گرد خنثی، هاور طلایی) */}
                 <li className="flex items-center gap-2.5 pt-3">
                   <a href="https://wa.me/989121234567" target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#0E7A38] transition-transform hover:scale-105">
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-white/60 bg-white/40 text-[#8A8474] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.wa}
                   </a>
                   <a href="https://instagram.com/procue.ir" target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:scale-105"
-                    style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}>
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-white/60 bg-white/40 text-[#8A8474] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.insta}
                   </a>
                 </li>

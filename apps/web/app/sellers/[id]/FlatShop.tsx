@@ -65,7 +65,13 @@ const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
   img: sp.img,
 }))
 
-const BRANDS = Array.from(new Set(PRODUCTS.map(p => p.brand)))
+/* بازه‌های قیمت سریع (تومان) */
+const PRICE_RANGES: { label: string; from?: number; to?: number }[] = [
+  { label: 'زیر ۱ میلیون',        to: 1000000 },
+  { label: '۱ تا ۵ میلیون',       from: 1000000,  to: 5000000 },
+  { label: '۵ تا ۲۰ میلیون',      from: 5000000,  to: 20000000 },
+  { label: 'بالای ۲۰ میلیون',     from: 20000000 },
+]
 
 type SortKey = 'popular' | 'price-asc' | 'price-desc' | 'rating'
 const SORT_OPTIONS: { k: SortKey; l: string }[] = [
@@ -136,11 +142,10 @@ export default function FlatShop() {
   const store = STORE
 
   /* filters */
-  const [checkedCats, setCheckedCats]     = useState<Set<CatKey>>(new Set())
-  const [checkedBrands, setCheckedBrands] = useState<Set<string>>(new Set())
-  const [ratingFloors, setRatingFloors]   = useState<Set<number>>(new Set())
+  const [checkedCats, setCheckedCats] = useState<Set<CatKey>>(new Set())
   const [priceFrom, setPriceFrom] = useState('')
   const [priceTo, setPriceTo]     = useState('')
+  const [quickRange, setQuickRange] = useState<number | null>(null)
   const [query, setQuery]         = useState('')
   const [sort, setSort]           = useState<SortKey>('popular')
   const [page, setPage]           = useState(1)
@@ -164,12 +169,11 @@ export default function FlatShop() {
     setCheckedCats(k === 'all' ? new Set() : new Set([k]))
 
   const clearFilters = () => {
-    setCheckedCats(new Set()); setCheckedBrands(new Set()); setRatingFloors(new Set())
-    setPriceFrom(''); setPriceTo(''); setQuery('')
+    setCheckedCats(new Set()); setPriceFrom(''); setPriceTo(''); setQuickRange(null); setQuery('')
   }
 
   const activeFilterCount =
-    checkedCats.size + checkedBrands.size + ratingFloors.size + (priceFrom ? 1 : 0) + (priceTo ? 1 : 0)
+    checkedCats.size + (quickRange !== null ? 1 : 0) + (priceFrom ? 1 : 0) + (priceTo ? 1 : 0)
 
   const catCounts = useMemo(() => {
     const c = Object.fromEntries(BAZAAR_CATS.map(x => [x.id, 0])) as Record<CatKey, number>
@@ -177,21 +181,17 @@ export default function FlatShop() {
     return c
   }, [])
 
-  const brandCounts = useMemo(() => {
-    const c: Record<string, number> = {}
-    PRODUCTS.forEach(p => { c[p.brand] = (c[p.brand] ?? 0) + 1 })
-    return c
-  }, [])
+  const pickQuickRange = (idx: number, r: { from?: number; to?: number }) => {
+    if (quickRange === idx) { setQuickRange(null); setPriceFrom(''); setPriceTo('') }
+    else { setQuickRange(idx); setPriceFrom(r.from ? String(r.from) : ''); setPriceTo(r.to ? String(r.to) : '') }
+  }
 
   const visible = useMemo(() => {
     const from = parsePrice(priceFrom)
     const to   = parsePrice(priceTo)
-    const minRating = ratingFloors.size ? Math.min(...ratingFloors) : null
     const q = query.trim()
     const list = PRODUCTS.filter(p => {
       if (checkedCats.size && !checkedCats.has(p.cat)) return false
-      if (checkedBrands.size && !checkedBrands.has(p.brand)) return false
-      if (minRating !== null && p.rating < minRating) return false
       if (from !== null && p.price < from) return false
       if (to !== null && p.price > to) return false
       if (q && !p.name.includes(q) && !p.brand.toLowerCase().includes(q.toLowerCase())) return false
@@ -203,7 +203,7 @@ export default function FlatShop() {
     if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price)
     if (sort === 'rating')     sorted.sort((a, b) => b.rating - a.rating)
     return sorted
-  }, [checkedCats, checkedBrands, ratingFloors, priceFrom, priceTo, query, sort])
+  }, [checkedCats, priceFrom, priceTo, query, sort])
 
   const heading = navActive === 'all' ? 'همه محصولات' : CAT_LABEL[navActive]
 
@@ -226,52 +226,37 @@ export default function FlatShop() {
         ))}
       </div>
 
-      <div className="border-b border-[#E7E2D6] py-5">
+      {/* بازه‌ی قیمت — سریع + دستی */}
+      <div className="py-5">
         <h4 className="mb-3.5 text-[13px] font-semibold">محدوده قیمت (تومان)</h4>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {PRICE_RANGES.map((r, i) => {
+            const on = quickRange === i
+            return (
+              <button key={i} onClick={() => pickQuickRange(i, r)}
+                className={`rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                  on ? 'border-[#14532D]/40 bg-[#14532D]/[0.10] text-[#14532D]' : 'border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[#14532D]/30'
+                }`}>
+                {r.label}
+              </button>
+            )
+          })}
+        </div>
         <div className="flex gap-2">
           <input
-            value={priceFrom} onChange={e => setPriceFrom(e.target.value)} placeholder="از"
+            value={priceFrom} onChange={e => { setPriceFrom(e.target.value); setQuickRange(null) }} placeholder="از"
             className={`w-full rounded-lg border border-[#E7E2D6] bg-white px-2.5 py-2 text-[12.5px] focus:border-[#14532D] focus:outline-none ${MONO}`}
           />
           <input
-            value={priceTo} onChange={e => setPriceTo(e.target.value)} placeholder="تا"
+            value={priceTo} onChange={e => { setPriceTo(e.target.value); setQuickRange(null) }} placeholder="تا"
             className={`w-full rounded-lg border border-[#E7E2D6] bg-white px-2.5 py-2 text-[12.5px] focus:border-[#14532D] focus:outline-none ${MONO}`}
           />
         </div>
-      </div>
-
-      <div className="border-b border-[#E7E2D6] py-5">
-        <h4 className="mb-3.5 text-[13px] font-semibold">برند</h4>
-        {BRANDS.map(b => (
-          <label key={b} className="mb-2.5 flex cursor-pointer items-center gap-2.5 text-[13px] text-[#5B564B]">
-            <input
-              type="checkbox"
-              checked={checkedBrands.has(b)}
-              onChange={() => setCheckedBrands(prev => toggleSet(prev, b))}
-              className="h-[15px] w-[15px] accent-[#14532D]"
-            />
-            {b}
-            <span className={`mr-auto text-[11.5px] text-[#8A8474] ${MONO}`}>{faNum(brandCounts[b] ?? 0)}</span>
-          </label>
-        ))}
-      </div>
-
-      <div className="py-5">
-        <h4 className="mb-3.5 text-[13px] font-semibold">امتیاز</h4>
-        {[{ f: 4.5 }, { f: 4 }].map(r => (
-          <label key={r.f} className="mb-2.5 flex cursor-pointer items-center gap-2.5 text-[13px] text-[#5B564B]">
-            <input
-              type="checkbox"
-              checked={ratingFloors.has(r.f)}
-              onChange={() => setRatingFloors(prev => toggleSet(prev, r.f))}
-              className="h-[15px] w-[15px] accent-[#14532D]"
-            />
-            <Stars r={r.f}/> و بالاتر
-          </label>
-        ))}
-        <button onClick={clearFilters} className="mt-3 text-[12.5px] font-medium text-[#14532D] transition-opacity hover:opacity-70">
-          پاک کردن فیلترها
-        </button>
+        {activeFilterCount > 0 && (
+          <button onClick={clearFilters} className="mt-4 text-[12.5px] font-medium text-[#14532D] transition-opacity hover:opacity-70">
+            پاک کردن فیلترها ({faNum(activeFilterCount)})
+          </button>
+        )}
       </div>
     </>
   )
@@ -354,13 +339,6 @@ export default function FlatShop() {
                 className={`${LQ} ${LQ_FELT} flex items-center gap-2 rounded-2xl px-4 py-2.5 text-[13px] font-semibold`}
               >
                 {Icon.phone} تماس
-              </a>
-              <a
-                href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-[0_4px_12px_rgba(214,41,118,0.35)] transition-transform duration-200 hover:scale-105 active:scale-95"
-                style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}
-              >
-                {Icon.insta}
               </a>
             </div>
 
@@ -536,15 +514,14 @@ export default function FlatShop() {
                 <li className="flex items-center gap-2.5 py-0.5">
                   <span className="text-[#14532D]">{Icon.clock}</span>{store.hours}
                 </li>
-                {/* آیکون‌های شبکه اجتماعی — با فاصله بیشتر از لینک‌ها */}
+                {/* آیکون‌های شبکه اجتماعی — مثل فوتر اصلی سایت (مربع گرد خنثی، هاور طلایی) */}
                 <li className="flex items-center gap-2.5 pt-3">
                   <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#0E7A38] transition-transform hover:scale-105">
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.wa}
                   </a>
                   <a href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:scale-105"
-                    style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}>
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.insta}
                   </a>
                 </li>
