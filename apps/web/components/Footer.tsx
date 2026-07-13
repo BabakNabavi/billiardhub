@@ -234,9 +234,9 @@ export default function Footer() {
           ))}
           {/* اعتبار توسعه‌دهنده — دسکتاپ: سمت چپ روبروی ایمیل */}
           <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center' }}>
-            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
+            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
               <span>DEVELOPED BY <span style={{ color: GOLD }}>BABAK NABAVI</span></span>
-              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD }}>
+              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <circle cx="12" cy="12" r="4.5"/>
@@ -262,9 +262,9 @@ export default function Footer() {
           </div>
           {/* اعتبار توسعه‌دهنده — موبایل: زیر لینک‌ها */}
           <div className="ft-dev-mob">
-            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
+            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.14em', color: 'rgba(26,25,23,0.30)' }}>
               <span>DEVELOPED BY <span style={{ color: GOLD }}>BABAK NABAVI</span></span>
-              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD }}>
+              <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <circle cx="12" cy="12" r="4.5"/>
