@@ -341,13 +341,16 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{
                 width: '90%', textAlign: 'center',
-                background: 'rgba(199,166,106,0.12)',
+                background: hov ? 'rgba(199,166,106,0.20)' : 'rgba(199,166,106,0.12)',
                 border: `1px solid ${GOLD_BOR}`,
                 borderRadius: rad,
                 padding: '9px 0',
                 color: GOLD,
                 fontSize: '13px', fontWeight: 700,
                 fontFamily: 'var(--font-base)',
+                transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
+                transform: hov ? 'translateY(-1px)' : 'none',
+                boxShadow: hov ? '0 8px 20px rgba(199,166,106,0.34)' : '0 0 0 rgba(199,166,106,0)',
               }}>
                 مشاهده و رزرو
               </div>
@@ -380,13 +383,16 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <div style={{ flex: 1 }} />
             <div style={{
               width: '90%', textAlign: 'center',
-              background: 'rgba(199,166,106,0.12)',
+              background: hov ? 'rgba(199,166,106,0.20)' : 'rgba(199,166,106,0.12)',
               border: `1px solid ${GOLD_BOR}`,
               borderRadius: rad,
               padding: '6px 0',
               color: GOLD,
               fontSize: '10px', fontWeight: 700,
               fontFamily: 'var(--font-base)',
+              transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
+              transform: hov ? 'translateY(-1px)' : 'none',
+              boxShadow: hov ? '0 6px 16px rgba(199,166,106,0.32)' : '0 0 0 rgba(199,166,106,0)',
             }}>
               مشاهده و رزرو
             </div>
@@ -1515,18 +1521,18 @@ useEffect(() => {
             onMouseLeave={() => { sellersPaused.current = false; }}
           >
             {[...SELLERS, ...SELLERS].map((s, i) => (
-              <div key={`${s.id}-${i}`} style={{ width: '220px', flexShrink: 0 }}>
+              <Link key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
                 <SellerCard s={s} />
-              </div>
+              </Link>
             ))}
           </div>
 
           {/* Mobile slider */}
           <div className="sellers-mob">
             {SELLERS.map((s) => (
-              <div key={s.id} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <Link key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
                 <SellerCard s={s} />
-              </div>
+              </Link>
             ))}
           </div>
         </div>

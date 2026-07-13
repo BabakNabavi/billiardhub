@@ -3,12 +3,11 @@
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/auth.store';
-import { useCartStore } from '../store/cart.store';
 import {
-  Search, Bell, ShoppingCart, ChevronDown, User, X, Trophy,
+  Search, Bell, ChevronDown, User, X, Trophy,
   Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
   Newspaper, Calendar, Menu, ArrowLeft, LogOut, Settings,
-  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home,
+  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Stories from './Stories';
@@ -22,11 +21,9 @@ const exploreMenu = [
     title: 'بازیکنان و افراد',
     color: GOLD,
     items: [
-      { href: '/players',      label: 'بازیکنان',      icon: <Users size={14} />,    desc: 'بازیکنان حرفه‌ای' },
       { href: '/coaches',      label: 'مربیان',         icon: <Star size={14} />,     desc: 'مربیان مجاز' },
       { href: '/referees',     label: 'داوران',          icon: <Trophy size={14} />,   desc: 'داوران رسمی' },
       { href: '/ranking',      label: 'رنکینگ',          icon: <Trophy size={14} />,   desc: 'جدول رنکینگ' },
-      { href: '/tournaments',  label: 'مسابقات',         icon: <Calendar size={14} />, desc: 'تورنمنت‌های بیلیارد' },
     ],
   },
   {
@@ -44,7 +41,6 @@ const exploreMenu = [
     color: GOLD,
     items: [
       { href: '/news',      label: 'اخبار',    icon: <Newspaper size={14} />,     desc: 'آخرین اخبار' },
-      { href: '/events',    label: 'مسابقات',  icon: <Calendar size={14} />,       desc: 'رویدادها' },
       { href: '/education', label: 'آموزش',    icon: <GraduationCap size={14} />, desc: 'ویدیو آموزشی' },
       { href: '/about',     label: 'درباره ما', icon: <Users size={14} />,         desc: 'داستان بیلیارد هاب' },
       { href: '/contact',   label: 'تماس با ما',icon: <Bell size={14} />,          desc: 'پشتیبانی ۲۴/۷' },
@@ -53,27 +49,26 @@ const exploreMenu = [
 ];
 
 const mobileLinks = [
-  { href: '/',              label: 'صفحه اصلی',              icon: <Home size={18} />,          color: GOLD, isHome: true },
-  { href: '/clubs',         label: 'باشگاه‌ها',               icon: <Building2 size={18} />,     color: GOLD },
-  { href: '/shop',          label: 'بیلیارد بازار',           icon: <ShoppingBag size={18} />,   color: GOLD },
-  { href: '/sellers',       label: 'فروشندگان',                icon: <ShoppingBag size={18} />,   color: GOLD },
-  { href: '/manufacturers', label: 'تولیدکنندگان تجهیزات',    icon: <Factory size={18} />,       color: GOLD },
-  { href: '/coaches',       label: 'مربیان',                  icon: <Star size={18} />,          color: GOLD },
-  { href: '/referees',      label: 'داوران',                  icon: <Trophy size={18} />,        color: GOLD },
-  { href: '/players',       label: 'بازیکنان',                icon: <Users size={18} />,         color: GOLD },
-  { href: '/tournaments',   label: 'مسابقات',                 icon: <Trophy size={18} />,        color: GOLD },
-  { href: '/installers',    label: 'خدمات فنی',               icon: <Wrench size={18} />,        color: GOLD },
-  { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={18} />,        color: GOLD },
-  { href: '/education',     label: 'آموزش',                   icon: <GraduationCap size={18} />, color: GOLD },
-  { href: '/live',          label: 'پخش زنده',                icon: <Radio size={18} />,         color: '#ef4444', live: true },
-  { href: '/news',          label: 'اخبار',                   icon: <Newspaper size={18} />,     color: GOLD },
-  { href: '/about',         label: 'درباره ما',               icon: <Users size={18} />,         color: '#8C7A5E' },
-  { href: '/contact',       label: 'تماس با ما',              icon: <Bell size={18} />,          color: '#8C7A5E' },
+  { href: '/',              label: 'صفحه اصلی',              icon: <Home size={17} />,          color: GOLD,      desc: 'خانه بیلیارد هاب', isHome: true },
+  { href: '/clubs',         label: 'باشگاه‌ها',               icon: <Building2 size={17} />,     color: GOLD,      desc: 'کلوب‌های بیلیارد' },
+  { href: '/shop',          label: 'بیلیارد بازار',           icon: <ShoppingBag size={17} />,   color: GOLD,      desc: 'خرید تجهیزات' },
+  { href: '/sellers',       label: 'فروشندگان',                icon: <Store size={17} />,         color: GOLD,      desc: 'فروشندگان تجهیزات' },
+  { href: '/manufacturers', label: 'تولیدکنندگان',            icon: <Factory size={17} />,       color: GOLD,      desc: 'سازندگان تجهیزات' },
+  { href: '/coaches',       label: 'مربیان',                  icon: <Star size={17} />,          color: GOLD,      desc: 'مربیان مجاز' },
+  { href: '/referees',      label: 'داوران',                  icon: <Trophy size={17} />,        color: GOLD,      desc: 'داوران رسمی' },
+  { href: '/players',       label: 'بازیکنان',                icon: <Users size={17} />,         color: GOLD,      desc: 'بازیکنان حرفه‌ای' },
+  { href: '/tournaments',   label: 'مسابقات',                 icon: <Calendar size={17} />,      color: GOLD,      desc: 'تورنمنت‌ها' },
+  { href: '/installers',    label: 'خدمات فنی',               icon: <Wrench size={17} />,        color: GOLD,      desc: 'نصب و راه‌اندازی' },
+  { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={17} />,        color: GOLD,      desc: 'جدول رنکینگ' },
+  { href: '/education',     label: 'آموزش',                   icon: <GraduationCap size={17} />, color: GOLD,      desc: 'ویدیو آموزشی' },
+  { href: '/live',          label: 'پخش زنده',                icon: <Radio size={17} />,         color: '#ef4444', desc: 'پخش زنده مسابقات', live: true },
+  { href: '/news',          label: 'اخبار',                   icon: <Newspaper size={17} />,     color: GOLD,      desc: 'آخرین اخبار' },
+  { href: '/about',         label: 'درباره ما',               icon: <Users size={17} />,         color: '#8C7A5E',  desc: 'داستان ما' },
+  { href: '/contact',       label: 'تماس با ما',              icon: <Bell size={17} />,          color: '#8C7A5E',  desc: 'پشتیبانی ۲۴/۷' },
 ];
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
-  const cartCount = useCartStore(s => s.totalItems());
   const router = useRouter();
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -349,19 +344,6 @@ export default function Navbar() {
               <span style={{ position: 'absolute', top: '9px', right: '9px', width: '6px', height: '6px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 6px #ef4444' }} />
             </button>
 
-            {/* Cart — desktop only */}
-            <Link href="/cart" className="desk"
-              style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', color: TEXT_MUT, transition: 'color 0.2s', flexShrink: 0 }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
-              <ShoppingCart size={22} />
-              {cartCount > 0 && (
-                <span style={{ position: 'absolute', top: 6, left: 6, minWidth: 16, height: 16, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', boxShadow: `0 2px 8px rgba(184,147,58,0.5)` }}>
-                  {cartCount > 9 ? '۹+' : String(cartCount).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)}
-                </span>
-              )}
-            </Link>
-
             {!user ? (
               <Link href="/login">
                 <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '9px 16px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
@@ -468,17 +450,16 @@ export default function Navbar() {
           overflowY: 'auto',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
-          {/* Header row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '32px', width: 'auto' }} />
-              <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.03em' }}>
-                <span style={{ color: '#ffffff' }}>بیلیارد</span>{' '}
-                <span style={{ color: GOLD }}>هاب</span>
-              </span>
-            </div>
+          {/* Header row — centered brand */}
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
+            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '36px', width: 'auto', marginBottom: '9px' }} />
+            <span style={{ fontWeight: 900, fontSize: '19px', letterSpacing: '0.16em', color: '#ffffff', lineHeight: 1 }}>BILLIARD HUB</span>
+            <span style={{ fontWeight: 800, fontSize: '13.5px', letterSpacing: '-0.02em', marginTop: '6px' }}>
+              <span style={{ color: '#ffffff' }}>بیلیارد</span>{' '}
+              <span style={{ color: GOLD }}>هاب</span>
+            </span>
             <button onClick={() => setMobileOpen(false)}
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', padding: '8px', display: 'flex' }}>
+              style={{ position: 'absolute', top: '16px', insetInlineStart: '20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', padding: '8px', display: 'flex' }}>
               <X size={20} />
             </button>
           </div>
@@ -510,46 +491,51 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Navigation section */}
+          {/* Navigation section — explore-menu style cards */}
           <div style={{ padding: '0 16px 8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {mobileLinks.map((item, i) => (
                 <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
                   style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                    padding: '14px 8px', borderRadius: '16px',
-                    background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(32px) saturate(200%)',
-                    WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-                    border: '1px solid rgba(255,255,255,0.10)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 18px rgba(0,0,0,0.18)',
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '11px 12px', borderRadius: '14px',
+                    background: 'rgba(255,255,255,0.05)',
+                    backdropFilter: 'blur(32px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10)',
                     textDecoration: 'none', position: 'relative', overflow: 'hidden',
                     transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
                   }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.14), 0 0 32px ${item.color}70, 0 0 60px ${item.color}35`;
+                    el.style.background = `linear-gradient(135deg,${item.color}14,${item.color}06)`;
+                    el.style.borderColor = `${item.color}30`;
+                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 24px ${item.color}22`;
                   }}
                   onMouseLeave={e => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 18px rgba(0,0,0,0.18)';
+                    el.style.background = 'rgba(255,255,255,0.05)';
+                    el.style.borderColor = 'rgba(255,255,255,0.09)';
+                    el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.10)';
                   }}>
-                  {/* top sheen */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0) 100%)', pointerEvents: 'none' }} />
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${item.color}18`, border: `1px solid ${item.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0, boxShadow: `0 0 12px ${item.color}28` }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `linear-gradient(135deg,${item.color}26,${item.color}0D)`, border: `1px solid ${item.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
                     {item.icon}
                   </div>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.75)', textAlign: 'center', lineHeight: 1.3 }}>{item.label}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</div>
+                    <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.34)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.desc}</div>
+                  </div>
                   {item.live && (
-                    <span style={{ position: 'absolute', top: '6px', left: '6px', fontSize: '9px', color: '#ef4444', background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '20px', padding: '1px 6px', fontWeight: 700 }}>LIVE</span>
+                    <span style={{ position: 'absolute', top: '6px', insetInlineStart: '6px', fontSize: '8px', color: '#ef4444', background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '20px', padding: '1px 5px', fontWeight: 700 }}>LIVE</span>
                   )}
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Bottom promo */}
-          <div style={{ margin: '20px', padding: '18px 20px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Bottom promo — pushed ~20% lower */}
+          <div style={{ margin: '20px', marginTop: 'clamp(52px, 16vh, 120px)', padding: '18px 20px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.80)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
