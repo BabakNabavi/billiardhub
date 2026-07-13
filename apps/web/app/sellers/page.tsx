@@ -123,6 +123,7 @@ const SELLERS = [
 ]
 
 const CITIES = ['همه', 'تهران', 'اصفهان', 'مشهد', 'شیراز']
+const SPECIALTIES = ['همه', 'چوب', 'میز', 'توپ', 'لوازم جانبی', 'اسنوکر', 'پارچه میز']
 const SORT_OPTIONS = [
   { value: 'rating',   label: 'بهترین امتیاز' },
   { value: 'products', label: 'بیشترین محصول' },
@@ -183,33 +184,118 @@ function SellerLogo({ name, size = 62 }: { name: string; size?: number }) {
   )
 }
 
-// ── Seller Card — modern, gold theme ──────────────────────────
-function SellerCard({ seller }: { seller: typeof SELLERS[0] }) {
+// ── Verified pill (inline, not overlapping banner) ────────────
+function VerifiedPill() {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 11, fontWeight: 700, borderRadius: 20, padding: '2px 8px', flexShrink: 0 }}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2"><polyline points="20 6 9 17 4 12"/></svg>
+      تأیید شده
+    </span>
+  )
+}
+const PhoneIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+
+// ── Seller Card — grid + list, modern gold theme ──────────────
+function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' | 'list' }) {
   const [hov, setHov] = useState(false)
   const router = useRouter()
+
+  const shell: React.CSSProperties = {
+    background: '#fff', borderRadius: 22, overflow: 'hidden',
+    border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
+    boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
+    transform: hov ? 'translateY(-5px)' : 'none',
+    transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
+  }
+
+  const ratingRow = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+      <Stars rating={seller.rating} />
+      <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>{seller.rating}</span>
+      <span style={{ fontSize: 12.5, color: TEXT_MUT }}>({seller.reviewCount} نظر)</span>
+    </div>
+  )
+  const metaRow = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: TEXT_SEC, flexWrap: 'wrap' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        {seller.city}
+      </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        از {seller.since}
+      </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        {seller.productCount} محصول
+      </span>
+    </div>
+  )
+  const brandsRow = (
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+      {seller.brands.map(b => (
+        <span key={b} style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 20, padding: '2px 9px' }}>{b}</span>
+      ))}
+    </div>
+  )
+  const viewBtn = (
+    <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
+      padding: '10px 18px', borderRadius: 12, textAlign: 'center', textDecoration: 'none',
+      background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
+      fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+    }}>
+      مشاهده فروشگاه
+    </Link>
+  )
+  const callBtn = (
+    <a href={`tel:${seller.phone}`} onClick={e => e.stopPropagation()} style={{
+      padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
+      border: '1px solid rgba(28,28,26,0.12)', color: TEXT, background: 'rgba(28,28,26,0.04)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    }}>{PhoneIcon}</a>
+  )
+
+  /* ── LIST VIEW ── */
+  if (view === 'list') {
+    return (
+      <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
+        className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
+        {/* image */}
+        <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
+          <img src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.35))' }} />
+          {seller.elite && (
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(199,166,106,0.94)', color: '#3a2800', fontSize: 10.5, fontWeight: 800, borderRadius: 20, padding: '3px 9px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              رسمی
+            </div>
+          )}
+        </div>
+        {/* info */}
+        <div style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
+            {seller.verified && <VerifiedPill />}
+          </div>
+          <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{ratingRow}{metaRow}</div>
+          <div className="sel-list-brands">{brandsRow}</div>
+        </div>
+        {/* actions */}
+        <div className="sel-list-actions" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, padding: '16px 18px 16px 0', flexShrink: 0 }}>
+          {viewBtn}{callBtn}
+        </div>
+      </div>
+    )
+  }
+
+  /* ── GRID VIEW ── */
   return (
-    <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      onClick={() => router.push(`/sellers/${seller.id}`)}
-      style={{
-        background: '#fff',
-        borderRadius: 22,
-        overflow: 'hidden',
-        border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
-        boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
-        transform: hov ? 'translateY(-5px)' : 'none',
-        transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
-        display: 'flex', flexDirection: 'column', cursor: 'pointer',
-      }}
-    >
+    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
+      style={{ ...shell, display: 'flex', flexDirection: 'column' }}>
       {/* banner */}
       <div style={{ height: 116, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-        <img
-          src={seller.bannerImage}
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }}
-        />
+        <img src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
         {seller.elite && (
           <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(199,166,106,0.94)', backdropFilter: 'blur(8px)', color: '#3a2800', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -225,64 +311,35 @@ function SellerCard({ seller }: { seller: typeof SELLERS[0] }) {
 
       {/* body */}
       <div style={{ padding: '0 18px 18px' }}>
-        {/* logo (fully visible, gold ring) + verified */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
+        {/* logo fully visible (no badge overlap on image) */}
+        <div style={{ marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
           <SellerLogo name={seller.name} size={62} />
-          {seller.verified && (
-            <div style={{ background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '4px 10px', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-              تأیید شده
-            </div>
-          )}
         </div>
 
-        <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: '0 0 5px', lineHeight: 1.35 }}>{seller.name}</h3>
+        {/* name + verified inline (fix: badge no longer stuck to image) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 5px', flexWrap: 'wrap' }}>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{seller.name}</h3>
+          {seller.verified && <VerifiedPill />}
+        </div>
+
         <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-          <Stars rating={seller.rating} />
-          <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>{seller.rating}</span>
-          <span style={{ fontSize: 12.5, color: TEXT_MUT }}>({seller.reviewCount} نظر)</span>
-        </div>
+        <div style={{ marginBottom: 10 }}>{ratingRow}</div>
+        <div style={{ marginBottom: 12 }}>{metaRow}</div>
+        <div style={{ marginBottom: 16 }}>{brandsRow}</div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12, fontSize: 13, color: TEXT_SEC }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {seller.city}
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            از {seller.since}
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 'auto' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            {seller.productCount} محصول
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 16 }}>
-          {seller.brands.map(b => (
-            <span key={b} style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 20, padding: '2px 9px' }}>{b}</span>
-          ))}
-        </div>
-
-        {/* action buttons — LQ (طرح مشاهده و رزرو) */}
+        {/* action buttons */}
         <div style={{ display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
-          <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
-            flex: 1, padding: '10px 0', borderRadius: 12, textAlign: 'center', textDecoration: 'none',
-            background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
-            fontSize: 13, fontWeight: 700,
-          }}>
-            مشاهده فروشگاه
-          </Link>
-          <a href={`tel:${seller.phone}`} onClick={e => e.stopPropagation()} style={{
-            padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
-            border: '1px solid rgba(28,28,26,0.12)', color: TEXT,
-            background: 'rgba(28,28,26,0.04)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          </a>
+          <div style={{ flex: 1 }}>
+            <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
+              display: 'block', padding: '10px 0', borderRadius: 12, textAlign: 'center', textDecoration: 'none',
+              background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
+              fontSize: 13, fontWeight: 700,
+            }}>
+              مشاهده فروشگاه
+            </Link>
+          </div>
+          {callBtn}
         </div>
       </div>
     </div>
@@ -293,23 +350,27 @@ function SellerCard({ seller }: { seller: typeof SELLERS[0] }) {
 export default function SellersPage() {
   const [search,      setSearch]      = useState('')
   const [activeCity,  setActiveCity]  = useState('همه')
+  const [activeSpec,  setActiveSpec]  = useState('همه')
   const [onlyVerified,setOnlyVerified]= useState(false)
   const [sort,        setSort]        = useState<'rating'|'products'|'newest'>('rating')
+  const [view,        setView]        = useState<'grid'|'list'>('grid')
 
   const filtered = useMemo(() => {
     return SELLERS
       .filter(s => !search.trim() || s.name.includes(search.trim()) || s.city.includes(search.trim()) || s.brands.some(b => b.toLowerCase().includes(search.toLowerCase())))
       .filter(s => activeCity === 'همه' || s.city === activeCity)
+      .filter(s => activeSpec === 'همه' || s.specialties.some(sp => sp.includes(activeSpec) || activeSpec.includes(sp)))
       .filter(s => !onlyVerified || s.verified)
       .sort((a, b) => {
         if (sort === 'rating')   return b.rating - a.rating
         if (sort === 'products') return b.productCount - a.productCount
         return b.sinceYear - a.sinceYear
       })
-  }, [search, activeCity, onlyVerified, sort])
+  }, [search, activeCity, activeSpec, onlyVerified, sort])
 
   const totalProducts = SELLERS.reduce((sum, s) => sum + s.productCount, 0)
   const cities = [...new Set(SELLERS.map(s => s.city))].length
+  const verifiedCount = SELLERS.filter(s => s.verified).length
 
   return (
     <>
@@ -319,131 +380,168 @@ export default function SellersPage() {
         .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
         @media(max-width:1000px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
         @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
+        .sel-list { display: flex; flex-direction: column; gap: 14px; }
         .s-chip { transition: all 0.18s; }
         .s-chip:hover { opacity: 0.85; }
         .search-inp:focus { border-color: rgba(199,166,106,0.7) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; outline: none; }
+        @media(max-width:640px){
+          .sel-list-card { flex-direction: column !important; }
+          .sel-list-img { width: 100% !important; height: 150px; }
+          .sel-list-actions { flex-direction: row !important; padding: 0 18px 16px !important; }
+          .sel-list-actions > a:first-child { flex: 1; }
+          .sel-list-brands { display: none; }
+        }
+        .filt-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+        .filt-scroll::-webkit-scrollbar { display: none; }
       `}</style>
 
       <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
 
-        {/* ─────── HERO ─────── */}
-        <div style={{ position: 'relative', height: 'clamp(280px,38vw,420px)', overflow: 'hidden' }}>
-          {/* background image */}
-          <img src="/images/shop/snooker-table.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(3px) brightness(0.45) saturate(0.7)', transform: 'scale(1.06)' }} />
-          {/* gradient overlay */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,8,5,0.55) 0%, rgba(20,15,8,0.78) 100%)' }} />
-          {/* grain texture */}
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E")', opacity: 0.6 }} />
+        {/* ─────── HERO — luxury ─────── */}
+        <div style={{ position: 'relative', minHeight: 'clamp(300px,40vw,400px)', overflow: 'hidden' }}>
+          <img src="/images/shop/snooker-table.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(2px) brightness(0.38) saturate(0.75)', transform: 'scale(1.06)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 80% at 50% 0%, rgba(199,166,106,0.16) 0%, transparent 55%), linear-gradient(to bottom, rgba(8,7,5,0.62) 0%, rgba(14,11,7,0.86) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E")', opacity: 0.5 }} />
+          {/* thin gold top rule */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }} />
 
-          {/* hero content */}
-          <div style={{ position: 'relative', zIndex: 2, maxWidth: 720, margin: '0 auto', padding: '0 clamp(20px,4vw,40px)', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', animation: 'fadeUp 0.6s ease both' }}>
-
-            {/* badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.35)', color: GOLD, fontSize: 13, fontWeight: 700, borderRadius: 24, padding: '5px 16px', marginBottom: 18, backdropFilter: 'blur(10px)', letterSpacing: '0.04em' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22" fill="none" stroke="currentColor" strokeWidth="2"/></svg>
-              فروشگاه‌های معتبر
+          <div style={{ position: 'relative', zIndex: 2, maxWidth: 760, margin: '0 auto', padding: 'clamp(48px,7vw,72px) clamp(20px,4vw,40px)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', animation: 'fadeUp 0.6s ease both' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD, fontSize: 11.5, fontWeight: 700, borderRadius: 24, padding: '6px 16px', marginBottom: 20, backdropFilter: 'blur(10px)', letterSpacing: '0.16em' }}>
+              BILLIARD HUB · مارکت‌پلیس رسمی
             </div>
-
-            <h1 style={{ fontSize: 'clamp(24px,4.5vw,44px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: 'clamp(26px,4.6vw,46px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               فروشگاه‌های تجهیزات بیلیارد
             </h1>
-            <p style={{ fontSize: 'clamp(14px,2vw,17px)', color: 'rgba(255,255,255,0.65)', margin: '0 0 28px', lineHeight: 1.7 }}>
-              بهترین فروشگاه‌های چوب، میز، توپ و لوازم جانبی بیلیارد در ایران
+            <p style={{ fontSize: 'clamp(13.5px,2vw,16px)', color: 'rgba(255,255,255,0.6)', margin: '0 0 26px', lineHeight: 1.8, maxWidth: 460 }}>
+              معتبرترین فروشندگان چوب، میز، توپ و لوازم جانبی — همه در یک جا
             </p>
 
-            {/* search bar */}
-            <div style={{ width: '100%', maxWidth: 500, position: 'relative' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(199,166,106,0.7)" strokeWidth="2.2" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
+            {/* search */}
+            <div style={{ width: '100%', maxWidth: 520, position: 'relative', marginBottom: 22 }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(199,166,106,0.75)" strokeWidth="2.2" style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
               <input
-                className="search-inp"
-                type="text"
-                placeholder="جستجوی فروشنده، شهر یا برند..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{
-                  width: '100%', padding: '14px 48px 14px 18px',
-                  borderRadius: 14, fontSize: 15,
-                  background: 'rgba(255,255,255,0.10)',
-                  border: '1.5px solid rgba(255,255,255,0.20)',
-                  backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                  color: '#fff', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                  transition: 'border-color 0.2s, box-shadow 0.2s',
-                  direction: 'rtl',
-                }}
+                className="search-inp" type="text" placeholder="جستجوی فروشنده، شهر یا برند..."
+                value={search} onChange={e => setSearch(e.target.value)}
+                style={{ width: '100%', padding: '15px 50px 15px 18px', borderRadius: 16, fontSize: 15,
+                  background: 'rgba(255,255,255,0.09)', border: '1.5px solid rgba(255,255,255,0.18)',
+                  backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', color: '#fff',
+                  fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'border-color 0.2s, box-shadow 0.2s', direction: 'rtl' }}
               />
+            </div>
+
+            {/* premium stats row */}
+            <div style={{ display: 'flex', gap: 'clamp(18px,4vw,44px)', alignItems: 'center' }}>
+              {[
+                { v: SELLERS.length,   l: 'فروشگاه فعال' },
+                { v: totalProducts,    l: 'محصول موجود' },
+                { v: verifiedCount,    l: 'تأییدشده' },
+              ].map((st, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'clamp(18px,4vw,44px)' }}>
+                  {i > 0 && <div style={{ width: 1, height: 26, background: 'rgba(255,255,255,0.14)' }} />}
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 'clamp(18px,2.6vw,24px)', fontWeight: 900, color: GOLD, lineHeight: 1 }}>{st.v.toLocaleString('fa-IR')}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 5 }}>{st.l}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* ─────── BODY ─────── */}
-        <div style={{ maxWidth: 1160, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 64px' }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
 
-          {/* ─── FILTERS ─── */}
-          <div style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', border: '1px solid rgba(255,255,255,0.75)', borderRadius: 18, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95), 0 4px 20px rgba(0,0,0,0.06)', padding: '14px 18px', marginBottom: 28, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+          {/* ─── FILTER BAR (sticky, luxury glass) ─── */}
+          <div style={{ position: 'sticky', top: 12, zIndex: 30, background: 'rgba(255,255,255,0.86)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 10px 34px rgba(28,28,26,0.10)', padding: 12, marginTop: -34, marginBottom: 24 }}>
 
-            {/* city pills */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {CITIES.map(city => (
-                <button key={city} className="s-chip" onClick={() => setActiveCity(city)} style={{
-                  padding: '7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                  border: activeCity === city ? 'none' : '1px solid rgba(255,255,255,0.88)',
-                  background: activeCity === city ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.78)',
-                  backdropFilter: activeCity === city ? 'none' : 'blur(14px) saturate(190%)',
-                  WebkitBackdropFilter: activeCity === city ? 'none' : 'blur(14px) saturate(190%)',
-                  color: activeCity === city ? '#fff' : TEXT_SEC,
-                  boxShadow: activeCity === city ? 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 3px 10px rgba(199,166,106,0.36)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)',
-                  fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-                }}>
-                  {city}
-                </button>
-              ))}
+            {/* row 1: city + specialty chips (scrollable on mobile) */}
+            <div className="filt-scroll" style={{ paddingBottom: 4 }}>
+              {CITIES.map(city => {
+                const on = activeCity === city
+                return (
+                  <button key={city} className="s-chip" onClick={() => setActiveCity(city)} style={{
+                    flexShrink: 0, padding: '7px 15px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+                    border: on ? 'none' : '1px solid rgba(28,28,26,0.10)',
+                    background: on ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(255,255,255,0.7)',
+                    color: on ? '#fff' : TEXT_SEC,
+                    boxShadow: on ? '0 3px 10px rgba(199,166,106,0.36)' : 'none',
+                    fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+                  }}>{city}</button>
+                )
+              })}
+              <div style={{ width: 1, alignSelf: 'stretch', margin: '2px 4px', background: 'rgba(28,28,26,0.10)', flexShrink: 0 }} />
+              {SPECIALTIES.map(sp => {
+                const on = activeSpec === sp
+                return (
+                  <button key={sp} className="s-chip" onClick={() => setActiveSpec(sp)} style={{
+                    flexShrink: 0, padding: '7px 15px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+                    border: on ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.10)',
+                    background: on ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
+                    color: on ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+                  }}>{sp}</button>
+                )
+              })}
             </div>
 
-            {/* divider */}
-            <div style={{ width: 1, height: 24, background: 'rgba(28,28,26,0.10)', flexShrink: 0 }} />
-
-            {/* verified toggle */}
-            <button className="s-chip" onClick={() => setOnlyVerified(!onlyVerified)} style={{
-              padding: '7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              border: onlyVerified ? '1px solid rgba(199,166,106,0.42)' : '1px solid rgba(255,255,255,0.88)',
-              background: onlyVerified ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.78)',
-              backdropFilter: 'blur(14px) saturate(190%)',
-              WebkitBackdropFilter: 'blur(14px) saturate(190%)',
-              color: onlyVerified ? GOLD : TEXT_SEC,
-              boxShadow: onlyVerified ? 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 3px 12px rgba(199,166,106,0.14)' : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.05)',
-              fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              فقط تأیید شده
-            </button>
-
-            {/* sort — pushed to left */}
-            <div style={{ marginRight: 'auto', position: 'relative' }}>
-              <select value={sort} onChange={e => setSort(e.target.value as typeof sort)} style={{
-                padding: '7px 36px 7px 16px', borderRadius: 24, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                background: 'rgba(28,28,26,0.06)', border: 'none', color: TEXT_SEC,
-                fontFamily: 'Vazirmatn,Tahoma,sans-serif', appearance: 'none', WebkitAppearance: 'none',
+            {/* row 2: verified + sort + view toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(28,28,26,0.07)', flexWrap: 'wrap' }}>
+              <button className="s-chip" onClick={() => setOnlyVerified(!onlyVerified)} style={{
+                padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                border: onlyVerified ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(28,28,26,0.10)',
+                background: onlyVerified ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)',
+                color: onlyVerified ? GOLD_D : TEXT_SEC, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+                display: 'flex', alignItems: 'center', gap: 6,
               }}>
-                {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>مرتب: {o.label}</option>)}
-              </select>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                فقط تأیید شده
+              </button>
+
+              <span style={{ fontSize: 12.5, color: TEXT_MUT, marginRight: 4 }}>
+                <b style={{ color: TEXT, fontWeight: 800 }}>{filtered.length.toLocaleString('fa-IR')}</b> فروشگاه
+              </span>
+
+              {/* left cluster */}
+              <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ position: 'relative' }}>
+                  <select value={sort} onChange={e => setSort(e.target.value as typeof sort)} style={{
+                    padding: '8px 34px 8px 14px', borderRadius: 12, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+                    background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', color: TEXT_SEC,
+                    fontFamily: 'Vazirmatn,Tahoma,sans-serif', appearance: 'none', WebkitAppearance: 'none',
+                  }}>
+                    {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>مرتب: {o.label}</option>)}
+                  </select>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+
+                {/* view toggle (grid / list) */}
+                <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 12, background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)' }}>
+                  {([['grid','⊞'],['list','☰']] as [ 'grid'|'list', string ][]).map(([v]) => {
+                    const on = view === v
+                    return (
+                      <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
+                        width: 34, height: 30, borderRadius: 9, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: on ? '#fff' : 'transparent', color: on ? GOLD_D : TEXT_MUT,
+                        boxShadow: on ? '0 2px 6px rgba(28,28,26,0.12)' : 'none', transition: 'all 0.18s',
+                      }}>
+                        {v === 'grid'
+                          ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                          : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* count */}
-          <p style={{ fontSize: 14, color: TEXT_SEC, marginBottom: 20, fontWeight: 500 }}>
-            <span style={{ fontWeight: 800, color: TEXT }}>{filtered.length}</span> فروشگاه یافت شد
-          </p>
-
-          {/* ─── GRID ─── */}
+          {/* ─── GRID / LIST ─── */}
           {filtered.length > 0 ? (
-            <div className="sel-grid" style={{ marginBottom: 56 }}>
+            <div className={view === 'grid' ? 'sel-grid' : 'sel-list'} style={{ marginBottom: 56 }}>
               {filtered.map((s, i) => (
-                <div key={s.id} style={{ animation: `fadeUp ${0.35 + i * 0.06}s ease both` }}>
-                  <SellerCard seller={s} />
+                <div key={s.id} style={{ animation: `fadeUp ${0.3 + i * 0.05}s ease both` }}>
+                  <SellerCard seller={s} view={view} />
                 </div>
               ))}
             </div>
