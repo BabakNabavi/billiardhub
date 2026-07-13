@@ -446,20 +446,19 @@ export default function Navbar() {
       {mobileOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
-          background: '#0B0E16',
+          background: '#F7F5F0',
           overflowY: 'auto',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
           {/* Header row — centered brand */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '36px', width: 'auto', marginBottom: '9px' }} />
-            <span style={{ fontWeight: 900, fontSize: '19px', letterSpacing: '0.16em', color: '#ffffff', lineHeight: 1 }}>BILLIARD HUB</span>
-            <span style={{ fontWeight: 800, fontSize: '13.5px', letterSpacing: '-0.02em', marginTop: '6px' }}>
-              <span style={{ color: '#ffffff' }}>بیلیارد</span>{' '}
+            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', marginBottom: '8px' }} />
+            <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
+              <span style={{ color: '#1C1B17' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
             </span>
             <button onClick={() => setMobileOpen(false)}
-              style={{ position: 'absolute', top: '16px', insetInlineStart: '20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', padding: '8px', display: 'flex' }}>
+              style={{ position: 'absolute', top: '16px', insetInlineStart: '20px', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
               <X size={20} />
             </button>
           </div>
@@ -475,13 +474,13 @@ export default function Navbar() {
                 <User size={17} /> ورود | ثبت‌نام رایگان
               </Link>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.7)', borderRadius: '16px', border: '1px solid rgba(28,28,26,0.08)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 12px rgba(28,28,26,0.05)' }}>
                 <div style={{ width: '40px', height: '40px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '19px', flexShrink: 0 }}>
                   {user.firstName?.[0]}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.38)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>
+                  <div style={{ color: '#1C1B17', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
+                  <div style={{ color: 'rgba(28,28,26,0.42)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>
                 </div>
                 <button onClick={() => { logout(); router.push('/'); setMobileOpen(false); }}
                   style={{ padding: '7px 12px', borderRadius: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.22)', color: '#ef4444', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -491,43 +490,38 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Navigation section — explore-menu style cards */}
+          {/* Navigation section — light explore-menu style cards, 4 per row */}
           <div style={{ padding: '0 16px 8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
               {mobileLinks.map((item, i) => (
                 <Link key={i} href={item.href} onClick={() => setMobileOpen(false)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '11px 12px', borderRadius: '14px',
-                    background: 'rgba(255,255,255,0.05)',
-                    backdropFilter: 'blur(32px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-                    border: '1px solid rgba(255,255,255,0.09)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px',
+                    padding: '12px 5px', borderRadius: '14px',
+                    background: 'rgba(255,255,255,0.72)',
+                    border: '1px solid rgba(28,28,26,0.07)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 10px rgba(28,28,26,0.04)',
                     textDecoration: 'none', position: 'relative', overflow: 'hidden',
                     transition: 'background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
                   }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.background = `linear-gradient(135deg,${item.color}14,${item.color}06)`;
-                    el.style.borderColor = `${item.color}30`;
-                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 24px ${item.color}22`;
+                    el.style.background = `linear-gradient(135deg,${item.color}12,${item.color}06)`;
+                    el.style.borderColor = `${item.color}33`;
+                    el.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 20px ${item.color}22`;
                   }}
                   onMouseLeave={e => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.background = 'rgba(255,255,255,0.05)';
-                    el.style.borderColor = 'rgba(255,255,255,0.09)';
-                    el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.10)';
+                    el.style.background = 'rgba(255,255,255,0.72)';
+                    el.style.borderColor = 'rgba(28,28,26,0.07)';
+                    el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 10px rgba(28,28,26,0.04)';
                   }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `linear-gradient(135deg,${item.color}26,${item.color}0D)`, border: `1px solid ${item.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `linear-gradient(135deg,${item.color}22,${item.color}0D)`, border: `1px solid ${item.color}2E`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
                     {item.icon}
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</div>
-                    <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.34)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.desc}</div>
-                  </div>
+                  <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'rgba(28,28,26,0.72)', textAlign: 'center', lineHeight: 1.25 }}>{item.label}</span>
                   {item.live && (
-                    <span style={{ position: 'absolute', top: '6px', insetInlineStart: '6px', fontSize: '8px', color: '#ef4444', background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '20px', padding: '1px 5px', fontWeight: 700 }}>LIVE</span>
+                    <span style={{ position: 'absolute', top: '5px', insetInlineStart: '5px', fontSize: '7.5px', color: '#ef4444', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.26)', borderRadius: '20px', padding: '1px 4px', fontWeight: 700 }}>LIVE</span>
                   )}
                 </Link>
               ))}
@@ -535,10 +529,10 @@ export default function Navbar() {
           </div>
 
           {/* Bottom promo — pushed ~20% lower */}
-          <div style={{ margin: '20px', marginTop: 'clamp(52px, 16vh, 120px)', padding: '18px 20px', background: 'rgba(184,147,58,0.08)', border: '1px solid rgba(184,147,58,0.18)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ margin: '20px', marginTop: 'clamp(52px, 16vh, 120px)', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.80)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.78)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
+              <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
             </div>
             <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
               ثبت‌نام <ArrowLeft size={10} />
