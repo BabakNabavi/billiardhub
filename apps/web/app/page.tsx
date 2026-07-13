@@ -1432,20 +1432,20 @@ useEffect(() => {
             onMouseLeave={() => { mktPausedRef.current = false; }}
           >
             {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
-              <div key={`${p.id}-${i}`} style={{ width: '200px', flexShrink: 0 }}>
-                <ProductCard p={p} h="320px" />
+              <div key={`${p.id}-${i}`} style={{ width: '190px', flexShrink: 0 }}>
+                <ProductCard p={p} h="304px" />
               </div>
             ))}
           </div>
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
-              <div key={p.id} className="mkt-mob-card" style={{ width: '38vw', minWidth: '140px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={p.id} className="mkt-mob-card" style={{ width: '36vw', minWidth: '133px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 {p.pct > 0 && (
                   <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4, background: '#ef4444', border: 'none', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
                     {p.pct}٪ تخفیف
                   </div>
                 )}
-                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(220px,64vw,297px)' }}>
+                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(209px,61vw,282px)' }}>
                   <div style={{ borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer', display: 'flex', flexDirection: 'column', border: '1px solid rgba(0,0,0,0.22)', boxShadow: '0 4px 20px rgba(0,0,0,0.10)' }}>
                     <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
                       <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -1515,7 +1515,7 @@ useEffect(() => {
             onMouseLeave={() => { sellersPaused.current = false; }}
           >
             {[...SELLERS, ...SELLERS].map((s, i) => (
-              <div key={`${s.id}-${i}`} style={{ width: '200px', flexShrink: 0 }}>
+              <div key={`${s.id}-${i}`} style={{ width: '220px', flexShrink: 0 }}>
                 <SellerCard s={s} />
               </div>
             ))}
@@ -1524,7 +1524,7 @@ useEffect(() => {
           {/* Mobile slider */}
           <div className="sellers-mob">
             {SELLERS.map((s) => (
-              <div key={s.id} style={{ width: '48vw', minWidth: '160px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+              <div key={s.id} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <SellerCard s={s} />
               </div>
             ))}

@@ -27,6 +27,7 @@ interface StoryGroup {
 }
 
 const sampleGroups: StoryGroup[] = [
+  { userId:'shop-procue', userName:'پروکیو', userAvatar:'پ', userRole:'shop', roleColor:'#f59e0b', roleLabel:'فروشگاه', allSeen:false, stories:[{id:'procue-s1', caption:'جدیدترین کالکشن چوب‌های کربنی Predator رسید — همین حالا ببینید!', createdAt:'۱ ساعت پیش', mediaUrl:'/images/shop/Pro_table.jpg', mediaType:'image'}] },
   { userId:'1',   userName:'باشگاه ستاره',  userAvatar:'س', userRole:'club',    roleColor:'#C7A66A', roleLabel:'باشگاه',  allSeen:false, stories:[{id:'1',   caption:'میز جدید اسنوکر نصب شد 🎱',           createdAt:'۲ ساعت پیش', mediaUrl:'/images/shop/snooker-table.jpg', mediaType:'image'},{id:'1b',caption:'رزرو آنلاین فعال شد ✅',createdAt:'۲ ساعت پیش'}] },
   { userId:'c1',  userName:'احمد رضایی',    userAvatar:'ا', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c1s1', caption:'کلاس خصوصی اسنوکر فردا ساعت ۱۰ 🎱', createdAt:'۱ ساعت پیش', mediaUrl:'/images/shop/snooker-table.jpg', mediaType:'image'}] },
   { userId:'c7',  userName:'نیلوفر صادقی',  userAvatar:'ن', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c7s1', caption:'مسابقات بانوان این هفته 🏆',        createdAt:'۲ ساعت پیش', mediaUrl:'/images/shop/Ball-1.jpg',        mediaType:'image'}] },

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ShoppingCart, Search, User, LogIn, ChevronLeft } from 'lucide-react'
 import { useCartStore } from '../../store/cart.store'
 import { useAuthStore } from '../../store/auth.store'
+import { SHOP_PRODUCTS } from './products'
 
 const GOLD     = '#C7A66A'
 const GOLD_BOR = 'rgba(199,166,106,0.32)'
@@ -198,21 +199,29 @@ const CATS = [
   },
 ]
 
-// ── Mock products ──────────────────────────────────────────────
-const PRODUCTS = [
-  { id: 1,  img: '/images/shop/cue_billiard_2.jpg',   name: 'چوب حرفه‌ای Predator 314³',              price: 2800000, old: 3300000, disc: 15, sellerName: 'فروشگاه چوب طلایی',        sellerPhone: '09121110001', sellerWhatsapp: '989121110001' },
-  { id: 2,  img: '/images/shop/snooker-table.jpg',    name: 'میز اسنوکر Dynamo Tournament',            price: 45000000,old: 50000000,disc: 10, sellerName: 'بیلیارد حرفه‌ای ایران',    sellerPhone: '09351110002', sellerWhatsapp: '989351110002' },
-  { id: 3,  img: '/images/shop/Ball-1.jpg',           name: 'توپ Aramith Pro Cup استاندارد WPBSA',     price: 1200000, old: 1500000, disc: 20, sellerName: 'فروشگاه توپ اصل',          sellerPhone: '09011110003', sellerWhatsapp: '989011110003' },
-  { id: 4,  img: '/images/shop/pool_chalk_1.jpg',     name: 'گچ Master Blue Square — ۱۴۴ عددی',       price: 180000,  old: 260000,  disc: 31, sellerName: 'لوازم جانبی بیلیارد',      sellerPhone: '09121110004', sellerWhatsapp: '989121110004' },
-  { id: 5,  img: '/images/shop/rest-pool.webp',       name: 'رست اسنوکر حرفه‌ای پیچ استنلس',          price: 450000,  old: 480000,  disc: 6,  sellerName: 'فروشگاه اکسسوری پلاس',    sellerPhone: '09361110005', sellerWhatsapp: '989361110005' },
-  { id: 6,  img: '/images/shop/accessori.png',        name: 'کیف چوب بیلیارد دو قسمتی چرم',           price: 850000,  old: 970000,  disc: 12, sellerName: 'کیف و کیس بیلیارد',        sellerPhone: '09191110006', sellerWhatsapp: '989191110006' },
-  { id: 7,  img: '/images/shop/cue_billiard.jpg',     name: 'چوب کربن فایبر Mezz EC7-CF',             price: 6500000, old: 7100000, disc: 8,  sellerName: 'فروشگاه چوب طلایی',        sellerPhone: '09121110001', sellerWhatsapp: '989121110001' },
-  { id: 8,  img: '/images/shop/Ball.jpg',             name: 'توپ Cyclop Omega Pool Set',               price: 950000,  old: 1120000, disc: 15, sellerName: 'فروشگاه توپ اصل',          sellerPhone: '09011110003', sellerWhatsapp: '989011110003' },
-  { id: 9,  img: '/images/shop/Home_table.jpg',       name: 'میز بیلیارد خانگی — پایه چوب ماسیو',    price: 18000000,old: 19000000,disc: 5,  sellerName: 'میز ایران',                 sellerPhone: '09351110009', sellerWhatsapp: '989351110009' },
-  { id: 10, img: '/images/shop/pool_chalk_2.jpg',     name: 'گچ Predator 1080 Pure — ۵ عددی',         price: 220000,  old: 245000,  disc: 10, sellerName: 'لوازم جانبی بیلیارد',      sellerPhone: '09121110004', sellerWhatsapp: '989121110004' },
-  { id: 11, img: '/images/shop/snooker-table-2.jpg',  name: 'میز اسنوکر Pro-Line ۱۲ فوتی',            price: 68000000,old: 75000000,disc: 9,  sellerName: 'بیلیارد حرفه‌ای ایران',    sellerPhone: '09351110002', sellerWhatsapp: '989351110002' },
-  { id: 12, img: '/images/shop/Pro_table.jpg',        name: 'میز بیلیارد حرفه‌ای پارچه ایتالیایی',   price: 32000000,old: 36000000,disc: 11, sellerName: 'میز ایران',                 sellerPhone: '09351110009', sellerWhatsapp: '989351110009' },
-]
+// ── Products: منبع واحد مشترک با صفحه‌ی جزئیات محصول ──────────
+const PRODUCTS = SHOP_PRODUCTS
+
+const parsePriceInput = (v: string) => {
+  const n = parseInt(v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, ''), 10)
+  return Number.isNaN(n) ? null : n
+}
+
+/* دکمه‌ی LQ طلایی — شیشه‌ی رنگ برند #b8933a (بدون سطح توپُر) */
+const BRAND_GOLD = '#b8933a'
+const LQ_GOLD_BTN: React.CSSProperties = {
+  background: 'rgba(184,147,58,0.16)',
+  backdropFilter: 'blur(40px) saturate(2.4)', WebkitBackdropFilter: 'blur(40px) saturate(2.4)',
+  border: '1px solid rgba(184,147,58,0.45)',
+  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.85), 0 8px 28px rgba(184,147,58,0.20)',
+  color: '#7d6222',
+}
+const LQ_WHITE_BTN: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.52)',
+  backdropFilter: 'blur(40px) saturate(2.4)', WebkitBackdropFilter: 'blur(40px) saturate(2.4)',
+  border: '1px solid rgba(255,255,255,0.82)',
+  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)',
+}
 
 function toFa(v: string | number) {
   return String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
@@ -238,7 +247,7 @@ function ShopTopBar({
       borderBottom: '1px solid rgba(255,255,255,0.6)',
       boxShadow: '0 1px 0 rgba(28,28,26,0.06), 0 4px 28px rgba(28,28,26,0.06)',
     }}>
-      <div style={{
+      <div className="bb-row" style={{
         maxWidth: 1300, margin: '0 auto',
         padding: '0 clamp(12px,3vw,32px)',
         height: 60,
@@ -257,7 +266,7 @@ function ShopTopBar({
         </Link>
         <div className="bb-divider" style={{ width: 1, height: 28, background: 'rgba(28,28,26,0.08)', flexShrink: 0 }} />
         {/* Search */}
-        <form onSubmit={onSearch} style={{ flex: 1, position: 'relative' }}>
+        <form onSubmit={onSearch} className="bb-search" style={{ flex: 1, position: 'relative' }}>
           <button type="submit" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, zIndex: 2, display: 'flex', alignItems: 'center' }}>
             <Search size={16} color={focused ? GOLD : 'rgba(28,28,26,0.3)'} strokeWidth={2.2} />
           </button>
@@ -362,7 +371,7 @@ function HeroSlider() {
 }
 
 // ── Categories Section ────────────────────────────────────────
-function CategoriesSection() {
+function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; onPick: (id: string) => void }) {
   const scrollRef  = useRef<HTMLDivElement>(null)
   const dragging   = useRef(false)
   const startX     = useRef(0)
@@ -402,25 +411,27 @@ function CategoriesSection() {
           style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
-            const hov = hovId === cat.id
+            const active = activeCat === cat.id
+            const hov = hovId === cat.id || active
             return (
-              <Link
+              <button
                 key={cat.id}
-                href={`/shop/category/${cat.id}`}
+                type="button"
+                onClick={() => onPick(cat.id)}
                 draggable={false}
                 onMouseEnter={() => setHovId(cat.id)}
                 onMouseLeave={() => setHovId(null)}
                 style={{
-                  textDecoration: 'none', flexShrink: 0,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                  width: 82,
-                  /* ── exact home-page card style ── */
+                  textDecoration: 'none', flexShrink: 0, fontFamily: 'inherit',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+                  width: 78,
+                  /* ── exact home-page card style (۵٪ کوچک‌تر) ── */
                   background: hov ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.52)',
                   backdropFilter: 'blur(40px) saturate(240%)',
                   WebkitBackdropFilter: 'blur(40px) saturate(240%)',
-                  border: `1px solid ${hov ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.82)'}`,
-                  borderRadius: 22,
-                  padding: '14px 8px 10px',
+                  border: `1px solid ${active ? cat.g[1] : hov ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.82)'}`,
+                  borderRadius: 21,
+                  padding: '13px 8px 9px',
                   boxShadow: hov
                     ? `inset 0 1.5px 0 rgba(255,255,255,1), 0 20px 52px ${cat.g[1]}2e, 0 8px 24px rgba(0,0,0,0.08)`
                     : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)',
@@ -431,10 +442,10 @@ function CategoriesSection() {
                 }}
               >
                 {/* top sheen — exactly like home page */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)', borderRadius: '22px 22px 0 0', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)', borderRadius: '21px 21px 0 0', pointerEvents: 'none' }} />
                 {/* icon container — home-page style: subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 46, height: 46, borderRadius: 13, flexShrink: 0,
+                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
                   border: `1px solid ${cat.g[1]}52`,
                   boxShadow: `0 4px 14px ${cat.g[1]}48`,
@@ -442,14 +453,14 @@ function CategoriesSection() {
                   color: cat.g[1],
                   position: 'relative', zIndex: 1,
                 }}>
-                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)` }}>
+                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(0.95)' }}>
                     {cat.icon}
                   </div>
                 </div>
-                <span style={{ fontSize: 10.5, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
-              </Link>
+              </button>
             )
           })}
         </div>
@@ -458,55 +469,377 @@ function CategoriesSection() {
   )
 }
 
-// ── Products Section ──────────────────────────────────────────
-function ProductsSection({ products }: { products: typeof PRODUCTS }) {
-  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
+// ── Catalog Section — بخش اصلی فروش: فیلتر + مرتب‌سازی + گرید ──
+type SortKey = 'newest' | 'price-asc' | 'price-desc' | 'disc'
+const SORT_OPTS: { k: SortKey; l: string }[] = [
+  { k: 'newest',     l: 'جدیدترین' },
+  { k: 'price-asc',  l: 'ارزان‌ترین' },
+  { k: 'price-desc', l: 'گران‌ترین' },
+  { k: 'disc',       l: 'بیشترین تخفیف' },
+]
+
+function BazaarSortDropdown({ value, onChange }: { value: SortKey; onChange: (v: SortKey) => void }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+  }, [])
+  const current = SORT_OPTS.find(o => o.k === value)!
   return (
-    <div style={{ background: '#F7F6F4' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>پیشنهاد محصولات</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link href="/shop/new" style={{ fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg,${GOLD},#A07840)`, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, boxShadow: '0 3px 10px rgba(199,166,106,0.30)' }}>
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
+        className="lq-sheen lq-lift"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 14,
+          ...LQ_WHITE_BTN,
+          ...(open ? { border: `1.5px solid ${BRAND_GOLD}` } : {}),
+          fontSize: 13, color: TEXT, cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >
+        <span style={{ color: TEXT_SEC }}>مرتب‌سازی:</span>
+        <span style={{ fontWeight: 700 }}>{current.l}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s', color: TEXT_SEC }}>
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+      <div role="listbox" style={{
+        position: 'absolute', insetInlineStart: 0, top: '100%', marginTop: 8, width: 200, zIndex: 60,
+        background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+        border: '1px solid rgba(255,255,255,0.7)', borderRadius: 14, overflow: 'hidden',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 16px 40px rgba(28,28,26,0.16)',
+        transformOrigin: 'top', transition: 'all .15s',
+        opacity: open ? 1 : 0, transform: open ? 'scale(1)' : 'scale(0.95)', pointerEvents: open ? 'auto' : 'none',
+      }}>
+        {SORT_OPTS.map(o => {
+          const selected = o.k === value
+          return (
+            <button
+              key={o.k} type="button" role="option" aria-selected={selected}
+              onClick={() => { onChange(o.k); setOpen(false) }}
+              style={{
+                display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 15px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13,
+                background: selected ? 'rgba(199,166,106,0.14)' : 'transparent',
+                color: selected ? '#A07840' : TEXT, fontWeight: selected ? 800 : 500, textAlign: 'right',
+              }}
+            >
+              {o.l}
+              {selected && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A07840" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+interface CatalogFilters {
+  cats: Set<string>; sellers: Set<string>
+  priceFrom: string; priceTo: string; discOnly: boolean
+  minRating: number | null
+}
+
+function CatalogSection({
+  products, filters, setFilters, sort, setSort,
+}: {
+  products: typeof PRODUCTS
+  filters: CatalogFilters
+  setFilters: React.Dispatch<React.SetStateAction<CatalogFilters>>
+  sort: SortKey
+  setSort: (v: SortKey) => void
+}) {
+  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
+  const [sheetOpen, setSheetOpen]     = useState(false)
+  const [sellerQuery, setSellerQuery] = useState('')
+  const [sellerOpen, setSellerOpen]   = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = sheetOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [sheetOpen])
+
+  const toggle = (key: 'cats' | 'sellers', v: string) =>
+    setFilters(f => {
+      const next = new Set(f[key])
+      if (next.has(v)) next.delete(v); else next.add(v)
+      return { ...f, [key]: next }
+    })
+
+  const clearAll = () => setFilters({ cats: new Set(), sellers: new Set(), priceFrom: '', priceTo: '', discOnly: false, minRating: null })
+
+  const catCounts: Record<string, number> = {}
+  products.forEach(p => { const c = (p as { cat?: string }).cat ?? 'other'; catCounts[c] = (catCounts[c] ?? 0) + 1 })
+  const sellerNames = Array.from(new Set(products.map(p => p.sellerName)))
+
+  const visible = (() => {
+    const from = parsePriceInput(filters.priceFrom)
+    const to   = parsePriceInput(filters.priceTo)
+    const list = products.filter(p => {
+      const c = (p as { cat?: string }).cat ?? 'other'
+      if (filters.cats.size && !filters.cats.has(c)) return false
+      if (filters.sellers.size && !filters.sellers.has(p.sellerName)) return false
+      if (filters.discOnly && !(p.disc > 0)) return false
+      if (filters.minRating !== null && p.rating < filters.minRating) return false
+      if (from !== null && p.price < from) return false
+      if (to !== null && p.price > to) return false
+      return true
+    })
+    const sorted = [...list]
+    if (sort === 'price-asc')  sorted.sort((a, b) => a.price - b.price)
+    if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price)
+    if (sort === 'disc')       sorted.sort((a, b) => b.disc - a.disc)
+    return sorted
+  })()
+
+  const activeCount =
+    filters.cats.size + filters.sellers.size + (filters.discOnly ? 1 : 0) +
+    (filters.priceFrom ? 1 : 0) + (filters.priceTo ? 1 : 0) + (filters.minRating !== null ? 1 : 0)
+
+  const sellerMatches = sellerNames.filter(sn => !sellerQuery.trim() || sn.includes(sellerQuery.trim()))
+
+  const panelCard: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+    border: '1px solid rgba(255,255,255,0.75)', borderRadius: 18,
+    boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 28px rgba(28,28,26,0.07)',
+    padding: '16px 16px 14px',
+  }
+  const rowLabel: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 9, marginBottom: 9,
+    fontSize: 13, color: 'rgba(28,28,26,0.62)', cursor: 'pointer',
+  }
+  const checkbox: React.CSSProperties = { width: 15, height: 15, accentColor: '#A07840', cursor: 'pointer' }
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '8px 10px', borderRadius: 10, fontSize: 12.5, outline: 'none',
+    background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.85)',
+    boxShadow: 'inset 0 1.5px 3px rgba(28,28,26,0.06)', fontFamily: 'inherit', color: TEXT, direction: 'rtl',
+    fontVariantNumeric: 'tabular-nums',
+  }
+
+  const FilterBlocks = (
+    <>
+      {/* دسته‌بندی */}
+      <div style={panelCard}>
+        <h4 style={{ fontSize: 13, fontWeight: 800, margin: '0 0 12px', color: TEXT }}>دسته‌بندی</h4>
+        {CATS.map(c => (
+          <label key={c.id} style={rowLabel}>
+            <input type="checkbox" style={checkbox} checked={filters.cats.has(c.id)} onChange={() => toggle('cats', c.id)} />
+            {c.label}
+            <span style={{ marginRight: 'auto', fontSize: 11.5, color: TEXT_MUT, fontVariantNumeric: 'tabular-nums' }}>
+              {toFa(catCounts[c.id] ?? 0)}
+            </span>
+          </label>
+        ))}
+      </div>
+
+      {/* قیمت */}
+      <div style={panelCard}>
+        <h4 style={{ fontSize: 13, fontWeight: 800, margin: '0 0 12px', color: TEXT }}>محدوده قیمت (تومان)</h4>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input style={inputStyle} placeholder="از" value={filters.priceFrom} onChange={e => setFilters(f => ({ ...f, priceFrom: e.target.value }))} />
+          <input style={inputStyle} placeholder="تا" value={filters.priceTo} onChange={e => setFilters(f => ({ ...f, priceTo: e.target.value }))} />
+        </div>
+      </div>
+
+      {/* فروشنده — دراپ‌داون قابل‌جستجو (مناسب صدها فروشگاه) */}
+      <div style={panelCard}>
+        <h4 style={{ fontSize: 13, fontWeight: 800, margin: '0 0 12px', color: TEXT }}>فروشنده</h4>
+
+        {/* چیپ‌های انتخاب‌شده */}
+        {filters.sellers.size > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            {[...filters.sellers].map(sn => (
+              <button key={sn} type="button" onClick={() => toggle('sellers', sn)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 999, fontSize: 11.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+                  background: 'rgba(184,147,58,0.14)', border: '1px solid rgba(184,147,58,0.34)', color: '#7d6222' }}>
+                {sn}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ورودی جستجو */}
+        <div style={{ position: 'relative' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input
+            value={sellerQuery}
+            onChange={e => { setSellerQuery(e.target.value); setSellerOpen(true) }}
+            onFocus={() => setSellerOpen(true)}
+            placeholder="جستجوی فروشنده..."
+            style={{ ...inputStyle, padding: '8px 32px 8px 10px' }}
+          />
+        </div>
+
+        {/* لیست کشویی */}
+        {sellerOpen && (
+          <div style={{ marginTop: 8, maxHeight: 176, overflowY: 'auto', borderRadius: 10, border: '1px solid rgba(28,28,26,0.08)', background: 'rgba(255,255,255,0.6)' }}>
+            {sellerMatches.length === 0 ? (
+              <div style={{ padding: '12px 12px', fontSize: 12, color: TEXT_MUT, textAlign: 'center' }}>فروشنده‌ای پیدا نشد</div>
+            ) : sellerMatches.map(sn => {
+              const on = filters.sellers.has(sn)
+              return (
+                <button key={sn} type="button" onClick={() => toggle('sellers', sn)}
+                  style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 9, padding: '8px 11px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, textAlign: 'right',
+                    background: on ? 'rgba(184,147,58,0.10)' : 'transparent', color: on ? '#7d6222' : 'rgba(28,28,26,0.68)', fontWeight: on ? 700 : 500 }}>
+                  <span style={{ width: 15, height: 15, borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: on ? '#A07840' : 'transparent', border: on ? 'none' : '1.5px solid rgba(28,28,26,0.22)' }}>
+                    {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
+                  </span>
+                  {sn}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* امتیاز */}
+      <div style={panelCard}>
+        <h4 style={{ fontSize: 13, fontWeight: 800, margin: '0 0 12px', color: TEXT }}>حداقل امتیاز</h4>
+        {[4.5, 4].map(r => {
+          const on = filters.minRating === r
+          return (
+            <label key={r} style={rowLabel} onClick={() => setFilters(f => ({ ...f, minRating: f.minRating === r ? null : r }))}>
+              <span style={{ width: 15, height: 15, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: on ? '4px solid #A07840' : '1.5px solid rgba(28,28,26,0.25)' }} />
+              <span style={{ color: '#D9A441', letterSpacing: '-1px' }}>★★★★★</span>
+              <span style={{ marginRight: 'auto', fontSize: 11.5, color: TEXT_MUT, fontVariantNumeric: 'tabular-nums' }}>{toFa(r.toString().replace('.', '٫'))}+</span>
+            </label>
+          )
+        })}
+      </div>
+
+      {/* تخفیف + پاک کردن */}
+      <div style={panelCard}>
+        <label style={{ ...rowLabel, marginBottom: 0 }}>
+          <input type="checkbox" style={checkbox} checked={filters.discOnly} onChange={() => setFilters(f => ({ ...f, discOnly: !f.discOnly }))} />
+          فقط کالاهای تخفیف‌دار
+        </label>
+        {activeCount > 0 && (
+          <button type="button" onClick={clearAll} style={{ marginTop: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#A07840', fontFamily: 'inherit', padding: 0 }}>
+            پاک کردن همه فیلترها ({toFa(activeCount)})
+          </button>
+        )}
+      </div>
+    </>
+  )
+
+  return (
+    <div id="bazaar-catalog" style={{ background: '#F7F6F4' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 44px', direction: 'rtl' }}>
+
+        {/* toolbar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>محصولات بیلیارد بازار</h2>
+            <span style={{ fontSize: 12.5, color: TEXT_SEC, fontVariantNumeric: 'tabular-nums' }}>{toFa(visible.length)} کالا</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            {/* فیلتر موبایل */}
+            <button
+              type="button" onClick={() => setSheetOpen(true)} className="bz-filterbtn lq-sheen lq-lift"
+              style={{
+                alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 14,
+                ...LQ_WHITE_BTN, fontSize: 13, color: TEXT, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+              فیلترها
+              {activeCount > 0 && (
+                <span style={{ minWidth: 17, height: 17, borderRadius: 9, background: `linear-gradient(135deg,${GOLD},#A07840)`, color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                  {toFa(activeCount)}
+                </span>
+              )}
+            </button>
+            <BazaarSortDropdown value={sort} onChange={setSort}/>
+            <Link href="/shop/new" className="lq-sheen lq-lift" style={{ fontSize: 13, fontWeight: 800, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px', borderRadius: 14, ...LQ_GOLD_BTN }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
               ثبت محصول
             </Link>
-            <Link href="/shop/all" style={{ fontSize: 13, color: GOLD, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
-              مشاهده همه
-              <ChevronLeft size={13} strokeWidth={2.5} />
-            </Link>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
-          {products.map(p => (
-            <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              {/* Image */}
-              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-                <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
-                    {toFa(p.disc)}٪
+
+        {/* layout: سایدبار + گرید */}
+        <div className="bz-catalog">
+          <aside className="bz-sidebar" style={{ position: 'sticky', top: 76, alignSelf: 'start', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {FilterBlocks}
+          </aside>
+
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }} className="bz-grid">
+              {visible.map(p => (
+                <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+                    <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {p.disc > 0 && (
+                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                        {toFa(p.disc)}٪
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              {/* Info */}
-              <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                <div style={{ marginTop: 'auto' }}>
-                  {p.disc > 0 && (
-                    <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
-                      {fmt(p.old)} تومان
+                  <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                    <span style={{ fontSize: 10.5, color: TEXT_MUT }}>{p.sellerName}</span>
+                    <div style={{ marginTop: 'auto' }}>
+                      {p.disc > 0 && (
+                        <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                          {fmt(p.old)} تومان
+                        </div>
+                      )}
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
+                        {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                      </div>
                     </div>
-                  )}
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                    <div className="lq-lift" style={{ marginTop: 10, textAlign: 'center', padding: '8px 0', borderRadius: 10, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38', fontSize: 12.5, fontWeight: 700 }}>
+                      مشاهده محصول
+                    </div>
                   </div>
-                </div>
+                </Link>
+              ))}
+            </div>
+
+            {visible.length === 0 && (
+              <div style={{ ...panelCard, textAlign: 'center', padding: '48px 20px', fontSize: 13.5, color: TEXT_SEC }}>
+                کالایی با این فیلترها پیدا نشد.
+                <button type="button" onClick={clearAll} style={{ marginRight: 8, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#A07840', fontFamily: 'inherit' }}>
+                  پاک کردن فیلترها
+                </button>
               </div>
-            </Link>
-          ))}
+            )}
+          </div>
         </div>
       </div>
+
+      {/* شیت فیلتر موبایل */}
+      {sheetOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 300 }}>
+          <div onClick={() => setSheetOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }}/>
+          <div style={{ position: 'absolute', insetInline: 0, bottom: 0, maxHeight: '82vh', overflowY: 'auto', borderRadius: '20px 20px 0 0', background: '#F7F6F4', padding: '14px 18px 24px', direction: 'rtl' }}>
+            <div style={{ width: 40, height: 4, borderRadius: 4, background: 'rgba(28,28,26,0.14)', margin: '0 auto 12px' }}/>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 800, margin: 0, color: TEXT }}>فیلترها</h3>
+              <button type="button" aria-label="بستن" onClick={() => setSheetOpen(false)} className="lq-lift" style={{ width: 36, height: 36, borderRadius: 12, ...LQ_WHITE_BTN, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: TEXT }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {FilterBlocks}
+            </div>
+            <button
+              type="button" onClick={() => setSheetOpen(false)} className="lq-sheen lq-lift"
+              style={{ marginTop: 14, width: '100%', padding: '13px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, ...LQ_GOLD_BTN }}
+            >
+              مشاهده {toFa(visible.length)} کالا
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -863,6 +1196,22 @@ export default function ShopPage() {
   const cartCount = useCartStore(s => s.totalItems())
   const user      = useAuthStore(s => s.user)
 
+  /* فیلترهای کاتالوگ اصلی */
+  const [filters, setFilters] = useState<CatalogFilters>({
+    cats: new Set(), sellers: new Set(), priceFrom: '', priceTo: '', discOnly: false, minRating: null,
+  })
+  const [sort, setSort] = useState<SortKey>('newest')
+
+  /* کلیک روی چیپ دسته‌بندی → فیلتر همان دسته + اسکرول به کاتالوگ */
+  const pickCategory = (id: string) => {
+    setFilters(f => {
+      const isActive = f.cats.size === 1 && f.cats.has(id)
+      return { ...f, cats: isActive ? new Set() : new Set([id]) }
+    })
+    document.getElementById('bazaar-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  const activeSingleCat = filters.cats.size === 1 ? [...filters.cats][0]! : null
+
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
@@ -902,6 +1251,33 @@ export default function ShopPage() {
           .bb-divider { display: none !important; }
           .hero-slider { height: clamp(190px,56vw,320px) !important; }
         }
+        /* موبایل: سرچ در ردیف کامل دوم — دیگر له یا نصفه نمی‌شود */
+        @media(max-width:640px) {
+          .bb-row    { height: auto !important; flex-wrap: wrap; padding-top: 9px !important; padding-bottom: 10px !important; row-gap: 9px; }
+          .bb-search { order: 10; flex: 0 0 100% !important; }
+        }
+        /* کاتالوگ اصلی بازار */
+        .bz-catalog { display: grid; grid-template-columns: 252px 1fr; gap: 24px; }
+        @media(max-width:900px) {
+          .bz-catalog { grid-template-columns: 1fr !important; }
+          .bz-sidebar { display: none !important; }
+        }
+        .bz-filterbtn { display: none !important; }
+        @media(max-width:900px) { .bz-filterbtn { display: flex !important; } }
+        .bz-grid { grid-template-columns: repeat(4,1fr) !important; }
+        @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(3,1fr) !important; } }
+        @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        /* دکمه‌ی LQ: جاروی نور + لیفت */
+        .lq-sheen { position: relative; overflow: hidden; }
+        .lq-sheen::after {
+          content: ''; position: absolute; inset: 0; pointer-events: none;
+          transform: translateX(-160%) skewX(-15deg);
+          background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
+        }
+        .lq-sheen:hover::after { transition: transform .65s ease; transform: translateX(200%) skewX(-15deg); }
+        .lq-lift { transition: all .3s cubic-bezier(0.22,1,0.36,1); }
+        .lq-lift:hover { transform: translateY(-2px); }
+        .lq-lift:active { transform: scale(0.96); }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5' }}>
@@ -913,8 +1289,14 @@ export default function ShopPage() {
           user={user}
         />
         <HeroSlider />
-        <CategoriesSection />
-        <ProductsSection products={allProducts} />
+        <CategoriesSection activeCat={activeSingleCat} onPick={pickCategory} />
+        <CatalogSection
+          products={allProducts}
+          filters={filters}
+          setFilters={setFilters}
+          sort={sort}
+          setSort={setSort}
+        />
         <DealsSection />
         <AdBanners />
         <NewestSection products={allProducts} />
