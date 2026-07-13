@@ -265,7 +265,7 @@ export default function FlatShop() {
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
       {/* ═══ HEADER ═══ */}
-      <header className="sticky top-0 z-40 border-b border-[#E7E2D6] bg-white">
+      <header className="sticky top-[72px] z-40 border-b border-[#E7E2D6] bg-white">
         <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-5 gap-y-2.5 px-4 py-3 sm:px-6">
           <Link href={`/sellers/${store.id}`} className="flex shrink-0 items-center gap-2.5 text-[17px] font-bold">
             <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_30%,#2b2b2b,#0a0a0a_70%)]">
@@ -350,7 +350,7 @@ export default function FlatShop() {
       <div className="mx-auto grid max-w-[1240px] grid-cols-1 gap-8 px-4 pb-20 pt-5 sm:px-6 min-[861px]:grid-cols-[236px_1fr]">
 
         {/* سایدبار دسکتاپ */}
-        <aside className="sticky top-[84px] hidden self-start min-[861px]:block">
+        <aside className="sticky top-[146px] hidden self-start min-[861px]:block">
           {FilterPanel}
         </aside>
 
@@ -469,14 +469,10 @@ export default function FlatShop() {
               <p className="mt-3 max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B]">
                 فروشگاه تخصصی تجهیزات بیلیارد — عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای.
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[11.5px] text-[#8A8474]">
-                <span className="rounded-full bg-[#DCEEE4] px-2.5 py-1 font-semibold text-[#14532D]">فروشگاه تایید شده</span>
-                عضو از {toFa(store.memberSince)}
-              </div>
             </div>
 
-            {/* دسته‌بندی‌ها */}
-            <div>
+            {/* دسته‌بندی‌ها — روی موبایل حذف */}
+            <div className="hidden sm:block">
               <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">دسته‌بندی‌ها</h4>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] text-[#5B564B]">
                 {BAZAAR_CATS.slice(0, 8).map(c => (
@@ -504,13 +500,13 @@ export default function FlatShop() {
             <div>
               <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">راه‌های ارتباطی</h4>
               <ul className="space-y-3 text-[13px] text-[#5B564B]">
-                {store.phones.map(ph => (
-                  <li key={ph}>
-                    <a href={`tel:${ph.replace(/-/g, '')}`} className={`flex items-center gap-2.5 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
+                <li className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+                  {store.phones.map(ph => (
+                    <a key={ph} href={`tel:${ph.replace(/-/g, '')}`} className={`flex items-center gap-2 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
                       <span className="text-[#14532D]">{Icon.phone}</span>{toFa(ph)}
                     </a>
-                  </li>
-                ))}
+                  ))}
+                </li>
                 <li className="flex items-center gap-2.5 py-0.5">
                   <span className="text-[#14532D]">{Icon.clock}</span>{store.hours}
                 </li>
