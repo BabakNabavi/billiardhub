@@ -206,15 +206,7 @@ const parsePriceInput = (v: string) => {
   return Number.isNaN(n) ? null : n
 }
 
-/* دکمه‌ی LQ طلایی — شیشه‌ی رنگ برند #b8933a (بدون سطح توپُر) */
-const BRAND_GOLD = '#b8933a'
-const LQ_GOLD_BTN: React.CSSProperties = {
-  background: 'rgba(184,147,58,0.16)',
-  backdropFilter: 'blur(40px) saturate(2.4)', WebkitBackdropFilter: 'blur(40px) saturate(2.4)',
-  border: '1px solid rgba(184,147,58,0.45)',
-  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.85), 0 8px 28px rgba(184,147,58,0.20)',
-  color: '#7d6222',
-}
+/* دکمه‌ی شیشه‌ای سفید — برای کنترل‌های آیکونی (بستن شیت) */
 const LQ_WHITE_BTN: React.CSSProperties = {
   background: 'rgba(255,255,255,0.52)',
   backdropFilter: 'blur(40px) saturate(2.4)', WebkitBackdropFilter: 'blur(40px) saturate(2.4)',
@@ -473,18 +465,18 @@ function BazaarSortDropdown({ value, onChange }: { value: SortKey; onChange: (v:
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
-        className="lq-sheen lq-lift"
+        className="lq-lift"
         style={{
-          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 14,
-          ...LQ_WHITE_BTN,
-          ...(open ? { border: `1.5px solid ${BRAND_GOLD}` } : {}),
-          fontSize: 13, color: TEXT, cursor: 'pointer', fontFamily: 'inherit',
+          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 10,
+          background: 'rgba(199,166,106,0.12)',
+          border: open ? '1px solid rgba(199,166,106,0.55)' : '1px solid rgba(199,166,106,0.34)',
+          fontSize: 13, color: '#9A6E38', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}
       >
-        <span style={{ color: TEXT_SEC }}>مرتب‌سازی:</span>
+        <span style={{ color: 'rgba(154,110,56,0.72)', fontWeight: 600 }}>مرتب‌سازی:</span>
         <span style={{ fontWeight: 700 }}>{current.l}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s', color: TEXT_SEC }}>
+          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s', color: '#9A6E38' }}>
           <path d="M6 9l6 6 6-6"/>
         </svg>
       </button>
@@ -504,13 +496,14 @@ function BazaarSortDropdown({ value, onChange }: { value: SortKey; onChange: (v:
               onClick={() => { onChange(o.k); setOpen(false) }}
               style={{
                 display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 15px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13,
-                background: selected ? 'rgba(199,166,106,0.14)' : 'transparent',
-                color: selected ? '#A07840' : TEXT, fontWeight: selected ? 800 : 500, textAlign: 'right',
+                padding: '10px 15px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13,
+                background: selected ? 'rgba(199,166,106,0.12)' : 'transparent',
+                border: selected ? '1px solid rgba(199,166,106,0.40)' : '1px solid transparent',
+                color: selected ? '#9A6E38' : TEXT, fontWeight: selected ? 800 : 500, textAlign: 'right',
               }}
             >
               {o.l}
-              {selected && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A07840" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>}
+              {selected && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A6E38" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>}
             </button>
           )
         })}
@@ -634,9 +627,9 @@ function CatalogSection({
         {filters.sellers.size > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
             {[...filters.sellers].map(sn => (
-              <button key={sn} type="button" onClick={() => toggle('sellers', sn)}
+              <button key={sn} type="button" onClick={() => toggle('sellers', sn)} className="lq-lift"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 999, fontSize: 11.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
-                  background: 'rgba(184,147,58,0.14)', border: '1px solid rgba(184,147,58,0.34)', color: '#7d6222' }}>
+                  background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.40)', color: '#9A6E38' }}>
                 {sn}
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
@@ -666,7 +659,7 @@ function CatalogSection({
               return (
                 <button key={sn} type="button" onClick={() => toggle('sellers', sn)}
                   style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 9, padding: '8px 11px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, textAlign: 'right',
-                    background: on ? 'rgba(184,147,58,0.10)' : 'transparent', color: on ? '#7d6222' : 'rgba(28,28,26,0.68)', fontWeight: on ? 700 : 500 }}>
+                    background: on ? 'rgba(199,166,106,0.12)' : 'transparent', color: on ? '#9A6E38' : 'rgba(28,28,26,0.68)', fontWeight: on ? 700 : 500 }}>
                   <span style={{ width: 15, height: 15, borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: on ? '#A07840' : 'transparent', border: on ? 'none' : '1.5px solid rgba(28,28,26,0.22)' }}>
                     {on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
@@ -702,7 +695,7 @@ function CatalogSection({
           فقط کالاهای تخفیف‌دار
         </label>
         {activeCount > 0 && (
-          <button type="button" onClick={clearAll} style={{ marginTop: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#A07840', fontFamily: 'inherit', padding: 0 }}>
+          <button type="button" onClick={clearAll} className="lq-lift" style={{ marginTop: 12, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 10, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#9A6E38', fontFamily: 'inherit', padding: '7px 12px' }}>
             پاک کردن همه فیلترها ({toFa(activeCount)})
           </button>
         )}
@@ -723,10 +716,11 @@ function CatalogSection({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             {/* فیلتر موبایل */}
             <button
-              type="button" onClick={() => setSheetOpen(true)} className="bz-filterbtn lq-sheen lq-lift"
+              type="button" onClick={() => setSheetOpen(true)} className="bz-filterbtn lq-lift"
               style={{
-                alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 14,
-                ...LQ_WHITE_BTN, fontSize: 13, color: TEXT, cursor: 'pointer', fontFamily: 'inherit',
+                alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 10,
+                background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
+                fontSize: 13, color: '#9A6E38', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
@@ -787,7 +781,7 @@ function CatalogSection({
             {visible.length === 0 && (
               <div style={{ ...panelCard, textAlign: 'center', padding: '48px 20px', fontSize: 13.5, color: TEXT_SEC }}>
                 کالایی با این فیلترها پیدا نشد.
-                <button type="button" onClick={clearAll} style={{ marginRight: 8, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#A07840', fontFamily: 'inherit' }}>
+                <button type="button" onClick={clearAll} className="lq-lift" style={{ marginRight: 8, display: 'inline-block', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#9A6E38', fontFamily: 'inherit', padding: '6px 14px' }}>
                   پاک کردن فیلترها
                 </button>
               </div>
@@ -812,8 +806,8 @@ function CatalogSection({
               {FilterBlocks}
             </div>
             <button
-              type="button" onClick={() => setSheetOpen(false)} className="lq-sheen lq-lift"
-              style={{ marginTop: 14, width: '100%', padding: '13px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, ...LQ_GOLD_BTN }}
+              type="button" onClick={() => setSheetOpen(false)} className="lq-lift"
+              style={{ marginTop: 14, width: '100%', padding: '13px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38' }}
             >
               مشاهده {toFa(visible.length)} کالا
             </button>

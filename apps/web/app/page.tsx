@@ -210,10 +210,10 @@ const SELLERS = [
 ];
 
 const SERVICES_LIST = [
-  { id:'1', icon: Wrench,    title:'نصب میز',          desc:'نصب حرفه‌ای انواع میز بیلیارد، اسنوکر و پاکت در محل شما', color:'#C7A66A' },
-  { id:'2', icon: Hammer,    title:'تعمیر و بازسازی',  desc:'تعمیر تخصصی چوب، تعویض ضربه‌گیر و مقره با متریال اصل',    color:'#4A9EFF' },
-  { id:'3', icon: Scissors,  title:'کشیدن ابر میز',    desc:'تعویض ابر و روکش میز با پارچه‌های اصل اسنوکر و پاکت',     color:'#30C55A' },
-  { id:'4', icon: Settings,  title:'تنظیم کوشن',       desc:'تنظیم و تعویض کوشن‌های حرفه‌ای برای انواع میزهای بیلیارد', color:'#B97BFF' },
+  { id:'1', icon: Wrench,    title:'نصب میز',          desc:'نصب حرفه‌ای انواع میزهای بیلیارد در محل شما', color:'#C7A66A' },
+  { id:'2', icon: Hammer,    title:'تعمیر و بازسازی',  desc:'تعمیرات تخصصی چوب، تعویض تیپ و فرول',    color:'#4A9EFF' },
+  { id:'3', icon: Scissors,  title:'تعویض ماهوت',      desc:'تعویض پارچه‌ی انواع میزهای بیلیاردی',     color:'#30C55A' },
+  { id:'4', icon: Settings,  title:'تنظیم باند و میز', desc:'تراز و تنظیم انواع باند، میز و پاکت', color:'#B97BFF' },
   { id:'5', icon: Truck,     title:'حمل و نقل',        desc:'جابجایی تخصصی تجهیزات بیلیارد با بیمه کامل بار',           color:'#FF6B9D' },
   { id:'6', icon: GraduationCap, title:'آموزش نگهداری',   desc:'آموزش سرویس دوره‌ای و نگهداری صحیح از تجهیزات بیلیارد',   color:'#06b6d4' },
 ];
@@ -471,7 +471,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
       }}
     >
       {/* Image area — curved bottom via border-radius clip */}
-      <div style={{ position: 'relative', height: '136px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
+      <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
         <img src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -506,8 +506,8 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
 /* ═══════════════════════════════════════════════════════════════
    MKT BANNER  — mini 3-image auto-slider
 ═══════════════════════════════════════════════════════════════ */
-function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0 }: {
-  slides: string[]; label: string; body: string; cta: string; accent: string; href: string; initialIdx?: number;
+function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqCta = false }: {
+  slides: string[]; label: string; body: string; cta: string; accent: string; href: string; initialIdx?: number; lqCta?: boolean;
 }) {
   const [idx, setIdx] = useState(initialIdx);
   useEffect(() => {
@@ -525,7 +525,10 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0 }: {
         <div>
           <div style={{ fontSize: '9px', color: accent, fontWeight: 700, letterSpacing: '0.24em', marginBottom: '5px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{label}</div>
           <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }}>{cta} <ArrowLeft size={9} /></div>
+          <div style={lqCta
+            ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#F6F1E8', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38', padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
+            : { display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }
+          }>{cta} <ArrowLeft size={9} /></div>
         </div>
       </div>
       <div style={{ position: 'absolute', bottom: '9px', left: '12px', display: 'flex', gap: '4px' }}>
@@ -1534,6 +1537,29 @@ useEffect(() => {
                 <SellerCard s={s} />
               </Link>
             ))}
+          </div>
+
+          {/* ── Ad banners (LQ CTA) ── */}
+          <div className="mkt-banners" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '20px' }}>
+            <MktBanner
+              slides={[IMG.cue, IMG.table, IMG.ball]}
+              label="فروشندگان معتبر"
+              body="بهترین فروشگاه‌های<br/>تجهیزات بیلیارد"
+              cta="فروشگاه‌ها"
+              accent={GOLD}
+              href="/sellers"
+              lqCta
+            />
+            <MktBanner
+              slides={[IMG.snooker, IMG.proTable, IMG.rest]}
+              label="خرید مطمئن"
+              body="از فروشندگان<br/>تأییدشده"
+              cta="مشاهده"
+              accent={GOLD}
+              href="/sellers"
+              initialIdx={1}
+              lqCta
+            />
           </div>
         </div>
       </section>
