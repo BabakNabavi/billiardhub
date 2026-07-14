@@ -442,8 +442,8 @@ export default function CoachProfilePage() {
                         const s = SPECS[dk as keyof typeof SPECS]
                         return (
                           <span key={dk} style={{ display:'inline-flex', alignItems:'center', gap:7 }}>
-                            {i > 0 && <span style={{ color:'rgba(0,0,0,0.20)', fontWeight:400 }}>·</span>}
-                            <span style={{ color: s?.color ?? '#9A6E38' }}>{s?.label ?? 'بیلیارد'}</span>
+                            {i > 0 && <span style={{ color:'rgba(0,0,0,0.22)', fontWeight:400 }}>·</span>}
+                            <span style={{ color: '#1c1c1c' }}>{s?.label ?? 'بیلیارد'}</span>
                           </span>
                         )
                       })}
