@@ -453,7 +453,7 @@ export default function Navbar() {
         }}>
           {/* Header row — centered brand */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
-            <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ height: '48px', width: '48px', borderRadius: '12px', marginBottom: '9px' }} />
+            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', marginBottom: '8px' }} />
             <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
               <span style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.28), 0 -1px 0 rgba(255,255,255,0.45)' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
