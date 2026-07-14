@@ -473,7 +473,7 @@ function BazaarSortDropdown({ value, onChange }: { value: SortKey; onChange: (v:
           fontSize: 13, color: '#9A6E38', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}
       >
-        <span style={{ color: 'rgba(154,110,56,0.72)', fontWeight: 600 }}>مرتب‌سازی:</span>
+        <span className="bz-sort-label" style={{ color: 'rgba(154,110,56,0.72)', fontWeight: 600 }}>مرتب‌سازی:</span>
         <span style={{ fontWeight: 700 }}>{current.l}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
           style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s', color: '#9A6E38' }}>
@@ -1237,6 +1237,8 @@ export default function ShopPage() {
         }
         .bz-filterbtn { display: none !important; }
         @media(max-width:900px) { .bz-filterbtn { display: flex !important; } }
+        /* موبایل: برچسب «مرتب‌سازی:» حذف تا «ثبت محصول» کنارش جا شود */
+        @media(max-width:640px) { .bz-sort-label { display: none !important; } }
         .bz-grid { grid-template-columns: repeat(4,1fr) !important; }
         @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(3,1fr) !important; } }
         @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(2,1fr) !important; } }
