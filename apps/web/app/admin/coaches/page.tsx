@@ -124,7 +124,7 @@ export default function AdminCoachesPage() {
                           <div style={{ fontSize: 11.5, fontWeight: 700, color: TEXT_M, marginBottom: 6 }}>درجات مربیگری</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                             {certificationLines(c.grades).map((l, i) => (
-                              <span key={i} style={{ fontSize: 12, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 20, padding: '3px 10px' }}>{l}</span>
+                              <span key={i} dir="auto" style={{ fontSize: 12, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 20, padding: '3px 10px', unicodeBidi: 'isolate' }}>{l}</span>
                             ))}
                           </div>
                         </div>

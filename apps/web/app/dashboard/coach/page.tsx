@@ -107,13 +107,18 @@ export default function CoachDashboardPage() {
     setForm(f => ({ ...f, disciplines: f.disciplines.includes(k) ? f.disciplines.filter(x => x !== k) : [...f.disciplines, k] }))
 
   const gradeSelected = (k: string) => form.grades.some(g => g.key === k)
-  const toggleGrade = (g: { key: string; label: string }) =>
-    setForm(f => ({
-      ...f,
-      grades: gradeSelected(g.key)
-        ? f.grades.filter(x => x.key !== g.key)
-        : [...f.grades, { key: g.key, label: g.label, year: '' }],
-    }))
+  // grades are cumulative: selecting one auto-selects all lower grades; deselecting drops it + all higher
+  const toggleGrade = (idx: number) =>
+    setForm(f => {
+      const g = GRADES[idx]!
+      const isOn = f.grades.some(x => x.key === g.key)
+      const yearOf = (k: string) => f.grades.find(x => x.key === k)?.year ?? ''
+      if (isOn) {
+        const keep = new Set(GRADES.slice(0, idx).map(x => x.key))
+        return { ...f, grades: f.grades.filter(x => keep.has(x.key)) }
+      }
+      return { ...f, grades: GRADES.slice(0, idx + 1).map(x => ({ key: x.key, label: x.label, year: yearOf(x.key) })) }
+    })
   const setGradeYear = (k: string, year: string) =>
     setForm(f => ({ ...f, grades: f.grades.map(g => (g.key === k ? { ...g, year } : g)) }))
 
@@ -295,10 +300,13 @@ export default function CoachDashboardPage() {
                   <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
                     {form.photo && <img src={form.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
-                  <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
-                    انتخاب عکس
-                    <input type="file" accept="image/*" hidden onChange={e => addPhoto(e.target.files?.[0])} />
-                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+                    <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
+                      {form.photo ? 'تغییر عکس' : 'انتخاب عکس'}
+                      <input type="file" accept="image/*" hidden onChange={e => addPhoto(e.target.files?.[0])} />
+                    </label>
+                    {form.photo && <button type="button" onClick={() => set('photo', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', padding: 0 }}>حذف عکس</button>}
+                  </div>
                 </div>
               </div>
               <div>
@@ -307,10 +315,13 @@ export default function CoachDashboardPage() {
                   <div style={{ width: 100, height: 60, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
                     {form.coverImage && <img src={form.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
-                  <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
-                    انتخاب عکس
-                    <input type="file" accept="image/*" hidden onChange={e => addCover(e.target.files?.[0])} />
-                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+                    <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
+                      {form.coverImage ? 'تغییر عکس' : 'انتخاب عکس'}
+                      <input type="file" accept="image/*" hidden onChange={e => addCover(e.target.files?.[0])} />
+                    </label>
+                    {form.coverImage && <button type="button" onClick={() => set('coverImage', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', padding: 0 }}>حذف عکس</button>}
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,16 +348,16 @@ export default function CoachDashboardPage() {
               از اولین مدرک (توجیهی) شروع کنید و مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {GRADES.map(g => {
+              {GRADES.map((g, idx) => {
                 const on = gradeSelected(g.key)
                 const yr = form.grades.find(x => x.key === g.key)?.year ?? ''
                 return (
                   <div key={g.key} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', borderRadius: 10, border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)', background: on ? 'rgba(199,166,106,0.07)' : '#fff' }}>
-                    <button type="button" onClick={() => toggleGrade(g)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', flex: 1, textAlign: 'right', minWidth: 0 }}>
+                    <button type="button" onClick={() => toggleGrade(idx)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', flex: 1, textAlign: 'right', minWidth: 0 }}>
                       <span style={{ width: 19, height: 19, borderRadius: 6, flexShrink: 0, border: on ? 'none' : '1.5px solid rgba(17,17,16,0.22)', background: on ? GOLD : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                       </span>
-                      <span style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, direction: g.label.startsWith('WPBSA') ? 'ltr' : 'rtl' }}>{g.label}</span>
+                      <span dir="auto" style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, unicodeBidi: 'isolate' }}>{g.label}</span>
                     </button>
                     {on && (
                       <input value={yr} onChange={e => setGradeYear(g.key, e.target.value)} placeholder="سال دریافت" inputMode="numeric"
