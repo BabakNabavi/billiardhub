@@ -20,6 +20,7 @@ const SPECS: Record<string,{label:string;color:string}> = {
   snooker:  {label:'اسنوکر',       color:'#7C3AED'},
   pocket:   {label:'پاکت بیلیارد', color:GOLD_D},
   highball: {label:'هی‌بال',       color:'#C2410C'},
+  carom:    {label:'کارامبول',     color:'#15803D'},
 }
 
 const GRADE_DOTS: Record<string,{dots:number;color:string}> = {
@@ -314,7 +315,6 @@ export default function CoachProfilePage() {
   const [expandedAlbum, setExpandedAlbum] = useState<string|null>(null)
   const [lightbox,      setLightbox]      = useState<GImg|null>(null)
 
-  const spec  = SPECS[coach.specialty as keyof typeof SPECS]
   const localBadge = localP ? badgeFromGrades(localP.grades) : null
   const grade = localP ? (localBadge ? { dots: localBadge.dots, color: GOLD_D } : undefined) : GRADE_DOTS[coach.badge]
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
@@ -436,9 +436,24 @@ export default function CoachProfilePage() {
                         </svg>
                       )}
                     </div>
-                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>مربی {localP && localP.disciplines.length ? localP.disciplines.map(disciplineLabel).join(' · ') : (spec?.label ?? 'بیلیارد')}</div>
+                    {/* رشته‌های تخصصی — چیپ */}
+                    <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginTop:7 }}>
+                      {(localP ? localP.disciplines : (coach.specialty ? [coach.specialty] : [])).map(dk => {
+                        const s = SPECS[dk as keyof typeof SPECS]
+                        const c = s?.color ?? '#9A6E38'
+                        return (
+                          <span key={dk} style={{ fontSize:12.5, fontWeight:700, color:c, background:`${c}14`, border:`1px solid ${c}33`, borderRadius:20, padding:'4px 13px' }}>{s?.label ?? 'بیلیارد'}</span>
+                        )
+                      })}
+                    </div>
+                    {/* درجه مربیگری — پیل، راست‌چین */}
                     {coach.badge && (
-                      <div dir="auto" style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3, unicodeBidi:'isolate' }}>{coach.badge}</div>
+                      <div style={{ display:'flex', marginTop:9 }}>
+                        <span dir="auto" style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize:12.5, fontWeight:800, color:coach.badgeColor, background:`${coach.badgeColor}14`, border:`1.5px solid ${coach.badgeColor}3d`, borderRadius:20, padding:'5px 14px', unicodeBidi:'isolate' }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                          {coach.badge}
+                        </span>
+                      </div>
                     )}
                     <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
                       {coach.city}، ایران
