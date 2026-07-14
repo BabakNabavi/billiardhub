@@ -264,7 +264,7 @@ export default function CoachesPage() {
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
         {/* ══════════════ HERO — compact banner ══════════════ */}
-        <section style={{ position:'relative', height:'clamp(155px,18vh,300px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(14px,3vh,28px)' }}>
+        <section style={{ position:'relative', height:'clamp(145px,16.5vh,300px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(8px,2.2vh,24px)' }}>
 
           {/* Aurora blobs — pastel tints on light bg */}
           <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
