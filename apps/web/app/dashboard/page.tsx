@@ -155,6 +155,7 @@ export default function DashboardPage() {
   const isClubOwner = userRoles.includes('club_owner');
   const isPlayer    = userRoles.includes('player');
   const isCoach     = userRoles.includes('coach');
+  const isReferee   = userRoles.includes('referee');
 
   return (
     <AuthGuard>
@@ -435,6 +436,27 @@ export default function DashboardPage() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#7c3aed', fontWeight: 700 }}>
                         {hasCoachProfile ? 'ویرایش پروفایل' : 'ساخت پروفایل'} <span style={{ fontSize: '16px' }}>←</span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
+                {/* Referee Card */}
+                {isReferee && (
+                  <Link href="/referees/dashboard" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, rgba(8,145,178,0.08), rgba(8,145,178,0.02))',
+                      border: '1.5px solid rgba(8,145,178,0.25)',
+                      transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                    }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🧑‍⚖️</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل داور رسمی</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                        مدیریت مسابقات و برنامه داوری، و انتشار استوری در صفحه‌ی اول
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
+                        ورود به پنل <span style={{ fontSize: '16px' }}>←</span>
                       </div>
                     </div>
                   </Link>

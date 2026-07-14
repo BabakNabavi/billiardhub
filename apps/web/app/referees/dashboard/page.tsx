@@ -9,13 +9,16 @@ import {
     ChevronRight, Check, X, Edit, Eye, Users,
     Trophy, Calendar, Zap, Target, BarChart2,
     MessageCircle, Settings, Play, Pause, Square,
-    Flag, RotateCcw, ChevronUp, ChevronDown, Plus, Award, Star
+    Flag, RotateCcw, ChevronUp, ChevronDown, Plus, Award, Star, Camera
 } from 'lucide-react';
+import {
+    STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory, type StoredStory,
+} from '../../../lib/story-store';
 
 /* ══ types ══ */
 type MatchStatus = 'scheduled' | 'live' | 'break' | 'completed' | 'disputed';
 type DisputeStatus = 'open' | 'resolved' | 'escalated';
-type Tab = 'overview' | 'live' | 'schedule' | 'reports' | 'disputes';
+type Tab = 'overview' | 'live' | 'schedule' | 'reports' | 'disputes' | 'stories';
 
 interface LiveMatch {
     id: string; player1: string; player2: string;
@@ -85,6 +88,35 @@ const REPORTS: Report[] = [
 function toFa(v: string | number) { return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d))); }
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
+
+const rid = () => Math.random().toString(36).slice(2, 9);
+
+/* Downscale + re-encode a story image before storing (localStorage quota). */
+function compressStoryImage(file: File, maxDim = 1080, quality = 0.72): Promise<string> {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onerror = () => resolve('');
+        reader.onload = () => {
+            const dataUrl = String(reader.result);
+            const im = document.createElement('img');
+            im.onerror = () => resolve(dataUrl);
+            im.onload = () => {
+                let w = im.naturalWidth || im.width;
+                let h = im.naturalHeight || im.height;
+                if (w >= h && w > maxDim)     { h = Math.round((h * maxDim) / w); w = maxDim; }
+                else if (h > w && h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { resolve(dataUrl); return; }
+                ctx.drawImage(im, 0, 0, w, h);
+                try { resolve(canvas.toDataURL('image/jpeg', quality)); } catch { resolve(dataUrl); }
+            };
+            im.src = dataUrl;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
 function ElapsedTimer({ seconds }: { seconds: number }) {
     const [t, setT] = useState(seconds);
@@ -264,7 +296,7 @@ function LiveControl({ match }: { match: LiveMatch }) {
 
 /* ══ MAIN CONTENT ══ */
 function DashboardContent() {
-    const { user } = useAuthStore();
+    const { user, _hydrated } = useAuthStore();
     const [tab, setTab] = useState<Tab>('overview');
     const [tick, setTick] = useState(0);
 
@@ -272,6 +304,43 @@ function DashboardContent() {
         const t = setInterval(() => setTick(n => n + 1), 1000);
         return () => clearInterval(t);
     }, []);
+
+    /* ── Stories — published independently; feed the home stories bar for 24h ── */
+    const ownerKey = user?.phone || user?.id || user?.firstName || 'referee';
+    const refRole = STORY_ROLES.referee!;
+    const [storyList, setStoryList]   = useState<StoredStory[]>([]);
+    const [storyDraft, setStoryDraft] = useState<{ url: string; caption: string } | null>(null);
+    const [storyBusy, setStoryBusy]   = useState(false);
+    const storyInput = useRef<HTMLInputElement>(null);
+
+    useEffect(() => { if (_hydrated) setStoryList(getOwnerStories(ownerKey)); }, [_hydrated, ownerKey]);
+
+    const pickStoryImage = async (file?: File) => {
+        if (!file) return;
+        setStoryBusy(true);
+        try {
+            const url = await compressStoryImage(file);
+            if (url) setStoryDraft(d => ({ url, caption: d?.caption ?? '' }));
+        } finally { setStoryBusy(false); }
+    };
+    const publishStory = () => {
+        if (!storyDraft?.url || storyList.length >= 10) return;
+        const name = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'داور';
+        addStoredStory({
+            id: `st-${Date.now()}-${rid()}`,
+            ownerKey,
+            userName: name,
+            roleKey: 'referee', roleLabel: refRole.label, roleColor: refRole.color,
+            avatar: (user?.firstName ?? 'د').charAt(0) || 'د',
+            logoUrl: user?.avatar || undefined,
+            mediaUrl: storyDraft.url,
+            caption: storyDraft.caption.trim(),
+            createdAt: Date.now(),
+        });
+        setStoryDraft(null);
+        setStoryList(getOwnerStories(ownerKey));
+    };
+    const deleteStory = (id: string) => { removeStoredStory(id); setStoryList(getOwnerStories(ownerKey)); };
 
     const now = new Date();
     const timeStr = toFa(`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`);
@@ -335,6 +404,7 @@ function DashboardContent() {
                             { k: 'schedule', l: 'برنامه', icon: <Calendar size={14} /> },
                             { k: 'reports', l: 'گزارش‌ها', icon: <Edit size={14} /> },
                             { k: 'disputes', l: 'اعتراضات', icon: <AlertCircle size={14} />, badge: DISPUTES.filter(d => d.status === 'open').length },
+                            { k: 'stories', l: 'استوری‌ها', icon: <Camera size={14} /> },
                         ].map(t => (
                             <button key={t.k} className={`r-tab ${tab === t.k ? 'active' : ''}`} onClick={() => setTab(t.k as Tab)}>
                                 {t.icon}{t.l}
@@ -594,6 +664,69 @@ function DashboardContent() {
                                     </p>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* ════ STORIES ════ */}
+                    {tab === 'stories' && (
+                        <div style={{ animation: 'fadeUp 0.4s ease both' }}>
+                            <div className="r-card">
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                                    <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{ width: '3px', height: '15px', background: 'linear-gradient(180deg,#C7A66A,transparent)', borderRadius: '2px', display: 'inline-block' }} />
+                                        استوری‌های شما
+                                        <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>({toFa(storyList.length)}/۱۰)</span>
+                                    </div>
+                                    {storyList.length < 10 && !storyDraft && (
+                                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', color: '#9A6E38', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: storyBusy ? 0.55 : 1 }}>
+                                            <Plus size={13} /> {storyBusy ? 'در حال آماده‌سازی…' : 'استوری جدید'}
+                                            <input ref={storyInput} type="file" accept="image/*" hidden disabled={storyBusy}
+                                                onChange={e => { void pickStoryImage(e.target.files?.[0]); e.currentTarget.value = ''; }} />
+                                        </label>
+                                    )}
+                                </div>
+                                <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.8, margin: '10px 0 16px' }}>
+                                    استوری بلافاصله منتشر می‌شود و به‌مدت ۲۴ ساعت در نوار استوری صفحه‌ی اول سایت به‌عنوان «داور» نمایش داده می‌شود.
+                                </p>
+
+                                {storyDraft && (
+                                    <div style={{ border: '1px solid rgba(0,0,0,0.07)', borderRadius: '14px', padding: '12px', marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                        <div style={{ width: '110px', height: '172px', borderRadius: '10px', overflow: 'hidden', background: '#000', flexShrink: 0 }}>
+                                            <img src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            <textarea value={storyDraft.caption} onChange={e => setStoryDraft(d => (d ? { ...d, caption: e.target.value } : d))}
+                                                placeholder="کپشن استوری (اختیاری)…" rows={3}
+                                                style={{ width: '100%', padding: '10px 13px', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '10px', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.8, outline: 'none' }} />
+                                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                                <button onClick={publishStory} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', color: '#9A6E38', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>انتشار استوری</button>
+                                                <button onClick={() => setStoryDraft(null)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '10px', color: 'rgba(0,0,0,0.45)', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>انصراف</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {storyList.length > 0 ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(100px,1fr))', gap: '10px' }}>
+                                        {storyList.map(s => (
+                                            <div key={s.id} style={{ position: 'relative', aspectRatio: '9/16', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(0,0,0,0.04)' }}>
+                                                <img src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                {s.caption && (
+                                                    <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '12px 7px 6px', background: 'linear-gradient(to top,rgba(0,0,0,0.72),transparent)', color: '#fff', fontSize: '10.5px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.caption}</div>
+                                                )}
+                                                <button onClick={() => deleteStory(s.id)} aria-label="حذف استوری" style={{ position: 'absolute', top: '5px', left: '5px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <X size={11} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : !storyDraft ? (
+                                    <div style={{ border: '1.5px dashed rgba(199,166,106,0.4)', borderRadius: '14px', padding: '30px 16px', textAlign: 'center', color: 'rgba(0,0,0,0.35)' }}>
+                                        <Camera size={30} style={{ margin: '0 auto 10px', opacity: 0.4 }} />
+                                        <div style={{ fontSize: '13px' }}>هنوز استوری‌ای منتشر نکرده‌اید — از دکمه‌ی «استوری جدید» یک استوری بگذارید.</div>
+                                    </div>
+                                ) : null}
+                            </div>
                         </div>
                     )}
                 </div>
