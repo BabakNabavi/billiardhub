@@ -29,15 +29,6 @@ const IMGS: string[] = [
 ]
 const img = (i: number) => IMGS[i % IMGS.length] ?? IMGS[0]!
 
-const GRADS: [string, string][] = [
-  ['#C7A66A','#7A4F1E'],['#7C3AED','#4C1D95'],['#2563EB','#1E3A8A'],
-  ['#16A34A','#14532D'],['#DC2626','#7F1D1D'],['#B45309','#78350F'],
-  ['#6D28D9','#3B0764'],['#0891B2','#164E63'],['#BE185D','#831843'],
-  ['#D97706','#78350F'],['#15803D','#14532D'],
-]
-const getGrad = (id: string): [string, string] =>
-  GRADS[parseInt(id, 10) % GRADS.length] ?? ['#C7A66A', '#7A4F1E']
-
 interface Coach {
   id: string; name: string; specialty: string; city: string
   experience: number; rating: number; students: number; medals: number
@@ -347,7 +338,6 @@ export default function CoachesPage() {
             <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
               {coaches.map((coach, idx) => {
                 const sp = SPECS[coach.specialty]
-                const [g1, g2] = getGrad(coach.id)
                 return (
                   <article key={coach.id} className="ccard" style={{
                     borderRadius:12, overflow:'hidden',
@@ -359,7 +349,7 @@ export default function CoachesPage() {
                   }}>
 
                     {/* ── Cover banner (LinkedIn-style dark) ── */}
-                    <div style={{ position:'relative', paddingTop:'42%', flexShrink:0,
+                    <div style={{ position:'relative', paddingTop:'46%', flexShrink:0,
                       background:'linear-gradient(135deg,#1b2a44 0%,#0e1728 100%)' }}>
                       <div style={{ position:'absolute', inset:0,
                         backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
@@ -368,31 +358,28 @@ export default function CoachesPage() {
                         background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
                     </div>
 
-                    {/* ── Avatar (large, centered, overlapping) ── */}
-                    <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%' }}>
-                      {coach.hasStory && coach.storyImage ? (
-                        <button type="button" aria-label="مشاهده استوری"
-                          onClick={e => { e.preventDefault(); e.stopPropagation(); setOpenStory(coach) }}
-                          className="cavatar"
-                          style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%', padding:0, cursor:'pointer',
-                            border:`3px solid ${GOLD}`, background:`linear-gradient(135deg,${g1},${g2})`,
-                            boxShadow:'0 4px 16px rgba(0,0,0,0.18)', overflow:'hidden',
-                            display:'flex', alignItems:'center', justifyContent:'center' }}>
-                          <span style={{ color:'#fff', fontWeight:900, fontSize:'clamp(26px,5vw,40px)', lineHeight:1 }}>{coach.name[0]}</span>
-                        </button>
-                      ) : (
-                        <div className="cavatar"
-                          style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%',
-                            border:'3px solid #FFFFFF', background:`linear-gradient(135deg,${g1},${g2})`,
-                            boxShadow:'0 4px 16px rgba(0,0,0,0.18)', overflow:'hidden',
-                            display:'flex', alignItems:'center', justifyContent:'center' }}>
-                          <span style={{ color:'#fff', fontWeight:900, fontSize:'clamp(26px,5vw,40px)', lineHeight:1 }}>{coach.name[0]}</span>
-                        </div>
-                      )}
+                    {/* ── Avatar (large, centered, overlapping) — story trigger ── */}
+                    <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%', position:'relative', zIndex:2 }}>
+                      <button type="button" aria-label="مشاهده استوری"
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); setOpenStory(coach) }}
+                        className="cavatar"
+                        style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%', padding:0, cursor:'pointer',
+                          border:`3px solid ${GOLD}`, background:'#E7ECF1',
+                          boxShadow:'0 4px 16px rgba(0,0,0,0.18)', overflow:'hidden',
+                          display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
+                        {coach.photo ? (
+                          <img src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                        ) : (
+                          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
+                            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
+                            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
+                          </svg>
+                        )}
+                      </button>
                     </div>
 
                     {/* ── Body ── */}
-                    <div style={{ padding:'10px 14px 14px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+                    <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
                       <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2,
                         letterSpacing:'-0.02em', marginBottom:4 }}>
                         {coach.name}
@@ -481,9 +468,9 @@ export default function CoachesPage() {
 
       </div>
 
-      {openStory && openStory.storyImage && (
+      {openStory && (
         <ClubStoryModal
-          club={{ name:openStory.name, logo:openStory.photo, storyMediaUrl:openStory.storyImage, storyText:openStory.bio, badge:'مربی' }}
+          club={{ name:openStory.name, logo:openStory.photo, storyMediaUrl:openStory.storyImage || img(parseInt(openStory.id, 10) || 0), storyText:openStory.bio, badge:'مربی' }}
           onClose={() => setOpenStory(null)}
         />
       )}
