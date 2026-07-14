@@ -546,7 +546,9 @@ export default function ClubsPage() {
 
               {/* Near me — order 3, no arrow icon */}
               <button className="tb-ctl" onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{ order: 3, height: 44, borderRadius: 12, padding: '0 16px', border: `1px solid ${sortBy === 'distance' ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortBy === 'distance' ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: sortBy === 'distance' ? '#A07840' : 'rgba(0,0,0,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                {locLoading && <div style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />}
+                {locLoading
+                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  : <Navigation size={15} />}
                 نزدیک من
               </button>
 

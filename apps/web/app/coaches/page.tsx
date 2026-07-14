@@ -252,13 +252,15 @@ export default function CoachesPage() {
         @media(max-width:1100px){.g5{grid-template-columns:repeat(3,1fr)!important;}}
         @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
+        /* mobile: search + toggles drop to their own row under the pills */
+        @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
 
       `}</style>
 
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
         {/* ══════════════ HERO — compact banner ══════════════ */}
-        <section style={{ position:'relative', height:'clamp(145px,20vh,300px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(4px,2vh,18px)' }}>
+        <section style={{ position:'relative', height:'clamp(140px,17vh,290px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(2px,1vh,12px)' }}>
 
           {/* Aurora blobs — pastel tints on light bg */}
           <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
@@ -335,6 +337,10 @@ export default function CoachesPage() {
           <div style={{ position:'relative', zIndex:5, maxWidth:1280, width:'100%',
             margin:'0 auto', padding:'0 clamp(24px,6vw,80px)' }}>
 
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:GOLD_D, fontSize:10.5, fontWeight:800, borderRadius:24, padding:'5px 13px', marginBottom:11, letterSpacing:'0.12em', animation:'fadeUp .5s .05s ease both' }}>
+              FIND YOUR COACH . BILLIARD HUB
+            </div>
+
             <div style={{ overflow:'hidden', paddingBottom:'0.18em' }}>
               <h1 style={{
                 fontSize:'clamp(32px,4.5vw,56px)', fontWeight:900, lineHeight:1.0,
@@ -376,43 +382,7 @@ export default function CoachesPage() {
         }}>
           <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
             display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-            {/* search — right side */}
-            <div style={{ display:'flex', alignItems:'center', gap:8,
-              background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
-              borderRadius:11, padding:'8px 14px', flex:'0 1 280px', minWidth:150,
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="جستجوی نام مربی یا شهر..."
-                style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
-                  fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
-              {search && (
-                <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
-                  style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              )}
-            </div>
-
-            {/* view toggles — beside search */}
-            <div style={{ display:'flex', gap:6, flexShrink:0 }}>
-              {([['grid', <svg key="g" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => {
-                const on = view === v
-                return (
-                  <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای عادی' : 'نمای لیست'} style={{
-                    width:38, height:38, borderRadius:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
-                    border: on ? '1px solid transparent' : '1px solid rgba(17,17,16,0.10)',
-                    background: on ? 'linear-gradient(135deg,#C7A66A,#9A6E38)' : 'rgba(255,255,255,0.78)',
-                    color: on ? '#fff' : TEXT_S,
-                    boxShadow: on ? '0 4px 12px rgba(199,166,106,0.30)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
-                  }}>{icon}</button>
-                )
-              })}
-            </div>
-
-            {/* category pills */}
+            {/* category pills — first */}
             {([
               { k:'all',      l:'همه مربیان' },
               { k:'snooker',  l:'اسنوکر' },
@@ -437,6 +407,45 @@ export default function CoachesPage() {
                 </button>
               )
             })}
+
+            {/* search + toggles — own row under the pills on mobile, right-aligned */}
+            <div className="coach-search-group" style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8 }}>
+              {/* search — right */}
+              <div style={{ display:'flex', alignItems:'center', gap:8,
+                background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
+                borderRadius:11, padding:'8px 14px', flex:'0 1 280px', minWidth:140,
+                boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder="جستجوی نام مربی یا شهر..."
+                  style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
+                    fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
+                {search && (
+                  <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
+                    style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                )}
+              </div>
+
+              {/* view toggles — beside search */}
+              <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                {([['grid', <svg key="g" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => {
+                  const on = view === v
+                  return (
+                    <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای عادی' : 'نمای لیست'} style={{
+                      width:38, height:38, borderRadius:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+                      border: on ? '1px solid transparent' : '1px solid rgba(17,17,16,0.10)',
+                      background: on ? 'linear-gradient(135deg,#C7A66A,#9A6E38)' : 'rgba(255,255,255,0.78)',
+                      color: on ? '#fff' : TEXT_S,
+                      boxShadow: on ? '0 4px 12px rgba(199,166,106,0.30)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
+                    }}>{icon}</button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
