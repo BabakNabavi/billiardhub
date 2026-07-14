@@ -448,10 +448,15 @@ export default function CoachProfilePage() {
                         )
                       })}
                     </div>
-                    {/* درجه مربیگری — مشکی شیک، بدون قاب و آیکون، راست‌چین */}
+                    {/* درجه مربیگری — طلایی، بدون قاب و آیکون؛ زیرش سال اولین مدرک */}
                     {coach.badge && (
-                      <div style={{ display:'flex', marginTop:7 }}>
-                        <span dir="auto" style={{ fontSize:13.5, fontWeight:800, color:'#1c1c1c', unicodeBidi:'isolate' }}>{coach.badge}</span>
+                      <div style={{ marginTop:7 }}>
+                        <div style={{ display:'flex' }}>
+                          <span dir="auto" style={{ fontSize:13.5, fontWeight:800, color:GOLD_D, unicodeBidi:'isolate' }}>{coach.badge}</span>
+                        </div>
+                        {localP && localP.grades[0]?.year && (
+                          <div style={{ fontSize:12, color:'rgba(0,0,0,0.45)', marginTop:2 }}>از سال {localP.grades[0].year}</div>
+                        )}
                       </div>
                     )}
                     <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
