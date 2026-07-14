@@ -46,7 +46,7 @@ interface Album { id:string; name:string; imageIds:string[] }
 interface CoachFull {
   id:string; name:string; specialty:string; city:string
   badge:string; badgeColor:string; verified:boolean
-  hasStory:boolean; storyImage:string
+  hasStory:boolean; storyImage:string; photo?:string; coverImage?:string
   bio:string; fullBio:string
   certifications:string[]; achievements:string[]; specialties:string[]
   phone:string; whatsapp:string; instagram?:string; telegram?:string
@@ -276,8 +276,10 @@ function mapLocalToFull(p: CoachProfile): CoachFull {
     badge: b?.label ?? '',
     badgeColor: '#9A6E38',
     verified: p.verified,
-    hasStory: !!p.storyImage,
-    storyImage: p.storyImage,
+    hasStory: false,
+    storyImage: '',
+    photo: p.photo,
+    coverImage: p.coverImage,
     bio: p.shortBio,
     fullBio: p.fullBio,
     certifications: certificationLines(p.grades),
@@ -388,6 +390,8 @@ export default function CoachProfilePage() {
             <div className="pcard pcard-profile" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
               {/* Cover — default coach poster */}
               <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
+                {coach.coverImage && <img src={coach.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>}
+                {coach.coverImage && <div style={{ position:'absolute', inset:0, background:'linear-gradient(115deg,rgba(12,20,36,0.58),rgba(30,47,77,0.40))' }}/>}
                 <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
                 <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
@@ -409,10 +413,14 @@ export default function CoachProfilePage() {
                       padding: coach.hasStory ? 4 : 0,
                       boxShadow: coach.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 2px 8px rgba(0,0,0,0.14)' }}>
                       <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-                        <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-                          <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-                          <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-                        </svg>
+                        {coach.photo ? (
+                          <img src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                        ) : (
+                          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
+                            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
+                            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
+                          </svg>
+                        )}
                       </div>
                     </div>
                   </button>

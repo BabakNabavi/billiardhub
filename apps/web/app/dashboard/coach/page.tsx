@@ -31,7 +31,7 @@ const emptyForm = {
   city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
   grades: [] as CoachGrade[], gallery: [] as CoachMedia[], videos: [] as CoachVideo[],
   phone: '', whatsapp: '', instagram: '', telegram: '',
-  storyImage: '', certificate: null as { name: string; url: string } | null,
+  photo: '', coverImage: '', certificate: null as { name: string; url: string } | null,
 }
 type FormState = typeof emptyForm
 
@@ -68,7 +68,7 @@ export default function CoachDashboardPage() {
         disciplines: mine.disciplines, shortBio: mine.shortBio, fullBio: mine.fullBio,
         grades: mine.grades, gallery: mine.gallery, videos: mine.videos,
         phone: mine.phone, whatsapp: mine.whatsapp, instagram: mine.instagram, telegram: mine.telegram,
-        storyImage: mine.storyImage, certificate: mine.certificate,
+        photo: mine.photo, coverImage: mine.coverImage, certificate: mine.certificate,
       })
     } else if (user) {
       setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
@@ -100,7 +100,8 @@ export default function CoachDashboardPage() {
     return !!p && p.ownerPhone !== user?.phone
   }
 
-  const addStory = async (file?: File) => { if (file) set('storyImage', await fileToDataUrl(file)) }
+  const addPhoto = async (file?: File) => { if (file) set('photo', await fileToDataUrl(file)) }
+  const addCover = async (file?: File) => { if (file) set('coverImage', await fileToDataUrl(file)) }
   const addGallery = async (files: FileList | null) => {
     if (!files) return
     const items: CoachMedia[] = []
@@ -251,16 +252,30 @@ export default function CoachDashboardPage() {
               {err('disciplines')}
             </div>
 
-            <div style={{ marginTop: 16 }}>
-              <label style={lbl}>عکس پروفایل / استوری</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
-                  {form.storyImage && <img src={form.storyImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+            <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
+              <div>
+                <label style={lbl}>عکس پروفایل</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
+                    {form.photo && <img src={form.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                  <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
+                    انتخاب عکس
+                    <input type="file" accept="image/*" hidden onChange={e => addPhoto(e.target.files?.[0])} />
+                  </label>
                 </div>
-                <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
-                  انتخاب عکس
-                  <input type="file" accept="image/*" hidden onChange={e => addStory(e.target.files?.[0])} />
-                </label>
+              </div>
+              <div>
+                <label style={lbl}>عکس بکگراند (کاور پروفایل)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 100, height: 60, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
+                    {form.coverImage && <img src={form.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                  <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
+                    انتخاب عکس
+                    <input type="file" accept="image/*" hidden onChange={e => addCover(e.target.files?.[0])} />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
