@@ -24,6 +24,32 @@ const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
   r.readAsDataURL(file)
 })
 
+/* Downscale + re-encode images to keep localStorage well under quota. */
+const compressImage = (file: File, maxDim: number, quality = 0.72): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('read failed'))
+    reader.onload = () => {
+      const dataUrl = String(reader.result)
+      const im = document.createElement('img')
+      im.onerror = () => resolve(dataUrl)
+      im.onload = () => {
+        let w = im.naturalWidth || im.width
+        let h = im.naturalHeight || im.height
+        if (w >= h && w > maxDim)      { h = Math.round((h * maxDim) / w); w = maxDim }
+        else if (h > w && h > maxDim)  { w = Math.round((w * maxDim) / h); h = maxDim }
+        const canvas = document.createElement('canvas')
+        canvas.width = w; canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { resolve(dataUrl); return }
+        ctx.drawImage(im, 0, 0, w, h)
+        try { resolve(canvas.toDataURL('image/jpeg', quality)) } catch { resolve(dataUrl) }
+      }
+      im.src = dataUrl
+    }
+    reader.readAsDataURL(file)
+  })
+
 const rid = () => Math.random().toString(36).slice(2, 9)
 
 const emptyForm = {
@@ -100,12 +126,12 @@ export default function CoachDashboardPage() {
     return !!p && p.ownerPhone !== user?.phone
   }
 
-  const addPhoto = async (file?: File) => { if (file) set('photo', await fileToDataUrl(file)) }
-  const addCover = async (file?: File) => { if (file) set('coverImage', await fileToDataUrl(file)) }
+  const addPhoto = async (file?: File) => { if (file) set('photo', await compressImage(file, 480, 0.82)) }
+  const addCover = async (file?: File) => { if (file) set('coverImage', await compressImage(file, 1280, 0.72)) }
   const addGallery = async (files: FileList | null) => {
     if (!files) return
     const items: CoachMedia[] = []
-    for (const f of Array.from(files).slice(0, 12)) items.push({ id: rid(), url: await fileToDataUrl(f), caption: '' })
+    for (const f of Array.from(files).slice(0, 12)) items.push({ id: rid(), url: await compressImage(f, 1100, 0.72), caption: '' })
     setForm(f => ({ ...f, gallery: [...f.gallery, ...items] }))
   }
   const setCaption = (id: string, caption: string) =>
@@ -113,14 +139,18 @@ export default function CoachDashboardPage() {
   const removeGallery = (id: string) => setForm(f => ({ ...f, gallery: f.gallery.filter(g => g.id !== id) }))
 
   const addVideo = async (file?: File) => {
-    const thumb = file ? await fileToDataUrl(file) : ''
+    const thumb = file ? await compressImage(file, 720, 0.72) : ''
     setForm(f => ({ ...f, videos: [...f.videos, { id: rid(), thumbnail: thumb, title: '', duration: '' }] }))
   }
   const setVideo = (id: string, patch: Partial<CoachVideo>) =>
     setForm(f => ({ ...f, videos: f.videos.map(v => (v.id === id ? { ...v, ...patch } : v)) }))
   const removeVideo = (id: string) => setForm(f => ({ ...f, videos: f.videos.filter(v => v.id !== id) }))
 
-  const addCertificate = async (file?: File) => { if (file) set('certificate', { name: file.name, url: await fileToDataUrl(file) }) }
+  const addCertificate = async (file?: File) => {
+    if (!file) return
+    const url = file.type.startsWith('image/') ? await compressImage(file, 1500, 0.8) : await fileToDataUrl(file)
+    set('certificate', { name: file.name, url })
+  }
 
   /* ── validation ── */
   const validate = (): boolean => {
@@ -151,8 +181,14 @@ export default function CoachDashboardPage() {
       submittedAt: new Date().toISOString(),
       ownerPhone: user?.phone || '',
     }
-    saveCoachProfile(profile)
     setWarn(false)
+    try {
+      saveCoachProfile(profile)
+    } catch {
+      setTopErr('حجم تصاویر بیش از ظرفیت مجاز مرورگر است. لطفاً تعداد یا حجم تصاویرِ گالری / کاور / مدرک را کمتر کنید و دوباره ثبت کنید.')
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
     setSubmitted(true)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
