@@ -165,13 +165,15 @@ function RefereeHeroSlider() {
 
         <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
           <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', marginBottom:11, letterSpacing:'0.12em', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
-              KNOW THE REFEREES . BILLIARD HUB
+            <div style={{ textAlign:'left', marginBottom:11 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', letterSpacing:'0.12em', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+                KNOW THE REFEREES . BILLIARD HUB
+              </div>
             </div>
-            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08 }}>
+            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
               معرفی داوران
             </h1>
-            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:'6px 0 0', fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
+            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:'13px 0 0', fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
               معرفی و آشنایی با داوران بیلیارد کشور
             </p>
           </div>
@@ -452,51 +454,6 @@ export default function RefereesPage() {
               هیچ داوری با این فیلتر پیدا نشد
             </div>
           )}
-        </div>
-
-        {/* ══════════════ BANNER — dark accent section ══════════════ */}
-        <div style={{ position:'relative', overflow:'hidden', borderTop:`1px solid rgba(17,17,16,0.06)` }}>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#111110 0%,#0A0908 100%)' }}/>
-          <div style={{ position:'absolute', left:'10%', top:'50%', transform:'translateY(-50%)',
-            width:480, height:240, borderRadius:'50%',
-            background:'radial-gradient(ellipse, rgba(199,166,106,0.07) 0%, transparent 70%)',
-            filter:'blur(40px)', pointerEvents:'none' }}/>
-          <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0.04, pointerEvents:'none' }}>
-            <defs>
-              <pattern id="bd" width="28" height="28" patternUnits="userSpaceOnUse">
-                <circle cx="3" cy="3" r="1.2" fill={GOLD}/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#bd)"/>
-          </svg>
-
-          <div style={{ position:'relative', zIndex:5, maxWidth:1280, margin:'0 auto',
-            padding:'48px clamp(24px,6vw,80px)',
-            display:'flex', alignItems:'center', justifyContent:'space-between', gap:24 }}>
-            <div>
-              <p style={{ fontSize:10.5, fontWeight:700, color:GOLD, letterSpacing:'0.25em', marginBottom:10, textTransform:'uppercase' }}>
-                Certified Referees
-              </p>
-              <h3 style={{ fontSize:'clamp(18px,2.8vw,28px)', fontWeight:800, color:'#F2EDE4',
-                letterSpacing:'-0.03em', lineHeight:1.2 }}>
-                به داور رسمی نیاز دارید؟
-              </h3>
-              <p style={{ fontSize:13.5, color:'rgba(242,237,228,0.50)', marginTop:8, maxWidth:360 }}>
-                داوران دارای مدرک فدراسیون برای مسابقات و رویدادهای شما
-              </p>
-            </div>
-            <Link href="/contact" className="btnBanner" style={{
-              textDecoration:'none', display:'inline-flex', alignItems:'center', gap:10,
-              padding:'14px 28px', background:GOLD, color:'#ffffff',
-              borderRadius:9, fontSize:14, fontWeight:800, whiteSpace:'nowrap', flexShrink:0,
-              boxShadow:'0 4px 18px rgba(199,166,106,0.22)',
-            }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .64 2.57 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.05 12.05 0 0 0 2.57.64A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              درخواست داور
-            </Link>
-          </div>
         </div>
 
       </div>

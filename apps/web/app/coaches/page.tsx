@@ -168,13 +168,15 @@ function CoachHeroSlider() {
 
         <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
           <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', marginBottom:11, letterSpacing:'0.12em', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
-              FIND YOUR COACH . BILLIARD HUB
+            <div style={{ textAlign:'left', marginBottom:11 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', letterSpacing:'0.12em', transform:'translateY(-13px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+                FIND YOUR COACH . BILLIARD HUB
+              </div>
             </div>
-            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 8px', letterSpacing:'-0.03em', lineHeight:1.08 }}>
+            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 12px', letterSpacing:'-0.03em', lineHeight:1.08, transform:'translateY(-6px)' }}>
               {COACH_SLIDES[active]?.title}
             </h1>
-            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:0, fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
+            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:'7px 0 0', fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
               {COACH_SLIDES[active]?.sub}
             </p>
           </div>
