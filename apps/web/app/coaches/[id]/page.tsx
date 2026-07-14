@@ -351,6 +351,8 @@ export default function CoachProfilePage() {
         @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
         .lq1{transition:filter .18s,transform .14s;}
         .lq1:hover{filter:brightness(1.08);transform:translateY(-1px);}
+        .goldbtn{transition:all .3s cubic-bezier(0.22,1,0.36,1);}
+        .goldbtn:hover{transform:translateY(-2px);}
         .gcard{overflow:hidden;border-radius:10px;transition:transform .3s,box-shadow .3s;cursor:pointer;}
         .gcard:hover{transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,0.12);}
         .gtab{transition:all .18s;cursor:pointer;}
@@ -363,7 +365,7 @@ export default function CoachProfilePage() {
 
         {/* ── Back ── */}
         <div style={{ maxWidth:1020, margin:'0 auto', padding:'20px clamp(16px,4vw,48px) 0' }}>
-          <Link href="/coaches" style={{ display:'inline-flex', alignItems:'center', gap:6, color:TEXT_S, textDecoration:'none', fontSize:13, fontWeight:600 }}>
+          <Link href="/coaches" className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:'#9A6E38', borderRadius:10, textDecoration:'none', fontSize:13, fontWeight:700, padding:'7px 14px' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
@@ -410,7 +412,7 @@ export default function CoachProfilePage() {
                 <span style={{ color:TEXT_S, fontSize:13 }}>📍 {coach.city}</span>
               </div>
               {coach.hasStory && (
-                <button onClick={() => setOpenStory(true)} className="lq1" style={{ ...lq1('rgba(214,41,118,0.65)', 'rgba(214,41,118,0.09)'), marginTop:12 }}>
+                <button onClick={() => setOpenStory(true)} className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const, marginTop:12 }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
                   مشاهده استوری
                 </button>
@@ -493,8 +495,8 @@ export default function CoachProfilePage() {
                   راه‌های ارتباطی
                 </h2>
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                  <a href={`tel:${coach.phone}`} className="lq1"
-                    style={{ ...lq1('rgba(37,99,235,0.65)', 'rgba(37,99,235,0.08)') }}>
+                  <a href={`tel:${coach.phone}`} className="goldbtn"
+                    style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
                     📞 {coach.phone}
                   </a>
                   <a href={`https://wa.me/${coach.whatsapp}`} target="_blank" rel="noopener" className="lq1"
@@ -643,12 +645,12 @@ export default function CoachProfilePage() {
                 style={{ width:'100%', padding:'11px 15px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:11, fontSize:14, fontFamily:"'Vazirmatn',Tahoma,sans-serif", color:TEXT, outline:'none', background:'rgba(17,17,16,0.02)' }}
               />
               <div style={{ display:'flex', gap:10, marginTop:18, justifyContent:'flex-end' }}>
-                <button onClick={() => setShowNewAlbum(false)} className="lq1"
-                  style={{ ...lq1('rgba(17,17,16,0.35)', 'rgba(17,17,16,0.05)') }}>
+                <button onClick={() => setShowNewAlbum(false)} className="goldbtn"
+                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
                   انصراف
                 </button>
-                <button onClick={createAlbum} className="lq1"
-                  style={{ ...lq1(GOLD_D, `${GOLD}18`) }}>
+                <button onClick={createAlbum} className="goldbtn"
+                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const }}>
                   ایجاد آلبوم
                 </button>
               </div>

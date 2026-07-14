@@ -109,7 +109,7 @@ export default function ProductDetailPage() {
             </div>
             <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>بیلیارد بازار</span>
           </Link>
-          <Link href="/shop" className="lq-lift" style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 12, ...lqWhite, fontSize: 12.5, fontWeight: 700, color: TEXT, textDecoration: 'none' }}>
+          <Link href="/shop" className="lq-lift" style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
             <ChevronLeft size={15} strokeWidth={2.4} />
             بازگشت
           </Link>
@@ -198,14 +198,14 @@ export default function ProductDetailPage() {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
-                <Link href={`/sellers/${product.sellerId}`} className="lq-lift" style={{ gridColumn: '1 / -1', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '12px', borderRadius: 12, ...lqGold, fontSize: 13, textDecoration: 'none' }}>
+                <Link href={`/sellers/${product.sellerId}`} className="lq-lift" style={{ gridColumn: '1 / -1', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '12px', borderRadius: 10, ...lqGold, fontSize: 13, textDecoration: 'none' }}>
                   <Store size={16} strokeWidth={2.2} /> رفتن به صفحه فروشگاه
                 </Link>
                 <a href={waLink} target="_blank" rel="noopener noreferrer" className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 12, ...lqGreen, fontSize: 12.5, textDecoration: 'none' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
                   واتساپ
                 </a>
-                <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 12, ...lqWhite, fontSize: 12.5, textDecoration: 'none' }}>
+                <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
                   <Phone size={15} strokeWidth={2.2} /> تماس
                 </a>
               </div>
