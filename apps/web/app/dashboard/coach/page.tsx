@@ -50,6 +50,27 @@ const compressImage = (file: File, maxDim: number, quality = 0.72): Promise<stri
     reader.readAsDataURL(file)
   })
 
+/* Re-compress an existing data URL (e.g. images loaded from a saved draft). */
+const compressDataUrl = (dataUrl: string, maxDim: number, quality = 0.72): Promise<string> =>
+  new Promise((resolve) => {
+    if (!dataUrl || !dataUrl.startsWith('data:image')) { resolve(dataUrl); return }
+    const im = document.createElement('img')
+    im.onerror = () => resolve(dataUrl)
+    im.onload = () => {
+      let w = im.naturalWidth || im.width
+      let h = im.naturalHeight || im.height
+      if (w >= h && w > maxDim)      { h = Math.round((h * maxDim) / w); w = maxDim }
+      else if (h > w && h > maxDim)  { w = Math.round((w * maxDim) / h); h = maxDim }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { resolve(dataUrl); return }
+      ctx.drawImage(im, 0, 0, w, h)
+      try { resolve(canvas.toDataURL('image/jpeg', quality)) } catch { resolve(dataUrl) }
+    }
+    im.src = dataUrl
+  })
+
 const rid = () => Math.random().toString(36).slice(2, 9)
 
 const emptyForm = {
@@ -64,6 +85,7 @@ type FormState = typeof emptyForm
 /* small style helpers */
 const card: React.CSSProperties = { background: '#fff', border: CBOR, borderRadius: 16, padding: '22px 24px', boxShadow: '0 2px 16px rgba(17,17,16,0.05)' }
 const inp:  React.CSSProperties = { width: '100%', padding: '10px 13px', border: '1px solid rgba(17,17,16,0.14)', borderRadius: 10, fontSize: 14, fontFamily: 'inherit', background: '#fff', color: TEXT, outline: 'none' }
+const inpRO: React.CSSProperties = { ...inp, background: 'rgba(17,17,16,0.045)', color: 'rgba(17,17,16,0.60)', cursor: 'not-allowed' }
 const lbl:  React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT_S, marginBottom: 6 }
 const lqBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, borderRadius: 10, fontWeight: 700, fontSize: 14, padding: '11px 22px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none' }
 const sectionTitle = (t: string, n: number) => (
@@ -89,7 +111,7 @@ export default function CoachDashboardPage() {
     const mine = user?.phone ? Object.values(getCoachProfiles()).find(p => p.ownerPhone === user.phone) : null
     if (mine) {
       setForm({
-        slug: mine.slug, firstNameFa: mine.firstNameFa, lastNameFa: mine.lastNameFa,
+        slug: mine.slug, firstNameFa: user?.firstName || mine.firstNameFa, lastNameFa: user?.lastName || mine.lastNameFa,
         firstNameEn: mine.firstNameEn, lastNameEn: mine.lastNameEn, city: mine.city,
         disciplines: mine.disciplines, shortBio: mine.shortBio, fullBio: mine.fullBio,
         grades: mine.grades, gallery: mine.gallery, videos: mine.videos,
@@ -102,6 +124,9 @@ export default function CoachDashboardPage() {
   }, [_hydrated, user])
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }))
+
+  const curJYear = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1405 } catch { return 1405 } })()
+  const YEARS = Array.from({ length: 61 }, (_, i) => curJYear - i)
 
   const toggleDiscipline = (k: string) =>
     setForm(f => ({ ...f, disciplines: f.disciplines.includes(k) ? f.disciplines.filter(x => x !== k) : [...f.disciplines, k] }))
@@ -176,9 +201,20 @@ export default function CoachDashboardPage() {
     return true
   }
 
-  const doSubmit = () => {
+  const doSubmit = async () => {
+    setWarn(false)
+    // re-compress every image (covers images loaded from an earlier draft, not just fresh uploads)
+    const [photo, coverImage] = await Promise.all([
+      compressDataUrl(form.photo, 480, 0.8),
+      compressDataUrl(form.coverImage, 1200, 0.7),
+    ])
+    const gallery = await Promise.all(form.gallery.map(async g => ({ ...g, url: await compressDataUrl(g.url, 1000, 0.68) })))
+    const videos  = await Promise.all(form.videos.map(async v => ({ ...v, thumbnail: await compressDataUrl(v.thumbnail, 700, 0.7) })))
+    const certificate = form.certificate && form.certificate.url.startsWith('data:image')
+      ? { ...form.certificate, url: await compressDataUrl(form.certificate.url, 1300, 0.75) }
+      : form.certificate
     const profile: CoachProfile = {
-      ...form,
+      ...form, photo, coverImage, gallery, videos, certificate,
       slug: form.slug.trim().toLowerCase(),
       status: 'pending',
       verified: false,
@@ -186,7 +222,6 @@ export default function CoachDashboardPage() {
       submittedAt: new Date().toISOString(),
       ownerPhone: user?.phone || '',
     }
-    setWarn(false)
     try {
       saveCoachProfile(profile)
     } catch {
@@ -201,7 +236,7 @@ export default function CoachDashboardPage() {
   const onSubmit = () => {
     if (!validate()) { window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.certificate) { setWarn(true); return }  // no certificate → warn first
-    doSubmit()
+    void doSubmit()
   }
 
   /* ── success screen ── */
@@ -259,10 +294,11 @@ export default function CoachDashboardPage() {
           <div style={card}>
             {sectionTitle('اطلاعات پایه', 1)}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
-              <div><label style={lbl}>نام{star}</label><input style={inp} value={form.firstNameFa} onChange={e => set('firstNameFa', e.target.value)} placeholder="مثلاً احمد" />{err('firstNameFa')}</div>
-              <div><label style={lbl}>نام خانوادگی{star}</label><input style={inp} value={form.lastNameFa} onChange={e => set('lastNameFa', e.target.value)} placeholder="مثلاً رضایی" />{err('lastNameFa')}</div>
-              <div><label style={lbl}>First name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Ahmad" />{err('firstNameEn')}</div>
+              <div><label style={lbl}>نام</label><input style={inpRO} value={form.firstNameFa} onChange={e => set('firstNameFa', e.target.value)} disabled placeholder="—" />{err('firstNameFa')}</div>
+              <div><label style={lbl}>نام خانوادگی</label><input style={inpRO} value={form.lastNameFa} onChange={e => set('lastNameFa', e.target.value)} disabled placeholder="—" />{err('lastNameFa')}</div>
+              <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.</div>
               <div><label style={lbl}>Last name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Rezaei" />{err('lastNameEn')}</div>
+              <div><label style={lbl}>First name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Ahmad" />{err('firstNameEn')}</div>
               <div><label style={lbl}>شهر{star}</label><input style={inp} value={form.city} onChange={e => set('city', e.target.value)} placeholder="تهران" />{err('city')}</div>
               <div>
                 <label style={lbl}>نشانی اختصاصی پروفایل (URL){star}</label>
@@ -345,7 +381,7 @@ export default function CoachDashboardPage() {
           <div style={card}>
             {sectionTitle('درجه مربیگری', 3)}
             <div style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: GOLD_D, lineHeight: 1.8, marginBottom: 14 }}>
-              از اولین مدرک (توجیهی) شروع کنید و مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید.
+              مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {GRADES.map((g, idx) => {
@@ -357,11 +393,14 @@ export default function CoachDashboardPage() {
                       <span style={{ width: 19, height: 19, borderRadius: 6, flexShrink: 0, border: on ? 'none' : '1.5px solid rgba(17,17,16,0.22)', background: on ? GOLD : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                       </span>
-                      <span dir="auto" style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, unicodeBidi: 'isolate' }}>{g.label}</span>
+                      <span dir="auto" className={g.label.startsWith('WPBSA') ? 'bh-latin' : undefined} style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, unicodeBidi: 'isolate' }}>{g.label}</span>
                     </button>
                     {on && (
-                      <input value={yr} onChange={e => setGradeYear(g.key, e.target.value)} placeholder="سال دریافت" inputMode="numeric"
-                        style={{ ...inp, width: 130, flexShrink: 0, padding: '7px 11px', fontSize: 12.5 }} />
+                      <select value={yr} onChange={e => setGradeYear(g.key, e.target.value)}
+                        style={{ ...inp, width: 150, flexShrink: 0, padding: '7px 11px', fontSize: 12.5, direction: 'ltr', textAlign: 'left', cursor: 'pointer' }}>
+                        <option value="">سال دریافت</option>
+                        {YEARS.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                      </select>
                     )}
                   </div>
                 )
@@ -460,7 +499,7 @@ export default function CoachDashboardPage() {
             <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 2 }}>در صورت آپلود نکردن مدرک مربیگری پروفایل شما تیک آبی تایید دریافت نخواهد کرد و عنوان «مربی آزاد» را خواهید داشت.</p>
             <div style={{ display: 'flex', gap: 10, marginTop: 22, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button onClick={() => setWarn(false)} style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S }}>انصراف و آپلود مدرک</button>
-              <button onClick={doSubmit} style={lqBtn}>ثبت به‌عنوان مربی آزاد</button>
+              <button onClick={() => void doSubmit()} style={lqBtn}>ثبت به‌عنوان مربی آزاد</button>
             </div>
           </div>
         </div>

@@ -46,6 +46,7 @@ export default function RootLayout({
           @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
           * { font-family: var(--font-base) !important; box-sizing:border-box; }
           input, select, textarea, button { font-family: var(--font-base) !important; }
+          .bh-latin, .bh-latin * { font-family: Arial, Tahoma, sans-serif !important; }
           body { margin: 0; padding: 0; direction: rtl; }
           @media (max-width: 900px) {
             input, textarea, select { font-size: 16px !important; }
