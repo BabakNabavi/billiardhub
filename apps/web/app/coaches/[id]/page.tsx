@@ -17,10 +17,10 @@ const CBOR   = '1px solid rgba(17,17,16,0.07)'
 const CSHA   = '0 2px 20px rgba(17,17,16,0.06)'
 
 const SPECS: Record<string,{label:string;color:string}> = {
-  snooker:  {label:'اسنوکر',       color:'#7C3AED'},
-  pocket:   {label:'پاکت بیلیارد', color:GOLD_D},
-  highball: {label:'هی‌بال',       color:'#C2410C'},
-  carom:    {label:'کارامبول',     color:'#15803D'},
+  snooker:  {label:'اسنوکر',       color:'#22C55E'},  // سبز درخشان
+  pocket:   {label:'پاکت بیلیارد', color:'#3B82F6'},  // آبی درخشان
+  highball: {label:'هی‌بال',       color:'#A855F7'},  // بنفش درخشان
+  carom:    {label:'کارامبول',     color:'#0D9488'},
 }
 
 const GRADE_DOTS: Record<string,{dots:number;color:string}> = {
@@ -436,21 +436,23 @@ export default function CoachProfilePage() {
                         </svg>
                       )}
                     </div>
-                    {/* رشته‌های تخصصی — چیپ */}
-                    <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginTop:7 }}>
-                      {(localP ? localP.disciplines : (coach.specialty ? [coach.specialty] : [])).map(dk => {
+                    {/* رشته‌های تخصصی — بدون قاب، رنگی */}
+                    <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap', marginTop:7, fontSize:14, fontWeight:800 }}>
+                      {(localP ? localP.disciplines : (coach.specialty ? [coach.specialty] : [])).map((dk, i) => {
                         const s = SPECS[dk as keyof typeof SPECS]
-                        const c = s?.color ?? '#9A6E38'
                         return (
-                          <span key={dk} style={{ fontSize:12.5, fontWeight:700, color:c, background:`${c}14`, border:`1px solid ${c}33`, borderRadius:20, padding:'4px 13px' }}>{s?.label ?? 'بیلیارد'}</span>
+                          <span key={dk} style={{ display:'inline-flex', alignItems:'center', gap:7 }}>
+                            {i > 0 && <span style={{ color:'rgba(0,0,0,0.20)', fontWeight:400 }}>·</span>}
+                            <span style={{ color: s?.color ?? '#9A6E38' }}>{s?.label ?? 'بیلیارد'}</span>
+                          </span>
                         )
                       })}
                     </div>
-                    {/* درجه مربیگری — پیل، راست‌چین */}
+                    {/* درجه مربیگری — طلایی، بدون قاب، راست‌چین */}
                     {coach.badge && (
-                      <div style={{ display:'flex', marginTop:9 }}>
-                        <span dir="auto" style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize:12.5, fontWeight:800, color:coach.badgeColor, background:`${coach.badgeColor}14`, border:`1.5px solid ${coach.badgeColor}3d`, borderRadius:20, padding:'5px 14px', unicodeBidi:'isolate' }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                      <div style={{ display:'flex', marginTop:7 }}>
+                        <span dir="auto" style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize:13.5, fontWeight:800, color:GOLD_D, unicodeBidi:'isolate' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
                           {coach.badge}
                         </span>
                       </div>
