@@ -443,18 +443,15 @@ export default function CoachProfilePage() {
                         return (
                           <span key={dk} style={{ display:'inline-flex', alignItems:'center', gap:7 }}>
                             {i > 0 && <span style={{ color:'rgba(0,0,0,0.22)', fontWeight:400 }}>·</span>}
-                            <span style={{ color: '#1c1c1c' }}>{s?.label ?? 'بیلیارد'}</span>
+                            <span style={{ color: '#0a66c2' }}>{s?.label ?? 'بیلیارد'}</span>
                           </span>
                         )
                       })}
                     </div>
-                    {/* درجه مربیگری — طلایی، بدون قاب، راست‌چین */}
+                    {/* درجه مربیگری — مشکی شیک، بدون قاب و آیکون، راست‌چین */}
                     {coach.badge && (
                       <div style={{ display:'flex', marginTop:7 }}>
-                        <span dir="auto" style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize:13.5, fontWeight:800, color:GOLD_D, unicodeBidi:'isolate' }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                          {coach.badge}
-                        </span>
+                        <span dir="auto" style={{ fontSize:13.5, fontWeight:800, color:'#1c1c1c', unicodeBidi:'isolate' }}>{coach.badge}</span>
                       </div>
                     )}
                     <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
