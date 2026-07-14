@@ -32,7 +32,7 @@ const img = (i: number) => IMGS[i % IMGS.length] ?? IMGS[0]!
 interface Coach {
   id: string; name: string; specialty: string; city: string
   experience: number; rating: number; students: number; medals: number
-  sessionPrice: number; hasStory: boolean; storyImage: string; bio: string; photo: string; verified?: boolean
+  sessionPrice: number; hasStory: boolean; storyImage: string; bio: string; photo: string; verified?: boolean; disciplines?: string[]
 }
 
 const COACHES: Coach[] = [
@@ -238,7 +238,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
             <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{coach.name}</h3>
             {coach.verified && <svg width="14" height="14" viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink:0 }}><path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z"/><path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z"/></svg>}
           </div>
-          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>مربی {sp?.label ?? 'بیلیارد'}</p>
+          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
@@ -279,7 +279,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
           <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em' }}>{coach.name}</h3>
           {coach.verified && <svg width="15" height="15" viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink:0 }}><path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z"/><path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z"/></svg>}
         </div>
-        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>مربی {sp?.label ?? 'بیلیارد'}</p>
+        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>مربی {coach.disciplines && coach.disciplines.length ? coach.disciplines.map(d => SPECS[d]?.label ?? d).join(' · ') : (sp?.label ?? 'بیلیارد')}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
@@ -303,7 +303,7 @@ function mapProfileToListCoach(p: CoachProfile): Coach {
     city: p.city,
     experience: 0, rating: 0, students: 0, medals: 0, sessionPrice: 0,
     hasStory: false, storyImage: p.photo,
-    bio: p.shortBio, photo: p.photo, verified: p.verified,
+    bio: p.shortBio, photo: p.photo, verified: p.verified, disciplines: p.disciplines,
   }
 }
 

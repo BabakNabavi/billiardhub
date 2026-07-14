@@ -436,22 +436,24 @@ export default function CoachProfilePage() {
                         </svg>
                       )}
                     </div>
-                    {/* رشته‌های تخصصی — بدون قاب، رنگی */}
+                    {/* رشته‌های تخصصی — بدون قاب، رنگی، با برچسب «مربی :» */}
                     <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap', marginTop:7, fontSize:14, fontWeight:800 }}>
+                      <span style={{ color:'rgba(0,0,0,0.45)', fontWeight:700 }}>مربی :</span>
                       {(localP ? localP.disciplines : (coach.specialty ? [coach.specialty] : [])).map((dk, i) => {
                         const s = SPECS[dk as keyof typeof SPECS]
                         return (
                           <span key={dk} style={{ display:'inline-flex', alignItems:'center', gap:7 }}>
                             {i > 0 && <span style={{ color:'rgba(0,0,0,0.22)', fontWeight:400 }}>·</span>}
-                            <span style={{ color: '#0a66c2' }}>{s?.label ?? 'بیلیارد'}</span>
+                            <span style={{ color: s?.color ?? '#9A6E38' }}>{s?.label ?? 'بیلیارد'}</span>
                           </span>
                         )
                       })}
                     </div>
-                    {/* درجه مربیگری — طلایی، بدون قاب و آیکون؛ زیرش سال اولین مدرک */}
+                    {/* درجه مربیگری — با برچسب، طلایی؛ زیرش سال اولین مدرک */}
                     {coach.badge && (
                       <div style={{ marginTop:7 }}>
-                        <div style={{ display:'flex' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                          <span style={{ fontSize:13.5, fontWeight:700, color:'rgba(0,0,0,0.45)' }}>درجه مربیگری :</span>
                           <span dir="auto" style={{ fontSize:13.5, fontWeight:800, color:GOLD_D, unicodeBidi:'isolate' }}>{coach.badge}</span>
                         </div>
                         {localP && localP.grades[0]?.year && (
