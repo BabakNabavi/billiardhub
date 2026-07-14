@@ -53,39 +53,39 @@ export default function AdminPage() {
 ];
 
   return (
-    <div className="max-w-6xl mx-auto pb-10 pt-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">پنل مدیریت</h1>
-          <p className="text-gray-500 text-sm mt-1">بیلیارد هاب — داشبورد ادمین</p>
+    <div className="max-w-6xl mx-auto pb-10 pt-6 px-4 sm:px-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">پنل مدیریت</h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-1">بیلیارد هاب — داشبورد ادمین</p>
         </div>
-        <div className="bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
-          <Settings size={16} />
+        <div className="bg-red-100 text-red-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <Settings size={15} />
           ادمین
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 mb-8">
         {stats.map((stat, i) => (
           <Link key={i} href={stat.link}>
-            <div className={`${stat.bg} rounded-2xl p-4 text-center hover:shadow-md transition-all cursor-pointer`}>
-              <div className={`${stat.color} flex justify-center mb-2`}>{stat.icon}</div>
-              <div className={`text-2xl font-black ${stat.color}`}>{stat.value}</div>
-              <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
+            <div className={`${stat.bg} rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center hover:shadow-md transition-all cursor-pointer h-full`}>
+              <div className={`${stat.color} flex justify-center mb-1.5 sm:mb-2`}>{stat.icon}</div>
+              <div className={`text-lg sm:text-2xl font-black ${stat.color}`}>{stat.value}</div>
+              <div className="text-[11px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 leading-tight">{stat.label}</div>
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
         {menuItems.map((item, i) => (
           <Link key={i} href={item.link}>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-green-200 transition-all group cursor-pointer">
-              <div className={`${item.color} w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-6 hover:shadow-md hover:border-green-200 transition-all group cursor-pointer h-full flex flex-col items-center text-center sm:items-start sm:text-right">
+              <div className={`${item.color} w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-4 group-hover:scale-110 transition-transform shrink-0`}>
                 {item.icon}
               </div>
-              <h3 className="font-bold text-gray-800 text-lg mb-1">{item.title}</h3>
-              <p className="text-gray-500 text-sm">{item.desc}</p>
+              <h3 className="font-bold text-gray-800 text-xs sm:text-lg leading-tight mb-0.5 sm:mb-1">{item.title}</h3>
+              <p className="hidden sm:block text-gray-500 text-sm">{item.desc}</p>
             </div>
           </Link>
         ))}
