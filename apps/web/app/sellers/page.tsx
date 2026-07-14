@@ -24,6 +24,101 @@ const RACK_C = [
   '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
 ]
 
+/* ── Subtle sliding header posters (text-less, behind the hero elements) ── */
+const SELLER_POSTERS = [
+  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'cues'  },
+  { bg:'linear-gradient(130deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'rack'  },
+  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'table' },
+  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'eight' },
+  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'aim'   },
+]
+
+function sellerMotif(motif: string) {
+  const s = 190
+  if (motif === 'rack') {
+    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
+    return (
+      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
+        {rows.flat().map((pt,i)=>(<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={GOLD} strokeWidth="1.3" opacity="0.82"/>))}
+        <circle cx="50" cy="11" r="3" fill={GOLD} opacity="0.6"/>
+      </svg>
+    )
+  }
+  if (motif === 'table') return (
+    <svg width={s} viewBox="0 0 120 72" fill="none" aria-hidden>
+      <rect x="4" y="4" width="112" height="64" rx="10" stroke={GOLD} strokeWidth="1.6" opacity="0.8"/>
+      <rect x="12" y="12" width="96" height="48" rx="4" stroke={GOLD} strokeWidth="1" opacity="0.42"/>
+      {[[10,10],[60,7],[110,10],[10,62],[60,65],[110,62]].map((p,i)=>(<circle key={i} cx={p[0]} cy={p[1]} r="4" fill={GOLD} opacity="0.68"/>))}
+      <line x1="36" y1="12" x2="36" y2="60" stroke={GOLD} strokeWidth="1" opacity="0.4"/>
+      <path d="M36 27 A9 9 0 0 0 36 45" stroke={GOLD} strokeWidth="1" opacity="0.4" fill="none"/>
+      <circle cx="60" cy="36" r="1.8" fill={GOLD} opacity="0.7"/>
+    </svg>
+  )
+  if (motif === 'eight') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
+      <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
+      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
+      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
+    </svg>
+  )
+  if (motif === 'aim') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="40" stroke={GOLD} strokeWidth="0.8" opacity="0.22"/>
+      <circle cx="50" cy="50" r="28" stroke={GOLD} strokeWidth="1" opacity="0.38"/>
+      <circle cx="50" cy="50" r="16" stroke={GOLD} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)"/>
+      {[[50,6],[50,94],[6,50],[94,50]].map((pt,i)=>(<rect key={i} x={pt[0]!-3} y={pt[1]!-3} width="6" height="6" fill={GOLD} opacity="0.58" transform={`rotate(45 ${pt[0]} ${pt[1]})`}/>))}
+      <circle cx="44" cy="44" r="3" fill={GOLD} opacity="0.4"/>
+    </svg>
+  )
+  return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <g stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
+      {[[12,86],[88,16],[12,16],[88,86]].map((pt,i)=>(<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={GOLD} opacity="0.72"/>))}
+      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD} strokeWidth="1.6" opacity="0.95"/>
+      <circle cx="45" cy="46" r="3" fill={GOLD} opacity="0.5"/>
+    </svg>
+  )
+}
+
+function SellerPoster({ variant }: { variant: number }) {
+  const p = SELLER_POSTERS[variant % SELLER_POSTERS.length]!
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.6 }} />
+      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at 30% 40%, ${p.glow}, transparent 55%)` }} />
+      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '52%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.4 }} />
+      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '58%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.2 }} />
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translateX(-12%)' }}>
+        <div style={{ display: 'flex' }}>{sellerMotif(p.motif)}</div>
+      </div>
+    </div>
+  )
+}
+
+function SellerPosterBg() {
+  const [active, setActive] = useState(0)
+  const [prev, setPrev] = useState<number | null>(null)
+  const activeRef = useRef(0)
+  useEffect(() => {
+    const iv = setInterval(() => {
+      const next = (activeRef.current + 1) % SELLER_POSTERS.length
+      setPrev(activeRef.current); activeRef.current = next; setActive(next)
+      setTimeout(() => setPrev(null), 900)
+    }, 4500)
+    return () => clearInterval(iv)
+  }, [])
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', opacity: 0.11, pointerEvents: 'none' }} aria-hidden>
+      {SELLER_POSTERS.map((_, i) => (
+        <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transition: 'opacity 0.9s ease', zIndex: i === active ? 2 : i === prev ? 1 : 0 }}>
+          <SellerPoster variant={i} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── Mock Data ─────────────────────────────────────────────────
 const SELLERS = [
   {
@@ -552,6 +647,9 @@ export default function SellersPage() {
 
         {/* ─────── HERO — coaches-style animated (light) ─────── */}
         <section style={{ position: 'relative', minHeight: 'clamp(150px,20vw,210px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+          {/* subtle sliding posters — behind every existing element, no text */}
+          <SellerPosterBg />
+
           {/* aurora blobs */}
           <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
             <div style={{ position: 'absolute', right: '-8%', top: '6%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)', filter: 'blur(58px)', animation: 'blob1 15s ease-in-out infinite' }} />
@@ -581,8 +679,10 @@ export default function SellersPage() {
 
           {/* content */}
           <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 10.5, fontWeight: 800, borderRadius: 24, padding: '5px 13px', marginBottom: 14, letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
-MARKET PLACE . BILLIARD HUB
+            <div style={{ textAlign: 'left', marginBottom: 14 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
+                MARKET PLACE . BILLIARD HUB
+              </div>
             </div>
 
             <div style={{ overflow: 'hidden', paddingBottom: '0.14em' }}>
