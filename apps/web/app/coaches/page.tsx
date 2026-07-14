@@ -1,12 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
 const GOLD_D  = '#9A6E38'
-const GOLD_G  = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'  // dark gold for light bg
 
 /* page colors (light theme) */
 const BG      = '#F6F4F0'
@@ -48,18 +47,148 @@ const COACHES: Coach[] = [
   { id:'10', name:'محسن طاهری',    specialty:'highball', city:'تهران',  experience:9,  rating:4.7, students:108, medals:4,  sessionPrice:290000, hasStory:true,  storyImage:img(1), bio:'مربی تیم ملی هی‌بال ۱۴۰۳ — متخصص آنالیز بازی',             photo:'' },
 ]
 
-/* billiard rack: 15 balls */
-const RACK: [number, number][] = [
-  [490,50],[442,133],[538,133],[394,216],[490,216],[586,216],
-  [346,299],[442,299],[538,299],[634,299],
-  [298,382],[394,382],[490,382],[586,382],[682,382],
+/* ════════ HERO POSTERS — dark, billiard/coach themed (slider) ════════ */
+const COACH_POSTERS = [
+  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'trophy' },
+  { bg:'linear-gradient(130deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'aim'    },
+  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'cues'   },
+  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'rack'   },
+  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'eight'  },
 ]
-const RACK_C = [
-  '#C7A66A','#DC2626','#7C3AED',
-  '#DC2626','#C7A66A','#DC2626',
-  '#C7A66A','#DC2626','#C7A66A','#DC2626',
-  '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
+
+const COACH_SLIDES = [
+  { title:'مربیان حرفه‌ای',       sub:'آموزش با بهترین‌ها' },
+  { title:'از مبتدی تا حرفه‌ای',  sub:'مسیرِ پیشرفت تو' },
+  { title:'قهرمان بساز',           sub:'با مربیان ملی‌پوش' },
+  { title:'جلسات خصوصی',           sub:'برنامه‌ی تمرینی اختصاصی' },
+  { title:'جامعه‌ی مربیان',        sub:'بیلیارد هاب، کنارِ تو' },
 ]
+
+function coachMotif(motif: string) {
+  const s = 168
+  if (motif === 'trophy') return (
+    <svg width={s} viewBox="0 0 100 104" fill="none" aria-hidden>
+      <path d="M32 20 H68 V34 C68 48 60 56 50 56 C40 56 32 48 32 34 Z" stroke={GOLD} strokeWidth="1.8" opacity="0.85"/>
+      <path d="M32 24 H22 A9 9 0 0 0 33 41" stroke={GOLD} strokeWidth="1.6" opacity="0.7"/>
+      <path d="M68 24 H78 A9 9 0 0 1 67 41" stroke={GOLD} strokeWidth="1.6" opacity="0.7"/>
+      <rect x="46" y="56" width="8" height="12" stroke={GOLD} strokeWidth="1.4" opacity="0.7"/>
+      <path d="M36 68 H64 L60 80 H40 Z" stroke={GOLD} strokeWidth="1.6" opacity="0.8"/>
+      <path d="M50 27 l2.6 5.3 5.8 0.8 -4.2 4.1 1 5.8 -5.2 -2.7 -5.2 2.7 1 -5.8 -4.2 -4.1 5.8 -0.8 Z" fill={GOLD} opacity="0.6"/>
+    </svg>
+  )
+  if (motif === 'aim') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="40" stroke={GOLD} strokeWidth="0.8" opacity="0.22"/>
+      <circle cx="50" cy="50" r="28" stroke={GOLD} strokeWidth="1" opacity="0.38"/>
+      <circle cx="50" cy="50" r="16" stroke={GOLD} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)"/>
+      {[[50,6],[50,94],[6,50],[94,50]].map((pt,i)=>(<rect key={i} x={pt[0]!-3} y={pt[1]!-3} width="6" height="6" fill={GOLD} opacity="0.58" transform={`rotate(45 ${pt[0]} ${pt[1]})`}/>))}
+      <circle cx="44" cy="44" r="3" fill={GOLD} opacity="0.4"/>
+    </svg>
+  )
+  if (motif === 'cues') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <g stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
+      {[[12,86],[88,16],[12,16],[88,86]].map((pt,i)=>(<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={GOLD} opacity="0.72"/>))}
+      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD} strokeWidth="1.6" opacity="0.95"/>
+      <circle cx="45" cy="46" r="3" fill={GOLD} opacity="0.5"/>
+    </svg>
+  )
+  if (motif === 'rack') {
+    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
+    return (
+      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
+        {rows.flat().map((pt,i)=>(<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={GOLD} strokeWidth="1.3" opacity="0.82"/>))}
+        <circle cx="50" cy="11" r="3" fill={GOLD} opacity="0.6"/>
+      </svg>
+    )
+  }
+  return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
+      <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
+      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
+      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
+    </svg>
+  )
+}
+
+function CoachPoster({ variant }: { variant: number }) {
+  const p = COACH_POSTERS[variant % COACH_POSTERS.length]!
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden', background:p.bg }}>
+      <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'18px 18px', opacity:0.6 }}/>
+      <div style={{ position:'absolute', inset:'-20%', background:`radial-gradient(circle at 30% 40%, ${p.glow}, transparent 55%)` }}/>
+      <div style={{ position:'absolute', top:'-25%', bottom:'-25%', left:'52%', width:2, background:`linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform:'rotate(19deg)', opacity:0.4 }}/>
+      <div style={{ position:'absolute', top:'-25%', bottom:'-25%', left:'58%', width:1, background:`linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform:'rotate(19deg)', opacity:0.2 }}/>
+      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', transform:'translateX(-15%)', opacity:0.6 }}>
+        <div style={{ display:'flex', filter:'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{coachMotif(p.motif)}</div>
+      </div>
+    </div>
+  )
+}
+
+function CoachHeroSlider() {
+  const [active, setActive]   = useState(0)
+  const [prevIdx, setPrevIdx] = useState<number | null>(null)
+  const activeRef = useRef(0)
+  const fadingRef = useRef(false)
+
+  const advance = (idx: number) => {
+    if (idx === activeRef.current || fadingRef.current) return
+    setPrevIdx(activeRef.current)
+    activeRef.current = idx
+    fadingRef.current = true
+    setActive(idx)
+    setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const next = (activeRef.current + 1) % COACH_SLIDES.length
+      setPrevIdx(activeRef.current)
+      activeRef.current = next
+      fadingRef.current = true
+      setActive(next)
+      setTimeout(() => { setPrevIdx(null); fadingRef.current = false }, 850)
+    }, 4500)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <>
+      <style>{`@keyframes kenBurnsC{0%{transform:scale(1.00) translate(0%,0%)}100%{transform:scale(1.14) translate(-2%,1.5%)}}`}</style>
+      <section style={{ position:'relative', height:'clamp(150px,16vw,205px)', overflow:'hidden', background:'#0a0a0a', direction:'rtl' }}>
+        {COACH_SLIDES.map((_, i) => (
+          <div key={i} style={{ position:'absolute', inset:0, opacity: i===active?1:0, transition:'opacity 0.90s ease', zIndex: i===active?2:i===prevIdx?1:0, animation:'kenBurnsC 9s ease-in-out infinite alternate', willChange:'transform' }}>
+            <CoachPoster variant={i}/>
+          </div>
+        ))}
+        <div style={{ position:'absolute', inset:0, zIndex:3, background:'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }}/>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'55%', zIndex:3, background:'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }}/>
+
+        <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
+          <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:10.5, fontWeight:800, borderRadius:24, padding:'5px 13px', marginBottom:11, letterSpacing:'0.12em', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+              FIND YOUR COACH . BILLIARD HUB
+            </div>
+            <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 8px', letterSpacing:'-0.03em', lineHeight:1.08 }}>
+              {COACH_SLIDES[active]?.title}
+            </h1>
+            <p style={{ fontSize:'clamp(12px,1.35vw,17px)', color:'#D4A843', margin:0, fontWeight:600, textShadow:'0 0 22px rgba(212,168,67,0.55)' }}>
+              {COACH_SLIDES[active]?.sub}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ position:'absolute', bottom:14, left:'clamp(24px,6vw,80px)', zIndex:6, display:'flex', gap:7 }}>
+          {COACH_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => advance(i)} aria-label={`اسلاید ${i+1}`} style={{ width: i===active?24:7, height:7, borderRadius:4, border:'none', cursor:'pointer', padding:0, background: i===active?'#C7A66A':'rgba(255,255,255,0.32)', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)' }}/>
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
 
 /* ── Avatar with story ring (Instagram gradient, like home) ── */
 function CoachAvatar({ coach, onStory, size }: { coach: Coach; onStory: () => void; size: string }) {
@@ -266,118 +395,8 @@ export default function CoachesPage() {
 
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
-        {/* ══════════════ HERO — compact banner ══════════════ */}
-        <section style={{ position:'relative', height:'clamp(145px,16.5vh,300px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(8px,2.2vh,24px)' }}>
-
-          {/* Aurora blobs — pastel tints on light bg */}
-          <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
-            <div style={{
-              position:'absolute', right:'-8%', top:'8%',
-              width:280, height:280, borderRadius:'50%',
-              background:'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)',
-              filter:'blur(55px)', animation:'blob1 15s ease-in-out infinite',
-            }}/>
-            <div style={{
-              position:'absolute', left:'-6%', top:'20%',
-              width:240, height:240, borderRadius:'50%',
-              background:'radial-gradient(circle, rgba(124,58,237,0.22) 0%, rgba(124,58,237,0.07) 50%, transparent 72%)',
-              filter:'blur(52px)', animation:'blob2 19s ease-in-out infinite',
-            }}/>
-            <div style={{
-              position:'absolute', left:'36%', top:'50%',
-              width:140, height:140, borderRadius:'50%',
-              background:'radial-gradient(circle, rgba(199,166,106,0.22) 0%, transparent 68%)',
-              filter:'blur(40px)', animation:'blob3 12s ease-in-out infinite',
-            }}/>
-            <div style={{
-              position:'absolute', left:'3%', bottom:'-4%',
-              width:150, height:110, borderRadius:'50%',
-              background:'radial-gradient(circle, rgba(37,99,235,0.14) 0%, transparent 70%)',
-              filter:'blur(44px)',
-            }}/>
-          </div>
-
-          {/* Rack instance 1 — left area, vertically centered, delay 0s */}
-          <svg style={{ position:'absolute', left:'4%', top:'50%', width:220, height:205,
-            transform:'translateY(-50%)',
-            pointerEvents:'none', animation:'rackCycle 18s 0s ease-in-out infinite', transformOrigin:'center' }}
-            viewBox="0 0 760 560">
-            {RACK.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[i]} strokeWidth="1.5"/>)}
-            <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.6"/>
-          </svg>
-          {/* Rack instance 2 — center-left, rotated 140deg, delay 6s */}
-          <svg style={{ position:'absolute', left:'26%', top:'50%', width:196, height:186,
-            transform:'translateY(-50%) rotate(140deg)',
-            pointerEvents:'none', animation:'rackCycle 18s 6s ease-in-out infinite', transformOrigin:'center' }}
-            viewBox="0 0 760 560">
-            {RACK.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[i]} strokeWidth="1.5"/>)}
-            <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.6"/>
-          </svg>
-          {/* Rack instance 3 — center, rotated 55deg, delay 12s */}
-          <svg style={{ position:'absolute', left:'46%', top:'50%', width:166, height:158,
-            transform:'translateY(-50%) rotate(55deg)',
-            pointerEvents:'none', animation:'rackCycle 18s 12s ease-in-out infinite', transformOrigin:'center' }}
-            viewBox="0 0 760 560">
-            {RACK.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[i]} strokeWidth="1.5"/>)}
-            <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.6"/>
-          </svg>
-
-          {/* Light streaks — gold on light bg */}
-          <div style={{
-            position:'absolute', top:'33%', left:0, width:'50%', height:'1.5px',
-            background:'linear-gradient(to right,transparent,rgba(154,110,56,0.45),transparent)',
-            transform:'rotate(-5deg)', pointerEvents:'none',
-            animation:'streakA 12s 1s ease-in-out infinite',
-          }}/>
-          <div style={{
-            position:'absolute', top:'53%', left:0, width:'40%', height:'1px',
-            background:'linear-gradient(to right,transparent,rgba(154,110,56,0.28),transparent)',
-            transform:'rotate(-3deg)', pointerEvents:'none',
-            animation:'streakB 16s 5s ease-in-out infinite',
-          }}/>
-
-          {/* Subtle bottom fade — transition to page bg */}
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:50,
-            background:`linear-gradient(to top, ${BG}, transparent)`, pointerEvents:'none' }}/>
-
-          {/* Content */}
-          <div style={{ position:'relative', zIndex:5, maxWidth:1280, width:'100%',
-            margin:'0 auto', padding:'0 clamp(24px,6vw,80px)' }}>
-
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:GOLD_D, fontSize:10.5, fontWeight:800, borderRadius:24, padding:'5px 13px', marginBottom:11, letterSpacing:'0.12em', animation:'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
-              FIND YOUR COACH . BILLIARD HUB
-            </div>
-
-            <div style={{ overflow:'hidden', paddingBottom:'0.18em' }}>
-              <h1 style={{
-                fontSize:'clamp(32px,4.5vw,56px)', fontWeight:900, lineHeight:1.0,
-                letterSpacing:'-0.05em',
-                background:GOLD_G,
-                WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-                animation:'lineReveal .72s .10s cubic-bezier(.4,0,.2,1) both',
-              }}>
-                مربیان
-              </h1>
-            </div>
-
-            {/* Accent line */}
-            <div style={{ transformOrigin:'right', animation:'scaleInX .5s .34s ease both' }}>
-              <div style={{
-                width:60, height:2, marginTop:8,
-                background:GOLD_G,
-                boxShadow:'0 0 10px rgba(154,110,56,0.35)',
-              }}/>
-            </div>
-
-            <p style={{
-              fontSize:'clamp(11px,1.2vw,13px)', color:TEXT_S, marginTop:8, maxWidth:360,
-              animation:'lineReveal .5s .44s ease both',
-            }}>
-              آموزش با بهترین‌ها · از مبتدی تا حرفه‌ای
-            </p>
-          </div>
-
-        </section>
+        {/* ══════════════ HERO — poster slider ══════════════ */}
+        <CoachHeroSlider />
 
         {/* ══════════════ FILTER ══════════════ */}
         <div id="coaches" style={{
