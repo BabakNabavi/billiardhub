@@ -67,8 +67,20 @@ export function listCoachProfiles(): CoachProfile[] {
 
 export function saveCoachProfile(p: CoachProfile) {
   const all = getCoachProfiles()
+  // one profile per owner — drop older entries by the same owner under a different slug
+  if (p.ownerPhone) {
+    for (const k of Object.keys(all)) {
+      if (k !== p.slug && all[k]?.ownerPhone === p.ownerPhone) delete all[k]
+    }
+  }
   all[p.slug] = p
-  localStorage.setItem(KEY, JSON.stringify(all))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(all))
+  } catch {
+    // storage quota exceeded — last resort: keep only this profile
+    // (re-throws if even a single profile is too large, handled by the caller)
+    localStorage.setItem(KEY, JSON.stringify({ [p.slug]: p }))
+  }
 }
 
 export function updateCoachProfile(slug: string, patch: Partial<CoachProfile>) {

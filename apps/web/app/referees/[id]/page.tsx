@@ -238,9 +238,7 @@ export default function RefereeProfilePage() {
   const [openStory,     setOpenStory]     = useState(false)
   const [copied,        setCopied]        = useState(false)
   const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
-  const [albums,        setAlbums]        = useState<Album[]>([
-    { id:'default', name:'مسابقات', imageIds: referee.gallery.slice(0,3).map(g=>g.id) },
-  ])
+  const [albums,        setAlbums]        = useState<Album[]>([])
   const [showNewAlbum,  setShowNewAlbum]  = useState(false)
   const [newAlbumName,  setNewAlbumName]  = useState('')
   const [expandedAlbum, setExpandedAlbum] = useState<string|null>(null)

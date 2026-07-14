@@ -308,9 +308,7 @@ export default function CoachProfilePage() {
   const [openStory,     setOpenStory]     = useState(false)
   const [copied,        setCopied]        = useState(false)
   const [tab,           setTab]           = useState<'photos'|'videos'|'albums'>('photos')
-  const [albums,        setAlbums]        = useState<Album[]>([
-    { id:'default', name:'مسابقات', imageIds: coach.gallery.slice(0,3).map(g=>g.id) },
-  ])
+  const [albums,        setAlbums]        = useState<Album[]>([])
   const [showNewAlbum,  setShowNewAlbum]  = useState(false)
   const [newAlbumName,  setNewAlbumName]  = useState('')
   const [expandedAlbum, setExpandedAlbum] = useState<string|null>(null)
@@ -440,7 +438,7 @@ export default function CoachProfilePage() {
                     </div>
                     <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>مربی {localP && localP.disciplines.length ? localP.disciplines.map(disciplineLabel).join(' · ') : (spec?.label ?? 'بیلیارد')}</div>
                     {coach.badge && (
-                      <div style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3 }}>{coach.badge}</div>
+                      <div dir="auto" style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3, unicodeBidi:'isolate' }}>{coach.badge}</div>
                     )}
                     <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
                       {coach.city}، ایران
@@ -594,7 +592,7 @@ export default function CoachProfilePage() {
             <div className="pcard pcard-grade" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
               <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>درجه مربیگری</h3>
               <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, flexWrap:'wrap' }}>
-                <span style={{ background:`${coach.badgeColor}15`, border:`1.5px solid ${coach.badgeColor}48`, color:coach.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px' }}>{coach.badge}</span>
+                <span dir="auto" style={{ background:`${coach.badgeColor}15`, border:`1.5px solid ${coach.badgeColor}48`, color:coach.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px', unicodeBidi:'isolate' }}>{coach.badge}</span>
                 {grade && (
                   <div style={{ display:'flex', gap:5 }}>
                     {[1,2,3,4,5].map(d => (<div key={d} style={{ width:9, height:9, borderRadius:'50%', background: d<=grade.dots ? grade.color : 'rgba(17,17,16,0.12)' }} />))}
@@ -605,7 +603,7 @@ export default function CoachProfilePage() {
                 {coach.certifications.map((c,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
                     <span style={{ color:GOLD, marginTop:2, flexShrink:0, fontSize:10 }}>✦</span>
-                    <span style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.65 }}>{c}</span>
+                    <span dir="auto" style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.65, unicodeBidi:'isolate' }}>{c}</span>
                   </div>
                 ))}
               </div>
