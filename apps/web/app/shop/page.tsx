@@ -738,7 +738,7 @@ function CatalogSection({
               )}
             </button>
             <BazaarSortDropdown value={sort} onChange={setSort}/>
-            <Link href="/shop/new" className="lq-sheen lq-lift" style={{ fontSize: 13, fontWeight: 800, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px', borderRadius: 14, ...LQ_GOLD_BTN }}>
+            <Link href="/shop/new" className="lq-lift" style={{ fontSize: 13, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px', borderRadius: 10, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38' }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
               ثبت محصول
             </Link>
