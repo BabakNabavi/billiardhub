@@ -363,12 +363,15 @@ export default function CoachProfilePage() {
                 </button>
               </div>
               {/* Body */}
-              <div style={{ padding:'0 24px 20px' }}>
+              <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
                 {/* avatar + edit */}
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginTop:'clamp(-64px,-9vw,-72px)' }}>
                   <button onClick={() => coach.hasStory && setOpenStory(true)} aria-label="عکس پروفایل" style={{ background:'none', border:'none', padding:0, cursor: coach.hasStory ? 'pointer' : 'default', borderRadius:'50%' }}>
-                    <div style={{ width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', borderRadius:'50%', border:'4px solid #fff', overflow:'hidden', background:`linear-gradient(135deg,${g1},${g2})`, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.14)' }}>
-                      <span style={{ color:'#fff', fontWeight:900, fontSize:'clamp(38px,5vw,56px)', lineHeight:1 }}>{coach.name[0]}</span>
+                    <div style={{ width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', borderRadius:'50%', border:'4px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.14)' }}>
+                      <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
+                        <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
+                        <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
+                      </svg>
                     </div>
                   </button>
                   <button aria-label="ویرایش پروفایل" style={{ marginBottom:10, width:36, height:36, borderRadius:'50%', background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(0,0,0,0.55)' }}>
