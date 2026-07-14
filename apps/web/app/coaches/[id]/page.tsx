@@ -29,14 +29,6 @@ const GRADE_DOTS: Record<string,{dots:number;color:string}> = {
   'مربی درجه C':     {dots:1, color:TEXT_S},
 }
 
-const GRADS: [string,string][] = [
-  ['#C7A66A','#7A4F1E'],['#7C3AED','#4C1D95'],['#2563EB','#1E3A8A'],
-  ['#16A34A','#14532D'],['#DC2626','#7F1D1D'],['#B45309','#78350F'],
-  ['#6D28D9','#3B0764'],['#0891B2','#164E63'],['#BE185D','#831843'],
-  ['#D97706','#78350F'],['#15803D','#14532D'],
-]
-const getGrad = (id:string):[string,string] => GRADS[parseInt(id,10)%GRADS.length]??[GOLD,'#7A4F1E']
-
 const IMGS = [
   '/images/shop/snooker-table.jpg',
   '/images/shop/cue_billiard_2.jpg',
@@ -289,7 +281,6 @@ export default function CoachProfilePage() {
 
   const spec  = SPECS[coach.specialty as keyof typeof SPECS]
   const grade = GRADE_DOTS[coach.badge]
-  const [g1, g2] = getGrad(coach.id)
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
   const createAlbum = () => {
@@ -339,11 +330,18 @@ export default function CoachProfilePage() {
 
             {/* Profile card */}
             <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
-              {/* Cover */}
-              <div style={{ position:'relative', height:'clamp(120px,20vw,200px)' }}>
-                {coach.storyImage
-                  ? <img src={coach.storyImage} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                  : <div style={{ width:'100%', height:'100%', background:`linear-gradient(120deg,${g1},${g2})` }} />}
+              {/* Cover — default coach poster */}
+              <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
+                <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
+                <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
+                <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
+                <div style={{ position:'absolute', top:'50%', insetInlineEnd:'clamp(20px,4vw,40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'10px' }}>
+                  <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
+                  <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                    <span style={{ width:'22px', height:'1.5px', background:'linear-gradient(90deg,#C7A66A,transparent)', display:'inline-block' }}/>
+                    <span style={{ fontSize:'clamp(9px,1.4vw,12px)', fontWeight:800, letterSpacing:'0.3em', color:'rgba(199,166,106,0.9)' }}>PROFESSIONAL COACH</span>
+                  </div>
+                </div>
               </div>
               {/* Body */}
               <div style={{ padding:'0 24px 20px', position:'relative', zIndex:2 }}>
