@@ -20,7 +20,8 @@ export interface CoachProfile {
   gallery: CoachMedia[]
   videos: CoachVideo[]
   phone: string; whatsapp: string; instagram: string; telegram: string
-  storyImage: string                    // profile/story image (data URL)
+  photo: string                         // profile photo (data URL) — shown as the avatar
+  coverImage: string                    // background / cover photo (data URL)
   certificate: { name: string; url: string } | null
   status: 'pending' | 'approved' | 'rejected'
   verified: boolean                     // blue check (admin grants — only with certificate)

@@ -87,7 +87,7 @@ export default function AdminCoachesPage() {
                   {/* Row header */}
                   <div style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
                     <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', background: 'rgba(17,17,16,0.06)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: CBOR }}>
-                      {c.storyImage ? <img src={c.storyImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontWeight: 800, color: TEXT_M }}>{c.firstNameFa[0] ?? '؟'}</span>}
+                      {c.photo ? <img src={c.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontWeight: 800, color: TEXT_M }}>{c.firstNameFa[0] ?? '؟'}</span>}
                     </div>
                     <div style={{ flex: 1, minWidth: 160 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
