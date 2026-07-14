@@ -278,6 +278,7 @@ export default function CoachProfilePage() {
   const [showNewAlbum,  setShowNewAlbum]  = useState(false)
   const [newAlbumName,  setNewAlbumName]  = useState('')
   const [expandedAlbum, setExpandedAlbum] = useState<string|null>(null)
+  const [lightbox,      setLightbox]      = useState<GImg|null>(null)
 
   const spec  = SPECS[coach.specialty as keyof typeof SPECS]
   const grade = GRADE_DOTS[coach.badge]
@@ -306,8 +307,24 @@ export default function CoachProfilePage() {
         .gtab{transition:all .18s;cursor:pointer;}
         .gtab:hover{opacity:.85;}
         @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
-        @media(max-width:520px){.pgrid{grid-template-columns:repeat(2,1fr)!important;}}
-        @media(max-width:900px){.ln-cols{grid-template-columns:1fr!important;}}
+        .pcard{min-width:0;}
+        /* mobile gallery grids: photos 4/row, videos 2/row, albums 3/row */
+        @media(max-width:600px){
+          .gphotos{grid-template-columns:repeat(4,1fr)!important;}
+          .gvideos{grid-template-columns:repeat(2,1fr)!important;}
+          .galbums{grid-template-columns:repeat(3,1fr)!important;}
+        }
+        /* mobile: single column; interleave main + sidebar cards in the requested order */
+        @media(max-width:900px){
+          .ln-cols{grid-template-columns:1fr!important;}
+          .ln-main,.ln-side{display:contents!important;}
+          .pcard-profile{order:1;}
+          .pcard-about{order:2;}
+          .pcard-grade{order:3;}
+          .pcard-public{order:4;}
+          .pcard-contact{order:5;}
+          .pcard-gallery{order:6;}
+        }
       `}</style>
 
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh', color:TEXT }}>
@@ -326,10 +343,10 @@ export default function CoachProfilePage() {
         <div className="ln-cols" style={{ maxWidth:1128, margin:'0 auto', padding:'16px clamp(12px,3vw,24px) 64px', display:'grid', gridTemplateColumns:'1fr 320px', gap:24, alignItems:'start' }}>
 
           {/* ═══ MAIN COLUMN ═══ */}
-          <div style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
+          <div className="ln-main" style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
 
             {/* Profile card */}
-            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
+            <div className="pcard pcard-profile" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
               {/* Cover — default coach poster */}
               <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
                 <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
@@ -389,7 +406,7 @@ export default function CoachProfilePage() {
 
 
           {/* About — explore-card style */}
-          <div style={{ background:'rgba(252,251,249,0.92)', backdropFilter:'blur(24px) saturate(1.6)', WebkitBackdropFilter:'blur(24px) saturate(1.6)', border:'1px solid rgba(28,28,26,0.08)', borderRadius:16, padding:'24px 26px', boxShadow:'0 8px 30px rgba(28,28,26,0.08), inset 0 1px 0 rgba(255,255,255,0.9)', position:'relative', overflow:'hidden', animation:'fadeUp .45s .08s ease both' }}>
+          <div className="pcard pcard-about" style={{ background:'rgba(252,251,249,0.92)', backdropFilter:'blur(24px) saturate(1.6)', WebkitBackdropFilter:'blur(24px) saturate(1.6)', border:'1px solid rgba(28,28,26,0.08)', borderRadius:16, padding:'24px 26px', boxShadow:'0 8px 30px rgba(28,28,26,0.08), inset 0 1px 0 rgba(255,255,255,0.9)', position:'relative', overflow:'hidden', animation:'fadeUp .45s .08s ease both' }}>
             <div style={{ position:'absolute', top:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(184,147,58,0.55),transparent)' }}/>
             <h2 style={{ fontSize:15, fontWeight:800, color:'#1c1c1c', marginBottom:14, display:'flex', alignItems:'center', gap:9 }}>
               <span style={{ width:3, height:16, borderRadius:2, background:'linear-gradient(180deg,#C7A66A,#8A6020)', flexShrink:0 }}/>
@@ -399,7 +416,7 @@ export default function CoachProfilePage() {
           </div>
 
           {/* ── Gallery ── */}
-          <div style={{ marginTop:20, background:CARD, border:CBOR, borderRadius:18, padding:26, boxShadow:CSHA, animation:'fadeUp .45s .18s ease both' }}>
+          <div className="pcard pcard-gallery" style={{ marginTop:20, background:CARD, border:CBOR, borderRadius:18, padding:26, boxShadow:CSHA, animation:'fadeUp .45s .18s ease both' }}>
 
             {/* Header + tabs */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:12 }}>
@@ -423,9 +440,9 @@ export default function CoachProfilePage() {
 
             {/* Photos */}
             {tab === 'photos' && (
-              <div className="pgrid" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10 }}>
+              <div className="gphotos" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10 }}>
                 {coach.gallery.map(g => (
-                  <div key={g.id} className="gcard" style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)' }}>
+                  <div key={g.id} className="gcard" onClick={() => setLightbox(g)} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)' }}>
                     <img src={g.url} alt={g.caption} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                   </div>
                 ))}
@@ -434,7 +451,7 @@ export default function CoachProfilePage() {
 
             {/* Videos */}
             {tab === 'videos' && (
-              <div className="pgrid" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+              <div className="gvideos" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
                 {coach.videos.map(v => (
                   <div key={v.id} className="gcard" style={{ aspectRatio:'16/9', background:'rgba(17,17,16,0.05)', position:'relative' }}>
                     <img src={v.thumbnail} alt={v.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
@@ -454,7 +471,7 @@ export default function CoachProfilePage() {
 
             {/* Albums */}
             {tab === 'albums' && (
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))', gap:12 }}>
+              <div className="galbums" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))', gap:12 }}>
 
                 {/* Create new album */}
                 <button onClick={() => setShowNewAlbum(true)} style={{ aspectRatio:'1', borderRadius:14, border:'1.5px dashed rgba(199,166,106,0.45)', background:'rgba(199,166,106,0.06)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:9, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
@@ -492,7 +509,7 @@ export default function CoachProfilePage() {
                         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                           {album.imageIds.map(imgId => {
                             const g = coach.gallery.find(x => x.id === imgId)
-                            return g ? <img key={imgId} src={g.url} alt={g.caption} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', borderRadius:7, display:'block' }} /> : null
+                            return g ? <img key={imgId} src={g.url} alt={g.caption} onClick={() => setLightbox(g)} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', borderRadius:7, display:'block', cursor:'pointer' }} /> : null
                           })}
                         </div>
                       )}
@@ -512,7 +529,7 @@ export default function CoachProfilePage() {
           <aside className="ln-side" style={{ display:'flex', flexDirection:'column', gap:16, animation:'fadeUp .45s .12s ease both' }}>
 
             {/* Public profile & URL */}
-            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="pcard pcard-public" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c' }}>پروفایل عمومی و نشانی</h3>
                 <button aria-label="کپی نشانی" onClick={() => { const u = `https://www.billiardhub.net/coaches/${coach.id}`; if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(u).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600) }).catch(() => {}) } }} style={{ background:'transparent', border:'none', cursor:'pointer', color: copied ? '#057642' : 'rgba(0,0,0,0.55)', display:'flex', alignItems:'center', gap:4, padding:4, fontSize:12, fontWeight:700, fontFamily:'inherit' }}>
@@ -527,7 +544,7 @@ export default function CoachProfilePage() {
             </div>
 
             {/* درجه مربیگری */}
-            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="pcard pcard-grade" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
               <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>درجه مربیگری</h3>
               <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, flexWrap:'wrap' }}>
                 <span style={{ background:`${coach.badgeColor}15`, border:`1.5px solid ${coach.badgeColor}48`, color:coach.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px' }}>{coach.badge}</span>
@@ -548,7 +565,7 @@ export default function CoachProfilePage() {
             </div>
 
             {/* راه‌های ارتباطی */}
-            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="pcard pcard-contact" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
               <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>راه‌های ارتباطی</h3>
               <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
                 <a href={`tel:${coach.phone}`} className="social-icn" aria-label="تماس" style={socialBtn}>
@@ -596,6 +613,21 @@ export default function CoachProfilePage() {
                   ایجاد آلبوم
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Image Lightbox ── */}
+        {lightbox && (
+          <div onClick={() => setLightbox(null)} style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,0.90)', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'clamp(16px,4vw,48px)', direction:'rtl', animation:'fadeUp .2s ease both' }}>
+            <button aria-label="بستن" onClick={() => setLightbox(null)} style={{ position:'absolute', top:16, insetInlineStart:16, width:42, height:42, borderRadius:'50%', background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.28)', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(6px)' }}>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div onClick={e => e.stopPropagation()} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, maxWidth:'min(940px,94vw)', maxHeight:'90vh' }}>
+              <img src={lightbox.url} alt={lightbox.caption} style={{ maxWidth:'100%', maxHeight:'82vh', objectFit:'contain', borderRadius:14, boxShadow:'0 24px 70px rgba(0,0,0,0.55)' }} />
+              {lightbox.caption && (
+                <div style={{ color:'rgba(255,255,255,0.86)', fontSize:14, fontWeight:600, textAlign:'center', maxWidth:640 }}>{lightbox.caption}</div>
+              )}
             </div>
           </div>
         )}
