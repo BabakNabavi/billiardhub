@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { toFa, faNum, parsePrice, MONO, toggleSet, Stars, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT, LQ_FELT_ON, LQ_GREEN } from './shared'
+import { toFa, faNum, parsePrice, MONO, toggleSet, Stars, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON, LQ_GREEN } from './shared'
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 
@@ -101,7 +101,7 @@ function SortDropdown({ value, onChange }: { value: SortKey; onChange: (v: SortK
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox" aria-expanded={open}
-        className={`${LQ} ${LQ_NEUTRAL} flex items-center gap-2.5 rounded-2xl px-3.5 py-2 text-[13px] ${
+        className={`flex items-center gap-2.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${
           open ? 'ring-2 ring-[#14532D]/20' : ''
         }`}
       >
@@ -253,7 +253,7 @@ export default function FlatShop() {
           />
         </div>
         {activeFilterCount > 0 && (
-          <button onClick={clearFilters} className="mt-4 text-[12.5px] font-medium text-[#14532D] transition-opacity hover:opacity-70">
+          <button onClick={clearFilters} className="mt-4 inline-flex items-center rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5">
             پاک کردن فیلترها ({faNum(activeFilterCount)})
           </button>
         )}
@@ -336,7 +336,7 @@ export default function FlatShop() {
               </a>
               <a
                 href={`tel:${store.phones[1]?.replace(/-/g, '') ?? ''}`}
-                className={`${LQ} ${LQ_FELT} flex items-center gap-2 rounded-2xl px-4 py-2.5 text-[13px] font-semibold`}
+                className="flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5"
               >
                 {Icon.phone} تماس
               </a>
@@ -365,7 +365,7 @@ export default function FlatShop() {
               {/* دکمه فیلتر موبایل */}
               <button
                 onClick={() => setSheetOpen(true)}
-                className={`${LQ} ${LQ_NEUTRAL} flex items-center gap-2 rounded-2xl px-3.5 py-2 text-[13px] text-[#5B564B] min-[861px]:hidden`}
+                className="flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 min-[861px]:hidden"
               >
                 {Icon.funnel} فیلترها
                 {activeFilterCount > 0 && (
@@ -429,7 +429,7 @@ export default function FlatShop() {
           {visible.length === 0 && (
             <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
               محصولی با این فیلترها پیدا نشد.
-              <button onClick={clearFilters} className="mr-2 font-semibold text-[#14532D] hover:opacity-70">پاک کردن فیلترها</button>
+              <button onClick={clearFilters} className="mr-2 font-bold text-[#9A6E38] transition hover:opacity-70">پاک کردن فیلترها</button>
             </div>
           )}
 
@@ -485,14 +485,6 @@ export default function FlatShop() {
                     </button>
                   </li>
                 ))}
-                <li>
-                  <button
-                    onClick={() => { setNavCat('all'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                    className="py-0.5 font-medium text-[#14532D] transition-opacity hover:opacity-70"
-                  >
-                    مشاهده همه ←
-                  </button>
-                </li>
               </ul>
             </div>
 
@@ -546,7 +538,7 @@ export default function FlatShop() {
                 <span className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-[70%] items-center justify-center rounded-full bg-[#14532D] text-white shadow-md transition-transform group-hover:scale-110">
                   {Icon.pin}
                 </span>
-                <span className="absolute bottom-2 right-2 rounded-md bg-white px-2.5 py-1 text-[11px] font-semibold text-[#14532D] shadow-sm">
+                <span className="absolute bottom-2 right-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-2.5 py-1 text-[11px] font-bold text-[#9A6E38] shadow-sm transition hover:-translate-y-0.5">
                   مشاهده روی نقشه
                 </span>
               </a>
@@ -578,7 +570,7 @@ export default function FlatShop() {
             {FilterPanel}
             <button
               onClick={() => setSheetOpen(false)}
-              className={`${LQ} ${LQ_FELT_ON} mt-2 w-full rounded-2xl py-3 text-[13.5px] font-bold`}
+              className="mt-2 w-full rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] py-3 text-[13.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5"
             >
               مشاهده {faNum(visible.length)} محصول
             </button>

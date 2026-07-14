@@ -111,7 +111,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
         </div>
         <Link href={`/coaches/${coach.id}`} className="btnConnect" aria-label="مشاهده پروفایل" style={{
           flexShrink:0, textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center',
-          width:40, height:40, border:`1.5px solid ${GOLD_D}`, borderRadius:11, color:GOLD_D, background:'transparent' }}>
+          width:40, height:40, border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, color:'#9A6E38', background:'rgba(199,166,106,0.12)' }}>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         </Link>
       </article>
@@ -144,7 +144,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
           <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
         </div>
         <div style={{ flex:1 }}/>
-        <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{ alignSelf:'stretch', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:`1.5px solid ${GOLD_D}`, borderRadius:24, fontSize:13, fontWeight:800, color:GOLD_D, background:'transparent' }}>
+        <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{ alignSelf:'stretch', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, fontSize:13, fontWeight:700, color:'#9A6E38', background:'rgba(199,166,106,0.12)' }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           مشاهده پروفایل
         </Link>
@@ -217,6 +217,7 @@ export default function CoachesPage() {
         @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes softBlink{0%,100%{opacity:1}50%{opacity:0.5}}
 
         /* filter pills */
         .fpill{transition:all .2s cubic-bezier(.4,0,.2,1);}
@@ -235,8 +236,8 @@ export default function CoachesPage() {
         .ccard:hover .cavatar{transform:scale(1.04);}
         .ccard-list{transition:transform .2s,box-shadow .2s,border-color .2s;}
         .ccard-list:hover{border-color:rgba(199,166,106,0.38)!important;box-shadow:0 6px 20px rgba(28,28,26,0.10)!important;}
-        .btnConnect{transition:background .18s,box-shadow .18s,border-color .18s;}
-        .btnConnect:hover{background:rgba(199,166,106,0.10)!important;box-shadow:0 4px 14px rgba(199,166,106,0.22)!important;}
+        .btnConnect{transition:all .3s cubic-bezier(0.22,1,0.36,1);}
+        .btnConnect:hover{transform:translateY(-2px);background:rgba(199,166,106,0.20)!important;box-shadow:0 6px 16px rgba(199,166,106,0.24)!important;}
 
         /* buttons */
         .btnG{transition:background .18s,transform .14s,box-shadow .18s;}
@@ -340,7 +341,7 @@ export default function CoachesPage() {
           <div style={{ position:'relative', zIndex:5, maxWidth:1280, width:'100%',
             margin:'0 auto', padding:'0 clamp(24px,6vw,80px)' }}>
 
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:GOLD_D, fontSize:10.5, fontWeight:800, borderRadius:24, padding:'5px 13px', marginBottom:11, letterSpacing:'0.12em', animation:'fadeUp .5s .05s ease both' }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:GOLD_D, fontSize:10.5, fontWeight:800, borderRadius:24, padding:'5px 13px', marginBottom:11, letterSpacing:'0.12em', animation:'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
               FIND YOUR COACH . BILLIARD HUB
             </div>
 
@@ -398,10 +399,10 @@ export default function CoachesPage() {
                   padding:'8px 16px', borderRadius:11, cursor:'pointer',
                   fontFamily:"'Vazirmatn',Tahoma,sans-serif", fontSize:13,
                   fontWeight: active ? 800 : 600,
-                  border: active ? '1px solid transparent' : '1px solid rgba(17,17,16,0.10)',
-                  background: active ? 'linear-gradient(135deg,#C7A66A,#9A6E38)' : 'rgba(255,255,255,0.78)',
-                  color: active ? '#fff' : TEXT_S,
-                  boxShadow: active ? '0 4px 14px rgba(199,166,106,0.32)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
+                  border: active ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
+                  background: active ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
+                  color: active ? '#9A6E38' : TEXT_S,
+                  boxShadow: active ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
                   backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
                 }}
                 onMouseEnter={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(199,166,106,0.12)'; el.style.borderColor = 'rgba(199,166,106,0.38)'; el.style.color = GOLD_D; el.style.boxShadow = '0 4px 14px rgba(199,166,106,0.18)'; } }}
@@ -440,10 +441,10 @@ export default function CoachesPage() {
                   return (
                     <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای عادی' : 'نمای لیست'} style={{
                       width:38, height:38, borderRadius:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
-                      border: on ? '1px solid transparent' : '1px solid rgba(17,17,16,0.10)',
-                      background: on ? 'linear-gradient(135deg,#C7A66A,#9A6E38)' : 'rgba(255,255,255,0.78)',
-                      color: on ? '#fff' : TEXT_S,
-                      boxShadow: on ? '0 4px 12px rgba(199,166,106,0.30)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
+                      border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)',
+                      background: on ? 'rgba(199,166,106,0.12)' : 'rgba(255,255,255,0.78)',
+                      color: on ? '#9A6E38' : TEXT_S,
+                      boxShadow: on ? '0 4px 12px rgba(199,166,106,0.16)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
                     }}>{icon}</button>
                   )
                 })}

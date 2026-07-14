@@ -281,7 +281,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   )
   const viewBtn = (
     <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
-      padding: '10px 18px', borderRadius: 12, textAlign: 'center', textDecoration: 'none',
+      padding: '10px 18px', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
       background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
       fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
     }}>
@@ -373,7 +373,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         <div style={{ display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
           <div style={{ flex: 1 }}>
             <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
-              display: 'block', padding: '10px 0', borderRadius: 12, textAlign: 'center', textDecoration: 'none',
+              display: 'block', padding: '10px 0', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
               background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
               fontSize: 13, fontWeight: 700,
             }}>
@@ -497,6 +497,7 @@ export default function SellersPage() {
     <>
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        @keyframes softBlink { 0%,100%{opacity:1} 50%{opacity:0.5} }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}25%{transform:translate(-28px,-20px) scale(1.05);}55%{transform:translate(-10px,26px) scale(0.96);}80%{transform:translate(20px,-12px) scale(1.02);}}
         @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}20%{transform:translate(32px,20px) scale(1.04);}55%{transform:translate(44px,-26px) scale(0.92);}75%{transform:translate(10px,30px) scale(1.06);}}
@@ -580,7 +581,7 @@ export default function SellersPage() {
 
           {/* content */}
           <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 10.5, fontWeight: 800, borderRadius: 24, padding: '5px 13px', marginBottom: 14, letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 10.5, fontWeight: 800, borderRadius: 24, padding: '5px 13px', marginBottom: 14, letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
 MARKET PLACE . BILLIARD HUB
             </div>
 
