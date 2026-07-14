@@ -48,6 +48,7 @@ export default function AdminPage() {
   { title: 'مسابقات', desc: 'ایجاد و مدیریت رویدادها', icon: <Trophy size={28} />, color: 'bg-amber-600', link: '/admin/events' },
   { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار', icon: <Newspaper size={28} />, color: 'bg-red-600', link: '/admin/news' },
   { title: 'تأیید کاربران', desc: 'verify کردن مربیان و داوران', icon: <CheckCircle size={28} />, color: 'bg-teal-600', link: '/admin/verifications' },
+  { title: 'تأیید مربیان (پروفایل)', desc: 'بررسی پروفایل مربیان ثبت‌شده در داشبورد و صدور تیک آبی', icon: <Star size={28} />, color: 'bg-indigo-600', link: '/admin/coaches' },
   { title: 'مدیریت تبلیغات', desc: 'بنرها و تبلیغات سایت', icon: <Megaphone size={28} />, color: 'bg-orange-500', link: '/admin/ads' },
 ];
 
