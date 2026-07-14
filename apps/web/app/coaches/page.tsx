@@ -37,7 +37,6 @@ const GRADS: [string, string][] = [
 ]
 const getGrad = (id: string): [string, string] =>
   GRADS[parseInt(id, 10) % GRADS.length] ?? ['#C7A66A', '#7A4F1E']
-const fmt = (n: number) => n.toLocaleString('fa-IR')
 
 interface Coach {
   id: string; name: string; specialty: string; city: string
@@ -70,46 +69,6 @@ const RACK_C = [
   '#C7A66A','#DC2626','#C7A66A','#DC2626',
   '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
 ]
-
-function Stars({ r, size = 9 }: { r: number; size?: number }) {
-  return (
-    <span style={{ display:'inline-flex', gap:1.5 }}>
-      {[1,2,3,4,5].map(i => (
-        <svg key={i} width={size} height={size} viewBox="0 0 24 24"
-          fill={i <= Math.round(r) ? '#F59E0B' : 'none'}
-          stroke={i <= Math.round(r) ? 'none' : 'rgba(245,158,11,0.25)'} strokeWidth="1.5">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      ))}
-    </span>
-  )
-}
-
-function StoryRing({ coach, size, onOpen }: { coach: Coach; size: number; onOpen: () => void }) {
-  const [g1, g2] = getGrad(coach.id)
-  return (
-    <button onClick={e => { e.preventDefault(); e.stopPropagation(); onOpen() }}
-      style={{ background:'none', border:'none', cursor:'pointer', padding:0 }}>
-      <div style={{
-        width:size, height:size, borderRadius:'50%',
-        background:'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
-        padding: size > 40 ? 3 : 2,
-        boxShadow:'0 0 14px rgba(214,41,118,0.50)',
-      }}>
-        <div style={{
-          width:'100%', height:'100%', borderRadius:'50%',
-          border:'2px solid #FFFFFF',
-          background:`linear-gradient(135deg,${g1},${g2})`,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color:'#fff', fontWeight:900, fontSize: size > 40 ? 19 : 13,
-          overflow:'hidden',
-        }}>
-          {coach.name[0]}
-        </div>
-      </div>
-    </button>
-  )
-}
 
 /* ════════════════ PAGE ════════════════ */
 export default function CoachesPage() {
@@ -174,20 +133,20 @@ export default function CoachesPage() {
         .fpill{transition:all .18s cubic-bezier(.4,0,.2,1);}
         .fpill:hover{background:rgba(0,0,0,0.06)!important;}
 
-        /* cards — light, explore-menu inspired */
-        .ccard{cursor:pointer;transition:transform .30s cubic-bezier(.4,0,.2,1),box-shadow .30s,border-color .30s;position:relative;}
+        /* cards — LinkedIn style */
+        .ccard{transition:transform .28s cubic-bezier(.4,0,.2,1),box-shadow .28s,border-color .28s;position:relative;}
         .ccard:hover{
-          transform:translateY(-6px);
-          border-color:rgba(199,166,106,0.42)!important;
+          transform:translateY(-5px);
+          border-color:rgba(199,166,106,0.38)!important;
           box-shadow:
-            0 0 0 3px rgba(199,166,106,0.10),
-            0 16px 44px rgba(199,166,106,0.15),
-            0 6px 18px rgba(0,0,0,0.08) !important;
+            0 0 0 3px rgba(199,166,106,0.08),
+            0 16px 40px rgba(28,28,26,0.12),
+            0 6px 16px rgba(0,0,0,0.06) !important;
         }
-        .cphoto{transition:transform .60s cubic-bezier(.4,0,.2,1);}
-        .ccard:hover .cphoto{transform:scale(1.06);}
-        .cavatar{transition:transform .40s cubic-bezier(.4,0,.2,1);}
-        .ccard:hover .cavatar{transform:scale(1.05);}
+        .cavatar{transition:transform .35s cubic-bezier(.4,0,.2,1);}
+        .ccard:hover .cavatar{transform:scale(1.04);}
+        .btnConnect{transition:background .18s,box-shadow .18s,border-color .18s;}
+        .btnConnect:hover{background:rgba(199,166,106,0.10)!important;box-shadow:0 4px 14px rgba(199,166,106,0.22)!important;}
 
         /* buttons */
         .btnG{transition:background .18s,transform .14s,box-shadow .18s;}
@@ -391,103 +350,76 @@ export default function CoachesPage() {
                 const [g1, g2] = getGrad(coach.id)
                 return (
                   <article key={coach.id} className="ccard" style={{
-                    borderRadius:18, overflow:'hidden',
+                    borderRadius:12, overflow:'hidden',
                     background:'#FFFFFF',
-                    border:'1px solid rgba(0,0,0,0.06)',
-                    boxShadow:'0 2px 12px rgba(0,0,0,0.05)',
+                    border:'1px solid rgba(0,0,0,0.08)',
+                    boxShadow:'0 1px 3px rgba(0,0,0,0.06), 0 8px 22px rgba(0,0,0,0.04)',
                     animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
                     display:'flex', flexDirection:'column',
                   }}>
 
-                    {/* ── Cover (specialty-tinted) ── */}
-                    <div style={{ position:'relative', paddingTop:'40%', flexShrink:0, overflow:'hidden' }}>
-                      <div className="cphoto" style={{ position:'absolute', inset:0,
-                        background:`linear-gradient(145deg,${g1} 0%,${g2} 100%)` }}/>
+                    {/* ── Cover banner (LinkedIn-style dark) ── */}
+                    <div style={{ position:'relative', paddingTop:'42%', flexShrink:0,
+                      background:'linear-gradient(135deg,#1b2a44 0%,#0e1728 100%)' }}>
                       <div style={{ position:'absolute', inset:0,
-                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)',
-                        backgroundSize:'18px 18px' }}/>
-                      {coach.photo && (
-                        <img className="cphoto" src={coach.photo} alt={coach.name}
-                          style={{ position:'absolute', inset:0, width:'100%', height:'100%',
-                            objectFit:'cover', objectPosition:'center top' }}/>
-                      )}
-                      {/* specialty pill */}
-                      {sp && (
-                        <span style={{ position:'absolute', top:9, insetInlineEnd:9, display:'inline-flex', alignItems:'center', gap:5,
-                          fontSize:9.5, fontWeight:800, color:'#fff', letterSpacing:'0.04em',
-                          background:'rgba(0,0,0,0.30)', backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)',
-                          borderRadius:20, padding:'3px 9px', zIndex:3 }}>
-                          <span style={{ width:4, height:4, borderRadius:'50%', background:sp.color,
-                            boxShadow:`0 0 6px ${sp.color}` }}/>
-                          {sp.label}
-                        </span>
-                      )}
-                      {/* fade to white */}
-                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:44,
-                        background:'linear-gradient(to bottom,transparent,#FFFFFF)', zIndex:2 }}/>
+                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
+                        backgroundSize:'16px 16px' }}/>
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'2px',
+                        background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
                     </div>
 
-                    {/* ── Info zone ── */}
-                    <div style={{ padding:'0 13px 13px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+                    {/* ── Avatar (large, centered, overlapping) ── */}
+                    <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%' }}>
+                      {coach.hasStory && coach.storyImage ? (
+                        <button type="button" aria-label="مشاهده استوری"
+                          onClick={e => { e.preventDefault(); e.stopPropagation(); setOpenStory(coach) }}
+                          className="cavatar"
+                          style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%', padding:0, cursor:'pointer',
+                            border:`3px solid ${GOLD}`, background:`linear-gradient(135deg,${g1},${g2})`,
+                            boxShadow:'0 4px 16px rgba(0,0,0,0.18)', overflow:'hidden',
+                            display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <span style={{ color:'#fff', fontWeight:900, fontSize:'clamp(26px,5vw,40px)', lineHeight:1 }}>{coach.name[0]}</span>
+                        </button>
+                      ) : (
+                        <div className="cavatar"
+                          style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%',
+                            border:'3px solid #FFFFFF', background:`linear-gradient(135deg,${g1},${g2})`,
+                            boxShadow:'0 4px 16px rgba(0,0,0,0.18)', overflow:'hidden',
+                            display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <span style={{ color:'#fff', fontWeight:900, fontSize:'clamp(26px,5vw,40px)', lineHeight:1 }}>{coach.name[0]}</span>
+                        </div>
+                      )}
+                    </div>
 
-                      {/* Avatar above name — story trigger */}
-                      <div style={{ marginTop:-34, marginBottom:9, position:'relative', zIndex:5 }}>
-                        {coach.hasStory && coach.storyImage ? (
-                          <StoryRing coach={coach} size={64} onOpen={() => setOpenStory(coach)}/>
-                        ) : (
-                          <div className="cavatar" style={{ width:64, height:64, borderRadius:'50%', padding:2.5,
-                            background:'#FFFFFF', boxShadow:'0 6px 20px rgba(0,0,0,0.14)' }}>
-                            <div style={{ width:'100%', height:'100%', borderRadius:'50%',
-                              background:`linear-gradient(135deg,${g1},${g2})`,
-                              display:'flex', alignItems:'center', justifyContent:'center',
-                              fontSize:23, fontWeight:900, color:'#fff', lineHeight:1 }}>
-                              {coach.name[0]}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <h3 style={{ fontSize:15.5, fontWeight:900, color:TEXT, lineHeight:1.15,
-                        letterSpacing:'-0.02em', marginBottom:6 }}>
+                    {/* ── Body ── */}
+                    <div style={{ padding:'10px 14px 14px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+                      <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2,
+                        letterSpacing:'-0.02em', marginBottom:4 }}>
                         {coach.name}
                       </h3>
-
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginBottom:11 }}>
-                        <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
-                        <span style={{ width:3, height:3, borderRadius:'50%', background:'rgba(17,17,16,0.18)' }}/>
-                        <div style={{ display:'flex', alignItems:'center', gap:3 }}>
-                          <Stars r={coach.rating} size={9}/>
-                          <span style={{ fontSize:11.5, fontWeight:800, color:'#D97706' }}>{coach.rating}</span>
-                        </div>
-                      </div>
-
-                      {/* Stats — always visible */}
-                      <div style={{ alignSelf:'stretch', display:'flex', gap:6, marginBottom:11 }}>
-                        <div style={{ flex:1, background:'rgba(17,17,16,0.04)', borderRadius:10, padding:'7px 3px' }}>
-                          <div style={{ fontSize:13.5, fontWeight:900, color:TEXT, lineHeight:1 }}>{coach.experience}</div>
-                          <div style={{ fontSize:8.5, color:TEXT_M, marginTop:3 }}>سال سابقه</div>
-                        </div>
-                        <div style={{ flex:1, background:'rgba(17,17,16,0.04)', borderRadius:10, padding:'7px 3px' }}>
-                          <div style={{ fontSize:13.5, fontWeight:900, color:TEXT, lineHeight:1 }}>{fmt(coach.students)}</div>
-                          <div style={{ fontSize:8.5, color:TEXT_M, marginTop:3 }}>هنرجو</div>
-                        </div>
-                        <div style={{ flex:1, background:'rgba(21,128,61,0.07)', borderRadius:10, padding:'7px 3px' }}>
-                          <div style={{ fontSize:13.5, fontWeight:900, color:'#15803D', lineHeight:1 }}>{fmt(Math.round(coach.sessionPrice / 1000))}K</div>
-                          <div style={{ fontSize:8.5, color:'rgba(21,128,61,0.60)', marginTop:3 }}>هر جلسه</div>
-                        </div>
-                      </div>
-
-                      <Link href={`/coaches/${coach.id}`} className="btnGO" style={{
-                        alignSelf:'stretch',
-                        textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:5,
-                        padding:'9px 10px', border:'1px solid rgba(199,166,106,0.30)',
-                        borderRadius:9, fontSize:12, fontWeight:800, color:GOLD_D,
-                        background:'rgba(199,166,106,0.07)',
-                      }}>
-                        مشاهده پروفایل
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polyline points="9 18 15 12 9 6"/>
+                      <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em',
+                        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+                        مربی {sp?.label ?? 'بیلیارد'}
+                      </p>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                         </svg>
+                        <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
+                      </div>
+
+                      <div style={{ flex:1 }}/>
+
+                      <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{
+                        alignSelf:'stretch', textDecoration:'none',
+                        display:'flex', alignItems:'center', justifyContent:'center', gap:7,
+                        padding:'9px 12px', border:`1.5px solid ${GOLD_D}`,
+                        borderRadius:24, fontSize:13, fontWeight:800, color:GOLD_D, background:'transparent',
+                      }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        مشاهده پروفایل
                       </Link>
                     </div>
 
