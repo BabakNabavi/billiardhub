@@ -254,13 +254,16 @@ export default function CoachesPage() {
         @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         /* mobile: search + toggles drop to their own row under the pills */
         @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
+        /* list view: 2 cards per row on desktop, 1 on mobile */
+        .coach-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        @media(max-width:700px){.coach-list-grid{grid-template-columns:1fr;}}
 
       `}</style>
 
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
         {/* ══════════════ HERO — compact banner ══════════════ */}
-        <section style={{ position:'relative', height:'clamp(140px,17vh,290px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(2px,1vh,12px)' }}>
+        <section style={{ position:'relative', height:'clamp(155px,18vh,300px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(14px,3vh,28px)' }}>
 
           {/* Aurora blobs — pastel tints on light bg */}
           <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
@@ -464,7 +467,7 @@ export default function CoachesPage() {
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 clamp(24px,6vw,80px) 64px' }}>
           {coaches.length > 0 ? (
             view === 'list' ? (
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <div className="coach-list-grid">
                 {coaches.map((coach, idx) => (
                   <CoachCard key={coach.id} coach={coach} view="list" idx={idx} onStory={() => setOpenStory(coach)} />
                 ))}

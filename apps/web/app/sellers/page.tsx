@@ -528,6 +528,7 @@ export default function SellersPage() {
         @media(max-width:640px){
           .dd-label { display: none !important; }
           .dd-btn { min-width: 0 !important; padding: 9px 11px !important; }
+          .sel-hide-mob { display: none !important; }
         }
         /* more-filters drawer / sheet */
         @keyframes ovIn { from{opacity:0} to{opacity:1} }
@@ -624,10 +625,14 @@ MARKET PLACE . BILLIARD HUB
             {/* filter box */}
             <div className="sel-filterbar" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 16, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 26px rgba(28,28,26,0.08)', padding: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
 
-            {/* ۱ دسته‌بندی */}
-            <Dropdown label="دسته‌بندی:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
-            {/* ۲ مرتب‌سازی (بهترین امتیاز) */}
-            <Dropdown label="نمایش بر اساس:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={160} />
+            {/* ۱ دسته‌بندی — روی موبایل حذف */}
+            <span className="sel-hide-mob" style={{ display: 'contents' }}>
+              <Dropdown label="دسته‌بندی:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
+            </span>
+            {/* ۲ مرتب‌سازی (بهترین امتیاز) — روی موبایل حذف */}
+            <span className="sel-hide-mob" style={{ display: 'contents' }}>
+              <Dropdown label="نمایش بر اساس:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={160} />
+            </span>
             {/* ۳ وضعیت (همه فروشگاه‌ها) */}
             <Dropdown label="وضعیت:" options={STATUS_OPTIONS} value={status} onChange={setStatus} minWidth={140} />
 
