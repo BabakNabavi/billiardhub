@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/api';
+import { getCoachProfiles } from '../../lib/coach-store';
 import {
   Calendar, Trophy, Bell, Settings,
   Award, Clock, MapPin,
@@ -71,6 +72,7 @@ export default function DashboardPage() {
   const [myRegs, setMyRegs] = useState<MyReg[]>([]);
   const [myClub, setMyClub] = useState<{ id: string; name: string; city: string } | null>(null);
   const [clubLoading, setClubLoading] = useState(false);
+  const [hasCoachProfile, setHasCoachProfile] = useState(false);
   const rafRef = useRef<number>(0);
   const unread = notifications.filter(n => !n.read).length;
 
@@ -131,6 +133,11 @@ export default function DashboardPage() {
       .catch(() => setMyClub(null))
       .finally(() => setClubLoading(false));
   }, [user]);
+
+  useEffect(() => {
+    if (!user?.phone) { setHasCoachProfile(false); return; }
+    setHasCoachProfile(Object.values(getCoachProfiles()).some(p => p.ownerPhone === user.phone));
+  }, [user?.phone]);
 
   useEffect(() => {
     const fn = () => {
@@ -338,7 +345,7 @@ export default function DashboardPage() {
           )}
 
           {/* ── Role Action Cards ── */}
-          {!isBasicUser && (isClubOwner || isPlayer || isCoach) && (
+          {!isBasicUser && (
             <div style={{ marginBottom: '28px', animation: 'fadeUp 0.5s ease both 0.1s', animationFillMode: 'both' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(0,0,0,0.35)', letterSpacing: '0.18em', marginBottom: '12px' }}>
                 نقش‌های شما
@@ -424,14 +431,24 @@ export default function DashboardPage() {
                       <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(167,139,250,0.10)', border: '1px solid rgba(167,139,250,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>👨‍🏫</div>
                       <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل مربی</div>
                       <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
-                        پروفایل مربیگری خود را بسازید و شاگردان را به خود جذب کنید
+                        {hasCoachProfile ? 'پروفایل مربیگری شما ساخته شده است — می‌توانید ویرایش کنید' : 'پروفایل مربیگری خود را بسازید و شاگردان را به خود جذب کنید'}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#7c3aed', fontWeight: 700 }}>
-                        ساخت پروفایل <span style={{ fontSize: '16px' }}>←</span>
+                        {hasCoachProfile ? 'ویرایش پروفایل' : 'ساخت پروفایل'} <span style={{ fontSize: '16px' }}>←</span>
                       </div>
                     </div>
                   </Link>
                 )}
+
+                {/* Add / manage roles */}
+                <Link href="/profile/role" style={{ textDecoration: 'none' }}>
+                  <div style={{ padding: '20px', borderRadius: '18px', cursor: 'pointer', background: 'rgba(0,0,0,0.015)', border: '1.5px dashed rgba(0,0,0,0.14)', height: '100%', display: 'flex', flexDirection: 'column', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(0,0,0,0.04)', border: '1px dashed rgba(0,0,0,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>➕</div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>افزودن نقش جدید</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>نقش دیگری (مثلاً تولیدکننده، فروشنده، داور) به حساب خود اضافه کنید</div>
+                    <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#111111', fontWeight: 700 }}>مدیریت نقش‌ها <span style={{ fontSize: '16px' }}>←</span></div>
+                  </div>
+                </Link>
 
               </div>
             </div>
