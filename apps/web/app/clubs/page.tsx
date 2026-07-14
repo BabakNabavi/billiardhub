@@ -518,8 +518,10 @@ export default function ClubsPage() {
         /* mobile — 1 ستون */
         @media(max-width:560px)  {
           .clubs-grid { grid-template-columns:1fr; gap:12px }
-          .toolbar-row { flex-wrap:wrap }
+          .toolbar-row { flex-wrap:wrap; gap:6px }
           .toolbar-search { min-width:100%!important; order:-1 }
+          .tb-count { display:none!important }
+          .tb-ctl { height:40px!important; padding:0 11px!important; font-size:13px!important }
         }
       `}</style>
 
@@ -542,17 +544,15 @@ export default function ClubsPage() {
                 {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', padding: 0, display: 'flex', flexShrink: 0 }}><X size={13} /></button>}
               </div>
 
-              {/* Near me */}
-              <button onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{ height: 44, borderRadius: 12, padding: '0 16px', border: `1px solid ${sortBy === 'distance' ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortBy === 'distance' ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: sortBy === 'distance' ? '#A07840' : 'rgba(0,0,0,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                {locLoading
-                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  : <Navigation size={15} />}
+              {/* Near me — order 3, no arrow icon */}
+              <button className="tb-ctl" onClick={getLocation} title="نزدیک‌ترین باشگاه‌ها" style={{ order: 3, height: 44, borderRadius: 12, padding: '0 16px', border: `1px solid ${sortBy === 'distance' ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortBy === 'distance' ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: sortBy === 'distance' ? '#A07840' : 'rgba(0,0,0,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                {locLoading && <div style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />}
                 نزدیک من
               </button>
 
-              {/* Filter */}
-              <div ref={filterRef} style={{ position: 'relative', flexShrink: 0 }}>
-                <button onClick={() => { setFilterOpen(p => !p); setSortOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', borderRadius: 12, border: `1px solid ${filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: filterOpen || activeFilters > 0 ? '#A07840' : 'rgba(0,0,0,0.55)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+              {/* Filter — order 1 */}
+              <div ref={filterRef} style={{ position: 'relative', flexShrink: 0, order: 1 }}>
+                <button className="tb-ctl" onClick={() => { setFilterOpen(p => !p); setSortOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', borderRadius: 12, border: `1px solid ${filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: filterOpen || activeFilters > 0 ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: filterOpen || activeFilters > 0 ? '#A07840' : 'rgba(0,0,0,0.55)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                   <SlidersHorizontal size={13} /> فیلتر
                   {activeFilters > 0 && <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#C7A66A', color: '#fff', fontSize: 10, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{toFa(activeFilters)}</span>}
                 </button>
@@ -607,9 +607,9 @@ export default function ClubsPage() {
                 )}
               </div>
 
-              {/* Sort */}
-              <div ref={sortRef} style={{ position: 'relative', flexShrink: 0 }}>
-                <button onClick={() => { setSortOpen(p => !p); setFilterOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px', borderRadius: 12, border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortOpen ? 'rgba(199,166,106,0.08)' : '#FFFFFF', color: 'rgba(0,0,0,0.65)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
+              {/* Sort — order 2 */}
+              <div ref={sortRef} style={{ position: 'relative', flexShrink: 0, order: 2 }}>
+                <button className="tb-ctl" onClick={() => { setSortOpen(p => !p); setFilterOpen(false); }} style={{ height: 44, display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px', borderRadius: 12, border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.40)' : 'rgba(0,0,0,0.09)'}`, background: sortOpen ? 'rgba(199,166,106,0.08)' : '#FFFFFF', color: 'rgba(0,0,0,0.65)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
                   {currentSort.label}
                   <ChevronDown size={11} style={{ transition: 'transform 0.3s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: 'rgba(0,0,0,0.35)' }} />
                 </button>
@@ -626,8 +626,8 @@ export default function ClubsPage() {
                 )}
               </div>
 
-              {/* View toggle */}
-              <div style={{ display: 'flex', gap: 4, marginRight: 'auto' }}>
+              {/* View toggle — order 4, beside نزدیک من */}
+              <div style={{ display: 'flex', gap: 4, order: 4, flexShrink: 0 }}>
                 {([['grid', <Grid3X3 size={14} />], ['list', <AlignJustify size={14} />]] as const).map(([v, icon]) => (
                   <button key={v} onClick={() => setView(v as any)} style={{ width: 36, height: 36, borderRadius: 9, border: `1px solid ${view === v ? 'rgba(199,166,106,0.35)' : 'rgba(0,0,0,0.09)'}`, background: view === v ? 'rgba(199,166,106,0.10)' : '#FFFFFF', color: view === v ? '#A07840' : 'rgba(0,0,0,0.40)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
                     {icon}
@@ -635,7 +635,7 @@ export default function ClubsPage() {
                 ))}
               </div>
 
-              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>{toFa(filtered.length)} باشگاه</div>
+              <div className="tb-count" style={{ order: 5, marginRight: 'auto', fontSize: 14, color: 'rgba(0,0,0,0.40)', whiteSpace: 'nowrap' }}>{toFa(filtered.length)} باشگاه</div>
             </div>
 
             {/* location hint */}
