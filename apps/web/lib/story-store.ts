@@ -71,3 +71,14 @@ export function addStoredStory(s: StoredStory) {
     try { localStorage.setItem(KEY, JSON.stringify([s])) } catch { /* give up */ }
   }
 }
+
+/* Live stories owned by a given entity (newest first). */
+export function getOwnerStories(ownerKey: string): StoredStory[] {
+  return getStoredStories().filter(s => s.ownerKey === ownerKey)
+}
+
+/* Remove a single story by id. */
+export function removeStoredStory(id: string) {
+  const kept = getStoredStories().filter(s => s.id !== id)
+  try { localStorage.setItem(KEY, JSON.stringify(kept)) } catch { /* ignore */ }
+}

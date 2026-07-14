@@ -7,6 +7,9 @@ import {
   GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile,
   type CoachProfile, type CoachGrade, type CoachMedia, type CoachVideo,
 } from '../../../lib/coach-store'
+import {
+  STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory, type StoredStory,
+} from '../../../lib/story-store'
 
 /* ─── Tokens ─── */
 const GOLD   = '#C7A66A'
@@ -105,6 +108,12 @@ export default function CoachDashboardPage() {
   const galleryInput = useRef<HTMLInputElement>(null)
   const videoInput   = useRef<HTMLInputElement>(null)
 
+  /* Stories — published independently of the profile; feed the home stories bar */
+  const [storyList, setStoryList]   = useState<StoredStory[]>([])
+  const [storyDraft, setStoryDraft] = useState<{ url: string; caption: string } | null>(null)
+  const [storyBusy, setStoryBusy]   = useState(false)
+  const storyInput = useRef<HTMLInputElement>(null)
+
   /* prefill from the logged-in user; load existing submission if any */
   useEffect(() => {
     if (!_hydrated) return
@@ -122,6 +131,11 @@ export default function CoachDashboardPage() {
       setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
     }
   }, [_hydrated, user])
+
+  /* owner key must match the one the home stories bar groups by (Stories.tsx) */
+  const ownerKey = user?.phone || user?.id || user?.firstName || 'coach'
+  const coachRole = STORY_ROLES.coach!
+  useEffect(() => { if (_hydrated) setStoryList(getOwnerStories(ownerKey)) }, [_hydrated, ownerKey])
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }))
 
@@ -181,6 +195,34 @@ export default function CoachDashboardPage() {
     const url = file.type.startsWith('image/') ? await compressImage(file, 1500, 0.8) : await fileToDataUrl(file)
     set('certificate', { name: file.name, url })
   }
+
+  /* ── Stories: publish immediately (independent of the profile form) ── */
+  const pickStoryImage = async (file?: File) => {
+    if (!file) return
+    setStoryBusy(true)
+    try {
+      const url = await compressImage(file, 1080, 0.72)
+      setStoryDraft(d => ({ url, caption: d?.caption ?? '' }))
+    } finally { setStoryBusy(false) }
+  }
+  const publishStory = () => {
+    if (!storyDraft?.url || storyList.length >= 10) return
+    const name = `${form.firstNameFa || user?.firstName || ''} ${form.lastNameFa || user?.lastName || ''}`.trim() || 'مربی'
+    addStoredStory({
+      id: `st-${Date.now()}-${rid()}`,
+      ownerKey,
+      userName: name,
+      roleKey: 'coach', roleLabel: coachRole.label, roleColor: coachRole.color,
+      avatar: (form.firstNameFa || user?.firstName || 'م').charAt(0) || 'م',
+      logoUrl: form.photo || user?.avatar || undefined,
+      mediaUrl: storyDraft.url,
+      caption: storyDraft.caption.trim(),
+      createdAt: Date.now(),
+    })
+    setStoryDraft(null)
+    setStoryList(getOwnerStories(ownerKey))
+  }
+  const deleteStory = (id: string) => { removeStoredStory(id); setStoryList(getOwnerStories(ownerKey)) }
 
   /* ── validation ── */
   const validate = (): boolean => {
@@ -289,6 +331,64 @@ export default function CoachDashboardPage() {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Stories — publishes to the home stories bar immediately, independent of the profile form */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, display: 'flex', alignItems: 'center', gap: 9, margin: 0 }}>
+                <span style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(199,166,106,0.14)', color: GOLD_D, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="3.4" /><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" /></svg>
+                </span>
+                استوری‌های شما <span style={{ color: TEXT_M, fontWeight: 700, fontSize: 13 }}>({storyList.length}/۱۰)</span>
+              </h2>
+              {storyList.length < 10 && !storyDraft && (
+                <label style={{ ...lqBtn, fontSize: 13, padding: '9px 16px', opacity: storyBusy ? 0.55 : 1 }}>
+                  {storyBusy ? 'در حال آماده‌سازی…' : '+ استوری جدید'}
+                  <input ref={storyInput} type="file" accept="image/*" hidden disabled={storyBusy}
+                    onChange={e => { void pickStoryImage(e.target.files?.[0]); e.target.value = '' }} />
+                </label>
+              )}
+            </div>
+            <p style={{ fontSize: 12.5, color: TEXT_M, lineHeight: 1.9, margin: '10px 0 14px' }}>
+              استوری بلافاصله منتشر می‌شود و به‌مدت ۲۴ ساعت در نوار استوری صفحه‌ی اول سایت نمایش داده می‌شود — مستقل از ثبت پروفایل.
+            </p>
+
+            {storyDraft && (
+              <div style={{ border: CBOR, borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ width: 108, height: 168, borderRadius: 10, overflow: 'hidden', background: '#000', flexShrink: 0 }}>
+                  <img src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <textarea value={storyDraft.caption} onChange={e => setStoryDraft(d => (d ? { ...d, caption: e.target.value } : d))}
+                    placeholder="کپشن استوری (اختیاری)…" rows={3} style={{ ...inp, resize: 'vertical', lineHeight: 1.8 }} />
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <button type="button" onClick={publishStory} style={{ ...lqBtn, fontSize: 13.5, padding: '10px 22px' }}>انتشار استوری</button>
+                    <button type="button" onClick={() => setStoryDraft(null)} style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13.5, padding: '10px 20px' }}>انصراف</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {storyList.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: 10 }}>
+                {storyList.map(s => (
+                  <div key={s.id} style={{ position: 'relative', aspectRatio: '9/16', borderRadius: 10, overflow: 'hidden', border: CBOR, background: 'rgba(17,17,16,0.04)' }}>
+                    <img src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {s.caption && (
+                      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '12px 7px 6px', background: 'linear-gradient(to top,rgba(0,0,0,0.72),transparent)', color: '#fff', fontSize: 10.5, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.caption}</div>
+                    )}
+                    <button type="button" onClick={() => deleteStory(s.id)} aria-label="حذف استوری" style={{ position: 'absolute', top: 5, left: 5, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : !storyDraft ? (
+              <div style={{ border: '1.5px dashed rgba(199,166,106,0.4)', borderRadius: 12, padding: '22px 16px', textAlign: 'center', fontSize: 12.5, color: TEXT_M }}>
+                هنوز استوری‌ای منتشر نکرده‌اید — از دکمه‌ی «استوری جدید» یک استوری بگذارید.
+              </div>
+            ) : null}
+          </div>
 
           {/* 1 — Basic info */}
           <div style={card}>
