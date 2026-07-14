@@ -466,19 +466,18 @@ export default function CoachDashboardPage() {
           <div style={card}>
             {sectionTitle('آپلود آخرین مدرک مربیگری', 6)}
             <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14, lineHeight: 1.8 }}>این مدرک توسط ادمین سیستم بررسی می‌شود؛ در صورت تایید، پروفایل شما تیک آبی تایید دریافت می‌کند.</p>
-            {form.certificate ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(5,118,66,0.25)', background: 'rgba(5,118,66,0.06)', borderRadius: 10, padding: '11px 14px' }}>
+            {form.certificate && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(5,118,66,0.25)', background: 'rgba(5,118,66,0.06)', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#057642" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 <span style={{ flex: 1, fontSize: 13, color: TEXT, direction: 'ltr', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.certificate.name}</span>
                 <button type="button" onClick={() => set('certificate', null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_M, fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>حذف</button>
               </div>
-            ) : (
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, border: '1.5px dashed rgba(199,166,106,0.45)', borderRadius: 12, padding: '20px', cursor: 'pointer', color: GOLD_D, fontWeight: 700, fontSize: 13.5 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                انتخاب فایل مدرک (تصویر یا PDF)
-                <input type="file" accept="image/*,.pdf" hidden onChange={e => addCertificate(e.target.files?.[0])} />
-              </label>
             )}
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, border: '1.5px dashed rgba(199,166,106,0.45)', borderRadius: 12, padding: '20px', cursor: 'pointer', color: GOLD_D, fontWeight: 700, fontSize: 13.5 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+              {form.certificate ? 'آپلود مدرک جدید (جایگزین مدرک قبلی)' : 'انتخاب فایل مدرک (تصویر یا PDF)'}
+              <input type="file" accept="image/*,.pdf" hidden onChange={e => addCertificate(e.target.files?.[0])} />
+            </label>
           </div>
 
           {/* Submit */}
