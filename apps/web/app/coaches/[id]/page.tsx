@@ -8,7 +8,6 @@ import ClubStoryModal from '@/components/ClubStoryModal'
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
 const GOLD_G = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
-const BG     = '#F6F4F0'
 const TEXT   = '#111110'
 const TEXT_S = 'rgba(17,17,16,0.52)'
 const TEXT_M = 'rgba(17,17,16,0.28)'
@@ -291,35 +290,6 @@ const D: CoachFull[] = [
   },
 ]
 
-/* ─── Avatar with optional story ring ─── */
-function Avatar({ coach, size, onOpen }: { coach:CoachFull; size:number; onOpen:()=>void }) {
-  const [g1,g2] = getGrad(coach.id)
-  const inner = (
-    <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: `linear-gradient(135deg,${g1},${g2})`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontWeight: 900, fontSize: size * 0.38,
-      border: '2.5px solid rgba(255,255,255,0.65)',
-      overflow: 'hidden',
-    }}>
-      {coach.name[0]}
-    </div>
-  )
-  if (!coach.hasStory) return inner
-  return (
-    <button onClick={onOpen} style={{ background:'none', border:'none', cursor:'pointer', padding:0, borderRadius:'50%' }}>
-      <div style={{
-        width: size+6, height: size+6, borderRadius: '50%',
-        background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
-        padding: 3, boxShadow: '0 0 20px rgba(214,41,118,0.55)',
-      }}>
-        {inner}
-      </div>
-    </button>
-  )
-}
-
 /* ─── Page ─── */
 export default function CoachProfilePage() {
   const { id } = useParams<{id:string}>()
@@ -336,6 +306,7 @@ export default function CoachProfilePage() {
 
   const spec  = SPECS[coach.specialty as keyof typeof SPECS]
   const grade = GRADE_DOTS[coach.badge]
+  const [g1, g2] = getGrad(coach.id)
 
   const createAlbum = () => {
     if (!newAlbumName.trim()) return
@@ -359,12 +330,13 @@ export default function CoachProfilePage() {
         .gtab:hover{opacity:.85;}
         @media(max-width:740px){.pcols{grid-template-columns:1fr!important;}}
         @media(max-width:520px){.pgrid{grid-template-columns:repeat(2,1fr)!important;}}
+        @media(max-width:900px){.ln-cols{grid-template-columns:1fr!important;}}
       `}</style>
 
-      <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
+      <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh', color:TEXT }}>
 
         {/* ── Back ── */}
-        <div style={{ maxWidth:1020, margin:'0 auto', padding:'20px clamp(16px,4vw,48px) 0' }}>
+        <div style={{ maxWidth:1128, margin:'0 auto', padding:'18px clamp(12px,3vw,24px) 0' }}>
           <Link href="/coaches" className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', color:'#9A6E38', borderRadius:10, textDecoration:'none', fontSize:13, fontWeight:700, padding:'7px 14px' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="15 18 9 12 15 6"/>
@@ -373,59 +345,75 @@ export default function CoachProfilePage() {
           </Link>
         </div>
 
-        {/* ── Hero ── */}
-        <section style={{ position:'relative', height:248, overflow:'hidden', marginTop:14 }}>
-          {coach.storyImage ? (
-            <img src={coach.storyImage} alt="" style={{ position:'absolute', inset:'-12% 0', width:'100%', height:'124%', objectFit:'cover', filter:'blur(22px) saturate(0.6)', transform:'scale(1.08)', pointerEvents:'none' }} />
-          ) : (
-            <div style={{ position:'absolute', inset:0, background:`linear-gradient(135deg,${BG} 0%, rgba(199,166,106,0.18) 100%)` }} />
-          )}
-          {/* Light overlay */}
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(246,244,240,0.55) 0%, rgba(246,244,240,0.82) 100%)' }} />
-          {/* Bottom fade */}
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:64, background:`linear-gradient(to top,${BG},transparent)` }} />
+        {/* ── LinkedIn-style layout ── */}
+        <div className="ln-cols" style={{ maxWidth:1128, margin:'0 auto', padding:'16px clamp(12px,3vw,24px) 64px', display:'grid', gridTemplateColumns:'1fr 320px', gap:24, alignItems:'start' }}>
 
-          <div style={{ position:'relative', zIndex:2, height:'100%', display:'flex', alignItems:'center', maxWidth:1020, margin:'0 auto', padding:'0 clamp(16px,4vw,48px)', gap:24 }}>
-            <Avatar coach={coach} size={80} onOpen={() => setOpenStory(true)} />
+          {/* ═══ MAIN COLUMN ═══ */}
+          <div style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
 
-            <div style={{ flex:1 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
-                <h1 style={{ fontSize:'clamp(22px,3.5vw,36px)', fontWeight:900, color:TEXT, lineHeight:1.1 }}>
-                  {coach.name}
-                </h1>
-                {coach.verified && (
-                  <span style={{ background:'rgba(37,99,235,0.10)', border:'1px solid rgba(37,99,235,0.25)', color:'#1d4ed8', borderRadius:100, fontSize:11, fontWeight:700, padding:'3px 10px' }}>
-                    ✓ تأییدشده
-                  </span>
-                )}
-              </div>
-              <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:7, flexWrap:'wrap' }}>
-                <span style={{ background:GOLD_G, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', fontSize:13, fontWeight:800 }}>
-                  {coach.badge}
-                </span>
-                <span style={{ color:TEXT_M }}>·</span>
-                {spec && (
-                  <span style={{ background:`${spec.color}14`, border:`1px solid ${spec.color}38`, color:spec.color, borderRadius:100, fontSize:12, fontWeight:700, padding:'3px 11px' }}>
-                    {spec.label}
-                  </span>
-                )}
-                <span style={{ color:TEXT_S, fontSize:13 }}>📍 {coach.city}</span>
-              </div>
-              {coach.hasStory && (
-                <button onClick={() => setOpenStory(true)} className="goldbtn" style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.12)', border:'1px solid rgba(199,166,106,0.34)', borderRadius:10, padding:'9px 20px', color:'#9A6E38', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif", textDecoration:'none', whiteSpace:'nowrap' as const, marginTop:12 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-                  مشاهده استوری
+            {/* Profile card */}
+            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
+              {/* Cover */}
+              <div style={{ position:'relative', height:'clamp(120px,20vw,200px)' }}>
+                {coach.storyImage
+                  ? <img src={coach.storyImage} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                  : <div style={{ width:'100%', height:'100%', background:`linear-gradient(120deg,${g1},${g2})` }} />}
+                <button aria-label="ویرایش تصویر کاور" style={{ position:'absolute', top:16, insetInlineStart:16, width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.92)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 6px rgba(0,0,0,0.25)', color:'#0a66c2' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                 </button>
-              )}
-            </div>
-          </div>
-        </section>
+              </div>
+              {/* Body */}
+              <div style={{ padding:'0 24px 20px' }}>
+                {/* avatar + edit */}
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginTop:'clamp(-64px,-9vw,-72px)' }}>
+                  <button onClick={() => coach.hasStory && setOpenStory(true)} aria-label="عکس پروفایل" style={{ background:'none', border:'none', padding:0, cursor: coach.hasStory ? 'pointer' : 'default', borderRadius:'50%' }}>
+                    <div style={{ width:'clamp(104px,14vw,148px)', aspectRatio:'1 / 1', borderRadius:'50%', border:'4px solid #fff', overflow:'hidden', background:`linear-gradient(135deg,${g1},${g2})`, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.14)' }}>
+                      <span style={{ color:'#fff', fontWeight:900, fontSize:'clamp(38px,5vw,56px)', lineHeight:1 }}>{coach.name[0]}</span>
+                    </div>
+                  </button>
+                  <button aria-label="ویرایش پروفایل" style={{ marginBottom:10, width:36, height:36, borderRadius:'50%', background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(0,0,0,0.55)' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </button>
+                </div>
 
-        {/* ── Content ── */}
-        <div style={{ maxWidth:1020, margin:'0 auto', padding:'22px clamp(16px,4vw,48px) 64px' }}>
+                {/* name + affiliation */}
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:20, marginTop:10, flexWrap:'wrap' }}>
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
+                      <h1 style={{ fontSize:'clamp(21px,2.6vw,26px)', fontWeight:700, color:'#1c1c1c', lineHeight:1.2 }}>{coach.name}</h1>
+                      {coach.verified && (
+                        <span style={{ display:'inline-flex', alignItems:'center', gap:3, color:'#0a66c2', fontSize:12, fontWeight:700 }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0a66c2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12.5l2 2 4-4.5"/><circle cx="12" cy="12" r="9.5"/></svg>
+                          تأییدشده
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>مربی {spec?.label ?? 'بیلیارد'}{coach.badge ? ` · ${coach.badge}` : ''}</div>
+                    <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6, display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
+                      <span>{coach.city}، ایران</span>
+                      <span>·</span>
+                      <a href={`tel:${coach.phone}`} style={{ color:'#0a66c2', fontWeight:600, textDecoration:'none' }}>اطلاعات تماس</a>
+                    </div>
+                    <span style={{ display:'inline-block', marginTop:6, fontSize:13, color:'#0a66c2', fontWeight:600 }}>+۵۰۰ ارتباط</span>
+                  </div>
+                  <div style={{ display:'flex', alignItems:'center', gap:9, flexShrink:0 }}>
+                    <img src="/images/Logo/logo-256x256.png" alt="" style={{ width:30, height:30, borderRadius:7, objectFit:'cover' }} />
+                    <span style={{ fontSize:13.5, fontWeight:600, color:'rgba(0,0,0,0.85)' }}>فدراسیون بیلیارد ایران</span>
+                  </div>
+                </div>
+
+                {/* action buttons */}
+                <div style={{ display:'flex', gap:8, marginTop:16, flexWrap:'wrap' }}>
+                  <button style={{ background:'#0a66c2', color:'#fff', border:'none', borderRadius:100, padding:'8px 20px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>پذیرای فرصت</button>
+                  <button style={{ background:'transparent', color:'#0a66c2', border:'1.5px solid #0a66c2', borderRadius:100, padding:'7px 18px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>افزودن بخش</button>
+                  <button style={{ background:'transparent', color:'rgba(0,0,0,0.6)', border:'1.5px solid rgba(0,0,0,0.55)', borderRadius:100, padding:'7px 18px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>منابع</button>
+                </div>
+              </div>
+            </div>
+
 
           {/* Top two-column grid */}
-          <div className="pcols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18, animation:'fadeUp .45s .08s ease both' }}>
+          <div className="pcols" style={{ display:'grid', gridTemplateColumns:'1fr', gap:16, animation:'fadeUp .45s .08s ease both' }}>
 
             {/* About */}
             <div style={{ background:CARD, border:CBOR, borderRadius:18, padding:26, boxShadow:CSHA }}>
@@ -629,6 +617,44 @@ export default function CoachProfilePage() {
             )}
           </div>
 
+          </div>
+
+          {/* ═══ SIDEBAR ═══ */}
+          <aside className="ln-side" style={{ display:'flex', flexDirection:'column', gap:16, animation:'fadeUp .45s .12s ease both' }}>
+
+            {/* Profile language */}
+            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c' }}>زبان پروفایل</h3>
+                <button aria-label="ویرایش" style={{ background:'transparent', border:'none', cursor:'pointer', color:'rgba(0,0,0,0.6)', display:'flex', padding:4 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                </button>
+              </div>
+              <div style={{ display:'flex', gap:8, marginTop:14 }}>
+                <span style={{ background:'#057642', color:'#fff', borderRadius:100, padding:'6px 18px', fontSize:13, fontWeight:700 }}>فارسی</span>
+                <span style={{ background:'transparent', color:'rgba(0,0,0,0.65)', border:'1px solid rgba(0,0,0,0.35)', borderRadius:100, padding:'6px 18px', fontSize:13, fontWeight:600 }}>English</span>
+              </div>
+            </div>
+
+            {/* Public profile & URL */}
+            <div style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c' }}>پروفایل عمومی و نشانی</h3>
+                <button aria-label="ویرایش" style={{ background:'transparent', border:'none', cursor:'pointer', color:'rgba(0,0,0,0.6)', display:'flex', padding:4 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                </button>
+              </div>
+              <div style={{ marginTop:8, fontSize:13, color:'rgba(0,0,0,0.62)', direction:'ltr', textAlign:'right' }}>www.billiardhub.ir/coaches/{coach.id}</div>
+            </div>
+
+            {/* Promo */}
+            <div style={{ background:'#1b2a44', borderRadius:12, overflow:'hidden', color:'#fff', padding:18 }}>
+              <div style={{ fontSize:12, fontWeight:800, color:'#C7A66A', letterSpacing:'0.06em', marginBottom:9 }}>بیلیارد هاب</div>
+              <div style={{ fontSize:16, fontWeight:700, lineHeight:1.55, marginBottom:14 }}>پروفایلت را کامل کن تا هنرجوهای بیشتری پیدا کنی</div>
+              <button style={{ background:'#F6F1E8', color:'#9A6E38', border:'1px solid rgba(199,166,106,0.45)', borderRadius:100, padding:'6px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>تکمیل پروفایل</button>
+            </div>
+
+          </aside>
         </div>
 
         {/* ── Create Album Modal ── */}
