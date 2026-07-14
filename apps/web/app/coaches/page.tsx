@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
+import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -287,14 +288,31 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
   )
 }
 
+/* Approved dashboard submissions → the list-card shape. */
+function mapProfileToListCoach(p: CoachProfile): Coach {
+  return {
+    id: p.slug,
+    name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
+    specialty: p.disciplines[0] ?? 'snooker',
+    city: p.city,
+    experience: 0, rating: 0, students: 0, medals: 0, sessionPrice: 0,
+    hasStory: false, storyImage: p.photo,
+    bio: p.shortBio, photo: p.photo,
+  }
+}
+
 /* ════════════════ PAGE ════════════════ */
 export default function CoachesPage() {
   const [filter,    setFilter]    = useState('all')
   const [search,    setSearch]    = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [openStory, setOpenStory] = useState<Coach | null>(null)
+  const [localCoaches, setLocalCoaches] = useState<Coach[]>([])
+  useEffect(() => {
+    setLocalCoaches(listCoachProfiles().filter(p => p.status === 'approved').map(mapProfileToListCoach))
+  }, [])
   const q = search.trim()
-  const coaches = COACHES.filter(c =>
+  const coaches = [...localCoaches, ...COACHES].filter(c =>
     (filter === 'all' || c.specialty === filter) &&
     (q === '' || c.name.includes(q) || c.city.includes(q))
   )
