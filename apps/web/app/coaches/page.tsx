@@ -64,8 +64,13 @@ const RACK_C = [
 /* ════════════════ PAGE ════════════════ */
 export default function CoachesPage() {
   const [filter,    setFilter]    = useState('all')
+  const [search,    setSearch]    = useState('')
   const [openStory, setOpenStory] = useState<Coach | null>(null)
-  const coaches = COACHES.filter(c => filter === 'all' || c.specialty === filter)
+  const q = search.trim()
+  const coaches = COACHES.filter(c =>
+    (filter === 'all' || c.specialty === filter) &&
+    (q === '' || c.name.includes(q) || c.city.includes(q))
+  )
 
   return (
     <>
@@ -121,8 +126,7 @@ export default function CoachesPage() {
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
         /* filter pills */
-        .fpill{transition:all .18s cubic-bezier(.4,0,.2,1);}
-        .fpill:hover{background:rgba(0,0,0,0.06)!important;}
+        .fpill{transition:all .2s cubic-bezier(.4,0,.2,1);}
 
         /* cards — LinkedIn style */
         .ccard{transition:transform .28s cubic-bezier(.4,0,.2,1),box-shadow .28s,border-color .28s;position:relative;}
@@ -159,7 +163,7 @@ export default function CoachesPage() {
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
         {/* ══════════════ HERO — compact banner ══════════════ */}
-        <section style={{ position:'relative', height:'clamp(220px,30vh,340px)', overflow:'hidden', display:'flex', alignItems:'center' }}>
+        <section style={{ position:'relative', height:'clamp(178px,22vh,320px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(8px,3vh,28px)' }}>
 
           {/* Aurora blobs — pastel tints on light bg */}
           <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
@@ -263,27 +267,6 @@ export default function CoachesPage() {
             }}>
               آموزش با بهترین‌ها · از مبتدی تا حرفه‌ای
             </p>
-
-            <div style={{ marginTop:16, display:'flex', gap:10, animation:'fadeUp .5s .56s ease both' }}>
-              <a href="#coaches" className="btnG" style={{
-                textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6,
-                padding:'8px 18px', background:GOLD, color:'#ffffff',
-                borderRadius:6, fontSize:13, fontWeight:800,
-              }}>
-                مشاهده مربیان
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
-                </svg>
-              </a>
-              <button className="btnO" style={{
-                padding:'8px 16px', border:`1px solid rgba(17,17,16,0.18)`,
-                borderRadius:6, fontSize:13, fontWeight:600, color:TEXT_S,
-                background:'transparent', cursor:'pointer',
-                fontFamily:"'Vazirmatn',Tahoma,sans-serif",
-              }}>
-                مشاوره رایگان
-              </button>
-            </div>
           </div>
 
         </section>
@@ -297,35 +280,59 @@ export default function CoachesPage() {
           boxShadow:'0 1px 8px rgba(17,17,16,0.05)',
         }}>
           <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
-            display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+            display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
             {([
               { k:'all',      l:'همه مربیان' },
-              { k:'pocket',   l:'پاکت بیلیارد' },
               { k:'snooker',  l:'اسنوکر' },
+              { k:'pocket',   l:'پاکت بیلیارد' },
               { k:'highball', l:'هی‌بال' },
             ] as { k:string; l:string }[]).map(({ k, l }) => {
               const active = filter === k
               return (
                 <button key={k} className="fpill" onClick={() => setFilter(k)} style={{
-                  padding:'7px 16px', borderRadius:100,
-                  border:`1px solid ${active ? 'transparent' : 'rgba(17,17,16,0.13)'}`,
-                  background: active ? TEXT : 'transparent',
-                  color: active ? '#ffffff' : TEXT_S,
-                  fontSize:13, fontWeight: active ? 700 : 400,
-                  cursor:'pointer', fontFamily:"'Vazirmatn',Tahoma,sans-serif",
-                }}>
+                  padding:'8px 16px', borderRadius:11, cursor:'pointer',
+                  fontFamily:"'Vazirmatn',Tahoma,sans-serif", fontSize:13,
+                  fontWeight: active ? 800 : 600,
+                  border: active ? '1px solid transparent' : '1px solid rgba(17,17,16,0.10)',
+                  background: active ? 'linear-gradient(135deg,#C7A66A,#9A6E38)' : 'rgba(255,255,255,0.78)',
+                  color: active ? '#fff' : TEXT_S,
+                  boxShadow: active ? '0 4px 14px rgba(199,166,106,0.32)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
+                  backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
+                }}
+                onMouseEnter={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(199,166,106,0.12)'; el.style.borderColor = 'rgba(199,166,106,0.38)'; el.style.color = GOLD_D; el.style.boxShadow = '0 4px 14px rgba(199,166,106,0.18)'; } }}
+                onMouseLeave={e => { if (!active) { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.78)'; el.style.borderColor = 'rgba(17,17,16,0.10)'; el.style.color = TEXT_S; el.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.9)'; } }}>
                   {l}
                 </button>
               )
             })}
+
+            {/* search — by coach name or city */}
+            <div style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8,
+              background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
+              borderRadius:11, padding:'8px 14px', flex:'0 1 260px', minWidth:180,
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="جستجوی نام مربی یا شهر..."
+                style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
+                  fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
+              {search && (
+                <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
+                  style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* ── Divider ── */}
-        <div style={{ maxWidth:1280, margin:'38px auto 24px', padding:'0 clamp(24px,6vw,80px)' }}>
+        <div style={{ maxWidth:1280, margin:'22px auto 20px', padding:'0 clamp(24px,6vw,80px)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:18 }}>
             <div style={{ flex:1, height:'1px', background:'linear-gradient(to left,transparent,rgba(154,110,56,0.28))' }}/>
-            <span style={{ fontSize:10, fontWeight:700, color:'rgba(154,110,56,0.60)', letterSpacing:'0.30em', whiteSpace:'nowrap' }}>
+            <span style={{ fontSize:11, fontWeight:800, color:'rgba(154,110,56,0.72)', whiteSpace:'nowrap' }}>
               مربیان فعال
             </span>
             <div style={{ flex:1, height:'1px', background:'linear-gradient(to right,transparent,rgba(154,110,56,0.28))' }}/>
@@ -363,18 +370,22 @@ export default function CoachesPage() {
                       <button type="button" aria-label="مشاهده استوری"
                         onClick={e => { e.preventDefault(); e.stopPropagation(); setOpenStory(coach) }}
                         className="cavatar"
-                        style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%', padding:0, cursor:'pointer',
-                          border:`3px solid ${GOLD}`, background:'#E7ECF1',
-                          boxShadow:'0 4px 16px rgba(0,0,0,0.18)', overflow:'hidden',
+                        style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', cursor:'pointer', border:'none',
+                          background:'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
+                          boxShadow:'0 4px 16px rgba(0,0,0,0.18), 0 0 14px rgba(214,41,118,0.32)',
+                          display:'flex' }}>
+                        <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
+                          border:'2.5px solid #FFFFFF', background:'#E7ECF1',
                           display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-                        {coach.photo ? (
-                          <img src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                        ) : (
-                          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-                            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-                            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-                          </svg>
-                        )}
+                          {coach.photo ? (
+                            <img src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                          ) : (
+                            <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
+                              <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
+                              <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
+                            </svg>
+                          )}
+                        </div>
                       </button>
                     </div>
 
