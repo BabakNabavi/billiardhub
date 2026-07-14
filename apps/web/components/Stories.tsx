@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Plus, Heart, Send } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
+import { getStoredStories, addStoredStory, pickStoryRole, type StoredStory } from '../lib/story-store';
 
 interface StoryItem {
   id: string;
@@ -19,7 +20,7 @@ interface StoryGroup {
   userName: string;
   userAvatar: string;
   logoUrl?: string;
-  userRole: 'player' | 'coach' | 'club' | 'shop' | 'admin' | 'referee';
+  userRole: string;
   roleColor: string;
   roleLabel: string;
   allSeen: boolean;
@@ -56,6 +57,10 @@ const bgGradients: Record<string,string> = {
   shop:    'linear-gradient(160deg,#100900 0%,#1c1000 50%,#78350f 100%)',
   admin:   'linear-gradient(160deg,#0f0303 0%,#1a0505 50%,#7f1d1d 100%)',
   referee: 'linear-gradient(160deg,#060e12 0%,#0a1a24 50%,#0e4d6e 100%)',
+  club_owner:   'linear-gradient(160deg,#011a0f 0%,#022c22 50%,#065f46 100%)',
+  seller:       'linear-gradient(160deg,#100900 0%,#1c1000 50%,#78350f 100%)',
+  manufacturer: 'linear-gradient(160deg,#04140d 0%,#06281c 50%,#047857 100%)',
+  technician:   'linear-gradient(160deg,#0a0a1a 0%,#141433 50%,#3730a3 100%)',
 };
 const STORY_DURATION = 15000;
 
@@ -66,6 +71,72 @@ function relativeTime(expiresAt: string): string {
   const diffH = Math.floor(diffMin / 60);
   if (diffH >= 1) return `${diffH} ساعت پیش`;
   return `${Math.max(1, diffMin)} دقیقه پیش`;
+}
+
+function relativeTimeFrom(createdAt: number): string {
+  const diffMin = Math.floor((Date.now() - createdAt) / 60000);
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH >= 1) return `${diffH} ساعت پیش`;
+  return `${Math.max(1, diffMin)} دقیقه پیش`;
+}
+
+/* Group user-posted (localStorage) stories by owner → StoryGroup[]. */
+function buildLocalGroups(stories: StoredStory[]): StoryGroup[] {
+  const byOwner = new Map<string, StoredStory[]>();
+  for (const s of stories) {
+    const arr = byOwner.get(s.ownerKey) ?? [];
+    arr.push(s);
+    byOwner.set(s.ownerKey, arr);
+  }
+  return Array.from(byOwner.values()).map((arr): StoryGroup => {
+    const sorted = [...arr].sort((a, b) => a.createdAt - b.createdAt);
+    const first = sorted[0]!;
+    return {
+      userId: `local-${first.ownerKey}`,
+      userName: first.userName,
+      userAvatar: first.avatar,
+      logoUrl: first.logoUrl,
+      userRole: first.roleKey,
+      roleColor: first.roleColor,
+      roleLabel: first.roleLabel,
+      allSeen: false,
+      stories: sorted.map(s => ({
+        id: s.id,
+        caption: s.caption || undefined,
+        createdAt: relativeTimeFrom(s.createdAt),
+        mediaUrl: s.mediaUrl,
+        mediaType: 'image',
+      })),
+    };
+  });
+}
+
+/* Downscale + re-encode a story image before storing (localStorage quota). */
+function compressStory(file: File): Promise<string> {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onerror = () => resolve('');
+    reader.onload = () => {
+      const dataUrl = String(reader.result);
+      const im = document.createElement('img');
+      im.onerror = () => resolve(dataUrl);
+      im.onload = () => {
+        const maxDim = 1080;
+        let w = im.naturalWidth || im.width;
+        let h = im.naturalHeight || im.height;
+        if (w >= h && w > maxDim)     { h = Math.round((h * maxDim) / w); w = maxDim; }
+        else if (h > w && h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(dataUrl); return; }
+        ctx.drawImage(im, 0, 0, w, h);
+        try { resolve(canvas.toDataURL('image/jpeg', 0.72)); } catch { resolve(dataUrl); }
+      };
+      im.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 /* ── Story viewer ── */
@@ -186,7 +257,8 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 /* ── Stories strip ── */
 export default function Stories() {
   const { user } = useAuthStore();
-  const [groups, setGroups] = useState<StoryGroup[]>(sampleGroups);
+  const [apiGroups, setApiGroups]     = useState<StoryGroup[]>([]);
+  const [localGroups, setLocalGroups] = useState<StoryGroup[]>([]);
   const [seenGroups, setSeenGroups] = useState<Set<string>>(new Set());
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
   const [activeStory, setActiveStory] = useState(0);
@@ -195,8 +267,34 @@ export default function Stories() {
   const [comment, setComment] = useState('');
   const [sentReaction, setSentReaction] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [storyImg, setStoryImg] = useState('');
+  const [storyCaption, setStoryCaption] = useState('');
 
-  useEffect(() => { setMounted(true); }, []);
+  // user-posted stories first, then live club/seller API stories, then the sample strip
+  const groups: StoryGroup[] = [...localGroups, ...apiGroups, ...sampleGroups];
+  const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
+  const reloadLocal = () => setLocalGroups(buildLocalGroups(getStoredStories()));
+
+  useEffect(() => { setMounted(true); reloadLocal(); }, []);
+
+  const onStoryFile = async (file?: File) => { if (file) setStoryImg(await compressStory(file)); };
+  const publishStory = () => {
+    if (!user || !storyImg) return;
+    addStoredStory({
+      id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,
+      ownerKey: user.phone || user.id || (user.firstName ?? 'user'),
+      userName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر',
+      roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
+      avatar: (user.firstName ?? 'ک').charAt(0) || 'ک',
+      logoUrl: user.avatar || undefined,
+      mediaUrl: storyImg,
+      caption: storyCaption.trim(),
+      createdAt: Date.now(),
+    });
+    reloadLocal();
+    setPosting(false); setStoryImg(''); setStoryCaption('');
+  };
 
   // Fetch real clubs + sellers with active stories and prepend to groups
   useEffect(() => {
@@ -269,12 +367,7 @@ export default function Stories() {
         }));
 
       const allApiGroups = [...clubGroups, ...sellerGroups];
-      if (allApiGroups.length > 0) {
-        setGroups(prev => [
-          ...allApiGroups,
-          ...prev.filter(g => !g.userId.startsWith('api-')),
-        ]);
-      }
+      setApiGroups(allApiGroups);
     };
 
     fetchAllStories().catch(() => {});
@@ -360,7 +453,7 @@ export default function Stories() {
       <div className="st-strip">
         {/* Add story button */}
         {user && (
-          <div className="st-item">
+          <div className="st-item" onClick={() => setPosting(true)} role="button">
             <div className="st-ring" style={{ background: 'rgba(199,166,106,0.16)', border: '1.5px dashed rgba(199,166,106,0.45)' }}>
               <div className="st-inner" style={{ background: 'rgba(199,166,106,0.08)', border: 'none' }}>
                 <Plus size={18} style={{ color: '#C7A66A' }} />
@@ -404,6 +497,33 @@ export default function Stories() {
           onReaction={handleReaction} onToggleEmojis={() => setShowEmojis(p => !p)}
           onComment={setComment} onSendComment={() => setComment('')}
         />
+      )}
+
+      {/* Story composer — any logged-in role can post; appears in the strip instantly */}
+      {mounted && posting && (
+        <div onClick={() => setPosting(false)} style={{ position:'fixed', inset:0, zIndex:99999, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:16, direction:'rtl' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:'#fff', borderRadius:20, width:'min(420px,94vw)', padding:22, boxShadow:'0 30px 80px rgba(0,0,0,0.4)', fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+              <h3 style={{ fontSize:16, fontWeight:800, color:'#111110', margin:0 }}>افزودن استوری</h3>
+              <button onClick={() => setPosting(false)} aria-label="بستن" style={{ background:'none', border:'none', cursor:'pointer', color:'#888', display:'flex' }}><X size={18} /></button>
+            </div>
+            <div style={{ fontSize:12.5, color:'#777', marginBottom:14 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight:800 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
+            {storyImg ? (
+              <div style={{ position:'relative', borderRadius:14, overflow:'hidden', marginBottom:14, maxHeight:340, background:'#000', display:'flex', justifyContent:'center' }}>
+                <img src={storyImg} alt="" style={{ maxWidth:'100%', maxHeight:340, objectFit:'contain' }} />
+                <button onClick={() => setStoryImg('')} aria-label="حذف" style={{ position:'absolute', top:8, insetInlineStart:8, width:30, height:30, borderRadius:'50%', background:'rgba(0,0,0,0.6)', border:'none', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><X size={15} /></button>
+              </div>
+            ) : (
+              <label style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, border:'1.5px dashed rgba(199,166,106,0.5)', borderRadius:14, padding:'34px 16px', cursor:'pointer', color:'#9A6E38', fontWeight:700, marginBottom:14 }}>
+                <Plus size={26} style={{ color:'#C7A66A' }} />
+                انتخاب تصویر استوری
+                <input type="file" accept="image/*" hidden onChange={e => onStoryFile(e.target.files?.[0])} />
+              </label>
+            )}
+            <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری)..." style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
+            <button onClick={publishStory} disabled={!storyImg} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid rgba(199,166,106,0.34)', background: storyImg ? 'rgba(199,166,106,0.14)' : 'rgba(17,17,16,0.05)', color: storyImg ? '#9A6E38' : '#aaa', fontWeight:800, fontSize:14, cursor: storyImg ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>انتشار استوری</button>
+          </div>
+        </div>
       )}
     </>
   );
