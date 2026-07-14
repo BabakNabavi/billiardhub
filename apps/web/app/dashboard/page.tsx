@@ -414,7 +414,7 @@ export default function DashboardPage() {
 
                 {/* Coach Card */}
                 {isCoach && (
-                  <Link href="/profile/setup?role=coach" style={{ textDecoration: 'none' }}>
+                  <Link href="/dashboard/coach" style={{ textDecoration: 'none' }}>
                     <div style={{
                       padding: '20px', borderRadius: '18px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(167,139,250,0.02))',
