@@ -1,8 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
+import { getCoachProfile, badgeFromGrades, certificationLines, disciplineLabel, type CoachProfile } from '@/lib/coach-store'
 
 /* ─── Tokens (same as listing) ─── */
 const GOLD   = '#C7A66A'
@@ -264,10 +265,43 @@ const D: CoachFull[] = [
   },
 ]
 
+/* Map a saved dashboard submission → the profile shape used below. */
+function mapLocalToFull(p: CoachProfile): CoachFull {
+  const b = badgeFromGrades(p.grades)
+  return {
+    id: p.slug,
+    name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
+    specialty: p.disciplines[0] ?? 'snooker',
+    city: p.city,
+    badge: b?.label ?? '',
+    badgeColor: '#9A6E38',
+    verified: p.verified,
+    hasStory: !!p.storyImage,
+    storyImage: p.storyImage,
+    bio: p.shortBio,
+    fullBio: p.fullBio,
+    certifications: certificationLines(p.grades),
+    achievements: [],
+    specialties: p.disciplines.map(disciplineLabel),
+    phone: p.phone,
+    whatsapp: p.whatsapp,
+    instagram: p.instagram || undefined,
+    telegram: p.telegram || undefined,
+    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
+    videos: p.videos.map(v => ({ id: v.id, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
+  }
+}
+
 /* ─── Page ─── */
 export default function CoachProfilePage() {
   const { id } = useParams<{id:string}>()
-  const coach = D.find(c => c.id === id) ?? D[0]!
+  const mock = D.find(c => c.id === id) ?? D[0]!
+  const isMockId = D.some(c => c.id === id)
+
+  const [localP, setLocalP]   = useState<CoachProfile | null>(null)
+  const [checked, setChecked] = useState(false)
+  useEffect(() => { setLocalP(id ? getCoachProfile(id) : null); setChecked(true) }, [id])
+  const coach = localP ? mapLocalToFull(localP) : mock
 
   const [openStory,     setOpenStory]     = useState(false)
   const [copied,        setCopied]        = useState(false)
@@ -281,7 +315,8 @@ export default function CoachProfilePage() {
   const [lightbox,      setLightbox]      = useState<GImg|null>(null)
 
   const spec  = SPECS[coach.specialty as keyof typeof SPECS]
-  const grade = GRADE_DOTS[coach.badge]
+  const localBadge = localP ? badgeFromGrades(localP.grades) : null
+  const grade = localP ? (localBadge ? { dots: localBadge.dots, color: GOLD_D } : undefined) : GRADE_DOTS[coach.badge]
   const socialBtn: React.CSSProperties = { width:44, height:44, borderRadius:11, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(26,25,23,0.06)', border:'1px solid rgba(26,25,23,0.10)', color:'rgba(26,25,23,0.5)', textDecoration:'none', flexShrink:0, cursor:'pointer' }
 
   const createAlbum = () => {
@@ -289,6 +324,10 @@ export default function CoachProfilePage() {
     setAlbums(prev => [...prev, { id:`a${Date.now()}`, name:newAlbumName.trim(), imageIds:[] }])
     setNewAlbumName('')
     setShowNewAlbum(false)
+  }
+
+  if (!isMockId && !checked) {
+    return <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:'#F1EFEC', minHeight:'100vh' }} />
   }
 
   return (
@@ -391,7 +430,7 @@ export default function CoachProfilePage() {
                         </svg>
                       )}
                     </div>
-                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>مربی {spec?.label ?? 'بیلیارد'}</div>
+                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>مربی {localP && localP.disciplines.length ? localP.disciplines.map(disciplineLabel).join(' · ') : (spec?.label ?? 'بیلیارد')}</div>
                     {coach.badge && (
                       <div style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3 }}>{coach.badge}</div>
                     )}
