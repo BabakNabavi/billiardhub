@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: "بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد",
   description: "اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و برترین تولیدکنندگان تجهیزات بیلیارد در ایران و جهان.",
   manifest: '/manifest.json',
+  icons: {
+    icon: '/images/Logo/favicon.ico',
+    apple: '/images/Logo/logo-512x512.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -32,7 +36,6 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <head>
-        <link rel="apple-touch-icon" href="/logo_org_b.jpg" />
         <meta name="mobile-web-app-capable" content="yes" />
         <style>{`
           @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Light.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }

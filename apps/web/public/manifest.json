@@ -9,7 +9,7 @@
   "background_color": "#111111",
   "theme_color": "#C7A66A",
   "icons": [
-    { "src": "/logo_org_b.jpg", "sizes": "192x192", "type": "image/jpeg" },
-    { "src": "/logo_org_b.jpg", "sizes": "512x512", "type": "image/jpeg" }
+    { "src": "/images/Logo/logo-256x256.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "/images/Logo/logo-512x512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }

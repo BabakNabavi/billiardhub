@@ -88,7 +88,7 @@ export default function RegisterPage() {
       <div className="register-card">
         {/* logo */}
         <div className="logo-wrap">
-          <div className="logo-icon">🎱</div>
+          <div className="logo-icon" style={{ display: 'flex' }}><img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '42px', height: '42px', borderRadius: '11px', display: 'block' }} /></div>
           <span className="logo-text">
             <span style={{ color: '#000000' }}>بیلیارد</span>
             {' '}

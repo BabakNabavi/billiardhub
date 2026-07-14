@@ -151,7 +151,7 @@ export default function LoginPage() {
           <div style={{ textAlign:'center', marginBottom:'32px' }}>
             <Link href="/" style={{ display:'inline-flex', alignItems:'center', gap:'10px', textDecoration:'none', marginBottom:'8px' }}>
               <div style={{ width:'44px', height:'44px', borderRadius:'14px', overflow:'hidden', boxShadow:`0 8px 24px rgba(199,166,106,0.35)`, flexShrink:0 }}>
-                <img src="/images/Logo/logo1.jpeg?v=3" alt="بیلیارد هاب" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
               </div>
               <span style={{ fontSize: '24px', fontWeight:900, color:'#1C1C1A', letterSpacing:'-0.025em' }}>
                 بیلیارد <span style={{ background:`linear-gradient(135deg,${GOLD},#A07840)`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>هاب</span>
