@@ -1,7 +1,8 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ElementType } from 'react'
 import { useRouter } from 'next/navigation'
+import { User, BarChart3, GraduationCap, Scale, Wrench, ShoppingBag, Factory, Store } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 
 // ─── Types (inline — نیاز به import از lib نیست) ──────────────
@@ -23,7 +24,8 @@ interface RoleRequest {
 interface RoleMeta {
   value: RoleValue
   label: string
-  icon: string
+  icon: string          // tabler webfont class (used by doc-upload step + chips)
+  Icon: ElementType     // lucide component (used by the role cards)
   color: string
   description: string
   requiresDoc: boolean
@@ -61,14 +63,14 @@ const STATUS_COLOR: Record<RoleStatus, string> = {
 }
 
 const ROLES: RoleMeta[] = [
-  { value: 'user',         label: 'کاربر عادی',     icon: 'ti-user',             color: 'rgba(0,0,0,0.50)', description: 'مشاهده و رزرو میز',        requiresDoc: false, docHint: '' },
-  { value: 'player',       label: 'بازیکن رنکینگی', icon: 'ti-chart-bar',        color: '#C7A66A', description: 'رنکینگ ملی بیلیارد',        requiresDoc: true,  docHint: 'کارت عضویت فدراسیون یا گواهی رتبه‌بندی ملی' },
-  { value: 'coach',        label: 'مربی',            icon: 'ti-school',           color: '#a78bfa', description: 'تدریس و آموزش بیلیارد',     requiresDoc: true,  docHint: 'مدرک مربیگری فدراسیون' },
-  { value: 'referee',      label: 'داور',            icon: 'ti-scale',            color: '#f59e0b', description: 'داوری مسابقات رسمی',        requiresDoc: true,  docHint: 'کارت داوری فدراسیون' },
-  { value: 'technician',   label: 'خدمات فنی',       icon: 'ti-tool',             color: '#06b6d4', description: 'تعمیر و نگهداری تجهیزات',  requiresDoc: false, docHint: '' },
-  { value: 'seller',       label: 'فروشنده',         icon: 'ti-shopping-bag',     color: '#f97316', description: 'فروش تجهیزات بیلیارد',      requiresDoc: true,  docHint: 'جواز کسب یا صفحه فروشگاه رسمی' },
-  { value: 'manufacturer', label: 'تولیدکننده',      icon: 'ti-building-factory', color: '#ef4444', description: 'تولید تجهیزات بیلیارد',     requiresDoc: true,  docHint: 'جواز تولید یا گواهی ثبت برند' },
-  { value: 'club_owner',   label: 'باشگاه‌دار',      icon: 'ti-building-store',   color: '#3b82f6', description: 'مدیریت باشگاه بیلیارد',    requiresDoc: true,  docHint: 'جواز کسب باشگاه یا مجوز اماکن ورزشی' },
+  { value: 'user',         label: 'کاربر عادی',     icon: 'ti-user',             Icon: User,          color: '#64748b', description: 'مشاهده و رزرو میز',        requiresDoc: false, docHint: '' },
+  { value: 'player',       label: 'بازیکن رنکینگی', icon: 'ti-chart-bar',        Icon: BarChart3,     color: '#C7A66A', description: 'رنکینگ ملی بیلیارد',        requiresDoc: true,  docHint: 'کارت عضویت فدراسیون یا گواهی رتبه‌بندی ملی' },
+  { value: 'coach',        label: 'مربی',            icon: 'ti-school',           Icon: GraduationCap, color: '#a78bfa', description: 'تدریس و آموزش بیلیارد',     requiresDoc: true,  docHint: 'مدرک مربیگری فدراسیون' },
+  { value: 'referee',      label: 'داور',            icon: 'ti-scale',            Icon: Scale,         color: '#f59e0b', description: 'داوری مسابقات رسمی',        requiresDoc: true,  docHint: 'کارت داوری فدراسیون' },
+  { value: 'technician',   label: 'خدمات فنی',       icon: 'ti-tool',             Icon: Wrench,        color: '#06b6d4', description: 'تعمیر و نگهداری تجهیزات',  requiresDoc: false, docHint: '' },
+  { value: 'seller',       label: 'فروشنده',         icon: 'ti-shopping-bag',     Icon: ShoppingBag,   color: '#f97316', description: 'فروش تجهیزات بیلیارد',      requiresDoc: true,  docHint: 'جواز کسب یا صفحه فروشگاه رسمی' },
+  { value: 'manufacturer', label: 'تولیدکننده',      icon: 'ti-building-factory', Icon: Factory,       color: '#ef4444', description: 'تولید تجهیزات بیلیارد',     requiresDoc: true,  docHint: 'جواز تولید یا گواهی ثبت برند' },
+  { value: 'club_owner',   label: 'باشگاه‌دار',      icon: 'ti-building-store',   Icon: Store,         color: '#3b82f6', description: 'مدیریت باشگاه بیلیارد',    requiresDoc: true,  docHint: 'جواز کسب باشگاه یا مجوز اماکن ورزشی' },
 ]
 
 const ROLE_MAP = Object.fromEntries(ROLES.map(r => [r.value, r])) as Record<RoleValue, RoleMeta>
@@ -81,56 +83,58 @@ function RoleCard({
   role,
   request,
   isQueued,
+  blocked,
   onToggle,
 }: {
   role: RoleMeta
   request?: RoleRequest
   isQueued: boolean
+  blocked: boolean
   onToggle: () => void
 }) {
   const status = request?.status
-  const isActive = isQueued || !!status
+  const isActive = isQueued || status === 'approved' || status === 'pending'
+  const disabled = status === 'approved' || blocked
+  const Icon = role.Icon
+  const rgba = (a: number) => hexToRgba(role.color, a)
 
   return (
     <button
       onClick={onToggle}
-      disabled={status === 'approved'}
-      title={status ? STATUS_LABEL[status] : undefined}
+      disabled={disabled}
+      title={blocked ? 'با انتخاب یک نقش تخصصی، «کاربر عادی» غیرفعال می‌شود' : status ? STATUS_LABEL[status] : undefined}
       style={{
-        background: isActive ? 'rgba(199,166,106,0.12)' : 'rgba(0,0,0,0.04)',
-        border: `1px solid ${isActive ? hexToRgba(role.color, 0.55) : 'rgba(0,0,0,0.07)'}`,
-        borderRadius: 14,
-        padding: '12px 8px',
-        cursor: status === 'approved' ? 'default' : 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 7,
-        position: 'relative',
-        overflow: 'hidden',
-        transition: 'all 0.22s ease',
-        WebkitTapHighlightColor: 'transparent',
-        outline: 'none',
-        opacity: status === 'rejected' ? 0.6 : 1,
+        position: 'relative', overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9,
+        padding: '16px 8px 13px',
+        borderRadius: 20,
+        background: isActive ? rgba(0.14) : 'rgba(255,255,255,0.55)',
+        backdropFilter: 'blur(30px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+        border: `1px solid ${isActive ? rgba(0.5) : 'rgba(255,255,255,0.82)'}`,
+        boxShadow: isActive
+          ? `inset 0 1.5px 0 rgba(255,255,255,0.9), 0 8px 26px ${rgba(0.20)}`
+          : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 6px 22px rgba(0,0,0,0.06)',
+        cursor: disabled ? (blocked ? 'not-allowed' : 'default') : 'pointer',
+        opacity: blocked ? 0.4 : status === 'rejected' ? 0.6 : 1,
+        transition: 'transform 0.26s cubic-bezier(0.22,1,0.36,1), background 0.26s, border-color 0.26s, box-shadow 0.26s',
+        WebkitTapHighlightColor: 'transparent', outline: 'none',
+        fontFamily: 'inherit', transform: 'translateY(0)',
       }}
+      onMouseEnter={e => { if (!disabled) e.currentTarget.style.transform = 'translateY(-4px)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
     >
-      {/* tinted overlay */}
-      <span style={{
-        position: 'absolute', inset: 0,
-        background: hexToRgba(role.color, isActive ? 0.09 : 0),
-        borderRadius: 'inherit', transition: 'background 0.22s', pointerEvents: 'none',
-      }} />
+      {/* top sheen */}
+      <span style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
 
       {/* check / status ring */}
       <span style={{
-        position: 'absolute', top: 6, left: 6,
+        position: 'absolute', top: 7, left: 7,
         width: 16, height: 16, borderRadius: '50%',
-        border: `1.5px solid ${isActive ? role.color : 'rgba(0,0,0,0.09)'}`,
-        background: status === 'approved'
-          ? role.color
-          : isQueued ? role.color : 'transparent',
+        border: `1.5px solid ${isActive ? role.color : 'rgba(0,0,0,0.12)'}`,
+        background: (status === 'approved' || isQueued) ? role.color : 'transparent',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 0.2s', zIndex: 1,
+        transition: 'all 0.2s', zIndex: 2,
       }}>
         {(status === 'approved' || isQueued) && (
           <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
@@ -145,23 +149,23 @@ function RoleCard({
         )}
       </span>
 
-      {/* icon */}
+      {/* icon square — بیلیارد هاب «بیشتر» card style */}
       <span style={{
-        width: 44, height: 44, borderRadius: 12,
-        background: hexToRgba(role.color, isActive ? 0.16 : 0.07),
+        width: 46, height: 46, borderRadius: 14, position: 'relative', zIndex: 1, flexShrink: 0,
+        background: `linear-gradient(135deg,${rgba(0.20)},${rgba(0.08)})`,
+        border: `1px solid ${rgba(0.32)}`,
+        boxShadow: `0 4px 14px ${rgba(0.26)}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: isActive ? `0 0 0 6px ${hexToRgba(role.color, 0.1)}` : 'none',
-        transition: 'all 0.22s', position: 'relative', zIndex: 1,
       }}>
-        <i className={`ti ${role.icon}`} style={{ fontSize: 24, color: role.color }} aria-hidden="true" />
+        <Icon size={21} color={role.color} style={{ filter: `drop-shadow(0 0 5px ${rgba(0.55)})` }} />
       </span>
 
-      {/* label */}
+      {/* label — fades out when the card is selected */}
       <span style={{
-        fontSize: 12, color: isActive ? '#e2e8f0' : '#64748b',
-        textAlign: 'center', lineHeight: 1.3,
-        position: 'relative', zIndex: 1,
-        transition: 'color 0.2s', whiteSpace: 'nowrap',
+        fontSize: 12, fontWeight: 700, textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap',
+        color: '#334155', position: 'relative', zIndex: 1,
+        opacity: isActive ? 0.26 : 1,
+        transition: 'opacity 0.26s ease',
       }}>
         {role.label}
       </span>
@@ -378,11 +382,23 @@ export default function RolePage() {
     requests.map(r => [r.role, r])
   ) as Record<string, RoleRequest>
 
+  // آیا کاربر نقش تخصصی (غیر از «کاربر عادی») تأییدشده/در انتظار دارد؟
+  const hasNonUserRequest = requests.some(r => r.role !== 'user' && r.status !== 'rejected')
+
   const toggle = (val: RoleValue) => {
     if (requestMap[val]?.status === 'approved') return
     setQueued(prev => {
       const next = new Set(prev)
-      next.has(val) ? next.delete(val) : next.add(val)
+      if (next.has(val)) { next.delete(val); return next }
+      if (val === 'user') {
+        // «کاربر عادی» را نمی‌توان همراه یک نقش تخصصی انتخاب کرد
+        const proQueued = Array.from(next).some(r => r !== 'user')
+        if (proQueued || hasNonUserRequest) return next
+        next.add('user')
+      } else {
+        next.add(val)
+        next.delete('user')   // انتخاب یک نقش تخصصی، «کاربر عادی» را خاموش می‌کند
+      }
       return next
     })
   }
@@ -485,6 +501,7 @@ export default function RolePage() {
                     role={role}
                     request={requestMap[role.value]}
                     isQueued={queued.has(role.value)}
+                    blocked={role.value === 'user' && (queuedArr.some(r => r !== 'user') || hasNonUserRequest)}
                     onToggle={() => toggle(role.value)}
                   />
                 ))}
@@ -556,13 +573,17 @@ export default function RolePage() {
                 <button
                   onClick={handleSubmitRoles}
                   disabled={queued.size === 0}
+                  onMouseEnter={e => { if (queued.size > 0) e.currentTarget.style.transform = 'translateY(-1px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
                   style={{
-                    width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-                    background: queued.size === 0 ? 'rgba(0,0,0,0.04)' : '#C7A66A',
-                    color: queued.size === 0 ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
+                    width: '100%', padding: '14px', borderRadius: 12,
+                    border: `1px solid ${queued.size === 0 ? 'transparent' : 'rgba(199,166,106,0.34)'}`,
+                    background: queued.size === 0 ? 'rgba(0,0,0,0.04)' : 'rgba(199,166,106,0.12)',
+                    color: queued.size === 0 ? 'rgba(0,0,0,0.35)' : '#9A6E38',
                     fontSize: 16, fontWeight: 700, fontFamily: 'inherit',
-                    cursor: queued.size === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    cursor: queued.size === 0 ? 'not-allowed' : 'pointer',
+                    transition: 'transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transform: 'translateY(0)',
                   }}
                 >
                   <i className="ti ti-check" style={{ fontSize: 18 }} aria-hidden="true" />
