@@ -105,7 +105,7 @@ export default function ProductDetailPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(14px,3vw,28px)', height: 58, display: 'flex', alignItems: 'center', gap: 14 }}>
           <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, overflow: 'hidden' }}>
-              <img src="/images/Logo/logo1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/images/Logo/logo-256x256.png" alt="بیلیارد بازار" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>بیلیارد بازار</span>
           </Link>

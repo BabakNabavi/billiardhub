@@ -247,7 +247,7 @@ function ShopTopBar({
         {/* Brand */}
         <Link href="/" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.28)' }}>
-            <img src="/images/Logo/logo1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src="/images/Logo/logo-256x256.png" alt="بیلیارد بازار" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div className="bb-brand" style={{ display: 'flex', flexDirection: 'column', gap: 1, lineHeight: 1 }}>
             <span style={{ fontFamily: '"Playfair Display",Georgia,serif', fontSize: 14, fontWeight: 700, color: '#1C1C1A', letterSpacing: '0.04em' }}>Billiard</span>

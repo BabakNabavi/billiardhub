@@ -176,7 +176,7 @@ export default function Footer() {
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
-                src="/images/Logo/logo1.png"
+                src="/images/Logo/logo-256x256.png"
                 alt="بیلیارد هاب"
                 style={{ width: '52px', height: '52px', objectFit: 'contain', flexShrink: 0, borderRadius: '12px' }}
               />

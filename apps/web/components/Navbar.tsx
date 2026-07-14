@@ -213,7 +213,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', boxShadow: `0 4px 18px rgba(184,147,58,0.38)`, flexShrink: 0 }}>
-                <img src="/images/Logo/logo1.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             <span style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
@@ -453,7 +453,7 @@ export default function Navbar() {
         }}>
           {/* Header row — centered brand */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', marginBottom: '8px' }} />
+            <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ height: '48px', width: '48px', borderRadius: '12px', marginBottom: '9px' }} />
             <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
               <span style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.28), 0 -1px 0 rgba(255,255,255,0.45)' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
