@@ -167,8 +167,8 @@ function CoachHeroSlider() {
         <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'55%', zIndex:3, background:'linear-gradient(to top, rgba(0,0,0,0.80), transparent)' }}/>
 
         <div style={{ position:'absolute', inset:0, zIndex:4, display:'flex', flexDirection:'column', justifyContent:'center', padding:'clamp(12px,2.4vw,32px) clamp(24px,6vw,80px)' }}>
-          <div style={{ maxWidth:1280, width:'100%', margin:'0 auto', transform:'translateY(-9px)' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', marginBottom:11, letterSpacing:'0.12em', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
+          <div style={{ maxWidth:1280, width:'100%', margin:'0 auto' }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(199,166,106,0.14)', border:'1px solid rgba(199,166,106,0.34)', color:'#D4A843', fontSize:8.9, fontWeight:800, borderRadius:24, padding:'4px 11px', marginBottom:11, letterSpacing:'0.12em', transform:'translateY(-9px)', animation:'softBlink 2.6s .7s ease-in-out infinite' }}>
               FIND YOUR COACH . BILLIARD HUB
             </div>
             <h1 style={{ fontSize:'clamp(25px,4vw,50px)', fontWeight:900, color:'#fff', margin:'0 0 8px', letterSpacing:'-0.03em', lineHeight:1.08 }}>
