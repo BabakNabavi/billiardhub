@@ -61,10 +61,103 @@ const RACK_C = [
   '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
 ]
 
+/* ── Avatar with story ring (Instagram gradient, like home) ── */
+function CoachAvatar({ coach, onStory, size }: { coach: Coach; onStory: () => void; size: string }) {
+  return (
+    <button type="button" aria-label="مشاهده استوری"
+      onClick={e => { e.preventDefault(); e.stopPropagation(); onStory() }}
+      className="cavatar"
+      style={{ width:size, aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', cursor:'pointer', border:'none', flexShrink:0,
+        background:'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
+        boxShadow:'0 4px 16px rgba(0,0,0,0.18), 0 0 14px rgba(214,41,118,0.32)', display:'flex' }}>
+      <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
+        border:'2.5px solid #FFFFFF', background:'#E7ECF1',
+        display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
+        {coach.photo ? (
+          <img src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+        ) : (
+          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
+            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
+            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
+          </svg>
+        )}
+      </div>
+    </button>
+  )
+}
+
+/* ── Coach card — grid + list ── */
+function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' | 'list'; idx: number; onStory: () => void }) {
+  const sp = SPECS[coach.specialty]
+
+  if (view === 'list') {
+    return (
+      <article className="ccard-list" style={{
+        display:'flex', alignItems:'center', gap:14, padding:'11px 13px',
+        borderRadius:12, background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.08)',
+        boxShadow:'0 1px 3px rgba(0,0,0,0.05)',
+        animation:`fadeUp .34s ${(idx * 0.04).toFixed(2)}s ease both`,
+      }}>
+        <div style={{ position:'relative', zIndex:2 }}>
+          <CoachAvatar coach={coach} onStory={onStory} size="58px"/>
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{coach.name}</h3>
+          <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>مربی {sp?.label ?? 'بیلیارد'}</p>
+          <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
+          </div>
+        </div>
+        <Link href={`/coaches/${coach.id}`} className="btnConnect" aria-label="مشاهده پروفایل" style={{
+          flexShrink:0, textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center',
+          width:40, height:40, border:`1.5px solid ${GOLD_D}`, borderRadius:11, color:GOLD_D, background:'transparent' }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </Link>
+      </article>
+    )
+  }
+
+  return (
+    <article className="ccard" style={{
+      borderRadius:12, overflow:'hidden', background:'#FFFFFF',
+      border:'1px solid rgba(0,0,0,0.08)',
+      boxShadow:'0 1px 3px rgba(0,0,0,0.06), 0 8px 22px rgba(0,0,0,0.04)',
+      animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
+      display:'flex', flexDirection:'column',
+    }}>
+      {/* cover */}
+      <div style={{ position:'relative', paddingTop:'46%', flexShrink:0, background:'linear-gradient(135deg,#1b2a44 0%,#0e1728 100%)' }}>
+        <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'2px', background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
+      </div>
+      {/* avatar */}
+      <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%', position:'relative', zIndex:2 }}>
+        <CoachAvatar coach={coach} onStory={onStory} size="58%"/>
+      </div>
+      {/* body */}
+      <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+        <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:4 }}>{coach.name}</h3>
+        <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>مربی {sp?.label ?? 'بیلیارد'}</p>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
+        </div>
+        <div style={{ flex:1 }}/>
+        <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{ alignSelf:'stretch', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'9px 12px', border:`1.5px solid ${GOLD_D}`, borderRadius:24, fontSize:13, fontWeight:800, color:GOLD_D, background:'transparent' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          مشاهده پروفایل
+        </Link>
+      </div>
+    </article>
+  )
+}
+
 /* ════════════════ PAGE ════════════════ */
 export default function CoachesPage() {
   const [filter,    setFilter]    = useState('all')
   const [search,    setSearch]    = useState('')
+  const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [openStory, setOpenStory] = useState<Coach | null>(null)
   const q = search.trim()
   const coaches = COACHES.filter(c =>
@@ -140,6 +233,8 @@ export default function CoachesPage() {
         }
         .cavatar{transition:transform .35s cubic-bezier(.4,0,.2,1);}
         .ccard:hover .cavatar{transform:scale(1.04);}
+        .ccard-list{transition:transform .2s,box-shadow .2s,border-color .2s;}
+        .ccard-list:hover{border-color:rgba(199,166,106,0.38)!important;box-shadow:0 6px 20px rgba(28,28,26,0.10)!important;}
         .btnConnect{transition:background .18s,box-shadow .18s,border-color .18s;}
         .btnConnect:hover{background:rgba(199,166,106,0.10)!important;box-shadow:0 4px 14px rgba(199,166,106,0.22)!important;}
 
@@ -163,7 +258,7 @@ export default function CoachesPage() {
       <div style={{ direction:'rtl', fontFamily:"'Vazirmatn',Tahoma,sans-serif", background:BG, minHeight:'100vh', color:TEXT }}>
 
         {/* ══════════════ HERO — compact banner ══════════════ */}
-        <section style={{ position:'relative', height:'clamp(178px,22vh,320px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(8px,3vh,28px)' }}>
+        <section style={{ position:'relative', height:'clamp(145px,20vh,300px)', overflow:'hidden', display:'flex', alignItems:'center', paddingTop:'clamp(4px,2vh,18px)' }}>
 
           {/* Aurora blobs — pastel tints on light bg */}
           <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
@@ -281,6 +376,43 @@ export default function CoachesPage() {
         }}>
           <div style={{ maxWidth:1280, margin:'0 auto', padding:'10px clamp(24px,6vw,80px)',
             display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+            {/* search — right side */}
+            <div style={{ display:'flex', alignItems:'center', gap:8,
+              background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
+              borderRadius:11, padding:'8px 14px', flex:'0 1 280px', minWidth:150,
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="جستجوی نام مربی یا شهر..."
+                style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
+                  fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
+              {search && (
+                <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
+                  style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              )}
+            </div>
+
+            {/* view toggles — beside search */}
+            <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+              {([['grid', <svg key="g" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => {
+                const on = view === v
+                return (
+                  <button key={v} onClick={() => setView(v)} aria-label={v === 'grid' ? 'نمای عادی' : 'نمای لیست'} style={{
+                    width:38, height:38, borderRadius:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+                    border: on ? '1px solid transparent' : '1px solid rgba(17,17,16,0.10)',
+                    background: on ? 'linear-gradient(135deg,#C7A66A,#9A6E38)' : 'rgba(255,255,255,0.78)',
+                    color: on ? '#fff' : TEXT_S,
+                    boxShadow: on ? '0 4px 12px rgba(199,166,106,0.30)' : 'inset 0 1px 0 rgba(255,255,255,0.9)',
+                  }}>{icon}</button>
+                )
+              })}
+            </div>
+
+            {/* category pills */}
             {([
               { k:'all',      l:'همه مربیان' },
               { k:'snooker',  l:'اسنوکر' },
@@ -305,26 +437,6 @@ export default function CoachesPage() {
                 </button>
               )
             })}
-
-            {/* search — by coach name or city */}
-            <div style={{ marginInlineStart:'auto', display:'flex', alignItems:'center', gap:8,
-              background:'rgba(255,255,255,0.82)', border:'1px solid rgba(17,17,16,0.10)',
-              borderRadius:11, padding:'8px 14px', flex:'0 1 260px', minWidth:180,
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ flexShrink:0 }}>
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="جستجوی نام مربی یا شهر..."
-                style={{ flex:1, minWidth:0, background:'none', border:'none', outline:'none',
-                  fontSize:13, color:TEXT, fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}/>
-              {search && (
-                <button onClick={() => setSearch('')} aria-label="پاک کردن جستجو"
-                  style={{ background:'none', border:'none', cursor:'pointer', color:TEXT_M, padding:0, display:'flex', flexShrink:0 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              )}
-            </div>
           </div>
         </div>
 
@@ -342,89 +454,19 @@ export default function CoachesPage() {
         {/* ══════════════ GRID ══════════════ */}
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 clamp(24px,6vw,80px) 64px' }}>
           {coaches.length > 0 ? (
-            <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
-              {coaches.map((coach, idx) => {
-                const sp = SPECS[coach.specialty]
-                return (
-                  <article key={coach.id} className="ccard" style={{
-                    borderRadius:12, overflow:'hidden',
-                    background:'#FFFFFF',
-                    border:'1px solid rgba(0,0,0,0.08)',
-                    boxShadow:'0 1px 3px rgba(0,0,0,0.06), 0 8px 22px rgba(0,0,0,0.04)',
-                    animation:`fadeUp .38s ${(idx * 0.05).toFixed(2)}s ease both`,
-                    display:'flex', flexDirection:'column',
-                  }}>
-
-                    {/* ── Cover banner (LinkedIn-style dark) ── */}
-                    <div style={{ position:'relative', paddingTop:'46%', flexShrink:0,
-                      background:'linear-gradient(135deg,#1b2a44 0%,#0e1728 100%)' }}>
-                      <div style={{ position:'absolute', inset:0,
-                        backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-                        backgroundSize:'16px 16px' }}/>
-                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'2px',
-                        background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
-                    </div>
-
-                    {/* ── Avatar (large, centered, overlapping) — story trigger ── */}
-                    <div style={{ display:'flex', justifyContent:'center', marginTop:'-31%', position:'relative', zIndex:2 }}>
-                      <button type="button" aria-label="مشاهده استوری"
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); setOpenStory(coach) }}
-                        className="cavatar"
-                        style={{ width:'58%', aspectRatio:'1 / 1', borderRadius:'50%', padding:'3px', cursor:'pointer', border:'none',
-                          background:'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)',
-                          boxShadow:'0 4px 16px rgba(0,0,0,0.18), 0 0 14px rgba(214,41,118,0.32)',
-                          display:'flex' }}>
-                        <div style={{ width:'100%', height:'100%', borderRadius:'50%', overflow:'hidden',
-                          border:'2.5px solid #FFFFFF', background:'#E7ECF1',
-                          display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-                          {coach.photo ? (
-                            <img src={coach.photo} alt={coach.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                          ) : (
-                            <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-                              <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-                              <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-                            </svg>
-                          )}
-                        </div>
-                      </button>
-                    </div>
-
-                    {/* ── Body ── */}
-                    <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-                      <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2,
-                        letterSpacing:'-0.02em', marginBottom:4 }}>
-                        {coach.name}
-                      </h3>
-                      <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em',
-                        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-                        مربی {sp?.label ?? 'بیلیارد'}
-                      </p>
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                        </svg>
-                        <span style={{ fontSize:11.5, color:TEXT_S }}>{coach.city}</span>
-                      </div>
-
-                      <div style={{ flex:1 }}/>
-
-                      <Link href={`/coaches/${coach.id}`} className="btnConnect" style={{
-                        alignSelf:'stretch', textDecoration:'none',
-                        display:'flex', alignItems:'center', justifyContent:'center', gap:7,
-                        padding:'9px 12px', border:`1.5px solid ${GOLD_D}`,
-                        borderRadius:24, fontSize:13, fontWeight:800, color:GOLD_D, background:'transparent',
-                      }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        مشاهده پروفایل
-                      </Link>
-                    </div>
-
-                  </article>
-                )
-              })}
-            </div>
+            view === 'list' ? (
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {coaches.map((coach, idx) => (
+                  <CoachCard key={coach.id} coach={coach} view="list" idx={idx} onStory={() => setOpenStory(coach)} />
+                ))}
+              </div>
+            ) : (
+              <div className="g5" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
+                {coaches.map((coach, idx) => (
+                  <CoachCard key={coach.id} coach={coach} view="grid" idx={idx} onStory={() => setOpenStory(coach)} />
+                ))}
+              </div>
+            )
           ) : (
             <div style={{ textAlign:'center', padding:'60px 0', color:TEXT_M, fontSize:14 }}>
               هیچ مربی با این فیلتر پیدا نشد
