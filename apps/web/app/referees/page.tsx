@@ -347,7 +347,7 @@ export default function RefereesPage() {
 
         {/* ══════════════ FILTER ══════════════ */}
         <div id="referees" style={{
-          position:'sticky', top:0, zIndex:50,
+          position:'sticky', top:72, zIndex:50,
           background:'rgba(246,244,240,0.90)',
           backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
           borderBottom:'1px solid rgba(17,17,16,0.08)',
