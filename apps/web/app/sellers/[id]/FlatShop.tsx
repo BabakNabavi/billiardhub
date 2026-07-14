@@ -227,7 +227,7 @@ export default function FlatShop() {
       </div>
 
       {/* بازه‌ی قیمت — سریع + دستی */}
-      <div className="py-5">
+      <div className="pt-5">
         <h4 className="mb-3.5 text-[13px] font-semibold">محدوده قیمت (تومان)</h4>
         <div className="mb-3 flex flex-wrap gap-2">
           {PRICE_RANGES.map((r, i) => {
@@ -350,7 +350,7 @@ export default function FlatShop() {
       <div className="mx-auto grid max-w-[1240px] grid-cols-1 gap-8 px-4 pb-20 pt-5 sm:px-6 min-[861px]:grid-cols-[236px_1fr]">
 
         {/* سایدبار دسکتاپ */}
-        <aside className="sticky top-[146px] hidden self-start min-[861px]:block">
+        <aside className="sticky top-[146px] hidden self-start rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_4px_20px_rgba(28,27,23,0.05)] min-[861px]:block">
           {FilterPanel}
         </aside>
 
