@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
+import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -31,6 +32,7 @@ interface Referee {
   id: string; name: string; specialty: string; city: string
   experience: number; grade: string; gradeColor: string
   hasStory: boolean; storyImage: string; bio: string; photo: string
+  verified?: boolean
 }
 
 const REFEREES: Referee[] = [
@@ -43,6 +45,38 @@ const REFEREES: Referee[] = [
   { id:'7',  name:'مینا صالحی',   specialty:'pocket',   city:'کرج',    experience:3,  grade:'داور درجه B',     gradeColor:'#16A34A', hasStory:false, storyImage:'',     bio:'داور درجه B پاکت بیلیارد — فعال در مسابقات استانی البرز و تهران',             photo:'' },
   { id:'8',  name:'کیان نوری',    specialty:'snooker',  city:'تهران',  experience:10, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(3), bio:'داور ملی اسنوکر — عضو هیئت داوران کنفدراسیون ACBS با تجربه ۱۰ ساله',        photo:'' },
 ]
+
+/* approved referees registered via /referees/dashboard → list cards */
+const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1404 } catch { return 1404 } })()
+
+function mapProfileToListReferee(p: RefereeProfile): Referee {
+  const b = badgeFromGrades(p.grades)
+  const firstYear = p.grades[0]?.year ? parseInt(p.grades[0].year, 10) : 0
+  return {
+    id: p.slug,
+    name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
+    specialty: p.disciplines[0] ?? 'snooker',
+    city: p.city,
+    experience: firstYear ? Math.max(0, CUR_JYEAR - firstYear) : 0,
+    grade: b?.label ?? 'داور',
+    gradeColor: b?.color ?? GOLD_D,
+    hasStory: false,
+    storyImage: '',
+    bio: p.shortBio || p.fullBio || '',
+    photo: p.photo || '',
+    verified: p.verified,
+  }
+}
+
+/* Instagram-style verified badge (shown next to verified referees) */
+function VerifiedBadge({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-label="تأیید شده" style={{ flexShrink: 0, marginInlineStart: 4, verticalAlign: '-2px', display: 'inline-block' }}>
+      <path fill="#0095F6" d="M19.998 3.094L14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094z" />
+      <path fill="#fff" d="M18.09 24.79l-4.28-4.28 1.53-1.53 2.75 2.75 6.57-6.57 1.53 1.53z" />
+    </svg>
+  )
+}
 
 /* ════════ HERO POSTERS — dark, billiard themed (slider) ════════ */
 const REFEREE_POSTERS = [
@@ -230,7 +264,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
           <RefereeAvatar referee={referee} onStory={onStory} size="58px"/>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}</h3>
+          <h3 style={{ fontSize:15, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{referee.name}{referee.verified && <VerifiedBadge size={14} />}</h3>
           <p style={{ fontSize:12, color:TEXT_S, marginBottom:5 }}>داور {sp?.label ?? 'بیلیارد'}</p>
           <div style={{ display:'flex', alignItems:'center', gap:5, color:TEXT_M }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -268,7 +302,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
       </div>
       {/* body */}
       <div style={{ padding:'12px 14px 18px', flex:1, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-        <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:4 }}>{referee.name}</h3>
+        <h3 style={{ fontSize:16, fontWeight:800, color:TEXT, lineHeight:1.2, letterSpacing:'-0.02em', marginBottom:4 }}>{referee.name}{referee.verified && <VerifiedBadge size={15} />}</h3>
         <p style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.35, marginBottom:9, minHeight:'2.7em', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>داور {sp?.label ?? 'بیلیارد'}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginBottom:13, color:TEXT_M }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -290,8 +324,12 @@ export default function RefereesPage() {
   const [search,    setSearch]    = useState('')
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [openStory, setOpenStory] = useState<Referee | null>(null)
+  const [localRefs, setLocalRefs] = useState<Referee[]>([])
+  useEffect(() => {
+    setLocalRefs(listRefereeProfiles().filter(p => p.status === 'approved').map(mapProfileToListReferee))
+  }, [])
   const q = search.trim()
-  const referees = REFEREES.filter(r =>
+  const referees = [...localRefs, ...REFEREES].filter(r =>
     (filter === 'all' || r.specialty === filter) &&
     (q === '' || r.name.includes(q) || r.city.includes(q))
   )
