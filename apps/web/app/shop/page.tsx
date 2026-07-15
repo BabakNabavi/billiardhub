@@ -351,14 +351,13 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
   }
 
   return (
-    <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', overflow: 'visible' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 16px', direction: 'rtl', overflow: 'visible' }}>
-        <h2 style={{ fontSize: 'clamp(16px,1.7vw,21px)', fontWeight: 700, color: TEXT, marginBottom: 18 }}>دسته‌بندی‌های بیلیارد بازار</h2>
+    <div style={{ background: '#fff', overflow: 'visible' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) 14px', direction: 'rtl', overflow: 'visible' }}>
         <div
           ref={scrollRef}
           className="cat-scroll"
           onMouseDown={onDown}
-          style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
             const active = activeCat === cat.id
@@ -374,7 +373,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                 style={{
                   textDecoration: 'none', flexShrink: 0, fontFamily: 'inherit',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-                  width: 72,
+                  width: 78,
                   /* white card background removed — just the icon tile + label */
                   background: 'transparent', border: 'none', boxShadow: 'none',
                   borderRadius: 21,
@@ -387,7 +386,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
               >
                 {/* icon container — subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 56, height: 56, borderRadius: '50%', flexShrink: 0,
+                  width: 62, height: 62, borderRadius: '50%', flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
                   border: `1px solid ${active ? cat.g[1] : `${cat.g[1]}52`}`,
                   boxShadow: hov ? `0 8px 22px ${cat.g[1]}66` : `0 4px 14px ${cat.g[1]}48`,
@@ -396,11 +395,11 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                   position: 'relative', zIndex: 1,
                   transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                 }}>
-                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.15)' }}>
+                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.25)' }}>
                     {cat.icon}
                   </div>
                 </div>
-                <span style={{ fontSize: 13.2, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span style={{ fontSize: 14.5, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </button>
@@ -675,16 +674,12 @@ function CatalogSection({
   )
 
   return (
-    <div id="bazaar-catalog" style={{ background: 'linear-gradient(to bottom,#E8E4DD 0,#E8E4DD clamp(130px,16vw,190px),#F7F6F4 clamp(220px,26vw,300px),#F7F6F4 100%)' }}>
+    <div id="bazaar-catalog" style={{ background: '#F7F6F4' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 44px', direction: 'rtl' }}>
 
         {/* toolbar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>محصولات بیلیارد بازار</h2>
-            <span style={{ fontSize: 12.5, color: TEXT_SEC, fontVariantNumeric: 'tabular-nums' }}>{toFa(visible.length)} کالا</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginInlineStart: 'auto' }}>
             {/* فیلتر موبایل */}
             <button
               type="button" onClick={() => setSheetOpen(true)} className="bz-filterbtn lq-lift"
@@ -723,22 +718,22 @@ function CatalogSection({
                   <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                     <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     {p.disc > 0 && (
-                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                         {toFa(p.disc)}٪
                       </div>
                     )}
                   </div>
                   <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ fontSize: 13.2, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                    <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{p.sellerName}</span>
+                    <span style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                    <span style={{ fontSize: 12.65, color: TEXT_MUT }}>{p.sellerName}</span>
                     <div style={{ marginTop: 'auto' }}>
                       {p.disc > 0 && (
-                        <div style={{ fontSize: 12, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                        <div style={{ fontSize: 13.2, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
                           {fmt(p.old)} تومان
                         </div>
                       )}
-                      <div style={{ fontSize: 14.3, fontWeight: 800, color: '#1A6B3A' }}>
-                        {fmt(p.price)} <span style={{ fontSize: 12, fontWeight: 500 }}>تومان</span>
+                      <div style={{ fontSize: 15.7, fontWeight: 800, color: '#1A6B3A' }}>
+                        {fmt(p.price)} <span style={{ fontSize: 13.2, fontWeight: 500 }}>تومان</span>
                       </div>
                     </div>
                   </div>
@@ -948,21 +943,21 @@ function DealsSection() {
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.1)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                     {toFa(p.disc)}٪
                   </div>
                 )}
               </div>
               <div style={{ padding: '10px 10px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <span style={{ fontSize: 13.2, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <span style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                 <div style={{ marginTop: 'auto' }}>
                   {p.disc > 0 && (
-                    <div style={{ fontSize: 12, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 1 }}>
+                    <div style={{ fontSize: 13.2, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 1 }}>
                       {fmt(p.old)} تومان
                     </div>
                   )}
-                  <div style={{ fontSize: 14.3, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                  <div style={{ fontSize: 15.7, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 12.1, fontWeight: 500 }}>تومان</span>
                   </div>
                 </div>
               </div>
@@ -1032,21 +1027,21 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
                 {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                     {toFa(p.disc)}٪
                   </div>
                 )}
               </div>
               <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 13.2, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <span style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                 <div style={{ marginTop: 'auto' }}>
                   {p.disc > 0 && (
-                    <div style={{ fontSize: 12, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                    <div style={{ fontSize: 13.2, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
                       {fmt(p.old)} تومان
                     </div>
                   )}
-                  <div style={{ fontSize: 14.3, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 12, fontWeight: 500 }}>تومان</span>
+                  <div style={{ fontSize: 15.7, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 13.2, fontWeight: 500 }}>تومان</span>
                   </div>
                 </div>
               </div>
