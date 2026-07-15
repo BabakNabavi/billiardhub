@@ -25,34 +25,40 @@ const LQ = {
 // ── Slides (گوی → توپ) ────────────────────────────────────────
 const SLIDES = [
   {
-    img: '/images/shop/snooker-table.jpg',
+    img: '/images/ads/1.gif',
     badge: 'میز اسنوکر', title: 'میزهای حرفه‌ای',
     sub: 'بهترین برندهای جهانی — ارسال به سراسر ایران',
     cta: 'مشاهده میزها', href: '/shop/category/table',
   },
   {
-    img: '/images/shop/cue_billiard_2.jpg',
+    img: '/images/ads/2.webp',
     badge: 'چوب بیلیارد', title: 'چوب‌های حرفه‌ای',
     sub: 'از کلاسیک تا کربن فایبر — برای هر سبک بازی',
     cta: 'مشاهده چوب‌ها', href: '/shop/category/cue',
   },
   {
-    img: '/images/shop/Ball-1.jpg',
+    img: '/images/ads/3.webp',
     badge: 'توپ بیلیارد', title: 'توپ‌های استاندارد',
     sub: 'توپ‌های Aramith، Cyclop و سایر برندهای معتبر',
     cta: 'مشاهده توپ‌ها', href: '/shop/category/ball',
   },
   {
-    img: '/images/shop/Home_table.jpg',
+    img: '/images/ads/4.webp',
     badge: 'میز خانگی', title: 'بیلیارد در خانه',
     sub: 'میزهای کمپکت و زیبا برای منزل و اداره',
     cta: 'خرید میز خانگی', href: '/shop/category/table',
   },
   {
-    img: '/images/shop/pool_chalk_1.jpg',
+    img: '/images/ads/5.gif',
     badge: 'لوازم جانبی', title: 'اکسسوری کامل',
     sub: 'گچ، نگهدارنده، کیف چوب و بیش از ۵۰۰ محصول',
     cta: 'مشاهده لوازم', href: '/shop/category/accessory',
+  },
+  {
+    img: '/images/ads/6.gif',
+    badge: 'بیلیارد بازار', title: 'فروشگاه بیلیارد هاب',
+    sub: 'همه‌ی تجهیزات بیلیارد در یک جا',
+    cta: 'ورود به فروشگاه', href: '/shop',
   },
 ]
 
@@ -249,9 +255,8 @@ function ShopTopBar({
           <div style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.28)' }}>
             <img src="/images/Logo/logo-256x256.png" alt="بیلیارد بازار" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div className="bb-brand" style={{ display: 'flex', flexDirection: 'column', gap: 1, lineHeight: 1 }}>
-            <span style={{ fontFamily: '"Playfair Display",Georgia,serif', fontSize: 14, fontWeight: 700, color: '#1C1C1A', letterSpacing: '0.04em' }}>Billiard</span>
-            <span style={{ fontFamily: '"Playfair Display",Georgia,serif', fontSize: 14, fontWeight: 900, color: GOLD, letterSpacing: '0.08em', fontStyle: 'italic' }}>Bazzar</span>
+          <div className="bb-brand" style={{ display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
+            <span style={{ fontWeight: 900, fontSize: 18, letterSpacing: '-0.03em', color: '#1C1C1A', whiteSpace: 'nowrap' }}>بیلیارد <span style={{ color: GOLD }}>هاب</span></span>
           </div>
         </Link>
         <div className="bb-divider" style={{ width: 1, height: 28, background: 'rgba(28,28,26,0.08)', flexShrink: 0 }} />
@@ -368,14 +373,14 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
   }
 
   return (
-    <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', borderBottom: '1px solid rgba(28,28,26,0.07)', overflow: 'visible' }}>
+    <div style={{ background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 50%,#E8E4DD 100%)', overflow: 'visible' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '22px clamp(16px,3vw,32px) 16px', direction: 'rtl', overflow: 'visible' }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: TEXT, marginBottom: 18 }}>دسته‌بندی‌های بیلیارد بازار</h2>
+        <h2 style={{ fontSize: 'clamp(16px,1.7vw,21px)', fontWeight: 700, color: TEXT, marginBottom: 18 }}>دسته‌بندی‌های بیلیارد بازار</h2>
         <div
           ref={scrollRef}
           className="cat-scroll"
           onMouseDown={onDown}
-          style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
             const active = activeCat === cat.id
@@ -404,7 +409,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
               >
                 {/* icon container — subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 46, height: 46, borderRadius: 13, flexShrink: 0,
+                  width: 51, height: 51, borderRadius: 14, flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
                   border: `1px solid ${active ? cat.g[1] : `${cat.g[1]}52`}`,
                   boxShadow: hov ? `0 8px 22px ${cat.g[1]}66` : `0 4px 14px ${cat.g[1]}48`,
@@ -413,11 +418,11 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                   position: 'relative', zIndex: 1,
                   transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                 }}>
-                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(0.95)' }}>
+                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.05)' }}>
                     {cat.icon}
                   </div>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </button>
@@ -692,7 +697,7 @@ function CatalogSection({
   )
 
   return (
-    <div id="bazaar-catalog" style={{ background: '#F7F6F4' }}>
+    <div id="bazaar-catalog" style={{ background: 'linear-gradient(to bottom,#E8E4DD 0,#E8E4DD clamp(130px,16vw,190px),#F7F6F4 clamp(220px,26vw,300px),#F7F6F4 100%)' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 44px', direction: 'rtl' }}>
 
         {/* toolbar */}
@@ -740,22 +745,22 @@ function CatalogSection({
                   <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                     <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     {p.disc > 0 && (
-                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                         {toFa(p.disc)}٪
                       </div>
                     )}
                   </div>
                   <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                    <span style={{ fontSize: 10.5, color: TEXT_MUT }}>{p.sellerName}</span>
+                    <span style={{ fontSize: 13.2, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                    <span style={{ fontSize: 11.5, color: TEXT_MUT }}>{p.sellerName}</span>
                     <div style={{ marginTop: 'auto' }}>
                       {p.disc > 0 && (
-                        <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                        <div style={{ fontSize: 12, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
                           {fmt(p.old)} تومان
                         </div>
                       )}
-                      <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
-                        {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                      <div style={{ fontSize: 14.3, fontWeight: 800, color: '#1A6B3A' }}>
+                        {fmt(p.price)} <span style={{ fontSize: 12, fontWeight: 500 }}>تومان</span>
                       </div>
                     </div>
                   </div>
@@ -1205,7 +1210,6 @@ export default function ShopPage() {
         .banner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(28,28,26,0.16) !important; }
         @media(max-width:600px) { .dual-banner { flex-direction: column !important; } }
         @media(max-width:600px) {
-          .bb-brand   { display: none !important; }
           .bb-divider { display: none !important; }
           .hero-slider { height: clamp(190px,56vw,320px) !important; }
         }
