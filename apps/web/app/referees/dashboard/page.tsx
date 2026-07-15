@@ -1,740 +1,600 @@
-﻿'use client';
-
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { useAuthStore } from '../../../store/auth.store';
-import AuthGuard from '../../../components/AuthGuard';
+'use client'
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { useAuthStore } from '../../../store/auth.store'
+import AuthGuard from '../../../components/AuthGuard'
 import {
-    Shield, Activity, Clock, CheckCircle, AlertCircle,
-    ChevronRight, Check, X, Edit, Eye, Users,
-    Trophy, Calendar, Zap, Target, BarChart2,
-    MessageCircle, Settings, Play, Pause, Square,
-    Flag, RotateCcw, ChevronUp, ChevronDown, Plus, Award, Star, Camera
-} from 'lucide-react';
+  GRADES, DISCIPLINES, getRefereeProfiles, saveRefereeProfile,
+  type RefereeProfile, type RefereeGrade, type RefereeMedia, type RefereeVideo,
+} from '../../../lib/referee-store'
 import {
-    STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory, type StoredStory,
-} from '../../../lib/story-store';
+  STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory, type StoredStory,
+} from '../../../lib/story-store'
+import { isValidSlug } from '../../../lib/slug'
 
-/* ══ types ══ */
-type MatchStatus = 'scheduled' | 'live' | 'break' | 'completed' | 'disputed';
-type DisputeStatus = 'open' | 'resolved' | 'escalated';
-type Tab = 'overview' | 'live' | 'schedule' | 'reports' | 'disputes' | 'stories';
+/* ─── Tokens ─── */
+const GOLD   = '#C7A66A'
+const GOLD_D = '#9A6E38'
+const BG     = '#F6F4F0'
+const TEXT   = '#111110'
+const TEXT_S = 'rgba(17,17,16,0.52)'
+const TEXT_M = 'rgba(17,17,16,0.30)'
+const CBOR   = '1px solid rgba(17,17,16,0.10)'
 
-interface LiveMatch {
-    id: string; player1: string; player2: string;
-    score1: number; score2: number; frame: number;
-    totalFrames: number; status: MatchStatus;
-    table: string; tournament: string; round: string;
-    startTime: string; elapsed: number;
-    currentBreak: number; p1Break: number; p2Break: number;
-    foulCount: number; timeouts: { p1: number; p2: number };
+const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+  const r = new FileReader()
+  r.onload  = () => resolve(String(r.result))
+  r.onerror = reject
+  r.readAsDataURL(file)
+})
+
+/* Downscale + re-encode images to keep localStorage well under quota. */
+const compressImage = (file: File, maxDim: number, quality = 0.72): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('read failed'))
+    reader.onload = () => {
+      const dataUrl = String(reader.result)
+      const im = document.createElement('img')
+      im.onerror = () => resolve(dataUrl)
+      im.onload = () => {
+        let w = im.naturalWidth || im.width
+        let h = im.naturalHeight || im.height
+        if (w >= h && w > maxDim)      { h = Math.round((h * maxDim) / w); w = maxDim }
+        else if (h > w && h > maxDim)  { w = Math.round((w * maxDim) / h); h = maxDim }
+        const canvas = document.createElement('canvas')
+        canvas.width = w; canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { resolve(dataUrl); return }
+        ctx.drawImage(im, 0, 0, w, h)
+        try { resolve(canvas.toDataURL('image/jpeg', quality)) } catch { resolve(dataUrl) }
+      }
+      im.src = dataUrl
+    }
+    reader.readAsDataURL(file)
+  })
+
+/* Re-compress an existing data URL (e.g. images loaded from a saved draft). */
+const compressDataUrl = (dataUrl: string, maxDim: number, quality = 0.72): Promise<string> =>
+  new Promise((resolve) => {
+    if (!dataUrl || !dataUrl.startsWith('data:image')) { resolve(dataUrl); return }
+    const im = document.createElement('img')
+    im.onerror = () => resolve(dataUrl)
+    im.onload = () => {
+      let w = im.naturalWidth || im.width
+      let h = im.naturalHeight || im.height
+      if (w >= h && w > maxDim)      { h = Math.round((h * maxDim) / w); w = maxDim }
+      else if (h > w && h > maxDim)  { w = Math.round((w * maxDim) / h); h = maxDim }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { resolve(dataUrl); return }
+      ctx.drawImage(im, 0, 0, w, h)
+      try { resolve(canvas.toDataURL('image/jpeg', quality)) } catch { resolve(dataUrl) }
+    }
+    im.src = dataUrl
+  })
+
+const rid = () => Math.random().toString(36).slice(2, 9)
+
+const emptyForm = {
+  slug: '', firstNameFa: '', lastNameFa: '', firstNameEn: '', lastNameEn: '',
+  city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
+  grades: [] as RefereeGrade[], gallery: [] as RefereeMedia[], videos: [] as RefereeVideo[],
+  phone: '', whatsapp: '', instagram: '', telegram: '',
+  photo: '', coverImage: '', certificate: null as { name: string; url: string } | null,
 }
+type FormState = typeof emptyForm
 
-interface ScheduledMatch {
-    id: string; player1: string; player2: string;
-    tournament: string; round: string;
-    table: string; time: string; date: string; status: MatchStatus;
-}
+/* small style helpers */
+const card: React.CSSProperties = { background: '#fff', border: CBOR, borderRadius: 16, padding: '22px 24px', boxShadow: '0 2px 16px rgba(17,17,16,0.05)' }
+const inp:  React.CSSProperties = { width: '100%', padding: '10px 13px', border: '1px solid rgba(17,17,16,0.14)', borderRadius: 10, fontSize: 14, fontFamily: 'inherit', background: '#fff', color: TEXT, outline: 'none' }
+const inpRO: React.CSSProperties = { ...inp, background: 'rgba(17,17,16,0.045)', color: 'rgba(17,17,16,0.60)', cursor: 'not-allowed' }
+const lbl:  React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 700, color: TEXT_S, marginBottom: 6 }
+const lqBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, borderRadius: 10, fontWeight: 700, fontSize: 14, padding: '11px 22px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none' }
+const sectionTitle = (t: string, n: number) => (
+  <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 9 }}>
+    <span style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(199,166,106,0.14)', color: GOLD_D, fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{n}</span>
+    {t}
+  </h2>
+)
 
-interface Dispute {
-    id: string; match: string; player: string;
-    issue: string; time: string; status: DisputeStatus;
-    description: string;
-}
+function RefereeDashboardInner() {
+  const { user, _hydrated } = useAuthStore()
+  const [form, setForm]       = useState<FormState>(emptyForm)
+  const [errors, setErrors]   = useState<Record<string, string>>({})
+  const [topError, setTopErr] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const galleryInput = useRef<HTMLInputElement>(null)
+  const videoInput   = useRef<HTMLInputElement>(null)
 
-interface Report {
-    id: string; match: string; tournament: string;
-    date: string; result: string; submitted: boolean;
-    duration: string; incidents: number;
-}
+  /* Stories — published independently of the profile; feed the home stories bar */
+  const [storyList, setStoryList]   = useState<StoredStory[]>([])
+  const [storyDraft, setStoryDraft] = useState<{ url: string; caption: string } | null>(null)
+  const [storyBusy, setStoryBusy]   = useState(false)
+  const storyInput = useRef<HTMLInputElement>(null)
 
-/* ══ data ══ */
-const LIVE_MATCHES: LiveMatch[] = [
-    {
-        id: 'lm1', player1: 'امیرحسین رضایی', player2: 'سعید موسوی',
-        score1: 4, score2: 3, frame: 8, totalFrames: 11, status: 'live',
-        table: 'میز ۱', tournament: 'لیگ برتر ۱۴۰۴', round: 'نیمه‌نهایی',
-        startTime: '۱۴:۰۰', elapsed: 142, currentBreak: 47,
-        p1Break: 143, p2Break: 121, foulCount: 2,
-        timeouts: { p1: 1, p2: 0 },
-    },
-    {
-        id: 'lm2', player1: 'محمد حسینی', player2: 'رضا کریمی',
-        score1: 2, score2: 2, frame: 5, totalFrames: 11, status: 'break',
-        table: 'میز ۲', tournament: 'لیگ برتر ۱۴۰۴', round: 'نیمه‌نهایی',
-        startTime: '۱۴:۰۰', elapsed: 98, currentBreak: 0,
-        p1Break: 95, p2Break: 112, foulCount: 1,
-        timeouts: { p1: 0, p2: 1 },
-    },
-];
+  /* prefill from the logged-in user; load existing submission if any */
+  useEffect(() => {
+    if (!_hydrated) return
+    const mine = user?.phone ? Object.values(getRefereeProfiles()).find(p => p.ownerPhone === user.phone) : null
+    if (mine) {
+      setForm({
+        slug: mine.slug, firstNameFa: user?.firstName || mine.firstNameFa, lastNameFa: user?.lastName || mine.lastNameFa,
+        firstNameEn: mine.firstNameEn, lastNameEn: mine.lastNameEn, city: mine.city,
+        disciplines: mine.disciplines, shortBio: mine.shortBio, fullBio: mine.fullBio,
+        grades: mine.grades, gallery: mine.gallery, videos: mine.videos,
+        phone: mine.phone, whatsapp: mine.whatsapp, instagram: mine.instagram, telegram: mine.telegram,
+        photo: mine.photo, coverImage: mine.coverImage, certificate: mine.certificate,
+      })
+    } else if (user) {
+      setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
+    }
+  }, [_hydrated, user])
 
-const SCHEDULED: ScheduledMatch[] = [
-    { id: 'sm1', player1: 'نیما نوری', player2: 'کاوه رستمی', tournament: 'جام جوانان', round: 'ربع‌نهایی', table: 'میز ۳', time: '۱۸:۰۰', date: 'امروز', status: 'scheduled' },
-    { id: 'sm2', player1: 'علی صادقی', player2: 'حسین فتحی', tournament: 'جام جوانان', round: 'ربع‌نهایی', table: 'میز ۴', time: '۲۰:۰۰', date: 'امروز', status: 'scheduled' },
-    { id: 'sm3', player1: 'مریم احمدی', player2: 'نازنین رضایی', tournament: 'لیگ بانوان', round: 'فینال', table: 'میز ۱', time: '۱۰:۰۰', date: 'فردا', status: 'scheduled' },
-];
+  /* owner key must match the one the home stories bar groups by (Stories.tsx) */
+  const ownerKey = user?.phone || user?.id || user?.firstName || 'referee'
+  const refRole = STORY_ROLES.referee!
+  useEffect(() => { if (_hydrated) setStoryList(getOwnerStories(ownerKey)) }, [_hydrated, ownerKey])
 
-const DISPUTES: Dispute[] = [
-    { id: 'd1', match: 'رضایی vs موسوی', player: 'سعید موسوی', issue: 'اعتراض به خطای اعلام‌شده', time: '۱۴:۳۲', status: 'open', description: 'بازیکن معتقد است توپ از روی خط خارج نشده بود.' },
-    { id: 'd2', match: 'حسینی vs کریمی', player: 'محمد حسینی', issue: 'اعتراض به تایم‌اوت رقیب', time: '۱۳:۱۵', status: 'resolved', description: 'طبق قوانین تایم‌اوت مجاز بود.' },
-];
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }))
 
-const REPORTS: Report[] = [
-    { id: 'rp1', match: 'رضایی vs موسوی ۶-۲', tournament: 'لیگ برتر', date: 'دیروز', result: 'رضایی پیروز', submitted: true, duration: '۱:۴۵', incidents: 1 },
-    { id: 'rp2', match: 'نوری vs رستمی ۶-۴', tournament: 'لیگ برتر', date: 'دیروز', result: 'نوری پیروز', submitted: true, duration: '۲:۱۲', incidents: 0 },
-    { id: 'rp3', match: 'حسینی vs کریمی (جاری)', tournament: 'لیگ برتر', date: 'امروز', result: 'در حال بازی', submitted: false, duration: '—', incidents: 1 },
-];
+  const curJYear = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1405 } catch { return 1405 } })()
+  const YEARS = Array.from({ length: 61 }, (_, i) => curJYear - i)
 
-function toFa(v: string | number) { return String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d))); }
+  const toggleDiscipline = (k: string) =>
+    setForm(f => ({ ...f, disciplines: f.disciplines.includes(k) ? f.disciplines.filter(x => x !== k) : [...f.disciplines, k] }))
 
-function pad(n: number) { return String(n).padStart(2, '0'); }
+  const gradeSelected = (k: string) => form.grades.some(g => g.key === k)
+  // grades are cumulative: selecting one auto-selects all lower grades; deselecting drops it + all higher
+  const toggleGrade = (idx: number) =>
+    setForm(f => {
+      const g = GRADES[idx]!
+      const isOn = f.grades.some(x => x.key === g.key)
+      const yearOf = (k: string) => f.grades.find(x => x.key === k)?.year ?? ''
+      if (isOn) {
+        const keep = new Set(GRADES.slice(0, idx).map(x => x.key))
+        return { ...f, grades: f.grades.filter(x => keep.has(x.key)) }
+      }
+      return { ...f, grades: GRADES.slice(0, idx + 1).map(x => ({ key: x.key, label: x.label, year: yearOf(x.key) })) }
+    })
+  const setGradeYear = (k: string, year: string) =>
+    setForm(f => ({ ...f, grades: f.grades.map(g => (g.key === k ? { ...g, year } : g)) }))
 
-const rid = () => Math.random().toString(36).slice(2, 9);
+  const suggestSlug = () => {
+    const base = `${form.firstNameEn} ${form.lastNameEn}`.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    if (base) set('slug', base)
+  }
+  const slugTaken = () => {
+    const p = getRefereeProfiles()[form.slug]
+    return !!p && p.ownerPhone !== user?.phone
+  }
 
-/* Downscale + re-encode a story image before storing (localStorage quota). */
-function compressStoryImage(file: File, maxDim = 1080, quality = 0.72): Promise<string> {
-    return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onerror = () => resolve('');
-        reader.onload = () => {
-            const dataUrl = String(reader.result);
-            const im = document.createElement('img');
-            im.onerror = () => resolve(dataUrl);
-            im.onload = () => {
-                let w = im.naturalWidth || im.width;
-                let h = im.naturalHeight || im.height;
-                if (w >= h && w > maxDim)     { h = Math.round((h * maxDim) / w); w = maxDim; }
-                else if (h > w && h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
-                const canvas = document.createElement('canvas');
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) { resolve(dataUrl); return; }
-                ctx.drawImage(im, 0, 0, w, h);
-                try { resolve(canvas.toDataURL('image/jpeg', quality)); } catch { resolve(dataUrl); }
-            };
-            im.src = dataUrl;
-        };
-        reader.readAsDataURL(file);
-    });
-}
+  const addPhoto = async (file?: File) => { if (file) set('photo', await compressImage(file, 480, 0.82)) }
+  const addCover = async (file?: File) => { if (file) set('coverImage', await compressImage(file, 1280, 0.72)) }
+  const addGallery = async (files: FileList | null) => {
+    if (!files) return
+    const items: RefereeMedia[] = []
+    for (const f of Array.from(files).slice(0, 12)) items.push({ id: rid(), url: await compressImage(f, 1100, 0.72), caption: '' })
+    setForm(f => ({ ...f, gallery: [...f.gallery, ...items] }))
+  }
+  const setCaption = (id: string, caption: string) =>
+    setForm(f => ({ ...f, gallery: f.gallery.map(g => (g.id === id ? { ...g, caption } : g)) }))
+  const removeGallery = (id: string) => setForm(f => ({ ...f, gallery: f.gallery.filter(g => g.id !== id) }))
 
-function ElapsedTimer({ seconds }: { seconds: number }) {
-    const [t, setT] = useState(seconds);
-    useEffect(() => {
-        const i = setInterval(() => setT(p => p + 1), 1000);
-        return () => clearInterval(i);
-    }, []);
-    const m = Math.floor(t / 60), s = t % 60;
-    return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{toFa(pad(m))}:{toFa(pad(s))}</span>;
-}
+  const addVideo = async (file?: File) => {
+    const thumb = file ? await compressImage(file, 720, 0.72) : ''
+    setForm(f => ({ ...f, videos: [...f.videos, { id: rid(), thumbnail: thumb, title: '', duration: '' }] }))
+  }
+  const setVideo = (id: string, patch: Partial<RefereeVideo>) =>
+    setForm(f => ({ ...f, videos: f.videos.map(v => (v.id === id ? { ...v, ...patch } : v)) }))
+  const removeVideo = (id: string) => setForm(f => ({ ...f, videos: f.videos.filter(v => v.id !== id) }))
 
-/* ══ Live Match Control Panel ══ */
-function LiveControl({ match }: { match: LiveMatch }) {
-    const [score1, setScore1] = useState(match.score1);
-    const [score2, setScore2] = useState(match.score2);
-    const [curBreak, setCurBreak] = useState(match.currentBreak);
-    const [status, setStatus] = useState(match.status);
-    const [foul, setFoul] = useState(match.foulCount);
-    const [showFoulModal, setFoulModal] = useState(false);
-    const accentMap: Record<string, string> = { live: '#ef4444', break: '#f59e0b', completed: '#C7A66A', scheduled: '#06b6d4', disputed: '#a78bfa' };
-    const accent = accentMap[status] ?? '#C7A66A';
-    const pct1 = match.totalFrames > 0 ? (score1 / (Math.ceil(match.totalFrames / 2))) * 100 : 0;
-    const pct2 = match.totalFrames > 0 ? (score2 / (Math.ceil(match.totalFrames / 2))) * 100 : 0;
+  const addCertificate = async (file?: File) => {
+    if (!file) return
+    const url = file.type.startsWith('image/') ? await compressImage(file, 1500, 0.8) : await fileToDataUrl(file)
+    set('certificate', { name: file.name, url })
+    setErrors(e => { const n = { ...e }; delete n.certificate; return n })
+  }
 
+  /* ── Stories: publish immediately (independent of the profile form) ── */
+  const pickStoryImage = async (file?: File) => {
+    if (!file) return
+    setStoryBusy(true)
+    try {
+      const url = await compressImage(file, 1080, 0.72)
+      setStoryDraft(d => ({ url, caption: d?.caption ?? '' }))
+    } finally { setStoryBusy(false) }
+  }
+  const publishStory = () => {
+    if (!storyDraft?.url || storyList.length >= 10) return
+    const name = `${form.firstNameFa || user?.firstName || ''} ${form.lastNameFa || user?.lastName || ''}`.trim() || 'داور'
+    addStoredStory({
+      id: `st-${Date.now()}-${rid()}`,
+      ownerKey,
+      userName: name,
+      roleKey: 'referee', roleLabel: refRole.label, roleColor: refRole.color,
+      avatar: (form.firstNameFa || user?.firstName || 'د').charAt(0) || 'د',
+      logoUrl: form.photo || user?.avatar || undefined,
+      mediaUrl: storyDraft.url,
+      caption: storyDraft.caption.trim(),
+      createdAt: Date.now(),
+    })
+    setStoryDraft(null)
+    setStoryList(getOwnerStories(ownerKey))
+  }
+  const deleteStory = (id: string) => { removeStoredStory(id); setStoryList(getOwnerStories(ownerKey)) }
+
+  /* ── validation — certificate is MANDATORY for referees ── */
+  const validate = (): boolean => {
+    const e: Record<string, string> = {}
+    if (!form.firstNameFa.trim()) e.firstNameFa = 'الزامی'
+    if (!form.lastNameFa.trim())  e.lastNameFa  = 'الزامی'
+    if (!form.firstNameEn.trim()) e.firstNameEn = 'الزامی'
+    if (!form.lastNameEn.trim())  e.lastNameEn  = 'الزامی'
+    if (!form.city.trim())        e.city        = 'الزامی'
+    if (!form.slug.trim())        e.slug        = 'الزامی'
+    else if (!isValidSlug(form.slug)) e.slug     = 'فقط حروف انگلیسی، عدد و خط تیره (۲ تا ۶۰ کاراکتر)'
+    else if (slugTaken())         e.slug        = 'این نشانی قبلاً استفاده شده است'
+    if (form.disciplines.length === 0) e.disciplines = 'حداقل یک رشته را انتخاب کنید'
+    if (!form.fullBio.trim())     e.fullBio     = 'الزامی'
+    if (!form.certificate)        e.certificate = 'آپلود مدرک داوری الزامی است — بدون مدرک امکان ثبت پروفایل وجود ندارد.'
+    setErrors(e)
+    if (Object.keys(e).length) {
+      setTopErr(e.certificate ? 'برای ثبت پروفایل داوری، آپلود مدرک داوری الزامی است. لطفاً فیلدهای مشخص‌شده را کامل کنید.' : 'لطفاً فیلدهای الزامی مشخص‌شده را تکمیل کنید.')
+      return false
+    }
+    setTopErr('')
+    return true
+  }
+
+  const doSubmit = async () => {
+    // re-compress every image (covers images loaded from an earlier draft, not just fresh uploads)
+    const [photo, coverImage] = await Promise.all([
+      compressDataUrl(form.photo, 480, 0.8),
+      compressDataUrl(form.coverImage, 1200, 0.7),
+    ])
+    const gallery = await Promise.all(form.gallery.map(async g => ({ ...g, url: await compressDataUrl(g.url, 1000, 0.68) })))
+    const videos  = await Promise.all(form.videos.map(async v => ({ ...v, thumbnail: await compressDataUrl(v.thumbnail, 700, 0.7) })))
+    const certificate = form.certificate && form.certificate.url.startsWith('data:image')
+      ? { ...form.certificate, url: await compressDataUrl(form.certificate.url, 1300, 0.75) }
+      : form.certificate
+    const profile: RefereeProfile = {
+      ...form, photo, coverImage, gallery, videos, certificate,
+      slug: form.slug.trim().toLowerCase(),
+      status: 'pending',
+      verified: false,
+      submittedAt: new Date().toISOString(),
+      ownerPhone: user?.phone || '',
+    }
+    try {
+      saveRefereeProfile(profile)
+    } catch {
+      setTopErr('حجم تصاویر بیش از ظرفیت مجاز مرورگر است. لطفاً تعداد یا حجم تصاویرِ گالری / کاور / مدرک را کمتر کنید و دوباره ثبت کنید.')
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    setSubmitted(true)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const onSubmit = () => {
+    if (!validate()) { window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    void doSubmit()
+  }
+
+  /* ── success screen ── */
+  if (submitted) {
     return (
-        <div style={{ background: '#FFFFFF', border: `1px solid ${accent}20`, borderRadius: '22px', overflow: 'hidden', position: 'relative' }}>
-            {/* Glow top */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg,transparent,${accent}70,transparent)`, boxShadow: `0 0 14px ${accent}50` }} />
-
-            {/* Header */}
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-                <div>
-                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.40)', letterSpacing: '0.12em', marginBottom: '3px' }}>{match.tournament} · {match.round}</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {match.table}
-                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 9px', borderRadius: '20px', background: `${accent}12`, border: `1px solid ${accent}25`, color: accent }}>
-                            {status === 'live' ? 'LIVE' : status === 'break' ? 'BREAK' : status === 'completed' ? 'FINAL' : '—'}
-                        </span>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', fontVariantNumeric: 'tabular-nums' }}>
-                    <Clock size={13} style={{ color: accent }} />
-                    {status === 'live' ? <ElapsedTimer seconds={match.elapsed} /> : toFa(pad(Math.floor(match.elapsed / 60))) + ':' + toFa(pad(match.elapsed % 60))}
-                </div>
-            </div>
-
-            {/* Scoreboard */}
-            <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '16px', alignItems: 'center' }}>
-
-                {/* Player 1 */}
-                <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 'clamp(14px, 2.2vw, 17px)', fontWeight: 800, color: '#111111', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {match.player1.split(' ').pop()}
-                    </div>
-                    {/* Score buttons */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
-                        <button onClick={() => setScore1(s => Math.max(0, s - 1))} style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                            <ChevronDown size={13} />
-                        </button>
-                        <div style={{ fontSize: '46px', fontWeight: 900, color: score1 > score2 ? '#C7A66A' : '#f0faf5', letterSpacing: '-0.04em', lineHeight: 1, textShadow: score1 > score2 ? '0 0 24px rgba(199,166,106,0.5)' : 'none', transition: 'all 0.3s' }}>
-                            {toFa(score1)}
-                        </div>
-                        <button onClick={() => setScore1(s => s + 1)} style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', cursor: 'pointer', color: '#C7A66A', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                            <ChevronUp size={13} />
-                        </button>
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginTop: '6px' }}>بالاترین بریک: {toFa(match.p1Break)}</div>
-                </div>
-
-                {/* Center */}
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.30)', marginBottom: '4px' }}>فریم {toFa(score1 + score2)} از {toFa(match.totalFrames)}</div>
-                    <div style={{ fontSize: '18px', fontWeight: 900, color: 'rgba(0,0,0,0.30)', letterSpacing: '-0.02em' }}>:</div>
-                    <div style={{ marginTop: '8px' }}>
-                        <div style={{ fontSize: '13px', color: curBreak > 0 ? '#f59e0b' : 'rgba(0,0,0,0.30)', fontWeight: 700 }}>
-                            {curBreak > 0 ? `بریک: ${toFa(curBreak)}` : '—'}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Player 2 */}
-                <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 'clamp(14px, 2.2vw, 17px)', fontWeight: 800, color: '#111111', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {match.player2.split(' ').pop()}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <button onClick={() => setScore2(s => Math.max(0, s - 1))} style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <ChevronDown size={13} />
-                        </button>
-                        <div style={{ fontSize: '46px', fontWeight: 900, color: score2 > score1 ? '#C7A66A' : '#f0faf5', letterSpacing: '-0.04em', lineHeight: 1, textShadow: score2 > score1 ? '0 0 24px rgba(199,166,106,0.5)' : 'none', transition: 'all 0.3s' }}>
-                            {toFa(score2)}
-                        </div>
-                        <button onClick={() => setScore2(s => s + 1)} style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', cursor: 'pointer', color: '#C7A66A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <ChevronUp size={13} />
-                        </button>
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)', marginTop: '6px' }}>بالاترین بریک: {toFa(match.p2Break)}</div>
-                </div>
-            </div>
-
-            {/* Frame progress */}
-            <div style={{ padding: '0 20px 16px' }}>
-                <div style={{ display: 'flex', gap: '3px' }}>
-                    {Array.from({ length: match.totalFrames }).map((_, i) => (
-                        <div key={i} style={{ flex: 1, height: '5px', borderRadius: '3px', background: i < score1 ? '#C7A66A' : i >= match.totalFrames - score2 ? '#06b6d4' : 'rgba(0,0,0,0.07)', boxShadow: i < score1 ? '0 0 6px rgba(199,166,106,0.5)' : i >= match.totalFrames - score2 ? '0 0 6px rgba(6,182,212,0.5)' : 'none', transition: 'all 0.3s' }} />
-                    ))}
-                </div>
-            </div>
-
-            {/* Controls */}
-            <div style={{ padding: '14px 20px 18px', borderTop: '1px solid rgba(0,0,0,0.04)', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                {/* Match controls */}
-                <div style={{ display: 'flex', gap: '6px', flex: 1, flexWrap: 'wrap' }}>
-                    {[
-                        { icon: <Play size={13} />, label: 'ادامه', color: '#C7A66A', action: () => setStatus('live'), show: status === 'break' || status === 'scheduled' },
-                        { icon: <Pause size={13} />, label: 'استراحت', color: '#f59e0b', action: () => setStatus('break'), show: status === 'live' },
-                        { icon: <Square size={13} />, label: 'پایان', color: '#ef4444', action: () => setStatus('completed'), show: status === 'live' || status === 'break' },
-                        { icon: <RotateCcw size={13} />, label: 'ریست', color: '#06b6d4', action: () => setCurBreak(0), show: true },
-                    ].filter(c => c.show).map((c, i) => (
-                        <button key={i} onClick={c.action} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: `${c.color}10`, border: `1px solid ${c.color}25`, borderRadius: '10px', color: c.color, fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                            {c.icon}{c.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Foul + Timeout */}
-                <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => setFoul(f => f + 1)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#ef4444', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                        <Flag size={12} /> فاول ({toFa(foul)})
-                    </button>
-                    <button onClick={() => setFoulModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '10px', color: '#a78bfa', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                        <AlertCircle size={12} /> اعتراض
-                    </button>
-                </div>
-            </div>
-
-            {/* Break counter row */}
-            <div style={{ padding: '0 20px 16px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.40)' }}>بریک جاری:</div>
-                {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(v => (
-                    <button key={v} onClick={() => setCurBreak(p => p + v)} style={{ padding: '4px 10px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '8px', color: '#f59e0b', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                        +{toFa(v)}
-                    </button>
-                ))}
-                {curBreak > 0 && (
-                    <div style={{ marginRight: 'auto', fontSize: '16px', fontWeight: 900, color: '#f59e0b', letterSpacing: '-0.01em' }}>
-                        = {toFa(curBreak)}
-                    </div>
-                )}
-            </div>
-
-            {/* Dispute modal */}
-            {showFoulModal && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ background: 'rgba(6,13,10,0.98)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '22px', padding: '28px', width: 'min(420px,92vw)', boxShadow: '0 40px 100px rgba(0,0,0,0.6)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111111', margin: 0 }}>ثبت اعتراض</h3>
-                            <button onClick={() => setFoulModal(false)} style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <X size={14} />
-                            </button>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
-                            {['خطای تکنیکی', 'خروج توپ', 'مشکل تجهیزات', 'رفتار نامناسب', 'سایر'].map(opt => (
-                                <button key={opt} onClick={() => setFoulModal(false)} style={{ padding: '12px 16px', background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: '12px', color: 'rgba(0,0,0,0.48)', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right', transition: 'all 0.2s' }}
-                                    onMouseEnter={e => { (e.currentTarget).style.background = 'rgba(167,139,250,0.12)'; (e.currentTarget).style.color = '#a78bfa'; }}
-                                    onMouseLeave={e => { (e.currentTarget).style.background = 'rgba(167,139,250,0.06)'; (e.currentTarget).style.color = 'rgba(0,0,0,0.48)'; }}>
-                                    {opt}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
+      <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh', color: TEXT, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div style={{ ...card, maxWidth: 460, textAlign: 'center', padding: '36px 30px' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(5,118,66,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#057642" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+          </div>
+          <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>اطلاعات شما ثبت شد</h1>
+          <p style={{ fontSize: 13.5, color: TEXT_S, lineHeight: 1.9, marginBottom: 8 }}>
+            پروفایل شما همراه با مدرک داوری برای بررسی و تایید به ادمین سیستم ارسال شد.
+          </p>
+          <p style={{ fontSize: 12.5, color: TEXT_M, lineHeight: 1.9, marginBottom: 22 }}>
+            پس از تایید مدرک توسط ادمین، پروفایل شما با تیک آبی تایید در صفحه‌ی داوران منتشر می‌شود.
+          </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href={`/referees/${form.slug}`} style={lqBtn}>مشاهده پیش‌نمایش پروفایل</Link>
+            <button onClick={() => setSubmitted(false)} style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S }}>ویرایش اطلاعات</button>
+          </div>
+          <div style={{ marginTop: 16, fontSize: 12, color: TEXT_M, direction: 'ltr' }}>www.billiardhub.net/referees/{form.slug}</div>
         </div>
-    );
-}
+      </div>
+    )
+  }
 
-/* ══ MAIN CONTENT ══ */
-function DashboardContent() {
-    const { user, _hydrated } = useAuthStore();
-    const [tab, setTab] = useState<Tab>('overview');
-    const [tick, setTick] = useState(0);
+  const err = (k: string) => errors[k] ? <span style={{ display: 'block', color: '#ef4444', fontSize: 11.5, marginTop: 4 }}>{errors[k]}</span> : null
+  const star = <span style={{ color: '#ef4444' }}> *</span>
 
-    useEffect(() => {
-        const t = setInterval(() => setTick(n => n + 1), 1000);
-        return () => clearInterval(t);
-    }, []);
+  return (
+    <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh', color: TEXT }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px clamp(16px,4vw,32px) 80px' }}>
 
-    /* ── Stories — published independently; feed the home stories bar for 24h ── */
-    const ownerKey = user?.phone || user?.id || user?.firstName || 'referee';
-    const refRole = STORY_ROLES.referee!;
-    const [storyList, setStoryList]   = useState<StoredStory[]>([]);
-    const [storyDraft, setStoryDraft] = useState<{ url: string; caption: string } | null>(null);
-    const [storyBusy, setStoryBusy]   = useState(false);
-    const storyInput = useRef<HTMLInputElement>(null);
+        {/* Header */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.28)', color: '#0e7490', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '4px 12px', letterSpacing: '0.08em', marginBottom: 10 }}>
+            REFEREE DASHBOARD
+          </div>
+          <h1 style={{ fontSize: 'clamp(22px,3vw,28px)', fontWeight: 900, letterSpacing: '-0.02em' }}>داشبورد داور</h1>
+          <p style={{ fontSize: 13.5, color: TEXT_S, marginTop: 6 }}>اطلاعات زیر را تکمیل کنید تا صفحه‌ی پروفایل داوری شما ساخته شود. آپلود مدرک داوری الزامی است.</p>
+        </div>
 
-    useEffect(() => { if (_hydrated) setStoryList(getOwnerStories(ownerKey)); }, [_hydrated, ownerKey]);
+        {topError && (
+          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#b91c1c', borderRadius: 12, padding: '11px 16px', fontSize: 13, fontWeight: 600, marginBottom: 18 }}>
+            {topError}
+          </div>
+        )}
 
-    const pickStoryImage = async (file?: File) => {
-        if (!file) return;
-        setStoryBusy(true);
-        try {
-            const url = await compressStoryImage(file);
-            if (url) setStoryDraft(d => ({ url, caption: d?.caption ?? '' }));
-        } finally { setStoryBusy(false); }
-    };
-    const publishStory = () => {
-        if (!storyDraft?.url || storyList.length >= 10) return;
-        const name = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'داور';
-        addStoredStory({
-            id: `st-${Date.now()}-${rid()}`,
-            ownerKey,
-            userName: name,
-            roleKey: 'referee', roleLabel: refRole.label, roleColor: refRole.color,
-            avatar: (user?.firstName ?? 'د').charAt(0) || 'د',
-            logoUrl: user?.avatar || undefined,
-            mediaUrl: storyDraft.url,
-            caption: storyDraft.caption.trim(),
-            createdAt: Date.now(),
-        });
-        setStoryDraft(null);
-        setStoryList(getOwnerStories(ownerKey));
-    };
-    const deleteStory = (id: string) => { removeStoredStory(id); setStoryList(getOwnerStories(ownerKey)); };
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-    const now = new Date();
-    const timeStr = toFa(`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`);
-
-    return (
-        <>
-            <style>{`
-        @keyframes fadeUp  { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;} }
-        @keyframes pulse   { 0%,100%{opacity:1;}50%{opacity:0.4;} }
-        @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.85);} }
-
-        .r-tab { padding:10px 18px; border-radius:10px; font-size:13px; font-weight:600; border:1px solid transparent; cursor:pointer; font-family:inherit; transition:all 0.25s; white-space:nowrap; display:flex; align-items:center; gap:7px; }
-        .r-tab.active { background:rgba(199,166,106,0.1); border-color:rgba(199,166,106,0.3); color:#C7A66A; }
-        .r-tab:not(.active) { background:rgba(0,0,0,0.03); color:rgba(0,0,0,0.45); }
-        .r-tab:not(.active):hover { background:rgba(0,0,0,0.05); color:rgba(0,0,0,0.50); }
-
-        .r-card { background:#FFFFFF; border:1px solid rgba(0,0,0,0.07); border-radius:20px; padding:22px; transition:all 0.3s; }
-        .r-card:hover { background:rgba(0,0,0,0.04); }
-
-        .sch-row { display:flex; align-items:center; gap:14px; padding:14px 16px; background:rgba(255,255,255,0.02); border:1px solid rgba(0,0,0,0.04); border-radius:14px; transition:all 0.25s; }
-        .sch-row:hover { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.07); }
-
-        @media(max-width:900px) { .ref-dash-g{grid-template-columns:1fr !important;} .kpi-g{grid-template-columns:repeat(2,1fr)!important;} }
-      `}</style>
-
-            <div style={{ minHeight: '100vh', background: '#F7F7F5', paddingBottom: '80px' }}>
-
-                {/* ── Header ── */}
-                <div style={{ background: 'rgba(2,8,6,0.98)', borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '0 clamp(16px,4vw,40px)', position: 'sticky', top: '62px', zIndex: 90, backdropFilter: 'blur(24px)' }}>
-                    <div style={{ maxWidth: '1280px', margin: '0 auto', height: '58px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-                            <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(199,166,106,0.3)' }}>
-                                <Shield size={18} style={{ color: '#fff' }} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '10px', color: 'rgba(199,166,106,0.6)', letterSpacing: '0.2em', fontWeight: 700 }}>REFEREE DASHBOARD</div>
-                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', letterSpacing: '-0.01em' }}>پنل داور رسمی</div>
-                            </div>
-                        </div>
-
-                        {/* Live clock */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '8px 16px', flexShrink: 0 }}>
-                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', boxShadow: '0 0 8px #ef4444', animation: 'livePulse 1.5s infinite' }} />
-                            <span style={{ fontSize: '16px', fontWeight: 900, color: '#ef4444', fontVariantNumeric: 'tabular-nums' }}>{timeStr}</span>
-                        </div>
-
-                        {/* Live matches badge */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '20px', flexShrink: 0 }}>
-                            <Activity size={13} style={{ color: '#ef4444' }} />
-                            <span style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>{toFa(LIVE_MATCHES.filter(m => m.status === 'live').length)} مسابقه زنده</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Tab nav ── */}
-                <div style={{ background: 'rgba(2,8,6,0.97)', borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '0 clamp(16px,4vw,40px)', overflowX: 'auto' }}>
-                    <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', gap: '4px', padding: '10px 0' }}>
-                        {[
-                            { k: 'overview', l: 'خلاصه', icon: <BarChart2 size={14} /> },
-                            { k: 'live', l: 'مسابقات زنده', icon: <Activity size={14} />, badge: LIVE_MATCHES.length },
-                            { k: 'schedule', l: 'برنامه', icon: <Calendar size={14} /> },
-                            { k: 'reports', l: 'گزارش‌ها', icon: <Edit size={14} /> },
-                            { k: 'disputes', l: 'اعتراضات', icon: <AlertCircle size={14} />, badge: DISPUTES.filter(d => d.status === 'open').length },
-                            { k: 'stories', l: 'استوری‌ها', icon: <Camera size={14} /> },
-                        ].map(t => (
-                            <button key={t.k} className={`r-tab ${tab === t.k ? 'active' : ''}`} onClick={() => setTab(t.k as Tab)}>
-                                {t.icon}{t.l}
-                                {(t.badge ?? 0) > 0 && <span style={{ minWidth: '18px', height: '18px', borderRadius: '9px', background: tab === t.k ? '#C7A66A' : '#ef4444', color: '#fff', fontSize: '10px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{toFa(t.badge!)}</span>}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px)' }}>
-
-                    {/* ════ OVERVIEW ════ */}
-                    {tab === 'overview' && (
-                        <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-
-                            {/* KPIs */}
-                            <div className="kpi-g" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', marginBottom: '24px' }}>
-                                {[
-                                    { l: 'مسابقات امسال', v: toFa(284), sub: 'داوری‌شده', c: '#C7A66A', icon: <Target size={16} /> },
-                                    { l: 'تورنومنت', v: toFa(18), sub: 'شرکت کرده', c: '#f59e0b', icon: <Trophy size={16} /> },
-                                    { l: 'امتیاز ارزیابی', v: '۴.۹', sub: 'از ۵', c: '#a78bfa', icon: <Star size={16} /> },
-                                    { l: 'اعتراض حل‌شده', v: '۹۸٪', sub: 'نرخ موفقیت', c: '#06b6d4', icon: <CheckCircle size={16} /> },
-                                ].map((s, i) => (
-                                    <div key={i} className="r-card" style={{ animationDelay: `${i * 0.07}s`, animation: 'fadeUp 0.5s ease both' }}>
-                                        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '52px', height: '1px', background: `linear-gradient(90deg,transparent,${s.c}50,transparent)` }} />
-                                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                            <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `${s.c}12`, border: `1px solid ${s.c}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.c }}>
-                                                {s.icon}
-                                            </div>
-                                        </div>
-                                        <div style={{ fontSize: 'clamp(24px, 3.3vw, 31px)', fontWeight: 900, color: '#111111', letterSpacing: '-0.03em', marginBottom: '4px', textShadow: `0 0 20px ${s.c}25` }}>{s.v}</div>
-                                        <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontWeight: 600, marginBottom: '2px' }}>{s.l}</div>
-                                        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{s.sub}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="ref-dash-g" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
-
-                                {/* Live now */}
-                                <div className="r-card">
-                                    <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', boxShadow: '0 0 8px #ef4444', animation: 'livePulse 1.5s infinite' }} />
-                                        مسابقات در حال برگزاری
-                                        <button onClick={() => setTab('live')} style={{ marginRight: 'auto', fontSize: '13px', color: '#C7A66A', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>مدیریت →</button>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        {LIVE_MATCHES.map(m => (
-                                            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', background: m.status === 'live' ? 'rgba(239,68,68,0.04)' : 'rgba(245,158,11,0.04)', border: `1px solid ${m.status === 'live' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'}`, borderRadius: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
-                                                onClick={() => setTab('live')}>
-                                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.status === 'live' ? '#ef4444' : '#f59e0b', flexShrink: 0, animation: 'pulse 2s infinite', boxShadow: `0 0 8px ${m.status === 'live' ? '#ef4444' : '#f59e0b'}` }} />
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '2px' }}>
-                                                        {m.player1.split(' ').pop()} {toFa(m.score1)}:{toFa(m.score2)} {m.player2.split(' ').pop()}
-                                                    </div>
-                                                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)' }}>{m.round} · {m.table}</div>
-                                                </div>
-                                                <div style={{ fontSize: '13px', color: m.status === 'live' ? '#ef4444' : '#f59e0b', fontWeight: 700, flexShrink: 0 }}>
-                                                    {m.status === 'live' ? 'LIVE' : 'BREAK'}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Right */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-
-                                    {/* Profile card */}
-                                    <div className="r-card" style={{ border: '1px solid rgba(199,166,106,0.2)', textAlign: 'center' }}>
-                                        <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', width: '100px', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.5),transparent)' }} />
-                                        <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 900, color: '#fff', margin: '0 auto 12px', boxShadow: '0 8px 24px rgba(199,166,106,0.3)' }}>
-                                            {user?.firstName?.[0] ?? 'D'}
-                                        </div>
-                                        <div style={{ fontSize: '18px', fontWeight: 800, color: '#111111', marginBottom: '4px' }}>{user?.firstName} {user?.lastName}</div>
-                                        <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.42)', marginBottom: '12px' }}>داور بین‌المللی اسنوکر</div>
-                                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                            <span style={{ fontSize: '10px', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '20px', padding: '3px 10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                <Award size={9} />WPBSA Level 4
-                                            </span>
-                                            <span style={{ fontSize: '10px', color: '#C7A66A', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.2)', borderRadius: '20px', padding: '3px 10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                <Shield size={9} />فدراسیون
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Today schedule */}
-                                    <div className="r-card">
-                                        <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{ width: '3px', height: '13px', background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: '2px', display: 'inline-block' }} />
-                                            برنامه امروز
-                                        </div>
-                                        {SCHEDULED.filter(m => m.date === 'امروز').map((m, i) => (
-                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderBottom: i < SCHEDULED.filter(m => m.date === 'امروز').length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
-                                                <div style={{ fontSize: '14px', fontWeight: 800, color: '#C7A66A', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{m.time}</div>
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '13px', color: '#111111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                        {m.player1.split(' ').pop()} vs {m.player2.split(' ').pop()}
-                                                    </div>
-                                                    <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.35)' }}>{m.table} · {m.round}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Open disputes */}
-                                    {DISPUTES.filter(d => d.status === 'open').length > 0 && (
-                                        <div className="r-card" style={{ border: '1px solid rgba(239,68,68,0.15)' }}>
-                                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <span style={{ width: '3px', height: '13px', background: 'linear-gradient(180deg,#ef4444,transparent)', borderRadius: '2px', display: 'inline-block' }} />
-                                                    اعتراضات باز
-                                                </div>
-                                                <span style={{ fontSize: '12px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 8px', fontWeight: 700 }}>
-                                                    {toFa(DISPUTES.filter(d => d.status === 'open').length)}
-                                                </span>
-                                            </div>
-                                            {DISPUTES.filter(d => d.status === 'open').map(d => (
-                                                <div key={d.id} style={{ padding: '10px 12px', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)', borderRadius: '12px', cursor: 'pointer', marginBottom: '6px' }}
-                                                    onClick={() => setTab('disputes')}>
-                                                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '3px' }}>{d.issue}</div>
-                                                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.42)' }}>{d.match} · {d.time}</div>
-                                                </div>
-                                            ))}
-                                            <button onClick={() => setTab('disputes')} style={{ width: '100%', marginTop: '6px', padding: '8px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '10px', color: '#ef4444', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                مشاهده همه →
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ════ LIVE ════ */}
-                    {tab === 'live' && (
-                        <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'livePulse 1.5s infinite', boxShadow: '0 0 10px #ef4444' }} />
-                                <span style={{ fontSize: '16px', fontWeight: 700, color: '#ef4444' }}>مدیریت مسابقات زنده</span>
-                            </div>
-                            {LIVE_MATCHES.map(m => <LiveControl key={m.id} match={m} />)}
-                        </div>
-                    )}
-
-                    {/* ════ SCHEDULE ════ */}
-                    {tab === 'schedule' && (
-                        <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-                            <div className="r-card" style={{ marginBottom: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-                                    <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ width: '3px', height: '15px', background: 'linear-gradient(180deg,#06b6d4,transparent)', borderRadius: '2px', display: 'inline-block' }} />
-                                        برنامه داوری
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                        {['امروز', 'فردا', 'این هفته'].map((d, i) => (
-                                            <button key={i} style={{ padding: '6px 13px', borderRadius: '20px', background: i === 0 ? 'rgba(199,166,106,0.1)' : 'rgba(0,0,0,0.03)', border: `1px solid ${i === 0 ? 'rgba(199,166,106,0.3)' : 'rgba(0,0,0,0.07)'}`, color: i === 0 ? '#C7A66A' : 'rgba(0,0,0,0.45)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                {d}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {SCHEDULED.map(m => {
-                                        const statusCfg = m.status === 'scheduled' ? { color: '#06b6d4', label: 'برنامه‌ریزی شده' } : { color: '#C7A66A', label: 'در حال بازی' };
-                                        return (
-                                            <div key={m.id} className="sch-row">
-                                                <div style={{ textAlign: 'center', flexShrink: 0, minWidth: '52px' }}>
-                                                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#C7A66A', fontVariantNumeric: 'tabular-nums' }}>{m.time}</div>
-                                                    <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)' }}>{m.date}</div>
-                                                </div>
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>
-                                                        {m.player1} vs {m.player2}
-                                                    </div>
-                                                    <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                                        <span>{m.tournament}</span><span>·</span><span>{m.round}</span><span>·</span><span>{m.table}</span>
-                                                    </div>
-                                                </div>
-                                                <div style={{ fontSize: '12px', padding: '3px 10px', borderRadius: '20px', background: `${statusCfg.color}10`, border: `1px solid ${statusCfg.color}25`, color: statusCfg.color, fontWeight: 700, flexShrink: 0 }}>
-                                                    {statusCfg.label}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ════ REPORTS ════ */}
-                    {tab === 'reports' && (
-                        <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-                            <div className="r-card">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px' }}>
-                                    <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ width: '3px', height: '15px', background: 'linear-gradient(180deg,#a78bfa,transparent)', borderRadius: '2px', display: 'inline-block' }} />
-                                        گزارش مسابقات
-                                    </div>
-                                    <button style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', borderRadius: '10px', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                                        <Plus size={13} /> گزارش جدید
-                                    </button>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {REPORTS.map((r, i) => (
-                                        <div key={i} className="sch-row" style={{ flexWrap: 'wrap', gap: '10px' }}>
-                                            <div style={{ flex: 1, minWidth: '160px' }}>
-                                                <div style={{ fontSize: '15px', fontWeight: 700, color: '#111111', marginBottom: '3px' }}>{r.match}</div>
-                                                <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                                    <span>{r.tournament}</span><span>·</span><span>{r.date}</span><span>·</span><span>{r.duration}</span>
-                                                    {r.incidents > 0 && <span style={{ color: '#f59e0b' }}>⚠ {toFa(r.incidents)} حادثه</span>}
-                                                </div>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
-                                                <span style={{ fontSize: '12px', padding: '3px 10px', borderRadius: '20px', background: r.submitted ? 'rgba(199,166,106,0.1)' : 'rgba(245,158,11,0.1)', border: `1px solid ${r.submitted ? 'rgba(199,166,106,0.25)' : 'rgba(245,158,11,0.25)'}`, color: r.submitted ? '#C7A66A' : '#f59e0b', fontWeight: 700 }}>
-                                                    {r.submitted ? 'ارسال شده' : 'در انتظار'}
-                                                </span>
-                                                <button style={{ padding: '6px 12px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '9px', color: 'rgba(0,0,0,0.45)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                    <Eye size={11} />{r.submitted ? 'مشاهده' : 'ویرایش'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ════ DISPUTES ════ */}
-                    {tab === 'disputes' && (
-                        <div style={{ animation: 'fadeUp 0.4s ease both', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {DISPUTES.map(d => (
-                                <div key={d.id} style={{ padding: '18px 20px', background: d.status === 'open' ? 'rgba(239,68,68,0.04)' : d.status === 'resolved' ? 'rgba(199,166,106,0.03)' : '#FFFFFF', border: `1px solid ${d.status === 'open' ? 'rgba(239,68,68,0.18)' : d.status === 'resolved' ? 'rgba(199,166,106,0.15)' : 'rgba(0,0,0,0.07)'}`, borderRadius: '18px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '10px', flexWrap: 'wrap' }}>
-                                        <div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                <span style={{ fontSize: '17px', fontWeight: 800, color: '#111111' }}>{d.issue}</span>
-                                                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 9px', borderRadius: '20px', background: d.status === 'open' ? 'rgba(239,68,68,0.12)' : d.status === 'resolved' ? 'rgba(199,166,106,0.12)' : 'rgba(167,139,250,0.12)', color: d.status === 'open' ? '#ef4444' : d.status === 'resolved' ? '#C7A66A' : '#a78bfa', border: `1px solid ${d.status === 'open' ? 'rgba(239,68,68,0.25)' : d.status === 'resolved' ? 'rgba(199,166,106,0.25)' : 'rgba(167,139,250,0.25)'}` }}>
-                                                    {d.status === 'open' ? 'باز' : d.status === 'resolved' ? 'حل‌شده' : 'ارجاع داده‌شده'}
-                                                </span>
-                                            </div>
-                                            <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)' }}>{d.match} · {d.player} · {d.time}</div>
-                                        </div>
-                                        {d.status === 'open' && (
-                                            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                                                <button style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: '10px', color: '#C7A66A', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                    <Check size={12} /> حل کردن
-                                                </button>
-                                                <button style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '10px', color: '#a78bfa', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                    <ChevronUp size={12} /> ارجاع
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.6, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '12px' }}>
-                                        {d.description}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* ════ STORIES ════ */}
-                    {tab === 'stories' && (
-                        <div style={{ animation: 'fadeUp 0.4s ease both' }}>
-                            <div className="r-card">
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                                    <div style={{ fontSize: '17px', fontWeight: 800, color: '#111111', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ width: '3px', height: '15px', background: 'linear-gradient(180deg,#C7A66A,transparent)', borderRadius: '2px', display: 'inline-block' }} />
-                                        استوری‌های شما
-                                        <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>({toFa(storyList.length)}/۱۰)</span>
-                                    </div>
-                                    {storyList.length < 10 && !storyDraft && (
-                                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', color: '#9A6E38', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: storyBusy ? 0.55 : 1 }}>
-                                            <Plus size={13} /> {storyBusy ? 'در حال آماده‌سازی…' : 'استوری جدید'}
-                                            <input ref={storyInput} type="file" accept="image/*" hidden disabled={storyBusy}
-                                                onChange={e => { void pickStoryImage(e.target.files?.[0]); e.currentTarget.value = ''; }} />
-                                        </label>
-                                    )}
-                                </div>
-                                <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', lineHeight: 1.8, margin: '10px 0 16px' }}>
-                                    استوری بلافاصله منتشر می‌شود و به‌مدت ۲۴ ساعت در نوار استوری صفحه‌ی اول سایت به‌عنوان «داور» نمایش داده می‌شود.
-                                </p>
-
-                                {storyDraft && (
-                                    <div style={{ border: '1px solid rgba(0,0,0,0.07)', borderRadius: '14px', padding: '12px', marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                                        <div style={{ width: '110px', height: '172px', borderRadius: '10px', overflow: 'hidden', background: '#000', flexShrink: 0 }}>
-                                            <img src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                            <textarea value={storyDraft.caption} onChange={e => setStoryDraft(d => (d ? { ...d, caption: e.target.value } : d))}
-                                                placeholder="کپشن استوری (اختیاری)…" rows={3}
-                                                style={{ width: '100%', padding: '10px 13px', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '10px', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.8, outline: 'none' }} />
-                                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                                                <button onClick={publishStory} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', color: '#9A6E38', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>انتشار استوری</button>
-                                                <button onClick={() => setStoryDraft(null)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '10px', color: 'rgba(0,0,0,0.45)', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>انصراف</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {storyList.length > 0 ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(100px,1fr))', gap: '10px' }}>
-                                        {storyList.map(s => (
-                                            <div key={s.id} style={{ position: 'relative', aspectRatio: '9/16', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(0,0,0,0.04)' }}>
-                                                <img src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                {s.caption && (
-                                                    <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '12px 7px 6px', background: 'linear-gradient(to top,rgba(0,0,0,0.72),transparent)', color: '#fff', fontSize: '10.5px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.caption}</div>
-                                                )}
-                                                <button onClick={() => deleteStory(s.id)} aria-label="حذف استوری" style={{ position: 'absolute', top: '5px', left: '5px', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <X size={11} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : !storyDraft ? (
-                                    <div style={{ border: '1.5px dashed rgba(199,166,106,0.4)', borderRadius: '14px', padding: '30px 16px', textAlign: 'center', color: 'rgba(0,0,0,0.35)' }}>
-                                        <Camera size={30} style={{ margin: '0 auto 10px', opacity: 0.4 }} />
-                                        <div style={{ fontSize: '13px' }}>هنوز استوری‌ای منتشر نکرده‌اید — از دکمه‌ی «استوری جدید» یک استوری بگذارید.</div>
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
-                    )}
-                </div>
+          {/* Stories — publishes to the home stories bar immediately, independent of the profile form */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <h2 style={{ fontSize: 15, fontWeight: 800, color: TEXT, display: 'flex', alignItems: 'center', gap: 9, margin: 0 }}>
+                <span style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(8,145,178,0.12)', color: '#0e7490', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="3.4" /><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" /></svg>
+                </span>
+                استوری‌های شما <span style={{ color: TEXT_M, fontWeight: 700, fontSize: 13 }}>({storyList.length}/۱۰)</span>
+              </h2>
+              {storyList.length < 10 && !storyDraft && (
+                <label style={{ ...lqBtn, fontSize: 13, padding: '9px 16px', opacity: storyBusy ? 0.55 : 1 }}>
+                  {storyBusy ? 'در حال آماده‌سازی…' : '+ استوری جدید'}
+                  <input ref={storyInput} type="file" accept="image/*" hidden disabled={storyBusy}
+                    onChange={e => { void pickStoryImage(e.target.files?.[0]); e.target.value = '' }} />
+                </label>
+              )}
             </div>
-        </>
-    );
+            <p style={{ fontSize: 12.5, color: TEXT_M, lineHeight: 1.9, margin: '10px 0 14px' }}>
+              استوری بلافاصله منتشر می‌شود و به‌مدت ۲۴ ساعت در نوار استوری صفحه‌ی اول سایت به‌عنوان «داور» نمایش داده می‌شود — مستقل از ثبت پروفایل.
+            </p>
+
+            {storyDraft && (
+              <div style={{ border: CBOR, borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ width: 108, height: 168, borderRadius: 10, overflow: 'hidden', background: '#000', flexShrink: 0 }}>
+                  <img src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <textarea value={storyDraft.caption} onChange={e => setStoryDraft(d => (d ? { ...d, caption: e.target.value } : d))}
+                    placeholder="کپشن استوری (اختیاری)…" rows={3} style={{ ...inp, resize: 'vertical', lineHeight: 1.8 }} />
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <button type="button" onClick={publishStory} style={{ ...lqBtn, fontSize: 13.5, padding: '10px 22px' }}>انتشار استوری</button>
+                    <button type="button" onClick={() => setStoryDraft(null)} style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13.5, padding: '10px 20px' }}>انصراف</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {storyList.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: 10 }}>
+                {storyList.map(s => (
+                  <div key={s.id} style={{ position: 'relative', aspectRatio: '9/16', borderRadius: 10, overflow: 'hidden', border: CBOR, background: 'rgba(17,17,16,0.04)' }}>
+                    <img src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {s.caption && (
+                      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '12px 7px 6px', background: 'linear-gradient(to top,rgba(0,0,0,0.72),transparent)', color: '#fff', fontSize: 10.5, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.caption}</div>
+                    )}
+                    <button type="button" onClick={() => deleteStory(s.id)} aria-label="حذف استوری" style={{ position: 'absolute', top: 5, left: 5, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : !storyDraft ? (
+              <div style={{ border: '1.5px dashed rgba(8,145,178,0.35)', borderRadius: 12, padding: '22px 16px', textAlign: 'center', fontSize: 12.5, color: TEXT_M }}>
+                هنوز استوری‌ای منتشر نکرده‌اید — از دکمه‌ی «استوری جدید» یک استوری بگذارید.
+              </div>
+            ) : null}
+          </div>
+
+          {/* 1 — Basic info */}
+          <div style={card}>
+            {sectionTitle('اطلاعات پایه', 1)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
+              <div><label style={lbl}>نام</label><input style={inpRO} value={form.firstNameFa} onChange={e => set('firstNameFa', e.target.value)} disabled placeholder="—" />{err('firstNameFa')}</div>
+              <div><label style={lbl}>نام خانوادگی</label><input style={inpRO} value={form.lastNameFa} onChange={e => set('lastNameFa', e.target.value)} disabled placeholder="—" />{err('lastNameFa')}</div>
+              <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.</div>
+              <div><label style={lbl}>Last name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Talebi" />{err('lastNameEn')}</div>
+              <div><label style={lbl}>First name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Kaveh" />{err('firstNameEn')}</div>
+              <div><label style={lbl}>شهر{star}</label><input style={inp} value={form.city} onChange={e => set('city', e.target.value)} placeholder="تهران" />{err('city')}</div>
+              <div>
+                <label style={lbl}>نشانی اختصاصی پروفایل (URL){star}</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.slug}
+                    onChange={e => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="kaveh-talebi" />
+                  <button type="button" onClick={suggestSlug} style={{ ...lqBtn, padding: '0 12px', fontSize: 12, whiteSpace: 'nowrap' }}>پیشنهاد</button>
+                </div>
+                <div style={{ fontSize: 11.5, color: TEXT_M, marginTop: 5, direction: 'ltr', textAlign: 'left' }}>www.billiardhub.net/referees/{form.slug || '...'}</div>
+                {err('slug')}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <label style={lbl}>رشته‌های تخصصی داوری (می‌توانید چند مورد انتخاب کنید){star}</label>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {DISCIPLINES.map(d => {
+                  const on = form.disciplines.includes(d.key)
+                  return (
+                    <button key={d.key} type="button" onClick={() => toggleDiscipline(d.key)} style={{
+                      padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontSize: 13, fontWeight: on ? 800 : 600, fontFamily: 'inherit',
+                      border: on ? '1px solid rgba(199,166,106,0.45)' : '1px solid rgba(17,17,16,0.12)',
+                      background: on ? 'rgba(199,166,106,0.14)' : '#fff', color: on ? GOLD_D : TEXT_S,
+                    }}>{d.label}</button>
+                  )
+                })}
+              </div>
+              {err('disciplines')}
+            </div>
+
+            <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
+              <div>
+                <label style={lbl}>عکس پروفایل</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
+                    {form.photo && <img src={form.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+                    <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
+                      {form.photo ? 'تغییر عکس' : 'انتخاب عکس'}
+                      <input type="file" accept="image/*" hidden onChange={e => addPhoto(e.target.files?.[0])} />
+                    </label>
+                    {form.photo && <button type="button" onClick={() => set('photo', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', padding: 0 }}>حذف عکس</button>}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label style={lbl}>عکس بکگراند (کاور پروفایل)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 100, height: 60, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
+                    {form.coverImage && <img src={form.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+                    <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
+                      {form.coverImage ? 'تغییر عکس' : 'انتخاب عکس'}
+                      <input type="file" accept="image/*" hidden onChange={e => addCover(e.target.files?.[0])} />
+                    </label>
+                    {form.coverImage && <button type="button" onClick={() => set('coverImage', '')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', padding: 0 }}>حذف عکس</button>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2 — About */}
+          <div style={card}>
+            {sectionTitle('معرفی', 2)}
+            <div style={{ marginBottom: 14 }}>
+              <label style={lbl}>بیو کوتاه (یک خط، برای کارت داوران)</label>
+              <input style={inp} value={form.shortBio} onChange={e => set('shortBio', e.target.value)} placeholder="داور بین‌المللی با ۲۰ سال سابقه" />
+            </div>
+            <div>
+              <label style={lbl}>معرفی کامل{star}</label>
+              <textarea style={{ ...inp, minHeight: 120, resize: 'vertical', lineHeight: 1.9 }} value={form.fullBio} onChange={e => set('fullBio', e.target.value)} placeholder="درباره‌ی سوابق داوری، رویدادها و تخصص خود بنویسید..." />
+              {err('fullBio')}
+            </div>
+          </div>
+
+          {/* 3 — Refereeing grades */}
+          <div style={card}>
+            {sectionTitle('درجه داوری', 3)}
+            <div style={{ background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: GOLD_D, lineHeight: 1.8, marginBottom: 14 }}>
+              مدارکی که دریافت کرده‌اید را به‌ترتیب انتخاب کنید و سال دریافت هر کدام را وارد نمایید.
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {GRADES.map((g, idx) => {
+                const on = gradeSelected(g.key)
+                const yr = form.grades.find(x => x.key === g.key)?.year ?? ''
+                return (
+                  <div key={g.key} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', borderRadius: 10, border: on ? '1px solid rgba(199,166,106,0.40)' : '1px solid rgba(17,17,16,0.10)', background: on ? 'rgba(199,166,106,0.07)' : '#fff' }}>
+                    <button type="button" onClick={() => toggleGrade(idx)} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', flex: 1, textAlign: 'right', minWidth: 0 }}>
+                      <span style={{ width: 19, height: 19, borderRadius: 6, flexShrink: 0, border: on ? 'none' : '1.5px solid rgba(17,17,16,0.22)', background: on ? GOLD : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                      </span>
+                      <span dir="auto" className={g.latin ? 'bh-latin' : undefined} style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, unicodeBidi: 'isolate' }}>{g.label}</span>
+                    </button>
+                    {on && (
+                      <select value={yr} onChange={e => setGradeYear(g.key, e.target.value)}
+                        style={{ ...inp, width: 150, flexShrink: 0, padding: '7px 11px', fontSize: 12.5, direction: 'ltr', textAlign: 'left', cursor: 'pointer' }}>
+                        <option value="">سال دریافت</option>
+                        {YEARS.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                      </select>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* 4 — Gallery */}
+          <div style={card}>
+            {sectionTitle('گالری', 4)}
+            <label style={lbl}>تصاویر</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10, marginBottom: 12 }}>
+              {form.gallery.map(g => (
+                <div key={g.id} style={{ border: CBOR, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.04)' }}>
+                  <div style={{ position: 'relative', aspectRatio: '1' }}>
+                    <img src={g.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    <button type="button" onClick={() => removeGallery(g.id)} aria-label="حذف" style={{ position: 'absolute', top: 6, left: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                  <input value={g.caption} onChange={e => setCaption(g.id, e.target.value)} placeholder="کپشن..." style={{ ...inp, border: 'none', borderTop: CBOR, borderRadius: 0, fontSize: 12, padding: '7px 10px' }} />
+                </div>
+              ))}
+              <button type="button" onClick={() => galleryInput.current?.click()} style={{ aspectRatio: '1', border: '1.5px dashed rgba(199,166,106,0.45)', borderRadius: 10, background: 'rgba(199,166,106,0.05)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: GOLD_D, fontFamily: 'inherit', fontSize: 12, fontWeight: 700 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                افزودن تصویر
+              </button>
+              <input ref={galleryInput} type="file" accept="image/*" multiple hidden onChange={e => { addGallery(e.target.files); e.target.value = '' }} />
+            </div>
+
+            <label style={lbl}>ویدیوها (اختیاری)</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {form.videos.map(v => (
+                <div key={v.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', border: CBOR, borderRadius: 10, padding: 10 }}>
+                  <div style={{ width: 76, height: 46, borderRadius: 8, overflow: 'hidden', background: 'rgba(17,17,16,0.06)', flexShrink: 0 }}>
+                    {v.thumbnail && <img src={v.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                  <input value={v.title} onChange={e => setVideo(v.id, { title: e.target.value })} placeholder="عنوان ویدیو" style={{ ...inp, flex: 1, minWidth: 140, padding: '8px 11px', fontSize: 13 }} />
+                  <input value={v.duration} onChange={e => setVideo(v.id, { duration: e.target.value })} placeholder="مدت (۱۲:۳۴)" style={{ ...inp, width: 110, padding: '8px 11px', fontSize: 13 }} />
+                  <button type="button" onClick={() => removeVideo(v.id)} aria-label="حذف" style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_M, padding: 4 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  </button>
+                </div>
+              ))}
+              <button type="button" onClick={() => videoInput.current?.click()} style={{ ...lqBtn, background: 'transparent', border: '1px dashed rgba(199,166,106,0.45)', alignSelf: 'flex-start', fontSize: 13, padding: '9px 16px' }}>+ افزودن ویدیو (با تصویر بندانگشتی)</button>
+              <input ref={videoInput} type="file" accept="image/*" hidden onChange={e => { addVideo(e.target.files?.[0]); e.target.value = '' }} />
+            </div>
+          </div>
+
+          {/* 5 — Contact */}
+          <div style={card}>
+            {sectionTitle('راه‌های ارتباطی', 5)}
+            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14 }}>هر کدام را که پر کنید، آیکونش در بخش «راه‌های ارتباطی» پروفایل نمایش داده می‌شود.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
+              <div><label style={lbl}>شماره تماس</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="09121234567" /></div>
+              <div><label style={lbl}>واتساپ</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="989121234567" /></div>
+              <div><label style={lbl}>اینستاگرام</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.instagram} onChange={e => set('instagram', e.target.value)} placeholder="referee.username" /></div>
+              <div><label style={lbl}>تلگرام</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.telegram} onChange={e => set('telegram', e.target.value)} placeholder="referee_username" /></div>
+            </div>
+          </div>
+
+          {/* 6 — Certificate (MANDATORY) */}
+          <div style={{ ...card, border: errors.certificate ? '1px solid rgba(239,68,68,0.45)' : CBOR }}>
+            {sectionTitle('آپلود مدرک داوری (الزامی)', 6)}
+            <p style={{ fontSize: 12.5, color: TEXT_M, marginBottom: 14, lineHeight: 1.8 }}>آپلود مدرک داوری برای ثبت پروفایل <b style={{ color: '#b91c1c' }}>الزامی</b> است. این مدرک توسط ادمین سیستم بررسی می‌شود؛ در صورت تایید، پروفایل شما با تیک آبی تایید منتشر می‌شود.</p>
+            {form.certificate && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(5,118,66,0.25)', background: 'rgba(5,118,66,0.06)', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#057642" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                <span style={{ flex: 1, fontSize: 13, color: TEXT, direction: 'ltr', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.certificate.name}</span>
+                <button type="button" onClick={() => set('certificate', null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_M, fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>حذف</button>
+              </div>
+            )}
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, border: `1.5px dashed ${errors.certificate ? 'rgba(239,68,68,0.5)' : 'rgba(199,166,106,0.45)'}`, borderRadius: 12, padding: '20px', cursor: 'pointer', color: GOLD_D, fontWeight: 700, fontSize: 13.5 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+              {form.certificate ? 'آپلود مدرک جدید (جایگزین مدرک قبلی)' : 'انتخاب فایل مدرک داوری (تصویر یا PDF)'}
+              <input type="file" accept="image/*,.pdf" hidden onChange={e => addCertificate(e.target.files?.[0])} />
+            </label>
+            {err('certificate')}
+          </div>
+
+          {/* Submit */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 4 }}>
+            <button type="button" onClick={onSubmit} style={{ ...lqBtn, padding: '13px 34px', fontSize: 15 }}>ثبت اطلاعات</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function RefereeDashboardPage() {
-    return <AuthGuard><DashboardContent /></AuthGuard>;
+  return (
+    <AuthGuard>
+      <RefereeDashboardInner />
+    </AuthGuard>
+  )
 }
