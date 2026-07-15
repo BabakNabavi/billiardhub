@@ -405,74 +405,6 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
 
 // ── Catalog Section — بخش اصلی فروش: فیلتر + مرتب‌سازی + گرید ──
 type SortKey = 'newest' | 'price-asc' | 'price-desc' | 'disc'
-const SORT_OPTS: { k: SortKey; l: string }[] = [
-  { k: 'newest',     l: 'جدیدترین' },
-  { k: 'price-asc',  l: 'ارزان‌ترین' },
-  { k: 'price-desc', l: 'گران‌ترین' },
-  { k: 'disc',       l: 'بیشترین تخفیف' },
-]
-
-function BazaarSortDropdown({ value, onChange }: { value: SortKey; onChange: (v: SortKey) => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
-  }, [])
-  const current = SORT_OPTS.find(o => o.k === value)!
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
-        className="lq-lift"
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 10,
-          background: 'rgba(199,166,106,0.12)',
-          border: open ? '1px solid rgba(199,166,106,0.55)' : '1px solid rgba(199,166,106,0.34)',
-          fontSize: 13, color: '#9A6E38', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-        }}
-      >
-        <span className="bz-sort-label" style={{ color: 'rgba(154,110,56,0.72)', fontWeight: 600 }}>مرتب‌سازی:</span>
-        <span style={{ fontWeight: 700 }}>{current.l}</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s', color: '#9A6E38' }}>
-          <path d="M6 9l6 6 6-6"/>
-        </svg>
-      </button>
-      <div role="listbox" style={{
-        position: 'absolute', insetInlineStart: 0, top: '100%', marginTop: 8, width: 200, zIndex: 60,
-        background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-        border: '1px solid rgba(255,255,255,0.7)', borderRadius: 14, overflow: 'hidden',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 16px 40px rgba(28,28,26,0.16)',
-        transformOrigin: 'top', transition: 'all .15s',
-        opacity: open ? 1 : 0, transform: open ? 'scale(1)' : 'scale(0.95)', pointerEvents: open ? 'auto' : 'none',
-      }}>
-        {SORT_OPTS.map(o => {
-          const selected = o.k === value
-          return (
-            <button
-              key={o.k} type="button" role="option" aria-selected={selected}
-              onClick={() => { onChange(o.k); setOpen(false) }}
-              style={{
-                display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 15px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13,
-                background: selected ? 'rgba(199,166,106,0.12)' : 'transparent',
-                border: selected ? '1px solid rgba(199,166,106,0.40)' : '1px solid transparent',
-                color: selected ? '#9A6E38' : TEXT, fontWeight: selected ? 800 : 500, textAlign: 'right',
-              }}
-            >
-              {o.l}
-              {selected && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A6E38" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 interface CatalogFilters {
   cats: Set<string>; sellers: Set<string>
@@ -481,7 +413,7 @@ interface CatalogFilters {
 }
 
 function CatalogSection({
-  products, filters, sort, setSort,
+  products, filters, sort,
 }: {
   products: typeof PRODUCTS
   filters: CatalogFilters
@@ -519,27 +451,17 @@ function CatalogSection({
   }
 
   return (
-    <div id="bazaar-catalog" style={{ background: '#F7F6F4' }}>
+    <div id="bazaar-catalog" style={{ background: '#fff' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 44px', direction: 'rtl' }}>
 
-        {/* toolbar */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginInlineStart: 'auto' }}>
-            <BazaarSortDropdown value={sort} onChange={setSort}/>
-            <Link href="/shop/new" className="lq-lift" style={{ fontSize: 13, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px', borderRadius: 10, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38' }}>
-              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-              ثبت محصول
-            </Link>
-          </div>
-        </div>
 
         {/* گرید محصولات */}
         <div className="bz-catalog">
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }} className="bz-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="bz-grid">
               {visible.map(p => (
-                <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+                <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', aspectRatio: '1 / 1.55' }}>
+                  <div style={{ width: '100%', flex: '0 0 55%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                     <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     {p.disc > 0 && (
                       <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -775,7 +697,7 @@ const AD_BANNERS = [
 
 function AdBanners() {
   return (
-    <div style={{ background: '#F7F6F4', padding: '20px 0' }}>
+    <div style={{ background: '#fff', padding: '20px 0' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', direction: 'rtl' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }} className="banner-grid">
           {AD_BANNERS.map((b, i) => (
@@ -817,10 +739,10 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
             <ChevronLeft size={13} strokeWidth={2.5} />
           </Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }} className="prod-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
           {newestProducts.map(p => (
             <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+              <div style={{ width: '100%', paddingTop: '90%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
                 {p.disc > 0 && (
                   <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -912,7 +834,7 @@ function BannerSlideCard({ banner }: { banner: typeof DUAL_BANNERS[0] }) {
 
 function DualBannerSection() {
   return (
-    <div style={{ background: '#F7F6F4', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+    <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '20px clamp(16px,3vw,32px)', direction: 'rtl' }}>
         <div style={{ display: 'flex', gap: 12 }} className="dual-banner">
           {DUAL_BANNERS.map((b, i) => <BannerSlideCard key={i} banner={b} />)}
@@ -968,9 +890,9 @@ export default function ShopPage() {
         * { box-sizing: border-box; }
         .hero-slider { aspect-ratio: 2048 / 421; }
         .cat-scroll::-webkit-scrollbar { display: none; }
-        .prod-grid { grid-template-columns: repeat(5,1fr) !important; }
-        @media(max-width:1100px) { .prod-grid { grid-template-columns: repeat(4,1fr) !important; } }
-        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(3,1fr) !important; } }
+        .prod-grid { grid-template-columns: repeat(6,1fr) !important; }
+        @media(max-width:1100px) { .prod-grid { grid-template-columns: repeat(5,1fr) !important; } }
+        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(4,1fr) !important; } }
         .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
         .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
@@ -996,9 +918,9 @@ export default function ShopPage() {
         @media(max-width:900px) { .bz-filterbtn { display: flex !important; } }
         /* موبایل: برچسب «مرتب‌سازی:» حذف تا «ثبت محصول» کنارش جا شود */
         @media(max-width:640px) { .bz-sort-label { display: none !important; } }
-        .bz-grid { grid-template-columns: repeat(5,1fr) !important; }
-        @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(4,1fr) !important; } }
-        @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(3,1fr) !important; } }
+        .bz-grid { grid-template-columns: repeat(6,1fr) !important; }
+        @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(5,1fr) !important; } }
+        @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(4,1fr) !important; } }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
         .lq-sheen::after {
