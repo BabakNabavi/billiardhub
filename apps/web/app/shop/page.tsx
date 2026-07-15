@@ -734,7 +734,7 @@ function CatalogSection({
           </aside>
 
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }} className="bz-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }} className="bz-grid">
               {visible.map(p => (
                 <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
@@ -757,9 +757,6 @@ function CatalogSection({
                       <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
                         {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
                       </div>
-                    </div>
-                    <div className="lq-lift" style={{ marginTop: 10, textAlign: 'center', padding: '8px 0', borderRadius: 10, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38', fontSize: 12.5, fontWeight: 700 }}>
-                      مشاهده محصول
                     </div>
                   </div>
                 </Link>
@@ -1227,8 +1224,8 @@ export default function ShopPage() {
         @media(max-width:900px) { .bz-filterbtn { display: flex !important; } }
         /* موبایل: برچسب «مرتب‌سازی:» حذف تا «ثبت محصول» کنارش جا شود */
         @media(max-width:640px) { .bz-sort-label { display: none !important; } }
-        .bz-grid { grid-template-columns: repeat(4,1fr) !important; }
-        @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(3,1fr) !important; } }
+        .bz-grid { grid-template-columns: repeat(5,1fr) !important; }
+        @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(4,1fr) !important; } }
         @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(2,1fr) !important; } }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
