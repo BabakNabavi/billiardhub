@@ -316,7 +316,6 @@ function HeroSlider() {
           <img src={s.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </Link>
       ))}
-      <div style={{ paddingTop: 'clamp(220px,38vw,420px)' }} />
     </div>
   )
 }
@@ -388,7 +387,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
               >
                 {/* icon container — subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 51, height: 51, borderRadius: '50%', flexShrink: 0,
+                  width: 56, height: 56, borderRadius: '50%', flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
                   border: `1px solid ${active ? cat.g[1] : `${cat.g[1]}52`}`,
                   boxShadow: hov ? `0 8px 22px ${cat.g[1]}66` : `0 4px 14px ${cat.g[1]}48`,
@@ -397,11 +396,11 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                   position: 'relative', zIndex: 1,
                   transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                 }}>
-                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.05)' }}>
+                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.15)' }}>
                     {cat.icon}
                   </div>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span style={{ fontSize: 13.2, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </button>
@@ -941,7 +940,7 @@ function DealsSection() {
           {/* deal product cards */}
           {DEAL_PRODUCTS.map((p, i) => (
             <Link key={`${p.id}-${i}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{
-              textDecoration: 'none', flexShrink: 0, width: 158, borderRadius: 12,
+              textDecoration: 'none', flexShrink: 0, width: 138, borderRadius: 12,
               background: '#fff', display: 'flex', flexDirection: 'column',
               border: '1.5px solid rgba(28,28,26,0.13)',
               overflow: 'hidden',
@@ -949,21 +948,21 @@ function DealsSection() {
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.1)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                     {toFa(p.disc)}٪
                   </div>
                 )}
               </div>
               <div style={{ padding: '10px 10px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <span style={{ fontSize: 13.2, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                 <div style={{ marginTop: 'auto' }}>
                   {p.disc > 0 && (
-                    <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 1 }}>
+                    <div style={{ fontSize: 12, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 1 }}>
                       {fmt(p.old)} تومان
                     </div>
                   )}
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 10, fontWeight: 500 }}>تومان</span>
+                  <div style={{ fontSize: 14.3, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
                   </div>
                 </div>
               </div>
@@ -1027,27 +1026,27 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
             <ChevronLeft size={13} strokeWidth={2.5} />
           </Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }} className="prod-grid">
           {newestProducts.map(p => (
             <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
                 {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 12, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                     {toFa(p.disc)}٪
                   </div>
                 )}
               </div>
               <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                <span style={{ fontSize: 13.2, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                 <div style={{ marginTop: 'auto' }}>
                   {p.disc > 0 && (
-                    <div style={{ fontSize: 11, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
+                    <div style={{ fontSize: 12, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
                       {fmt(p.old)} تومان
                     </div>
                   )}
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                  <div style={{ fontSize: 14.3, fontWeight: 800, color: '#1A6B3A' }}>
+                    {fmt(p.price)} <span style={{ fontSize: 12, fontWeight: 500 }}>تومان</span>
                   </div>
                 </div>
               </div>
@@ -1176,11 +1175,11 @@ export default function ShopPage() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,900&display=swap');
         @keyframes hsIn { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
         * { box-sizing: border-box; }
-        .hero-slider { height: clamp(220px,38vw,420px); }
+        .hero-slider { aspect-ratio: 2048 / 421; }
         .cat-scroll::-webkit-scrollbar { display: none; }
-        .prod-grid { grid-template-columns: repeat(6,1fr) !important; }
+        .prod-grid { grid-template-columns: repeat(5,1fr) !important; }
         @media(max-width:1100px) { .prod-grid { grid-template-columns: repeat(4,1fr) !important; } }
-        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(3,1fr) !important; } }
         .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
         .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
@@ -1190,7 +1189,6 @@ export default function ShopPage() {
         @media(max-width:600px) { .dual-banner { flex-direction: column !important; } }
         @media(max-width:600px) {
           .bb-divider { display: none !important; }
-          .hero-slider { height: clamp(190px,56vw,320px) !important; }
         }
         /* موبایل: سرچ در ردیف کامل دوم — دیگر له یا نصفه نمی‌شود */
         @media(max-width:640px) {
@@ -1209,7 +1207,7 @@ export default function ShopPage() {
         @media(max-width:640px) { .bz-sort-label { display: none !important; } }
         .bz-grid { grid-template-columns: repeat(5,1fr) !important; }
         @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(4,1fr) !important; } }
-        @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(3,1fr) !important; } }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
         .lq-sheen::after {
