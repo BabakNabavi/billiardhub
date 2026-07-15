@@ -495,13 +495,13 @@ function CatalogSection({
                   <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                     <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     {p.disc > 0 && (
-                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                      <div style={{ position: 'absolute', top: 8, left: 8, background: '#7C3AED', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                         {toFa(p.disc)}٪
                       </div>
                     )}
                   </div>
-                  <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+                  <div className="pc-body" style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                     <span style={{ fontSize: 12.65, color: TEXT_MUT }}>{p.sellerName}</span>
                     <div style={{ marginTop: 'auto' }}>
                       {p.disc > 0 && (
@@ -509,8 +509,8 @@ function CatalogSection({
                           {fmt(p.old)} تومان
                         </div>
                       )}
-                      <div style={{ fontSize: 15.7, fontWeight: 800, color: '#1A6B3A' }}>
-                        {fmt(p.price)} <span style={{ fontSize: 13.2, fontWeight: 500 }}>تومان</span>
+                      <div style={{ fontSize: 15.7, fontWeight: 800, color: TEXT }}>
+                        {fmt(p.price)} <span style={{ fontSize: 13.2, fontWeight: 500, color: TEXT_SEC }}>تومان</span>
                       </div>
                     </div>
                   </div>
@@ -527,8 +527,8 @@ function CatalogSection({
             {/* پوسترهای آگهی — ۲ ردیف × ۲ ستون */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginTop: 18 }}>
               {CATALOG_AD_POSTERS.map((ad, i) => (
-                <Link key={i} href={ad.href} style={{ display: 'block', borderRadius: 12, overflow: 'hidden', border: '1.5px solid rgba(28,28,26,0.1)', lineHeight: 0 }}>
-                  <img src={ad.img} alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                <Link key={i} href={ad.href} className="cat-ad-poster" style={{ display: 'block', borderRadius: 12, overflow: 'hidden', border: '1.5px solid rgba(28,28,26,0.1)', lineHeight: 0 }}>
+                  <img src={ad.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </Link>
               ))}
             </div>
@@ -701,21 +701,21 @@ function DealsSection() {
               <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.1)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#7C3AED', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                     {toFa(p.disc)}٪
                   </div>
                 )}
               </div>
-              <div style={{ padding: '10px 10px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <span style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+              <div className="pc-body" style={{ padding: '10px 10px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                 <div style={{ marginTop: 'auto' }}>
                   {p.disc > 0 && (
                     <div style={{ fontSize: 13.2, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 1 }}>
                       {fmt(p.old)} تومان
                     </div>
                   )}
-                  <div style={{ fontSize: 15.7, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 12.1, fontWeight: 500 }}>تومان</span>
+                  <div style={{ fontSize: 15.7, fontWeight: 800, color: TEXT }}>
+                    {fmt(p.price)} <span style={{ fontSize: 12.1, fontWeight: 500, color: TEXT_SEC }}>تومان</span>
                   </div>
                 </div>
               </div>
@@ -785,21 +785,21 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
               <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
                 {p.disc > 0 && (
-                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: '#7C3AED', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
                     {toFa(p.disc)}٪
                   </div>
                 )}
               </div>
-              <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
+              <div className="pc-body" style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
                 <div style={{ marginTop: 'auto' }}>
                   {p.disc > 0 && (
                     <div style={{ fontSize: 13.2, color: TEXT_SEC, textDecoration: 'line-through', marginBottom: 2 }}>
                       {fmt(p.old)} تومان
                     </div>
                   )}
-                  <div style={{ fontSize: 15.7, fontWeight: 800, color: '#1A6B3A' }}>
-                    {fmt(p.price)} <span style={{ fontSize: 13.2, fontWeight: 500 }}>تومان</span>
+                  <div style={{ fontSize: 15.7, fontWeight: 800, color: TEXT }}>
+                    {fmt(p.price)} <span style={{ fontSize: 13.2, fontWeight: 500, color: TEXT_SEC }}>تومان</span>
                   </div>
                 </div>
               </div>
@@ -937,6 +937,7 @@ export default function ShopPage() {
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
         .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
         @media(max-width:900px) { .banner-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        .cat-ad-poster { aspect-ratio: 2048 / 421; }
         .banner-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .banner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(28,28,26,0.16) !important; }
         @media(max-width:600px) { .dual-banner { flex-direction: column !important; } }
@@ -967,6 +968,12 @@ export default function ShopPage() {
           .cat-icn-in { transform: scale(1.13) !important; }
           .cat-lbl { font-size: 13px !important; }
           .hero-slider { aspect-ratio: 2048 / 1052 !important; }
+          /* متن کارت‌ها در موبایل جمع‌تر شود تا قیمت بریده نشود */
+          .pc-body { padding: 5px 7px 7px !important; gap: 2px !important; }
+          .pc-name { line-height: 1.35 !important; }
+          /* پوسترهای آگهی ۵۰٪ بلندتر — و بنرهای زیر «زمان باقیمانده» هم‌ارتفاع با آن‌ها */
+          .cat-ad-poster { aspect-ratio: 2048 / 632; }
+          .banner-card   { height: auto !important; aspect-ratio: 2048 / 632; }
         }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
