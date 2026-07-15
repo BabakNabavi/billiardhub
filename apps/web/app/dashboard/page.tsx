@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/api';
 import { getCoachProfiles } from '../../lib/coach-store';
+import { getRefereeProfiles } from '../../lib/referee-store';
 import {
   Calendar, Trophy, Bell, Settings,
   Award, Clock, MapPin,
@@ -73,6 +74,7 @@ export default function DashboardPage() {
   const [myClub, setMyClub] = useState<{ id: string; name: string; city: string } | null>(null);
   const [clubLoading, setClubLoading] = useState(false);
   const [hasCoachProfile, setHasCoachProfile] = useState(false);
+  const [hasRefereeProfile, setHasRefereeProfile] = useState(false);
   const rafRef = useRef<number>(0);
   const unread = notifications.filter(n => !n.read).length;
 
@@ -137,6 +139,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user?.phone) { setHasCoachProfile(false); return; }
     setHasCoachProfile(Object.values(getCoachProfiles()).some(p => p.ownerPhone === user.phone));
+  }, [user?.phone]);
+
+  useEffect(() => {
+    if (!user?.phone) { setHasRefereeProfile(false); return; }
+    setHasRefereeProfile(Object.values(getRefereeProfiles()).some(p => p.ownerPhone === user.phone));
   }, [user?.phone]);
 
   useEffect(() => {
@@ -451,12 +458,12 @@ export default function DashboardPage() {
                       transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
                     }}>
                       <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(8,145,178,0.10)', border: '1px solid rgba(8,145,178,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🧑‍⚖️</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل داور رسمی</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل داور</div>
                       <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
-                        مدیریت مسابقات و برنامه داوری، و انتشار استوری در صفحه‌ی اول
+                        {hasRefereeProfile ? 'پروفایل داوری شما ساخته شده است — می‌توانید ویرایش کنید' : 'پروفایل داوری خود را بسازید (درجات و مدرک داوری) و استوری منتشر کنید'}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
-                        ورود به پنل <span style={{ fontSize: '16px' }}>←</span>
+                        {hasRefereeProfile ? 'ویرایش پروفایل' : 'ساخت پروفایل'} <span style={{ fontSize: '16px' }}>←</span>
                       </div>
                     </div>
                   </Link>

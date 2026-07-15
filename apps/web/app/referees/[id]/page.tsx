@@ -1,8 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
+import {
+  getRefereeProfile, badgeFromGrades, certificationLines, disciplineLabel, GRADES,
+  type RefereeProfile,
+} from '../../../lib/referee-store'
 
 /* ─── Tokens (same as listing) ─── */
 const GOLD   = '#C7A66A'
@@ -44,12 +48,39 @@ interface Album { id:string; name:string; imageIds:string[] }
 
 interface RefereeFull {
   id:string; name:string; specialty:string; city:string
-  badge:string; badgeColor:string; verified:boolean
+  badge:string; badgeColor:string; badgeLatin?:boolean; verified:boolean
   hasStory:boolean; storyImage:string
   bio:string; fullBio:string
   certifications:string[]; achievements:string[]; specialties:string[]
   phone:string; whatsapp:string; instagram?:string; telegram?:string
   gallery:GImg[]; videos:VItem[]
+  photo?:string; coverImage?:string; specialtyLabel?:string
+}
+
+/* Map a saved referee profile (localStorage) → the profile-page shape. */
+function mapLocalToFull(p: RefereeProfile): RefereeFull {
+  const b = badgeFromGrades(p.grades)
+  const bLatin = !!GRADES.find(g => g.label === b?.label)?.latin
+  return {
+    id: p.slug,
+    name: `${p.firstNameFa} ${p.lastNameFa}`.trim(),
+    specialty: p.disciplines[0] ?? 'snooker',
+    specialtyLabel: p.disciplines.map(disciplineLabel).join(' · ') || undefined,
+    city: p.city,
+    badge: b?.label ?? '', badgeColor: b?.color ?? GOLD_D, badgeLatin: bLatin,
+    verified: p.verified,
+    hasStory: false, storyImage: '',
+    bio: p.shortBio, fullBio: p.fullBio,
+    certifications: certificationLines(p.grades),
+    achievements: [],
+    specialties: p.disciplines.map(disciplineLabel),
+    phone: p.phone, whatsapp: p.whatsapp,
+    instagram: p.instagram || undefined, telegram: p.telegram || undefined,
+    gallery: p.gallery.map(g => ({ id: g.id, url: g.url, caption: g.caption })),
+    videos: p.videos.map(v => ({ id: v.id, thumbnail: v.thumbnail, title: v.title, duration: v.duration })),
+    photo: p.photo || undefined,
+    coverImage: p.coverImage || undefined,
+  }
 }
 
 /* ─── Data ─── */
@@ -233,7 +264,9 @@ const D: RefereeFull[] = [
 /* ─── Page ─── */
 export default function RefereeProfilePage() {
   const { id } = useParams<{id:string}>()
-  const referee = D.find(r => r.id === id) ?? D[0]!
+  const [localP, setLocalP] = useState<RefereeProfile | null>(null)
+  useEffect(() => { if (id) setLocalP(getRefereeProfile(id)) }, [id])
+  const referee = localP ? mapLocalToFull(localP) : (D.find(r => r.id === id) ?? D[0]!)
 
   const [openStory,     setOpenStory]     = useState(false)
   const [copied,        setCopied]        = useState(false)
@@ -313,9 +346,18 @@ export default function RefereeProfilePage() {
             <div className="pcard pcard-profile" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', animation:'fadeUp .4s ease both' }}>
               {/* Cover — default referee poster */}
               <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
-                <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
-                <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
-                <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
+                {referee.coverImage ? (
+                  <>
+                    <img src={referee.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
+                    <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(6,12,22,0.62) 0%, rgba(6,12,22,0.18) 55%, rgba(6,12,22,0.05) 100%)' }}/>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize:'16px 16px' }}/>
+                    <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
+                    <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
+                  </>
+                )}
                 <div style={{ position:'absolute', top:'50%', insetInlineEnd:'clamp(20px,4vw,40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'10px' }}>
                   <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
                   <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
@@ -334,10 +376,14 @@ export default function RefereeProfilePage() {
                       padding: referee.hasStory ? 4 : 0,
                       boxShadow: referee.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 2px 8px rgba(0,0,0,0.14)' }}>
                       <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
-                        <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
-                          <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
-                          <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
-                        </svg>
+                        {referee.photo ? (
+                          <img src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                        ) : (
+                          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
+                            <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
+                            <path d="M15 100 C15 74 31 65 50 65 C69 65 85 74 85 100 Z" fill="#A9B8CC"/>
+                          </svg>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -355,9 +401,9 @@ export default function RefereeProfilePage() {
                         </svg>
                       )}
                     </div>
-                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>داور {spec?.label ?? 'بیلیارد'}</div>
+                    <div style={{ fontSize:15, color:'rgba(0,0,0,0.9)', marginTop:4 }}>داور {referee.specialtyLabel ?? spec?.label ?? 'بیلیارد'}</div>
                     {referee.badge && (
-                      <div style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3 }}>{referee.badge}</div>
+                      <div dir="auto" className={referee.badgeLatin ? 'bh-latin' : undefined} style={{ fontSize:13.5, color:'#0a66c2', fontWeight:600, marginTop:3, unicodeBidi:'isolate' }}>{referee.badge}</div>
                     )}
                     <div style={{ fontSize:13, color:'rgba(0,0,0,0.55)', marginTop:6 }}>
                       {referee.city}، ایران
@@ -511,7 +557,7 @@ export default function RefereeProfilePage() {
             <div className="pcard pcard-grade" style={{ background:'#fff', border:'1px solid rgba(0,0,0,0.10)', borderRadius:12, padding:'16px 18px', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
               <h3 style={{ fontSize:16, fontWeight:700, color:'#1c1c1c', marginBottom:14 }}>درجه داوری</h3>
               <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, flexWrap:'wrap' }}>
-                <span style={{ background:`${referee.badgeColor}15`, border:`1.5px solid ${referee.badgeColor}48`, color:referee.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px' }}>{referee.badge}</span>
+                <span dir="auto" className={referee.badgeLatin ? 'bh-latin' : undefined} style={{ background:`${referee.badgeColor}15`, border:`1.5px solid ${referee.badgeColor}48`, color:referee.badgeColor, borderRadius:100, fontSize:13, fontWeight:800, padding:'6px 16px', unicodeBidi:'isolate' }}>{referee.badge}</span>
                 {grade && (
                   <div style={{ display:'flex', gap:5 }}>
                     {[1,2,3,4,5].map(d => (<div key={d} style={{ width:9, height:9, borderRadius:'50%', background: d<=grade.dots ? grade.color : 'rgba(17,17,16,0.12)' }} />))}
@@ -522,7 +568,7 @@ export default function RefereeProfilePage() {
                 {referee.certifications.map((c,i) => (
                   <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
                     <span style={{ color:GOLD, marginTop:2, flexShrink:0, fontSize:10 }}>✦</span>
-                    <span style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.65 }}>{c}</span>
+                    <span dir="auto" style={{ fontSize:12.5, color:TEXT_S, lineHeight:1.65, unicodeBidi:'isolate' }}>{c}</span>
                   </div>
                 ))}
               </div>
