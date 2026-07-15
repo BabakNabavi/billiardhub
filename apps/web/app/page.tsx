@@ -1441,8 +1441,8 @@ useEffect(() => {
             onMouseLeave={() => { mktPausedRef.current = false; }}
           >
             {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
-              <div key={`${p.id}-${i}`} style={{ width: '190px', flexShrink: 0 }}>
-                <ProductCard p={p} h="304px" />
+              <div key={`${p.id}-${i}`} style={{ width: '143px', flexShrink: 0 }}>
+                <ProductCard p={p} h="274px" />
               </div>
             ))}
           </div>
