@@ -309,35 +309,14 @@ function HeroSlider() {
     timerRef.current = setTimeout(next, 4500)
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [active, next])
-  const slide = SLIDES[active]!
   return (
     <div className="hero-slider" style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#1C1C1A' }}>
       {SLIDES.map((s, i) => (
-        <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transform: i === active ? 'scale(1)' : 'scale(1.025)', transition: 'opacity 0.75s ease,transform 0.75s ease', pointerEvents: i === active ? 'auto' : 'none' }}>
-          <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55) saturate(0.85)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left,rgba(10,8,5,0.92) 0%,rgba(10,8,5,0.45) 50%,transparent 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(10,8,5,0.6) 0%,transparent 40%)' }} />
-        </div>
+        <Link key={i} href={s.href} style={{ position: 'absolute', inset: 0, display: 'block', opacity: i === active ? 1 : 0, transform: i === active ? 'scale(1)' : 'scale(1.025)', transition: 'opacity 0.75s ease,transform 0.75s ease', pointerEvents: i === active ? 'auto' : 'none' }}>
+          <img src={s.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </Link>
       ))}
       <div style={{ paddingTop: 'clamp(220px,38vw,420px)' }} />
-      <div style={{ position: 'absolute', inset: 0, zIndex: 10, display: 'flex', alignItems: 'center', padding: 'clamp(16px,5%,80px)', direction: 'rtl' }}>
-        <div key={active} style={{ maxWidth: 460, animation: 'hsIn 0.55s cubic-bezier(0.22,1,0.36,1) both' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 100, padding: '4px 14px', marginBottom: 16, backdropFilter: 'blur(10px)' }}>
-            <span style={{ fontSize: 12, color: GOLD, fontWeight: 700 }}>{slide.badge}</span>
-          </div>
-          <h2 style={{ fontSize: 'clamp(24px,4.5vw,46px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', lineHeight: 1.15, letterSpacing: '-0.03em' }}>{slide.title}</h2>
-          <p style={{ fontSize: 'clamp(13px,1.6vw,16px)', color: 'rgba(255,255,255,0.55)', margin: '0 0 28px', lineHeight: 1.8 }}>{slide.sub}</p>
-          <Link href={slide.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 'clamp(5px,1.6vw,8px)', background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '1px solid rgba(199,166,106,0.5)', boxShadow: '0 8px 32px rgba(199,166,106,0.18),inset 0 1px 0 rgba(255,255,255,0.25)', color: '#fff', padding: 'clamp(8px,2.4vw,13px) clamp(14px,4vw,26px)', borderRadius: 'clamp(10px,2vw,13px)', textDecoration: 'none', fontSize: 'clamp(13px,1.6vw,14px)', fontWeight: 700, transition: 'all 0.25s' }}>
-            {slide.cta}<ChevronLeft size={16} strokeWidth={2.5} />
-          </Link>
-        </div>
-      </div>
-      {/* Dots */}
-      <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 20, display: 'flex', gap: 6 }}>
-        {SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setActive(i)} style={{ width: i === active ? 18 : 5, height: 5, borderRadius: 3, border: 'none', cursor: 'pointer', padding: 0, background: i === active ? GOLD : 'rgba(255,255,255,0.28)', backdropFilter: 'blur(8px)', boxShadow: i === active ? '0 0 8px rgba(199,166,106,0.55)' : 'none', transition: 'all 0.35s ease' }} />
-        ))}
-      </div>
     </div>
   )
 }
@@ -380,7 +359,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
           ref={scrollRef}
           className="cat-scroll"
           onMouseDown={onDown}
-          style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
             const active = activeCat === cat.id
@@ -396,7 +375,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                 style={{
                   textDecoration: 'none', flexShrink: 0, fontFamily: 'inherit',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-                  width: 78,
+                  width: 72,
                   /* white card background removed — just the icon tile + label */
                   background: 'transparent', border: 'none', boxShadow: 'none',
                   borderRadius: 21,
@@ -409,7 +388,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
               >
                 {/* icon container — subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 51, height: 51, borderRadius: 14, flexShrink: 0,
+                  width: 51, height: 51, borderRadius: '50%', flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
                   border: `1px solid ${active ? cat.g[1] : `${cat.g[1]}52`}`,
                   boxShadow: hov ? `0 8px 22px ${cat.g[1]}66` : `0 4px 14px ${cat.g[1]}48`,
@@ -422,7 +401,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                     {cat.icon}
                   </div>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </button>
