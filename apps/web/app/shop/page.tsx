@@ -358,6 +358,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
               <button
                 key={cat.id}
                 type="button"
+                className="cat-tile"
                 onClick={() => onPick(cat.id)}
                 draggable={false}
                 onMouseEnter={() => setHovId(cat.id)}
@@ -377,7 +378,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                 }}
               >
                 {/* icon container — subtle tinted bg + colored border + glow */}
-                <div style={{
+                <div className="cat-icn" style={{
                   width: 62, height: 62, borderRadius: '50%', flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
                   border: `1px solid ${active ? cat.g[1] : `${cat.g[1]}52`}`,
@@ -387,11 +388,11 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                   position: 'relative', zIndex: 1,
                   transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                 }}>
-                  <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.25)' }}>
+                  <div className="cat-icn-in" style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.25)' }}>
                     {cat.icon}
                   </div>
                 </div>
-                <span style={{ fontSize: 14.5, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span className="cat-lbl" style={{ fontSize: 14.5, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </button>
@@ -450,6 +451,26 @@ function CatalogSection({
     padding: '16px 16px 14px',
   }
 
+  const scrollRef  = useRef<HTMLDivElement>(null)
+  const startX     = useRef(0)
+  const scrollLeft = useRef(0)
+  const onDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return
+    e.preventDefault()
+    startX.current     = e.pageX - scrollRef.current.offsetLeft
+    scrollLeft.current = scrollRef.current.scrollLeft
+    scrollRef.current.style.cursor = 'grabbing'
+    const stop = () => {
+      if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
+      window.removeEventListener('mouseup', stop); window.removeEventListener('mousemove', move)
+    }
+    const move = (ev: MouseEvent) => {
+      if (!scrollRef.current) return
+      scrollRef.current.scrollLeft = scrollLeft.current - ((ev.pageX - scrollRef.current.offsetLeft) - startX.current) * 1.4
+    }
+    window.addEventListener('mouseup', stop); window.addEventListener('mousemove', move)
+  }
+
   return (
     <div id="bazaar-catalog" style={{ background: '#fff' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 44px', direction: 'rtl' }}>
@@ -458,10 +479,10 @@ function CatalogSection({
         {/* گرید محصولات */}
         <div className="bz-catalog">
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="bz-grid">
+            <div ref={scrollRef} onMouseDown={onDown} className="bz-grid" style={{ display: 'flex', gap: 19, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none', paddingBottom: 8 }}>
               {visible.map(p => (
-                <Link key={p.id} href={`/shop/${p.id}`} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', aspectRatio: '1 / 1.55' }}>
-                  <div style={{ width: '100%', flex: '0 0 55%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+                <Link key={p.id} href={`/shop/${p.id}`} draggable={false} className="prod-card bz-scroll-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                  <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                     <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     {p.disc > 0 && (
                       <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -656,9 +677,9 @@ function DealsSection() {
               textDecoration: 'none', flexShrink: 0, width: 138, borderRadius: 12,
               background: '#fff', display: 'flex', flexDirection: 'column',
               border: '1.5px solid rgba(28,28,26,0.13)',
-              overflow: 'hidden',
+              overflow: 'hidden', aspectRatio: '1 / 2.2',
             }}>
-              <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.1)' }}>
+              <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F8F7F5', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.1)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 {p.disc > 0 && (
                   <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -741,8 +762,8 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 10 }} className="prod-grid">
           {newestProducts.map(p => (
-            <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ width: '100%', paddingTop: '90%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+            <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', aspectRatio: '1 / 2.2' }}>
+              <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
                 {p.disc > 0 && (
                   <div style={{ position: 'absolute', top: 8, left: 8, background: '#E53935', color: '#fff', fontSize: 13.2, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>
@@ -918,9 +939,16 @@ export default function ShopPage() {
         @media(max-width:900px) { .bz-filterbtn { display: flex !important; } }
         /* موبایل: برچسب «مرتب‌سازی:» حذف تا «ثبت محصول» کنارش جا شود */
         @media(max-width:640px) { .bz-sort-label { display: none !important; } }
-        .bz-grid { grid-template-columns: repeat(6,1fr) !important; }
-        @media(max-width:1100px) { .bz-grid { grid-template-columns: repeat(5,1fr) !important; } }
-        @media(max-width:700px)  { .bz-grid { grid-template-columns: repeat(4,1fr) !important; } }
+        .bz-grid::-webkit-scrollbar { display: none; }
+        .bz-scroll-card { width: 168px; aspect-ratio: 1 / 2.2; }
+        @media(max-width:700px) {
+          .bz-scroll-card { width: 42vw; }
+          .cat-tile { width: 70px !important; }
+          .cat-icn { width: 56px !important; height: 56px !important; }
+          .cat-icn-in { transform: scale(1.13) !important; }
+          .cat-lbl { font-size: 13px !important; }
+          .hero-slider { aspect-ratio: 2048 / 526 !important; }
+        }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
         .lq-sheen::after {
