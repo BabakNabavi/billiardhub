@@ -520,7 +520,7 @@ export default function Navbar() {
                   <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `linear-gradient(135deg,${item.color}22,${item.color}0D)`, border: `1px solid ${item.color}2E`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, flexShrink: 0 }}>
                     {item.icon}
                   </div>
-                  <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'rgba(28,28,26,0.72)', textAlign: 'center', lineHeight: 1.25 }}>{item.label}</span>
+                  <span style={{ fontSize: '11.6px', fontWeight: 700, color: 'rgba(28,28,26,0.72)', textAlign: 'center', lineHeight: 1.25 }}>{item.label}</span>
                   {item.live && (
                     <span style={{ position: 'absolute', top: '5px', insetInlineStart: '5px', fontSize: '7.5px', color: '#ef4444', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.26)', borderRadius: '20px', padding: '1px 4px', fontWeight: 700 }}>LIVE</span>
                   )}
