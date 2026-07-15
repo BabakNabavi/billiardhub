@@ -344,12 +344,13 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
 
   return (
     <div style={{ background: '#fff', overflow: 'visible' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) 14px', direction: 'rtl', overflow: 'visible' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '14px clamp(16px,3vw,32px) 6px', direction: 'rtl', overflow: 'visible' }}>
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(28,28,26,0.06)', boxShadow: '0 1px 6px rgba(28,28,26,0.05)', padding: '2px 10px', overflow: 'hidden' }}>
         <div
           ref={scrollRef}
           className="cat-scroll"
           onMouseDown={onDown}
-          style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 12, paddingTop: 10, cursor: 'grab', userSelect: 'none' }}
+          style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 8, paddingTop: 6, cursor: 'grab', userSelect: 'none' }}
         >
           {CATS.map(cat => {
             const active = activeCat === cat.id
@@ -399,12 +400,21 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
             )
           })}
         </div>
+        </div>
       </div>
     </div>
   )
 }
 
 // ── Catalog Section — بخش اصلی فروش: فیلتر + مرتب‌سازی + گرید ──
+/* پوسترهای آگهی زیر کارت‌های کاتالوگ — ۲ ردیف × ۲ ستون */
+const CATALOG_AD_POSTERS = [
+  { img: '/images/ads/3.webp', href: '/shop/category/table' },
+  { img: '/images/ads/4.webp', href: '/shop/category/cue' },
+  { img: '/images/ads/2.webp', href: '/shop/category/ball' },
+  { img: '/images/ads/6.gif',  href: '/shop/category/accessory' },
+]
+
 type SortKey = 'newest' | 'price-asc' | 'price-desc' | 'disc'
 
 interface CatalogFilters {
@@ -473,7 +483,7 @@ function CatalogSection({
 
   return (
     <div id="bazaar-catalog" style={{ background: '#fff' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 44px', direction: 'rtl' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '10px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
 
 
         {/* گرید محصولات */}
@@ -513,6 +523,15 @@ function CatalogSection({
                 کالایی یافت نشد.
               </div>
             )}
+
+            {/* پوسترهای آگهی — ۲ ردیف × ۲ ستون */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginTop: 18 }}>
+              {CATALOG_AD_POSTERS.map((ad, i) => (
+                <Link key={i} href={ad.href} style={{ display: 'block', borderRadius: 12, overflow: 'hidden', border: '1.5px solid rgba(28,28,26,0.1)', lineHeight: 0 }}>
+                  <img src={ad.img} alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -724,7 +743,7 @@ function AdBanners() {
           {AD_BANNERS.map((b, i) => (
             <Link key={i} href={b.href} className="banner-card" style={{
               textDecoration: 'none', borderRadius: 14, overflow: 'hidden',
-              height: 150, position: 'relative', display: 'block',
+              height: 135, position: 'relative', display: 'block',
               border: '1.5px solid rgba(28,28,26,0.1)',
             }}>
               <img src={b.img} alt={b.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -911,9 +930,9 @@ export default function ShopPage() {
         * { box-sizing: border-box; }
         .hero-slider { aspect-ratio: 2048 / 421; }
         .cat-scroll::-webkit-scrollbar { display: none; }
-        .prod-grid { grid-template-columns: repeat(6,1fr) !important; }
-        @media(max-width:1100px) { .prod-grid { grid-template-columns: repeat(5,1fr) !important; } }
-        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(4,1fr) !important; } }
+        /* کارت‌های «جدیدترین‌ها» هم‌اندازه‌ی کارت‌های کاتالوگ (۱۶۸px دسکتاپ / ۱۳۸px موبایل) */
+        .prod-grid { grid-template-columns: repeat(auto-fill, 168px) !important; }
+        @media(max-width:700px)  { .prod-grid { grid-template-columns: repeat(auto-fill, 138px) !important; } }
         .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
         .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
@@ -942,12 +961,12 @@ export default function ShopPage() {
         .bz-grid::-webkit-scrollbar { display: none; }
         .bz-scroll-card { width: 168px; aspect-ratio: 1 / 2.2; }
         @media(max-width:700px) {
-          .bz-scroll-card { width: 42vw; }
+          .bz-scroll-card { width: 138px; }
           .cat-tile { width: 70px !important; }
           .cat-icn { width: 56px !important; height: 56px !important; }
           .cat-icn-in { transform: scale(1.13) !important; }
           .cat-lbl { font-size: 13px !important; }
-          .hero-slider { aspect-ratio: 2048 / 526 !important; }
+          .hero-slider { aspect-ratio: 2048 / 1052 !important; }
         }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
