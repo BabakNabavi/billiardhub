@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import { Search, User, LogIn, ChevronLeft } from 'lucide-react'
+import { Search, LogIn, ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { SHOP_PRODUCTS } from './products'
 
@@ -283,13 +283,8 @@ function ShopTopBar({
             }}
           />
         </form>
-        {/* Auth */}
-        {user ? (
-          <Link href="/dashboard" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, background: LQ.bg, backdropFilter: LQ.blur, WebkitBackdropFilter: LQ.blur, border: LQ.border, borderRadius: 10, padding: '7px 13px', boxShadow: LQ.shadow, transition: 'all 0.25s' }}>
-            <User size={14} color={TEXT} strokeWidth={2.2} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{user.firstName}</span>
-          </Link>
-        ) : (
+        {/* Auth — logged-in profile chip removed; only the guest login button remains */}
+        {!user && (
           <Link href="/login" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, background: LQ.bgGold, backdropFilter: LQ.blur, WebkitBackdropFilter: LQ.blur, border: LQ.borderGold, borderRadius: 10, padding: '8px 16px', boxShadow: LQ.shadowGold, transition: 'all 0.25s' }}>
             <LogIn size={14} color={GOLD} strokeWidth={2.5} />
             <span style={{ fontSize: 13, fontWeight: 700, color: GOLD, whiteSpace: 'nowrap' }}>ورود | عضویت</span>
@@ -327,7 +322,7 @@ function HeroSlider() {
           </div>
           <h2 style={{ fontSize: 'clamp(24px,4.5vw,46px)', fontWeight: 900, color: '#fff', margin: '0 0 12px', lineHeight: 1.15, letterSpacing: '-0.03em' }}>{slide.title}</h2>
           <p style={{ fontSize: 'clamp(13px,1.6vw,16px)', color: 'rgba(255,255,255,0.55)', margin: '0 0 28px', lineHeight: 1.8 }}>{slide.sub}</p>
-          <Link href={slide.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '1px solid rgba(199,166,106,0.5)', boxShadow: '0 8px 32px rgba(199,166,106,0.18),inset 0 1px 0 rgba(255,255,255,0.25)', color: '#fff', padding: '13px 26px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 700, transition: 'all 0.25s' }}>
+          <Link href={slide.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 'clamp(5px,1.6vw,8px)', background: 'rgba(199,166,106,0.18)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '1px solid rgba(199,166,106,0.5)', boxShadow: '0 8px 32px rgba(199,166,106,0.18),inset 0 1px 0 rgba(255,255,255,0.25)', color: '#fff', padding: 'clamp(8px,2.4vw,13px) clamp(14px,4vw,26px)', borderRadius: 'clamp(10px,2vw,13px)', textDecoration: 'none', fontSize: 'clamp(13px,1.6vw,14px)', fontWeight: 700, transition: 'all 0.25s' }}>
             {slide.cta}<ChevronLeft size={16} strokeWidth={2.5} />
           </Link>
         </div>
@@ -397,33 +392,26 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                   textDecoration: 'none', flexShrink: 0, fontFamily: 'inherit',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
                   width: 78,
-                  /* ── exact home-page card style (۵٪ کوچک‌تر) ── */
-                  background: hov ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.52)',
-                  backdropFilter: 'blur(40px) saturate(240%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(240%)',
-                  border: `1px solid ${active ? cat.g[1] : hov ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.82)'}`,
+                  /* white card background removed — just the icon tile + label */
+                  background: 'transparent', border: 'none', boxShadow: 'none',
                   borderRadius: 21,
-                  padding: '13px 8px 9px',
-                  boxShadow: hov
-                    ? `inset 0 1.5px 0 rgba(255,255,255,1), 0 20px 52px ${cat.g[1]}2e, 0 8px 24px rgba(0,0,0,0.08)`
-                    : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)',
-                  transform: hov ? 'translateY(-6px)' : 'none',
-                  transition: 'background 0.3s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease, border-color 0.3s ease',
+                  padding: '10px 8px 6px',
+                  transform: hov ? 'translateY(-5px)' : 'none',
+                  transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1)',
                   cursor: 'pointer',
-                  position: 'relative', overflow: 'hidden',
+                  position: 'relative', overflow: 'visible',
                 }}
               >
-                {/* top sheen — exactly like home page */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)', borderRadius: '21px 21px 0 0', pointerEvents: 'none' }} />
-                {/* icon container — home-page style: subtle tinted bg + colored border + glow */}
+                {/* icon container — subtle tinted bg + colored border + glow */}
                 <div style={{
-                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                  width: 46, height: 46, borderRadius: 13, flexShrink: 0,
                   background: `linear-gradient(135deg,${cat.g[0]}33,${cat.g[1]}18)`,
-                  border: `1px solid ${cat.g[1]}52`,
-                  boxShadow: `0 4px 14px ${cat.g[1]}48`,
+                  border: `1px solid ${active ? cat.g[1] : `${cat.g[1]}52`}`,
+                  boxShadow: hov ? `0 8px 22px ${cat.g[1]}66` : `0 4px 14px ${cat.g[1]}48`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: cat.g[1],
                   position: 'relative', zIndex: 1,
+                  transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                 }}>
                   <div style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(0.95)' }}>
                     {cat.icon}
