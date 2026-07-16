@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { toFa, faNum, parsePrice, MONO, toggleSet, Stars, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
+import { toFa, faNum, parsePrice, MONO, toggleSet, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 
@@ -19,7 +19,8 @@ const BAZAAR_CATS = [
   { id: 'tip',       label: 'تیپ' },
   { id: 'chalk',     label: 'گچ' },
   { id: 'extension', label: 'اکستنشن' },
-  { id: 'case-bag',  label: 'کیس و کیف' },
+  { id: 'cue-case',  label: 'کیس' },
+  { id: 'ball-bag',  label: 'کیف توپ' },
   { id: 'rest',      label: 'رست' },
   { id: 'cloth',     label: 'پارچه' },
   { id: 'oil',       label: 'روغن' },
@@ -33,7 +34,7 @@ const CAT_LABEL = Object.fromEntries(BAZAAR_CATS.map(c => [c.id, c.label])) as R
 
 interface Product {
   id: string; name: string; cat: CatKey; brand: string
-  price: number; old?: number; rating: number; reviews: number; sales: number
+  price: number; old?: number; disc: number; rating: number; reviews: number; sales: number
   badge?: { text: string; kind: 'sale' | 'new' }; img: string
 }
 
@@ -58,6 +59,7 @@ const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
   brand: sp.brand,
   price: sp.price,
   old: sp.old > 0 ? sp.old : undefined,
+  disc: sp.disc,
   rating: sp.rating,
   reviews: sp.reviews,
   sales: sp.sales,
@@ -66,13 +68,6 @@ const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
 }))
 
 /* بازه‌های قیمت سریع (تومان) */
-const PRICE_RANGES: { label: string; from?: number; to?: number }[] = [
-  { label: 'زیر ۱ میلیون',        to: 1000000 },
-  { label: '۱ تا ۵ میلیون',       from: 1000000,  to: 5000000 },
-  { label: '۵ تا ۲۰ میلیون',      from: 5000000,  to: 20000000 },
-  { label: 'بالای ۲۰ میلیون',     from: 20000000 },
-]
-
 type SortKey = 'popular' | 'price-asc' | 'price-desc' | 'rating'
 const SORT_OPTIONS: { k: SortKey; l: string }[] = [
   { k: 'popular',    l: 'پرفروش‌ترین' },
@@ -145,7 +140,6 @@ export default function FlatShop() {
   const [checkedCats, setCheckedCats] = useState<Set<CatKey>>(new Set())
   const [priceFrom, setPriceFrom] = useState('')
   const [priceTo, setPriceTo]     = useState('')
-  const [quickRange, setQuickRange] = useState<number | null>(null)
   const [sort, setSort]           = useState<SortKey>('popular')
   const [page, setPage]           = useState(1)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -168,22 +162,17 @@ export default function FlatShop() {
     setCheckedCats(k === 'all' ? new Set() : new Set([k]))
 
   const clearFilters = () => {
-    setCheckedCats(new Set()); setPriceFrom(''); setPriceTo(''); setQuickRange(null)
+    setCheckedCats(new Set()); setPriceFrom(''); setPriceTo('')
   }
 
   const activeFilterCount =
-    checkedCats.size + (quickRange !== null ? 1 : 0) + (priceFrom ? 1 : 0) + (priceTo ? 1 : 0)
+    checkedCats.size + (priceFrom ? 1 : 0) + (priceTo ? 1 : 0)
 
   const catCounts = useMemo(() => {
     const c = Object.fromEntries(BAZAAR_CATS.map(x => [x.id, 0])) as Record<CatKey, number>
     PRODUCTS.forEach(p => { c[p.cat]++ })
     return c
   }, [])
-
-  const pickQuickRange = (idx: number, r: { from?: number; to?: number }) => {
-    if (quickRange === idx) { setQuickRange(null); setPriceFrom(''); setPriceTo('') }
-    else { setQuickRange(idx); setPriceFrom(r.from ? String(r.from) : ''); setPriceTo(r.to ? String(r.to) : '') }
-  }
 
   const visible = useMemo(() => {
     const from = parsePrice(priceFrom)
@@ -223,29 +212,16 @@ export default function FlatShop() {
         ))}
       </div>
 
-      {/* بازه‌ی قیمت — سریع + دستی */}
+      {/* بازه‌ی قیمت — فقط ورودی دستیِ از/تا (دکمه‌های بازه‌ی سریع حذف شدند) */}
       <div className="pt-5">
         <h4 className="mb-3.5 text-[13px] font-semibold">محدوده قیمت (تومان)</h4>
-        <div className="mb-3 flex flex-wrap gap-2">
-          {PRICE_RANGES.map((r, i) => {
-            const on = quickRange === i
-            return (
-              <button key={i} onClick={() => pickQuickRange(i, r)}
-                className={`rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors ${
-                  on ? 'border-[#14532D]/40 bg-[#14532D]/[0.10] text-[#14532D]' : 'border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[#14532D]/30'
-                }`}>
-                {r.label}
-              </button>
-            )
-          })}
-        </div>
         <div className="flex gap-2">
           <input
-            value={priceFrom} onChange={e => { setPriceFrom(e.target.value); setQuickRange(null) }} placeholder="از"
+            value={priceFrom} onChange={e => setPriceFrom(e.target.value)} placeholder="از"
             className={`w-full rounded-lg border border-[#E7E2D6] bg-white px-2.5 py-2 text-[12.5px] focus:border-[#14532D] focus:outline-none ${MONO}`}
           />
           <input
-            value={priceTo} onChange={e => { setPriceTo(e.target.value); setQuickRange(null) }} placeholder="تا"
+            value={priceTo} onChange={e => setPriceTo(e.target.value)} placeholder="تا"
             className={`w-full rounded-lg border border-[#E7E2D6] bg-white px-2.5 py-2 text-[12.5px] focus:border-[#14532D] focus:outline-none ${MONO}`}
           />
         </div>
@@ -260,6 +236,34 @@ export default function FlatShop() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
+
+      <style>{`
+        /* کارت محصول — هم‌فرمِ کارت sec1 در صفحه‌ی بیلیارد بازار.
+           عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
+           سهم عکس، گردی، بوردر و فونت‌ها عیناً همان‌اند. */
+        .prod-card-sec1 {
+          aspect-ratio: 1 / 1.944;
+          border-radius: 10px;
+          border: 1.5px solid rgba(28,28,26,0.18);
+          transition: transform .22s cubic-bezier(0.22,1,0.36,1), box-shadow .22s;
+        }
+        .prod-card-sec1:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12); }
+        .pc-body-sec1 { padding: 21px 10px 12px; }
+        /* نام محصول — حداکثر دو خط، مثل sec1 */
+        .pc-name-sec1 {
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        @media(max-width:700px) {
+          .prod-card-sec1 { aspect-ratio: 1 / 1.847; }
+          .pc-body-sec1 { padding: 14px 7px 7px; }
+          .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
+        }
+        /* دکمه‌ی علاقه‌مندی */
+        .wish-btn { transition: transform .18s cubic-bezier(0.22,1,0.36,1), color .18s, background .18s, border-color .18s; }
+        .wish-btn:hover  { transform: scale(1.08); }
+        .wish-btn:active { transform: scale(0.9); }
+        @media (prefers-reduced-motion: reduce) { .wish-btn { transition: none; } .wish-btn:hover, .wish-btn:active { transform: none; } }
+      `}</style>
 
       {/* ── breadcrumb ── */}
       <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#8A8474] sm:px-6">
@@ -330,42 +334,48 @@ export default function FlatShop() {
             {visible.map(p => {
               const isWished = wish.has(p.id)
               return (
+                /* کارت هم‌فرمِ sec1 (صفحه‌ی بیلیارد بازار). کلاس‌های bz-scroll-card/pc-body آنجا داخل
+                   <style> همان صفحه‌اند و اینجا وجود ندارند، پس مقادیرشان اینجا بازتولید شده:
+                   نسبت ۱:۱.۹۴۴ (موبایل ۱:۱.۸۴۷)، عکس ۶۰٪، radius ۱۰، بوردر ۱.۵px، فونت‌ها و ردیف قیمت. */
                 <article
                   key={p.id}
                   onClick={() => router.push(`/shop/${p.id}`)}
-                  className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white transition-all duration-200 hover:-translate-y-[3px] hover:border-[#14532D]/30 hover:shadow-[0_12px_26px_rgba(28,27,23,0.10)]"
+                  className="prod-card-sec1 group flex cursor-pointer flex-col overflow-hidden bg-white"
                 >
-                  <div className="relative aspect-square overflow-hidden bg-[#F7F5F0]">
-                    <img src={p.img} alt={p.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"/>
-                    {p.badge && (
-                      <span className={`absolute right-2.5 top-2.5 rounded-md px-2 py-1 text-[11px] font-semibold text-white ${
-                        p.badge.kind === 'sale' ? 'bg-[#B23B2E]' : 'bg-[#A8791F]'
-                      }`}>
-                        {p.badge.text}
-                      </span>
-                    )}
+                  <div className="relative shrink-0 basis-[60%] overflow-hidden border-b-[1.5px] border-[rgba(28,28,26,0.18)] bg-[#F4F3F1]">
+                    <img src={p.img} alt={p.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"/>
+                    {/* قلب — خطی تا وقتی انتخاب نشده، توپر بعد از انتخاب (قبلاً همیشه توپر بود و
+                        فقط رنگ عوض می‌شد). شیشه‌ی مات + فشار کوچک هنگام کلیک. */}
                     <button
-                      aria-label="علاقه‌مندی"
+                      aria-label={isWished ? 'حذف از علاقه‌مندی' : 'افزودن به علاقه‌مندی'}
+                      aria-pressed={isWished}
                       onClick={e => { e.stopPropagation(); setWish(prev => toggleSet(prev, p.id)) }}
-                      className={`${LQI} absolute left-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full ${
-                        isWished ? 'text-[#B23B2E]' : 'text-[#5B564B] hover:text-[#B23B2E]'
+                      className={`wish-btn absolute left-2.5 top-2.5 z-10 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-md ${
+                        isWished
+                          ? 'border-[#B23B2E]/30 bg-white/85 text-[#B23B2E]'
+                          : 'border-white/70 bg-white/55 text-[#5B564B] hover:text-[#B23B2E]'
                       }`}
                     >
-                      {Icon.heart}
+                      {isWished ? Icon.heart : Icon.heartO}
                     </button>
                   </div>
 
-                  <div className="flex flex-1 flex-col gap-1.5 p-3 pb-3.5 sm:gap-2 sm:p-3.5 sm:pb-4">
-                    <div className="text-[11.5px] text-[#8A8474]">{CAT_LABEL[p.cat]}</div>
-                    <div className="text-[13.5px] font-semibold leading-relaxed sm:text-[14px]">{p.name}</div>
-                    <div className="flex items-center gap-1.5 text-[11.5px] text-[#8A8474]">
-                      <Stars r={p.rating}/>
-                      <span className={MONO}>{faNum(p.rating, 1)} ({faNum(p.reviews)})</span>
-                    </div>
-                    <div className="mt-auto flex flex-wrap items-baseline gap-x-2 pt-1">
-                      <span className={`text-[14.5px] font-semibold ${MONO}`}>{faNum(p.price)}</span>
-                      {p.old && <span className={`text-[11.5px] text-[#8A8474] line-through ${MONO}`}>{faNum(p.old)}</span>}
-                      <span className="text-[10.5px] text-[#8A8474]">تومان</span>
+                  <div className="pc-body-sec1 flex flex-1 flex-col gap-1.5">
+                    <span className="pc-name-sec1 text-[14.5px] leading-[1.55] text-[#1C1C1A]">{p.name}</span>
+                    <div className="mt-auto flex items-center gap-1.5">
+                      {p.disc > 0 && (
+                        <span dir="ltr" className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#b400ae] px-2.5 pb-0.5 pt-1 text-[16px] font-extrabold leading-none text-white ${MONO}`}>
+                          ٪{toFa(p.disc)}
+                        </span>
+                      )}
+                      <div className="ms-auto text-right">
+                        {p.disc > 0 && p.old !== undefined && (
+                          <div className={`-mb-[3px] mt-[3px] text-[12.3px] leading-[1.1] text-[rgba(28,28,26,0.5)] line-through tabular-nums ${MONO}`}>
+                            {faNum(p.old)} <span className="inline-block text-[10.6px] font-medium no-underline">تومان</span>
+                          </div>
+                        )}
+                        <div className={`text-[15.5px] font-bold tabular-nums text-[#1C1C1A] ${MONO}`}>{faNum(p.price)}</div>
+                      </div>
                     </div>
                   </div>
                 </article>
