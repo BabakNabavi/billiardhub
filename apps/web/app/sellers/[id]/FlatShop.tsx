@@ -11,6 +11,142 @@ import ClubStoryModal from '../../../components/ClubStoryModal'
   دسته‌بندی‌ها: عیناً از «بیلیارد بازار» (۱۴ دسته)
 */
 
+/* ── گالری تصاویر فروشگاه ─────────────────────────────────────────────
+   نمونه‌ی اولیه: عکس‌ها base64 در localStorage ذخیره می‌شوند (مثل بقیه‌ی فلوهای پروژه).
+   حتماً قبلش با canvas فشرده می‌شوند وگرنه localStorage سریع پر می‌شود و QuotaExceededError می‌دهد. */
+const GALLERY_KEY = (sellerId: string) => `bh_seller_gallery_${sellerId}`
+const GALLERY_MAX = 12
+
+const compressImage = (file: File, maxDim = 1280, quality = 0.72): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('read failed'))
+    reader.onload = () => {
+      const dataUrl = String(reader.result)
+      const im = document.createElement('img')
+      im.onerror = () => resolve(dataUrl)
+      im.onload = () => {
+        let w = im.naturalWidth || im.width
+        let h = im.naturalHeight || im.height
+        if (w >= h && w > maxDim)     { h = Math.round((h * maxDim) / w); w = maxDim }
+        else if (h > w && h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim }
+        const canvas = document.createElement('canvas')
+        canvas.width = w; canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { resolve(dataUrl); return }
+        ctx.drawImage(im, 0, 0, w, h)
+        try { resolve(canvas.toDataURL('image/jpeg', quality)) } catch { resolve(dataUrl) }
+      }
+      im.src = dataUrl
+    }
+    reader.readAsDataURL(file)
+  })
+
+function StoreGallery({ sellerId }: { sellerId: string }) {
+  const [shots, setShots] = useState<string[]>([])
+  const [busy, setBusy]   = useState(false)
+  const [err, setErr]     = useState('')
+  const [lightbox, setLightbox] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  /* بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند */
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(GALLERY_KEY(sellerId))
+      if (raw) setShots(JSON.parse(raw) as string[])
+    } catch { /* داده‌ی خراب ⇒ گالری خالی */ }
+  }, [sellerId])
+
+  const save = (next: string[]) => {
+    setShots(next)
+    try { localStorage.setItem(GALLERY_KEY(sellerId), JSON.stringify(next)) }
+    catch { setErr('حافظه‌ی مرورگر پر است — چند عکس را حذف کنید.') }
+  }
+
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+    setErr(''); setBusy(true)
+    try {
+      const room = GALLERY_MAX - shots.length
+      if (room <= 0) { setErr(`حداکثر ${toFa(GALLERY_MAX)} عکس.`); return }
+      const picked = files.slice(0, room)
+      const added = await Promise.all(picked.map(f => compressImage(f)))
+      save([...shots, ...added])
+      if (files.length > room) setErr(`فقط ${toFa(room)} عکس اضافه شد — حداکثر ${toFa(GALLERY_MAX)} عکس.`)
+    } catch {
+      setErr('آپلود نشد. دوباره تلاش کنید.')
+    } finally {
+      setBusy(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  return (
+    <section className="mx-auto max-w-[1240px] px-4 pb-10 sm:px-6">
+      <div className="rounded-2xl border border-[#E7E2D6] bg-white p-4 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-[14.5px] font-bold">گالری تصاویر فروشگاه</h3>
+            <p className="mt-1 text-[12px] text-[#8A8474]">
+              {shots.length > 0 ? `${toFa(shots.length)} از ${toFa(GALLERY_MAX)} عکس` : 'هنوز عکسی اضافه نشده'}
+            </p>
+          </div>
+          <button
+            type="button" onClick={() => fileRef.current?.click()} disabled={busy || shots.length >= GALLERY_MAX}
+            className="inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[12.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
+          >
+            {Icon.upload}
+            {busy ? 'در حال افزودن…' : 'افزودن عکس'}
+          </button>
+          <input
+            ref={fileRef} type="file" accept="image/*" multiple onChange={onPick} className="hidden"
+          />
+        </div>
+
+        {err && <p className="mb-3 text-[12px] text-[#B23B2E]">{err}</p>}
+
+        {shots.length === 0 ? (
+          <button
+            type="button" onClick={() => fileRef.current?.click()}
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-12 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]"
+          >
+            {Icon.upload}
+            <span className="text-[12.5px]">عکس‌های فروشگاه را اینجا اضافه کنید</span>
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 min-[1000px]:grid-cols-4">
+            {shots.map((src, i) => (
+              <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
+                <button type="button" onClick={() => setLightbox(src)} className="h-full w-full" aria-label={`عکس ${toFa(i + 1)}`}>
+                  <img src={src} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/>
+                </button>
+                <button
+                  type="button" aria-label="حذف عکس"
+                  onClick={() => save(shots.filter((_, j) => j !== i))}
+                  className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]"
+                >
+                  {Icon.trash}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* لایت‌باکس */}
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(null)} role="presentation"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
+        >
+          <img src={lightbox} alt="" className="max-h-full max-w-full rounded-xl object-contain"/>
+        </div>
+      )}
+    </section>
+  )
+}
+
 /* ─── دسته‌بندی‌های بیلیارد بازار ─── */
 const BAZAAR_CATS = [
   { id: 'cue',       label: 'چوب' },
@@ -41,7 +177,12 @@ interface Product {
 const SELLER_ID = '1'
 
 const STORE = {
-  id: SELLER_ID, brand: 'پروکیو', title: 'پروکیو | تجهیزات حرفه‌ای بیلیارد', logoText: 'پک',
+  id: SELLER_ID, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
+  city: 'تهران',
+  desc: 'عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای',
+  contactPhone: '66554433',
+  /* لوگوی آپلودشده‌ی فروشگاه؛ تا وقتی null است آیکون پیش‌فرض نشان داده می‌شود */
+  logo: null as string | null,
   verified: true, rating: 4.8, reviews: 312, memberSince: 1402,
   whatsapp: '989121234567', phones: ['021-88221100', '0912-123-4567'], instagram: 'procue.ir',
   address: 'تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵',
@@ -68,12 +209,12 @@ const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
 }))
 
 /* بازه‌های قیمت سریع (تومان) */
-type SortKey = 'popular' | 'price-asc' | 'price-desc' | 'rating'
+type SortKey = 'popular' | 'price-asc' | 'price-desc' | 'newest'
 const SORT_OPTIONS: { k: SortKey; l: string }[] = [
   { k: 'popular',    l: 'پرفروش‌ترین' },
   { k: 'price-asc',  l: 'ارزان‌ترین' },
   { k: 'price-desc', l: 'گران‌ترین' },
-  { k: 'rating',     l: 'بیشترین امتیاز' },
+  { k: 'newest',     l: 'جدیدترین' },
 ]
 
 /* ─── دراپ‌داون حرفه‌ای (کاستوم، با انیمیشن و کیبورد) ─── */
@@ -142,6 +283,17 @@ export default function FlatShop() {
   const [priceTo, setPriceTo]     = useState('')
   const [sort, setSort]           = useState<SortKey>('popular')
   const [page, setPage]           = useState(1)
+  const [query, setQuery]         = useState('')
+  /* مقدار اولیه ثابت است تا SSR و کلاینت یکی باشند؛ بعد از mount اصلاح می‌شود */
+  const [mobile, setMobile]       = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 699px)')
+    const apply = () => setMobile(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
   const [sheetOpen, setSheetOpen] = useState(false)
 
   /* wishlist + story */
@@ -177,19 +329,33 @@ export default function FlatShop() {
   const visible = useMemo(() => {
     const from = parsePrice(priceFrom)
     const to   = parsePrice(priceTo)
+    const q = query.trim()
     const list = PRODUCTS.filter(p => {
       if (checkedCats.size && !checkedCats.has(p.cat)) return false
       if (from !== null && p.price < from) return false
       if (to !== null && p.price > to) return false
+      if (q && !p.name.includes(q) && !p.brand.toLowerCase().includes(q.toLowerCase())) return false
       return true
     })
     const sorted = [...list]
     if (sort === 'popular')    sorted.sort((a, b) => b.sales - a.sales)
     if (sort === 'price-asc')  sorted.sort((a, b) => a.price - b.price)
     if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price)
-    if (sort === 'rating')     sorted.sort((a, b) => b.rating - a.rating)
+    /* جدیدترین: idهای بزرگ‌تر محصولات تازه‌ترند (منبع واحد بیلیارد بازار ترتیبی درج می‌شود) */
+    if (sort === 'newest')     sorted.sort((a, b) => Number(b.id) - Number(a.id))
     return sorted
-  }, [checkedCats, priceFrom, priceTo, sort])
+  }, [checkedCats, priceFrom, priceTo, query, sort])
+
+  /* صفحه‌بندی واقعی — قبلاً دکمه‌ها تزئینی بودند و لیست هیچ‌وقت برش نمی‌خورد.
+     دسکتاپ ۸ تا (۲ ردیفِ ۴تایی)، موبایل ۶ تا (۳ ردیفِ ۲تایی).
+     تا وقتی همه در یک صفحه جا شوند هیچ دکمه‌ای نیست؛ بعدش به ازای هر صفحه یک عدد. */
+  const perPage   = mobile ? 6 : 8
+  const pageCount = Math.max(1, Math.ceil(visible.length / perPage))
+  const safePage  = Math.min(page, pageCount)
+  const paged     = visible.slice((safePage - 1) * perPage, safePage * perPage)
+
+  /* اگر فیلتر باعث شد صفحه‌ی فعلی دیگر وجود نداشته باشد، برگرد به صفحه‌ی ۱ */
+  useEffect(() => { if (page > pageCount) setPage(1) }, [page, pageCount])
 
   const heading = navActive === 'all' ? 'همه محصولات' : CAT_LABEL[navActive]
 
@@ -242,7 +408,8 @@ export default function FlatShop() {
            عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
            سهم عکس، گردی، بوردر و فونت‌ها عیناً همان‌اند. */
         .prod-card-sec1 {
-          aspect-ratio: 1 / 1.944;
+          /* ۱.۷۵ = ۱.۹۴۴ منهای ۱۰٪ */
+          aspect-ratio: 1 / 1.75;
           border-radius: 10px;
           border: 1.5px solid rgba(28,28,26,0.18);
           transition: transform .22s cubic-bezier(0.22,1,0.36,1), box-shadow .22s;
@@ -254,7 +421,7 @@ export default function FlatShop() {
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
         @media(max-width:700px) {
-          .prod-card-sec1 { aspect-ratio: 1 / 1.847; }
+          .prod-card-sec1 { aspect-ratio: 1 / 1.662; }  /* ۱.۸۴۷ منهای ۱۰٪ */
           .pc-body-sec1 { padding: 14px 7px 7px; }
           .pc-name-sec1 { font-size: 13.05px; line-height: 1.35; color: #666; }
         }
@@ -283,17 +450,40 @@ export default function FlatShop() {
             className="shrink-0 rounded-full p-[3px] transition-transform duration-200 hover:scale-105 active:scale-95"
             style={{ background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 0 14px rgba(214,41,118,0.35)' }}
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full border-[2.5px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-lg font-bold text-white sm:h-16 sm:w-16 sm:text-xl">
-              {store.logoText}
+            <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-16 sm:w-16">
+              {/* لوگوی آپلودشده، وگرنه آیکون پیش‌فرضِ فروشگاه */}
+              {store.logo
+                ? <img src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
+                : Icon.storefront}
             </span>
           </button>
 
           <div className="min-w-[200px] flex-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-[15.5px] font-bold sm:text-[17px]">{store.title}</h2>
+            <h2 className="text-[15.5px] font-bold sm:text-[17px]">{store.title}</h2>
+            <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
+              <span className="text-[#14532D]">{Icon.pin}</span>{store.city}
             </div>
-
+            <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
+            <a
+              href={`tel:${store.contactPhone}`}
+              className={`mt-2.5 inline-flex items-center gap-1.5 text-[13px] text-[#5B564B] transition-colors hover:text-[#14532D] ${MONO}`}
+            >
+              <span className="text-[#14532D]">{Icon.phone}</span>
+              {toFa(store.contactPhone)}
+            </a>
           </div>
+        </div>
+
+        {/* سرچ — زیر باکس فروشگاه */}
+        <div className="relative mt-3">
+          <input
+            type="text"
+            value={query}
+            onChange={e => { setQuery(e.target.value); setPage(1) }}
+            placeholder="جستجو در محصولات این فروشگاه..."
+            className="w-full rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#8A8474] focus:border-[#14532D] focus:outline-none"
+          />
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8474]">{Icon.search}</span>
         </div>
       </div>
 
@@ -331,7 +521,7 @@ export default function FlatShop() {
 
           {/* گرید — ۴ کارت در دسکتاپ */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4 min-[700px]:grid-cols-3 min-[1000px]:grid-cols-4">
-            {visible.map(p => {
+            {paged.map(p => {
               const isWished = wish.has(p.id)
               return (
                 /* کارت هم‌فرمِ sec1 (صفحه‌ی بیلیارد بازار). کلاس‌های bz-scroll-card/pc-body آنجا داخل
@@ -390,30 +580,42 @@ export default function FlatShop() {
             </div>
           )}
 
-          {visible.length > 0 && (
+          {/* صفحه‌بندی — فقط وقتی محصولات در یک صفحه جا نمی‌شوند */}
+          {pageCount > 1 && (
             <div className="mt-9 flex justify-center gap-2">
-              {['۱', '۲', '۳', '‹'].map((label, i) => (
+              {Array.from({ length: pageCount }, (_, i) => (
                 <button
                   key={i}
-                  onClick={() => i < 3 && setPage(i + 1)}
+                  onClick={() => setPage(i + 1)}
+                  aria-current={safePage === i + 1 ? 'page' : undefined}
                   className={`${LQ} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] ${
-                    page === i + 1
-                      ? `${LQ_FELT_ON} font-bold`
-                      : `${LQ_NEUTRAL} text-[#5B564B]`
+                    safePage === i + 1 ? `${LQ_FELT_ON} font-bold` : `${LQ_NEUTRAL} text-[#5B564B]`
                   } ${MONO}`}
                 >
-                  {label}
+                  {toFa(i + 1)}
                 </button>
               ))}
+              <button
+                onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                disabled={safePage === pageCount}
+                aria-label="صفحه‌ی بعد"
+                className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}
+              >
+                ‹
+              </button>
             </div>
           )}
         </main>
       </div>
 
+      {/* ═══ گالری تصاویر فروشگاه — قبل از فوتر ═══ */}
+      <StoreGallery sellerId={SELLER_ID}/>
+
       {/* ═══ FOOTER — کارت اختصاصی فروشگاه (سبک sellers/2) ═══ */}
       <footer className="px-4 pb-8 pt-2 sm:px-6">
         <div className="mx-auto max-w-[1240px] overflow-hidden rounded-2xl border border-[#E8E3D6] bg-[#FAFAF7] shadow-[0_4px_20px_rgba(28,27,23,0.05)]">
-          <div className="grid grid-cols-1 gap-x-8 gap-y-9 p-6 sm:grid-cols-2 sm:p-8 lg:grid-cols-4">
+          {/* موبایل: فاصله‌ی بلوک‌ها ۳۶ ⇒ ۱۸ و پدینگ ۲۴ ⇒ ۱۸، تا فوتر جمع‌تر شود. دسکتاپ دست‌نخورده. */}
+          <div className="grid grid-cols-1 gap-x-8 gap-y-[18px] p-[18px] sm:grid-cols-2 sm:gap-y-9 sm:p-8 lg:grid-cols-4">
 
             {/* برند */}
             <div>
@@ -423,14 +625,15 @@ export default function FlatShop() {
                 </span>
                 {store.brand}
               </div>
-              <p className="mt-3 max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B]">
+              {/* توضیحات فقط دسکتاپ — در موبایل فوتر باید جمع باشد */}
+              <p className="mt-1.5 hidden max-w-[240px] text-[12.5px] leading-relaxed text-[#5B564B] sm:mt-3 sm:block">
                 فروشگاه تخصصی تجهیزات بیلیارد — عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای.
               </p>
             </div>
 
             {/* دسته‌بندی‌ها — روی موبایل حذف */}
             <div className="hidden sm:block">
-              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">دسته‌بندی‌ها</h4>
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">دسته‌بندی‌ها</h4>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] text-[#5B564B]">
                 {BAZAAR_CATS.slice(0, 8).map(c => (
                   <li key={c.id}>
@@ -447,8 +650,8 @@ export default function FlatShop() {
 
             {/* راه‌های ارتباطی */}
             <div>
-              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">راه‌های ارتباطی</h4>
-              <ul className="space-y-3 text-[13px] text-[#5B564B]">
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">راه‌های ارتباطی</h4>
+              <ul className="space-y-1.5 text-[13px] text-[#5B564B] sm:space-y-3">
                 <li className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   {store.phones.map(ph => (
                     <a key={ph} href={`tel:${ph.replace(/-/g, '')}`} className={`flex items-center gap-2 py-0.5 transition-colors hover:text-[#14532D] ${MONO}`}>
@@ -460,7 +663,7 @@ export default function FlatShop() {
                   <span className="text-[#14532D]">{Icon.clock}</span>{store.hours}
                 </li>
                 {/* آیکون‌های شبکه اجتماعی — مثل فوتر اصلی سایت (مربع گرد خنثی، هاور طلایی) */}
-                <li className="flex items-center gap-2.5 pt-3">
+                <li className="flex items-center gap-2.5 pt-1.5 sm:pt-3">
                   <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتساپ"
                     className="flex h-10 w-10 items-center justify-center rounded-[11px] border border-[#E7E2D6] bg-[rgba(26,25,23,0.05)] text-[#8A8474] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C7A66A]/45 hover:bg-[#C7A66A]/[0.12] hover:text-[#C7A66A]">
                     {Icon.wa}
@@ -475,8 +678,8 @@ export default function FlatShop() {
 
             {/* موقعیت فروشگاه */}
             <div>
-              <h4 className="mb-4 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E]">موقعیت فروشگاه</h4>
-              <p className="mb-3 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B]">
+              <h4 className="mb-2 text-[10.5px] font-bold tracking-[0.08em] text-[#A69F8E] sm:mb-4">موقعیت فروشگاه</h4>
+              <p className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5B564B] sm:mb-3">
                 <span className="mt-0.5 shrink-0 text-[#14532D]">{Icon.pin}</span>
                 {store.address}
               </p>
