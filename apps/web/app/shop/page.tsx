@@ -10,7 +10,6 @@ const GOLD     = '#C7A66A'
 const GOLD_BOR = 'rgba(199,166,106,0.32)'
 const TEXT     = '#1C1C1A'
 const TEXT_SEC = 'rgba(28,28,26,0.5)'
-const TEXT_MUT = 'rgba(28,28,26,0.28)'
 
 const LQ = {
   bg:         'rgba(255,255,255,0.55)',
@@ -235,7 +234,7 @@ function ShopTopBar({
 }) {
   const [focused, setFocused] = useState(false)
   return (
-    <div style={{
+    <div className="bz-topbar" style={{
       position: 'sticky', top: 0, zIndex: 150,
       background: 'rgba(255,255,255,0.82)',
       backdropFilter: 'blur(28px) saturate(1.8)',
@@ -326,7 +325,7 @@ function HeroSlider() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [active, next])
   return (
-    <div className="hero-slider" style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#1C1C1A' }}>
+    <div className="hero-slider bz-hero" style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#1C1C1A' }}>
       {SLIDES.map((s, i) => (
         <Link key={i} href={s.href} style={{ position: 'absolute', inset: 0, display: 'block', opacity: i === active ? 1 : 0, transform: i === active ? 'scale(1)' : 'scale(1.025)', transition: 'opacity 0.75s ease,transform 0.75s ease', pointerEvents: i === active ? 'auto' : 'none' }}>
           <img src={s.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -367,11 +366,11 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
   }
 
   return (
-    <div id="bazaar-categories" style={{ background: '#fff', overflow: 'visible', scrollMarginTop: 110 }}>
+    <div id="bazaar-categories" className="bz-categories" style={{ background: '#fff', overflow: 'visible', scrollMarginTop: 110 }}>
       {/* بالا: ۲۰px پدینگ AdBanners + ۲۸ = ۴۸ | پایین: ۲۰ + ۲۸px پدینگ NewestSection = ۴۸
           (فاصله‌ی باکس با سکشن بالا و پایین، در هر دو طرف قرینه) */}
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 20px', direction: 'rtl', overflow: 'visible' }}>
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(28,28,26,0.06)', boxShadow: '0 1px 6px rgba(28,28,26,0.05)', padding: '2px 10px', overflow: 'hidden' }}>
+      <div className="cat-wrap" style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 20px', direction: 'rtl', overflow: 'visible' }}>
+        <div className="cat-box" style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(28,28,26,0.06)', boxShadow: '0 1px 6px rgba(28,28,26,0.05)', padding: '2px 10px', overflow: 'hidden' }}>
         <div
           ref={scrollRef}
           className="cat-scroll"
@@ -419,7 +418,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                     {cat.icon}
                   </div>
                 </div>
-                <span className="cat-lbl" style={{ fontSize: 14.5, fontWeight: 700, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
+                <span className="cat-lbl" style={{ fontSize: 14.5, fontWeight: 600, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
                 </span>
               </button>
@@ -465,26 +464,26 @@ function WeeklyCountdown({ onScroll, cycleMs = WEEK_MS }: { onScroll: (dir: 'pre
   const s = rem % 60
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap', margin: '42px 0 24px' }}>
+    <div className="bz-cd" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap', margin: '42px 0 24px' }}>
       {/* برچسب — سمت راستِ تایمر */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-        <span className="bz-blink" style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, boxShadow: `0 0 8px ${GOLD}`, flexShrink: 0 }} />
+      <div className="bz-cd-label" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+        <span className="bz-blink bz-cd-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, boxShadow: `0 0 8px ${GOLD}`, flexShrink: 0 }} />
         <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC, whiteSpace: 'nowrap' }}>زمان باقیمانده</span>
         <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC, marginInlineStart: -3 }}>:</span>
       </div>
       {/* همه‌ی اعداد در یک باکس — طرح LQ — روز:ساعت:دقیقه:ثانیه */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 7, padding: '5px 12px' }}>
-        <span style={{ fontSize: 15.4, fontWeight: 500, color: '#9A6E38', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums', direction: 'ltr', flexShrink: 0 }}>
+      <div className="bz-cd-box" style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 7, padding: '5px 12px' }}>
+        <span className="bz-cd-num" style={{ fontSize: 15.4, fontWeight: 500, color: '#9A6E38', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums', direction: 'ltr', flexShrink: 0 }}>
           {showDays && <><span style={numBox}>{pad2(d)}</span>:</>}
           <span style={numBox}>{pad2(h)}</span>:<span style={numBox}>{pad2(m)}</span>:<span style={numBox}>{pad2(s)}</span>
         </span>
         {/* خط جداکننده — کل ارتفاع دکمه (marginBlock منفی پدینگ عمودی را خنثی می‌کند) */}
-        <span style={{ width: 1, alignSelf: 'stretch', marginBlock: -5, background: 'rgba(154,110,56,0.38)', flexShrink: 0 }} />
+        <span className="bz-cd-div" style={{ width: 1, alignSelf: 'stretch', marginBlock: -5, background: 'rgba(154,110,56,0.38)', flexShrink: 0 }} />
         {/* marginInlineEnd منفی = در RTL کمی به سمت چپ (لبه‌ی باکس) */}
         <Timer size={21.8} color="#F5C518" strokeWidth={2.2} style={{ flexShrink: 0, marginInlineEnd: -6 }} />
       </div>
       {/* فلش‌های اسکرول کارت‌ها — سمت چپ */}
-      <div style={{ display: 'flex', gap: 5 }}>
+      <div className="bz-cd-arrows" style={{ display: 'flex', gap: 5 }}>
         {(['prev', 'next'] as const).map(dir => (
           <button
             key={dir} type="button" onClick={() => onScroll(dir)}
@@ -725,7 +724,10 @@ function CatalogSection({
 
   return (
     <div id="bazaar-catalog" style={{ background: '#fff' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '10px clamp(16px,3vw,32px) 40px', direction: 'rtl' }}>
+      {/* پدینگ پایین صفر: فاصله‌ی این سکشن تا تایمرِ سکشن پارتی را خودِ پارتی می‌سازد
+          (۱۰ پدینگ بالا + ۴۲ مارجین تایمر = ۵۲) — دقیقاً برابرِ فاصله‌ی هیرو تا تایمر همین سکشن.
+          با ۴۰px پدینگِ پایین، فاصله‌ی پارتی ۹۲px می‌شد و با بالایی قرینه نبود. */}
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '10px clamp(16px,3vw,32px) 0', direction: 'rtl' }}>
 
 
         <WeeklyCountdown onScroll={scrollBy} />
@@ -743,10 +745,9 @@ function CatalogSection({
                   <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                     <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                  <div className="pc-body" style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="pc-body" style={{ padding: '21px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                    <span style={{ fontSize: 12.65, color: TEXT_MUT }}>{p.sellerName}</span>
-                    <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
                       {p.disc > 0 && (
                         <span className="pc-disc" dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           ٪{toFa(p.disc)}
@@ -754,12 +755,12 @@ function CatalogSection({
                       )}
                       <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
                         {p.disc > 0 && (
-                          <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3 }}>
-                            {fmt(p.old)}
+                          <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3, fontVariantNumeric: 'tabular-nums' }}>
+                            {fmt(p.old)} <span style={{ fontSize: 10.6, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>تومان</span>
                           </div>
                         )}
-                        <div style={{ fontSize: 15.5, fontWeight: 800, color: TEXT }}>
-                          {fmt(p.price)} <span style={{ fontSize: 10.6, fontWeight: 500, color: TEXT_SEC }}>تومان</span>
+                        <div style={{ fontSize: 15.5, fontWeight: 700, color: TEXT, fontVariantNumeric: 'tabular-nums' }}>
+                          {fmt(p.price)}
                         </div>
                       </div>
                     </div>
@@ -777,8 +778,8 @@ function CatalogSection({
               </div>
             )}
 
-            {/* پوسترهای آگهی — ۲ ردیف × ۲ ستون */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginTop: 18 }}>
+            {/* پوسترهای آگهی — ۲ ردیف × ۲ ستون در همه‌ی اندازه‌ها */}
+            <div className="bz-sec1-ads" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginTop: 18 }}>
               {CATALOG_AD_POSTERS.map((ad, i) => (
                 <Link key={i} href={ad.href} className="cat-ad-poster" style={{ display: 'block', borderRadius: 12, overflow: 'hidden', border: '1.5px solid rgba(28,28,26,0.1)', lineHeight: 0 }}>
                   <img src={ad.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -908,9 +909,8 @@ function DealsSection() {
               <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <div className="pc-body" style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="pc-body" style={{ padding: '21px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                <span style={{ fontSize: 12.65, color: TEXT_MUT }}>{p.sellerName}</span>
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
                   {p.disc > 0 && (
                     <span className="pc-disc" dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -919,12 +919,12 @@ function DealsSection() {
                   )}
                   <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
                     {p.disc > 0 && (
-                      <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3 }}>
-                        {fmt(p.old)}
+                      <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3, fontVariantNumeric: 'tabular-nums' }}>
+                        {fmt(p.old)} <span style={{ fontSize: 10.6, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>تومان</span>
                       </div>
                     )}
-                    <div style={{ fontSize: 15.5, fontWeight: 800, color: TEXT }}>
-                      {fmt(p.price)} <span style={{ fontSize: 10.6, fontWeight: 500, color: TEXT_SEC }}>تومان</span>
+                    <div style={{ fontSize: 15.5, fontWeight: 700, color: TEXT, fontVariantNumeric: 'tabular-nums' }}>
+                      {fmt(p.price)}
                     </div>
                   </div>
                 </div>
@@ -991,7 +991,7 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
           (۱۸px از پدینگ بالای DualBannerSection می‌آید) */}
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 0', direction: 'rtl' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 19, fontWeight: 700, color: TEXT, margin: 0 }}>جدید ترین ها</h2>
+          <h2 style={{ fontSize: 19, fontWeight: 600, color: TEXT, margin: 0 }}>جدیدترین ها</h2>
           {/* دکمه — طرح LQ، دقیقاً هم‌رنگ و هم‌فرمِ دکمه‌ی تایمر (radius ۷ و padding یکسان) */}
           <Link href="/shop/newest" style={{
             fontSize: 13, fontWeight: 500, color: '#9A6E38', textDecoration: 'none',
@@ -1010,13 +1010,12 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 22.8, justifyContent: 'space-between' }} className="prod-grid">
           {/* aspectRatio ۲.۰۳۷ = ۲.۱۴۴ × ۰.۹۵ — ۵٪ کوتاه‌تر (عرض ثابت مانده، پس کلِ کاهش روی ارتفاع می‌نشیند) */}
           {newestProducts.map(p => (
-            <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', aspectRatio: '1 / 2.037' }}>
+            <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', aspectRatio: '1 / 1.935' }}>
               <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
               </div>
-              <div className="pc-body" style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="pc-body" style={{ padding: '21px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                <span style={{ fontSize: 12.65, color: TEXT_MUT }}>{p.sellerName}</span>
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
                   {p.disc > 0 && (
                     <span className="pc-disc" dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -1025,12 +1024,12 @@ function NewestSection({ products }: { products: typeof PRODUCTS }) {
                   )}
                   <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
                     {p.disc > 0 && (
-                      <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3 }}>
-                        {fmt(p.old)}
+                      <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3, fontVariantNumeric: 'tabular-nums' }}>
+                        {fmt(p.old)} <span style={{ fontSize: 10.6, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>تومان</span>
                       </div>
                     )}
-                    <div style={{ fontSize: 15.5, fontWeight: 800, color: TEXT }}>
-                      {fmt(p.price)} <span style={{ fontSize: 10.6, fontWeight: 500, color: TEXT_SEC }}>تومان</span>
+                    <div style={{ fontSize: 15.5, fontWeight: 700, color: TEXT, fontVariantNumeric: 'tabular-nums' }}>
+                      {fmt(p.price)}
                     </div>
                   </div>
                 </div>
@@ -1179,7 +1178,7 @@ export default function ShopPage() {
           /* ۱.۶۵۴ = ۱.۷۴۱ منهای ۵٪ (روی‌هم ۱۹٪ کوتاه‌تر از ۲.۰۳۷ دسکتاپ) — فقط موبایل و فقط
              کارت‌های «جدید ترین ها». سلکتورِ نسل‌دار لازم است تا کارت‌های sec1/پارتی
              (که .prod-card هم دارند) دست‌نخورده بمانند. */
-          .prod-grid .prod-card { aspect-ratio: 1 / 1.654 !important; }
+          .prod-grid .prod-card { aspect-ratio: 1 / 1.571 !important; }
         }
         .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
         .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
@@ -1222,28 +1221,42 @@ export default function ShopPage() {
         @media(max-width:640px) { .bz-sort-label { display: none !important; } }
         .bz-grid::-webkit-scrollbar { display: none; }
         /* contain: کششِ افقی به صفحه/back-navigation مرورگر نشت نکند.
-           موبایل دست‌نخورده می‌ماند و از اسکرول لمسیِ بومی (که خودش اینرسی دارد) استفاده می‌کند. */
-        .bz-grid { --card-w: 176px; overscroll-behavior-x: contain; will-change: transform; }
-        @media (prefers-reduced-motion: reduce) { .bz-grid { will-change: auto; } }
-        /* ۲.۰۴۶ = ۲.۲ منهای ۷٪ — فقط کارت‌های sec1 و بیلیارد پارتی (کارت‌های «جدیدترین‌ها» روی ۱:۲.۲ می‌مانند) */
-        .bz-scroll-card { width: var(--card-w); aspect-ratio: 1 / 2.046; }
+           موبایل دست‌نخورده می‌ماند و از اسکرول لمسیِ بومی (که خودش اینرسی دارد) استفاده می‌کند.
+           will-change: transform اینجا نداریم — لایه‌ی کامپوزیتِ دائمی می‌ساخت و متنِ کارت‌ها
+           subpixel antialiasing را از دست می‌داد و کدر می‌شد. کششِ فنری بدونش هم روان است. */
+        .bz-grid { --card-w: 176px; overscroll-behavior-x: contain; }
+        /* ۱.۹۴۴ = ۲.۰۴۶ منهای ۵٪ — کارت‌های sec1 و بیلیارد پارتی */
+        .bz-scroll-card { width: var(--card-w); aspect-ratio: 1 / 1.944; }
         /* کارت اولِ زرد: با اسکرول ۷۵٪ بیرون می‌رود، بعد قفل می‌شود و ۲۵٪ آن پیدا می‌ماند.
            آفستِ منفی روی لبه‌ی راست (RTL) ⇒ کارت اجازه دارد ۷۵٪ عرضش از پورت بیرون برود و همان‌جا می‌چسبد.
            z-index بالا ⇒ بقیه‌ی محصولات از زیرش رد می‌شوند. */
-        .bz-sticky-first { position: sticky; right: calc(var(--card-w) * -0.75); z-index: 3; }
+        /* ۰.۷۷۵ ⇒ ۲۲.۵٪ از کارت پیدا می‌ماند (= ۲۵٪ منهای ۱۰٪) */
+        .bz-sticky-first { position: sticky; right: calc(var(--card-w) * -0.775); z-index: 3; }
         @media(max-width:700px) {
-          .bz-grid { --card-w: 145px; }
-          .cat-tile { width: 70px !important; }
-          .cat-icn { width: 56px !important; height: 56px !important; }
+          /* ۱۵۲ = ۱۴۵ + ۵٪ | فاصله ۲۰ = ۲۱ منهای ۵٪.
+             column-gap حتماً !important — وگرنه gap:21 در استایل اینلاینِ ردیف برنده می‌شود. */
+          .bz-grid { --card-w: 152px; column-gap: 20px !important; }
+          /* ۱.۸۴۷ = ۱.۹۴۴ منهای ۵٪ — موبایل کوتاه‌تر از دسکتاپ می‌ماند */
+          .bz-scroll-card { aspect-ratio: 1 / 1.847; }
+          /* فاصله‌ی برچسب تا ایکون: هم gap کم شد، هم ارتفاعِ کادر — کادر ۵۶px برای ایکونِ ~۳۵px
+             فضای مرده داشت و برچسب را دور می‌انداخت. (gap اینلاین است ⇒ !important) */
+          .cat-tile { width: 70px !important; gap: 3px !important; padding: 3px 8px 3px !important; }
+          .cat-icn { width: 56px !important; height: 40px !important; }
+          /* ارتفاع باکس: پدینگ عمودیِ خودِ باکس و پدینگِ سکشن هم جمع شود */
+          .cat-box { padding: 2px 10px !important; }
+          /* padding-top = فاصله‌ی باکس تا اسلایدر بالای صفحه (در موبایل دسته‌بندی‌ها زیر اسلایدر است) */
+          .cat-wrap { padding-top: 26px !important; padding-bottom: 8px !important; }
           .cat-icn-in { transform: scale(1.356) !important; }   /* ۱.۱۳ + ۲۰٪ */
           .cat-lbl { font-size: 13px !important; }
           .hero-slider { aspect-ratio: 2048 / 1052 !important; }
-          /* متن کارت‌ها در موبایل جمع‌تر شود تا قیمت بریده نشود */
-          .pc-body { padding: 5px 7px 7px !important; gap: 2px !important; }
-          .pc-name { line-height: 1.35 !important; }
-          /* پوسترهای آگهی ۵۰٪ بلندتر — و بنرهای زیر «زمان باقیمانده» هم‌ارتفاع با آن‌ها */
-          .cat-ad-poster { aspect-ratio: 2048 / 632; }
-          .banner-card   { height: auto !important; aspect-ratio: 2048 / 632; }
+          /* متن کارت‌ها در موبایل جمع‌تر شود تا قیمت بریده نشود — ولی بالای نام کمی نفس بکشد */
+          .pc-body { padding: 14px 7px 7px !important; gap: 2px !important; }
+          /* ۱۳.۰۵ = ۱۴.۵ منهای ۱۰٪. #666 خاکستریِ کلاسیکِ وب. !important لازم است چون fontSize/color اینلاین‌اند */
+          .pc-name { line-height: 1.35 !important; font-size: 13.05px !important; color: #666 !important; }
+          /* ۱۱۸۵ = ۹۴۸ × ۱.۲۵ ⇒ فقط ارتفاع ۲۵٪ بیشتر؛ عرض و چیدمانِ ۲×۲ دست‌نخورده */
+          .cat-ad-poster { aspect-ratio: 2048 / 1185; }
+          /* بنرهای زیر بیلیارد پارتی هم‌نسبت با پوسترهای بالا ⇒ چون عرضشان هم برابر است، هم‌ارتفاع می‌شوند */
+          .banner-card   { height: auto !important; aspect-ratio: 2048 / 1185; }
         }
         /* دکمه‌ی LQ: جاروی نور + لیفت */
         .lq-sheen { position: relative; overflow: hidden; }
@@ -1256,9 +1269,40 @@ export default function ShopPage() {
         .lq-lift { transition: all .3s cubic-bezier(0.22,1,0.36,1); }
         .lq-lift:hover { transform: translateY(-2px); }
         .lq-lift:active { transform: scale(0.96); }
+        /* موبایل: تایمر بدون فلش و ۱۵٪ کوچک‌تر. با transform:scale نمی‌سازیم چون لایه‌ی کامپوزیت
+           درست می‌کند و متن دوباره کدر می‌شود — به‌جایش هر اندازه صریح × ۰.۸۵ نوشته شده.
+           جای گروه عوض نمی‌شود: در RTL خودِ justify-content:flex-end یعنی سمت چپِ فیزیکی،
+           و با حذف فلش‌ها بقیه خودبه‌خود به چپ می‌لغزند. */
+        @media(max-width:700px) {
+          .bz-cd-arrows { display: none !important; }
+          /* مارجین بالا ۴۲ ⇒ ۱۶: در موبایل دسته‌بندی‌ها بالای sec1 می‌آید و ۷۲px فاصله زیاد بود */
+          .bz-cd        { gap: 10.2px !important; margin: 16px 0 18px !important; }
+          /* اهرم مستقل برای فاصله‌ی پوسترهای sec1 تا سکشن پارتی — نمی‌شود از مارجینِ تایمر استفاده کرد
+             چون همان عدد، فاصله‌ی دسته‌بندی‌ها تا sec1 را هم تعیین می‌کند. ۱۴+۱۰+۱۶ = ۴۰px */
+          .bz-sec1-ads  { margin-bottom: 14px !important; }
+          .bz-cd-label  { gap: 5.95px !important; }
+          .bz-cd-label span { font-size: 11.05px !important; }
+          .bz-cd-dot    { width: 5.1px !important; height: 5.1px !important; }
+          .bz-cd-box    { gap: 5.95px !important; padding: 4.25px 10.2px !important; }
+          .bz-cd-num    { font-size: 13.09px !important; }
+          .bz-cd-num span { min-width: 17px !important; }
+          .bz-cd-div    { margin-block: -4.25px !important; }
+          .bz-cd-box svg { width: 18.53px !important; height: 18.53px !important; }
+        }
+        /* موبایل: دسته‌بندی‌ها می‌آید بلافاصله بعد از اسلایدر و قبل از sec1.
+           بقیه‌ی سکشن‌ها order بزرگ‌تر می‌گیرند تا ترتیبشان حفظ شود.
+           (order فقط چیدمانِ بصری را عوض می‌کند؛ ترتیب DOM دست‌نخورده می‌ماند.) */
+        @media(max-width:700px) {
+          .bz-page > *              { order: 3; }
+          .bz-page > .bz-topbar     { order: 0; }
+          .bz-page > .bz-hero       { order: 1; }
+          .bz-page > .bz-categories { order: 2; }
+        }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5' }}>
+      {/* فلکسِ ستونی فقط برای اینکه در موبایل بتوانیم با order جای دسته‌بندی‌ها را عوض کنیم
+          بدون دست‌زدن به ترتیب DOM (یعنی بدون تغییر در ترتیب خواندنِ اسکرین‌ریدر و SEO) */}
+      <div className="bz-page" style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', flexDirection: 'column' }}>
         <ShopTopBar
           searchInput={searchInput}
           onSearchInput={setSearchInput}

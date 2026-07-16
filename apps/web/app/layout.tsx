@@ -44,6 +44,11 @@ export default function RootLayout({
           @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-DemiBold.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
           @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
           @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
+          /* وزن ۹۰۰ چند جا استفاده می‌شد ولی فایلی برایش اعلام نشده بود ⇒ مرورگر faux-bold می‌ساخت
+             (حروف را مصنوعی ضخیم می‌کرد) و متن کدر و بدشکل می‌شد. حالا به فایل واقعی Black وصل است. */
+          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Black.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
+          /* از ساختنِ وزن/ایتالیکِ مصنوعی جلوگیری کن — اگر وزنی فایل نداشت، نزدیک‌ترین فایل استفاده شود */
+          * { font-synthesis-weight: none; font-synthesis-style: none; }
           * { font-family: var(--font-base) !important; box-sizing:border-box; }
           input, select, textarea, button { font-family: var(--font-base) !important; }
           .bh-latin, .bh-latin * { font-family: Arial, Tahoma, sans-serif !important; }

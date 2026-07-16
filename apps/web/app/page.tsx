@@ -1120,7 +1120,9 @@ useEffect(() => {
           .club-open-btn   { display:flex !important; }
           .clubs-desk      { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
-          .clubs-section { padding-top:36px !important; padding-left:0 !important; padding-right:0 !important; }
+          /* padding-bottom در موبایل از clamp دسکتاپ ۵۶px می‌گرفت و با ۱۶px پدینگِ خودِ اسلایدر
+             ⇒ ۷۲px فضای خالی ته سکشن. حالا ۱۶+۲۴ = ۴۰px. */
+          .clubs-section { padding-top:36px !important; padding-bottom:24px !important; padding-left:0 !important; padding-right:0 !important; }
           .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:22px !important; }
           .marketplace-section { padding-left:0 !important; padding-right:0 !important; }
           .marketplace-hd { padding-left:14px !important; padding-right:14px !important; margin-bottom:22px !important; }
@@ -1394,10 +1396,11 @@ useEffect(() => {
               <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(374px,36vw,495px)" /></SR>
             ))}
           </div>
+          {/* موبایل — عرض ۲.۵٪ بیشتر (۴۲ ⇒ ۴۳.۰۵vw) و ارتفاع ۵٪ بیشتر (هر سه عددِ clamp × ۱.۰۵) */}
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '42vw', minWidth: '154px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                <ClubCard club={c} h="clamp(220px,64vw,297px)" />
+              <div key={c.id} className="club-mob-card" style={{ width: '43.05vw', minWidth: '158px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                <ClubCard club={c} h="clamp(237px,68.88vw,320px)" />
               </div>
             ))}
           </div>
