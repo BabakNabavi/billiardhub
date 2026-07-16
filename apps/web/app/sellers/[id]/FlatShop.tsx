@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { toFa, faNum, parsePrice, MONO, toggleSet, Stars, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON, LQ_GREEN } from './shared'
+import { toFa, faNum, parsePrice, MONO, toggleSet, Stars, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 
@@ -146,7 +146,6 @@ export default function FlatShop() {
   const [priceFrom, setPriceFrom] = useState('')
   const [priceTo, setPriceTo]     = useState('')
   const [quickRange, setQuickRange] = useState<number | null>(null)
-  const [query, setQuery]         = useState('')
   const [sort, setSort]           = useState<SortKey>('popular')
   const [page, setPage]           = useState(1)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -169,7 +168,7 @@ export default function FlatShop() {
     setCheckedCats(k === 'all' ? new Set() : new Set([k]))
 
   const clearFilters = () => {
-    setCheckedCats(new Set()); setPriceFrom(''); setPriceTo(''); setQuickRange(null); setQuery('')
+    setCheckedCats(new Set()); setPriceFrom(''); setPriceTo(''); setQuickRange(null)
   }
 
   const activeFilterCount =
@@ -189,12 +188,10 @@ export default function FlatShop() {
   const visible = useMemo(() => {
     const from = parsePrice(priceFrom)
     const to   = parsePrice(priceTo)
-    const q = query.trim()
     const list = PRODUCTS.filter(p => {
       if (checkedCats.size && !checkedCats.has(p.cat)) return false
       if (from !== null && p.price < from) return false
       if (to !== null && p.price > to) return false
-      if (q && !p.name.includes(q) && !p.brand.toLowerCase().includes(q.toLowerCase())) return false
       return true
     })
     const sorted = [...list]
@@ -203,7 +200,7 @@ export default function FlatShop() {
     if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price)
     if (sort === 'rating')     sorted.sort((a, b) => b.rating - a.rating)
     return sorted
-  }, [checkedCats, priceFrom, priceTo, query, sort])
+  }, [checkedCats, priceFrom, priceTo, sort])
 
   const heading = navActive === 'all' ? 'همه محصولات' : CAT_LABEL[navActive]
 
@@ -264,31 +261,6 @@ export default function FlatShop() {
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
-      {/* ═══ HEADER ═══ */}
-      <header className="sticky top-[72px] z-40 border-b border-[#E7E2D6] bg-white">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-5 gap-y-2.5 px-4 py-3 sm:px-6">
-          <Link href={`/sellers/${store.id}`} className="flex shrink-0 items-center gap-2.5 text-[17px] font-bold">
-            <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_30%,#2b2b2b,#0a0a0a_70%)]">
-              <span className="flex h-[13px] w-[13px] items-center justify-center rounded-full bg-white text-[8px] font-bold text-[#111]">۸</span>
-            </span>
-            {store.brand}
-          </Link>
-
-          {/* سرچ — بلافاصله کنار لوگو؛ روی موبایل ردیف کامل دوم */}
-          <div className="relative order-last w-full sm:order-none sm:w-auto sm:max-w-[520px] sm:flex-1">
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="جستجوی محصول، مثلا چوب کربنی..."
-              className="w-full rounded-[10px] border border-[#E7E2D6] bg-[#F7F5F0] px-4 py-2.5 pl-11 text-[13.5px] text-[#1C1B17] placeholder:text-[#8A8474] focus:border-[#14532D] focus:outline-none"
-            />
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8474]">{Icon.search}</span>
-          </div>
-        </div>
-
-      </header>
-
       {/* ── breadcrumb ── */}
       <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#8A8474] sm:px-6">
         <Link href="/" className="transition-colors hover:text-[#14532D]">خانه</Link>
@@ -315,31 +287,6 @@ export default function FlatShop() {
           <div className="min-w-[200px] flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-[15.5px] font-bold sm:text-[17px]">{store.title}</h2>
-              {store.verified && (
-                <span className="rounded-full bg-[#DCEEE4] px-2.5 py-1 text-[11px] font-semibold text-[#14532D]">
-                  فروشگاه تایید شده
-                </span>
-              )}
-            </div>
-            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[12.5px] text-[#8A8474]">
-              <Stars r={store.rating}/>
-              <span className={`font-semibold text-[#1C1B17] ${MONO}`}>{faNum(store.rating, 1)}</span>
-              از {faNum(store.reviews)} نظر · عضو از {toFa(store.memberSince)}
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              <a
-                href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener noreferrer"
-                className={`${LQ} ${LQ_GREEN} flex items-center gap-2 rounded-2xl px-4 py-2.5 text-[13px] font-semibold`}
-              >
-                {Icon.wa} واتساپ
-              </a>
-              <a
-                href={`tel:${store.phones[1]?.replace(/-/g, '') ?? ''}`}
-                className="flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5"
-              >
-                {Icon.phone} تماس
-              </a>
             </div>
 
           </div>
