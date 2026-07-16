@@ -5,136 +5,36 @@ import { useRouter } from 'next/navigation'
 import { toFa, faNum, parsePrice, MONO, toggleSet, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
+import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 
 /*
   نسخه‌ی فلت — UX فروشگاه واقعی
   دسته‌بندی‌ها: عیناً از «بیلیارد بازار» (۱۴ دسته)
 */
 
-/* ── گالری تصاویر فروشگاه ─────────────────────────────────────────────
-   نمونه‌ی اولیه: عکس‌ها base64 در localStorage ذخیره می‌شوند (مثل بقیه‌ی فلوهای پروژه).
-   حتماً قبلش با canvas فشرده می‌شوند وگرنه localStorage سریع پر می‌شود و QuotaExceededError می‌دهد. */
-const GALLERY_KEY = (sellerId: string) => `bh_seller_gallery_${sellerId}`
-const GALLERY_MAX = 12
-
-const compressImage = (file: File, maxDim = 1280, quality = 0.72): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => reject(new Error('read failed'))
-    reader.onload = () => {
-      const dataUrl = String(reader.result)
-      const im = document.createElement('img')
-      im.onerror = () => resolve(dataUrl)
-      im.onload = () => {
-        let w = im.naturalWidth || im.width
-        let h = im.naturalHeight || im.height
-        if (w >= h && w > maxDim)     { h = Math.round((h * maxDim) / w); w = maxDim }
-        else if (h > w && h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim }
-        const canvas = document.createElement('canvas')
-        canvas.width = w; canvas.height = h
-        const ctx = canvas.getContext('2d')
-        if (!ctx) { resolve(dataUrl); return }
-        ctx.drawImage(im, 0, 0, w, h)
-        try { resolve(canvas.toDataURL('image/jpeg', quality)) } catch { resolve(dataUrl) }
-      }
-      im.src = dataUrl
-    }
-    reader.readAsDataURL(file)
-  })
-
-function StoreGallery({ sellerId }: { sellerId: string }) {
-  const [shots, setShots] = useState<string[]>([])
-  const [busy, setBusy]   = useState(false)
-  const [err, setErr]     = useState('')
+/* ── گالری تصاویر فروشگاه — فقط نمایش ───────────────────────────────
+   این صفحه عمومی است، پس آپلود اینجا نیست (قبلاً بود و هر بازدیدکننده‌ای
+   می‌توانست عکس اضافه کند). مدیریت عکس‌ها در /dashboard/seller است. */
+function StoreGallery({ shots }: { shots: string[] }) {
   const [lightbox, setLightbox] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
-
-  /* بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند */
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(GALLERY_KEY(sellerId))
-      if (raw) setShots(JSON.parse(raw) as string[])
-    } catch { /* داده‌ی خراب ⇒ گالری خالی */ }
-  }, [sellerId])
-
-  const save = (next: string[]) => {
-    setShots(next)
-    try { localStorage.setItem(GALLERY_KEY(sellerId), JSON.stringify(next)) }
-    catch { setErr('حافظه‌ی مرورگر پر است — چند عکس را حذف کنید.') }
-  }
-
-  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
-    if (!files.length) return
-    setErr(''); setBusy(true)
-    try {
-      const room = GALLERY_MAX - shots.length
-      if (room <= 0) { setErr(`حداکثر ${toFa(GALLERY_MAX)} عکس.`); return }
-      const picked = files.slice(0, room)
-      const added = await Promise.all(picked.map(f => compressImage(f)))
-      save([...shots, ...added])
-      if (files.length > room) setErr(`فقط ${toFa(room)} عکس اضافه شد — حداکثر ${toFa(GALLERY_MAX)} عکس.`)
-    } catch {
-      setErr('آپلود نشد. دوباره تلاش کنید.')
-    } finally {
-      setBusy(false)
-      if (fileRef.current) fileRef.current.value = ''
-    }
-  }
+  if (shots.length === 0) return null
 
   return (
     <section className="mx-auto max-w-[1240px] px-4 pb-10 sm:px-6">
       <div className="rounded-2xl border border-[#E7E2D6] bg-white p-4 sm:p-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-[14.5px] font-bold">گالری تصاویر فروشگاه</h3>
-            <p className="mt-1 text-[12px] text-[#8A8474]">
-              {shots.length > 0 ? `${toFa(shots.length)} از ${toFa(GALLERY_MAX)} عکس` : 'هنوز عکسی اضافه نشده'}
-            </p>
-          </div>
-          <button
-            type="button" onClick={() => fileRef.current?.click()} disabled={busy || shots.length >= GALLERY_MAX}
-            className="inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[12.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
-          >
-            {Icon.upload}
-            {busy ? 'در حال افزودن…' : 'افزودن عکس'}
-          </button>
-          <input
-            ref={fileRef} type="file" accept="image/*" multiple onChange={onPick} className="hidden"
-          />
+        <h3 className="mb-4 text-[14.5px] font-bold">گالری تصاویر فروشگاه</h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 min-[1000px]:grid-cols-4">
+          {shots.map((src, i) => (
+            <button
+              key={i} type="button" onClick={() => setLightbox(src)} aria-label={`عکس ${toFa(i + 1)}`}
+              className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]"
+            >
+              <img src={src} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/>
+            </button>
+          ))}
         </div>
-
-        {err && <p className="mb-3 text-[12px] text-[#B23B2E]">{err}</p>}
-
-        {shots.length === 0 ? (
-          <button
-            type="button" onClick={() => fileRef.current?.click()}
-            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-12 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]"
-          >
-            {Icon.upload}
-            <span className="text-[12.5px]">عکس‌های فروشگاه را اینجا اضافه کنید</span>
-          </button>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 min-[1000px]:grid-cols-4">
-            {shots.map((src, i) => (
-              <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
-                <button type="button" onClick={() => setLightbox(src)} className="h-full w-full" aria-label={`عکس ${toFa(i + 1)}`}>
-                  <img src={src} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/>
-                </button>
-                <button
-                  type="button" aria-label="حذف عکس"
-                  onClick={() => save(shots.filter((_, j) => j !== i))}
-                  className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]"
-                >
-                  {Icon.trash}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* لایت‌باکس */}
       {lightbox && (
         <div
           onClick={() => setLightbox(null)} role="presentation"
@@ -176,11 +76,11 @@ interface Product {
 
 const SELLER_ID = '1'
 
+/* پیش‌فرض‌ها — تا وقتی صاحب فروشگاه در /dashboard/seller چیزی ذخیره نکرده،
+   صفحه با همین‌ها نمایش داده می‌شود. هر فیلدِ ذخیره‌شده جای همتای خودش را می‌گیرد. */
 const STORE = {
   id: SELLER_ID, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
   city: 'تهران',
-  /* «درباره‌ی فروشگاه» — متنی که صاحب فروشگاه موقع ثبت می‌نویسد.
-     TODO: فرم ثبت فروشگاه هنوز ساخته نشده؛ فعلاً ثابت است و هدر و فوتر هر دو از همین می‌خوانند. */
   desc: 'عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای',
   contactPhone: '66554433',
   /* لوگوی آپلودشده‌ی فروشگاه؛ تا وقتی null است آیکون پیش‌فرض نشان داده می‌شود */
@@ -277,7 +177,33 @@ function SortDropdown({ value, onChange }: { value: SortKey; onChange: (v: SortK
 
 /* ═══ صفحه ═══ */
 export default function FlatShop() {
-  const store = STORE
+  /* پروفایلِ ذخیره‌شده‌ی صاحب فروشگاه (از /dashboard/seller).
+     بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
+  const [profile, setProfile] = useState<SellerProfile | null>(null)
+  useEffect(() => { setProfile(getSellerProfile(SELLER_ID)) }, [])
+
+  /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلدِ خالی نباید صفحه را خالی کند */
+  const store = useMemo(() => {
+    if (!profile) return STORE
+    const pick = (v: string | undefined, fallback: string) => (v && v.trim() ? v : fallback)
+    const phones = profile.phones.filter(p => p.trim())
+    return {
+      ...STORE,
+      logo:         profile.logo || null,
+      title:        pick(profile.title, STORE.title),
+      brand:        pick(profile.brand, STORE.brand),
+      city:         pick(profile.city, STORE.city),
+      desc:         pick(profile.desc, STORE.desc),
+      contactPhone: pick(profile.contactPhone, STORE.contactPhone),
+      address:      pick(profile.address, STORE.address),
+      hours:        pick(profile.hours, STORE.hours),
+      whatsapp:     pick(profile.whatsapp, STORE.whatsapp),
+      instagram:    pick(profile.instagram, STORE.instagram),
+      storyImage:   pick(profile.storyImage, STORE.storyImage),
+      storyText:    pick(profile.storyText, STORE.storyText),
+      phones:       phones.length ? phones : STORE.phones,
+    }
+  }, [profile])
 
   /* filters */
   const [checkedCats, setCheckedCats] = useState<Set<CatKey>>(new Set())
@@ -610,8 +536,8 @@ export default function FlatShop() {
         </main>
       </div>
 
-      {/* ═══ گالری تصاویر فروشگاه — قبل از فوتر ═══ */}
-      <StoreGallery sellerId={SELLER_ID}/>
+      {/* ═══ گالری تصاویر فروشگاه — قبل از فوتر. فقط نمایش؛ آپلود در /dashboard/seller ═══ */}
+      <StoreGallery shots={profile?.gallery.map(s => s.url) ?? []}/>
 
       {/* ═══ FOOTER — کارت اختصاصی فروشگاه (سبک sellers/2) ═══ */}
       <footer className="px-4 pb-8 pt-2 sm:px-6">

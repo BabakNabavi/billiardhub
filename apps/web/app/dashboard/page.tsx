@@ -163,6 +163,7 @@ export default function DashboardPage() {
   const isPlayer    = userRoles.includes('player');
   const isCoach     = userRoles.includes('coach');
   const isReferee   = userRoles.includes('referee');
+  const isSeller    = userRoles.includes('seller');
 
   return (
     <AuthGuard>
@@ -464,6 +465,27 @@ export default function DashboardPage() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
                         {hasRefereeProfile ? 'ویرایش پروفایل' : 'ساخت پروفایل'} <span style={{ fontSize: '16px' }}>←</span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
+                {/* Seller Card — پنل فروشگاه */}
+                {isSeller && (
+                  <Link href="/dashboard/seller" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, rgba(249,115,22,0.08), rgba(249,115,22,0.02))',
+                      border: '1.5px solid rgba(249,115,22,0.25)',
+                      transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                    }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(249,115,22,0.10)', border: '1px solid rgba(249,115,22,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🏪</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل فروشگاه</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                        نام، لوگو، توضیحات، راه‌های ارتباطی، استوری و گالری فروشگاه خود را تنظیم کنید
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#ea580c', fontWeight: 700 }}>
+                        تنظیمات فروشگاه <span style={{ fontSize: '16px' }}>←</span>
                       </div>
                     </div>
                   </Link>
