@@ -118,13 +118,20 @@ export default function Footer() {
           .ft-brand { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
-          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 16px 14px !important; }
+          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 14px !important; margin-bottom: 16px !important; }
           .ft-brand { grid-column: 1 / -1 !important; }
-          .ft-inner { padding: 26px 18px 18px !important; }
-          .ft-bottom { flex-direction: column !important; gap: 4px !important; text-align: center; margin-top: 4px !important; }
+          .ft-tagline { margin-bottom: 10px !important; }
+          .ft-inner { padding: 26px 18px 12px !important; }
+          /* نوار آدرس/تلفن: gap ۲۴ برای چیدمانِ یک‌سطریِ دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
+             همان عدد به فاصله‌ی عمودیِ بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
+          .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; }
+          /* سه خط آخر (کپی‌رایت / لینک‌ها / اعتبار). gap صفر است و فاصله فقط از line-height
+             می‌آید — که خودش برای متنِ ۱۳px حدود ۶px فضای نامرئی می‌سازد، پس مهارش می‌کنیم. */
+          .ft-bottom { flex-direction: column !important; gap: 0 !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
+          .ft-bottom > div { padding: 1px 0; }
           .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
           .ft-dev-desk { display: none !important; }
-          .ft-dev-mob { display: block !important; margin-top: 12px; }
+          .ft-dev-mob { display: block !important; margin-top: 3px; }
           .ft-link { font-size: 12px !important; padding: 2.5px 0 !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
@@ -158,7 +165,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <p style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.7, marginBottom: '16px', maxWidth: '260px', marginTop: '-2px' }}>
+            <p className="ft-tagline" style={{ color: DIM, fontSize: '13.5px', lineHeight: 1.7, marginBottom: '16px', maxWidth: '260px', marginTop: '-2px' }}>
               اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران
             </p>
 
@@ -187,7 +194,7 @@ export default function Footer() {
         </div>
 
         {/* ── Contact strip ─────────────────────────── */}
-        <div style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '13px 0', marginBottom: '16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+        <div className="ft-contact" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '13px 0', marginBottom: '16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           {[
             { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، ایران' },
             { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: '۰۲۱-۱۲۳۴۵۶۷۸' },
