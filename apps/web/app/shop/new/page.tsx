@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
+import { findSellerByOwner } from '../../../lib/seller-store'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -272,15 +273,27 @@ export default function NewProductPage() {
   useEffect(() => {
     if (!user) return
     const u = user as any
-    const autoName = u.shopName || [u.firstName||'', u.lastName||''].filter(Boolean).join(' ') || u.name || ''
-    if (autoName) {
-      setForm(f => ({ ...f, shopName: autoName }))
-      setShopNameLocked(true)
-    }
-    const autoOwner = [u.firstName||'', u.lastName||''].filter(Boolean).join(' ') || u.name || u.ownerName || ''
-    if (autoOwner) {
-      setForm(f => ({ ...f, ownerName: autoOwner }))
-      setOwnerNameLocked(true)
+    const authName = [u.firstName || '', u.lastName || ''].filter(Boolean).join(' ') || u.name || ''
+    /* فروشگاهِ ثبت‌شده‌ی همین فروشنده — منبعِ نامِ فروشگاه/شهر/آدرس/تماس روی فرم محصول */
+    const store = findSellerByOwner(u.phone ?? '')
+
+    // نام فروشگاه: از پروفایلِ فروشگاه، وگرنه از حساب. قفل — روی محصول قابل تغییر نیست.
+    const autoName = store?.title || u.shopName || authName
+    if (autoName) { setForm(f => ({ ...f, shopName: autoName })); setShopNameLocked(true) }
+
+    // نام مالک: همان نامِ احرازشده. قفل.
+    const autoOwner = store?.ownerName || authName || u.ownerName || ''
+    if (autoOwner) { setForm(f => ({ ...f, ownerName: autoOwner })); setOwnerNameLocked(true) }
+
+    // شهر/آدرس/تماس: از همان فروشگاه پیش‌پر می‌شوند (قابل ویرایش)
+    if (store) {
+      setForm(f => ({
+        ...f,
+        city:           store.city || f.city,
+        address:        store.address || f.address,
+        sellerPhone:    store.contactPhone || f.sellerPhone,
+        sellerWhatsapp: store.whatsapp || f.sellerWhatsapp,
+      }))
     }
   }, [user])
 
@@ -441,15 +454,11 @@ export default function NewProductPage() {
               <ChevronLeft size={15} />
               بازگشت به فروشگاه
             </Link>
-            <div style={{ fontSize: 12, color: TEXT_MUT, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              <span>ذخیره خودکار فعال</span>
-            </div>
           </div>
 
           {/* ── Page Header ── */}
           <div style={{ marginBottom: 40, animation: 'fadeUp 0.4s ease both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
               <div style={{ width: 44, height: 44, borderRadius: 13, background: `linear-gradient(135deg,${GOLD},#A07840)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 6px 20px rgba(199,166,106,0.36)` }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -458,6 +467,11 @@ export default function NewProductPage() {
               <div>
                 <p style={{ fontSize: 11, color: GOLD, letterSpacing: '0.2em', fontWeight: 700, margin: '0 0 2px' }}>NEW PRODUCT</p>
                 <h1 style={{ fontSize: 'clamp(21px,2.8vw,28px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ثبت محصول جدید</h1>
+              </div>
+              {/* «ذخیره خودکار فعال» — کنارِ عنوان (قبلاً گوشه‌ی بالا بود و دیده نمی‌شد) */}
+              <div style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: GOLD_D, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, borderRadius: 20, padding: '6px 13px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                <span>ذخیره خودکار فعال</span>
               </div>
             </div>
             <p style={{ fontSize: 14.5, color: TEXT_SEC, margin: '0 0 0 54px', lineHeight: 1.6 }}>

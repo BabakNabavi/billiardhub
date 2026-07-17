@@ -3,6 +3,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
+import { productsBySeller } from '../shop/products'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -230,6 +232,37 @@ const SELLERS = [
     description: 'متخصص فروش لوازم جانبی و قطعات حرفه‌ای بیلیارد — واردکننده مستقیم',
   },
 ]
+
+/* یک فروشگاهِ ذخیره‌شده (از /dashboard/seller، تاییدشده) را به شکلِ کارتِ همین لیست در می‌آورد.
+   فیلدهایی که فروشنده وارد نکرده با پیش‌فرضِ خنثی پر می‌شوند تا کارت نشکند. */
+function profileToSeller(p: SellerProfile): typeof SELLERS[0] {
+  const phones = p.phones.filter(x => x.trim())
+  return {
+    id: p.slug,
+    name: p.title || 'فروشگاه',
+    city: p.city || '—',
+    verified: p.verified,
+    elite: false,
+    rating: 5,
+    reviewCount: 0,
+    productCount: productsBySeller(p.slug).length,
+    since: '۱۴۰۴',
+    sinceYear: 1404,
+    brands: [] as string[],
+    specialties: [] as string[],
+    responseTime: '—',
+    phone: p.contactPhone || phones[0] || '',
+    bannerImage: p.gallery[0]?.url || p.storyImage || '/images/shop/Pro_table.jpg',
+    description: p.desc || '',
+  }
+}
+
+/* فروشگاه‌های تاییدشده روی لیست هاردکد سوار می‌شوند؛ اگر id یکی بود، نسخه‌ی ذخیره‌شده برنده است */
+function mergeStores(base: typeof SELLERS, approved: SellerProfile[]): typeof SELLERS {
+  const byId = new Map(base.map(s => [s.id, s]))
+  for (const p of approved) byId.set(p.slug, profileToSeller(p))
+  return [...byId.values()]
+}
 
 const CATEGORY_OPTIONS = [
   { value: 'همه',          label: 'همه دسته‌ها' },
@@ -555,6 +588,11 @@ export default function SellersPage() {
   const [locLoading, setLocLoading] = useState(false)
   const [locError,  setLocError]  = useState(false)
 
+  /* فروشگاه‌های تاییدشده‌ی ذخیره‌شده. مقدار اولیه = SELLERS تا SSR و اولین رندرِ کلاینت یکی باشند؛
+     بعد از mount، فروشگاه‌های approved از localStorage خوانده و اضافه می‌شوند. */
+  const [stores, setStores] = useState<typeof SELLERS>(SELLERS)
+  useEffect(() => { setStores(mergeStores(SELLERS, listApprovedSellers())) }, [])
+
   const getLocation = () => {
     if (nearMe) { setNearMe(false); return }
     if (!navigator.geolocation) { setLocError(true); return }
@@ -574,11 +612,11 @@ export default function SellersPage() {
   }
 
   const filtered = useMemo(() => {
-    const list = SELLERS
+    const list = stores
       .filter(s => !search.trim() || s.name.includes(search.trim()) || s.city.includes(search.trim()) || s.brands.some(b => b.toLowerCase().includes(search.toLowerCase())) || s.specialties.some(sp => sp.includes(search.trim())))
       .filter(s => category === 'همه' || matchSpec(s, category))
       .filter(s => status === 'همه' || (status === 'verified' && s.verified) || (status === 'elite' && s.elite) || (status === 'top' && s.rating >= 4.7))
-    return list.sort((a, b) => {
+    return [...list].sort((a, b) => {
       if (nearMe && userLoc) { const da = distOf(a) ?? 9e9, db = distOf(b) ?? 9e9; if (da !== db) return da - db }
       if (sort === 'rating')   return b.rating - a.rating
       if (sort === 'popular')  return b.reviewCount - a.reviewCount
@@ -586,7 +624,7 @@ export default function SellersPage() {
       return b.sinceYear - a.sinceYear
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, status, sort, nearMe, userLoc])
+  }, [stores, search, category, status, sort, nearMe, userLoc])
 
   return (
     <>

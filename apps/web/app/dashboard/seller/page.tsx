@@ -15,6 +15,15 @@ import {
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
+/* برای جواز کسبِ PDF (تصویر با canvas فشرده می‌شود، PDF مستقیم base64) */
+const readAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onerror = () => reject(new Error('read failed'))
+    r.onload = () => resolve(String(r.result))
+    r.readAsDataURL(file)
+  })
+
 /* ── توکن‌های ظاهری، هم‌راستا با بقیه‌ی داشبوردها ── */
 const CARD  = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 sm:p-6'
 const LABEL = 'mb-1.5 block text-[12.5px] font-semibold text-[#5B564B]'
@@ -28,6 +37,8 @@ const Icon = {
   store:  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>,
   plus:   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>,
   back:   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>,
+  doc:    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>,
+  check:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
 }
 
 /* اسلاگ فروشگاه = همان id در آدرس. فعلاً تک‌فروشگاهیِ نمونه؛ بعداً از سرور می‌آید. */
@@ -42,10 +53,12 @@ export default function SellerDashboard() {
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
+  const [warn, setWarn]     = useState(false)   // هشدارِ «بدون جواز کسب»
 
   const logoRef  = useRef<HTMLInputElement>(null)
   const storyRef = useRef<HTMLInputElement>(null)
   const shotsRef = useRef<HTMLInputElement>(null)
+  const certRef  = useRef<HTMLInputElement>(null)
 
   const isSeller = useMemo(() => {
     if (!user) return false
@@ -92,15 +105,36 @@ export default function SellerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
+  /* جواز کسب — عکس/PDF. مثل گالری فشرده می‌شود (اگر تصویر باشد). */
+  const pickCertificate = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setBusy(true); setErr('')
+    try {
+      const url = file.type.startsWith('image/') ? await compressImage(file, 1400, 0.75) : await readAsDataUrl(file)
+      set('certificate', { name: file.name, url })
+    } catch { setErr('فایل خوانده نشد. دوباره تلاش کنید.') }
+    finally { setBusy(false); e.target.value = '' }
+  }
+
+  const persist = () => {
+    const ownerName = form.ownerName || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
+    saveSellerProfile({
+      ...form,
+      ownerName,
+      ownerPhone: form.ownerPhone || (user?.phone ?? ''),
+      status: 'pending',                                   // هر ذخیره = ارسال برای بازبینی
+      submittedAt: form.submittedAt || new Date().toISOString(),
+    })
+    setSaved(true); setErr(''); setWarn(false)
+  }
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) { setErr('نام فروشگاه لازم است.'); return }
-    try {
-      saveSellerProfile({ ...form, ownerPhone: form.ownerPhone || (user?.phone ?? '') })
-      setSaved(true); setErr('')
-    } catch {
-      setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید.')
-    }
+    if (!form.certificate)  { setWarn(true); return }      // جواز کسب اجباری — مثل پنل مربی
+    try { persist() }
+    catch { setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید.') }
   }
 
   /* تا وقتی auth هیدریت نشده چیزی رندر نمی‌کنیم تا SSR و کلاینت یکی بمانند */
@@ -351,18 +385,73 @@ export default function SellerDashboard() {
             <Link href="/dashboard/shop" className={`${LQ_BTN} mt-3`}>{Icon.back} مدیریت محصولات</Link>
           </section>
 
+          {/* ═══ جواز کسب (اجباری) ═══ */}
+          <section className={CARD}>
+            <h2 className="text-[14.5px] font-bold">جواز کسب <span className="text-[#B23B2E]">*</span></h2>
+            <p className="mb-4 mt-1 text-[12.5px] leading-relaxed text-[#5B564B]">
+              برای انتشار فروشگاه، آپلود جواز کسب الزامی است. بدون آن، اطلاعات فروشگاه ثبت نمی‌شود.
+            </p>
+            {form.certificate ? (
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
+                {form.certificate.url.startsWith('data:image')
+                  ? <img src={form.certificate.url} alt="" className="h-16 w-16 shrink-0 rounded-lg border border-[#E7E2D6] object-cover"/>
+                  : <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[#E7E2D6] bg-white text-[#9A6E38]">{Icon.doc}</span>}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[#14532D]">
+                    <span className="text-[#057642]">{Icon.check}</span> جواز کسب آپلود شد
+                  </div>
+                  <div className="mt-0.5 truncate text-[11.5px] text-[#8A8474]" dir="ltr">{form.certificate.name}</div>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => certRef.current?.click()} disabled={busy} className={LQ_BTN}>تغییر فایل</button>
+                  <button type="button" onClick={() => set('certificate', null)}
+                    className="rounded-[10px] border border-[#E7E2D6] px-3 py-2.5 text-[12.5px] text-[#5B564B] transition hover:text-[#B23B2E]">حذف</button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" onClick={() => certRef.current?.click()} disabled={busy}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                {Icon.upload}
+                <span className="text-[12.5px]">جواز کسب را آپلود کنید (عکس یا PDF)</span>
+              </button>
+            )}
+            <input ref={certRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={pickCertificate}/>
+          </section>
+
           {/* ═══ ذخیره ═══ */}
           <div className="sticky bottom-0 -mx-4 border-t border-[#E7E2D6] bg-[#F7F5F0]/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
             <div className="flex flex-wrap items-center justify-end gap-3">
-              {err && <p className="me-auto text-[12.5px] font-semibold text-[#B23B2E]">{err}</p>}
-              {saved && !err && <p className="me-auto text-[12.5px] font-semibold text-[#14532D]">ذخیره شد ✓</p>}
+              {err   && <p className="me-auto text-[12.5px] font-semibold text-[#B23B2E]">{err}</p>}
+              {saved && !err && <p className="me-auto text-[12.5px] font-semibold text-[#14532D]">ذخیره شد ✓ — برای بازبینی به ادمین ارسال شد</p>}
+              {/* دکمه به طرح LQ (طلایی) */}
               <button type="submit" disabled={busy}
-                className="rounded-[10px] bg-[#14532D] px-6 py-2.5 text-[13.5px] font-bold text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45">
+                className="inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-6 py-2.5 text-[13.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0">
                 ذخیره‌ی تغییرات
               </button>
             </div>
           </div>
         </form>
+
+        {/* هشدارِ بدونِ جواز کسب */}
+        {warn && (
+          <div onClick={() => setWarn(false)} role="presentation"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm">
+            <div onClick={e => e.stopPropagation()} className="w-full max-w-[420px] rounded-2xl border border-[#E7E2D6] bg-white p-6 text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(180,60,46,0.10)] text-[#B23B2E]">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+              </div>
+              <h3 className="text-[16px] font-bold">جواز کسب آپلود نشده</h3>
+              <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">
+                بدون آپلود جواز کسب، اطلاعات فروشگاه شما ثبت و منتشر نمی‌شود. لطفاً ابتدا جواز کسب را آپلود کنید.
+              </p>
+              <div className="mt-4 flex justify-center gap-2">
+                <button onClick={() => { setWarn(false); certRef.current?.click() }} className={LQ_BTN}>{Icon.upload} آپلود جواز کسب</button>
+                <button onClick={() => setWarn(false)}
+                  className="rounded-[10px] border border-[#E7E2D6] px-4 py-2.5 text-[13px] text-[#5B564B] transition hover:text-[#1C1B17]">انصراف</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <button onClick={() => router.push('/dashboard')}
           className="mt-6 text-[12.5px] text-[#8A8474] transition hover:text-[#14532D]">

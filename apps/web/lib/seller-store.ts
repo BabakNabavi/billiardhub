@@ -8,9 +8,12 @@
 
 export interface SellerShot { id: string; url: string }
 
+export type SellerStatus = 'pending' | 'approved' | 'rejected'
+
 export interface SellerProfile {
   slug: string                 // = seller id in the URL, /sellers/<slug>
   ownerPhone: string           // whoever holds the `seller` role
+  ownerName: string            // نام و نام‌خانوادگیِ مالک (از احراز هویت) — روی فرم ثبت محصول قفل می‌شود
 
   /* ── هدر ── */
   logo: string                 // data URL; خالی ⇒ آیکون پیش‌فرض فروشگاه
@@ -34,8 +37,13 @@ export interface SellerProfile {
   /* ── گالری تصاویر فروشگاه ── */
   gallery: SellerShot[]
 
+  /* ── جواز کسب (اجباری — بدون آن فروشگاه منتشر نمی‌شود) ── */
+  certificate: { name: string; url: string } | null
+
   /* ── وضعیت (ادمین سایت تعیین می‌کند، نه صاحب فروشگاه) ── */
-  verified: boolean
+  status: SellerStatus         // فقط approvedها در /sellers دیده می‌شوند
+  verified: boolean            // تیک آبی (ادمین می‌دهد)
+  submittedAt: string          // زمانِ ارسال برای تایید
   updatedAt: string
 }
 
@@ -45,6 +53,7 @@ export const GALLERY_MAX = 12
 export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile {
   return {
     slug, ownerPhone,
+    ownerName: '',
     logo: '',
     title: '',
     city: '',
@@ -59,17 +68,30 @@ export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile
     storyImage: '',
     storyText: '',
     gallery: [],
+    certificate: null,
+    status: 'pending',
     verified: false,
+    submittedAt: '',
     updatedAt: '',
   }
 }
 
 const KEY = 'bh_seller_profiles'
 
+/* فیلدهای تازه (ownerName/certificate/status/...) در پروفایل‌های قدیمی نیستند؛
+   اینجا با پیش‌فرض پر می‌شوند تا هیچ‌جای کد undefined نبیند. */
+function normalize(raw: Partial<SellerProfile> & { slug: string }): SellerProfile {
+  return { ...emptySellerProfile(raw.slug, raw.ownerPhone ?? ''), ...raw }
+}
+
 export function getSellerProfiles(): Record<string, SellerProfile> {
   if (typeof window === 'undefined') return {}
-  try { return JSON.parse(localStorage.getItem(KEY) ?? '{}') as Record<string, SellerProfile> }
-  catch { return {} }
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Record<string, SellerProfile>
+    const out: Record<string, SellerProfile> = {}
+    for (const [k, v] of Object.entries(raw)) out[k] = normalize({ ...v, slug: v.slug ?? k })
+    return out
+  } catch { return {} }
 }
 
 export function getSellerProfile(slug: string): SellerProfile | null {
@@ -78,6 +100,11 @@ export function getSellerProfile(slug: string): SellerProfile | null {
 
 export function listSellerProfiles(): SellerProfile[] {
   return Object.values(getSellerProfiles())
+}
+
+/* فقط فروشگاه‌های تاییدشده — همینی که در صفحه‌ی عمومی /sellers دیده می‌شود */
+export function listApprovedSellers(): SellerProfile[] {
+  return listSellerProfiles().filter(p => p.status === 'approved')
 }
 
 export function findSellerByOwner(ownerPhone: string): SellerProfile | null {
@@ -91,6 +118,16 @@ export function saveSellerProfile(p: SellerProfile) {
   all[p.slug] = { ...p, updatedAt: new Date().toISOString() }
   try { localStorage.setItem(KEY, JSON.stringify(all)) }
   catch { throw new Error('quota') }   // صفحه پیام «حافظه پر است» نشان می‌دهد
+}
+
+/* ادمین: تغییر وضعیت / تیک آبی یک فروشگاه */
+export function updateSellerProfile(slug: string, patch: Partial<SellerProfile>) {
+  if (typeof window === 'undefined') return
+  const all = getSellerProfiles()
+  const cur = all[slug]
+  if (!cur) return
+  all[slug] = { ...cur, ...patch, updatedAt: new Date().toISOString() }
+  try { localStorage.setItem(KEY, JSON.stringify(all)) } catch { /* ignore */ }
 }
 
 /* ── فشرده‌سازی عکس ─────────────────────────────────────────────
