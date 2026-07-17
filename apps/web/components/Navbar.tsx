@@ -30,7 +30,7 @@ const exploreMenu = [
     title: 'تجهیزات و خدمات',
     color: GOLD,
     items: [
-      { href: '/sellers',       label: 'فروشندگان',   icon: <ShoppingBag size={14} />, desc: 'فروشندگان تجهیزات' },
+      { href: '/sellers',       label: 'فروشگاه‌ها',   icon: <ShoppingBag size={14} />, desc: 'فروشگاه‌های تجهیزات' },
       { href: '/manufacturers', label: 'تولیدکنندگان', icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
       { href: '/installers',    label: 'خدمات فنی',   icon: <Wrench size={14} />,     desc: 'نصب و راه‌اندازی'  },
       { href: '/live',          label: 'پخش زنده',    icon: <Radio size={14} />,      desc: 'پخش زنده مسابقات' },
@@ -52,7 +52,7 @@ const mobileLinks = [
   { href: '/',              label: 'صفحه اصلی',              icon: <Home size={17} />,          color: GOLD,      desc: 'خانه بیلیارد هاب', isHome: true },
   { href: '/clubs',         label: 'باشگاه‌ها',               icon: <Building2 size={17} />,     color: GOLD,      desc: 'کلوب‌های بیلیارد' },
   { href: '/shop',          label: 'بیلیارد بازار',           icon: <ShoppingBag size={17} />,   color: GOLD,      desc: 'خرید تجهیزات' },
-  { href: '/sellers',       label: 'فروشندگان',                icon: <Store size={17} />,         color: GOLD,      desc: 'فروشندگان تجهیزات' },
+  { href: '/sellers',       label: 'فروشگاه‌ها',                icon: <Store size={17} />,         color: GOLD,      desc: 'فروشگاه‌های تجهیزات' },
   { href: '/manufacturers', label: 'تولیدکنندگان',            icon: <Factory size={17} />,       color: GOLD,      desc: 'سازندگان تجهیزات' },
   { href: '/coaches',       label: 'مربیان',                  icon: <Star size={17} />,          color: GOLD,      desc: 'مربیان مجاز' },
   { href: '/referees',      label: 'داوران',                  icon: <Trophy size={17} />,        color: GOLD,      desc: 'داوران رسمی' },

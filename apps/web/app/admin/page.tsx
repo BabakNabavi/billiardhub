@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
 import {
   Users, ShoppingBag, Trophy, Newspaper, Settings,
-  CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale
+  CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store
 } from 'lucide-react';
 
 
@@ -50,6 +50,7 @@ export default function AdminPage() {
   { title: 'تأیید کاربران', desc: 'verify کردن مربیان و داوران', icon: <CheckCircle size={28} />, color: 'bg-teal-600', link: '/admin/verifications' },
   { title: 'تأیید مربیان (پروفایل)', desc: 'بررسی پروفایل مربیان ثبت‌شده در داشبورد و صدور تیک آبی', icon: <Star size={28} />, color: 'bg-indigo-600', link: '/admin/coaches' },
   { title: 'تأیید داوران (پروفایل)', desc: 'بررسی پروفایل و مدرک داوران ثبت‌شده در داشبورد و صدور تیک آبی', icon: <Scale size={28} />, color: 'bg-cyan-700', link: '/admin/referees' },
+  { title: 'تأیید فروشگاه‌ها', desc: 'بررسی جواز کسب فروشگاه‌های ثبت‌شده و انتشار در سایت', icon: <Store size={28} />, color: 'bg-orange-600', link: '/admin/sellers' },
   { title: 'مدیریت تبلیغات', desc: 'بنرها و تبلیغات سایت', icon: <Megaphone size={28} />, color: 'bg-orange-500', link: '/admin/ads' },
 ];
 
