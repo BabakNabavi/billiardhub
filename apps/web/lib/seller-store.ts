@@ -18,6 +18,7 @@ export interface SellerProfile {
 
   /* ── هدر ── */
   logo: string                 // data URL; خالی ⇒ آیکون پیش‌فرض فروشگاه
+  banners: string[]            // اسلایدرِ بنرِ هدر (حداکثر ۳)؛ خالی ⇒ بنر پیش‌فرض
   title: string                // نام فروشگاه — تیتر اصلی
   province: string             // استان (کنار شهر)
   city: string                 // شهر — کنار آیکون لوکیشن
@@ -32,9 +33,15 @@ export interface SellerProfile {
   whatsapp: string             // شماره‌ی واتساپ (بدون +)
   instagram: string            // آیدی اینستاگرام (بدون @)
 
+  /* ── برندها ── */
+  brands: string[]             // برندهایی که فروشگاه نماینده‌شان است
+
   /* ── استوری (حلقه‌ی دور لوگو) ── */
   storyImage: string
   storyText: string
+
+  /* ── «درباره ما» ── */
+  aboutImages: string[]        // اسلایدرِ باکس درباره ما (حداکثر ۳)؛ متنش همان desc است
 
   /* ── گالری تصاویر فروشگاه ── */
   gallery: SellerShot[]
@@ -57,6 +64,7 @@ export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile
     slug, ownerPhone,
     ownerName: '',
     logo: '',
+    banners: [],
     title: '',
     province: '',
     city: '',
@@ -68,8 +76,10 @@ export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile
     address: '',
     whatsapp: '',
     instagram: '',
+    brands: [],
     storyImage: '',
     storyText: '',
+    aboutImages: [],
     gallery: [],
     certificate: null,
     status: 'pending',
