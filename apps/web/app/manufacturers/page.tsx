@@ -1,105 +1,589 @@
-﻿// ════════════════════════════════════════════════════════════════
-// FILE 1: apps/web/app/manufacturers/page.tsx
-// ════════════════════════════════════════════════════════════════
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useMemo, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { MANUFACTURERS, type MockManufacturer } from '../../lib/manufacturers-data'
 
-const MANUFACTURERS = [
-  { id: '1', name: 'کارخانه بیلیارد سازان ایران', city: 'تهران', verified: true, since: '۱۳۷۸', employees: '۸۵', totalProduced: '۴,۲۰۰', exportCountries: '۶', specialties: ['میز اسنوکر', 'میز آمریکایی', 'پارچه'], certifications: 4, emoji: '🏭' },
-  { id: '2', name: 'صنایع چوب بیلیارد پارسه', city: 'اصفهان', verified: true, since: '۱۳۸۸', employees: '۳۰', totalProduced: '۱۵,۰۰۰', exportCountries: '۲', specialties: ['چوب سفارشی', 'تعمیر چوب'], certifications: 1, emoji: '🔨' },
-  { id: '3', name: 'کارگاه پارچه بیلیارد رویال', city: 'یزد', verified: false, since: '۱۳۹۰', employees: '۱۸', totalProduced: '۸,۵۰۰', exportCountries: '۱', specialties: ['پارچه اسنوکر', 'پارچه آمریکایی'], certifications: 1, emoji: '🧶' },
-  { id: '4', name: 'فناوری بیلیارد نوین', city: 'مشهد', verified: true, since: '۱۴۰۰', employees: '۲۵', totalProduced: '۲,۱۰۰', exportCountries: '۳', specialties: ['سیستم هوشمند', 'میز LED'], certifications: 1, emoji: '💡' },
-];
+const GOLD     = '#C7A66A'
+const GOLD_D   = '#9A6E38'
+const GOLD_G   = 'linear-gradient(135deg,#7A4F10 0%,#C7A66A 50%,#8A6020 100%)'
+const BG       = '#F7F7F5'
+const TEXT     = '#1C1C1A'
+const TEXT_SEC = 'rgba(28,28,26,0.52)'
+const TEXT_MUT = 'rgba(28,28,26,0.32)'
 
-export default function ManufacturersPage() {
-  const [activeCity, setActiveCity] = useState('همه');
-  const cities = ['همه', 'تهران', 'اصفهان', 'یزد', 'مشهد'];
+/* billiard rack — 15 balls in triangle formation (coaches-style hero graphic) */
+const RACK: [number, number][] = [
+  [490,50],[442,133],[538,133],[394,216],[490,216],[586,216],
+  [346,299],[442,299],[538,299],[634,299],
+  [298,382],[394,382],[490,382],[586,382],[682,382],
+]
+const RACK_C = [
+  '#C7A66A','#DC2626','#7C3AED','#DC2626','#C7A66A','#DC2626',
+  '#C7A66A','#DC2626','#C7A66A','#DC2626',
+  '#7C3AED','#DC2626','#C7A66A','#DC2626','#C7A66A',
+]
 
-  const filtered = MANUFACTURERS.filter(m => activeCity === 'همه' || m.city === activeCity);
+/* ── Subtle sliding header posters (text-less, behind the hero elements) ── */
+const MFR_POSTERS = [
+  { bg:'linear-gradient(125deg,#0b1322 0%,#17253f 55%,#1e2f4d 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'cues'  },
+  { bg:'linear-gradient(130deg,#141414 0%,#272524 55%,#1a1a19 100%)', glow:'rgba(199,166,106,0.30)', accent:'rgba(199,166,106,0.55)', motif:'rack'  },
+  { bg:'linear-gradient(130deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'table' },
+  { bg:'linear-gradient(125deg,#1c0e13 0%,#341826 55%,#230f1a 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'eight' },
+  { bg:'linear-gradient(130deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow:'rgba(199,166,106,0.26)', accent:'rgba(199,166,106,0.50)', motif:'aim'   },
+]
 
+function mfrMotif(motif: string) {
+  const s = 190
+  if (motif === 'rack') {
+    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
+    return (
+      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
+        {rows.flat().map((pt,i)=>(<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={GOLD} strokeWidth="1.3" opacity="0.82"/>))}
+        <circle cx="50" cy="11" r="3" fill={GOLD} opacity="0.6"/>
+      </svg>
+    )
+  }
+  if (motif === 'table') return (
+    <svg width={s} viewBox="0 0 120 72" fill="none" aria-hidden>
+      <rect x="4" y="4" width="112" height="64" rx="10" stroke={GOLD} strokeWidth="1.6" opacity="0.8"/>
+      <rect x="12" y="12" width="96" height="48" rx="4" stroke={GOLD} strokeWidth="1" opacity="0.42"/>
+      {[[10,10],[60,7],[110,10],[10,62],[60,65],[110,62]].map((p,i)=>(<circle key={i} cx={p[0]} cy={p[1]} r="4" fill={GOLD} opacity="0.68"/>))}
+      <line x1="36" y1="12" x2="36" y2="60" stroke={GOLD} strokeWidth="1" opacity="0.4"/>
+      <path d="M36 27 A9 9 0 0 0 36 45" stroke={GOLD} strokeWidth="1" opacity="0.4" fill="none"/>
+      <circle cx="60" cy="36" r="1.8" fill={GOLD} opacity="0.7"/>
+    </svg>
+  )
+  if (motif === 'eight') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="38" stroke={GOLD} strokeWidth="1.8" opacity="0.85" fill="rgba(0,0,0,0.18)"/>
+      <circle cx="50" cy="50" r="16" fill={GOLD} opacity="0.9"/>
+      <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize="19" fontWeight="800" fill="#1c0e13">8</text>
+      <ellipse cx="38" cy="36" rx="7" ry="4" fill={GOLD} opacity="0.22" transform="rotate(-30 38 36)"/>
+    </svg>
+  )
+  if (motif === 'aim') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <circle cx="50" cy="50" r="40" stroke={GOLD} strokeWidth="0.8" opacity="0.22"/>
+      <circle cx="50" cy="50" r="28" stroke={GOLD} strokeWidth="1" opacity="0.38"/>
+      <circle cx="50" cy="50" r="16" stroke={GOLD} strokeWidth="1.6" opacity="0.9" fill="rgba(0,0,0,0.18)"/>
+      {[[50,6],[50,94],[6,50],[94,50]].map((pt,i)=>(<rect key={i} x={pt[0]!-3} y={pt[1]!-3} width="6" height="6" fill={GOLD} opacity="0.58" transform={`rotate(45 ${pt[0]} ${pt[1]})`}/>))}
+      <circle cx="44" cy="44" r="3" fill={GOLD} opacity="0.4"/>
+    </svg>
+  )
   return (
-    <div style={{ background: '#F7F7F5', minHeight: '100vh', color: '#111111', fontFamily: 'Vazirmatn, system-ui', direction: 'rtl' }}>
-      {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg, #05081a 0%, #030512 100%)', padding: 'clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(28px, 5vw, 48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(167,139,250,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.04) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
-        <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 14, padding: '5px 16px', borderRadius: 20, marginBottom: 16, fontWeight: 600 }}>
-            🏭 تولیدکنندگان
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <g stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
+      {[[12,86],[88,16],[12,16],[88,86]].map((pt,i)=>(<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={GOLD} opacity="0.72"/>))}
+      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={GOLD} strokeWidth="1.6" opacity="0.95"/>
+      <circle cx="45" cy="46" r="3" fill={GOLD} opacity="0.5"/>
+    </svg>
+  )
+}
+
+function MfrPoster({ variant }: { variant: number }) {
+  const p = MFR_POSTERS[variant % MFR_POSTERS.length]!
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.6 }} />
+      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at 30% 40%, ${p.glow}, transparent 55%)` }} />
+      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '52%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.4 }} />
+      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '58%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.2 }} />
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translateX(-12%)' }}>
+        <div style={{ display: 'flex' }}>{mfrMotif(p.motif)}</div>
+      </div>
+    </div>
+  )
+}
+
+function MfrPosterBg() {
+  const [active, setActive] = useState(0)
+  const [prev, setPrev] = useState<number | null>(null)
+  const activeRef = useRef(0)
+  useEffect(() => {
+    const iv = setInterval(() => {
+      const next = (activeRef.current + 1) % MFR_POSTERS.length
+      setPrev(activeRef.current); activeRef.current = next; setActive(next)
+      setTimeout(() => setPrev(null), 900)
+    }, 4500)
+    return () => clearInterval(iv)
+  }, [])
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', opacity: 0.11, pointerEvents: 'none' }} aria-hidden>
+      {MFR_POSTERS.map((_, i) => (
+        <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === active ? 1 : 0, transition: 'opacity 0.9s ease', zIndex: i === active ? 2 : i === prev ? 1 : 0 }}>
+          <MfrPoster variant={i} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const CATEGORY_OPTIONS = [
+  { value: 'همه',        label: 'همه تخصص‌ها' },
+  { value: 'میز',        label: 'میز'         },
+  { value: 'چوب',        label: 'چوب'         },
+  { value: 'پارچه',      label: 'پارچه'       },
+  { value: 'هوشمند',     label: 'هوشمند / دیجیتال' },
+] as const
+const STATUS_OPTIONS = [
+  { value: 'همه',      label: 'همه تولیدکنندگان' },
+  { value: 'verified', label: 'تأیید شده'        },
+  { value: 'elite',    label: 'رسمی'             },
+] as const
+const SORT_OPTIONS = [
+  { value: 'experience', label: 'باسابقه‌ترین'   },
+  { value: 'products',   label: 'بیشترین محصول'  },
+  { value: 'newest',     label: 'تازه‌ترین'      },
+] as const
+type SortKey = typeof SORT_OPTIONS[number]['value']
+
+/* مختصات تقریبی مرکز شهرها برای «نزدیک من» */
+const CITY_COORDS: Record<string, [number, number]> = {
+  'تهران':  [35.6892, 51.3890],
+  'اصفهان': [32.6539, 51.6660],
+  'مشهد':   [36.2605, 59.6168],
+  'یزد':    [31.8974, 54.3569],
+  'شیراز':  [29.5918, 52.5837],
+}
+const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+// ── Logo — آیکون مدرنِ کارخانه (تولیدکنندگان لوگوی آپلودی ندارند) ──
+function MfrLogo({ name, size = 62 }: { name: string; size?: number }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      padding: 2.5, background: `linear-gradient(135deg,${GOLD},${GOLD_D})`,
+      boxShadow: `0 6px 18px rgba(199,166,106,0.45)`,
+    }}>
+      <div style={{
+        width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
+        border: '2.5px solid #fff',
+        background: 'linear-gradient(135deg,#14532D,#1E6B3C)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+      }} aria-label={name}>
+        <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M7 18h.01"/><path d="M12 18h.01"/><path d="M17 18h.01"/>
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+const PhoneIcon =<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+
+// ── Manufacturer Card — grid + list, modern gold theme ──────────
+function MfrCard({ mfr, view }: { mfr: MockManufacturer; view: 'grid' | 'list' }) {
+  const [hov, setHov] = useState(false)
+  const router = useRouter()
+
+  const shell: React.CSSProperties = {
+    background: '#fff', borderRadius: 14, overflow: 'hidden',
+    border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
+    boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
+    transform: hov ? 'translateY(-5px)' : 'none',
+    transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
+  }
+
+  const metaRow = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: TEXT_SEC, flexWrap: 'wrap' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        {mfr.city}
+      </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        از {mfr.since}
+      </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        {mfr.productCount} محصول
+      </span>
+    </div>
+  )
+  const specRow = mfr.specialties.length > 0 && (
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+      <span style={{ fontSize: 11.5, fontWeight: 700, color: TEXT_MUT }}>تخصص:</span>
+      {mfr.specialties.slice(0, 3).map(s => (
+        <span key={s} style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 20, padding: '2px 9px' }}>{s}</span>
+      ))}
+    </div>
+  )
+  const viewBtn = (
+    <Link href={`/manufacturers/${mfr.id}`} onClick={e => e.stopPropagation()} style={{
+      padding: '10px 18px', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
+      background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
+      fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+    }}>
+      مشاهده تولیدکننده
+    </Link>
+  )
+  const callBtn = (
+    <a href={`tel:${mfr.phone}`} onClick={e => e.stopPropagation()} style={{
+      padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
+      border: '1px solid rgba(28,28,26,0.12)', color: TEXT, background: 'rgba(28,28,26,0.04)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    }}>{PhoneIcon}</a>
+  )
+
+  /* ── LIST VIEW ── */
+  if (view === 'list') {
+    return (
+      <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/manufacturers/${mfr.id}`)}
+        className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
+        <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
+          <img src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.35))' }} />
+          {mfr.elite && (
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(199,166,106,0.94)', color: '#3a2800', fontSize: 10.5, fontWeight: 800, borderRadius: 20, padding: '3px 9px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              رسمی
+            </div>
+          )}
+        </div>
+        <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{mfr.name}</h3>
           </div>
-          <h1 style={{ fontSize: 'clamp(24px, 5.5vw, 40px)', fontWeight: 900, margin: '0 0 12px', background: 'linear-gradient(135deg, #f0faf5, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            تولیدکنندگان تجهیزات بیلیارد
-          </h1>
-          <p style={{ color: '#6b7280', fontSize: 'clamp(14px, 2.2vw, 17px)', margin: 0, lineHeight: 1.7 }}>
-            کارخانه‌ها و کارگاه‌های تخصصی ساخت تجهیزات بیلیارد در ایران
-          </p>
+          <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{metaRow}</div>
+          <div className="sel-list-brands">{specRow}</div>
+        </div>
+        <div className="sel-list-actions" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, padding: '16px 20px', flexShrink: 0, borderInlineStart: '1px solid rgba(28,28,26,0.06)' }}>
+          {viewBtn}{callBtn}
+        </div>
+      </div>
+    )
+  }
+
+  /* ── GRID VIEW ── */
+  return (
+    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/manufacturers/${mfr.id}`)}
+      style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
+      <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+        <img src={mfr.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
+        {mfr.elite && (
+          <div style={{ position: 'absolute', top: 10, right: 12, background: 'rgba(199,166,106,0.94)', backdropFilter: 'blur(8px)', color: '#3a2800', fontSize: 11, fontWeight: 800, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            تولیدکننده‌ی رسمی
+          </div>
+        )}
+        <div style={{ position: 'absolute', top: 10, left: 12, background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.92)', fontSize: 11, fontWeight: 600, borderRadius: 20, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {mfr.responseTime}
         </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(20px, 4vw, 32px) clamp(16px, 4vw, 32px)' }}>
-        {/* City filter */}
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 28 }}>
-          {cities.map(city => (
-            <button key={city} onClick={() => setActiveCity(city)} style={{
-              background: activeCity === city ? '#a78bfa' : 'rgba(0,0,0,0.04)',
-              border: `1px solid ${activeCity === city ? '#a78bfa' : 'rgba(0,0,0,0.06)'}`,
-              color: activeCity === city ? '#010604' : '#94a3b8',
-              padding: '7px 14px', borderRadius: 20, fontSize: 14,
-              fontWeight: activeCity === city ? 700 : 400,
-              cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s',
-            }}>{city}</button>
-          ))}
+      {/* body — flex تا کارت پر شود و دکمه‌ها ته کارت بچسبند ⇒ همه‌ی کارت‌ها یک‌اندازه */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
+        <div style={{ marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
+          <MfrLogo name={mfr.name} size={62} />
         </div>
 
-        {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: 16, marginBottom: 48 }}>
-          {filtered.map(mfr => (
-            <Link key={mfr.id} href={`/manufacturers/${mfr.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div style={{
-                background: 'linear-gradient(135deg, #0f0e1a, #0a0d18)',
-                border: '1px solid rgba(167,139,250,0.1)', borderRadius: 18,
-                overflow: 'hidden', transition: 'all 0.3s', cursor: 'pointer', height: '100%',
-              }}
-              onMouseEnter={e => { const el = e.currentTarget as HTMLDivElement; el.style.border = '1px solid rgba(167,139,250,0.35)'; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = '0 12px 40px rgba(167,139,250,0.08)'; }}
-              onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.border = '1px solid rgba(167,139,250,0.1)'; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'; }}
-              >
-                <div style={{ height: 90, background: 'linear-gradient(135deg, rgba(167,139,250,0.06), rgba(6,182,212,0.04))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 53, opacity: 0.7 }}>
-                  {mfr.emoji}
-                </div>
-                <div style={{ padding: '16px 18px 18px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                    <h3 style={{ color: '#111111', fontSize: 17, fontWeight: 700, margin: 0, lineHeight: 1.4, flex: 1 }}>{mfr.name}</h3>
-                    {mfr.verified && <span style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', fontSize: 12, padding: '2px 7px', borderRadius: 10, fontWeight: 600, marginRight: 8, flexShrink: 0 }}>✓</span>}
-                  </div>
-                  <div style={{ color: '#6b7280', fontSize: 14, marginBottom: 12 }}>📍 {mfr.city} | از {mfr.since}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
-                    {[
-                      ['🏭', mfr.totalProduced + ' تولید', '#a78bfa'],
-                      ['🌍', mfr.exportCountries + ' کشور صادرات', '#06b6d4'],
-                      ['👷', mfr.employees + ' پرسنل', '#C7A66A'],
-                      ['📋', mfr.certifications + ' گواهینامه', '#f59e0b'],
-                    ].map(([icon, label, color], i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span>{icon}</span>
-                        <span style={{ color: color as string, fontSize: 13, fontWeight: 600 }}>{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                    {mfr.specialties.slice(0, 2).map(s => (
-                      <span key={s} style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: 12, padding: '2px 8px', borderRadius: 10 }}>{s}</span>
-                    ))}
-                  </div>
-                  <div style={{ textAlign: 'left', borderTop: '1px solid rgba(0,0,0,0.04)', paddingTop: 12 }}>
-                    <span style={{ color: '#a78bfa', fontSize: 14, fontWeight: 600 }}>مشاهده پروفایل ←</span>
-                  </div>
-                </div>
-              </div>
+        <div style={{ margin: '0 0 5px' }}>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{mfr.name}</h3>
+        </div>
+
+        <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, minHeight: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{mfr.description}</p>
+
+        <div style={{ marginBottom: 12 }}>{metaRow}</div>
+        <div style={{ marginBottom: 16, minHeight: 26 }}>{specRow}</div>
+
+        <div style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
+          <div style={{ flex: 1 }}>
+            <Link href={`/manufacturers/${mfr.id}`} onClick={e => e.stopPropagation()} style={{
+              display: 'block', padding: '10px 0', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
+              background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
+              fontSize: 13, fontWeight: 700,
+            }}>
+              مشاهده تولیدکننده
             </Link>
-          ))}
+          </div>
+          {callBtn}
         </div>
       </div>
     </div>
-  );
+  )
+}
+
+// ── Professional dropdown ─────────────────────────────────────
+function Dropdown({ label, options, value, onChange, minWidth = 150 }: {
+  label?: string
+  options: readonly { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
+  minWidth?: number
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+  }, [])
+  const current = options.find(o => o.value === value) ?? options[0]!
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
+        className="dd-btn"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, minWidth, padding: '9px 13px', borderRadius: 12,
+          background: open ? '#fff' : 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+          border: open ? `1.5px solid ${GOLD}` : '1px solid rgba(28,28,26,0.1)', fontSize: 12.5, color: TEXT,
+          boxShadow: open ? '0 4px 14px rgba(199,166,106,0.12)' : 'none', transition: 'all .18s',
+        }}>
+        {label && <span className="dd-label" style={{ color: TEXT_MUT, fontWeight: 500 }}>{label}</span>}
+        <span style={{ fontWeight: 700 }}>{current.label}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={TEXT_MUT} strokeWidth="2.5" style={{ marginRight: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div role="listbox" style={{
+        position: 'absolute', insetInlineStart: 0, top: '100%', marginTop: 8, minWidth: minWidth + 20, zIndex: 90,
+        background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+        border: '1px solid rgba(28,28,26,0.08)', borderRadius: 14, overflow: 'hidden',
+        boxShadow: '0 16px 40px rgba(28,28,26,0.16)', transformOrigin: 'top', transition: 'all .15s',
+        opacity: open ? 1 : 0, transform: open ? 'scale(1)' : 'scale(0.96)', pointerEvents: open ? 'auto' : 'none',
+      }}>
+        {options.map(o => {
+          const sel = o.value === value
+          return (
+            <button key={o.value} type="button" role="option" aria-selected={sel}
+              onClick={() => { onChange(o.value); setOpen(false) }}
+              style={{
+                display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                padding: '10px 14px', border: 'none', cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, textAlign: 'right',
+                background: sel ? 'rgba(199,166,106,0.14)' : 'transparent', color: sel ? GOLD_D : TEXT_SEC, fontWeight: sel ? 800 : 500,
+              }}>
+              {o.label}
+              {sel && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.6"><path d="M20 6L9 17l-5-5"/></svg>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Main Page ─────────────────────────────────────────────────
+export default function ManufacturersPage() {
+  const [search,   setSearch]   = useState('')
+  const [category, setCategory] = useState('همه')
+  const [status,   setStatus]   = useState('همه')
+  const [sort,     setSort]     = useState<SortKey>('experience')
+  const [view,     setView]     = useState<'grid'|'list'>('grid')
+
+  /* نزدیک من */
+  const [userLoc,   setUserLoc]   = useState<{ lat: number; lon: number } | null>(null)
+  const [nearMe,    setNearMe]    = useState(false)
+  const [locLoading, setLocLoading] = useState(false)
+  const [locError,  setLocError]  = useState(false)
+
+  const getLocation = () => {
+    if (nearMe) { setNearMe(false); return }
+    if (!navigator.geolocation) { setLocError(true); return }
+    setLocLoading(true); setLocError(false)
+    navigator.geolocation.getCurrentPosition(
+      pos => { setUserLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setNearMe(true); setLocLoading(false) },
+      () => { setLocLoading(false); setLocError(true) },
+      { timeout: 8000, enableHighAccuracy: false },
+    )
+  }
+
+  const matchCat = (m: MockManufacturer, term: string) =>
+    m.specialties.some(sp => sp.includes(term) || term.includes(sp)) || m.description.includes(term)
+  const distOf = (m: MockManufacturer) => {
+    const c = CITY_COORDS[m.city.split('،')[0]!.trim()]
+    return userLoc && c ? calcDistance(userLoc.lat, userLoc.lon, c[0], c[1]) : undefined
+  }
+
+  const filtered = useMemo(() => {
+    const list = MANUFACTURERS
+      .filter(m => !search.trim() || m.name.includes(search.trim()) || m.city.includes(search.trim()) || m.specialties.some(sp => sp.includes(search.trim())))
+      .filter(m => category === 'همه' || matchCat(m, category))
+      .filter(m => status === 'همه' || (status === 'verified' && m.verified) || (status === 'elite' && m.elite))
+    return [...list].sort((a, b) => {
+      if (nearMe && userLoc) { const da = distOf(a) ?? 9e9, db = distOf(b) ?? 9e9; if (da !== db) return da - db }
+      if (sort === 'products')   return b.productCount - a.productCount
+      if (sort === 'newest')     return b.sinceYear - a.sinceYear
+      return a.sinceYear - b.sinceYear   // experience = باسابقه‌ترین (قدیمی‌تر اول)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, category, status, sort, nearMe, userLoc])
+
+  return (
+    <>
+      <style>{`
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        @keyframes softBlink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}25%{transform:translate(-28px,-20px) scale(1.05);}55%{transform:translate(-10px,26px) scale(0.96);}80%{transform:translate(20px,-12px) scale(1.02);}}
+        @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}20%{transform:translate(32px,20px) scale(1.04);}55%{transform:translate(44px,-26px) scale(0.92);}75%{transform:translate(10px,30px) scale(1.06);}}
+        @keyframes blob3{0%,100%{transform:translate(0,0);}50%{transform:translate(-26px,-36px) scale(1.10);}}
+        @keyframes rackCycle{0%{opacity:0;}6%{opacity:.42;}32%{opacity:.42;}40%{opacity:0;}100%{opacity:0;}}
+        @keyframes streakA{0%{opacity:0;transform:translateX(-130%) skewX(-18deg);}15%{opacity:1;}85%{opacity:1;}100%{opacity:0;transform:translateX(230%) skewX(-18deg);}}
+        @keyframes streakB{0%{opacity:0;transform:translateX(-120%) skewX(-14deg);}15%{opacity:.5;}85%{opacity:.5;}100%{opacity:0;transform:translateX(250%) skewX(-14deg);}}
+        @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
+        @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+        * { box-sizing: border-box; }
+        .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; grid-auto-rows: 1fr; }
+        @media(max-width:1000px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
+        @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
+        .search-inp:focus { border-color: rgba(199,166,106,0.7) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; outline: none; }
+        @media(max-width:640px){
+          .sel-list-img { width: clamp(96px,28vw,128px) !important; }
+          .sel-list-actions { display: none !important; }
+          .sel-list-brands { display: none !important; }
+          .sel-list-desc { display: none !important; }
+          .sel-list-body { padding: 12px 14px !important; gap: 7px !important; }
+        }
+        @media(max-width:640px){
+          .dd-label { display: none !important; }
+          .dd-btn { min-width: 0 !important; padding: 9px 11px !important; }
+          .sel-hide-mob { display: none !important; }
+        }
+      `}</style>
+
+      <div style={{ background: '#F7F7F5', minHeight: '100vh', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
+
+        {/* ─────── HERO — coaches-style animated (light) ─────── */}
+        <section style={{ position: 'relative', minHeight: 'clamp(150px,20vw,210px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+          <MfrPosterBg />
+
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', right: '-8%', top: '6%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.38) 0%, rgba(199,166,106,0.12) 45%, transparent 70%)', filter: 'blur(58px)', animation: 'blob1 15s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', left: '-6%', top: '18%', width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0.06) 50%, transparent 72%)', filter: 'blur(54px)', animation: 'blob2 19s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', left: '38%', top: '48%', width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.22) 0%, transparent 68%)', filter: 'blur(42px)', animation: 'blob3 12s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', left: '4%', bottom: '-6%', width: 160, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.13) 0%, transparent 70%)', filter: 'blur(46px)' }} />
+          </div>
+
+          {([
+            { left: '3%',  size: 224, rot: 0,   delay: '0s'  },
+            { left: '25%', size: 198, rot: 140, delay: '6s'  },
+            { left: '45%', size: 168, rot: 55,  delay: '12s' },
+          ] as { left: string; size: number; rot: number; delay: string }[]).map((r, i) => (
+            <svg key={i} style={{ position: 'absolute', left: r.left, top: '50%', width: r.size, height: r.size * 0.93, transform: `translateY(-50%) rotate(${r.rot}deg)`, pointerEvents: 'none', animation: `rackCycle 18s ${r.delay} ease-in-out infinite`, transformOrigin: 'center' }} viewBox="0 0 760 560">
+              {RACK.map(([cx, cy], j) => <circle key={j} cx={cx} cy={cy} r={44} fill="none" stroke={RACK_C[j]} strokeWidth="1.5" />)}
+              <line x1="0" y1="480" x2="700" y2="10" stroke={GOLD} strokeWidth="1" strokeDasharray="14 7" opacity="0.55" />
+            </svg>
+          ))}
+
+          <div style={{ position: 'absolute', top: '32%', left: 0, width: '50%', height: '1.5px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.42),transparent)', transform: 'rotate(-5deg)', animation: 'streakA 12s 1s ease-in-out infinite', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '56%', left: 0, width: '40%', height: '1px', background: 'linear-gradient(to right,transparent,rgba(154,110,56,0.28),transparent)', transform: 'rotate(-3deg)', animation: 'streakB 16s 5s ease-in-out infinite', pointerEvents: 'none' }} />
+
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: `linear-gradient(to top, ${BG}, transparent)`, pointerEvents: 'none' }} />
+
+          <div style={{ position: 'relative', zIndex: 5, maxWidth: 1160, width: '100%', margin: '0 auto', padding: '0 clamp(20px,4vw,40px)' }}>
+            <div style={{ textAlign: 'left', marginBottom: 14 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, fontSize: 8.9, fontWeight: 800, borderRadius: 24, padding: '4px 11px', letterSpacing: '0.12em', animation: 'fadeUp .5s .05s ease both, softBlink 2.6s .7s ease-in-out infinite' }}>
+                MANUFACTURERS . BILLIARD HUB
+              </div>
+            </div>
+
+            <div style={{ overflow: 'hidden', paddingBottom: '0.14em' }}>
+              <h1 style={{ fontSize: 'clamp(30px,4.6vw,52px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.045em', margin: 0, background: GOLD_G, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', animation: 'lineReveal .72s .1s cubic-bezier(.4,0,.2,1) both' }}>
+                تولیدکنندگان تجهیزات بیلیارد
+              </h1>
+            </div>
+
+            <div style={{ transformOrigin: 'right', animation: 'scaleInX .5s .36s ease both' }}>
+              <div style={{ width: 66, height: 2.5, marginTop: 9, borderRadius: 2, background: GOLD_G, boxShadow: '0 0 10px rgba(154,110,56,0.35)' }} />
+            </div>
+
+            <p style={{ fontSize: 'clamp(12.5px,1.4vw,15px)', color: TEXT_SEC, marginTop: 10, maxWidth: 460, animation: 'lineReveal .5s .46s ease both' }}>
+              کارخانه‌ها و کارگاه‌های تخصصیِ ساختِ میز، چوب، پارچه و تجهیزات بیلیارد در ایران
+            </p>
+          </div>
+        </section>
+
+        {/* ─────── BODY ─────── */}
+        <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 clamp(16px,3vw,32px) 64px' }}>
+
+          {/* ─── STICKY: search + filter ─── */}
+          <div style={{ position: 'sticky', top: 72, zIndex: 50, background: BG, paddingTop: 14, paddingBottom: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+            <div style={{ position: 'relative' }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.2" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 2 }}>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                className="search-inp" type="text" placeholder="جستجوی تولیدکننده، شهر یا تخصص..."
+                value={search} onChange={e => setSearch(e.target.value)}
+                style={{ width: '100%', padding: '13px 48px 13px 16px', borderRadius: 14, fontSize: 14.5,
+                  background: 'rgba(255,255,255,0.86)', border: '1.5px solid rgba(28,28,26,0.1)',
+                  backdropFilter: 'blur(18px) saturate(190%)', WebkitBackdropFilter: 'blur(18px) saturate(190%)',
+                  boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 6px 20px rgba(28,28,26,0.07)',
+                  color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', transition: 'border-color 0.2s, box-shadow 0.2s', direction: 'rtl' }}
+              />
+            </div>
+
+            <div className="sel-filterbar" style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 16, boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 26px rgba(28,28,26,0.08)', padding: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+
+            <span className="sel-hide-mob" style={{ display: 'contents' }}>
+              <Dropdown label="تخصص:" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} minWidth={150} />
+            </span>
+            <span className="sel-hide-mob" style={{ display: 'contents' }}>
+              <Dropdown label="نمایش بر اساس:" options={SORT_OPTIONS} value={sort} onChange={v => setSort(v as SortKey)} minWidth={160} />
+            </span>
+            <Dropdown label="وضعیت:" options={STATUS_OPTIONS} value={status} onChange={setStatus} minWidth={140} />
+
+            <button onClick={getLocation} title={locError ? 'دسترسی به موقعیت رد شد' : 'نزدیک‌ترین تولیدکنندگان'} style={{
+              display: 'flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 12.5, fontWeight: 700,
+              border: nearMe ? `1.5px solid ${GOLD}` : locError ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(28,28,26,0.1)',
+              background: nearMe ? 'rgba(199,166,106,0.14)' : 'rgba(255,255,255,0.7)', color: nearMe ? GOLD_D : locError ? '#ef4444' : TEXT_SEC, transition: 'all .2s',
+            }}>
+              {locLoading
+                ? <span style={{ width: 14, height: 14, border: '2px solid rgba(199,166,106,0.3)', borderTop: `2px solid ${GOLD}`, borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
+                : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>}
+              نزدیک من
+            </button>
+
+            <div style={{ display: 'flex', gap: 4 }}>
+              {([['grid', <svg key="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>], ['list', <svg key="l" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>]] as const).map(([v, icon]) => (
+                <button key={v} onClick={() => setView(v as 'grid'|'list')} aria-label={v === 'grid' ? 'نمای شبکه‌ای' : 'نمای لیستی'} style={{
+                  width: 36, height: 36, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
+                  border: `1px solid ${view === v ? 'rgba(199,166,106,0.4)' : 'rgba(28,28,26,0.1)'}`,
+                  background: view === v ? 'rgba(199,166,106,0.12)' : '#fff', color: view === v ? GOLD_D : TEXT_MUT,
+                }}>{icon}</button>
+              ))}
+            </div>
+            </div>
+          </div>
+
+          {/* ─── GRID / LIST ─── */}
+          {filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '64px 0', color: TEXT_MUT }}>
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ margin: '0 auto 16px', display: 'block', opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <p style={{ fontSize: 17, fontWeight: 700, color: TEXT_SEC }}>تولیدکننده‌ای یافت نشد</p>
+              <p style={{ fontSize: 14 }}>فیلترها را تغییر دهید یا جستجو را پاک کنید</p>
+            </div>
+          ) : view === 'grid' ? (
+            <div className="sel-grid" style={{ marginBottom: 56 }}>
+              {filtered.map((m, i) => (
+                <div key={m.id} style={{ animation: `fadeUp ${0.3 + i * 0.05}s ease both` }}>
+                  <MfrCard mfr={m} view="grid" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 56 }}>
+              {filtered.map((m, i) => (
+                <div key={m.id} style={{ animation: `fadeUp ${0.28 + i * 0.04}s ease both` }}>
+                  <MfrCard mfr={m} view="list" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )
 }
