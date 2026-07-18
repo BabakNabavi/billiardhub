@@ -13,7 +13,8 @@ export type SellerStatus = 'pending' | 'approved' | 'rejected'
 
 export interface SellerProfile {
   slug: string                 // = seller id in the URL, /sellers/<slug>
-  ownerPhone: string           // whoever holds the `seller` role
+  ownerId: string              // کلیدِ مالکیت = user.id (همیشه موجود). مبنای «فروشگاهِ من».
+  ownerPhone: string           // شماره‌ی مالک (اختیاری در حساب — نباید مبنای مالکیت باشد)
   ownerName: string            // نام و نام‌خانوادگیِ مالک (از احراز هویت) — روی فرم ثبت محصول قفل می‌شود
 
   /* ── هدر ── */
@@ -59,9 +60,9 @@ export interface SellerProfile {
 export const GALLERY_MAX = 12
 
 /* پیش‌فرض‌ها = همان چیزی که قبل از ساخت پنل روی /sellers/1 هاردکد بود */
-export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile {
+export function emptySellerProfile(slug: string, ownerPhone = '', ownerId = ''): SellerProfile {
   return {
-    slug, ownerPhone,
+    slug, ownerId, ownerPhone,
     ownerName: '',
     logo: '',
     banners: [],
@@ -125,9 +126,23 @@ export function listApprovedSellers(): SellerProfile[] {
   return listSellerProfiles().filter(p => p.status === 'approved')
 }
 
-export function findSellerByOwner(ownerPhone: string): SellerProfile | null {
-  if (!ownerPhone) return null
-  return listSellerProfiles().find(p => p.ownerPhone === ownerPhone) ?? null
+/* «فروشگاهِ من» را پیدا کن. مبنا user.id است (همیشه موجود)؛ ولی شماره هم چک می‌شود
+   تا رکوردهای قدیمی که فقط با ownerPhone ذخیره شده بودند هم پیدا شوند. */
+export function findSellerByOwner(
+  owner: string | { id?: string; phone?: string } | null | undefined,
+): SellerProfile | null {
+  if (!owner) return null
+  const keys = (typeof owner === 'string' ? [owner] : [owner.id, owner.phone]).filter(Boolean) as string[]
+  if (!keys.length) return null
+  return listSellerProfiles().find(p =>
+    (p.ownerId && keys.includes(p.ownerId)) || (p.ownerPhone && keys.includes(p.ownerPhone)),
+  ) ?? null
+}
+
+/* رکوردِ قدیمیِ بی‌صاحب (پیش از افزودنِ ownerId ذخیره شده و بدونِ شماره) —
+   امن برای تصاحب توسط کاربرِ فعلی؛ فروشگاه‌های جدید همیشه ownerId دارند. */
+export function findUnclaimedSeller(): SellerProfile | null {
+  return listSellerProfiles().find(p => !p.ownerId && !p.ownerPhone) ?? null
 }
 
 /* اسلاگ‌های ۱ تا ۶ برای فروشگاه‌های نمونه (lib/sellers-data) رزرو است. */

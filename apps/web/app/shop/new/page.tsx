@@ -276,7 +276,7 @@ export default function NewProductPage() {
     const u = user as any
     const authName = [u.firstName || '', u.lastName || ''].filter(Boolean).join(' ') || u.name || ''
     /* فروشگاهِ ثبت‌شده‌ی همین فروشنده — منبعِ نامِ فروشگاه/شهر/آدرس/تماس روی فرم محصول */
-    const store = findSellerByOwner(u.phone ?? '')
+    const store = findSellerByOwner({ id: u.id, phone: u.phone })
 
     // نام فروشگاه: از پروفایلِ فروشگاه، وگرنه از حساب. قفل — روی محصول قابل تغییر نیست.
     const autoName = store?.title || u.shopName || authName
