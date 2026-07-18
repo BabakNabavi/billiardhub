@@ -29,7 +29,8 @@ export interface CoachProfile {
   verified: boolean                     // blue check (admin grants — only with certificate)
   freeCoach: boolean                    // «مربی آزاد» (no certificate)
   submittedAt: string
-  ownerPhone: string
+  ownerId: string                       // کلیدِ مالکیت = user.id (همیشه موجود؛ phone اختیاری است)
+  ownerPhone: string                    // شماره‌ی مالک — فقط fallbackِ رکوردهای قدیمی
 }
 
 /* Coaching grades — ordered from the first (entry) certificate upward. */
@@ -58,8 +59,11 @@ export function getCoachProfiles(): Record<string, CoachProfile> {
   if (typeof window === 'undefined') return {}
   try {
     const all = JSON.parse(localStorage.getItem(KEY) || '{}') as Record<string, CoachProfile>
-    // پروفایل‌های قدیمی province ندارند ⇒ از روی شهر بک‌فیل می‌شود
-    for (const p of Object.values(all)) if (!p.province && p.city) p.province = provinceOfCity(p.city)
+    // پروفایل‌های قدیمی province/ownerId ندارند ⇒ بک‌فیل می‌شوند
+    for (const p of Object.values(all)) {
+      if (!p.province && p.city) p.province = provinceOfCity(p.city)
+      if (p.ownerId == null) p.ownerId = ''
+    }
     return all
   } catch { return {} }
 }
@@ -75,10 +79,11 @@ export function listCoachProfiles(): CoachProfile[] {
 export function saveCoachProfile(p: CoachProfile) {
   const all = getCoachProfiles()
   // one profile per owner — drop older entries by the same owner under a different slug
-  if (p.ownerPhone) {
-    for (const k of Object.keys(all)) {
-      if (k !== p.slug && all[k]?.ownerPhone === p.ownerPhone) delete all[k]
-    }
+  for (const k of Object.keys(all)) {
+    if (k === p.slug) continue
+    const o = all[k]
+    if (!o) continue
+    if ((p.ownerId && o.ownerId === p.ownerId) || (p.ownerPhone && o.ownerPhone === p.ownerPhone)) delete all[k]
   }
   all[p.slug] = p
   try {
@@ -96,6 +101,24 @@ export function updateCoachProfile(slug: string, patch: Partial<CoachProfile>) {
   if (!cur) return
   all[slug] = { ...cur, ...patch }
   localStorage.setItem(KEY, JSON.stringify(all))
+}
+
+/* «پروفایلِ من» — مبنا user.id (همیشه موجود)؛ شماره fallbackِ رکوردهای قدیمی است.
+   بدون این، پروفایلی که با شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد. */
+export function findCoachByOwner(
+  owner: string | { id?: string; phone?: string } | null | undefined,
+): CoachProfile | null {
+  if (!owner) return null
+  const keys = (typeof owner === 'string' ? [owner] : [owner.id, owner.phone]).filter(Boolean) as string[]
+  if (!keys.length) return null
+  return listCoachProfiles().find(p =>
+    (p.ownerId && keys.includes(p.ownerId)) || (p.ownerPhone && keys.includes(p.ownerPhone)),
+  ) ?? null
+}
+
+/* رکوردِ قدیمیِ بی‌صاحب (بدونِ ownerId و ownerPhone) — امن برای تصاحبِ کاربرِ فعلی. */
+export function findUnclaimedCoach(): CoachProfile | null {
+  return listCoachProfiles().find(p => !p.ownerId && !p.ownerPhone) ?? null
 }
 
 /* Highest selected grade → the badge shown on the profile («درجه مربیگری»). */

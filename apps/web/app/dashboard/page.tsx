@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/api';
-import { getCoachProfiles } from '../../lib/coach-store';
-import { getRefereeProfiles } from '../../lib/referee-store';
+import { findCoachByOwner } from '../../lib/coach-store';
+import { findRefereeByOwner } from '../../lib/referee-store';
 import {
   Calendar, Trophy, Bell, Settings,
   Award, Clock, MapPin,
@@ -137,14 +137,14 @@ export default function DashboardPage() {
   }, [user]);
 
   useEffect(() => {
-    if (!user?.phone) { setHasCoachProfile(false); return; }
-    setHasCoachProfile(Object.values(getCoachProfiles()).some(p => p.ownerPhone === user.phone));
-  }, [user?.phone]);
+    if (!user) { setHasCoachProfile(false); return; }
+    setHasCoachProfile(!!findCoachByOwner(user));
+  }, [user?.id, user?.phone]);
 
   useEffect(() => {
-    if (!user?.phone) { setHasRefereeProfile(false); return; }
-    setHasRefereeProfile(Object.values(getRefereeProfiles()).some(p => p.ownerPhone === user.phone));
-  }, [user?.phone]);
+    if (!user) { setHasRefereeProfile(false); return; }
+    setHasRefereeProfile(!!findRefereeByOwner(user));
+  }, [user?.id, user?.phone]);
 
   useEffect(() => {
     const fn = () => {

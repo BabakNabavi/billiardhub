@@ -30,7 +30,8 @@ export interface RefereeProfile {
   status: 'pending' | 'approved' | 'rejected'
   verified: boolean                      // blue check (admin grants)
   submittedAt: string
-  ownerPhone: string
+  ownerId: string                        // کلیدِ مالکیت = user.id (همیشه موجود؛ phone اختیاری است)
+  ownerPhone: string                     // شماره‌ی مالک — فقط fallbackِ رکوردهای قدیمی
 }
 
 /* Refereeing grades — ordered from the first (entry) certificate upward.
@@ -58,7 +59,10 @@ export function getRefereeProfiles(): Record<string, RefereeProfile> {
   if (typeof window === 'undefined') return {}
   try {
     const all = JSON.parse(localStorage.getItem(KEY) || '{}') as Record<string, RefereeProfile>
-    for (const p of Object.values(all)) if (!p.province && p.city) p.province = provinceOfCity(p.city)
+    for (const p of Object.values(all)) {
+      if (!p.province && p.city) p.province = provinceOfCity(p.city)
+      if (p.ownerId == null) p.ownerId = ''
+    }
     return all
   } catch { return {} }
 }
@@ -74,10 +78,11 @@ export function listRefereeProfiles(): RefereeProfile[] {
 export function saveRefereeProfile(p: RefereeProfile) {
   const all = getRefereeProfiles()
   // one profile per owner — drop older entries by the same owner under a different slug
-  if (p.ownerPhone) {
-    for (const k of Object.keys(all)) {
-      if (k !== p.slug && all[k]?.ownerPhone === p.ownerPhone) delete all[k]
-    }
+  for (const k of Object.keys(all)) {
+    if (k === p.slug) continue
+    const o = all[k]
+    if (!o) continue
+    if ((p.ownerId && o.ownerId === p.ownerId) || (p.ownerPhone && o.ownerPhone === p.ownerPhone)) delete all[k]
   }
   all[p.slug] = p
   try {
@@ -95,6 +100,24 @@ export function updateRefereeProfile(slug: string, patch: Partial<RefereeProfile
   if (!cur) return
   all[slug] = { ...cur, ...patch }
   localStorage.setItem(KEY, JSON.stringify(all))
+}
+
+/* «پروفایلِ من» — مبنا user.id (همیشه موجود)؛ شماره fallbackِ رکوردهای قدیمی است.
+   بدون این، پروفایلی که با شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد. */
+export function findRefereeByOwner(
+  owner: string | { id?: string; phone?: string } | null | undefined,
+): RefereeProfile | null {
+  if (!owner) return null
+  const keys = (typeof owner === 'string' ? [owner] : [owner.id, owner.phone]).filter(Boolean) as string[]
+  if (!keys.length) return null
+  return listRefereeProfiles().find(p =>
+    (p.ownerId && keys.includes(p.ownerId)) || (p.ownerPhone && keys.includes(p.ownerPhone)),
+  ) ?? null
+}
+
+/* رکوردِ قدیمیِ بی‌صاحب (بدونِ ownerId و ownerPhone) — امن برای تصاحبِ کاربرِ فعلی. */
+export function findUnclaimedReferee(): RefereeProfile | null {
+  return listRefereeProfiles().find(p => !p.ownerId && !p.ownerPhone) ?? null
 }
 
 /* Highest selected grade → the badge shown on the profile («درجه داوری»). */
