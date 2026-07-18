@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '../../store/cart.store'
+import ProvinceCitySelect from '../../components/ProvinceCitySelect'
 
 const GOLD = '#C7A66A'
 const GOLD_DARK = '#A07840'
@@ -14,7 +15,7 @@ function fmt(n: number) { return Number(n).toLocaleString('fa-IR') }
 
 type Step = 'address' | 'payment' | 'confirm'
 
-const PROVINCES = ['تهران','اصفهان','مشهد','شیراز','تبریز','اهواز','کرج','قم','رشت','کرمانشاه','زاهدان','ارومیه','بندرعباس','همدان','سایر']
+// استان/شهر از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 function StepIndicator({ current }: { current: Step }) {
   const steps: { key: Step; label: string; icon: string }[] = [
@@ -210,19 +211,12 @@ export default function CheckoutPage() {
                         </div>
                       ))}
 
-                      <div>
-                        <label style={labelStyle}>استان</label>
-                        <select value={form.province} onChange={e => set('province', e.target.value)} style={{ ...inputStyle(errors.province), appearance: 'none' }}>
-                          <option value="">انتخاب استان</option>
-                          {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                        {errors.province && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.province}</p>}
-                      </div>
-
-                      <div>
-                        <label style={labelStyle}>شهر</label>
-                        <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="شهر" style={inputStyle(errors.city)} />
-                        {errors.city && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.city}</p>}
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <ProvinceCitySelect
+                          value={{ province: form.province, city: form.city }}
+                          onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                          required provinceError={errors.province} cityError={errors.city}
+                        />
                       </div>
 
                       <div style={{ gridColumn: 'span 2' }}>

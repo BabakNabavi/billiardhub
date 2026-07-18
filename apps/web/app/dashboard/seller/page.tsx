@@ -12,6 +12,7 @@ import {
   type SellerProfile, GALLERY_MAX,
   emptySellerProfile, findSellerByOwner, getSellerProfile, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
@@ -217,11 +218,12 @@ export default function SellerDashboard() {
                   onChange={e => set('brand', e.target.value)} placeholder="پروکیو"/>
                 <p className={HINT}>در فوتر فروشگاه کنار نشان استفاده می‌شود.</p>
               </div>
-              <div>
-                <label className={LABEL} htmlFor="f-city">شهر</label>
-                <input id="f-city" className={INPUT} value={form.city}
-                  onChange={e => set('city', e.target.value)} placeholder="تهران"/>
-                <p className={HINT}>کنار آیکون لوکیشن، زیر نام فروشگاه.</p>
+              <div className="sm:col-span-2">
+                <ProvinceCitySelect
+                  value={{ province: form.province, city: form.city }}
+                  onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                />
+                <p className={HINT}>شهر کنار آیکون لوکیشن، زیر نام فروشگاه نمایش داده می‌شود.</p>
               </div>
               <div>
                 <label className={LABEL} htmlFor="f-phone">شماره تماس</label>

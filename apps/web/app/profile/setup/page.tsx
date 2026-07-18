@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 
 // ─── Types ────────────────────────────────────────────────────
 type RoleValue =
@@ -257,12 +258,24 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
       </div>
 
       {role.profileFields.map(f => (
-        <Field
-          key={f.key}
-          field={f}
-          value={data[f.key] ?? ''}
-          onChange={v => setData(d => ({ ...d, [f.key]: v }))}
-        />
+        f.key === 'location' ? (
+          /* شهر (و استان) — همه‌جا از ProvinceCitySelect؛ شهر در data.location می‌ماند تا ذخیره‌ی قبلی نشکند */
+          <div key={f.key} style={{ marginBottom: 14 }}>
+            <ProvinceCitySelect
+              cityLabel={f.label.includes('شهر') ? f.label : 'شهر'}
+              required={f.required}
+              value={{ province: data.province ?? '', city: data.location ?? '' }}
+              onChange={v => setData(d => ({ ...d, province: v.province, location: v.city }))}
+            />
+          </div>
+        ) : (
+          <Field
+            key={f.key}
+            field={f}
+            value={data[f.key] ?? ''}
+            onChange={v => setData(d => ({ ...d, [f.key]: v }))}
+          />
+        )
       ))}
 
       <button

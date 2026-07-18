@@ -5,6 +5,7 @@
    Every field here maps to something the storefront actually renders — see
    SELLER_FIELD_MAP below for the exact correspondence.
    ───────────────────────────────────────────────────────────── */
+import { provinceOfCity } from './iran-geo'
 
 export interface SellerShot { id: string; url: string }
 
@@ -18,6 +19,7 @@ export interface SellerProfile {
   /* ── هدر ── */
   logo: string                 // data URL; خالی ⇒ آیکون پیش‌فرض فروشگاه
   title: string                // نام فروشگاه — تیتر اصلی
+  province: string             // استان (کنار شهر)
   city: string                 // شهر — کنار آیکون لوکیشن
   desc: string                 // «درباره‌ی فروشگاه» — هدر و فوتر هر دو از همین می‌خوانند
   contactPhone: string         // شماره‌ی تماس کنار آیکون تلفن
@@ -56,6 +58,7 @@ export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile
     ownerName: '',
     logo: '',
     title: '',
+    province: '',
     city: '',
     desc: '',
     contactPhone: '',
@@ -78,10 +81,12 @@ export function emptySellerProfile(slug: string, ownerPhone = ''): SellerProfile
 
 const KEY = 'bh_seller_profiles'
 
-/* فیلدهای تازه (ownerName/certificate/status/...) در پروفایل‌های قدیمی نیستند؛
-   اینجا با پیش‌فرض پر می‌شوند تا هیچ‌جای کد undefined نبیند. */
+/* فیلدهای تازه (ownerName/certificate/status/province/...) در پروفایل‌های قدیمی نیستند؛
+   اینجا با پیش‌فرض پر می‌شوند تا هیچ‌جای کد undefined نبیند. استانِ خالی از روی شهر بک‌فیل می‌شود. */
 function normalize(raw: Partial<SellerProfile> & { slug: string }): SellerProfile {
-  return { ...emptySellerProfile(raw.slug, raw.ownerPhone ?? ''), ...raw }
+  const p = { ...emptySellerProfile(raw.slug, raw.ownerPhone ?? ''), ...raw }
+  if (!p.province && p.city) p.province = provinceOfCity(p.city)
+  return p
 }
 
 export function getSellerProfiles(): Record<string, SellerProfile> {

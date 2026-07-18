@@ -3,6 +3,7 @@
    Shared by: /dashboard/coach (form), /admin/coaches (review),
    and /coaches/[id] (public profile, by slug).
    ───────────────────────────────────────────────────────────── */
+import { provinceOfCity } from './iran-geo'
 
 export interface CoachGrade  { key: string; label: string; year: string }
 export interface CoachMedia  { id: string; url: string; caption: string }
@@ -12,6 +13,7 @@ export interface CoachProfile {
   slug: string
   firstNameFa: string; lastNameFa: string
   firstNameEn: string; lastNameEn: string
+  province: string
   city: string
   disciplines: string[]                 // discipline keys (snooker/pocket/highball)
   shortBio: string
@@ -54,7 +56,12 @@ const KEY = 'bh_coach_profiles'
 
 export function getCoachProfiles(): Record<string, CoachProfile> {
   if (typeof window === 'undefined') return {}
-  try { return JSON.parse(localStorage.getItem(KEY) || '{}') } catch { return {} }
+  try {
+    const all = JSON.parse(localStorage.getItem(KEY) || '{}') as Record<string, CoachProfile>
+    // پروفایل‌های قدیمی province ندارند ⇒ از روی شهر بک‌فیل می‌شود
+    for (const p of Object.values(all)) if (!p.province && p.city) p.province = provinceOfCity(p.city)
+    return all
+  } catch { return {} }
 }
 
 export function getCoachProfile(slug: string): CoachProfile | null {

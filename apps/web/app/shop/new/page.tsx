@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -34,7 +35,7 @@ const CATEGORIES = [
   { id: 'other',     label: 'سایر'       },
 ]
 
-const CITIES = ['تهران', 'اصفهان', 'مشهد', 'شیراز', 'تبریز', 'سایر']
+// شهر/استان از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 // ── Spec field definitions ─────────────────────────────────────
 interface SpecFieldDef {
@@ -256,7 +257,7 @@ export default function NewProductPage() {
     name: '', category: '', price: '', oldPrice: '',
     description: '', brand: '', condition: 'new',
     shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
-    city: '', address: '',
+    province: '', city: '', address: '',
   })
   const [images,   setImages]   = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
@@ -285,10 +286,11 @@ export default function NewProductPage() {
     const autoOwner = store?.ownerName || authName || u.ownerName || ''
     if (autoOwner) { setForm(f => ({ ...f, ownerName: autoOwner })); setOwnerNameLocked(true) }
 
-    // شهر/آدرس/تماس: از همان فروشگاه پیش‌پر می‌شوند (قابل ویرایش)
+    // استان/شهر/آدرس/تماس: از همان فروشگاه پیش‌پر می‌شوند (قابل ویرایش)
     if (store) {
       setForm(f => ({
         ...f,
+        province:       store.province || f.province,
         city:           store.city || f.city,
         address:        store.address || f.address,
         sellerPhone:    store.contactPhone || f.sellerPhone,
@@ -344,6 +346,7 @@ export default function NewProductPage() {
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
     else if (!/^(\+98|0)9\d{9}$/.test(form.sellerPhone.trim()))
       e.sellerPhone = 'شماره موبایل معتبر وارد کنید (09xxxxxxxxx)'
+    if (!form.province)           e.province    = 'استان را انتخاب کنید'
     if (!form.city)               e.city        = 'شهر را انتخاب کنید'
     return e
   }
@@ -382,6 +385,7 @@ export default function NewProductPage() {
       ownerName:      form.ownerName.trim(),
       sellerPhone:    form.sellerPhone.trim(),
       sellerWhatsapp: (form.sellerWhatsapp.trim() || form.sellerPhone.trim()).replace(/^0/, '98'),
+      sellerProvince: form.province,
       sellerCity:     form.city,
       address:        form.address.trim(),
     }
@@ -736,14 +740,11 @@ export default function NewProductPage() {
                       </div>
                     </div>
 
-                    <div>
-                      <Label required>شهر</Label>
-                      <select className="nf" value={form.city} onChange={e => set('city', e.target.value)} style={sel(errors.city)}>
-                        <option value="">انتخاب شهر...</option>
-                        {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <ErrMsg msg={errors.city} />
-                    </div>
+                    <ProvinceCitySelect
+                      value={{ province: form.province, city: form.city }}
+                      onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                      required provinceError={errors.province} cityError={errors.city}
+                    />
 
                     <div>
                       <Label optional>آدرس</Label>

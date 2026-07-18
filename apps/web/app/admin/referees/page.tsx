@@ -103,7 +103,7 @@ export default function AdminRefereesPage() {
                         {c.firstNameEn} {c.lastNameEn} · /referees/{c.slug}
                       </div>
                       <div style={{ fontSize: 12, color: TEXT_M, marginTop: 3 }}>
-                        {c.city} · {c.disciplines.map(disciplineLabel).join('، ') || '—'}{b ? ` · ${b.label}` : ''}
+                        {[c.province, c.city].filter(Boolean).join('، ') || '—'} · {c.disciplines.map(disciplineLabel).join('، ') || '—'}{b ? ` · ${b.label}` : ''}
                       </div>
                     </div>
                     <span style={{ ...btn(st.bg, st.color, `1px solid ${st.color}30`), cursor: 'default' }}>{st.label}</span>
