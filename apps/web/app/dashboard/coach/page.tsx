@@ -5,7 +5,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import {
-  GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile,
+  GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile, findCoachByOwner, findUnclaimedCoach,
   type CoachProfile, type CoachGrade, type CoachMedia, type CoachVideo,
 } from '../../../lib/coach-store'
 import {
@@ -115,10 +115,17 @@ export default function CoachDashboardPage() {
   const [storyBusy, setStoryBusy]   = useState(false)
   const storyInput = useRef<HTMLInputElement>(null)
 
-  /* prefill from the logged-in user; load existing submission if any */
+  /* prefill from the logged-in user; load existing submission if any.
+     مالکیت بر اساسِ user.id است، نه شماره‌ی موبایلِ اختیاری — وگرنه پروفایلی که با
+     شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد و فرم خالی باز می‌شد. رکوردِ قدیمیِ
+     بی‌صاحب را همین کاربر تصاحب می‌کند تا داده‌اش برگردد. */
   useEffect(() => {
     if (!_hydrated) return
-    const mine = user?.phone ? Object.values(getCoachProfiles()).find(p => p.ownerPhone === user.phone) : null
+    let mine = findCoachByOwner(user)
+    if (!mine && user) {
+      const orphan = findUnclaimedCoach()
+      if (orphan) { mine = { ...orphan, ownerId: user.id, ownerPhone: user.phone ?? orphan.ownerPhone }; saveCoachProfile(mine) }
+    }
     if (mine) {
       setForm({
         slug: mine.slug, firstNameFa: user?.firstName || mine.firstNameFa, lastNameFa: user?.lastName || mine.lastNameFa,
@@ -168,7 +175,9 @@ export default function CoachDashboardPage() {
   }
   const slugTaken = () => {
     const p = getCoachProfiles()[form.slug]
-    return !!p && p.ownerPhone !== user?.phone
+    if (!p) return false
+    const mine = (p.ownerId && p.ownerId === user?.id) || (p.ownerPhone && p.ownerPhone === user?.phone) || (!p.ownerId && !p.ownerPhone)
+    return !mine
   }
 
   const addPhoto = async (file?: File) => { if (file) set('photo', await compressImage(file, 480, 0.82)) }
@@ -264,6 +273,7 @@ export default function CoachDashboardPage() {
       verified: false,
       freeCoach: !form.certificate,
       submittedAt: new Date().toISOString(),
+      ownerId: user?.id || '',
       ownerPhone: user?.phone || '',
     }
     try {
