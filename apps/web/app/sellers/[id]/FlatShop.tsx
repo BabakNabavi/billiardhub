@@ -6,7 +6,8 @@ import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
-import { telPrefix } from '../../../lib/iran-geo'
+import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
+import { getMockSeller } from '../../../lib/sellers-data'
 
 /*
   نسخه‌ی فلت — UX فروشگاه واقعی
@@ -276,12 +277,28 @@ export default function FlatShop() {
   const [profile, setProfile] = useState<SellerProfile | null>(null)
   useEffect(() => { setProfile(getSellerProfile(sellerId)) }, [sellerId])
 
-  /* محصولاتِ همین فروشگاه */
-  const PRODUCTS = useMemo(() => productsForSeller(sellerId), [sellerId])
+  /* محصولاتِ همین فروشگاه؛ فروشگاهِ نمونه که محصولِ اختصاصی ندارد، کاتالوگِ دمو را نشان می‌دهد
+     تا storefront خالی نماند. */
+  const PRODUCTS = useMemo(() => {
+    const own = productsForSeller(sellerId)
+    return own.length ? own : productsForSeller('1')
+  }, [sellerId])
 
   /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلدِ خالی نباید صفحه را خالی کند */
   const store = useMemo(() => {
-    if (!profile) return { ...STORE, id: sellerId }
+    if (!profile) {
+      /* پروفایلِ واقعی نیست ⇒ اگر این id یکی از فروشگاه‌های نمونه است، اطلاعاتِ همان را نشان بده
+         (نه پیش‌فرضِ «بابی»). این باعث می‌شود هر کارت، فروشگاهِ خودش را باز کند. */
+      const m = getMockSeller(sellerId)
+      if (m) return {
+        ...STORE, id: sellerId,
+        title: m.name, brand: m.name,
+        province: provinceOfCity(m.city), city: m.city,
+        desc: m.description, contactPhone: m.phone,
+        brands: m.brands, banners: [m.bannerImage], verified: m.verified,
+      }
+      return { ...STORE, id: sellerId }
+    }
     const pick = (v: string | undefined, fallback: string) => (v && v.trim() ? v : fallback)
     const phones = profile.phones.filter(p => p.trim())
     return {
@@ -347,6 +364,14 @@ export default function FlatShop() {
 
   /* با تغییر دسته/جستجو برگرد به صفحه‌ی ۱ */
   useEffect(() => { setPage(1) }, [cat, query])
+
+  /* تغییر صفحه: نرم به بالای گریدِ محصولات اسکرول کن تا صفحه نپرد
+     (وقتی صفحه‌ی بعدی محصولِ کمتری دارد، ارتفاع گرید کم می‌شود و بدونِ این، صفحه می‌پرد). */
+  const gridRef = useRef<HTMLDivElement>(null)
+  const goToPage = (n: number) => {
+    setPage(n)
+    requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
@@ -458,7 +483,7 @@ export default function FlatShop() {
       </div>
 
       {/* ═══ محصولات فروشگاه ═══ */}
-      <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-6 sm:px-6">
+      <div ref={gridRef} className="mx-auto max-w-[1240px] px-4 pb-16 pt-6 sm:px-6" style={{ scrollMarginTop: 80 }}>
         {/* تیتر + دراپ‌داون دسته‌بندی */}
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -535,7 +560,7 @@ export default function FlatShop() {
             {Array.from({ length: pageCount }, (_, i) => (
               <button
                 key={i}
-                onClick={() => setPage(i + 1)}
+                onClick={() => goToPage(i + 1)}
                 aria-current={safePage === i + 1 ? 'page' : undefined}
                 className={`${LQ} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] ${
                   safePage === i + 1 ? `${LQ_FELT_ON} font-bold` : `${LQ_NEUTRAL} text-[#5B564B]`
@@ -545,7 +570,7 @@ export default function FlatShop() {
               </button>
             ))}
             <button
-              onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+              onClick={() => goToPage(Math.min(pageCount, safePage + 1))}
               disabled={safePage === pageCount}
               aria-label="صفحه‌ی بعد"
               className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}

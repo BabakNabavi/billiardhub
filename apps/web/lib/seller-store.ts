@@ -130,6 +130,19 @@ export function findSellerByOwner(ownerPhone: string): SellerProfile | null {
   return listSellerProfiles().find(p => p.ownerPhone === ownerPhone) ?? null
 }
 
+/* اسلاگ‌های ۱ تا ۶ برای فروشگاه‌های نمونه (lib/sellers-data) رزرو است. */
+const RESERVED_SLUGS = new Set(['1', '2', '3', '4', '5', '6'])
+
+/* یک اسلاگِ یکتا برای یک فروشگاهِ تازه — نه با پروفایل‌های موجود تصادم می‌کند
+   نه با idهای رزروشده‌ی فروشگاه‌های نمونه. بدون این، هر فروشگاهِ جدید اسلاگِ
+   پیش‌فرض («۱») را می‌گرفت و روی فروشگاهِ قبلی می‌نوشت (آن را حذف می‌کرد). */
+export function newSellerSlug(): string {
+  const taken = new Set([...Object.keys(getSellerProfiles()), ...RESERVED_SLUGS])
+  let n = 7
+  while (taken.has(String(n))) n++
+  return String(n)
+}
+
 export function saveSellerProfile(p: SellerProfile) {
   if (typeof window === 'undefined') return
   const all = getSellerProfiles()
