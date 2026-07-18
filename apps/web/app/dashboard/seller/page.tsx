@@ -13,6 +13,7 @@ import {
   emptySellerProfile, findSellerByOwner, getSellerProfile, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import { STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory } from '../../../lib/story-store'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
@@ -120,15 +121,40 @@ export default function SellerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
+  /* استوریِ فروشگاه را با نوار استوریِ صفحه‌ی اول هماهنگ می‌کند (bh_stories).
+     upsert: استوریِ قبلیِ همین فروشگاه پاک و نسخه‌ی فعلی جایگزین می‌شود؛
+     اگر عکس استوری خالی باشد، از نوار حذف می‌شود. */
+  const syncStoryBar = () => {
+    const ownerKey = user?.phone || user?.id || form.title || 'seller'
+    getOwnerStories(ownerKey).filter(s => s.roleKey === 'seller').forEach(s => removeStoredStory(s.id))
+    if (form.storyImage) {
+      const meta = STORY_ROLES.seller!
+      addStoredStory({
+        id: `st-seller-${Date.now()}`,
+        ownerKey,
+        userName: form.title || 'فروشگاه',
+        roleKey: 'seller', roleLabel: meta.label, roleColor: meta.color,
+        avatar: (form.title || 'ف').charAt(0) || 'ف',
+        logoUrl: form.logo || undefined,
+        mediaUrl: form.storyImage,
+        caption: form.storyText.trim(),
+        createdAt: Date.now(),
+      })
+    }
+  }
+
   const persist = () => {
     const ownerName = form.ownerName || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
+    /* انتشار هنگام ذخیره: فروشگاه بلافاصله در «فروشگاه‌ها» دیده می‌شود (جواز کسب اجباری است).
+       اگر ادمین قبلاً ردش کرده بود، ویرایش دوباره منتشرش می‌کند. */
     saveSellerProfile({
       ...form,
       ownerName,
       ownerPhone: form.ownerPhone || (user?.phone ?? ''),
-      status: 'pending',                                   // هر ذخیره = ارسال برای بازبینی
+      status: 'approved',
       submittedAt: form.submittedAt || new Date().toISOString(),
     })
+    syncStoryBar()                                          // استوری را در نوار صفحه‌ی اول نشان بده
     setSaved(true); setErr(''); setWarn(false)
   }
 
@@ -373,7 +399,7 @@ export default function SellerDashboard() {
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">استوری فروشگاه</h2>
             <p className="mb-4 text-[12px] text-[#8A8474]">
-              با کلیک روی لوگوی فروشگاه باز می‌شود — همان حلقه‌ی رنگی دور لوگو.
+              با کلیک روی لوگوی فروشگاه باز می‌شود، و پس از ذخیره تا ۲۴ ساعت در نوار استوری‌های صفحه‌ی اول سایت هم دیده می‌شود.
             </p>
             <div className="flex flex-wrap items-start gap-4">
               <div className="shrink-0">
@@ -490,7 +516,7 @@ export default function SellerDashboard() {
           <div className="sticky bottom-0 -mx-4 border-t border-[#E7E2D6] bg-[#F7F5F0]/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
             <div className="flex flex-wrap items-center justify-end gap-3">
               {err   && <p className="me-auto text-[12.5px] font-semibold text-[#B23B2E]">{err}</p>}
-              {saved && !err && <p className="me-auto text-[12.5px] font-semibold text-[#14532D]">ذخیره شد ✓ — برای بازبینی به ادمین ارسال شد</p>}
+              {saved && !err && <p className="me-auto text-[12.5px] font-semibold text-[#14532D]">ذخیره و منتشر شد ✓ — در صفحه‌ی «فروشگاه‌ها» نمایش داده می‌شود</p>}
               {/* دکمه به طرح LQ (طلایی) */}
               <button type="submit" disabled={busy}
                 className="inline-flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-6 py-2.5 text-[13.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0">

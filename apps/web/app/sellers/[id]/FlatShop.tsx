@@ -144,9 +144,9 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
     return (
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
         {layers}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '22px 18px', textAlign: 'center' }}>
-          <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.4vw,34px)', width: 'auto' }}/>
-          {title && <div style={{ fontSize: 'clamp(16px,2.6vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.3, maxWidth: '92%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(7px,1.2vw,12px)', padding: 'clamp(12px,2vw,22px) 16px', textAlign: 'center' }}>
+          <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
+          {title && <div style={{ fontSize: 'clamp(14px,2.5vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.28, maxWidth: '94%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
           {subtitleRow(true)}
         </div>
       </div>
@@ -550,7 +550,7 @@ export default function FlatShop() {
       <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
         <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
           {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم)؛ اگر خالی، پوسترِ پیش‌فرضِ «درباره ما» */}
-          <div className="relative min-h-[210px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
+          <div className="relative min-h-[147px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
             {store.aboutImages.length
               ? <ImageSlider images={store.aboutImages} />
               : <StorePoster variant={3} title={store.title} about />}

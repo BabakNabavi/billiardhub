@@ -96,6 +96,9 @@ const KEY = 'bh_seller_profiles'
 function normalize(raw: Partial<SellerProfile> & { slug: string }): SellerProfile {
   const p = { ...emptySellerProfile(raw.slug, raw.ownerPhone ?? ''), ...raw }
   if (!p.province && p.city) p.province = provinceOfCity(p.city)
+  /* مدلِ جدید: فروشگاه هنگام ذخیره منتشر می‌شود. رکوردهای قدیمیِ pending (که در مدلِ قبلی
+     منتظرِ تاییدِ دستیِ ادمین مانده بودند) به approved مهاجرت می‌کنند؛ rejected دست‌نخورده. */
+  if (p.status === 'pending') p.status = 'approved'
   return p
 }
 
