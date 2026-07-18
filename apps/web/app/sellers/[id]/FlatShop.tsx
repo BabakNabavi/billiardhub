@@ -79,14 +79,10 @@ const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
   img: sp.img,
 }))
 
-/* پوسترهای پیش‌فرض (SVG اختصاصی) — وقتی فروشگاه چیزی آپلود نکرده */
-const DEFAULT_BANNERS = ['/images/seller/banner-1.svg', '/images/seller/banner-2.svg', '/images/seller/banner-3.svg']
-const DEFAULT_ABOUT   = ['/images/seller/about.svg']
-
-/* ─── اسلایدر تصاویر (بنر هدر + باکس درباره ما) ─── */
-function ImageSlider({ images, radius = 0 }: { images: string[]; radius?: number }) {
+/* ─── اسلایدر عکسِ آپلودشده (بنر هدر + باکس درباره ما) ─── */
+function ImageSlider({ images }: { images: string[] }) {
   const [i, setI] = useState(0)
-  const shots = images.length ? images : DEFAULT_BANNERS
+  const shots = images
   useEffect(() => {
     if (shots.length < 2) return
     const t = setInterval(() => setI(v => (v + 1) % shots.length), 4500)
@@ -94,7 +90,7 @@ function ImageSlider({ images, radius = 0 }: { images: string[]; radius?: number
   }, [shots.length])
   const active = Math.min(i, shots.length - 1)
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: radius }}>
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
       {shots.map((src, k) => (
         <img
           key={k} src={src} alt="" draggable={false}
@@ -108,6 +104,112 @@ function ImageSlider({ images, radius = 0 }: { images: string[]; radius?: number
             <button key={k} type="button" aria-label={`تصویر ${k + 1}`} onClick={() => setI(k)}
               style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',
                 background: k === active ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'width .25s, background .25s' }} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ════════ پوسترهای پیش‌فرض — به‌سبکِ هدرِ صفحه‌ی مربیان (کامپوننتِ لایه‌ای، نه عکس) ════════
+   هر پوستر: گرادیانِ تیره + بافتِ نقطه‌ای + گلوی طلایی + خطوطِ اریبِ چوب + موتیفِ ظریفِ خطیِ طلایی. */
+const PGOLD = '#C7A66A'
+const STORE_POSTERS = [
+  { bg: 'linear-gradient(125deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow: 'rgba(199,166,106,0.30)', accent: 'rgba(199,166,106,0.55)', motif: 'rack'  },
+  { bg: 'linear-gradient(130deg,#141414 0%,#232a26 55%,#12211b 100%)', glow: 'rgba(199,166,106,0.28)', accent: 'rgba(199,166,106,0.52)', motif: 'cues'  },
+  { bg: 'linear-gradient(125deg,#0b1c2a 0%,#123047 55%,#0c2436 100%)', glow: 'rgba(199,166,106,0.26)', accent: 'rgba(199,166,106,0.50)', motif: 'table' },
+  { bg: 'linear-gradient(130deg,#1c1210 0%,#33231a 55%,#20140f 100%)', glow: 'rgba(199,166,106,0.26)', accent: 'rgba(199,166,106,0.50)', motif: 'case'  },
+  { bg: 'linear-gradient(125deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow: 'rgba(199,166,106,0.28)', accent: 'rgba(199,166,106,0.52)', motif: 'store' },
+]
+
+function storeMotif(motif: string) {
+  const s = 172
+  if (motif === 'rack') {
+    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
+    return (
+      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
+        {rows.flat().map((pt, i) => (<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={PGOLD} strokeWidth="1.3" opacity="0.82"/>))}
+        <path d="M12 79 L50 5 L88 79 Z" stroke={PGOLD} strokeWidth="1" opacity="0.34"/>
+        <circle cx="50" cy="11" r="3" fill={PGOLD} opacity="0.6"/>
+      </svg>
+    )
+  }
+  if (motif === 'cues') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <g stroke={PGOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
+      {[[12,86],[88,16],[12,16],[88,86]].map((pt, i) => (<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={PGOLD} opacity="0.72"/>))}
+      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={PGOLD} strokeWidth="1.6" opacity="0.95"/>
+      <circle cx="45" cy="46" r="3" fill={PGOLD} opacity="0.5"/>
+    </svg>
+  )
+  if (motif === 'table') return (
+    <svg width={s} viewBox="0 0 100 74" fill="none" aria-hidden>
+      <rect x="8" y="8" width="84" height="58" rx="9" stroke={PGOLD} strokeWidth="1.7" opacity="0.85"/>
+      <rect x="16" y="16" width="68" height="42" rx="5" stroke={PGOLD} strokeWidth="0.8" opacity="0.4"/>
+      {[[8,8],[50,6],[92,8],[8,66],[50,68],[92,66]].map((pt, i) => (<circle key={i} cx={pt[0]} cy={pt[1]} r="3.4" fill={PGOLD} opacity="0.6"/>))}
+      {[[30,4],[70,4],[30,70],[70,70]].map((pt, i) => (<circle key={i} cx={pt[0]} cy={pt[1]} r="1.5" fill={PGOLD} opacity="0.7"/>))}
+      <circle cx="40" cy="37" r="5.4" stroke={PGOLD} strokeWidth="1.4" opacity="0.8"/>
+      <circle cx="58" cy="34" r="5.4" fill={PGOLD} opacity="0.22"/>
+    </svg>
+  )
+  if (motif === 'case') return (
+    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
+      <rect x="34" y="14" width="32" height="74" rx="9" stroke={PGOLD} strokeWidth="1.7" opacity="0.85"/>
+      <path d="M42 14 v-4 a8 8 0 0 1 16 0 v4" stroke={PGOLD} strokeWidth="1.5" opacity="0.7"/>
+      <line x1="34" y1="40" x2="66" y2="40" stroke={PGOLD} strokeWidth="1.1" opacity="0.5"/>
+      <line x1="34" y1="62" x2="66" y2="62" stroke={PGOLD} strokeWidth="1.1" opacity="0.5"/>
+      <g stroke={PGOLD} strokeWidth="2" strokeLinecap="round" opacity="0.6"><line x1="46" y1="20" x2="46" y2="82"/><line x1="54" y1="20" x2="54" y2="82"/></g>
+      <circle cx="46" cy="20" r="2.4" fill={PGOLD} opacity="0.75"/><circle cx="54" cy="20" r="2.4" fill={PGOLD} opacity="0.75"/>
+    </svg>
+  )
+  // store — سردرِ فروشگاه
+  return (
+    <svg width={s} viewBox="0 0 100 92" fill="none" aria-hidden>
+      <path d="M12 30 L20 12 H80 L88 30" stroke={PGOLD} strokeWidth="1.7" opacity="0.85" strokeLinejoin="round"/>
+      <path d="M12 30 q4 8 10 8 t10-8 10 8 10-8 10 8 10-8 10 8 10-8" stroke={PGOLD} strokeWidth="1.5" opacity="0.7"/>
+      <rect x="20" y="42" width="60" height="42" rx="3" stroke={PGOLD} strokeWidth="1.5" opacity="0.8"/>
+      <rect x="44" y="58" width="16" height="26" stroke={PGOLD} strokeWidth="1.3" opacity="0.7"/>
+      <circle cx="66" cy="56" r="6" stroke={PGOLD} strokeWidth="1.2" opacity="0.55"/>
+    </svg>
+  )
+}
+
+function StorePoster({ variant }: { variant: number }) {
+  const p = STORE_POSTERS[variant % STORE_POSTERS.length]!
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.6 }}/>
+      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at 32% 42%, ${p.glow}, transparent 55%)` }}/>
+      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '50%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.4 }}/>
+      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '57%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.2 }}/>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translateX(-14%)', opacity: 0.62 }}>
+        <div style={{ display: 'flex', filter: 'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{storeMotif(p.motif)}</div>
+      </div>
+    </div>
+  )
+}
+
+/* اسلایدرِ پوسترهای پیش‌فرض — کراس‌فِیدِ نرم بین چند پوستر */
+function PosterSlider({ variants }: { variants: number[] }) {
+  const [active, setActive] = useState(0)
+  useEffect(() => {
+    if (variants.length < 2) return
+    const t = setInterval(() => setActive(a => (a + 1) % variants.length), 4500)
+    return () => clearInterval(t)
+  }, [variants.length])
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+      {variants.map((v, k) => (
+        <div key={k} style={{ position: 'absolute', inset: 0, opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }}>
+          <StorePoster variant={v}/>
+        </div>
+      ))}
+      {variants.length > 1 && (
+        <div style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {variants.map((_, k) => (
+            <button key={k} type="button" aria-label={`پوستر ${k + 1}`} onClick={() => setActive(k)}
+              style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',
+                background: k === active ? '#fff' : 'rgba(255,255,255,0.5)', transition: 'width .25s, background .25s' }} />
           ))}
         </div>
       )}
@@ -303,10 +405,12 @@ export default function FlatShop() {
       {/* ═══ هدر: بنر اسلایدی + کارت فروشگاه ═══ */}
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
         <div className="overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white">
-          {/* بنر — اسلایدر ۳ عکسی؛ اگر فروشگاه بنری نگذاشته، بنر پیش‌فرض */}
-          <div className="relative" style={{ height: 'clamp(140px,24vw,240px)', background: 'linear-gradient(115deg,#0f3d22,#14532D 55%,#1E6B3C)' }}>
-            <ImageSlider images={store.banners} />
-            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.03) 0%,rgba(0,0,0,0.30) 100%)' }} />
+          {/* بنر — اسلایدرِ عکسِ آپلودشده؛ اگر چیزی نگذاشته، اسلایدرِ ۳ پوسترِ پیش‌فرض */}
+          <div className="relative" style={{ height: 'clamp(150px,24vw,250px)', background: '#0a2f22' }}>
+            {store.banners.length
+              ? <ImageSlider images={store.banners} />
+              : <PosterSlider variants={[0, 1, 2]} />}
+            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
           </div>
 
           {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیرِ هم */}
@@ -324,10 +428,20 @@ export default function FlatShop() {
               </span>
             </button>
 
-            {/* نام، شهر، توضیحات — زیرِ هم */}
+            {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیرِ هم */}
             <h2 className="mt-3 text-[17px] font-bold sm:text-[19px]">{store.title}</h2>
-            <div className="mt-1.5 flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
-              <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}
+            <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
+                <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}
+              </div>
+              {phoneDig && (
+                <a
+                  href={`tel:${phoneHref}`}
+                  className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${MONO}`}
+                >
+                  <span>{Icon.phone}</span>{toFa(phoneText)}
+                </a>
+              )}
             </div>
             <p className="mt-2 max-w-[720px] text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
 
@@ -339,16 +453,6 @@ export default function FlatShop() {
                   <span key={i} className="rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]">{b}</span>
                 ))}
               </div>
-            )}
-
-            {/* دکمه‌ی تلفن — پایین، با کد شهر */}
-            {phoneDig && (
-              <a
-                href={`tel:${phoneHref}`}
-                className={`mt-4 inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-4 py-2.5 text-[13.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${MONO}`}
-              >
-                <span>{Icon.phone}</span>{toFa(phoneText)}
-              </a>
             )}
           </div>
         </div>
@@ -468,9 +572,11 @@ export default function FlatShop() {
       {/* ═══ درباره ما — ۱/۳ اسلایدر سمت راست، متن سمت چپ ═══ */}
       <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
         <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
-          {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم) */}
-          <div className="relative min-h-[200px] bg-[#F4F3F1] min-[760px]:min-h-[260px]">
-            <ImageSlider images={store.aboutImages.length ? store.aboutImages : DEFAULT_ABOUT} />
+          {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم)؛ اگر خالی، پوسترِ پیش‌فرضِ «درباره ما» */}
+          <div className="relative min-h-[210px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
+            {store.aboutImages.length
+              ? <ImageSlider images={store.aboutImages} />
+              : <StorePoster variant={4} />}
           </div>
           {/* متن (دو سوم) */}
           <div className="flex flex-col justify-center p-6 sm:p-8">
