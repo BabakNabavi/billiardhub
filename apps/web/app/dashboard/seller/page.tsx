@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../../store/auth.store'
 import {
   type SellerProfile,
-  emptySellerProfile, findSellerByOwner, getSellerProfile, saveSellerProfile, compressImage,
+  emptySellerProfile, findSellerByOwner, newSellerSlug, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 
@@ -68,11 +68,14 @@ export default function SellerDashboard() {
     return [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('seller')
   }, [user])
 
-  /* بعد از هیدریت: پروفایل خودِ کاربر، وگرنه پروفایل اسلاگ پیش‌فرض، وگرنه خالی */
+  /* بعد از هیدریت: فروشگاهِ خودِ همین کاربر را بارگذاری کن (بر اساسِ شماره‌ی مالک).
+     اگر هنوز فروشگاهی ندارد، یک فرمِ خالی با اسلاگِ *یکتای تازه* بساز — نه اسلاگِ
+     پیش‌فرض «۱»؛ وگرنه کاربرِ جدید فروشگاهِ کاربرِ قبلی را بار می‌زد و با ذخیره،
+     آن را بازنویسی/حذف می‌کرد. */
   useEffect(() => {
     if (!_hydrated) return
-    const mine = findSellerByOwner(user?.phone ?? '') ?? getSellerProfile(DEFAULT_SLUG)
-    setForm(mine ?? emptySellerProfile(DEFAULT_SLUG, user?.phone ?? ''))
+    const mine = findSellerByOwner(user?.phone ?? '')
+    setForm(mine ?? emptySellerProfile(newSellerSlug(), user?.phone ?? ''))
     setLoaded(true)
   }, [_hydrated, user?.phone])
 
