@@ -421,9 +421,9 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   /* ── GRID VIEW ── */
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
-      style={{ ...shell, display: 'flex', flexDirection: 'column' }}>
-      {/* banner */}
-      <div style={{ height: 116, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* banner (+۲۰٪ ارتفاع) */}
+      <div style={{ height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <img src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
         {seller.elite && (
@@ -438,8 +438,8 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         </div>
       </div>
 
-      {/* body */}
-      <div style={{ padding: '0 18px 18px' }}>
+      {/* body — flex تا کارت پر شود و دکمه‌ها ته کارت بچسبند ⇒ همه‌ی کارت‌ها یک‌اندازه */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 18px 18px' }}>
         {/* logo fully visible (no badge overlap on image) */}
         <div style={{ marginTop: -32, marginBottom: 12, position: 'relative', zIndex: 2 }}>
           <SellerLogo name={seller.name} size={62} />
@@ -450,13 +450,14 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{seller.name}</h3>
         </div>
 
-        <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
+        {/* توضیحات — همیشه فضای ۲ خط را می‌گیرد تا ارتفاع کارت‌ها یکسان بماند */}
+        <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, minHeight: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
 
         <div style={{ marginBottom: 12 }}>{metaRow}</div>
-        <div style={{ marginBottom: 16 }}>{brandsRow}</div>
+        <div style={{ marginBottom: 16, minHeight: 26 }}>{brandsRow}</div>
 
-        {/* action buttons */}
-        <div style={{ display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
+        {/* action buttons — به ته کارت چسبیده */}
+        <div style={{ marginTop: 'auto', display: 'flex', gap: 8, borderTop: '1px solid rgba(28,28,26,0.06)', paddingTop: 14 }}>
           <div style={{ flex: 1 }}>
             <Link href={`/sellers/${seller.id}`} onClick={e => e.stopPropagation()} style={{
               display: 'block', padding: '10px 0', borderRadius: 10, textAlign: 'center', textDecoration: 'none',
@@ -599,7 +600,7 @@ export default function SellersPage() {
         @keyframes lineReveal{from{clip-path:inset(0 0 105% 0);transform:translateY(14px);opacity:0;}to{clip-path:inset(0 0 -25% 0);transform:none;opacity:1;}}
         @keyframes scaleInX{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
         * { box-sizing: border-box; }
-        .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+        .sel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; grid-auto-rows: 1fr; }
         @media(max-width:1000px) { .sel-grid { grid-template-columns: repeat(2,1fr) !important; } }
         @media(max-width:600px)  { .sel-grid { grid-template-columns: 1fr !important; } }
         .sel-list { display: flex; flex-direction: column; gap: 14px; }

@@ -13,7 +13,6 @@ import {
   emptySellerProfile, findSellerByOwner, getSellerProfile, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
-import { STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory } from '../../../lib/story-store'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
@@ -121,28 +120,6 @@ export default function SellerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
-  /* استوریِ فروشگاه را با نوار استوریِ صفحه‌ی اول هماهنگ می‌کند (bh_stories).
-     upsert: استوریِ قبلیِ همین فروشگاه پاک و نسخه‌ی فعلی جایگزین می‌شود؛
-     اگر عکس استوری خالی باشد، از نوار حذف می‌شود. */
-  const syncStoryBar = () => {
-    const ownerKey = user?.phone || user?.id || form.title || 'seller'
-    getOwnerStories(ownerKey).filter(s => s.roleKey === 'seller').forEach(s => removeStoredStory(s.id))
-    if (form.storyImage) {
-      const meta = STORY_ROLES.seller!
-      addStoredStory({
-        id: `st-seller-${Date.now()}`,
-        ownerKey,
-        userName: form.title || 'فروشگاه',
-        roleKey: 'seller', roleLabel: meta.label, roleColor: meta.color,
-        avatar: (form.title || 'ف').charAt(0) || 'ف',
-        logoUrl: form.logo || undefined,
-        mediaUrl: form.storyImage,
-        caption: form.storyText.trim(),
-        createdAt: Date.now(),
-      })
-    }
-  }
-
   const persist = () => {
     const ownerName = form.ownerName || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
     /* انتشار هنگام ذخیره: فروشگاه بلافاصله در «فروشگاه‌ها» دیده می‌شود (جواز کسب اجباری است).
@@ -154,7 +131,6 @@ export default function SellerDashboard() {
       status: 'approved',
       submittedAt: form.submittedAt || new Date().toISOString(),
     })
-    syncStoryBar()                                          // استوری را در نوار صفحه‌ی اول نشان بده
     setSaved(true); setErr(''); setWarn(false)
   }
 
