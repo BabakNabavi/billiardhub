@@ -87,6 +87,7 @@ const CATS = [
   },
   {
     id: 'ball', label: 'توپ', g: ['#B71C1C','#E53935'],
+    img: '/images/icon/ball/ballset-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <circle cx="14" cy="14" r="10" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8"/>
       <path d="M6 11 Q14 7 22 11" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
@@ -96,6 +97,7 @@ const CATS = [
   },
   {
     id: 'tip', label: 'تیپ', g: ['#0D47A1','#1976D2'],
+    img: '/images/icon/tip/tip-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <ellipse cx="14" cy="12" rx="7" ry="3" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.8"/>
       <line x1="7" y1="12" x2="7" y2="19" stroke="currentColor" strokeWidth="1.8"/>
@@ -106,6 +108,7 @@ const CATS = [
   },
   {
     id: 'chalk', label: 'گچ', g: ['#4A148C','#7B1FA2'],
+    img: '/images/icon/chalk/chalk-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <rect x="7" y="12" width="14" height="11" rx="2" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
       <path d="M7 12 L10 8 L24 8 L21 12" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" fill="currentColor" fillOpacity="0.15"/>
