@@ -113,77 +113,29 @@ function ImageSlider({ images }: { images: string[] }) {
 
 /* ════════ پوسترهای پیش‌فرض — به‌سبکِ هدرِ صفحه‌ی مربیان (کامپوننتِ لایه‌ای، نه عکس) ════════
    هر پوستر: گرادیانِ تیره + بافتِ نقطه‌ای + گلوی طلایی + خطوطِ اریبِ چوب + موتیفِ ظریفِ خطیِ طلایی. */
-const PGOLD = '#C7A66A'
 const STORE_POSTERS = [
-  { bg: 'linear-gradient(125deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', glow: 'rgba(199,166,106,0.30)', accent: 'rgba(199,166,106,0.55)', motif: 'rack'  },
-  { bg: 'linear-gradient(130deg,#141414 0%,#232a26 55%,#12211b 100%)', glow: 'rgba(199,166,106,0.28)', accent: 'rgba(199,166,106,0.52)', motif: 'cues'  },
-  { bg: 'linear-gradient(125deg,#0b1c2a 0%,#123047 55%,#0c2436 100%)', glow: 'rgba(199,166,106,0.26)', accent: 'rgba(199,166,106,0.50)', motif: 'table' },
-  { bg: 'linear-gradient(130deg,#1c1210 0%,#33231a 55%,#20140f 100%)', glow: 'rgba(199,166,106,0.26)', accent: 'rgba(199,166,106,0.50)', motif: 'case'  },
-  { bg: 'linear-gradient(125deg,#08201f 0%,#0d3835 55%,#0a2a28 100%)', glow: 'rgba(199,166,106,0.28)', accent: 'rgba(199,166,106,0.52)', motif: 'store' },
+  { bg: 'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)', sub: 'PROFESSIONAL BILLIARD SHOP' },  // سرمه‌ای (مثل کاور مربی)
+  { bg: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', sub: 'CUES · BALLS · TABLES'        },  // نمدِ سبز
+  { bg: 'linear-gradient(120deg,#141414 0%,#26221d 55%,#17140f 100%)', sub: 'PRO EQUIPMENT · لوازم حرفه‌ای' },  // زغالی-طلایی
+  { bg: 'linear-gradient(120deg,#101c2b 0%,#14324a 55%,#0d2334 100%)', sub: 'ABOUT US · درباره ما'         },  // پوستر «درباره ما»
 ]
 
-function storeMotif(motif: string) {
-  const s = 172
-  if (motif === 'rack') {
-    const rows = [[[50,11]],[[41,27],[59,27]],[[32,43],[50,43],[68,43]],[[23,59],[41,59],[59,59],[77,59]],[[14,75],[32,75],[50,75],[68,75],[86,75]]]
-    return (
-      <svg width={s} viewBox="0 0 100 86" fill="none" aria-hidden>
-        {rows.flat().map((pt, i) => (<circle key={i} cx={pt![0]} cy={pt![1]} r="7.4" stroke={PGOLD} strokeWidth="1.3" opacity="0.82"/>))}
-        <path d="M12 79 L50 5 L88 79 Z" stroke={PGOLD} strokeWidth="1" opacity="0.34"/>
-        <circle cx="50" cy="11" r="3" fill={PGOLD} opacity="0.6"/>
-      </svg>
-    )
-  }
-  if (motif === 'cues') return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <g stroke={PGOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.78"><line x1="12" y1="86" x2="88" y2="16"/><line x1="12" y1="16" x2="88" y2="86"/></g>
-      {[[12,86],[88,16],[12,16],[88,86]].map((pt, i) => (<circle key={i} cx={pt[0]} cy={pt[1]} r="2.4" fill={PGOLD} opacity="0.72"/>))}
-      <circle cx="50" cy="51" r="13" fill="rgba(0,0,0,0.35)" stroke={PGOLD} strokeWidth="1.6" opacity="0.95"/>
-      <circle cx="45" cy="46" r="3" fill={PGOLD} opacity="0.5"/>
-    </svg>
-  )
-  if (motif === 'table') return (
-    <svg width={s} viewBox="0 0 100 74" fill="none" aria-hidden>
-      <rect x="8" y="8" width="84" height="58" rx="9" stroke={PGOLD} strokeWidth="1.7" opacity="0.85"/>
-      <rect x="16" y="16" width="68" height="42" rx="5" stroke={PGOLD} strokeWidth="0.8" opacity="0.4"/>
-      {[[8,8],[50,6],[92,8],[8,66],[50,68],[92,66]].map((pt, i) => (<circle key={i} cx={pt[0]} cy={pt[1]} r="3.4" fill={PGOLD} opacity="0.6"/>))}
-      {[[30,4],[70,4],[30,70],[70,70]].map((pt, i) => (<circle key={i} cx={pt[0]} cy={pt[1]} r="1.5" fill={PGOLD} opacity="0.7"/>))}
-      <circle cx="40" cy="37" r="5.4" stroke={PGOLD} strokeWidth="1.4" opacity="0.8"/>
-      <circle cx="58" cy="34" r="5.4" fill={PGOLD} opacity="0.22"/>
-    </svg>
-  )
-  if (motif === 'case') return (
-    <svg width={s} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <rect x="34" y="14" width="32" height="74" rx="9" stroke={PGOLD} strokeWidth="1.7" opacity="0.85"/>
-      <path d="M42 14 v-4 a8 8 0 0 1 16 0 v4" stroke={PGOLD} strokeWidth="1.5" opacity="0.7"/>
-      <line x1="34" y1="40" x2="66" y2="40" stroke={PGOLD} strokeWidth="1.1" opacity="0.5"/>
-      <line x1="34" y1="62" x2="66" y2="62" stroke={PGOLD} strokeWidth="1.1" opacity="0.5"/>
-      <g stroke={PGOLD} strokeWidth="2" strokeLinecap="round" opacity="0.6"><line x1="46" y1="20" x2="46" y2="82"/><line x1="54" y1="20" x2="54" y2="82"/></g>
-      <circle cx="46" cy="20" r="2.4" fill={PGOLD} opacity="0.75"/><circle cx="54" cy="20" r="2.4" fill={PGOLD} opacity="0.75"/>
-    </svg>
-  )
-  // store — سردرِ فروشگاه
-  return (
-    <svg width={s} viewBox="0 0 100 92" fill="none" aria-hidden>
-      <path d="M12 30 L20 12 H80 L88 30" stroke={PGOLD} strokeWidth="1.7" opacity="0.85" strokeLinejoin="round"/>
-      <path d="M12 30 q4 8 10 8 t10-8 10 8 10-8 10 8 10-8 10 8 10-8" stroke={PGOLD} strokeWidth="1.5" opacity="0.7"/>
-      <rect x="20" y="42" width="60" height="42" rx="3" stroke={PGOLD} strokeWidth="1.5" opacity="0.8"/>
-      <rect x="44" y="58" width="16" height="26" stroke={PGOLD} strokeWidth="1.3" opacity="0.7"/>
-      <circle cx="66" cy="56" r="6" stroke={PGOLD} strokeWidth="1.2" opacity="0.55"/>
-    </svg>
-  )
-}
-
+/* پوستر پیش‌فرض — عیناً به سبکِ کاورِ صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
+   گلوی طلایی + خط اریب + وردمارکِ «بیلیارد هاب» و زیرنویس. */
 function StorePoster({ variant }: { variant: number }) {
   const p = STORE_POSTERS[variant % STORE_POSTERS.length]!
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.6 }}/>
-      <div style={{ position: 'absolute', inset: '-20%', background: `radial-gradient(circle at 32% 42%, ${p.glow}, transparent 55%)` }}/>
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '50%', width: 2, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.4 }}/>
-      <div style={{ position: 'absolute', top: '-25%', bottom: '-25%', left: '57%', width: 1, background: `linear-gradient(180deg, transparent, ${p.accent}, transparent)`, transform: 'rotate(19deg)', opacity: 0.2 }}/>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translateX(-14%)', opacity: 0.62 }}>
-        <div style={{ display: 'flex', filter: 'drop-shadow(0 5px 18px rgba(0,0,0,0.45))' }}>{storeMotif(p.motif)}</div>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize: '16px 16px' }}/>
+      <div style={{ position: 'absolute', insetInlineStart: '-6%', top: '-40%', width: '46%', height: '180%', background: 'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter: 'blur(18px)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '54%', width: '1.5px', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(-10deg)', pointerEvents: 'none' }}/>
+      {/* وردمارک BILLIARD HUB + زیرنویس */}
+      <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(24px,3.6vw,40px)', width: 'auto' }}/>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 22, height: '1.5px', background: 'linear-gradient(90deg,#C7A66A,transparent)', display: 'inline-block' }}/>
+          <span dir="auto" style={{ fontSize: 'clamp(8.5px,1.25vw,11.5px)', fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(199,166,106,0.92)', whiteSpace: 'nowrap' }}>{p.sub}</span>
+        </div>
       </div>
     </div>
   )
@@ -576,7 +528,7 @@ export default function FlatShop() {
           <div className="relative min-h-[210px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
             {store.aboutImages.length
               ? <ImageSlider images={store.aboutImages} />
-              : <StorePoster variant={4} />}
+              : <StorePoster variant={3} />}
           </div>
           {/* متن (دو سوم) */}
           <div className="flex flex-col justify-center p-6 sm:p-8">
