@@ -5,7 +5,8 @@ import { createPortal } from 'react-dom';
 import { X, Plus, Heart, Send } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
-import { getStoredStories, addStoredStory, pickStoryRole, type StoredStory } from '../lib/story-store';
+import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, type StoredStory } from '../lib/story-store';
+import { listSellerProfiles } from '../lib/seller-store';
 
 interface StoryItem {
   id: string;
@@ -109,6 +110,25 @@ function buildLocalGroups(stories: StoredStory[]): StoryGroup[] {
       })),
     };
   });
+}
+
+/* استوریِ فروشگاه‌ها — مستقیم از پروفایلِ فروشگاه (لوکال) خوانده می‌شود؛
+   هر فروشگاهِ تاییدشده که عکسِ استوری دارد، خودکار در نوار می‌آید (بدون نیاز به ذخیره‌ی مجدد). */
+function buildSellerStoreGroups(): StoryGroup[] {
+  const meta = STORY_ROLES.seller ?? { label: 'فروشگاه', color: '#f59e0b' };
+  return listSellerProfiles()
+    .filter(p => p.storyImage && p.status === 'approved')
+    .map(p => ({
+      userId: `store-${p.slug}`,
+      userName: p.title || 'فروشگاه',
+      userAvatar: (p.title || 'ف').charAt(0) || 'ف',
+      logoUrl: p.logo || undefined,
+      userRole: 'seller',
+      roleColor: meta.color,
+      roleLabel: meta.label,
+      allSeen: false,
+      stories: [{ id: `store-story-${p.slug}`, caption: p.storyText || undefined, createdAt: 'به‌تازگی', mediaUrl: p.storyImage, mediaType: 'image' }],
+    }));
 }
 
 /* Downscale + re-encode a story image before storing (localStorage quota). */
@@ -259,6 +279,7 @@ export default function Stories() {
   const { user } = useAuthStore();
   const [apiGroups, setApiGroups]     = useState<StoryGroup[]>([]);
   const [localGroups, setLocalGroups] = useState<StoryGroup[]>([]);
+  const [storeGroups, setStoreGroups] = useState<StoryGroup[]>([]);
   const [seenGroups, setSeenGroups] = useState<Set<string>>(new Set());
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
   const [activeStory, setActiveStory] = useState(0);
@@ -271,10 +292,13 @@ export default function Stories() {
   const [storyImg, setStoryImg] = useState('');
   const [storyCaption, setStoryCaption] = useState('');
 
-  // user-posted stories first, then live club/seller API stories, then the sample strip
-  const groups: StoryGroup[] = [...localGroups, ...apiGroups, ...sampleGroups];
+  // user-posted stories, then local store-profile stories, then live API stories, then sample
+  const groups: StoryGroup[] = [...localGroups, ...storeGroups, ...apiGroups, ...sampleGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
-  const reloadLocal = () => setLocalGroups(buildLocalGroups(getStoredStories()));
+  const reloadLocal = () => {
+    setLocalGroups(buildLocalGroups(getStoredStories()));
+    setStoreGroups(buildSellerStoreGroups());
+  };
 
   useEffect(() => { setMounted(true); reloadLocal(); }, []);
 

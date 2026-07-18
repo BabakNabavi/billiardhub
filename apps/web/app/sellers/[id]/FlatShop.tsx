@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
@@ -40,12 +40,12 @@ interface Product {
   badge?: { text: string; kind: 'sale' | 'new' }; img: string
 }
 
-const SELLER_ID = '1'
+const DEFAULT_SLUG = '1'
 
 /* پیش‌فرض‌ها — تا وقتی صاحب فروشگاه در /dashboard/seller چیزی ذخیره نکرده،
    صفحه با همین‌ها نمایش داده می‌شود. هر فیلدِ ذخیره‌شده جای همتای خودش را می‌گیرد. */
 const STORE = {
-  id: SELLER_ID, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
+  id: DEFAULT_SLUG, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
   province: 'تهران', city: 'تهران',
   desc: 'عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای',
   contactPhone: '66554433',
@@ -63,21 +63,23 @@ const STORE = {
   storyText: 'جدیدترین کالکشن چوب‌های کربنی Predator رسید — همین حالا ببینید!',
 }
 
-/* محصولات از منبع واحد بیلیارد بازار (همین فروشنده) */
-const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
-  id: String(sp.id),
-  name: sp.name,
-  cat: sp.cat as CatKey,
-  brand: sp.brand,
-  price: sp.price,
-  old: sp.old > 0 ? sp.old : undefined,
-  disc: sp.disc,
-  rating: sp.rating,
-  reviews: sp.reviews,
-  sales: sp.sales,
-  badge: sp.disc > 0 ? { text: `${toFa(sp.disc)}٪ تخفیف`, kind: 'sale' as const } : undefined,
-  img: sp.img,
-}))
+/* محصولاتِ یک فروشنده (به شکلِ کارت) — بر اساس id همان فروشگاه */
+function productsForSeller(sellerId: string): Product[] {
+  return productsBySeller(sellerId).map(sp => ({
+    id: String(sp.id),
+    name: sp.name,
+    cat: sp.cat as CatKey,
+    brand: sp.brand,
+    price: sp.price,
+    old: sp.old > 0 ? sp.old : undefined,
+    disc: sp.disc,
+    rating: sp.rating,
+    reviews: sp.reviews,
+    sales: sp.sales,
+    badge: sp.disc > 0 ? { text: `${toFa(sp.disc)}٪ تخفیف`, kind: 'sale' as const } : undefined,
+    img: sp.img,
+  }))
+}
 
 /* ─── اسلایدر عکسِ آپلودشده (بنر هدر + باکس درباره ما) ─── */
 function ImageSlider({ images }: { images: string[] }) {
@@ -264,14 +266,22 @@ function CategoryDropdown({
 
 /* ═══ صفحه ═══ */
 export default function FlatShop() {
-  /* پروفایلِ ذخیره‌شده‌ی صاحب فروشگاه (از /dashboard/seller).
+  /* شناسه‌ی فروشگاه از آدرس (/sellers/[id]) — هر کارت فروشگاهِ خودش را باز می‌کند،
+     نه همیشه فروشگاه شماره‌ی ۱. */
+  const params = useParams()
+  const sellerId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_SLUG
+
+  /* پروفایلِ ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
-  useEffect(() => { setProfile(getSellerProfile(SELLER_ID)) }, [])
+  useEffect(() => { setProfile(getSellerProfile(sellerId)) }, [sellerId])
+
+  /* محصولاتِ همین فروشگاه */
+  const PRODUCTS = useMemo(() => productsForSeller(sellerId), [sellerId])
 
   /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلدِ خالی نباید صفحه را خالی کند */
   const store = useMemo(() => {
-    if (!profile) return STORE
+    if (!profile) return { ...STORE, id: sellerId }
     const pick = (v: string | undefined, fallback: string) => (v && v.trim() ? v : fallback)
     const phones = profile.phones.filter(p => p.trim())
     return {
@@ -294,7 +304,7 @@ export default function FlatShop() {
       storyText:    pick(profile.storyText, STORE.storyText),
       phones:       phones.length ? phones : STORE.phones,
     }
-  }, [profile])
+  }, [profile, sellerId])
 
   /* شماره‌ی تماس با کد شهر (استان) — مثلاً ۰۲۱-۶۶۵۵۴۴۳۳ */
   const areaCode  = telPrefix(store.province)
@@ -317,7 +327,7 @@ export default function FlatShop() {
     const c = Object.fromEntries(BAZAAR_CATS.map(x => [x.id, 0])) as Record<CatKey, number>
     PRODUCTS.forEach(p => { c[p.cat]++ })
     return c
-  }, [])
+  }, [PRODUCTS])
 
   const visible = useMemo(() => {
     const q = query.trim()
@@ -326,7 +336,7 @@ export default function FlatShop() {
       if (q && !p.name.includes(q) && !p.brand.toLowerCase().includes(q.toLowerCase())) return false
       return true
     })
-  }, [cat, query])
+  }, [PRODUCTS, cat, query])
 
   /* صفحه‌بندی: در حالت «همه محصولات» دو ردیف ۵تایی (۱۰ در هر صفحه).
      تا ۱۰ محصول هیچ دکمه‌ای نیست؛ از ۱۱ به بعد عددِ ۲ و … پایین صفحه می‌آید. */
