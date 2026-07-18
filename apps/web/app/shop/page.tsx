@@ -65,6 +65,7 @@ const SLIDES = [
 const CATS = [
   {
     id: 'cue', label: 'چوب', g: ['#8B4513','#D2691E'],
+    img: '/images/icon/cue/cue-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor" transform="rotate(-38 3 13)"/>
       <rect x="18" y="4" width="7" height="3" rx="1.5" fill="currentColor" fillOpacity="0.6" transform="rotate(-38 18 4)"/>
@@ -73,6 +74,7 @@ const CATS = [
   },
   {
     id: 'table', label: 'میز', g: ['#1A6B3A','#28A860'],
+    img: '/images/icon/table/snooker-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <rect x="3" y="7" width="22" height="14" rx="3" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
       <circle cx="3.5" cy="7.5" r="2.2" fill="currentColor"/>
@@ -413,10 +415,15 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                   opacity: active ? 1 : 0.9,
                   transition: 'opacity 0.3s ease',
                 }}>
-                  {/* ۱.۵ = ۱.۲۵ + ۲۰٪ — ایکونِ پایه ۲۶px است ⇒ ۳۹px، داخل کادر ۶۲px جا می‌شود */}
-                  <div className="cat-icn-in" style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.5)' }}>
-                    {cat.icon}
-                  </div>
+                  {/* ایکونِ تصویری (میز/چوب) بدون گلوی رنگی و اسکیل؛ بقیه SVGِ خطی با اسکیل ۱.۵ */}
+                  {(cat as { img?: string }).img ? (
+                    <img className="cat-img" src={(cat as { img?: string }).img} alt={cat.label} draggable={false}
+                      style={{ objectFit: 'contain', display: 'block' }} />
+                  ) : (
+                    <div className="cat-icn-in" style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.5)' }}>
+                      {cat.icon}
+                    </div>
+                  )}
                 </div>
                 <span className="cat-lbl" style={{ fontSize: 14.5, fontWeight: 600, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
                   {cat.label}
@@ -1238,10 +1245,14 @@ export default function ShopPage() {
            z-index بالا ⇒ بقیه‌ی محصولات از زیرش رد می‌شوند. */
         /* ۰.۷۷۵ ⇒ ۲۲.۵٪ از کارت پیدا می‌ماند (= ۲۵٪ منهای ۱۰٪) */
         .bz-sticky-first { position: sticky; right: calc(var(--card-w) * -0.775); z-index: 3; }
+        /* ایکونِ تصویریِ دسته‌بندی (میز/چوب) — دسکتاپ ۵۲px، هم‌وزنِ بصریِ SVGهای خطی */
+        .cat-img { width: 52px; height: 52px; }
         @media(max-width:700px) {
           /* ۱۵۲ = ۱۴۵ + ۵٪ | فاصله ۲۰ = ۲۱ منهای ۵٪.
              column-gap حتماً !important — وگرنه gap:21 در استایل اینلاینِ ردیف برنده می‌شود. */
           .bz-grid { --card-w: 152px; column-gap: 20px !important; }
+          /* موبایل: کادرِ ایکون ۵۶×۴۰ ⇒ تصویر ۳۶px تا در ارتفاع جا شود */
+          .cat-img { width: 36px !important; height: 36px !important; }
           /* ۱.۸۴۷ = ۱.۹۴۴ منهای ۵٪ — موبایل کوتاه‌تر از دسکتاپ می‌ماند */
           .bz-scroll-card { aspect-ratio: 1 / 1.847; }
           /* فاصله‌ی برچسب تا ایکون: هم gap کم شد، هم ارتفاعِ کادر — کادر ۵۶px برای ایکونِ ~۳۵px
