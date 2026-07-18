@@ -118,6 +118,7 @@ const CATS = [
   },
   {
     id: 'extension', label: 'اکستنشن', g: ['#004D40','#00897B'],
+    img: '/images/icon/ex/shaft-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <line x1="3" y1="22" x2="13" y2="12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
       <circle cx="13" cy="12" r="2.5" fill="currentColor"/>
@@ -128,6 +129,7 @@ const CATS = [
   },
   {
     id: 'cue-case', label: 'کیس', g: ['#4527A0','#7C4DFF'],
+    img: '/images/icon/case/case-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       {/* لوله‌ی کیس چوب */}
       <rect x="4" y="11" width="21" height="7" rx="3.5" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.6"/>
@@ -138,6 +140,7 @@ const CATS = [
   },
   {
     id: 'ball-bag', label: 'کیف توپ', g: ['#00695C','#26A69A'],
+    img: '/images/icon/kif/ballcase-icon-256.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       {/* کیف توپ */}
       <rect x="5" y="11" width="18" height="12" rx="2.5" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.7"/>
@@ -147,6 +150,7 @@ const CATS = [
   },
   {
     id: 'rest', label: 'رست', g: ['#1B5E20','#388E3C'],
+    img: '/images/icon/rest/rest.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <line x1="3" y1="25" x2="18" y2="13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
       <circle cx="18" cy="13" r="2.2" fill="currentColor"/>
@@ -158,6 +162,7 @@ const CATS = [
   },
   {
     id: 'cloth', label: 'پارچه', g: ['#006064','#00ACC1'],
+    img: '/images/icon/parche/parche.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <rect x="3" y="8" width="22" height="13" rx="2" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8"/>
       <path d="M3 12 L25 12" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
@@ -169,6 +174,7 @@ const CATS = [
   },
   {
     id: 'oil', label: 'روغن', g: ['#E65100','#F57C00'],
+    img: '/images/icon/oil/oil.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <path d="M11 7 L11 11 Q6 13 6 17 L6 22 Q6 24 8 24 L20 24 Q22 24 22 22 L22 17 Q22 13 17 11 L17 7 Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
       <rect x="11" y="5" width="6" height="3.5" rx="1.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.4"/>
@@ -177,6 +183,7 @@ const CATS = [
   },
   {
     id: 'towel', label: 'حوله', g: ['#AD1457','#D81B60'],
+    img: '/images/icon/hole/hole.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <rect x="5" y="7" width="18" height="5" rx="2.5" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.7"/>
       <rect x="5" y="14" width="18" height="5" rx="2.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.7"/>
@@ -186,6 +193,7 @@ const CATS = [
   },
   {
     id: 'clothing', label: 'پوشاک', g: ['#1A237E','#283593'],
+    img: '/images/icon/pooshak/pooshak.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <path d="M11 5 Q14 9 17 5 L23 9 L20 13 L20 23 L8 23 L8 13 L5 9 Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
       <path d="M11 5 Q14 8 17 5" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
@@ -193,6 +201,7 @@ const CATS = [
   },
   {
     id: 'accessory', label: 'اکسسوری', g: ['#78550A','#B8860B'],
+    img: '/images/icon/accessori/accessori.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <path d="M8 23 L8 13 Q8 11 10 11 L12 11 L12 9 Q12 7 14 7 Q16 7 16 9 L16 11 L18 11 Q20 11 20 13 L20 23 Q20 25 14 25 Q8 25 8 23Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
       <line x1="12" y1="15" x2="12" y2="19" stroke="currentColor" strokeWidth="1.3" opacity="0.6"/>
@@ -202,6 +211,7 @@ const CATS = [
   },
   {
     id: 'other', label: 'سایر', g: ['#37474F','#546E7A'],
+    img: '/images/icon/other/other.png',
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <circle cx="8"  cy="8"  r="2.8" fill="currentColor" opacity="0.5"/>
       <circle cx="14" cy="8"  r="2.8" fill="currentColor"/>
