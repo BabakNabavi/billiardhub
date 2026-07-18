@@ -121,22 +121,37 @@ const STORE_POSTERS = [
 ]
 
 /* پوستر پیش‌فرض — عیناً به سبکِ کاورِ صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
-   گلوی طلایی + خط اریب + وردمارکِ «بیلیارد هاب» و زیرنویس. */
-function StorePoster({ variant }: { variant: number }) {
+   گلوی طلایی + خط اریب + وردمارکِ «بیلیارد هاب» و زیرنویس.
+   با title (حالت «درباره ما») نامِ فروشگاه هم وسط‌چین روی پوستر می‌آید. */
+function StorePoster({ variant, title }: { variant: number; title?: string }) {
   const p = STORE_POSTERS[variant % STORE_POSTERS.length]!
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)', backgroundSize: '16px 16px' }}/>
       <div style={{ position: 'absolute', insetInlineStart: '-6%', top: '-40%', width: '46%', height: '180%', background: 'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter: 'blur(18px)', pointerEvents: 'none' }}/>
       <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '54%', width: '1.5px', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(-10deg)', pointerEvents: 'none' }}/>
-      {/* وردمارک BILLIARD HUB + زیرنویس */}
-      <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(24px,3.6vw,40px)', width: 'auto' }}/>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 22, height: '1.5px', background: 'linear-gradient(90deg,#C7A66A,transparent)', display: 'inline-block' }}/>
-          <span dir="auto" style={{ fontSize: 'clamp(8.5px,1.25vw,11.5px)', fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(199,166,106,0.92)', whiteSpace: 'nowrap' }}>{p.sub}</span>
+
+      {title ? (
+        /* حالتِ «درباره ما» — وسط‌چین با نامِ فروشگاه */
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '22px 18px', textAlign: 'center' }}>
+          <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.4vw,34px)', width: 'auto' }}/>
+          <div style={{ fontSize: 'clamp(16px,2.6vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.3, maxWidth: '92%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 20, height: '1.5px', background: 'linear-gradient(90deg,transparent,#C7A66A)', display: 'inline-block' }}/>
+            <span dir="auto" style={{ fontSize: 'clamp(8.5px,1.25vw,11.5px)', fontWeight: 800, letterSpacing: '0.2em', color: 'rgba(199,166,106,0.92)', whiteSpace: 'nowrap' }}>{p.sub}</span>
+            <span style={{ width: 20, height: '1.5px', background: 'linear-gradient(90deg,#C7A66A,transparent)', display: 'inline-block' }}/>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* حالتِ هدر — وردمارک راست‌چینِ کنارِ خط اریب */
+        <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(24px,3.6vw,40px)', width: 'auto' }}/>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 22, height: '1.5px', background: 'linear-gradient(90deg,#C7A66A,transparent)', display: 'inline-block' }}/>
+            <span dir="auto" style={{ fontSize: 'clamp(8.5px,1.25vw,11.5px)', fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(199,166,106,0.92)', whiteSpace: 'nowrap' }}>{p.sub}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -528,7 +543,7 @@ export default function FlatShop() {
           <div className="relative min-h-[210px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
             {store.aboutImages.length
               ? <ImageSlider images={store.aboutImages} />
-              : <StorePoster variant={3} />}
+              : <StorePoster variant={3} title={store.title} />}
           </div>
           {/* متن (دو سوم) */}
           <div className="flex flex-col justify-center p-6 sm:p-8">
