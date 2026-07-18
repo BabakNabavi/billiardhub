@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Store, Phone, Heart, ShieldCheck, Truck, ArrowLeftRight } from 'lucide-react'
@@ -55,12 +55,53 @@ function Stars({ r, size = 15 }: { r: number; size?: number }) {
   )
 }
 
+/* محصولِ ثبت‌شده‌ی کاربر (localStorage) → شکلِ ShopProduct تا همین صفحه بتواند نمایشش دهد */
+function normalizeUserProduct(up: Record<string, unknown>): ShopProduct {
+  const num = (v: unknown, d = 0) => (typeof v === 'number' ? v : d)
+  const str = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
+  const imgs = up.images as string[] | undefined
+  return {
+    id:             num(up.id),
+    cat:            str(up.category, 'other'),
+    img:            str(up.img) || imgs?.[0] || '/images/shop/cue_billiard_2.jpg',
+    name:           str(up.name, 'محصول'),
+    desc:           str(up.description),
+    brand:          str(up.brand),
+    price:          num(up.price),
+    old:            num(up.old, num(up.price)),
+    disc:           num(up.disc),
+    rating:         5,
+    reviews:        0,
+    sales:          0,
+    sellerId:       str(up.sellerId),
+    sellerName:     str(up.sellerName),
+    sellerPhone:    str(up.sellerPhone),
+    sellerWhatsapp: str(up.sellerWhatsapp),
+  }
+}
+
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const product: ShopProduct | undefined = useMemo(
+  const staticProduct: ShopProduct | undefined = useMemo(
     () => SHOP_PRODUCTS.find(p => String(p.id) === String(id)),
     [id]
   )
+
+  /* اگر در کاتالوگِ نمونه نبود، از محصولاتِ ثبت‌شده‌ی کاربر (localStorage) بخوان.
+     بعد از mount خوانده می‌شود؛ تا آن‌موقع «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
+  const [userProduct, setUserProduct] = useState<ShopProduct | null>(null)
+  const [checked, setChecked] = useState(false)
+  useEffect(() => {
+    if (staticProduct) { setChecked(true); return }
+    try {
+      const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[]
+      const up = list.find(p => String(p.id) === String(id))
+      setUserProduct(up ? normalizeUserProduct(up) : null)
+    } catch { setUserProduct(null) }
+    setChecked(true)
+  }, [id, staticProduct])
+
+  const product: ShopProduct | undefined = staticProduct ?? userProduct ?? undefined
 
   const [wished, setWished] = useState(false)
 
@@ -70,6 +111,13 @@ export default function ProductDetailPage() {
   )
 
   if (!product) {
+    if (!checked) {
+      return (
+        <div style={{ minHeight: '100vh', background: BG, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: TSEC }}>در حال بارگذاری…</p>
+        </div>
+      )
+    }
     return (
       <div style={{ minHeight: '100vh', background: BG, direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>

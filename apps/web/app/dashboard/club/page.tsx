@@ -290,6 +290,8 @@ export default function ClubDashboardPage() {
   // Bookings
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingFilter, setBookingFilter] = useState('all');
+  /* بستنِ رزروِ آنلاین: '' = باز | 'always' = همیشه بسته | عدد = بسته تا آن timestamp */
+  const [reserveClosedUntil, setReserveClosedUntil] = useState<string>('');
 
   // Tables
   const [tables, setTables] = useState<Table[]>([]);
@@ -489,6 +491,10 @@ export default function ClubDashboardPage() {
         setTables([]);
       }
     } catch { setTables([]); }
+
+    // وضعیتِ بستنِ رزروِ آنلاین
+    try { setReserveClosedUntil(localStorage.getItem(`club-reserveClosedUntil-${selectedClub.id}`) ?? ''); }
+    catch { setReserveClosedUntil(''); }
 
     api.get(`/bookings/club/${selectedClub.id}`)
       .then(r => setBookings(r.data))
@@ -862,6 +868,23 @@ export default function ClubDashboardPage() {
 
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const filteredBookings = bookingFilter === 'all' ? bookings : bookings.filter(b => b.status === bookingFilter);
+
+  /* رزروِ آنلاین بسته است؟ (همیشه یا تا زمانِ آینده) */
+  const isReserveClosed = reserveClosedUntil === 'always' || (reserveClosedUntil !== '' && Number(reserveClosedUntil) > Date.now());
+  const reserveClosedLabel = reserveClosedUntil === 'always'
+    ? 'رزروِ آنلاین همیشه بسته است'
+    : isReserveClosed
+      ? `رزروِ آنلاین تا ${new Date(Number(reserveClosedUntil)).toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })} بسته است`
+      : 'رزروِ آنلاین باز است';
+  const setReservationClosure = (opt: number | 'always' | 'open') => {
+    if (!selectedClub) return;
+    const val = opt === 'open' ? '' : opt === 'always' ? 'always' : String(Date.now() + opt * 3600_000);
+    setReserveClosedUntil(val);
+    try {
+      const k = `club-reserveClosedUntil-${selectedClub.id}`;
+      if (val) localStorage.setItem(k, val); else localStorage.removeItem(k);
+    } catch { /* ignore */ }
+  };
 
   const TABS: { key: TabKey; label: string; Icon: React.ComponentType<{size?: number; strokeWidth?: number}>; badge?: number }[] = [
     { key: 'dashboard',   label: 'داشبورد',    Icon: LayoutDashboard },
@@ -1750,6 +1773,33 @@ export default function ClubDashboardPage() {
       {/* ════ Tab: Bookings ════ */}
       {activeTab === 'bookings' && (
         <div>
+          {/* ── بستن/بازکردنِ رزروِ آنلاین ── */}
+          <Card style={{ marginBottom: 16, padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: isReserveClosed ? '#DC2626' : '#16A34A', flexShrink: 0 }} />
+              <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A' }}>{reserveClosedLabel}</span>
+              <span style={{ fontSize: 12, color: '#6B7280' }}>— وقتی بسته باشد، کسی نمی‌تواند از سایت رزرو کند.</span>
+            </div>
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+              {([
+                ['۳ ساعت', 3], ['۶ ساعت', 6], ['۱۲ ساعت', 12], ['یک روز', 24], ['همیشه', 'always'],
+              ] as [string, number | 'always'][]).map(([lbl, opt]) => (
+                <button key={lbl} onClick={() => setReservationClosure(opt)} style={{
+                  padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                  fontFamily: 'var(--font-base)',
+                  border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)', color: '#9A6E38',
+                }}>بستن برای {lbl}</button>
+              ))}
+              {isReserveClosed && (
+                <button onClick={() => setReservationClosure('open')} style={{
+                  padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                  fontFamily: 'var(--font-base)',
+                  border: '1px solid rgba(22,163,74,0.34)', background: 'rgba(22,163,74,0.12)', color: '#0E7A38',
+                }}>باز کردنِ رزرو</button>
+              )}
+            </div>
+          </Card>
+
           <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
             {[
               { key: 'all',       label: 'همه'       },

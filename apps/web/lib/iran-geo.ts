@@ -19,8 +19,9 @@ export function getProvinces(): Province[] {
   return PROVINCES
 }
 
+/* نام استان‌ها — به‌ترتیبِ الفبای فارسی (برای دراپ‌داونِ ProvinceCitySelect) */
 export function getProvinceNames(): string[] {
-  return PROVINCES.map(p => p.name)
+  return PROVINCES.map(p => p.name).sort((a, b) => a.localeCompare(b, 'fa'))
 }
 
 /* شهرهای یک استان (به‌ترتیب الفبا). استانِ ناموجود ⇒ آرایه‌ی خالی */
