@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../../store/auth.store'
 import {
   type SellerProfile,
-  emptySellerProfile, findSellerByOwner, newSellerSlug, saveSellerProfile, compressImage,
+  emptySellerProfile, findSellerByOwner, findUnclaimedSeller, newSellerSlug, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 
@@ -68,16 +68,28 @@ export default function SellerDashboard() {
     return [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('seller')
   }, [user])
 
-  /* بعد از هیدریت: فروشگاهِ خودِ همین کاربر را بارگذاری کن (بر اساسِ شماره‌ی مالک).
-     اگر هنوز فروشگاهی ندارد، یک فرمِ خالی با اسلاگِ *یکتای تازه* بساز — نه اسلاگِ
-     پیش‌فرض «۱»؛ وگرنه کاربرِ جدید فروشگاهِ کاربرِ قبلی را بار می‌زد و با ذخیره،
-     آن را بازنویسی/حذف می‌کرد. */
+  /* بعد از هیدریت: فروشگاهِ خودِ همین کاربر را بارگذاری کن — بر اساسِ user.id (که همیشه
+     موجود است). شماره‌ی موبایل اختیاری است و نباید مبنای مالکیت باشد، وگرنه فروشگاه با
+     مالکِ خالی ذخیره می‌شد و دیگر پیدا نمی‌شد (فرم خالی می‌ماند).
+       • اگر فروشگاهِ خودش را دارد → همان.
+       • وگرنه اگر رکوردِ قدیمیِ بی‌صاحبی هست → همین کاربر تصاحبش می‌کند (بازیابیِ فروشگاهی
+         که پیش‌تر بدونِ شناسه‌ی مالک ذخیره شده بود).
+       • وگرنه فرمِ خالی با اسلاگِ *یکتای تازه* (نه «۱») تا روی فروشگاهِ دیگری ننویسد. */
   useEffect(() => {
     if (!_hydrated) return
-    const mine = findSellerByOwner(user?.phone ?? '')
-    setForm(mine ?? emptySellerProfile(newSellerSlug(), user?.phone ?? ''))
+    if (user) {
+      let mine = findSellerByOwner(user)
+      if (!mine) {
+        const orphan = findUnclaimedSeller()
+        if (orphan) {
+          mine = { ...orphan, ownerId: user.id, ownerPhone: user.phone ?? orphan.ownerPhone }
+          saveSellerProfile(mine)
+        }
+      }
+      setForm(mine ?? emptySellerProfile(newSellerSlug(), user.phone ?? '', user.id))
+    }
     setLoaded(true)
-  }, [_hydrated, user?.phone])
+  }, [_hydrated, user?.id])
 
   const set = <K extends keyof SellerProfile>(k: K, v: SellerProfile[K]) => {
     setForm(f => ({ ...f, [k]: v })); setSaved(false); setErr('')
@@ -130,7 +142,8 @@ export default function SellerDashboard() {
     saveSellerProfile({
       ...form,
       ownerName,
-      ownerPhone: form.ownerPhone || (user?.phone ?? ''),
+      ownerId: user?.id || form.ownerId,           // مالکیت به کاربرِ فعلی گره می‌خورد تا همیشه پیدا شود
+      ownerPhone: user?.phone || form.ownerPhone,
       status: 'approved',
       submittedAt: form.submittedAt || new Date().toISOString(),
     })
