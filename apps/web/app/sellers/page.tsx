@@ -141,7 +141,7 @@ function profileToSeller(p: SellerProfile): typeof SELLERS[0] {
     productCount: productsBySeller(p.slug).length,
     since: '۱۴۰۴',
     sinceYear: 1404,
-    brands: [] as string[],
+    brands: (p.brands ?? []).filter(b => b.trim()),
     specialties: [] as string[],
     responseTime: '—',
     phone: p.contactPhone || phones[0] || '',
@@ -231,7 +231,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   const router = useRouter()
 
   const shell: React.CSSProperties = {
-    background: '#fff', borderRadius: 22, overflow: 'hidden',
+    background: '#fff', borderRadius: 14, overflow: 'hidden',
     border: `1.5px solid ${hov ? 'rgba(199,166,106,0.5)' : 'rgba(28,28,26,0.09)'}`,
     boxShadow: hov ? '0 18px 46px rgba(28,28,26,0.13), 0 4px 14px rgba(199,166,106,0.12)' : '0 2px 12px rgba(28,28,26,0.06)',
     transform: hov ? 'translateY(-5px)' : 'none',
@@ -254,8 +254,9 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
       </span>
     </div>
   )
-  const brandsRow = (
-    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+  const brandsRow = seller.brands.length > 0 && (
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+      <span style={{ fontSize: 11.5, fontWeight: 700, color: TEXT_MUT }}>نمایندگی:</span>
       {seller.brands.map(b => (
         <span key={b} style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 20, padding: '2px 9px' }}>{b}</span>
       ))}
@@ -315,8 +316,8 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
       style={{ ...shell, display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* banner (+۲۰٪ ارتفاع) */}
-      <div style={{ height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      {/* banner (ارتفاع +۱۰٪ ⇒ کل کارت بلندتر) */}
+      <div style={{ height: 154, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <img src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.45) 100%)' }} />
         {seller.elite && (
