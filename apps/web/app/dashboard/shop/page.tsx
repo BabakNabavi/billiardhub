@@ -6,7 +6,51 @@ import Link from 'next/link';
 import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/auth.store';
 import { uploadFile } from '../../../lib/supabase';
+import { findSellerByOwner } from '../../../lib/seller-store';
 import { Package, Edit, Trash2, Eye, CheckCircle, Clock, XCircle, Plus, ShoppingBag, Camera, X, Share2, Loader2 } from 'lucide-react';
+
+/* طرح LQ (تینت طلایی) — همه‌ی دکمه‌های این صفحه از این استفاده می‌کنند */
+const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#9A6E38] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
+const LQ_NEUTRAL = 'bg-[rgba(28,28,26,0.04)] border border-[rgba(28,28,26,0.1)] text-[#5B564B] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5';
+
+/* محصولِ ثبت‌شده در localStorage → شکلِ Product این صفحه */
+function mapLocalProduct(up: Record<string, unknown>): Product {
+  const num = (v: unknown, d = 0) => (typeof v === 'number' ? v : d);
+  const str = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
+  const disc = num(up.disc);
+  const price = num(up.price);
+  const old = num(up.old, price);
+  const cond = str(up.condition, 'new');
+  return {
+    id: String(up.id),
+    title: str(up.name, 'محصول'),
+    price: disc > 0 ? old : price,
+    discountPrice: disc > 0 ? price : undefined,
+    discountPercent: disc > 0 ? disc : undefined,
+    category: str(up.category, 'other'),
+    condition: cond === 'like-new' ? 'like_new' : cond,
+    city: str(up.sellerCity),
+    images: (up.images as string[] | undefined) ?? [str(up.img)].filter(Boolean),
+    isVerified: false,
+    isOfficialStore: false,
+    status: 'active',
+    stock: 1,
+    views: 0,
+    requestedVerification: false,
+    createdAt: new Date(num(up.id, 0) || Date.now()).toISOString(),
+  };
+}
+
+function loadLocalProducts(owner: { id?: string; phone?: string }): Product[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[];
+    const mySlug = findSellerByOwner(owner)?.slug ?? '';
+    return list
+      .filter(up => { const sid = typeof up.sellerId === 'string' ? up.sellerId : ''; return !mySlug || !sid || sid === mySlug; })
+      .map(mapLocalProduct);
+  } catch { return []; }
+}
 
 interface Product {
   id: string;
@@ -81,10 +125,12 @@ export default function MyShopPage() {
 
   useEffect(() => {
     if (!user) return;
+    const local = loadLocalProducts({ id: user.id, phone: user.phone });
     api.get('/products/my-products').then(res => {
-      setProducts(res.data);
+      const remote = Array.isArray(res.data) ? res.data : [];
+      setProducts([...local, ...remote]);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => { setProducts(local); setLoading(false); });
   }, [user]);
 
   useEffect(() => {
@@ -98,14 +144,15 @@ export default function MyShopPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('آیا مطمئنی؟')) return;
     setDeleting(id);
+    /* محصولِ محلی را از localStorage هم حذف کن */
     try {
-      await api.delete(`/products/${id}`);
-      setProducts(products.filter(p => p.id !== id));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDeleting(null);
-    }
+      const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[];
+      const next = list.filter(p => String(p.id) !== String(id));
+      if (next.length !== list.length) localStorage.setItem('userProducts', JSON.stringify(next));
+    } catch { /* ignore */ }
+    try { await api.delete(`/products/${id}`); } catch { /* remote may not exist for local products */ }
+    setProducts(products.filter(p => p.id !== id));
+    setDeleting(null);
   };
 
   const handleStoryFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,9 +228,9 @@ export default function MyShopPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">فروشگاه من</h1>
         <Link href="/shop/new"
-          className="bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm hover:bg-green-800 flex items-center gap-2 font-medium">
+          className={`${LQ} px-5 py-2.5 text-sm flex items-center gap-2 font-bold`}>
           <Plus size={16} />
-          محصول جدید
+          ثبت محصول جدید
         </Link>
       </div>
 
@@ -201,7 +248,7 @@ export default function MyShopPage() {
           </div>
           <button
             onClick={() => storyFileRef.current?.click()}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+            className={`${LQ} flex items-center gap-1.5 text-xs font-bold px-3 py-2`}>
             <Plus size={14} />
             استوری جدید
           </button>
@@ -258,8 +305,10 @@ export default function MyShopPage() {
                     <div className="flex gap-1.5">
                       {STORY_TEXT_SIZES.map(s => (
                         <button key={s.value} onClick={() => setStoryDraft(d => d ? { ...d, textSize: s.value } : d)}
-                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${
-                            storyDraft.textSize === s.value ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                            storyDraft.textSize === s.value
+                              ? 'bg-[rgba(199,166,106,0.18)] border border-[rgba(199,166,106,0.44)] text-[#9A6E38]'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}>
                           {s.label}
                         </button>
@@ -269,12 +318,12 @@ export default function MyShopPage() {
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={uploadStory} disabled={uploadingStory}
-                    className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                    className={`${LQ} flex items-center gap-1.5 disabled:opacity-60 text-sm font-bold px-4 py-2`}>
                     {uploadingStory ? <Loader2 size={15} className="animate-spin" /> : <Share2 size={15} />}
                     {uploadingStory ? 'در حال آپلود...' : 'اشتراک‌گذاری'}
                   </button>
                   <button onClick={() => { URL.revokeObjectURL(storyDraft.previewUrl); setStoryDraft(null); }}
-                    className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                    className={`${LQ_NEUTRAL} flex items-center gap-1.5 text-sm font-bold px-4 py-2`}>
                     <X size={15} />
                     لغو
                   </button>
@@ -347,12 +396,12 @@ export default function MyShopPage() {
             { id: 'pending', label: 'در انتظار تأیید', count: stats.pending },
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium flex-shrink-0 border-b-2 transition-colors ${
-                activeTab === tab.id ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'
+              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-bold flex-shrink-0 border-b-2 transition-colors ${
+                activeTab === tab.id ? 'border-[#C7A66A] text-[#9A6E38]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}>
               {tab.label}
               {tab.count > 0 && (
-                <span className={`text-xs px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-[rgba(199,166,106,0.16)] text-[#9A6E38]' : 'bg-gray-100 text-gray-500'}`}>
                   {tab.count.toLocaleString('fa-IR')}
                 </span>
               )}
@@ -370,8 +419,8 @@ export default function MyShopPage() {
                 {activeTab === 'all' ? 'هنوز محصولی ثبت نکردی' : 'محصولی در این دسته نیست'}
               </p>
               {activeTab === 'all' && (
-                <Link href="/shop/new" className="bg-green-700 text-white px-6 py-2.5 rounded-xl hover:bg-green-800 text-sm">
-                  ثبت اولین محصول
+                <Link href="/shop/new" className={`${LQ} inline-block px-6 py-2.5 text-sm font-bold`}>
+                  ثبت محصول جدید
                 </Link>
               )}
             </div>
@@ -434,11 +483,11 @@ export default function MyShopPage() {
                   {/* دکمه‌ها */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Link href={`/shop/${product.id}`}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="مشاهده">
+                      className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="مشاهده">
                       <Eye size={18} />
                     </Link>
                     <Link href={`/shop/edit/${product.id}`}
-                      className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors" title="ویرایش">
+                      className="p-2 text-gray-400 hover:text-[#9A6E38] hover:bg-[rgba(199,166,106,0.12)] rounded-xl transition-colors" title="ویرایش">
                       <Edit size={18} />
                     </Link>
                     <button onClick={() => handleDelete(product.id)} disabled={deleting === product.id}

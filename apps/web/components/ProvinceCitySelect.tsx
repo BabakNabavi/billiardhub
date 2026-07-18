@@ -65,7 +65,7 @@ const CSS = `
 .pcs-btn.err { border-color: #E4A2A2; }
 .pcs-btn:disabled { opacity: .55; cursor: not-allowed; }
 .pcs-val { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pcs-val.ph { color: var(--pcs-mut); }
+.pcs-val.ph { color: var(--pcs-mut); font-size: 11.5px; }
 .pcs-chev { flex-shrink: 0; color: var(--pcs-mut); transition: transform .2s ease; }
 .pcs-btn.open .pcs-chev { transform: rotate(180deg); color: var(--pcs-gold-d); }
 .pcs-panel {

@@ -245,6 +245,7 @@ function BookingContent() {
   const isoDate = jDay ? toISO(jYear,jMonth,jDay) : '';
 
   const [loading, setLoading]       = useState(true);
+  const [reserveClosed, setReserveClosed] = useState(false);   // صاحبِ باشگاه رزروِ آنلاین را بسته
   const [slotsLoad, setSlotsLoad]   = useState(false);
   const [booking, setBooking]       = useState(false);
   const [error, setError]           = useState('');
@@ -265,6 +266,12 @@ function BookingContent() {
   const slotsRef = useRef<HTMLDivElement>(null);
 
   useEffect(()=>{
+    // صاحبِ باشگاه رزروِ آنلاین را بسته است؟ (از داشبورد باشگاه، همان کلید)
+    try {
+      const rc = localStorage.getItem(`club-reserveClosedUntil-${clubId}`) ?? '';
+      setReserveClosed(rc === 'always' || (rc !== '' && Number(rc) > Date.now()));
+    } catch { /* ignore */ }
+
     api.get(`/clubs/${clubId}`).catch(()=>({data:{id:clubId,name:'باشگاه',managerName:''}}))
       .then(c=>{ setClub(c.data); });
 
@@ -585,6 +592,24 @@ function BookingContent() {
       </div>
     );
   }
+
+  /* ── رزروِ آنلاین بسته است ── */
+  if (reserveClosed) return (
+    <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+      <div style={{maxWidth:420,textAlign:'center',background:'#fff',borderRadius:22,border:'1px solid rgba(0,0,0,0.07)',boxShadow:'0 12px 40px rgba(0,0,0,0.06)',padding:'36px 28px'}}>
+        <div style={{width:66,height:66,borderRadius:'50%',background:'rgba(220,38,38,0.10)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزروِ آنلاین موقتاً بسته است</h1>
+        <p style={{fontSize:14,color:'rgba(0,0,0,0.55)',lineHeight:1.8,margin:'0 0 22px'}}>
+          {club?.name ?? 'این باشگاه'} فعلاً رزروِ اینترنتی را غیرفعال کرده است. لطفاً بعداً دوباره تلاش کنید یا مستقیم با باشگاه تماس بگیرید.
+        </p>
+        <Link href={`/clubs/${clubId}`} style={{display:'inline-flex',alignItems:'center',gap:6,color:'#9A6E38',fontSize:14,fontWeight:800,textDecoration:'none',background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.34)',borderRadius:12,padding:'11px 20px'}}>
+          بازگشت به صفحه‌ی باشگاه
+        </Link>
+      </div>
+    </div>
+  );
 
   /* ── Main booking form ── */
   return (

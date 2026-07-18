@@ -48,18 +48,18 @@ const nav = [
     heading: 'PLATFORM',
     color: GOLD,
     links: [
-      { href: '/clubs',       label: 'باشگاه‌ها' },
-      { href: '/shop',        label: 'فروشگاه'   },
-      { href: '/tournaments', label: 'مسابقات'   },
+      { href: '/clubs',    label: 'باشگاه‌ها'     },
+      { href: '/sellers',  label: 'فروشگاه‌ها'    },
+      { href: '/shop',     label: 'بیلیارد بازار' },
     ],
   },
   {
     heading: 'EXPLORE',
     color: '#4A8FC8',
     links: [
-      { href: '/players',   label: 'بازیکنان' },
-      { href: '/coaches',   label: 'مربیان'   },
-      { href: '/education', label: 'آموزش'    },
+      { href: '/players',  label: 'بازیکنان' },
+      { href: '/coaches',  label: 'مربیان'   },
+      { href: '/referees', label: 'داوران'   },
     ],
   },
   {

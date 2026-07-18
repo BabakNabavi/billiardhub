@@ -116,6 +116,26 @@ const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
   ],
 }
 
+/* «نوع» برای هر دسته — دراپ‌داونِ بالای فرم (اجباری). دسته‌هایی که اینجا نیستند، «نوع» متنِ آزاد می‌گیرند.
+   توجه: در «چوب» گزینه‌ی «سایر» حذف شده است. */
+const TYPE_OPTIONS: Record<string, string[]> = {
+  cue:        ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول'],
+  table:      ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول', 'خانگی'],
+  ball:       ['۱۵ تایی پاکت بیلیارد', '۲۲ تایی اسنوکر', '۳ تایی کارامبول'],
+  tip:        ['تک لایه چرم', 'چندلایه چرم', 'سینتتیک', 'فنولیک'],
+  'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
+}
+
+/* فیلدهایی که به بالای فرم (دسته/نوع/برند/مدل) منتقل شده‌اند و نباید در «مشخصات فنی» تکرار شوند */
+const HIDDEN_SPEC_KEYS: Record<string, string[]> = {
+  cue:        ['cueType', 'brand'],
+  table:      ['tableType', 'brand', 'model'],
+  ball:       ['setType', 'brand'],
+  tip:        ['tipType', 'brand', 'model'],
+  chalk:      ['brand'],
+  'case-bag': ['caseType', 'brand'],
+}
+
 function SpecField({ field, value, otherValue, onChange, onOtherChange, dependencyValue }: {
   field: SpecFieldDef; value: string; otherValue: string
   onChange: (v: string) => void; onOtherChange: (v: string) => void
@@ -153,7 +173,7 @@ function SpecField({ field, value, otherValue, onChange, onOtherChange, dependen
             {resolvedOptions.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         ) : effectiveType === 'number' ? (
-          <input className="nf" type="number" placeholder={field.placeholder ?? ''} value={value}
+          <input className="nf" type="number" step="any" inputMode="decimal" placeholder={field.placeholder ?? ''} value={value}
             onChange={e => onChange(e.target.value)}
             style={{ ...inp(), direction: 'ltr', textAlign: 'right' }} />
         ) : (
@@ -221,12 +241,12 @@ function sel(err?: string, disabled?: boolean): React.CSSProperties {
   }
 }
 
-function Label({ children, required, optional }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
+/* optional دیگر برچسبِ «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کلِ فرم حذف شد */
+function Label({ children, required }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
   return (
     <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
       {children}
       {required && <span style={{ color: ERR, marginRight: 3 }}>*</span>}
-      {optional && <span style={{ fontSize: 11, fontWeight: 400, color: TEXT_MUT, marginRight: 4 }}>(اختیاری)</span>}
     </label>
   )
 }
@@ -254,11 +274,14 @@ export default function NewProductPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
-    name: '', category: '', price: '', oldPrice: '',
+    category: '', type: '', model: '', price: '', oldPrice: '',
     description: '', brand: '', condition: 'new',
     shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
     province: '', city: '', address: '',
   })
+  const [storeSlug, setStoreSlug] = useState('')
+  const [showSection, setShowSection] = useState(false)   // مودالِ انتخابِ سکشن قبل از ثبت
+  const [geoLocked, setGeoLocked] = useState(false)       // استان/شهر/آدرس از فروشگاه ⇒ قفل
   const [images,   setImages]   = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
   const [errors,   setErrors]   = useState<Record<string, string>>({})
@@ -286,8 +309,10 @@ export default function NewProductPage() {
     const autoOwner = store?.ownerName || authName || u.ownerName || ''
     if (autoOwner) { setForm(f => ({ ...f, ownerName: autoOwner })); setOwnerNameLocked(true) }
 
-    // استان/شهر/آدرس/تماس: از همان فروشگاه پیش‌پر می‌شوند (قابل ویرایش)
+    // استان/شهر/آدرس/تماس: از همان فروشگاه پیش‌پر و قفل می‌شوند
     if (store) {
+      setStoreSlug(store.slug || '')
+      setGeoLocked(!!(store.province || store.city || store.address))
       setForm(f => ({
         ...f,
         province:       store.province || f.province,
@@ -306,6 +331,7 @@ export default function NewProductPage() {
 
   const handleCategoryChange = (cat: string) => {
     set('category', cat)
+    set('type', '')          // لیستِ «نوع» با تغییر دسته عوض می‌شود
     setSpecs({})
     setSpecOthers({})
   }
@@ -339,8 +365,10 @@ export default function NewProductPage() {
 
   const validate = () => {
     const e: Record<string, string> = {}
-    if (!form.name.trim())        e.name        = 'نام محصول الزامی است'
     if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
+    if (!form.type.trim())        e.type        = 'نوع را مشخص کنید'
+    if (!form.brand.trim())       e.brand       = 'برند الزامی است'
+    if (!form.model.trim())       e.model       = 'مدل الزامی است'
     if (!form.price)              e.price       = 'قیمت الزامی است'
     if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه | فروشنده الزامی است'
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
@@ -351,10 +379,16 @@ export default function NewProductPage() {
     return e
   }
 
+  /* ثبت: اول اعتبارسنجی، بعد مودالِ انتخابِ سکشن؛ کاربر سکشن را می‌زند و finalize ذخیره می‌کند */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    setShowSection(true)
+  }
+
+  const finalize = (section: 'weekly' | 'party' | 'newest') => {
+    setShowSection(false)
     setSubmitting(true)
 
     const rawPrice = Number(toAsciiDigits(form.price).replace(/\D/g, ''))
@@ -362,18 +396,25 @@ export default function NewProductPage() {
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
     const imgList  = images.map(i => i.data)
 
-    const finalSpecs: Record<string, string> = {}
+    const finalSpecs: Record<string, string> = { نوع: form.type.trim(), مدل: form.model.trim() }
     Object.entries(specs).forEach(([k, v]) => {
       if (v === 'سایر' && specOthers[k]) finalSpecs[k] = `سایر: ${specOthers[k]}`
       else if (v) finalSpecs[k] = v
     })
 
+    /* نامِ محصول از دسته/نوع/برند/مدل ساخته می‌شود (فیلدِ «نام محصول» حذف شده) */
+    const composedName = [form.brand.trim(), form.model.trim()].filter(Boolean).join(' ')
+      || [catLabel, form.type.trim()].filter(Boolean).join(' ') || 'محصول'
+
     const product = {
       id: Date.now(),
+      section,
       img:       imgList[0] ?? '/images/shop/cue_billiard_2.jpg',
       images:    imgList.length > 0 ? imgList : ['/images/shop/cue_billiard_2.jpg'],
-      name:      form.name.trim(),
+      name:      composedName,
       category:  form.category,
+      type:      form.type.trim(),
+      model:     form.model.trim(),
       price:     rawPrice,
       old:       rawOld,
       disc,
@@ -381,6 +422,7 @@ export default function NewProductPage() {
       brand:          form.brand.trim(),
       condition:      form.condition,
       specs:          finalSpecs,
+      sellerId:       storeSlug,
       sellerName:     form.shopName.trim(),
       ownerName:      form.ownerName.trim(),
       sellerPhone:    form.sellerPhone.trim(),
@@ -424,12 +466,15 @@ export default function NewProductPage() {
   )
 
   const catLabel = CATEGORIES.find(c => c.id === form.category)?.label ?? ''
+  const previewName = [form.brand.trim(), form.model.trim()].filter(Boolean).join(' ')
+    || [catLabel, form.type.trim()].filter(Boolean).join(' ')
 
   return (
     <>
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes popIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
         * { box-sizing: border-box; }
         .nf:focus { border-color: ${GOLD} !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.14) !important; }
         .nf::placeholder { color: rgba(28,28,26,0.28); }
@@ -472,11 +517,6 @@ export default function NewProductPage() {
                 <p style={{ fontSize: 11, color: GOLD, letterSpacing: '0.2em', fontWeight: 700, margin: '0 0 2px' }}>NEW PRODUCT</p>
                 <h1 style={{ fontSize: 'clamp(21px,2.8vw,28px)', fontWeight: 900, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>ثبت محصول جدید</h1>
               </div>
-              {/* «ذخیره خودکار فعال» — کنارِ عنوان (قبلاً گوشه‌ی بالا بود و دیده نمی‌شد) */}
-              <div style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: GOLD_D, background: LQ_BG, border: LQ_BOR, boxShadow: LQ_SHAD, borderRadius: 20, padding: '6px 13px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                <span>ذخیره خودکار فعال</span>
-              </div>
             </div>
             <p style={{ fontSize: 14.5, color: TEXT_SEC, margin: '0 0 0 54px', lineHeight: 1.6 }}>
               محصول خود را در بیلیارد هاب معرفی کنید و مستقیماً با خریداران در ارتباط باشید
@@ -508,14 +548,7 @@ export default function NewProductPage() {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
 
-                    {/* name */}
-                    <div>
-                      <Label required>نام محصول</Label>
-                      <input className="nf" type="text" placeholder="مثال: چوب حرفه‌ای Predator 314³" value={form.name} onChange={e => set('name', e.target.value)} style={inp(errors.name)} />
-                      <ErrMsg msg={errors.name} />
-                    </div>
-
-                    {/* category — full width */}
+                    {/* دسته‌بندی */}
                     <div>
                       <Label required>دسته‌بندی</Label>
                       <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={sel(errors.category)}>
@@ -525,13 +558,42 @@ export default function NewProductPage() {
                       <ErrMsg msg={errors.category} />
                     </div>
 
+                    {/* نوع — دراپ‌داون اگر دسته لیست نوع دارد، وگرنه متن */}
+                    <div>
+                      <Label required>نوع</Label>
+                      {form.category && TYPE_OPTIONS[form.category] ? (
+                        <select className="nf" value={form.type} onChange={e => set('type', e.target.value)} style={sel(errors.type)}>
+                          <option value="">انتخاب...</option>
+                          {TYPE_OPTIONS[form.category]!.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                      ) : (
+                        <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type} onChange={e => set('type', e.target.value)} style={inp(errors.type)} />
+                      )}
+                      <ErrMsg msg={errors.type} />
+                    </div>
+
+                    {/* برند */}
+                    <div>
+                      <Label required>برند</Label>
+                      <input className="nf" type="text" placeholder="نام برند" value={form.brand} onChange={e => set('brand', e.target.value)} style={inp(errors.brand)} />
+                      <ErrMsg msg={errors.brand} />
+                    </div>
+
+                    {/* مدل */}
+                    <div>
+                      <Label required>مدل</Label>
+                      <input className="nf" type="text" placeholder="مثال: 314³" value={form.model} onChange={e => set('model', e.target.value)} style={inp(errors.model)} />
+                      <ErrMsg msg={errors.model} />
+                    </div>
+
                   </div>
                 </div>
 
                 {/* card: specs + condition + description — always visible */}
                 {(() => {
                   const currentSpecs = form.category ? (CATEGORY_SPECS[form.category] ?? GENERIC_SPECS) : []
-                  const specFields = currentSpecs.filter(f => f.key !== 'condition')
+                  const hidden = HIDDEN_SPEC_KEYS[form.category] ?? ['brand']   // نوع/برند/مدل بالای فرم آمده‌اند
+                  const specFields = currentSpecs.filter(f => f.key !== 'condition' && !hidden.includes(f.key))
                   return (
                     <div key={form.category || 'no-cat'} style={{ background: LQ_BG, backdropFilter: 'blur(40px) saturate(220%)', WebkitBackdropFilter: 'blur(40px) saturate(220%)', border: LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '24px', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.35s ease both' }}>
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '46%', background: 'linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%)', pointerEvents: 'none' }} />
@@ -587,21 +649,14 @@ export default function NewProductPage() {
                         {/* divider */}
                         <div style={{ height: 1, background: 'rgba(28,28,26,0.08)', margin: '4px 0 18px' }} />
 
-                        {/* condition */}
+                        {/* condition — منوی مدرن (به‌جای دکمه‌های رنگی) */}
                         <div style={{ marginBottom: 16 }}>
                           <Label required>وضعیت کالا</Label>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            {([
-                              ['new',      'نو',       '🟢'],
-                              ['like-new', 'در حد نو', '🔵'],
-                              ['used',     'کارکرده',  '🟡'],
-                            ] as [string,string,string][]).map(([val, lbl, icon]) => (
-                              <button key={val} type="button" className="cond-btn" onClick={() => set('condition', val)} style={{ flex: 1, padding: '10px 6px', borderRadius: 11, border: `1px solid ${form.condition === val ? GOLD : 'rgba(199,166,106,0.22)'}`, background: form.condition === val ? 'rgba(199,166,106,0.15)' : 'rgba(255,255,255,0.55)', backdropFilter: 'blur(16px) saturate(200%)', WebkitBackdropFilter: 'blur(16px) saturate(200%)', boxShadow: form.condition === val ? `0 4px 16px rgba(199,166,106,0.28), inset 0 1px 0 rgba(255,255,255,0.60)` : 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(0,0,0,0.04)', fontSize: 13, fontWeight: 700, color: form.condition === val ? GOLD_D : TEXT_SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-                                <span style={{ fontSize: 15 }}>{icon}</span>
-                                {lbl}
-                              </button>
-                            ))}
-                          </div>
+                          <select className="nf" value={form.condition} onChange={e => set('condition', e.target.value)} style={sel()}>
+                            <option value="new">نو</option>
+                            <option value="like-new">در حد نو</option>
+                            <option value="used">کارکرده</option>
+                          </select>
                         </div>
 
                         {/* description */}
@@ -742,13 +797,14 @@ export default function NewProductPage() {
 
                     <ProvinceCitySelect
                       value={{ province: form.province, city: form.city }}
-                      onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
-                      required provinceError={errors.province} cityError={errors.city}
+                      onChange={v => !geoLocked && setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                      required disabled={geoLocked} provinceError={errors.province} cityError={errors.city}
                     />
+                    {geoLocked && <p style={{ fontSize: 11, color: GOLD_D, marginTop: -6, opacity: 0.8 }}>از فروشگاه شما پر شده و قفل است</p>}
 
                     <div>
-                      <Label optional>آدرس</Label>
-                      <textarea className="nf" rows={2} placeholder="خیابان، کوچه، پلاک..." value={form.address} onChange={e => set('address', e.target.value)} style={{ ...inp(), resize: 'vertical', minHeight: 72, lineHeight: 1.7 }} />
+                      <Label>آدرس</Label>
+                      <textarea className="nf" rows={2} placeholder="خیابان، کوچه، پلاک..." value={form.address} readOnly={geoLocked} onChange={e => !geoLocked && set('address', e.target.value)} style={{ ...inp(undefined, geoLocked), resize: 'vertical', minHeight: 72, lineHeight: 1.7 }} />
                     </div>
 
                   </div>
@@ -794,15 +850,15 @@ export default function NewProductPage() {
                       <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
                     </svg>
                     <p style={{ fontSize: 13, color: TEXT_SEC, lineHeight: 1.75, margin: 0 }}>
-                      اطلاعات تماس شما مستقیماً به خریداران نمایش داده می‌شود. این سایت مثل دیوار عمل می‌کند — خریدار مستقیم با شما تماس می‌گیرد.
+                      اطلاعات تماس شما مستقیماً به خریداران نمایش داده می‌شود ، خریدار مستقیم با شما تماس می‌گیرد.
                     </p>
                   </div>
                 </div>
 
                 {/* live preview */}
-                {(form.name || images.length > 0) && (
+                {(previewName || images.length > 0) && (
                   <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: LQ_BOR, borderRadius: 16, padding: '16px', boxShadow: LQ_SHAD, animation: 'fadeIn 0.3s ease both' }}>
-                    <p style={{ fontSize: 11.5, color: TEXT_MUT, marginBottom: 12, fontWeight: 700, letterSpacing: '0.1em' }}>پیش‌نمایش کارت</p>
+                    <p style={{ fontSize: 11.5, color: TEXT_MUT, marginBottom: 12, fontWeight: 700, letterSpacing: '0.1em' }}>پیش‌نمایش محصول</p>
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px', background: '#fff', borderRadius: 12, border: '1.5px solid rgba(28,28,26,0.08)' }}>
                       <div style={{ width: 64, height: 64, borderRadius: 10, overflow: 'hidden', background: '#F4F3F1', flexShrink: 0 }}>
                         {images.length > 0 && images[0]
@@ -811,7 +867,7 @@ export default function NewProductPage() {
                         }
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.name || 'نام محصول'}</p>
+                        <p style={{ fontSize: 13.5, fontWeight: 700, color: TEXT, margin: '0 0 3px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{previewName || 'محصول'}</p>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                           {catLabel && <span style={{ fontSize: 11, color: GOLD, fontWeight: 600, background: 'rgba(199,166,106,0.1)', padding: '1px 7px', borderRadius: 10 }}>{catLabel}</span>}
                           {form.condition !== 'new' && <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, background: 'rgba(180,83,9,0.08)', padding: '1px 7px', borderRadius: 10 }}>{form.condition === 'like-new' ? 'در حد نو' : 'کارکرده'}</span>}
@@ -854,6 +910,38 @@ export default function NewProductPage() {
             </div>
           </form>
         </div>
+
+        {/* ── مودالِ انتخابِ محلِ نمایشِ محصول (قبل از ثبت نهایی) ── */}
+        {showSection && (
+          <div onClick={() => setShowSection(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18, animation: 'fadeIn 0.2s ease both' }}>
+            <div onClick={e => e.stopPropagation()} style={{ width: 'min(460px,100%)', background: '#fff', borderRadius: 22, border: '1px solid rgba(28,28,26,0.08)', boxShadow: '0 24px 60px rgba(20,18,14,0.28)', padding: '24px', animation: 'popIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+              <h3 style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>محصول کجا نمایش داده شود؟</h3>
+              <p style={{ fontSize: 13, color: TEXT_SEC, margin: '0 0 18px', lineHeight: 1.6 }}>محلِ نمایشِ محصول در بیلیارد بازار را انتخاب کنید.</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {([
+                  ['weekly', 'هفته‌های بیلیاردی', 'در سکشنِ اولِ بیلیارد بازار (تخفیف‌های هفته)'],
+                  ['party',  'بیلیارد پارتی',      'در سکشنِ بیلیارد پارتی'],
+                  ['newest', 'جدیدترین‌ها',        'انتخابِ پیش‌فرض — در سکشنِ جدیدترین‌ها'],
+                ] as ['weekly'|'party'|'newest', string, string][]).map(([val, title, sub]) => (
+                  <button key={val} type="button" onClick={() => finalize(val)}
+                    style={{ textAlign: 'right', padding: '14px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+                      background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', transition: 'all 0.18s', display: 'flex', flexDirection: 'column', gap: 3 }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(199,166,106,0.10)'; e.currentTarget.style.transform = 'none' }}>
+                    <span style={{ fontSize: 14.5, fontWeight: 800, color: GOLD_D }}>{title}</span>
+                    <span style={{ fontSize: 12, color: TEXT_SEC }}>{sub}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button type="button" onClick={() => setShowSection(false)}
+                style={{ marginTop: 14, width: '100%', padding: '11px', borderRadius: 12, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif', background: 'rgba(28,28,26,0.04)', border: '1px solid rgba(28,28,26,0.1)', color: TEXT_SEC, fontSize: 13, fontWeight: 600 }}>
+                انصراف
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )

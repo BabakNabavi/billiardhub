@@ -882,8 +882,9 @@ function PartyPromoCard({ href, variant }: { href: string; variant: 'cta' | 'arr
   )
 }
 
-function DealsSection() {
+function DealsSection({ userProds = [] }: { userProds?: typeof PRODUCTS }) {
   const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
+  const dealProducts = [...userProds, ...DEAL_PRODUCTS]
 
   const { ref: scrollRef, onDown, onClickCapture, scrollBy } = useDragScroll()
 
@@ -904,7 +905,7 @@ function DealsSection() {
           <PartyPromoCard href="/shop/party" variant="cta" />
 
           {/* deal product cards — دقیقاً همان مارک‌آپ کارت‌های sec1 */}
-          {DEAL_PRODUCTS.map((p, i) => (
+          {dealProducts.map((p, i) => (
             <Link key={`${p.id}-${i}`} href={`/shop/${p.id}`} draggable={false} className="prod-card bz-scroll-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
               <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
                 <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -982,9 +983,10 @@ function AdBanners() {
 }
 
 // ── Newest Section ────────────────────────────────────────────
-function NewestSection({ products }: { products: typeof PRODUCTS }) {
+function NewestSection({ products, userProds = [] }: { products: typeof PRODUCTS; userProds?: typeof PRODUCTS }) {
   const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
-  const newestProducts = [...products].reverse()
+  /* محصولاتِ تازه‌ی کاربر اول، بعد کاتالوگِ نمونه (وارونه، جدیدترین اول) */
+  const newestProducts = [...userProds, ...[...products].reverse()]
   return (
     <div style={{ background: '#fff' }}>
       {/* پدینگ پایین صفر است تا فاصله‌ی کارت‌ها تا بنرهای تبلیغاتیِ زیرش همان ۱۸px سکشن sec1 شود
@@ -1145,7 +1147,11 @@ export default function ShopPage() {
     } catch { /* ignore */ }
   }, [])
 
-  const allProducts = [...userProds, ...PRODUCTS]
+  /* محصولاتِ ثبت‌شده‌ی کاربر بر اساسِ سکشنی که هنگام ثبت انتخاب کرده به سه دسته تقسیم می‌شوند:
+     weekly ⇒ «هفته‌های بیلیاردی» (sec1) | party ⇒ «بیلیارد پارتی» | بقیه ⇒ «جدیدترین‌ها». */
+  const weeklyProds = userProds.filter(p => (p as { section?: string }).section === 'weekly')
+  const partyProds  = userProds.filter(p => (p as { section?: string }).section === 'party')
+  const newestProds = userProds.filter(p => { const s = (p as { section?: string }).section; return !s || s === 'newest' })
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -1311,16 +1317,16 @@ export default function ShopPage() {
         />
         <HeroSlider />
         <CatalogSection
-          products={allProducts}
+          products={[...weeklyProds, ...PRODUCTS]}
           filters={filters}
           setFilters={setFilters}
           sort={sort}
           setSort={setSort}
         />
-        <DealsSection />
+        <DealsSection userProds={partyProds} />
         <AdBanners />
         <CategoriesSection activeCat={activeSingleCat} onPick={pickCategory} />
-        <NewestSection products={allProducts} />
+        <NewestSection products={PRODUCTS} userProds={newestProds} />
         <DualBannerSection />
       </div>
     </>
