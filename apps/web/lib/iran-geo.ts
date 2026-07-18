@@ -34,3 +34,8 @@ export function provinceOfCity(cityName: string): string {
   if (!cityName) return ''
   return PROVINCES.find(p => p.cities.includes(cityName))?.name ?? ''
 }
+
+/* کد تلفنِ استان (مثلاً تهران ⇒ 021) — برای نمایش شماره‌ی ثابت با کد شهر */
+export function telPrefix(provinceName: string): string {
+  return PROVINCES.find(p => p.name === provinceName)?.tel ?? ''
+}
