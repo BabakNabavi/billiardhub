@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import AuthGuard from '../../../components/AuthGuard'
 import {
   GRADES, DISCIPLINES, getRefereeProfiles, saveRefereeProfile,
@@ -79,7 +80,7 @@ const rid = () => Math.random().toString(36).slice(2, 9)
 
 const emptyForm = {
   slug: '', firstNameFa: '', lastNameFa: '', firstNameEn: '', lastNameEn: '',
-  city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
+  province: '', city: '', disciplines: [] as string[], shortBio: '', fullBio: '',
   grades: [] as RefereeGrade[], gallery: [] as RefereeMedia[], videos: [] as RefereeVideo[],
   phone: '', whatsapp: '', instagram: '', telegram: '',
   photo: '', coverImage: '', certificate: null as { name: string; url: string } | null,
@@ -121,7 +122,7 @@ function RefereeDashboardInner() {
     if (mine) {
       setForm({
         slug: mine.slug, firstNameFa: user?.firstName || mine.firstNameFa, lastNameFa: user?.lastName || mine.lastNameFa,
-        firstNameEn: mine.firstNameEn, lastNameEn: mine.lastNameEn, city: mine.city,
+        firstNameEn: mine.firstNameEn, lastNameEn: mine.lastNameEn, province: mine.province, city: mine.city,
         disciplines: mine.disciplines, shortBio: mine.shortBio, fullBio: mine.fullBio,
         grades: mine.grades, gallery: mine.gallery, videos: mine.videos,
         phone: mine.phone, whatsapp: mine.whatsapp, instagram: mine.instagram, telegram: mine.telegram,
@@ -232,6 +233,7 @@ function RefereeDashboardInner() {
     if (!form.lastNameFa.trim())  e.lastNameFa  = 'الزامی'
     if (!form.firstNameEn.trim()) e.firstNameEn = 'الزامی'
     if (!form.lastNameEn.trim())  e.lastNameEn  = 'الزامی'
+    if (!form.province.trim())    e.province    = 'الزامی'
     if (!form.city.trim())        e.city        = 'الزامی'
     if (!form.slug.trim())        e.slug        = 'الزامی'
     else if (!isValidSlug(form.slug)) e.slug     = 'فقط حروف انگلیسی، عدد و خط تیره (۲ تا ۶۰ کاراکتر)'
@@ -399,7 +401,13 @@ function RefereeDashboardInner() {
               <div style={{ gridColumn: '1 / -1', fontSize: 11.5, color: TEXT_M, marginTop: -6 }}>نام و نام خانوادگی از اطلاعات حساب کاربری شما گرفته شده و قابل تغییر نیست.</div>
               <div><label style={lbl}>Last name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.lastNameEn} onChange={e => set('lastNameEn', e.target.value)} placeholder="Talebi" />{err('lastNameEn')}</div>
               <div><label style={lbl}>First name (English){star}</label><input style={{ ...inp, direction: 'ltr', textAlign: 'left' }} value={form.firstNameEn} onChange={e => set('firstNameEn', e.target.value)} placeholder="Kaveh" />{err('firstNameEn')}</div>
-              <div><label style={lbl}>شهر{star}</label><input style={inp} value={form.city} onChange={e => set('city', e.target.value)} placeholder="تهران" />{err('city')}</div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <ProvinceCitySelect
+                  value={{ province: form.province, city: form.city }}
+                  onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                  required cityError={errors.city} provinceError={errors.province}
+                />
+              </div>
               <div>
                 <label style={lbl}>نشانی اختصاصی پروفایل (URL){star}</label>
                 <div style={{ display: 'flex', gap: 6 }}>

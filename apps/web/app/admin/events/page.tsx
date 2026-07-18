@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Trophy, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 
 interface EventItem {
   id: string;
@@ -12,6 +13,7 @@ interface EventItem {
   category: string;
   sport: string;
   location: string;
+  province?: string;
   city: string;
   startDate: string;
   endDate: string;
@@ -36,14 +38,11 @@ const sports = [
   { value: 'highball', label: 'هی‌بال' },
 ];
 
-const iranCities = [
-  'تهران', 'مشهد', 'اصفهان', 'کرج', 'شیراز', 'تبریز', 'اهواز', 'قم',
-  'کرمانشاه', 'ارومیه', 'رشت', 'همدان', 'کرمان', 'یزد', 'اردبیل',
-];
+// شهر/استان از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 const emptyForm = {
   title: '', description: '', category: 'national', sport: 'snooker',
-  location: '', city: 'تهران', startDate: '', endDate: '',
+  location: '', province: 'تهران', city: 'تهران', startDate: '', endDate: '',
   maxParticipants: 32, prize: '', organizer: '', registrationOpen: true, status: 'upcoming',
 };
 
@@ -69,7 +68,7 @@ export default function AdminEventsPage() {
 
   const handleEdit = (item: EventItem) => {
     setEditingId(item.id);
-    setForm({ ...item });
+    setForm({ ...item, province: item.province ?? '' });
     setShowForm(true);
   };
 
@@ -174,12 +173,11 @@ export default function AdminEventsPage() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="مثال: سالن المپیک" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">شهر</label>
-                <select value={form.city} onChange={e => set('city', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500">
-                  {iranCities.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+              <div className="sm:col-span-2">
+                <ProvinceCitySelect
+                  value={{ province: form.province || '', city: form.city }}
+                  onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                />
               </div>
             </div>
 

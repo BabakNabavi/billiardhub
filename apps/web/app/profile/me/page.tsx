@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -61,14 +62,7 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 const GOLD = '#C7A66A'
 const GOLD_DARK = '#A07840'
 
-const PROVINCES = [
-  'آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز',
-  'ایلام','بوشهر','تهران','چهارمحال و بختیاری','خراسان جنوبی',
-  'خراسان رضوی','خراسان شمالی','خوزستان','زنجان','سمنان',
-  'سیستان و بلوچستان','فارس','قزوین','قم','کردستان',
-  'کرمان','کرمانشاه','کهگیلویه و بویراحمد','گلستان','گیلان',
-  'لرستان','مازندران','مرکزی','هرمزگان','همدان','یزد',
-]
+// استان/شهر از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 // ─── Section wrapper ──────────────────────────────────────────
 function Section({ title, icon, color = '#C7A66A', children }: {
@@ -410,17 +404,10 @@ export default function ProfileMePage() {
 
             {/* ── موقعیت ── */}
             <Section title="موقعیت" icon="ti-map-pin" color="#06b6d4">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
-                <Field label="استان">
-                  <select value={province} onChange={e => setProvince(e.target.value)} style={{ ...inputStyle, appearance: 'none' as any }}>
-                    <option value="">انتخاب استان</option>
-                    {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                </Field>
-                <Field label="شهر">
-                  <input value={city} onChange={e => setCity(e.target.value)} placeholder="نام شهر" style={inputStyle} />
-                </Field>
-              </div>
+              <ProvinceCitySelect
+                value={{ province, city }}
+                onChange={v => { setProvince(v.province); setCity(v.city) }}
+              />
             </Section>
 
             {/* ── باشگاه ── */}

@@ -5,15 +5,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import { useAuthStore } from '../../../store/auth.store';
 import { persianToSlug, isValidSlug } from '../../../lib/slug';
 
-const IRAN_PROVINCES = [
-  'آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز','ایلام','بوشهر','تهران',
-  'چهارمحال و بختیاری','خراسان جنوبی','خراسان رضوی','خراسان شمالی','خوزستان','زنجان',
-  'سمنان','سیستان و بلوچستان','فارس','قزوین','قم','کردستان','کرمان','کرمانشاه',
-  'کهگیلویه و بویراحمد','گلستان','گیلان','لرستان','مازندران','مرکزی','هرمزگان','همدان','یزد',
-];
+// استان/شهر از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 export default function NewClubPage() {
   const router = useRouter();
@@ -339,23 +335,14 @@ export default function NewClubPage() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>📍 آدرس باشگاه</h2>
 
-            {/* ردیف ۱: استان */}
+            {/* استان + شهر */}
             <div className="mb-4">
-              <label className={labelCls}>استان *</label>
-              <select name="province" value={form.province} onChange={handleChange}
-                className={`${inputCls} dark-input`} style={inputStyle}>
-                <option value="">انتخاب استان...</option>
-                {IRAN_PROVINCES.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* ردیف ۲: شهر */}
-            <div className="mb-4">
-              <label className={labelCls}>شهر *</label>
-              <input type="text" name="city" value={form.city} onChange={handleChange}
-                className={`${inputCls} dark-input`} style={inputStyle} placeholder="مثلاً تهران" />
+              <ProvinceCitySelect
+                theme="dark"
+                value={{ province: form.province, city: form.city }}
+                onChange={v => setForm(prev => ({ ...prev, province: v.province, city: v.city }))}
+                required
+              />
             </div>
 
             {/* ردیف ۳: آدرس کامل */}

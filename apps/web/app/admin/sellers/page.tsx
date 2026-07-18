@@ -102,7 +102,7 @@ export default function AdminSellersPage() {
                         {s.ownerName || '—'} · /sellers/{s.slug}
                       </div>
                       <div style={{ fontSize: 12, color: TEXT_M, marginTop: 3 }}>
-                        {s.city || '—'}{s.contactPhone ? ` · ${s.contactPhone}` : ''}
+                        {[s.province, s.city].filter(Boolean).join('، ') || '—'}{s.contactPhone ? ` · ${s.contactPhone}` : ''}
                       </div>
                     </div>
                     <span style={{ ...btn(st.bg, st.color, `1px solid ${st.color}30`), cursor: 'default' }}>{st.label}</span>

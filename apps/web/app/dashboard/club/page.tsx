@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
+import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
+import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
@@ -303,7 +305,7 @@ export default function ClubDashboardPage() {
 
   // Club info
   const [clubInfo, setClubInfo] = useState({
-    name: '', managerName: '', description: '', address: '', city: '',
+    name: '', managerName: '', description: '', address: '', province: '', city: '',
     country: 'ایران', phone: '', website: '', timezone: 'Asia/Tehran',
     snookerTables: '0', pocketTables: '0', highballTables: '0',
     vipSnookerTables: '0', vipPocketTables: '0', airHockeyTables: '0',
@@ -417,6 +419,7 @@ export default function ClubDashboardPage() {
         managerName: c.managerName ?? '',
         description: c.description ?? '',
         address: c.address ?? '',
+        province: c.province ?? provinceOfCity(c.city ?? ''),   // بک‌فیلِ استان از شهر برای باشگاه‌های قدیمی
         city: c.city ?? '',
         country: c.country ?? 'ایران',
         phone: c.phone ?? '',
@@ -1176,7 +1179,12 @@ export default function ClubDashboardPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <InputField label="نام باشگاه"   value={clubInfo.name}        onChange={v => setClubInfo(p => ({...p, name: v}))} />
               <InputField label="نام مدیر"     value={clubInfo.managerName} onChange={v => setClubInfo(p => ({...p, managerName: v}))} />
-              <InputField label="شهر"          value={clubInfo.city}        onChange={v => setClubInfo(p => ({...p, city: v}))} />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <ProvinceCitySelect
+                  value={{ province: clubInfo.province, city: clubInfo.city }}
+                  onChange={v => setClubInfo(p => ({ ...p, province: v.province, city: v.city }))}
+                />
+              </div>
               <InputField label="کشور"         value={clubInfo.country}     onChange={v => setClubInfo(p => ({...p, country: v}))} />
               <InputField label="آدرس"         value={clubInfo.address}     onChange={v => setClubInfo(p => ({...p, address: v}))} placeholder="آدرس کامل" />
               <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))} placeholder="021-..." />

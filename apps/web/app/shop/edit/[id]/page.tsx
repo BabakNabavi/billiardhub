@@ -6,6 +6,8 @@ import { useAuthStore } from '../../../../store/auth.store';
 import { uploadFile } from '../../../../lib/supabase';
 import { Package, X, Upload, Info, Plus, ChevronDown, Check } from 'lucide-react';
 import api from '../../../../lib/api';
+import ProvinceCitySelect from '../../../../components/ProvinceCitySelect';
+import { provinceOfCity } from '../../../../lib/iran-geo';
 
 function CustomSelect({ options, value, onChange, placeholder = 'انتخاب کنید' }: {
   options: { value: string; label: string; icon?: string }[];
@@ -63,12 +65,7 @@ const conditions = [
   { value: 'used', label: 'کارکرده', icon: '🔄' },
 ];
 
-const iranCities = [
-  'تهران', 'مشهد', 'اصفهان', 'کرج', 'شیراز', 'تبریز', 'اهواز', 'قم',
-  'کرمانشاه', 'ارومیه', 'رشت', 'زاهدان', 'همدان', 'کرمان', 'یزد',
-  'اردبیل', 'بندرعباس', 'اراک', 'زنجان', 'سنندج', 'قزوین',
-  'خرم‌آباد', 'گرگان', 'ساری', 'بوشهر', 'بیرجند', 'سمنان',
-].map(c => ({ value: c, label: c, icon: '📍' }));
+// شهر/استان از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
 function numberToFarsiWords(num: number): string {
   if (!num || num === 0) return '';
@@ -103,7 +100,7 @@ export default function EditProductPage() {
   const [form, setForm] = useState({
     title: '', description: '', brand: '', model: '',
     price: '', discountPrice: '', category: 'table', condition: 'new',
-    city: '', stock: '1', color: '', keywords: '',
+    province: '', city: '', stock: '1', color: '', keywords: '',
     specs: [{ label: '', value: '' }],
   });
 
@@ -133,6 +130,7 @@ export default function EditProductPage() {
         discountPrice: String(p.discountPrice || ''),
         category: p.category || 'table',
         condition: p.condition || 'new',
+        province: p.province || provinceOfCity(p.city || ''),   // بک‌فیلِ استان از روی شهر برای محصولات قدیمی
         city: p.city || '',
         stock: String(p.stock || '1'),
         color: p.color || '',
@@ -252,8 +250,11 @@ export default function EditProductPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">شهر *</label>
-              <CustomSelect options={iranCities} value={form.city} onChange={v => set('city', v)} placeholder="انتخاب شهر" />
+              <ProvinceCitySelect
+                value={{ province: form.province, city: form.city }}
+                onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
+                required
+              />
             </div>
           </div>
         </div>

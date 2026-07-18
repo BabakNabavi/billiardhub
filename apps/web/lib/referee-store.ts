@@ -5,6 +5,7 @@
    Mirrors coach-store, but the referee certificate is MANDATORY
    (a referee can't submit without it) — so there is no «free» state.
    ───────────────────────────────────────────────────────────── */
+import { provinceOfCity } from './iran-geo'
 
 export interface RefereeGrade  { key: string; label: string; year: string }
 export interface RefereeMedia  { id: string; url: string; caption: string }
@@ -14,6 +15,7 @@ export interface RefereeProfile {
   slug: string
   firstNameFa: string; lastNameFa: string
   firstNameEn: string; lastNameEn: string
+  province: string
   city: string
   disciplines: string[]                 // officiating disciplines (snooker/pocket/highball)
   shortBio: string
@@ -54,7 +56,11 @@ const KEY = 'bh_referee_profiles'
 
 export function getRefereeProfiles(): Record<string, RefereeProfile> {
   if (typeof window === 'undefined') return {}
-  try { return JSON.parse(localStorage.getItem(KEY) || '{}') } catch { return {} }
+  try {
+    const all = JSON.parse(localStorage.getItem(KEY) || '{}') as Record<string, RefereeProfile>
+    for (const p of Object.values(all)) if (!p.province && p.city) p.province = provinceOfCity(p.city)
+    return all
+  } catch { return {} }
 }
 
 export function getRefereeProfile(slug: string): RefereeProfile | null {
