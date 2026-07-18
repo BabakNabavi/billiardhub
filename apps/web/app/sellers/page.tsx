@@ -299,41 +299,9 @@ const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) =>
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// ── Stars ─────────────────────────────────────────────────────
-function Stars({ rating }: { rating: number }) {
-  return (
-    <div style={{ display: 'flex', gap: 2 }}>
-      {[1,2,3,4,5].map(i => {
-        const full = i <= Math.floor(rating)
-        const half = !full && i - 0.5 <= rating
-        return (
-          <svg key={i} width={13} height={13} viewBox="0 0 24 24"
-            fill={full ? '#f59e0b' : half ? 'url(#half)' : 'none'}
-            stroke="#f59e0b" strokeWidth={full || half ? 0 : 1.5}>
-            {half && (
-              <defs>
-                <linearGradient id="half" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="50%" stopColor="#f59e0b"/>
-                  <stop offset="50%" stopColor="transparent"/>
-                </linearGradient>
-              </defs>
-            )}
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-        )
-      })}
-    </div>
-  )
-}
 
-// ── Logo with gold story ring (fully visible) ─────────────────
-function SellerLogo({ name, size = 62 }: { name: string; size?: number }) {
-  const hues = [
-    ['#C7A66A','#A07840'], ['#6A9EC7','#4070A0'], ['#9EC76A','#70A040'],
-    ['#C76A9E','#A04070'], ['#6AC79E','#40A070'], ['#C79E6A','#A07040'],
-  ]
-  const idx = name.charCodeAt(0) % hues.length
-  const [c1, c2] = hues[idx] ?? ['#C7A66A','#A07840']
+// ── Logo — لوگوی آپلودشده، وگرنه آیکون مدرنِ فروشگاه (نه حرف اول اسم) ──
+function SellerLogo({ name, logo, size = 62 }: { name: string; logo?: string; size?: number }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
@@ -341,28 +309,28 @@ function SellerLogo({ name, size = 62 }: { name: string; size?: number }) {
       boxShadow: `0 6px 18px rgba(199,166,106,0.45)`,
     }}>
       <div style={{
-        width: '100%', height: '100%', borderRadius: '50%',
+        width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
         border: '2.5px solid #fff',
-        background: `linear-gradient(135deg,${c1},${c2})`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: size * 0.36, fontWeight: 900, color: '#fff',
+        background: 'linear-gradient(135deg,#14532D,#1E6B3C)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
       }}>
-        {name.charAt(0)}
+        {logo
+          ? <img src={logo} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : (
+            <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+              <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
+              <path d="M2 7h20"/>
+              <path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>
+            </svg>
+          )}
       </div>
     </div>
   )
 }
 
-// ── Verified pill (inline, not overlapping banner) ────────────
-function VerifiedPill() {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: 'rgba(22,163,74,0.12)', border: '1px solid rgba(22,163,74,0.34)', color: '#15803D', fontSize: 11, fontWeight: 700, borderRadius: 20, padding: '2px 8px', flexShrink: 0 }}>
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2"><polyline points="20 6 9 17 4 12"/></svg>
-      تأیید شده
-    </span>
-  )
-}
-const PhoneIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+const PhoneIcon =<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.47-1.47a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
 
 // ── Seller Card — grid + list, modern gold theme ──────────────
 function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' | 'list' }) {
@@ -377,13 +345,6 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
     transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)', cursor: 'pointer',
   }
 
-  const ratingRow = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-      <Stars rating={seller.rating} />
-      <span style={{ fontSize: 14, fontWeight: 800, color: TEXT }}>{seller.rating}</span>
-      <span style={{ fontSize: 12.5, color: TEXT_MUT }}>({seller.reviewCount} نظر)</span>
-    </div>
-  )
   const metaRow = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: TEXT_SEC, flexWrap: 'wrap' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -444,10 +405,9 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
         <div className="sel-list-body" style={{ flex: 1, minWidth: 0, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
-            {seller.verified && <VerifiedPill />}
           </div>
           <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{ratingRow}{metaRow}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{metaRow}</div>
           <div className="sel-list-brands">{brandsRow}</div>
         </div>
         {/* actions */}
@@ -485,15 +445,13 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <SellerLogo name={seller.name} size={62} />
         </div>
 
-        {/* name + verified (verified pushed to the left so they align across cards) */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, margin: '0 0 5px' }}>
+        {/* name */}
+        <div style={{ margin: '0 0 5px' }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.35 }}>{seller.name}</h3>
-          {seller.verified && <VerifiedPill />}
         </div>
 
         <p style={{ fontSize: 12.5, color: TEXT_SEC, margin: '0 0 12px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
 
-        <div style={{ marginBottom: 10 }}>{ratingRow}</div>
         <div style={{ marginBottom: 12 }}>{metaRow}</div>
         <div style={{ marginBottom: 16 }}>{brandsRow}</div>
 

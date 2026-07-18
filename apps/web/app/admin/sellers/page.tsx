@@ -118,13 +118,22 @@ export default function AdminSellersPage() {
                   {isOpen && (
                     <div style={{ borderTop: CBOR, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {s.desc && <p style={{ fontSize: 13, color: TEXT_S, lineHeight: 1.9 }}>{s.desc}</p>}
+                      {s.brands.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                          <span style={{ fontSize: 12, color: TEXT_M }}>نماینده‌ی:</span>
+                          {s.brands.map((b, i) => (
+                            <span key={i} style={{ fontSize: 12, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 20, padding: '2px 9px' }}>{b}</span>
+                          ))}
+                        </div>
+                      )}
                       {s.address && <p style={{ fontSize: 12.5, color: TEXT_S }}>آدرس: {s.address}</p>}
                       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12.5, color: TEXT_S }}>
                         {phones.length > 0 && <span>تلفن: <span style={{ direction: 'ltr', display: 'inline-block' }}>{phones.join('، ')}</span></span>}
                         {s.whatsapp  && <span>واتساپ: <span style={{ direction: 'ltr', display: 'inline-block' }}>{s.whatsapp}</span></span>}
                         {s.instagram && <span>اینستاگرام: <span style={{ direction: 'ltr', display: 'inline-block' }}>@{s.instagram}</span></span>}
                         {s.hours && <span>ساعت کاری: {s.hours}</span>}
-                        {s.gallery.length > 0 && <span>تصاویر: {s.gallery.length}</span>}
+                        {s.banners.length > 0 && <span>بنر: {s.banners.length}</span>}
+                        {s.aboutImages.length > 0 && <span>عکس درباره ما: {s.aboutImages.length}</span>}
                       </div>
                       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                         {s.certificate && (

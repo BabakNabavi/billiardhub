@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../../store/auth.store'
 import {
-  type SellerProfile, GALLERY_MAX,
+  type SellerProfile,
   emptySellerProfile, findSellerByOwner, getSellerProfile, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
@@ -55,11 +55,13 @@ export default function SellerDashboard() {
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
   const [warn, setWarn]     = useState(false)   // هشدارِ «بدون جواز کسب»
+  const [brandInput, setBrandInput] = useState('')
 
-  const logoRef  = useRef<HTMLInputElement>(null)
-  const storyRef = useRef<HTMLInputElement>(null)
-  const shotsRef = useRef<HTMLInputElement>(null)
-  const certRef  = useRef<HTMLInputElement>(null)
+  const logoRef   = useRef<HTMLInputElement>(null)
+  const storyRef  = useRef<HTMLInputElement>(null)
+  const certRef   = useRef<HTMLInputElement>(null)
+  const bannerRef = useRef<HTMLInputElement>(null)
+  const aboutRef  = useRef<HTMLInputElement>(null)
 
   const isSeller = useMemo(() => {
     if (!user) return false
@@ -91,17 +93,17 @@ export default function SellerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
-  const addShots = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* اسلایدرهای بنر هدر و «درباره ما» — آرایه‌ی رشته، حداکثر ۳ عکس */
+  const addImages = async (e: React.ChangeEvent<HTMLInputElement>, key: 'banners' | 'aboutImages', max = 3) => {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
     setBusy(true); setErr('')
     try {
-      const room = GALLERY_MAX - form.gallery.length
-      if (room <= 0) { setErr(`حداکثر ${toFa(GALLERY_MAX)} عکس.`); return }
-      const picked = files.slice(0, room)
-      const urls = await Promise.all(picked.map(f => compressImage(f)))
-      set('gallery', [...form.gallery, ...urls.map((url, i) => ({ id: `${Date.now()}-${i}`, url }))])
-      if (files.length > room) setErr(`فقط ${toFa(room)} عکس اضافه شد — حداکثر ${toFa(GALLERY_MAX)} عکس.`)
+      const cur = form[key]
+      const room = max - cur.length
+      if (room <= 0) { setErr(`حداکثر ${toFa(max)} عکس.`); return }
+      const urls = await Promise.all(files.slice(0, room).map(f => compressImage(f, 1600)))
+      set(key, [...cur, ...urls])
     } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
     finally { setBusy(false); e.target.value = '' }
   }
@@ -238,7 +240,71 @@ export default function SellerDashboard() {
               <textarea id="f-desc" rows={3} className={`${INPUT} resize-y leading-relaxed`} value={form.desc}
                 onChange={e => set('desc', e.target.value)}
                 placeholder="عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای"/>
-              <p className={HINT}>هم زیر نام فروشگاه و هم در فوتر نمایش داده می‌شود.</p>
+              <p className={HINT}>هم زیر نام فروشگاه و هم در باکس «درباره ما» نمایش داده می‌شود.</p>
+            </div>
+          </section>
+
+          {/* ═══ بنر هدر (اسلایدر، حداکثر ۳) ═══ */}
+          <section className={CARD}>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-[14.5px] font-bold">بنر هدر فروشگاه</h2>
+                <p className="mt-1 text-[12px] text-[#8A8474]">
+                  {form.banners.length ? `${toFa(form.banners.length)} از ۳ عکس` : 'حداکثر ۳ عکس (اسلایدی)؛ اگر خالی باشد بنر پیش‌فرض نمایش داده می‌شود'}
+                </p>
+              </div>
+              <button type="button" onClick={() => bannerRef.current?.click()} disabled={busy || form.banners.length >= 3} className={LQ_BTN}>
+                {Icon.upload} افزودن بنر
+              </button>
+              <input ref={bannerRef} type="file" accept="image/*" multiple className="hidden" onChange={e => addImages(e, 'banners')}/>
+            </div>
+            {form.banners.length === 0 ? (
+              <button type="button" onClick={() => bannerRef.current?.click()}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-9 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                {Icon.upload}<span className="text-[12.5px]">عکس پس‌زمینه‌ی هدر فروشگاه را اضافه کنید</span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-3 gap-3">
+                {form.banners.map((url, i) => (
+                  <div key={i} className="relative aspect-[16/7] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
+                    <img src={url} alt="" className="h-full w-full object-cover"/>
+                    <button type="button" aria-label="حذف بنر"
+                      onClick={() => set('banners', form.banners.filter((_, j) => j !== i))}
+                      className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
+                      {Icon.trash}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ═══ برندهای نمایندگی ═══ */}
+          <section className={CARD}>
+            <h2 className="text-[14.5px] font-bold">برندهای نمایندگی</h2>
+            <p className="mb-3 mt-1 text-[12px] leading-relaxed text-[#5B564B]">
+              اگر نماینده‌ی برند یا برندهایی هستید، اینجا اضافه کنید؛ زیر نام فروشگاه به‌صورت برچسب نمایش داده می‌شوند.
+            </p>
+            {form.brands.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {form.brands.map((b, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-3 py-1.5 text-[12.5px] font-semibold text-[#5B564B]">
+                    {b}
+                    <button type="button" aria-label={`حذف ${b}`} onClick={() => set('brands', form.brands.filter((_, j) => j !== i))}
+                      className="text-[#A69F8E] transition hover:text-[#B23B2E]">✕</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                className={INPUT} value={brandInput}
+                onChange={e => setBrandInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = brandInput.trim(); if (v && !form.brands.includes(v)) { set('brands', [...form.brands, v]); setBrandInput('') } } }}
+                placeholder="مثلاً Predator، Mezz، Aramith…"
+              />
+              <button type="button" onClick={() => { const v = brandInput.trim(); if (v && !form.brands.includes(v)) { set('brands', [...form.brands, v]); setBrandInput('') } }}
+                className={LQ_BTN}>افزودن</button>
             </div>
           </section>
 
@@ -338,37 +404,37 @@ export default function SellerDashboard() {
             </div>
           </section>
 
-          {/* ═══ گالری ═══ */}
+          {/* ═══ عکس‌های «درباره ما» (اسلایدر، حداکثر ۳) ═══ */}
           <section className={CARD}>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-[14.5px] font-bold">گالری تصاویر فروشگاه</h2>
+                <h2 className="text-[14.5px] font-bold">عکس‌های «درباره ما»</h2>
                 <p className="mt-1 text-[12px] text-[#8A8474]">
-                  {form.gallery.length > 0
-                    ? `${toFa(form.gallery.length)} از ${toFa(GALLERY_MAX)} عکس`
-                    : 'عکس‌های فروشگاه — پایین صفحه‌ی فروشگاه نمایش داده می‌شوند'}
+                  {form.aboutImages.length > 0
+                    ? `${toFa(form.aboutImages.length)} از ۳ عکس`
+                    : 'حداکثر ۳ عکس (اسلایدی) — کنار متنِ «درباره ما» پایین صفحه نمایش داده می‌شوند'}
                 </p>
               </div>
-              <button type="button" onClick={() => shotsRef.current?.click()}
-                disabled={busy || form.gallery.length >= GALLERY_MAX} className={LQ_BTN}>
+              <button type="button" onClick={() => aboutRef.current?.click()}
+                disabled={busy || form.aboutImages.length >= 3} className={LQ_BTN}>
                 {Icon.upload} افزودن عکس
               </button>
-              <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden" onChange={addShots}/>
+              <input ref={aboutRef} type="file" accept="image/*" multiple className="hidden" onChange={e => addImages(e, 'aboutImages')}/>
             </div>
 
-            {form.gallery.length === 0 ? (
-              <button type="button" onClick={() => shotsRef.current?.click()}
+            {form.aboutImages.length === 0 ? (
+              <button type="button" onClick={() => aboutRef.current?.click()}
                 className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
                 {Icon.upload}
                 <span className="text-[12.5px]">هنوز عکسی اضافه نشده</span>
               </button>
             ) : (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {form.gallery.map(shot => (
-                  <div key={shot.id} className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
-                    <img src={shot.url} alt="" className="h-full w-full object-cover"/>
+              <div className="grid grid-cols-3 gap-3">
+                {form.aboutImages.map((url, i) => (
+                  <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
+                    <img src={url} alt="" className="h-full w-full object-cover"/>
                     <button type="button" aria-label="حذف عکس"
-                      onClick={() => set('gallery', form.gallery.filter(s => s.id !== shot.id))}
+                      onClick={() => set('aboutImages', form.aboutImages.filter((_, j) => j !== i))}
                       className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
                       {Icon.trash}
                     </button>

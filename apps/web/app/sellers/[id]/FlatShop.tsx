@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { toFa, faNum, parsePrice, MONO, toggleSet, Icon, LQ, LQI, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
+import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
@@ -11,41 +11,6 @@ import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
   نسخه‌ی فلت — UX فروشگاه واقعی
   دسته‌بندی‌ها: عیناً از «بیلیارد بازار» (۱۴ دسته)
 */
-
-/* ── گالری تصاویر فروشگاه — فقط نمایش ───────────────────────────────
-   این صفحه عمومی است، پس آپلود اینجا نیست (قبلاً بود و هر بازدیدکننده‌ای
-   می‌توانست عکس اضافه کند). مدیریت عکس‌ها در /dashboard/seller است. */
-function StoreGallery({ shots }: { shots: string[] }) {
-  const [lightbox, setLightbox] = useState<string | null>(null)
-  if (shots.length === 0) return null
-
-  return (
-    <section className="mx-auto max-w-[1240px] px-4 pb-10 sm:px-6">
-      <div className="rounded-2xl border border-[#E7E2D6] bg-white p-4 sm:p-6">
-        <h3 className="mb-4 text-[14.5px] font-bold">گالری تصاویر فروشگاه</h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 min-[1000px]:grid-cols-4">
-          {shots.map((src, i) => (
-            <button
-              key={i} type="button" onClick={() => setLightbox(src)} aria-label={`عکس ${toFa(i + 1)}`}
-              className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]"
-            >
-              <img src={src} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {lightbox && (
-        <div
-          onClick={() => setLightbox(null)} role="presentation"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
-        >
-          <img src={lightbox} alt="" className="max-h-full max-w-full rounded-xl object-contain"/>
-        </div>
-      )}
-    </section>
-  )
-}
 
 /* ─── دسته‌بندی‌های بیلیارد بازار ─── */
 const BAZAAR_CATS = [
@@ -80,11 +45,14 @@ const SELLER_ID = '1'
    صفحه با همین‌ها نمایش داده می‌شود. هر فیلدِ ذخیره‌شده جای همتای خودش را می‌گیرد. */
 const STORE = {
   id: SELLER_ID, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
-  city: 'تهران',
+  province: 'تهران', city: 'تهران',
   desc: 'عرضه‌ی مستقیم چوب، میز، توپ و لوازم جانبی حرفه‌ای',
   contactPhone: '66554433',
   /* لوگوی آپلودشده‌ی فروشگاه؛ تا وقتی null است آیکون پیش‌فرض نشان داده می‌شود */
   logo: null as string | null,
+  banners: [] as string[],
+  brands: [] as string[],
+  aboutImages: [] as string[],
   verified: true, rating: 4.8, reviews: 312, memberSince: 1402,
   whatsapp: '989121234567', phones: ['021-88221100', '0912-123-4567'], instagram: 'procue.ir',
   address: 'تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵',
@@ -110,62 +78,100 @@ const PRODUCTS: Product[] = productsBySeller(SELLER_ID).map(sp => ({
   img: sp.img,
 }))
 
-/* بازه‌های قیمت سریع (تومان) */
-type SortKey = 'popular' | 'price-asc' | 'price-desc' | 'newest'
-const SORT_OPTIONS: { k: SortKey; l: string }[] = [
-  { k: 'popular',    l: 'پرفروش‌ترین' },
-  { k: 'price-asc',  l: 'ارزان‌ترین' },
-  { k: 'price-desc', l: 'گران‌ترین' },
-  { k: 'newest',     l: 'جدیدترین' },
-]
+/* بنر پیش‌فرضِ هدر — وقتی فروشگاه بنری آپلود نکرده */
+const DEFAULT_BANNER = '/images/shop/Pro_table.jpg'
 
-/* ─── دراپ‌داون حرفه‌ای (کاستوم، با انیمیشن و کیبورد) ─── */
-function SortDropdown({ value, onChange }: { value: SortKey; onChange: (v: SortKey) => void }) {
+/* ─── اسلایدر تصاویر (بنر هدر + باکس درباره ما) ─── */
+function ImageSlider({ images, className, radius = 0 }: { images: string[]; className?: string; radius?: number }) {
+  const [i, setI] = useState(0)
+  const shots = images.length ? images : [DEFAULT_BANNER]
+  useEffect(() => {
+    if (shots.length < 2) return
+    const t = setInterval(() => setI(v => (v + 1) % shots.length), 4500)
+    return () => clearInterval(t)
+  }, [shots.length])
+  const active = Math.min(i, shots.length - 1)
+  return (
+    <div className={className} style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: radius }}>
+      {shots.map((src, k) => (
+        <img
+          key={k} src={src} alt="" draggable={false}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+            opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }}
+        />
+      ))}
+      {shots.length > 1 && (
+        <div style={{ position: 'absolute', bottom: 10, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {shots.map((_, k) => (
+            <button key={k} type="button" aria-label={`تصویر ${k + 1}`} onClick={() => setI(k)}
+              style={{ width: k === active ? 18 : 6, height: 6, borderRadius: 3, border: 'none', cursor: 'pointer',
+                background: k === active ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'width .25s, background .25s' }} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── دراپ‌داون دسته‌بندی محصولات (مدرن) ─── */
+function CategoryDropdown({
+  value, onChange, counts,
+}: {
+  value: 'all' | CatKey
+  onChange: (v: 'all' | CatKey) => void
+  counts: Record<CatKey, number>
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onDoc); document.addEventListener('keydown', onKey)
     return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
   }, [])
 
-  const current = SORT_OPTIONS.find(o => o.k === value)!
+  const total = Object.values(counts).reduce((s, n) => s + n, 0)
+  const label = value === 'all' ? 'همه محصولات' : CAT_LABEL[value]
+  const items: { key: 'all' | CatKey; label: string; count: number }[] = [
+    { key: 'all', label: 'همه محصولات', count: total },
+    ...BAZAAR_CATS.map(c => ({ key: c.id, label: c.label, count: counts[c.id] ?? 0 })),
+  ]
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative w-full max-w-[300px]">
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox" aria-expanded={open}
-        className={`flex items-center gap-2.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${
-          open ? 'ring-2 ring-[#14532D]/20' : ''
+        className={`flex w-full items-center gap-2.5 rounded-xl border bg-white px-4 py-3 text-right transition ${
+          open ? 'border-[#14532D] shadow-[0_0_0_3px_rgba(20,83,45,0.10)]' : 'border-[#E7E2D6] hover:border-[#14532D]/45'
         }`}
       >
-        <span className="text-[#8A8474]">مرتب‌سازی:</span>
-        <span className="font-semibold text-[#1C1B17]">{current.l}</span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgba(199,166,106,0.14)] text-[#9A6E38]">{Icon.funnel}</span>
+        <span className="flex-1">
+          <span className="block text-[10.5px] text-[#8A8474]">دسته‌بندی</span>
+          <span className="block text-[14px] font-bold text-[#1C1B17]">{label}</span>
+        </span>
         <span className={`text-[#8A8474] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>{Icon.chevron}</span>
       </button>
 
       <div
         role="listbox"
-        className={`absolute start-0 top-full z-30 mt-2 w-52 origin-top overflow-hidden rounded-2xl border border-white/60 bg-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_16px_40px_rgba(28,27,23,0.16)] backdrop-blur-xl transition-all duration-150 ${
+        className={`absolute start-0 top-full z-40 mt-2 max-h-[340px] w-full origin-top overflow-y-auto rounded-2xl border border-[#E7E2D6] bg-white p-1.5 shadow-[0_20px_44px_rgba(28,27,23,0.16)] transition-all duration-150 ${
           open ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
         }`}
       >
-        {SORT_OPTIONS.map(o => {
-          const selected = o.k === value
+        {items.map(it => {
+          const selected = it.key === value
           return (
             <button
-              key={o.k}
-              role="option" aria-selected={selected}
-              onClick={() => { onChange(o.k); setOpen(false) }}
-              className={`flex w-full items-center justify-between px-4 py-2.5 text-right text-[13px] transition-colors ${
-                selected ? 'bg-[#DCEEE4]/60 font-semibold text-[#14532D]' : 'text-[#5B564B] hover:bg-white/70'
-              }`}
+              key={it.key} role="option" aria-selected={selected}
+              onClick={() => { onChange(it.key); setOpen(false) }}
+              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-right text-[13.5px] transition-colors ${
+                selected ? 'bg-[#DCEEE4]/70 font-bold text-[#14532D]' : 'text-[#5B564B] hover:bg-[#F7F5F0]'
+              }${it.key === 'all' ? ' border-b border-[#EFEBE1] mb-1 rounded-b-none' : ''}`}
             >
-              {o.l}
+              <span className="flex-1">{it.label}</span>
+              <span className={`text-[11.5px] ${MONO} ${selected ? 'text-[#14532D]' : 'text-[#A69F8E]'}`}>{faNum(it.count)}</span>
               {selected && <span className="text-[#14532D]">{Icon.check}</span>}
             </button>
           )
@@ -190,8 +196,12 @@ export default function FlatShop() {
     return {
       ...STORE,
       logo:         profile.logo || null,
+      banners:      profile.banners?.length ? profile.banners : STORE.banners,
+      brands:       profile.brands?.length ? profile.brands : STORE.brands,
+      aboutImages:  profile.aboutImages?.length ? profile.aboutImages : STORE.aboutImages,
       title:        pick(profile.title, STORE.title),
       brand:        pick(profile.brand, STORE.brand),
+      province:     pick(profile.province, STORE.province),
       city:         pick(profile.city, STORE.city),
       desc:         pick(profile.desc, STORE.desc),
       contactPhone: pick(profile.contactPhone, STORE.contactPhone),
@@ -205,48 +215,15 @@ export default function FlatShop() {
     }
   }, [profile])
 
-  /* filters */
-  const [checkedCats, setCheckedCats] = useState<Set<CatKey>>(new Set())
-  const [priceFrom, setPriceFrom] = useState('')
-  const [priceTo, setPriceTo]     = useState('')
-  const [sort, setSort]           = useState<SortKey>('popular')
-  const [page, setPage]           = useState(1)
-  const [query, setQuery]         = useState('')
-  /* مقدار اولیه ثابت است تا SSR و کلاینت یکی باشند؛ بعد از mount اصلاح می‌شود */
-  const [mobile, setMobile]       = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 699px)')
-    const apply = () => setMobile(mq.matches)
-    apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
-  }, [])
-  const [sheetOpen, setSheetOpen] = useState(false)
+  /* دسته‌بندیِ انتخاب‌شده در دراپ‌داون + جستجو + صفحه */
+  const [cat, setCat]     = useState<'all' | CatKey>('all')
+  const [page, setPage]   = useState(1)
+  const [query, setQuery] = useState('')
 
   /* wishlist + story */
   const [wish, setWish] = useState<Set<string>>(new Set())
   const [storyOpen, setStoryOpen] = useState(false)
   const router = useRouter()
-
-  /* قفل اسکرول وقتی شیت موبایل باز است */
-  useEffect(() => {
-    document.body.style.overflow = sheetOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [sheetOpen])
-
-  const navActive: 'all' | CatKey =
-    checkedCats.size === 0 ? 'all' : checkedCats.size === 1 ? [...checkedCats][0]! : 'all'
-
-  const setNavCat = (k: 'all' | CatKey) =>
-    setCheckedCats(k === 'all' ? new Set() : new Set([k]))
-
-  const clearFilters = () => {
-    setCheckedCats(new Set()); setPriceFrom(''); setPriceTo('')
-  }
-
-  const activeFilterCount =
-    checkedCats.size + (priceFrom ? 1 : 0) + (priceTo ? 1 : 0)
 
   const catCounts = useMemo(() => {
     const c = Object.fromEntries(BAZAAR_CATS.map(x => [x.id, 0])) as Record<CatKey, number>
@@ -255,78 +232,23 @@ export default function FlatShop() {
   }, [])
 
   const visible = useMemo(() => {
-    const from = parsePrice(priceFrom)
-    const to   = parsePrice(priceTo)
     const q = query.trim()
-    const list = PRODUCTS.filter(p => {
-      if (checkedCats.size && !checkedCats.has(p.cat)) return false
-      if (from !== null && p.price < from) return false
-      if (to !== null && p.price > to) return false
+    return PRODUCTS.filter(p => {
+      if (cat !== 'all' && p.cat !== cat) return false
       if (q && !p.name.includes(q) && !p.brand.toLowerCase().includes(q.toLowerCase())) return false
       return true
     })
-    const sorted = [...list]
-    if (sort === 'popular')    sorted.sort((a, b) => b.sales - a.sales)
-    if (sort === 'price-asc')  sorted.sort((a, b) => a.price - b.price)
-    if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price)
-    /* جدیدترین: idهای بزرگ‌تر محصولات تازه‌ترند (منبع واحد بیلیارد بازار ترتیبی درج می‌شود) */
-    if (sort === 'newest')     sorted.sort((a, b) => Number(b.id) - Number(a.id))
-    return sorted
-  }, [checkedCats, priceFrom, priceTo, query, sort])
+  }, [cat, query])
 
-  /* صفحه‌بندی واقعی — قبلاً دکمه‌ها تزئینی بودند و لیست هیچ‌وقت برش نمی‌خورد.
-     دسکتاپ ۸ تا (۲ ردیفِ ۴تایی)، موبایل ۶ تا (۳ ردیفِ ۲تایی).
-     تا وقتی همه در یک صفحه جا شوند هیچ دکمه‌ای نیست؛ بعدش به ازای هر صفحه یک عدد. */
-  const perPage   = mobile ? 6 : 8
-  const pageCount = Math.max(1, Math.ceil(visible.length / perPage))
+  /* صفحه‌بندی: در حالت «همه محصولات» دو ردیف ۵تایی (۱۰ در هر صفحه).
+     تا ۱۰ محصول هیچ دکمه‌ای نیست؛ از ۱۱ به بعد عددِ ۲ و … پایین صفحه می‌آید. */
+  const PER_PAGE  = 10
+  const pageCount = Math.max(1, Math.ceil(visible.length / PER_PAGE))
   const safePage  = Math.min(page, pageCount)
-  const paged     = visible.slice((safePage - 1) * perPage, safePage * perPage)
+  const paged     = visible.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
 
-  /* اگر فیلتر باعث شد صفحه‌ی فعلی دیگر وجود نداشته باشد، برگرد به صفحه‌ی ۱ */
-  useEffect(() => { if (page > pageCount) setPage(1) }, [page, pageCount])
-
-  const heading = navActive === 'all' ? 'همه محصولات' : CAT_LABEL[navActive]
-
-  /* پنل فیلتر — هم در سایدبار دسکتاپ هم در شیت موبایل */
-  const FilterPanel = (
-    <>
-      <div className="border-b border-[#E7E2D6] pb-5">
-        <h4 className="mb-3.5 text-[13px] font-semibold">دسته‌بندی</h4>
-        {BAZAAR_CATS.map(c => (
-          <label key={c.id} className="mb-2.5 flex cursor-pointer items-center gap-2.5 text-[13px] text-[#5B564B]">
-            <input
-              type="checkbox"
-              checked={checkedCats.has(c.id)}
-              onChange={() => setCheckedCats(prev => toggleSet(prev, c.id))}
-              className="h-[15px] w-[15px] accent-[#14532D]"
-            />
-            {c.label}
-            <span className={`mr-auto text-[11.5px] text-[#8A8474] ${MONO}`}>{faNum(catCounts[c.id])}</span>
-          </label>
-        ))}
-      </div>
-
-      {/* بازه‌ی قیمت — فقط ورودی دستیِ از/تا (دکمه‌های بازه‌ی سریع حذف شدند) */}
-      <div className="pt-5">
-        <h4 className="mb-3.5 text-[13px] font-semibold">محدوده قیمت (تومان)</h4>
-        <div className="flex gap-2">
-          <input
-            value={priceFrom} onChange={e => setPriceFrom(e.target.value)} placeholder="از"
-            className={`w-full rounded-lg border border-[#E7E2D6] bg-white px-2.5 py-2 text-[12.5px] focus:border-[#14532D] focus:outline-none ${MONO}`}
-          />
-          <input
-            value={priceTo} onChange={e => setPriceTo(e.target.value)} placeholder="تا"
-            className={`w-full rounded-lg border border-[#E7E2D6] bg-white px-2.5 py-2 text-[12.5px] focus:border-[#14532D] focus:outline-none ${MONO}`}
-          />
-        </div>
-        {activeFilterCount > 0 && (
-          <button onClick={clearFilters} className="mt-4 inline-flex items-center rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3 py-1.5 text-[12.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5">
-            پاک کردن فیلترها ({faNum(activeFilterCount)})
-          </button>
-        )}
-      </div>
-    </>
-  )
+  /* با تغییر دسته/جستجو برگرد به صفحه‌ی ۱ */
+  useEffect(() => { setPage(1) }, [cat, query])
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
@@ -364,41 +286,62 @@ export default function FlatShop() {
       <div className="mx-auto max-w-[1240px] px-4 pt-4 text-[12.5px] text-[#8A8474] sm:px-6">
         <Link href="/" className="transition-colors hover:text-[#14532D]">خانه</Link>
         <span className="mx-1.5">/</span>
-        <Link href="/sellers" className="transition-colors hover:text-[#14532D]">فروشگاه</Link>
+        <Link href="/sellers" className="transition-colors hover:text-[#14532D]">فروشگاه‌ها</Link>
         <span className="mx-1.5">/</span>
-        <span>{heading}</span>
+        <span>{store.title}</span>
       </div>
 
-      {/* ═══ STORE CARD ═══ */}
+      {/* ═══ هدر: بنر اسلایدی + کارت فروشگاه ═══ */}
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
-        <div className="flex flex-wrap items-start gap-5 rounded-2xl border border-[#E7E2D6] bg-white p-4 sm:gap-6 sm:p-6">
-          {/* لوگوی دایره‌ای با حلقه‌ی استوری (مثل صفحه‌ی باشگاه) */}
-          <button
-            type="button" onClick={() => setStoryOpen(true)} aria-label="مشاهده استوری فروشگاه"
-            className="shrink-0 rounded-full p-[3px] transition-transform duration-200 hover:scale-105 active:scale-95"
-            style={{ background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 0 14px rgba(214,41,118,0.35)' }}
-          >
-            <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-16 sm:w-16">
-              {/* لوگوی آپلودشده، وگرنه آیکون پیش‌فرضِ فروشگاه */}
-              {store.logo
-                ? <img src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
-                : Icon.storefront}
-            </span>
-          </button>
+        <div className="overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white">
+          {/* بنر — اسلایدر ۳ عکسی؛ اگر فروشگاه بنری نگذاشته، بنر پیش‌فرض */}
+          <div className="relative" style={{ height: 'clamp(140px,24vw,240px)', background: 'linear-gradient(115deg,#0f3d22,#14532D 55%,#1E6B3C)' }}>
+            <ImageSlider images={store.banners} />
+            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.03) 0%,rgba(0,0,0,0.30) 100%)' }} />
+          </div>
 
-          <div className="min-w-[200px] flex-1">
-            <h2 className="text-[15.5px] font-bold sm:text-[17px]">{store.title}</h2>
-            <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
-              <span className="text-[#14532D]">{Icon.pin}</span>{store.city}
+          {/* کارت فروشگاه — روی بنر می‌نشیند */}
+          <div className="relative px-4 pb-4 sm:px-6 sm:pb-6">
+            <div className="-mt-10 flex flex-wrap items-end gap-4 sm:-mt-12 sm:gap-5">
+              {/* لوگو با حلقه‌ی استوری */}
+              <button
+                type="button" onClick={() => setStoryOpen(true)} aria-label="مشاهده استوری فروشگاه"
+                className="shrink-0 rounded-full p-[3px] transition-transform duration-200 hover:scale-105 active:scale-95"
+                style={{ background: 'linear-gradient(135deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', boxShadow: '0 6px 18px rgba(214,41,118,0.30)' }}
+              >
+                <span className="flex h-[76px] w-[76px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-[88px] sm:w-[88px]">
+                  {store.logo
+                    ? <img src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
+                    : Icon.storefront}
+                </span>
+              </button>
+
+              <div className="min-w-[200px] flex-1 pb-1">
+                <h2 className="text-[16px] font-bold sm:text-[18px]">{store.title}</h2>
+                <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
+                  <span className="text-[#14532D]">{Icon.pin}</span>{[store.province, store.city].filter(Boolean).join('، ')}
+                </div>
+              </div>
+
+              <a
+                href={`tel:${store.contactPhone}`}
+                className={`inline-flex items-center gap-1.5 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 ${MONO}`}
+              >
+                <span>{Icon.phone}</span>{toFa(store.contactPhone)}
+              </a>
             </div>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
-            <a
-              href={`tel:${store.contactPhone}`}
-              className={`mt-2.5 inline-flex items-center gap-1.5 text-[13px] text-[#5B564B] transition-colors hover:text-[#14532D] ${MONO}`}
-            >
-              <span className="text-[#14532D]">{Icon.phone}</span>
-              {toFa(store.contactPhone)}
-            </a>
+
+            <p className="mt-3 text-[13px] leading-relaxed text-[#5B564B]">{store.desc}</p>
+
+            {/* برندهای نمایندگی */}
+            {store.brands.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-[11.5px] text-[#8A8474]">نماینده‌ی:</span>
+                {store.brands.map((b, i) => (
+                  <span key={i} className="rounded-full border border-[#E7E2D6] bg-[#FAFAF7] px-2.5 py-1 text-[11.5px] font-semibold text-[#5B564B]">{b}</span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -415,40 +358,19 @@ export default function FlatShop() {
         </div>
       </div>
 
-      {/* ═══ LAYOUT ═══ */}
-      <div className="mx-auto grid max-w-[1240px] grid-cols-1 gap-8 px-4 pb-20 pt-5 sm:px-6 min-[861px]:grid-cols-[236px_1fr]">
-
-        {/* سایدبار دسکتاپ */}
-        <aside className="sticky top-[146px] hidden self-start rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_4px_20px_rgba(28,27,23,0.05)] min-[861px]:block">
-          {FilterPanel}
-        </aside>
-
-        <main>
-          {/* toolbar */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-lg font-bold sm:text-xl">{heading}</h1>
-              <span className="text-[12.5px] text-[#8A8474]">{faNum(visible.length)} محصول</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* دکمه فیلتر موبایل */}
-              <button
-                onClick={() => setSheetOpen(true)}
-                className="flex items-center gap-2 rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] px-3.5 py-2 text-[13px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5 min-[861px]:hidden"
-              >
-                {Icon.funnel} فیلترها
-                {activeFilterCount > 0 && (
-                  <span className={`flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#14532D] px-1 text-[10px] font-bold text-white ${MONO}`}>
-                    {faNum(activeFilterCount)}
-                  </span>
-                )}
-              </button>
-              <SortDropdown value={sort} onChange={setSort}/>
-            </div>
+      {/* ═══ محصولات فروشگاه ═══ */}
+      <div className="mx-auto max-w-[1240px] px-4 pb-16 pt-6 sm:px-6">
+        {/* تیتر + دراپ‌داون دسته‌بندی */}
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-bold sm:text-2xl">محصولات فروشگاه</h1>
+            <span className="text-[12.5px] text-[#8A8474]">{faNum(visible.length)} محصول</span>
           </div>
+          <CategoryDropdown value={cat} onChange={setCat} counts={catCounts} />
+        </div>
 
-          {/* گرید — ۴ کارت در دسکتاپ */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 min-[700px]:grid-cols-3 min-[1000px]:grid-cols-4">
+        {/* گرید — ۵ ستون در دسکتاپ (۲ ردیفِ ۵تایی = ۱۰ در هر صفحه) */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 min-[640px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1120px]:grid-cols-5">
             {paged.map(p => {
               const isWished = wish.has(p.id)
               return (
@@ -501,43 +423,57 @@ export default function FlatShop() {
             })}
           </div>
 
-          {visible.length === 0 && (
-            <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
-              محصولی با این فیلترها پیدا نشد.
-              <button onClick={clearFilters} className="mr-2 font-bold text-[#9A6E38] transition hover:opacity-70">پاک کردن فیلترها</button>
-            </div>
-          )}
+        {visible.length === 0 && (
+          <div className="rounded-2xl border border-[#E7E2D6] bg-white px-6 py-14 text-center text-[13.5px] text-[#8A8474]">
+            محصولی در این دسته‌بندی پیدا نشد.
+            {cat !== 'all' && <button onClick={() => setCat('all')} className="mr-2 font-bold text-[#9A6E38] transition hover:opacity-70">نمایش همه محصولات</button>}
+          </div>
+        )}
 
-          {/* صفحه‌بندی — فقط وقتی محصولات در یک صفحه جا نمی‌شوند */}
-          {pageCount > 1 && (
-            <div className="mt-9 flex justify-center gap-2">
-              {Array.from({ length: pageCount }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  aria-current={safePage === i + 1 ? 'page' : undefined}
-                  className={`${LQ} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] ${
-                    safePage === i + 1 ? `${LQ_FELT_ON} font-bold` : `${LQ_NEUTRAL} text-[#5B564B]`
-                  } ${MONO}`}
-                >
-                  {toFa(i + 1)}
-                </button>
-              ))}
+        {/* صفحه‌بندی — تا ۱۰ محصول هیچ دکمه‌ای نیست؛ از ۱۱ به بعد عدد ۲ و … */}
+        {pageCount > 1 && (
+          <div className="mt-9 flex justify-center gap-2">
+            {Array.from({ length: pageCount }, (_, i) => (
               <button
-                onClick={() => setPage(p => Math.min(pageCount, p + 1))}
-                disabled={safePage === pageCount}
-                aria-label="صفحه‌ی بعد"
-                className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}
+                key={i}
+                onClick={() => setPage(i + 1)}
+                aria-current={safePage === i + 1 ? 'page' : undefined}
+                className={`${LQ} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] ${
+                  safePage === i + 1 ? `${LQ_FELT_ON} font-bold` : `${LQ_NEUTRAL} text-[#5B564B]`
+                } ${MONO}`}
               >
-                ‹
+                {toFa(i + 1)}
               </button>
-            </div>
-          )}
-        </main>
+            ))}
+            <button
+              onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+              disabled={safePage === pageCount}
+              aria-label="صفحه‌ی بعد"
+              className={`${LQ} ${LQ_NEUTRAL} flex h-9 w-9 items-center justify-center rounded-xl text-[13px] text-[#5B564B] disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              ‹
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ═══ گالری تصاویر فروشگاه — قبل از فوتر. فقط نمایش؛ آپلود در /dashboard/seller ═══ */}
-      <StoreGallery shots={profile?.gallery.map(s => s.url) ?? []}/>
+      {/* ═══ درباره ما — ۱/۳ اسلایدر سمت راست، متن سمت چپ ═══ */}
+      <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
+        <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
+          {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم) */}
+          <div className="relative min-h-[200px] bg-[#F4F3F1] min-[760px]:min-h-[260px]">
+            <ImageSlider images={store.aboutImages} />
+          </div>
+          {/* متن (دو سوم) */}
+          <div className="flex flex-col justify-center p-6 sm:p-8">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="h-4 w-[3px] rounded bg-gradient-to-b from-[#C7A66A] to-[#8A6020]" />
+              <h3 className="text-[17px] font-bold sm:text-[19px]">درباره ما</h3>
+            </div>
+            <p className="text-[13.5px] leading-[2] text-[#5B564B]">{store.desc}</p>
+          </div>
+        </div>
+      </div>
 
       {/* ═══ FOOTER — کارت اختصاصی فروشگاه (سبک sellers/2) ═══ */}
       <footer className="px-4 pb-8 pt-2 sm:px-6">
@@ -567,7 +503,7 @@ export default function FlatShop() {
                 {BAZAAR_CATS.slice(0, 8).map(c => (
                   <li key={c.id}>
                     <button
-                      onClick={() => { setNavCat(c.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      onClick={() => { setCat(c.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                       className="py-0.5 transition-colors hover:text-[#14532D]"
                     >
                       {c.label}
@@ -643,29 +579,6 @@ export default function FlatShop() {
           </div>
         </div>
       </footer>
-
-      {/* ═══ شیت فیلتر موبایل ═══ */}
-      {sheetOpen && (
-        <div className="fixed inset-0 z-50 min-[861px]:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSheetOpen(false)}/>
-          <div className="absolute inset-x-0 bottom-0 max-h-[82vh] overflow-y-auto rounded-t-2xl bg-white px-5 pb-6 pt-4">
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[#E7E2D6]"/>
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-[15px] font-bold">فیلترها</h3>
-              <button aria-label="بستن" onClick={() => setSheetOpen(false)} className={`${LQI} flex h-9 w-9 items-center justify-center rounded-xl text-[#5B564B]`}>
-                {Icon.close}
-              </button>
-            </div>
-            {FilterPanel}
-            <button
-              onClick={() => setSheetOpen(false)}
-              className="mt-2 w-full rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] py-3 text-[13.5px] font-bold text-[#9A6E38] transition hover:-translate-y-0.5"
-            >
-              مشاهده {faNum(visible.length)} محصول
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ═══ استوری فروشگاه (مثل صفحه‌ی باشگاه) ═══ */}
       {storyOpen && (
