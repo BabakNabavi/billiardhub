@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 540" preserveAspectRatio="xMidYMid slice" role="img" aria-label="فروشگاه تجهیزات بیلیارد">
+  <defs>
+    <radialGradient id="b1felt" cx="26%" cy="18%" r="95%">
+      <stop offset="0%" stop-color="#1E6B3C"/>
+      <stop offset="55%" stop-color="#14532D"/>
+      <stop offset="100%" stop-color="#0c3a20"/>
+    </radialGradient>
+    <radialGradient id="b1glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ballR" cx="34%" cy="30%" r="72%"><stop offset="0%" stop-color="#ff7a6b"/><stop offset="42%" stop-color="#d21f1f"/><stop offset="100%" stop-color="#7c0d0d"/></radialGradient>
+    <radialGradient id="ballY" cx="34%" cy="30%" r="72%"><stop offset="0%" stop-color="#ffe493"/><stop offset="45%" stop-color="#f4b40a"/><stop offset="100%" stop-color="#9a6e00"/></radialGradient>
+    <radialGradient id="ballB" cx="34%" cy="30%" r="72%"><stop offset="0%" stop-color="#7fb0e8"/><stop offset="45%" stop-color="#1f5fb0"/><stop offset="100%" stop-color="#0c2f63"/></radialGradient>
+    <radialGradient id="ballK" cx="34%" cy="30%" r="72%"><stop offset="0%" stop-color="#565656"/><stop offset="45%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#000000"/></radialGradient>
+    <radialGradient id="ballW" cx="34%" cy="30%" r="72%"><stop offset="0%" stop-color="#ffffff"/><stop offset="60%" stop-color="#eae6da"/><stop offset="100%" stop-color="#b7b1a0"/></radialGradient>
+  </defs>
+
+  <rect width="1600" height="540" fill="url(#b1felt)"/>
+  <ellipse cx="360" cy="120" rx="720" ry="440" fill="url(#b1glow)"/>
+
+  <!-- rack of glossy balls, bottom-right -->
+  <g transform="translate(1140 300)">
+    <g>
+      <circle cx="0"   cy="0"   r="58" fill="url(#ballR)"/>
+      <circle cx="118" cy="0"   r="58" fill="url(#ballB)"/>
+      <circle cx="59"  cy="-100" r="58" fill="url(#ballY)"/>
+      <circle cx="236" cy="0"   r="58" fill="url(#ballK)"/>
+      <circle cx="177" cy="-100" r="58" fill="url(#ballR)"/>
+      <circle cx="118" cy="-200" r="58" fill="url(#ballW)"/>
+    </g>
+    <!-- highlights -->
+    <g fill="#ffffff" opacity="0.55">
+      <circle cx="-18" cy="-20" r="9"/><circle cx="100" cy="-20" r="9"/><circle cx="41" cy="-120" r="9"/>
+      <circle cx="218" cy="-20" r="9"/><circle cx="159" cy="-120" r="9"/><circle cx="100" cy="-220" r="9"/>
+    </g>
+  </g>
+
+  <!-- gold hairline frame -->
+  <rect x="26" y="26" width="1548" height="488" rx="20" fill="none" stroke="#C7A66A" stroke-opacity="0.55" stroke-width="2"/>
+
+  <!-- subtle wordmark -->
+  <g transform="translate(96 250)" fill="#ffffff">
+    <text x="0" y="0" font-family="Vazirmatn, Tahoma, sans-serif" font-size="62" font-weight="800" letter-spacing="1">تجهیزات حرفه‌ای بیلیارد</text>
+    <text x="4" y="52" font-family="Georgia, serif" font-size="26" letter-spacing="10" fill="#C7A66A" opacity="0.9">BILLIARD · PRO SHOP</text>
+  </g>
+</svg>
