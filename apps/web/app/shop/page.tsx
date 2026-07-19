@@ -74,7 +74,7 @@ const CATS = [
   },
   {
     id: 'table', label: 'میز', g: ['#1A6B3A','#28A860'],
-    img: '/images/icon/table/snooker-icon-256.png',
+    img: '/images/icon/table/wiraka.png', imgBig: true,
     icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
       <rect x="3" y="7" width="22" height="14" rx="3" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
       <circle cx="3.5" cy="7.5" r="2.2" fill="currentColor"/>
@@ -430,7 +430,7 @@ function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; on
                 }}>
                   {/* ایکونِ تصویری (میز/چوب) بدون گلوی رنگی و اسکیل؛ بقیه SVGِ خطی با اسکیل ۱.۵ */}
                   {(cat as { img?: string }).img ? (
-                    <img className="cat-img" src={(cat as { img?: string }).img} alt={cat.label} draggable={false}
+                    <img className={`cat-img${(cat as { imgBig?: boolean }).imgBig ? ' cat-img-lg' : ''}`} src={(cat as { img?: string }).img} alt={cat.label} draggable={false}
                       style={{ objectFit: 'contain', display: 'block' }} />
                   ) : (
                     <div className="cat-icn-in" style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.5)' }}>
@@ -1260,12 +1260,15 @@ export default function ShopPage() {
         .bz-sticky-first { position: sticky; right: calc(var(--card-w) * -0.775); z-index: 3; }
         /* ایکونِ تصویریِ دسته‌بندی (میز/چوب) — دسکتاپ ۵۲px، هم‌وزنِ بصریِ SVGهای خطی */
         .cat-img { width: 52px; height: 52px; }
+        /* آیکونِ میز ۱۰٪ بزرگ‌تر (تصویرِ WIRAKA لَنداسکِیپ است و کوچک دیده می‌شد) */
+        .cat-img-lg { width: 57px; height: 57px; }
         @media(max-width:700px) {
           /* ۱۵۲ = ۱۴۵ + ۵٪ | فاصله ۲۰ = ۲۱ منهای ۵٪.
              column-gap حتماً !important — وگرنه gap:21 در استایل اینلاینِ ردیف برنده می‌شود. */
           .bz-grid { --card-w: 152px; column-gap: 20px !important; }
           /* موبایل: کادرِ ایکون ۵۶×۴۰ ⇒ تصویر ۳۶px تا در ارتفاع جا شود */
           .cat-img { width: 36px !important; height: 36px !important; }
+          .cat-img-lg { width: 40px !important; height: 40px !important; }
           /* ۱.۸۴۷ = ۱.۹۴۴ منهای ۵٪ — موبایل کوتاه‌تر از دسکتاپ می‌ماند */
           .bz-scroll-card { aspect-ratio: 1 / 1.847; }
           /* فاصله‌ی برچسب تا ایکون: هم gap کم شد، هم ارتفاعِ کادر — کادر ۵۶px برای ایکونِ ~۳۵px
