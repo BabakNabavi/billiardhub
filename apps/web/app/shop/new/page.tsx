@@ -150,6 +150,130 @@ const CUE_MODELS: Record<string, string[]> = {
   'Mike Wooldridge':['Professional', 'Signature', 'Handmade', 'Traditional', 'Custom', 'سایر'],
 }
 
+/* برندهای دسته‌های دیگر (توپ/کیس/پارچه/گچ/تیپ/اکستنشن/اکسسوری/رست) — مستقل از نوع.
+   «سایر» به‌صورت خودکار ته لیست اضافه می‌شود (withOther). */
+const CAT_BRANDS: Record<string, string[]> = {
+  ball:       ['Aramith', 'Dynaspheres', 'Predator', 'Cyclop', 'Super Aramith', 'Riley', 'Brunswick', 'Molinari', 'Diamond'],
+  'case-bag': ['Predator', 'Mezz', 'Cuetec', 'Poison', 'Instroke', 'Justis', 'Whitten', 'JB Cases', 'Kronos', 'Longoni', 'Omin'],
+  cloth:      ['Simonis', 'Strachan', 'Hainsworth', 'Milliken', 'Championship', 'Gorina', 'Iwan Simonis'],
+  chalk:      ['Taom', 'Master', 'Kamui', 'Blue Diamond', 'Triangle', 'Predator', 'Longoni', 'Silver Cup', 'Brunswick', 'Tweeten', 'G2', 'Mezz', 'J Flowers', 'Riley', 'CueSoul'],
+  tip:        ['Kamui', 'Moori', 'Talisman', 'Taom', 'Tiger', 'Elk Master', 'Le Professional', 'Triangle', 'Blue Diamond', 'Century', 'HOW', 'Zan', 'Navigator', 'G2', 'Hirano', 'Black Heart'],
+  extension:  ['Predator', 'Mezz', 'Cuetec', 'Longoni', 'Peradon', 'John Parris', 'Riley', 'Omin', 'Universal'],
+  accessory:  ['Predator', 'Kamui', 'Mezz', 'Cuetec', 'Longoni', 'Aramith', 'Magic Ball Rack', 'Accu Rack', 'Q-Wiz', 'Tweeten', 'Master', 'Tiger', 'Universal'],
+  rest:       ['Peradon', 'Riley', 'Hamilton', 'PowerGlide', 'Master', 'Tweeten', 'Longoni', 'Predator'],
+}
+
+/* مدل‌های هر دسته بر اساسِ برند. برندهایی که اینجا نیستند ⇒ مدلِ متنِ دستی. «سایر» خودکار اضافه می‌شود. */
+const CAT_MODELS: Record<string, Record<string, string[]>> = {
+  ball: {
+    'Aramith':       ['Tournament Champion', 'Tournament Black', 'Premium', 'Super Pro', 'Premier', 'Pro Cup', 'Pro Cup TV', 'Duramith', 'Stone Collection', 'Philosophy Collection'],
+    'Dynaspheres':   ['Platinum', 'Titanium', 'Earth', 'Carom'],
+    'Predator':      ['Arcos II', 'Arcos'],
+    'Cyclop':        ['Hyperion', 'TV Pro', 'Super Pro', 'Prime'],
+    'Super Aramith': ['Pro', 'Premium', 'Tournament'],
+    'Riley':         ['Standard', 'Tournament'],
+    'Brunswick':     ['Centennial', 'Pro Cup'],
+    'Molinari':      ['Tournament Set'],
+    'Diamond':       ['Tournament Balls'],
+  },
+  'case-bag': {
+    'Predator': ['Metro Case', 'Roadline Case', 'Urban Case', 'Hard Case'],
+    'Mezz':     ['MZ Series', 'MP Series', 'Hybrid Case'],
+    'Cuetec':   ['Pro Case', 'Cynergy Case'],
+    'Poison':   ['Voodoo Case', 'Smash Case'],
+    'Instroke': ['Cowboy', 'Deluxe', 'Buffalo', 'Leather Case'],
+    'Justis':   ['Custom Leather', 'Traditional'],
+    'Whitten':  ['Custom Case', 'Leather Series'],
+    'JB Cases': ['Hybrid', 'Custom', 'GTF', 'Butterfly'],
+    'Kronos':   ['Hard Case', 'Soft Case'],
+    'Longoni':  ['Luxury Case', 'Leather Case'],
+    'Omin':     ['Classic Case', 'Premium Case'],
+  },
+  cloth: {
+    'Simonis':      ['860', '860 HR', '760', '920', '300 Rapide', '300 Tournament'],
+    'Strachan':     ['6811', '6811 Tournament', '777', '10K'],
+    'Hainsworth':   ['Match', 'Smart', 'Precision', 'Elite Pro'],
+    'Milliken':     ['Tournament Cloth', 'Super Pro'],
+    'Championship': ['Tour Edition', 'Invitational', 'Mercury Ultra'],
+    'Gorina':       ['Super Pro', 'Basalt', 'Granito'],
+    'Iwan Simonis': ['860 Tournament', '760 Tournament'],
+  },
+  chalk: {
+    'Taom':         ['Pyro', 'V10', 'V11', 'V10 Blue', 'V10 Green', 'Professional'],
+    'Master':       ['Blue', 'Green', 'Red', 'Black', 'Gold'],
+    'Kamui':        ['Roku', '0.98', '1.21'],
+    'Blue Diamond': ['Blue Diamond Chalk'],
+    'Triangle':     ['Triangle Blue', 'Triangle Green'],
+    'Predator':     ['1080 Pure', '1080'],
+    'Longoni':      ['Black Fire', 'Nero', 'Original'],
+    'Silver Cup':   ['Silver Cup Blue', 'Silver Cup Green'],
+    'Brunswick':    ['Brunswick Blue', 'Brunswick Green'],
+    'Tweeten':      ['Master', 'Triangle'],
+    'G2':           ['G2 Chalk'],
+    'Mezz':         ['Mezz Chalk'],
+    'J Flowers':    ['J Flowers Chalk'],
+    'Riley':        ['Riley Blue', 'Riley Green'],
+    'CueSoul':      ['CueSoul Chalk'],
+  },
+  tip: {
+    'Kamui':          ['Original Soft', 'Original Medium', 'Original Hard', 'Black Soft', 'Black Medium', 'Black Hard', 'Athlete Soft', 'Athlete Medium', 'Athlete Hard', 'Clear Black Soft', 'Clear Black Medium', 'Clear Black Hard'],
+    'Moori':          ['Moori Soft', 'Moori Medium', 'Moori Hard', 'Moori Quick Soft', 'Moori Quick Medium', 'Moori Quick Hard'],
+    'Talisman':       ['Pro Soft', 'Pro Medium', 'Pro Hard', 'WB Soft', 'WB Medium', 'WB Hard', 'Everest'],
+    'Taom':           ['Fusion', 'Hybrid', 'Original'],
+    'Tiger':          ['Everest', 'Onyx', 'Sniper', 'Dynamite', 'Emerald'],
+    'Elk Master':     ['Elk Master Blue', 'Elk Master Black'],
+    'Le Professional':['Le Professional Blue', 'Le Professional Black'],
+    'Triangle':       ['Triangle Blue', 'Triangle Black'],
+    'Blue Diamond':   ['Blue Diamond Tip'],
+    'Century':        ['Century Soft', 'Century Medium', 'Century Hard'],
+    'HOW':            ['HOW Soft', 'HOW Medium', 'HOW Hard', 'HOW Titan'],
+    'Zan':            ['Zan Plus Soft', 'Zan Plus Medium', 'Zan Plus Hard', 'Zan Hybrid Max', 'Zan Premium'],
+    'Navigator':      ['Navigator Alpha Soft', 'Navigator Alpha Medium', 'Navigator Alpha Hard', 'Navigator Black Soft', 'Navigator Black Medium', 'Navigator Black Hard'],
+    'G2':             ['G2 Soft', 'G2 Medium', 'G2 Hard'],
+    'Hirano':         ['Hirano Soft', 'Hirano Medium', 'Hirano Hard'],
+    'Black Heart':    ['Black Heart Soft', 'Black Heart Medium', 'Black Heart Hard'],
+  },
+  extension: {
+    'Predator':    ['QR Extension', 'Uni-Loc Extension', 'Air II Extension'],
+    'Mezz':        ['Mezz Extension', 'Exceed Extension', 'Wavy Extension'],
+    'Cuetec':      ['Cynergy Extension', 'AVID Extension'],
+    'Longoni':     ['Longoni Extension', 'Quick Release Extension'],
+    'Peradon':     ['Telescopic Extension', 'Mini Extension'],
+    'John Parris': ['Snooker Extension', 'Classic Extension'],
+    'Riley':       ['Riley Extension', 'Telescopic Extension'],
+    'Omin':        ['Classic Extension', 'Premium Extension'],
+    'Universal':   ['Universal Screw Extension', 'Universal Quick Release Extension'],
+  },
+  accessory: {
+    'Predator':        ['Second Skin Glove', 'Chalk Holder', 'Joint Protector', 'Tip Tool', 'Ball Rack'],
+    'Kamui':           ['Kamui Glove', 'Tip Tool', 'Gator Grip', 'Tip Shaper', 'Joint Protector'],
+    'Mezz':            ['Mezz Glove', 'Tip Tool', 'Joint Protector', 'Extension Holder'],
+    'Cuetec':          ['Cynergy Glove', 'Tip Tool', 'Cue Towel', 'Joint Protector'],
+    'Longoni':         ['Professional Glove', 'Tip Tool', 'Cue Towel', 'Joint Protector'],
+    'Aramith':         ['Ball Rack', 'Triangle Rack', 'Ball Cleaner', 'Ball Polisher'],
+    'Magic Ball Rack': ['9 Ball Rack', '10 Ball Rack', '8 Ball Rack'],
+    'Accu Rack':       ['9 Ball', '10 Ball', '8 Ball', 'Template Rack'],
+    'Q-Wiz':           ['Shaft Cleaner', 'Burnisher', 'Microfiber Cloth'],
+    'Tweeten':         ['Tip Pick', 'Tip Tool', 'Cue Wax'],
+    'Master':          ['Tip Scuffer', 'Tip Pick', 'Chalk Holder'],
+    'Tiger':           ['Tip Tool', 'Tip Shaper', 'Burnisher'],
+    'Universal':       ['Cue Towel', 'Glove', 'Chalk Holder', 'Extension Holder', 'Cue Stand'],
+  },
+  rest: {
+    'Peradon':    ['Spider Rest', 'Swan Rest', 'Cross Rest', 'Hook Rest', 'Half Butt', 'Full Butt', 'Telescopic Rest'],
+    'Riley':      ['Spider', 'Cross', 'Rest Head', 'Telescopic Rest'],
+    'Hamilton':   ['Tournament Rest', 'Club Rest'],
+    'PowerGlide': ['Spider Rest', 'Cross Rest', 'Rest Set'],
+    'Master':     ['Spider', 'Cross', 'Rest Head'],
+    'Tweeten':    ['Bridge Head', 'Rest Accessories'],
+    'Longoni':    ['Carom Bridge', 'Pool Bridge'],
+    'Predator':   ['Extension Bridge', 'Pool Bridge'],
+  },
+}
+
+/* «سایر» را یک‌بار ته لیست تضمین می‌کند (چه در داده باشد چه نباشد) */
+const withOther = (arr: string[]): string[] => (arr.includes('سایر') ? arr : [...arr, 'سایر'])
+
 /* فیلدهایی که به بالای فرم (دسته/نوع/برند/مدل) منتقل شده‌اند و نباید در «مشخصات فنی» تکرار شوند */
 const HIDDEN_SPEC_KEYS: Record<string, string[]> = {
   cue:        ['cueType', 'brand'],
@@ -432,9 +556,14 @@ export default function NewProductPage() {
     setErrors(e => { const n = { ...e }; delete n[k]; return n })
   }
 
-  /* برندِ «چوب» بر اساسِ نوع؛ مدل بر اساسِ برند — اگر لیست داشت دراپ‌داون، وگرنه متنِ دستی */
-  const brandOptions = form.category === 'cue' ? (CUE_BRANDS[form.type] ?? null) : null
-  const modelOptions = form.category === 'cue' ? (CUE_MODELS[form.brand] ?? null) : null
+  /* برند/مدل — اگر لیست داشت دراپ‌داون، وگرنه متنِ دستی.
+     چوب: برند بر اساسِ نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برندِ ثابتِ همان دسته. مدل همیشه بر اساسِ برند. */
+  const brandOptions = form.category === 'cue'
+    ? (CUE_BRANDS[form.type] ?? null)
+    : (CAT_BRANDS[form.category] ?? null)
+  const modelOptions = form.category === 'cue'
+    ? (CUE_MODELS[form.brand] ?? null)
+    : (CAT_MODELS[form.category]?.[form.brand] ?? null)
   /* مقدارِ مؤثر: اگر «سایر» انتخاب شده، متنِ دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
@@ -445,10 +574,10 @@ export default function NewProductPage() {
     setSpecs({})
     setSpecOthers({})
   }
-  /* تغییر نوع ⇒ ریستِ برند و مدل (لیست‌هایشان عوض می‌شود) */
+  /* تغییر نوع ⇒ فقط در «چوب» برند/مدل ریست می‌شوند (چون برندِ چوب به نوع وابسته است) */
   const setType = (v: string) => {
-    setForm(f => ({ ...f, type: v, brand: '', brandOther: '', model: '', modelOther: '' }))
-    setErrors(e => { const n = { ...e }; delete n.type; delete n.brand; delete n.model; return n })
+    setForm(f => ({ ...f, type: v, ...(f.category === 'cue' ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
+    setErrors(e => { const n = { ...e }; delete n.type; if (form.category === 'cue') { delete n.brand; delete n.model } return n })
   }
   /* تغییر برند ⇒ ریستِ مدل */
   const setBrand = (v: string) => {
@@ -696,7 +825,7 @@ export default function NewProductPage() {
                       {brandOptions ? (
                         <>
                           <FancySelect value={form.brand} onChange={setBrand}
-                            options={brandOptions.map(o => ({ value: o, label: o === 'سایر' ? 'سایر (وارد کردن دستی)' : o }))}
+                            options={withOther(brandOptions).map(o => ({ value: o, label: o }))}
                             placeholder="انتخاب برند..." error={!!errors.brand} />
                           {form.brand === 'سایر' && (
                             <input className="nf" type="text" placeholder="نام برند را وارد کنید..." value={form.brandOther}
@@ -716,7 +845,7 @@ export default function NewProductPage() {
                       {modelOptions ? (
                         <>
                           <FancySelect value={form.model} onChange={v => set('model', v)}
-                            options={modelOptions.map(o => ({ value: o, label: o === 'سایر' ? 'سایر (وارد کردن دستی)' : o }))}
+                            options={withOther(modelOptions).map(o => ({ value: o, label: o }))}
                             placeholder="انتخاب مدل..." error={!!errors.model} />
                           {form.model === 'سایر' && (
                             <input className="nf" type="text" placeholder="مدل را وارد کنید..." value={form.modelOther}
