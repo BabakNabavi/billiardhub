@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
@@ -245,7 +246,8 @@ function inp(err?: string, locked?: boolean): React.CSSProperties {
 // ── Modern select style ─────────────────────────────────────────
 /* (استایلِ <select> بومی حذف شد — همه‌ی دراپ‌داون‌ها حالا FancySelect هستند) */
 
-/* ── دراپ‌داونِ حرفه‌ای (جایگزینِ <select> بومی) — پنلِ استایل‌دار، سرچ‌دار برای لیست‌های بلند ── */
+/* ── دراپ‌داونِ حرفه‌ای — پنل با Portal روی document.body و position:fixed رندر می‌شود
+   تا از overflow:hidden و stacking-contextِ کارت‌ها فرار کند و زیرِ المانِ بعدی نرود. ── */
 function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', disabled, error }: {
   value: string
   onChange: (v: string) => void
@@ -256,20 +258,39 @@ function FancySelect({ value, onChange, options, placeholder = 'انتخاب...'
 }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
-  const ref = useRef<HTMLDivElement>(null)
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const searchable = options.length > 8
+
+  const place = () => {
+    const r = btnRef.current?.getBoundingClientRect()
+    if (r) setRect({ top: r.bottom + 6, left: r.left, width: r.width })
+  }
+  const toggle = () => { if (disabled) return; if (!open) place(); setOpen(o => !o) }
+
   useEffect(() => {
     if (!open) return
-    const onDoc = (ev: MouseEvent) => { if (ref.current && !ref.current.contains(ev.target as Node)) setOpen(false) }
+    const onDoc = (ev: MouseEvent) => {
+      const t = ev.target as Node
+      if (btnRef.current?.contains(t) || panelRef.current?.contains(t)) return
+      setOpen(false)
+    }
     const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onDoc); document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+    window.addEventListener('scroll', place, true); window.addEventListener('resize', place)
+    return () => {
+      document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place)
+    }
   }, [open])
+
   const cur = options.find(o => o.value === value)
   const list = searchable && q.trim() ? options.filter(o => o.label.toLowerCase().includes(q.trim().toLowerCase())) : options
+
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button type="button" disabled={disabled} onClick={() => { if (!disabled) setOpen(o => !o) }}
+    <>
+      <button ref={btnRef} type="button" disabled={disabled} onClick={toggle}
         style={{
           width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 8,
           padding: '12px 14px', borderRadius: 11, fontSize: 14.5, textAlign: 'right',
@@ -282,11 +303,12 @@ function FancySelect({ value, onChange, options, placeholder = 'انتخاب...'
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur ? cur.label : placeholder}</span>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      {open && !disabled && (
-        <div style={{
-          position: 'absolute', zIndex: 40, top: 'calc(100% + 6px)', insetInlineStart: 0, insetInlineEnd: 0,
+
+      {open && !disabled && rect && typeof document !== 'undefined' && createPortal(
+        <div ref={panelRef} style={{
+          position: 'fixed', zIndex: 9999, top: rect.top, left: rect.left, width: rect.width,
           background: '#fff', border: '1px solid rgba(28,28,26,0.1)', borderRadius: 13, overflow: 'hidden',
-          boxShadow: '0 18px 44px rgba(28,27,23,0.18)', animation: 'fadeIn 0.14s ease both',
+          boxShadow: '0 18px 44px rgba(28,27,23,0.20)', animation: 'fadeIn 0.14s ease both', direction: 'rtl',
         }}>
           {searchable && (
             <div style={{ padding: 8, borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
@@ -315,9 +337,10 @@ function FancySelect({ value, onChange, options, placeholder = 'انتخاب...'
               )
             })}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
-    </div>
+    </>
   )
 }
 
