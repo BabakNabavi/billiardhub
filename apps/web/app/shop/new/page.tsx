@@ -158,7 +158,6 @@ const CAT_BRANDS: Record<string, string[]> = {
   ball:       ['Aramith', 'Dynaspheres', 'Predator', 'Cyclop', 'Super Aramith', 'Riley', 'Brunswick', 'Molinari', 'Diamond'],
   'case-bag': ['Predator', 'Mezz', 'Cuetec', 'Poison', 'Instroke', 'Justis', 'Whitten', 'JB Cases', 'Kronos', 'Longoni', 'Omin'],
   cloth:      ['Simonis', 'Strachan', 'Hainsworth', 'Milliken', 'Championship', 'Gorina', 'Iwan Simonis'],
-  chalk:      ['Taom', 'Master', 'Kamui', 'Blue Diamond', 'Triangle', 'Predator', 'Longoni', 'Silver Cup', 'Brunswick', 'Tweeten', 'G2', 'Mezz', 'J Flowers', 'Riley', 'CueSoul'],
   extension:  ['Predator', 'Mezz', 'Cuetec', 'Longoni', 'Peradon', 'John Parris', 'Riley', 'Omin', 'Universal'],
   accessory:  ['Predator', 'Kamui', 'Mezz', 'Cuetec', 'Longoni', 'Aramith', 'Magic Ball Rack', 'Accu Rack', 'Q-Wiz', 'Tweeten', 'Master', 'Tiger', 'Universal'],
   rest:       ['Peradon', 'Riley', 'Hamilton', 'PowerGlide', 'Master', 'Tweeten', 'Longoni', 'Predator'],
@@ -198,23 +197,6 @@ const CAT_MODELS: Record<string, Record<string, string[]>> = {
     'Championship': ['Tour Edition', 'Invitational', 'Mercury Ultra'],
     'Gorina':       ['Super Pro', 'Basalt', 'Granito'],
     'Iwan Simonis': ['860 Tournament', '760 Tournament'],
-  },
-  chalk: {
-    'Taom':         ['Pyro', 'Pyro Blue', 'Pyro Pink', 'V10', 'V10 Green', 'V10 Blue', 'Snooker Chalk 2.0', 'Snooker 2.0 Green', 'Pool Chalk 2.0', 'Pool 2.0 Blue', 'Soft Chalk', 'Soft Green'],
-    'Master':       ['Blue', 'Green', 'Red', 'Black', 'Gold'],
-    'Kamui':        ['Roku', '0.98', '1.21'],
-    'Blue Diamond': ['Blue Diamond Chalk'],
-    'Triangle':     ['Triangle Blue', 'Triangle Green'],
-    'Predator':     ['1080 Pure', '1080'],
-    'Longoni':      ['Black Fire', 'Nero', 'Original'],
-    'Silver Cup':   ['Silver Cup Blue', 'Silver Cup Green'],
-    'Brunswick':    ['Brunswick Blue', 'Brunswick Green'],
-    'Tweeten':      ['Master', 'Triangle'],
-    'G2':           ['G2 Chalk'],
-    'Mezz':         ['Mezz Chalk'],
-    'J Flowers':    ['J Flowers Chalk'],
-    'Riley':        ['Riley Blue', 'Riley Green'],
-    'CueSoul':      ['CueSoul Chalk'],
   },
   extension: {
     'Predator':    ['QR Extension', 'Uni-Loc Extension', 'Air II Extension'],
@@ -364,6 +346,57 @@ const TIP_MODELS: Record<string, Record<string, string[]>> = {
     'KO Brothers': ['KO Brothers'],
   },
 }
+
+/* گچ — برند/مدل بر اساسِ نوع. اسنوکر و هی‌بال یک داده‌ی مشترک؛ پاکت داده‌ی جدا. */
+const SNOOKER_CHALK_BRANDS = ['Taom', 'Kamui', 'Master', 'Triangle', 'Blue Diamond', 'Silver Cup', 'Peradon', 'Riley', 'PowerGlide', 'Century', 'Pioneer']
+const SNOOKER_CHALK_MODELS: Record<string, string[]> = {
+  'Taom':         ['V10', 'Snooker Chalk 2.0', 'Soft', 'Pyro'],
+  'Kamui':        ['Roku'],
+  'Master':       ['Master Chalk'],
+  'Triangle':     ['Triangle Chalk'],
+  'Blue Diamond': ['Blue Diamond'],
+  'Silver Cup':   ['Silver Cup'],
+  'Peradon':      ['Peradon Chalk'],
+  'Riley':        ['Riley Chalk'],
+  'PowerGlide':   ['PowerGlide Chalk'],
+  'Century':      ['Century Chalk'],
+  'Pioneer':      ['Pioneer Chalk'],
+}
+const CHALK_BRANDS: Record<string, string[]> = {
+  'اسنوکر':       SNOOKER_CHALK_BRANDS,
+  'هی‌بال':        SNOOKER_CHALK_BRANDS,
+  'پاکت بیلیارد': ['Taom', 'Kamui', 'Predator', 'Master', 'Triangle', 'Blue Diamond', 'Silver Cup', 'Tiger', 'Molinari', 'Navigator', 'HOW', 'Mezz', 'Outsville', 'Great White', 'Lava', 'Magic Chalk', 'Pagulayan', 'Turning Point', 'Triple 60', 'Viking'],
+}
+const CHALK_MODELS: Record<string, Record<string, string[]>> = {
+  'اسنوکر': SNOOKER_CHALK_MODELS,
+  'هی‌بال':  SNOOKER_CHALK_MODELS,
+  'پاکت بیلیارد': {
+    'Taom':          ['V10', 'Pyro', 'Pool Chalk 2.0', 'Soft'],
+    'Kamui':         ['Roku', '0.98', '1.21', 'Sai', 'Kageki'],
+    'Predator':      ['1080', '1080 Pure'],
+    'Master':        ['Master Chalk'],
+    'Triangle':      ['Triangle Chalk', 'Triangle Pro'],
+    'Blue Diamond':  ['Blue Diamond'],
+    'Silver Cup':    ['Silver Cup'],
+    'Tiger':         ['Tiger Chalk'],
+    'Molinari':      ['Molinari Chalk'],
+    'Navigator':     ['Navigator Chalk'],
+    'HOW':           ['HOW Chalk'],
+    'Mezz':          ['Smart Chalk'],
+    'Outsville':     ['TechnoDud'],
+    'Great White':   ['Great White Chalk'],
+    'Lava':          ['Lava Chalk'],
+    'Magic Chalk':   ['Magic Chalk'],
+    'Pagulayan':     ['Pagulayan Chalk'],
+    'Turning Point': ['TP Chalk'],
+    'Triple 60':     ['Triple 60 Chalk'],
+    'Viking':        ['Viking Chalk'],
+  },
+}
+
+/* دسته‌های نوع‌محور. برند بر اساسِ نوع؛ مدل بر اساسِ (نوع، برند) — به‌جز چوب که مدلش فقط بر اساسِ برند است. */
+const TYPE_BRANDS: Record<string, Record<string, string[]>> = { cue: CUE_BRANDS, table: TABLE_BRANDS, tip: TIP_BRANDS, chalk: CHALK_BRANDS }
+const TYPE_MODELS: Record<string, Record<string, Record<string, string[]>>> = { table: TABLE_MODELS, tip: TIP_MODELS, chalk: CHALK_MODELS }
 
 /* «سایر» را یک‌بار ته لیست تضمین می‌کند (چه در داده باشد چه نباشد) */
 const withOther = (arr: string[]): string[] => (arr.includes('سایر') ? arr : [...arr, 'سایر'])
@@ -652,20 +685,14 @@ export default function NewProductPage() {
 
   /* برند/مدل — اگر لیست داشت دراپ‌داون، وگرنه متنِ دستی.
      چوب: برند بر اساسِ نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برندِ ثابتِ همان دسته. مدل همیشه بر اساسِ برند. */
-  const brandOptions = form.category === 'cue'
-    ? (CUE_BRANDS[form.type] ?? null)
-    : form.category === 'table'
-      ? (TABLE_BRANDS[form.type] ?? null)
-      : form.category === 'tip'
-        ? (TIP_BRANDS[form.type] ?? null)
-        : (CAT_BRANDS[form.category] ?? null)
+  const brandOptions = TYPE_BRANDS[form.category]
+    ? (TYPE_BRANDS[form.category]![form.type] ?? null)          // نوع‌محور (چوب/میز/تیپ/گچ)
+    : (CAT_BRANDS[form.category] ?? null)                        // برندِ ثابتِ همان دسته
   const modelOptions = form.category === 'cue'
-    ? (CUE_MODELS[form.brand] ?? null)
-    : form.category === 'table'
-      ? (TABLE_MODELS[form.type]?.[form.brand] ?? null)
-      : form.category === 'tip'
-        ? (TIP_MODELS[form.type]?.[form.brand] ?? null)
-        : (CAT_MODELS[form.category]?.[form.brand] ?? null)
+    ? (CUE_MODELS[form.brand] ?? null)                          // چوب: مدل فقط بر اساسِ برند
+    : TYPE_MODELS[form.category]
+      ? (TYPE_MODELS[form.category]![form.type]?.[form.brand] ?? null)  // میز/تیپ/گچ: مدل بر اساسِ (نوع، برند)
+      : (CAT_MODELS[form.category]?.[form.brand] ?? null)
   /* مقدارِ مؤثر: اگر «سایر» انتخاب شده، متنِ دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
@@ -676,8 +703,8 @@ export default function NewProductPage() {
     setSpecs({})
     setSpecOthers({})
   }
-  /* تغییر نوع ⇒ در «چوب»/«میز»/«تیپ» برند/مدل ریست می‌شوند (برندشان به نوع وابسته است) */
-  const typeDrivenCat = (c: string) => c === 'cue' || c === 'table' || c === 'tip'
+  /* تغییر نوع ⇒ در دسته‌های نوع‌محور (چوب/میز/تیپ/گچ) برند/مدل ریست می‌شوند */
+  const typeDrivenCat = (c: string) => !!TYPE_BRANDS[c]
   const setType = (v: string) => {
     setForm(f => ({ ...f, type: v, ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (typeDrivenCat(form.category)) { delete n.brand; delete n.model } return n })
