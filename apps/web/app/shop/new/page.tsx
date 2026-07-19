@@ -125,6 +125,8 @@ const TYPE_OPTIONS: Record<string, string[]> = {
   ball:       ['۱۵ تایی پاکت بیلیارد', '۲۲ تایی اسنوکر', '۳ تایی کارامبول'],
   tip:        ['تک لایه چرم', 'چندلایه چرم', 'سینتتیک', 'فنولیک'],
   'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
+  /* گچ: نوع فقط برای دسته‌بندی؛ لیستِ برند مستقل از نوع است (هرکدام که انتخاب شود همان برندهای گچ می‌آید) */
+  chalk:      ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
 }
 
 /* برندهای «چوب» بر اساسِ نوع (اسنوکر / پاکت بیلیارد). «سایر» ⇒ فیلدِ متنِ دستی باز می‌شود.
@@ -199,7 +201,7 @@ const CAT_MODELS: Record<string, Record<string, string[]>> = {
     'Iwan Simonis': ['860 Tournament', '760 Tournament'],
   },
   chalk: {
-    'Taom':         ['Pyro', 'V10', 'V11', 'V10 Blue', 'V10 Green', 'Professional'],
+    'Taom':         ['Pyro', 'Pyro Blue', 'Pyro Pink', 'V10', 'V10 Green', 'V10 Blue', 'Snooker Chalk 2.0', 'Snooker 2.0 Green', 'Pool Chalk 2.0', 'Pool 2.0 Blue', 'Soft Chalk', 'Soft Green'],
     'Master':       ['Blue', 'Green', 'Red', 'Black', 'Gold'],
     'Kamui':        ['Roku', '0.98', '1.21'],
     'Blue Diamond': ['Blue Diamond Chalk'],
