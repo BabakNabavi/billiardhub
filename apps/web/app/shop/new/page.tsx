@@ -866,7 +866,7 @@ export default function NewProductPage() {
         @media(max-width:820px) { .two-col { grid-template-columns: 1fr !important; } .spec-grid { grid-template-columns: 1fr !important; } }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT }}>
+      <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, overflowX: 'hidden' }}>
 
         {/* ambient blobs */}
         <div style={{ position: 'fixed', top: -120, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.08) 0%,transparent 65%)', filter: 'blur(70px)', pointerEvents: 'none', zIndex: 0 }} />
@@ -902,8 +902,8 @@ export default function NewProductPage() {
             </p>
           </div>
 
-          {/* ── Steps indicator ── */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28, animation: 'fadeUp 0.45s ease both' }}>
+          {/* ── Steps indicator ── (flex-wrap تا روی موبایل سرریزِ افقی نسازد) */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap', animation: 'fadeUp 0.45s ease both' }}>
             {[{ n: '۱', t: 'اطلاعات محصول' }, { n: '۲', t: 'اطلاعات فروشنده' }, { n: '۳', t: 'ثبت نهایی' }].map((s, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 20, background: i < 2 ? `rgba(199,166,106,0.10)` : 'rgba(28,28,26,0.05)', border: `1px solid ${i < 2 ? 'rgba(199,166,106,0.28)' : 'rgba(28,28,26,0.08)'}` }}>
                 <span style={{ width: 22, height: 22, borderRadius: '50%', background: i < 2 ? `linear-gradient(135deg,${GOLD},#A07840)` : 'rgba(28,28,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: i < 2 ? '#fff' : TEXT_MUT, flexShrink: 0 }}>{s.n}</span>
