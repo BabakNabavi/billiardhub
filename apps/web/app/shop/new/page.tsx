@@ -271,6 +271,54 @@ const CAT_MODELS: Record<string, Record<string, string[]>> = {
   },
 }
 
+/* برندهای «میز» بر اساسِ نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب، وابسته به نوع.
+   نوع‌های دیگر (کارامبول/خانگی) برندِ متنِ آزاد می‌گیرند. */
+const TABLE_BRANDS: Record<string, string[]> = {
+  'اسنوکر':       ['Wiraka', 'JOY', 'Rasson', 'Xingpai (Star)', 'Riley', 'BCE', 'Hamilton', 'Thurston', 'Shender', 'DPT'],
+  'پاکت بیلیارد': ['Diamond', 'Brunswick', 'Olhausen', 'Rasson', 'Riley', 'Dynamic', 'Buffalo', 'Valley', 'Connelly', 'Imperial', 'Toulet', 'SAM'],
+  'هی‌بال':        ['JOY', 'Wiraka', 'Xingpai (Star)', 'Rasson', 'Shender', 'Xingjue', 'Super Power', 'Hans Delta'],
+}
+
+/* مدل‌های «میز» بر اساسِ نوع سپس برند (یک برند در نوع‌های مختلف مدل‌های متفاوت دارد). */
+const TABLE_MODELS: Record<string, Record<string, string[]>> = {
+  'اسنوکر': {
+    'Wiraka':         ['M1 Tournament Steelblock', 'M1 Classic', 'M1 Classic Gold', 'M1 1980', 'Jewel', 'Armour Rocky', 'Berlin Commercial', 'Morris'],
+    'JOY':            ['Q7 Snooker'],
+    'Rasson':         ['Magnum Pro', 'Sword II', 'Strong II', 'Victory II Snooker', 'Ambassador', 'OX Snooker'],
+    'Xingpai (Star)': ['S101', 'S102', 'S103', 'S104', 'S105', 'S106', 'S107', 'XW101-12S', 'XW102', 'XW103', 'Champion Series', 'Tournament Series'],
+    'Riley':          ['Aristocrat', 'Renaissance', 'Clubmaster', 'Tournament', 'Match', 'Burwat'],
+    'BCE':            ['Westbury', 'Supreme', 'Club', 'Tournament'],
+    'Hamilton':       ['Tournament', 'Club', 'Heritage'],
+    'Thurston':       ['Tournament Table', 'Club Table', 'Heritage'],
+    'Shender':        ['S100', 'S200', 'S300', 'S500', 'Champion'],
+    'DPT':            ['Professional Snooker', 'Tournament Snooker'],
+  },
+  'پاکت بیلیارد': {
+    'Diamond':   ['Professional', 'Professional Tournament', 'Pro-Am', 'Paragon', 'League', 'Smart Table'],
+    'Brunswick': ['Gold Crown I', 'Gold Crown II', 'Gold Crown III', 'Gold Crown IV', 'Gold Crown V', 'Gold Crown VI', 'Gold Crown VII', 'Anniversary', 'Centennial', 'Black Wolf', 'Black Wolf Pro', 'Allenton', 'Botanic', 'Bristol', 'Canton', 'Glenwood', 'Oakland', 'Sanibel', 'Winfield', 'Bayfield', 'Contender', 'Metro'],
+    'Olhausen':  ['Americana', 'Augusta', 'Belmont', 'Eclipse', 'Grand Champion', 'Hampton', 'Monaco', 'Orleans', 'Pasadena', 'Reno', 'Tahoe', 'West End'],
+    'Rasson':    ['Victory II', 'Victory II Plus', 'Acurra', 'Challenger', 'Challenger Plus', 'OX', 'Leo', 'Shadow', 'Black Hole', 'Caesar'],
+    'Riley':     ['Elegance', 'Windsor', 'Hamilton', 'Classic'],
+    'Dynamic':   ['Dynamic II', 'Dynamic III', 'Triumph'],
+    'Buffalo':   ['Eliminator', 'Dominator', 'Gladiator', 'Harwood', 'Royal'],
+    'Valley':    ['Panther', 'Cougar', 'Tiger', 'Black Cat'],
+    'Connelly':  ['Catalina', 'Cochise', 'Presidio', 'Ventura'],
+    'Imperial':  ['Eliminator', 'Penelope', 'Reno', 'Bishop'],
+    'Toulet':    ['BlackLight', 'Crystal', 'Dining Collection'],
+    'SAM':       ['Atlantic', 'K Steel', 'Competition'],
+  },
+  'هی‌بال': {
+    'JOY':            ['Q3+', 'Q7', 'Q8', 'Q8 Pro', 'Q9', 'G3'],
+    'Wiraka':         ['Classic M1 Chinese Pool', 'CM1'],
+    'Xingpai (Star)': ['Champion Series', 'Tournament Series'],
+    'Rasson':         ['Victory II Heyball', 'Victory II Plus Heyball', 'Acurra Heyball'],
+    'Shender':        ['Heyball Professional', 'Tournament Heyball'],
+    'Xingjue':        ['Professional Series', 'Tournament Series'],
+    'Super Power':    ['Competition Series', 'Professional Series'],
+    'Hans Delta':     ['Tournament Series', 'Club Series'],
+  },
+}
+
 /* «سایر» را یک‌بار ته لیست تضمین می‌کند (چه در داده باشد چه نباشد) */
 const withOther = (arr: string[]): string[] => (arr.includes('سایر') ? arr : [...arr, 'سایر'])
 
@@ -560,10 +608,14 @@ export default function NewProductPage() {
      چوب: برند بر اساسِ نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برندِ ثابتِ همان دسته. مدل همیشه بر اساسِ برند. */
   const brandOptions = form.category === 'cue'
     ? (CUE_BRANDS[form.type] ?? null)
-    : (CAT_BRANDS[form.category] ?? null)
+    : form.category === 'table'
+      ? (TABLE_BRANDS[form.type] ?? null)
+      : (CAT_BRANDS[form.category] ?? null)
   const modelOptions = form.category === 'cue'
     ? (CUE_MODELS[form.brand] ?? null)
-    : (CAT_MODELS[form.category]?.[form.brand] ?? null)
+    : form.category === 'table'
+      ? (TABLE_MODELS[form.type]?.[form.brand] ?? null)
+      : (CAT_MODELS[form.category]?.[form.brand] ?? null)
   /* مقدارِ مؤثر: اگر «سایر» انتخاب شده، متنِ دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
@@ -574,10 +626,11 @@ export default function NewProductPage() {
     setSpecs({})
     setSpecOthers({})
   }
-  /* تغییر نوع ⇒ فقط در «چوب» برند/مدل ریست می‌شوند (چون برندِ چوب به نوع وابسته است) */
+  /* تغییر نوع ⇒ در «چوب» و «میز» برند/مدل ریست می‌شوند (برندشان به نوع وابسته است) */
   const setType = (v: string) => {
-    setForm(f => ({ ...f, type: v, ...(f.category === 'cue' ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
-    setErrors(e => { const n = { ...e }; delete n.type; if (form.category === 'cue') { delete n.brand; delete n.model } return n })
+    const typeDriven = form.category === 'cue' || form.category === 'table'
+    setForm(f => ({ ...f, type: v, ...((f.category === 'cue' || f.category === 'table') ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
+    setErrors(e => { const n = { ...e }; delete n.type; if (typeDriven) { delete n.brand; delete n.model } return n })
   }
   /* تغییر برند ⇒ ریستِ مدل */
   const setBrand = (v: string) => {
