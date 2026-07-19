@@ -123,7 +123,7 @@ const TYPE_OPTIONS: Record<string, string[]> = {
   cue:        ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول'],
   table:      ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول', 'خانگی'],
   ball:       ['۱۵ تایی پاکت بیلیارد', '۲۲ تایی اسنوکر', '۳ تایی کارامبول'],
-  tip:        ['تک لایه چرم', 'چندلایه چرم', 'سینتتیک', 'فنولیک'],
+  tip:        ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
   'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
   /* گچ: نوع فقط برای دسته‌بندی؛ لیستِ برند مستقل از نوع است (هرکدام که انتخاب شود همان برندهای گچ می‌آید) */
   chalk:      ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
@@ -159,7 +159,6 @@ const CAT_BRANDS: Record<string, string[]> = {
   'case-bag': ['Predator', 'Mezz', 'Cuetec', 'Poison', 'Instroke', 'Justis', 'Whitten', 'JB Cases', 'Kronos', 'Longoni', 'Omin'],
   cloth:      ['Simonis', 'Strachan', 'Hainsworth', 'Milliken', 'Championship', 'Gorina', 'Iwan Simonis'],
   chalk:      ['Taom', 'Master', 'Kamui', 'Blue Diamond', 'Triangle', 'Predator', 'Longoni', 'Silver Cup', 'Brunswick', 'Tweeten', 'G2', 'Mezz', 'J Flowers', 'Riley', 'CueSoul'],
-  tip:        ['Kamui', 'Moori', 'Talisman', 'Taom', 'Tiger', 'Elk Master', 'Le Professional', 'Triangle', 'Blue Diamond', 'Century', 'HOW', 'Zan', 'Navigator', 'G2', 'Hirano', 'Black Heart'],
   extension:  ['Predator', 'Mezz', 'Cuetec', 'Longoni', 'Peradon', 'John Parris', 'Riley', 'Omin', 'Universal'],
   accessory:  ['Predator', 'Kamui', 'Mezz', 'Cuetec', 'Longoni', 'Aramith', 'Magic Ball Rack', 'Accu Rack', 'Q-Wiz', 'Tweeten', 'Master', 'Tiger', 'Universal'],
   rest:       ['Peradon', 'Riley', 'Hamilton', 'PowerGlide', 'Master', 'Tweeten', 'Longoni', 'Predator'],
@@ -216,24 +215,6 @@ const CAT_MODELS: Record<string, Record<string, string[]>> = {
     'J Flowers':    ['J Flowers Chalk'],
     'Riley':        ['Riley Blue', 'Riley Green'],
     'CueSoul':      ['CueSoul Chalk'],
-  },
-  tip: {
-    'Kamui':          ['Original Soft', 'Original Medium', 'Original Hard', 'Black Soft', 'Black Medium', 'Black Hard', 'Athlete Soft', 'Athlete Medium', 'Athlete Hard', 'Clear Black Soft', 'Clear Black Medium', 'Clear Black Hard'],
-    'Moori':          ['Moori Soft', 'Moori Medium', 'Moori Hard', 'Moori Quick Soft', 'Moori Quick Medium', 'Moori Quick Hard'],
-    'Talisman':       ['Pro Soft', 'Pro Medium', 'Pro Hard', 'WB Soft', 'WB Medium', 'WB Hard', 'Everest'],
-    'Taom':           ['Fusion', 'Hybrid', 'Original'],
-    'Tiger':          ['Everest', 'Onyx', 'Sniper', 'Dynamite', 'Emerald'],
-    'Elk Master':     ['Elk Master Blue', 'Elk Master Black'],
-    'Le Professional':['Le Professional Blue', 'Le Professional Black'],
-    'Triangle':       ['Triangle Blue', 'Triangle Black'],
-    'Blue Diamond':   ['Blue Diamond Tip'],
-    'Century':        ['Century Soft', 'Century Medium', 'Century Hard'],
-    'HOW':            ['HOW Soft', 'HOW Medium', 'HOW Hard', 'HOW Titan'],
-    'Zan':            ['Zan Plus Soft', 'Zan Plus Medium', 'Zan Plus Hard', 'Zan Hybrid Max', 'Zan Premium'],
-    'Navigator':      ['Navigator Alpha Soft', 'Navigator Alpha Medium', 'Navigator Alpha Hard', 'Navigator Black Soft', 'Navigator Black Medium', 'Navigator Black Hard'],
-    'G2':             ['G2 Soft', 'G2 Medium', 'G2 Hard'],
-    'Hirano':         ['Hirano Soft', 'Hirano Medium', 'Hirano Hard'],
-    'Black Heart':    ['Black Heart Soft', 'Black Heart Medium', 'Black Heart Hard'],
   },
   extension: {
     'Predator':    ['QR Extension', 'Uni-Loc Extension', 'Air II Extension'],
@@ -318,6 +299,69 @@ const TABLE_MODELS: Record<string, Record<string, string[]>> = {
     'Xingjue':        ['Professional Series', 'Tournament Series'],
     'Super Power':    ['Competition Series', 'Professional Series'],
     'Hans Delta':     ['Tournament Series', 'Club Series'],
+  },
+}
+
+/* برندهای «تیپ» بر اساسِ نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب/میز، وابسته به نوع. */
+const TIP_BRANDS: Record<string, string[]> = {
+  'اسنوکر':       ['Kamui', 'Century', 'Elk Master', 'Blue Diamond', 'ADR147', 'Talisman', 'Moori', 'Zan', 'G2', 'Navigator', 'HOW', 'Tiger', 'Taom', 'Le Professional', 'Triangle', 'Peradon', 'Riley', 'PowerGlide'],
+  'پاکت بیلیارد': ['Kamui', 'Predator', 'Tiger', 'HOW', 'Zan', 'Moori', 'Navigator', 'G2', 'Taom', 'Le Professional', 'Triangle', 'Blue Diamond', 'Molinari', 'Longoni', 'Caiden', 'KO Brothers', 'Techno Dud'],
+  'هی‌بال':        ['Kamui', 'Predator', 'HOW', 'Tiger', 'Zan', 'Navigator', 'G2', 'Taom', 'Molinari', 'Caiden', 'KO Brothers'],
+}
+
+/* مدل‌های «تیپ» بر اساسِ نوع سپس برند. */
+const TIP_MODELS: Record<string, Record<string, string[]>> = {
+  'اسنوکر': {
+    'Kamui':          ['Black', 'Original', 'Clear Black', 'Clear Original', 'Athlete'],
+    'Century':        ['G1'],
+    'Elk Master':     ['Elk Master'],
+    'Blue Diamond':   ['Blue Diamond'],
+    'ADR147':         ['Ultimate'],
+    'Talisman':       ['Pro', 'WB'],
+    'Moori':          ['Moori', 'Quick'],
+    'Zan':            ['Plus', 'Hybrid Max', 'Boost'],
+    'G2':             ['G2'],
+    'Navigator':      ['Alpha', 'Black'],
+    'HOW':            ['HOW'],
+    'Tiger':          ['Sniper', 'Everest', 'Onyx'],
+    'Taom':           ['Fusion'],
+    'Le Professional':['Le Professional'],
+    'Triangle':       ['Triangle'],
+    'Peradon':        ['Peradon'],
+    'Riley':          ['Riley'],
+    'PowerGlide':     ['PowerGlide'],
+  },
+  'پاکت بیلیارد': {
+    'Kamui':          ['Black', 'Original', 'Clear Black', 'Clear Original', 'Athlete'],
+    'Predator':       ['Victory'],
+    'Tiger':          ['Sniper', 'Everest', 'Onyx', 'Dynamite', 'Emerald', 'Icebreaker'],
+    'HOW':            ['HOW', 'Titan'],
+    'Zan':            ['Plus', 'Hybrid Max', 'Boost'],
+    'Moori':          ['Moori', 'Quick'],
+    'Navigator':      ['Alpha', 'Black', 'Blue Impact'],
+    'G2':             ['G2'],
+    'Taom':           ['Fusion'],
+    'Le Professional':['Le Professional'],
+    'Triangle':       ['Triangle'],
+    'Blue Diamond':   ['Blue Diamond'],
+    'Molinari':       ['Molinari'],
+    'Longoni':        ['Longoni'],
+    'Caiden':         ['Warrior', 'Fenrir'],
+    'KO Brothers':    ['KO Brothers'],
+    'Techno Dud':     ['Techno Dud'],
+  },
+  'هی‌بال': {
+    'Kamui':       ['Black', 'Original', 'Athlete'],
+    'Predator':    ['Victory'],
+    'HOW':         ['HOW', 'Titan'],
+    'Tiger':       ['Sniper', 'Everest', 'Onyx'],
+    'Zan':         ['Plus', 'Hybrid Max'],
+    'Navigator':   ['Alpha', 'Black'],
+    'G2':          ['G2'],
+    'Taom':        ['Fusion'],
+    'Molinari':    ['Molinari'],
+    'Caiden':      ['Warrior', 'Fenrir'],
+    'KO Brothers': ['KO Brothers'],
   },
 }
 
@@ -612,12 +656,16 @@ export default function NewProductPage() {
     ? (CUE_BRANDS[form.type] ?? null)
     : form.category === 'table'
       ? (TABLE_BRANDS[form.type] ?? null)
-      : (CAT_BRANDS[form.category] ?? null)
+      : form.category === 'tip'
+        ? (TIP_BRANDS[form.type] ?? null)
+        : (CAT_BRANDS[form.category] ?? null)
   const modelOptions = form.category === 'cue'
     ? (CUE_MODELS[form.brand] ?? null)
     : form.category === 'table'
       ? (TABLE_MODELS[form.type]?.[form.brand] ?? null)
-      : (CAT_MODELS[form.category]?.[form.brand] ?? null)
+      : form.category === 'tip'
+        ? (TIP_MODELS[form.type]?.[form.brand] ?? null)
+        : (CAT_MODELS[form.category]?.[form.brand] ?? null)
   /* مقدارِ مؤثر: اگر «سایر» انتخاب شده، متنِ دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
@@ -628,11 +676,11 @@ export default function NewProductPage() {
     setSpecs({})
     setSpecOthers({})
   }
-  /* تغییر نوع ⇒ در «چوب» و «میز» برند/مدل ریست می‌شوند (برندشان به نوع وابسته است) */
+  /* تغییر نوع ⇒ در «چوب»/«میز»/«تیپ» برند/مدل ریست می‌شوند (برندشان به نوع وابسته است) */
+  const typeDrivenCat = (c: string) => c === 'cue' || c === 'table' || c === 'tip'
   const setType = (v: string) => {
-    const typeDriven = form.category === 'cue' || form.category === 'table'
-    setForm(f => ({ ...f, type: v, ...((f.category === 'cue' || f.category === 'table') ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
-    setErrors(e => { const n = { ...e }; delete n.type; if (typeDriven) { delete n.brand; delete n.model } return n })
+    setForm(f => ({ ...f, type: v, ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
+    setErrors(e => { const n = { ...e }; delete n.type; if (typeDrivenCat(form.category)) { delete n.brand; delete n.model } return n })
   }
   /* تغییر برند ⇒ ریستِ مدل */
   const setBrand = (v: string) => {
