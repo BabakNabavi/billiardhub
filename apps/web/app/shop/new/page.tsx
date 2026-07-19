@@ -126,6 +126,29 @@ const TYPE_OPTIONS: Record<string, string[]> = {
   'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
 }
 
+/* برندهای «چوب» بر اساسِ نوع (اسنوکر / پاکت بیلیارد). «سایر» ⇒ فیلدِ متنِ دستی باز می‌شود.
+   نوع‌های دیگر (هی‌بال/کارامبول) برندِ متنِ آزاد می‌گیرند. */
+const CUE_BRANDS: Record<string, string[]> = {
+  'اسنوکر': ['John Parris', 'Peradon', 'Cue Craft', "O'Min", 'Ton Praram', 'Phoenix', 'PowerGlide', 'Trevor White', 'Jason Owen', 'Mike Wooldridge', 'Woods Cues', 'BCE', 'Precision', 'Master Cue', 'Maximus', 'Paochan', 'سایر'],
+  'پاکت بیلیارد': ['Predator', 'Mezz', 'McDermott', 'Meucci', 'Jacoby', 'Pechauer', 'Viking', 'Cuetec', 'Joss', 'Lucasi', 'Longoni', 'Becue', 'Tiger', 'Schon', 'Players', 'Action', 'Poison', 'OB', 'Falcon', 'Dufferin', 'سایر'],
+}
+
+/* مدل‌های «چوب» بر اساسِ برند. برندهایی که اینجا نیستند ⇒ مدلِ متنِ دستی. «سایر» ⇒ فیلدِ متن. */
+const CUE_MODELS: Record<string, string[]> = {
+  'Peradon':        ['Winchester', 'Newbury', 'Guildford', 'Harlow', 'Knight', 'Joe Davis 600', 'Chiltern', 'Royal', 'Edwardian', 'Salisbury', 'Cannon', 'Crown', 'Lazer', 'Warwick', 'Oxford', 'Trafalgar', 'Stamford', 'Liverpool', 'York', 'Sheffield', 'سایر'],
+  'McDermott':      ['SN801', 'SN802', 'SN401', 'SN402', 'SN404', 'SN503', 'SN504', 'سایر'],
+  'Predator':       ['Classic', 'Crown', 'Royal', 'Edwardian', 'Winchester', 'Newbury', 'Guildford', 'Harlow', 'Knight', 'York', 'King', 'Pro Cue', 'Joe Davis', 'Walter Lindrum', 'Lazer', 'Salisbury', 'Trafalgar', 'Oxford', 'Liverpool', 'Sheffield', 'Warwick', 'Cannon', 'سایر'],
+  'John Parris':    ['Traditional', 'Professional', 'Ultimate', 'Ultimate Pro', 'Paragon', 'Ambassador', 'Exclusive', 'Custom Built', 'Signature', 'Titanium Ferrule Series', 'سایر'],
+  "O'Min":          ['Classic', 'Traditional', 'Champion', 'Professional', 'Master', 'Black Series', 'Signature', 'Prestige', 'Supreme', 'Ultimate', 'Handmade Series', 'Custom Series', 'Limited Edition', 'سایر'],
+  'Cue Craft':      ['Traditional', 'Heritage', '3 Lions', 'Signature', 'Champion', 'Professional', 'Custom Handmade', 'Limited Edition', 'سایر'],
+  'PowerGlide':     ['Heritage', 'Classic', 'Deluxe', 'Supreme', 'Diamond', 'Challenger', 'Club', 'Competition', 'Professional', 'Custom', 'سایر'],
+  'Ton Praram':     ['Classic', 'Champion', 'Professional', 'Ultimate', 'Signature', 'Handmade', 'Custom', 'سایر'],
+  'Phoenix':        ['Master', 'Supreme', 'Professional', 'Classic', 'Maple Series', 'Ash Series', 'Handmade', 'سایر'],
+  'Maximus':        ['Ultimate', 'Impression', 'Master', 'Professional', 'Handmade', 'Custom', 'سایر'],
+  'Trevor White':   ['Traditional', 'Professional', 'Handmade', 'Signature', 'Custom', 'سایر'],
+  'Mike Wooldridge':['Professional', 'Signature', 'Handmade', 'Traditional', 'Custom', 'سایر'],
+}
+
 /* فیلدهایی که به بالای فرم (دسته/نوع/برند/مدل) منتقل شده‌اند و نباید در «مشخصات فنی» تکرار شوند */
 const HIDDEN_SPEC_KEYS: Record<string, string[]> = {
   cue:        ['cueType', 'brand'],
@@ -166,12 +189,10 @@ function SpecField({ field, value, otherValue, onChange, onOtherChange, dependen
         style={{ animation: hasDep ? 'fadeIn 0.25s ease both' : undefined }}>
 
         {effectiveType === 'dropdown' ? (
-          <select className="nf" value={value} onChange={e => onChange(e.target.value)}
-            disabled={noDepYet}
-            style={sel(undefined, noDepYet)}>
-            <option value="">{noDepYet ? 'ابتدا نوع را انتخاب کنید' : 'انتخاب...'}</option>
-            {resolvedOptions.map(o => <option key={o} value={o}>{o}</option>)}
-          </select>
+          <FancySelect value={value} onChange={onChange}
+            options={resolvedOptions.map(o => ({ value: o, label: o }))}
+            placeholder={noDepYet ? 'ابتدا نوع را انتخاب کنید' : 'انتخاب...'}
+            disabled={noDepYet} />
         ) : effectiveType === 'number' ? (
           <input className="nf" type="number" step="any" inputMode="decimal" placeholder={field.placeholder ?? ''} value={value}
             onChange={e => onChange(e.target.value)}
@@ -222,23 +243,82 @@ function inp(err?: string, locked?: boolean): React.CSSProperties {
 }
 
 // ── Modern select style ─────────────────────────────────────────
-function sel(err?: string, disabled?: boolean): React.CSSProperties {
-  return {
-    width: '100%', boxSizing: 'border-box' as const,
-    padding: '12px 14px 12px 38px', borderRadius: 11, fontSize: 14.5,
-    border: `1.5px solid ${err ? ERR : disabled ? 'rgba(28,28,26,0.07)' : 'rgba(28,28,26,0.13)'}`,
-    background: disabled ? 'rgba(28,28,26,0.03)' : '#FAFAFA',
-    color: disabled ? 'rgba(28,28,26,0.30)' : TEXT,
-    fontFamily: 'Vazirmatn,Tahoma,sans-serif',
-    outline: 'none', direction: 'rtl',
-    transition: 'border-color 0.2s, box-shadow 0.2s',
-    appearance: 'none' as any, WebkitAppearance: 'none' as any,
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C7A66A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'left 12px center',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.55 : 1,
-  }
+/* (استایلِ <select> بومی حذف شد — همه‌ی دراپ‌داون‌ها حالا FancySelect هستند) */
+
+/* ── دراپ‌داونِ حرفه‌ای (جایگزینِ <select> بومی) — پنلِ استایل‌دار، سرچ‌دار برای لیست‌های بلند ── */
+function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', disabled, error }: {
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+  placeholder?: string
+  disabled?: boolean
+  error?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [q, setQ] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+  const searchable = options.length > 8
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (ev: MouseEvent) => { if (ref.current && !ref.current.contains(ev.target as Node)) setOpen(false) }
+    const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDoc); document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+  }, [open])
+  const cur = options.find(o => o.value === value)
+  const list = searchable && q.trim() ? options.filter(o => o.label.toLowerCase().includes(q.trim().toLowerCase())) : options
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" disabled={disabled} onClick={() => { if (!disabled) setOpen(o => !o) }}
+        style={{
+          width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 8,
+          padding: '12px 14px', borderRadius: 11, fontSize: 14.5, textAlign: 'right',
+          border: `1.5px solid ${error ? ERR : open ? GOLD : disabled ? 'rgba(28,28,26,0.07)' : 'rgba(28,28,26,0.13)'}`,
+          background: disabled ? 'rgba(28,28,26,0.03)' : '#FAFAFA',
+          color: cur ? TEXT : (disabled ? 'rgba(28,28,26,0.30)' : TEXT_MUT),
+          fontFamily: 'Vazirmatn,Tahoma,sans-serif', cursor: disabled ? 'not-allowed' : 'pointer',
+          boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.14)' : 'none', transition: 'border-color .18s, box-shadow .18s',
+        }}>
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur ? cur.label : placeholder}</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      {open && !disabled && (
+        <div style={{
+          position: 'absolute', zIndex: 40, top: 'calc(100% + 6px)', insetInlineStart: 0, insetInlineEnd: 0,
+          background: '#fff', border: '1px solid rgba(28,28,26,0.1)', borderRadius: 13, overflow: 'hidden',
+          boxShadow: '0 18px 44px rgba(28,27,23,0.18)', animation: 'fadeIn 0.14s ease both',
+        }}>
+          {searchable && (
+            <div style={{ padding: 8, borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
+              <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو..." dir="rtl"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '8px 11px', borderRadius: 9, fontSize: 13, border: '1.5px solid rgba(28,28,26,0.12)', background: '#FAFAFA', color: TEXT, outline: 'none', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }} />
+            </div>
+          )}
+          <div style={{ maxHeight: 264, overflowY: 'auto', padding: 6 }}>
+            {list.length === 0 ? (
+              <div style={{ padding: '18px 10px', textAlign: 'center', fontSize: 13, color: TEXT_MUT }}>موردی یافت نشد</div>
+            ) : list.map(o => {
+              const s = o.value === value
+              return (
+                <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); setQ('') }}
+                  style={{
+                    display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                    padding: '10px 12px', border: 'none', borderRadius: 9, cursor: 'pointer', textAlign: 'right',
+                    fontFamily: 'Vazirmatn,Tahoma,sans-serif', fontSize: 14,
+                    background: s ? 'rgba(199,166,106,0.14)' : 'transparent', color: s ? GOLD_D : TEXT, fontWeight: s ? 800 : 500,
+                  }}
+                  onMouseEnter={e => { if (!s) e.currentTarget.style.background = 'rgba(28,28,26,0.04)' }}
+                  onMouseLeave={e => { if (!s) e.currentTarget.style.background = 'transparent' }}>
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.label}</span>
+                  {s && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={GOLD_D} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 /* optional دیگر برچسبِ «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کلِ فرم حذف شد */
@@ -274,8 +354,8 @@ export default function NewProductPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
-    category: '', type: '', model: '', price: '', oldPrice: '',
-    description: '', brand: '', condition: 'new',
+    category: '', type: '', model: '', modelOther: '', price: '', oldPrice: '',
+    description: '', brand: '', brandOther: '', condition: 'new',
     shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
     province: '', city: '', address: '',
   })
@@ -329,11 +409,28 @@ export default function NewProductPage() {
     setErrors(e => { const n = { ...e }; delete n[k]; return n })
   }
 
+  /* برندِ «چوب» بر اساسِ نوع؛ مدل بر اساسِ برند — اگر لیست داشت دراپ‌داون، وگرنه متنِ دستی */
+  const brandOptions = form.category === 'cue' ? (CUE_BRANDS[form.type] ?? null) : null
+  const modelOptions = form.category === 'cue' ? (CUE_MODELS[form.brand] ?? null) : null
+  /* مقدارِ مؤثر: اگر «سایر» انتخاب شده، متنِ دستی جای آن می‌نشیند */
+  const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
+  const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
+
   const handleCategoryChange = (cat: string) => {
-    set('category', cat)
-    set('type', '')          // لیستِ «نوع» با تغییر دسته عوض می‌شود
+    setForm(f => ({ ...f, category: cat, type: '', brand: '', brandOther: '', model: '', modelOther: '' }))
+    setErrors(e => { const n = { ...e }; delete n.category; delete n.type; delete n.brand; delete n.model; return n })
     setSpecs({})
     setSpecOthers({})
+  }
+  /* تغییر نوع ⇒ ریستِ برند و مدل (لیست‌هایشان عوض می‌شود) */
+  const setType = (v: string) => {
+    setForm(f => ({ ...f, type: v, brand: '', brandOther: '', model: '', modelOther: '' }))
+    setErrors(e => { const n = { ...e }; delete n.type; delete n.brand; delete n.model; return n })
+  }
+  /* تغییر برند ⇒ ریستِ مدل */
+  const setBrand = (v: string) => {
+    setForm(f => ({ ...f, brand: v, model: '', modelOther: '' }))
+    setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
   }
 
   const handleFiles = useCallback((files: FileList | null) => {
@@ -367,8 +464,8 @@ export default function NewProductPage() {
     const e: Record<string, string> = {}
     if (!form.category)           e.category    = 'دسته‌بندی را انتخاب کنید'
     if (!form.type.trim())        e.type        = 'نوع را مشخص کنید'
-    if (!form.brand.trim())       e.brand       = 'برند الزامی است'
-    if (!form.model.trim())       e.model       = 'مدل الزامی است'
+    if (!effBrand)                e.brand       = 'برند الزامی است'
+    if (!effModel)                e.model       = 'مدل الزامی است'
     if (!form.price)              e.price       = 'قیمت الزامی است'
     if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه | فروشنده الزامی است'
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
@@ -396,14 +493,14 @@ export default function NewProductPage() {
     const disc     = rawOld > rawPrice ? Math.round((1 - rawPrice / rawOld) * 100) : 0
     const imgList  = images.map(i => i.data)
 
-    const finalSpecs: Record<string, string> = { نوع: form.type.trim(), مدل: form.model.trim() }
+    const finalSpecs: Record<string, string> = { نوع: form.type.trim(), مدل: effModel }
     Object.entries(specs).forEach(([k, v]) => {
       if (v === 'سایر' && specOthers[k]) finalSpecs[k] = `سایر: ${specOthers[k]}`
       else if (v) finalSpecs[k] = v
     })
 
     /* نامِ محصول از دسته/نوع/برند/مدل ساخته می‌شود (فیلدِ «نام محصول» حذف شده) */
-    const composedName = [form.brand.trim(), form.model.trim()].filter(Boolean).join(' ')
+    const composedName = [effBrand, effModel].filter(Boolean).join(' ')
       || [catLabel, form.type.trim()].filter(Boolean).join(' ') || 'محصول'
 
     const product = {
@@ -414,12 +511,12 @@ export default function NewProductPage() {
       name:      composedName,
       category:  form.category,
       type:      form.type.trim(),
-      model:     form.model.trim(),
+      model:     effModel,
       price:     rawPrice,
       old:       rawOld,
       disc,
       description:    form.description.trim(),
-      brand:          form.brand.trim(),
+      brand:          effBrand,
       condition:      form.condition,
       specs:          finalSpecs,
       sellerId:       storeSlug,
@@ -466,7 +563,7 @@ export default function NewProductPage() {
   )
 
   const catLabel = CATEGORIES.find(c => c.id === form.category)?.label ?? ''
-  const previewName = [form.brand.trim(), form.model.trim()].filter(Boolean).join(' ')
+  const previewName = [effBrand, effModel].filter(Boolean).join(' ')
     || [catLabel, form.type.trim()].filter(Boolean).join(' ')
 
   return (
@@ -551,10 +648,9 @@ export default function NewProductPage() {
                     {/* دسته‌بندی */}
                     <div>
                       <Label required>دسته‌بندی</Label>
-                      <select className="nf" value={form.category} onChange={e => handleCategoryChange(e.target.value)} style={sel(errors.category)}>
-                        <option value="">انتخاب...</option>
-                        {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                      </select>
+                      <FancySelect value={form.category} onChange={handleCategoryChange}
+                        options={CATEGORIES.map(c => ({ value: c.id, label: c.label }))}
+                        placeholder="انتخاب دسته‌بندی..." error={!!errors.category} />
                       <ErrMsg msg={errors.category} />
                     </div>
 
@@ -562,27 +658,52 @@ export default function NewProductPage() {
                     <div>
                       <Label required>نوع</Label>
                       {form.category && TYPE_OPTIONS[form.category] ? (
-                        <select className="nf" value={form.type} onChange={e => set('type', e.target.value)} style={sel(errors.type)}>
-                          <option value="">انتخاب...</option>
-                          {TYPE_OPTIONS[form.category]!.map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
+                        <FancySelect value={form.type} onChange={setType}
+                          options={TYPE_OPTIONS[form.category]!.map(o => ({ value: o, label: o }))}
+                          placeholder="انتخاب نوع..." error={!!errors.type} />
                       ) : (
                         <input className="nf" type="text" placeholder="مثال: اسنوکر" value={form.type} onChange={e => set('type', e.target.value)} style={inp(errors.type)} />
                       )}
                       <ErrMsg msg={errors.type} />
                     </div>
 
-                    {/* برند */}
+                    {/* برند — چوب: دراپ‌داونِ برند بر اساسِ نوع؛ «سایر» ⇒ فیلدِ متن. بقیه: متنِ آزاد */}
                     <div>
                       <Label required>برند</Label>
-                      <input className="nf" type="text" placeholder="نام برند" value={form.brand} onChange={e => set('brand', e.target.value)} style={inp(errors.brand)} />
+                      {brandOptions ? (
+                        <>
+                          <FancySelect value={form.brand} onChange={setBrand}
+                            options={brandOptions.map(o => ({ value: o, label: o === 'سایر' ? 'سایر (وارد کردن دستی)' : o }))}
+                            placeholder="انتخاب برند..." error={!!errors.brand} />
+                          {form.brand === 'سایر' && (
+                            <input className="nf" type="text" placeholder="نام برند را وارد کنید..." value={form.brandOther}
+                              onChange={e => set('brandOther', e.target.value)}
+                              style={{ ...inp(errors.brand), marginTop: 8, background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
+                          )}
+                        </>
+                      ) : (
+                        <input className="nf" type="text" placeholder="نام برند" value={form.brand} onChange={e => set('brand', e.target.value)} style={inp(errors.brand)} />
+                      )}
                       <ErrMsg msg={errors.brand} />
                     </div>
 
-                    {/* مدل */}
+                    {/* مدل — چوب: دراپ‌داونِ مدل بر اساسِ برند؛ «سایر» ⇒ فیلدِ متن. بقیه: متنِ آزاد */}
                     <div>
                       <Label required>مدل</Label>
-                      <input className="nf" type="text" placeholder="مثال: 314³" value={form.model} onChange={e => set('model', e.target.value)} style={inp(errors.model)} />
+                      {modelOptions ? (
+                        <>
+                          <FancySelect value={form.model} onChange={v => set('model', v)}
+                            options={modelOptions.map(o => ({ value: o, label: o === 'سایر' ? 'سایر (وارد کردن دستی)' : o }))}
+                            placeholder="انتخاب مدل..." error={!!errors.model} />
+                          {form.model === 'سایر' && (
+                            <input className="nf" type="text" placeholder="مدل را وارد کنید..." value={form.modelOther}
+                              onChange={e => set('modelOther', e.target.value)}
+                              style={{ ...inp(errors.model), marginTop: 8, background: 'rgba(199,166,106,0.05)', borderColor: 'rgba(199,166,106,0.30)' }} />
+                          )}
+                        </>
+                      ) : (
+                        <input className="nf" type="text" placeholder="مثال: 314³" value={form.model} onChange={e => set('model', e.target.value)} style={inp(errors.model)} />
+                      )}
                       <ErrMsg msg={errors.model} />
                     </div>
 
@@ -649,14 +770,11 @@ export default function NewProductPage() {
                         {/* divider */}
                         <div style={{ height: 1, background: 'rgba(28,28,26,0.08)', margin: '4px 0 18px' }} />
 
-                        {/* condition — منوی مدرن (به‌جای دکمه‌های رنگی) */}
+                        {/* condition — دراپ‌داونِ حرفه‌ای */}
                         <div style={{ marginBottom: 16 }}>
                           <Label required>وضعیت کالا</Label>
-                          <select className="nf" value={form.condition} onChange={e => set('condition', e.target.value)} style={sel()}>
-                            <option value="new">نو</option>
-                            <option value="like-new">در حد نو</option>
-                            <option value="used">کارکرده</option>
-                          </select>
+                          <FancySelect value={form.condition} onChange={v => set('condition', v)}
+                            options={[{ value: 'new', label: 'نو' }, { value: 'like-new', label: 'در حد نو' }, { value: 'used', label: 'کارکرده' }]} />
                         </div>
 
                         {/* description */}
