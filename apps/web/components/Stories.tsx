@@ -460,12 +460,13 @@ export default function Stories() {
           padding: 3px; border-radius: 50%;
           transition: box-shadow 0.22s ease;
         }
-        .st-item:hover .st-ring { box-shadow: 0 6px 20px rgba(0,0,0,0.36); }
+        .st-item:hover .st-ring { box-shadow: 0 8px 22px rgba(26,25,23,0.16); }
         .st-inner {
           width: 67px; height: 67px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 24px; color: #fff;
-          border: 2px solid rgba(4,2,10,0.55); overflow: hidden;
+          font-weight: 900; font-size: 24px; color: #3A362E;
+          border: 2.5px solid #FFFFFF; overflow: hidden;
+          box-shadow: 0 2px 8px rgba(26,25,23,0.08);
         }
         .st-name {
           font-size: 10px; font-weight: 600; white-space: nowrap;
@@ -483,7 +484,7 @@ export default function Stories() {
                 <Plus size={18} style={{ color: '#C7A66A' }} />
               </div>
             </div>
-            <span className="st-name" style={{ color: 'rgba(199,166,106,0.80)' }}>جدید</span>
+            <span className="st-name" style={{ color: '#A07840' }}>جدید</span>
           </div>
         )}
 
@@ -494,9 +495,9 @@ export default function Stories() {
             <button key={g.userId} className="st-item" onClick={() => openStory(i)}>
               <div className="st-ring" style={{
                 background: isSeen
-                  ? 'rgba(255,255,255,0.08)'
+                  ? 'rgba(26,25,23,0.10)'
                   : 'linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)',
-                boxShadow: isSeen ? 'none' : '0 0 14px rgba(214,41,118,0.45)',
+                boxShadow: isSeen ? 'none' : '0 4px 14px rgba(214,41,118,0.28)',
               }}>
                 <div className="st-inner" style={{ background: `linear-gradient(135deg,${g.roleColor}28,${g.roleColor}0E)` }}>
                   {g.logoUrl
@@ -504,7 +505,7 @@ export default function Stories() {
                     : g.userAvatar}
                 </div>
               </div>
-              <span className="st-name" style={{ color: isSeen ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.65)' }}>
+              <span className="st-name" style={{ color: isSeen ? 'rgba(26,25,23,0.34)' : 'rgba(26,25,23,0.70)' }}>
                 {g.userName}
               </span>
             </button>
