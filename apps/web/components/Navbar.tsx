@@ -134,17 +134,18 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  // Adaptive theme: over dark hero = transparent/white-text, else = warm glass/dark-text
-  const isLight = scrolled || !isHomePage;
+  /* هیروی صفحه‌ی اول حالا روشن است ⇒ متن نَوبار همیشه تیره.
+     بالای صفحه: شفاف/شناور؛ با اسکرول: گلسِ روشن + بلور + سایه‌ی ظریف. */
+  const isLight = scrolled || !isHomePage;   // فقط برای سطح (bg/بوردر/بلور)
 
   const navBg = isHomePage
-    ? scrolled ? 'rgba(247,247,245,0.94)' : 'transparent'
+    ? scrolled ? 'rgba(247,246,243,0.92)' : 'rgba(247,246,243,0.55)'
     : 'rgba(247,247,245,0.94)';
 
-  const TEXT      = isLight ? '#1C1C1A' : 'rgba(255,255,255,0.88)';
-  const TEXT_MUT  = isLight ? 'rgba(28,28,26,0.48)' : 'rgba(255,255,255,0.48)';
-  const BORDER_C  = isLight ? 'rgba(28,28,26,0.08)' : 'rgba(255,255,255,0.18)';
-  const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
+  const TEXT      = '#1C1C1A';
+  const TEXT_MUT  = 'rgba(28,28,26,0.48)';
+  const BORDER_C  = 'rgba(28,28,26,0.08)';
+  const SURF      = 'rgba(28,28,26,0.05)';
 
   if (isShopPage) return null;
 
@@ -203,8 +204,9 @@ export default function Navbar() {
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         background: navBg,
-        borderBottom: isLight ? `1px solid rgba(28,28,26,0.06)` : '1px solid transparent',
-        backdropFilter: isLight ? 'blur(32px) saturate(1.8)' : 'none',
+        borderBottom: isLight ? `1px solid rgba(28,28,26,0.06)` : '1px solid rgba(28,28,26,0.04)',
+        backdropFilter: isLight ? 'blur(32px) saturate(1.8)' : 'blur(14px) saturate(1.4)',
+        WebkitBackdropFilter: isLight ? 'blur(32px) saturate(1.8)' : 'blur(14px) saturate(1.4)',
         transition: 'all 0.4s ease',
         boxShadow: isLight ? '0 1px 0 rgba(28,28,26,0.04), 0 4px 24px rgba(28,28,26,0.04)' : 'none',
       }}>
@@ -542,14 +544,14 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Stories — home only, slides down when search opens */}
+      {/* Stories — home only, slides down when search opens (تمِ روشن) */}
       {isHomePage && (
         <div className="hero-stories-bar" style={{
           position: 'fixed',
           top: searchOpen ? '130px' : '72px',
           left: 0, right: 0, zIndex: 49,
-          padding: '6px clamp(16px,3vw,32px) 4px',
-          background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
+          padding: '8px clamp(16px,3vw,32px) 6px',
+          background: 'linear-gradient(to bottom,rgba(247,246,243,0.92) 0%,rgba(247,246,243,0.55) 55%,rgba(247,246,243,0) 100%)',
           opacity: Math.max(0, 1 - scrollY / 700),
           pointerEvents: scrollY > 560 ? 'none' : 'auto',
           transition: 'top 0.38s cubic-bezier(0.22,1,0.36,1)',
