@@ -830,35 +830,34 @@ export default function HomePage() {
   useEffect(() => { startBannerTimer(); return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); }; }, []);
 
 
-  const handleSliderScroll = useCallback(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-    const sliderCenter = slider.scrollLeft + slider.offsetWidth / 2;
-    const cards = Array.from(slider.querySelectorAll<HTMLElement>('.feat-card'));
-    let minDist = Infinity, newActive = 0;
-    cards.forEach((card, i) => {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-      const dist = Math.abs(cardCenter - sliderCenter);
-      const t = Math.max(0, 1 - dist / (slider.offsetWidth * 0.55));
-      const sx = (1 + t * 0.12).toFixed(3);
-      const sy = (1 + t * 0.20).toFixed(3);
-      card.style.transform = `scaleX(${sx}) scaleY(${sy})`;
-      if (dist < minDist) { minDist = dist; newActive = i; }
-    });
-    if (newActive !== activeCardRef.current) {
-      activeCardRef.current = newActive;
-      setActiveCard(newActive);
-      try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(12); } catch(_) {}
-    }
-  }, []);
-
+  /* تشخیصِ کارتِ وسط با rAF (به‌جای رویدادِ اسکرول) — چون در دسکتاپ ترک با
+     انیمیشنِ CSS می‌چرخد و اسکرول رخ نمی‌دهد. کارتِ نزدیک به مرکز نرم بزرگ می‌شود
+     و activeCard همیشه اندیسِ منطقیِ ۰..۶ است (محتوا برای حلقه ×۲ رندر می‌شود). */
   useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-    slider.addEventListener('scroll', handleSliderScroll, { passive: true });
-    handleSliderScroll();
-    return () => slider.removeEventListener('scroll', handleSliderScroll);
-  }, [handleSliderScroll]);
+    let raf = 0;
+    const loop = () => {
+      const slider = sliderRef.current;
+      if (slider) {
+        const rect = slider.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const cards = slider.querySelectorAll<HTMLElement>('.feat-card');
+        let minDist = Infinity, newActive = 0;
+        cards.forEach((card, i) => {
+          const r = card.getBoundingClientRect();
+          if (r.width === 0) return;                       // کپیِ مخفیِ موبایل
+          const dist = Math.abs(r.left + r.width / 2 - centerX);
+          const t = Math.max(0, 1 - dist / (rect.width * 0.55));
+          card.style.transform = `scale(${(1 + t * 0.15).toFixed(3)})`;
+          if (dist < minDist) { minDist = dist; newActive = i; }
+        });
+        const feat = newActive % FEATURE_CARDS.length;
+        if (feat !== activeCardRef.current) { activeCardRef.current = feat; setActiveCard(feat); }
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const clubsRafRef = useRef<number>(0);
   const handleClubsScroll = useCallback(() => {
@@ -1099,6 +1098,20 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
+        /* ── چرخشِ بی‌نهایتِ نرمِ کارت‌ها (فقط دسکتاپ) ──
+           مارکِیِ transform: محتوا دوبار رندر می‌شود و ترک ۵۰٪ جابه‌جا می‌شود ⇒ حلقه‌ی بی‌درز.
+           gap صفر است و فاصله با margin-left هر کارت ساخته می‌شود تا نقطه‌ی ۵۰٪ دقیقاً
+           هم‌ارزِ یک کپیِ کامل باشد (وگرنه هر دور یک پرشِ نیم‌gap دیده می‌شد). */
+        @keyframes heroLoop { from { transform: translateX(0); } to { transform: translateX(50%); } }
+        .feat-track { display:flex; gap:0; width:max-content; align-items:stretch; }
+        .feat-track .feat-card { margin-left:18px; }
+        @media(min-width:901px){
+          .feat-slider { overflow:hidden !important; scroll-snap-type:none !important; justify-content:flex-start !important; }
+          .feat-track  { animation: heroLoop 46s linear infinite; will-change: transform; }
+          .feat-slider:hover .feat-track { animation-play-state: paused; }
+        }
+        @media(max-width:900px){ .feat-dup { display:none !important; } }
+        @media (prefers-reduced-motion: reduce){ .feat-track { animation:none !important; } }
         .clubs-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
@@ -1256,64 +1269,67 @@ useEffect(() => {
           {/* Feature card slider — 7 cards */}
           <div className="hd" style={{ width: '100%', marginTop: '16px', flexGrow: isMobile ? 1 : 0 }}>
             <div ref={sliderRef} className="feat-slider" style={{
-              display: 'flex', gap: '18px', overflowX: 'auto',
+              display: 'flex', overflowX: 'auto',
               scrollbarWidth: 'none', padding: '20px 22px 38px',
               justifyContent: 'center', alignItems: 'stretch',
               scrollSnapType: 'x mandatory',
             }}>
-              {FEATURE_CARDS.map((card, i) => (
-                <Link key={i} href={card.href} className="feat-card" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
-                  <div style={{
-                    width: '118px', padding: '18px 10px 16px',
-                    background: `rgba(${card.rgb},0.09)`,
-                    backdropFilter: 'blur(28px) saturate(200%)',
-                    WebkitBackdropFilter: 'blur(28px) saturate(200%)',
-                    border: `1px solid rgba(${card.rgb},${i === activeCard ? '0.45' : '0.26'})`,
-                    borderRadius: '20px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                    textAlign: 'center', flex: 1,
-                    boxShadow: i === activeCard
-                      ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 18px rgba(${card.rgb},0.50), 0 0 0 1px rgba(${card.rgb},0.18)`
-                      : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(${card.rgb},0.12)`,
-                    cursor: 'pointer',
-                    transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
-                  }}>
-                    <div style={{
-                      width: '46px', height: '46px', borderRadius: '14px',
-                      background: `rgba(${card.rgb},0.14)`,
-                      border: `1px solid rgba(${card.rgb},0.32)`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
-                      marginBottom: '32px',
-                    }}>
-                      <card.Icon size={22} color={card.clr}
-                        style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
-                      {card.title}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, flex: 1 }}>
-                      {card.caption}
-                    </div>
-                  </div>
-                </Link>
-              ))}
+              {/* ترکِ حلقه — دسکتاپ: محتوا ×۲ + مارکِیِ CSS؛ موبایل: کپیِ دوم مخفی و سوایپ عادی */}
+              <div className="feat-track">
+                {[...FEATURE_CARDS, ...FEATURE_CARDS].map((card, i) => {
+                  const isDup  = i >= FEATURE_CARDS.length;
+                  const active = i % FEATURE_CARDS.length === activeCard;
+                  return (
+                    <Link key={i} href={card.href} className={`feat-card${isDup ? ' feat-dup' : ''}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
+                      <div style={{
+                        width: '118px', padding: '18px 10px 16px',
+                        background: `rgba(${card.rgb},0.09)`,
+                        backdropFilter: 'blur(28px) saturate(200%)',
+                        WebkitBackdropFilter: 'blur(28px) saturate(200%)',
+                        border: `1px solid rgba(${card.rgb},${active ? '0.45' : '0.26'})`,
+                        borderRadius: '20px',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                        textAlign: 'center', flex: 1,
+                        boxShadow: active
+                          ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 18px rgba(${card.rgb},0.50), 0 0 0 1px rgba(${card.rgb},0.18)`
+                          : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(${card.rgb},0.12)`,
+                        cursor: 'pointer',
+                        transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+                      }}>
+                        <div style={{
+                          width: '46px', height: '46px', borderRadius: '14px',
+                          background: `rgba(${card.rgb},0.14)`,
+                          border: `1px solid rgba(${card.rgb},0.32)`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                          boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
+                          marginBottom: '32px',
+                        }}>
+                          <card.Icon size={22} color={card.clr}
+                            style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
+                        </div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
+                          {card.title}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, flex: 1 }}>
+                          {card.caption}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-            {/* Carousel dots — all 7 always rendered, no mount/unmount jank */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '18px' }}>
-              {FEATURE_CARDS.map((card, i) => {
-                const dist = Math.abs(i - activeCard);
-                return (
-                  <div key={i} style={{
-                    height: '5px',
-                    width: i === activeCard ? '18px' : '5px',
-                    borderRadius: '3px',
-                    opacity: dist >= 3 ? 0.35 : 1,
-                    background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
-                    transition: 'all 0.3s ease',
-                  }} />
-                );
-              })}
+            {/* نقطه‌های کاروسل — همیشه دقیقاً ۷ تا، یکنواخت (بدونِ محوِ فاصله‌ای که «سوراخ» می‌ساخت) */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '18px' }}>
+              {FEATURE_CARDS.map((card, i) => (
+                <div key={i} style={{
+                  height: '5px',
+                  width: i === activeCard ? '18px' : '5px',
+                  borderRadius: '3px', flexShrink: 0,
+                  background: i === activeCard ? card.clr : 'rgba(255,255,255,0.28)',
+                  transition: 'all 0.3s ease',
+                }} />
+              ))}
             </div>
           </div>
 
