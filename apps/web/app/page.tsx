@@ -671,9 +671,6 @@ export default function HomePage() {
   const [scrollY, setScrollY] = useState(0);
   const rafRef   = useRef<number>(0);
 
-  /* تیلتِ خیلی ظریفِ تصویر هیرو با موس (فقط دسکتاپ) */
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
-
   const sliderRef      = useRef<HTMLDivElement>(null);
   const [activeCard, setActiveCard] = useState(0);
   const activeCardRef  = useRef(0);
@@ -918,16 +915,9 @@ export default function HomePage() {
     return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  /* هیروی روشن: پارالاکسِ ظریف — متن کمی آهسته‌تر از صفحه، تصویر کمی سریع‌تر */
+  /* هیروی روشن: پارالاکسِ ظریف — متن کمی آهسته‌تر از صفحه، تصویرِ پس‌زمینه کمی برعکس */
   const heroShiftText = Math.min(scrollY, 600) * 0.045;
-  const heroShiftImg  = Math.min(scrollY, 600) * -0.025;
-
-  const onHeroTilt = (e: React.MouseEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width  - 0.5;
-    const py = (e.clientY - r.top)  / r.height - 0.5;
-    setTilt({ rx: py * -2.2, ry: px * 2.6 });
-  };
+  const heroShiftImg  = Math.min(scrollY, 600) * -0.03;
 
   return (
     <>
@@ -1003,14 +993,36 @@ export default function HomePage() {
 
         .dp-tabs { grid-template-columns:repeat(4,1fr)!important; }
 
-        /* ══ HERO روشن — ادیتوریالِ پریمیوم ══ */
+        /* ══ HERO روشن — ادیتوریالِ پریمیوم (تصویرِ محوشونده مطابق ماکاپ) ══ */
         @keyframes heroImgIn { from{opacity:0;transform:scale(1.045);} to{opacity:1;transform:scale(1);} }
+        @keyframes cueDrop { 0%,100%{transform:translateY(0);opacity:1;} 55%{transform:translateY(9px);opacity:0.15;} }
         .hero-wrap { position:relative; background:#F7F6F3; overflow:hidden; }
+        /* تصویرِ لانژ به‌صورت بک‌گراندِ سمتِ راست که به نرمی در زمینه محو می‌شود */
+        .hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; animation:heroImgIn 1.6s cubic-bezier(.22,1,.36,1) 0.4s both; }
+        /* ارتفاعِ تصویر عمداً ≤۸۰٪ هیرو است تا (۱) کراپ/زومِ cover کم شود و
+           (۲) میز و توپ‌ها بالای ردیفِ کارت‌ها بمانند؛ لبه‌ی چپ و پایین نرم محو می‌شوند. */
+        .hero-bg img {
+          position:absolute; top:0; right:0; height:80%; width:78%;
+          object-fit:cover; object-position:center 40%;
+          -webkit-mask-image:linear-gradient(to left, black 55%, transparent 98%), linear-gradient(to bottom, black 68%, transparent 99%);
+          -webkit-mask-composite:source-in;
+          mask-image:linear-gradient(to left, black 55%, transparent 98%), linear-gradient(to bottom, black 68%, transparent 99%);
+          mask-composite:intersect;
+        }
+        .hero-bg::after {
+          content:''; position:absolute; inset:0;
+          background:linear-gradient(to top, #F7F6F3 8%, rgba(247,246,243,0) 38%);
+        }
         .hero-grid {
-          max-width:1340px; margin:0 auto;
-          padding:clamp(150px,19vh,196px) clamp(16px,4vw,48px) 0;
-          display:grid; grid-template-columns:1.02fr 1fr;
-          gap:clamp(28px,4.5vw,72px); align-items:center;
+          position:relative; z-index:2;
+          max-width:1440px; margin:0 auto; width:100%;
+          padding:clamp(150px,19vh,196px) clamp(16px,3vw,32px) 0;
+          display:grid; grid-template-columns:1.2fr 1fr;
+          gap:clamp(24px,4vw,64px); align-items:center;
+        }
+        @media(min-width:901px){
+          .hero-wrap { display:flex; flex-direction:column; min-height:100vh; }
+          .hero-grid { flex:1; }
         }
         .hero-eyebrow2 {
           display:inline-flex; align-items:center; gap:9px;
@@ -1049,16 +1061,10 @@ export default function HomePage() {
           transition:border-color .25s, background .25s, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
         }
         .cta-white:hover { border-color:rgba(199,166,106,0.55); background:#FFFDF9; transform:translateY(-2px); box-shadow:0 8px 22px rgba(26,25,23,0.08); }
-        .hero-visual {
-          position:relative; border-radius:36px; overflow:hidden;
-          box-shadow:0 30px 80px rgba(26,25,23,0.16), 0 6px 24px rgba(26,25,23,0.08);
-          border:1px solid rgba(255,255,255,0.7);
-          aspect-ratio:5/4; background:#EDEAE4;
-          transform-style:preserve-3d; will-change:transform;
-          animation:heroImgIn 1.4s cubic-bezier(.22,1,.36,1) 0.55s both;
-        }
-        .hero-visual img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s cubic-bezier(.22,1,.36,1); }
-        .hero-visual:hover img { transform:scale(1.03); }
+        /* نشانگرِ اسکرول — مثل ماکاپ، زیرِ کارت‌ها */
+        .hero-cue { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 0 26px; color:rgba(26,25,23,0.42); font-size:11.5px; font-weight:600; }
+        .hero-cue-mouse { width:22px; height:34px; border:1.5px solid rgba(26,25,23,0.30); border-radius:12px; position:relative; }
+        .hero-cue-mouse::after { content:''; position:absolute; top:6px; left:50%; width:3px; height:7px; margin-left:-1.5px; border-radius:2px; background:rgba(26,25,23,0.38); animation:cueDrop 1.8s ease-in-out infinite; }
         /* ── کارت‌های کشف ── */
         .disc-wrap { max-width:1340px; margin:0 auto; padding:clamp(36px,5vh,60px) clamp(16px,4vw,48px) clamp(44px,6vh,72px); }
         .disc-row  { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; }
@@ -1100,11 +1106,27 @@ export default function HomePage() {
           .dp-tabs     { grid-template-columns:repeat(2,1fr) !important; }
         }
 
-        /* ══ TABLET ≤900px — هیرو ستونی + کارت‌ها کاروسلِ اسنپی ══ */
+        /* ══ TABLET ≤900px — هیرو ستونی؛ تصویر همان بک‌گراندِ داخلِ هیرو می‌ماند ══ */
         @media(max-width:900px){
           .hero-grid { grid-template-columns:1fr !important; gap:30px !important; padding-top:clamp(196px,24vh,230px) !important; }
+          .hero-spacer { display:none !important; }
+          .hero-cue    { display:none !important; }
+          /* بک‌گراند: تمام‌عرض ولی فقط بالای هیرو (زومِ cover کم می‌شود)؛
+             پایینش نرم محو و متن با گرادیانِ عاجی خوانا می‌ماند */
+          .hero-bg img {
+            width:100% !important; height:52% !important;
+            object-position:center 32% !important;
+            -webkit-mask-image:linear-gradient(to bottom, black 42%, transparent 97%) !important;
+            -webkit-mask-composite:source-over !important;
+            mask-image:linear-gradient(to bottom, black 42%, transparent 97%) !important;
+            mask-composite:add !important;
+          }
+          .hero-bg::after {
+            background:linear-gradient(to top,
+              #F7F6F3 10%, rgba(247,246,243,0.72) 34%,
+              rgba(247,246,243,0.30) 58%, rgba(247,246,243,0.08) 82%) !important;
+          }
           .hero-p    { max-width:none !important; }
-          .hero-visual { aspect-ratio:4/3 !important; border-radius:26px !important; }
           .disc-row {
             display:flex !important; overflow-x:auto; gap:12px;
             scroll-snap-type:x mandatory; scrollbar-width:none;
@@ -1204,12 +1226,27 @@ export default function HomePage() {
           ║  HERO — ادیتوریالِ روشنِ پریمیوم (برندِ جهانی)        ║
           ╚══════════════════════════════════════════════════════╝ */}
       <section className="hero-wrap">
-        {/* هاله‌های محیطیِ خیلی ملایم */}
-        <div aria-hidden style={{ position: 'absolute', top: '-12%', insetInlineStart: '-6%', width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.10) 0%, transparent 62%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-        <div aria-hidden style={{ position: 'absolute', bottom: '-18%', insetInlineEnd: '-8%', width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,102,65,0.06) 0%, transparent 65%)', filter: 'blur(70px)', pointerEvents: 'none' }} />
+        {/* تصویرِ لانژ — بک‌گراندِ سمتِ راست با محوِ نرم به زمینه (مطابق ماکاپ)
+            اسلاتِ تولید: /images/hero/hero-lounge.jpg */}
+        <div className="hero-bg" aria-hidden>
+          <img
+            src="/images/hero/hero-lounge.jpg"
+            alt=""
+            style={{ transform: `translateY(${heroShiftImg}px)` }}
+            onError={e => {
+              const el = e.target as HTMLImageElement;
+              if (!el.dataset.fb) { el.dataset.fb = '1'; el.src = IMG.table; }
+            }}
+          />
+        </div>
+        {/* هاله‌ی طلاییِ خیلی ملایم پشتِ متن */}
+        <div aria-hidden style={{ position: 'absolute', top: '4%', left: '-8%', width: 520, height: 520, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.09) 0%, transparent 62%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 1 }} />
 
         <div className="hero-grid">
-          {/* ── ستون متن (در RTL سمت راست) ── */}
+          {/* ── اسپیسر روی تصویر (در RTL: ستونِ راست) ── */}
+          <div className="hero-spacer" aria-hidden />
+
+          {/* ── ستون متن — سمتِ چپِ صفحه، مطابق ماکاپ ── */}
           <div style={{ transform: `translateY(${heroShiftText}px)` }}>
             <div className="ha hero-eyebrow2">
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, boxShadow: `0 0 8px ${GOLD}`, display: 'inline-block', animation: 'gentlePulse 3s ease-in-out infinite' }} />
@@ -1236,26 +1273,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ── ستون تصویر (در RTL سمت چپ) — اسلاتِ تولید: /images/hero/hero-lounge.jpg ── */}
-          <div style={{ transform: `translateY(${heroShiftImg}px)`, perspective: '1100px' }}>
-            <div
-              className="hero-visual"
-              onMouseMove={onHeroTilt}
-              onMouseLeave={() => setTilt({ rx: 0, ry: 0 })}
-              style={{ transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)` }}
-            >
-              <img
-                src="/images/hero/hero-lounge.jpg"
-                alt="لانژ بیلیارد پریمیوم — بیلیارد هاب"
-                onError={e => {
-                  const el = e.target as HTMLImageElement;
-                  if (!el.dataset.fb) { el.dataset.fb = '1'; el.src = IMG.table; }
-                }}
-              />
-              {/* هایلایتِ لبه برای عمقِ ظریف */}
-              <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -40px 70px rgba(26,25,23,0.10)', pointerEvents: 'none' }} />
-            </div>
-          </div>
         </div>
 
         {/* ── کشفِ بیلیارد هاب — کارت‌های ناوبری (نه آمار) ── */}
@@ -1277,6 +1294,12 @@ export default function HomePage() {
               <span key={i} style={{ height: 5, width: i === activeCard ? 18 : 5, borderRadius: 3, background: i === activeCard ? GOLD_D : 'rgba(26,25,23,0.18)', transition: 'all 0.3s ease' }} />
             ))}
           </div>
+        </div>
+
+        {/* نشانگرِ اسکرول — مثل ماکاپ (فقط دسکتاپ) */}
+        <div className="hero-cue" aria-hidden>
+          <span>اسکرول کنید</span>
+          <span className="hero-cue-mouse" />
         </div>
       </section>
 
