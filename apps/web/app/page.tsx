@@ -1103,14 +1103,23 @@ useEffect(() => {
            gap صفر است و فاصله با margin-left هر کارت ساخته می‌شود تا نقطه‌ی ۵۰٪ دقیقاً
            هم‌ارزِ یک کپیِ کامل باشد (وگرنه هر دور یک پرشِ نیم‌gap دیده می‌شد). */
         @keyframes heroLoop { from { transform: translateX(0); } to { transform: translateX(50%); } }
-        .feat-track { display:flex; gap:0; width:max-content; align-items:stretch; }
-        .feat-track .feat-card { margin-left:18px; }
-        @media(min-width:901px){
-          .feat-slider { overflow:hidden !important; scroll-snap-type:none !important; justify-content:flex-start !important; }
-          .feat-track  { animation: heroLoop 46s linear infinite; will-change: transform; }
-          .feat-slider:hover .feat-track { animation-play-state: paused; }
+        /* «باکسِ» کارت‌ها: ۷ کارت دائم داخلِ یک پنجره‌ی محدود می‌چرخند (دسکتاپ ~۶ کارت پیدا)
+           ⇒ چون پنجره از تعدادِ کارت‌ها کوچک‌تر است، هیچ کارتِ تکراری هم‌زمان دیده نمی‌شود.
+           لبه‌های باکس با ماسک محو می‌شوند تا ورود/خروجِ کارت‌ها نرم و شیک باشد. */
+        .feat-slider {
+          overflow:hidden !important; scroll-snap-type:none !important; justify-content:flex-start !important;
+          -webkit-mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
         }
-        @media(max-width:900px){ .feat-dup { display:none !important; } }
+        .feat-track { display:flex; gap:0; width:max-content; align-items:stretch; animation: heroLoop 44s linear infinite; will-change: transform; }
+        .feat-track .feat-card { margin-left:18px; }
+        .feat-slider:hover .feat-track, .feat-slider:active .feat-track { animation-play-state: paused; }
+        @media(min-width:901px){
+          .feat-slider { max-width:860px; margin:0 auto; }   /* ≈ ۶ کارت */
+        }
+        @media(max-width:900px){
+          .feat-track { animation-duration: 30s; }           /* موبایل هم همان چرخشِ نرم */
+        }
         @media (prefers-reduced-motion: reduce){ .feat-track { animation:none !important; } }
         .clubs-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
