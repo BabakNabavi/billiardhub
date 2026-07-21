@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
-  MapPin, Star, Trophy, Users,
+  MapPin, Star, Heart, Trophy, Users,
   ShoppingBag, Building2, Wrench, GraduationCap,
-  Eye, X, Calendar,
+  Clock, Eye, CheckCircle, X, Calendar,
   Hammer, Scissors, Settings, Truck, Radio, Scale,
 } from 'lucide-react';
 
@@ -119,15 +119,31 @@ const IMG = {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   HERO — کارت‌های کشف/ناوبری (نه آمار). اکسنت‌ها عمداً خیلی ملایم‌اند.
+   HERO SLIDES — all 5 wallpapers, each with an accent colour
 ═══════════════════════════════════════════════════════════════ */
+const HERO_SLIDES = [
+  { bg: IMG.wall1, accent: GRN,  label: 'باشگاه‌ها' },
+  { bg: IMG.wall2, accent: BLU,  label: 'مربیان'    },
+  { bg: IMG.wall3, accent: GOLD, label: 'تجهیزات'   },
+  { bg: IMG.wall4, accent: PRP,  label: 'رقابت'     },
+  { bg: IMG.wall5, accent: BRN,  label: 'آموزش'     },
+];
+
 const FEATURE_CARDS = [
-  { Icon: Building2,   title: 'باشگاه‌ها',         caption: 'باشگاه‌های بیلیارد نزدیک خود را پیدا کنید',   href: '/clubs',       clr: '#1E6641' },
-  { Icon: Trophy,      title: 'مسابقات',            caption: 'مسابقات را پیدا کنید و دنبال کنید',            href: '/tournaments', clr: '#A07840' },
-  { Icon: Star,        title: 'بازیکنان',           caption: 'بازیکنان را بشناسید و دنبال کنید',             href: '/players',     clr: '#1A4A7A' },
-  { Icon: ShoppingBag, title: 'بیلیارد بازار',      caption: 'تجهیزات و لوازم بیلیارد را پیدا کنید',         href: '/shop',        clr: '#7A4A2D' },
-  { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'با دیگر علاقه‌مندان بیلیارد در ارتباط باشید',  href: '/events',      clr: '#4A2D8A' },
-  { Icon: Calendar,    title: 'اخبار و رویدادها',   caption: 'آخرین اخبار و رویدادهای دنیای بیلیارد',        href: '/news',        clr: '#B4541E' },
+  { Icon: Calendar,    title: 'رزرو میز',          caption: 'جستجو و رزرو آنلاین میز در بهترین باشگاهها',          href: '/clubs',         clr: '#4A9EFF', rgb: '74,158,255'   },
+  { Icon: Trophy,      title: 'مسابقات',            caption: 'شرکت در مسابقات و مشاهده نتایج زنده',                 href: '/tournaments',   clr: '#30C55A', rgb: '48,197,90'    },
+  { Icon: ShoppingBag, title: 'خرید و فروش',        caption: 'خرید و فروش انواع تجهیزات بیلیارد',                   href: '/shop',          clr: '#B97BFF', rgb: '185,123,255'  },
+  { Icon: Users,       title: 'جامعه بیلیارد',      caption: 'ارتباط با همه‌ی صنوف بیلیاردی و اشتراک تجربه‌ها',   href: '/players',       clr: '#FF6B9D', rgb: '255,107,157'  },
+  { Icon: Building2,   title: 'تولیدکنندگان',       caption: 'معرفی بهترین تولیدکنندگان تجهیزات',                   href: '/manufacturers', clr: '#06b6d4', rgb: '6,182,212'    },
+  { Icon: Wrench,         title: 'خدمات فنی',    caption: 'خدمات نصب و تعمیر تجهیزات بیلیارد',                      href: '/services', clr: '#C7A66A', rgb: '199,166,106' },
+  { Icon: GraduationCap, title: 'آموزش',         caption: 'آموزش آکادمیک با برترین مربیان و بالاترین سطح',            href: '/coaches',  clr: '#F472B6', rgb: '244,114,182' },
+];
+
+const TRUST_ITEMS = [
+  { Icon: Users,       label: 'جامعه فعال',       sub: 'در حال رشد',          clr: '#B97BFF', rgb: '185,123,255' },
+  { Icon: CheckCircle, label: 'پرداخت امن',        sub: 'سریع و مطمئن',        clr: '#4A9EFF', rgb: '74,158,255'  },
+  { Icon: Clock,       label: 'پشتیبانی ۲۴/۷',   sub: 'همیشه در کنار شما',   clr: '#30C55A', rgb: '48,197,90'   },
+  { Icon: Star,        label: 'تجربه‌ای متفاوت',  sub: 'برای عاشقان بیلیارد', clr: '#C7A66A', rgb: '199,166,106' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -668,8 +684,17 @@ function DiscoveryPanel() {
 ═══════════════════════════════════════════════════════════════ */
 
 export default function HomePage() {
+  const [slide, setSlide]     = useState(0);
   const [scrollY, setScrollY] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const rafRef   = useRef<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+
+  const next = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
+  const prev = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
 
   const sliderRef      = useRef<HTMLDivElement>(null);
   const [activeCard, setActiveCard] = useState(0);
@@ -687,6 +712,14 @@ export default function HomePage() {
   const mktDragRef   = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const mktPausedRef = useRef(false);
   const mktTickerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const el = mktDeskRef.current;
@@ -800,14 +833,8 @@ export default function HomePage() {
   const handleSliderScroll = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return;
-    /* فقط وقتی ردیف واقعاً اسکرول‌شونده است (کاروسلِ موبایل) — روی گریدِ دسکتاپ
-       transform اینلاین نگذار تا hover-lift کارت‌ها کار کند. */
-    if (slider.scrollWidth <= slider.offsetWidth + 8) {
-      slider.querySelectorAll<HTMLElement>('.disc-card').forEach(c => { c.style.transform = ''; });
-      return;
-    }
     const sliderCenter = slider.scrollLeft + slider.offsetWidth / 2;
-    const cards = Array.from(slider.querySelectorAll<HTMLElement>('.disc-card'));
+    const cards = Array.from(slider.querySelectorAll<HTMLElement>('.feat-card'));
     let minDist = Infinity, newActive = 0;
     cards.forEach((card, i) => {
       const cardCenter = card.offsetLeft + card.offsetWidth / 2;
@@ -829,9 +856,8 @@ export default function HomePage() {
     const slider = sliderRef.current;
     if (!slider) return;
     slider.addEventListener('scroll', handleSliderScroll, { passive: true });
-    window.addEventListener('resize', handleSliderScroll);
     handleSliderScroll();
-    return () => { slider.removeEventListener('scroll', handleSliderScroll); window.removeEventListener('resize', handleSliderScroll); };
+    return () => slider.removeEventListener('scroll', handleSliderScroll);
   }, [handleSliderScroll]);
 
   const clubsRafRef = useRef<number>(0);
@@ -915,12 +941,22 @@ export default function HomePage() {
     return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  /* هیروی روشن: پارالاکسِ ظریف — متن کمی آهسته‌تر از صفحه، تصویرِ پس‌زمینه کمی برعکس */
-  const heroShiftText = Math.min(scrollY, 600) * 0.045;
-  const heroShiftImg  = Math.min(scrollY, 600) * -0.03;
+
+useEffect(() => {
+    if (!playing) { if (timerRef.current) clearInterval(timerRef.current); return; }
+    timerRef.current = setInterval(next, 7000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [playing, next]);
+
+  const heroO = Math.max(0, 1 - scrollY / 700);
+  const heroS = 1 + scrollY * 0.00013;
+  const sl    = HERO_SLIDES[slide]!;
 
   return (
     <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&display=swap" rel="stylesheet" />
       <style>{`
         :root { --hero-bottom-gap: 5px; }
         @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
@@ -992,99 +1028,8 @@ export default function HomePage() {
         .news-img:hover img{transform:scale(1.06);}
 
         .dp-tabs { grid-template-columns:repeat(4,1fr)!important; }
-
-        /* ══ HERO روشن — ادیتوریالِ پریمیوم (تصویرِ محوشونده مطابق ماکاپ) ══ */
-        @keyframes heroImgIn { from{opacity:0;transform:scale(1.045);} to{opacity:1;transform:scale(1);} }
-        @keyframes cueDrop { 0%,100%{transform:translateY(0);opacity:1;} 55%{transform:translateY(9px);opacity:0.15;} }
-        .hero-wrap { position:relative; background:#F7F6F3; overflow:hidden; }
-        /* تصویرِ لانژ به‌صورت بک‌گراندِ سمتِ راست که به نرمی در زمینه محو می‌شود */
-        .hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; animation:heroImgIn 1.6s cubic-bezier(.22,1,.36,1) 0.4s both; }
-        /* ارتفاعِ تصویر عمداً ≤۸۰٪ هیرو است تا (۱) کراپ/زومِ cover کم شود و
-           (۲) میز و توپ‌ها بالای ردیفِ کارت‌ها بمانند؛ لبه‌ی چپ و پایین نرم محو می‌شوند. */
-        .hero-bg img {
-          position:absolute; top:0; right:0; height:80%; width:78%;
-          object-fit:cover; object-position:center 40%;
-          -webkit-mask-image:linear-gradient(to left, black 55%, transparent 98%), linear-gradient(to bottom, black 68%, transparent 99%);
-          -webkit-mask-composite:source-in;
-          mask-image:linear-gradient(to left, black 55%, transparent 98%), linear-gradient(to bottom, black 68%, transparent 99%);
-          mask-composite:intersect;
-        }
-        .hero-bg::after {
-          content:''; position:absolute; inset:0;
-          background:linear-gradient(to top, #F7F6F3 8%, rgba(247,246,243,0) 38%);
-        }
-        .hero-grid {
-          position:relative; z-index:2;
-          max-width:1440px; margin:0 auto; width:100%;
-          padding:clamp(150px,19vh,196px) clamp(16px,3vw,32px) 0;
-          display:grid; grid-template-columns:1.2fr 1fr;
-          gap:clamp(24px,4vw,64px); align-items:center;
-        }
-        @media(min-width:901px){
-          .hero-wrap { display:flex; flex-direction:column; min-height:100vh; }
-          .hero-grid { flex:1; }
-        }
-        .hero-eyebrow2 {
-          display:inline-flex; align-items:center; gap:9px;
-          background:#FFFFFF; border:1px solid rgba(26,25,23,0.09);
-          border-radius:100px; padding:8px 18px;
-          box-shadow:0 2px 10px rgba(26,25,23,0.05);
-          font-size:12.5px; font-weight:700; color:rgba(26,25,23,0.62);
-          letter-spacing:0.02em;
-        }
-        .hero-h1-l {
-          font-size:clamp(34px,4.9vw,72px); font-weight:900; line-height:1.14;
-          letter-spacing:-0.035em; color:#1A1917; margin:26px 0 0;
-        }
-        .hero-p {
-          font-size:clamp(14.5px,1.35vw,18px); line-height:2;
-          color:rgba(26,25,23,0.55); margin:22px 0 0; max-width:480px;
-        }
-        .hero-cta-row { display:flex; align-items:center; gap:12px; margin-top:34px; flex-wrap:wrap; }
-        .cta-gold {
-          display:inline-flex; align-items:center; gap:9px;
-          background:${GOLD}; color:#221A0C;
-          border:1px solid rgba(160,120,64,0.5); border-radius:16px;
-          padding:15px 30px; font-size:14.5px; font-weight:800; text-decoration:none;
-          box-shadow:0 6px 22px rgba(199,166,106,0.38), inset 0 1px 0 rgba(255,255,255,0.35);
-          transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
-        }
-        .cta-gold svg { transition:transform .25s cubic-bezier(.22,1,.36,1); }
-        .cta-gold:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(199,166,106,0.5), inset 0 1px 0 rgba(255,255,255,0.35); }
-        .cta-gold:hover svg { transform:translateX(-4px); }
-        .cta-white {
-          display:inline-flex; align-items:center; gap:8px;
-          background:#FFFFFF; color:#1A1917;
-          border:1px solid rgba(26,25,23,0.13); border-radius:16px;
-          padding:15px 26px; font-size:14.5px; font-weight:700; text-decoration:none;
-          box-shadow:0 2px 10px rgba(26,25,23,0.05);
-          transition:border-color .25s, background .25s, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
-        }
-        .cta-white:hover { border-color:rgba(199,166,106,0.55); background:#FFFDF9; transform:translateY(-2px); box-shadow:0 8px 22px rgba(26,25,23,0.08); }
-        /* نشانگرِ اسکرول — مثل ماکاپ، زیرِ کارت‌ها */
-        .hero-cue { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 0 26px; color:rgba(26,25,23,0.42); font-size:11.5px; font-weight:600; }
-        .hero-cue-mouse { width:22px; height:34px; border:1.5px solid rgba(26,25,23,0.30); border-radius:12px; position:relative; }
-        .hero-cue-mouse::after { content:''; position:absolute; top:6px; left:50%; width:3px; height:7px; margin-left:-1.5px; border-radius:2px; background:rgba(26,25,23,0.38); animation:cueDrop 1.8s ease-in-out infinite; }
-        /* ── کارت‌های کشف ── */
-        .disc-wrap { max-width:1340px; margin:0 auto; padding:clamp(36px,5vh,60px) clamp(16px,4vw,48px) clamp(44px,6vh,72px); }
-        .disc-row  { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; }
-        .disc-card {
-          background:#FFFFFF; border:1px solid rgba(26,25,23,0.08);
-          border-radius:20px; padding:20px 16px 18px;
-          display:flex; flex-direction:column; align-items:flex-start; gap:10px;
-          text-decoration:none; box-shadow:0 2px 12px rgba(26,25,23,0.045);
-          transition:transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s;
-        }
-        .disc-card:hover { transform:translateY(-4px); box-shadow:0 14px 34px rgba(26,25,23,0.10); border-color:rgba(199,166,106,0.35); }
-        .disc-ic {
-          width:42px; height:42px; border-radius:13px;
-          display:flex; align-items:center; justify-content:center; flex-shrink:0;
-          transition:transform .28s cubic-bezier(.22,1,.36,1);
-        }
-        .disc-card:hover .disc-ic { transform:scale(1.08) rotate(-3deg); }
-        .disc-t { font-size:14px; font-weight:800; color:#1A1917; line-height:1.35; }
-        .disc-c { font-size:11.5px; color:rgba(26,25,23,0.45); line-height:1.75; }
-        .disc-dots { display:none; justify-content:center; gap:5px; margin-top:16px; }
+        .trust-strip { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
+        .hero-arrows { position:absolute;bottom:36px;right:28px;display:flex;gap:6px;z-index:10; }
 
         /* ══ TABLET ≤1100px ══ */
         @media(max-width:1100px){
@@ -1106,45 +1051,25 @@ export default function HomePage() {
           .dp-tabs     { grid-template-columns:repeat(2,1fr) !important; }
         }
 
-        /* ══ TABLET ≤900px — هیرو ستونی؛ تصویر همان بک‌گراندِ داخلِ هیرو می‌ماند ══ */
-        @media(max-width:900px){
-          .hero-grid { grid-template-columns:1fr !important; gap:30px !important; padding-top:clamp(196px,24vh,230px) !important; }
-          .hero-spacer { display:none !important; }
-          .hero-cue    { display:none !important; }
-          /* بک‌گراند: تمام‌عرض ولی فقط بالای هیرو (زومِ cover کم می‌شود)؛
-             پایینش نرم محو و متن با گرادیانِ عاجی خوانا می‌ماند */
-          .hero-bg img {
-            width:100% !important; height:52% !important;
-            object-position:center 32% !important;
-            -webkit-mask-image:linear-gradient(to bottom, black 42%, transparent 97%) !important;
-            -webkit-mask-composite:source-over !important;
-            mask-image:linear-gradient(to bottom, black 42%, transparent 97%) !important;
-            mask-composite:add !important;
-          }
-          .hero-bg::after {
-            background:linear-gradient(to top,
-              #F7F6F3 10%, rgba(247,246,243,0.72) 34%,
-              rgba(247,246,243,0.30) 58%, rgba(247,246,243,0.08) 82%) !important;
-          }
-          .hero-p    { max-width:none !important; }
-          .disc-row {
-            display:flex !important; overflow-x:auto; gap:12px;
-            scroll-snap-type:x mandatory; scrollbar-width:none;
-            padding:4px 2px 6px; margin:0 -2px;
-          }
-          .disc-row::-webkit-scrollbar { display:none; }
-          .disc-card { flex:0 0 216px; scroll-snap-align:center; }
-          .disc-dots { display:flex !important; }
-        }
-
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
-          .hero-grid   { padding-top:206px !important; gap:24px !important; }
-          .hero-h1-l   { font-size:clamp(30px,8.6vw,38px) !important; margin-top:20px !important; }
-          .hero-p      { font-size:14px !important; margin-top:16px !important; }
-          .hero-cta-row{ margin-top:24px !important; }
-          .cta-gold    { padding:13px 22px !important; font-size:13.5px !important; }
-          .cta-white   { padding:13px 19px !important; font-size:13.5px !important; }
+          /* horizontal padding removed from hero-content; applied per-element below */
+          .hero-content  { padding-top:220px !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:var(--hero-bottom-gap) !important; }
+          .hero-h1       { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
+          .hero-subtitle { padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
+          .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
+          .hero-cta-link { width:auto !important; }
+          .hero-desc    { display:none !important; }
+          .hero-sub     { display:none !important; }
+          .hero-eyebrow { display:none !important; }
+          .hero-actions { display:none !important; }
+          .hero-arrows  { display:none !important; }
+          .trust-strip  { display:flex !important; flex-wrap:nowrap !important; gap:6px !important; }
+          .trust-box    { margin-top:43px !important; width:100% !important; box-sizing:border-box !important; padding:0 16px !important; display:flex !important; justify-content:center !important; overflow:visible !important; }
+          .trust-grid   { zoom:0.43 !important; }
+          .trust-label  { font-size:9.9px !important; }
+          .trust-sub    { font-size:8.1px !important; }
+          .feat-slider  { justify-content:flex-start !important; }
           .dp-tabs      { grid-template-columns:repeat(2,1fr) !important; }
           .dp-cta       { width:100% !important; }
           .comm-grid    { grid-template-columns:1fr 1fr !important; gap:12px !important; }
@@ -1154,14 +1079,26 @@ export default function HomePage() {
         /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
           .hero-stories-bar { zoom:0.90; }
-          .hero-grid { padding-top:clamp(138px,18vh,168px) !important; }
-          .hero-h1-l { font-size:clamp(30px,4.2vw,56px) !important; }
+          .hero-content { padding-top:clamp(165px,23vh,205px) !important; zoom:0.90; }
+          .hero-desc    { display:none !important; }
+        }
+        @media(max-height:680px) and (min-width:601px){
+          .hero-content { padding-top:clamp(157px,26vh,188px) !important; zoom:0.90; }
+          .hero-sub     { display:none !important; }
+        }
+
+        /* ══ MOBILE — keep content just below stories bar ══ */
+        @media(max-width:600px){
+          .hero-content { padding-top:232px !important; }
+          .trust-strip  { margin-top:16px !important; }
         }
 
         /* ══ MOBILE XS ≤400px ══ */
         @media(max-width:400px){
           .comm-grid { grid-template-columns:1fr !important; }
         }
+        .feat-slider::-webkit-scrollbar { display: none; }
+        .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
         .clubs-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
@@ -1223,88 +1160,219 @@ export default function HomePage() {
       `}</style>
 
       {/* ╔══════════════════════════════════════════════════════╗
-          ║  HERO — ادیتوریالِ روشنِ پریمیوم (برندِ جهانی)        ║
+          ║  HERO — cinematic  video + wallpaper crossfade      ║
           ╚══════════════════════════════════════════════════════╝ */}
-      <section className="hero-wrap">
-        {/* تصویرِ لانژ — بک‌گراندِ سمتِ راست با محوِ نرم به زمینه (مطابق ماکاپ)
-            اسلاتِ تولید: /images/hero/hero-lounge.jpg */}
-        <div className="hero-bg" aria-hidden>
-          <img
-            src="/images/hero/hero-lounge.jpg"
-            alt=""
-            style={{ transform: `translateY(${heroShiftImg}px)` }}
-            onError={e => {
-              const el = e.target as HTMLImageElement;
-              if (!el.dataset.fb) { el.dataset.fb = '1'; el.src = IMG.table; }
-            }}
-          />
-        </div>
-        {/* هاله‌ی طلاییِ خیلی ملایم پشتِ متن */}
-        <div aria-hidden style={{ position: 'absolute', top: '4%', left: '-8%', width: 520, height: 520, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.09) 0%, transparent 62%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 1 }} />
+      <div style={{ position: 'relative', height: isMobile ? 'auto' : '100dvh', minHeight: isMobile ? '100dvh' : '640px', overflow: 'hidden', background: '#04020A' }}>
 
-        <div className="hero-grid">
-          {/* ── اسپیسر روی تصویر (در RTL: ستونِ راست) ── */}
-          <div className="hero-spacer" aria-hidden />
+        {/* ── Layer 1: video (continuous motion background) ── */}
+        <video ref={videoRef} autoPlay muted loop playsInline preload="auto"
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', zIndex: 1,
+            filter: 'brightness(0.52) saturate(0.62) contrast(1.08)',
+            transform: `scale(${heroS})`, transformOrigin: 'center', willChange: 'transform',
+          }}>
+          <source src="/images/video/hero.mp4" type="video/mp4" />
+        </video>
 
-          {/* ── ستون متن — سمتِ چپِ صفحه، مطابق ماکاپ ── */}
-          <div style={{ transform: `translateY(${heroShiftText}px)` }}>
-            <div className="ha hero-eyebrow2">
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, boxShadow: `0 0 8px ${GOLD}`, display: 'inline-block', animation: 'gentlePulse 3s ease-in-out infinite' }} />
-              پلتفرم تخصصی بیلیارد
+        {/* ── Layer 2: wallpaper slides crossfading over video ── */}
+        {HERO_SLIDES.map((s, i) => (
+          <div key={i} style={{
+            position: 'absolute', inset: 0, zIndex: 2,
+            opacity: i === slide ? 0.48 : 0,
+            transition: 'opacity 3.2s cubic-bezier(0.4,0,0.2,1)',
+            pointerEvents: 'none',
+          }}>
+            <img src={s.bg} alt="" loading={i === 0 ? 'eager' : 'lazy'}
+              style={{ width: '100%', height: '100%', objectFit: 'cover',
+                filter: 'brightness(0.72) saturate(0.80) contrast(1.06) blur(2.5px)',
+                transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          </div>
+        ))}
+
+        {/* ── Layer 3: cinematic gradients ── */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
+          background: 'linear-gradient(to bottom,rgba(4,2,10,0.80) 0%,rgba(4,2,10,0) 24%,rgba(4,2,10,0) 46%,rgba(4,2,10,0.97) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 90% 82% at 50% 42%,transparent 26%,rgba(4,2,10,0.56) 100%)' }} />
+
+        {/* ── Ambient accent orb — colour shifts with slide ── */}
+        <div style={{
+          position: 'absolute', top: '42%', left: '50%',
+          transform: 'translate(-50%,-50%)',
+          width: 'min(920px,130vw)', height: 'min(720px,90vh)',
+          background: `radial-gradient(ellipse,${sl.accent}0A 0%,transparent 65%)`,
+          filter: 'blur(90px)', zIndex: 3, pointerEvents: 'none',
+          transition: 'background 3.2s ease',
+          animation: 'floatOrb 28s ease-in-out infinite',
+        }} />
+
+        {/* Story bar is handled by Navbar → Stories.tsx */}
+
+        {/* ── CONTENT — no key prop → animates exactly ONCE on page load ── */}
+        <div className="hero-content" style={{
+          position: isMobile ? 'relative' : 'absolute',
+          inset: isMobile ? undefined : 0,
+          minHeight: isMobile ? '100dvh' : undefined,
+          zIndex: 10,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+          padding: 'clamp(189px,25vh,236px) clamp(16px,5%,80px) 0',
+          opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
+        }}>
+          {/* Eyebrow */}
+          <div className="ha hero-eyebrow" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '10px',
+            background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255,255,255,0.11)', borderRadius: '100px',
+            padding: '7px 22px', marginBottom: '28px', transform: 'translateY(-5vh)',
+          }}>
+            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: GOLD,
+              boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
+              display: 'inline-block', animation: 'pulse2 3s ease-in-out infinite' }} />
+            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '13px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+              BILLIARD HUB IRAN
+            </span>
+          </div>
+
+          {/* Headline — رنگی با spans */}
+          <h1 className="hb hero-h1" style={{
+            fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 900, lineHeight: 1.08,
+            margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
+          }}>
+            <span style={{ color: '#ffffff' }}>پلتفرم جامع و هوشمند </span>
+            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>بیلیارد</span>
+          </h1>
+
+          {/* Subtitle — نقطه‌ی اتصال */}
+          <p className="hc hero-subtitle" style={{
+            fontSize: 'clamp(15px, 2.1vw, 24px)', fontWeight: 500,
+            margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
+            color: 'rgba(255,255,255,0.82)',
+          }}>
+            اتصال بی واسطه جامعه بیلیارد
+          </p>
+
+          {/* Feature card slider — 7 cards */}
+          <div className="hd" style={{ width: '100%', marginTop: '16px', flexGrow: isMobile ? 1 : 0 }}>
+            <div ref={sliderRef} className="feat-slider" style={{
+              display: 'flex', gap: '18px', overflowX: 'auto',
+              scrollbarWidth: 'none', padding: '20px 22px 38px',
+              justifyContent: 'center', alignItems: 'stretch',
+              scrollSnapType: 'x mandatory',
+            }}>
+              {FEATURE_CARDS.map((card, i) => (
+                <Link key={i} href={card.href} className="feat-card" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
+                  <div style={{
+                    width: '118px', padding: '18px 10px 16px',
+                    background: `rgba(${card.rgb},0.09)`,
+                    backdropFilter: 'blur(28px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(28px) saturate(200%)',
+                    border: `1px solid rgba(${card.rgb},${i === activeCard ? '0.45' : '0.26'})`,
+                    borderRadius: '20px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                    textAlign: 'center', flex: 1,
+                    boxShadow: i === activeCard
+                      ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 18px rgba(${card.rgb},0.50), 0 0 0 1px rgba(${card.rgb},0.18)`
+                      : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(${card.rgb},0.12)`,
+                    cursor: 'pointer',
+                    transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+                  }}>
+                    <div style={{
+                      width: '46px', height: '46px', borderRadius: '14px',
+                      background: `rgba(${card.rgb},0.14)`,
+                      border: `1px solid rgba(${card.rgb},0.32)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
+                      marginBottom: '32px',
+                    }}>
+                      <card.Icon size={22} color={card.clr}
+                        style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
+                      {card.title}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.65, flex: 1 }}>
+                      {card.caption}
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
-            <h1 className="hb hero-h1-l">
-              پلتفرم جامع و هوشمند
-              <br />
-              دنیای <span style={{ color: GOLD_D }}>بیلیارد</span>
-            </h1>
-            <p className="hc hero-p">
-              باشگاه‌ها، بازیکنان و مسابقات را دنبال کنید؛ با جامعه‌ی بیلیارد در
-              ارتباط باشید و دنیای این ورزش را یک‌جا کشف کنید.
-            </p>
-            <div className="hd hero-cta-row">
-              <Link href="/tournaments" className="cta-gold">
-                کشف مسابقات
-                <ArrowLeft size={16} />
-              </Link>
-              <Link href="/clubs" className="cta-white">
-                <MapPin size={15} style={{ color: GOLD_D }} />
-                باشگاه‌های نزدیک
-              </Link>
+            {/* Carousel dots — all 7 always rendered, no mount/unmount jank */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '18px' }}>
+              {FEATURE_CARDS.map((card, i) => {
+                const dist = Math.abs(i - activeCard);
+                return (
+                  <div key={i} style={{
+                    height: '5px',
+                    width: i === activeCard ? '18px' : '5px',
+                    borderRadius: '3px',
+                    opacity: dist >= 3 ? 0.35 : 1,
+                    background: i === activeCard ? card.clr : 'rgba(255,255,255,0.22)',
+                    transition: 'all 0.3s ease',
+                  }} />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Trust items — unified box with 4 cells divided by thin lines */}
+          <div className="he trust-box" style={{ marginTop: '44px' }}>
+            <div className="trust-grid" style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              zoom: 0.8,
+              background: 'rgba(255,255,255,0.07)',
+              backdropFilter: 'blur(48px) saturate(240%)',
+              WebkitBackdropFilter: 'blur(48px) saturate(240%)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.18)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.22), 0 0 0 1px rgba(255,255,255,0.06)',
+              overflow: 'hidden',
+            }}>
+              {TRUST_ITEMS.map((item, i) => (
+                <div key={i} style={{
+                  display: 'flex', flexDirection: 'row', alignItems: 'center',
+                  gap: '9px', padding: '10px 14px',
+                  borderLeft: i < 3 ? '1px solid rgba(255,255,255,0.14)' : 'none',
+                }}>
+                  <div style={{
+                    width: '30px', height: '30px', borderRadius: '50%',
+                    background: `rgba(${item.rgb},0.16)`,
+                    border: `1px solid rgba(${item.rgb},0.28)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    boxShadow: `0 0 10px rgba(${item.rgb},0.30)`,
+                  }}>
+                    <item.Icon size={14} color={item.clr}
+                      style={{ filter: `drop-shadow(0 0 4px rgba(${item.rgb},0.65))` }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span className="trust-label" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
+                    <span className="trust-sub" style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
         </div>
 
-        {/* ── کشفِ بیلیارد هاب — کارت‌های ناوبری (نه آمار) ── */}
-        <div className="disc-wrap">
-          <div ref={sliderRef} className="disc-row">
-            {FEATURE_CARDS.map((c, i) => (
-              <Link key={c.href} href={c.href} className="disc-card he" style={{ animationDelay: `${0.72 + i * 0.07}s` }}>
-                <span className="disc-ic" style={{ color: c.clr, background: `${c.clr}12`, border: `1px solid ${c.clr}22` }}>
-                  <c.Icon size={19} />
-                </span>
-                <span className="disc-t">{c.title}</span>
-                <span className="disc-c">{c.caption}</span>
-              </Link>
-            ))}
-          </div>
-          {/* نقطه‌های کاروسل — فقط موبایل */}
-          <div className="disc-dots">
-            {FEATURE_CARDS.map((_, i) => (
-              <span key={i} style={{ height: 5, width: i === activeCard ? 18 : 5, borderRadius: 3, background: i === activeCard ? GOLD_D : 'rgba(26,25,23,0.18)', transition: 'all 0.3s ease' }} />
-            ))}
-          </div>
+
+        {/* ── Prev/next arrows — hidden on mobile ── */}
+        <div className="hero-arrows" style={{ opacity: heroO }}>
+          {[{ fn: prev, icon: <ArrowRight size={13} /> }, { fn: next, icon: <ArrowLeft size={13} /> }].map((b, i) => (
+            <button key={i} onClick={b.fn} style={{ width: '34px', height: '34px', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.22)', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.60)', transition: 'background 0.2s' }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.12)'; el.style.color = '#fff'; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.06)'; el.style.color = 'rgba(255,255,255,0.60)'; }}>
+              {b.icon}
+            </button>
+          ))}
         </div>
 
-        {/* نشانگرِ اسکرول — مثل ماکاپ (فقط دسکتاپ) */}
-        <div className="hero-cue" aria-hidden>
-          <span>اسکرول کنید</span>
-          <span className="hero-cue-mouse" />
-        </div>
-      </section>
-
-
-
+      </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
       <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
