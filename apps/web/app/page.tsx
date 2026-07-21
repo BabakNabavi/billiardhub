@@ -1017,6 +1017,18 @@ useEffect(() => {
         }
         .btn-ghost-dark:hover { background:rgba(255,255,255,0.12); }
 
+        /* «مشاهده همه» — دکمه به طرح LQ (تینتِ طلایی برند) */
+        .see-all-lq {
+          display:inline-flex; align-items:center; gap:6px;
+          background:rgba(199,166,106,0.12); color:#9A6E38;
+          border:1px solid rgba(199,166,106,0.34); border-radius:10px;
+          padding:9px 16px; font-size:13px; font-weight:700; text-decoration:none;
+          transition:background .2s ease, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
+        }
+        .see-all-lq:hover { background:rgba(199,166,106,0.18); transform:translateY(-2px); box-shadow:0 8px 20px rgba(199,166,106,0.20); }
+        /* روی سکشن‌های تیره متنِ طلاییِ روشن‌تر تا خوانا بماند */
+        .see-all-lq.on-dark { color:${GOLD}; border-color:rgba(199,166,106,0.42); }
+
         .sec-label{font-size:9px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;margin-bottom:14px;display:block;}
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
         .sec-rule {height:2px;width:46px;border-radius:1px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
@@ -1409,9 +1421,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های منتخب</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
-              <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: '#C7A66A', fontSize: '13.5px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4B97D'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A'; }}>
+              <Link href="/clubs" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
@@ -1453,9 +1463,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>بیلیارد بازار</h2>
                 <div className="sec-rule" style={{ color: BRN }} />
               </div>
-              <Link href="/shop" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700, transition: 'color 0.25s', textShadow: '0 0 12px rgba(199,166,106,0.35)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4B97D'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = GOLD; }}>
+              <Link href="/shop" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
@@ -1537,7 +1545,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>فروشندگان تجهیزات</h2>
                 <div className="sec-rule" style={{ color: GOLD }} />
               </div>
-              <Link href="/sellers" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
+              <Link href="/sellers" className="see-all-lq">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
@@ -1602,7 +1610,7 @@ useEffect(() => {
                 <h2 className="sec-title" style={{ color: '#FFFFFF', fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات فنی و تخصصی</h2>
                 <div className="sec-rule" style={{ color: 'rgba(199,166,106,0.60)' }} />
               </div>
-              <Link href="/services" style={{ display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: GOLD, fontSize: '13.5px', fontWeight: 700 }}>
+              <Link href="/services" className="see-all-lq on-dark">
                 مشاهده همه <ArrowLeft size={12} />
               </Link>
             </div>
