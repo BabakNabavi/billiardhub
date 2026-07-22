@@ -1,467 +1,329 @@
-﻿'use client';
+'use client'
 
-import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { useAuthStore } from '../../../store/auth.store';
+/* ─────────────────────────────────────────────────────────────
+   پروفایل متخصص خدمات فنی — ادیتوریال، لوکس و شخصی.
+   هیروی معرفی → درباره من → خدمات من → پروژه‌ها (پرتفولیو) →
+   گالریِ آلبوم‌دار با لایت‌باکسِ فول‌اسکرین → محل فعالیت → CTA.
+   بدون آمار/امتیاز. داده از lib/technicians-data.
+   ───────────────────────────────────────────────────────────── */
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import {
-  Star, Check, MapPin, Clock, Shield, Award, Wrench,
-  ChevronRight, MessageCircle, Share2, UserPlus,
-  Calendar, CheckCircle, AlertCircle, Camera,
-  ChevronLeft, Play, Target, Zap, ThumbsUp,
-} from 'lucide-react';
+  MapPin, ChevronLeft, ChevronRight, ArrowLeft, Wrench, Check,
+  Phone, X, ZoomIn, ZoomOut, Images,
+} from 'lucide-react'
+import { getTechnician, faDigits } from '../../../lib/technicians-data'
 
-/* ══ data ══ */
-const PROVIDERS: Record<string,any> = {
-  s1: {
-    id:'s1', name:'مهدی کرمی', title:'متخصص ارشد نصب و کلاث‌کشی',
-    city:'تهران', address:'تهران، مناطق ۱ تا ۱۵',
-    experience:14, rating:4.9, reviewCount:183, jobs:420,
-    avatar:'م', avatarColor:'#C7A66A', coverImg:'/images/billiadr-club-1.jpg',
-    isVerified:true, isCertified:true, isOnline:true,
-    bio:'با ۱۴ سال تجربه در نصب و کلاث‌کشی میزهای اسنوکر و پاکت، من یکی از معتبرترین متخصصان این حوزه در تهران هستم. تخصص اصلی من کلاث Strachan و Hainsworth با ضمانت ۲ ساله کامل بر روی تمامی پروژه‌هاست. هر پروژه را با دقت اجرا می‌کنم تا میز شما به استانداردهای بین‌المللی برسد.',
-    responseTime:'زیر ۲ ساعت', warranty:'۲۴ ماه',
-    priceFrom:850000,
-    certifications:['Riley Certified Installer','Strachan Approved Fitter','نصاب رسمی ویراکا','Hainsworth Partner'],
-    serviceTypes:['install','cloth','maintenance'],
-    brands:['Riley','Viraka','Aramith','Strachan','Hainsworth','BCE'],
-    speciality:['کلاث‌کشی اسنوکر','نصب و تراز','لاستیک‌کشی','تعمیر سازه'],
-    services:[
-      { title:'کلاث‌کشی اسنوکر ۱۲ فوت',    duration:'۴-۶ ساعت', price:2800000, popular:true  },
-      { title:'کلاث‌کشی پاکت ۷ فوت',        duration:'۳-۴ ساعت', price:1800000, popular:false },
-      { title:'نصب کامل میز اسنوکر',        duration:'۶-۸ ساعت', price:4500000, popular:false },
-      { title:'تراز لیزری + تنظیم',         duration:'۲-۳ ساعت', price:850000,  popular:false },
-      { title:'تعویض لاستیک‌های کوشن',     duration:'۳-۵ ساعت', price:2200000, popular:false },
-      { title:'بازسازی کامل میز',           duration:'۱-۲ روز',  price:8500000, popular:false },
-    ],
-    gallery:['/images/billiadr-club-1.jpg','/images/billiadr-club-3.jpg','/images/billiadr-club-1.jpg','/images/billiadr-club-3.jpg'],
-    beforeAfter:[
-      { before:'/images/billiadr-club-3.jpg', after:'/images/billiadr-club-1.jpg', title:'کلاث‌کشی اسنوکر VIP — باشگاه سنچوری' },
-      { before:'/images/billiadr-club-1.jpg', after:'/images/billiadr-club-3.jpg', title:'نصب میز پاکت — باشگاه المپیک' },
-    ],
-  },
-};
+const GOLD   = '#C7A66A'
+const GOLD_D = '#9A6E38'
+const TEXT   = '#1C1B17'
+const SEC    = '#5B564B'
+const MUT    = '#8A8474'
+const LINE   = '#E7E2D6'
+const BG     = '#F7F7F5'
 
-const REVIEWS = [
-  { name:'مدیر باشگاه سنچوری', rating:5, text:'مهدی واقعاً حرفه‌ایه. کلاث‌کشی میز VIP ما رو در ۵ ساعت انجام داد و نتیجه فوق‌العاده‌ست.', date:'۱۴۰۴/۰۲/۱۵', project:'کلاث‌کشی اسنوکر', verified:true },
-  { name:'محمد احمدی',         rating:5, text:'نصب میز جدید رو بهش سپردم. دقیق، سریع، و ضمانت کاملش خیالم رو راحت کرد.',              date:'۱۴۰۴/۰۱/۲۸', project:'نصب میز پاکت', verified:true },
-  { name:'نیلوفر کریمی',       rating:5, text:'تراز لیزری خیلی دقیق. حالا بازی روی میزم کاملاً متفاوته.',                              date:'۱۴۰۴/۰۱/۱۰', project:'تراز لیزری',   verified:false},
-];
+/* آیکون واتساپ (هم‌خانواده‌ی فوترِ فروشگاه) */
+const WaIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
+)
 
-function toFa(v: string|number){ return String(v).replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.charAt(Number(d))); }
-
-export default function ServiceProviderPage() {
-  const params   = useParams();
-  const id       = String(params.id ?? 's1');
-  const provider = PROVIDERS[id] ?? PROVIDERS['s1'];
-  const { user } = useAuthStore();
-
-  const [tab,       setTab]      = useState<'overview'|'services'|'portfolio'|'reviews'>('overview');
-  const [selSvc,    setSelSvc]   = useState<number|null>(null);
-  const [followed,  setFollowed] = useState(false);
-  const [baIdx,     setBaIdx]    = useState(0);
-  const [requested, setReq]      = useState(false);
-  const [scrollY,   setScrollY]  = useState(0);
-  const rafRef = useRef<number>(0);
-
-  useEffect(() => {
-    const fn = () => { cancelAnimationFrame(rafRef.current); rafRef.current = requestAnimationFrame(()=>setScrollY(window.scrollY)); };
-    window.addEventListener('scroll', fn, { passive:true });
-    return () => { window.removeEventListener('scroll', fn); cancelAnimationFrame(rafRef.current); };
-  }, []);
-
-  const heroOp = Math.max(0, 1-scrollY/600);
-  const p = provider;
-
+function SectionHead({ title }: { title: string }) {
   return (
-    <>
-      <style>{`
-        @keyframes fadeUp  { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;} }
-        @keyframes pulse   { 0%,100%{opacity:1;}50%{opacity:0.4;} }
-        @keyframes ambient { 0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-14px);} }
-        .tab-b { padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; border:1px solid transparent; cursor:pointer; font-family:inherit; transition:all 0.3s; white-space:nowrap; }
-        .tab-b.active { background:rgba(199,166,106,0.1); border-color:rgba(199,166,106,0.3); color:#C7A66A; }
-        .tab-b:not(.active) { background:rgba(0,0,0,0.03); color:rgba(0,0,0,0.42); }
-        .tab-b:not(.active):hover { background:rgba(0,0,0,0.05); color:rgba(0,0,0,0.48); }
-        .svc-row { display:flex; align-items:center; gap:16px; padding:16px 18px; background:#FFFFFF; border:1px solid rgba(0,0,0,0.07); border-radius:16px; cursor:pointer; transition:all 0.3s; }
-        .svc-row:hover { background:rgba(255,255,255,0.045); border-color:rgba(199,166,106,0.2); }
-        @media(max-width:900px) { .prov-g{grid-template-columns:1fr !important;} }
-      `}</style>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+      <span style={{ width: 3, height: 17, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
+      <h2 style={{ fontSize: 16, fontWeight: 900, margin: 0 }}>{title}</h2>
+      <span style={{ flex: 1, height: 1, background: LINE }} />
+    </div>
+  )
+}
 
-      <div style={{ minHeight:'100vh', background:'#F7F7F5', paddingBottom:'80px' }}>
+export default function TechnicianProfilePage() {
+  const params = useParams()
+  const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
+  const tech = useMemo(() => getTechnician(id), [id])
 
-        {/* ══ HERO ══ */}
-        <div style={{ position:'relative', height:'clamp(420px,55vh,580px)', overflow:'hidden' }}>
-          <img src={p.coverImg} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.15) saturate(0.4)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
-          <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse 55% 65% at 20% 70%,${p.avatarColor}10,transparent 100%)` }}/>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(2,8,6,0.5) 0%,transparent 30%,rgba(2,8,6,0.97) 100%)' }}/>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left,rgba(2,8,6,0.6) 0%,transparent 55%)' }}/>
-          <div style={{ position:'absolute', top:'-15%', left:'-5%', width:'50vw', height:'50vw', maxWidth:'500px', borderRadius:'50%', background:`radial-gradient(${p.avatarColor}06,transparent 65%)`, filter:'blur(40px)', animation:'ambient 14s ease-in-out infinite', pointerEvents:'none' }}/>
+  /* گالری: آلبومِ فعال + لایت‌باکس */
+  const [albumIdx, setAlbumIdx] = useState(0)
+  const [lightbox, setLightbox] = useState<number | null>(null)
+  const [zoomed, setZoomed]     = useState(false)
 
-          {/* Nav */}
-          <div style={{ position:'absolute', top:'24px', left:0, right:0, padding:'0 clamp(16px,4vw,48px)', display:'flex', justifyContent:'space-between', zIndex:10 }}>
-            <Link href="/services" style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '14px', textDecoration:'none', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px' }}>
-              <ChevronRight size={13}/> خدمات فنی
-            </Link>
-            <button style={{ display:'flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,0.5)', fontSize: '14px', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', padding:'7px 14px', cursor:'pointer', fontFamily:'inherit' }}>
-              <Share2 size={12}/> اشتراک
-            </button>
-          </div>
+  const album  = tech?.albums[Math.min(albumIdx, (tech?.albums.length ?? 1) - 1)]
+  const photos = album?.photos ?? []
 
-          {/* Content */}
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'clamp(24px,4vw,52px)', zIndex:10, opacity:heroOp }}>
-            <div style={{ display:'flex', alignItems:'flex-end', gap:'24px', flexWrap:'wrap' }}>
-              {/* Avatar */}
-              <div style={{ position:'relative', flexShrink:0 }}>
-                <div style={{ width:'clamp(72px,12vw,108px)', height:'clamp(72px,12vw,108px)', borderRadius:'22px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: 'clamp(31px, 6.6vw, 48px)', fontWeight:900, color:'#fff', border:'3px solid rgba(199,166,106,0.4)', boxShadow:`0 0 40px ${p.avatarColor}30,0 20px 60px rgba(0,0,0,0.5)` }}>
-                  {p.avatar}
-                </div>
-                {p.isOnline && <div style={{ position:'absolute', bottom:'4px', right:'4px', width:'14px', height:'14px', borderRadius:'50%', background:'#C7A66A', border:'2px solid rgba(2,8,6,0.98)', boxShadow:'0 0 10px #C7A66A' }}/>}
-              </div>
+  const closeLb = useCallback(() => { setLightbox(null); setZoomed(false) }, [])
+  const stepLb  = useCallback((d: number) => {
+    setZoomed(false)
+    setLightbox(i => (i === null ? null : (i + d + photos.length) % photos.length))
+  }, [photos.length])
 
-              <div style={{ flex:1, minWidth:'200px' }}>
-                {/* Badges */}
-                <div style={{ display:'flex', gap:'8px', marginBottom:'10px', flexWrap:'wrap' }}>
-                  {p.isCertified && (
-                    <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:'20px', padding:'4px 13px', backdropFilter:'blur(16px)' }}>
-                      <Award size={10} style={{ color:'#f59e0b' }}/><span style={{ fontSize: '10px', color:'#f59e0b', fontWeight:700, letterSpacing:'0.12em' }}>متخصص تأیید شده</span>
-                    </div>
-                  )}
-                  <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:`${p.avatarColor}12`, border:`1px solid ${p.avatarColor}28`, borderRadius:'20px', padding:'4px 13px', backdropFilter:'blur(16px)' }}>
-                    <span style={{ width:'5px', height:'5px', borderRadius:'50%', background:p.avatarColor, animation:'pulse 2s infinite', display:'inline-block' }}/>
-                    <span style={{ fontSize: '10px', color:p.avatarColor, fontWeight:700, letterSpacing:'0.12em' }}>VERIFIED TECH</span>
-                  </div>
-                </div>
+  /* کیبورد + قفل اسکرول برای لایت‌باکس */
+  useEffect(() => {
+    if (lightbox === null) return
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLb()
+      if (e.key === 'ArrowLeft') stepLb(1)
+      if (e.key === 'ArrowRight') stepLb(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
+  }, [lightbox, closeLb, stepLb])
 
-                <h1 style={{ fontSize: 'clamp(26px, 5.5vw, 53px)', fontWeight:900, color:'#fff', margin:'0 0 6px', letterSpacing:'-0.035em', lineHeight:1.0, textShadow:`0 0 60px ${p.avatarColor}20` }}>
-                  {p.name}
-                </h1>
-                <div style={{ fontSize: '16px', color:'rgba(255,255,255,0.5)', marginBottom:'10px' }}>{p.title}</div>
-
-                <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px', fontSize: '14px', color:'rgba(255,255,255,0.8)' }}>
-                    <MapPin size={10} style={{ color:p.avatarColor }}/>{p.city}
-                  </div>
-                  <div style={{ display:'flex', gap:'3px', alignItems:'center', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px' }}>
-                    {[1,2,3,4,5].map(s=><Star key={s} size={11} style={{ color:'#f59e0b', fill: s<=Math.floor(p.rating)?'#f59e0b':'transparent' }}/>)}
-                    <span style={{ fontSize: '14px', color:'rgba(255,255,255,0.7)', marginRight:'5px' }}>{p.rating}</span>
-                    <span style={{ fontSize: '12px', color:'rgba(255,255,255,0.35)', marginRight:'3px' }}>({toFa(p.reviewCount)})</span>
-                  </div>
-                  <div style={{ display:'flex', alignItems:'center', gap:'5px', background:'rgba(0,0,0,0.06)', backdropFilter:'blur(12px)', borderRadius:'20px', padding:'5px 13px', fontSize: '14px', color:'rgba(255,255,255,0.8)' }}>
-                    <Clock size={10} style={{ color:'#C7A66A' }}/>{p.responseTime}
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display:'flex', gap:'10px', flexShrink:0, flexWrap:'wrap' }}>
-                <button onClick={()=>setReq(true)} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'12px 24px', borderRadius:'12px', border:'none', background:'linear-gradient(135deg,#f59e0b,#d97706)', color:'#fff', fontSize: '15px', fontWeight:800, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 8px 24px rgba(245,158,11,0.35)', transition:'all 0.3s' }}>
-                  <Wrench size={15}/>{requested?'درخواست ارسال شد':'درخواست خدمت'}
-                </button>
-                <button style={{ display:'flex', alignItems:'center', gap:'7px', padding:'12px 18px', borderRadius:'12px', background:'rgba(0,0,0,0.05)', border:'1px solid rgba(0,0,0,0.08)', color:'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
-                  <MessageCircle size={14}/>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ══ STATS BAR ══ */}
-        <div style={{ background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(0,0,0,0.04)', padding:'0 clamp(16px,4vw,48px)' }}>
-          <div style={{ maxWidth:'1280px', margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(4,1fr)' }}>
-            {[
-              { v:toFa(p.experience)+'سال', l:'تجربه',       c:p.avatarColor },
-              { v:toFa(p.jobs),              l:'پروژه',       c:'#a78bfa'     },
-              { v:toFa(p.reviewCount),       l:'نظر مشتری',   c:'#f59e0b'     },
-              { v:p.warranty,                l:'ضمانت',       c:'#C7A66A'     },
-            ].map((s,i) => (
-              <div key={i} style={{ padding:'18px 10px', textAlign:'center', borderLeft: i>0?'1px solid rgba(0,0,0,0.04)':'none' }}>
-                <div style={{ fontSize: 'clamp(18px, 2.8vw, 24px)', fontWeight:900, color: '#111111', letterSpacing:'-0.02em', textShadow:`0 0 14px ${s.c}25` }}>{s.v}</div>
-                <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', marginTop:'3px' }}>{s.l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ══ MAIN ══ */}
-        <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'clamp(24px,4vw,40px) clamp(16px,3vw,32px)' }}>
-
-          {/* Tabs */}
-          <div style={{ display:'flex', gap:'8px', marginBottom:'32px', overflowX:'auto', padding:'2px' }}>
-            {[{k:'overview',l:'خلاصه'},{k:'services',l:`خدمات (${p.services.length})`},{k:'portfolio',l:'نمونه کارها'},{k:'reviews',l:`نظرات (${p.reviewCount})`}].map(t => (
-              <button key={t.k} className={`tab-b ${tab===t.k?'active':''}`} onClick={()=>setTab(t.k as any)}>{t.l}</button>
-            ))}
-          </div>
-
-          <div className="prov-g" style={{ display:'grid', gridTemplateColumns:'1fr 320px', gap:'28px', alignItems:'start' }}>
-
-            {/* ── LEFT ── */}
-            <div>
-
-              {/* ════ OVERVIEW ════ */}
-              {tab==='overview' && (
-                <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:'20px' }}>
-
-                  {/* Bio */}
-                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize: '17px', fontWeight:800, color: '#111111', margin:'0 0 14px', display:'flex', alignItems:'center', gap:'10px' }}>
-                      <span style={{ width:'3px', height:'16px', background:`linear-gradient(180deg,${p.avatarColor},#06b6d4)`, borderRadius:'2px', display:'inline-block' }}/>
-                      درباره متخصص
-                    </h3>
-                    <p style={{ fontSize: '16px', color:'rgba(0,0,0,0.50)', lineHeight:1.9, margin:'0 0 20px' }}>{p.bio}</p>
-
-                    <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'10px' }}>
-                      {[
-                        { l:'شهر پوشش',    v:p.address,         icon:<MapPin size={13} style={{ color:p.avatarColor }}/> },
-                        { l:'زمان پاسخ',   v:p.responseTime,    icon:<Clock size={13} style={{ color:'#06b6d4' }}/> },
-                        { l:'ضمانت کار',   v:p.warranty,        icon:<Shield size={13} style={{ color:'#C7A66A' }}/> },
-                        { l:'شروع قیمت',   v:`${toFa(p.priceFrom.toLocaleString())} تومان`, icon:<Zap size={13} style={{ color:'#f59e0b' }}/> },
-                      ].map((r,i) => (
-                        <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'12px' }}>
-                          <span style={{ flexShrink:0 }}>{r.icon}</span>
-                          <div style={{ minWidth:0 }}>
-                            <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)', marginBottom:'2px' }}>{r.l}</div>
-                            <div style={{ fontSize: '15px', fontWeight:600, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.v}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Certifications */}
-                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize: '17px', fontWeight:800, color: '#111111', margin:'0 0 18px', display:'flex', alignItems:'center', gap:'10px' }}>
-                      <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#f59e0b,#a78bfa)', borderRadius:'2px', display:'inline-block' }}/>
-                      گواهینامه‌ها
-                    </h3>
-                    <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'10px' }}>
-                      {p.certifications.map((cert: string, i: number) => (
-                        <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px', background:'rgba(245,158,11,0.04)', border:'1px solid rgba(245,158,11,0.12)', borderRadius:'13px' }}>
-                          <Award size={13} style={{ color:'#f59e0b', flexShrink:0 }}/>
-                          <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.48)', fontWeight:500 }}>{cert}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Brands */}
-                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'26px' }}>
-                    <h3 style={{ fontSize: '17px', fontWeight:800, color: '#111111', margin:'0 0 16px', display:'flex', alignItems:'center', gap:'10px' }}>
-                      <span style={{ width:'3px', height:'16px', background:'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius:'2px', display:'inline-block' }}/>
-                      برندهای تخصصی
-                    </h3>
-                    <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
-                      {p.brands.map((b: string) => (
-                        <span key={b} style={{ fontSize: '14px', fontWeight:700, color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'6px 14px' }}>{b}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Before/After */}
-                  {p.beforeAfter.length > 0 && (
-                    <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', overflow:'hidden' }}>
-                      <div style={{ padding:'22px 24px 16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                        <h3 style={{ fontSize: '17px', fontWeight:800, color: '#111111', margin:0, display:'flex', alignItems:'center', gap:'10px' }}>
-                          <span style={{ width:'3px', height:'16px', background:'linear-gradient(180deg,#ef4444,#f59e0b)', borderRadius:'2px', display:'inline-block' }}/>
-                          قبل و بعد
-                        </h3>
-                        <div style={{ display:'flex', gap:'6px' }}>
-                          <button onClick={()=>setBaIdx(i=>Math.max(0,i-1))} style={{ width:'28px', height:'28px', borderRadius:'8px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.06)', cursor:'pointer', color:'rgba(0,0,0,0.45)', display:'flex', alignItems:'center', justifyContent:'center' }}><ChevronRight size={14}/></button>
-                          <button onClick={()=>setBaIdx(i=>Math.min(p.beforeAfter.length-1,i+1))} style={{ width:'28px', height:'28px', borderRadius:'8px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.06)', cursor:'pointer', color:'rgba(0,0,0,0.45)', display:'flex', alignItems:'center', justifyContent:'center' }}><ChevronLeft size={14}/></button>
-                        </div>
-                      </div>
-
-                      {p.beforeAfter[baIdx] && (
-                        <div style={{ padding:'0 24px 20px' }}>
-                          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'10px' }}>
-                            {[{img: p.beforeAfter[baIdx].before, label:'قبل'},{img: p.beforeAfter[baIdx].after, label:'بعد'}].map((side,i) => (
-                              <div key={i} style={{ position:'relative', borderRadius:'14px', overflow:'hidden', aspectRatio:'16/9' }}>
-                                <img src={side.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:`brightness(${i===0?0.3:0.55})` }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
-                                <div style={{ position:'absolute', bottom:'8px', right:'8px', background:'rgba(0,0,0,0.7)', backdropFilter:'blur(6px)', borderRadius:'20px', padding:'3px 10px', fontSize: '12px', color:'rgba(255,255,255,0.8)', fontWeight:700 }}>{side.label}</div>
-                              </div>
-                            ))}
-                          </div>
-                          <div style={{ fontSize: '15px', color:'rgba(0,0,0,0.45)', textAlign:'center' }}>{p.beforeAfter[baIdx].title}</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ════ SERVICES ════ */}
-              {tab==='services' && (
-                <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:'10px' }}>
-                  {p.services.map((svc: any, i: number) => (
-                    <div key={i} className="svc-row" onClick={()=>setSelSvc(selSvc===i?null:i)}
-                      style={{ borderColor: selSvc===i?`${p.avatarColor}40`:'rgba(0,0,0,0.07)', background: selSvc===i?`${p.avatarColor}08`:'#FFFFFF' }}>
-                      <div style={{ width:'42px', height:'42px', borderRadius:'12px', background:`${p.avatarColor}12`, border:`1px solid ${p.avatarColor}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '20px', flexShrink:0 }}>🔧</div>
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' }}>
-                          <span style={{ fontSize: '16px', fontWeight:700, color: '#111111' }}>{svc.title}</span>
-                          {svc.popular && <span style={{ fontSize: '10px', color:'#ef4444', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>پرطرفدار</span>}
-                        </div>
-                        <div style={{ display:'flex', gap:'10px', fontSize: '13px', color:'rgba(0,0,0,0.42)' }}>
-                          <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Clock size={10} style={{ color:'rgba(0,0,0,0.30)' }}/>{svc.duration}</span>
-                          <span style={{ display:'flex', alignItems:'center', gap:'3px' }}><Shield size={10} style={{ color:'rgba(0,0,0,0.30)' }}/>{p.warranty} ضمانت</span>
-                        </div>
-                      </div>
-                      <div style={{ textAlign:'left', flexShrink:0 }}>
-                        <div style={{ fontSize: '18px', fontWeight:900, color:p.avatarColor, letterSpacing:'-0.02em', textShadow: selSvc===i?`0 0 14px ${p.avatarColor}50`:'none' }}>
-                          {toFa(svc.price.toLocaleString())}
-                        </div>
-                        <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)' }}>تومان</div>
-                      </div>
-                      {selSvc===i && <Check size={16} style={{ color:p.avatarColor, flexShrink:0 }}/>}
-                    </div>
-                  ))}
-
-                  {selSvc !== null && (
-                    <div style={{ padding:'16px 18px', background:`${p.avatarColor}08`, border:`1px solid ${p.avatarColor}22`, borderRadius:'16px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px', animation:'fadeUp 0.3s ease both' }}>
-                      <div>
-                        <div style={{ fontSize: '16px', fontWeight:800, color: '#111111', marginBottom:'3px' }}>{p.services[selSvc]?.title}</div>
-                        <div style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>هزینه: {toFa(p.services[selSvc]?.price.toLocaleString())} تومان</div>
-                      </div>
-                      <button onClick={()=>setReq(true)} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'12px 24px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}cc)`, border:'none', borderRadius:'12px', color:'#fff', fontSize: '15px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:`0 6px 18px ${p.avatarColor}30` }}>
-                        <Calendar size={14}/> درخواست خدمت →
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ════ PORTFOLIO ════ */}
-              {tab==='portfolio' && (
-                <div style={{ animation:'fadeUp 0.4s ease both' }}>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'14px', marginBottom:'20px' }}>
-                    {p.gallery.map((img: string, i: number) => (
-                      <div key={i} style={{ borderRadius:'16px', overflow:'hidden', aspectRatio:'16/9', position:'relative', cursor:'pointer' }}>
-                        <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.45)', transition:'all 0.5s' }}
-                          onMouseEnter={e=>{(e.target as HTMLImageElement).style.filter='brightness(0.65)';(e.target as HTMLImageElement).style.transform='scale(1.04)';}}
-                          onMouseLeave={e=>{(e.target as HTMLImageElement).style.filter='brightness(0.45)';(e.target as HTMLImageElement).style.transform='none';}}
-                          onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
-                        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
-                          <Camera size={20} style={{ color:'rgba(255,255,255,0.3)' }}/>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ════ REVIEWS ════ */}
-              {tab==='reviews' && (
-                <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:'12px' }}>
-                  {/* Summary */}
-                  <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'24px', display:'flex', gap:'24px', alignItems:'center', flexWrap:'wrap' }}>
-                    <div style={{ textAlign:'center', flexShrink:0 }}>
-                      <div style={{ fontSize: '57px', fontWeight:900, color: '#111111', lineHeight:1 }}>{p.rating}</div>
-                      <div style={{ display:'flex', gap:'3px', justifyContent:'center', margin:'7px 0 4px' }}>
-                        {[1,2,3,4,5].map(s=><Star key={s} size={14} style={{ color:'#f59e0b', fill:'#f59e0b' }}/>)}
-                      </div>
-                      <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.40)' }}>{toFa(p.reviewCount)} نظر</div>
-                    </div>
-                    <div style={{ flex:1, minWidth:'160px', display:'flex', flexDirection:'column', gap:'6px' }}>
-                      {[{s:5,pct:88},{s:4,pct:9},{s:3,pct:2},{s:2,pct:1},{s:1,pct:0}].map(r => (
-                        <div key={r.s} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                          <span style={{ fontSize: '12px', color:'rgba(0,0,0,0.40)', width:'12px' }}>{toFa(r.s)}</span>
-                          <Star size={9} style={{ color:'#f59e0b', fill:'#f59e0b', flexShrink:0 }}/>
-                          <div style={{ flex:1, height:'5px', background:'rgba(0,0,0,0.05)', borderRadius:'3px', overflow:'hidden' }}>
-                            <div style={{ height:'100%', width:`${r.pct}%`, background:'linear-gradient(90deg,#f59e0b,#f59e0b70)', borderRadius:'3px' }}/>
-                          </div>
-                          <span style={{ fontSize: '12px', color:'rgba(0,0,0,0.30)', width:'26px', textAlign:'left' }}>{toFa(r.pct)}٪</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {REVIEWS.map((r,i) => (
-                    <div key={i} style={{ padding:'20px', background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.05)', borderRadius:'18px' }}>
-                      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'12px' }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-                          <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}80)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize: '18px', fontWeight:900, color:'#fff', flexShrink:0 }}>
-                            {r.name[0]}
-                          </div>
-                          <div>
-                            <div style={{ display:'flex', alignItems:'center', gap:'7px', marginBottom:'3px' }}>
-                              <span style={{ fontSize: '16px', fontWeight:700, color: '#111111' }}>{r.name}</span>
-                              {r.verified && <span style={{ fontSize: '10px', color:'#C7A66A', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', padding:'1px 7px', fontWeight:700, display:'flex', alignItems:'center', gap:'2px' }}><Check size={8}/>تأیید</span>}
-                              <span style={{ fontSize: '10px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}20`, borderRadius:'20px', padding:'1px 7px', fontWeight:700 }}>{r.project}</span>
-                            </div>
-                            <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.35)' }}>{r.date}</div>
-                          </div>
-                        </div>
-                        <div style={{ display:'flex', gap:'2px', flexShrink:0 }}>
-                          {[1,2,3,4,5].map(s=><Star key={s} size={12} style={{ color: s<=r.rating?'#f59e0b':'rgba(0,0,0,0.08)', fill: s<=r.rating?'#f59e0b':'transparent' }}/>)}
-                        </div>
-                      </div>
-                      <p style={{ fontSize: '15px', color:'rgba(0,0,0,0.50)', margin:'0 0 12px', lineHeight:1.75 }}>{r.text}</p>
-                      <button style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 12px', borderRadius:'20px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.07)', fontSize: '13px', color:'rgba(0,0,0,0.45)', cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}>
-                        <ThumbsUp size={10}/> مفید بود
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ── SIDEBAR ── */}
-            <div style={{ position:'sticky', top:'80px', display:'flex', flexDirection:'column', gap:'16px' }}>
-
-              {/* Book CTA */}
-              <div style={{ background:'#FFFFFF', border:`1px solid ${p.avatarColor}22`, borderRadius:'22px', padding:'22px', position:'relative', overflow:'hidden' }}>
-                <div style={{ position:'absolute', top:'-1px', left:'50%', transform:'translateX(-50%)', width:'120px', height:'1px', background:`linear-gradient(90deg,transparent,${p.avatarColor}55,transparent)`, boxShadow:`0 0 14px ${p.avatarColor}35` }}/>
-                <div style={{ fontSize: '12px', color:`${p.avatarColor}70`, fontWeight:700, marginBottom:'14px', textAlign:'center' }}>درخواست خدمت</div>
-                <div style={{ fontSize: '15px', color:'rgba(0,0,0,0.45)', marginBottom:'16px', textAlign:'center', lineHeight:1.6 }}>
-                  از {toFa(p.priceFrom.toLocaleString())} تومان
-                </div>
-
-                {/* Quick info */}
-                {[
-                  { icon:<Clock size={13}/>,  label:'پاسخ',  v:p.responseTime, c:'#C7A66A' },
-                  { icon:<Shield size={13}/>, label:'ضمانت', v:p.warranty,     c:'#06b6d4' },
-                ].map((x,i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 12px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(0,0,0,0.04)', borderRadius:'11px', marginBottom:'8px' }}>
-                    <span style={{ color:x.c, flexShrink:0 }}>{x.icon}</span>
-                    <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>{x.label}:</span>
-                    <span style={{ fontSize: '14px', fontWeight:600, color: '#111111', marginRight:'auto' }}>{x.v}</span>
-                  </div>
-                ))}
-
-                <button onClick={()=>setReq(true)} style={{ width:'100%', padding:'14px', marginTop:'8px', borderRadius:'13px', border:'none', background: requested?'rgba(199,166,106,0.2)':`linear-gradient(135deg,${p.avatarColor},${p.avatarColor}cc)`, color: requested?'#C7A66A':'#fff', fontSize: '16px', fontWeight:800, cursor:'pointer', fontFamily:'inherit', transition:'all 0.3s', boxShadow: requested?'none':`0 8px 24px ${p.avatarColor}30`, display:'flex', alignItems:'center', justifyContent:'center', gap:'9px' }}>
-                  {requested ? <><Check size={16}/>درخواست ارسال شد</> : <><Wrench size={16}/>درخواست خدمت</>}
-                </button>
-              </div>
-
-              {/* Specialities */}
-              <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'12px' }}>تخصص‌ها</div>
-                <div style={{ display:'flex', flexWrap:'wrap', gap:'7px' }}>
-                  {p.speciality.map((s: string) => (
-                    <span key={s} style={{ fontSize: '13px', color:p.avatarColor, background:`${p.avatarColor}10`, border:`1px solid ${p.avatarColor}22`, borderRadius:'20px', padding:'5px 12px', fontWeight:600 }}>{s}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div style={{ background:'#FFFFFF', border:'1px solid rgba(0,0,0,0.07)', borderRadius:'20px', padding:'20px' }}>
-                <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.35)', fontWeight:700, marginBottom:'14px' }}>آمار کاری</div>
-                {[
-                  { l:'پروژه تکمیل‌شده', v:toFa(p.jobs),          c:p.avatarColor },
-                  { l:'سال‌های تجربه',   v:toFa(p.experience),    c:'#a78bfa'     },
-                  { l:'امتیاز کلی',      v:`${p.rating}/5`,       c:'#f59e0b'     },
-                  { l:'گواهینامه',        v:toFa(p.certifications.length), c:'#C7A66A' },
-                ].map((s,i) => (
-                  <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'9px 0', borderBottom: i<3?'1px solid rgba(0,0,0,0.04)':'none' }}>
-                    <span style={{ fontSize: '14px', color:'rgba(0,0,0,0.42)' }}>{s.l}</span>
-                    <span style={{ fontSize: '15px', fontWeight:800, color:s.c }}>{s.v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+  if (!tech) {
+    return (
+      <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
+        <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
+          <Wrench size={34} style={{ color: MUT, opacity: 0.5, marginBottom: 10 }} />
+          <p style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 8px' }}>متخصص پیدا نشد</p>
+          <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.8 }}>ممکن است این پروفایل حذف شده یا نشانی تغییر کرده باشد.</p>
+          <Link href="/services" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
+            بازگشت به خدمات فنی <ArrowLeft size={14} />
+          </Link>
         </div>
       </div>
-    </>
-  );
+    )
+  }
+
+  return (
+    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+      <style>{`
+        @keyframes tpFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+        @keyframes tpFade   { from { opacity:0; } to { opacity:1; } }
+        .tp-wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
+
+        .tp-hero { display: grid; grid-template-columns: 300px minmax(0,1fr); gap: clamp(20px,3.4vw,40px); align-items: center; }
+        @media (max-width: 760px) { .tp-hero { grid-template-columns: 1fr; gap: 18px; } .tp-idcard { max-width: 260px; margin: 0 auto; } }
+
+        .tp-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700;
+          color: ${SEC}; background: #fff; border: 1px solid ${LINE}; border-radius: 999px; padding: 7px 14px;
+          transition: all .2s; }
+        .tp-chip:hover { border-color: rgba(199,166,106,0.45); color: ${GOLD_D}; transform: translateY(-1px); }
+
+        .tp-cta { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px;
+          padding: 0 20px; border-radius: 11px; cursor: pointer; text-decoration: none; font-family: inherit;
+          font-size: 13px; font-weight: 800; transition: all .25s cubic-bezier(.22,1,.36,1); }
+        .tp-cta.gold { background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34); color: ${GOLD_D}; }
+        .tp-cta.gold:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); box-shadow: 0 8px 20px rgba(199,166,106,0.2); }
+        .tp-cta.wa { background: rgba(37,211,102,0.10); border: 1px solid rgba(37,211,102,0.3); color: #0E7A38; }
+        .tp-cta.wa:hover { transform: translateY(-2px); background: rgba(37,211,102,0.16); }
+
+        /* پروژه‌ها */
+        .tp-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        @media (max-width: 700px) { .tp-projects { grid-template-columns: 1fr; } }
+        .tp-proj { display: flex; flex-direction: column; background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
+          overflow: hidden; box-shadow: 0 2px 10px rgba(28,27,23,0.05);
+          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; animation: tpFadeUp .5s ease both; }
+        .tp-proj:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(28,27,23,0.11); border-color: rgba(199,166,106,0.35); }
+        .tp-proj .im { aspect-ratio: 16/9.4; overflow: hidden; }
+        .tp-proj .im img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s cubic-bezier(.22,1,.36,1); }
+        .tp-proj:hover .im img { transform: scale(1.05); }
+
+        /* گالری — Masonry با CSS columns */
+        .tp-gal { columns: 3 210px; column-gap: 12px; }
+        .tp-gal button { display: block; width: 100%; border: none; padding: 0; margin: 0 0 12px; cursor: zoom-in;
+          border-radius: 14px; overflow: hidden; background: #EDEAE2; border: 1px solid ${LINE};
+          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
+        .tp-gal button:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(28,27,23,0.13); }
+        .tp-gal img { width: 100%; display: block; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+        .tp-gal button:hover img { transform: scale(1.04); }
+
+        .tp-lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px;
+          border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: rgba(20,18,14,0.5);
+          color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+          backdrop-filter: blur(6px); transition: background .2s, transform .2s; }
+        .tp-lb-nav:hover { background: rgba(199,166,106,0.5); transform: translateY(-50%) scale(1.06); }
+      `}</style>
+
+      <div className="tp-wrap" style={{ paddingTop: 18, paddingBottom: 76 }}>
+
+        {/* بردکرامب */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: MUT, marginBottom: 20, animation: 'tpFadeUp .4s ease both' }}>
+          <Link href="/" style={{ color: MUT, textDecoration: 'none' }}>خانه</Link>
+          <ChevronLeft size={12} />
+          <Link href="/services" style={{ color: MUT, textDecoration: 'none' }}>خدمات فنی</Link>
+          <ChevronLeft size={12} />
+          <span style={{ color: SEC }}>{tech.name}</span>
+        </nav>
+
+        {/* ═══ هیرو معرفی ═══ */}
+        <header className="tp-hero" style={{ marginBottom: 'clamp(30px,4.4vw,48px)', animation: 'tpFadeUp .5s .05s ease both' }}>
+          {/* کارت هویت */}
+          <div className="tp-idcard" style={{ position: 'relative', aspectRatio: '3/3.4', borderRadius: 22, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 14px 38px rgba(154,110,56,0.13)', background: 'linear-gradient(170deg,#FBF9F5 0%,#F1ECE1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 76% 16%, rgba(199,166,106,0.20) 0%, transparent 48%), radial-gradient(circle at 18% 90%, rgba(20,83,45,0.08) 0%, transparent 44%), radial-gradient(rgba(28,27,23,0.03) 1px, transparent 1px)', backgroundSize: 'auto, auto, 17px 17px' }} />
+            <div style={{ position: 'absolute', top: '-24%', bottom: '-24%', left: '26%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
+            <div style={{ position: 'relative', textAlign: 'center' }}>
+              <span style={{ position: 'relative', width: 118, height: 118, margin: '0 auto', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, fontWeight: 900, color: GOLD_D, background: 'linear-gradient(160deg,#FFFDF9,#F5EFE4)', boxShadow: '0 14px 30px rgba(154,110,56,0.18), inset 0 1px 0 #fff' }}>
+                <span style={{ position: 'absolute', inset: -9, borderRadius: '50%', border: '1px solid rgba(199,166,106,0.55)' }} />
+                <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '1px dashed rgba(199,166,106,0.35)' }} />
+                {tech.name.slice(0, 1)}
+              </span>
+              <div style={{ marginTop: 16, fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(154,110,56,0.65)' }}>BILLIARD HUB</div>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: MUT, marginTop: 3 }}>متخصص خدمات فنی</div>
+            </div>
+          </div>
+
+          {/* معرفی */}
+          <div>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.2em', color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
+              <Wrench size={11} /> TECHNICAL SPECIALIST
+            </span>
+            <h1 style={{ fontSize: 'clamp(24px,3.6vw,38px)', fontWeight: 900, margin: '0 0 6px', lineHeight: 1.35, letterSpacing: '-0.02em' }}>{tech.name}</h1>
+            <div style={{ fontSize: 'clamp(13.5px,1.7vw,16px)', fontWeight: 800, color: GOLD_D, marginBottom: 10 }}>{tech.title}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: SEC, marginBottom: 14 }}>
+              <MapPin size={14} style={{ color: '#14532D' }} />
+              <span>{tech.city}</span>
+              {tech.club && <><span style={{ color: MUT }}>·</span><span style={{ color: MUT }}>{tech.club}</span></>}
+            </div>
+            <p style={{ fontSize: 14, lineHeight: 2, color: SEC, margin: '0 0 16px', maxWidth: 560 }}>{tech.intro}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+              {tech.services.map(s => <span key={s} className="tp-chip">{s}</span>)}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              <a className="tp-cta gold" href={`tel:${tech.phone}`}><Phone size={15} /> ارتباط با این متخصص</a>
+              <a className="tp-cta wa" href={`https://wa.me/${tech.whatsapp}`} target="_blank" rel="noopener noreferrer">{WaIcon} واتساپ</a>
+            </div>
+          </div>
+        </header>
+
+        {/* ═══ درباره من ═══ */}
+        <section style={{ marginBottom: 'clamp(28px,4vw,44px)', animation: 'tpFadeUp .5s .1s ease both' }}>
+          <SectionHead title="درباره من" />
+          <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: 'clamp(18px,2.6vw,26px)' }}>
+            {tech.about.map((p, i) => (
+              <p key={i} style={{ fontSize: 14, lineHeight: 2.2, color: '#2B2822', margin: i === tech.about.length - 1 ? 0 : '0 0 14px' }}>{p}</p>
+            ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16, paddingTop: 14, borderTop: '1px solid #F0EDE5', fontSize: 12.5, color: MUT }}>
+              <span style={{ fontWeight: 800, color: SEC }}>شهرهای تحت پوشش:</span>
+              {tech.coverage.map(c => <span key={c} style={{ background: BG, border: `1px solid ${LINE}`, borderRadius: 999, padding: '4px 12px', fontWeight: 700, color: SEC }}>{c}</span>)}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ پروژه‌ها ═══ */}
+        {tech.projects.length > 0 && (
+          <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
+            <SectionHead title="پروژه‌ها و کارهای انجام‌شده" />
+            <div className="tp-projects">
+              {tech.projects.map((p, i) => (
+                <article key={p.id} className="tp-proj" style={{ animationDelay: `${i * 70}ms` }}>
+                  <div className="im"><img src={p.image} alt={p.title} loading="lazy" /></div>
+                  <div style={{ padding: '15px 17px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ alignSelf: 'flex-start', fontSize: 10.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 999, padding: '3px 10px' }}>{p.service}</span>
+                    <h3 style={{ fontSize: 14.5, fontWeight: 900, margin: '2px 0 0' }}>{p.title}</h3>
+                    <p style={{ fontSize: 12.5, lineHeight: 1.9, color: SEC, margin: 0 }}>{p.desc}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: MUT, marginTop: 4 }}>
+                      <MapPin size={11} style={{ color: '#14532D' }} />
+                      {p.city}{p.club ? ` — ${p.club}` : ''}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ═══ گالری تصاویر (آلبوم‌دار) ═══ */}
+        {tech.albums.length > 0 && album && (
+          <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
+            <SectionHead title="گالری تصاویر" />
+            {/* انتخاب آلبوم */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+              {tech.albums.map((a, i) => (
+                <button key={a.id} onClick={() => { setAlbumIdx(i) }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '8px 15px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, transition: 'all .2s', background: i === albumIdx ? 'rgba(199,166,106,0.12)' : '#fff', border: `1px solid ${i === albumIdx ? 'rgba(199,166,106,0.38)' : LINE}`, color: i === albumIdx ? GOLD_D : SEC }}>
+                  <Images size={13} />
+                  {a.title}
+                  <span style={{ fontSize: 10.5, color: MUT }}>{faDigits(a.photos.length)}</span>
+                </button>
+              ))}
+            </div>
+            <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.8 }}>{album.desc}</p>
+            {/* Masonry */}
+            <div className="tp-gal">
+              {photos.map((src, i) => (
+                <button key={`${album.id}-${i}`} onClick={() => setLightbox(i)} aria-label={`تصویر ${faDigits(i + 1)}`}>
+                  <img src={src} alt={`${album.title} — ${faDigits(i + 1)}`} loading="lazy" />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ═══ محل فعالیت ═══ */}
+        <section style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
+          <SectionHead title="محل فعالیت" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '18px 20px' }}>
+            <span style={{ width: 44, height: 44, borderRadius: 13, background: 'rgba(20,83,45,0.08)', border: '1px solid rgba(20,83,45,0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#14532D', flexShrink: 0 }}>
+              <MapPin size={19} />
+            </span>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 900 }}>{tech.city}{tech.club ? ` — ${tech.club}` : ''}</div>
+              <div style={{ fontSize: 12, color: MUT, marginTop: 3 }}>ارائه‌ی خدمات در {tech.coverage.join('، ')}</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ CTA پایانی ═══ */}
+        <section style={{ position: 'relative', overflow: 'hidden', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 20, padding: 'clamp(24px,3.4vw,36px)', textAlign: 'center', boxShadow: '0 6px 24px rgba(28,27,23,0.06)' }}>
+          <div style={{ position: 'absolute', left: '-6%', top: '-70%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.14) 0%, transparent 66%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+          <h2 style={{ fontSize: 'clamp(16px,2.2vw,21px)', fontWeight: 900, margin: '0 0 8px' }}>به این خدمات نیاز دارید؟</h2>
+          <p style={{ fontSize: 13, color: SEC, margin: '0 0 18px', lineHeight: 1.9 }}>
+            برای هماهنگی و دریافت مشاوره، مستقیم با {tech.name} در ارتباط باشید.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 10 }}>
+            <a className="tp-cta gold" href={`tel:${tech.phone}`}><Phone size={15} /> درخواست خدمات</a>
+            <a className="tp-cta wa" href={`https://wa.me/${tech.whatsapp}?text=${encodeURIComponent(`سلام ${tech.name} عزیز، از طریق بیلیارد هاب با شما تماس می‌گیرم.`)}`} target="_blank" rel="noopener noreferrer">{WaIcon} گفت‌وگو در واتساپ</a>
+          </div>
+        </section>
+      </div>
+
+      {/* ═══ لایت‌باکس فول‌اسکرین ═══ */}
+      {lightbox !== null && photos[lightbox] && typeof document !== 'undefined' && createPortal(
+        <div onClick={closeLb} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(12,11,9,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'tpFade .18s ease both' }}>
+          {/* نوار بالا */}
+          <div style={{ position: 'absolute', top: 0, insetInline: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', color: '#fff', zIndex: 2 }} onClick={e => e.stopPropagation()}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
+              {album?.title} — {faDigits(lightbox + 1)} از {faDigits(photos.length)}
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setZoomed(z => !z)} aria-label="بزرگ‌نمایی"
+                style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {zoomed ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
+              </button>
+              <button onClick={closeLb} aria-label="بستن"
+                style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={17} />
+              </button>
+            </div>
+          </div>
+
+          {/* تصویر */}
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: '92vw', maxHeight: '84vh', overflow: zoomed ? 'auto' : 'hidden', borderRadius: 14 }}>
+            <img
+              src={photos[lightbox]}
+              alt=""
+              onClick={() => setZoomed(z => !z)}
+              style={{ maxWidth: zoomed ? 'none' : '92vw', maxHeight: zoomed ? 'none' : '84vh', width: zoomed ? '160%' : 'auto', display: 'block', margin: 'auto', cursor: zoomed ? 'zoom-out' : 'zoom-in', borderRadius: 12, transition: 'opacity .2s' }}
+            />
+          </div>
+
+          {/* ناوبری — در RTL فلشِ راست = تصویر قبلی */}
+          {photos.length > 1 && (
+            <>
+              <button className="tp-lb-nav" style={{ insetInlineStart: 14 }} onClick={e => { e.stopPropagation(); stepLb(1) }} aria-label="بعدی">
+                <ChevronLeft size={20} />
+              </button>
+              <button className="tp-lb-nav" style={{ insetInlineEnd: 14 }} onClick={e => { e.stopPropagation(); stepLb(-1) }} aria-label="قبلی">
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
+        </div>,
+        document.body,
+      )}
+    </div>
+  )
 }

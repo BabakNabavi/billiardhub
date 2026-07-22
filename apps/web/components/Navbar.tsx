@@ -32,7 +32,7 @@ const exploreMenu = [
     items: [
       { href: '/sellers',       label: 'فروشگاه‌ها',   icon: <ShoppingBag size={14} />, desc: 'فروشگاه‌های تجهیزات' },
       { href: '/manufacturers', label: 'تولیدکنندگان', icon: <Factory size={14} />,    desc: 'سازندگان تجهیزات' },
-      { href: '/installers',    label: 'خدمات فنی',   icon: <Wrench size={14} />,     desc: 'نصب و راه‌اندازی'  },
+      { href: '/services',      label: 'خدمات فنی',   icon: <Wrench size={14} />,     desc: 'متخصصان فنی بیلیارد' },
       { href: '/live',          label: 'پخش زنده',    icon: <Radio size={14} />,      desc: 'پخش زنده مسابقات' },
     ],
   },
@@ -58,7 +58,7 @@ const mobileLinks = [
   { href: '/referees',      label: 'داوران',                  icon: <Trophy size={17} />,        color: GOLD,      desc: 'داوران رسمی' },
   { href: '/players',       label: 'بازیکنان',                icon: <Users size={17} />,         color: GOLD,      desc: 'بازیکنان حرفه‌ای' },
   { href: '/tournaments',   label: 'مسابقات',                 icon: <Calendar size={17} />,      color: GOLD,      desc: 'تورنمنت‌ها' },
-  { href: '/installers',    label: 'خدمات فنی',               icon: <Wrench size={17} />,        color: GOLD,      desc: 'نصب و راه‌اندازی' },
+  { href: '/services',      label: 'خدمات فنی',               icon: <Wrench size={17} />,        color: GOLD,      desc: 'متخصصان فنی بیلیارد' },
   { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={17} />,        color: GOLD,      desc: 'جدول رنکینگ' },
   { href: '/media',         label: 'بیلیارد مدیا',            icon: <Clapperboard size={17} />,  color: GOLD,      desc: 'پلتفرم ویدیویی' },
   { href: '/live',          label: 'پخش زنده',                icon: <Radio size={17} />,         color: '#ef4444', desc: 'پخش زنده مسابقات', live: true },

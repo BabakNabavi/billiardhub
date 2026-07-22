@@ -7,6 +7,9 @@ const nextConfig = {
       // «آموزش» به «بیلیارد مدیا» تغییر نام داد — لینک‌های قدیمی منتقل می‌شوند
       { source: '/education', destination: '/media', permanent: true },
       { source: '/education/:path*', destination: '/media', permanent: true },
+      // خدمات فنی روی /services یکپارچه شد؛ /installers قدیمی منتقل می‌شود
+      { source: '/installers', destination: '/services', permanent: true },
+      { source: '/installers/:path*', destination: '/services', permanent: true },
     ];
   },
   async headers() {
