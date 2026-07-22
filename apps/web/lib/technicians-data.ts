@@ -39,6 +39,8 @@ export interface TechAlbum {
 export interface Technician {
   id: string
   name: string
+  /** عکسِ پروفایل (اختیاری) — نبودش ⇒ مونوگرامِ لوکس */
+  photo?: string
   /** عنوانِ تخصصی — زیرِ نام */
   title: string
   city: string

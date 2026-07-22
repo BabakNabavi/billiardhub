@@ -177,10 +177,12 @@ export default function TechnicianProfilePage() {
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 76% 16%, rgba(199,166,106,0.20) 0%, transparent 48%), radial-gradient(circle at 18% 90%, rgba(20,83,45,0.08) 0%, transparent 44%), radial-gradient(rgba(28,27,23,0.03) 1px, transparent 1px)', backgroundSize: 'auto, auto, 17px 17px' }} />
             <div style={{ position: 'absolute', top: '-24%', bottom: '-24%', left: '26%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
             <div style={{ position: 'relative', textAlign: 'center' }}>
-              <span style={{ position: 'relative', width: 118, height: 118, margin: '0 auto', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, fontWeight: 900, color: GOLD_D, background: 'linear-gradient(160deg,#FFFDF9,#F5EFE4)', boxShadow: '0 14px 30px rgba(154,110,56,0.18), inset 0 1px 0 #fff' }}>
+              <span style={{ position: 'relative', width: 118, height: 118, margin: '0 auto', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, fontWeight: 900, color: GOLD_D, background: 'linear-gradient(160deg,#FFFDF9,#F5EFE4)', boxShadow: '0 14px 30px rgba(154,110,56,0.18), inset 0 1px 0 #fff', overflow: 'visible' }}>
                 <span style={{ position: 'absolute', inset: -9, borderRadius: '50%', border: '1px solid rgba(199,166,106,0.55)' }} />
                 <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '1px dashed rgba(199,166,106,0.35)' }} />
-                {tech.name.slice(0, 1)}
+                {tech.photo
+                  ? <img src={tech.photo} alt={tech.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  : tech.name.slice(0, 1)}
               </span>
               <div style={{ marginTop: 16, fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(154,110,56,0.65)' }}>BILLIARD HUB</div>
               <div style={{ fontSize: 10.5, fontWeight: 700, color: MUT, marginTop: 3 }}>متخصص خدمات فنی</div>

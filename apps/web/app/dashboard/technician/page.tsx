@@ -44,6 +44,7 @@ export default function TechnicianDashboard() {
   /* فرمِ پروژه‌ی جدید */
   const [prj, setPrj] = useState({ title: '', desc: '', city: '', club: '', service: '' as TechService | '', image: '' })
   const prjImgRef = useRef<HTMLInputElement>(null)
+  const photoRef  = useRef<HTMLInputElement>(null)
   /* آلبومِ جدید */
   const [albTitle, setAlbTitle] = useState('')
   const [albDesc, setAlbDesc]   = useState('')
@@ -172,6 +173,32 @@ export default function TechnicianDashboard() {
           {/* ═══ هویت حرفه‌ای ═══ */}
           <section className={CARD}>
             <h2 className="mb-4 text-[14.5px] font-bold">هویت حرفه‌ای</h2>
+
+            {/* عکس پروفایل */}
+            <div className="mb-5 flex items-center gap-4">
+              <div className="relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-full border-2 border-[rgba(199,166,106,0.45)] bg-gradient-to-bl from-[#FFFDF9] to-[#F5EFE4] shadow-[0_8px_22px_rgba(154,110,56,0.16)]">
+                {form.photo
+                  ? <img src={form.photo} alt="" className="h-full w-full object-cover" />
+                  : <span className="flex h-full w-full items-center justify-center text-[30px] font-black text-[#9A6E38]">{(form.name || 'م').slice(0, 1)}</span>}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input ref={photoRef} type="file" accept="image/*" className="hidden"
+                  onChange={async e => {
+                    const f = e.target.files?.[0]; if (!f) return
+                    setBusy(true)
+                    try { set('photo', await compressImage(f, 480, 0.82)) }
+                    catch { setErr('عکس خوانده نشد.') }
+                    finally { setBusy(false); e.target.value = '' }
+                  }} />
+                <button type="button" onClick={() => photoRef.current?.click()} className={LQ_BTN} disabled={busy}>
+                  <Images size={14} /> {form.photo ? 'تغییر عکس پروفایل' : 'آپلود عکس پروفایل'}
+                </button>
+                {form.photo && (
+                  <button type="button" onClick={() => set('photo', '')} className="text-right text-[11.5px] font-bold text-[#B23B2E]">حذف عکس</button>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">نام و نام‌خانوادگی *</label>
