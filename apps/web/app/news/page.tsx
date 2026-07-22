@@ -12,7 +12,7 @@ import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, Clock3, Eye, ArrowLeft, Zap } from 'lucide-react'
 import {
-  NEWS_ARTICLES, NEWS_CATEGORIES, categoryOf, faDigits, faNum,
+  NEWS_ARTICLES, NEWS_CATEGORIES, categoryOf, faNum,
   type NewsArticle, type NewsCategoryKey,
 } from '../../lib/news-data'
 
@@ -125,10 +125,39 @@ export default function NewsPage() {
     })
   }, [sorted, cat, query])
 
-  /* ویژه‌ها فقط در حالتِ مرور (بدون فیلتر/جستجو) جدا می‌شوند */
-  const featured  = isBrowsing ? sorted.filter(a => a.featured).slice(0, 3) : []
-  const latest    = isBrowsing ? [...NEWS_ARTICLES].sort((a, b) => b.ts - a.ts).slice(0, 5) : []
-  const gridBase  = isBrowsing ? filtered.filter(a => !featured.some(f => f.id === a.id)) : filtered
+  /* ── چیدمانِ تحریریه‌ای «صفحه‌ی اول» — فقط در حالتِ مرور ── */
+  const byTs = useMemo(() => [...NEWS_ARTICLES].sort((a, b) => b.ts - a.ts), [])
+  const lead      = isBrowsing ? (byTs.find(a => a.featured) ?? byTs[0]) : undefined
+  const headlines = isBrowsing ? byTs.filter(a => a.id !== lead?.id).slice(0, 6) : []
+  const secondRow = isBrowsing
+    ? byTs.filter(a => a.featured && a.id !== lead?.id).concat(byTs.filter(a => !a.featured && a.id !== lead?.id)).slice(0, 3)
+    : []
+  /* دو بخشِ پرمطلب ⇒ باندهای بخش (به سبکِ سرویس‌های خبری) */
+  const bands = useMemo(() => {
+    if (!isBrowsing || !lead) return []
+    const used = new Set<string>([lead.id, ...secondRow.map(a => a.id)])
+    const counts = new Map<NewsCategoryKey, number>()
+    for (const a of NEWS_ARTICLES) counts.set(a.category, (counts.get(a.category) ?? 0) + 1)
+    const topCats = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0])
+    return topCats.map(k => {
+      const items = byTs.filter(a => a.category === k && !used.has(a.id))
+      const feature = items[0]
+      const rows = items.slice(1, 4)
+      if (feature) { used.add(feature.id); rows.forEach(r => used.add(r.id)) }
+      return { cat: k, feature, rows }
+    }).filter(b => !!b.feature)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBrowsing, lead?.id])
+  const frontIds = useMemo(() => {
+    const s = new Set<string>()
+    if (lead) s.add(lead.id)
+    secondRow.forEach(a => s.add(a.id))
+    bands.forEach(b => { if (b.feature) s.add(b.feature.id); b.rows.forEach(r => s.add(r.id)) })
+    return s
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lead?.id, bands])
+
+  const gridBase  = isBrowsing ? filtered.filter(a => !frontIds.has(a.id)) : filtered
   const gridItems = gridBase.slice(0, shown)
   const hasMore   = gridBase.length > shown
   const breaking  = NEWS_ARTICLES.filter(a => a.breaking)
@@ -217,10 +246,59 @@ export default function NewsPage() {
         .nw-sk { background: linear-gradient(100deg, #EFECE4 40%, #F8F6F1 50%, #EFECE4 60%);
           background-size: 200% 100%; animation: nwShimmer 1.2s linear infinite; }
 
-        /* ── چیدمانِ سکشن ویژه ── */
-        .nw-top { display: grid; grid-template-columns: 1fr 1fr minmax(300px, 340px); grid-template-rows: auto auto; gap: 18px; }
-        .nw-top .nw-hero { grid-column: 1 / 3; grid-row: 1; min-height: 350px; }
-        .nw-top .nw-rail { grid-column: 3; grid-row: 1 / 3; }
+        /* ── صفحه‌ی اول (تحریریه) ── */
+        .nw-front { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: clamp(18px,2.6vw,30px); align-items: start; }
+        .nw-lead { display: block; text-decoration: none; color: inherit; animation: nwFadeUp .55s ease both; }
+        .nw-lead-img { position: relative; aspect-ratio: 16/8.6; border-radius: 18px; overflow: hidden; background: #EDEAE2;
+          border: 1px solid ${LINE}; box-shadow: 0 6px 26px rgba(28,27,23,0.10); }
+        .nw-lead-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s cubic-bezier(.22,1,.36,1); }
+        .nw-lead:hover .nw-lead-img img { transform: scale(1.04); }
+        .nw-lead-title { font-size: clamp(20px, 2.8vw, 30px); font-weight: 900; line-height: 1.6; letter-spacing: -0.02em;
+          color: ${TEXT}; margin: 14px 0 10px; transition: color .2s; text-wrap: balance; }
+        .nw-lead:hover .nw-lead-title { color: ${GOLD_D}; }
+        .nw-standfirst { font-size: 14px; line-height: 2; color: ${SEC}; margin: 0 0 12px; max-width: 640px;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .nw-byline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid ${LINE}; }
+
+        /* ستون «عناوین اصلی» — متن‌محور */
+        .nw-heads { border-inline-start: 1px solid ${LINE}; padding-inline-start: clamp(14px,2vw,24px); animation: nwFadeUp .55s .08s ease both; }
+        .nw-head-item { display: flex; gap: 10px; align-items: flex-start; padding: 12px 0; text-decoration: none;
+          border-bottom: 1px solid #EFEBE1; transition: padding-inline-start .25s; }
+        .nw-head-item:last-child { border-bottom: none; }
+        .nw-head-item:hover { padding-inline-start: 6px; }
+        .nw-head-sq { width: 7px; height: 7px; border-radius: 2px; background: ${GOLD}; margin-top: 8px; flex-shrink: 0;
+          transition: transform .25s, background .2s; }
+        .nw-head-item:hover .nw-head-sq { transform: rotate(45deg); background: ${GOLD_D}; }
+        .nw-head-title { font-size: 13.3px; font-weight: 800; color: ${TEXT}; line-height: 1.75; margin: 0;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
+        .nw-head-item:hover .nw-head-title { color: ${GOLD_D}; }
+
+        /* ردیف گزارش‌های ویژه (افقی) */
+        .nw-srow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .nw-h-item { display: flex; gap: 12px; align-items: stretch; text-decoration: none; color: inherit;
+          background: #fff; border: 1px solid ${LINE}; border-radius: 14px; padding: 10px; overflow: hidden;
+          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; animation: nwFadeUp .5s ease both; }
+        .nw-h-item:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(28,27,23,0.10); border-color: rgba(199,166,106,0.35); }
+        .nw-h-item .tn { width: 116px; flex-shrink: 0; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: #EDEAE2; }
+        .nw-h-item .tn img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+        .nw-h-item:hover .tn img { transform: scale(1.06); }
+        .nw-h-title { font-size: 13px; font-weight: 800; color: ${TEXT}; line-height: 1.7; margin: 4px 0 6px;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
+        .nw-h-item:hover .nw-h-title { color: ${GOLD_D}; }
+
+        /* باند بخش (سرویس خبری) */
+        .nw-band-head { display: flex; align-items: center; gap: 10px; padding-top: 12px; margin-bottom: 16px;
+          border-top: 3px solid ${TEXT}; position: relative; }
+        .nw-band-head::before { content: ''; position: absolute; top: -3px; inset-inline-start: 0; width: 64px; height: 3px;
+          background: linear-gradient(90deg, ${GOLD}, #8A6020); }
+        .nw-band-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+        .nw-band-row { display: block; text-decoration: none; padding: 13px 2px; border-bottom: 1px solid #EFEBE1; transition: padding-inline-start .25s; }
+        .nw-band-row:last-child { border-bottom: none; }
+        .nw-band-row:hover { padding-inline-start: 8px; }
+        .nw-band-row-title { font-size: 13.8px; font-weight: 800; color: ${TEXT}; line-height: 1.75; margin: 0 0 5px;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
+        .nw-band-row:hover .nw-band-row-title { color: ${GOLD_D}; }
+
         .nw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 
         .nw-search:focus { border-color: rgba(199,166,106,0.6) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.13) !important; outline: none; }
@@ -228,15 +306,13 @@ export default function NewsPage() {
         .nw-chips-row::-webkit-scrollbar { display: none; }
 
         @media (max-width: 1020px) {
-          .nw-top { grid-template-columns: 1fr 1fr; }
-          .nw-top .nw-hero { grid-column: 1 / 3; }
-          .nw-top .nw-rail { grid-column: 1 / 3; grid-row: auto; }
+          .nw-front { grid-template-columns: 1fr; }
+          .nw-heads { border-inline-start: none; padding-inline-start: 0; border-top: 1px solid ${LINE}; padding-top: 14px; }
+          .nw-srow { grid-template-columns: 1fr; gap: 12px; }
+          .nw-band-grid { grid-template-columns: 1fr; }
           .nw-grid { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 620px) {
-          .nw-top { grid-template-columns: 1fr; gap: 14px; }
-          .nw-top .nw-hero { grid-column: 1; min-height: 300px; }
-          .nw-top .nw-rail { grid-column: 1; }
           .nw-grid { grid-template-columns: 1fr; gap: 14px; }
           .nw-hide-mob { display: none !important; }
         }
@@ -337,64 +413,99 @@ export default function NewsPage() {
 
       <main className="nw-wrap" style={{ padding: 'clamp(22px,3vw,34px) clamp(16px,3vw,28px) 72px' }}>
 
-        {/* ═══ سکشن ویژه: خبر اصلی + دو ویژه + ریل آخرین اخبار ═══ */}
-        {isBrowsing && featured.length > 0 && (
-          <section className="nw-top" style={{ marginBottom: 'clamp(28px,4vw,44px)' }}>
-            {/* خبر اصلی */}
-            <Link href={`/news/${featured[0]!.id}`} className="nw-hero">
-              <img className="bg" src={featured[0]!.image} alt={featured[0]!.title} />
-              <div className="nw-hero-shade" />
-              <div style={{ position: 'relative', padding: 'clamp(18px,3vw,28px)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                  <CatPill k={featured[0]!.category} onImage />
-                  {featured[0]!.breaking && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 800, color: '#fff', background: 'rgba(178,59,46,0.92)', borderRadius: 999, padding: '3px 9px' }}>
-                      <Zap size={10} /> فوری
-                    </span>
-                  )}
-                </div>
-                <h2 style={{ fontSize: 'clamp(18px,2.6vw,27px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', lineHeight: 1.55, letterSpacing: '-0.01em', maxWidth: 640 }}>
-                  {featured[0]!.title}
-                </h2>
-                <p className="nw-clamp2 nw-hide-mob" style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.78)', lineHeight: 1.9, margin: '0 0 14px', maxWidth: 560 }}>
-                  {featured[0]!.excerpt}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(199,166,106,0.9)', color: '#241B08', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12.5, fontWeight: 900 }}>
-                      {featured[0]!.author.slice(0, 1)}
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.88)' }}>{featured[0]!.author}</span>
-                    <Meta a={featured[0]!} light />
+        {/* ═══ صفحه‌ی اول: سرخط + ستون عناوین ═══ */}
+        {isBrowsing && lead && (
+          <>
+            <section className="nw-front" style={{ marginBottom: 'clamp(26px,3.6vw,40px)' }}>
+              {/* خبرِ سرخط — ادیتوریالِ متن‌زیرِ‌تصویر */}
+              <Link href={`/news/${lead.id}`} className="nw-lead">
+                <div className="nw-lead-img">
+                  <img src={lead.image} alt={lead.title} />
+                  <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8 }}>
+                    <CatPill k={lead.category} onImage />
+                    {lead.breaking && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 800, color: '#fff', background: 'rgba(178,59,46,0.92)', borderRadius: 999, padding: '3px 9px' }}>
+                        <Zap size={10} /> فوری
+                      </span>
+                    )}
                   </div>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 800, color: '#fff', background: 'rgba(199,166,106,0.22)', border: '1px solid rgba(199,166,106,0.45)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '8px 14px' }}>
+                </div>
+                <h2 className="nw-lead-title">{lead.title}</h2>
+                <p className="nw-standfirst">{lead.excerpt}</p>
+                <div className="nw-byline">
+                  <span style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#8A6020)`, color: '#241B08', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12.5, fontWeight: 900 }}>
+                    {lead.author.slice(0, 1)}
+                  </span>
+                  <span style={{ fontSize: 12.5, fontWeight: 800, color: TEXT }}>{lead.author}</span>
+                  <Meta a={lead} />
+                  <span style={{ marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 800, color: GOLD_D }}>
                     ادامه‌ی خبر <ArrowLeft size={14} />
                   </span>
                 </div>
-              </div>
-            </Link>
+              </Link>
 
-            {/* دو خبر ویژه‌ی بعدی */}
-            {featured.slice(1, 3).map((a, i) => <NewsCard key={a.id} a={a} i={i + 1} />)}
+              {/* ستون «عناوین اصلی» — متن‌محور */}
+              <aside className="nw-heads">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 4 }}>
+                  <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
+                  <h2 style={{ fontSize: 14.5, fontWeight: 900, margin: 0 }}>عناوین اصلی</h2>
+                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>TOP STORIES</span>
+                  <span style={{ marginInlineStart: 'auto', width: 7, height: 7, borderRadius: '50%', background: '#0E7A38', boxShadow: '0 0 0 3px rgba(14,122,56,0.15)' }} />
+                </div>
+                {headlines.map(a => (
+                  <Link key={a.id} href={`/news/${a.id}`} className="nw-head-item">
+                    <span className="nw-head-sq" />
+                    <div style={{ minWidth: 0 }}>
+                      <p className="nw-head-title">{a.title}</p>
+                      <span style={{ fontSize: 10.5, color: MUT }}>{categoryOf(a.category).label} · {a.date}</span>
+                    </div>
+                  </Link>
+                ))}
+              </aside>
+            </section>
 
-            {/* ریل «آخرین اخبار» */}
-            <aside className="nw-rail" style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: '16px 16px 8px', boxShadow: '0 2px 10px rgba(28,27,23,0.05)', animation: 'nwFadeUp .5s .1s ease both' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6 }}>
-                <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-                <h2 style={{ fontSize: 14, fontWeight: 900, margin: 0 }}>آخرین اخبار</h2>
-                <span style={{ marginInlineStart: 'auto', width: 7, height: 7, borderRadius: '50%', background: '#0E7A38', boxShadow: '0 0 0 3px rgba(14,122,56,0.15)' }} />
-              </div>
-              {latest.map((a, i) => (
-                <Link key={a.id} href={`/news/${a.id}`} className="nw-rail-item">
-                  <span className="nw-rail-num">{faDigits(String(i + 1).padStart(2, '0'))}</span>
-                  <div style={{ minWidth: 0 }}>
-                    <p className="nw-rail-title">{a.title}</p>
-                    <span style={{ fontSize: 10.5, color: MUT }}>{categoryOf(a.category).label} · {a.date}</span>
+            {/* ═══ گزارش‌های ویژه (ردیف افقی) ═══ */}
+            {secondRow.length > 0 && (
+              <section className="nw-srow" style={{ marginBottom: 'clamp(28px,4vw,46px)' }}>
+                {secondRow.map((a, i) => (
+                  <Link key={a.id} href={`/news/${a.id}`} className="nw-h-item" style={{ animationDelay: `${i * 70}ms` }}>
+                    <span className="tn"><img src={a.image} alt={a.title} loading="lazy" /></span>
+                    <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                      <CatPill k={a.category} />
+                      <p className="nw-h-title">{a.title}</p>
+                      <span style={{ fontSize: 10.5, color: MUT, marginTop: 'auto' }}>{a.date} · {a.readTime}</span>
+                    </div>
+                  </Link>
+                ))}
+              </section>
+            )}
+
+            {/* ═══ باندهای بخش ═══ */}
+            {bands.map(b => (
+              <section key={b.cat} style={{ marginBottom: 'clamp(28px,4vw,46px)' }}>
+                <div className="nw-band-head">
+                  <h2 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>{categoryOf(b.cat).label}</h2>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: categoryOf(b.cat).dot }} />
+                  <span style={{ flex: 1 }} />
+                  <button onClick={() => pickCat(b.cat)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D, transition: 'all .2s' }}>
+                    مشاهده همه <ArrowLeft size={12} />
+                  </button>
+                </div>
+                <div className="nw-band-grid">
+                  {b.feature && <NewsCard a={b.feature} i={0} />}
+                  <div>
+                    {b.rows.map(r => (
+                      <Link key={r.id} href={`/news/${r.id}`} className="nw-band-row">
+                        <p className="nw-band-row-title">{r.title}</p>
+                        <span style={{ fontSize: 11, color: MUT }}>{r.date} · {r.readTime} · <Eye size={10} style={{ display: 'inline', verticalAlign: '-1px' }} /> {faNum(r.views)}</span>
+                      </Link>
+                    ))}
                   </div>
-                </Link>
-              ))}
-            </aside>
-          </section>
+                </div>
+              </section>
+            ))}
+          </>
         )}
 
         {/* ═══ گرید همه‌ی اخبار ═══ */}
@@ -402,7 +513,7 @@ export default function NewsPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
             <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
             <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>
-              {isBrowsing ? 'همه‌ی اخبار' : cat !== 'all' ? categoryOf(cat as NewsCategoryKey).label : 'نتایج جستجو'}
+              {isBrowsing ? 'دیگر خبرها' : cat !== 'all' ? categoryOf(cat as NewsCategoryKey).label : 'نتایج جستجو'}
             </h2>
             <span style={{ fontSize: 12, color: MUT }}>{faNum(gridBase.length)} خبر</span>
             <span style={{ flex: 1, height: 1, background: LINE }} />
