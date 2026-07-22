@@ -410,7 +410,7 @@ export default function DashboardPage() {
 
                 {/* Player Card */}
                 {isPlayer && (
-                  <Link href="/profile/setup?role=player" style={{ textDecoration: 'none' }}>
+                  <Link href="/dashboard/player" style={{ textDecoration: 'none' }}>
                     <div style={{
                       padding: '20px', borderRadius: '18px', cursor: 'pointer',
                       background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(6,182,212,0.02))',
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                       <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(6,182,212,0.10)', border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🎱</div>
                       <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پروفایل بازیکن</div>
                       <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
-                        اطلاعات بازیکنی خود را تکمیل کنید و در رنکینگ ملی قرار بگیرید
+                        هویت، بیوگرافی، افتخارات، مسابقات و آلبوم‌های خود را کامل کنید تا در بخش بازیکنان دیده شوید
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#0891b2', fontWeight: 700 }}>
                         تکمیل پروفایل <span style={{ fontSize: '16px' }}>←</span>

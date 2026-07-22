@@ -8,13 +8,14 @@
    داده از lib/players-data.
    ───────────────────────────────────────────────────────────── */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search, MapPin, ArrowLeft } from 'lucide-react'
 import {
   PLAYERS, DISCIPLINE_LABEL, TONES, faDigits,
   type Player,
 } from '../../lib/players-data'
+import { listApprovedPlayers, profileToPlayer } from '../../lib/player-store'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -85,9 +86,18 @@ export default function PlayersPage() {
   const [seg, setSeg]     = useState<Seg>('all')
   const [query, setQuery] = useState('')
 
+  /* بازیکنانِ ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اولِ لیست می‌نشینند */
+  const [registered, setRegistered] = useState<Player[]>([])
+  useEffect(() => { setRegistered(listApprovedPlayers().map(profileToPlayer)) }, [])
+
+  const ALL = useMemo(() => {
+    const staticOnly = PLAYERS.filter(p => !registered.some(r => r.id === p.id))
+    return [...registered, ...staticOnly]
+  }, [registered])
+
   const filtered = useMemo(() => {
     const q = query.trim()
-    return PLAYERS.filter(p => {
+    return ALL.filter(p => {
       if (seg === 'snooker' && p.discipline !== 'snooker') return false
       if (seg === 'pool' && p.discipline !== 'pool') return false
       if (seg === 'national' && !p.national) return false
@@ -97,7 +107,7 @@ export default function PlayersPage() {
       if (q && !p.name.includes(q) && !p.nameEn.toLowerCase().includes(q.toLowerCase()) && !p.city.includes(q) && !p.country.includes(q) && !DISCIPLINE_LABEL[p.discipline].fa.includes(q)) return false
       return true
     }).sort((a, b) => (a.ranking ?? 99) - (b.ranking ?? 99))
-  }, [seg, query])
+  }, [ALL, seg, query])
 
   const isBrowsing = seg === 'all' && !query.trim()
   const featured   = PLAYERS.filter(p => p.featured).sort((a, b) => (a.ranking ?? 99) - (b.ranking ?? 99)).slice(0, 3)

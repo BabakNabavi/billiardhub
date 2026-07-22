@@ -16,7 +16,8 @@ import {
   MapPin, ChevronLeft, ChevronRight, ArrowLeft, X, ZoomIn, ZoomOut,
   Trophy, Images, Building2, Newspaper, Clapperboard,
 } from 'lucide-react'
-import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits } from '../../../lib/players-data'
+import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../../../lib/players-data'
+import { getPlayerProfile, profileToPlayer } from '../../../lib/player-store'
 import { NEWS_ARTICLES } from '../../../lib/news-data'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
 
@@ -42,7 +43,20 @@ function SectionHead({ title, en }: { title: string; en?: string }) {
 export default function PlayerProfilePage() {
   const params = useParams()
   const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
-  const player = useMemo(() => getPlayer(id), [id])
+  const staticPlayer = useMemo(() => getPlayer(id), [id])
+
+  /* پروفایل‌های ثبت‌نامی (پنل بازیکن ⇒ localStorage) بعد از mount خوانده می‌شوند */
+  const [stored, setStored]   = useState<Player | null>(null)
+  const [checked, setChecked] = useState(false)
+  useEffect(() => {
+    if (!staticPlayer) {
+      const p = getPlayerProfile(id)
+      setStored(p ? profileToPlayer(p) : null)
+    }
+    setChecked(true)
+  }, [id, staticPlayer])
+
+  const player = staticPlayer ?? stored
 
   const [albumIdx, setAlbumIdx] = useState(0)
   const [lightbox, setLightbox] = useState<number | null>(null)
@@ -80,6 +94,13 @@ export default function PlayerProfilePage() {
   }, [player])
 
   if (!player) {
+    if (!checked) {
+      return (
+        <div dir="rtl" style={{ minHeight: '60vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: MUT }}>در حال بارگذاری…</p>
+        </div>
+      )
+    }
     return (
       <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
         <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
