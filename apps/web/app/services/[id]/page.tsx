@@ -16,6 +16,8 @@ import {
   Phone, X, ZoomIn, ZoomOut, Images,
 } from 'lucide-react'
 import { getTechnician, faDigits } from '../../../lib/technicians-data'
+import { getTechnicianProfile, profileToTechnician } from '../../../lib/technician-store'
+import type { Technician } from '../../../lib/technicians-data'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -43,7 +45,20 @@ function SectionHead({ title }: { title: string }) {
 export default function TechnicianProfilePage() {
   const params = useParams()
   const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
-  const tech = useMemo(() => getTechnician(id), [id])
+  const staticTech = useMemo(() => getTechnician(id), [id])
+
+  /* پروفایل‌های ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده می‌شوند */
+  const [stored, setStored]   = useState<Technician | null>(null)
+  const [checked, setChecked] = useState(false)
+  useEffect(() => {
+    if (!staticTech) {
+      const p = getTechnicianProfile(id)
+      setStored(p ? profileToTechnician(p) : null)
+    }
+    setChecked(true)
+  }, [id, staticTech])
+
+  const tech = staticTech ?? stored
 
   /* گالری: آلبومِ فعال + لایت‌باکس */
   const [albumIdx, setAlbumIdx] = useState(0)
@@ -73,6 +88,13 @@ export default function TechnicianProfilePage() {
   }, [lightbox, closeLb, stepLb])
 
   if (!tech) {
+    if (!checked) {
+      return (
+        <div dir="rtl" style={{ minHeight: '60vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: MUT }}>در حال بارگذاری…</p>
+        </div>
+      )
+    }
     return (
       <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
         <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>

@@ -11,9 +11,10 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search, MapPin, ArrowLeft, SlidersHorizontal, X, Wrench, ChevronDown } from 'lucide-react'
 import {
-  TECHNICIANS, TECH_SERVICES, techCities, faDigits,
+  TECHNICIANS, TECH_SERVICES, faDigits,
   type Technician, type TechService,
 } from '../../lib/technicians-data'
+import { listApprovedTechnicians, profileToTechnician } from '../../lib/technician-store'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -69,7 +70,16 @@ export default function ServicesPage() {
   const [cityOpen, setCityOpen] = useState(false)
   const [sheet, setSheet]     = useState(false)
 
-  const cities = techCities()
+  /* متخصصانِ ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اولِ لیست می‌نشینند */
+  const [registered, setRegistered] = useState<Technician[]>([])
+  useEffect(() => { setRegistered(listApprovedTechnicians().map(profileToTechnician)) }, [])
+
+  const ALL = useMemo(() => {
+    const staticOnly = TECHNICIANS.filter(t => !registered.some(r => r.id === t.id))
+    return [...registered, ...staticOnly]
+  }, [registered])
+
+  const cities = useMemo(() => [...new Set(ALL.map(t => t.city).filter(c => c && c !== '—'))], [ALL])
 
   /* قفلِ اسکرول هنگامِ بازبودنِ Bottom Sheet */
   useEffect(() => {
@@ -79,13 +89,13 @@ export default function ServicesPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim()
-    return TECHNICIANS.filter(t => {
+    return ALL.filter(t => {
       if (city !== 'all' && t.city !== city) return false
       if (service !== 'all' && !t.services.includes(service)) return false
       if (q && !t.name.includes(q) && !t.title.includes(q) && !t.services.some(s => s.includes(q)) && !(t.club ?? '').includes(q)) return false
       return true
     })
-  }, [query, city, service])
+  }, [ALL, query, city, service])
 
   const activeFilters = (city !== 'all' ? 1 : 0) + (service !== 'all' ? 1 : 0)
   const clearFilters = () => { setCity('all'); setService('all') }
