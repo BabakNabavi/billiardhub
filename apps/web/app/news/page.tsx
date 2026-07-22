@@ -180,6 +180,40 @@ export default function NewsPage() {
         @keyframes nwTick   { from { transform: translateX(0); } to { transform: translateX(50%); } }
         @keyframes nwShimmer{ from { background-position: 200% 0; } to { background-position: -200% 0; } }
         @keyframes nwBlob   { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-22px,14px) scale(1.06); } }
+        @keyframes nwPulse  { 0%,100% { box-shadow: 0 0 0 0 rgba(224,82,82,0.55); } 55% { box-shadow: 0 0 0 7px rgba(224,82,82,0); } }
+        @keyframes nwSweep  { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
+
+        /* ═══ ماست‌هد خبری (بنر هدر) ═══ */
+        .nw-mast { position: relative; overflow: hidden; color: #fff;
+          background:
+            radial-gradient(circle at 84% -10%, rgba(199,166,106,0.22), transparent 46%),
+            radial-gradient(circle at 8% 120%, rgba(178,59,46,0.14), transparent 40%),
+            linear-gradient(115deg, #0B0A08 0%, #171208 55%, #0B0A08 100%); }
+        .nw-mast::after { content: ''; position: absolute; top: -30%; bottom: -30%; width: 34%;
+          background: linear-gradient(105deg, transparent, rgba(255,248,235,0.055), transparent);
+          animation: nwSweep 7.5s cubic-bezier(.4,0,.2,1) infinite; pointer-events: none; }
+        .nw-mast-word { position: absolute; bottom: -10px; inset-inline-start: -6px; font-weight: 900;
+          font-size: clamp(64px, 11vw, 148px); line-height: 1; letter-spacing: .04em;
+          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.075); user-select: none; pointer-events: none; direction: ltr; }
+        .nw-mast-grid { position: absolute; inset: 0; pointer-events: none; opacity: .5;
+          background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+          background-size: 22px 22px;
+          -webkit-mask-image: linear-gradient(100deg, transparent 42%, black 78%);
+          mask-image: linear-gradient(100deg, transparent 42%, black 78%); }
+        .nw-live { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 800;
+          letter-spacing: .18em; color: #FFD9D3; background: rgba(178,59,46,0.24);
+          border: 1px solid rgba(224,82,82,0.5); border-radius: 999px; padding: 5px 13px; }
+        .nw-live i { width: 7px; height: 7px; border-radius: 50%; background: #E05252; animation: nwPulse 1.8s ease-out infinite; }
+        .nw-mast-tag { font-size: 9.5px; font-weight: 800; letter-spacing: .34em; color: rgba(255,255,255,0.45); direction: ltr; }
+        .nw-spectrum { display: flex; align-items: center; gap: 5px; }
+        .nw-spectrum i { width: 16px; height: 4px; border-radius: 2px; opacity: .9; }
+        .nw-mast-date { text-align: left; }
+        @media (max-width: 720px) { .nw-mast-date { display: none; } }
+        /* نوار سه‌رنگِ پایین ماست‌هد */
+        .nw-mast-bar { position: absolute; bottom: 0; inset-inline: 0; height: 3px; display: flex; }
+        .nw-mast-bar i:nth-child(1) { flex: 2.6; background: linear-gradient(90deg, #8A6020, ${GOLD}); }
+        .nw-mast-bar i:nth-child(2) { flex: 1; background: #B23B2E; }
+        .nw-mast-bar i:nth-child(3) { flex: 1.6; background: #14532D; }
 
         .nw-wrap { max-width: 1240px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 28px); }
 
@@ -319,10 +353,49 @@ export default function NewsPage() {
         @media (prefers-reduced-motion: reduce) {
           .nw-ticker-track { animation: none; }
           .nw-card, .nw-hero { animation: none; }
+          .nw-mast::after { animation: none; display: none; }
+          .nw-live i { animation: none; }
         }
       `}</style>
 
-      {/* ═══ تیکر خبر فوری ═══ */}
+      {/* ═══ ماست‌هد خبری — بنر لوکسِ تحریریه ═══ */}
+      <header className="nw-mast">
+        <div className="nw-mast-grid" />
+        <div className="nw-mast-word">NEWS</div>
+        <div style={{ position: 'absolute', top: '-24%', bottom: '-24%', left: '31%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform: 'rotate(14deg)', pointerEvents: 'none' }} />
+        <div className="nw-wrap" style={{ position: 'relative', padding: 'clamp(30px,4.6vw,54px) clamp(16px,3vw,28px) clamp(26px,4vw,46px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '18px 28px', flexWrap: 'wrap' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+              <span className="nw-live"><i /> پوشش زنده</span>
+              <span className="nw-mast-tag">BILLIARD HUB · NEWSROOM</span>
+            </div>
+            <h1 style={{ fontSize: 'clamp(30px,5.2vw,56px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+              اخبار <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span>
+            </h1>
+            <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 13, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'nwScaleX .55s .3s ease both' }} />
+            <p style={{ margin: '13px 0 0', fontSize: 'clamp(12px,1.4vw,13.5px)', color: 'rgba(255,255,255,0.58)', lineHeight: 1.9, maxWidth: 460 }}>
+              مرجع رسمی اخبار اسنوکر و پاکت بیلیارد ایران و جهان
+            </p>
+            {/* طیفِ سرویس‌های خبری */}
+            <div className="nw-spectrum" style={{ marginTop: 16 }}>
+              {NEWS_CATEGORIES.map(c => <i key={c.key} style={{ background: c.dot }} title={c.label} />)}
+            </div>
+          </div>
+
+          {/* بلوکِ تاریخ و وضعیت */}
+          <div className="nw-mast-date" style={{ animation: 'nwFadeUp .5s .15s ease both' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.26em', color: 'rgba(199,166,106,0.8)', marginBottom: 8, textAlign: 'right' }}>امروز</div>
+            <div style={{ fontSize: 15.5, fontWeight: 900, color: '#fff', textAlign: 'right' }}>{todayFa}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginTop: 9, fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22B45A', boxShadow: '0 0 0 3px rgba(34,180,90,0.18)' }} />
+              به‌روزرسانی لحظه‌ای تحریریه
+            </div>
+          </div>
+        </div>
+        <div className="nw-mast-bar"><i /><i /><i /></div>
+      </header>
+
+      {/* ═══ تیکر خبر فوری — زیر ماست‌هد ═══ */}
       {breaking.length > 0 && (
         <div style={{ background: '#fff', borderBottom: `1px solid ${LINE}` }}>
           <div className="nw-wrap" style={{ display: 'flex', alignItems: 'center', gap: 14, height: 42 }}>
@@ -342,24 +415,6 @@ export default function NewsPage() {
           </div>
         </div>
       )}
-
-      {/* ═══ هدر ادیتوریال ═══ */}
-      <header style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FDFCFA 0%,#F7F7F5 100%)', borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ position: 'absolute', left: '-4%', top: '-40%', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.16) 0%, transparent 66%)', filter: 'blur(46px)', animation: 'nwBlob 14s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: '12%', bottom: '-58%', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(48px)', pointerEvents: 'none' }} />
-        <div className="nw-wrap" style={{ position: 'relative', padding: 'clamp(26px,4vw,44px) clamp(16px,3vw,28px) clamp(20px,3vw,30px)', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
-          <div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.22em', color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
-              BILLIARD HUB · NEWSROOM
-            </span>
-            <h1 style={{ fontSize: 'clamp(26px,4vw,42px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-              اخبار <span style={{ background: `linear-gradient(135deg,#7A4F10,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد</span>
-            </h1>
-            <div style={{ width: 62, height: 3, borderRadius: 2, marginTop: 10, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'nwScaleX .5s .25s ease both' }} />
-          </div>
-          <p style={{ margin: 0, fontSize: 12.5, color: MUT }}>{todayFa}</p>
-        </div>
-      </header>
 
       {/* ═══ نوار ابزار چسبان: جستجو + مرتب‌سازی + دسته‌ها ═══ */}
       <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
