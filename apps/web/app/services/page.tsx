@@ -31,10 +31,17 @@ function TechCard({ t, i }: { t: Technician; i: number }) {
       {/* هویت: مونوگرامِ طلایی روی بافتِ نرم؛ hover ⇒ پرده‌ی خدمات (دسکتاپ) */}
       <div className="sv-id">
         <div className="sv-id-tex" />
-        <span className="sv-mono">
-          <span className="sv-mono-ring" />
-          {t.name.slice(0, 1)}
-        </span>
+        {t.photo ? (
+          <span className="sv-mono sv-mono-photo">
+            <span className="sv-mono-ring" />
+            <img src={t.photo} alt={t.name} />
+          </span>
+        ) : (
+          <span className="sv-mono">
+            <span className="sv-mono-ring" />
+            {t.name.slice(0, 1)}
+          </span>
+        )}
         <div className="sv-veil">
           <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.14em', color: GOLD_D, marginBottom: 4 }}>خدمات</span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
@@ -131,6 +138,8 @@ export default function ServicesPage() {
           box-shadow: 0 10px 26px rgba(154,110,56,0.16), inset 0 1px 0 #fff;
           transition: transform .45s cubic-bezier(.22,1,.36,1); }
         .sv-card:hover .sv-mono { transform: scale(1.06) translateY(-2px); }
+        .sv-mono-photo { overflow: visible; }
+        .sv-mono-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         .sv-mono-ring { position: absolute; inset: -7px; border-radius: 50%;
           border: 1px solid rgba(199,166,106,0.55); }
         .sv-mono-ring::after { content: ''; position: absolute; inset: 3px; border-radius: 50%;

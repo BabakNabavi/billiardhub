@@ -12,6 +12,7 @@ export interface TechnicianProfile {
   ownerId: string
   ownerPhone: string
   name: string
+  photo: string
   title: string
   province: string
   city: string
@@ -33,7 +34,7 @@ const KEY = 'bh_technician_profiles'
 export function emptyTechnicianProfile(slug: string, ownerId = '', ownerPhone = ''): TechnicianProfile {
   return {
     slug, ownerId, ownerPhone,
-    name: '', title: '', province: '', city: '', club: '',
+    name: '', photo: '', title: '', province: '', city: '', club: '',
     coverage: [], intro: '', about: [], services: [],
     projects: [], albums: [], phone: '', whatsapp: '',
     status: 'approved', updatedAt: '',
@@ -101,6 +102,7 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
   return {
     id: p.slug,
     name: p.name || 'متخصص خدمات فنی',
+    photo: p.photo || undefined,
     title: p.title || 'متخصص خدمات فنی',
     city: p.city || '—',
     club: p.club || undefined,
