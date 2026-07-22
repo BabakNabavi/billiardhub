@@ -1686,7 +1686,7 @@ useEffect(() => {
               { Icon: GraduationCap, label: 'مربیان حرفه‌ای', desc: 'برترین مربیان کشور',     href: '/coaches',       color: '#F472B6', rgb: '244,114,182' },
               { Icon: Trophy,        label: 'مسابقات',         desc: 'تورنمنت‌های بیلیارد',   href: '/tournaments',   color: '#4A9EFF', rgb: '74,158,255'  },
               { Icon: ShoppingBag,   label: 'تجهیزات اصل',    desc: 'محصولات معتبر برند',     href: '/shop',          color: '#C7A66A', rgb: '199,166,106' },
-              { Icon: Eye,           label: 'آموزش',           desc: 'ویدیوهای آموزشی',        href: '/education',     color: '#30C55A', rgb: '48,197,90'   },
+              { Icon: Eye,           label: 'بیلیارد مدیا',    desc: 'پلتفرم ویدیویی',         href: '/media',         color: '#30C55A', rgb: '48,197,90'   },
               { Icon: Star,          label: 'رنکینگ',          desc: 'جدول رتبه‌بندی ملی',    href: '/ranking',       color: '#B97BFF', rgb: '185,123,255' },
               { Icon: Scale,         label: 'داوران',          desc: 'داوران رسمی مسابقات',    href: '/referees',      color: '#fb923c', rgb: '251,146,60'  },
               { Icon: Radio,         label: 'پخش زنده',        desc: 'استریم مسابقات',          href: '/live',          color: '#ef4444', rgb: '239,68,68'   },

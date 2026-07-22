@@ -7,7 +7,7 @@ import {
   Search, Bell, ChevronDown, User, X, Trophy,
   Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
   Newspaper, Calendar, Menu, ArrowLeft, LogOut, Settings,
-  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store,
+  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Stories from './Stories';
@@ -41,7 +41,7 @@ const exploreMenu = [
     color: GOLD,
     items: [
       { href: '/news',      label: 'اخبار',    icon: <Newspaper size={14} />,     desc: 'آخرین اخبار' },
-      { href: '/education', label: 'آموزش',    icon: <GraduationCap size={14} />, desc: 'ویدیو آموزشی' },
+      { href: '/media', label: 'بیلیارد مدیا', icon: <Clapperboard size={14} />, desc: 'پلتفرم ویدیویی' },
       { href: '/about',     label: 'درباره ما', icon: <Users size={14} />,         desc: 'داستان بیلیارد هاب' },
       { href: '/contact',   label: 'تماس با ما',icon: <Bell size={14} />,          desc: 'پشتیبانی ۲۴/۷' },
     ],
@@ -60,7 +60,7 @@ const mobileLinks = [
   { href: '/tournaments',   label: 'مسابقات',                 icon: <Calendar size={17} />,      color: GOLD,      desc: 'تورنمنت‌ها' },
   { href: '/installers',    label: 'خدمات فنی',               icon: <Wrench size={17} />,        color: GOLD,      desc: 'نصب و راه‌اندازی' },
   { href: '/ranking',       label: 'رنکینگ',                  icon: <Trophy size={17} />,        color: GOLD,      desc: 'جدول رنکینگ' },
-  { href: '/education',     label: 'آموزش',                   icon: <GraduationCap size={17} />, color: GOLD,      desc: 'ویدیو آموزشی' },
+  { href: '/media',         label: 'بیلیارد مدیا',            icon: <Clapperboard size={17} />,  color: GOLD,      desc: 'پلتفرم ویدیویی' },
   { href: '/live',          label: 'پخش زنده',                icon: <Radio size={17} />,         color: '#ef4444', desc: 'پخش زنده مسابقات', live: true },
   { href: '/news',          label: 'اخبار',                   icon: <Newspaper size={17} />,     color: GOLD,      desc: 'آخرین اخبار' },
   { href: '/about',         label: 'درباره ما',               icon: <Users size={17} />,         color: '#8C7A5E',  desc: 'داستان ما' },
