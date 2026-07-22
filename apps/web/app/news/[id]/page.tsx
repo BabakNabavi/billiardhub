@@ -1,219 +1,204 @@
-'use client';
+'use client'
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { Clock, Eye, Tag, ChevronLeft, Share2, Bookmark, ThumbsUp } from 'lucide-react';
+/* ─────────────────────────────────────────────────────────────
+   جزئیات خبر — هم‌خانواده‌ی صفحه‌ی لیست (/news): تم روشن، RTL،
+   تصویرِ هیرو، لیدِ خلاصه، متن، برچسب‌ها، اشتراک‌گذاری و اخبارِ
+   مرتبط (سایدبارِ چسبان در دسکتاپ). داده از lib/news-data.
+   ───────────────────────────────────────────────────────────── */
 
-const sampleNews = [
-  {
-    id: '1',
-    title: 'برگزاری مسابقات قهرمانی اسنوکر ایران ۱۴۰۳ با حضور ۱۲۸ بازیکن',
-    content: `مسابقات قهرمانی اسنوکر ایران ۱۴۰۳ با حضور بیش از ۱۲۸ بازیکن از سراسر کشور در سالن المپیک تهران برگزار می‌شود.
+import { useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { Clock3, Eye, ChevronLeft, Link2, Check, Zap, ArrowLeft } from 'lucide-react'
+import {
+  getArticle, relatedArticles, categoryOf, faNum, NEWS_CATEGORIES,
+} from '../../../lib/news-data'
 
-این رویداد بزرگ‌ترین مسابقه اسنوکر ایران در ۵ سال گذشته است و با حمایت فدراسیون بیلیارد و اسنوکر جمهوری اسلامی ایران برگزار خواهد شد.
-
-بازیکنان از ۳۱ استان کشور در این مسابقات شرکت می‌کنند و رقابت‌ها در قالب دو بخش آقایان و بانوان برگزار می‌شود.
-
-جوایز این دوره از مسابقات به مبلغ ۵۰۰ میلیون تومان تعیین شده که بین نفرات برتر توزیع خواهد شد.
-
-مسابقات از تاریخ ۱۵ خرداد آغاز و تا ۲۲ خرداد ادامه خواهد داشت. علاقه‌مندان می‌توانند از طریق سایت بیلیارد پلاس ثبت‌نام کنند.`,
-    summary: 'مسابقات قهرمانی اسنوکر ایران با حضور بیش از ۱۲۸ بازیکن از سراسر کشور در تهران برگزار می‌شود.',
-    category: 'tournament',
-    categoryLabel: 'مسابقات',
-    categoryColor: '#e8192c',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۳/۱۵',
-    views: 1250,
-    likes: 89,
-    tags: ['مسابقات', 'اسنوکر', 'تهران', 'قهرمانی'],
-    imageBg: 'from-red-900 to-red-700',
-  },
-  {
-    id: '2',
-    title: 'رنکینگ جدید بازیکنان اسنوکر دسته برتر اعلام شد',
-    content: `فدراسیون بیلیارد و اسنوکر ایران رنکینگ جدید دسته برتر آقایان را برای فصل جاری اعلام کرد.
-
-بر اساس این رنکینگ، علی محمدی با کسب ۱۲۰۰ امتیاز در صدر جدول قرار گرفته است. رضا احمدی و کاوه موسوی به ترتیب در رتبه‌های دوم و سوم قرار دارند.
-
-این رنکینگ بر اساس نتایج مسابقات یک سال گذشته محاسبه شده و هر سه ماه یک بار به‌روزرسانی می‌شود.`,
-    summary: 'فدراسیون بیلیارد و اسنوکر ایران رنکینگ جدید دسته برتر آقایان را برای فصل جاری اعلام کرد.',
-    category: 'ranking',
-    categoryLabel: 'رنکینگ',
-    categoryColor: '#2563eb',
-    author: 'تیم بیلیارد پلاس',
-    date: '۱۴۰۳/۰۳/۱۰',
-    views: 890,
-    likes: 45,
-    tags: ['رنکینگ', 'دسته برتر', 'اسنوکر'],
-    imageBg: 'from-blue-900 to-blue-700',
-  },
-];
-
-const relatedNews = sampleNews.slice(0, 3);
+const GOLD   = '#C7A66A'
+const GOLD_D = '#9A6E38'
+const TEXT   = '#1C1B17'
+const SEC    = '#5B564B'
+const MUT    = '#8A8474'
+const LINE   = '#E7E2D6'
+const BG     = '#F7F7F5'
 
 export default function NewsDetailPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const news = sampleNews.find(n => n.id === id) || sampleNews[0];
-  if (!news) return null;
+  const params = useParams()
+  const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
+  const article = useMemo(() => getArticle(id), [id])
+  const related = useMemo(() => (article ? relatedArticles(article, 4) : []), [article])
+  const [copied, setCopied] = useState(false)
+
+  if (!article) {
+    return (
+      <div dir="rtl" style={{ minHeight: '70vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
+        <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '40px 34px', maxWidth: 380 }}>
+          <p style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 8px' }}>خبر پیدا نشد</p>
+          <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.8 }}>ممکن است این خبر حذف شده یا نشانی تغییر کرده باشد.</p>
+          <Link href="/news" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
+            بازگشت به اخبار <ArrowLeft size={14} />
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  const cat = categoryOf(article.category)
+  /* URL کانونیکالِ ثابت — هم برای SSR هم کلاینت یکی است (بدون hydration mismatch) */
+  const pageUrl = `https://mybilliardhb1.vercel.app/news/${article.id}`
+  const shareText = encodeURIComponent(article.title)
+
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(pageUrl); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { /* ignore */ }
+  }
 
   return (
-    <div className="max-w-6xl mx-auto pb-10">
+    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+      <style>{`
+        @keyframes ndFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+        .nd-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
+        .nd-layout { display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 26px; align-items: start; }
+        .nd-share-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:38px;
+          border-radius:10px; cursor:pointer; text-decoration:none; font-family:inherit; font-size:12.5px; font-weight:700;
+          background:rgba(199,166,106,0.10); border:1px solid rgba(199,166,106,0.30); color:${GOLD_D};
+          padding: 0 14px; transition: all .22s cubic-bezier(.22,1,.36,1); }
+        .nd-share-btn:hover { transform: translateY(-2px); background: rgba(199,166,106,0.17); }
+        .nd-rel { display:flex; gap:12px; padding:12px 10px; border-radius:12px; text-decoration:none; transition: background .2s; }
+        .nd-rel:hover { background: rgba(199,166,106,0.07); }
+        .nd-rel img { width:76px; height:58px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid ${LINE}; }
+        .nd-rel-title { font-size:12.5px; font-weight:700; color:${TEXT}; line-height:1.65; margin:0 0 4px;
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition: color .2s; }
+        .nd-rel:hover .nd-rel-title { color:${GOLD_D}; }
+        .nd-tag { font-size:11.5px; font-weight:700; color:${SEC}; background:#fff; border:1px solid ${LINE};
+          border-radius:999px; padding:6px 13px; text-decoration:none; transition: all .2s; }
+        .nd-tag:hover { color:${GOLD_D}; border-color: rgba(199,166,106,0.4); }
+        @media (max-width: 940px) { .nd-layout { grid-template-columns: 1fr; } .nd-side { position: static !important; } }
+      `}</style>
 
-      {/* breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
-        <Link href="/news" className="hover:text-green-700">اخبار</Link>
-        <ChevronLeft size={14} />
-        <span className="text-gray-600 line-clamp-1">{news.title}</span>
-      </div>
+      <div className="nd-wrap" style={{ paddingTop: 18, paddingBottom: 72 }}>
 
-      <div className="grid grid-cols-12 gap-8">
+        {/* ── بردکرامب ── */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: MUT, marginBottom: 16, animation: 'ndFadeUp .4s ease both' }}>
+          <Link href="/" style={{ color: MUT, textDecoration: 'none' }}>خانه</Link>
+          <ChevronLeft size={12} />
+          <Link href="/news" style={{ color: MUT, textDecoration: 'none' }}>اخبار</Link>
+          <ChevronLeft size={12} />
+          <span style={{ color: SEC, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>{article.title}</span>
+        </nav>
 
-        {/* محتوای اصلی */}
-        <div className="col-span-12 lg:col-span-8">
+        <div className="nd-layout">
 
-          {/* هدر خبر */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
-            {/* تصویر */}
-            <div className={`bg-gradient-to-br ${news.imageBg} relative overflow-hidden`} style={{ height: '360px' }}>
-              <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                <span className="text-white font-black" style={{ fontSize: '220px' }}>🎱</span>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-              <div className="absolute bottom-0 right-0 left-0 p-6">
-                <span className="text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block"
-                  style={{ backgroundColor: news.categoryColor + '30', color: 'white', border: `1px solid ${news.categoryColor}` }}>
-                  {news.categoryLabel}
+          {/* ═══ ستون اصلی ═══ */}
+          <article style={{ minWidth: 0 }}>
+
+            {/* سربرگ خبر */}
+            <header style={{ marginBottom: 18, animation: 'ndFadeUp .45s .05s ease both' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 800, padding: '5px 12px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.26)', color: GOLD_D }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: cat.dot }} />
+                  {cat.label}
                 </span>
-                <h1 className="text-white text-2xl font-black leading-8">{news.title}</h1>
+                {article.breaking && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, color: '#B23B2E', background: 'rgba(178,59,46,0.09)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 999, padding: '4px 11px' }}>
+                    <Zap size={11} /> خبر فوری
+                  </span>
+                )}
               </div>
+              <h1 style={{ fontSize: 'clamp(20px,3.2vw,30px)', fontWeight: 900, lineHeight: 1.65, margin: '0 0 14px', letterSpacing: '-0.01em' }}>
+                {article.title}
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px 16px', flexWrap: 'wrap', fontSize: 12.5, color: MUT }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg,${GOLD},#8A6020)`, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12.5, fontWeight: 900 }}>
+                    {article.author.slice(0, 1)}
+                  </span>
+                  <span style={{ color: SEC, fontWeight: 700 }}>{article.author}</span>
+                </span>
+                <span>{article.date}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock3 size={12} /> {article.readTime} مطالعه</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={12} /> {faNum(article.views)} بازدید</span>
+              </div>
+            </header>
+
+            {/* تصویر هیرو */}
+            <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 6px 26px rgba(28,27,23,0.09)', marginBottom: 22, animation: 'ndFadeUp .5s .1s ease both' }}>
+              <img src={article.image} alt={article.title} style={{ width: '100%', display: 'block', aspectRatio: '16/8.2', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 30%)' }} />
             </div>
 
-            {/* اطلاعات */}
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span className="flex items-center gap-1.5">
-                    <div className="w-7 h-7 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-xs">
-                      {news.author[0]}
-                    </div>
-                    {news.author}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock size={13} />
-                    {news.date}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Eye size={13} />
-                    {news.views.toLocaleString('fa-IR')} بازدید
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors">
-                    <Share2 size={18} />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
-                    <Bookmark size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* خلاصه */}
-              <div className="bg-gray-50 rounded-2xl p-4 mb-6 border-r-4 border-green-500">
-                <p className="text-gray-700 leading-8 font-medium">{news.summary}</p>
-              </div>
-
-              {/* محتوا */}
-              <div className="prose prose-lg max-w-none">
-                {news.content.split('\n\n').map((paragraph, i) => (
-                  paragraph.trim() && (
-                    <p key={i} className="text-gray-700 leading-9 mb-4 text-base">
-                      {paragraph}
-                    </p>
-                  )
-                ))}
-              </div>
-
-              {/* تگ‌ها */}
-              <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-100">
-                {news.tags.map(tag => (
-                  <span key={tag} className="bg-gray-100 text-gray-600 text-sm px-3 py-1.5 rounded-xl flex items-center gap-1 hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors">
-                    <Tag size={12} />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* لایک */}
-              <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100">
-                <button className="flex items-center gap-2 bg-green-50 text-green-700 px-5 py-2.5 rounded-xl hover:bg-green-100 transition-colors font-medium">
-                  <ThumbsUp size={18} />
-                  مفید بود ({news.likes.toLocaleString('fa-IR')})
-                </button>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">اشتراک‌گذاری:</span>
-                  <button className="w-9 h-9 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-colors text-xs font-bold">W</button>
-                  <button className="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors text-xs font-bold">T</button>
-                  <button className="w-9 h-9 rounded-xl bg-gray-800 text-white flex items-center justify-center hover:bg-gray-900 transition-colors text-xs font-bold">C</button>
-                </div>
-              </div>
+            {/* لید */}
+            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${LINE}`, borderInlineStart: `3px solid ${GOLD}`, padding: '16px 18px', marginBottom: 22, animation: 'ndFadeUp .5s .14s ease both' }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, lineHeight: 2, color: SEC }}>{article.excerpt}</p>
             </div>
-          </div>
-        </div>
 
-        {/* ستون کنار */}
-        <div className="col-span-12 lg:col-span-4">
-          <div className="sticky top-24 space-y-5">
+            {/* متن خبر */}
+            <div style={{ animation: 'ndFadeUp .5s .18s ease both' }}>
+              {article.body.map((p, i) => (
+                <p key={i} style={{ fontSize: 14.5, lineHeight: 2.25, color: '#2B2822', margin: '0 0 18px' }}>{p}</p>
+              ))}
+            </div>
+
+            {/* برچسب‌ها */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '26px 0 0', paddingTop: 20, borderTop: `1px solid ${LINE}` }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: MUT }}>برچسب‌ها:</span>
+              {article.tags.map(t => <span key={t} className="nd-tag">#{t}</span>)}
+            </div>
+
+            {/* اشتراک‌گذاری */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 18, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '14px 16px' }}>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: SEC }}>اشتراک‌گذاری خبر:</span>
+              <a className="nd-share-btn" href={`https://wa.me/?text=${shareText}%0A${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener noreferrer">واتساپ</a>
+              <a className="nd-share-btn" href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${shareText}`} target="_blank" rel="noopener noreferrer">تلگرام</a>
+              <button className="nd-share-btn" onClick={copyLink}>
+                {copied ? <Check size={14} /> : <Link2 size={14} />}
+                {copied ? 'کپی شد' : 'کپی لینک'}
+              </button>
+            </div>
+          </article>
+
+          {/* ═══ سایدبار ═══ */}
+          <aside className="nd-side" style={{ position: 'sticky', top: 84, display: 'flex', flexDirection: 'column', gap: 18, animation: 'ndFadeUp .5s .2s ease both' }}>
 
             {/* اخبار مرتبط */}
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div className="bg-gray-900 px-5 py-3">
-                <span className="text-white font-black text-sm">اخبار مرتبط</span>
+            <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: '16px 10px 8px', boxShadow: '0 2px 10px rgba(28,27,23,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '0 8px 8px' }}>
+                <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
+                <h2 style={{ fontSize: 14, fontWeight: 900, margin: 0 }}>اخبار مرتبط</h2>
               </div>
-              <div className="divide-y divide-gray-50">
-                {sampleNews.map(item => (
-                  <Link key={item.id} href={`/news/${item.id}`}>
-                    <div className="flex gap-3 p-4 hover:bg-gray-50 transition-colors group">
-                      <div className={`bg-gradient-to-br ${item.imageBg} w-16 h-16 rounded-xl flex-shrink-0 relative overflow-hidden`}>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                          <span className="text-white text-xl">🎱</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-gray-800 leading-5 line-clamp-2 group-hover:text-green-700 transition-colors mb-1">
-                          {item.title}
-                        </h4>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span style={{ color: item.categoryColor }} className="font-medium">{item.categoryLabel}</span>
-                          <span>•</span>
-                          <span>{item.date}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-              <div className="p-3">
-                <Link href="/news" className="block text-center text-green-700 text-sm py-2 hover:underline">
-                  مشاهده همه اخبار
+              {related.map(r => (
+                <Link key={r.id} href={`/news/${r.id}`} className="nd-rel">
+                  <img src={r.image} alt={r.title} loading="lazy" />
+                  <div style={{ minWidth: 0 }}>
+                    <p className="nd-rel-title">{r.title}</p>
+                    <span style={{ fontSize: 10.5, color: MUT }}>{categoryOf(r.category).label} · {r.date}</span>
+                  </div>
+                </Link>
+              ))}
+              <div style={{ padding: '8px 8px 10px' }}>
+                <Link href="/news" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
+                  مشاهده همه اخبار <ArrowLeft size={13} />
                 </Link>
               </div>
             </div>
 
-            {/* تگ‌های محبوب */}
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              <h3 className="font-black text-gray-900 text-sm mb-4">تگ‌های محبوب</h3>
-              <div className="flex flex-wrap gap-2">
-                {['اسنوکر', 'پاکت بیلیارد', 'مسابقات', 'رنکینگ', 'باشگاه', 'میز', 'چوب', 'تیم ملی'].map(tag => (
-                  <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-xl hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors">
-                    {tag}
-                  </span>
+            {/* دسته‌بندی‌ها */}
+            <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16, boxShadow: '0 2px 10px rgba(28,27,23,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12 }}>
+                <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
+                <h2 style={{ fontSize: 14, fontWeight: 900, margin: 0 }}>دسته‌بندی‌ها</h2>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {NEWS_CATEGORIES.map(c => (
+                  <Link key={c.key} href="/news" className="nd-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.dot }} />
+                    {c.label}
+                  </Link>
                 ))}
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>
-  );
+  )
 }
