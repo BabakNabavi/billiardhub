@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MANUFACTURERS, type MockManufacturer } from '../../lib/manufacturers-data'
+import { listApprovedManufacturers, profileToManufacturer } from '../../lib/manufacturer-store'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -406,7 +407,10 @@ export default function ManufacturersPage() {
   }
 
   const filtered = useMemo(() => {
-    const list = MANUFACTURERS
+    /* تولیدکنندگانِ ثبت‌نامی (پنل ⇒ localStorage) اولِ لیست می‌نشینند */
+    const registered = listApprovedManufacturers().map(profileToManufacturer)
+    const ALL = [...registered, ...MANUFACTURERS.filter(m => !registered.some(r => r.id === m.id))]
+    const list = ALL
       .filter(m => !search.trim() || m.name.includes(search.trim()) || m.city.includes(search.trim()) || m.specialties.some(sp => sp.includes(search.trim())))
       .filter(m => category === 'همه' || matchCat(m, category))
       .filter(m => status === 'همه' || (status === 'verified' && m.verified) || (status === 'elite' && m.elite))

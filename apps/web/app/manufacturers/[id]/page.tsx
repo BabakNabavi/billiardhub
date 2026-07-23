@@ -3,6 +3,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
+import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getManufacturer, MANUFACTURERS, type MfrProduct } from '../../../lib/manufacturers-data'
 
@@ -179,7 +180,15 @@ function CategoryDropdown({
 export default function ManufacturerPage() {
   const params = useParams()
   const mfrId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_ID
-  const mfr = getManufacturer(mfrId) ?? MANUFACTURERS[0]!
+  /* اول داده‌ی ایستا؛ اگر نبود، پروفایلِ ثبت‌نامی (پنل ⇒ localStorage) */
+  const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
+  useEffect(() => {
+    if (!getManufacturer(mfrId)) {
+      const p = getManufacturerProfile(mfrId)
+      setStoredMfr(p ? profileToManufacturer(p) : null)
+    }
+  }, [mfrId])
+  const mfr = getManufacturer(mfrId) ?? storedMfr ?? MANUFACTURERS[0]!
 
   const province = provinceOfCity(mfr.city)
 
