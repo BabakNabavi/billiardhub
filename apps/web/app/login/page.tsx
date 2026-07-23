@@ -80,9 +80,12 @@ export default function LoginPage() {
         .au-brand-grade { position: absolute; inset: 0; background:
           radial-gradient(ellipse 60% 80% at 70% 10%, rgba(255,238,204,0.14), transparent 55%),
           linear-gradient(200deg, rgba(11,10,8,0.55) 0%, rgba(11,10,8,0.88) 78%); }
-        .au-word { position: absolute; bottom: -8px; left: -4px; font-weight: 900;
-          font-size: clamp(46px, 6.5vw, 92px); line-height: 1; letter-spacing: .04em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.09); user-select: none; direction: ltr; }
+        .au-word { position: absolute; bottom: -10px; left: -4px; font-weight: 900;
+          font-size: clamp(64px, 9vw, 128px); line-height: 1; letter-spacing: .05em;
+          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.11); user-select: none; direction: ltr; }
+        .au-mob-word { position: absolute; bottom: -6px; left: -3px; font-weight: 900;
+          font-size: 52px; line-height: 1; letter-spacing: .05em;
+          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.12); user-select: none; direction: ltr; pointer-events: none; }
         .au-hair { position: absolute; top: -25%; bottom: -25%; left: 32%; width: 1px;
           background: linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent); transform: rotate(14deg); }
         .au-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700;
@@ -134,6 +137,7 @@ export default function LoginPage() {
       {/* ═══ نوارِ برندِ موبایل ═══ */}
       <div className="au-mob-brand">
         <div style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
+        <div className="au-mob-word" aria-hidden>LOGIN</div>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: 38, height: 38, borderRadius: 11 }} />
           <span style={{ fontSize: 19, fontWeight: 900, color: '#fff' }}>
@@ -249,7 +253,7 @@ export default function LoginPage() {
         <div className="au-brand-img" />
         <div className="au-brand-grade" />
         <div className="au-hair" />
-        <div className="au-word">BILLIARD HUB</div>
+        <div className="au-word">LOGIN</div>
         <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 'clamp(28px,4vw,56px)', gap: 16 }}>
           <span style={{ display: 'inline-flex', alignSelf: 'flex-start', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
             BILLIARD HUB · IRAN
