@@ -51,6 +51,7 @@ export default function RegisterPage() {
   const [focusKey, setFocusKey] = useState('');
   const [showPw, setShowPw]   = useState(false);
   const [showPw2, setShowPw2] = useState(false);
+  const [pwWarn, setPwWarn]   = useState(false);
 
   const [form, setForm] = useState<FormData>({
     phone: '',
@@ -61,18 +62,28 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
 
-  /* سانیتایزِ ورودی‌ها: نام‌ها بدونِ عدد؛ کد ملی فقط ۱۰ رقم */
+  /* سانیتایزِ ورودی‌ها: نام‌ها بدونِ عدد؛ کد ملی فقط ۱۰ رقم؛
+     موبایل فقط عدد، ۱۱ رقم و حتماً با ۰۹ (اگر با ۹ شروع شد، ۰ اضافه می‌شود) */
   const sanitize = (key: keyof FormData, v: string): string => {
+    const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
     if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹]/g, '');
-    if (key === 'nationalId') {
-      const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
-      return latin.replace(/[^0-9]/g, '').slice(0, 10);
+    if (key === 'nationalId') return latin.replace(/[^0-9]/g, '').slice(0, 10);
+    if (key === 'phone') {
+      let d = latin.replace(/[^0-9]/g, '');
+      if (d && d[0] !== '0') d = d[0] === '9' ? '0' + d : '';
+      if (d.length >= 2 && d[1] !== '9') d = d.slice(0, 1);
+      return d.slice(0, 11);
     }
+    if (key === 'password' || key === 'confirmPassword') return v.replace(/[؀-ۿ]/g, '');
     return v;
   };
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = sanitize(key, e.target.value);
+    const raw = e.target.value;
+    if (key === 'password' || key === 'confirmPassword') {
+      setPwWarn(/[؀-ۿ]/.test(raw));
+    }
+    const v = sanitize(key, raw);
     setForm((prev) => ({ ...prev, [key]: v }));
     setError('');
   };
@@ -326,6 +337,12 @@ export default function RegisterPage() {
                 کد ملی برای احراز هویت استفاده می‌شود و باید با نام و شماره موبایل شما مطابقت داشته باشد.
               </p>
               {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
+              {pwWarn && (
+                <p style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
+                  <AlertCircle size={13} style={{ flexShrink: 0 }} />
+                  کیبورد شما فارسی است — لطفاً زبان کیبورد را انگلیسی کنید.
+                </p>
+              )}
               <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
                 باید شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه باشد.

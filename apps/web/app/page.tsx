@@ -1478,7 +1478,7 @@ useEffect(() => {
             color: 'rgba(255,255,255,0.66)', letterSpacing: '0.01em',
             textShadow: '0 1px 16px rgba(0,0,0,0.45)',
           }}>
-            اتصال بی واسطه جامعه بیلیارد
+            اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور
           </p>
 
           {/* Feature card slider — 7 cards */}
