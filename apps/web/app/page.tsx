@@ -1179,6 +1179,7 @@ useEffect(() => {
           transition:background .2s ease, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s;
         }
         .see-all-lq:hover { background:rgba(199,166,106,0.18); transform:translateY(-2px); box-shadow:0 8px 20px rgba(199,166,106,0.20); }
+        @media(max-width:640px){ .see-all-lq { padding:6px 12px; font-size:11.5px; gap:4px; border-radius:8px; } }
         /* روی سکشن‌های تیره متنِ طلاییِ روشن‌تر تا خوانا بماند */
         .see-all-lq.on-dark { color:${GOLD}; border-color:rgba(199,166,106,0.42); }
 
@@ -1297,7 +1298,7 @@ useEffect(() => {
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         .clubs-dots { display:none !important; }
-        .mkt-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
+        .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-split::-webkit-scrollbar { display:none; }
         .mkt-banners { margin-bottom:8px; }
@@ -1650,29 +1651,34 @@ useEffect(() => {
               </div>
             ))}
           </div>
+          {/* موبایل — دقیقاً فرمتِ کارتِ صفحه‌ی بیلیارد بازار (کارت سفید، حاشیه‌ی نازک، پیلِ ٪ بنفش، قیمتِ خط‌خورده) */}
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
-              <div key={p.id} className="mkt-mob-card" style={{ width: '36vw', minWidth: '133px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                {p.pct > 0 && (
-                  <div style={{ position: 'absolute', top: '-3px', right: '8px', zIndex: 4, background: '#ef4444', border: 'none', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
-                    {p.pct}٪ تخفیف
-                  </div>
-                )}
-                <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: 'clamp(209px,61vw,282px)' }}>
-                  <div style={{ borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer', display: 'flex', flexDirection: 'column', border: '1px solid rgba(0,0,0,0.22)', boxShadow: '0 4px 20px rgba(0,0,0,0.10)' }}>
-                    <div style={{ flex: '0 0 62%', position: 'relative', overflow: 'hidden', background: '#111' }}>
-                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 55%,rgba(8,4,1,0.30) 100%)' }} />
-                      <div style={{ position: 'absolute', bottom: '6px', left: '7px', fontSize: '8px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.18em' }}>{p.brand}</div>
+              <Link key={p.id} href={`/shop/${p.id}`} className="mkt-mob-card" style={{ width: '36vw', minWidth: '133px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 'clamp(209px,61vw,282px)' }}>
+                <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+                  <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                </div>
+                <div style={{ padding: '9px 8px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden' }}>
+                  <span style={{ fontSize: '12.5px', color: '#1C1B17', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name} — {p.sub}</span>
+                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    {p.pct > 0 && (
+                      <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: '12px', fontWeight: 800, borderRadius: 999, padding: '3px 8px 1px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        ٪{p.pct.toLocaleString('fa-IR')}
+                      </span>
+                    )}
+                    <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
+                      {p.pct > 0 && (
+                        <div style={{ fontSize: '10px', color: '#8A8474', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
+                          {p.price.toLocaleString('fa-IR')}
+                        </div>
+                      )}
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums' }}>
+                        {p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}>تومان</span>
+                      </div>
                     </div>
-                    <div style={{ flex: '0 0 38%', background: '#fff', padding: '8px 8px 7px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', overflow: 'hidden' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.2, letterSpacing: '-0.01em' }}>{p.name}</div>
-                      <div style={{ fontSize: '11px', color: TEXT_M }}>{p.sub}</div>
-                      <div style={{ fontSize: '15px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '10px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
-                    </div>
                   </div>
-                </Link>
-              </div>
+                </div>
+              </Link>
             ))}
           </div>
           {/* ── Ad banners ── */}
