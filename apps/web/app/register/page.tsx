@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
-import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint } from 'lucide-react';
+import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff } from 'lucide-react';
 
 type Step = 1 | 2;
 
@@ -49,6 +49,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [focusKey, setFocusKey] = useState('');
+  const [showPw, setShowPw]   = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     phone: '',
@@ -59,8 +61,19 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
 
+  /* سانیتایزِ ورودی‌ها: نام‌ها بدونِ عدد؛ کد ملی فقط ۱۰ رقم */
+  const sanitize = (key: keyof FormData, v: string): string => {
+    if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹]/g, '');
+    if (key === 'nationalId') {
+      const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+      return latin.replace(/[^0-9]/g, '').slice(0, 10);
+    }
+    return v;
+  };
+
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    const v = sanitize(key, e.target.value);
+    setForm((prev) => ({ ...prev, [key]: v }));
     setError('');
   };
 
@@ -83,8 +96,9 @@ export default function RegisterPage() {
       setError('کد ملی معتبر نیست');
       return;
     }
-    if (form.password.length < 8) {
-      setError('رمز عبور باید حداقل ۸ کاراکتر باشد');
+    const pw = form.password;
+    if (pw.length < 8 || !/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+      setError('رمز عبور باید حداقل ۸ کاراکتر و شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه (مثل ! یا @) باشد');
       return;
     }
     if (form.password !== form.confirmPassword) {
@@ -116,7 +130,8 @@ export default function RegisterPage() {
   /* فیلدِ استاندارد — تابعِ رندر (نه کامپوننت) تا با هر تایپ remount نشود و فوکِس نپرد */
   const field = (
     k: keyof FormData, label: string, icon: React.ReactNode,
-    opts: { type?: string; placeholder: string; inputMode?: 'numeric'; maxLength?: number; ltr?: boolean },
+    opts: { type?: string; placeholder: string; inputMode?: 'numeric'; maxLength?: number; ltr?: boolean;
+      reveal?: { shown: boolean; toggle: () => void } },
   ) => (
     <div style={{ marginBottom: 14 }}>
       <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>{label}</label>
@@ -125,7 +140,7 @@ export default function RegisterPage() {
         <input
           className="au-inp"
           style={opts.ltr ? undefined : { direction: 'rtl', textAlign: 'right' }}
-          type={opts.type ?? 'text'}
+          type={opts.reveal ? (opts.reveal.shown ? 'text' : 'password') : (opts.type ?? 'text')}
           placeholder={opts.placeholder}
           value={form[k]}
           onChange={set(k)}
@@ -134,6 +149,12 @@ export default function RegisterPage() {
           inputMode={opts.inputMode}
           maxLength={opts.maxLength}
         />
+        {opts.reveal && (
+          <button type="button" onClick={opts.reveal.toggle} tabIndex={-1}
+            style={{ padding: '0 12px 0 14px', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            {opts.reveal.shown ? <EyeOff size={15} /> : <Eye size={15} />}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -153,7 +174,9 @@ export default function RegisterPage() {
         .au-root { min-height: 100vh; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
           background: #F7F5F0; font-family: Vazirmatn, Tahoma, sans-serif; }
 
-        .au-brand { position: relative; overflow: hidden; color: #fff; background: #0B0A08; }
+        /* پنل برند: چسبان و دقیقاً هم‌ارتفاعِ ویوپورت (زیر نوبار) ⇒ عکس همیشه فیت، بدون اسکرول اضافه */
+        .au-brand { position: sticky; top: 62px; align-self: start; height: calc(100vh - 62px);
+          overflow: hidden; color: #fff; background: #0B0A08; }
         .au-brand-img { position: absolute; inset: 0; background: url('/images/hero/1.png') center/cover;
           filter: grayscale(0.3) brightness(0.5) contrast(1.08); transform: scale(1.03); }
         .au-brand-grade { position: absolute; inset: 0; background:
@@ -211,6 +234,9 @@ export default function RegisterPage() {
 
         .au-mob-brand { display: none; }
         .au-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* آیتم‌های گرید باید بتوانند از عرضِ ذاتیِ input کوچک‌تر شوند */
+        .au-row2 > div { min-width: 0; }
+        .au-wrap { min-width: 0; }
         @media (max-width: 900px) {
           .au-root { grid-template-columns: 1fr; }
           .au-brand { display: none; }
@@ -226,27 +252,13 @@ export default function RegisterPage() {
       <div className="au-mob-brand">
         <div style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
         <div className="au-mob-word" aria-hidden>REGISTER</div>
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: 38, height: 38, borderRadius: 11 }} />
-          <span style={{ fontSize: 19, fontWeight: 900, color: '#fff' }}>
-            بیلیارد <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>هاب</span>
-          </span>
-        </Link>
-        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>به جامعه‌ی بیلیارد ایران بپیوندید</div>
+        <div style={{ fontSize: 15, fontWeight: 900, color: '#fff' }}>ساخت حساب جدید</div>
+        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', marginTop: 5 }}>به جامعه‌ی بیلیارد ایران بپیوندید</div>
       </div>
 
       {/* ═══ ستون فرم ═══ */}
       <div className="au-form-col">
         <div className="au-card">
-
-          <div className="au-desk-logo" style={{ textAlign: 'center', marginBottom: 26 }}>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: 44, height: 44, borderRadius: 13, boxShadow: '0 8px 24px rgba(199,166,106,0.3)' }} />
-              <span style={{ fontSize: 23, fontWeight: 900, color: TEXT, letterSpacing: '-0.02em' }}>
-                بیلیارد <span style={{ background: `linear-gradient(135deg,#7A4F10,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>هاب</span>
-              </span>
-            </Link>
-          </div>
 
           {/* استپر */}
           <div className="au-steps">
@@ -313,8 +325,12 @@ export default function RegisterPage() {
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
                 کد ملی برای احراز هویت استفاده می‌شود و باید با نام و شماره موبایل شما مطابقت داشته باشد.
               </p>
-              {field('password', 'رمز عبور', <Lock size={16} />, { type: 'password', placeholder: 'حداقل ۸ کاراکتر' })}
-              {field('confirmPassword', 'تکرار رمز عبور', <Lock size={16} />, { type: 'password', placeholder: 'رمز عبور را تکرار کنید' })}
+              {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
+              <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
+                باید شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه باشد.
+              </p>
+              {field('confirmPassword', 'تکرار رمز عبور', <Lock size={16} />, { placeholder: 'رمز عبور را تکرار کنید', reveal: { shown: showPw2, toggle: () => setShowPw2(p => !p) } })}
 
               <button className="au-btn" onClick={handleRegister} disabled={loading} style={{ marginTop: 6 }}>
                 {loading ? (
