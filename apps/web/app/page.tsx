@@ -737,8 +737,8 @@ function HomeMediaBand() {
           display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
           min-height: clamp(220px, 22vw, 275px); justify-content: center; }
         .hm-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 9.5px; font-weight: 800;
-          letter-spacing: 0.26em; color: #C7A66A; border: 1px solid rgba(199,166,106,0.4);
-          background: rgba(199,166,106,0.10); border-radius: 999px; padding: 4px 12px; }
+          letter-spacing: 0.26em; color: #B79CFF; border: 1px solid rgba(167,139,250,0.45);
+          background: rgba(139,92,246,0.12); border-radius: 999px; padding: 4px 12px; }
         @keyframes hmIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
         .hm-title { font-size: clamp(22px, 2.9vw, 38px); font-weight: 900; line-height: 1.25; margin: 0;
           letter-spacing: -0.02em; color: #fff; }
