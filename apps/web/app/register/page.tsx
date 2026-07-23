@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
-import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint } from 'lucide-react';
 
 type Step = 1 | 2;
 
@@ -20,8 +20,18 @@ interface FormData {
   phone: string;
   firstName: string;
   lastName: string;
+  nationalId: string;
   password: string;
   confirmPassword: string;
+}
+
+/* اعتبارسنجی کد ملی ایران (چک‌سام استاندارد) */
+function isValidNationalId(v: string): boolean {
+  if (!/^\d{10}$/.test(v)) return false;
+  if (/^(\d)\1{9}$/.test(v)) return false;
+  const check = +v[9]!;
+  const sum = v.slice(0, 9).split('').reduce((acc, d, i) => acc + +d * (10 - i), 0) % 11;
+  return sum < 2 ? check === sum : check === 11 - sum;
 }
 
 const GOLD   = '#C7A66A';
@@ -44,6 +54,7 @@ export default function RegisterPage() {
     phone: '',
     firstName: '',
     lastName: '',
+    nationalId: '',
     password: '',
     confirmPassword: '',
   });
@@ -68,6 +79,10 @@ export default function RegisterPage() {
       setError('نام و نام خانوادگی الزامی است');
       return;
     }
+    if (!isValidNationalId(form.nationalId.trim())) {
+      setError('کد ملی معتبر نیست');
+      return;
+    }
     if (form.password.length < 8) {
       setError('رمز عبور باید حداقل ۸ کاراکتر باشد');
       return;
@@ -79,10 +94,13 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
+      /* nationalId هم ارسال می‌شود — بعداً با وب‌سرویسِ احراز هویت
+         (تطبیقِ موبایل + نام + کد ملی) در بک‌اند بررسی خواهد شد */
       const { data } = await api.post('/auth/register', {
         phone: form.phone,
         firstName: form.firstName,
         lastName: form.lastName,
+        nationalId: form.nationalId.trim(),
         password: form.password,
       });
 
@@ -290,6 +308,11 @@ export default function RegisterPage() {
                 {field('firstName', 'نام', <User size={16} />, { placeholder: 'علی' })}
                 {field('lastName', 'نام خانوادگی', <User size={16} />, { placeholder: 'احمدی' })}
               </div>
+              {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'مثال: 0012345678', inputMode: 'numeric', maxLength: 10, ltr: true })}
+              <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
+                کد ملی برای احراز هویت استفاده می‌شود و باید با نام و شماره موبایل شما مطابقت داشته باشد.
+              </p>
               {field('password', 'رمز عبور', <Lock size={16} />, { type: 'password', placeholder: 'حداقل ۸ کاراکتر' })}
               {field('confirmPassword', 'تکرار رمز عبور', <Lock size={16} />, { type: 'password', placeholder: 'رمز عبور را تکرار کنید' })}
 
