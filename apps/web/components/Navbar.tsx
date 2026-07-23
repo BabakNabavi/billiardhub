@@ -568,7 +568,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {!isHomePage && <div style={{ height: '72px' }} />}
+      {!isHomePage && <div className={pathname === '/login' || pathname === '/register' ? 'nav-auth-page' : undefined} style={{ height: '72px' }} />}
     </>
   );
 }
