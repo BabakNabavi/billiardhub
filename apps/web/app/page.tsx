@@ -7,9 +7,9 @@ import {
   MapPin, Star, Heart, Trophy, Users,
   ShoppingBag, Building2, Wrench, GraduationCap,
   Clock, Eye, CheckCircle, X, Calendar,
-  Hammer, Scissors, Settings, Truck, Radio, Scale, Zap,
+  Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
-import { NEWS_ARTICLES, categoryOf } from '../lib/news-data';
+import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 
 /* ═══════════════════════════════════════════════════════════════
    SCROLL REVEAL
@@ -681,151 +681,132 @@ function DiscoveryPanel() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOME NEWS SLIDER — بریکِ تیره‌ی ادیتوریال بین بازار و فروشندگان.
-   داده از منبعِ واحدِ /news (lib/news-data) — چهار خبرِ تازه.
-   کم‌ارتفاع، تمام‌عرض، کراس‌فیدِ سینمایی + سوایپ + پروگرسِ طلایی.
+   HOME MEDIA BAND — پوسترِ سینماییِ «بیلیارد مدیا» بین بازار و
+   فروشندگان. بریکِ تیره بین دو سکشنِ روشن، به هویتِ «سالن نمایش»
+   (/media): شارکُل-برنزی، پرفراژِ فیلم، پلیِ طلایی، دیوارِ پوستر.
 ═══════════════════════════════════════════════════════════════ */
-const HOME_NEWS = [...NEWS_ARTICLES].sort((a, b) => b.ts - a.ts).slice(0, 4);
-const HN_DUR = 6200;
+const MEDIA_FEAT  = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0]!;
+const MEDIA_MINIS = [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== MEDIA_FEAT.id).slice(0, 3);
 
-function HomeNewsSlider() {
-  const [idx, setIdx]   = useState(0);
-  const [hov, setHov]   = useState(false);
-  const touchX = useRef<number | null>(null);
-  const hovRef = useRef(false);
-
-  useEffect(() => {
-    const t = setInterval(() => { if (!hovRef.current) setIdx(i => (i + 1) % HOME_NEWS.length); }, HN_DUR);
-    return () => clearInterval(t);
-  }, []);
-
-  const go = (d: number) => setIdx(i => (i + d + HOME_NEWS.length) % HOME_NEWS.length);
-  const a = HOME_NEWS[idx]!;
-  const cat = categoryOf(a.category);
-
+function HomeMediaBand() {
   return (
-    <section
-      dir="rtl"
-      className="hn-band"
-      onMouseEnter={() => { hovRef.current = true; setHov(true); }}
-      onMouseLeave={() => { hovRef.current = false; setHov(false); }}
-      onTouchStart={e => { touchX.current = e.touches[0]?.clientX ?? null; hovRef.current = true; }}
-      onTouchEnd={e => {
-        const x0 = touchX.current; touchX.current = null; hovRef.current = false;
-        const x1 = e.changedTouches[0]?.clientX ?? null;
-        if (x0 != null && x1 != null && Math.abs(x1 - x0) > 42) go(x1 < x0 ? 1 : -1);
-      }}
-    >
+    <section dir="rtl" className="hm-band">
       <style>{`
-        .hn-band { position: relative; overflow: hidden; color: #fff; background:
-          radial-gradient(circle at 12% 0%, rgba(199,166,106,0.10), transparent 42%),
-          linear-gradient(120deg, #0B0A08 0%, #14100A 55%, #0B0A08 100%); }
-        .hn-band::before, .hn-band::after { content: ''; position: absolute; inset-inline: 0; height: 1px; z-index: 6;
-          background: linear-gradient(90deg, transparent, rgba(199,166,106,0.45), transparent); }
-        .hn-band::before { top: 0; } .hn-band::after { bottom: 0; }
-        .hn-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900; z-index: 1;
+        .hm-band { position: relative; overflow: hidden; color: #F2EFE9; background:
+          radial-gradient(circle at 86% 0%, rgba(199,166,106,0.13), transparent 44%),
+          linear-gradient(120deg, #0C0B09 0%, #171208 55%, #0C0B09 100%); }
+        .hm-band::before, .hm-band::after { content: ''; position: absolute; inset-inline: 0; height: 1px; z-index: 7;
+          background: linear-gradient(90deg, transparent, rgba(199,166,106,0.5), transparent); }
+        .hm-band::before { top: 0; } .hm-band::after { bottom: 0; }
+        /* پرفراژِ فیلم — امضای سالن نمایش */
+        .hm-perf { position: absolute; inset-inline: 0; height: 7px; z-index: 6; opacity: .5; pointer-events: none;
+          background: repeating-linear-gradient(90deg, rgba(255,255,255,0.14) 0 14px, transparent 14px 32px); }
+        .hm-perf-t { top: 5px; } .hm-perf-b { bottom: 5px; }
+        .hm-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900; z-index: 1;
           font-size: clamp(48px, 7.6vw, 104px); line-height: 1; letter-spacing: .04em;
           color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.06); user-select: none; pointer-events: none; direction: ltr; }
-        .hn-media { position: absolute; top: 0; bottom: 0; left: 0; width: 54%; z-index: 0;
-          -webkit-mask-image: linear-gradient(to right, black 42%, transparent 96%);
-          mask-image: linear-gradient(to right, black 42%, transparent 96%); }
-        .hn-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-          filter: brightness(0.62) saturate(0.9) contrast(1.06);
-          transition: opacity 1.1s cubic-bezier(0.33,0,0.15,1), transform 6.5s ease; }
-        .hn-wrap { position: relative; z-index: 4; max-width: 1340px; margin: 0 auto;
-          padding: clamp(22px,2.6vw,34px) clamp(16px,5%,80px);
-          display: flex; flex-direction: column; gap: 12px;
-          min-height: clamp(215px, 22vw, 270px); justify-content: center; }
-        .hn-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .hn-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 9.5px; font-weight: 800;
+        .hm-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 52%; z-index: 0;
+          -webkit-mask-image: linear-gradient(to right, black 44%, transparent 96%);
+          mask-image: linear-gradient(to right, black 44%, transparent 96%); }
+        .hm-poster img { width: 100%; height: 100%; object-fit: cover;
+          filter: brightness(0.6) saturate(0.95) contrast(1.06);
+          transition: transform .9s cubic-bezier(.22,1,.36,1); }
+        .hm-band:hover .hm-poster img { transform: scale(1.03); }
+        .hm-play { position: absolute; z-index: 5; top: 50%; left: 24%; transform: translate(-50%,-50%);
+          width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          color: #0C0B09; background: rgba(199,166,106,0.94); box-shadow: 0 12px 36px rgba(199,166,106,0.4);
+          transition: transform .3s cubic-bezier(.22,1,.36,1); }
+        .hm-play:hover { transform: translate(-50%,-50%) scale(1.09); }
+        .hm-dur { position: absolute; z-index: 5; bottom: 16px; left: 16px; font-size: 11px; font-weight: 800;
+          color: #F2EFE9; background: rgba(8,7,5,0.8); border: 1px solid rgba(255,255,255,0.14);
+          border-radius: 7px; padding: 2px 9px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+        .hm-wrap { position: relative; z-index: 4; max-width: 1340px; margin: 0 auto;
+          padding: clamp(26px,3vw,38px) clamp(16px,5%,80px);
+          display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+          min-height: clamp(220px, 22vw, 275px); justify-content: center; }
+        .hm-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 9.5px; font-weight: 800;
           letter-spacing: 0.26em; color: #C7A66A; border: 1px solid rgba(199,166,106,0.4);
           background: rgba(199,166,106,0.10); border-radius: 999px; padding: 4px 12px; }
-        .hn-kicker i { width: 6px; height: 6px; border-radius: 50%; background: #E05252;
-          animation: hnPulse 1.9s ease-out infinite; }
-        @keyframes hnPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(224,82,82,0.5); } 60% { box-shadow: 0 0 0 6px rgba(224,82,82,0); } }
-        @keyframes hnIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-        @keyframes hnProg { from { width: 0; } to { width: 100%; } }
-        .hn-slide { display: flex; flex-direction: column; gap: 9px; animation: hnIn .6s cubic-bezier(.22,1,.36,1) both; max-width: 660px; }
-        .hn-title { font-size: clamp(17px, 2.3vw, 27px); font-weight: 900; line-height: 1.6; margin: 0;
-          letter-spacing: -0.01em; color: #fff; display: -webkit-box; -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical; overflow: hidden; text-wrap: balance; }
-        .hn-ex { font-size: clamp(11.5px, 1.2vw, 13px); color: rgba(255,255,255,0.58); line-height: 1.9; margin: 0;
-          display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; max-width: 560px; }
-        .hn-cta { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800;
-          color: #E8CE96; text-decoration: none; transition: gap .25s; }
-        .hn-cta:hover { gap: 10px; }
-        .hn-ctrl { display: flex; align-items: center; gap: 12px; }
-        .hn-num { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); font-variant-numeric: tabular-nums;
-          letter-spacing: 0.1em; direction: ltr; }
-        .hn-track { position: relative; width: clamp(90px, 12vw, 150px); height: 2.5px; border-radius: 2px;
-          background: rgba(255,255,255,0.14); overflow: hidden; }
-        .hn-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 2px;
-          background: linear-gradient(90deg, #8A6020, #C7A66A); }
-        .hn-ar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2);
-          background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.65); cursor: pointer;
-          display: inline-flex; align-items: center; justify-content: center; transition: all .2s; }
-        .hn-ar:hover { background: rgba(199,166,106,0.2); color: #fff; border-color: rgba(199,166,106,0.5); }
-        .hn-all { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
-          font-weight: 700; color: rgba(255,255,255,0.6); text-decoration: none; border: 1px solid rgba(255,255,255,0.16);
-          border-radius: 10px; padding: 7px 14px; transition: all .22s; }
-        .hn-all:hover { color: #E8CE96; border-color: rgba(199,166,106,0.45); }
+        @keyframes hmIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        .hm-title { font-size: clamp(22px, 2.9vw, 38px); font-weight: 900; line-height: 1.25; margin: 0;
+          letter-spacing: -0.02em; color: #fff; }
+        .hm-title b { background: linear-gradient(135deg,#E8CE96,#C7A66A 55%,#8A6020);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hm-tag { font-size: clamp(11.5px, 1.2vw, 13px); color: rgba(242,239,233,0.55); line-height: 1.9; margin: 0; }
+        .hm-feat { display: flex; align-items: center; gap: 9px; max-width: 620px; }
+        .hm-feat-title { font-size: clamp(12.5px, 1.35vw, 15px); font-weight: 800; color: rgba(255,255,255,0.88);
+          line-height: 1.7; margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .hm-cta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+        .hm-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 11px;
+          text-decoration: none; font-size: 13px; font-weight: 800; color: #241B08;
+          background: linear-gradient(135deg, #E8CE96, #C7A66A 55%, #A8853F);
+          box-shadow: 0 10px 26px rgba(199,166,106,0.32);
+          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
+        .hm-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(199,166,106,0.42); }
+        .hm-all { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
+          color: rgba(242,239,233,0.62); text-decoration: none; border: 1px solid rgba(255,255,255,0.16);
+          border-radius: 11px; padding: 9px 16px; transition: all .22s; }
+        .hm-all:hover { color: #E8CE96; border-color: rgba(199,166,106,0.45); }
+        /* دیوارِ پوستر — سه ویدیوی پربازدید */
+        .hm-minis { display: flex; gap: 10px; margin-top: 10px; }
+        .hm-mini { position: relative; width: 118px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.12); flex-shrink: 0;
+          transition: transform .28s cubic-bezier(.22,1,.36,1), border-color .28s; }
+        .hm-mini:hover { transform: translateY(-3px); border-color: rgba(199,166,106,0.5); }
+        .hm-mini img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); }
+        .hm-mini i { position: absolute; bottom: 4px; inset-inline-start: 5px; font-size: 9px; font-weight: 800;
+          font-style: normal; color: #F2EFE9; background: rgba(8,7,5,0.8); border-radius: 5px; padding: 1px 6px;
+          font-variant-numeric: tabular-nums; }
+        .hm-anim { animation: hmIn .6s cubic-bezier(.22,1,.36,1) both; }
         @media (max-width: 760px) {
-          .hn-media { width: 100%; opacity: .5;
+          .hm-poster { width: 100%; opacity: .42;
             -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 30%, transparent 100%); }
-          .hn-wrap { min-height: 0; padding-block: 24px 20px; }
-          .hn-ex, .hn-all { display: none; }
+          .hm-play, .hm-dur, .hm-minis { display: none; }
+          .hm-wrap { min-height: 0; padding-block: 26px 22px; }
         }
-        @media (prefers-reduced-motion: reduce) { .hn-slide { animation: none; } .hn-fill { animation: none !important; width: 100% !important; } }
+        @media (prefers-reduced-motion: reduce) { .hm-anim { animation: none; } }
       `}</style>
 
-      {/* لایه‌ی تصویر — کراس‌فید */}
-      <div className="hn-media" aria-hidden>
-        {HOME_NEWS.map((n, i) => (
-          <img key={n.id} src={n.image} alt="" loading={i === 0 ? 'eager' : 'lazy'}
-            style={{ opacity: i === idx ? 1 : 0, transform: i === idx ? 'scale(1.05)' : 'scale(1)' }} />
-        ))}
+      <div className="hm-perf hm-perf-t" aria-hidden />
+      <div className="hm-perf hm-perf-b" aria-hidden />
+
+      {/* پوسترِ ویدیوی ویژه — در تاریکی حل می‌شود */}
+      <div className="hm-poster" aria-hidden>
+        <img src={MEDIA_FEAT.thumb} alt="" loading="lazy" />
       </div>
+      <Link href={`/media/${MEDIA_FEAT.id}`} className="hm-play" aria-label="پخش ویدیوی ویژه">
+        <Play size={24} fill="currentColor" />
+      </Link>
+      <span className="hm-dur" aria-hidden>{MEDIA_FEAT.duration}</span>
       <div aria-hidden style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '46%', width: 1, zIndex: 2, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)', pointerEvents: 'none' }} />
-      <div className="hn-word" aria-hidden>NEWS</div>
+      <div className="hm-word" aria-hidden>MEDIA</div>
 
-      <div className="hn-wrap">
-        {/* سربرگ باند */}
-        <div className="hn-top">
-          <span className="hn-kicker"><i /> NEWSROOM</span>
-          <span style={{ fontSize: 13, fontWeight: 900, color: 'rgba(255,255,255,0.88)' }}>اخبار بیلیارد</span>
-          <Link href="/news" className="hn-all">همه اخبار <ArrowLeft size={12} /></Link>
+      <div className="hm-wrap">
+        <span className="hm-kicker hm-anim"><Clapperboard size={11} /> BILLIARD MEDIA</span>
+        <h3 className="hm-title hm-anim" style={{ animationDelay: '60ms' }}>
+          بیلیارد <b>مدیا</b> — سالنِ نمایشِ دنیای بیلیارد
+        </h3>
+        <p className="hm-tag hm-anim" style={{ animationDelay: '110ms' }}>
+          آموزش‌های حرفه‌ای، هایلایتِ مسابقات و مصاحبه‌های اختصاصی — در پلتفرم ویدیویی بیلیارد هاب
+        </p>
+        <div className="hm-feat hm-anim" style={{ animationDelay: '160ms' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.18em', color: '#E8CE96', flexShrink: 0 }}>NOW SHOWING</span>
+          <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
+          <p className="hm-feat-title">{MEDIA_FEAT.title}</p>
+          <span style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(MEDIA_FEAT.views)} بازدید</span>
         </div>
-
-        {/* اسلایدِ فعال */}
-        <div className="hn-slide" key={a.id}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 10.5, fontWeight: 800, color: 'rgba(255,255,255,0.82)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 999, padding: '3px 10px', backdropFilter: 'blur(6px)' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: cat.dot }} />
-              {cat.label}
-            </span>
-            {a.breaking && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, color: '#fff', background: 'rgba(178,59,46,0.85)', borderRadius: 999, padding: '3px 9px' }}>
-                <Zap size={10} /> فوری
-              </span>
-            )}
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)' }}>{a.date}</span>
-          </div>
-          <Link href={`/news/${a.id}`} style={{ textDecoration: 'none' }}>
-            <h3 className="hn-title">{a.title}</h3>
-          </Link>
-          <p className="hn-ex">{a.excerpt}</p>
-          <Link href={`/news/${a.id}`} className="hn-cta">مشاهده خبر <ArrowLeft size={13} /></Link>
+        <div className="hm-cta-row hm-anim" style={{ animationDelay: '210ms' }}>
+          <Link href={`/media/${MEDIA_FEAT.id}`} className="hm-cta"><Play size={14} fill="currentColor" /> تماشای ویدیو</Link>
+          <Link href="/media" className="hm-all">همه ویدیوها <ArrowLeft size={12} /></Link>
         </div>
-
-        {/* کنترل‌ها */}
-        <div className="hn-ctrl">
-          <button className="hn-ar" onClick={() => go(-1)} aria-label="خبر قبلی"><ArrowRight size={13} /></button>
-          <button className="hn-ar" onClick={() => go(1)} aria-label="خبر بعدی"><ArrowLeft size={13} /></button>
-          <div className="hn-track" aria-hidden>
-            <div key={idx} className="hn-fill" style={{ animation: `hnProg ${HN_DUR}ms linear both`, animationPlayState: hov ? 'paused' : 'running' }} />
-          </div>
-          <span className="hn-num">{String(idx + 1).padStart(2, '۰').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)} / {String(HOME_NEWS.length).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)}</span>
+        <div className="hm-minis hm-anim" style={{ animationDelay: '260ms' }}>
+          {MEDIA_MINIS.map(v => (
+            <Link key={v.id} href={`/media/${v.id}`} className="hm-mini" title={v.title}>
+              <img src={v.thumb} alt={v.title} loading="lazy" />
+              <i>{v.duration}</i>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
@@ -1709,8 +1690,8 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* §3.5 NEWS BAND — بریکِ تیره‌ی ادیتوریال ═══════════════ */}
-      <HomeNewsSlider />
+      {/* §3.5 MEDIA BAND — پوسترِ سینماییِ بیلیارد مدیا ═══════ */}
+      <HomeMediaBand />
 
       {/* §4 SELLERS ═════════════════════════════════════════════ */}
       <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
