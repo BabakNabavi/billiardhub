@@ -11,7 +11,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  Trophy, Calendar, Plus, Search, ChevronLeft, MapPin, Crown, Users, ArrowLeft,
+  Trophy, Calendar, Search, ChevronLeft, MapPin, Crown, Users, ArrowLeft,
+  LayoutGrid, List,
 } from 'lucide-react'
 import {
   SAMPLE_TOURNAMENTS, GAME_TYPE_LABELS, GAME_TYPE_COLORS,
@@ -124,6 +125,7 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
 export default function TournamentsPage() {
   const [tab, setTab]       = useState<TournamentStatus | 'all'>('all')
   const [search, setSearch] = useState('')
+  const [view, setView]     = useState<'grid' | 'list'>('grid')
 
   const filtered = SAMPLE_TOURNAMENTS.filter(t => {
     const matchTab    = tab === 'all' || t.status === tab
@@ -165,11 +167,23 @@ export default function TournamentsPage() {
         .tn-stat b { display: block; font-size: clamp(19px,2.2vw,26px); font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
         .tn-stat span { font-size: 10.5px; color: rgba(255,255,255,0.55); font-weight: 700; }
         .tn-stat-sep { width: 1px; align-self: stretch; background: linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent); }
-        .tn-new-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 12px;
-          text-decoration: none; font-size: 13.5px; font-weight: 800; color: #241B08;
-          background: linear-gradient(135deg, #E8CE96, ${GOLD} 55%, #A8853F);
-          box-shadow: 0 10px 28px rgba(199,166,106,0.35); transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
-        .tn-new-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(199,166,106,0.45); }
+        @keyframes tnBlink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+
+        /* سوییچ نمایش: گرید / لیست */
+        .tn-view { display: flex; gap: 4px; padding: 4px; background: #fff; border: 1px solid ${LINE}; border-radius: 12px; flex-shrink: 0; }
+        .tn-view button { width: 34px; height: 34px; border-radius: 9px; border: none; background: transparent;
+          color: ${SEC}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+        .tn-view button.on { background: rgba(199,166,106,0.14); color: ${GOLD_D}; box-shadow: inset 0 0 0 1px rgba(199,166,106,0.36); }
+
+        /* حالت لیست */
+        .tn-list { display: flex; flex-direction: column; gap: 10px; }
+        .tn-lrow { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid ${LINE};
+          border-radius: 14px; padding: 10px 14px; text-decoration: none; color: inherit;
+          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, border-color .25s;
+          animation: tnFadeUp .45s ease both; }
+        .tn-lrow:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(28,27,23,0.10); border-color: rgba(199,166,106,0.4); }
+        .lr-thumb { position: relative; width: 104px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #14120E; }
+        .lr-thumb img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.78); }
 
         /* ═══ نوار ابزار ═══ */
         .tn-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px;
@@ -229,7 +243,20 @@ export default function TournamentsPage() {
 
         .tn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
         @media (max-width: 1000px) { .tn-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px)  { .tn-grid { grid-template-columns: 1fr; gap: 16px; } .tn-hide-mob { display: none !important; } }
+        @media (max-width: 640px)  {
+          .tn-grid { grid-template-columns: 1fr; gap: 16px; }
+          .tn-hide-mob { display: none !important; }
+          /* تولبار موبایل: همه در یک ردیف — سرچِ کوچک سمتِ چپ */
+          .tn-toolbar { flex-wrap: nowrap !important; }
+          .tn-tabs { flex: 1 1 auto !important; min-width: 0 !important; }
+          .tn-view { padding: 3px; }
+          .tn-view button { width: 30px; height: 30px; }
+          .tn-sbox { flex: 0 0 116px !important; min-width: 0 !important; }
+          .tn-sbox input { padding: 9px 28px 9px 8px !important; font-size: 11px !important; border-radius: 10px !important; }
+          .tn-sbox svg { right: 8px !important; }
+          .lr-thumb { width: 74px; }
+          .lr-fee { display: none; }
+        }
         @media (prefers-reduced-motion: reduce) { .tn-hero::after { animation: none; display: none; } .tn-card, .tn-main { animation: none; } }
       `}</style>
 
@@ -249,11 +276,8 @@ export default function TournamentsPage() {
             </h1>
             <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'tnScaleX .55s .3s ease both' }} />
             <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', maxWidth: 470, lineHeight: 2, animation: 'tnFadeUp .5s .35s ease both' }}>
-              از لیگ‌های باشگاهی تا جام‌های قهرمانی — رویدادهای رسمی اکوسیستم بیلیارد هاب را دنبال کنید یا مسابقه‌ی خودتان را برگزار کنید.
+              از لیگ‌های باشگاهی تا جام‌های قهرمانی — رویدادهای رسمی اکوسیستم بیلیارد هاب را دنبال کنید.
             </p>
-            <div style={{ marginTop: 20, animation: 'tnFadeUp .5s .4s ease both' }}>
-              <Link href="/tournaments/new" className="tn-new-btn"><Plus size={15} /> ایجاد مسابقه</Link>
-            </div>
           </div>
 
           {/* آمارِ زنده‌ی رویدادها — از همان داده */}
@@ -275,12 +299,12 @@ export default function TournamentsPage() {
 
       {/* ═══ نوار ابزار چسبان: تب‌ها + جستجو ═══ */}
       <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
-        <div className="tn-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="tn-wrap tn-toolbar" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <div className="tn-tabs" style={{ flex: '1 1 430px', minWidth: 0 }}>
             {TABS.map(t => (
               <button key={t.key} className={`tn-tab${tab === t.key ? ' on' : ''}`} onClick={() => setTab(t.key)}>
                 {t.pulse && (
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: t.key === 'live' ? '#ef4444' : '#30C55A' }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: t.key === 'live' ? '#ef4444' : '#30C55A', boxShadow: t.key === 'live' ? '0 0 6px rgba(239,68,68,0.6)' : '0 0 6px rgba(48,197,90,0.6)', animation: 'tnBlink 1.5s ease-in-out infinite' }} />
                 )}
                 {t.label}
                 {t.key !== 'all' && (
@@ -291,7 +315,12 @@ export default function TournamentsPage() {
               </button>
             ))}
           </div>
-          <div style={{ position: 'relative', flex: '1 1 210px', minWidth: 190 }}>
+          {/* سوییچ گرید/لیست */}
+          <div className="tn-view" role="group" aria-label="حالت نمایش">
+            <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>
+            <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')} aria-label="نمایش لیستی"><List size={17} /></button>
+          </div>
+          <div className="tn-sbox" style={{ position: 'relative', flex: '1 1 210px', minWidth: 190 }}>
             <input
               className="tn-search"
               value={search}
@@ -370,9 +399,29 @@ export default function TournamentsPage() {
                 نمایش همه مسابقات
               </button>
             </div>
-          ) : (
+          ) : view === 'grid' ? (
             <div className="tn-grid">
               {gridItems.map((t, i) => <TournamentCard key={t.id} t={t} i={i} />)}
+            </div>
+          ) : (
+            <div className="tn-list">
+              {gridItems.map((t, i) => (
+                <Link key={t.id} href={`/tournaments/${t.id}`} className="tn-lrow" style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}>
+                  <span className="lr-thumb"><img src={t.banner} alt={t.name} loading="lazy" /></span>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: MUT, marginTop: 4, minWidth: 0 }}>
+                      <MapPin size={11} style={{ color: '#14532D', flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.clubName}</span>
+                      <span style={{ width: 3.5, height: 3.5, borderRadius: '50%', background: '#D8D2C4', flexShrink: 0 }} />
+                      <span style={{ flexShrink: 0 }}>{t.date}</span>
+                    </div>
+                  </div>
+                  <StatusPill t={t} />
+                  <span className="lr-fee" style={{ fontSize: 13, fontWeight: 900, color: GOLD_D, whiteSpace: 'nowrap' }}>{formatFee(t.entryFee)}</span>
+                  <ChevronLeft size={16} style={{ color: GOLD_D, flexShrink: 0 }} />
+                </Link>
+              ))}
             </div>
           )}
         </section>
