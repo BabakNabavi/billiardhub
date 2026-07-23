@@ -36,6 +36,13 @@ export default function LoginPage() {
     if (_hydrated && user) router.replace('/dashboard');
   }, [_hydrated, user, router]);
 
+  /* خطا بعد از چند ثانیه خودش بسته می‌شود */
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(''), 6500);
+    return () => clearTimeout(t);
+  }, [error]);
+
   const handleLogin = async () => {
     if (!phone.trim())    { setError('لطفاً شماره موبایل را وارد کنید'); return; }
     if (!password.trim()) { setError('لطفاً رمز عبور را وارد کنید'); return; }
@@ -97,19 +104,43 @@ export default function LoginPage() {
         .au-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(199,166,106,0.42); }
         .au-btn:not(:disabled):active { transform: scale(0.985); }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
+
+        /* ── خطای مرکزی: وسطِ صفحه، جلوی چشمِ کاربر ── */
+        @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
+        .au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+          padding: 24px; background: rgba(15,14,11,0.42); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+          animation: auFade .22s ease both; }
+        .au-erbox { position: relative; width: 100%; max-width: 350px; background: #fff; border: 1px solid rgba(178,59,46,0.28);
+          border-radius: 18px; padding: 26px 22px 20px; text-align: center; overflow: hidden;
+          box-shadow: 0 26px 80px rgba(15,14,11,0.4); animation: auPop .3s cubic-bezier(.22,1,.36,1) both; }
+        .au-erbox::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
+          background: linear-gradient(90deg, #7E241A, #B23B2E, #7E241A); }
+        .au-erbox .eric { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 4px;
+          display: flex; align-items: center; justify-content: center; color: #B23B2E;
+          background: rgba(178,59,46,0.08); border: 1px solid rgba(178,59,46,0.22); }
+        .au-erbox p { font-size: 13.5px; font-weight: 700; color: ${TEXT}; line-height: 2; margin: 12px 0 16px; }
+        .au-erbox button { width: 100%; padding: 11px; border-radius: 11px; cursor: pointer; font-family: inherit;
+          font-size: 13px; font-weight: 800; color: #B23B2E; background: rgba(178,59,46,0.06);
+          border: 1px solid rgba(178,59,46,0.3); transition: background .2s; }
+        .au-erbox button:hover { background: rgba(178,59,46,0.11); }
       `}</style>
+
+      {/* خطا — وسطِ صفحه */}
+      {error && (
+        <div className="au-erlay" onClick={() => setError('')} role="alert">
+          <div className="au-erbox" onClick={e => e.stopPropagation()}>
+            <span className="eric"><AlertCircle size={22} /></span>
+            <p>{error}</p>
+            <button type="button" onClick={() => setError('')}>متوجه شدم</button>
+          </div>
+        </div>
+      )}
 
       <div className="au-card">
         <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
         <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
         <p style={{ fontSize: 13, color: MUT, margin: '0 0 24px', lineHeight: 1.8 }}>با شماره موبایل خود وارد شوید</p>
-
-        {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 15px', background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.25)', borderRadius: 12, marginBottom: 18, animation: 'auUp .3s ease both' }}>
-            <AlertCircle size={15} style={{ color: '#B23B2E', flexShrink: 0 }} />
-            <span style={{ fontSize: 13, color: '#A03428', flex: 1 }}>{error}</span>
-          </div>
-        )}
 
         <div style={{ marginBottom: 14 }}>
           <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>شماره موبایل</label>
