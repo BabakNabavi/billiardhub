@@ -293,7 +293,7 @@ export default function MediaPage() {
         <div className="mx-hero-word">MEDIA</div>
         <div className="mx-wrap" style={{ position: 'relative', padding: 'clamp(28px,4.4vw,50px) clamp(16px,3vw,28px) clamp(22px,3.4vw,36px)', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
           <div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: GOLD, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: '#B79CFF', background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(167,139,250,0.45)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
               <Clapperboard size={11} /> BILLIARD MEDIA
             </span>
             <h1 style={{ fontSize: 'clamp(26px,4vw,44px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
@@ -426,7 +426,16 @@ export default function MediaPage() {
 
             {/* ═══ کانال‌ها — سازندگانِ بیلیارد مدیا ═══ */}
             <section style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>
-              <SecHead title="کانال‌ها" icon={<span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>CHANNELS</span>} />
+              <SecHead
+                title="کانال‌ها"
+                icon={<span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>CHANNELS</span>}
+                action={
+                  <Link href="/media/channels"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 10, textDecoration: 'none', fontSize: 12, fontWeight: 700, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD, transition: 'all .2s' }}>
+                    مشاهده همه <ArrowLeft size={12} />
+                  </Link>
+                }
+              />
               <div className="mx-rail">
                 {listChannels().map((ch, i) => (
                   <Link key={ch.creator.id} href={`/media/channel/${ch.creator.handle}`} className="mx-chan" style={{ animationDelay: `${Math.min(i, 6) * 60}ms` }}>
