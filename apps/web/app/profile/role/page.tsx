@@ -474,6 +474,29 @@ export default function RolePage() {
                 </p>
               </div>
 
+              {/* نقش‌های فعال — با امکانِ حذفِ نقشِ اشتباه */}
+              {(user?.secondaryRoles ?? []).length > 0 && (
+                <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgba(0,0,0,0.55)', marginBottom: 10 }}>نقش‌های فعال شما</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {(user?.secondaryRoles ?? []).map(r => (
+                      <span key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '6px 8px 6px 6px' }}>
+                        {ROLE_MAP[r as RoleValue]?.label ?? r}
+                        <button
+                          onClick={() => {
+                            updateUser({ secondaryRoles: (user?.secondaryRoles ?? []).filter(x => x !== r) })
+                            showToast('نقش حذف شد')
+                          }}
+                          title="حذف نقش"
+                          style={{ width: 18, height: 18, borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'rgba(178,59,46,0.12)', color: '#B23B2E', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, lineHeight: 1, fontFamily: 'inherit' }}>
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Stats */}
               {requests.length > 0 && (
                 <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>

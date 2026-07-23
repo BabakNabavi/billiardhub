@@ -374,15 +374,21 @@ export default function Navbar() {
                         {({'admin':'ادمین سیستم','user':'کاربر','player':'بازیکن رنکینگی','coach':'مربی','referee':'داور','club_owner':'باشگاه‌دار','seller':'فروشنده','manufacturer':'تولیدکننده','installer':'متخصص نصب'} as Record<string,string>)[user.primaryRole] ?? user.primaryRole}
                       </div>
                     </div>
-                    {/* آیتم‌ها نقش‌محورند — فقط پنل‌هایی که واقعاً به کاربر مربوط‌اند */}
+                    {/* ادمین ⇒ منوی مینیمال؛ بقیه ⇒ نقش‌محور (فقط پنل‌های مربوط به خودشان) */}
                     {(() => {
+                      if (user.primaryRole === 'admin') {
+                        return [
+                          { href: '/dashboard', label: 'داشبورد', icon: <LayoutDashboard size={13} /> },
+                          { href: '/admin', label: 'پنل ادمین', icon: <Crown size={13} /> },
+                          { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
+                        ];
+                      }
                       const roles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
                       return [
                         { href: '/dashboard', label: 'داشبورد', icon: <LayoutDashboard size={13} /> },
                         ...(roles.includes('seller') ? [{ href: '/dashboard/shop', label: 'فروشگاه من', icon: <ShoppingBag size={13} /> }] : []),
                         ...(roles.includes('club_owner') ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
-                        ...(user.primaryRole === 'admin' ? [{ href: '/admin', label: 'پنل ادمین', icon: <Crown size={13} /> }] : []),
-                        { href: '/profile', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
+                        { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
                       ];
                     })().map((item, i) => (
                       <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}

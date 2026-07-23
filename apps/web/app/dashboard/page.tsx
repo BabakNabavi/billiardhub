@@ -8,9 +8,9 @@ import api from '../../lib/api';
 import { findCoachByOwner } from '../../lib/coach-store';
 import { findRefereeByOwner } from '../../lib/referee-store';
 import {
-  Calendar, Trophy, Bell, Settings,
+  Calendar, Trophy, Bell,
   Award, Clock, MapPin,
-  CheckCircle, Circle, ArrowLeft, BarChart2, Users,
+  CheckCircle, Circle, ArrowLeft, Users,
   ShoppingBag, Play, Plus, Shield, ShieldCheck,
   ClipboardList,
 } from 'lucide-react';
@@ -165,6 +165,7 @@ export default function DashboardPage() {
   const isReferee   = userRoles.includes('referee');
   const isSeller    = userRoles.includes('seller');
   const isTechnician = userRoles.includes('technician');
+  const isManufacturer = userRoles.includes('manufacturer');
 
   return (
     <AuthGuard>
@@ -192,9 +193,10 @@ export default function DashboardPage() {
           border-color: rgba(0,0,0,0.10);
         }
         .card-label {
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.22em; text-transform: uppercase;
-          color: rgba(0,0,0,0.35); margin-bottom: 14px;
+          font-size: 12px; font-weight: 800;
+          /* letter-spacing روی فارسی حروف را از هم جدا می‌کند — صفر شد */
+          letter-spacing: 0;
+          color: rgba(0,0,0,0.45); margin-bottom: 14px;
           display: flex; align-items: center; gap: 8px;
         }
         .card-label span { width:3px; height:12px; border-radius:2px; display:inline-block; flex-shrink:0; }
@@ -269,9 +271,9 @@ export default function DashboardPage() {
           .stats-row    { grid-template-columns: repeat(2,1fr) !important; }
           .actions-row  { grid-template-columns: repeat(3,1fr) !important; }
         }
-        /* موبایل — حسِ اپ: دسترسی سریع مثل تب‌بار، ۵تایی و فشرده */
+        /* موبایل — حسِ اپ: دسترسی سریع مثل تب‌بار، ۴تایی و فشرده */
         @media(max-width:640px) {
-          .actions-row { grid-template-columns: repeat(5,1fr) !important; gap: 7px !important; }
+          .actions-row { grid-template-columns: repeat(4,1fr) !important; gap: 7px !important; }
           .quick-action { padding: 10px 2px !important; gap: 6px !important; border-radius: 13px !important; }
           .quick-action > div { width: 36px !important; height: 36px !important; border-radius: 11px !important; }
           .quick-action > div svg { width: 17px !important; height: 17px !important; }
@@ -333,9 +335,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <Link href="/profile" style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', cursor: 'pointer', color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', textDecoration: 'none' }}>
-                <Settings size={16} />
-              </Link>
+              {/* دکمه‌ی چرخ‌دنده حذف شد — با «ویرایش پروفایل» منوی پروفایل تکراری بود و مقصدش هم ۴۰۴ می‌داد */}
             </div>
           </div>
         </div>
@@ -364,7 +364,7 @@ export default function DashboardPage() {
           {/* ── Role Action Cards ── */}
           {!isBasicUser && (
             <div style={{ marginBottom: '28px', animation: 'fadeUp 0.5s ease both 0.1s', animationFillMode: 'both' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(0,0,0,0.35)', letterSpacing: '0.18em', marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(0,0,0,0.45)', marginBottom: '12px' }}>
                 نقش‌های شما
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
@@ -520,6 +520,27 @@ export default function DashboardPage() {
                   </Link>
                 )}
 
+                {/* Manufacturer Card — پنل تولیدکننده */}
+                {isManufacturer && (
+                  <Link href="/dashboard/manufacturer" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      padding: '20px', borderRadius: '18px', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, rgba(160,120,64,0.08), rgba(160,120,64,0.02))',
+                      border: '1.5px solid rgba(160,120,64,0.25)',
+                      transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)',
+                    }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(160,120,64,0.10)', border: '1px solid rgba(160,120,64,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', marginBottom: '14px' }}>🏭</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A18', marginBottom: '4px' }}>پنل تولیدکننده</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.42)', marginBottom: '16px', lineHeight: 1.6 }}>
+                        هویت کارخانه، محصولات و راه‌های ارتباطی خود را کامل کنید تا در بخش تولیدکنندگان دیده شوید
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#A07840', fontWeight: 700 }}>
+                        تکمیل پروفایل <span style={{ fontSize: '16px' }}>←</span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
                 {/* Add / manage roles */}
                 <Link href="/profile/role" style={{ textDecoration: 'none' }}>
                   <div style={{ padding: '20px', borderRadius: '18px', cursor: 'pointer', background: 'rgba(0,0,0,0.015)', border: '1.5px dashed rgba(0,0,0,0.14)', height: '100%', display: 'flex', flexDirection: 'column', transition: 'all 0.28s cubic-bezier(0.22,1,0.36,1)' }}>
@@ -547,13 +568,12 @@ export default function DashboardPage() {
                     <span style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)' }} />
                     دسترسی سریع
                   </div>
-                  <div className="actions-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '10px' }}>
+                  <div className="actions-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px' }}>
                     {[
-                      { href: '/clubs', icon: <MapPin size={20} />, label: 'رزرو میز', color: '#C7A66A' },
-                      { href: '/tournaments', icon: <Trophy size={20} />, label: 'مسابقات', color: '#f59e0b' },
-                      { href: '/shop', icon: <ShoppingBag size={20} />, label: 'فروشگاه', color: '#a78bfa' },
-                      { href: '/players', icon: <Users size={20} />, label: 'بازیکنان', color: '#06b6d4' },
-                      { href: '/rankings', icon: <BarChart2 size={20} />, label: 'رنکینگ', color: '#ef4444' },
+                      { href: '/clubs', icon: <MapPin size={20} />, label: 'باشگاه‌ها', color: '#C7A66A' },
+                      { href: '/shop', icon: <ShoppingBag size={20} />, label: 'بیلیارد بازار', color: '#a78bfa' },
+                      { href: '/sellers', icon: <Users size={20} />, label: 'فروشگاه‌ها', color: '#06b6d4' },
+                      { href: '/coaches', icon: <Trophy size={20} />, label: 'مربیان', color: '#f59e0b' },
                     ].map((a, i) => (
                       <Link key={i} href={a.href} className="quick-action">
                         <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: `${a.color}12`, border: `1px solid ${a.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: a.color }}>
