@@ -130,3 +130,10 @@ export function profileToPlayer(p: PlayerProfile): Player {
     tags: p.tags,
   }
 }
+
+export function deletePlayerProfile(slug: string) {
+  if (typeof window === 'undefined') return
+  const all = getPlayerProfiles()
+  delete all[slug]
+  localStorage.setItem('bh_player_profiles', JSON.stringify(all))
+}

@@ -138,3 +138,10 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     certificates: p.certificates,
   }
 }
+
+export function deleteManufacturerProfile(slug: string) {
+  if (typeof window === 'undefined') return
+  const all = getManufacturerProfiles()
+  delete all[slug]
+  localStorage.setItem('bh_manufacturer_profiles', JSON.stringify(all))
+}

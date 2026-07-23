@@ -1,9 +1,9 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   ورود — بازطراحی پریمیوم (۱۴۰۵). منطق (api/store/redirect) عیناً
-   حفظ شده؛ پوسته: اسپلیتِ سینمایی — پنلِ برندِ تیره + فرمِ روشنِ
-   مینیمال با فیلدهای لوکس و CTA طلایی.
+   ورود — فرمِ تمیزِ وسط‌چین (بدون پنل تصویری، طبق درخواست).
+   نوبار سر جای خودش است؛ فوتر در این صفحه نیست.
+   منطق (api/store/redirect) عیناً حفظ شده.
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect } from 'react';
@@ -52,7 +52,6 @@ export default function LoginPage() {
     }
   };
 
-  /* هنوز hydrate نشده */
   if (!_hydrated) return (
     <div style={{ minHeight:'100vh', background:'#F7F5F0', display:'flex', alignItems:'center', justifyContent:'center' }}>
       <div style={{ width:36, height:36, border:'2px solid rgba(199,166,106,0.15)', borderTop:`2px solid ${GOLD}`, borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
@@ -60,54 +59,28 @@ export default function LoginPage() {
     </div>
   );
 
-  /* اگه لاگین هست صبر کن redirect بشه */
   if (user) return null;
 
   return (
     <div dir="rtl" className="au-root">
       <style>{`
-        @keyframes spin   { to { transform: rotate(360deg); } }
-        @keyframes auUp   { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-        @keyframes auX    { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes auUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+        @keyframes auX  { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
 
-        .au-root { min-height: 100vh; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
-          background: #F7F5F0; font-family: Vazirmatn, Tahoma, sans-serif; }
+        .au-root { min-height: calc(100vh - 72px); background: #F7F5F0;
+          display: flex; align-items: flex-start; justify-content: center;
+          padding: clamp(24px,6vh,64px) 20px 48px; font-family: Vazirmatn, Tahoma, sans-serif; }
+        .au-card { width: 100%; max-width: 420px; background: #fff; border: 1px solid ${LINE};
+          border-radius: 22px; padding: clamp(24px,4vw,34px);
+          box-shadow: 0 18px 60px rgba(28,27,23,0.08);
+          animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
+        .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
+          background: linear-gradient(90deg, #8A6020, ${GOLD}, #8A6020); }
 
-        /* ═══ پنل برند (تیره‌ی سینمایی) ═══ */
-        /* پنل برند: چسبان و دقیقاً هم‌ارتفاعِ ویوپورت (زیر نوبار) ⇒ عکس همیشه فیت، بدون اسکرول اضافه */
-        .au-brand { position: sticky; top: 62px; align-self: start; height: calc(100vh - 62px);
-          overflow: hidden; color: #fff; background: #0B0A08; }
-        .au-brand-img { position: absolute; inset: 0; background: url('/images/hero/hero-lounge.jpg') center/cover;
-          filter: grayscale(0.3) brightness(0.5) contrast(1.08); transform: scale(1.03); }
-        .au-brand-grade { position: absolute; inset: 0; background:
-          radial-gradient(ellipse 60% 80% at 70% 10%, rgba(255,238,204,0.14), transparent 55%),
-          linear-gradient(200deg, rgba(11,10,8,0.55) 0%, rgba(11,10,8,0.88) 78%); }
-        .au-word { position: absolute; bottom: -10px; left: -4px; font-weight: 900;
-          font-size: clamp(64px, 9vw, 128px); line-height: 1; letter-spacing: .05em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.11); user-select: none; direction: ltr; }
-        .au-mob-word { position: absolute; bottom: -6px; left: -3px; font-weight: 900;
-          font-size: 52px; line-height: 1; letter-spacing: .05em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.12); user-select: none; direction: ltr; pointer-events: none; }
-        .au-hair { position: absolute; top: -25%; bottom: -25%; left: 32%; width: 1px;
-          background: linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent); transform: rotate(14deg); }
-        .au-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700;
-          color: rgba(255,255,255,0.78); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
-          padding: 6px 13px; backdrop-filter: blur(6px); }
-        .au-chip i { width: 6px; height: 6px; border-radius: 50%; background: ${GOLD}; }
-        .au-bar { position: absolute; bottom: 0; inset-inline: 0; height: 3px; display: flex; }
-        .au-bar i:nth-child(1) { flex: 2.6; background: linear-gradient(90deg,#8A6020,${GOLD}); }
-        .au-bar i:nth-child(2) { flex: 1; background: #B23B2E; }
-        .au-bar i:nth-child(3) { flex: 1.6; background: #14532D; }
-
-        /* ═══ ستون فرم ═══ */
-        .au-form-col { display: flex; flex-direction: column; align-items: center; justify-content: center;
-          padding: clamp(28px,5vh,56px) clamp(20px,4vw,48px); position: relative; }
-        .au-card { width: 100%; max-width: 420px; animation: auUp .55s cubic-bezier(.22,1,.36,1) both; }
-
-        .au-field label { display: block; font-size: 12.5px; font-weight: 700; color: ${SEC}; margin-bottom: 8px; }
-        .au-wrap { display: flex; align-items: center; background: #fff; border: 1px solid ${LINE};
-          border-radius: 13px; transition: border-color .25s, box-shadow .25s; }
-        .au-wrap.on { border-color: rgba(199,166,106,0.65); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); }
+        .au-wrap { display: flex; align-items: center; background: #FAFAF7; border: 1px solid ${LINE};
+          border-radius: 13px; transition: border-color .25s, box-shadow .25s; min-width: 0; }
+        .au-wrap.on { border-color: rgba(199,166,106,0.65); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: #fff; }
         .au-wrap.err { border-color: rgba(178,59,46,0.55); box-shadow: 0 0 0 3px rgba(178,59,46,0.10); }
         .au-ic { padding: 0 14px 0 0; color: ${MUT}; display: flex; align-items: center; flex-shrink: 0; transition: color .25s; }
         .au-wrap.on .au-ic { color: ${GOLD_D}; }
@@ -124,147 +97,94 @@ export default function LoginPage() {
         .au-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(199,166,106,0.42); }
         .au-btn:not(:disabled):active { transform: scale(0.985); }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
-
-        .au-mob-brand { display: none; }
-        @media (max-width: 900px) {
-          .au-root { grid-template-columns: 1fr; }
-          .au-brand { display: none; }
-          .au-mob-brand { display: block; position: relative; overflow: hidden; color: #fff;
-            background: radial-gradient(circle at 80% 0%, rgba(199,166,106,0.16), transparent 50%), linear-gradient(120deg,#0B0A08,#171208 60%,#0B0A08); padding: 22px 20px 20px; }
-          .au-form-col { justify-content: flex-start; }
-          .au-desk-logo { display: none; }
-        }
       `}</style>
 
-      {/* ═══ نوارِ برندِ موبایل ═══ */}
-      <div className="au-mob-brand">
-        <div style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
-        <div className="au-mob-word" aria-hidden>LOGIN</div>
-        <div style={{ fontSize: 15, fontWeight: 900, color: '#fff' }}>ورود به حساب</div>
-        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', marginTop: 5 }}>پلتفرم جامع و هوشمند بیلیارد ایران</div>
-      </div>
+      <div className="au-card">
+        <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
+        <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
+        <p style={{ fontSize: 13, color: MUT, margin: '0 0 24px', lineHeight: 1.8 }}>با شماره موبایل خود وارد شوید</p>
 
-      {/* ═══ ستون فرم ═══ */}
-      <div className="au-form-col">
-        <div className="au-card">
-
-          <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
-          <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
-          <p style={{ fontSize: 13, color: MUT, margin: '0 0 24px', lineHeight: 1.8 }}>با شماره موبایل خود وارد شوید</p>
-
-          {/* خطا */}
-          {error && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 15px', background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.25)', borderRadius: 12, marginBottom: 18, animation: 'auUp .3s ease both' }}>
-              <AlertCircle size={15} style={{ color: '#B23B2E', flexShrink: 0 }} />
-              <span style={{ fontSize: 13, color: '#A03428', flex: 1 }}>{error}</span>
-            </div>
-          )}
-
-          {/* شماره موبایل */}
-          <div className="au-field" style={{ marginBottom: 14 }}>
-            <label>شماره موبایل</label>
-            <div className={`au-wrap${phoneFocus ? ' on' : ''}${error && !phone ? ' err' : ''}`}>
-              <span className="au-ic"><Phone size={16} /></span>
-              <input
-                type="tel"
-                value={phone}
-                onChange={e => {
-                  /* فقط عدد، ۱۱ رقم، حتماً ۰۹ (۹ اول ⇒ ۰ اضافه می‌شود) */
-                  let d = e.target.value.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
-                  if (d && d[0] !== '0') d = d[0] === '9' ? '0' + d : '';
-                  if (d.length >= 2 && d[1] !== '9') d = d.slice(0, 1);
-                  setPhone(d.slice(0, 11)); setError('');
-                }}
-                onFocus={() => setPhoneFocus(true)}
-                onBlur={() => setPhoneFocus(false)}
-                onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                className="au-inp"
-                placeholder="09121234567"
-                maxLength={11}
-                autoComplete="tel"
-              />
-            </div>
+        {error && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 15px', background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.25)', borderRadius: 12, marginBottom: 18, animation: 'auUp .3s ease both' }}>
+            <AlertCircle size={15} style={{ color: '#B23B2E', flexShrink: 0 }} />
+            <span style={{ fontSize: 13, color: '#A03428', flex: 1 }}>{error}</span>
           </div>
+        )}
 
-          {/* رمز عبور */}
-          <div className="au-field" style={{ marginBottom: 22 }}>
-            <label>رمز عبور</label>
-            <div className={`au-wrap${passFocus ? ' on' : ''}${error && !password ? ' err' : ''}`}>
-              <span className="au-ic"><Lock size={16} /></span>
-              <input
-                type={showPass ? 'text' : 'password'}
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(''); }}
-                onFocus={() => setPassFocus(true)}
-                onBlur={() => setPassFocus(false)}
-                onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                className="au-inp"
-                placeholder="رمز عبور"
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass(p => !p)}
-                style={{ padding: '0 12px 0 14px', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>شماره موبایل</label>
+          <div className={`au-wrap${phoneFocus ? ' on' : ''}${error && !phone ? ' err' : ''}`}>
+            <span className="au-ic"><Phone size={16} /></span>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => {
+                /* فقط عدد، ۱۱ رقم، حتماً ۰۹ (۹ اول ⇒ ۰ اضافه می‌شود) */
+                let d = e.target.value.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
+                if (d && d[0] !== '0') d = d[0] === '9' ? '0' + d : '';
+                if (d.length >= 2 && d[1] !== '9') d = d.slice(0, 1);
+                setPhone(d.slice(0, 11)); setError('');
+              }}
+              onFocus={() => setPhoneFocus(true)}
+              onBlur={() => setPhoneFocus(false)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              className="au-inp"
+              placeholder="09121234567"
+              maxLength={11}
+              autoComplete="tel"
+            />
           </div>
+        </div>
 
-          {/* ورود */}
-          <button className="au-btn" onClick={handleLogin} disabled={loading}>
-            {loading ? (
-              <>
-                <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
-                در حال ورود…
-              </>
-            ) : 'ورود به حساب'}
-          </button>
-
-          {/* جداکننده */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-            <div style={{ flex: 1, height: 1, background: LINE }} />
-            <span style={{ fontSize: 12, color: MUT }}>حساب ندارید؟</span>
-            <div style={{ flex: 1, height: 1, background: LINE }} />
+        <div style={{ marginBottom: 22 }}>
+          <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>رمز عبور</label>
+          <div className={`au-wrap${passFocus ? ' on' : ''}${error && !password ? ' err' : ''}`}>
+            <span className="au-ic"><Lock size={16} /></span>
+            <input
+              type={showPass ? 'text' : 'password'}
+              value={password}
+              onChange={e => { setPassword(e.target.value); setError(''); }}
+              onFocus={() => setPassFocus(true)}
+              onBlur={() => setPassFocus(false)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              className="au-inp"
+              placeholder="رمز عبور"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass(p => !p)}
+              style={{ padding: '0 12px 0 14px', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
           </div>
+        </div>
 
-          {/* ثبت‌نام */}
-          <Link href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)', transition: 'background .2s' }}>
-            ساخت حساب جدید
+        <button className="au-btn" onClick={handleLogin} disabled={loading}>
+          {loading ? (
+            <>
+              <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+              در حال ورود…
+            </>
+          ) : 'ورود به حساب'}
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+          <div style={{ flex: 1, height: 1, background: LINE }} />
+          <span style={{ fontSize: 12, color: MUT }}>حساب ندارید؟</span>
+          <div style={{ flex: 1, height: 1, background: LINE }} />
+        </div>
+
+        <Link href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', boxSizing: 'border-box', padding: '13px', borderRadius: 13, textDecoration: 'none', fontSize: 14, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)', transition: 'background .2s' }}>
+          ساخت حساب جدید
+        </Link>
+
+        <div style={{ textAlign: 'center', marginTop: 22 }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
+            <ArrowLeft size={12} /> بازگشت به صفحه اصلی
           </Link>
-
-          <div style={{ textAlign: 'center', marginTop: 22 }}>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
-              <ArrowLeft size={12} /> بازگشت به صفحه اصلی
-            </Link>
-          </div>
         </div>
       </div>
-
-      {/* ═══ پنل برند — دسکتاپ ═══ */}
-      <aside className="au-brand">
-        <div className="au-brand-img" />
-        <div className="au-brand-grade" />
-        <div className="au-hair" />
-        <div className="au-word">LOGIN</div>
-        <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 'clamp(28px,4vw,56px)', gap: 16 }}>
-          <span style={{ display: 'inline-flex', alignSelf: 'flex-start', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
-            BILLIARD HUB · IRAN
-          </span>
-          <h2 style={{ fontSize: 'clamp(22px,2.4vw,34px)', fontWeight: 900, margin: 0, lineHeight: 1.5, maxWidth: 420 }}>
-            خانه‌ی دیجیتالِ <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>جامعه‌ی بیلیارد</span> ایران
-          </h2>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 2, maxWidth: 400 }}>
-            رزرو میز، مسابقات، بازار تجهیزات، مربیان و باشگاه‌ها — همه در یک حساب.
-          </p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-            <span className="au-chip"><i /> رزرو آنلاین میز</span>
-            <span className="au-chip"><i /> مسابقات رسمی</span>
-            <span className="au-chip"><i /> بیلیارد بازار</span>
-          </div>
-        </div>
-        <div className="au-bar"><i /><i /><i /></div>
-      </aside>
     </div>
   );
 }

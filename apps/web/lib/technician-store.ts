@@ -116,3 +116,10 @@ export function profileToTechnician(p: TechnicianProfile): Technician {
     whatsapp: p.whatsapp || p.phone.replace(/^0/, '98'),
   }
 }
+
+export function deleteTechnicianProfile(slug: string) {
+  if (typeof window === 'undefined') return
+  const all = getTechnicianProfiles()
+  delete all[slug]
+  localStorage.setItem('bh_technician_profiles', JSON.stringify(all))
+}
