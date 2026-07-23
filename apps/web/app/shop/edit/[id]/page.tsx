@@ -8,6 +8,7 @@ import { Package, X, Upload, Info, Plus, ChevronDown, Check } from 'lucide-react
 import api from '../../../../lib/api';
 import ProvinceCitySelect from '../../../../components/ProvinceCitySelect';
 import { provinceOfCity } from '../../../../lib/iran-geo';
+import { compressImage } from '../../../../lib/seller-store';
 
 function CustomSelect({ options, value, onChange, placeholder = 'انتخاب کنید' }: {
   options: { value: string; label: string; icon?: string }[];
@@ -96,6 +97,9 @@ export default function EditProductPage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+  /* محصولاتِ ساخته‌شده در پنل، در localStorage (userProducts) هستند نه API */
+  const [isLocal, setIsLocal] = useState(false);
+  const localRef = useRef<any>(null);
 
   const [form, setForm] = useState({
     title: '', description: '', brand: '', model: '',
@@ -139,7 +143,40 @@ export default function EditProductPage() {
       });
       setExistingImages(p.images || []);
       setPageLoading(false);
-    }).catch(() => { setError('محصول پیدا نشد'); setPageLoading(false); });
+    }).catch(() => {
+      /* API ندارد ⇒ محصولِ محلیِ ساخته‌شده در پنل را از userProducts بخوان */
+      try {
+        const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]');
+        const p = Array.isArray(list) ? list.find((x: any) => String(x.id) === String(id)) : null;
+        if (p) {
+          localRef.current = p;
+          setIsLocal(true);
+          const hasOld = p.old && p.old > p.price;
+          setForm({
+            title: p.name || '',
+            description: p.description || '',
+            brand: p.brand || '',
+            model: p.model || '',
+            price: String(hasOld ? p.old : (p.price || '')),
+            discountPrice: hasOld ? String(p.price) : '',
+            category: p.category || 'table',
+            condition: p.condition || 'new',
+            province: p.sellerProvince || provinceOfCity(p.sellerCity || ''),
+            city: p.sellerCity || '',
+            stock: '1',
+            color: '',
+            keywords: '',
+            specs: p.specs && typeof p.specs === 'object' && !Array.isArray(p.specs)
+              ? Object.entries(p.specs).map(([label, value]) => ({ label, value: String(value) }))
+              : [{ label: '', value: '' }],
+          });
+          setExistingImages(Array.isArray(p.images) ? p.images : []);
+          setPageLoading(false);
+          return;
+        }
+      } catch {}
+      setError('محصول پیدا نشد'); setPageLoading(false);
+    });
   }, [id, user]);
 
   const set = (name: string, value: any) => setForm(f => ({ ...f, [name]: value }));
@@ -174,6 +211,44 @@ export default function EditProductPage() {
   const handleSubmit = async () => {
     if (!form.title || !form.price || !form.city) { setError('لطفاً فیلدهای اجباری را پر کنید'); return; }
     setLoading(true); setError('');
+
+    /* مسیرِ محلی: همان رکوردِ userProducts آپدیت می‌شود (با همان شکلِ داده) */
+    if (isLocal) {
+      try {
+        const newUrls = await Promise.all(newImageFiles.map(f => compressImage(f, 1200, 0.7)));
+        const imgs = [...existingImages, ...newUrls];
+        const base = parseInt(form.price) || 0;
+        const final = form.discountPrice ? parseInt(form.discountPrice) : base;
+        const specsObj: Record<string, string> = {};
+        form.specs.filter(s => s.label && s.value).forEach(s => { specsObj[s.label] = s.value; });
+        const updated = {
+          ...localRef.current,
+          name: form.title.trim(),
+          description: form.description,
+          brand: form.brand,
+          model: form.model,
+          category: form.category,
+          condition: form.condition,
+          price: final,
+          old: base,
+          disc: base > final ? Math.round((1 - final / base) * 100) : 0,
+          sellerProvince: form.province,
+          sellerCity: form.city,
+          img: imgs[0] ?? localRef.current?.img,
+          images: imgs.length ? imgs : localRef.current?.images,
+          specs: specsObj,
+        };
+        const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]');
+        localStorage.setItem('userProducts', JSON.stringify(
+          (Array.isArray(list) ? list : []).map((x: any) => String(x.id) === String(id) ? updated : x),
+        ));
+        router.push('/dashboard/shop');
+      } catch {
+        setError('خطا در ذخیره‌ی محصول');
+      } finally { setLoading(false); }
+      return;
+    }
+
     try {
       const newUrls: string[] = [];
       for (let i = 0; i < newImageFiles.length; i++) {

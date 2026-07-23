@@ -375,8 +375,9 @@ export default function Navbar() {
                     {/* ادمین ⇒ منوی مینیمال؛ بقیه ⇒ نقش‌محور (فقط پنل‌های مربوط به خودشان) */}
                     {(() => {
                       if (user.primaryRole === 'admin') {
+                        /* «داشبورد» برای ادمین حذف شد — /dashboard خودش ادمین را به /admin
+                           می‌فرستاد و دو گزینه عملاً یک کار می‌کردند */
                         return [
-                          { href: '/dashboard', label: 'داشبورد', icon: <LayoutDashboard size={13} /> },
                           { href: '/admin', label: 'پنل ادمین', icon: <Crown size={13} /> },
                           { href: '/profile/me', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
                         ];

@@ -12,6 +12,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import { provinceOfCity } from '../../../lib/iran-geo'
+import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { compressImage } from '../../../lib/seller-store'
 import { TONES, type PlayerHighlight, type PlayerTournament, type PlayerAlbum } from '../../../lib/players-data'
 import {
@@ -48,6 +50,8 @@ export default function PlayerDashboard() {
   const [hl, setHl]   = useState({ year: '', title: '' })
   const [tr, setTr]   = useState({ name: '', year: '', result: '' })
   const [albTitle, setAlbTitle] = useState('')
+  const [clubOptions, setClubOptions] = useState<ClubOption[]>([])
+  useEffect(() => { fetchClubOptions().then(setClubOptions) }, [])
 
   const isPlayer = !!user && [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('player')
 
@@ -196,8 +200,8 @@ export default function PlayerDashboard() {
               </div>
               <div className="sm:col-span-2">
                 <ProvinceCitySelect
-                  value={{ province: '', city: form.city }}
-                  onChange={v => set('city', v.city)}
+                  value={{ province: form.province || provinceOfCity(form.city) || '', city: form.city }}
+                  onChange={v => { setForm(f => ({ ...f, province: v.province, city: v.city })); setSaved(false); setErr('') }}
                   required cityLabel="شهر" provinceLabel="استان"
                 />
               </div>
@@ -211,7 +215,16 @@ export default function PlayerDashboard() {
               </div>
               <div>
                 <label className={LABEL}>باشگاه محل تمرین</label>
-                <input className={INPUT} value={form.clubName} onChange={e => set('clubName', e.target.value)} placeholder="مثال: باشگاه پلاتینیوم" />
+                {/* فقط باشگاه‌های ثبت‌شده (همان لیستِ صفحه‌ی /clubs) */}
+                <select value={form.clubName} onChange={e => set('clubName', e.target.value)} style={{ width: '100%' }}>
+                  <option value="">انتخاب باشگاه…</option>
+                  {clubOptions.map(c => (
+                    <option key={c.id} value={c.name}>{c.name} — {c.city}</option>
+                  ))}
+                  {form.clubName && !clubOptions.some(c => c.name === form.clubName) && (
+                    <option value={form.clubName}>{form.clubName}</option>
+                  )}
+                </select>
               </div>
               <div>
                 <label className={LABEL}>شروع فعالیت</label>

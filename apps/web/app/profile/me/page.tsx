@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useAuthStore } from '../../../store/auth.store'
+import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -34,12 +35,6 @@ interface UserProfile {
   bankCardOwner?: string
 }
 
-interface Club {
-  id: string
-  name: string
-  city: string
-  memberCount?: number
-}
 
 // ─── Helpers ──────────────────────────────────────────────────
 function toFa(v: string | number) {
@@ -100,88 +95,50 @@ const inputStyle: React.CSSProperties = {
 }
 
 // ─── Club Search ──────────────────────────────────────────────
-function ClubSearch({
-  value, manualValue,
-  onSelect, onManual,
-}: {
-  value?: string
-  manualValue?: string
-  onSelect: (clubId: string, name: string) => void
-  onManual: (name: string) => void
-}) {
-  const [q, setQ]           = useState('')
-  const [clubs, setClubs]   = useState<Club[]>([])
-  const [open, setOpen]     = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [useManual, setUseManual] = useState(false)
-  const [manual, setManual] = useState(manualValue ?? '')
-  const timer = useRef<number | null>(null)
+/* فقط باشگاه‌های ثبت‌شده (همان لیستِ صفحه‌ی /clubs) — ورودی دستی مجاز نیست */
+function ClubSearch({ onSelect }: { onSelect: (clubId: string, name: string) => void }) {
+  const [q, setQ]         = useState('')
+  const [clubs, setClubs] = useState<ClubOption[]>([])
+  const [open, setOpen]   = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
 
-  const search = async (v: string) => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API}/user/profile/clubs?q=${encodeURIComponent(v)}`)
-      const j = await res.json()
-      setClubs(Array.isArray(j) ? j : [])
-    } catch { setClubs([]) }
-    finally { setLoading(false) }
-  }
-
+  useEffect(() => { fetchClubOptions().then(setClubs) }, [])
   useEffect(() => {
-    if (timer.current) clearTimeout(timer.current)
-    if (q.length < 1) { search(''); return }
-    timer.current = window.setTimeout(() => search(q), 400)
-  }, [q])
+    const fn = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', fn)
+    return () => document.removeEventListener('mousedown', fn)
+  }, [])
 
-  useEffect(() => { search('') }, [])
-
-  if (useManual) return (
-    <div>
-      <input
-        value={manual}
-        onChange={e => setManual(e.target.value)}
-        placeholder="نام باشگاه را تایپ کنید"
-        style={inputStyle}
-      />
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button onClick={() => { onManual(manual); setUseManual(false) }} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
-          ثبت
-        </button>
-        <button onClick={() => setUseManual(false)} style={{ flex: 1, padding: '8px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.45)', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer' }}>
-          انصراف
-        </button>
-      </div>
-    </div>
-  )
+  const filtered = clubs.filter(c => !q.trim() || c.name.includes(q.trim()) || c.city.includes(q.trim()))
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={wrapRef} style={{ position: 'relative' }}>
       <div style={{ position: 'relative' }}>
         <i className="ti ti-search" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 18, color: 'rgba(0,0,0,0.38)' }} />
         <input
           value={q}
           onChange={e => { setQ(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
-          placeholder="جستجو باشگاه..."
+          placeholder="جستجو در باشگاه‌های ثبت‌شده..."
           style={{ ...inputStyle, paddingRight: 34 }}
         />
       </div>
 
       {open && (
         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: 12, marginTop: 4, maxHeight: 220, overflowY: 'auto' }}>
-          {loading && (
-            <div style={{ padding: '12px 14px', fontSize: 14, color: 'rgba(0,0,0,0.38)' }}>در حال جستجو...</div>
-          )}
-          {!loading && clubs.map(c => (
-            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(c.name); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111111', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {filtered.map(c => (
+            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(''); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111111', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span>{c.name}</span>
-              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>{c.city} · {toFa(c.memberCount ?? 0)} عضو</span>
+              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>{c.city}</span>
             </button>
           ))}
-          <button onClick={() => { setOpen(false); setUseManual(true) }} style={{ width: '100%', padding: '10px 14px', background: 'rgba(199,166,106,0.05)', border: 'none', color: '#A07840', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right' }}>
-            <i className="ti ti-plus" style={{ marginLeft: 6, fontSize: 15 }} />
-            باشگاه من در لیست نیست
-          </button>
+          {filtered.length === 0 && (
+            <div style={{ padding: '12px 14px', fontSize: 13, color: 'rgba(0,0,0,0.4)', lineHeight: 1.8 }}>
+              باشگاهی با این نام ثبت نشده — فقط باشگاه‌های ثبت‌شده در «باشگاه‌ها» قابل انتخاب‌اند.
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -255,6 +212,11 @@ export default function ProfileMePage() {
       .then(j => { if (j) applyProfile(j); else fallback() })
       .catch(fallback)
       .finally(() => setLoading(false))
+    /* باشگاهِ انتخاب‌شده‌ی قبلی (ذخیره‌ی محلی) */
+    try {
+      const saved = JSON.parse(localStorage.getItem('bh_my_club') ?? 'null')
+      if (saved?.name) setClubName(saved.name)
+    } catch {}
   }, [])
 
   const showToast = (msg: string, type: 'success'|'error' = 'success') => {
@@ -279,16 +241,45 @@ export default function ProfileMePage() {
     } finally { setSaving(false) }
   }
 
+  /* فشرده‌سازی سمتِ کلاینت — خروجی dataURL برای ذخیره‌ی محلی */
+  const compressAvatar = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const size = 420
+        const c = document.createElement('canvas')
+        const s = Math.min(img.width, img.height)
+        c.width = size; c.height = size
+        const ctx = c.getContext('2d')!
+        ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size)
+        resolve(c.toDataURL('image/jpeg', 0.82))
+      }
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const form = new FormData()
-    form.append('file', file)
-    const res = await fetch(`${API}/user/profile/avatar`, { method: 'POST', headers: authHeader(), body: form })
-    if (res.ok) {
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`${API}/user/profile/avatar`, { method: 'POST', headers: authHeader(), body: form })
+      if (!res.ok) throw new Error()
       const j = await res.json()
       setProfile(p => p ? { ...p, avatar: j.url } : p)
+      useAuthStore.getState().updateUser({ avatar: j.url })
       showToast('عکس پروفایل بروز شد')
+    } catch {
+      /* API در دسترس نیست ⇒ ذخیره‌ی محلی (در حسابِ کاربر persist می‌شود و در نوبار هم می‌آید) */
+      try {
+        const dataUrl = await compressAvatar(file)
+        setProfile(p => p ? { ...p, avatar: dataUrl } : p)
+        useAuthStore.getState().updateUser({ avatar: dataUrl })
+        showToast('عکس پروفایل ذخیره شد')
+      } catch { showToast('خواندن عکس ممکن نشد', 'error') }
+    } finally {
+      e.target.value = ''
     }
   }
 
@@ -306,22 +297,15 @@ export default function ProfileMePage() {
 
   const handleClub = async (clubId: string, name: string) => {
     setClubName(name)
-    await fetch(`${API}/user/profile/club`, {
-      method: 'PUT',
-      headers: { ...authHeader(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clubId }),
-    })
+    try { localStorage.setItem('bh_my_club', JSON.stringify({ id: clubId, name })) } catch {}
+    try {
+      await fetch(`${API}/user/profile/club`, {
+        method: 'PUT',
+        headers: { ...authHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clubId }),
+      })
+    } catch {}
     showToast(`باشگاه ${name} انتخاب شد`)
-  }
-
-  const handleClubManual = async (name: string) => {
-    setClubName(name)
-    await fetch(`${API}/user/profile/club`, {
-      method: 'PUT',
-      headers: { ...authHeader(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clubNameManual: name }),
-    })
-    showToast(`باشگاه «${name}» ثبت شد`)
   }
 
   if (loading) return (
@@ -332,7 +316,8 @@ export default function ProfileMePage() {
 
   if (!profile) return null
 
-  const isVerified = profile.nationalIdVerified && profile.phoneVerified
+  /* کد ملی هنگام ثبت‌نام گرفته می‌شود؛ تطبیق نهایی با وب‌سرویس احراز هویت
+     در بک‌اند انجام خواهد شد — اینجا درخواست مجدد از کاربر نمی‌کنیم */
   const fullName = `${profile.firstName} ${profile.lastName}`
 
   return (
@@ -373,31 +358,12 @@ export default function ProfileMePage() {
                 <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>{fullName}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{profile.phone}</span>
-                  {isVerified
-                    ? <span style={{ fontSize: 10, color: '#C7A66A', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <i className="ti ti-shield-check" style={{ fontSize: 12 }} />احراز شده
-                      </span>
-                    : <button onClick={() => router.push('/profile/verify')} style={{ fontSize: 10, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 20, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <i className="ti ti-alert-triangle" style={{ fontSize: 12 }} />احراز هویت کنید
-                      </button>
-                  }
+                  <span style={{ fontSize: 10, color: '#C7A66A', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <i className="ti ti-shield-check" style={{ fontSize: 12 }} />کد ملی ثبت شده
+                  </span>
                 </div>
               </div>
             </div>
-
-            {/* ── وضعیت احراز هویت ── */}
-            {!isVerified && (
-              <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <i className="ti ti-shield-off" style={{ fontSize: 26, color: '#f59e0b', flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#fbbf24', marginBottom: 4 }}>هویت تأیید نشده</div>
-                  <div style={{ fontSize: 13, color: '#92400e', lineHeight: 1.6 }}>برای رزرو میز و خرید و فروش باید احراز هویت کنید</div>
-                </div>
-                <button onClick={() => router.push('/profile/verify')} style={{ background: '#f59e0b', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 14, fontWeight: 700, color: '#000', fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0 }}>
-                  احراز هویت
-                </button>
-              </div>
-            )}
 
             {/* ── اطلاعات پایه ── */}
             <Section title="اطلاعات شخصی" icon="ti-user">
@@ -414,7 +380,8 @@ export default function ProfileMePage() {
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
                 <Field label="جنسیت">
-                  <select value={gender} onChange={e => setGender(e.target.value)} style={{ ...inputStyle, appearance: 'none' as any }}>
+                  {/* استایلِ حرفه‌ای select از globals.css می‌آید — اینلاین override نکن */}
+                  <select value={gender} onChange={e => setGender(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }}>
                     <option value="">انتخاب کنید</option>
                     <option value="male">مرد</option>
                     <option value="female">زن</option>
@@ -440,7 +407,7 @@ export default function ProfileMePage() {
             {/* ── باشگاه ── */}
             <Section title="باشگاه" icon="ti-building-store" color="#a78bfa">
               <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
-                باشگاهی که در آن بازی می‌کنید را انتخاب کنید
+                باشگاهی که در آن بازی می‌کنید را از میان باشگاه‌های ثبت‌شده انتخاب کنید
               </p>
               {clubName && (
                 <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 15, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -448,12 +415,7 @@ export default function ProfileMePage() {
                   {clubName}
                 </div>
               )}
-              <ClubSearch
-                value={profile.clubId}
-                manualValue={profile.clubNameManual}
-                onSelect={handleClub}
-                onManual={handleClubManual}
-              />
+              <ClubSearch onSelect={handleClub} />
             </Section>
 
             {/* ── کارت بانکی ── */}
@@ -484,22 +446,19 @@ export default function ProfileMePage() {
               </button>
             </Section>
 
-            {/* ── دسترسی‌ها ── */}
+            {/* ── دسترسی‌ها — همه با ثبتِ کد ملی هنگام ثبت‌نام فعال‌اند ── */}
             <Section title="دسترسی‌ها" icon="ti-lock-open" color="#C7A66A">
               {[
-                { label: 'رزرو میز', ok: isVerified, icon: 'ti-table' },
-                { label: 'خرید و فروش', ok: isVerified, icon: 'ti-shopping-bag' },
-                { label: 'مشاهده استوری', ok: isVerified, icon: 'ti-eye' },
-                { label: 'ثبت آگهی', ok: isVerified, icon: 'ti-plus' },
-                { label: 'پروفایل عمومی', ok: true, icon: 'ti-user' },
+                { label: 'رزرو میز', icon: 'ti-table' },
+                { label: 'خرید و فروش', icon: 'ti-shopping-bag' },
+                { label: 'مشاهده استوری', icon: 'ti-eye' },
+                { label: 'ثبت آگهی', icon: 'ti-plus' },
+                { label: 'پروفایل عمومی', icon: 'ti-user' },
               ].map(f => (
                 <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <i className={`ti ${f.icon}`} style={{ fontSize: 18, color: f.ok ? '#C7A66A' : 'rgba(0,0,0,0.35)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 15, color: f.ok ? '#111111' : 'rgba(0,0,0,0.35)', flex: 1 }}>{f.label}</span>
-                  {f.ok
-                    ? <i className="ti ti-check" style={{ fontSize: 16, color: '#C7A66A' }} />
-                    : <span style={{ fontSize: 12, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', borderRadius: 20, padding: '2px 8px' }}>نیاز به احراز</span>
-                  }
+                  <i className={`ti ${f.icon}`} style={{ fontSize: 18, color: '#C7A66A', flexShrink: 0 }} />
+                  <span style={{ fontSize: 15, color: '#111111', flex: 1 }}>{f.label}</span>
+                  <i className="ti ti-check" style={{ fontSize: 16, color: '#C7A66A' }} />
                 </div>
               ))}
             </Section>

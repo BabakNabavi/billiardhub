@@ -17,6 +17,7 @@ export interface PlayerProfile {
   name: string
   nameEn: string
   discipline: Discipline
+  province: string
   city: string
   country: string
   ranking: string            // خالی ⇒ بدون رنکینگ (در فرم متن است)
@@ -43,7 +44,7 @@ const KEY = 'bh_player_profiles'
 export function emptyPlayerProfile(slug: string, ownerId = '', ownerPhone = ''): PlayerProfile {
   return {
     slug, ownerId, ownerPhone,
-    name: '', nameEn: '', discipline: 'snooker', city: '', country: 'ایران',
+    name: '', nameEn: '', discipline: 'snooker', province: '', city: '', country: 'ایران',
     ranking: '', national: false, gender: 'm', youth: false, clubName: '',
     tone: 'felt', scene: '', intro: '', bio: [], careerStart: '',
     highlights: [], tournaments: [], albums: [], tags: [],
