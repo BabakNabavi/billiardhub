@@ -214,8 +214,12 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', boxShadow: `0 4px 18px rgba(184,147,58,0.38)`, flexShrink: 0 }}>
+            {/* سایه‌ی دولایه‌ی نرم + اورلی بِوِل (هایلایت بالا، تیرگی پایین) */}
+            <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
+              boxShadow: '0 1px 3px rgba(28,27,23,0.22), 0 6px 14px rgba(184,147,58,0.24)' }}>
                 <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
+                  boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(60,40,10,0.4), inset 1px 0 1px rgba(255,255,255,0.16), inset -1px 0 1px rgba(60,40,10,0.14)' }} />
               </div>
             <span style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
@@ -430,27 +434,28 @@ export default function Navbar() {
           padding: '8px clamp(16px,3vw,32px) 0',
           animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
+          {/* کارتِ روشنِ شیشه‌ای — متنِ سفیدِ قبلی روی صفحاتِ روشن دیده نمی‌شد */}
           <div style={{
             maxWidth: '560px', margin: '0 auto',
             display: 'flex', alignItems: 'center', gap: '10px',
-            background: 'rgba(255,255,255,0.10)',
-            border: '1px solid rgba(255,255,255,0.18)',
+            background: 'rgba(255,255,255,0.92)',
+            border: '1px solid rgba(28,28,26,0.10)',
             borderRadius: '20px', padding: '11px 16px',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 28px rgba(0,0,0,0.28)',
+            boxShadow: '0 6px 28px rgba(0,0,0,0.18)',
             backdropFilter: 'blur(48px) saturate(200%)',
             WebkitBackdropFilter: 'blur(48px) saturate(200%)',
           }}>
-            <Search size={18} color="rgba(255,255,255,0.38)" style={{ flexShrink: 0 }} />
+            <Search size={18} color="rgba(28,28,26,0.38)" style={{ flexShrink: 0 }} />
             <input autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="جستجو باشگاه، بازیکن، مربی..."
-              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontSize: '16px', fontFamily: 'inherit' }} />
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#1C1B17', fontSize: '16px', fontFamily: 'inherit' }} />
             {search && (
-              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(28,28,26,0.36)', padding: 0, display: 'flex', flexShrink: 0 }}>
                 <X size={13} />
               </button>
             )}
             <button onClick={() => { setSearchOpen(false); setSearch(''); }}
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.42)', padding: '4px', display: 'flex', flexShrink: 0 }}>
+              style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.10)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.45)', padding: '4px', display: 'flex', flexShrink: 0 }}>
               <X size={13} />
             </button>
           </div>
@@ -468,7 +473,7 @@ export default function Navbar() {
         }}>
           {/* Header row — centered brand */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', marginBottom: '8px' }} />
+            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', margin: '6px 0 8px' }} />
             <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
               <span style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.28), 0 -1px 0 rgba(255,255,255,0.45)' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
@@ -548,7 +553,7 @@ export default function Navbar() {
           <div style={{ margin: '20px 20px calc(14px + env(safe-area-inset-bottom))', marginTop: 'auto', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.78)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
-              <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
+              <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
             </div>
             <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
               ثبت‌نام <ArrowLeft size={10} />
