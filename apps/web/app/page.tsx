@@ -123,11 +123,10 @@ const IMG = {
    HERO SLIDES — all 5 wallpapers, each with an accent colour
 ═══════════════════════════════════════════════════════════════ */
 const HERO_SLIDES = [
-  { bg: IMG.wall1, accent: GRN,  label: 'باشگاه‌ها' },
-  { bg: IMG.wall2, accent: BLU,  label: 'مربیان'    },
-  { bg: IMG.wall3, accent: GOLD, label: 'تجهیزات'   },
-  { bg: IMG.wall4, accent: PRP,  label: 'رقابت'     },
-  { bg: IMG.wall5, accent: BRN,  label: 'آموزش'     },
+  { bg: '/images/hero/1.png',            accent: GRN,  label: 'باشگاه‌ها' },
+  { bg: '/images/hero/2.png',            accent: GOLD, label: 'تجهیزات'   },
+  { bg: '/images/hero/3.png',            accent: BLU,  label: 'مربیان'    },
+  { bg: '/images/hero/hero-lounge.jpg',  accent: BRN,  label: 'رقابت'     },
 ];
 
 const FEATURE_CARDS = [
@@ -705,13 +704,25 @@ function HomeMediaBand() {
         .hm-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900; z-index: 1;
           font-size: clamp(48px, 7.6vw, 104px); line-height: 1; letter-spacing: .04em;
           color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.06); user-select: none; pointer-events: none; direction: ltr; }
-        .hm-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 52%; z-index: 0;
+        .hm-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 52%; z-index: 0; overflow: hidden;
           -webkit-mask-image: linear-gradient(to right, black 44%, transparent 96%);
           mask-image: linear-gradient(to right, black 44%, transparent 96%); }
-        .hm-poster img { width: 100%; height: 100%; object-fit: cover;
-          filter: brightness(0.6) saturate(0.95) contrast(1.06);
-          transition: transform .9s cubic-bezier(.22,1,.36,1); }
-        .hm-band:hover .hm-poster img { transform: scale(1.03); }
+        /* صحنه‌ی سینمایی — تماماً CSS/SVG، بدون عکس */
+        .hm-stage { position: absolute; inset: 0;
+          background: radial-gradient(ellipse 70% 60% at 30% 100%, rgba(199,166,106,0.10), transparent 60%),
+                      linear-gradient(120deg, #0A0908 0%, #131009 60%, #0C0B09 100%); }
+        /* پرتوی نورِ پروژکتور از بالا-چپ */
+        .hm-beam { position: absolute; top: -12%; left: 6%; width: 68%; height: 130%;
+          background: conic-gradient(from 158deg at 18% 0%, transparent 0deg, rgba(255,238,204,0.13) 12deg, rgba(255,238,204,0.05) 26deg, transparent 38deg);
+          filter: blur(6px); animation: hmBeam 9s ease-in-out infinite; transform-origin: 18% 0%; }
+        @keyframes hmBeam { 0%,100% { transform: rotate(0deg); opacity: 1; } 50% { transform: rotate(3.5deg); opacity: .85; } }
+        .hm-cam { position: absolute; left: 9%; bottom: 6%; width: clamp(150px, 15vw, 220px); height: auto; opacity: .85;
+          filter: drop-shadow(0 14px 30px rgba(0,0,0,0.5)); }
+        /* هاله‌ی لنز */
+        .hm-flare { position: absolute; left: 26%; top: 34%; width: 90px; height: 90px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,240,210,0.22) 0%, rgba(199,166,106,0.08) 40%, transparent 68%);
+          filter: blur(4px); animation: hmFlare 6s ease-in-out infinite; }
+        @keyframes hmFlare { 0%,100% { opacity: .9; transform: scale(1); } 50% { opacity: .55; transform: scale(1.15); } }
         .hm-play { position: absolute; z-index: 5; top: 50%; left: 24%; transform: translate(-50%,-50%);
           width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
           color: #0C0B09; background: rgba(199,166,106,0.94); box-shadow: 0 12px 36px rgba(199,166,106,0.4);
@@ -771,9 +782,31 @@ function HomeMediaBand() {
       <div className="hm-perf hm-perf-t" aria-hidden />
       <div className="hm-perf hm-perf-b" aria-hidden />
 
-      {/* پوسترِ ویدیوی ویژه — در تاریکی حل می‌شود */}
+      {/* پوسترِ سینمایی — صحنه‌ی CSS/SVG: دوربین فیلم‌برداری + نور پروژکتور */}
       <div className="hm-poster" aria-hidden>
-        <img src={MEDIA_FEAT.thumb} alt="" loading="lazy" />
+        <div className="hm-stage" />
+        <div className="hm-beam" />
+        <div className="hm-flare" />
+        {/* دوربین سینمایی — لاین‌آرتِ طلایی */}
+        <svg className="hm-cam" viewBox="0 0 220 150" fill="none" stroke="#C7A66A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          {/* حلقه‌های فیلم */}
+          <circle cx="78" cy="28" r="20" opacity=".9" />
+          <circle cx="78" cy="28" r="8" opacity=".55" />
+          <circle cx="122" cy="28" r="20" opacity=".9" />
+          <circle cx="122" cy="28" r="8" opacity=".55" />
+          {/* بدنه */}
+          <rect x="58" y="48" width="86" height="44" rx="8" opacity=".95" />
+          <circle cx="80" cy="70" r="9" opacity=".5" />
+          {/* لنز */}
+          <path d="M144 60 L172 50 L172 90 L144 80 Z" opacity=".95" />
+          <line x1="172" y1="56" x2="184" y2="52" opacity=".45" />
+          <line x1="172" y1="84" x2="184" y2="88" opacity=".45" />
+          {/* سه‌پایه */}
+          <line x1="101" y1="92" x2="101" y2="104" opacity=".8" />
+          <line x1="101" y1="104" x2="76" y2="142" opacity=".8" />
+          <line x1="101" y1="104" x2="126" y2="142" opacity=".8" />
+          <line x1="101" y1="104" x2="101" y2="140" opacity=".55" />
+        </svg>
       </div>
       <Link href={`/media/${MEDIA_FEAT.id}`} className="hm-play" aria-label="پخش ویدیوی ویژه">
         <Play size={24} fill="currentColor" />
