@@ -202,6 +202,8 @@ export default function Navbar() {
       {/* ── NAV ── */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
+        /* PWA اپل (Add to Home Screen): نوبار نباید زیر ساعت/آنتن برود */
+        paddingTop: 'env(safe-area-inset-top)',
         background: navBg,
         borderBottom: isLight ? `1px solid rgba(28,28,26,0.06)` : '1px solid transparent',
         backdropFilter: isLight ? 'blur(32px) saturate(1.8)' : 'none',
@@ -424,7 +426,7 @@ export default function Navbar() {
       {/* Search pill — floats below navbar, no dark backdrop */}
       {searchOpen && (
         <div ref={searchRef} style={{
-          position: 'fixed', top: '72px', left: 0, right: 0, zIndex: 180,
+          position: 'fixed', top: 'calc(72px + env(safe-area-inset-top))', left: 0, right: 0, zIndex: 180,
           padding: '8px clamp(16px,3vw,32px) 0',
           animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
@@ -559,7 +561,7 @@ export default function Navbar() {
       {isHomePage && (
         <div className="hero-stories-bar" style={{
           position: 'fixed',
-          top: searchOpen ? '130px' : '72px',
+          top: searchOpen ? 'calc(130px + env(safe-area-inset-top))' : 'calc(72px + env(safe-area-inset-top))',
           left: 0, right: 0, zIndex: 49,
           padding: '6px clamp(16px,3vw,32px) 4px',
           background: 'linear-gradient(to bottom,rgba(4,2,10,0.48) 0%,rgba(4,2,10,0) 100%)',
@@ -573,7 +575,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {!isHomePage && <div style={{ height: '72px' }} />}
+      {!isHomePage && <div style={{ height: 'calc(72px + env(safe-area-inset-top))' }} />}
     </>
   );
 }
