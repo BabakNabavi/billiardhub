@@ -194,6 +194,12 @@ export default function Navbar() {
         .mob  { display:none  !important; }
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
+        /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون */
+        @media(max-width:430px) {
+          .nav-inner { padding:0 10px !important; gap:6px !important; }
+          .nav-brand { font-size:17px !important; }
+          .nav-login-btn { padding:8px 10px !important; font-size:12.5px !important; gap:4px !important; }
+        }
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
         .mob-link-item:hover { background: rgba(184,147,58,0.06) !important; }
@@ -210,18 +216,18 @@ export default function Navbar() {
         transition: 'all 0.4s ease',
         boxShadow: isLight ? '0 1px 0 rgba(28,28,26,0.04), 0 4px 24px rgba(28,28,26,0.04)' : 'none',
       }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div className="nav-inner" style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
 
           {/* Logo */}
           <Link href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            {/* سایه‌ی دولایه‌ی نرم + اورلی بِوِل (هایلایت بالا، تیرگی پایین) */}
+            {/* سایه‌ی خیلی نرم + بِوِلِ ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
-              boxShadow: '0 1px 3px rgba(28,27,23,0.22), 0 6px 14px rgba(184,147,58,0.24)' }}>
+              boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
                 <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
-                  boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(60,40,10,0.4), inset 1px 0 1px rgba(255,255,255,0.16), inset -1px 0 1px rgba(60,40,10,0.14)' }} />
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>
-            <span style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+            <span className="nav-brand" style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
               <span style={{ color: isLight ? '#000000' : '#ffffff' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
             </span>
@@ -354,7 +360,7 @@ export default function Navbar() {
 
             {!user ? (
               <Link href="/login">
-                <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '9px 16px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
+                <button className="nav-login-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '9px 16px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(184,147,58,0.15)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = GOLD_LIGHT }}>
                   <User size={16} /> ورود | عضویت
