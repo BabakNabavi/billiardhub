@@ -185,6 +185,10 @@ const CLUBS = [
   { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.clubB, img2:IMG.club1,   price:65000, badge:null,      tags:['مربی','مسابقه'],        hasStory:true  },
   { id:'3', name:'باشگاه پیروزی اصفهان', city:'اصفهان', dist:'چهارباغ',    tables:10, rating:4.8, reviews:198, type:'هی‌بال', img:IMG.club6, img2:IMG.club2,   price:75000, badge:'جدید',    tags:['آموزش','مبتدی'],        hasStory:false },
   { id:'4', name:'باشگاه حافظ شیراز',    city:'شیراز',  dist:'لطفعلی‌خان', tables:6,  rating:4.6, reviews:89,  type:'اسنوکر', img:IMG.club1, img2:IMG.snooker, price:55000, badge:null,      tags:['هفت روز'],              hasStory:false },
+  { id:'5', name:'باشگاه آریا تبریز',    city:'تبریز',  dist:'شریعتی',     tables:14, rating:4.5, reviews:143, type:'اسنوکر', img:IMG.club4, img2:IMG.club5,   price:70000, badge:null,      tags:['پارکینگ','کافه'],       hasStory:false },
+  { id:'6', name:'باشگاه مروارید کرج',   city:'کرج',    dist:'توحید',      tables:8,  rating:4.1, reviews:34,  type:'پاکت',   img:IMG.club5, img2:IMG.club6,   price:60000, badge:null,      tags:['مبتدی'],                hasStory:false },
+  { id:'7', name:'باشگاه سنچوری تهران',  city:'تهران',  dist:'ولیعصر',     tables:13, rating:4.8, reviews:124, type:'اسنوکر', img:IMG.clubA, img2:IMG.club2,   price:85000, badge:'VIP',     tags:['VIP','مربی'],           hasStory:false },
+  { id:'8', name:'باشگاه شاهین اهواز',   city:'اهواز',  dist:'کیانپارس',   tables:9,  rating:4.4, reviews:76,  type:'هی‌بال', img:IMG.clubC, img2:IMG.club1,   price:50000, badge:null,      tags:['کافه'],                 hasStory:false },
 ];
 
 const PRODUCTS = [
@@ -370,12 +374,18 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', direction: 'ltr' }}>
-              <span style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', marginRight: '2px' }}>{club.rating}</span>
-              {[1,2,3,4,5].map(i => (
-                <Star key={i} size={9} style={{ color: '#F5A623',
-                  fill: i <= Math.round(club.rating) ? '#F5A623' : 'transparent',
-                  opacity: i <= Math.round(club.rating) ? 1 : 0.22 }} />
+            {/* تعداد میزها به‌جای امتیاز */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap', marginTop: '1px' }}>
+              {[
+                { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
+                { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
+                { label: 'هی‌بال', n: hiballTables,  clr: '#8b5cf6' },
+              ].map(t => (
+                <span key={t.label} style={{ fontSize: '9px', fontWeight: 700, color: t.clr,
+                  background: `${t.clr}12`, border: `1px solid ${t.clr}26`,
+                  borderRadius: '20px', padding: '1px 6px', whiteSpace: 'nowrap' }}>
+                  {t.label} {t.n.toLocaleString('fa-IR')}
+                </span>
               ))}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
@@ -1340,9 +1350,14 @@ useEffect(() => {
           .feat-track { animation-duration: 30s; }           /* موبایل هم همان چرخشِ نرم */
         }
         @media (prefers-reduced-motion: reduce){ .feat-track { animation:none !important; } }
-        .clubs-mobile-slider { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
+        .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
+        /* نوارِ اسکرولیِ دسکتاپِ باشگاه‌ها — مثل بازار/فروشندگان */
+        .clubs-strip { display:flex; gap:14px; overflow-x:auto; scrollbar-width:none;
+          padding:2px 2px 10px; scroll-snap-type:x proximity; }
+        .clubs-strip::-webkit-scrollbar { display:none; }
+        .club-desk-card { flex:0 0 290px; scroll-snap-align:start; }
         .clubs-dots { display:none !important; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
@@ -1638,16 +1653,19 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          <div className="clubs-desk clubs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+          {/* دسکتاپ — نوارِ اسکرولی مثل بازار/فروشندگان؛ کارت ۱۰٪ کوچک‌تر، ۸ باشگاه با اسکرول */}
+          <div className="clubs-desk clubs-strip">
             {CLUBS.map((c, i) => (
-              <SR key={c.id} delay={i * 60}><ClubCard club={c} h="clamp(374px,36vw,495px)" /></SR>
+              <div key={c.id} className="club-desk-card">
+                <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(337px,32.4vw,446px)" /></SR>
+              </div>
             ))}
           </div>
-          {/* موبایل — عرض ۲.۵٪ بیشتر (۴۲ ⇒ ۴۳.۰۵vw) و ارتفاع ۵٪ بیشتر (هر سه عددِ clamp × ۱.۰۵) */}
+          {/* موبایل — ۱۰٪ بزرگ‌تر (۴۳.۰۵ ⇒ ۴۷.۳۶vw) و فاصله‌ی کمتر بین کارت‌ها */}
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
             {CLUBS.map((c) => (
-              <div key={c.id} className="club-mob-card" style={{ width: '43.05vw', minWidth: '158px', flexShrink: 0, scrollSnapAlign: 'center' }}>
-                <ClubCard club={c} h="clamp(237px,68.88vw,320px)" />
+              <div key={c.id} className="club-mob-card" style={{ width: '47.36vw', minWidth: '174px', flexShrink: 0, scrollSnapAlign: 'center' }}>
+                <ClubCard club={c} h="clamp(261px,75.77vw,352px)" />
               </div>
             ))}
           </div>
