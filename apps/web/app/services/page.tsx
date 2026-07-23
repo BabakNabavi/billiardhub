@@ -112,6 +112,32 @@ export default function ServicesPage() {
       <style>{`
         @keyframes svFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
         @keyframes svScaleX { from { opacity:0; transform: scaleX(0); } to { opacity:1; transform: scaleX(1); } }
+        @keyframes svSweep  { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(240%) skewX(-18deg); } }
+
+        /* ═══ هیروی سینماییِ Craftsmanship ═══ */
+        .sv-hero { position: relative; overflow: hidden; color: #fff; background: #0C0B09; }
+        .sv-hero-img { position: absolute; inset: 0; background: url('/images/services/repaire.jfif') center 40%/cover;
+          filter: grayscale(0.45) brightness(0.48) contrast(1.1) sepia(0.12); transform: scale(1.05); }
+        .sv-hero-grade { position: absolute; inset: 0; background:
+          radial-gradient(ellipse 55% 85% at 22% 10%, rgba(255,238,204,0.16), transparent 55%),
+          linear-gradient(260deg, rgba(12,11,9,0.96) 28%, rgba(12,11,9,0.55) 60%, rgba(12,11,9,0.85) 100%),
+          linear-gradient(0deg, rgba(12,11,9,0.92) 0%, transparent 36%); }
+        .sv-hero::after { content: ''; position: absolute; top: -30%; bottom: -30%; width: 28%;
+          background: linear-gradient(105deg, transparent, rgba(255,244,222,0.045), transparent);
+          animation: svSweep 9s cubic-bezier(.4,0,.2,1) infinite; pointer-events: none; }
+        .sv-hero-word { position: absolute; bottom: -8px; inset-inline-start: -5px; font-weight: 900;
+          font-size: clamp(60px, 10.5vw, 136px); line-height: 1; letter-spacing: .04em;
+          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.08); user-select: none; pointer-events: none; direction: ltr; }
+        /* خط‌کشِ دقت — تیک‌های اندازه‌گیری در پایینِ هیرو */
+        .sv-ruler { position: absolute; bottom: 0; inset-inline: 0; height: 12px;
+          background:
+            repeating-linear-gradient(90deg, rgba(199,166,106,0.55) 0 1px, transparent 1px 12px),
+            repeating-linear-gradient(90deg, rgba(199,166,106,0.85) 0 1.5px, transparent 1.5px 60px);
+          background-position: bottom; background-size: 100% 5px, 100% 12px; background-repeat: no-repeat; opacity: .8; }
+        .sv-spec { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700;
+          color: rgba(255,255,255,0.72); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
+          padding: 5px 13px; backdrop-filter: blur(6px); }
+        .sv-spec i { width: 6px; height: 6px; border-radius: 50%; background: ${GOLD}; }
         @keyframes svSheet  { from { transform: translateY(100%); } to { transform: none; } }
         @keyframes svFade   { from { opacity:0; } to { opacity:1; } }
         .sv-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
@@ -173,27 +199,34 @@ export default function ServicesPage() {
           .sv-desk-filters { display: none !important; }
           .sv-mobile-only { display: inline-flex; }
         }
-        @media (prefers-reduced-motion: reduce) { .sv-card { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { .sv-card { animation: none; } .sv-hero::after { animation: none; display: none; } }
       `}</style>
 
-      {/* ═══ هیرو — مینیمال و لوکس ═══ */}
-      <header style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FDFCFA 0%,#F7F7F5 100%)', borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ position: 'absolute', left: '-4%', top: '-44%', width: 330, height: 330, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.15) 0%, transparent 66%)', filter: 'blur(46px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: '14%', bottom: '-58%', width: 270, height: 270, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.08) 0%, transparent 62%)', filter: 'blur(46px)', pointerEvents: 'none' }} />
-        {/* خطِ موییِ اریب — امضای ظریفِ این بخش */}
-        <div style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '30%', width: 1, background: `linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)`, transform: 'rotate(16deg)', pointerEvents: 'none' }} />
-        <div className="sv-wrap" style={{ position: 'relative', padding: 'clamp(28px,4.4vw,50px) clamp(16px,3vw,28px) clamp(22px,3.4vw,34px)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.22em', color: GOLD_D, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: 999, padding: '4px 12px', marginBottom: 14 }}>
+      {/* ═══ هیروی سینمایی — Craftsmanship ═══ */}
+      <header className="sv-hero">
+        <div className="sv-hero-img" />
+        <div className="sv-hero-grade" />
+        <div style={{ position: 'absolute', top: '-24%', bottom: '-24%', left: '31%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform: 'rotate(14deg)', pointerEvents: 'none' }} />
+        <div className="sv-hero-word">CRAFT</div>
+        <div className="sv-wrap" style={{ position: 'relative', padding: 'clamp(34px,5.2vw,66px) clamp(16px,3vw,28px) clamp(34px,5vw,58px)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px', marginBottom: 16 }}>
             <Wrench size={11} /> TECHNICAL SPECIALISTS
           </span>
-          <h1 style={{ fontSize: 'clamp(24px,3.8vw,40px)', fontWeight: 900, margin: 0, lineHeight: 1.3, letterSpacing: '-0.02em', maxWidth: 620 }}>
-            متخصصان <span style={{ background: `linear-gradient(135deg,#7A4F10,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>خدمات فنی</span> بیلیارد
+          <h1 style={{ fontSize: 'clamp(26px,4.4vw,48px)', fontWeight: 900, margin: 0, lineHeight: 1.3, letterSpacing: '-0.02em', maxWidth: 640 }}>
+            متخصصان <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 50%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>خدمات فنی</span> بیلیارد
           </h1>
-          <div style={{ width: 62, height: 3, borderRadius: 2, marginTop: 12, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'svScaleX .5s .25s ease both' }} />
-          <p style={{ margin: '12px 0 0', fontSize: 'clamp(12.5px,1.4vw,14px)', color: SEC, maxWidth: 540, lineHeight: 1.9 }}>
+          <div style={{ width: 66, height: 3, borderRadius: 2, marginTop: 13, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'svScaleX .55s .3s ease both' }} />
+          <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.62)', maxWidth: 520, lineHeight: 2, animation: 'svFadeUp .5s .3s ease both' }}>
             از نصب و رگلاژ تا پارچه‌کشی و بازسازی — متخصصانِ اکوسیستم بیلیارد هاب را بشناسید و مستقیم با آن‌ها در ارتباط باشید.
           </p>
+          {/* مهرِ کیفیتِ کار — دقت، مهارت، اعتماد */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 18, animation: 'svFadeUp .5s .4s ease both' }}>
+            <span className="sv-spec"><i /> رگلاژ میلی‌متری</span>
+            <span className="sv-spec"><i /> پارچه‌ی مسابقه‌ای</span>
+            <span className="sv-spec"><i /> بازسازی تخصصی</span>
+          </div>
         </div>
+        <div className="sv-ruler" />
       </header>
 
       {/* ═══ نوار جستجو و فیلتر ═══ */}
