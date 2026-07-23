@@ -22,7 +22,9 @@ export interface ManufacturerProfile {
   about: string
   productionCapability: string
   exportCountries: string
+  totalProduced: string
   employees: string
+  certificates: { title: string; issuer: string; year: string }[]
   phone: string
   whatsapp: string
   instagram: string
@@ -43,7 +45,7 @@ export function emptyManufacturerProfile(slug: string, ownerId = '', ownerPhone 
     slug, ownerId, ownerPhone,
     name: '', city: '', province: '', sinceYear: '', specialties: [],
     description: '', tagline: '', about: '', productionCapability: '',
-    exportCountries: '', employees: '', phone: '', whatsapp: '',
+    exportCountries: '', totalProduced: '', employees: '', certificates: [], phone: '', whatsapp: '',
     instagram: '', website: '', address: '', hours: '', bannerImage: '',
     products: [],
     status: 'approved', updatedAt: '',
@@ -125,7 +127,7 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     about: p.about || p.description,
     employees: p.employees || '—',
     exportCountries: p.exportCountries || '—',
-    totalProduced: '—',
+    totalProduced: p.totalProduced || '—',
     productionCapability: p.productionCapability || '—',
     whatsapp: p.whatsapp || p.phone.replace(/^0/, '98'),
     instagram: p.instagram,
@@ -133,6 +135,6 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     hours: p.hours || '—',
     website: p.website,
     products: p.products,
-    certificates: [],
+    certificates: p.certificates,
   }
 }

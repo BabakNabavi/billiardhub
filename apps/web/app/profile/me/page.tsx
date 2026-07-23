@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import { useAuthStore } from '../../../store/auth.store'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -213,22 +214,46 @@ export default function ProfileMePage() {
 
   const fileRef = useRef<HTMLInputElement>(null)
 
+  /* اگر API در دسترس نبود، از حسابِ محلی (store) پر می‌کنیم —
+     قبلاً به /login می‌فرستاد که خودش به /dashboard برمی‌گشت و
+     «ویرایش پروفایل» عملاً بی‌اثر می‌شد */
+  const buildLocalProfile = (): UserProfile | null => {
+    const u = useAuthStore.getState().user
+    if (!u) return null
+    return {
+      id: u.id, firstName: u.firstName ?? '', lastName: u.lastName ?? '',
+      phone: u.phone ?? '', email: u.email || undefined, avatar: u.avatar || undefined,
+      bio: u.bio ?? '', province: undefined, city: u.city ?? '',
+      birthDate: undefined, gender: undefined, instagram: undefined, telegram: undefined,
+      nationalId: undefined, nationalIdVerified: false, phoneVerified: false,
+      emailVerified: false, verificationStatus: 'none', isProfileComplete: u.isProfileComplete,
+      primaryRole: u.primaryRole, secondaryRoles: u.secondaryRoles ?? [],
+      clubId: undefined, clubNameManual: undefined, bankCard: undefined, bankCardOwner: undefined,
+    }
+  }
+
+  const applyProfile = (j: UserProfile) => {
+    setProfile(j)
+    setBio(j.bio ?? '')
+    setProvince(j.province ?? '')
+    setCity(j.city ?? '')
+    setBirthDate(j.birthDate ?? '')
+    setGender(j.gender ?? '')
+    setInstagram(j.instagram ?? '')
+    setBankOwner(j.bankCardOwner ?? '')
+    setClubName(j.clubNameManual ?? '')
+  }
+
   useEffect(() => {
+    const fallback = () => {
+      const local = buildLocalProfile()
+      if (local) applyProfile(local)
+      else router.push('/login')
+    }
     fetch(`${API}/user/profile/me`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : null)
-      .then(j => {
-        if (!j) { router.push('/login'); return }
-        setProfile(j)
-        setBio(j.bio ?? '')
-        setProvince(j.province ?? '')
-        setCity(j.city ?? '')
-        setBirthDate(j.birthDate ?? '')
-        setGender(j.gender ?? '')
-        setInstagram(j.instagram ?? '')
-        setBankOwner(j.bankCardOwner ?? '')
-        setClubName(j.clubNameManual ?? '')
-      })
-      .catch(() => router.push('/login'))
+      .then(j => { if (j) applyProfile(j); else fallback() })
+      .catch(fallback)
       .finally(() => setLoading(false))
   }, [])
 
@@ -248,7 +273,9 @@ export default function ProfileMePage() {
       if (!res.ok) throw new Error()
       showToast('پروفایل ذخیره شد')
     } catch {
-      showToast('خطا در ذخیره', 'error')
+      /* API در دسترس نیست ⇒ ذخیره‌ی محلی در حسابِ کاربر (persist می‌شود) */
+      useAuthStore.getState().updateUser({ bio, city })
+      showToast('پروفایل به‌صورت محلی ذخیره شد')
     } finally { setSaving(false) }
   }
 

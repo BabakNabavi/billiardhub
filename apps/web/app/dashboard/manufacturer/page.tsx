@@ -38,6 +38,7 @@ export default function ManufacturerDashboard() {
   const bannerRef = useRef<HTMLInputElement>(null)
   const prodImgRef = useRef<HTMLInputElement>(null)
   const [prod, setProd] = useState({ name: '', category: '', description: '', image: '' })
+  const [cert, setCert] = useState({ title: '', issuer: '', year: '' })
 
   const isManufacturer = !!user && [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('manufacturer')
 
@@ -212,6 +213,46 @@ export default function ManufacturerDashboard() {
                 <label className={LABEL}>تعداد پرسنل</label>
                 <input className={INPUT} value={form.employees} onChange={e => set('employees', e.target.value)} placeholder="مثال: ۲۵ نفر" />
               </div>
+              <div>
+                <label className={LABEL}>کشورهای صادرات</label>
+                <input className={INPUT} value={form.exportCountries} onChange={e => set('exportCountries', e.target.value)} placeholder="مثال: عراق، امارات، عمان" />
+              </div>
+              <div>
+                <label className={LABEL}>مجموع تولید تاکنون</label>
+                <input className={INPUT} value={form.totalProduced} onChange={e => set('totalProduced', e.target.value)} placeholder="مثال: بیش از ۲٬۰۰۰ میز" />
+              </div>
+            </div>
+          </section>
+
+          {/* ═══ گواهینامه‌ها و استانداردها ═══ */}
+          <section className={CARD}>
+            <h2 className="mb-1 text-[14.5px] font-bold">گواهینامه‌ها و استانداردها</h2>
+            <p className="mb-4 text-[12px] text-[#8A8474]">در صفحه‌ی تولیدکننده نمایش داده می‌شوند.</p>
+            {form.certificates.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {form.certificates.map((c, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] px-3 py-2.5">
+                    <span className="flex-1 text-[13px] font-bold">{c.title}</span>
+                    <span className="text-[11.5px] text-[#8A8474]">{c.issuer}</span>
+                    <span className="text-[11.5px] text-[#8A8474]">{c.year}</span>
+                    <button type="button" onClick={() => set('certificates', form.certificates.filter((_, x) => x !== i))}
+                      className="rounded-lg p-1.5 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={14} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-col gap-2 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:flex-row">
+              <input className={INPUT} value={cert.title} onChange={e => setCert(c => ({ ...c, title: e.target.value }))} placeholder="عنوان — مثال: ISO 9001" />
+              <input className={INPUT} value={cert.issuer} onChange={e => setCert(c => ({ ...c, issuer: e.target.value }))} placeholder="صادرکننده" />
+              <input className={`${INPUT} sm:w-28`} value={cert.year} onChange={e => setCert(c => ({ ...c, year: e.target.value }))} placeholder="سال" />
+              <button type="button" className={`${LQ_BTN} shrink-0`}
+                onClick={() => {
+                  if (!cert.title.trim()) { setErr('عنوان گواهینامه لازم است.'); return }
+                  set('certificates', [...form.certificates, { title: cert.title.trim(), issuer: cert.issuer.trim(), year: cert.year.trim() }])
+                  setCert({ title: '', issuer: '', year: '' })
+                }}>
+                <Plus size={14} /> افزودن
+              </button>
             </div>
           </section>
 

@@ -62,6 +62,7 @@ export default function SellerDashboard() {
   const certRef   = useRef<HTMLInputElement>(null)
   const bannerRef = useRef<HTMLInputElement>(null)
   const aboutRef  = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   const isSeller = useMemo(() => {
     if (!user) return false
@@ -119,6 +120,20 @@ export default function SellerDashboard() {
       if (room <= 0) { setErr(`حداکثر ${toFa(max)} عکس.`); return }
       const urls = await Promise.all(files.slice(0, room).map(f => compressImage(f, 1600)))
       set(key, [...cur, ...urls])
+    } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
+    finally { setBusy(false); e.target.value = '' }
+  }
+
+  /* گالریِ فروشگاه — تا ۱۲ عکس؛ همان گالری‌ای که در صفحه‌ی عمومی نمایش داده می‌شود */
+  const addGalleryShots = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+    setBusy(true); setErr('')
+    try {
+      const room = 12 - form.gallery.length
+      if (room <= 0) { setErr('حداکثر ۱۲ عکس.'); return }
+      const urls = await Promise.all(files.slice(0, room).map(f => compressImage(f, 1400, 0.72)))
+      set('gallery', [...form.gallery, ...urls.map(u => ({ id: Math.random().toString(36).slice(2, 9), url: u }))])
     } catch { setErr('آپلود نشد. دوباره تلاش کنید.') }
     finally { setBusy(false); e.target.value = '' }
   }
@@ -453,6 +468,46 @@ export default function SellerDashboard() {
                     <img src={url} alt="" className="h-full w-full object-cover"/>
                     <button type="button" aria-label="حذف عکس"
                       onClick={() => set('aboutImages', form.aboutImages.filter((_, j) => j !== i))}
+                      className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
+                      {Icon.trash}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ═══ گالری تصاویر فروشگاه ═══ */}
+          <section className={CARD}>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-[14.5px] font-bold">گالری تصاویر فروشگاه</h2>
+                <p className="mt-1 text-[12px] text-[#8A8474]">
+                  {form.gallery.length > 0
+                    ? `${toFa(form.gallery.length)} از ۱۲ عکس`
+                    : 'حداکثر ۱۲ عکس — در بخشِ گالریِ صفحه‌ی فروشگاه نمایش داده می‌شوند'}
+                </p>
+              </div>
+              <button type="button" onClick={() => galleryRef.current?.click()}
+                disabled={busy || form.gallery.length >= 12} className={LQ_BTN}>
+                {Icon.upload} افزودن عکس
+              </button>
+              <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={addGalleryShots}/>
+            </div>
+
+            {form.gallery.length === 0 ? (
+              <button type="button" onClick={() => galleryRef.current?.click()}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E7E2D6] py-10 text-[#8A8474] transition-colors hover:border-[#14532D]/40 hover:text-[#14532D]">
+                {Icon.upload}
+                <span className="text-[12.5px]">هنوز عکسی اضافه نشده</span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                {form.gallery.map((shot, i) => (
+                  <div key={shot.id} className="relative aspect-square overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
+                    <img src={shot.url} alt="" className="h-full w-full object-cover"/>
+                    <button type="button" aria-label="حذف عکس"
+                      onClick={() => set('gallery', form.gallery.filter((_, j) => j !== i))}
                       className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
                       {Icon.trash}
                     </button>
