@@ -74,7 +74,9 @@ export default function LoginPage() {
           background: #F7F5F0; font-family: Vazirmatn, Tahoma, sans-serif; }
 
         /* ═══ پنل برند (تیره‌ی سینمایی) ═══ */
-        .au-brand { position: relative; overflow: hidden; color: #fff; background: #0B0A08; }
+        /* پنل برند: چسبان و دقیقاً هم‌ارتفاعِ ویوپورت (زیر نوبار) ⇒ عکس همیشه فیت، بدون اسکرول اضافه */
+        .au-brand { position: sticky; top: 62px; align-self: start; height: calc(100vh - 62px);
+          overflow: hidden; color: #fff; background: #0B0A08; }
         .au-brand-img { position: absolute; inset: 0; background: url('/images/hero/hero-lounge.jpg') center/cover;
           filter: grayscale(0.3) brightness(0.5) contrast(1.08); transform: scale(1.03); }
         .au-brand-grade { position: absolute; inset: 0; background:
@@ -138,28 +140,13 @@ export default function LoginPage() {
       <div className="au-mob-brand">
         <div style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
         <div className="au-mob-word" aria-hidden>LOGIN</div>
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: 38, height: 38, borderRadius: 11 }} />
-          <span style={{ fontSize: 19, fontWeight: 900, color: '#fff' }}>
-            بیلیارد <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>هاب</span>
-          </span>
-        </Link>
-        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>پلتفرم جامع و هوشمند بیلیارد ایران</div>
+        <div style={{ fontSize: 15, fontWeight: 900, color: '#fff' }}>ورود به حساب</div>
+        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', marginTop: 5 }}>پلتفرم جامع و هوشمند بیلیارد ایران</div>
       </div>
 
       {/* ═══ ستون فرم ═══ */}
       <div className="au-form-col">
         <div className="au-card">
-
-          {/* لوگو — دسکتاپ */}
-          <div className="au-desk-logo" style={{ textAlign: 'center', marginBottom: 26 }}>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: 44, height: 44, borderRadius: 13, boxShadow: '0 8px 24px rgba(199,166,106,0.3)' }} />
-              <span style={{ fontSize: 23, fontWeight: 900, color: TEXT, letterSpacing: '-0.02em' }}>
-                بیلیارد <span style={{ background: `linear-gradient(135deg,#7A4F10,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>هاب</span>
-              </span>
-            </Link>
-          </div>
 
           <h1 style={{ fontSize: 23, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>ورود به حساب</h1>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
