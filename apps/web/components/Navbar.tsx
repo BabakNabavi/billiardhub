@@ -351,7 +351,7 @@ export default function Navbar() {
                 <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: GOLD_LIGHT, border: `1px solid ${GOLD_BORDER}`, borderRadius: '12px', padding: '9px 16px', color: GOLD, fontSize: '14px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '40px' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(184,147,58,0.15)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = GOLD_LIGHT }}>
-                  <User size={16} /> ورود
+                  <User size={16} /> ورود | عضویت
                 </button>
               </Link>
             ) : (
