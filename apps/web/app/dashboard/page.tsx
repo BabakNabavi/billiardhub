@@ -269,9 +269,16 @@ export default function DashboardPage() {
           .stats-row    { grid-template-columns: repeat(2,1fr) !important; }
           .actions-row  { grid-template-columns: repeat(3,1fr) !important; }
         }
+        /* موبایل — حسِ اپ: دسترسی سریع مثل تب‌بار، ۵تایی و فشرده */
+        @media(max-width:640px) {
+          .actions-row { grid-template-columns: repeat(5,1fr) !important; gap: 7px !important; }
+          .quick-action { padding: 10px 2px !important; gap: 6px !important; border-radius: 13px !important; }
+          .quick-action > div { width: 36px !important; height: 36px !important; border-radius: 11px !important; }
+          .quick-action > div svg { width: 17px !important; height: 17px !important; }
+          .quick-action span { font-size: 10.5px !important; }
+        }
         @media(max-width:480px) {
           .stats-row    { grid-template-columns: repeat(2,1fr) !important; }
-          .actions-row  { grid-template-columns: repeat(2,1fr) !important; }
         }
       `}</style>
 
