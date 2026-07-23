@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Trophy, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
@@ -53,16 +53,19 @@ const sampleEvents: EventItem[] = [
 
 export default function AdminEventsPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hydrated } = useAuthStore();
   const [events, setEvents] = useState<EventItem[]>(sampleEvents);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<typeof emptyForm>(emptyForm);
 
-  if (!user || user.primaryRole !== 'admin') {
-    router.push('/');
-    return null;
-  }
+  /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
+  useEffect(() => {
+    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, user, router]);
+
+  if (!_hydrated) return null;
+  if (!user || user.primaryRole !== 'admin') return null;
 
   const set = (name: string, value: any) => setForm(f => ({ ...f, [name]: value }));
 

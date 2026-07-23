@@ -11,7 +11,7 @@ import {
 
 export default function AdminRankingsPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hydrated } = useAuthStore();
   const [sport, setSport] = useState('snooker');
   const [gender, setGender] = useState('آقایان');
   const [category, setCategory] = useState('دسته برتر');
@@ -21,10 +21,13 @@ export default function AdminRankingsPage() {
   /* داده‌ی ذخیره‌شده بعد از mount لود می‌شود */
   useEffect(() => { setRankings(getStoredRankings()); }, []);
 
-  if (!user || user.primaryRole !== 'admin') {
-    router.push('/');
-    return null;
-  }
+  /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
+  useEffect(() => {
+    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, user, router]);
+
+  if (!_hydrated) return null;
+  if (!user || user.primaryRole !== 'admin') return null;
 
   const players = rankings[sport]?.[gender]?.[category] || [];
 

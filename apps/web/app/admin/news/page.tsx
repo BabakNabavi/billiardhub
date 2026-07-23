@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Newspaper, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
@@ -33,17 +33,20 @@ const emptyForm = { title: '', summary: '', content: '', category: 'general', ta
 
 export default function AdminNewsPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hydrated } = useAuthStore();
   const [news, setNews] = useState<NewsItem[]>(sampleNews);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saved, setSaved] = useState(false);
 
-  if (!user || user.primaryRole !== 'admin') {
-    router.push('/');
-    return null;
-  }
+  /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
+  useEffect(() => {
+    if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
+  }, [_hydrated, user, router]);
+
+  if (!_hydrated) return null;
+  if (!user || user.primaryRole !== 'admin') return null;
 
   const handleEdit = (item: NewsItem) => {
     setEditingId(item.id);
