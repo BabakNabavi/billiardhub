@@ -168,7 +168,13 @@ export default function LoginPage() {
               <input
                 type="tel"
                 value={phone}
-                onChange={e => { setPhone(e.target.value); setError(''); }}
+                onChange={e => {
+                  /* فقط عدد، ۱۱ رقم، حتماً ۰۹ (۹ اول ⇒ ۰ اضافه می‌شود) */
+                  let d = e.target.value.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
+                  if (d && d[0] !== '0') d = d[0] === '9' ? '0' + d : '';
+                  if (d.length >= 2 && d[1] !== '9') d = d.slice(0, 1);
+                  setPhone(d.slice(0, 11)); setError('');
+                }}
                 onFocus={() => setPhoneFocus(true)}
                 onBlur={() => setPhoneFocus(false)}
                 onKeyDown={e => e.key === 'Enter' && handleLogin()}

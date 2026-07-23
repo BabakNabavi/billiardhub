@@ -305,7 +305,7 @@ export default function Navbar() {
                   <div style={{ margin: '4px 20px 18px', padding: '12px 18px', background: 'linear-gradient(135deg,rgba(184,147,58,0.07),rgba(184,147,58,0.03))', border: '1px solid rgba(184,147,58,0.16)', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
                     <div>
                       <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
-                      <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
                     </div>
                     <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#9A6E38', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; }}
@@ -535,7 +535,7 @@ export default function Navbar() {
           <div style={{ margin: '20px 20px calc(14px + env(safe-area-inset-bottom))', marginTop: 'auto', padding: '18px 20px', background: 'rgba(184,147,58,0.10)', border: '1px solid rgba(184,147,58,0.22)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.78)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
-              <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
+              <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.42)', marginTop: '2px' }}>اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور</div>
             </div>
             <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: GOLD, borderRadius: '20px', padding: '8px 16px', whiteSpace: 'nowrap' }}>
               ثبت‌نام <ArrowLeft size={10} />
