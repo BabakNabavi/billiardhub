@@ -197,12 +197,10 @@ export default function Navbar() {
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
         .mob-link-item:hover { background: rgba(184,147,58,0.06) !important; }
-        /* صفحات ورود/ثبت‌نام در موبایل هدر ندارند */
-        @media(max-width:900px){ .nav-auth-page { display: none !important; } }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav className={pathname === '/login' || pathname === '/register' ? 'nav-auth-page' : undefined} style={{
+      <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         background: navBg,
         borderBottom: isLight ? `1px solid rgba(28,28,26,0.06)` : '1px solid transparent',
@@ -574,7 +572,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {!isHomePage && <div className={pathname === '/login' || pathname === '/register' ? 'nav-auth-page' : undefined} style={{ height: '72px' }} />}
+      {!isHomePage && <div style={{ height: '72px' }} />}
     </>
   );
 }

@@ -182,37 +182,15 @@ export default function RegisterPage() {
         @keyframes auUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         @keyframes auX  { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
 
-        .au-root { min-height: 100vh; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
-          background: #F7F5F0; font-family: Vazirmatn, Tahoma, sans-serif; }
-
-        /* پنل برند: چسبان و دقیقاً هم‌ارتفاعِ ویوپورت (زیر نوبار) ⇒ عکس همیشه فیت، بدون اسکرول اضافه */
-        .au-brand { position: sticky; top: 62px; align-self: start; height: calc(100vh - 62px);
-          overflow: hidden; color: #fff; background: #0B0A08; }
-        .au-brand-img { position: absolute; inset: 0; background: url('/images/hero/1.png') center/cover;
-          filter: grayscale(0.3) brightness(0.5) contrast(1.08); transform: scale(1.03); }
-        .au-brand-grade { position: absolute; inset: 0; background:
-          radial-gradient(ellipse 60% 80% at 70% 10%, rgba(255,238,204,0.14), transparent 55%),
-          linear-gradient(200deg, rgba(11,10,8,0.55) 0%, rgba(11,10,8,0.88) 78%); }
-        .au-word { position: absolute; bottom: -10px; left: -4px; font-weight: 900;
-          font-size: clamp(56px, 8vw, 112px); line-height: 1; letter-spacing: .05em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.11); user-select: none; direction: ltr; }
-        .au-mob-word { position: absolute; bottom: -6px; left: -3px; font-weight: 900;
-          font-size: 44px; line-height: 1; letter-spacing: .05em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.12); user-select: none; direction: ltr; pointer-events: none; }
-        .au-hair { position: absolute; top: -25%; bottom: -25%; left: 32%; width: 1px;
-          background: linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent); transform: rotate(14deg); }
-        .au-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700;
-          color: rgba(255,255,255,0.78); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
-          padding: 6px 13px; backdrop-filter: blur(6px); }
-        .au-chip i { width: 6px; height: 6px; border-radius: 50%; background: ${GOLD}; }
-        .au-bar { position: absolute; bottom: 0; inset-inline: 0; height: 3px; display: flex; }
-        .au-bar i:nth-child(1) { flex: 2.6; background: linear-gradient(90deg,#8A6020,${GOLD}); }
-        .au-bar i:nth-child(2) { flex: 1; background: #B23B2E; }
-        .au-bar i:nth-child(3) { flex: 1.6; background: #14532D; }
-
-        .au-form-col { display: flex; flex-direction: column; align-items: center; justify-content: center;
-          padding: clamp(28px,5vh,56px) clamp(20px,4vw,48px); }
-        .au-card { width: 100%; max-width: 440px; animation: auUp .55s cubic-bezier(.22,1,.36,1) both; }
+        .au-root { min-height: calc(100vh - 72px); background: #F7F5F0;
+          display: flex; align-items: flex-start; justify-content: center;
+          padding: clamp(24px,5vh,56px) 20px 48px; font-family: Vazirmatn, Tahoma, sans-serif; }
+        .au-card { width: 100%; max-width: 460px; background: #fff; border: 1px solid ${LINE};
+          border-radius: 22px; padding: clamp(24px,4vw,34px);
+          box-shadow: 0 18px 60px rgba(28,27,23,0.08);
+          animation: auUp .55s cubic-bezier(.22,1,.36,1) both; position: relative; overflow: hidden; }
+        .au-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
+          background: linear-gradient(90deg, #8A6020, ${GOLD}, #8A6020); }
 
         .au-wrap { display: flex; align-items: center; background: #fff; border: 1px solid ${LINE};
           border-radius: 13px; transition: border-color .25s, box-shadow .25s; }
@@ -243,33 +221,14 @@ export default function RegisterPage() {
         .au-step .b i { display: block; height: 100%; background: linear-gradient(90deg,#8A6020,${GOLD});
           transition: width .45s cubic-bezier(.22,1,.36,1); }
 
-        .au-mob-brand { display: none; }
         .au-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         /* آیتم‌های گرید باید بتوانند از عرضِ ذاتیِ input کوچک‌تر شوند */
         .au-row2 > div { min-width: 0; }
         .au-wrap { min-width: 0; }
-        @media (max-width: 900px) {
-          .au-root { grid-template-columns: 1fr; }
-          .au-brand { display: none; }
-          .au-desk-logo { display: none; }
-          .au-mob-brand { display: block; position: relative; overflow: hidden; color: #fff;
-            background: radial-gradient(circle at 80% 0%, rgba(199,166,106,0.16), transparent 50%), linear-gradient(120deg,#0B0A08,#171208 60%,#0B0A08); padding: 22px 20px 20px; }
-          .au-form-col { justify-content: flex-start; }
-        }
         @media (max-width: 420px) { .au-row2 { grid-template-columns: 1fr; } }
       `}</style>
 
-      {/* ═══ نوارِ برندِ موبایل ═══ */}
-      <div className="au-mob-brand">
-        <div style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform: 'rotate(14deg)' }} />
-        <div className="au-mob-word" aria-hidden>REGISTER</div>
-        <div style={{ fontSize: 15, fontWeight: 900, color: '#fff' }}>ساخت حساب جدید</div>
-        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', marginTop: 5 }}>به جامعه‌ی بیلیارد ایران بپیوندید</div>
-      </div>
-
-      {/* ═══ ستون فرم ═══ */}
-      <div className="au-form-col">
-        <div className="au-card">
+      <div className="au-card">
 
           {/* استپر */}
           <div className="au-steps">
@@ -380,34 +339,7 @@ export default function RegisterPage() {
               <ArrowLeft size={12} /> بازگشت به صفحه اصلی
             </Link>
           </div>
-        </div>
       </div>
-
-      {/* ═══ پنل برند — دسکتاپ ═══ */}
-      <aside className="au-brand">
-        <div className="au-brand-img" />
-        <div className="au-brand-grade" />
-        <div className="au-hair" />
-        <div className="au-word">REGISTER</div>
-        <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 'clamp(28px,4vw,56px)', gap: 16 }}>
-          <span style={{ display: 'inline-flex', alignSelf: 'flex-start', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.26em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
-            BILLIARD HUB · IRAN
-          </span>
-          <h2 style={{ fontSize: 'clamp(22px,2.4vw,34px)', fontWeight: 900, margin: 0, lineHeight: 1.5, maxWidth: 420 }}>
-            به <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>جامعه‌ی بیلیارد</span> ایران بپیوندید
-          </h2>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 2, maxWidth: 400 }}>
-            بعد از ساخت حساب، نقش خود را انتخاب کنید — بازیکن، مربی، داور، فروشنده، باشگاه‌دار یا متخصص فنی — و پروفایل حرفه‌ای‌تان را بسازید.
-          </p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-            <span className="au-chip"><i /> بازیکن</span>
-            <span className="au-chip"><i /> مربی</span>
-            <span className="au-chip"><i /> باشگاه‌دار</span>
-            <span className="au-chip"><i /> فروشنده</span>
-          </div>
-        </div>
-        <div className="au-bar"><i /><i /><i /></div>
-      </aside>
     </div>
   );
 }

@@ -76,9 +76,29 @@ export default function AdminRankingsPage() {
         ))}
       </div>
 
-      <div className="flex gap-5">
-        {/* منوی چپ */}
-        <div className="w-44 flex-shrink-0 space-y-3">
+      {/* موبایل: انتخاب‌گرهای افقی به‌جای سایدبار */}
+      <div className="md:hidden mb-4 space-y-2">
+        <div className="flex gap-2">
+          {['آقایان', 'بانوان'].map(g => (
+            <button key={g} onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
+              className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${gender === g ? 'bg-green-700 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
+              {g}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+          {Object.keys(rankings[sport]?.[gender] ?? {}).map(cat => (
+            <button key={cat} onClick={() => setCategory(cat)}
+              className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${category === cat ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-200 text-gray-600'}`}>
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-5">
+        {/* منوی چپ — فقط دسکتاپ */}
+        <div className="hidden md:block w-44 flex-shrink-0 space-y-3">
           {['آقایان', 'بانوان'].map(g => (
             <div key={g} className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <button onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
@@ -106,8 +126,8 @@ export default function AdminRankingsPage() {
             <span className="text-sm opacity-80">{toFa(categorySize(sport, category))} نفر</span>
           </div>
 
-          {/* هدر */}
-          <div className="grid grid-cols-12 px-4 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b">
+          {/* هدر — فقط دسکتاپ */}
+          <div className="hidden sm:grid grid-cols-12 px-4 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b">
             <div className="col-span-1 text-center">رتبه</div>
             <div className="col-span-4">نام و نام خانوادگی</div>
             <div className="col-span-3">شهر</div>
@@ -117,7 +137,7 @@ export default function AdminRankingsPage() {
 
           <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
             {players.map((player, index) => (
-              <div key={index} className={`grid grid-cols-12 items-center px-4 py-2 ${index < 16 ? 'bg-green-50' : ''}`}>
+              <div key={index} className={`grid grid-cols-6 sm:grid-cols-12 items-center gap-y-1.5 px-3 sm:px-4 py-2.5 sm:py-2 ${index < 16 ? 'bg-green-50' : ''}`}>
                 <div className="col-span-1 text-center">
                   <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mx-auto ${index === 0 ? 'bg-yellow-400 text-white' :
                       index === 1 ? 'bg-gray-400 text-white' :
@@ -128,7 +148,7 @@ export default function AdminRankingsPage() {
                     {toFa(index + 1)}
                   </span>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-5 sm:col-span-4">
                   <input
                     type="text"
                     value={player.name}
@@ -137,7 +157,7 @@ export default function AdminRankingsPage() {
                     placeholder="نام بازیکن"
                   />
                 </div>
-                <div className="col-span-3 px-2">
+                <div className="col-span-3 sm:col-span-3 sm:px-2">
                   <input
                     type="text"
                     value={player.city}
@@ -146,7 +166,7 @@ export default function AdminRankingsPage() {
                     placeholder="شهر"
                   />
                 </div>
-                <div className="col-span-3 px-2">
+                <div className="col-span-2 sm:col-span-3 sm:px-2">
                   <input
                     type="number"
                     value={player.points || ''}
@@ -155,7 +175,7 @@ export default function AdminRankingsPage() {
                     placeholder="۰"
                   />
                 </div>
-                <div className="col-span-1 px-1">
+                <div className="col-span-1 sm:px-1">
                   <input
                     type="number"
                     value={player.previousRank || ''}

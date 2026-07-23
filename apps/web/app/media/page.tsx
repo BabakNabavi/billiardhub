@@ -9,13 +9,14 @@
    ریل‌های تیره با هاورهای طلایی.
    ───────────────────────────────────────────────────────────── */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, Play, Eye, Clock3, ArrowLeft, Flame, Clapperboard } from 'lucide-react'
 import {
   MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits, listChannels,
   type MediaVideo, type MediaCategoryKey,
 } from '../../lib/media-data'
+import { getHiddenVideoIds, getFeaturedOverride } from '../../lib/media-admin-store'
 
 const GOLD  = '#C7A66A'
 const IVORY = '#F2EFE9'
@@ -94,11 +95,20 @@ export default function MediaPage() {
 
   const isBrowsing = cat === 'all' && !query.trim()
 
+  /* کنترل‌های ادمین: ویدیوهای مخفی‌شده حذف و ویدیوی ویژه override می‌شود */
+  const [pool, setPool] = useState<MediaVideo[]>(MEDIA_VIDEOS)
+  const [featOverride, setFeatOverride] = useState<string | null>(null)
+  useEffect(() => {
+    const hidden = new Set(getHiddenVideoIds())
+    setPool(MEDIA_VIDEOS.filter(v => !hidden.has(v.id)))
+    setFeatOverride(getFeaturedOverride())
+  }, [])
+
   const sorted = useMemo(() => {
-    const list = [...MEDIA_VIDEOS]
+    const list = [...pool]
     list.sort((a, b) => sort === 'views' ? b.views - a.views : sort === 'likes' ? b.likes - a.likes : b.ts - a.ts)
     return list
-  }, [sort])
+  }, [sort, pool])
 
   const filtered = useMemo(() => {
     const q = query.trim()
@@ -109,10 +119,11 @@ export default function MediaPage() {
     })
   }, [sorted, cat, query])
 
-  const featuredV  = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0]!
-  const trending   = [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== featuredV.id).slice(0, 4)
-  const newest     = [...MEDIA_VIDEOS].sort((a, b) => b.ts - a.ts).filter(v => v.id !== featuredV.id).slice(0, 8)
-  const popular    = [...MEDIA_VIDEOS].sort((a, b) => b.likes - a.likes).slice(0, 8)
+  const featuredV  = (featOverride ? pool.find(v => v.id === featOverride) : undefined)
+    ?? pool.find(v => v.featured) ?? pool[0] ?? MEDIA_VIDEOS[0]!
+  const trending   = [...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== featuredV.id).slice(0, 4)
+  const newest     = [...pool].sort((a, b) => b.ts - a.ts).filter(v => v.id !== featuredV.id).slice(0, 8)
+  const popular    = [...pool].sort((a, b) => b.likes - a.likes).slice(0, 8)
   const catRows: MediaCategoryKey[] = ['snooker-training', 'highlights', 'techniques']
 
   const gridItems = filtered.slice(0, shown)
@@ -459,7 +470,7 @@ export default function MediaPage() {
             {/* ═══ ردیف‌های دسته‌ای ═══ */}
             {catRows.map(k => {
               const c = mediaCategoryOf(k)
-              const vids = MEDIA_VIDEOS.filter(v => v.category === k).slice(0, 8)
+              const vids = pool.filter(v => v.category === k).slice(0, 8)
               if (!vids.length) return null
               return (
                 <section key={k} style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>

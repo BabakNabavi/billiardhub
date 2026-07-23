@@ -53,7 +53,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'تأیید مربیان', desc: 'بررسی پروفایل مربیان و صدور تیک تأیید', icon: <Star size={20} />, link: '/admin/coaches' },
       { title: 'تأیید داوران', desc: 'بررسی پروفایل و مدرک داوران', icon: <Scale size={20} />, link: '/admin/referees' },
       { title: 'رنکینگ بازیکنان', desc: 'ورود و ویرایش رنکینگ رسمی', icon: <TrendingUp size={20} />, link: '/admin/rankings' },
-      { title: 'بازیکنان شاخص', desc: 'مدیریت پروفایل بازیکنان بخش «ستارگان»', icon: <UserCheck size={20} /> },
+      { title: 'بازیکنان شاخص', desc: 'مدیریت پروفایل بازیکنان بخش «ستارگان»', icon: <UserCheck size={20} />, link: '/admin/players' },
     ],
   },
   {
@@ -62,8 +62,8 @@ const SECTIONS: AdminSection[] = [
       { title: 'تأیید باشگاه‌ها', desc: 'بررسی جواز کسب و صدور تأیید رسمی', icon: <Building2 size={20} />, link: '/admin/clubs' },
       { title: 'تأیید فروشگاه‌ها', desc: 'بررسی و انتشار فروشگاه‌های ثبت‌شده', icon: <Store size={20} />, link: '/admin/sellers' },
       { title: 'تأیید محصولات', desc: 'بررسی محصولات بیلیارد بازار', icon: <ShoppingBag size={20} />, link: '/admin/products' },
-      { title: 'تولیدکنندگان', desc: 'مدیریت پروفایل تولیدکنندگان', icon: <Factory size={20} /> },
-      { title: 'متخصصان فنی', desc: 'تأیید متخصصان خدمات فنی', icon: <Wrench size={20} /> },
+      { title: 'تولیدکنندگان', desc: 'مدیریت پروفایل تولیدکنندگان', icon: <Factory size={20} />, link: '/admin/manufacturers' },
+      { title: 'متخصصان فنی', desc: 'تأیید متخصصان خدمات فنی', icon: <Wrench size={20} />, link: '/admin/technicians' },
     ],
   },
   {
@@ -72,7 +72,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار بیلیارد', icon: <Newspaper size={20} />, link: '/admin/news' },
       { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
       { title: 'تبلیغات', desc: 'بنرها و کمپین‌های تبلیغاتی سایت', icon: <Megaphone size={20} />, link: '/admin/ads' },
-      { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} /> },
+      { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
     ],
   },
 ];

@@ -10,6 +10,7 @@ import {
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
+import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 
 /* ═══════════════════════════════════════════════════════════════
    SCROLL REVEAL
@@ -676,6 +677,19 @@ const MEDIA_FEAT  = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0]!;
 const MEDIA_MINIS = [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== MEDIA_FEAT.id).slice(0, 3);
 
 function HomeMediaBand() {
+  /* کنترل‌های ادمین (ویژه/مخفی) بعد از mount اعمال می‌شوند */
+  const [feat, setFeat]   = useState(MEDIA_FEAT);
+  const [minis, setMinis] = useState(MEDIA_MINIS);
+  useEffect(() => {
+    const hidden = new Set(getHiddenVideoIds());
+    const pool = MEDIA_VIDEOS.filter(v => !hidden.has(v.id));
+    if (!pool.length) return;
+    const ov = getFeaturedOverride();
+    const f = (ov ? pool.find(v => v.id === ov) : undefined) ?? pool.find(v => v.featured) ?? pool[0]!;
+    setFeat(f);
+    setMinis([...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== f.id).slice(0, 3));
+  }, []);
+
   return (
     <section dir="rtl" className="hm-band">
       <style>{`
@@ -826,10 +840,10 @@ function HomeMediaBand() {
           <line x1="101" y1="104" x2="101" y2="140" opacity=".55" />
         </svg>
       </div>
-      <Link href={`/media/${MEDIA_FEAT.id}`} className="hm-play" aria-label="پخش ویدیوی ویژه">
+      <Link href={`/media/${feat.id}`} className="hm-play" aria-label="پخش ویدیوی ویژه">
         <Play size={24} fill="currentColor" />
       </Link>
-      <span className="hm-dur" aria-hidden>{MEDIA_FEAT.duration}</span>
+      <span className="hm-dur" aria-hidden>{feat.duration}</span>
       <div aria-hidden style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '46%', width: 1, zIndex: 2, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)', pointerEvents: 'none' }} />
       <div className="hm-word" aria-hidden>MEDIA</div>
 
@@ -844,15 +858,15 @@ function HomeMediaBand() {
         <div className="hm-feat hm-anim" style={{ animationDelay: '160ms' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.18em', color: '#E8CE96', flexShrink: 0 }}><span className="hm-nsdot" /> NOW SHOWING</span>
           <span className="hm-featdot" style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
-          <p className="hm-feat-title">{MEDIA_FEAT.title}</p>
-          <span className="hm-views" style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(MEDIA_FEAT.views)} بازدید</span>
+          <p className="hm-feat-title">{feat.title}</p>
+          <span className="hm-views" style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(feat.views)} بازدید</span>
         </div>
         <div className="hm-cta-row hm-anim" style={{ animationDelay: '210ms' }}>
-          <Link href={`/media/${MEDIA_FEAT.id}`} className="hm-cta"><Play size={14} fill="currentColor" /> تماشای ویدیو</Link>
+          <Link href={`/media/${feat.id}`} className="hm-cta"><Play size={14} fill="currentColor" /> تماشای ویدیو</Link>
           <Link href="/media" className="hm-all">همه ویدیوها <ArrowLeft size={12} /></Link>
         </div>
         <div className="hm-minis hm-anim" style={{ animationDelay: '260ms' }}>
-          {MEDIA_MINIS.map(v => (
+          {minis.map(v => (
             <Link key={v.id} href={`/media/${v.id}`} className="hm-mini" title={v.title}>
               <img src={v.thumb} alt={v.title} loading="lazy" />
               <i>{v.duration}</i>
