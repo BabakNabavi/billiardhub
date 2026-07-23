@@ -181,12 +181,23 @@ export default function RankingsPage() {
           background: #fff; border: 1px solid ${LINE}; border-radius: 16px 16px 16px 0; overflow: hidden;
           padding: 0 0 0 18px; min-height: 74px; text-decoration: none; color: inherit;
           clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%, 0 calc(100% - 14px)); }
-        .rk-row .chip { align-self: stretch; width: 52px; flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-          color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums; }
+        /* مربعِ رتبه — لیکویید گلسِ کریستالی (iOS): هایلایت شیشه‌ای + عددِ نورانی */
+        .rk-row .chip { align-self: stretch; width: 56px; flex-shrink: 0; position: relative;
+          display: flex; align-items: center; justify-content: center; gap: 1px; direction: ltr;
+          color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums;
+          background-image:
+            radial-gradient(130% 62% at 50% 0%, rgba(255,255,255,0.34), transparent 62%),
+            linear-gradient(160deg, rgba(255,255,255,0.38), rgba(255,255,255,0.08) 40%, rgba(255,255,255,0) 58%, rgba(0,0,0,0.14));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 1px 0 0 rgba(255,255,255,0.16),
+            inset 0 -2px 5px rgba(0,0,0,0.2);
+          text-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.5); }
+        .rk-row .chip i { font-style: normal; font-size: 0.7em; font-weight: 800; opacity: .85; }
+        .rk-city { flex-shrink: 0; margin-inline-start: clamp(16px, 4vw, 44px);
+          font-size: 12px; color: ${MUT}; white-space: nowrap; }
         @media (max-width: 640px) {
           .rk-row { gap: 11px; padding-left: 12px; min-height: 64px; }
-          .rk-row .chip { width: 42px; font-size: 14.5px; }
+          .rk-row .chip { width: 46px; font-size: 14.5px; }
+          .rk-city { margin-inline-start: 10px; font-size: 10.5px; }
         }
       `}</style>
 
@@ -279,9 +290,9 @@ export default function RankingsPage() {
                   return (
                     <div key={p.rank} className="rk-rowwrap" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
                       <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
-                        <span className="chip" style={{ background: rankColor(p.rank) }}>{faDigits(p.rank)}</span>
+                        <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}><i>#</i>{faDigits(p.rank)}</span>
                         <Portrait p={p} size={46} />
-                        <div style={{ minWidth: 0, flex: 1, padding: '11px 0' }}>
+                        <div style={{ minWidth: 0, flexShrink: 1, padding: '11px 0' }}>
                           {lastName ? (
                             <>
                               <div style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</div>
@@ -290,8 +301,9 @@ export default function RankingsPage() {
                           ) : (
                             <div style={{ fontSize: 15.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</div>
                           )}
-                          <div style={{ fontSize: 11, color: MUT, marginTop: 5 }}>{p.city || '—'}</div>
                         </div>
+                        <span className="rk-city">{p.city || '—'}</span>
+                        <span style={{ flex: 1 }} aria-hidden />
                         <TrendChip diff={diff} />
                         <span style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4 }}>
                           {p.points.toLocaleString('fa-IR')}
