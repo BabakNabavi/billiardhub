@@ -10,9 +10,10 @@
    شماره‌ی گرافیکیِ محو — نه جدولِ اکسلی.
    ───────────────────────────────────────────────────────────── */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Trophy, TrendingUp, TrendingDown, Minus, Crown, Medal, Award, ArrowLeft } from 'lucide-react'
+import { getCategoryPlayers, categorySize } from '../../lib/rankings-store'
 
 interface RankingPlayer {
   rank: number
@@ -122,8 +123,18 @@ export default function RankingsPage() {
   const [gender, setGender]     = useState('آقایان')
   const [category, setCategory] = useState('دسته برتر')
 
+  /* داده‌ی واقعیِ واردشده در پنل ادمین (localStorage) بعد از mount خوانده می‌شود */
+  const [adminPlayers, setAdminPlayers] = useState<RankingPlayer[] | null>(null)
+  useEffect(() => {
+    setAdminPlayers(getCategoryPlayers(sport, gender, category))
+  }, [sport, gender, category])
+
   const currentCategories = categories[sport]?.[gender] ?? []
-  const players = sport !== 'highball' ? samplePlayers : []
+  /* اگر ادمین برای این دسته اسم وارد کرده باشد همان نمایش داده می‌شود؛ وگرنه داده‌ی نمونه */
+  const players = sport !== 'highball'
+    ? (adminPlayers && adminPlayers.length > 0 ? adminPlayers : samplePlayers)
+    : []
+  const capacity = categorySize(sport, category)
 
   const top3 = players.filter(p => p.rank <= 3)
   const rest = players.filter(p => p.rank > 3)
@@ -171,7 +182,8 @@ export default function RankingsPage() {
           padding: 26px 16px 20px; box-shadow: 0 10px 32px rgba(15,14,11,0.18);
           transition: transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s; animation: rkFadeUp .6s ease both; }
         .rk-pod:hover { transform: translateY(-5px); box-shadow: 0 24px 54px rgba(15,14,11,0.28); }
-        .rk-pod .num { position: absolute; top: -6px; inset-inline-start: 8px; font-weight: 900;
+        /* شماره سمتِ راستِ کارت (direction:ltr خودِ المان inline-start را چپ می‌کرد) */
+        .rk-pod .num { position: absolute; top: -6px; right: 8px; font-weight: 900;
           font-size: clamp(58px, 6.4vw, 84px); line-height: 1; color: transparent;
           -webkit-text-stroke: 1.5px rgba(255,255,255,0.16); letter-spacing: -0.04em;
           font-variant-numeric: tabular-nums; direction: ltr; user-select: none; }
@@ -194,7 +206,7 @@ export default function RankingsPage() {
           transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s;
           animation: rkFadeUp .5s ease both; }
         .rk-row:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(28,27,23,0.10); border-color: rgba(199,166,106,0.4); }
-        .rk-row .ghost { position: absolute; inset-inline-start: 6px; top: 50%; transform: translateY(-50%);
+        .rk-row .ghost { position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
           font-weight: 900; font-size: 46px; line-height: 1; color: transparent;
           -webkit-text-stroke: 1.2px rgba(28,27,23,0.10); letter-spacing: -0.04em;
           font-variant-numeric: tabular-nums; direction: ltr; user-select: none; pointer-events: none;
@@ -281,7 +293,7 @@ export default function RankingsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
                 <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
                 <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0 }}>{gender} — {category}</h2>
-                <span style={{ fontSize: 12, color: MUT }}>{faDigits(players.length)} بازیکن</span>
+                <span style={{ fontSize: 12, color: MUT }}>{faDigits(players.length)} از {faDigits(capacity)} بازیکن</span>
                 <span style={{ flex: 1, height: 1, background: LINE }} />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontSize: 11, color: MUT }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrendingUp size={11} style={{ color: '#22B45A' }} /> صعود</span>
