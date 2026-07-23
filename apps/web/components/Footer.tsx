@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD    = '#C7A66A';
@@ -74,6 +75,9 @@ const nav = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  /* صفحات ورود/ثبت‌نام فوتر ندارند */
+  if (pathname === '/login' || pathname === '/register') return null;
   return (
     <footer style={{ background: '#F5F3EF', borderTop: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
 

@@ -197,10 +197,12 @@ export default function Navbar() {
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
         .mob-link-item:hover { background: rgba(184,147,58,0.06) !important; }
+        /* صفحات ورود/ثبت‌نام در موبایل هدر ندارند */
+        @media(max-width:900px){ .nav-auth-page { display: none !important; } }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{
+      <nav className={pathname === '/login' || pathname === '/register' ? 'nav-auth-page' : undefined} style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         background: navBg,
         borderBottom: isLight ? `1px solid rgba(28,28,26,0.06)` : '1px solid transparent',
@@ -372,13 +374,17 @@ export default function Navbar() {
                         {({'admin':'ادمین سیستم','user':'کاربر','player':'بازیکن رنکینگی','coach':'مربی','referee':'داور','club_owner':'باشگاه‌دار','seller':'فروشنده','manufacturer':'تولیدکننده','installer':'متخصص نصب'} as Record<string,string>)[user.primaryRole] ?? user.primaryRole}
                       </div>
                     </div>
-                    {[
-                      { href: '/dashboard',       label: 'داشبورد',         icon: <LayoutDashboard size={13} /> },
-                      { href: '/dashboard/shop',  label: 'فروشگاه من',      icon: <ShoppingBag size={13} /> },
-                      ...(user.primaryRole === 'club_owner' || user.primaryRole === 'admin' ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
-                      ...(user.primaryRole === 'admin'      ? [{ href: '/admin',           label: 'پنل ادمین',      icon: <Crown size={13} /> }] : []),
-                      { href: '/profile',         label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
-                    ].map((item, i) => (
+                    {/* آیتم‌ها نقش‌محورند — فقط پنل‌هایی که واقعاً به کاربر مربوط‌اند */}
+                    {(() => {
+                      const roles = [user.primaryRole, ...(user.secondaryRoles ?? [])];
+                      return [
+                        { href: '/dashboard', label: 'داشبورد', icon: <LayoutDashboard size={13} /> },
+                        ...(roles.includes('seller') ? [{ href: '/dashboard/shop', label: 'فروشگاه من', icon: <ShoppingBag size={13} /> }] : []),
+                        ...(roles.includes('club_owner') ? [{ href: '/dashboard/club', label: 'مدیریت باشگاه', icon: <Building2 size={13} /> }] : []),
+                        ...(user.primaryRole === 'admin' ? [{ href: '/admin', label: 'پنل ادمین', icon: <Crown size={13} /> }] : []),
+                        { href: '/profile', label: 'ویرایش پروفایل', icon: <Settings size={13} /> },
+                      ];
+                    })().map((item, i) => (
                       <Link key={i} href={item.href} onClick={() => setProfileOpen(false)}
                         style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 12px', borderRadius: '10px', fontSize: '15px', color: 'rgba(28,28,26,0.55)', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(28,28,26,0.05)'; (e.currentTarget as HTMLElement).style.color = '#1C1C1A' }}

@@ -1,15 +1,90 @@
 'use client';
 
+/* ─────────────────────────────────────────────────────────────
+   پنل سوپرادمین — هابِ مدیریتِ کلِ پلتفرم (بازسازی ۱۴۰۵).
+   گروه‌بندی بر اساسِ دامنه‌های واقعیِ سایت، بدونِ آیتم‌های
+   تکراری (پنلِ باشگاه‌دار حذف شد — آن پنلِ مالک است نه ادمین)
+   و با جای‌گذاریِ بخش‌های آینده به‌صورت «به‌زودی».
+   ───────────────────────────────────────────────────────────── */
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
 import {
-  Users, ShoppingBag, Trophy, Newspaper, Settings,
-  CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store
+  Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
+  CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
+  Clapperboard, Factory, Wrench, ShieldCheck, KeyRound,
 } from 'lucide-react';
 
+const GOLD   = '#C7A66A';
+const GOLD_D = '#9A6E38';
+const TEXT   = '#1C1B17';
+const SEC    = '#5B564B';
+const MUT    = '#8A8474';
+const LINE   = '#E7E2D6';
 
+interface AdminItem {
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  link?: string;          // بدونِ لینک ⇒ به‌زودی
+}
+
+interface AdminSection {
+  title: string;
+  en: string;
+  dot: string;
+  items: AdminItem[];
+}
+
+const SECTIONS: AdminSection[] = [
+  {
+    title: 'کاربران و دسترسی', en: 'USERS & ACCESS', dot: '#1D4ED8',
+    items: [
+      { title: 'مدیریت کاربران', desc: 'مشاهده، ویرایش و مسدودسازی کاربران', icon: <Users size={20} />, link: '/admin/users' },
+      { title: 'مدیریت نقش‌ها', desc: 'اعطا و لغو نقش‌ها (مربی، داور، فروشنده…)', icon: <KeyRound size={20} />, link: '/admin/roles' },
+      { title: 'احراز هویت', desc: 'بررسی درخواست‌های تأیید هویت کاربران', icon: <ShieldCheck size={20} />, link: '/admin/verifications' },
+    ],
+  },
+  {
+    title: 'جامعه‌ی حرفه‌ای', en: 'COMMUNITY', dot: '#14532D',
+    items: [
+      { title: 'تأیید مربیان', desc: 'بررسی پروفایل مربیان و صدور تیک تأیید', icon: <Star size={20} />, link: '/admin/coaches' },
+      { title: 'تأیید داوران', desc: 'بررسی پروفایل و مدرک داوران', icon: <Scale size={20} />, link: '/admin/referees' },
+      { title: 'رنکینگ بازیکنان', desc: 'ورود و ویرایش رنکینگ رسمی', icon: <TrendingUp size={20} />, link: '/admin/rankings' },
+      { title: 'بازیکنان شاخص', desc: 'مدیریت پروفایل بازیکنان بخش «ستارگان»', icon: <UserCheck size={20} /> },
+    ],
+  },
+  {
+    title: 'کسب‌وکارها', en: 'BUSINESSES', dot: '#A07840',
+    items: [
+      { title: 'تأیید باشگاه‌ها', desc: 'بررسی جواز کسب و صدور تأیید رسمی', icon: <Building2 size={20} />, link: '/admin/clubs' },
+      { title: 'تأیید فروشگاه‌ها', desc: 'بررسی و انتشار فروشگاه‌های ثبت‌شده', icon: <Store size={20} />, link: '/admin/sellers' },
+      { title: 'تأیید محصولات', desc: 'بررسی محصولات بیلیارد بازار', icon: <ShoppingBag size={20} />, link: '/admin/products' },
+      { title: 'تولیدکنندگان', desc: 'مدیریت پروفایل تولیدکنندگان', icon: <Factory size={20} /> },
+      { title: 'متخصصان فنی', desc: 'تأیید متخصصان خدمات فنی', icon: <Wrench size={20} /> },
+    ],
+  },
+  {
+    title: 'محتوا و رویدادها', en: 'CONTENT & EVENTS', dot: '#B23B2E',
+    items: [
+      { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار بیلیارد', icon: <Newspaper size={20} />, link: '/admin/news' },
+      { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
+      { title: 'تبلیغات', desc: 'بنرها و کمپین‌های تبلیغاتی سایت', icon: <Megaphone size={20} />, link: '/admin/ads' },
+      { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} /> },
+    ],
+  },
+];
+
+const STATS = [
+  { label: 'کاربران', value: 124, link: '/admin/users' },
+  { label: 'محصولات', value: 87, link: '/admin/products' },
+  { label: 'باشگاه‌ها', value: 43, link: '/admin/clubs' },
+  { label: 'مسابقات', value: 12, link: '/admin/events' },
+  { label: 'اخبار', value: 36, link: '/admin/news' },
+  { label: 'در انتظار تأیید', value: 8, link: '/admin/verifications' },
+];
 
 export default function AdminPage() {
   const router = useRouter();
@@ -25,72 +100,105 @@ export default function AdminPage() {
     if (!checked) return;
     if (!user) { router.push('/login'); return; }
     if (user.primaryRole !== 'admin') { router.push('/'); return; }
-  }, [checked, user]);
+  }, [checked, user, router]);
 
-  if (!checked) return <div className="text-center py-20 text-gray-400">در حال بارگذاری...</div>;
+  if (!checked) return <div style={{ textAlign: 'center', padding: '80px 0', color: MUT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>در حال بارگذاری…</div>;
   if (!user || user.primaryRole !== 'admin') return null;
 
-  const stats = [
-    { label: 'کاربران', value: (124).toLocaleString('fa-IR'), icon: <Users size={24} />, color: 'text-blue-600', bg: 'bg-blue-50', link: '/admin/users' },
-    { label: 'محصولات', value: (87).toLocaleString('fa-IR'), icon: <ShoppingBag size={24} />, color: 'text-purple-600', bg: 'bg-purple-50', link: '/admin/products' },
-    { label: 'باشگاه‌ها', value: (43).toLocaleString('fa-IR'), icon: <Building2 size={24} />, color: 'text-green-600', bg: 'bg-green-50', link: '/admin/clubs' },
-    { label: 'مسابقات', value: (12).toLocaleString('fa-IR'), icon: <Trophy size={24} />, color: 'text-amber-600', bg: 'bg-amber-50', link: '/admin/events' },
-    { label: 'اخبار', value: (36).toLocaleString('fa-IR'), icon: <Newspaper size={24} />, color: 'text-red-600', bg: 'bg-red-50', link: '/admin/news' },
-    { label: 'درخواست تأیید', value: (8).toLocaleString('fa-IR'), icon: <Star size={24} />, color: 'text-yellow-600', bg: 'bg-yellow-50', link: '/admin/verifications' },
-  ];
-
-  const menuItems = [
-  { title: 'پنل مدیریت باشگاه', desc: 'مدیریت باشگاه‌ها، میزها، رزروها و مسابقات', icon: <Building2 size={28} />, color: 'bg-yellow-600', link: '/dashboard/club' },
-  { title: 'تأیید باشگاه‌ها', desc: 'بررسی جواز کسب و صدور تیک تأیید رسمی', icon: <CheckCircle size={28} />, color: 'bg-emerald-600', link: '/admin/clubs' },
-  { title: 'مدیریت کاربران', desc: 'تأیید، ویرایش و مدیریت کاربران', icon: <Users size={28} />, color: 'bg-blue-600', link: '/admin/users' },
-  { title: 'رنکینگ', desc: 'ورود و ویرایش رنکینگ بازیکنان', icon: <TrendingUp size={28} />, color: 'bg-green-600', link: '/admin/rankings' },
-  { title: 'تأیید محصولات', desc: 'بررسی و تأیید محصولات فروشگاه', icon: <ShoppingBag size={28} />, color: 'bg-purple-600', link: '/admin/products' },
-  { title: 'مسابقات', desc: 'ایجاد و مدیریت رویدادها', icon: <Trophy size={28} />, color: 'bg-amber-600', link: '/admin/events' },
-  { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار', icon: <Newspaper size={28} />, color: 'bg-red-600', link: '/admin/news' },
-  { title: 'تأیید کاربران', desc: 'verify کردن مربیان و داوران', icon: <CheckCircle size={28} />, color: 'bg-teal-600', link: '/admin/verifications' },
-  { title: 'تأیید مربیان (پروفایل)', desc: 'بررسی پروفایل مربیان ثبت‌شده در داشبورد و صدور تیک آبی', icon: <Star size={28} />, color: 'bg-indigo-600', link: '/admin/coaches' },
-  { title: 'تأیید داوران (پروفایل)', desc: 'بررسی پروفایل و مدرک داوران ثبت‌شده در داشبورد و صدور تیک آبی', icon: <Scale size={28} />, color: 'bg-cyan-700', link: '/admin/referees' },
-  { title: 'تأیید فروشگاه‌ها', desc: 'بررسی جواز کسب فروشگاه‌های ثبت‌شده و انتشار در سایت', icon: <Store size={28} />, color: 'bg-orange-600', link: '/admin/sellers' },
-  { title: 'مدیریت تبلیغات', desc: 'بنرها و تبلیغات سایت', icon: <Megaphone size={28} />, color: 'bg-orange-500', link: '/admin/ads' },
-];
-
   return (
-    <div className="max-w-6xl mx-auto pb-10 pt-6 px-4 sm:px-6">
-      <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">پنل مدیریت</h1>
-          <p className="text-gray-500 text-xs sm:text-sm mt-1">بیلیارد هاب — داشبورد ادمین</p>
-        </div>
-        <div className="bg-red-100 text-red-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <Settings size={15} />
-          ادمین
-        </div>
-      </div>
+    <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', paddingBottom: 72 }}>
+      <style>{`
+        @keyframes adUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .ad-wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
+        .ad-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        .ad-stat { display: block; text-decoration: none; background: #fff; border: 1px solid ${LINE};
+          border-radius: 14px; padding: 14px 10px; text-align: center;
+          transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, box-shadow .25s; }
+        .ad-stat:hover { transform: translateY(-2px); border-color: rgba(199,166,106,0.45); box-shadow: 0 10px 24px rgba(28,27,23,0.08); }
+        .ad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .ad-card { position: relative; display: flex; gap: 12px; align-items: flex-start; text-decoration: none;
+          background: #fff; border: 1px solid ${LINE}; border-radius: 16px; padding: 15px 16px;
+          transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, box-shadow .25s;
+          animation: adUp .45s ease both; }
+        .ad-card:not(.soon):hover { transform: translateY(-3px); border-color: rgba(199,166,106,0.45); box-shadow: 0 14px 30px rgba(28,27,23,0.09); }
+        .ad-card.soon { opacity: .62; cursor: default; }
+        .ad-ic { width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.3); color: ${GOLD_D}; }
+        @media (max-width: 900px) { .ad-stats { grid-template-columns: repeat(3, 1fr); } .ad-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .ad-grid { grid-template-columns: 1fr; } }
+      `}</style>
 
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 mb-8">
-        {stats.map((stat, i) => (
-          <Link key={i} href={stat.link}>
-            <div className={`${stat.bg} rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center hover:shadow-md transition-all cursor-pointer h-full`}>
-              <div className={`${stat.color} flex justify-center mb-1.5 sm:mb-2`}>{stat.icon}</div>
-              <div className={`text-lg sm:text-2xl font-black ${stat.color}`}>{stat.value}</div>
-              <div className="text-[11px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 leading-tight">{stat.label}</div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <div className="ad-wrap" style={{ paddingTop: 24 }}>
 
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
-        {menuItems.map((item, i) => (
-          <Link key={i} href={item.link}>
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-6 hover:shadow-md hover:border-green-200 transition-all group cursor-pointer h-full flex flex-col items-center text-center sm:items-start sm:text-right">
-              <div className={`${item.color} w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-4 group-hover:scale-110 transition-transform shrink-0`}>
-                {item.icon}
-              </div>
-              <h3 className="font-bold text-gray-800 text-xs sm:text-lg leading-tight mb-0.5 sm:mb-1">{item.title}</h3>
-              <p className="hidden sm:block text-gray-500 text-sm">{item.desc}</p>
+        {/* سربرگ */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 22 }}>
+          <div>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: GOLD_D, border: '1px solid rgba(199,166,106,0.35)', borderRadius: 999, padding: '4px 12px', marginBottom: 10 }}>
+              <Crown size={11} /> SUPER ADMIN
+            </span>
+            <h1 style={{ fontSize: 'clamp(19px,2.6vw,24px)', fontWeight: 900, margin: 0 }}>پنل مدیریت بیلیارد هاب</h1>
+            <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0' }}>مدیریت کاربران، کسب‌وکارها، محتوا و رویدادهای کل پلتفرم</p>
+          </div>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 800, color: '#B23B2E', background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.25)', borderRadius: 12, padding: '8px 14px' }}>
+            <ShieldCheck size={15} /> {user.firstName} {user.lastName}
+          </span>
+        </div>
+
+        {/* آمار سریع */}
+        <div className="ad-stats" style={{ marginBottom: 28 }}>
+          {STATS.map((s, i) => (
+            <Link key={i} href={s.link} className="ad-stat" style={{ animation: `adUp .4s ${i * 40}ms ease both` }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums' }}>{s.value.toLocaleString('fa-IR')}</div>
+              <div style={{ fontSize: 11, color: SEC, marginTop: 3, fontWeight: 700 }}>{s.label}</div>
+            </Link>
+          ))}
+        </div>
+
+        {/* بخش‌ها */}
+        {SECTIONS.map((sec, si) => (
+          <section key={sec.en} style={{ marginBottom: 26 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
+              <h2 style={{ fontSize: 15, fontWeight: 900, margin: 0 }}>{sec.title}</h2>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: sec.dot }} />
+              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', color: MUT }}>{sec.en}</span>
+              <span style={{ flex: 1, height: 1, background: LINE }} />
             </div>
-          </Link>
+            <div className="ad-grid">
+              {sec.items.map((item, i) => {
+                const inner = (
+                  <>
+                    <span className="ad-ic">{item.icon}</span>
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, fontWeight: 900, color: TEXT }}>
+                        {item.title}
+                        {!item.link && (
+                          <span style={{ fontSize: 9.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '2px 8px' }}>به‌زودی</span>
+                        )}
+                      </span>
+                      <span style={{ display: 'block', fontSize: 11.5, color: MUT, lineHeight: 1.8, marginTop: 3 }}>{item.desc}</span>
+                    </span>
+                  </>
+                );
+                const delay = { animationDelay: `${si * 60 + i * 40}ms` } as React.CSSProperties;
+                return item.link ? (
+                  <Link key={item.title} href={item.link} className="ad-card" style={delay}>{inner}</Link>
+                ) : (
+                  <div key={item.title} className="ad-card soon" style={delay} title="در نسخه‌های بعدی">{inner}</div>
+                );
+              })}
+            </div>
+          </section>
         ))}
+
+        {/* یادداشت */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 16px' }}>
+          <CheckCircle size={15} style={{ color: '#0E7A38', flexShrink: 0 }} />
+          <span style={{ fontSize: 12, color: SEC }}>
+            مدیریتِ روزانه‌ی هر باشگاه (میزها، رزروها) در پنلِ خودِ باشگاه‌دار انجام می‌شود؛ این پنل مخصوص نظارت و تأییدهای سراسری است.
+          </span>
+        </div>
       </div>
     </div>
   );
