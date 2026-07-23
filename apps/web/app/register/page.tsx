@@ -7,7 +7,7 @@
    بهبود UX: بازگشت به مرحله‌ی قبل.
    ───────────────────────────────────────────────────────────── */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
@@ -62,11 +62,11 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
 
-  /* سانیتایزِ ورودی‌ها: نام‌ها بدونِ عدد؛ کد ملی فقط ۱۰ رقم؛
+  /* سانیتایزِ ورودی‌ها: نام‌ها فقط حروف فارسی (بدون عدد و حروف انگلیسی)؛ کد ملی فقط ۱۰ رقم؛
      موبایل فقط عدد، ۱۱ رقم و حتماً با ۰۹ (اگر با ۹ شروع شد، ۰ اضافه می‌شود) */
   const sanitize = (key: keyof FormData, v: string): string => {
     const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
-    if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹]/g, '');
+    if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹A-Za-z]/g, '');
     if (key === 'nationalId') return latin.replace(/[^0-9]/g, '').slice(0, 10);
     if (key === 'phone') {
       let d = latin.replace(/[^0-9]/g, '');
@@ -77,6 +77,13 @@ export default function RegisterPage() {
     if (key === 'password' || key === 'confirmPassword') return v.replace(/[؀-ۿ]/g, '');
     return v;
   };
+
+  /* خطا بعد از چند ثانیه خودش بسته می‌شود */
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(''), 6500);
+    return () => clearTimeout(t);
+  }, [error]);
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -226,7 +233,38 @@ export default function RegisterPage() {
         .au-row2 > div { min-width: 0; }
         .au-wrap { min-width: 0; }
         @media (max-width: 420px) { .au-row2 { grid-template-columns: 1fr; } }
+
+        /* ── خطای مرکزی: وسطِ صفحه، جلوی چشمِ کاربر ── */
+        @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
+        .au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+          padding: 24px; background: rgba(15,14,11,0.42); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+          animation: auFade .22s ease both; }
+        .au-erbox { position: relative; width: 100%; max-width: 350px; background: #fff; border: 1px solid rgba(178,59,46,0.28);
+          border-radius: 18px; padding: 26px 22px 20px; text-align: center; overflow: hidden;
+          box-shadow: 0 26px 80px rgba(15,14,11,0.4); animation: auPop .3s cubic-bezier(.22,1,.36,1) both; }
+        .au-erbox::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px;
+          background: linear-gradient(90deg, #7E241A, #B23B2E, #7E241A); }
+        .au-erbox .eric { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 4px;
+          display: flex; align-items: center; justify-content: center; color: #B23B2E;
+          background: rgba(178,59,46,0.08); border: 1px solid rgba(178,59,46,0.22); }
+        .au-erbox p { font-size: 13.5px; font-weight: 700; color: ${TEXT}; line-height: 2; margin: 12px 0 16px; }
+        .au-erbox button { width: 100%; padding: 11px; border-radius: 11px; cursor: pointer; font-family: inherit;
+          font-size: 13px; font-weight: 800; color: #B23B2E; background: rgba(178,59,46,0.06);
+          border: 1px solid rgba(178,59,46,0.3); transition: background .2s; }
+        .au-erbox button:hover { background: rgba(178,59,46,0.11); }
       `}</style>
+
+      {/* خطا — وسطِ صفحه */}
+      {error && (
+        <div className="au-erlay" onClick={() => setError('')} role="alert">
+          <div className="au-erbox" onClick={e => e.stopPropagation()}>
+            <span className="eric"><AlertCircle size={22} /></span>
+            <p>{error}</p>
+            <button type="button" onClick={() => setError('')}>متوجه شدم</button>
+          </div>
+        </div>
+      )}
 
       <div className="au-card">
 
@@ -260,14 +298,6 @@ export default function RegisterPage() {
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
             {step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `شماره ${form.phone} — حالا اطلاعات حساب را کامل کنید`}
           </p>
-
-          {/* خطا */}
-          {error && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 15px', background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.25)', borderRadius: 12, marginBottom: 18, animation: 'auUp .3s ease both' }}>
-              <AlertCircle size={15} style={{ color: '#B23B2E', flexShrink: 0 }} />
-              <span style={{ fontSize: 13, color: '#A03428', flex: 1 }}>{error}</span>
-            </div>
-          )}
 
           {/* ── مرحله ۱ ── */}
           {step === 1 && (
