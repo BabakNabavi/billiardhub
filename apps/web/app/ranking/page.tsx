@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Trophy, TrendingUp, TrendingDown, Minus, ArrowLeft } from 'lucide-react'
+import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { getCategoryPlayers, categorySize } from '../../lib/rankings-store'
 
 interface RankingPlayer {
@@ -171,23 +171,22 @@ export default function RankingsPage() {
         .rk-chip:hover { border-color: rgba(199,166,106,0.45); transform: translateY(-1px); }
         .rk-chip.on { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.38); color: ${GOLD_D}; }
 
-        /* ردیف‌های جدول */
+        /* ردیف‌های جدول — به سبک جدول فدراسیون جهانی:
+           مربعِ رنگیِ رتبه چسبیده به لبه‌ی راست + پخِ برش‌خورده در گوشه‌ی پایین-چپ */
+        .rk-rowwrap { animation: rkFadeUp .5s ease both;
+          filter: drop-shadow(0 1px 2px rgba(28,27,23,0.05));
+          transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s; }
+        .rk-rowwrap:hover { transform: translateY(-3px); filter: drop-shadow(0 12px 20px rgba(28,27,23,0.13)); }
         .rk-row { position: relative; display: flex; align-items: center; gap: 14px;
-          background: #fff; border: 1px solid ${LINE}; border-radius: 16px; overflow: hidden;
-          padding: 13px 18px; text-decoration: none; color: inherit;
-          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s;
-          animation: rkFadeUp .5s ease both; }
-        .rk-row:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(28,27,23,0.10); border-color: rgba(199,166,106,0.4); }
-        .rk-row .ghost { position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-          font-weight: 900; font-size: 46px; line-height: 1; letter-spacing: -0.04em;
-          font-variant-numeric: tabular-nums; direction: ltr; user-select: none; pointer-events: none; }
-        .rk-row .go { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800;
-          color: ${GOLD_D}; opacity: 0; transform: translateX(6px); transition: opacity .25s, transform .3s; white-space: nowrap; }
-        .rk-row:hover .go { opacity: 1; transform: none; }
+          background: #fff; border: 1px solid ${LINE}; border-radius: 16px 16px 16px 0; overflow: hidden;
+          padding: 0 0 0 18px; min-height: 74px; text-decoration: none; color: inherit;
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%, 0 calc(100% - 14px)); }
+        .rk-row .chip { align-self: stretch; width: 52px; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) {
-          .rk-row { padding: 12px 12px; gap: 11px; }
-          .rk-row .ghost { font-size: 36px; }
-          .rk-row .go, .rk-city-d { display: none !important; }
+          .rk-row { gap: 11px; padding-left: 12px; min-height: 64px; }
+          .rk-row .chip { width: 42px; font-size: 14.5px; }
         }
       `}</style>
 
@@ -270,25 +269,35 @@ export default function RankingsPage() {
                 </span>
               </div>
 
-              {/* ═══ جدول کامل — شماره‌ها با رنگ‌بندی رسمی ═══ */}
+              {/* ═══ جدول کامل — مربعِ رنگیِ رتبه با عدد سفید ═══ */}
               <section style={{ display: 'grid', gap: 10 }}>
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
+                  const parts = p.name.trim().split(/\s+/)
+                  const firstName = parts[0] ?? ''
+                  const lastName = parts.slice(1).join(' ')
                   return (
-                    <Link key={p.rank} href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
-                      <span className="ghost" style={{ color: rankColor(p.rank) }}>{faDigits(String(p.rank).padStart(2, '0'))}</span>
-                      <span style={{ width: 44, flexShrink: 0 }} aria-hidden />
-                      <Portrait p={p} size={46} />
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 14.5, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                        <div style={{ fontSize: 11.5, color: MUT, marginTop: 2 }}>{p.city || '—'}</div>
-                      </div>
-                      <TrendChip diff={diff} />
-                      <span style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap' }}>
-                        {p.points.toLocaleString('fa-IR')}
-                      </span>
-                      <span className="go">مشاهده پروفایل <ArrowLeft size={13} /></span>
-                    </Link>
+                    <div key={p.rank} className="rk-rowwrap" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
+                      <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
+                        <span className="chip" style={{ background: rankColor(p.rank) }}>{faDigits(p.rank)}</span>
+                        <Portrait p={p} size={46} />
+                        <div style={{ minWidth: 0, flex: 1, padding: '11px 0' }}>
+                          {lastName ? (
+                            <>
+                              <div style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</div>
+                              <div style={{ fontSize: 15.5, fontWeight: 900, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastName}</div>
+                            </>
+                          ) : (
+                            <div style={{ fontSize: 15.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</div>
+                          )}
+                          <div style={{ fontSize: 11, color: MUT, marginTop: 5 }}>{p.city || '—'}</div>
+                        </div>
+                        <TrendChip diff={diff} />
+                        <span style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4 }}>
+                          {p.points.toLocaleString('fa-IR')}
+                        </span>
+                      </Link>
+                    </div>
                   )
                 })}
               </section>
