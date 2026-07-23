@@ -1,49 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import { Trophy, Plus, X, Save, ChevronDown } from 'lucide-react';
-
-interface RankingPlayer {
-  rank: number;
-  name: string;
-  city: string;
-  points: number;
-  previousRank?: number;
-  userId?: string;
-}
-
-const emptyPlayer = (): RankingPlayer => ({ rank: 0, name: '', city: '', points: 0 });
-
-const structure: Record<string, Record<string, Record<string, RankingPlayer[]>>> = {
-  snooker: {
-    آقایان: {
-      'دسته برتر': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'دسته یک': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'زیر ۲۱ سال': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'پیشکسوتان': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-    },
-    بانوان: {
-      'دسته برتر': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'زیر ۲۱ سال': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'پیشکسوتان': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-    },
-  },
-  pocket: {
-    آقایان: {
-      'دسته برتر': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'دسته یک': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'زیر ۲۱ سال': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'پیشکسوتان': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-    },
-    بانوان: {
-      'دسته برتر': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'زیر ۲۱ سال': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-      'پیشکسوتان': Array.from({ length: 32 }, (_, i) => ({ rank: i + 1, name: '', city: '', points: 0 })),
-    },
-  },
-};
+import { Trophy, Save } from 'lucide-react';
+import {
+  buildEmptyRankings, getStoredRankings, saveRankings, categorySize,
+  type RankingPlayer, type RankingsStructure,
+} from '../../../lib/rankings-store';
 
 export default function AdminRankingsPage() {
   const router = useRouter();
@@ -51,8 +15,11 @@ export default function AdminRankingsPage() {
   const [sport, setSport] = useState('snooker');
   const [gender, setGender] = useState('آقایان');
   const [category, setCategory] = useState('دسته برتر');
-  const [rankings, setRankings] = useState(structure);
+  const [rankings, setRankings] = useState<RankingsStructure>(() => buildEmptyRankings());
   const [saved, setSaved] = useState(false);
+
+  /* داده‌ی ذخیره‌شده بعد از mount لود می‌شود */
+  useEffect(() => { setRankings(getStoredRankings()); }, []);
 
   if (!user || user.primaryRole !== 'admin') {
     router.push('/');
@@ -62,15 +29,17 @@ export default function AdminRankingsPage() {
   const players = rankings[sport]?.[gender]?.[category] || [];
 
   const updatePlayer = (index: number, field: keyof RankingPlayer, value: string | number) => {
-    const newRankings = JSON.parse(JSON.stringify(rankings));
-    newRankings[sport][gender][category][index] = {
-      ...newRankings[sport][gender][category][index],
+    const newRankings = JSON.parse(JSON.stringify(rankings)) as RankingsStructure;
+    newRankings[sport]![gender]![category]![index] = {
+      ...newRankings[sport]![gender]![category]![index]!,
       [field]: value,
     };
     setRankings(newRankings);
   };
 
+  /* ذخیره‌ی واقعی — همین داده در /ranking سایت نمایش داده می‌شود */
   const handleSave = () => {
+    saveRankings(rankings);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -131,7 +100,7 @@ export default function AdminRankingsPage() {
         <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-green-700 text-white px-5 py-3 flex items-center justify-between">
             <span className="font-bold">{gender} — {category}</span>
-            <span className="text-sm opacity-80">۳۲ نفر</span>
+            <span className="text-sm opacity-80">{toFa(categorySize(sport, category))} نفر</span>
           </div>
 
           {/* هدر */}

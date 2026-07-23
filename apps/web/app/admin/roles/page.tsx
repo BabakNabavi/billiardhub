@@ -201,15 +201,23 @@ export default function AdminRolesPage() {
   const [loading, setLoading]   = useState(true)
   const [toast, setToast]       = useState<string | null>(null)
 
+  const [svcDown, setSvcDown] = useState(false)
+
+  /* اگر سرویس در دسترس نبود، به‌جای برگرداندنِ کاربر، صفحه با پیامِ خالی می‌ماند */
   const load = async (status: RoleStatus) => {
     setLoading(true)
-    const res = await fetch(`/api/admin/roles?status=${status}`, {
-      headers: authHeader() as Record<string, string>,
-    })
-    if (!res.ok) { router.push('/dashboard'); return }
-    const j = await res.json()
-    setRequests(j.requests ?? [])
-    setLoading(false)
+    try {
+      const res = await fetch(`/api/admin/roles?status=${status}`, {
+        headers: authHeader() as Record<string, string>,
+      })
+      if (!res.ok) { setSvcDown(true); setRequests([]); setLoading(false); return }
+      const j = await res.json()
+      setSvcDown(false)
+      setRequests(j.requests ?? [])
+      setLoading(false)
+    } catch {
+      setSvcDown(true); setRequests([]); setLoading(false)
+    }
   }
 
   useEffect(() => { load(filter) }, [filter])
@@ -279,6 +287,13 @@ export default function AdminRolesPage() {
               </button>
             ))}
           </div>
+
+          {/* سرویس در دسترس نیست */}
+          {svcDown && !loading && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 12, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#A03428' }}>
+              سرویسِ درخواست‌های نقش فعلاً در دسترس نیست — بعداً دوباره تلاش کنید. (تأیید/لغو نقش‌ها به بک‌اند متصل است)
+            </div>
+          )}
 
           {/* List */}
           {loading ? (
