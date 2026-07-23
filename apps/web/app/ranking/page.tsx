@@ -199,12 +199,19 @@ export default function RankingsPage() {
         /* ترکِ گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
         .rk-rowwrap { min-width: 0; }
         @media (max-width: 640px) {
-          .rk-row { gap: 8px; padding-left: 10px; min-height: 64px; }
+          /* جای تبِ امتیاز در لبه‌ی چپ رزرو می‌شود */
+          .rk-row { gap: 8px; padding-left: 78px; min-height: 64px; }
           .rk-row .chip { width: 44px; font-size: 14px; }
           .rk-name { flex-basis: 86px; }
           .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 60px;
             overflow: hidden; text-overflow: ellipsis; }
-          .rk-row .rk-pts { font-size: 12px !important; padding: 4px 9px !important; margin-left: 0 !important; }
+          /* امتیاز = تبِ چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
+             فقط گوشه‌های راست گرد است */
+          .rk-row .rk-pts { position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            border-radius: 0 12px 12px 0 !important; border-left: none !important;
+            background: linear-gradient(90deg, rgba(199,166,106,0.24), rgba(199,166,106,0.07)) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 2px rgba(154,110,56,0.12);
+            font-size: 12px !important; padding: 6px 12px 6px 10px !important; margin-left: 0 !important; }
         }
       `}</style>
 
