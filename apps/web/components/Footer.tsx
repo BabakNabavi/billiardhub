@@ -209,7 +209,7 @@ export default function Footer() {
             {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متنِ تمام‌بزرگ تنظیم شده بود
                 و روی متنِ حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.30)' }}>
-              <span>Designed &amp; Developed by <span style={{ color: GOLD }}>Babak Nabavi</span></span>
+              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD }}>Babak Nabavi</span></a>
               <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
@@ -238,7 +238,7 @@ export default function Footer() {
             {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متنِ تمام‌بزرگ تنظیم شده بود
                 و روی متنِ حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.30)' }}>
-              <span>Designed &amp; Developed by <span style={{ color: GOLD }}>Babak Nabavi</span></span>
+              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD }}>Babak Nabavi</span></a>
               <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>

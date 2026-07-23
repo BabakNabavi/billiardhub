@@ -13,7 +13,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, Play, Eye, Clock3, ArrowLeft, Flame, Clapperboard } from 'lucide-react'
 import {
-  MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits,
+  MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits, listChannels,
   type MediaVideo, type MediaCategoryKey,
 } from '../../lib/media-data'
 
@@ -196,13 +196,32 @@ export default function MediaPage() {
         .mx-rail::-webkit-scrollbar { display: none; }
         .mx-rail .mx-card { flex: 0 0 254px; scroll-snap-align: start; }
 
+        /* کارت کانال */
+        .mx-chan { flex: 0 0 208px; scroll-snap-align: start; display: flex; flex-direction: column;
+          align-items: center; gap: 6px; text-align: center; text-decoration: none;
+          background: rgba(255,255,255,0.045); border: 1px solid ${LINE}; border-radius: 18px;
+          padding: 22px 16px 18px; transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s, box-shadow .3s;
+          animation: mxFadeUp .5s ease both; }
+        .mx-chan:hover { transform: translateY(-4px); border-color: rgba(199,166,106,0.45);
+          box-shadow: 0 16px 36px rgba(0,0,0,0.45); }
+        .mx-chan .av { width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center;
+          justify-content: center; font-size: 22px; font-weight: 900; color: #241B08; margin-bottom: 4px;
+          background: linear-gradient(135deg, ${GOLD}, #8A6020); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+        .mx-chan .go { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
+          font-size: 11.5px; font-weight: 800; color: ${GOLD}; text-decoration: none; transition: gap .25s; }
+        .mx-chan:hover .go { gap: 8px; }
+        .mx-chan-cta { border-color: rgba(167,139,250,0.35); background: rgba(139,92,246,0.08); }
+        .mx-chan-cta:hover { border-color: rgba(167,139,250,0.6); }
+
         /* چیپ و ابزار */
         .mx-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
           font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 8px 14px; border-radius: 10px;
           background: rgba(255,255,255,0.045); border: 1px solid ${LINE}; color: ${SEC}; transition: all .2s ease; }
         .mx-chip:hover { border-color: rgba(199,166,106,0.5); color: ${GOLD}; transform: translateY(-1px); }
         .mx-chip.on { background: rgba(199,166,106,0.16); border-color: rgba(199,166,106,0.45); color: ${GOLD}; }
-        .mx-chips-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+        /* ردیفِ چیپ‌ها تا لبه‌ی صفحه bleed می‌شود تا چیپِ آخر «بریده در وسطِ کادر» به نظر نرسد */
+        .mx-chips-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+          padding: 2px clamp(16px,3vw,28px); margin-inline: calc(clamp(16px,3vw,28px) * -1); }
         .mx-chips-row::-webkit-scrollbar { display: none; }
         .mx-search { background: rgba(255,255,255,0.05); border: 1px solid ${LINE}; color: ${IVORY}; }
         .mx-search::placeholder { color: ${MUT}; }
@@ -215,6 +234,25 @@ export default function MediaPage() {
         .mx-hero-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900;
           font-size: clamp(52px, 9vw, 110px); line-height: 1; letter-spacing: .02em;
           color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.07); user-select: none; pointer-events: none; direction: ltr; }
+
+        /* پوسترِ سینماییِ CSS/SVG — همان صحنه‌ی باندِ صفحه‌ی اصلی */
+        .mx-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 46%; pointer-events: none;
+          -webkit-mask-image: linear-gradient(to right, black 40%, transparent 96%);
+          mask-image: linear-gradient(to right, black 40%, transparent 96%); }
+        .mx-stage { position: absolute; inset: 0;
+          background: radial-gradient(ellipse 70% 62% at 26% 100%, rgba(139,92,246,0.16), transparent 62%),
+                      radial-gradient(ellipse 50% 50% at 20% 6%, rgba(167,139,250,0.09), transparent 60%); }
+        @keyframes mxBeam { 0%,100% { transform: rotate(0deg); opacity: 1; } 50% { transform: rotate(3.5deg); opacity: .85; } }
+        .mx-beam { position: absolute; top: -12%; left: 4%; width: 80%; height: 140%;
+          background: conic-gradient(from 158deg at 18% 0%, transparent 0deg, rgba(196,171,255,0.22) 12deg, rgba(167,139,250,0.08) 26deg, transparent 38deg);
+          filter: blur(5px); animation: mxBeam 9s ease-in-out infinite; transform-origin: 18% 0%; }
+        .mx-cam { position: absolute; left: 4%; bottom: 8%; width: clamp(96px, 10vw, 150px); height: auto; opacity: .95;
+          filter: drop-shadow(0 0 12px rgba(167,139,250,0.4)) drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
+        @keyframes mxFlare { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(1.15); } }
+        .mx-flare { position: absolute; left: 16%; top: 24%; width: 80px; height: 80px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(214,196,255,0.28) 0%, rgba(139,92,246,0.12) 40%, transparent 68%);
+          filter: blur(4px); animation: mxFlare 6s ease-in-out infinite; }
+        @media (max-width: 760px) { .mx-poster { width: 70%; opacity: .7; } .mx-cam { width: 84px; bottom: 6%; } }
 
         @media (max-width: 1080px) { .mx-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 900px)  { .mx-top { grid-template-columns: 1fr; } }
@@ -231,6 +269,27 @@ export default function MediaPage() {
       <header style={{ position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${LINE}` }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 84% 0%, rgba(199,166,106,0.14), transparent 52%)' }} />
         <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
+        {/* پوسترِ سینمایی — دوربین + نور پروژکتور (CSS/SVG) */}
+        <div className="mx-poster" aria-hidden>
+          <div className="mx-stage" />
+          <div className="mx-beam" />
+          <div className="mx-flare" />
+          <svg className="mx-cam" viewBox="0 0 220 150" fill="none" stroke="#B79CFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="78" cy="28" r="20" opacity=".9" />
+            <circle cx="78" cy="28" r="8" opacity=".55" />
+            <circle cx="122" cy="28" r="20" opacity=".9" />
+            <circle cx="122" cy="28" r="8" opacity=".55" />
+            <rect x="58" y="48" width="86" height="44" rx="8" opacity=".95" />
+            <circle cx="80" cy="70" r="9" opacity=".5" />
+            <path d="M144 60 L172 50 L172 90 L144 80 Z" opacity=".95" />
+            <line x1="172" y1="56" x2="184" y2="52" opacity=".45" />
+            <line x1="172" y1="84" x2="184" y2="88" opacity=".45" />
+            <line x1="101" y1="92" x2="101" y2="104" opacity=".8" />
+            <line x1="101" y1="104" x2="76" y2="142" opacity=".8" />
+            <line x1="101" y1="104" x2="126" y2="142" opacity=".8" />
+            <line x1="101" y1="104" x2="101" y2="140" opacity=".55" />
+          </svg>
+        </div>
         <div className="mx-hero-word">MEDIA</div>
         <div className="mx-wrap" style={{ position: 'relative', padding: 'clamp(28px,4.4vw,50px) clamp(16px,3vw,28px) clamp(22px,3.4vw,36px)', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
           <div>
@@ -362,6 +421,29 @@ export default function MediaPage() {
               <SecHead title="محبوب‌ترین ویدیوها" />
               <div className="mx-rail">
                 {popular.map((v, i) => <VideoCard key={v.id} v={v} i={i} />)}
+              </div>
+            </section>
+
+            {/* ═══ کانال‌ها — سازندگانِ بیلیارد مدیا ═══ */}
+            <section style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>
+              <SecHead title="کانال‌ها" icon={<span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>CHANNELS</span>} />
+              <div className="mx-rail">
+                {listChannels().map((ch, i) => (
+                  <Link key={ch.creator.id} href={`/media/channel/${ch.creator.handle}`} className="mx-chan" style={{ animationDelay: `${Math.min(i, 6) * 60}ms` }}>
+                    <span className="av">{ch.creator.name.slice(0, 1)}</span>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: IVORY }}>{ch.creator.name}</span>
+                    <span style={{ fontSize: 10.5, color: MUT, direction: 'ltr' }}>@{ch.creator.handle}</span>
+                    <span style={{ fontSize: 11, color: SEC, marginTop: 2 }}>{faDigits(ch.videoCount)} ویدیو · {compactViews(ch.totalViews)} بازدید</span>
+                    <span className="go">مشاهده کانال <ArrowLeft size={11} /></span>
+                  </Link>
+                ))}
+                {/* CTA — کانالِ خودت را بساز */}
+                <div className="mx-chan mx-chan-cta">
+                  <span className="av" style={{ background: 'linear-gradient(135deg,#B79CFF,#7C3AED)', color: '#1B1230' }}>+</span>
+                  <span style={{ fontSize: 14, fontWeight: 900, color: IVORY }}>کانالِ خودت را بساز</span>
+                  <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8, textAlign: 'center' }}>مربی، بازیکن یا باشگاه هستی؟ ویدیوهایت را در بیلیارد مدیا منتشر کن.</span>
+                  <Link href="/profile/role" className="go" style={{ color: '#B79CFF' }}>ساخت کانال <ArrowLeft size={11} /></Link>
+                </div>
               </div>
             </section>
 

@@ -686,8 +686,8 @@ function HomeMediaBand() {
           background: linear-gradient(90deg, transparent, rgba(199,166,106,0.5), transparent); }
         .hm-band::before { top: 0; } .hm-band::after { bottom: 0; }
         /* پرفراژِ فیلم — امضای سالن نمایش */
-        .hm-perf { position: absolute; inset-inline: 0; height: 7px; z-index: 6; opacity: .9; pointer-events: none;
-          background: repeating-linear-gradient(90deg, rgba(255,255,255,0.26) 0 14px, transparent 14px 32px); }
+        .hm-perf { position: absolute; inset-inline: 0; height: 7px; z-index: 6; opacity: .95; pointer-events: none;
+          background: repeating-linear-gradient(90deg, rgba(183,156,255,0.4) 0 14px, transparent 14px 32px); }
         .hm-perf-t { top: 5px; } .hm-perf-b { bottom: 5px; }
         .hm-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900; z-index: 1;
           font-size: clamp(48px, 7.6vw, 104px); line-height: 1; letter-spacing: .04em;
@@ -712,15 +712,23 @@ function HomeMediaBand() {
           background: radial-gradient(circle, rgba(214,196,255,0.32) 0%, rgba(139,92,246,0.14) 40%, transparent 68%);
           filter: blur(4px); animation: hmFlare 6s ease-in-out infinite; }
         @keyframes hmFlare { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .6; transform: scale(1.15); } }
-        /* پلی — طرح LQ با تینتِ بنفش (هم‌رنگِ المان‌های پوستر) */
+        /* پلی — طرح LQ بنفش، چشمک‌زن (حلقه‌ی تپنده) */
+        @keyframes hmPlayPulse {
+          0%   { box-shadow: 0 10px 30px rgba(139,92,246,0.28), 0 0 0 0 rgba(167,139,250,0.5); }
+          70%  { box-shadow: 0 10px 30px rgba(139,92,246,0.28), 0 0 0 12px rgba(167,139,250,0); }
+          100% { box-shadow: 0 10px 30px rgba(139,92,246,0.28), 0 0 0 0 rgba(167,139,250,0); }
+        }
         .hm-play { position: absolute; z-index: 5; top: 50%; left: 24%; transform: translate(-50%,-50%);
           width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
           color: #B79CFF; background: rgba(139,92,246,0.16); border: 1px solid rgba(167,139,250,0.5);
           backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 10px 30px rgba(139,92,246,0.28);
-          transition: transform .3s cubic-bezier(.22,1,.36,1), background .25s, box-shadow .3s; }
-        .hm-play:hover { transform: translate(-50%,-50%) scale(1.09); background: rgba(139,92,246,0.26);
-          box-shadow: 0 14px 40px rgba(139,92,246,0.4); }
+          animation: hmPlayPulse 2.1s ease-out infinite;
+          transition: transform .3s cubic-bezier(.22,1,.36,1), background .25s; }
+        .hm-play:hover { transform: translate(-50%,-50%) scale(1.09); background: rgba(139,92,246,0.26); }
+        /* نقطه‌ی بنفشِ چشمک‌زنِ NOW SHOWING */
+        @keyframes hmDot { 0%,100% { opacity: 1; box-shadow: 0 0 7px rgba(183,156,255,0.8); } 50% { opacity: .2; box-shadow: none; } }
+        .hm-nsdot { width: 6px; height: 6px; border-radius: 50%; background: #B79CFF; flex-shrink: 0;
+          animation: hmDot 1.6s ease-in-out infinite; }
         .hm-dur { position: absolute; z-index: 5; bottom: 16px; left: 16px; font-size: 11px; font-weight: 800;
           color: #F2EFE9; background: rgba(8,7,5,0.8); border: 1px solid rgba(255,255,255,0.14);
           border-radius: 7px; padding: 2px 9px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
@@ -768,15 +776,15 @@ function HomeMediaBand() {
           .hm-poster { width: 100%; opacity: .85;
             -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
-          .hm-cam { left: 3%; top: auto; bottom: 12px; width: 112px; opacity: .95; }
+          /* دوربین روبروی NOW SHOWING؛ پلی به موازاتش */
+          .hm-cam { left: 2%; top: auto; bottom: 64px; width: 96px; opacity: .95; }
           .hm-beam { left: -8%; width: 95%; }
-          .hm-flare { left: 12%; top: 30%; width: 84px; height: 84px; }
+          .hm-flare { left: 10%; top: 26%; width: 80px; height: 80px; }
           .hm-dur, .hm-minis { display: none; }
-          /* پلی — جلوی دوربین، LQ بنفش */
-          .hm-play { display: flex; top: auto; bottom: 34px; left: 40%; transform: none;
-            width: 46px; height: 46px; }
+          .hm-play { display: flex; top: auto; bottom: 86px; left: 33%; transform: none;
+            width: 44px; height: 44px; }
           .hm-play:hover { transform: scale(1.08); }
-          .hm-wrap { min-height: 0; padding-block: 26px 78px; }
+          .hm-wrap { min-height: 0; padding-block: 26px 24px; }
           /* NOW SHOWING: بدونِ بازدید؛ عنوانِ ریزتر زیرِ لیبل */
           .hm-views, .hm-featdot { display: none; }
           .hm-feat { flex-wrap: wrap; gap: 6px; }
@@ -834,7 +842,7 @@ function HomeMediaBand() {
           آموزش‌های حرفه‌ای، هایلایتِ مسابقات و مصاحبه‌های اختصاصی — در پلتفرم ویدیویی بیلیارد هاب
         </p>
         <div className="hm-feat hm-anim" style={{ animationDelay: '160ms' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.18em', color: '#E8CE96', flexShrink: 0 }}>NOW SHOWING</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.18em', color: '#E8CE96', flexShrink: 0 }}><span className="hm-nsdot" /> NOW SHOWING</span>
           <span className="hm-featdot" style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
           <p className="hm-feat-title">{MEDIA_FEAT.title}</p>
           <span className="hm-views" style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(MEDIA_FEAT.views)} بازدید</span>

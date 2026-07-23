@@ -254,7 +254,7 @@ export default function Navbar() {
 
                   {/* Header row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px 12px', borderBottom: '1px solid rgba(28,28,26,0.06)' }}>
-                    <span style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD PLUS</span>
+                    <span style={{ fontSize: '10px', color: GOLD, letterSpacing: '0.28em', fontWeight: 700 }}>EXPLORE BILLIARD HUB</span>
                     <button onClick={() => setExploreOpen(false)} style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '8px', cursor: 'pointer', color: 'rgba(28,28,26,0.38)', padding: '5px', display: 'flex', transition: 'all 0.2s' }}>
                       <X size={12} />
                     </button>
@@ -307,7 +307,9 @@ export default function Navbar() {
                       <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(28,28,26,0.7)' }}>اولین و بزرگترین پلتفرم تخصصی بیلیارد ایران</div>
                       <div style={{ fontSize: '11px', color: 'rgba(28,28,26,0.36)', marginTop: '2px' }}>اتصال بی واسطه جامعه بیلیارد</div>
                     </div>
-                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '20px', padding: '7px 16px', boxShadow: `0 4px 16px rgba(184,147,58,0.32)`, whiteSpace: 'nowrap' }}>
+                    <Link href="/register" onClick={() => setExploreOpen(false)} style={{ fontSize: '13px', color: '#9A6E38', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: '10px', padding: '7px 16px', whiteSpace: 'nowrap', transition: 'transform .25s cubic-bezier(.22,1,.36,1), background .2s' }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(199,166,106,0.18)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(199,166,106,0.12)'; }}>
                       ثبت‌نام رایگان <ArrowLeft size={10} />
                     </Link>
                   </div>
