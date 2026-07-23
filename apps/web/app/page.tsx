@@ -124,10 +124,10 @@ const IMG = {
    HERO SLIDES — all 5 wallpapers, each with an accent colour
 ═══════════════════════════════════════════════════════════════ */
 const HERO_SLIDES = [
-  { bg: '/images/hero/1.png',            accent: GRN,  label: 'باشگاه‌ها' },
-  { bg: '/images/hero/2.png',            accent: GOLD, label: 'تجهیزات'   },
-  { bg: '/images/hero/3.png',            accent: BLU,  label: 'مربیان'    },
-  { bg: '/images/hero/hero-lounge.jpg',  accent: BRN,  label: 'رقابت'     },
+  { bg: '/images/hero/1.jpg',   accent: GRN,  label: 'باشگاه‌ها' },
+  { bg: '/images/hero/2.png',   accent: GOLD, label: 'تجهیزات'   },
+  { bg: '/images/hero/3.jfif',  accent: BLU,  label: 'مربیان'    },
+  { bg: '/images/hero/4.png',   accent: BRN,  label: 'رقابت'     },
 ];
 
 const FEATURE_CARDS = [
