@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Trophy, TrendingUp, TrendingDown, Minus, Crown, Medal, Award, ArrowLeft } from 'lucide-react'
+import { Trophy, TrendingUp, TrendingDown, Minus, ArrowLeft } from 'lucide-react'
 import { getCategoryPlayers, categorySize } from '../../lib/rankings-store'
 
 interface RankingPlayer {
@@ -77,12 +77,15 @@ const BG     = '#F7F7F5'
 
 const faDigits = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
-/* تُنِ سکوی سه نفرِ اول — ظریف و در خانواده‌ی برند (بدون گرادیان‌های کلیشه‌ای) */
-const PODIUM_TONE: Record<number, { from: string; to: string; ring: string; icon: React.ReactNode; label: string }> = {
-  1: { from: '#171310', to: '#2A2118', ring: 'rgba(199,166,106,0.75)', icon: <Crown size={13} />, label: 'قهرمان رنکینگ' },
-  2: { from: '#0C1424', to: '#17253F', ring: 'rgba(160,175,195,0.6)',  icon: <Medal size={13} />, label: 'رتبه‌ی دوم' },
-  3: { from: '#07231A', to: '#0E3A2A', ring: 'rgba(180,120,60,0.6)',   icon: <Award size={13} />, label: 'رتبه‌ی سوم' },
-}
+/* رنگ‌بندیِ رتبه‌ها — به سبکِ جدول رنکینگ فدراسیون جهانی:
+   ۱ مشکی، ۲–۸ صورتی، ۹–۱۶ آبی، ۱۷–۳۲ قهوه‌ای، ۳۳–۶۴ سبز (دسته یک)، بقیه خاکستری */
+const rankColor = (r: number): string =>
+  r === 1 ? '#111111'
+  : r <= 8 ? '#F06EAE'
+  : r <= 16 ? '#3D63E6'
+  : r <= 32 ? '#A9613F'
+  : r <= 64 ? '#229A47'
+  : '#8A8474'
 
 /* چیپِ تغییرِ رتبه — همان منطقِ قبلی (previousRank - rank) */
 function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean }) {
@@ -136,13 +139,6 @@ export default function RankingsPage() {
     : []
   const capacity = categorySize(sport, category)
 
-  const top3 = players.filter(p => p.rank <= 3)
-  const rest = players.filter(p => p.rank > 3)
-
-  /* ترتیبِ سکو در دسکتاپ: ۲ — ۱ — ۳ (قهرمان وسط و بلندتر) */
-  const podium = [top3.find(p => p.rank === 2), top3.find(p => p.rank === 1), top3.find(p => p.rank === 3)]
-    .filter(Boolean) as RankingPlayer[]
-
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
@@ -175,31 +171,7 @@ export default function RankingsPage() {
         .rk-chip:hover { border-color: rgba(199,166,106,0.45); transform: translateY(-1px); }
         .rk-chip.on { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.38); color: ${GOLD_D}; }
 
-        /* سکوی Top 3 */
-        .rk-podium { display: grid; grid-template-columns: 1fr 1.18fr 1fr; gap: 16px; align-items: end; }
-        .rk-pod { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;
-          border-radius: 20px; overflow: hidden; text-decoration: none; color: #fff; isolation: isolate;
-          padding: 26px 16px 20px; box-shadow: 0 10px 32px rgba(15,14,11,0.18);
-          transition: transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s; animation: rkFadeUp .6s ease both; }
-        .rk-pod:hover { transform: translateY(-5px); box-shadow: 0 24px 54px rgba(15,14,11,0.28); }
-        /* شماره سمتِ راستِ کارت (direction:ltr خودِ المان inline-start را چپ می‌کرد) */
-        .rk-pod .num { position: absolute; top: -6px; right: 8px; font-weight: 900;
-          font-size: clamp(58px, 6.4vw, 84px); line-height: 1; color: transparent;
-          -webkit-text-stroke: 1.5px rgba(255,255,255,0.16); letter-spacing: -0.04em;
-          font-variant-numeric: tabular-nums; direction: ltr; user-select: none; }
-        .rk-pod .frame { position: absolute; inset: 9px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); pointer-events: none; transition: border-color .3s; }
-        .rk-pod:hover .frame { border-color: rgba(199,166,106,0.5); }
-        .rk-pod.first { padding-top: 34px; padding-bottom: 26px; }
-        @media (max-width: 720px) {
-          .rk-podium { grid-template-columns: 1fr; align-items: stretch; }
-          .rk-pod { flex-direction: row; text-align: right; align-items: center; gap: 14px; padding: 18px 16px !important; }
-          .rk-pod .num { font-size: 54px; top: auto; bottom: -10px; }
-          .rk-pod-info { align-items: flex-start !important; }
-          /* موبایل: قهرمان اول */
-          .rk-pod.first { order: -1; }
-        }
-
-        /* ردیف‌های ۴ به بعد */
+        /* ردیف‌های جدول */
         .rk-row { position: relative; display: flex; align-items: center; gap: 14px;
           background: #fff; border: 1px solid ${LINE}; border-radius: 16px; overflow: hidden;
           padding: 13px 18px; text-decoration: none; color: inherit;
@@ -207,11 +179,8 @@ export default function RankingsPage() {
           animation: rkFadeUp .5s ease both; }
         .rk-row:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(28,27,23,0.10); border-color: rgba(199,166,106,0.4); }
         .rk-row .ghost { position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-          font-weight: 900; font-size: 46px; line-height: 1; color: transparent;
-          -webkit-text-stroke: 1.2px rgba(28,27,23,0.10); letter-spacing: -0.04em;
-          font-variant-numeric: tabular-nums; direction: ltr; user-select: none; pointer-events: none;
-          transition: -webkit-text-stroke-color .3s; }
-        .rk-row:hover .ghost { -webkit-text-stroke-color: rgba(199,166,106,0.5); }
+          font-weight: 900; font-size: 46px; line-height: 1; letter-spacing: -0.04em;
+          font-variant-numeric: tabular-nums; direction: ltr; user-select: none; pointer-events: none; }
         .rk-row .go { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800;
           color: ${GOLD_D}; opacity: 0; transform: translateX(6px); transition: opacity .25s, transform .3s; white-space: nowrap; }
         .rk-row:hover .go { opacity: 1; transform: none; }
@@ -301,47 +270,13 @@ export default function RankingsPage() {
                 </span>
               </div>
 
-              {/* ═══ سکوی سه نفرِ اول ═══ */}
-              {top3.length > 0 && (
-                <section className="rk-podium" style={{ marginBottom: 'clamp(24px,3.4vw,36px)' }}>
-                  {podium.map((p, i) => {
-                    const tone = PODIUM_TONE[p.rank]!
-                    const diff = p.previousRank ? p.previousRank - p.rank : 0
-                    const first = p.rank === 1
-                    return (
-                      <Link key={p.rank} href={p.userId ? `/players/${p.userId}` : '#'}
-                        className={`rk-pod${first ? ' first' : ''}`}
-                        style={{ background: `linear-gradient(165deg, ${tone.from} 10%, ${tone.to} 90%)`, animationDelay: `${i * 90}ms` }}>
-                        <span style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 80% 12%, rgba(199,166,106,0.20), transparent 55%)`, zIndex: -1 }} />
-                        <span className="num">{faDigits(p.rank)}</span>
-                        <span className="frame" />
-                        <Portrait p={p} size={first ? 84 : 68} onDark />
-                        <div className="rk-pod-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, marginTop: 12, minWidth: 0 }}>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: tone.ring }}>
-                            {tone.icon} {tone.label}
-                          </span>
-                          <span style={{ fontSize: first ? 19 : 16.5, fontWeight: 900, lineHeight: 1.4 }}>{p.name}</span>
-                          <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>{p.city || '—'}</span>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                            <span style={{ fontSize: first ? 16 : 14, fontWeight: 900, color: '#F3E7CF', fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.4)', borderRadius: 10, padding: '4px 13px' }}>
-                              {p.points.toLocaleString('fa-IR')}
-                            </span>
-                            <TrendChip diff={diff} onDark />
-                          </span>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </section>
-              )}
-
-              {/* ═══ رتبه‌های ۴ به بعد ═══ */}
+              {/* ═══ جدول کامل — شماره‌ها با رنگ‌بندی رسمی ═══ */}
               <section style={{ display: 'grid', gap: 10 }}>
-                {rest.map((p, i) => {
+                {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
                   return (
                     <Link key={p.rank} href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
-                      <span className="ghost">{faDigits(String(p.rank).padStart(2, '0'))}</span>
+                      <span className="ghost" style={{ color: rankColor(p.rank) }}>{faDigits(String(p.rank).padStart(2, '0'))}</span>
                       <span style={{ width: 44, flexShrink: 0 }} aria-hidden />
                       <Portrait p={p} size={46} />
                       <div style={{ minWidth: 0, flex: 1 }}>
@@ -362,7 +297,7 @@ export default function RankingsPage() {
               <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 <span style={{ fontSize: 12.5, color: SEC }}>
-                  رنکینگ رسمی فدراسیون بیلیارد و اسنوکر جمهوری اسلامی ایران — به‌روزرسانی هر هفته
+                  رنکینگ رسمی فدراسیون بیلیارد، بولینگ و بولس جمهوری اسلامی ایران — به‌روز شده
                 </span>
               </div>
             </>
