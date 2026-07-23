@@ -266,7 +266,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
             transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
             boxShadow: hov
-              ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)'
+              ? '0 10px 22px rgba(0,0,0,0.11), 0 3px 8px rgba(0,0,0,0.06)'
               : '0 4px 16px rgba(0,0,0,0.09)',
             willChange: 'transform',
           }}
@@ -368,7 +368,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             borderRadius: `0 0 ${rad} ${rad}`,
             padding: '9px 7px 11px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '6px',
+            overflow: 'hidden', gap: '9px',
           }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>

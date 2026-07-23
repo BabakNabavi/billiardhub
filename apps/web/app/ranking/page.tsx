@@ -199,8 +199,8 @@ export default function RankingsPage() {
         /* ترکِ گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
         .rk-rowwrap { min-width: 0; }
         @media (max-width: 640px) {
-          /* جای تبِ امتیاز در لبه‌ی چپ رزرو می‌شود */
-          .rk-row { gap: 8px; padding-left: 78px; min-height: 64px; }
+          /* جای تبِ امتیاز در لبه‌ی چپ رزرو می‌شود — چیپِ صعود/نزول چسبیده به تب */
+          .rk-row { gap: 8px; padding-left: 70px; min-height: 64px; }
           .rk-row .chip { width: 44px; font-size: 14px; }
           .rk-name { flex-basis: 86px; }
           .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 60px;
