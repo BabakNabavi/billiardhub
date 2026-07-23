@@ -279,7 +279,12 @@ type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'tourname
 
 export default function ClubDashboardPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, _hydrated } = useAuthStore();
+
+  /* بدون این گارد، کاربرِ لاگین‌نشده برای همیشه در «در حال بارگذاری» می‌ماند */
+  useEffect(() => {
+    if (_hydrated && !user) router.push('/login');
+  }, [_hydrated, user, router]);
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
@@ -496,6 +501,12 @@ export default function ClubDashboardPage() {
     try { setReserveClosedUntil(localStorage.getItem(`club-reserveClosedUntil-${selectedClub.id}`) ?? ''); }
     catch { setReserveClosedUntil(''); }
 
+    // مسابقاتِ ساخته‌شده — قبلاً فقط در state بودند و با رفرش می‌پریدند
+    try {
+      const t = localStorage.getItem(`club-tournaments-${selectedClub.id}`);
+      setMyTournaments(t ? JSON.parse(t) : []);
+    } catch { setMyTournaments([]); }
+
     api.get(`/bookings/club/${selectedClub.id}`)
       .then(r => setBookings(r.data))
       .catch(() => {});
@@ -647,7 +658,11 @@ export default function ClubDashboardPage() {
   };
 
   const deleteTournament = (id: string) => {
-    setMyTournaments(ts => ts.filter(t => t.id !== id));
+    setMyTournaments(ts => {
+      const next = ts.filter(t => t.id !== id);
+      try { localStorage.setItem(lsKey('tournaments'), JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
 
   const createTournament = async () => {
@@ -671,7 +686,11 @@ export default function ClubDashboardPage() {
         cardNumber: tForm.cardNumber, cardHolder: tForm.cardHolder, bankName: tForm.bankName,
         status: 'upcoming', registeredCount: 0,
       };
-      setMyTournaments(ts => [newT, ...ts]);
+      setMyTournaments(ts => {
+        const next = [newT, ...ts];
+        try { localStorage.setItem(lsKey('tournaments'), JSON.stringify(next)); } catch {}
+        return next;
+      });
       setTournamentTab('list');
       setTForm({
         name: '', description: '', gameType: 'snooker', date: '', startTime: '',

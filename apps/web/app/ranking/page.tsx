@@ -192,14 +192,17 @@ export default function RankingsPage() {
             inset 0 -2px 5px rgba(0,0,0,0.2);
           text-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.5); }
         .rk-row .chip i { font-style: normal; font-size: 0.7em; font-weight: 800; opacity: .85; }
-        .rk-city { flex-shrink: 0; margin-inline-start: clamp(16px, 4vw, 44px);
+        /* بلوکِ نام عرضِ ثابت دارد تا ستونِ شهرها در همه‌ی ردیف‌ها دقیقاً هم‌راستا بماند */
+        .rk-name { flex: 0 0 clamp(130px, 20vw, 210px); min-width: 0; padding: 11px 0; }
+        .rk-city { flex-shrink: 0; margin-inline-start: clamp(18px, 3vw, 34px);
           font-size: 12px; color: ${MUT}; white-space: nowrap; }
         /* ترکِ گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
         .rk-rowwrap { min-width: 0; }
         @media (max-width: 640px) {
           .rk-row { gap: 8px; padding-left: 10px; min-height: 64px; }
           .rk-row .chip { width: 44px; font-size: 14px; }
-          .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 66px;
+          .rk-name { flex-basis: 86px; }
+          .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 60px;
             overflow: hidden; text-overflow: ellipsis; }
           .rk-row .rk-pts { font-size: 12px !important; padding: 4px 9px !important; margin-left: 0 !important; }
         }
@@ -296,7 +299,7 @@ export default function RankingsPage() {
                       <Link href={p.userId ? `/players/${p.userId}` : '#'} className="rk-row">
                         <span className="chip" style={{ backgroundColor: rankColor(p.rank) }}><i>#</i>{faDigits(p.rank)}</span>
                         <Portrait p={p} size={46} />
-                        <div style={{ minWidth: 0, flexShrink: 1, padding: '11px 0' }}>
+                        <div className="rk-name">
                           {lastName ? (
                             <>
                               <div style={{ fontSize: 11.5, fontWeight: 700, color: GOLD_D, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</div>

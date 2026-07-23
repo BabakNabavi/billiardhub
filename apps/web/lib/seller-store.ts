@@ -161,6 +161,18 @@ export function newSellerSlug(): string {
 export function saveSellerProfile(p: SellerProfile) {
   if (typeof window === 'undefined') return
   const all = getSellerProfiles()
+  /* dedupe مالک — مثل بقیه‌ی storeها: هر مالک فقط یک فروشگاه (رکوردِ سرگردانِ
+     قبلی با اسلاگِ متفاوت حذف می‌شود تا دوتایی نشود) */
+  const ownerKeys = [p.ownerId, p.ownerPhone].filter(Boolean) as string[]
+  if (ownerKeys.length) {
+    for (const slug of Object.keys(all)) {
+      const o = all[slug]!
+      if (slug !== p.slug &&
+          ((o.ownerId && ownerKeys.includes(o.ownerId)) || (o.ownerPhone && ownerKeys.includes(o.ownerPhone)))) {
+        delete all[slug]
+      }
+    }
+  }
   all[p.slug] = { ...p, updatedAt: new Date().toISOString() }
   try { localStorage.setItem(KEY, JSON.stringify(all)) }
   catch { throw new Error('quota') }   // صفحه پیام «حافظه پر است» نشان می‌دهد
