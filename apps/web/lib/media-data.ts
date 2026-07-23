@@ -304,6 +304,40 @@ export function getVideo(id: string): MediaVideo | null {
   return MEDIA_VIDEOS.find(v => v.id === id) ?? null
 }
 
+/* ── کانال‌ها — مثل یوتیوب: هر سازنده یک کانال ──────────────── */
+export const CHANNEL_TAGLINES: Record<string, string> = {
+  hub:     'رسانه‌ی رسمی بیلیارد هاب — رویدادها و گزارش‌های اختصاصی',
+  academy: 'آموزش حرفه‌ای اسنوکر و پاکت بیلیارد، از مبتدی تا مسابقه',
+  masters: 'پوشش کامل مسابقات؛ هایلایت، پشت صحنه و تحلیل',
+  gearlab: 'تست و بررسی تخصصی تجهیزات بیلیارد',
+  proplay: 'تکنیک، الگوخوانی و هنرِ بازی',
+}
+
+export interface MediaChannel {
+  creator: MediaCreator
+  tagline: string
+  videoCount: number
+  totalViews: number
+}
+
+export function listChannels(): MediaChannel[] {
+  const map = new Map<string, MediaChannel>()
+  for (const v of MEDIA_VIDEOS) {
+    const c = map.get(v.creator.id)
+    if (c) { c.videoCount++; c.totalViews += v.views }
+    else map.set(v.creator.id, { creator: v.creator, tagline: CHANNEL_TAGLINES[v.creator.id] ?? '', videoCount: 1, totalViews: v.views })
+  }
+  return [...map.values()].sort((a, b) => b.totalViews - a.totalViews)
+}
+
+export function getChannel(handle: string): MediaChannel | null {
+  return listChannels().find(c => c.creator.handle === handle) ?? null
+}
+
+export function channelVideos(handle: string): MediaVideo[] {
+  return MEDIA_VIDEOS.filter(v => v.creator.handle === handle).sort((a, b) => b.ts - a.ts)
+}
+
 export function relatedVideos(v: MediaVideo, count = 6): MediaVideo[] {
   const same = MEDIA_VIDEOS.filter(x => x.id !== v.id && x.category === v.category)
   const rest = MEDIA_VIDEOS.filter(x => x.id !== v.id && x.category !== v.category)
