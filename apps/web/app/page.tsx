@@ -1220,13 +1220,13 @@ useEffect(() => {
         {HERO_SLIDES.map((s, i) => (
           <div key={i} style={{
             position: 'absolute', inset: 0, zIndex: 2,
-            opacity: i === slide ? 0.48 : 0,
-            transition: 'opacity 3.2s cubic-bezier(0.4,0,0.2,1)',
+            opacity: i === slide ? 0.56 : 0,
+            transition: 'opacity 3.6s cubic-bezier(0.33,0,0.15,1)',
             pointerEvents: 'none',
           }}>
             <img src={s.bg} alt="" loading={i === 0 ? 'eager' : 'lazy'}
               style={{ width: '100%', height: '100%', objectFit: 'cover',
-                filter: 'brightness(0.72) saturate(0.80) contrast(1.06) blur(2.5px)',
+                filter: 'brightness(0.78) saturate(0.85) contrast(1.06) blur(1.5px)',
                 transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
@@ -1234,9 +1234,9 @@ useEffect(() => {
 
         {/* ── Layer 3: cinematic gradients ── */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-          background: 'linear-gradient(to bottom,rgba(4,2,10,0.80) 0%,rgba(4,2,10,0) 24%,rgba(4,2,10,0) 46%,rgba(4,2,10,0.97) 100%)' }} />
+          background: 'linear-gradient(to bottom,rgba(4,2,10,0.78) 0%,rgba(4,2,10,0) 26%,rgba(4,2,10,0) 44%,rgba(4,2,10,0.97) 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 90% 82% at 50% 42%,transparent 26%,rgba(4,2,10,0.56) 100%)' }} />
+          background: 'radial-gradient(ellipse 90% 82% at 50% 40%,transparent 22%,rgba(4,2,10,0.62) 100%)' }} />
 
         {/* ── Ambient accent orb — colour shifts with slide ── */}
         <div style={{
@@ -1281,15 +1281,16 @@ useEffect(() => {
             fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 900, lineHeight: 1.08,
             margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
-            <span style={{ color: '#ffffff' }}>پلتفرم جامع و هوشمند </span>
-            <span style={{ color: '#D4A843', textShadow: '0 2px 8px rgba(212,168,67,0.45)' }}>بیلیارد</span>
+            <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>پلتفرم جامع و هوشمند </span>
+            <span style={{ color: '#D4A843', textShadow: '0 2px 10px rgba(212,168,67,0.40), 0 2px 28px rgba(0,0,0,0.55)' }}>بیلیارد</span>
           </h1>
 
-          {/* Subtitle — نقطه‌ی اتصال */}
+          {/* Subtitle — نقطه‌ی اتصال؛ عمداً کم‌وزن‌تر از تیتر */}
           <p className="hc hero-subtitle" style={{
-            fontSize: 'clamp(15px, 2.1vw, 24px)', fontWeight: 500,
+            fontSize: 'clamp(14px, 1.9vw, 21px)', fontWeight: 500,
             margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
-            color: 'rgba(255,255,255,0.82)',
+            color: 'rgba(255,255,255,0.66)', letterSpacing: '0.01em',
+            textShadow: '0 1px 16px rgba(0,0,0,0.45)',
           }}>
             اتصال بی واسطه جامعه بیلیارد
           </p>
@@ -1311,29 +1312,29 @@ useEffect(() => {
                     <Link key={i} href={card.href} className={`feat-card${isDup ? ' feat-dup' : ''}`} style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', scrollSnapAlign: 'center' }}>
                       <div style={{
                         width: '118px', padding: '18px 10px 16px',
-                        background: `rgba(${card.rgb},0.09)`,
-                        backdropFilter: 'blur(28px) saturate(200%)',
-                        WebkitBackdropFilter: 'blur(28px) saturate(200%)',
-                        border: `1px solid rgba(${card.rgb},${active ? '0.45' : '0.26'})`,
+                        background: `linear-gradient(180deg, rgba(${card.rgb},0.11) 0%, rgba(10,9,14,0.34) 40%, rgba(10,9,14,0.42) 100%)`,
+                        backdropFilter: 'blur(26px) saturate(160%)',
+                        WebkitBackdropFilter: 'blur(26px) saturate(160%)',
+                        border: `1px solid ${active ? 'rgba(199,166,106,0.52)' : 'rgba(255,255,255,0.13)'}`,
                         borderRadius: '20px',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                         textAlign: 'center', flex: 1,
                         boxShadow: active
-                          ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 18px rgba(${card.rgb},0.50), 0 0 0 1px rgba(${card.rgb},0.18)`
-                          : `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(${card.rgb},0.12)`,
+                          ? 'inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 32px rgba(0,0,0,0.42), 0 0 24px rgba(199,166,106,0.14)'
+                          : 'inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.30)',
                         cursor: 'pointer',
-                        transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+                        transition: 'box-shadow 0.35s ease, border-color 0.35s ease',
                       }}>
                         <div style={{
                           width: '46px', height: '46px', borderRadius: '14px',
-                          background: `rgba(${card.rgb},0.14)`,
-                          border: `1px solid rgba(${card.rgb},0.32)`,
+                          background: `rgba(${card.rgb},0.12)`,
+                          border: `1px solid rgba(${card.rgb},0.24)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                          boxShadow: `0 0 20px rgba(${card.rgb},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
+                          boxShadow: `0 0 14px rgba(${card.rgb},0.18), inset 0 1px 0 rgba(255,255,255,0.10)`,
                           marginBottom: '32px',
                         }}>
                           <card.Icon size={22} color={card.clr}
-                            style={{ filter: `drop-shadow(0 0 6px rgba(${card.rgb},0.85))` }} />
+                            style={{ filter: `drop-shadow(0 0 5px rgba(${card.rgb},0.40))` }} />
                         </div>
                         <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
                           {card.title}
@@ -1349,13 +1350,14 @@ useEffect(() => {
             </div>
             {/* نقطه‌های کاروسل — همیشه دقیقاً ۷ تا، یکنواخت (بدونِ محوِ فاصله‌ای که «سوراخ» می‌ساخت) */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '18px' }}>
-              {FEATURE_CARDS.map((card, i) => (
+              {FEATURE_CARDS.map((_, i) => (
                 <div key={i} style={{
                   height: '5px',
-                  width: i === activeCard ? '18px' : '5px',
+                  width: i === activeCard ? '20px' : '5px',
                   borderRadius: '3px', flexShrink: 0,
-                  background: i === activeCard ? card.clr : 'rgba(255,255,255,0.28)',
-                  transition: 'all 0.3s ease',
+                  background: i === activeCard ? GOLD : 'rgba(255,255,255,0.25)',
+                  boxShadow: i === activeCard ? '0 0 8px rgba(199,166,106,0.5)' : 'none',
+                  transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
                 }} />
               ))}
             </div>
@@ -1366,33 +1368,33 @@ useEffect(() => {
             <div className="trust-grid" style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
               zoom: 0.8,
-              background: 'rgba(255,255,255,0.07)',
-              backdropFilter: 'blur(48px) saturate(240%)',
-              WebkitBackdropFilter: 'blur(48px) saturate(240%)',
+              background: 'rgba(10,9,14,0.30)',
+              backdropFilter: 'blur(40px) saturate(170%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(170%)',
               borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.18)',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.22), 0 0 0 1px rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 10px 36px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.14)',
               overflow: 'hidden',
             }}>
               {TRUST_ITEMS.map((item, i) => (
                 <div key={i} style={{
                   display: 'flex', flexDirection: 'row', alignItems: 'center',
                   gap: '9px', padding: '10px 14px',
-                  borderLeft: i < 3 ? '1px solid rgba(255,255,255,0.14)' : 'none',
+                  borderLeft: i < 3 ? '1px solid rgba(255,255,255,0.09)' : 'none',
                 }}>
                   <div style={{
                     width: '30px', height: '30px', borderRadius: '50%',
-                    background: `rgba(${item.rgb},0.16)`,
-                    border: `1px solid rgba(${item.rgb},0.28)`,
+                    background: `rgba(${item.rgb},0.13)`,
+                    border: `1px solid rgba(${item.rgb},0.22)`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    boxShadow: `0 0 10px rgba(${item.rgb},0.30)`,
+                    boxShadow: `0 0 8px rgba(${item.rgb},0.14)`,
                   }}>
                     <item.Icon size={14} color={item.clr}
-                      style={{ filter: `drop-shadow(0 0 4px rgba(${item.rgb},0.65))` }} />
+                      style={{ filter: `drop-shadow(0 0 3px rgba(${item.rgb},0.35))` }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span className="trust-label" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{item.label}</span>
-                    <span className="trust-sub" style={{ fontSize: '9px', color: `rgba(${item.rgb},0.70)`, fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
+                    <span className="trust-label" style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.92)', whiteSpace: 'nowrap' }}>{item.label}</span>
+                    <span className="trust-sub" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.45)', fontWeight: 500, whiteSpace: 'nowrap' }}>{item.sub}</span>
                   </div>
                 </div>
               ))}
