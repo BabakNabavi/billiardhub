@@ -194,10 +194,14 @@ export default function RankingsPage() {
         .rk-row .chip i { font-style: normal; font-size: 0.7em; font-weight: 800; opacity: .85; }
         .rk-city { flex-shrink: 0; margin-inline-start: clamp(16px, 4vw, 44px);
           font-size: 12px; color: ${MUT}; white-space: nowrap; }
+        /* ترکِ گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
+        .rk-rowwrap { min-width: 0; }
         @media (max-width: 640px) {
-          .rk-row { gap: 11px; padding-left: 12px; min-height: 64px; }
-          .rk-row .chip { width: 46px; font-size: 14.5px; }
-          .rk-city { margin-inline-start: 10px; font-size: 10.5px; }
+          .rk-row { gap: 8px; padding-left: 10px; min-height: 64px; }
+          .rk-row .chip { width: 44px; font-size: 14px; }
+          .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 66px;
+            overflow: hidden; text-overflow: ellipsis; }
+          .rk-row .rk-pts { font-size: 12px !important; padding: 4px 9px !important; margin-left: 0 !important; }
         }
       `}</style>
 
@@ -281,7 +285,7 @@ export default function RankingsPage() {
               </div>
 
               {/* ═══ جدول کامل — مربعِ رنگیِ رتبه با عدد سفید ═══ */}
-              <section style={{ display: 'grid', gap: 10 }}>
+              <section style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10 }}>
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
                   const parts = p.name.trim().split(/\s+/)
@@ -305,7 +309,7 @@ export default function RankingsPage() {
                         <span className="rk-city">{p.city || '—'}</span>
                         <span style={{ flex: 1 }} aria-hidden />
                         <TrendChip diff={diff} />
-                        <span style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4 }}>
+                        <span className="rk-pts" style={{ fontSize: 14, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums', background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 10, padding: '5px 13px', whiteSpace: 'nowrap', marginLeft: 4, flexShrink: 0 }}>
                           {p.points.toLocaleString('fa-IR')}
                         </span>
                       </Link>
