@@ -1029,9 +1029,16 @@ useEffect(() => {
         /* روی سکشن‌های تیره متنِ طلاییِ روشن‌تر تا خوانا بماند */
         .see-all-lq.on-dark { color:${GOLD}; border-color:rgba(199,166,106,0.42); }
 
-        .sec-label{font-size:9px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;margin-bottom:14px;display:block;}
+        .sec-label{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;margin-bottom:14px;padding:5px 13px;border-radius:999px;border:1px solid currentColor;}
+        .sec-label::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
-        .sec-rule {height:2px;width:46px;border-radius:1px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
+        .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
+        /* وردمارکِ outline پس‌زمینه‌ی هر سکشن — امضای هویتِ جدید */
+        .sec-word{position:absolute;top:2px;inset-inline-end:-6px;font-weight:900;font-size:clamp(56px,9vw,120px);line-height:1;letter-spacing:0.03em;color:transparent;-webkit-text-stroke:1px var(--wc,rgba(28,27,23,0.06));user-select:none;pointer-events:none;direction:ltr;}
+        /* خطِ موییِ اریب — امضای برند */
+        .sec-hair{position:absolute;top:-25%;bottom:-25%;width:1px;transform:rotate(14deg);pointer-events:none;}
+        /* لبه‌های محوِ مارکی فروشندگان */
+        .sellers-desk{-webkit-mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);}
 
         .prod-hover{transition:transform .4s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;}
         .prod-hover:hover{transform:translateY(-6px);box-shadow:0 20px 52px rgba(26,25,23,0.12)!important;}
@@ -1412,8 +1419,11 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
-      <section className="clubs-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+      <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
+        <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
+        <div aria-hidden className="sec-hair" style={{ left: '28%', background: 'linear-gradient(180deg,transparent,rgba(20,83,45,0.28),transparent)' }} />
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(20,83,45,0.07)' }}>CLUBS</div>
+        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
@@ -1454,8 +1464,11 @@ useEffect(() => {
       </section>
 
       {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
-      <section className="marketplace-section" style={{ background: '#FFFFFF', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+      <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+        <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
+        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div className="marketplace-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
@@ -1536,8 +1549,11 @@ useEffect(() => {
       </section>
 
       {/* §4 SELLERS ═════════════════════════════════════════════ */}
-      <section className="sellers-section" style={{ background: '#F2F0EC', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+      <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+        <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.13) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
+        <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
+        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
@@ -1601,8 +1617,15 @@ useEffect(() => {
       </section>
 
       {/* §4 SERVICES ════════════════════════════════════════════ */}
-      <section className="svc-section" style={{ background: 'linear-gradient(145deg, #08101E 0%, #0D1A2D 55%, #091422 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(40px,4vw,64px)' }}>
-        <div style={{ maxWidth: '1340px', margin: '0 auto' }}>
+      <section className="svc-section" style={{ position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 82% 0%, rgba(199,166,106,0.14), transparent 46%), linear-gradient(145deg, #0B0A08 0%, #171208 55%, #0B0A08 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(44px,4.2vw,68px)' }}>
+        <div aria-hidden className="sec-hair" style={{ left: '30%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)' }} />
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(255,255,255,0.055)' }}>SERVICE</div>
+        <div aria-hidden style={{ position: 'absolute', bottom: 0, insetInline: 0, height: 3, display: 'flex' }}>
+          <i style={{ flex: 2.6, background: 'linear-gradient(90deg,#8A6020,#C7A66A)' }} />
+          <i style={{ flex: 1, background: '#B23B2E' }} />
+          <i style={{ flex: 1.6, background: '#14532D' }} />
+        </div>
+        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <SR>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '52px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
@@ -1670,16 +1693,17 @@ useEffect(() => {
 
       {/* §5 EXPLORE STRIP ══════════════════════════════════════ */}
       <section style={{ position: 'relative', background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 45%,#E8E4DD 100%)', padding: 'clamp(36px,3.8vw,56px) clamp(16px,5%,80px)', overflow: 'hidden' }}>
-        {/* ambient blobs — make backdrop-filter visible */}
+        {/* ambient blobs — پالتِ کنترل‌شده: فقط طلایی و سبزِ نمدی */}
         <div style={{ position: 'absolute', top: '-80px', right: '8%',  width: '360px', height: '360px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.28) 0%,transparent 65%)', filter: 'blur(48px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-60px', left: '12%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(74,158,255,0.22) 0%,transparent 65%)',  filter: 'blur(44px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '30%', left: '38%',   width: '240px', height: '240px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(48,197,90,0.16) 0%,transparent 65%)',   filter: 'blur(42px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '10%', left: '22%',   width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(185,123,255,0.14) 0%,transparent 65%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-60px', left: '12%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(20,83,45,0.14) 0%,transparent 65%)',  filter: 'blur(44px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '30%', left: '38%',   width: '240px', height: '240px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.12) 0%,transparent 65%)',   filter: 'blur(42px)', pointerEvents: 'none' }} />
+        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)', top: 'auto', bottom: '-8px' }}>EXPLORE</div>
 
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(20px,2.4vw,32px)' }}>
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.34em', color: GOLD_D, display: 'block', marginBottom: '8px' }}>DISCOVER MORE</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '9.5px', fontWeight: 800, letterSpacing: '0.28em', color: GOLD_D, border: '1px solid rgba(199,166,106,0.4)', borderRadius: 999, padding: '5px 13px', marginBottom: '10px' }}>DISCOVER MORE</span>
             <h3 style={{ fontSize: 'clamp(17px,1.9vw,24px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: 0 }}>بیشتر در بیلیارد هاب کاوش کن</h3>
+            <div style={{ width: 54, height: 3, borderRadius: 2, margin: '12px auto 0', background: 'linear-gradient(90deg,#C7A66A,#8A6020)' }} />
           </div>
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: '12px' }}>
             {([
