@@ -698,8 +698,8 @@ function HomeMediaBand() {
           background: linear-gradient(90deg, transparent, rgba(199,166,106,0.5), transparent); }
         .hm-band::before { top: 0; } .hm-band::after { bottom: 0; }
         /* پرفراژِ فیلم — امضای سالن نمایش */
-        .hm-perf { position: absolute; inset-inline: 0; height: 7px; z-index: 6; opacity: .5; pointer-events: none;
-          background: repeating-linear-gradient(90deg, rgba(255,255,255,0.14) 0 14px, transparent 14px 32px); }
+        .hm-perf { position: absolute; inset-inline: 0; height: 7px; z-index: 6; opacity: .9; pointer-events: none;
+          background: repeating-linear-gradient(90deg, rgba(255,255,255,0.26) 0 14px, transparent 14px 32px); }
         .hm-perf-t { top: 5px; } .hm-perf-b { bottom: 5px; }
         .hm-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900; z-index: 1;
           font-size: clamp(48px, 7.6vw, 104px); line-height: 1; letter-spacing: .04em;
@@ -724,11 +724,15 @@ function HomeMediaBand() {
           background: radial-gradient(circle, rgba(214,196,255,0.32) 0%, rgba(139,92,246,0.14) 40%, transparent 68%);
           filter: blur(4px); animation: hmFlare 6s ease-in-out infinite; }
         @keyframes hmFlare { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .6; transform: scale(1.15); } }
+        /* پلی — طرح LQ با تینتِ بنفش (هم‌رنگِ المان‌های پوستر) */
         .hm-play { position: absolute; z-index: 5; top: 50%; left: 24%; transform: translate(-50%,-50%);
           width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          color: #0C0B09; background: rgba(199,166,106,0.94); box-shadow: 0 12px 36px rgba(199,166,106,0.4);
-          transition: transform .3s cubic-bezier(.22,1,.36,1); }
-        .hm-play:hover { transform: translate(-50%,-50%) scale(1.09); }
+          color: #B79CFF; background: rgba(139,92,246,0.16); border: 1px solid rgba(167,139,250,0.5);
+          backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+          box-shadow: 0 10px 30px rgba(139,92,246,0.28);
+          transition: transform .3s cubic-bezier(.22,1,.36,1), background .25s, box-shadow .3s; }
+        .hm-play:hover { transform: translate(-50%,-50%) scale(1.09); background: rgba(139,92,246,0.26);
+          box-shadow: 0 14px 40px rgba(139,92,246,0.4); }
         .hm-dur { position: absolute; z-index: 5; bottom: 16px; left: 16px; font-size: 11px; font-weight: 800;
           color: #F2EFE9; background: rgba(8,7,5,0.8); border: 1px solid rgba(255,255,255,0.14);
           border-radius: 7px; padding: 2px 9px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
@@ -772,11 +776,17 @@ function HomeMediaBand() {
           font-variant-numeric: tabular-nums; }
         .hm-anim { animation: hmIn .6s cubic-bezier(.22,1,.36,1) both; }
         @media (max-width: 760px) {
-          .hm-poster { width: 100%; opacity: .42;
-            -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 30%, transparent 100%); }
+          /* صحنه‌ی بنفش در موبایل هم دیده شود: تمام‌پهنا، پررنگ، با محوِ ملایم */
+          .hm-poster { width: 100%; opacity: .8;
+            -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 58%, transparent 100%); }
+          .hm-cam { left: 2%; bottom: auto; top: 10px; width: 108px; opacity: .95; }
+          .hm-beam { left: -8%; width: 90%; }
+          .hm-flare { left: 14%; top: 12%; width: 80px; height: 80px; }
           .hm-play, .hm-dur, .hm-minis { display: none; }
           .hm-wrap { min-height: 0; padding-block: 26px 22px; }
+          .hm-cta { padding: 7px 13px; font-size: 11.5px; gap: 5px; border-radius: 9px; }
+          .hm-all { padding: 7px 12px; font-size: 11px; gap: 4px; border-radius: 9px; }
         }
         @media (prefers-reduced-motion: reduce) { .hm-anim { animation: none; } }
       `}</style>
