@@ -404,50 +404,38 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PRODUCT CARD
+   BAZAAR CARD — دقیقاً فرمتِ کارتِ صفحه‌ی بیلیارد بازار (/shop)؛
+   یک کارت برای دسکتاپ و موبایل (کارت سفید، حاشیه‌ی نازک،
+   پیلِ ٪ بنفش، قیمتِ خط‌خورده).
 ═══════════════════════════════════════════════════════════════ */
-function ProductCard({ p, h = '360px' }: { p: typeof PRODUCTS[0]; h?: string }) {
-  const [hov, setHov] = useState(false);
+function BazaarCard({ p, className, style }: { p: typeof PRODUCTS[0]; className?: string; style?: React.CSSProperties }) {
   return (
-    <div style={{ position: 'relative', height: h }}>
-      {p.pct > 0 && (
-        <div style={{ position: 'absolute', top: '-3px', right: '12px', zIndex: 4,
-          background: '#ef4444',
-          border: 'none',
-          color: '#fff', fontSize: '11px', fontWeight: 700,
-          padding: '4px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
-          {p.pct}٪ تخفیف
-        </div>
-      )}
-      <Link href={`/shop/${p.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-        <div
-          onMouseEnter={() => setHov(true)}
-          onMouseLeave={() => setHov(false)}
-          style={{
-            borderRadius: '12px', overflow: 'hidden', height: '100%', cursor: 'pointer',
-            display: 'flex', flexDirection: 'column',
-            border: '1px solid rgba(0,0,0,0.22)',
-            transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1), box-shadow 0.5s ease',
-            transform: hov ? 'translateY(-8px) scale(1.015)' : 'none',
-            boxShadow: hov ? '0 32px 72px rgba(0,0,0,0.28),0 8px 24px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
-            willChange: 'transform',
-          }}>
-          <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', background: '#111' }}>
-            <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease', transform: hov ? 'scale(1.06)' : 'scale(1)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 55%,rgba(8,4,1,0.30) 100%)' }} />
-            <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10px', fontWeight: 800, color: GOLD_DIM, letterSpacing: '0.22em' }}>{p.brand}</div>
-          </div>
-          <div style={{ flex: '0 0 40%', background: '#fff', padding: '10px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', textAlign: 'center' }}>
-            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.25, letterSpacing: '-0.01em' }}>{p.name}</div>
-            <div style={{ fontSize: '12px', color: TEXT_M }}>{p.sub}</div>
-            <div style={{ marginTop: '4px' }}>
-              {p.pct > 0 && <div style={{ fontSize: '11px', color: TEXT_M, textDecoration: 'line-through', marginBottom: '2px' }}>{p.price.toLocaleString('fa-IR')} تومان</div>}
-              <div style={{ fontSize: '17px', fontWeight: 900, color: BRN }}>{p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '11px', fontWeight: 400, color: TEXT_M }}>تومان</span></div>
+    <Link href={`/shop/${p.id}`} className={`prod-hover${className ? ` ${className}` : ''}`}
+      style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0, ...style }}>
+      <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
+        <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+      </div>
+      <div style={{ padding: '9px 8px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden' }}>
+        <span style={{ fontSize: '12.5px', color: '#1C1B17', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name} — {p.sub}</span>
+        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
+          {p.pct > 0 && (
+            <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: '12px', fontWeight: 800, borderRadius: 999, padding: '3px 8px 1px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              ٪{p.pct.toLocaleString('fa-IR')}
+            </span>
+          )}
+          <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
+            {p.pct > 0 && (
+              <div style={{ fontSize: '10px', color: '#8A8474', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
+                {p.price.toLocaleString('fa-IR')}
+              </div>
+            )}
+            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums' }}>
+              {p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}>تومان</span>
             </div>
           </div>
         </div>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 }
 
@@ -753,17 +741,17 @@ function HomeMediaBand() {
         .hm-feat-title { font-size: clamp(12.5px, 1.35vw, 15px); font-weight: 800; color: rgba(255,255,255,0.88);
           line-height: 1.7; margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .hm-cta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-        /* دکمه‌ها — طرح LQ (نسخه‌ی روی سکشن تیره) */
+        /* دکمه‌ها — طرح LQ با تینتِ بنفش (هم‌رنگِ پوستر) */
         .hm-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px;
-          text-decoration: none; font-size: 13px; font-weight: 800; color: #C7A66A;
-          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.42);
+          text-decoration: none; font-size: 13px; font-weight: 800; color: #B79CFF;
+          background: rgba(139,92,246,0.14); border: 1px solid rgba(167,139,250,0.45);
           transition: transform .25s cubic-bezier(.22,1,.36,1), background .2s, box-shadow .25s; }
-        .hm-cta:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); box-shadow: 0 8px 22px rgba(199,166,106,0.22); }
+        .hm-cta:hover { transform: translateY(-2px); background: rgba(139,92,246,0.22); box-shadow: 0 8px 22px rgba(139,92,246,0.26); }
         .hm-all { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
-          color: #C7A66A; text-decoration: none; background: rgba(199,166,106,0.12);
-          border: 1px solid rgba(199,166,106,0.34); border-radius: 10px; padding: 9px 16px;
+          color: #B79CFF; text-decoration: none; background: rgba(139,92,246,0.14);
+          border: 1px solid rgba(167,139,250,0.4); border-radius: 10px; padding: 9px 16px;
           transition: transform .25s cubic-bezier(.22,1,.36,1), background .2s, box-shadow .25s; }
-        .hm-all:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); box-shadow: 0 8px 22px rgba(199,166,106,0.20); }
+        .hm-all:hover { transform: translateY(-2px); background: rgba(139,92,246,0.22); box-shadow: 0 8px 22px rgba(139,92,246,0.24); }
         /* دیوارِ پوستر — سه ویدیوی پربازدید */
         .hm-minis { display: flex; gap: 10px; margin-top: 10px; }
         .hm-mini { position: relative; width: 118px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
@@ -776,17 +764,27 @@ function HomeMediaBand() {
           font-variant-numeric: tabular-nums; }
         .hm-anim { animation: hmIn .6s cubic-bezier(.22,1,.36,1) both; }
         @media (max-width: 760px) {
-          /* صحنه‌ی بنفش در موبایل هم دیده شود: تمام‌پهنا، پررنگ، با محوِ ملایم */
-          .hm-poster { width: 100%; opacity: .8;
-            -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 58%, transparent 100%); }
-          .hm-cam { left: 2%; bottom: auto; top: 10px; width: 108px; opacity: .95; }
-          .hm-beam { left: -8%; width: 90%; }
-          .hm-flare { left: 14%; top: 12%; width: 80px; height: 80px; }
-          .hm-play, .hm-dur, .hm-minis { display: none; }
-          .hm-wrap { min-height: 0; padding-block: 26px 22px; }
-          .hm-cta { padding: 7px 13px; font-size: 11.5px; gap: 5px; border-radius: 9px; }
-          .hm-all { padding: 7px 12px; font-size: 11px; gap: 4px; border-radius: 9px; }
+          /* صحنه‌ی بنفش تمام‌پهنا؛ دوربین پایین، زیرِ پرتوی نور */
+          .hm-poster { width: 100%; opacity: .85;
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
+          .hm-cam { left: 3%; top: auto; bottom: 12px; width: 112px; opacity: .95; }
+          .hm-beam { left: -8%; width: 95%; }
+          .hm-flare { left: 12%; top: 30%; width: 84px; height: 84px; }
+          .hm-dur, .hm-minis { display: none; }
+          /* پلی — جلوی دوربین، LQ بنفش */
+          .hm-play { display: flex; top: auto; bottom: 34px; left: 40%; transform: none;
+            width: 46px; height: 46px; }
+          .hm-play:hover { transform: scale(1.08); }
+          .hm-wrap { min-height: 0; padding-block: 26px 78px; }
+          /* NOW SHOWING: بدونِ بازدید؛ عنوانِ ریزتر زیرِ لیبل */
+          .hm-views, .hm-featdot { display: none; }
+          .hm-feat { flex-wrap: wrap; gap: 6px; }
+          .hm-feat-title { flex-basis: 100%; font-size: 11px; line-height: 1.8; color: rgba(255,255,255,0.7);
+            -webkit-line-clamp: 2; }
+          /* فقط «همه ویدیوها»، سمتِ راست (جای قبلیِ تماشای ویدیو) */
+          .hm-cta { display: none; }
+          .hm-all { padding: 8px 14px; font-size: 11.5px; gap: 5px; border-radius: 9px; }
         }
         @media (prefers-reduced-motion: reduce) { .hm-anim { animation: none; } }
       `}</style>
@@ -837,9 +835,9 @@ function HomeMediaBand() {
         </p>
         <div className="hm-feat hm-anim" style={{ animationDelay: '160ms' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.18em', color: '#E8CE96', flexShrink: 0 }}>NOW SHOWING</span>
-          <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
+          <span className="hm-featdot" style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
           <p className="hm-feat-title">{MEDIA_FEAT.title}</p>
-          <span style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(MEDIA_FEAT.views)} بازدید</span>
+          <span className="hm-views" style={{ fontSize: 11, color: 'rgba(242,239,233,0.45)', flexShrink: 0 }}>{compactViews(MEDIA_FEAT.views)} بازدید</span>
         </div>
         <div className="hm-cta-row hm-anim" style={{ animationDelay: '210ms' }}>
           <Link href={`/media/${MEDIA_FEAT.id}`} className="hm-cta"><Play size={14} fill="currentColor" /> تماشای ویدیو</Link>
@@ -1672,39 +1670,13 @@ useEffect(() => {
             onMouseLeave={() => { mktPausedRef.current = false; }}
           >
             {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
-              <div key={`${p.id}-${i}`} style={{ width: '143px', flexShrink: 0 }}>
-                <ProductCard p={p} h="274px" />
-              </div>
+              <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 143, height: 274 }} />
             ))}
           </div>
-          {/* موبایل — دقیقاً فرمتِ کارتِ صفحه‌ی بیلیارد بازار (کارت سفید، حاشیه‌ی نازک، پیلِ ٪ بنفش، قیمتِ خط‌خورده) */}
+          {/* موبایل — همان BazaarCard (فرمتِ یکسان با دسکتاپ) */}
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {PRODUCTS.map((p) => (
-              <Link key={p.id} href={`/shop/${p.id}`} className="mkt-mob-card" style={{ width: '36vw', minWidth: '133px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 'clamp(209px,61vw,282px)' }}>
-                <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-                  <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                </div>
-                <div style={{ padding: '9px 8px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden' }}>
-                  <span style={{ fontSize: '12.5px', color: '#1C1B17', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name} — {p.sub}</span>
-                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    {p.pct > 0 && (
-                      <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: '12px', fontWeight: 800, borderRadius: 999, padding: '3px 8px 1px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        ٪{p.pct.toLocaleString('fa-IR')}
-                      </span>
-                    )}
-                    <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
-                      {p.pct > 0 && (
-                        <div style={{ fontSize: '10px', color: '#8A8474', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
-                          {p.price.toLocaleString('fa-IR')}
-                        </div>
-                      )}
-                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums' }}>
-                        {p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}>تومان</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '36vw', minWidth: 133, scrollSnapAlign: 'center', height: 'clamp(209px,61vw,282px)' }} />
             ))}
           </div>
           {/* ── Ad banners ── */}
