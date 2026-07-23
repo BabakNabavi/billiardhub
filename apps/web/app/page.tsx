@@ -707,22 +707,23 @@ function HomeMediaBand() {
         .hm-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 52%; z-index: 0; overflow: hidden;
           -webkit-mask-image: linear-gradient(to right, black 44%, transparent 96%);
           mask-image: linear-gradient(to right, black 44%, transparent 96%); }
-        /* صحنه‌ی سینمایی — تماماً CSS/SVG، بدون عکس */
+        /* صحنه‌ی سینمایی — تماماً CSS/SVG، بدون عکس؛ المان‌ها بنفشِ درخشان */
         .hm-stage { position: absolute; inset: 0;
-          background: radial-gradient(ellipse 70% 60% at 30% 100%, rgba(199,166,106,0.10), transparent 60%),
-                      linear-gradient(120deg, #0A0908 0%, #131009 60%, #0C0B09 100%); }
+          background: radial-gradient(ellipse 70% 62% at 26% 100%, rgba(139,92,246,0.18), transparent 62%),
+                      radial-gradient(ellipse 50% 50% at 20% 6%, rgba(167,139,250,0.10), transparent 60%),
+                      linear-gradient(120deg, #0D0B12 0%, #16121D 60%, #0D0B10 100%); }
         /* پرتوی نورِ پروژکتور از بالا-چپ */
         .hm-beam { position: absolute; top: -12%; left: 6%; width: 68%; height: 130%;
-          background: conic-gradient(from 158deg at 18% 0%, transparent 0deg, rgba(255,238,204,0.13) 12deg, rgba(255,238,204,0.05) 26deg, transparent 38deg);
-          filter: blur(6px); animation: hmBeam 9s ease-in-out infinite; transform-origin: 18% 0%; }
+          background: conic-gradient(from 158deg at 18% 0%, transparent 0deg, rgba(196,171,255,0.26) 12deg, rgba(167,139,250,0.10) 26deg, transparent 38deg);
+          filter: blur(5px); animation: hmBeam 9s ease-in-out infinite; transform-origin: 18% 0%; }
         @keyframes hmBeam { 0%,100% { transform: rotate(0deg); opacity: 1; } 50% { transform: rotate(3.5deg); opacity: .85; } }
-        .hm-cam { position: absolute; left: 9%; bottom: 6%; width: clamp(150px, 15vw, 220px); height: auto; opacity: .85;
-          filter: drop-shadow(0 14px 30px rgba(0,0,0,0.5)); }
+        .hm-cam { position: absolute; left: 9%; bottom: 6%; width: clamp(160px, 15.5vw, 230px); height: auto; opacity: 1;
+          filter: drop-shadow(0 0 14px rgba(167,139,250,0.45)) drop-shadow(0 14px 30px rgba(0,0,0,0.55)); }
         /* هاله‌ی لنز */
-        .hm-flare { position: absolute; left: 26%; top: 34%; width: 90px; height: 90px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,240,210,0.22) 0%, rgba(199,166,106,0.08) 40%, transparent 68%);
+        .hm-flare { position: absolute; left: 26%; top: 32%; width: 110px; height: 110px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(214,196,255,0.32) 0%, rgba(139,92,246,0.14) 40%, transparent 68%);
           filter: blur(4px); animation: hmFlare 6s ease-in-out infinite; }
-        @keyframes hmFlare { 0%,100% { opacity: .9; transform: scale(1); } 50% { opacity: .55; transform: scale(1.15); } }
+        @keyframes hmFlare { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .6; transform: scale(1.15); } }
         .hm-play { position: absolute; z-index: 5; top: 50%; left: 24%; transform: translate(-50%,-50%);
           width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
           color: #0C0B09; background: rgba(199,166,106,0.94); box-shadow: 0 12px 36px rgba(199,166,106,0.4);
@@ -748,16 +749,17 @@ function HomeMediaBand() {
         .hm-feat-title { font-size: clamp(12.5px, 1.35vw, 15px); font-weight: 800; color: rgba(255,255,255,0.88);
           line-height: 1.7; margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .hm-cta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-        .hm-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 11px;
-          text-decoration: none; font-size: 13px; font-weight: 800; color: #241B08;
-          background: linear-gradient(135deg, #E8CE96, #C7A66A 55%, #A8853F);
-          box-shadow: 0 10px 26px rgba(199,166,106,0.32);
-          transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
-        .hm-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(199,166,106,0.42); }
+        /* دکمه‌ها — طرح LQ (نسخه‌ی روی سکشن تیره) */
+        .hm-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px;
+          text-decoration: none; font-size: 13px; font-weight: 800; color: #C7A66A;
+          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.42);
+          transition: transform .25s cubic-bezier(.22,1,.36,1), background .2s, box-shadow .25s; }
+        .hm-cta:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); box-shadow: 0 8px 22px rgba(199,166,106,0.22); }
         .hm-all { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
-          color: rgba(242,239,233,0.62); text-decoration: none; border: 1px solid rgba(255,255,255,0.16);
-          border-radius: 11px; padding: 9px 16px; transition: all .22s; }
-        .hm-all:hover { color: #E8CE96; border-color: rgba(199,166,106,0.45); }
+          color: #C7A66A; text-decoration: none; background: rgba(199,166,106,0.12);
+          border: 1px solid rgba(199,166,106,0.34); border-radius: 10px; padding: 9px 16px;
+          transition: transform .25s cubic-bezier(.22,1,.36,1), background .2s, box-shadow .25s; }
+        .hm-all:hover { transform: translateY(-2px); background: rgba(199,166,106,0.18); box-shadow: 0 8px 22px rgba(199,166,106,0.20); }
         /* دیوارِ پوستر — سه ویدیوی پربازدید */
         .hm-minis { display: flex; gap: 10px; margin-top: 10px; }
         .hm-mini { position: relative; width: 118px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
@@ -788,7 +790,7 @@ function HomeMediaBand() {
         <div className="hm-beam" />
         <div className="hm-flare" />
         {/* دوربین سینمایی — لاین‌آرتِ طلایی */}
-        <svg className="hm-cam" viewBox="0 0 220 150" fill="none" stroke="#C7A66A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="hm-cam" viewBox="0 0 220 150" fill="none" stroke="#B79CFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           {/* حلقه‌های فیلم */}
           <circle cx="78" cy="28" r="20" opacity=".9" />
           <circle cx="78" cy="28" r="8" opacity=".55" />
