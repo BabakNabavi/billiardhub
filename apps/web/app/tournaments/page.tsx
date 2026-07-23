@@ -246,14 +246,9 @@ export default function TournamentsPage() {
         @media (max-width: 640px)  {
           .tn-grid { grid-template-columns: 1fr; gap: 16px; }
           .tn-hide-mob { display: none !important; }
-          /* تولبار موبایل: همه در یک ردیف — سرچِ کوچک سمتِ چپ */
-          .tn-toolbar { flex-wrap: nowrap !important; }
-          .tn-tabs { flex: 1 1 auto !important; min-width: 0 !important; }
           .tn-view { padding: 3px; }
           .tn-view button { width: 30px; height: 30px; }
-          .tn-sbox { flex: 0 0 116px !important; min-width: 0 !important; }
-          .tn-sbox input { padding: 9px 28px 9px 8px !important; font-size: 11px !important; border-radius: 10px !important; }
-          .tn-sbox svg { right: 8px !important; }
+          .tn-sbox input { padding: 9px 34px 9px 10px !important; font-size: 12px !important; }
           .lr-thumb { width: 74px; }
           .lr-fee { display: none; }
         }
@@ -299,8 +294,8 @@ export default function TournamentsPage() {
 
       {/* ═══ نوار ابزار چسبان: تب‌ها + جستجو ═══ */}
       <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(247,247,245,0.92)', backdropFilter: 'blur(18px) saturate(1.6)', WebkitBackdropFilter: 'blur(18px) saturate(1.6)', borderBottom: `1px solid ${LINE}` }}>
-        <div className="tn-wrap tn-toolbar" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div className="tn-tabs" style={{ flex: '1 1 430px', minWidth: 0 }}>
+        <div className="tn-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="tn-tabs" style={{ minWidth: 0 }}>
             {TABS.map(t => (
               <button key={t.key} className={`tn-tab${tab === t.key ? ' on' : ''}`} onClick={() => setTab(t.key)}>
                 {t.pulse && (
@@ -315,20 +310,22 @@ export default function TournamentsPage() {
               </button>
             ))}
           </div>
-          {/* سوییچ گرید/لیست */}
-          <div className="tn-view" role="group" aria-label="حالت نمایش">
-            <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>
-            <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')} aria-label="نمایش لیستی"><List size={17} /></button>
-          </div>
-          <div className="tn-sbox" style={{ position: 'relative', flex: '1 1 210px', minWidth: 190 }}>
-            <input
-              className="tn-search"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="جستجو در مسابقات…"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#fff', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
-            />
-            <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+          {/* سطر دوم: سرچ (راست) + سوییچ گرید/لیست روبرویش (چپ) */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div className="tn-sbox" style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+              <input
+                className="tn-search"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="جستجو در مسابقات…"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '11px 40px 11px 14px', borderRadius: 12, fontSize: 13, background: '#fff', border: `1px solid ${LINE}`, color: TEXT, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
+              />
+              <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD_D, pointerEvents: 'none' }} />
+            </div>
+            <div className="tn-view" role="group" aria-label="حالت نمایش">
+              <button className={view === 'grid' ? 'on' : ''} onClick={() => setView('grid')} aria-label="نمایش کارتی"><LayoutGrid size={16} /></button>
+              <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')} aria-label="نمایش لیستی"><List size={17} /></button>
+            </div>
           </div>
         </div>
       </div>

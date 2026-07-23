@@ -283,7 +283,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
   if (view === 'list') {
     return (
       <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={() => router.push(`/sellers/${seller.id}`)}
-        className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch' }}>
+        className="sel-list-card" style={{ ...shell, display: 'flex', alignItems: 'stretch', minHeight: 158 }}>
         {/* image */}
         <div className="sel-list-img" style={{ position: 'relative', width: 176, flexShrink: 0, overflow: 'hidden' }}>
           <img src={seller.bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', transform: hov ? 'scale(1.05)' : 'scale(1)' }} />
@@ -300,9 +300,10 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
           </div>
-          <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
+          {/* ارتفاعِ ثابت برای توضیح و برندها ⇒ همه‌ی ردیف‌ها هم‌اندازه */}
+          <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, height: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{metaRow}</div>
-          <div className="sel-list-brands">{brandsRow}</div>
+          <div className="sel-list-brands" style={{ height: 24, overflow: 'hidden' }}>{brandsRow}</div>
         </div>
         {/* actions */}
         <div className="sel-list-actions" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, padding: '16px 20px', flexShrink: 0, borderInlineStart: '1px solid rgba(28,28,26,0.06)' }}>
