@@ -324,7 +324,7 @@ export default function AboutPage() {
           <p style={{ fontSize: 'clamp(14.5px,1.8vw,17px)', fontWeight: 700, lineHeight: 2.3, margin: 0, color: TEXT }}>
             پلتفرم Billiard Hub متعلق به<br />
             <span style={{ fontSize: 'clamp(17px,2.2vw,21px)', fontWeight: 900, color: GOLD_D }}>شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا</span><br />
-            است و با برند Billiard Hub ارائه می‌شود
+            می‌باشد و با برند Billiard Hub ارائه می‌شود
           </p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 20, padding: '7px 16px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD }} />
