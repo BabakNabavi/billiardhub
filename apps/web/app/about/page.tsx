@@ -233,7 +233,7 @@ export default function AboutPage() {
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
           <span className="ab-rev" style={{ display: 'inline-block', fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT, marginBottom: 26 }}>THE IDEA</span>
           <h2 style={{ fontSize: 'clamp(24px,4.6vw,52px)', fontWeight: 900, lineHeight: 1.75, letterSpacing: '-0.015em', margin: 0 }}>
-            <span className="ab-rev" style={{ display: 'block' }}>بیلیارد هاب فقط یک وب‌سایت نیست؛</span>
+            <span className="ab-rev" style={{ display: 'block' }}>بیلیارد هاب فقط یک پلتفرم نیست؛</span>
             <span className="ab-rev d2" style={{ display: 'block', color: GOLD_D }}>
               یک فضای دیجیتال برای دنیای بیلیارد است.
             </span>
@@ -256,12 +256,12 @@ export default function AboutPage() {
             </h2>
             <div style={{ width: 52, height: 3, borderRadius: 2, marginTop: 16, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
             <p style={{ fontSize: 14.5, color: SEC, lineHeight: 2.2, margin: '18px 0 0' }}>
-              فضایی برای کشف، ارتباط و تجربه‌ی بهترِ دنیای اسنوکر و پاکت بیلیارد.
+              فضایی برای جستجو، ارتباط و تجربه‌ی بهترِ دنیای اسنوکر و پاکت بیلیارد.
             </p>
           </div>
           <div>
             {[
-              { t: 'کشف',    d: 'باشگاه‌ها، مربیان، بازیکنان و رویدادهای دنیای بیلیارد — همه در یک‌جا و در دسترس.', c: BALLS.red,   en: 'DISCOVER' },
+              { t: 'جستجو',  d: 'باشگاه‌ها، مربیان، بازیکنان و رویدادهای دنیای بیلیارد — همه در یک‌جا و در دسترس.', c: BALLS.red,   en: 'SEARCH' },
               { t: 'ارتباط', d: 'شبکه‌ای که بازیکن، باشگاه، داور و فروشنده را بی‌واسطه به هم وصل می‌کند.',            c: BALLS.blue,  en: 'CONNECT'  },
               { t: 'تجربه',  d: 'از رزرو میز و رنکینگ رسمی تا بازارِ تجهیزات — یک تجربه‌ی یکپارچه و مدرن.',           c: BALLS.green, en: 'EXPERIENCE' },
             ].map((f, i) => (
@@ -311,7 +311,7 @@ export default function AboutPage() {
           </div>
 
           <p style={{ fontSize: 'clamp(14.5px,1.8vw,17px)', fontWeight: 700, lineHeight: 2.3, margin: 0, color: TEXT }}>
-            وب‌سایت Billiard Hub متعلق به<br />
+            پلتفرم Billiard Hub متعلق به<br />
             <span style={{ fontSize: 'clamp(17px,2.2vw,21px)', fontWeight: 900, color: GOLD_D }}>شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا</span><br />
             است و با برند Billiard Hub ارائه می‌شود.
           </p>
@@ -396,7 +396,7 @@ export default function AboutPage() {
         ))}
         <div style={{ maxWidth: 640, margin: '0 auto', position: 'relative' }}>
           <h2 className="ab-rev" style={{ fontSize: 'clamp(26px,4.6vw,50px)', fontWeight: 900, lineHeight: 1.5, margin: 0 }}>
-            دنیای بیلیارد را<br /><span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>کشف کن.</span>
+            دنیای بیلیارد را<br /><span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>جستجو کن.</span>
           </h2>
           <div className="ab-rev d2" style={{ marginTop: 34, display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
             <MagneticLink href="/register">
