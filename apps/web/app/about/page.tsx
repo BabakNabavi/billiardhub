@@ -152,13 +152,14 @@ export default function AboutPage() {
           .ab-node:active .dot { transform: scale(1.12); border-color: var(--nc); }
         }
 
-        /* ── لوگوهای گوشه‌ی کارتِ شرکت — هم‌تراز و هم‌اندازه ── */
-        .ab-clogo { position: absolute; top: 24px; width: 54px; height: 54px; object-fit: contain; }
-        .ab-clogo.l { left: 28px; }
-        .ab-clogo.r { right: 28px; border-radius: 13px; border: 1px solid ${LINE}; box-shadow: 0 4px 12px rgba(28,27,23,0.08); }
+        /* ── لوگوهای گوشه‌ی کارتِ شرکت — هم‌قد و هم‌تراز ──
+           لوگوی آرتا واژه‌نگاشتِ پهن است؛ ارتفاعش دقیقاً برابرِ لوگوی بیلیارد هاب */
+        .ab-clogo { position: absolute; top: 24px; height: 54px; object-fit: contain; }
+        .ab-clogo.l { left: 28px; width: auto; max-width: 170px; }
+        .ab-clogo.r { right: 28px; width: 54px; border-radius: 13px; border: 1px solid ${LINE}; box-shadow: 0 4px 12px rgba(28,27,23,0.08); }
         @media (max-width: 560px) {
-          .ab-clogo { width: 42px; height: 42px; top: 18px; }
-          .ab-clogo.l { left: 18px; } .ab-clogo.r { right: 18px; }
+          .ab-clogo { height: 42px; top: 18px; }
+          .ab-clogo.l { left: 18px; max-width: 128px; } .ab-clogo.r { right: 18px; width: 42px; }
         }
 
         /* ── مُهر برند ثبت‌شده ── */
