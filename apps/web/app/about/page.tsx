@@ -155,7 +155,8 @@ export default function AboutPage() {
 
         /* ── مُهر برند ثبت‌شده ── */
         @keyframes abSealSpin { to { transform: rotate(360deg); } }
-        .ab-seal-text { animation: abSealSpin 26s linear infinite; transform-origin: 50% 50%; }
+        /* origin بر حسبِ مختصاتِ viewBox — با درصد، دورِ مبدأ (0,0) می‌چرخید و متن از کادر بیرون می‌رفت */
+        .ab-seal-text { animation: abSealSpin 26s linear infinite; transform-origin: 60px 60px; }
 
         /* ── CTA ── */
         .ab-cta-btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 34px; border-radius: 12px;
