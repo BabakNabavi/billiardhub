@@ -137,20 +137,19 @@ export default function AboutPage() {
         @keyframes abHubPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(199,166,106,0.26), 0 18px 50px rgba(28,27,23,0.25); }
           60% { box-shadow: 0 0 0 26px rgba(199,166,106,0), 0 18px 50px rgba(28,27,23,0.25); } }
         .ab-orbit-lines { position: absolute; inset: 0; pointer-events: none; }
-        .ab-eco-mobile { display: none; }
 
+        /* موبایل: همان مدار، فشرده — نه لیستِ ساده */
         @media (max-width: 760px) {
-          .ab-orbit-stage, .ab-orbit-hint { display: none; }
-          .ab-eco-mobile { display: block; position: relative; max-width: 340px; margin: 0 auto; }
-          .ab-eco-mobile::before { content: ''; position: absolute; top: 8px; bottom: 8px; right: 26px; width: 1px;
-            background: linear-gradient(180deg, transparent, rgba(154,110,56,0.35) 12%, rgba(154,110,56,0.35) 88%, transparent); }
-          .ab-eco-row { position: relative; display: flex; align-items: center; gap: 14px; padding: 10px 0; text-decoration: none; }
-          .ab-eco-row .dot { width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-            background: #fff; border: 1px solid ${LINE}; box-shadow: 0 5px 14px rgba(28,27,23,0.07); z-index: 1;
-            transition: transform .25s; }
-          .ab-eco-row .dot i { width: 13px; height: 13px; border-radius: 50%; display: block;
-            box-shadow: inset 0 -2px 3px rgba(0,0,0,0.25), inset 0 2px 2px rgba(255,255,255,0.6); }
-          .ab-eco-row:active .dot { transform: scale(0.94); }
+          .ab-orbit-stage { width: min(94vw, 390px); }
+          .ab-node { width: 78px; margin: -39px; gap: 3px; }
+          .ab-node .dot { width: 42px; height: 42px; }
+          .ab-node .dot i { width: 11px; height: 11px; }
+          .ab-node .lb { font-size: 11px; }
+          .ab-node .en { display: none; }
+          .ab-hub { width: 98px; height: 98px; }
+          .ab-hub span:nth-child(1) { font-size: 12.5px !important; }
+          .ab-hub span:nth-child(2) { font-size: 6.5px !important; }
+          .ab-node:active .dot { transform: scale(1.12); border-color: var(--nc); }
         }
 
         /* ── مُهر برند ثبت‌شده ── */
@@ -365,20 +364,6 @@ export default function AboutPage() {
           <p className="ab-orbit-hint ab-rev d2" style={{ textAlign: 'center', fontSize: 12, color: MUT, marginTop: 30 }}>
             هر گره، دری به یکی از دنیاهای پلتفرم است.
           </p>
-
-          {/* موبایل: ستونِ عمودی با خطِ اتصال */}
-          <div className="ab-eco-mobile">
-            {ECO_NODES.map((n, i) => (
-              <Link key={n.en} href={n.href} className={`ab-eco-row ab-rev d${(i % 4) + 1}`}>
-                <span className="dot"><i style={{ background: n.clr }} /></span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14.5, fontWeight: 800, color: TEXT }}>{n.label}</span>
-                  <span style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: '0.22em', color: MUT, direction: 'ltr' }}>{n.en}</span>
-                </span>
-                <ArrowLeft size={14} style={{ marginInlineStart: 'auto', color: MUT }} />
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 
