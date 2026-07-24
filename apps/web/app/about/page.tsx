@@ -175,7 +175,7 @@ export default function AboutPage() {
       <section className="ab-hero">
         {/* تصویر با پارالاکسِ سبک */}
         <div aria-hidden style={{ position: 'absolute', inset: '-12% 0', transform: `translateY(${sy * 0.16}px)`, willChange: 'transform' }}>
-          <img src="/images/clubs/wallpaper21.jpg" alt=""
+          <img src="/images/about/5.png" alt=""
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club1.png' }}
             style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.34, filter: 'saturate(0.72) brightness(0.72)' }} />
         </div>
