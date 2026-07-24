@@ -152,6 +152,15 @@ export default function AboutPage() {
           .ab-node:active .dot { transform: scale(1.12); border-color: var(--nc); }
         }
 
+        /* ── لوگوهای گوشه‌ی کارتِ شرکت — هم‌تراز و هم‌اندازه ── */
+        .ab-clogo { position: absolute; top: 24px; width: 54px; height: 54px; object-fit: contain; }
+        .ab-clogo.l { left: 28px; }
+        .ab-clogo.r { right: 28px; border-radius: 13px; border: 1px solid ${LINE}; box-shadow: 0 4px 12px rgba(28,27,23,0.08); }
+        @media (max-width: 560px) {
+          .ab-clogo { width: 42px; height: 42px; top: 18px; }
+          .ab-clogo.l { left: 18px; } .ab-clogo.r { right: 18px; }
+        }
+
         /* ── مُهر برند ثبت‌شده ── */
         @keyframes abSealSpin { to { transform: rotate(360deg); } }
         /* origin بر حسبِ مختصاتِ viewBox — با درصد، دورِ مبدأ (0,0) می‌چرخید و متن از کادر بیرون می‌رفت */
@@ -289,6 +298,9 @@ export default function AboutPage() {
           boxShadow: '0 24px 70px rgba(28,27,23,0.08)', overflow: 'hidden',
         }}>
           <div aria-hidden style={{ position: 'absolute', top: 0, insetInline: 0, height: 3, background: `linear-gradient(90deg,#8A6020,${GOLD},#8A6020)` }} />
+          {/* دو لوگو — چپ: آرتا تجارت، راست: بیلیارد هاب، هم‌تراز و هم‌اندازه */}
+          <img className="ab-clogo l" src="/images/Logo/Arta.svg" alt="شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا" />
+          <img className="ab-clogo r" src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" />
           <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>COMPANY &amp; BRAND</span>
 
           {/* مُهرِ برندِ ثبت‌شده — متنِ چرخانِ آهسته */}
