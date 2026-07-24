@@ -22,7 +22,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Search, MapPin, SlidersHorizontal, X, Check, ChevronDown,
-  Sparkles, Store, ArrowLeft,
+  Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
 } from 'lucide-react'
 import { SHOP_PRODUCTS } from '../shop/products'
 import { MOCK_SELLERS } from '../../lib/sellers-data'
@@ -110,9 +110,13 @@ function loadListings(): Listing[] {
 }
 
 /* ── کارت محصول — همان فرمتِ عمودیِ کارت‌های فعلی بازار (ایزوله) ── */
-function MarketCard({ l, i }: { l: Listing; i: number }) {
+function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
   return (
-    <Link href={`/shop/${l.id}`} className="mk-card" style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}>
+    <Link href={`/shop/${l.id}`} className="mk-card" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
+      <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
+        onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
+        <Bookmark size={16} />
+      </button>
       <div className="mk-img">
         <img src={l.img} alt={l.name} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
@@ -135,6 +139,29 @@ function MarketCard({ l, i }: { l: Listing; i: number }) {
           </div>
         </div>
       </div>
+    </Link>
+  )
+}
+
+/* ── ردیف افقی موبایل — به سبکِ دیوار با هویتِ بازار ── */
+function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
+  return (
+    <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
+      <div className="info">
+        <span className="ttl">{l.name}</span>
+        <span className="cnd">{COND_LABEL[l.condition]}</span>
+        <span className="prc">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></span>
+        <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
+      </div>
+      <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
+        onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
+        <Bookmark size={16} />
+      </button>
+      <span className="pic">
+        <img src={l.img} alt={l.name} loading="lazy"
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+        {l.disc > 0 && <span className="pct" dir="ltr">٪{toFa(l.disc)}</span>}
+      </span>
     </Link>
   )
 }
@@ -230,9 +257,36 @@ export default function MarketNewPage() {
   const [sort, setSort]     = useState<SortId>('relevant')
   const [q, setQ]           = useState('')
   const [drawer, setDrawer] = useState(false)
+  const [cityOpen, setCityOpen] = useState(false)
+  /* نشان‌ها — ذخیره‌ی محلی */
+  const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set())
+  const [showSaved, setShowSaved] = useState(false)
   const gridRef = useRef<HTMLDivElement>(null)
+  const cityRef = useRef<HTMLDivElement>(null)
+  const mCityRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { setListings(loadListings()); setReady(true) }, [])
+  useEffect(() => {
+    setListings(loadListings())
+    try { setSavedKeys(new Set(JSON.parse(localStorage.getItem('bh_market_saved') ?? '[]'))) } catch {}
+    setReady(true)
+  }, [])
+  useEffect(() => {
+    const fn = (e: MouseEvent) => {
+      const inDesk = cityRef.current?.contains(e.target as Node)
+      const inMob  = mCityRef.current?.contains(e.target as Node)
+      if (!inDesk && !inMob) setCityOpen(false)
+    }
+    document.addEventListener('mousedown', fn)
+    return () => document.removeEventListener('mousedown', fn)
+  }, [])
+  const toggleSave = (key: string) => {
+    setSavedKeys(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      try { localStorage.setItem('bh_market_saved', JSON.stringify([...next])) } catch {}
+      return next
+    })
+  }
   useEffect(() => {
     document.body.style.overflow = drawer ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -261,13 +315,14 @@ export default function MarketNewPage() {
         if (time === 'week' && age > 86400000 * 7) return false
       }
       if (term && !(`${l.name} ${l.brand}`.includes(term))) return false
+      if (showSaved && !savedKeys.has(l.key)) return false
       return true
     })
     if (sort === 'cheap')  out = [...out].sort((a, b) => a.price - b.price)
     if (sort === 'expens') out = [...out].sort((a, b) => b.price - a.price)
     if (sort === 'newest') out = [...out].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     return out
-  }, [listings, cat, city, minP, maxP, cond, onlyDisc, time, q, sort])
+  }, [listings, cat, city, minP, maxP, cond, onlyDisc, time, q, sort, showSaved, savedKeys])
 
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
@@ -415,6 +470,60 @@ export default function MarketNewPage() {
           border-radius: 999px; padding: 5px 11px; }
         .mk-chip button { display: flex; background: none; border: none; cursor: pointer; color: inherit; padding: 0; }
 
+        /* ── تاپ‌بار دسکتاپ / سرچ موبایل ── */
+        .mk-topbar { position: sticky; top: 0; z-index: 150; padding-top: env(safe-area-inset-top);
+          background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
+          border-bottom: 1px solid ${LINE}; }
+        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+          background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid ${LINE}; }
+
+        /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; padding: 16px 4px 6px; }
+        .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
+          cursor: pointer; font-family: inherit; padding: 0; }
+        .mk-mcat .ic { width: 52px; height: 52px; border-radius: 16px; background: #fff; border: 1px solid ${LINE};
+          display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
+        .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
+        .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
+        .mk-mcat:active .ic { transform: scale(0.93); }
+        .mk-mcat .lb { font-size: 10px; font-weight: 700; color: ${SEC}; }
+        .mk-mcat.on .lb { color: ${GOLD_D}; font-weight: 800; }
+
+        /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
+        .mk-rows { display: none; flex-direction: column; gap: 10px; }
+        .mk-row { display: flex; gap: 12px; background: #fff; border: 1px solid ${LINE}; border-radius: 14px;
+          padding: 11px; text-decoration: none; color: inherit; position: relative;
+          animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
+        .mk-row:active { transform: scale(0.99); }
+        .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
+        .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; display: -webkit-box;
+          -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
+        .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
+        .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+        .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
+        .mk-row .pic { width: 108px; height: 108px; border-radius: 11px; overflow: hidden; flex-shrink: 0;
+          background: #F4F3F1; border: 1px solid ${LINE}; position: relative; }
+        .mk-row .pic img { width: 100%; height: 100%; object-fit: cover; }
+        .mk-row .pct { position: absolute; bottom: 6px; right: 6px; background: #b400ae; color: #fff;
+          font-size: 10px; font-weight: 800; border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; }
+        .mk-bk { position: absolute; top: 8px; left: 8px; background: none; border: none; cursor: pointer;
+          color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
+        .mk-bk.on { color: ${GOLD_D}; }
+        .mk-bk.on svg { fill: ${GOLD_D}; }
+
+        /* ── نوار پایین موبایل ── */
+        .mk-bottomnav { display: none; position: fixed; insetInline: 0; bottom: 0; z-index: 200;
+          background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+          border-top: 1px solid ${LINE}; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+          grid-template-columns: repeat(4, 1fr); }
+        .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none;
+          cursor: pointer; font-family: inherit; text-decoration: none; padding: 3px 0; color: ${MUT}; }
+        .mk-bnav .lb { font-size: 10px; font-weight: 700; }
+        .mk-bnav.on { color: ${GOLD_D}; }
+        .mk-bnav.on svg { fill: rgba(199,166,106,0.2); }
+
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
         .mk-sidebar { position: sticky; top: calc(76px + env(safe-area-inset-top)); background: #fff; border: 1px solid ${LINE};
@@ -423,45 +532,123 @@ export default function MarketNewPage() {
         .mk-mobilebar { display: none; }
         .mk-drawer { display: none; }
         @media (max-width: 900px) {
+          .mk-topbar { display: none; }
+          .mk-msearch { display: block; }
+          .mk-mcats { display: grid; }
           .mk-layout { grid-template-columns: 1fr; }
           .mk-sidebar { display: none; }
           .mk-mobilebar { display: flex; }
-          .mk-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+          .mk-grid { display: none; }
+          .mk-rows { display: flex; }
           .mk-drawer { display: block; }
+          .mk-bottomnav { display: grid; }
+          .mk-desk-sort { display: none !important; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .mk-card { animation: none; }
+          .mk-card, .mk-row { animation: none; }
         }
       `}</style>
 
-      {/* ═══ هدر صفحه ═══ */}
-      <header style={{ background: '#fff', borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ maxWidth: 1300, margin: '0 auto', padding: '26px clamp(16px,3vw,32px) 18px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
-            <div>
-              <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.28em', color: MUT }}>BILLIARD BAZAAR · MARKET</span>
-              <h1 style={{ fontSize: 'clamp(21px,3vw,30px)', fontWeight: 900, margin: '8px 0 0', letterSpacing: '-0.02em' }}>
-                بیلیارد <span style={{ color: GOLD_D }}>بازار</span>
-              </h1>
-              <div style={{ width: 46, height: 3, borderRadius: 2, marginTop: 10, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              {/* جستجو */}
-              <div style={{ position: 'relative' }}>
-                <Search size={14} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: MUT }} />
-                <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو در بازار…"
-                  style={{ width: 'min(250px, 56vw)', boxSizing: 'border-box', padding: '10px 34px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+      {/* ═══ تاپ‌بار دسکتاپ — به‌جای نوبار و هدر ═══ */}
+      <div className="mk-topbar">
+        <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: 64, display: 'flex', alignItems: 'center', gap: 14 }}>
+          {/* برند */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.26)' }}>
+              <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </span>
+            <span style={{ fontWeight: 900, fontSize: 17.5, letterSpacing: '-0.02em', color: TEXT, whiteSpace: 'nowrap' }}>
+              بیلیارد <span style={{ color: GOLD }}>هاب</span>
+            </span>
+          </Link>
+
+          {/* شهر */}
+          <div ref={cityRef} style={{ position: 'relative', flexShrink: 0 }}>
+            <button type="button" onClick={() => setCityOpen(p => !p)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: city ? GOLD_D : SEC }}>
+              <MapPin size={14} style={{ color: GOLD_D }} />
+              {city || 'همه‌ی شهرها'}
+              <ChevronDown size={12} style={{ color: MUT, transform: cityOpen ? 'rotate(180deg)' : 'none', transition: 'transform .3s' }} />
+            </button>
+            {cityOpen && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 60, width: 250, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
+                <CityPicker value={city} onPick={c => { setCity(c); setCityOpen(false) }} />
               </div>
-              <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 800, color: MUT, textDecoration: 'none', border: `1px dashed ${LINE}`, borderRadius: 999, padding: '7px 13px' }}>
-                نسخه‌ی فعلی بازار <ArrowLeft size={12} />
-              </Link>
-            </div>
+            )}
           </div>
+
+          {/* سرچ — پلیس‌هولدر با «بازار» طلایی */}
+          <div style={{ position: 'relative', flex: 1, minWidth: 0, maxWidth: 520 }}>
+            <Search size={14} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 36px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+            {!q && (
+              <span aria-hidden style={{ position: 'absolute', right: 36, top: '50%', transform: 'translateY(-50%)', fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                جستجو در بیلیارد <b style={{ color: GOLD_D, fontWeight: 800 }}>بازار</b>
+              </span>
+            )}
+          </div>
+
+          <span style={{ flex: 1 }} />
+
+          {/* نشان‌ها */}
+          <button type="button" onClick={() => setShowSaved(p => !p)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, flexShrink: 0,
+              color: showSaved ? GOLD_D : SEC, background: showSaved ? 'rgba(199,166,106,0.12)' : 'transparent',
+              border: showSaved ? '1px solid rgba(199,166,106,0.34)' : `1px solid ${LINE}`, transition: 'all .22s' }}>
+            <Bookmark size={15} style={showSaved ? { fill: GOLD_D } : undefined} /> نشان‌ها
+            {savedKeys.size > 0 && <span style={{ fontSize: 10, color: MUT }}>{toFa(savedKeys.size)}</span>}
+          </button>
+
+          {/* ثبت آگهی */}
+          <Link href="/shop/new"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 13, fontWeight: 800, color: '#241B08', flexShrink: 0,
+              background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, boxShadow: '0 6px 18px rgba(199,166,106,0.28)' }}>
+            <Plus size={15} /> ثبت آگهی
+          </Link>
         </div>
-      </header>
+      </div>
+
+      {/* ═══ سرچ‌بار موبایل — لوکیشن داخل خودِ باکس ═══ */}
+      <div className="mk-msearch" ref={mCityRef}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: '#FAFAF7', border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'visible', position: 'relative' }}>
+          <Search size={15} style={{ color: MUT, flexShrink: 0, margin: '0 12px 0 4px' }} />
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
+            {!q && (
+              <span aria-hidden style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                جستجو در بیلیارد <b style={{ color: GOLD_D, fontWeight: 800 }}>بازار</b>
+              </span>
+            )}
+          </div>
+          {/* لوکیشن — سمت چپ باکس */}
+          <button type="button" onClick={() => setCityOpen(p => !p)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: city ? GOLD_D : SEC, flexShrink: 0 }}>
+            <MapPin size={13} style={{ color: GOLD_D }} />
+            {city || 'همه شهرها'}
+          </button>
+          {cityOpen && (
+            <div className="mk-mcitypop" style={{ position: 'absolute', top: 'calc(100% + 8px)', insetInline: 0, zIndex: 60, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.16)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
+              <CityPicker value={city} onPick={c => { setCity(c); setCityOpen(false) }} />
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ═══ بدنه ═══ */}
-      <main style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) 80px' }}>
+      <main style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
+
+        {/* گرید دسته‌ها — موبایل: ۳ ردیف ۵تایی */}
+        <div className="mk-mcats">
+          {CATS_M.map(c => (
+            <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
+              className={`mk-mcat${cat === c.id ? ' on' : ''}`}>
+              <span className="ic"><img src={c.img} alt="" /></span>
+              <span className="lb">{c.label}</span>
+            </button>
+          ))}
+        </div>
 
         {/* نوار موبایل: فیلتر + مرتب‌سازی */}
         <div className="mk-mobilebar" style={{ alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -526,13 +713,48 @@ export default function MarketNewPage() {
                 </button>
               </div>
             ) : (
-              <div className="mk-grid">
-                {filtered.map((l, i) => <MarketCard key={l.key} l={l} i={i} />)}
-              </div>
+              <>
+                {/* دسکتاپ: گرید کارت‌های عمودی */}
+                <div className="mk-grid">
+                  {filtered.map((l, i) => (
+                    <MarketCard key={l.key} l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
+                  ))}
+                </div>
+                {/* موبایل: ردیف‌های افقی */}
+                <div className="mk-rows">
+                  {filtered.map((l, i) => (
+                    <MarketRow key={l.key} l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
+                  ))}
+                </div>
+              </>
             )}
           </section>
         </div>
       </main>
+
+      {/* ═══ نوار پایین موبایل ═══ */}
+      <nav className="mk-bottomnav">
+        <Link href="/" className="mk-bnav">
+          <Home size={19} />
+          <span className="lb">خانه</span>
+        </Link>
+        <button type="button" className={`mk-bnav${!showSaved ? ' on' : ''}`}
+          onClick={() => { setShowSaved(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+          <LayoutGrid size={19} />
+          <span className="lb">آگهی‌ها</span>
+        </button>
+        <button type="button" className={`mk-bnav${showSaved ? ' on' : ''}`}
+          onClick={() => { setShowSaved(p => !p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+          <Bookmark size={19} />
+          <span className="lb">نشان‌ها</span>
+        </button>
+        <Link href="/shop/new" className="mk-bnav">
+          <span style={{ width: 21, height: 21, borderRadius: 8, background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#241B08' }}>
+            <Plus size={14} />
+          </span>
+          <span className="lb">ثبت آگهی</span>
+        </Link>
+      </nav>
 
       {/* ═══ کشوی فیلتر موبایل (bottom sheet) ═══ */}
       {drawer && (

@@ -147,6 +147,8 @@ export default function Navbar() {
   const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
 
   if (isShopPage) return null;
+  /* نسخه‌ی آزمایشی بازار تاپ‌بار اختصاصی خودش را دارد */
+  if (pathname === '/market-new') return null;
 
   return (
     <>
