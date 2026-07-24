@@ -48,6 +48,56 @@ function useReveal() {
   }, [])
 }
 
+/* دراپ‌داونِ سفارشیِ موضوع — پنلِ شیشه‌ای با انیمیشن، هماهنگ با فرم */
+function SubjectSelect({ value, onChange, options, error }: {
+  value: string; onChange: (v: string) => void; options: string[]; error?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', fn)
+    return () => document.removeEventListener('mousedown', fn)
+  }, [])
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(p => !p)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+          padding: '12px 16px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
+          color: value ? TEXT : MUT, textAlign: 'right',
+          background: '#fff', border: `1px solid ${error ? 'rgba(178,59,46,0.5)' : open ? 'rgba(199,166,106,0.6)' : LINE}`,
+          boxShadow: open ? '0 0 0 3px rgba(199,166,106,0.13)' : 'none',
+          transition: 'border-color .25s, box-shadow .25s' }}>
+        {value || 'انتخاب موضوع…'}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={open ? GOLD_D : MUT} strokeWidth="2.4"
+          strokeLinecap="round" strokeLinejoin="round"
+          style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .3s cubic-bezier(.22,1,.36,1)' }}>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', insetInline: 0, zIndex: 40,
+          background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'hidden',
+          boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'ctEnter .28s cubic-bezier(.22,1,.36,1) both' }}>
+          {options.map(o => (
+            <button key={o} type="button" onClick={() => { onChange(o); setOpen(false) }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.09)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                padding: '11px 16px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5,
+                fontWeight: value === o ? 800 : 600, color: value === o ? GOLD_D : SEC,
+                background: 'transparent', textAlign: 'right', transition: 'background .2s' }}>
+              {o}
+              {value === o && <Check size={14} style={{ color: GOLD_D, flexShrink: 0 }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* فیلدِ فلوتینگ‌لیبل با خطِ زیرینِ انیمیت‌شونده */
 function FloatField({ label, value, onChange, type = 'text', ltr = false, textarea = false, error, inputMode, maxLength }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; ltr?: boolean
@@ -229,7 +279,7 @@ export default function ContactPage() {
             با ما <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>در ارتباط باشید</span>
           </h1>
           <p style={{ fontSize: 'clamp(13px,1.5vw,15.5px)', color: 'rgba(255,255,255,0.6)', lineHeight: 2.1, margin: '14px 0 0', maxWidth: 480 }}>
-            برای ارتباط با تیم Billiard Hub، همکاری، پیشنهاد یا هرگونه پرسش، با ما در تماس باشید.
+            برای ارتباط با تیم Billiard Hub، همکاری، پیشنهاد یا هرگونه پرسش، با ما در تماس باشید
           </p>
         </div>
       </section>
@@ -250,7 +300,7 @@ export default function ContactPage() {
             <div style={{ padding: 'clamp(26px,4vw,44px)' }}>
               <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>CHANNELS</span>
               <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 4px' }}>کانال‌های ارتباطی</h2>
-              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px', lineHeight: 1.9 }}>مستقیم، بدون واسطه — راهت را انتخاب کن.</p>
+              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px', lineHeight: 1.9 }}>مستقیم، بدون واسطه — راهت را انتخاب کن</p>
 
               {/* ایمیل — کلیک = کپی */}
               <button type="button" className="ct-ch" onClick={copyEmail} style={{ ['--cc' as never]: BALLS.blue }}>
@@ -339,10 +389,7 @@ export default function ContactPage() {
 
                   <div style={{ marginTop: 18 }}>
                     <label style={{ display: 'block', fontSize: 10.5, fontWeight: 700, color: errors.subject ? '#B23B2E' : MUT, marginBottom: 8 }}>موضوع</label>
-                    <select value={form.subject} onChange={e => { set('subject')(e.target.value) }} style={{ width: '100%' }}>
-                      <option value="">انتخاب موضوع…</option>
-                      {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <SubjectSelect value={form.subject} onChange={set('subject')} options={SUBJECTS} error={errors.subject} />
                     {errors.subject && <div style={{ fontSize: 11, fontWeight: 700, color: '#B23B2E', marginTop: 6 }}>{errors.subject}</div>}
                   </div>
 
@@ -370,7 +417,7 @@ export default function ContactPage() {
                   </svg>
                   <h3 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 8px' }}>پیام شما ثبت شد</h3>
                   <p style={{ fontSize: 13, color: SEC, lineHeight: 2, margin: '0 0 22px' }}>
-                    ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند.
+                    ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند
                   </p>
                   <button type="button" onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
                     style={{ padding: '11px 24px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)' }}>

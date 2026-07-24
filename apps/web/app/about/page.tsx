@@ -216,7 +216,7 @@ export default function AboutPage() {
           </h1>
           <p style={{ fontSize: 'clamp(13.5px,1.6vw,17px)', color: 'rgba(255,255,255,0.62)', lineHeight: 2.1, margin: '18px 0 0', maxWidth: 520 }}>
             بیلیارد هاب، پلتفرم تخصصی جامعه‌ی بیلیارد — جایی که بازیکنان، باشگاه‌ها،
-            مسابقات و بازارِ تجهیزات در یک خانه‌ی دیجیتال به هم می‌رسند.
+            مسابقات و بازارِ تجهیزات در یک خانه‌ی دیجیتال به هم می‌رسند
           </p>
           <div style={{ width: 64, height: 3, borderRadius: 2, marginTop: 24, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
           <div style={{ marginTop: 'clamp(36px,6vh,64px)', display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 700, letterSpacing: '0.14em' }}>
@@ -234,7 +234,7 @@ export default function AboutPage() {
           <h2 style={{ fontSize: 'clamp(24px,4.6vw,52px)', fontWeight: 900, lineHeight: 1.75, letterSpacing: '-0.015em', margin: 0 }}>
             <span className="ab-rev" style={{ display: 'block' }}>بیلیارد هاب فقط یک پلتفرم نیست؛</span>
             <span className="ab-rev d2" style={{ display: 'block', color: GOLD_D }}>
-              یک فضای دیجیتال برای دنیای بیلیارد است.
+              یک فضای دیجیتال برای دنیای بیلیارد است
             </span>
           </h2>
           <div className="ab-rev d3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 34 }}>
@@ -255,14 +255,14 @@ export default function AboutPage() {
             </h2>
             <div style={{ width: 52, height: 3, borderRadius: 2, marginTop: 16, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
             <p style={{ fontSize: 14.5, color: SEC, lineHeight: 2.2, margin: '18px 0 0' }}>
-              فضایی برای جستجو، ارتباط و تجربه‌ی بهترِ دنیای اسنوکر و پاکت بیلیارد.
+              فضایی برای جستجو، ارتباط و تجربه‌ی بهترِ دنیای اسنوکر و پاکت بیلیارد
             </p>
           </div>
           <div>
             {[
-              { t: 'جستجو',  d: 'باشگاه‌ها، مربیان، بازیکنان و رویدادهای دنیای بیلیارد — همه در یک‌جا و در دسترس.', c: BALLS.red,   en: 'SEARCH' },
-              { t: 'ارتباط', d: 'شبکه‌ای که بازیکن، باشگاه، داور و فروشنده را بی‌واسطه به هم وصل می‌کند.',            c: BALLS.blue,  en: 'CONNECT'  },
-              { t: 'تجربه',  d: 'از رزرو میز و رنکینگ رسمی تا بازارِ تجهیزات — یک تجربه‌ی یکپارچه و مدرن.',           c: BALLS.green, en: 'EXPERIENCE' },
+              { t: 'جستجو',  d: 'باشگاه‌ها، مربیان، بازیکنان و رویدادهای دنیای بیلیارد — همه در یک‌جا و در دسترس', c: BALLS.red,   en: 'SEARCH' },
+              { t: 'ارتباط', d: 'شبکه‌ای که بازیکن، باشگاه، مربی و فروشنده را بی‌واسطه به هم وصل می‌کند',            c: BALLS.blue,  en: 'CONNECT'  },
+              { t: 'تجربه',  d: 'از رزرو میز و رنکینگ رسمی تا بازارِ تجهیزات — یک تجربه‌ی یکپارچه و مدرن',           c: BALLS.green, en: 'EXPERIENCE' },
             ].map((f, i) => (
               <div key={f.t} className={`ab-rev d${i + 1}`} style={{ display: 'flex', gap: 18, padding: '22px 0', borderBottom: i < 2 ? `1px solid ${LINE}` : 'none', alignItems: 'flex-start' }}>
                 <span style={{ width: 15, height: 15, borderRadius: '50%', flexShrink: 0, marginTop: 6, background: f.c, boxShadow: 'inset 0 -2px 3px rgba(0,0,0,0.28), inset 0 2px 2px rgba(255,255,255,0.5)' }} />
@@ -312,7 +312,7 @@ export default function AboutPage() {
           <p style={{ fontSize: 'clamp(14.5px,1.8vw,17px)', fontWeight: 700, lineHeight: 2.3, margin: 0, color: TEXT }}>
             پلتفرم Billiard Hub متعلق به<br />
             <span style={{ fontSize: 'clamp(17px,2.2vw,21px)', fontWeight: 900, color: GOLD_D }}>شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا</span><br />
-            است و با برند Billiard Hub ارائه می‌شود.
+            است و با برند Billiard Hub ارائه می‌شود
           </p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 20, padding: '7px 16px', borderRadius: 999, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD }} />
@@ -362,7 +362,7 @@ export default function AboutPage() {
             </div>
           </div>
           <p className="ab-orbit-hint ab-rev d2" style={{ textAlign: 'center', fontSize: 12, color: MUT, marginTop: 30 }}>
-            هر گره، دری به یکی از دنیاهای پلتفرم است.
+            هر گره، دری به یکی از دنیاهای پلتفرم است
           </p>
         </div>
       </section>
@@ -381,7 +381,7 @@ export default function AboutPage() {
         ))}
         <div style={{ maxWidth: 640, margin: '0 auto', position: 'relative' }}>
           <h2 className="ab-rev" style={{ fontSize: 'clamp(26px,4.6vw,50px)', fontWeight: 900, lineHeight: 1.5, margin: 0 }}>
-            دنیای بیلیارد را<br /><span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>جستجو کن.</span>
+            دنیای بیلیارد را<br /><span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>جستجو کن</span>
           </h2>
           <div className="ab-rev d2" style={{ marginTop: 34, display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
             <MagneticLink href="/register">
