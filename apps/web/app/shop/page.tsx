@@ -251,6 +251,8 @@ function ShopTopBar({
   return (
     <div className="bz-topbar" style={{
       position: 'sticky', top: 0, zIndex: 150,
+      /* PWA اپل: تاپ‌بار نباید زیر ساعت/آنتن برود */
+      paddingTop: 'env(safe-area-inset-top)',
       background: 'rgba(255,255,255,0.82)',
       backdropFilter: 'blur(28px) saturate(1.8)',
       WebkitBackdropFilter: 'blur(28px) saturate(1.8)',

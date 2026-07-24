@@ -1283,7 +1283,8 @@ useEffect(() => {
         /* ══ MOBILE ≤600px ══ */
         @media(max-width:600px){
           /* horizontal padding removed from hero-content; applied per-element below */
-          .hero-content  { padding-top:220px !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:var(--hero-bottom-gap) !important; }
+          /* env(safe-area-inset-top): در PWA اپل نوبار/استوری پایین می‌آیند، محتوا هم باید بیاید */
+          .hero-content  { padding-top:calc(220px + env(safe-area-inset-top)) !important; padding-left:0 !important; padding-right:0 !important; padding-bottom:var(--hero-bottom-gap) !important; }
           .hero-h1       { font-size:clamp(23px,7.2vw,34px) !important; margin-bottom:12px !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
           .hero-subtitle { padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
           .hero-ctas     { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:center !important; padding:0 16px !important; width:100% !important; box-sizing:border-box !important; }
@@ -1308,17 +1309,17 @@ useEffect(() => {
         /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
           .hero-stories-bar { zoom:0.90; }
-          .hero-content { padding-top:clamp(165px,23vh,205px) !important; zoom:0.90; }
+          .hero-content { padding-top:calc(clamp(165px,23vh,205px) + env(safe-area-inset-top)) !important; zoom:0.90; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:clamp(157px,26vh,188px) !important; zoom:0.90; }
+          .hero-content { padding-top:calc(clamp(157px,26vh,188px) + env(safe-area-inset-top)) !important; zoom:0.90; }
           .hero-sub     { display:none !important; }
         }
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:232px !important; }
+          .hero-content { padding-top:calc(232px + env(safe-area-inset-top)) !important; }
           .trust-strip  { margin-top:16px !important; }
         }
 
@@ -1474,7 +1475,7 @@ useEffect(() => {
           minHeight: isMobile ? '100dvh' : undefined,
           zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'clamp(189px,25vh,236px) clamp(16px,5%,80px) 0',
+          padding: 'calc(clamp(189px,25vh,236px) + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Eyebrow */}
