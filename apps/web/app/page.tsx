@@ -126,7 +126,7 @@ const IMG = {
 const HERO_SLIDES = [
   { bg: '/images/hero/1.jpg',   accent: GRN,  label: 'باشگاه‌ها' },
   { bg: '/images/hero/2.png',   accent: GOLD, label: 'تجهیزات'   },
-  { bg: '/images/hero/3.jfif',  accent: BLU,  label: 'مربیان'    },
+  { bg: '/images/hero/3.png',   accent: BLU,  label: 'مربیان'    },
   /* ?v=2 — فایل هم‌نام عوض شده؛ بدونِ ورژن، کش CDN/مرورگر عکسِ قبلی را می‌داد */
   { bg: '/images/hero/4.png?v=2', accent: BRN, label: 'رقابت' },
 ];
