@@ -300,9 +300,10 @@ export default function AboutPage() {
               </defs>
               <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(199,166,106,0.35)" strokeWidth="1" />
               <circle cx="60" cy="60" r="33" fill="none" stroke="rgba(199,166,106,0.5)" strokeWidth="1" />
+              {/* direction:ltr لازم است — در سندِ RTL متنِ روی مسیر رندر نمی‌شد */}
               <g className="ab-seal-text">
-                <text style={{ fontSize: 8.2, fontWeight: 700, letterSpacing: '0.32em', fill: GOLD_D }}>
-                  <textPath href="#abSealPath">REGISTERED BRAND · BILLIARD HUB · REGISTERED ·</textPath>
+                <text direction="ltr" style={{ fontSize: 8.2, fontWeight: 700, letterSpacing: '0.2em', fill: GOLD_D, direction: 'ltr' }}>
+                  <textPath href="#abSealPath">REGISTERED BRAND · BILLIARD HUB · REGISTERED BRAND ·</textPath>
                 </text>
               </g>
               <text x="60" y="69" textAnchor="middle" style={{ fontSize: 26, fontWeight: 800, fill: GOLD_D }}>®</text>
