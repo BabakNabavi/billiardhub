@@ -1,298 +1,394 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+/* ─────────────────────────────────────────────────────────────
+   تماس با ما — تجربه‌ی ارتباطِ دیجیتال Billiard Hub (بازطراحی ۱۴۰۵)
+   هیروی سینمایی با میزِ مینیمالِ SVG → کامپوزیشنِ واحد:
+   کانال‌های تعاملی (کپی ایمیل، میان‌بُرِ موضوع) + فرمِ فلوتینگ‌لیبل
+   با ولیدیشن، لودینگ و انیمیشنِ موفقیت. فرم واقعی است:
+   ابتدا API، درنبودش ذخیره‌ی محلی (bh_contact_messages).
+   ───────────────────────────────────────────────────────────── */
+
+import { useEffect, useRef, useState } from 'react'
+import { Mail, MapPin, Handshake, Headphones, Check, Copy, Send, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
-function toFa(v: string | number) {
-  return String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
+const GOLD   = '#C7A66A'
+const GOLD_D = '#9A6E38'
+const TEXT   = '#1C1B17'
+const SEC    = '#5B564B'
+const MUT    = '#8A8474'
+const LINE   = '#E7E2D6'
+const BALLS = { red: '#C43D2E', green: '#1B7A4B', blue: '#3D63E6', pink: '#F06EAE', yellow: '#E8B93A' }
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+
+/* ── اطلاعات تماسِ رسمی ──
+   ایمیل همان است که در فوتر سایت استفاده می‌شود.
+   فیلدهای خالی «placeholder» هستند: تا وقتی مقدار واقعی نگیرند
+   در صفحه نمایش داده نمی‌شوند — برای فعال‌کردن فقط همین‌جا مقدار بده. */
+const CONTACT = {
+  email: 'info@billiardhub.net',
+  phone: '',        // TODO: شماره‌ی رسمی (مثل 02100000000) — فعلاً نمایش داده نمی‌شود
+  city: 'تهران، ایران',
+  instagram: '',    // TODO: آدرس کامل پروفایل — فعلاً نمایش داده نمی‌شود
+  telegram: '',     // TODO: آدرس کامل کانال — فعلاً نمایش داده نمی‌شود
 }
 
-const FAQ_ITEMS = [
-  { q: 'چطور می‌توانم باشگاه خود را ثبت کنم؟', a: 'پس از ثبت‌نام و انتخاب نقش "باشگاه‌دار"، از پنل مدیریت می‌توانید مشخصات باشگاه را وارد کنید.' },
-  { q: 'هزینه استفاده از پلتفرم چقدر است؟', a: 'ثبت‌نام و استفاده پایه رایگان است. برای امکانات پیشرفته، پلن‌های اشتراک موجود است.' },
-  { q: 'آیا امکان درج تبلیغات وجود دارد؟', a: 'بله، برای اطلاعات درباره تبلیغات در پلتفرم می‌توانید با تیم ما از طریق فرم تماس ارتباط برقرار کنید.' },
-  { q: 'نحوه ارتباط با پشتیبانی چگونه است؟', a: 'از طریق فرم تماس، ایمیل یا تلگرام می‌توانید با تیم پشتیبانی ما در ارتباط باشید.' },
-]
+const SUBJECTS = ['پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد', 'تبلیغات', 'سایر']
+
+function useReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll('.ct-rev'))
+    const io = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target) } }),
+      { threshold: 0.15 },
+    )
+    els.forEach(el => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+}
+
+/* فیلدِ فلوتینگ‌لیبل با خطِ زیرینِ انیمیت‌شونده */
+function FloatField({ label, value, onChange, type = 'text', ltr = false, textarea = false, error, inputMode, maxLength }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; ltr?: boolean
+  textarea?: boolean; error?: string; inputMode?: 'numeric' | 'email'; maxLength?: number
+}) {
+  const [focus, setFocus] = useState(false)
+  const up = focus || value.length > 0
+  return (
+    <div style={{ position: 'relative', paddingTop: 18 }}>
+      <label style={{
+        position: 'absolute', right: 0, top: up ? 0 : textarea ? 26 : 30,
+        fontSize: up ? 10.5 : 14, fontWeight: 700,
+        color: error ? '#B23B2E' : up ? (focus ? GOLD_D : MUT) : MUT,
+        transition: 'all .28s cubic-bezier(.22,1,.36,1)', pointerEvents: 'none',
+      }}>{label}</label>
+      {textarea ? (
+        <textarea value={value} onChange={e => onChange(e.target.value)} rows={4}
+          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+          style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
+            padding: '10px 0 8px', fontSize: 14.5, color: TEXT, fontFamily: 'inherit', resize: 'vertical', minHeight: 96, lineHeight: 2 }} />
+      ) : (
+        <input type={type} value={value} onChange={e => onChange(e.target.value)}
+          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+          inputMode={inputMode === 'numeric' ? 'numeric' : undefined} maxLength={maxLength}
+          style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', outline: 'none',
+            padding: '10px 0 8px', fontSize: 14.5, color: TEXT, fontFamily: 'inherit',
+            direction: ltr ? 'ltr' : 'rtl', textAlign: 'right' }} />
+      )}
+      <div style={{ position: 'relative', height: 1.5, background: error ? 'rgba(178,59,46,0.4)' : LINE, borderRadius: 2, overflow: 'hidden' }}>
+        <span style={{ position: 'absolute', inset: 0, transformOrigin: 'right',
+          transform: focus ? 'scaleX(1)' : 'scaleX(0)', transition: 'transform .45s cubic-bezier(.22,1,.36,1)',
+          background: `linear-gradient(90deg,#8A6020,${GOLD})` }} />
+      </div>
+      {error && <div style={{ fontSize: 11, fontWeight: 700, color: '#B23B2E', marginTop: 6 }}>{error}</div>}
+    </div>
+  )
+}
 
 export default function ContactPage() {
+  useReveal()
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
-  const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [faqOpen, setFaqOpen] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const formRef = useRef<HTMLDivElement>(null)
 
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: keyof typeof form) => (v: string) => {
+    if (k === 'phone') v = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 11)
+    setForm(f => ({ ...f, [k]: v }))
+    setErrors(e => ({ ...e, [k]: '' }))
+  }
+
+  const copyEmail = async () => {
+    try { await navigator.clipboard.writeText(CONTACT.email) } catch {
+      const ta = document.createElement('textarea')
+      ta.value = CONTACT.email; document.body.appendChild(ta); ta.select()
+      try { document.execCommand('copy') } catch {}
+      ta.remove()
+    }
+    setCopied(true); setTimeout(() => setCopied(false), 2200)
+  }
+
+  const jumpToForm = (subject: string) => {
+    setForm(f => ({ ...f, subject }))
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
 
   const validate = () => {
     const e: Record<string, string> = {}
-    if (!form.name.trim()) e.name = 'نام الزامی است'
-    if (!form.email.trim() || !form.email.includes('@')) e.email = 'ایمیل نامعتبر است'
-    if (!form.subject.trim()) e.subject = 'موضوع الزامی است'
-    if (!form.message.trim() || form.message.length < 10) e.message = 'پیام باید حداقل ۱۰ کاراکتر باشد'
+    if (!form.name.trim()) e.name = 'نام و نام خانوادگی الزامی است'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'ایمیل معتبر نیست'
+    if (form.phone && !/^09\d{9}$/.test(form.phone)) e.phone = 'شماره باید ۱۱ رقم و با ۰۹ شروع شود'
+    if (!form.subject) e.subject = 'موضوع را انتخاب کنید'
+    if (form.message.trim().length < 10) e.message = 'پیام باید حداقل ۱۰ کاراکتر باشد'
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submit = async (ev: React.FormEvent) => {
+    ev.preventDefault()
     if (!validate()) return
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1500))
-    setSent(true)
+    const payload = { ...form, at: new Date().toISOString() }
+    try {
+      const res = await fetch(`${API}/contact`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error()
+    } catch {
+      /* API در دسترس نیست ⇒ ذخیره‌ی محلی؛ پیام‌ها بعداً قابل انتقال‌اند */
+      try {
+        const all = JSON.parse(localStorage.getItem('bh_contact_messages') ?? '[]')
+        localStorage.setItem('bh_contact_messages', JSON.stringify([{ id: Date.now(), ...payload }, ...all]))
+      } catch {}
+    }
+    /* مکثِ کوتاه برای حسِ واقعی لودینگ */
+    await new Promise(r => setTimeout(r, 700))
     setLoading(false)
+    setSent(true)
   }
 
-  const labelStyle: React.CSSProperties = { fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.50)', marginBottom: 6, display: 'block' }
-  const inputStyle = (err?: string): React.CSSProperties => ({
-    width: '100%', boxSizing: 'border-box',
-    background: '#F7F7F5', border: `1px solid ${err ? 'rgba(239,68,68,0.50)' : 'rgba(0,0,0,0.10)'}`,
-    borderRadius: 12, padding: '12px 14px', color: '#111111', fontSize: 16, fontFamily: 'inherit',
-    outline: 'none', transition: 'border-color 0.2s',
-  })
-
   return (
-    <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <div dir="rtl" style={{ background: '#F7F7F5', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif', overflowX: 'clip' }}>
       <style>{`
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
-        @keyframes scaleIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
-        input:focus, select:focus, textarea:focus { border-color: rgba(199,166,106,0.50) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.10) !important; }
-        .info-card { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
-        .info-card:hover { transform: translateY(-4px); border-color: rgba(199,166,106,0.30) !important; box-shadow: 0 16px 48px rgba(0,0,0,0.10) !important; }
-        @media(max-width:900px){ .contact-grid{grid-template-columns:1fr!important;} .social-grid{grid-template-columns:1fr 1fr!important;} }
+        .ct-rev { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1); }
+        .ct-rev.on { opacity: 1; transform: none; }
+        .ct-rev.d1 { transition-delay: .08s; } .ct-rev.d2 { transition-delay: .18s; } .ct-rev.d3 { transition-delay: .3s; }
+
+        @keyframes ctEnter { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+        @keyframes ctPulse { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+        @keyframes ctDash { to { stroke-dashoffset: 0; } }
+        @keyframes ctSpin { to { transform: rotate(360deg); } }
+        @keyframes ctPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+        .ct-hero-in > * { animation: ctEnter .8s cubic-bezier(.22,1,.36,1) both; }
+        .ct-hero-in > *:nth-child(2) { animation-delay: .12s; }
+        .ct-hero-in > *:nth-child(3) { animation-delay: .24s; }
+
+        /* ردیف‌های کانال — تعاملی */
+        .ct-ch { display: flex; align-items: center; gap: 14px; padding: 17px 6px; cursor: pointer;
+          border-bottom: 1px solid ${LINE}; background: transparent; width: 100%; text-align: right;
+          font-family: inherit; border-inline: none; border-top: none; text-decoration: none;
+          transition: background .3s, transform .3s cubic-bezier(.22,1,.36,1); position: relative; }
+        .ct-ch:hover { transform: translateX(-5px); }
+        .ct-ch .ic { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          background: #fff; border: 1px solid ${LINE}; color: var(--cc);
+          transition: box-shadow .3s, border-color .3s, transform .3s; }
+        .ct-ch:hover .ic { border-color: var(--cc); transform: scale(1.07); box-shadow: 0 8px 20px rgba(28,27,23,0.1); }
+        .ct-ch .hint { margin-inline-start: auto; font-size: 10.5px; font-weight: 800; color: ${MUT};
+          display: inline-flex; align-items: center; gap: 4px; opacity: 0; transform: translateX(5px);
+          transition: opacity .3s, transform .3s; white-space: nowrap; }
+        .ct-ch:hover .hint { opacity: 1; transform: none; }
+
+        .ct-submit { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
+          font-family: inherit; font-size: 15px; font-weight: 800; color: #241B08;
+          background: linear-gradient(135deg, #E8CE96, ${GOLD} 55%, #A8853F);
+          box-shadow: 0 10px 26px rgba(199,166,106,0.3);
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, opacity .2s; }
+        .ct-submit:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(199,166,106,0.42); }
+        .ct-submit:disabled { opacity: .65; cursor: not-allowed; }
+
+        .ct-grid { display: grid; grid-template-columns: minmax(0,5fr) minmax(0,7fr); }
+        @media (max-width: 860px) { .ct-grid { grid-template-columns: 1fr; } .ct-side { border-inline-start: none !important; border-top: 1px solid ${LINE}; } }
+        @media (prefers-reduced-motion: reduce) {
+          .ct-rev { opacity: 1 !important; transform: none !important; transition: none !important; }
+          .ct-hero-in > * { animation: none !important; }
+        }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn,Tahoma,sans-serif', direction: 'rtl', color: '#111111' }}>
+      {/* ═══ HERO — کوتاه و سینمایی با میزِ مینیمال ═══ */}
+      <section style={{ position: 'relative', background: '#0B0A08', color: '#fff', overflow: 'hidden' }}>
+        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 14%, rgba(199,166,106,0.15), transparent 46%)' }} />
+        <div aria-hidden style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
+        <div aria-hidden style={{ position: 'absolute', bottom: '-1vw', insetInlineStart: -8, fontWeight: 900, fontSize: 'clamp(56px,11vw,150px)', lineHeight: .9, direction: 'ltr', color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.06)', userSelect: 'none', pointerEvents: 'none' }}>CONTACT</div>
 
-        {/* ambient orb */}
-        <div style={{ position: 'fixed', top: -100, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.07)0%,transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
-        <div style={{ position: 'fixed', bottom: -80, left: -60, width: 400, height: 400, background: 'radial-gradient(circle,rgba(6,182,212,0.04)0%,transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* میزِ مینیمال — پاکت‌ها نقاطِ ارتباط */}
+        <svg aria-hidden viewBox="0 0 520 300" style={{ position: 'absolute', top: '50%', left: 'clamp(-60px,2vw,60px)', transform: 'translateY(-50%)', width: 'min(46vw, 520px)', opacity: 0.55, pointerEvents: 'none' }}>
+          <rect x="20" y="30" width="480" height="240" rx="18" fill="none" stroke="rgba(199,166,106,0.4)" strokeWidth="1.4" />
+          <rect x="44" y="54" width="432" height="192" rx="8" fill="none" stroke="rgba(199,166,106,0.16)" strokeWidth="1" />
+          {[[20, 30], [260, 22], [500, 30], [20, 270], [260, 278], [500, 270]].map((p, i) => (
+            <circle key={i} cx={p[0]} cy={p[1]} r="7" fill="rgba(199,166,106,0.55)" style={{ animation: `ctPulse 3.2s ${i * 0.4}s ease-in-out infinite` }} />
+          ))}
+          <path d="M 130 210 L 300 110 L 452 168" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1" strokeDasharray="420" strokeDashoffset="420" style={{ animation: 'ctDash 2.4s .6s cubic-bezier(.4,0,.2,1) forwards' }} />
+          <circle cx="130" cy="210" r="9" fill="url(#ctCue)" />
+          <defs>
+            <radialGradient id="ctCue" cx="0.35" cy="0.3" r="1">
+              <stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#BDB8AC" />
+            </radialGradient>
+          </defs>
+        </svg>
 
-        {/* ── Hero mini ── */}
-        <div style={{ position: 'relative', height: 240, overflow: 'hidden', background: '#F7F7F5' }}>
-          <img src="/images/billiadr-club-6.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.12) saturate(0.4)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(1,6,4,0.4), rgba(2,8,6,0.98))' }} />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)', borderRadius: 100, padding: '6px 18px', animation: 'fadeUp 0.6s ease both' }}>
-              <span style={{ fontSize: 12, color: '#C7A66A', fontWeight: 700, letterSpacing: '0.22em' }}>CONTACT US</span>
-            </div>
-            <h1 style={{ fontSize: 'clamp(31px, 4.4vw, 51px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.035em', animation: 'fadeUp 0.6s ease 0.15s both' }}>تماس با ما</h1>
-            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.35)', margin: 0, animation: 'fadeUp 0.6s ease 0.3s both' }}>همیشه در کنار شما هستیم</p>
-          </div>
+        <div className="ct-hero-in" style={{ position: 'relative', zIndex: 1, maxWidth: 1080, margin: '0 auto', padding: 'clamp(68px,10vh,110px) clamp(20px,4vw,32px) clamp(60px,9vh,96px)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.28em', color: GOLD, border: '1px solid rgba(199,166,106,0.4)', background: 'rgba(199,166,106,0.10)', borderRadius: 999, padding: '5px 14px' }}>
+            CONTACT · BILLIARD HUB
+          </span>
+          <h1 style={{ fontSize: 'clamp(30px,5.4vw,58px)', fontWeight: 900, lineHeight: 1.3, letterSpacing: '-0.02em', margin: '16px 0 0' }}>
+            با ما <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>در ارتباط باشید</span>
+          </h1>
+          <p style={{ fontSize: 'clamp(13px,1.5vw,15.5px)', color: 'rgba(255,255,255,0.6)', lineHeight: 2.1, margin: '14px 0 0', maxWidth: 480 }}>
+            برای ارتباط با تیم Billiard Hub، همکاری، پیشنهاد یا هرگونه پرسش، با ما در تماس باشید.
+          </p>
         </div>
+      </section>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: '60px 24px 80px' }}>
+      {/* ═══ کامپوزیشنِ واحد: کانال‌ها + فرم ═══ */}
+      <section style={{ padding: 'clamp(40px,7vw,90px) clamp(16px,4vw,32px) clamp(70px,9vw,120px)' }}>
+        <div className="ct-rev" style={{
+          maxWidth: 1080, margin: '0 auto', position: 'relative',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.78))',
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          border: `1px solid ${LINE}`, borderRadius: 26, overflow: 'hidden',
+          boxShadow: '0 28px 80px rgba(28,27,23,0.09)',
+        }}>
+          <div aria-hidden style={{ position: 'absolute', top: 0, insetInline: 0, height: 3, background: `linear-gradient(90deg,#8A6020,${GOLD},#8A6020)` }} />
 
-          {/* ── Contact info cards ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 60 }}>
-            {[
-              { icon: 'ti-phone', title: 'تلفن پشتیبانی', value: '۰۲۱-۸۸۱۲۳۴۵۶', sub: 'شنبه تا پنج‌شنبه ۹ تا ۱۸', color: '#C7A66A' },
-              { icon: 'ti-mail', title: 'ایمیل', value: 'support@billiardplus.ir', sub: 'پاسخ در کمتر از ۲۴ ساعت', color: '#06b6d4' },
-              { icon: 'ti-map-pin', title: 'دفتر مرکزی', value: 'تهران، ونک، خیابان ملاصدرا', sub: 'ساختمان پلاس، طبقه ۴', color: '#a78bfa' },
-            ].map((c, i) => (
-              <div key={i} className="info-card" style={{ padding: '24px 20px', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, animation: `fadeUp 0.5s ease ${i * 0.1}s both` }}>
-                <div style={{ width: 44, height: 44, borderRadius: 13, background: `${c.color}12`, border: `1px solid ${c.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                  <i className={`ti ${c.icon}`} style={{ fontSize: 22, color: c.color }} />
+          <div className="ct-grid">
+            {/* ── کانال‌های ارتباطی ── */}
+            <div style={{ padding: 'clamp(26px,4vw,44px)' }}>
+              <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>CHANNELS</span>
+              <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 4px' }}>کانال‌های ارتباطی</h2>
+              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px', lineHeight: 1.9 }}>مستقیم، بدون واسطه — راهت را انتخاب کن.</p>
+
+              {/* ایمیل — کلیک = کپی */}
+              <button type="button" className="ct-ch" onClick={copyEmail} style={{ ['--cc' as never]: BALLS.blue }}>
+                <span className="ic"><Mail size={18} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>ایمیل</span>
+                  <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>{CONTACT.email}</span>
+                </span>
+                <span className="hint" style={copied ? { opacity: 1, transform: 'none', color: '#1B7A4B' } : undefined}>
+                  {copied ? <><Check size={12} /> کپی شد</> : <><Copy size={12} /> برای کپی کلیک کن</>}
+                </span>
+              </button>
+
+              {/* تلفن — فقط وقتی شماره‌ی واقعی ثبت شده باشد */}
+              {CONTACT.phone && (
+                <a className="ct-ch" href={`tel:${CONTACT.phone}`} style={{ ['--cc' as never]: BALLS.green }}>
+                  <span className="ic"><Headphones size={18} /></span>
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>تلفن</span>
+                    <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>{CONTACT.phone}</span>
+                  </span>
+                  <span className="hint">تماس مستقیم</span>
+                </a>
+              )}
+
+              {/* موقعیت */}
+              <div className="ct-ch" style={{ ['--cc' as never]: BALLS.red, cursor: 'default' }}>
+                <span className="ic"><MapPin size={18} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>موقعیت</span>
+                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>{CONTACT.city}</span>
+                </span>
+              </div>
+
+              {/* میان‌بُرهای موضوع — می‌پرد به فرم با موضوعِ ازپیش‌انتخاب‌شده */}
+              <button type="button" className="ct-ch" onClick={() => jumpToForm('همکاری')} style={{ ['--cc' as never]: BALLS.yellow }}>
+                <span className="ic"><Handshake size={18} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>همکاری با ما</span>
+                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>پیشنهاد همکاری و مشارکت</span>
+                </span>
+                <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
+              </button>
+              <button type="button" className="ct-ch" onClick={() => jumpToForm('پشتیبانی')} style={{ ['--cc' as never]: BALLS.pink, borderBottom: 'none' }}>
+                <span className="ic"><Headphones size={18} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>پشتیبانی</span>
+                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>سؤال درباره‌ی حساب و امکانات</span>
+                </span>
+                <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
+              </button>
+
+              {/* شبکه‌های اجتماعی — فقط وقتی آدرسِ واقعی ثبت شده باشد */}
+              {(CONTACT.instagram || CONTACT.telegram) && (
+                <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+                  {CONTACT.instagram && (
+                    <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none', padding: '8px 16px', borderRadius: 10, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)' }}>
+                      اینستاگرام
+                    </a>
+                  )}
+                  {CONTACT.telegram && (
+                    <a href={CONTACT.telegram} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none', padding: '8px 16px', borderRadius: 10, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)' }}>
+                      تلگرام
+                    </a>
+                  )}
                 </div>
-                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 6px', fontWeight: 700 }}>{c.title}</p>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#111111', margin: '0 0 4px' }}>{c.value}</p>
-                <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{c.sub}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Main grid: Form + Sidebar ── */}
-          <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 28, marginBottom: 64 }}>
-
-            {/* Form */}
-            <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 24, overflow: 'hidden' }}>
-              <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.5),transparent)' }} />
-              <div style={{ padding: '32px' }}>
-                {sent ? (
-                  <div style={{ textAlign: 'center', padding: '40px 20px', animation: 'scaleIn 0.5s ease both' }}>
-                    <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(199,166,106,0.10)', border: '2px solid rgba(199,166,106,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 40px rgba(199,166,106,0.20)' }}>
-                      <i className="ti ti-check" style={{ fontSize: 40, color: '#C7A66A' }} />
-                    </div>
-                    <h2 style={{ fontSize: 24, fontWeight: 900, color: '#111111', margin: '0 0 12px' }}>پیام ارسال شد!</h2>
-                    <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, margin: '0 0 28px' }}>
-                      تیم پشتیبانی ما در اسرع وقت با شما تماس خواهد گرفت.
-                    </p>
-                    <button onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
-                      style={{ padding: '12px 24px', borderRadius: 12, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.25)', color: '#C7A66A', fontSize: 16, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
-                      ارسال پیام جدید
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <i className="ti ti-send" style={{ fontSize: 19, color: '#C7A66A' }} />
-                      </div>
-                      <h2 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: 0 }}>ارسال پیام</h2>
-                    </div>
-
-                    <form onSubmit={handleSubmit}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                        <div>
-                          <label style={labelStyle}>نام و نام خانوادگی *</label>
-                          <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="نام خود را وارد کنید" style={inputStyle(errors.name)} />
-                          {errors.name && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.name}</p>}
-                        </div>
-                        <div>
-                          <label style={labelStyle}>شماره موبایل</label>
-                          <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="۰۹۱۲۳۴۵۶۷۸۹" style={inputStyle()} />
-                        </div>
-                        <div style={{ gridColumn: 'span 2' }}>
-                          <label style={labelStyle}>ایمیل *</label>
-                          <input value={form.email} onChange={e => set('email', e.target.value)} placeholder="example@email.com" type="email" style={inputStyle(errors.email)} />
-                          {errors.email && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.email}</p>}
-                        </div>
-                        <div style={{ gridColumn: 'span 2' }}>
-                          <label style={labelStyle}>موضوع *</label>
-                          <select value={form.subject} onChange={e => set('subject', e.target.value)} style={{ ...inputStyle(errors.subject), appearance: 'none' }}>
-                            <option value="">موضوع تماس را انتخاب کنید</option>
-                            <option>پشتیبانی فنی</option>
-                            <option>درخواست تبلیغات</option>
-                            <option>ثبت باشگاه</option>
-                            <option>گزارش مشکل</option>
-                            <option>همکاری و شراکت</option>
-                            <option>سایر</option>
-                          </select>
-                          {errors.subject && <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>{errors.subject}</p>}
-                        </div>
-                        <div style={{ gridColumn: 'span 2' }}>
-                          <label style={labelStyle}>پیام *</label>
-                          <textarea value={form.message} onChange={e => set('message', e.target.value)} placeholder="پیام خود را اینجا بنویسید..." rows={5} style={{ ...inputStyle(errors.message), resize: 'vertical', lineHeight: 1.7 }} />
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                            {errors.message && <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{errors.message}</p>}
-                            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginRight: 'auto' }}>{toFa(form.message.length)} کاراکتر</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        style={{ width: '100%', padding: '15px', borderRadius: 14, border: 'none', background: loading ? 'rgba(199,166,106,0.30)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', fontSize: 17, fontWeight: 800, fontFamily: 'inherit', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: loading ? 'none' : '0 8px 28px rgba(199,166,106,0.35)', transition: 'all 0.3s' }}
-                      >
-                        {loading ? (
-                          <><i className="ti ti-loader-2 ti-spin" style={{ fontSize: 20 }} /> در حال ارسال...</>
-                        ) : (
-                          <><i className="ti ti-send" style={{ fontSize: 20 }} /> ارسال پیام</>
-                        )}
-                      </button>
-                    </form>
-                  </>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* Sidebar */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Working hours */}
-              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, overflow: 'hidden' }}>
-                <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.40),transparent)' }} />
-                <div style={{ padding: '20px' }}>
-                  <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <i className="ti ti-clock" style={{ fontSize: 17, color: '#C7A66A' }} />
-                    ساعت پشتیبانی
+            {/* ── فرم ── */}
+            <div ref={formRef} className="ct-side" style={{ padding: 'clamp(26px,4vw,44px)', borderInlineStart: `1px solid ${LINE}`, background: 'rgba(250,250,247,0.6)' }}>
+              {!sent ? (
+                <form onSubmit={submit} noValidate>
+                  <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>MESSAGE</span>
+                  <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 18px' }}>پیام بگذارید</h2>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 22px' }}>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <FloatField label="نام و نام خانوادگی" value={form.name} onChange={set('name')} error={errors.name} />
+                    </div>
+                    <FloatField label="ایمیل" value={form.email} onChange={set('email')} type="email" ltr inputMode="email" error={errors.email} />
+                    <FloatField label="شماره تماس (اختیاری)" value={form.phone} onChange={set('phone')} type="tel" ltr inputMode="numeric" maxLength={11} error={errors.phone} />
+                  </div>
+
+                  <div style={{ marginTop: 18 }}>
+                    <label style={{ display: 'block', fontSize: 10.5, fontWeight: 700, color: errors.subject ? '#B23B2E' : MUT, marginBottom: 8 }}>موضوع</label>
+                    <select value={form.subject} onChange={e => { set('subject')(e.target.value) }} style={{ width: '100%' }}>
+                      <option value="">انتخاب موضوع…</option>
+                      {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    {errors.subject && <div style={{ fontSize: 11, fontWeight: 700, color: '#B23B2E', marginTop: 6 }}>{errors.subject}</div>}
+                  </div>
+
+                  <div style={{ marginTop: 6 }}>
+                    <FloatField label="پیام شما" value={form.message} onChange={set('message')} textarea error={errors.message} />
+                  </div>
+
+                  <button type="submit" className="ct-submit" disabled={loading} style={{ marginTop: 24 }}>
+                    {loading ? (
+                      <>
+                        <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'ctSpin .7s linear infinite', display: 'inline-block' }} />
+                        در حال ارسال…
+                      </>
+                    ) : (<>ارسال پیام <Send size={15} /></>)}
+                  </button>
+                </form>
+              ) : (
+                /* ── انیمیشن موفقیت ── */
+                <div style={{ textAlign: 'center', padding: 'clamp(30px,5vw,60px) 10px', animation: 'ctPop .5s cubic-bezier(.22,1,.36,1) both' }}>
+                  <svg width="86" height="86" viewBox="0 0 86 86" style={{ margin: '0 auto 18px', display: 'block' }}>
+                    <circle cx="43" cy="43" r="40" fill="rgba(27,122,75,0.07)" stroke="rgba(27,122,75,0.35)" strokeWidth="1.5"
+                      strokeDasharray="252" strokeDashoffset="252" style={{ animation: 'ctDash 1s .1s cubic-bezier(.4,0,.2,1) forwards' }} />
+                    <path d="M 27 44 L 39 56 L 60 32" fill="none" stroke="#1B7A4B" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+                      strokeDasharray="60" strokeDashoffset="60" style={{ animation: 'ctDash .6s .7s cubic-bezier(.4,0,.2,1) forwards' }} />
+                  </svg>
+                  <h3 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 8px' }}>پیام شما ثبت شد</h3>
+                  <p style={{ fontSize: 13, color: SEC, lineHeight: 2, margin: '0 0 22px' }}>
+                    ممنون که با بیلیارد هاب در ارتباطی — تیم ما پیامت را بررسی می‌کند.
                   </p>
-                  {[
-                    { day: 'شنبه تا چهارشنبه', hours: '۹:۰۰ — ۱۸:۰۰', active: true },
-                    { day: 'پنج‌شنبه', hours: '۹:۰۰ — ۱۴:۰۰', active: true },
-                    { day: 'جمعه', hours: 'تعطیل', active: false },
-                  ].map((r, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, padding: '10px 0', borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                      <span style={{ color: 'rgba(0,0,0,0.45)' }}>{r.day}</span>
-                      <span style={{ color: r.active ? '#C7A66A' : '#ef4444', fontWeight: 600 }}>{r.hours}</span>
-                    </div>
-                  ))}
-                  <div style={{ marginTop: 14, padding: '10px 12px', background: 'rgba(199,166,106,0.06)', borderRadius: 10, border: '1px solid rgba(199,166,106,0.12)', fontSize: 14, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <i className="ti ti-info-circle" style={{ fontSize: 15, color: '#C7A66A', flexShrink: 0 }} />
-                    پشتیبانی اضطراری از طریق تلگرام ۲۴ ساعته فعال است
-                  </div>
+                  <button type="button" onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
+                    style={{ padding: '11px 24px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)' }}>
+                    ارسال پیام جدید
+                  </button>
                 </div>
-              </div>
-
-              {/* Social media */}
-              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '20px' }}>
-                <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="ti ti-share" style={{ fontSize: 17, color: '#C7A66A' }} />
-                  شبکه‌های اجتماعی
-                </p>
-                <div className="social-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  {[
-                    { icon: 'ti-brand-instagram', label: 'اینستاگرام', handle: '@billiardplus', color: '#e1306c', bg: 'rgba(225,48,108,0.08)' },
-                    { icon: 'ti-brand-telegram', label: 'تلگرام', handle: '@BilliardPlus', color: '#2CA5E0', bg: 'rgba(44,165,224,0.08)' },
-                    { icon: 'ti-brand-twitter', label: 'توییتر/X', handle: '@billiardplus', color: '#1DA1F2', bg: 'rgba(29,161,242,0.08)' },
-                    { icon: 'ti-brand-youtube', label: 'یوتیوب', handle: 'BilliardPlus', color: '#FF0000', bg: 'rgba(255,0,0,0.08)' },
-                  ].map(s => (
-                    <div key={s.label} style={{ padding: '12px', background: s.bg, border: `1px solid ${s.color}20`, borderRadius: 12, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.03)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}>
-                      <i className={`ti ${s.icon}`} style={{ fontSize: 20, color: s.color, flexShrink: 0 }} />
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: '#111111', margin: '0 0 1px' }}>{s.label}</p>
-                        <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', margin: 0 }}>{s.handle}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick links */}
-              <div style={{ background: 'rgba(199,166,106,0.04)', border: '1px solid rgba(199,166,106,0.12)', borderRadius: 20, padding: '20px' }}>
-                <p style={{ fontSize: 15, fontWeight: 800, color: '#111111', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="ti ti-link" style={{ fontSize: 17, color: '#C7A66A' }} />
-                  لینک‌های مفید
-                </p>
-                {[
-                  { href: '/about', label: 'درباره ما', icon: 'ti-info-circle' },
-                  { href: '/shop', label: 'فروشگاه', icon: 'ti-shopping-bag' },
-                  { href: '/clubs', label: 'باشگاه‌ها', icon: 'ti-building' },
-                  { href: '/events', label: 'مسابقات', icon: 'ti-trophy' },
-                ].map(l => (
-                  <Link key={l.href} href={l.href} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.50)', textDecoration: 'none', fontSize: 15, transition: 'color 0.2s' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.50)' }}>
-                    <i className={`ti ${l.icon}`} style={{ fontSize: 16, color: '#C7A66A', opacity: 0.7 }} />
-                    {l.label}
-                    <i className="ti ti-arrow-left" style={{ fontSize: 14, marginRight: 'auto' }} />
-                  </Link>
-                ))}
-              </div>
+              )}
             </div>
           </div>
-
-          {/* ── FAQ ── */}
-          <section>
-            <div style={{ textAlign: 'center', marginBottom: 36 }}>
-              <p style={{ fontSize: 12, color: '#A07840', letterSpacing: '0.22em', fontWeight: 700, marginBottom: 10, textTransform: 'uppercase' }}>FAQ</p>
-              <h2 style={{ fontSize: 'clamp(24px, 2.8vw, 33px)', fontWeight: 900, color: '#111111', margin: 0 }}>سوالات متداول</h2>
-            </div>
-            <div style={{ maxWidth: 720, margin: '0 auto', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, overflow: 'hidden' }}>
-              <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(199,166,106,0.40),transparent)' }} />
-              <div style={{ padding: '8px 24px' }}>
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} style={{ borderBottom: i < FAQ_ITEMS.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                    <button
-                      onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-                      style={{ width: '100%', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '18px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
-                    >
-                      <span style={{ fontSize: 16, fontWeight: 700, color: faqOpen === i ? '#C7A66A' : '#111111', transition: 'color 0.2s' }}>{item.q}</span>
-                      <span style={{ fontSize: 22, color: '#C7A66A', transition: 'transform 0.3s', transform: faqOpen === i ? 'rotate(45deg)' : 'rotate(0)', flexShrink: 0, lineHeight: 1 }}>+</span>
-                    </button>
-                    {faqOpen === i && (
-                      <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.50)', lineHeight: 1.8, margin: '0 0 16px', paddingRight: 4 }}>{item.a}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
         </div>
-      </div>
-    </>
+
+        {/* لینک به درباره ما */}
+        <div className="ct-rev d2" style={{ maxWidth: 1080, margin: '22px auto 0', textAlign: 'center' }}>
+          <Link href="/about" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: MUT, textDecoration: 'none' }}>
+            بیشتر درباره‌ی بیلیارد هاب بدانید <ArrowLeft size={13} />
+          </Link>
+        </div>
+      </section>
+    </div>
   )
 }

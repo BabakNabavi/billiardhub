@@ -229,12 +229,15 @@ export default function Footer() {
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ fontSize: '13px', color: DIM2 }}>© ۱۴۰۵ BilliardHub</div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
-            {['حریم خصوصی', 'قوانین', 'تماس با ما'].map(item => (
-              <span key={item} style={{ fontSize: '13px', color: DIM2, cursor: 'pointer', transition: 'color 0.22s ease' }}
+            {[
+              { label: 'درباره ما', href: '/about' },
+              { label: 'تماس با ما', href: '/contact' },
+            ].map(item => (
+              <Link key={item.href} href={item.href} style={{ fontSize: '13px', color: DIM2, textDecoration: 'none', transition: 'color 0.22s ease' }}
                 onMouseEnter={e => { (e.target as HTMLElement).style.color = GOLD; }}
                 onMouseLeave={e => { (e.target as HTMLElement).style.color = DIM2; }}>
-                {item}
-              </span>
+                {item.label}
+              </Link>
             ))}
           </div>
           {/* اعتبار توسعه‌دهنده — موبایل: زیر لینک‌ها */}
