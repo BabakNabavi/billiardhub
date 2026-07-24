@@ -344,11 +344,11 @@ export default function AboutPage() {
             </svg>
             {ECO_NODES.map((n, i) => {
               const a = (i / ECO_NODES.length) * Math.PI * 2 - Math.PI / 2
-              /* شعاعِ ۴۰٪ از استیجِ ۶۲۰px ⇒ ضریب ۲.۴۸ */
-              const x = Math.cos(a) * 40 * 2.48, y = Math.sin(a) * 40 * 2.48
+              /* موقعیتِ درصدی روی شعاعِ ۴۰٪ — با هر سایزِ استیج دقیق می‌ماند */
+              const x = 50 + Math.cos(a) * 40, y = 50 + Math.sin(a) * 40
               return (
                 <Link key={n.en} href={n.href} className="ab-node"
-                  style={{ transform: `translate(${x}px, ${y}px)`, ['--nc' as never]: n.clr }}>
+                  style={{ left: `${x}%`, top: `${y}%`, ['--nc' as never]: n.clr }}>
                   <span className="dot"><i style={{ background: n.clr }} /></span>
                   <span className="lb">{n.label}</span>
                   <span className="en">{n.en}</span>
