@@ -120,7 +120,8 @@ export default function DirectPage() {
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-      <header style={{ background: '#fff', borderBottom: `1px solid ${LINE}`, position: 'sticky', top: 0, zIndex: 20, paddingTop: 'env(safe-area-inset-top)' }}>
+      {/* هدر fixed (sticky روی iOS گلیچ می‌کرد و ردیف زیرش می‌رفت) */}
+      <header style={{ background: '#fff', borderBottom: `1px solid ${LINE}`, position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30, paddingTop: 'env(safe-area-inset-top)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '13px clamp(14px,3vw,22px)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <button onClick={() => (active ? setActive(null) : router.back())} aria-label="بازگشت"
             style={{ display: 'flex', background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 8, cursor: 'pointer', color: SEC }}>
@@ -140,7 +141,8 @@ export default function DirectPage() {
         </div>
       </header>
 
-      <main style={{ maxWidth: 760, margin: '0 auto', padding: active ? 0 : '16px clamp(14px,3vw,22px) 80px' }}>
+      {/* padding-top = ارتفاعِ هدرِ fixed تا محتوا زیرش نرود */}
+      <main style={{ maxWidth: 760, margin: '0 auto', paddingTop: 'calc(64px + env(safe-area-inset-top))', paddingInline: active ? 0 : 'clamp(14px,3vw,22px)', paddingBottom: active ? 0 : 80 }}>
         {/* ── لیست گفتگوها ── */}
         {!active && (
           ready && convs.length === 0 ? (
