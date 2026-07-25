@@ -6,6 +6,7 @@ import {
   addNotification, bumpConvIndex, clearConvUnread, touchPoll, getPoll,
   type ConvIndexItem, type DMsg,
 } from '@/lib/social-server'
+import { sendPush } from '@/lib/push-server'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -74,6 +75,10 @@ export async function POST(req: NextRequest) {
       fromKey: from.key, fromName: from.name, fromRole: from.role, text, storyId: b?.storyRef,
     })
   }
+
+  /* Web Push برای گیرنده (وقتی اپ بسته/پس‌زمینه است) — best-effort */
+  const body = kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
+  await sendPush(to.key, { title: from.name || 'پیام جدید', body, url: '/direct', tag: id })
 
   return NextResponse.json({ ok: true, convId: id, message: msg }, { status: 201, headers: CORS })
 }

@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../store/auth.store'
 import { fetchConversations, fetchThread, sendDM, type ConvIndexItem, type DMsg } from '../../lib/social'
 import { subscribeDM } from '../../lib/realtime'
-import { ArrowRight, Inbox, Send, Check, CheckCheck } from 'lucide-react'
+import { enablePush, pushPermission } from '../../lib/push-client'
+import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell } from 'lucide-react'
 
 const GOLD = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -47,6 +48,7 @@ export default function DirectPage() {
   const [headerH, setHeaderH] = useState(84)   // ارتفاعِ واقعیِ هدرِ fixed (پویا)
   const activeRef = useRef<ConvIndexItem | null>(null)   // برای هندلرهای Realtime
   const lastAtRef = useRef(0)                            // آخرین زمانِ پیامِ واقعی (خواندنِ افزایشی)
+  const [pushState, setPushState] = useState<'granted' | 'denied' | 'default' | 'unsupported'>('unsupported')
 
   useEffect(() => {
     const measure = () => { if (headerRef.current) setHeaderH(headerRef.current.offsetHeight) }
@@ -86,6 +88,17 @@ export default function DirectPage() {
 
   const loadConvs = async () => { if (meKey) { setConvs(await fetchConversations(meKey)); setReady(true) } }
   useEffect(() => { if (user) loadConvs() }, [user]) // eslint-disable-line
+
+  /* Web Push: وضعیتِ مجوز؛ اگر قبلاً granted بوده، اشتراک را بی‌صدا تازه کن */
+  useEffect(() => {
+    if (!meKey) return
+    const p = pushPermission(); setPushState(p)
+    if (p === 'granted') enablePush(meKey, true)
+  }, [meKey])
+  const askPush = async () => {
+    const r = await enablePush(meKey)
+    setPushState(r === 'ok' ? 'granted' : r === 'denied' ? 'denied' : pushPermission())
+  }
 
   /* ادغامِ پیام‌ها بدونِ تکرار؛ tmpِ خوش‌بینانه را با نسخه‌ی واقعیِ هم‌متن جایگزین کن */
   const mergeMsgs = (prev: DMsg[], incoming: DMsg[]): DMsg[] => {
@@ -201,6 +214,17 @@ export default function DirectPage() {
 
       {/* padding-top = ارتفاعِ واقعیِ هدرِ fixed تا محتوا زیرش نرود */}
       <main style={{ maxWidth: 760, margin: '0 auto', paddingTop: headerH, paddingInline: active ? 0 : 'clamp(14px,3vw,22px)', paddingBottom: active ? 0 : 80 }}>
+        {/* بنرِ فعال‌سازیِ اعلانِ Web Push (وقتی مجوز هنوز پرسیده نشده) */}
+        {!active && pushState === 'default' && (
+          <button onClick={askPush}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'right', marginBottom: 12, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 12, padding: '11px 14px', cursor: 'pointer', fontFamily: 'inherit', color: GOLD_D }}>
+            <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 9, background: 'rgba(199,166,106,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Bell size={17} /></span>
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800, color: TEXT }}>اعلانِ پیام‌ها را روشن کنید</span>
+              <span style={{ display: 'block', fontSize: 11.5, color: MUT, marginTop: 1 }}>تا وقتی اپ بسته است هم از پیام‌های جدید باخبر شوید</span>
+            </span>
+          </button>
+        )}
         {/* ── لیست گفتگوها ── */}
         {!active && (
           ready && convs.length === 0 ? (
