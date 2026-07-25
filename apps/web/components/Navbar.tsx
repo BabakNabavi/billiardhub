@@ -12,7 +12,6 @@ import {
 import { useRouter, usePathname } from 'next/navigation';
 import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
 import { subscribeDM } from '../lib/realtime';
-import { storyLimitFor } from '../lib/story-store';
 import Stories from './Stories';
 
 const GOLD = '#B8933A';
@@ -77,10 +76,11 @@ export default function Navbar() {
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const dmEligible = user ? storyLimitFor([user.primaryRole, ...(user.secondaryRoles ?? [])]) > 0 : false;
+  /* دایرکت/اعلان برای همه‌ی کاربرانِ لاگین — کاربرِ عادی هم با ریپلایِ استوری گفتگو دارد
+     (قبلاً به نقش‌های استوری‌دار محدود بود و آیکونِ پیام برای بقیه اصلاً دیده نمی‌شد) */
   const notifUnread = notifs.filter(n => !n.read).length;
   useEffect(() => {
-    if (!user || !dmEligible) { setDmUnread(0); setNotifs([]); return; }
+    if (!user) { setDmUnread(0); setNotifs([]); return; }
     const key = user.phone || user.id || (user.firstName ?? 'user');
     const tick = async () => {
       const [convs, ns] = await Promise.all([fetchConversations(key), fetchNotifs(key)]);
@@ -92,7 +92,7 @@ export default function Navbar() {
     const stop = subscribeDM(key, { onMsg: () => tick() });
     const iv = setInterval(tick, 20000);
     return () => { clearInterval(iv); stop(); };
-  }, [user, dmEligible]);
+  }, [user]);
   useEffect(() => {
     const fn = (e: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false); };
     document.addEventListener('mousedown', fn);
@@ -399,8 +399,8 @@ export default function Navbar() {
               <Search size={20} />
             </button>
 
-            {/* Bell — notifications (فقط نقش‌های واجدِ استوری، سمت‌سرور) */}
-            {user && dmEligible && (
+            {/* Bell — notifications (همه‌ی کاربرانِ لاگین، سمت‌سرور) */}
+            {user && (
               <div ref={notifRef} className="desk" style={{ position: 'relative', flexShrink: 0 }}>
                 <button onClick={openNotifs} aria-label="اعلان‌ها"
                   style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: notifOpen ? GOLD_LIGHT : 'none', border: 'none', cursor: 'pointer', borderRadius: '12px', color: notifOpen ? GOLD : TEXT_MUT, transition: 'color 0.2s' }}>
@@ -435,8 +435,8 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* دایرکتِ استوری — فقط برای نقش‌های واجدِ استوری، با بجِ نخوانده */}
-            {user && dmEligible && (
+            {/* دایرکتِ استوری — همه‌ی کاربرانِ لاگین، با بجِ نخوانده */}
+            {user && (
               <Link href="/direct" aria-label="دایرکت"
                 style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '12px', color: TEXT_MUT, flexShrink: 0, transition: 'color 0.2s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}
