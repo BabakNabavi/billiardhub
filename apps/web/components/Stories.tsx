@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Heart, Send } from 'lucide-react';
+import { X, Plus, Heart, Send, Check } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
-import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, type StoredStory } from '../lib/story-store';
+import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
+import { addStoryReply } from '../lib/story-inbox';
 import { listSellerProfiles } from '../lib/seller-store';
 
 interface StoryItem {
@@ -160,7 +161,7 @@ function compressStory(file: File): Promise<string> {
 }
 
 /* ── Story viewer ── */
-function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment }: any) {
+function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
   if (!currentGroup || !currentStory) return null;
@@ -215,7 +216,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
               {si < activeStory ? (
                 <div style={{ width:'100%',height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px' }} />
               ) : si === activeStory ? (
-                <div key={`p-${activeGroup}-${activeStory}`} style={{ height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px',boxShadow:'0 0 6px rgba(255,255,255,0.7)',animation:`storyProgress ${STORY_DURATION}ms linear forwards` }} />
+                <div key={`p-${activeGroup}-${activeStory}`} style={{ height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px',boxShadow:'0 0 6px rgba(255,255,255,0.7)',animation:`storyProgress ${STORY_DURATION}ms linear forwards`,animationPlayState: paused ? 'paused' : 'running' }} />
               ) : null}
             </div>
           ))}
@@ -255,8 +256,15 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         )}
 
         <div style={{ position:'absolute',bottom:0,left:0,right:0,zIndex:30,padding:'14px 16px 26px',background:'linear-gradient(to top,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.2) 70%,transparent 100%)' }}>
+          {replySent && (
+            <div style={{ textAlign:'center',marginBottom:10 }}>
+              <span style={{ display:'inline-flex',alignItems:'center',gap:6,fontSize:12.5,fontWeight:700,color:'#fff',background:'rgba(16,185,129,0.9)',borderRadius:100,padding:'6px 14px' }}>
+                <Check size={13} /> پاسخ برای صاحب استوری ارسال شد
+              </span>
+            </div>
+          )}
           <div style={{ display:'flex',gap:'8px',alignItems:'center' }}>
-            <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onKeyDown={e => e.key==='Enter' && onSendComment()} placeholder="پیام بفرست..." />
+            <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onFocus={onReplyFocus} onBlur={onReplyBlur} onKeyDown={e => e.key==='Enter' && onSendComment()} placeholder="پاسخ به استوری..." />
             <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background:showEmojis?'rgba(199,166,106,0.2)':'rgba(0,0,0,0.06)',borderColor:showEmojis?'rgba(199,166,106,0.4)':'rgba(0,0,0,0.09)',fontSize:'22px' }}>😊</button>
             <button className="story-icon-btn" onClick={onLike} style={{ background:liked?'rgba(239,68,68,0.2)':'rgba(0,0,0,0.06)',borderColor:liked?'rgba(239,68,68,0.5)':'rgba(0,0,0,0.09)' }}>
               <Heart size={17} fill={liked?'#ef4444':'none'} style={{ color:liked?'#ef4444':'rgba(255,255,255,0.7)' }} />
@@ -295,6 +303,13 @@ export default function Stories() {
   // user-posted stories, then local store-profile stories, then live API stories, then sample
   const groups: StoryGroup[] = [...localGroups, ...storeGroups, ...apiGroups, ...sampleGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
+  const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
+  const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
+  const dailyLimit = storyLimitFor(myRoles);   // ۰ = کاربرِ عادی، مجاز نیست
+  const canPost = dailyLimit > 0;
+  const [postErr, setPostErr] = useState('');
+  const [replyFocus, setReplyFocus] = useState(false);
+  const [replySent, setReplySent] = useState(false);
   const reloadLocal = () => {
     setLocalGroups(buildLocalGroups(getStoredStories()));
     setStoreGroups(buildSellerStoreGroups());
@@ -305,6 +320,11 @@ export default function Stories() {
   const onStoryFile = async (file?: File) => { if (file) setStoryImg(await compressStory(file)); };
   const publishStory = () => {
     if (!user || !storyImg) return;
+    if (!canPost) { setPostErr('حساب شما امکان انتشار استوری ندارد'); return; }
+    if (countTodayStories(ownerKey) >= dailyLimit) {
+      setPostErr(`سقف استوریِ امروزِ شما (${dailyLimit.toLocaleString('fa-IR')} عدد) پر شده است`);
+      return;
+    }
     addStoredStory({
       id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,
       ownerKey: user.phone || user.id || (user.firstName ?? 'user'),
@@ -429,15 +449,44 @@ export default function Stories() {
     setSeenGroups(prev => new Set([...prev, groups[index]?.userId ?? '']));
   };
 
+  /* استوری هنگام نوشتنِ ریپلای، تمرکز روی فیلد یا بازبودنِ استیکرها متوقف می‌شود */
+  const storyPaused = showEmojis || replyFocus || comment.trim().length > 0;
   useEffect(() => {
-    if (activeGroup === null) return;
+    if (activeGroup === null || storyPaused) return;
     const timer = setTimeout(() => { nextStory(); }, STORY_DURATION);
     return () => clearTimeout(timer);
-  }, [activeGroup, activeStory]);
+  }, [activeGroup, activeStory, storyPaused]);
+
+  /* ریپلای/استیکر → دایرکتِ صاحبِ استوری */
+  const sendReply = (text: string, kind: 'text' | 'reaction') => {
+    if (activeGroup === null || !text.trim()) return;
+    const g = groups[activeGroup];
+    const st = g?.stories[activeStory];
+    if (!g || !st) return;
+    const owner = g.userId.startsWith('local-') ? g.userId.slice('local-'.length) : g.userId;
+    addStoryReply({
+      ownerKey: owner,
+      storyId: st.id,
+      fromName: user ? (`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر') : 'مهمان',
+      fromRole: user ? roleInfo.label : undefined,
+      kind,
+      text: text.trim(),
+      caption: st.caption || undefined,
+    });
+    setReplySent(true);
+    setTimeout(() => setReplySent(false), 2000);
+  };
 
   const handleReaction = (emoji: string) => {
     setSentReaction(emoji); setShowEmojis(false);
+    sendReply(emoji, 'reaction');
     setTimeout(() => setSentReaction(''), 2500);
+  };
+
+  const handleSendComment = () => {
+    if (!comment.trim()) return;
+    sendReply(comment, 'text');
+    setComment('');
   };
 
   return (
@@ -475,9 +524,9 @@ export default function Stories() {
       `}</style>
 
       <div className="st-strip">
-        {/* Add story button */}
-        {user && (
-          <div className="st-item" onClick={() => setPosting(true)} role="button">
+        {/* Add story button — فقط نقش‌های واجدِ استوری (کاربر عادی نمی‌بیند) */}
+        {user && canPost && (
+          <div className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} role="button">
             <div className="st-ring" style={{ background: 'rgba(199,166,106,0.16)', border: '1.5px dashed rgba(199,166,106,0.45)' }}>
               <div className="st-inner" style={{ background: 'rgba(199,166,106,0.08)', border: 'none' }}>
                 <Plus size={18} style={{ color: '#C7A66A' }} />
@@ -516,10 +565,12 @@ export default function Stories() {
         <StoryViewer
           groups={groups} activeGroup={activeGroup} activeStory={activeStory}
           liked={liked} showEmojis={showEmojis} comment={comment} sentReaction={sentReaction}
-          onClose={closeStory} onNext={nextStory} onPrev={prevStory}
+          paused={storyPaused} replySent={replySent}
+          onClose={() => { closeStory(); setReplyFocus(false); }} onNext={nextStory} onPrev={prevStory}
           onLike={() => { setLiked(p => !p); if (!liked) handleReaction('❤️'); }}
           onReaction={handleReaction} onToggleEmojis={() => setShowEmojis(p => !p)}
-          onComment={setComment} onSendComment={() => setComment('')}
+          onComment={setComment} onSendComment={handleSendComment}
+          onReplyFocus={() => setReplyFocus(true)} onReplyBlur={() => setReplyFocus(false)}
         />
       )}
 
@@ -533,7 +584,20 @@ export default function Stories() {
               <h3 style={{ fontSize:16, fontWeight:800, color:'#111110', margin:0 }}>افزودن استوری</h3>
               <button onClick={() => setPosting(false)} aria-label="بستن" style={{ background:'none', border:'none', cursor:'pointer', color:'#888', display:'flex' }}><X size={18} /></button>
             </div>
-            <div style={{ fontSize:12.5, color:'#777', marginBottom:14 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight:800 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
+            <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight:800 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
+            {/* شمارنده‌ی سقفِ روزانه */}
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'rgba(199,166,106,0.08)', border:'1px solid rgba(199,166,106,0.22)' }}>
+              <span style={{ fontSize:11.5, fontWeight:700, color:'#9A6E38' }}>سقف امروز:</span>
+              <span style={{ fontSize:12, fontWeight:800, color:'#1C1B17' }}>{countTodayStories(ownerKey).toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>
+              <span style={{ marginInlineStart:'auto', display:'flex', gap:4 }}>
+                {Array.from({ length: dailyLimit }).map((_, i) => (
+                  <span key={i} style={{ width:8, height:8, borderRadius:'50%', background: i < countTodayStories(ownerKey) ? '#C7A66A' : 'rgba(199,166,106,0.25)' }} />
+                ))}
+              </span>
+            </div>
+            {postErr && (
+              <div style={{ fontSize:12, fontWeight:700, color:'#B23B2E', background:'rgba(178,59,46,0.07)', border:'1px solid rgba(178,59,46,0.25)', borderRadius:10, padding:'9px 12px', marginBottom:14 }}>{postErr}</div>
+            )}
             {storyImg ? (
               <div style={{ position:'relative', borderRadius:14, overflow:'hidden', marginBottom:14, maxHeight:340, background:'#000', display:'flex', justifyContent:'center' }}>
                 <img src={storyImg} alt="" style={{ maxWidth:'100%', maxHeight:340, objectFit:'contain' }} />

@@ -7,9 +7,11 @@ import {
   Search, Bell, ChevronDown, User, X, Trophy,
   Users, BookOpen, ShoppingBag, Building2, Radio, Star, Wrench,
   Newspaper, Calendar, Menu, ArrowLeft, LogOut, Settings,
-  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard,
+  Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard, Send,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import { unreadReplies } from '../lib/story-inbox';
+import { storyLimitFor } from '../lib/story-store';
 import Stories from './Stories';
 
 const GOLD = '#B8933A';
@@ -69,6 +71,19 @@ const mobileLinks = [
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
+  /* بجِ نخوانده‌ی دایرکتِ استوری — فقط برای نقش‌های واجدِ استوری */
+  const [dmUnread, setDmUnread] = useState(0);
+  const dmEligible = user ? storyLimitFor([user.primaryRole, ...(user.secondaryRoles ?? [])]) > 0 : false;
+  useEffect(() => {
+    if (!user) { setDmUnread(0); return; }
+    const key = user.phone || user.id || (user.firstName ?? 'user');
+    const tick = () => setDmUnread(unreadReplies(key));
+    tick();
+    const iv = setInterval(tick, 8000);
+    const onStorage = (e: StorageEvent) => { if (e.key === 'bh_story_inbox') tick(); };
+    window.addEventListener('storage', onStorage);
+    return () => { clearInterval(iv); window.removeEventListener('storage', onStorage); };
+  }, [user]);
   const router = useRouter();
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -365,6 +380,21 @@ export default function Navbar() {
               <Bell size={22} />
               <span style={{ position: 'absolute', top: '9px', right: '9px', width: '6px', height: '6px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 6px #ef4444' }} />
             </button>
+
+            {/* دایرکتِ استوری — فقط برای نقش‌های واجدِ استوری، با بجِ نخوانده */}
+            {user && dmEligible && (
+              <Link href="/direct" aria-label="دایرکت"
+                style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '12px', color: TEXT_MUT, flexShrink: 0, transition: 'color 0.2s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
+                <Send size={20} />
+                {dmUnread > 0 && (
+                  <span style={{ position: 'absolute', top: '5px', right: '5px', minWidth: '16px', height: '16px', padding: '0 4px', background: '#ef4444', color: '#fff', fontSize: '9.5px', fontWeight: 800, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 8px rgba(239,68,68,0.6)', border: '1.5px solid #fff' }}>
+                    {dmUnread > 9 ? '۹+' : dmUnread.toLocaleString('fa-IR')}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {!user ? (
               <Link href="/login">
