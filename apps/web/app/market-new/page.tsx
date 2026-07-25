@@ -21,7 +21,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  Search, MapPin, X, ChevronDown,
+  Search, MapPin, X, Check, ChevronDown,
   Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
 } from 'lucide-react'
 import { SHOP_PRODUCTS } from '../shop/products'
@@ -50,11 +50,12 @@ const CATS_M = [
   { id: 'tip',       label: 'تیپ',      img: '/images/icon/tip/tip-icon-256.png' },
   { id: 'chalk',     label: 'گچ',       img: '/images/icon/chalk/chalk-icon-256.png' },
   { id: 'extension', label: 'اکستنشن',  img: '/images/icon/ex/shaft-icon-256.png' },
-  { id: 'cue-case',  label: 'کیس',      img: '/images/icon/case/case-icon-256.png' },
+  { id: 'cue-case',  label: 'کیس چوب',  img: '/images/icon/case/case-icon-256.png' },
   { id: 'ball-bag',  label: 'کیف توپ',  img: '/images/icon/kif/ballcase-icon-256.png' },
   { id: 'rest',      label: 'رست',      img: '/images/icon/rest/rest.png' },
   { id: 'cloth',     label: 'پارچه',    img: '/images/icon/parche/parche.png' },
-  { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil.png' },
+  /* تصویرِ روغن در فایلش چپ‌نشین است — کمی به راست هل داده می‌شود */
+  { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil.png', imgStyle: { transform: 'translateX(9%)' } as React.CSSProperties },
   { id: 'towel',     label: 'حوله',     img: '/images/icon/hole/hole.png' },
   { id: 'clothing',  label: 'پوشاک',    img: '/images/icon/pooshak/pooshak.png' },
   { id: 'accessory', label: 'اکسسوری',  img: '/images/icon/accessori/accessori.png' },
@@ -189,8 +190,10 @@ function Section({ title, children, defaultOpen = true }: { title: string; child
   )
 }
 
-/* ── انتخاب شهر — جستجو روی داده‌ی iran-geo ── */
-function CityPicker({ value, onPick }: { value: string; onPick: (c: string) => void }) {
+/* ── انتخاب شهر — چندشهره، جستجو روی داده‌ی iran-geo ── */
+function CityPicker({ value, onToggle, onClear }: {
+  value: string[]; onToggle: (c: string) => void; onClear: () => void
+}) {
   const [q, setQ] = useState('')
   const all = useMemo(() => getProvinceNames().flatMap(p => getCities(p)), [])
   const matches = useMemo(() => {
@@ -200,40 +203,43 @@ function CityPicker({ value, onPick }: { value: string; onPick: (c: string) => v
   }, [q, all])
   return (
     <div>
-      {value ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 10, padding: '8px 12px' }}>
-          <MapPin size={13} style={{ color: GOLD_D }} />
-          <span style={{ fontSize: 13, fontWeight: 800, color: GOLD_D, flex: 1 }}>{value}</span>
-          <button type="button" onClick={() => onPick('')}
-            style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: MUT, padding: 2 }}>
-            <X size={13} />
-          </button>
-        </div>
-      ) : (
-        <div>
-          {/* ذره‌بین فقط نسبت به اینپوت وسط‌چین می‌شود، نه کلِ لیست */}
-          <div style={{ position: 'relative' }}>
-            <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجوی شهر…"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 30px 9px 10px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 12.5, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
-          </div>
-          <div style={{ marginTop: 6, border: `1px solid ${LINE}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
-            {/* گزینه‌ی اول: کل ایران (بدون فیلتر شهر) */}
-            <button type="button" onClick={() => { onPick(''); setQ('') }}
-              className="mk-cityopt"
-              style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: GOLD_D, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <MapPin size={12} /> کل ایران
-            </button>
-            {matches.map(c => (
-              <button key={c} type="button" onClick={() => { onPick(c); setQ('') }}
-                className="mk-cityopt"
-                style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, color: SEC }}>
-                {c}
+      {/* شهرهای انتخاب‌شده — با امکان حذفِ تکی */}
+      {value.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          {value.map(c => (
+            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 999, padding: '4px 10px' }}>
+              {c}
+              <button type="button" onClick={() => onToggle(c)}
+                style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
+                <X size={11} />
               </button>
-            ))}
-          </div>
+            </span>
+          ))}
         </div>
       )}
+      {/* ذره‌بین فقط نسبت به اینپوت وسط‌چین می‌شود، نه کلِ لیست */}
+      <div style={{ position: 'relative' }}>
+        <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
+        <input value={q} onChange={e => setQ(e.target.value)}
+          placeholder={value.length ? 'افزودن شهر دیگر…' : 'جستجوی شهر…'}
+          style={{ width: '100%', boxSizing: 'border-box', padding: '9px 30px 9px 10px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 12.5, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+      </div>
+      <div style={{ marginTop: 6, border: `1px solid ${LINE}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
+        {/* گزینه‌ی اول: کل ایران (حذف همه‌ی شهرها) */}
+        <button type="button" onClick={() => { onClear(); setQ('') }}
+          className="mk-cityopt"
+          style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: GOLD_D, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <MapPin size={12} /> کل ایران
+        </button>
+        {matches.map(c => (
+          <button key={c} type="button" onClick={() => { onToggle(c); setQ('') }}
+            className="mk-cityopt"
+            style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: value.includes(c) ? 800 : 600, color: value.includes(c) ? GOLD_D : SEC, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {c}
+            {value.includes(c) && <Check size={13} style={{ color: GOLD_D }} />}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -259,7 +265,7 @@ export default function MarketNewPage() {
 
   /* فیلترها */
   const [cat, setCat]       = useState('')
-  const [city, setCity]     = useState('')
+  const [cities, setCities] = useState<string[]>([])
   const [minP, setMinP]     = useState('')
   const [maxP, setMaxP]     = useState('')
   const [cond, setCond]     = useState<'' | Cond>('')
@@ -289,6 +295,13 @@ export default function MarketNewPage() {
     document.addEventListener('mousedown', fn)
     return () => document.removeEventListener('mousedown', fn)
   }, [])
+  const toggleCity = (c: string) =>
+    setCities(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
+  /* برچسبِ دکمه‌ی لوکیشن: کل ایران / تهران / تهران +۲ */
+  const cityBtnLabel = cities.length === 0 ? 'کل ایران'
+    : cities.length === 1 ? cities[0]
+    : `${cities[0]} +${toFa(cities.length - 1)}`
+
   const toggleSave = (key: string) => {
     setSavedKeys(prev => {
       const next = new Set(prev)
@@ -309,7 +322,7 @@ export default function MarketNewPage() {
     const term = q.trim()
     let out = listings.filter(l => {
       if (cat && l.cat !== cat) return false
-      if (city && l.city !== city) return false
+      if (cities.length > 0 && !cities.includes(l.city)) return false
       if (lo != null && l.price < lo) return false
       if (hi != null && l.price > hi) return false
       if (cond && l.condition !== cond) return false
@@ -328,17 +341,17 @@ export default function MarketNewPage() {
     if (sort === 'expens') out = [...out].sort((a, b) => b.price - a.price)
     if (sort === 'newest') out = [...out].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     return out
-  }, [listings, cat, city, minP, maxP, cond, onlyDisc, time, q, sort, showSaved, savedKeys])
+  }, [listings, cat, cities, minP, maxP, cond, onlyDisc, time, q, sort, showSaved, savedKeys])
 
   const chips: { label: string; clear: () => void }[] = []
   if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
-  if (city)     chips.push({ label: city, clear: () => setCity('') })
+  cities.forEach(c => chips.push({ label: c, clear: () => toggleCity(c) }))
   if (cond)     chips.push({ label: COND_LABEL[cond], clear: () => setCond('') })
   if (onlyDisc) chips.push({ label: 'تخفیف‌دار', clear: () => setOnlyDisc(false) })
   if (time !== 'all') chips.push({ label: TIME_OPTS.find(t => t.id === time)!.label, clear: () => setTime('all') })
   if (parsePrice(minP) != null || parsePrice(maxP) != null)
     chips.push({ label: 'محدوده‌ی قیمت', clear: () => { setMinP(''); setMaxP('') } })
-  const clearAll = () => { setCat(''); setCity(''); setMinP(''); setMaxP(''); setCond(''); setOnlyDisc(false); setTime('all'); setQ('') }
+  const clearAll = () => { setCat(''); setCities([]); setMinP(''); setMaxP(''); setCond(''); setOnlyDisc(false); setTime('all'); setQ('') }
 
   /* بدنه‌ی فیلترها — مشترک بین سایدبار دسکتاپ و کشوی موبایل */
   const FilterBody = (
@@ -356,7 +369,7 @@ export default function MarketNewPage() {
           {CATS_M.map(c => (
             <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
               className={`mk-catrow${cat === c.id ? ' on' : ''}`}>
-              <span className="ic"><img src={c.img} alt="" /></span>
+              <span className="ic"><img src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
               <span className="lb">{c.label}</span>
               <span className="ct">{toFa(counts[c.id] ?? 0)}</span>
             </button>
@@ -365,7 +378,7 @@ export default function MarketNewPage() {
       </Section>
 
       <Section title="شهر">
-        <CityPicker value={city} onPick={setCity} />
+        <CityPicker value={cities} onToggle={toggleCity} onClear={() => setCities([])} />
       </Section>
 
       <Section title="قیمت (تومان)">
@@ -485,7 +498,7 @@ export default function MarketNewPage() {
           border-bottom: 1px solid ${LINE}; }
 
         /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
-        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; padding: 16px 4px 6px; }
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; padding: 6px 4px 4px; }
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
         .mk-mcat .ic { width: 52px; height: 52px; border-radius: 16px; background: #fff; border: 1px solid ${LINE};
@@ -537,7 +550,8 @@ export default function MarketNewPage() {
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
         .mk-sidebar { position: sticky; top: calc(76px + env(safe-area-inset-top)); background: #fff; border: 1px solid ${LINE};
           border-radius: 16px; padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: thin; }
-        .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 16px; }
+        /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
+        .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
         .mk-mobilebar { display: none; }
         .mk-drawer { display: none; }
         @media (max-width: 900px) {
@@ -579,14 +593,14 @@ export default function MarketNewPage() {
           {/* شهر */}
           <div ref={cityRef} style={{ position: 'relative', flexShrink: 0 }}>
             <button type="button" onClick={() => setCityOpen(p => !p)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: city ? GOLD_D : SEC }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: cities.length ? GOLD_D : SEC }}>
               <MapPin size={14} style={{ color: GOLD_D }} />
-              {city || 'کل ایران'}
+              {cityBtnLabel}
               <ChevronDown size={12} style={{ color: MUT, transform: cityOpen ? 'rotate(180deg)' : 'none', transition: 'transform .3s' }} />
             </button>
             {cityOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 60, width: 250, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
-                <CityPicker value={city} onPick={c => { setCity(c); setCityOpen(false) }} />
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 60, width: 260, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
+                <CityPicker value={cities} onToggle={toggleCity} onClear={() => setCities([])} />
               </div>
             )}
           </div>
@@ -638,13 +652,13 @@ export default function MarketNewPage() {
           </div>
           {/* لوکیشن — سمت چپ باکس */}
           <button type="button" onClick={() => setCityOpen(p => !p)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: city ? GOLD_D : SEC, flexShrink: 0 }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: cities.length ? GOLD_D : SEC, flexShrink: 0 }}>
             <MapPin size={13} style={{ color: GOLD_D }} />
-            {city || 'کل ایران'}
+            {cityBtnLabel}
           </button>
           {cityOpen && (
             <div className="mk-mcitypop" style={{ position: 'absolute', top: 'calc(100% + 8px)', insetInline: 0, zIndex: 60, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.16)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
-              <CityPicker value={city} onPick={c => { setCity(c); setCityOpen(false) }} />
+              <CityPicker value={cities} onToggle={toggleCity} onClear={() => setCities([])} />
             </div>
           )}
         </div>
@@ -658,7 +672,7 @@ export default function MarketNewPage() {
           {CATS_M.map(c => (
             <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
               className={`mk-mcat${cat === c.id ? ' on' : ''}`}>
-              <span className="ic"><img src={c.img} alt="" /></span>
+              <span className="ic"><img src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
               <span className="lb">{c.label}</span>
             </button>
           ))}
@@ -673,7 +687,8 @@ export default function MarketNewPage() {
             {/* نوار وضعیت: تعداد + مرتب‌سازی + چیپ‌ها */}
             <div className="mk-statusbar" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
               <span className="mk-stitle" style={{ fontSize: 13, fontWeight: 800 }}>
-                {cat ? catLabel(cat) : 'همه‌ی آگهی‌ها'}{city ? ` در ${city}` : ''}
+                {cat ? catLabel(cat) : 'همه‌ی آگهی‌ها'}
+                {cities.length === 1 ? ` در ${cities[0]}` : cities.length > 1 ? ` در ${toFa(cities.length)} شهر` : ''}
               </span>
               <span style={{ fontSize: 11.5, color: MUT }}>{toFa(filtered.length)} آگهی</span>
               <span className="mk-hr" style={{ flex: 1 }} />
