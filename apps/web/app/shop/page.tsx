@@ -502,6 +502,14 @@ export default function MarketNewPage() {
           border-radius: 999px; padding: 5px 11px; }
         .mk-chip button { display: flex; background: none; border: none; cursor: pointer; color: inherit; padding: 0; }
 
+        /* دکمه‌ی LQ گرد — تینت طلایی، بوردر، هاور لیفت */
+        .mk-lqbtn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 22px;
+          border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 800;
+          color: ${GOLD_D}; background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34);
+          flex-shrink: 0; transition: transform .25s cubic-bezier(.22,1,.36,1), background .25s, box-shadow .25s; }
+        .mk-lqbtn:hover { transform: translateY(-1px); background: rgba(199,166,106,0.2);
+          box-shadow: 0 8px 20px rgba(199,166,106,0.25); }
+
         /* ── تاپ‌بار دسکتاپ / سرچ موبایل ── */
         .mk-topbar { position: sticky; top: 0; z-index: 150; padding-top: env(safe-area-inset-top);
           background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
@@ -657,10 +665,8 @@ export default function MarketNewPage() {
             {savedKeys.size > 0 && <span style={{ fontSize: 10, color: MUT }}>{toFa(savedKeys.size)}</span>}
           </button>
 
-          {/* ثبت آگهی */}
-          <Link href="/shop/new"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 13, fontWeight: 800, color: '#241B08', flexShrink: 0,
-              background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, boxShadow: '0 6px 18px rgba(199,166,106,0.28)' }}>
+          {/* ثبت آگهی — طرح LQ، کاملاً گرد با بوردر */}
+          <Link href="/shop/new" className="mk-lqbtn">
             <Plus size={15} /> ثبت آگهی
           </Link>
         </div>
@@ -796,7 +802,8 @@ export default function MarketNewPage() {
           <span className="lb">نشان‌ها</span>
         </button>
         <Link href="/shop/new" className="mk-bnav">
-          <span style={{ width: 21, height: 21, borderRadius: 8, background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#241B08' }}>
+          {/* گرد + بوردر، طرح LQ */}
+          <span style={{ width: 23, height: 23, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, boxSizing: 'border-box' }}>
             <Plus size={14} />
           </span>
           <span className="lb">ثبت آگهی</span>
