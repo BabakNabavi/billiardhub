@@ -41,6 +41,17 @@ export const P = {
   conv:    (id: string) => `social/dm/${id}.json`,
   dmIndex: (user: string) => `social/dm-idx/${safeKey(user)}.json`,
   notif:   (user: string) => `social/notif/${safeKey(user)}.json`,
+  poll:    (user: string) => `social/dm-poll/${safeKey(user)}.json`,
+}
+
+/* «آخرین فعالیتِ» هر کاربر — برای تیکِ «رسیده» (وقتی طرفِ مقابل لیست/ترد را گرفت). */
+export async function touchPoll(user: string) {
+  if (!user) return
+  await writeJson(P.poll(user), Date.now())
+}
+export async function getPoll(user: string): Promise<number> {
+  if (!user) return 0
+  return await readJson<number>(P.poll(user), 0)
 }
 
 /* ── نوتیفیکیشن ── */

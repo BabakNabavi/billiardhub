@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../store/auth.store'
 import { fetchConversations, fetchThread, sendDM, type ConvIndexItem, type DMsg } from '../../lib/social'
-import { ArrowRight, Inbox, Send } from 'lucide-react'
+import { ArrowRight, Inbox, Send, Check, CheckCheck } from 'lucide-react'
 
 const GOLD = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -34,10 +34,26 @@ export default function DirectPage() {
   const [convs, setConvs] = useState<ConvIndexItem[]>([])
   const [active, setActive] = useState<ConvIndexItem | null>(null)
   const [msgs, setMsgs] = useState<DMsg[]>([])
+  const [otherPoll, setOtherPoll] = useState(0)
+  const [otherKey, setOtherKey] = useState('')
   const [draft, setDraft] = useState('')
   const [ready, setReady] = useState(false)
   const [sending, setSending] = useState(false)
+  const [kb, setKb] = useState(0)   // ارتفاعِ همپوشانیِ کیبورد
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  /* نوارِ پاسخ باید بالای کیبوردِ موبایل بماند (VisualViewport) */
+  useEffect(() => {
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null
+    if (!vv) return
+    const onResize = () => {
+      const overlap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
+      setKb(overlap)
+      if (overlap > 0) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight }), 60)
+    }
+    vv.addEventListener('resize', onResize); vv.addEventListener('scroll', onResize)
+    return () => { vv.removeEventListener('resize', onResize); vv.removeEventListener('scroll', onResize) }
+  }, [])
 
   const meKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : ''
   const meName = user ? (`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر') : ''
@@ -54,9 +70,15 @@ export default function DirectPage() {
   }, [user, active]) // eslint-disable-line
 
   const refreshThread = async (c: ConvIndexItem) => {
-    const m = await fetchThread(c.convId, meKey)
-    setMsgs(m)
+    const t = await fetchThread(c.convId, meKey)
+    setMsgs(t.messages); setOtherPoll(t.otherPoll || 0); setOtherKey(t.otherKey || c.otherKey)
     setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 60)
+  }
+  /* وضعیتِ تیک برای پیام‌های خودم: sent / delivered / read */
+  const msgStatus = (m: DMsg): 'sent' | 'delivered' | 'read' => {
+    if (otherKey && m.readBy?.includes(otherKey)) return 'read'
+    if (otherPoll >= m.at) return 'delivered'
+    return 'sent'
   }
   const openConv = async (c: ConvIndexItem) => {
     setActive(c)
@@ -165,15 +187,25 @@ export default function DirectPage() {
                       <div style={{ fontSize: m.kind === 'reaction' ? 22 : 13.5, lineHeight: 1.9, color: TEXT, wordBreak: 'break-word' }}>
                         {m.kind === 'like' ? '❤️' : m.text}
                       </div>
-                      <div style={{ fontSize: 9.5, color: MUT, marginTop: 3, textAlign: 'left' }}>{timeAgo(m.at)}</div>
+                      <div style={{ fontSize: 9.5, color: MUT, marginTop: 3, textAlign: 'left', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-start', flexDirection: 'row-reverse' }}>
+                        <span>{timeAgo(m.at)}</span>
+                        {mine && (() => {
+                          const st = msgStatus(m)
+                          return st === 'read'
+                            ? <CheckCheck size={13} style={{ color: '#3B82F6' }} />
+                            : st === 'delivered'
+                              ? <CheckCheck size={13} style={{ color: MUT }} />
+                              : <Check size={13} style={{ color: MUT }} />
+                        })()}
+                      </div>
                     </div>
                   </div>
                 )
               })}
             </div>
-            {/* نوارِ پاسخ — فیکس به کفِ ویوپورت (موبایل و دسکتاپ) */}
-            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-              <div style={{ maxWidth: 760, margin: '0 auto', padding: '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* نوارِ پاسخ — فیکس به کفِ ویوپورت و بالای کیبورد (bottom = ارتفاعِ کیبورد) */}
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: kb, zIndex: 40, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', transition: 'bottom .12s ease' }}>
+              <div style={{ maxWidth: 760, margin: '0 auto', padding: kb > 0 ? '10px clamp(14px,3vw,22px)' : '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
                   placeholder="پیام خود را بنویسید…"
                   style={{ flex: 1, minWidth: 0, padding: '11px 15px', borderRadius: 100, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 14, fontFamily: 'inherit', outline: 'none', color: TEXT }} />

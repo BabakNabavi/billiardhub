@@ -2,23 +2,37 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   CORS, P, readJson, writeJson, convId, addNotification, bumpConvIndex, clearConvUnread,
-  type ConvIndexItem,
+  touchPoll, getPoll, type ConvIndexItem,
 } from '@/lib/social-server'
 
-interface DMsg { id: string; fromKey: string; text: string; kind: string; storyRef?: string; at: number }
+interface DMsg { id: string; fromKey: string; text: string; kind: string; storyRef?: string; at: number; readBy?: string[] }
 interface Conv { id: string; parts: string[]; messages: DMsg[] }
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* GET ?user=KEY            → لیست گفتگوهای کاربر
-   GET ?conv=ID&user=KEY    → پیام‌های یک گفتگو (و علامت‌گذاریِ خوانده‌شده) */
+/* GET ?user=KEY            → لیست گفتگوها (و ثبتِ فعالیتِ کاربر برای تیکِ «رسیده»)
+   GET ?conv=ID&user=KEY    → { messages, otherKey, otherPoll } + علامت‌گذاریِ دیده‌شده */
 export async function GET(req: NextRequest) {
   const cid = req.nextUrl.searchParams.get('conv')
   const user = req.nextUrl.searchParams.get('user') || ''
+  if (user) await touchPoll(user)   // این کاربر آنلاین است ⇒ پیام‌های او «رسیده»
+
   if (cid) {
     const conv = await readJson<Conv | null>(P.conv(cid), null)
-    if (user) await clearConvUnread(user, cid)
-    return NextResponse.json(conv?.messages ?? [], { headers: CORS })
+    let changed = false
+    if (conv && user) {
+      for (const m of conv.messages) {
+        if (m.fromKey !== user) {
+          m.readBy = m.readBy || []
+          if (!m.readBy.includes(user)) { m.readBy.push(user); changed = true }
+        }
+      }
+      if (changed) await writeJson(P.conv(cid), conv)
+      await clearConvUnread(user, cid)
+    }
+    const otherKey = conv ? conv.parts.find(p => p !== user) || '' : ''
+    const otherPoll = otherKey ? await getPoll(otherKey) : 0
+    return NextResponse.json({ messages: conv?.messages ?? [], otherKey, otherPoll }, { headers: CORS })
   }
   const list = await readJson<ConvIndexItem[]>(P.dmIndex(user), [])
   return NextResponse.json(list, { headers: CORS })
