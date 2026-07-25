@@ -436,8 +436,10 @@ export default function MarketNewPage() {
           77%       { transform: translateY(130%);   opacity: 0; }
           86%, 100% { transform: translateY(0);      opacity: 1; }
         }
-        .mk-rollwrap { display: inline-flex; overflow: hidden; height: 1.4em; align-items: center; vertical-align: -0.35em; }
-        .mk-roll { display: inline-block; color: ${GOLD_D}; font-weight: 800;
+        /* اورلی پلیس‌هولدر فلکس است ⇒ متن و کلمه‌ی رول‌شونده دقیقاً هم‌مرکز */
+        .mk-ph { display: flex; align-items: center; gap: 4px; }
+        .mk-rollwrap { display: inline-flex; overflow: hidden; height: 1.5em; align-items: center; }
+        .mk-roll { display: inline-block; line-height: 1.5; color: ${GOLD_D}; font-weight: 800;
           animation: mkWord 3.8s cubic-bezier(.22,1,.36,1) infinite; }
         @media (prefers-reduced-motion: reduce) { .mk-roll { animation: none; } }
 
@@ -560,10 +562,12 @@ export default function MarketNewPage() {
 
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
-        /* translateZ(0) ⇒ لایه‌ی مستقل برای عنصرِ sticky — لرزشِ ریزِ هنگامِ اسکرولِ سمتِ محصولات رفع می‌شود */
-        .mk-sidebar { position: sticky; top: calc(76px + env(safe-area-inset-top)); background: #fff; border: 1px solid ${LINE};
-          border-radius: 16px; padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto;
-          scrollbar-width: thin; scrollbar-gutter: stable; transform: translateZ(0); overscroll-behavior: contain; }
+        /* عنصرِ sticky از عنصرِ اسکرول‌شونده جدا شده — منشأ لرزشِ ریز، ترکیبِ sticky+overflow روی یک عنصر بود */
+        .mk-sidebar { position: sticky; top: 76px; will-change: transform; transform: translateZ(0);
+          backface-visibility: hidden; }
+        .mk-sidebar-inner { background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
+          padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto;
+          scrollbar-width: thin; overscroll-behavior: contain; }
         /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
         .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
         .mk-mobilebar { display: none; }
@@ -625,7 +629,7 @@ export default function MarketNewPage() {
             <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
               style={{ width: '100%', boxSizing: 'border-box', padding: '10px 36px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
             {!q && (
-              <span aria-hidden style={{ position: 'absolute', right: 36, top: '50%', transform: 'translateY(-50%)', fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 36, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
                 جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
               </span>
             )}
@@ -659,7 +663,7 @@ export default function MarketNewPage() {
             <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
               style={{ width: '100%', boxSizing: 'border-box', padding: '12px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
             {!q && (
-              <span aria-hidden style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
                 جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
               </span>
             )}
@@ -694,7 +698,7 @@ export default function MarketNewPage() {
 
         <div className="mk-layout">
           {/* ── سایدبار دسکتاپ ── */}
-          <aside className="mk-sidebar">{FilterBody}</aside>
+          <aside className="mk-sidebar"><div className="mk-sidebar-inner">{FilterBody}</div></aside>
 
           {/* ── محتوای اصلی ── */}
           <section ref={gridRef}>
