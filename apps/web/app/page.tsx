@@ -368,7 +368,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '9px 7px 16px',
+            padding: '17px 7px 16px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '9px',
           }}>
@@ -1507,10 +1507,11 @@ useEffect(() => {
           </h1>
 
           {/* Subtitle — نقطه‌ی اتصال؛ عمداً کم‌وزن‌تر از تیتر */}
+          {/* letter-spacing حذف شد: روی متنِ فارسی اتصالِ حروفِ چسبان (مثل «اتصال») را باز می‌کرد */}
           <p className="hc hero-subtitle" style={{
             fontSize: 'clamp(14px, 1.9vw, 21px)', fontWeight: 500,
             margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
-            color: 'rgba(255,255,255,0.66)', letterSpacing: '0.01em',
+            color: 'rgba(255,255,255,0.66)', letterSpacing: 'normal',
             textShadow: '0 1px 16px rgba(0,0,0,0.45)',
           }}>
             اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}

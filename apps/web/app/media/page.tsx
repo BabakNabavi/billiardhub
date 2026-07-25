@@ -312,7 +312,7 @@ export default function MediaPage() {
             </h1>
             <div style={{ width: 62, height: 3, borderRadius: 2, marginTop: 10, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'mxScaleX .5s .25s ease both' }} />
           </div>
-          <p style={{ margin: 0, fontSize: 12.5, color: MUT }}>سالنِ نمایشِ دنیای بیلیارد — آموزش، هایلایت، مصاحبه</p>
+          <p style={{ margin: 0, fontSize: 12.5, color: MUT }}>سالن نمایش دنیای بیلیارد — آموزش، هایلایت، مصاحبه</p>
         </div>
       </header>
 
