@@ -34,6 +34,12 @@ export async function postStory(s: Partial<SStory>): Promise<{ ok: boolean; stat
   } catch { return { ok: false, status: 0, message: 'offline' } }
 }
 
+/* ── دیده‌شدنِ استوری (per-viewer، ماندگار روی سرور) ── */
+export const fetchSeen = (user: string) =>
+  j<string[]>(fetch(`/api/social/seen?user=${encodeURIComponent(user)}`, { cache: 'no-store' }), [])
+export const markSeen = (user: string, ids: string[]) =>
+  j(fetch('/api/social/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user, ids }) }), { ok: false })
+
 /* ── دایرکت ── */
 export const fetchConversations = (user: string) =>
   j<ConvIndexItem[]>(fetch(`/api/social/dm?user=${encodeURIComponent(user)}`, { cache: 'no-store' }), [])

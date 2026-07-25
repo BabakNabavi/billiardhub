@@ -8,7 +8,7 @@ import api from '../lib/api';
 import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
 import { addStoryReply } from '../lib/story-inbox';
 import { uploadFile } from '../lib/supabase';
-import { fetchStories, postStory, sendDM, type SStory } from '../lib/social';
+import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
 import { listSellerProfiles } from '../lib/seller-store';
 
 interface StoryItem {
@@ -189,6 +189,26 @@ function compressStory(file: File): Promise<string> {
 function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, canReply, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
+
+  /* اندازه‌ی ناحیه‌ی دیدنی (بالای کیبورد) + قفلِ اسکرولِ بدنه ⇒ استوری مثل
+     اینستاگرام دقیقاً بالای کیبورد جمع می‌شود و سایتِ زیر بیرون نمی‌زند */
+  const [vp, setVp] = useState<{ h: number; top: number }>({ h: typeof window !== 'undefined' ? window.innerHeight : 800, top: 0 });
+  useEffect(() => {
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+    const apply = () => { if (vv) setVp({ h: vv.height, top: vv.offsetTop }); else setVp({ h: window.innerHeight, top: 0 }); };
+    apply();
+    if (vv) { vv.addEventListener('resize', apply); vv.addEventListener('scroll', apply); }
+    const sy = window.scrollY;
+    document.body.style.position = 'fixed'; document.body.style.top = `-${sy}px`;
+    document.body.style.left = '0'; document.body.style.right = '0'; document.body.style.width = '100%';
+    return () => {
+      if (vv) { vv.removeEventListener('resize', apply); vv.removeEventListener('scroll', apply); }
+      document.body.style.position = ''; document.body.style.top = '';
+      document.body.style.left = ''; document.body.style.right = ''; document.body.style.width = '';
+      window.scrollTo(0, sy);
+    };
+  }, []);
+
   if (!currentGroup || !currentStory) return null;
 
   const hasMedia = !!currentStory.mediaUrl;
@@ -219,9 +239,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         .story-stk button { background:none;border:none;cursor:pointer;font-size:28px;line-height:1;padding:2px;transition:transform .18s cubic-bezier(.22,1,.36,1); }
         .story-stk button:hover { transform:scale(1.35) translateY(-2px); }
       `}</style>
-      <div style={{ position:'fixed',inset:0,zIndex:99998,background:'rgba(0,0,0,0.94)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease' }} onClick={onClose} />
-      {/* رَپِر تمام‌صفحه: استوری بالا، ناحیه‌ی پاسخ بیرونِ استوری پایین */}
-      <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,display:'flex',flexDirection:'column',alignItems:'center',padding:'calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 12px)' }}>
+      {/* رَپِرِ واحد، دقیقاً هم‌اندازه‌ی ناحیه‌ی دیدنی (بالای کیبورد) — مثل اینستاگرام:
+          استوری بالا جمع می‌شود، نوارِ پاسخ درست بالای کیبورد می‌ماند، هیچ‌چیزِ سایت بیرون نمی‌زند */}
+      <div onClick={onClose} style={{ position:'fixed',top:vp.top,left:0,right:0,height:vp.h,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease',display:'flex',flexDirection:'column',alignItems:'center',padding:'calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 12px)' }}>
 
         {/* ── کارتِ استوری ── */}
         <div onClick={e => e.stopPropagation()} style={{ position:'relative',width:'min(440px,96vw)',flex:'1 1 auto',minHeight:0,maxHeight:'100%',borderRadius:'16px',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:`0 30px 80px rgba(0,0,0,0.6),0 0 60px ${currentGroup.roleColor}22` }}>
@@ -331,6 +351,7 @@ export default function Stories() {
   const [serverGroups, setServerGroups] = useState<StoryGroup[]>([]);
   const [storeGroups, setStoreGroups] = useState<StoryGroup[]>([]);
   const [seenGroups, setSeenGroups] = useState<Set<string>>(new Set());
+  const [seenIds, setSeenIds] = useState<Set<string>>(new Set());   // storyId‌هایِ دیده‌شده (سروری، per-viewer)
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
   const [activeStory, setActiveStory] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -369,6 +390,21 @@ export default function Stories() {
     const iv = setInterval(reloadServer, 25000);
     return () => clearInterval(iv);
   }, []);
+
+  /* «دیده‌شدنِ» ماندگار را از سرور بخوان (وقتی کاربر لاگین شد/کلید آماده شد) */
+  useEffect(() => {
+    if (!ownerKey) return;
+    fetchSeen(ownerKey).then(ids => { if (Array.isArray(ids) && ids.length) setSeenIds(new Set(ids)); });
+  }, [ownerKey]);
+
+  /* یک گروه را دیده‌شده علامت بزن: هم لوکال (فوری) هم سرور (ماندگار) */
+  const markGroupSeen = (g?: StoryGroup) => {
+    if (!g) return;
+    const ids = g.stories.map(s => s.id).filter(Boolean);
+    if (!ids.length) return;
+    setSeenIds(prev => { const n = new Set(prev); ids.forEach(i => n.add(i)); return n; });
+    if (ownerKey) markSeen(ownerKey, ids);
+  };
 
   const onStoryFile = async (file?: File) => { if (file) setStoryImg(await compressStory(file)); };
 
@@ -513,6 +549,7 @@ export default function Stories() {
       setLiked(false);
       setSentReaction('');
       setSeenGroups(prev => new Set([...prev, groups[next]?.userId ?? '']));
+      markGroupSeen(groups[next]);
     } else {
       closeStory();
     }
@@ -528,6 +565,7 @@ export default function Stories() {
     setActiveGroup(index); setActiveStory(0);
     setLiked(false); setSentReaction(''); setShowEmojis(false);
     setSeenGroups(prev => new Set([...prev, groups[index]?.userId ?? '']));
+    markGroupSeen(groups[index]);
   };
 
   /* استوری هنگام نوشتنِ ریپلای، تمرکز روی فیلد یا بازبودنِ استیکرها متوقف می‌شود */
@@ -619,7 +657,7 @@ export default function Stories() {
         )}
 
         {groups.map((g, i) => {
-          const isSeen = seenGroups.has(g.userId) || g.allSeen;
+          const isSeen = seenGroups.has(g.userId) || g.allSeen || (g.stories.length > 0 && g.stories.every(s => seenIds.has(s.id)));
           const firstStory = g.stories[0];
           return (
             <button key={g.userId} className="st-item" onClick={() => openStory(i)}>
