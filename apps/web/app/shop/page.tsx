@@ -135,8 +135,9 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
         <div className="mk-priceline">
           {l.disc > 0 && <span className="mk-pct" dir="ltr">٪{toFa(l.disc)}</span>}
           <div style={{ marginInlineStart: 'auto', textAlign: 'left' }}>
-            {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))}</div>}
-            <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></div>
+            {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمتِ اصلی جا برای مبلغ + پیلِ ٪ داشته باشد */}
+            {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))} <span style={{ fontStyle: 'normal' }}>تومان</span></div>}
+            <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</div>
           </div>
         </div>
       </div>
@@ -151,12 +152,12 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
       <div className="info">
         <span className="ttl">{l.name}</span>
         <span className="cnd">{COND_LABEL[l.condition]}</span>
-        {/* پیلِ ٪ کنارِ قیمتِ تخفیف‌خورده؛ قیمتِ اصلیِ خط‌خورده زیرش */}
+        {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمت جا برای مبلغ + پیلِ ٪ داشته باشد */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
-          <span className="prc">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></span>
+          <span className="prc">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</span>
         </span>
-        {l.disc > 0 && <span className="oldp">{toFa(l.old.toLocaleString('en-US'))}</span>}
+        {l.disc > 0 && <span className="oldp">{toFa(l.old.toLocaleString('en-US'))} تومان</span>}
         <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
       </div>
       <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"

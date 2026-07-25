@@ -437,14 +437,14 @@ function BazaarCard({ p, className, style }: { p: typeof PRODUCTS[0]; className?
             </span>
           )}
           <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
+            {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمتِ اصلی جا برای مبلغ + پیلِ تخفیف داشته باشد */}
             {p.pct > 0 && (
-              <div style={{ fontSize: '10px', color: '#8A8474', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
-                {p.price.toLocaleString('fa-IR')}
+              <div style={{ fontSize: '10px', color: '#8A8474', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                {p.price.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500 }}>تومان</span>
               </div>
             )}
-            {/* nowrap — «تومان» به خط بعد می‌شکست و از مبلغ جدا می‌افتاد */}
             <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-              {p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}>تومان</span>
+              {p.sale.toLocaleString('fa-IR')}{p.pct === 0 && <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}> تومان</span>}
             </div>
           </div>
         </div>
