@@ -184,7 +184,7 @@ function compressStory(file: File): Promise<string> {
 }
 
 /* ── Story viewer ── */
-function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
+function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, canReply, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
   if (!currentGroup || !currentStory) return null;
@@ -205,10 +205,10 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         .story-reaction-pop { position:absolute;bottom:140px;left:50%;font-size:48px;pointer-events:none;z-index:60;animation:reactionFloat 2.2s ease forwards; }
         .story-emoji-btn { font-size:24px;padding:10px;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.06);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease; }
         .story-emoji-btn:hover { transform:scale(1.35);background:rgba(255,255,255,0.14); }
-        .story-msg-input { flex:1;background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.09);border-radius:100px;padding:11px 18px;color:#fff;font-size:13px;outline:none;font-family:inherit; }
-        .story-msg-input::placeholder { color:rgba(255,255,255,0.3); }
-        .story-msg-input:focus { background:rgba(0,0,0,0.09);border-color:rgba(255,255,255,0.2); }
-        .story-icon-btn { width:42px;height:42px;border-radius:50%;border:1px solid rgba(0,0,0,0.09);background:rgba(0,0,0,0.06);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s ease;color:#fff; }
+        .story-msg-input { flex:1;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.45);border-radius:100px;padding:12px 18px;color:#fff;font-size:13.5px;font-weight:500;outline:none;font-family:inherit;backdrop-filter:blur(12px); }
+        .story-msg-input::placeholder { color:rgba(255,255,255,0.75); }
+        .story-msg-input:focus { background:rgba(255,255,255,0.24);border-color:rgba(255,255,255,0.85); }
+        .story-icon-btn { width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.16);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s ease;color:#fff;backdrop-filter:blur(12px); }
         .story-icon-btn:hover { background:rgba(255,255,255,0.15);transform:scale(1.08); }
       `}</style>
       <div style={{ position:'fixed',inset:0,zIndex:99998,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(20px)',animation:'overlayFadeIn .2s ease' }} onClick={onClose} />
@@ -282,22 +282,29 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           {replySent && (
             <div style={{ textAlign:'center',marginBottom:10 }}>
               <span style={{ display:'inline-flex',alignItems:'center',gap:6,fontSize:12.5,fontWeight:700,color:'#fff',background:'rgba(16,185,129,0.9)',borderRadius:100,padding:'6px 14px' }}>
-                <Check size={13} /> پاسخ برای صاحب استوری ارسال شد
+                <Check size={13} /> پیام ارسال شد
               </span>
             </div>
           )}
-          <div style={{ display:'flex',gap:'8px',alignItems:'center' }}>
-            <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onFocus={onReplyFocus} onBlur={onReplyBlur} onKeyDown={e => e.key==='Enter' && onSendComment()} placeholder="پاسخ به استوری..." />
-            <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background:showEmojis?'rgba(199,166,106,0.2)':'rgba(0,0,0,0.06)',borderColor:showEmojis?'rgba(199,166,106,0.4)':'rgba(0,0,0,0.09)',fontSize:'22px' }}>😊</button>
-            <button className="story-icon-btn" onClick={onLike} style={{ background:liked?'rgba(239,68,68,0.2)':'rgba(0,0,0,0.06)',borderColor:liked?'rgba(239,68,68,0.5)':'rgba(0,0,0,0.09)' }}>
-              <Heart size={17} fill={liked?'#ef4444':'none'} style={{ color:liked?'#ef4444':'rgba(255,255,255,0.7)' }} />
-            </button>
-            {comment.trim() && (
-              <button className="story-icon-btn" onClick={onSendComment} style={{ background:'rgba(199,166,106,0.15)',borderColor:'rgba(199,166,106,0.35)' }}>
-                <Send size={16} style={{ color:'#C7A66A' }} />
+          {canReply ? (
+            <div style={{ display:'flex',gap:'8px',alignItems:'center' }}>
+              <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onFocus={onReplyFocus} onBlur={onReplyBlur} onKeyDown={e => e.key==='Enter' && onSendComment()} placeholder="پاسخ به استوری..." />
+              <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background:showEmojis?'rgba(199,166,106,0.28)':'rgba(255,255,255,0.16)',borderColor:showEmojis?'rgba(199,166,106,0.5)':'rgba(255,255,255,0.35)',fontSize:'22px' }}>😊</button>
+              <button className="story-icon-btn" onClick={onLike} style={{ background:liked?'rgba(239,68,68,0.28)':'rgba(255,255,255,0.16)',borderColor:liked?'rgba(239,68,68,0.6)':'rgba(255,255,255,0.35)' }}>
+                <Heart size={17} fill={liked?'#ef4444':'none'} style={{ color:liked?'#ef4444':'#fff' }} />
               </button>
-            )}
-          </div>
+              {comment.trim() && (
+                <button className="story-icon-btn" onClick={onSendComment} style={{ background:'rgba(199,166,106,0.3)',borderColor:'rgba(199,166,106,0.6)' }}>
+                  <Send size={16} style={{ color:'#fff' }} />
+                </button>
+              )}
+            </div>
+          ) : (
+            /* مهمان فقط می‌بیند — برای ریپلای/استیکر/لایک باید وارد شود */
+            <a href="/login" style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none',padding:'13px',borderRadius:100,background:'rgba(255,255,255,0.16)',border:'1px solid rgba(255,255,255,0.4)',backdropFilter:'blur(12px)',color:'#fff',fontSize:13.5,fontWeight:700,fontFamily:'inherit' }}>
+              برای پاسخ به استوری وارد شوید
+            </a>
+          )}
         </div>
       </div>
     </>,
@@ -629,7 +636,7 @@ export default function Stories() {
         <StoryViewer
           groups={groups} activeGroup={activeGroup} activeStory={activeStory}
           liked={liked} showEmojis={showEmojis} comment={comment} sentReaction={sentReaction}
-          paused={storyPaused} replySent={replySent}
+          paused={storyPaused} replySent={replySent} canReply={!!user}
           onClose={() => { closeStory(); setReplyFocus(false); }} onNext={nextStory} onPrev={prevStory}
           onLike={() => { setLiked(p => !p); if (!liked) handleReaction('❤️'); }}
           onReaction={handleReaction} onToggleEmojis={() => setShowEmojis(p => !p)}
