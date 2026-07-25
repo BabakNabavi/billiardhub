@@ -88,10 +88,21 @@ export default function Navbar() {
       setNotifs(ns);
     };
     tick();
-    /* Realtime: با هر پیامِ ورودی، نشان‌ها را فوری تازه کن (پول فقط تورِ ایمنی) */
-    const stop = subscribeDM(key, { onMsg: () => tick() });
-    const iv = setInterval(tick, 20000);
-    return () => { clearInterval(iv); stop(); };
+    /* Realtime: با هر پیامِ ورودی، نشان‌ها فوری تازه شوند؛ برقراری/بازیابیِ اتصال و
+       برگشت به اپ هم فوری sync می‌کنند (برادکستِ حین اتصال گم می‌شد ⇒ بجِ دیرهنگام) */
+    const stop = subscribeDM(key, {
+      onMsg: () => tick(),
+      onStatus: (s) => { if (s === 'SUBSCRIBED') tick(); },
+    });
+    const onVisible = () => { if (document.visibilityState === 'visible') tick(); };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    const iv = setInterval(tick, 15000);
+    return () => {
+      clearInterval(iv); stop();
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
   }, [user]);
   useEffect(() => {
     const fn = (e: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false); };

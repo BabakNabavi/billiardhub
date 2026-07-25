@@ -120,6 +120,10 @@ export default function DirectPage() {
         const cur = activeRef.current
         if (cur && p.convId === cur.convId) setOtherPoll(x => Math.max(x, p.at || 0))
       },
+      onStatus: (s) => {
+        /* اشتراک تازه برقرار/دوباره‌وصل شد ⇒ هرچه در فاصله‌ی اتصال از دست رفته را فوری بگیر */
+        if (s === 'SUBSCRIBED') { loadConvs(); const c = activeRef.current; if (c) refreshThread(c) }
+      },
     })
     return stop
   }, [meKey]) // eslint-disable-line
@@ -151,11 +155,14 @@ export default function DirectPage() {
     }
   }, [user]) // eslint-disable-line
 
-  /* خواندنِ افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند */
+  /* خواندنِ افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند.
+     کرسرهای رسید فقط جلو می‌روند (Math.max) — قبلاً پاسخِ کهنه‌ی storage مقدارِ
+     realtime را بازنویسی می‌کرد و تیکِ آبی برمی‌گشت به یک تیک. */
   const refreshThread = async (c: ConvIndexItem) => {
     const t = await fetchThread(c.convId, meKey, lastAtRef.current)
     if (t.messages.length) { setMsgs(prev => mergeMsgs(prev, t.messages)); scrollBottom() }
-    setOtherPoll(t.otherPoll || 0); setOtherRead(t.otherRead || 0)
+    setOtherPoll(x => Math.max(x, t.otherPoll || 0))
+    setOtherRead(x => Math.max(x, t.otherRead || 0))
   }
   /* وضعیتِ تیک برای پیام‌های خودم: sent / delivered / read */
   const msgStatus = (m: DMsg): 'sent' | 'delivered' | 'read' => {
@@ -167,7 +174,9 @@ export default function DirectPage() {
     setActive(c); activeRef.current = c; lastAtRef.current = 0
     setMsgs([]); setOtherPoll(0); setOtherRead(0)
     const t = await fetchThread(c.convId, meKey, 0)
-    setMsgs(mergeMsgs([], t.messages)); setOtherPoll(t.otherPoll || 0); setOtherRead(t.otherRead || 0)
+    setMsgs(mergeMsgs([], t.messages))
+    setOtherPoll(x => Math.max(x, t.otherPoll || 0))
+    setOtherRead(x => Math.max(x, t.otherRead || 0))
     scrollBottom()
     loadConvs()   // unread صفر شد
   }
