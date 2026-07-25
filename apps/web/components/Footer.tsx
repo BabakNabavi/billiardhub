@@ -77,7 +77,8 @@ const nav = [
 export default function Footer() {
   const pathname = usePathname();
   /* صفحات ورود/ثبت‌نام فوتر ندارند */
-  if (pathname === '/login' || pathname === '/register') return null;
+  /* بازارِ جدید اپ‌شل است (لیست اسکرولِ داخلی دارد) — فوتر نباید روی باکسِ فیکسِ فیلترها بیاید */
+  if (pathname === '/login' || pathname === '/register' || pathname === '/shop') return null;
   return (
     <footer style={{ background: '#F5F3EF', borderTop: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
 

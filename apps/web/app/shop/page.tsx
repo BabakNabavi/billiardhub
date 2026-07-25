@@ -566,11 +566,19 @@ export default function MarketNewPage() {
            ستونِ گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
            right با %‏ (نه vw) حساب می‌شود تا عرضِ اسکرول‌بار محاسبه را به‌هم نزند. */
         .mk-sidebar { min-width: 0; }
-        .mk-sidebar-inner { position: fixed; top: 92px; width: 272px;
+        .mk-sidebar-inner { position: fixed; top: 106px; width: 272px;
           right: calc(max((100% - 1300px) / 2, 0px) + clamp(16px, 3vw, 32px));
           background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
-          padding: 6px 16px 10px; max-height: calc(100vh - 112px); overflow-y: auto;
+          padding: 6px 16px 10px; max-height: calc(100vh - 126px); overflow-y: auto;
           scrollbar-width: thin; overscroll-behavior: contain; box-sizing: border-box; }
+        /* دسکتاپ: لیستِ آگهی‌ها در ناحیه‌ی خودش اسکرول می‌شود (اپ‌شل) —
+           هر تعداد آگهی هم باشد، صفحه و فوتر روی باکسِ فیلترها نمی‌آیند */
+        @media (min-width: 901px) {
+          .mk-main { padding-bottom: 24px !important; }
+          .mk-listcol { height: calc(100vh - 136px); overflow-y: auto;
+            overscroll-behavior: contain; scrollbar-width: thin;
+            padding-inline-end: 6px; padding-bottom: 30px; box-sizing: border-box; }
+        }
         /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
         .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
         .mk-mobilebar { display: none; }
@@ -686,7 +694,7 @@ export default function MarketNewPage() {
       </div>
 
       {/* ═══ بدنه ═══ */}
-      <main style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
+      <main className="mk-main" style={{ maxWidth: 1300, margin: '0 auto', padding: '30px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
 
         {/* گرید دسته‌ها — موبایل: ۳ ردیف ۵تایی */}
         <div className="mk-mcats">
@@ -704,7 +712,7 @@ export default function MarketNewPage() {
           <aside className="mk-sidebar"><div className="mk-sidebar-inner">{FilterBody}</div></aside>
 
           {/* ── محتوای اصلی ── */}
-          <section ref={gridRef}>
+          <section ref={gridRef} className="mk-listcol">
             {/* نوار وضعیت: تعداد + مرتب‌سازی + چیپ‌ها */}
             <div className="mk-statusbar" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
               <span className="mk-stitle" style={{ fontSize: 13, fontWeight: 800 }}>
