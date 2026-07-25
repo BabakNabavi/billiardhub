@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Heart, Send, Check } from 'lucide-react';
+import { X, Plus, Heart, Send, Check, Smile } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
 import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
@@ -55,6 +55,8 @@ const sampleGroups: StoryGroup[] = [
 ];
 
 const emojis = ['❤️','🔥','👏','😮','😂','🎱','💪','🏆'];
+/* استیکرهای سریعِ پاسخِ استوری — ست مدرن و به‌روز */
+const STICKERS = ['❤️','😍','😂','😮','🔥','👏','💯','🎯'];
 const bgGradients: Record<string,string> = {
   club:    'linear-gradient(160deg,#011a0f 0%,#022c22 50%,#065f46 100%)',
   player:  'linear-gradient(160deg,#060e1a 0%,#0c1f35 50%,#075985 100%)',
@@ -194,114 +196,123 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
   return createPortal(
     <>
       <style>{`
-        @keyframes storyModalIn { from{opacity:0;transform:translate(-50%,-50%) scale(0.88);}to{opacity:1;transform:translate(-50%,-50%) scale(1);} }
+        @keyframes storyModalIn { from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:none;} }
         @keyframes overlayFadeIn { from{opacity:0;}to{opacity:1;} }
         @keyframes storyProgress { from{width:0%;}to{width:100%;} }
+        @keyframes stkIn { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;} }
         @keyframes reactionFloat {
           0%{opacity:1;transform:translateX(-50%) translateY(0) scale(0.5);}
-          40%{opacity:1;transform:translateX(-50%) translateY(-50px) scale(1.6);}
-          100%{opacity:0;transform:translateX(-50%) translateY(-100px) scale(1);}
+          40%{opacity:1;transform:translateX(-50%) translateY(-60px) scale(1.6);}
+          100%{opacity:0;transform:translateX(-50%) translateY(-130px) scale(1);}
         }
-        .story-reaction-pop { position:absolute;bottom:140px;left:50%;font-size:48px;pointer-events:none;z-index:60;animation:reactionFloat 2.2s ease forwards; }
-        .story-emoji-btn { font-size:24px;padding:10px;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.06);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease; }
-        .story-emoji-btn:hover { transform:scale(1.35);background:rgba(255,255,255,0.14); }
-        .story-msg-input { flex:1;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.45);border-radius:100px;padding:12px 18px;color:#fff;font-size:13.5px;font-weight:500;outline:none;font-family:inherit;backdrop-filter:blur(12px); }
-        .story-msg-input::placeholder { color:rgba(255,255,255,0.75); }
-        .story-msg-input:focus { background:rgba(255,255,255,0.24);border-color:rgba(255,255,255,0.85); }
-        .story-icon-btn { width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.16);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s ease;color:#fff;backdrop-filter:blur(12px); }
-        .story-icon-btn:hover { background:rgba(255,255,255,0.15);transform:scale(1.08); }
+        .story-reaction-pop { position:absolute;bottom:28px;left:50%;font-size:52px;pointer-events:none;z-index:60;animation:reactionFloat 2.2s ease forwards; }
+        /* پیلِ پاسخ — خط‌دار و شفاف روی نوارِ مشکی (مثل دایرکتِ اینستاگرام) */
+        .story-msg-input { flex:1;min-width:0;background:transparent;border:1.5px solid rgba(255,255,255,0.55);border-radius:100px;padding:13px 20px;color:#fff;font-size:14px;font-weight:500;outline:none;font-family:inherit; }
+        .story-msg-input::placeholder { color:rgba(255,255,255,0.7); }
+        .story-msg-input:focus { border-color:rgba(255,255,255,0.9); }
+        /* آیکون‌های خطیِ سفید، بدونِ پس‌زمینه */
+        .story-ic { width:40px;height:40px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s ease;color:#fff; }
+        .story-ic:hover { transform:scale(1.14); }
+        .story-ic.on { color:#ef4444; }
+        /* ردیفِ استیکرِ سریع — بارِ شیشه‌ای افقی */
+        .story-stk { display:flex;justify-content:space-around;gap:4px;background:rgba(30,28,34,0.7);border:1px solid rgba(255,255,255,0.14);border-radius:100px;padding:9px 12px;margin-bottom:12px;backdrop-filter:blur(24px);animation:stkIn .22s cubic-bezier(.22,1,.36,1) both; }
+        .story-stk button { background:none;border:none;cursor:pointer;font-size:28px;line-height:1;padding:2px;transition:transform .18s cubic-bezier(.22,1,.36,1); }
+        .story-stk button:hover { transform:scale(1.35) translateY(-2px); }
       `}</style>
-      <div style={{ position:'fixed',inset:0,zIndex:99998,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(20px)',animation:'overlayFadeIn .2s ease' }} onClick={onClose} />
-      <div style={{ position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:99999,width:'min(400px,94vw)',height:'min(700px,88vh)',borderRadius:'10px',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.4,0,.2,1)',boxShadow:`0 40px 100px rgba(0,0,0,0.8),0 0 0 1px rgba(0,0,0,0.06),0 0 80px ${currentGroup.roleColor}25` }} onClick={e => e.stopPropagation()}>
+      <div style={{ position:'fixed',inset:0,zIndex:99998,background:'rgba(0,0,0,0.94)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease' }} onClick={onClose} />
+      {/* رَپِر تمام‌صفحه: استوری بالا، ناحیه‌ی پاسخ بیرونِ استوری پایین */}
+      <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,display:'flex',flexDirection:'column',alignItems:'center',padding:'calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 12px)' }}>
 
-        {/* Background — real media OR gradient */}
-        {hasMedia ? (
-          <div style={{ position:'absolute', inset:0 }}>
-            {currentStory.mediaType === 'video'
-              ? <video src={currentStory.mediaUrl} autoPlay muted playsInline loop style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-              : <img src={currentStory.mediaUrl} alt="story" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
-            {/* Dark overlay so text/UI is readable */}
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.6) 100%)' }} />
-          </div>
-        ) : (
-          <div style={{ position:'absolute',inset:0,background:bgGradients[currentGroup.userRole]||bgGradients.player }}>
-            <div style={{ position:'absolute',top:'-100px',left:'50%',transform:'translateX(-50%)',width:'350px',height:'350px',borderRadius:'50%',background:`radial-gradient(${currentGroup.roleColor}25,transparent 65%)`,pointerEvents:'none' }} />
-            <div style={{ position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'154px',opacity:0.05,userSelect:'none',pointerEvents:'none' }}>🎱</div>
-          </div>
-        )}
+        {/* ── کارتِ استوری ── */}
+        <div onClick={e => e.stopPropagation()} style={{ position:'relative',width:'min(440px,96vw)',flex:'1 1 auto',minHeight:0,maxHeight:'100%',borderRadius:'16px',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:`0 30px 80px rgba(0,0,0,0.6),0 0 60px ${currentGroup.roleColor}22` }}>
 
-        <div style={{ position:'absolute',inset:0,borderRadius:'10px',border:'1px solid rgba(0,0,0,0.08)',pointerEvents:'none',zIndex:55 }} />
-
-        {/* Progress bars */}
-        <div style={{ position:'absolute',top:'16px',left:'14px',right:'14px',display:'flex',gap:'5px',zIndex:50,direction:'ltr' }}>
-          {currentGroup.stories.map((_: any,si: number) => (
-            <div key={si} style={{ flex:1,height:'3px',background:'rgba(255,255,255,0.2)',borderRadius:'3px',overflow:'hidden' }}>
-              {si < activeStory ? (
-                <div style={{ width:'100%',height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px' }} />
-              ) : si === activeStory ? (
-                <div key={`p-${activeGroup}-${activeStory}`} style={{ height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px',boxShadow:'0 0 6px rgba(255,255,255,0.7)',animation:`storyProgress ${STORY_DURATION}ms linear forwards`,animationPlayState: paused ? 'paused' : 'running' }} />
-              ) : null}
+          {hasMedia ? (
+            <div style={{ position:'absolute', inset:0 }}>
+              {currentStory.mediaType === 'video'
+                ? <video src={currentStory.mediaUrl} autoPlay muted playsInline loop style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : <img src={currentStory.mediaUrl} alt="story" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%)' }} />
             </div>
-          ))}
+          ) : (
+            <div style={{ position:'absolute',inset:0,background:bgGradients[currentGroup.userRole]||bgGradients.player }}>
+              <div style={{ position:'absolute',top:'-100px',left:'50%',transform:'translateX(-50%)',width:'350px',height:'350px',borderRadius:'50%',background:`radial-gradient(${currentGroup.roleColor}25,transparent 65%)`,pointerEvents:'none' }} />
+              <div style={{ position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'154px',opacity:0.05,userSelect:'none',pointerEvents:'none' }}>🎱</div>
+            </div>
+          )}
+
+          {/* Progress bars */}
+          <div style={{ position:'absolute',top:'12px',left:'12px',right:'12px',display:'flex',gap:'5px',zIndex:50,direction:'ltr' }}>
+            {currentGroup.stories.map((_: any,si: number) => (
+              <div key={si} style={{ flex:1,height:'3px',background:'rgba(255,255,255,0.25)',borderRadius:'3px',overflow:'hidden' }}>
+                {si < activeStory ? (
+                  <div style={{ width:'100%',height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px' }} />
+                ) : si === activeStory ? (
+                  <div key={`p-${activeGroup}-${activeStory}`} style={{ height:'100%',background:'rgba(255,255,255,0.95)',borderRadius:'3px',boxShadow:'0 0 6px rgba(255,255,255,0.7)',animation:`storyProgress ${STORY_DURATION}ms linear forwards`,animationPlayState: paused ? 'paused' : 'running' }} />
+                ) : null}
+              </div>
+            ))}
+          </div>
+
+          {/* Header */}
+          <div style={{ position:'absolute',top:'26px',left:'12px',right:'12px',display:'flex',alignItems:'center',gap:'10px',zIndex:50 }}>
+            <div style={{ width:'40px',height:'40px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}90`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize:'17px',overflow:'hidden' }}>
+              {currentGroup.logoUrl
+                ? <img src={currentGroup.logoUrl} alt={currentGroup.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
+                : currentGroup.userAvatar}
+            </div>
+            <div style={{ flex:1,minWidth:0 }}>
+              <div style={{ color:'#fff',fontWeight:700,fontSize:'15px',textShadow:'0 1px 4px rgba(0,0,0,0.5)' }}>{currentGroup.userName}</div>
+              <div style={{ color:'rgba(255,255,255,0.7)',fontSize:'12px',textShadow:'0 1px 4px rgba(0,0,0,0.5)' }}>{currentStory.createdAt}</div>
+            </div>
+            <span style={{ fontSize:'11px',color:'#fff',background:`${currentGroup.roleColor}`,borderRadius:'20px',padding:'3px 11px',fontWeight:700,flexShrink:0 }}>{currentGroup.roleLabel}</span>
+            <button onClick={onClose} style={{ width:'32px',height:'32px',borderRadius:'50%',background:'none',border:'none',cursor:'pointer',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><X size={22} /></button>
+          </div>
+
+          {/* نواحیِ لمسِ قبلی/بعدی */}
+          <button onClick={onNext} style={{ position:'absolute',right:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
+          <button onClick={onPrev} style={{ position:'absolute',left:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
+
+          {currentStory.caption && (
+            <div style={{ position:'absolute',bottom:'18px',left:'14px',right:'14px',zIndex:20 }}>
+              <div style={{ background:'rgba(0,0,0,0.42)',borderRadius:'16px',padding:'12px 16px',backdropFilter:'blur(14px)' }}>
+                <p style={{ color:'#fff',fontSize:'15.5px',margin:0,lineHeight:1.8,fontWeight:500,direction:'rtl' }}>{currentStory.caption}</p>
+              </div>
+            </div>
+          )}
+
+          {sentReaction && <div className="story-reaction-pop">{sentReaction}</div>}
         </div>
 
-        {/* Header */}
-        <div style={{ position:'absolute',top:'30px',left:'14px',right:'14px',display:'flex',alignItems:'center',gap:'10px',zIndex:50,paddingTop:'6px' }}>
-          <div style={{ width:'44px',height:'44px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}80`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize:'19px',boxShadow:`0 0 16px ${currentGroup.roleColor}50`,overflow:'hidden' }}>
-            {currentGroup.logoUrl
-              ? <img src={currentGroup.logoUrl} alt={currentGroup.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
-              : currentGroup.userAvatar}
-          </div>
-          <div style={{ flex:1 }}>
-            <div style={{ color:'#fff',fontWeight:700,fontSize:'16px' }}>{currentGroup.userName}</div>
-            <div style={{ color:'rgba(255,255,255,0.4)',fontSize:'13px' }}>{currentStory.createdAt}</div>
-          </div>
-          <span style={{ fontSize:'12px',color:currentGroup.roleColor,background:`${currentGroup.roleColor}18`,border:`1px solid ${currentGroup.roleColor}40`,borderRadius:'20px',padding:'4px 11px',fontWeight:700,backdropFilter:'blur(10px)',flexShrink:0 }}>{currentGroup.roleLabel}</span>
-          <button onClick={onClose} style={{ width:'34px',height:'34px',borderRadius:'50%',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(0,0,0,0.09)',cursor:'pointer',color:'rgba(255,255,255,0.8)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><X size={15} /></button>
-        </div>
-
-        <button onClick={onNext} style={{ position:'absolute',right:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
-        <button onClick={onPrev} style={{ position:'absolute',left:0,top:'95px',bottom:'140px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
-
-        {currentStory.caption && (
-          <div style={{ position:'absolute',bottom:'130px',left:'16px',right:'16px',zIndex:20 }}>
-            <div style={{ background:'rgba(0,0,0,0.5)',borderRadius:'18px',padding:'14px 18px',backdropFilter:'blur(16px)',border:'1px solid rgba(0,0,0,0.06)' }}>
-              <p style={{ color:'#fff',fontSize:'17px',margin:0,lineHeight:1.7,fontWeight:500,direction:'rtl' }}>{currentStory.caption}</p>
-            </div>
-          </div>
-        )}
-
-        {sentReaction && <div className="story-reaction-pop">{sentReaction}</div>}
-        {showEmojis && (
-          <div style={{ position:'absolute',bottom:'135px',left:'16px',right:'16px',zIndex:40,background:'rgba(4,12,8,0.96)',borderRadius:'20px',padding:'16px',border:'1px solid rgba(0,0,0,0.06)',backdropFilter:'blur(24px)',display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'10px' }}>
-            {emojis.map((e: string) => (<button key={e} className="story-emoji-btn" onClick={() => onReaction(e)}>{e}</button>))}
-          </div>
-        )}
-
-        <div style={{ position:'absolute',bottom:0,left:0,right:0,zIndex:30,padding:'14px 16px 26px',background:'linear-gradient(to top,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.2) 70%,transparent 100%)' }}>
+        {/* ── ناحیه‌ی پاسخ — بیرونِ استوری، روی نوارِ مشکی ── */}
+        <div onClick={e => e.stopPropagation()} style={{ width:'min(440px,96vw)',flexShrink:0,paddingTop:'12px' }}>
           {replySent && (
             <div style={{ textAlign:'center',marginBottom:10 }}>
-              <span style={{ display:'inline-flex',alignItems:'center',gap:6,fontSize:12.5,fontWeight:700,color:'#fff',background:'rgba(16,185,129,0.9)',borderRadius:100,padding:'6px 14px' }}>
+              <span style={{ display:'inline-flex',alignItems:'center',gap:6,fontSize:12.5,fontWeight:700,color:'#fff',background:'rgba(16,185,129,0.92)',borderRadius:100,padding:'6px 14px' }}>
                 <Check size={13} /> پیام ارسال شد
               </span>
             </div>
           )}
+          {canReply && showEmojis && (
+            <div className="story-stk">
+              {STICKERS.map((e: string) => (<button key={e} onClick={() => onReaction(e)}>{e}</button>))}
+            </div>
+          )}
           {canReply ? (
-            <div style={{ display:'flex',gap:'8px',alignItems:'center' }}>
+            <div style={{ display:'flex',gap:'6px',alignItems:'center' }}>
               <input className="story-msg-input" value={comment} onChange={e => onComment(e.target.value)} onFocus={onReplyFocus} onBlur={onReplyBlur} onKeyDown={e => e.key==='Enter' && onSendComment()} placeholder="پاسخ به استوری..." />
-              <button className="story-icon-btn" onClick={onToggleEmojis} style={{ background:showEmojis?'rgba(199,166,106,0.28)':'rgba(255,255,255,0.16)',borderColor:showEmojis?'rgba(199,166,106,0.5)':'rgba(255,255,255,0.35)',fontSize:'22px' }}>😊</button>
-              <button className="story-icon-btn" onClick={onLike} style={{ background:liked?'rgba(239,68,68,0.28)':'rgba(255,255,255,0.16)',borderColor:liked?'rgba(239,68,68,0.6)':'rgba(255,255,255,0.35)' }}>
-                <Heart size={17} fill={liked?'#ef4444':'none'} style={{ color:liked?'#ef4444':'#fff' }} />
+              <button className={`story-ic${liked ? ' on' : ''}`} onClick={onLike} aria-label="لایک">
+                <Heart size={25} fill={liked?'#ef4444':'none'} />
               </button>
-              {comment.trim() && (
-                <button className="story-icon-btn" onClick={onSendComment} style={{ background:'rgba(199,166,106,0.3)',borderColor:'rgba(199,166,106,0.6)' }}>
-                  <Send size={16} style={{ color:'#fff' }} />
-                </button>
-              )}
+              <button className="story-ic" onClick={onToggleEmojis} aria-label="استیکر" style={{ color: showEmojis ? '#C7A66A' : '#fff' }}>
+                <Smile size={25} />
+              </button>
+              <button className="story-ic" onClick={onSendComment} aria-label="ارسال" style={{ opacity: comment.trim() ? 1 : 0.5 }}>
+                <Send size={23} />
+              </button>
             </div>
           ) : (
-            /* مهمان فقط می‌بیند — برای ریپلای/استیکر/لایک باید وارد شود */
-            <a href="/login" style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none',padding:'13px',borderRadius:100,background:'rgba(255,255,255,0.16)',border:'1px solid rgba(255,255,255,0.4)',backdropFilter:'blur(12px)',color:'#fff',fontSize:13.5,fontWeight:700,fontFamily:'inherit' }}>
+            /* مهمان فقط می‌بیند */
+            <a href="/login" style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none',padding:'13px',borderRadius:100,background:'transparent',border:'1.5px solid rgba(255,255,255,0.5)',color:'#fff',fontSize:13.5,fontWeight:700,fontFamily:'inherit' }}>
               برای پاسخ به استوری وارد شوید
             </a>
           )}
