@@ -506,7 +506,7 @@ export default function MarketNewPage() {
         .mk-topbar { position: sticky; top: 0; z-index: 150; padding-top: env(safe-area-inset-top);
           background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
           border-bottom: 1px solid ${LINE}; }
-        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(16px + env(safe-area-inset-top)) 14px 12px;
           background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid ${LINE}; }
 
@@ -566,10 +566,10 @@ export default function MarketNewPage() {
            ستونِ گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
            right با %‏ (نه vw) حساب می‌شود تا عرضِ اسکرول‌بار محاسبه را به‌هم نزند. */
         .mk-sidebar { min-width: 0; }
-        .mk-sidebar-inner { position: fixed; top: 76px; width: 272px;
+        .mk-sidebar-inner { position: fixed; top: 92px; width: 272px;
           right: calc(max((100% - 1300px) / 2, 0px) + clamp(16px, 3vw, 32px));
           background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
-          padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto;
+          padding: 6px 16px 10px; max-height: calc(100vh - 112px); overflow-y: auto;
           scrollbar-width: thin; overscroll-behavior: contain; box-sizing: border-box; }
         /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
         .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
@@ -600,7 +600,7 @@ export default function MarketNewPage() {
 
       {/* ═══ تاپ‌بار دسکتاپ — به‌جای نوبار و هدر ═══ */}
       <div className="mk-topbar">
-        <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: 64, display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: 76, display: 'flex', alignItems: 'center', gap: 14 }}>
           {/* برند */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
             <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.26)' }}>
