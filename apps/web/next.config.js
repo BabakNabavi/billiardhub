@@ -10,6 +10,8 @@ const nextConfig = {
       // خدمات فنی روی /services یکپارچه شد؛ /installers قدیمی منتقل می‌شود
       { source: '/installers', destination: '/services', permanent: true },
       { source: '/installers/:path*', destination: '/services', permanent: true },
+      // نسخه‌ی آزمایشی بازار تأیید و جایگزین /shop شد
+      { source: '/market-new', destination: '/shop', permanent: true },
     ];
   },
   async headers() {

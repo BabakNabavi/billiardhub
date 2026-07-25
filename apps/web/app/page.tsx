@@ -254,6 +254,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
     <div style={{ position: 'relative' }}>
       <Link href={`/clubs/${club.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div
+          className="club-card-x"
           onMouseEnter={() => setHov(true)}
           onMouseLeave={() => setHov(false)}
           style={{
@@ -367,7 +368,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '9px 7px 11px',
+            padding: '9px 7px 16px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '9px',
           }}>
@@ -1319,8 +1320,14 @@ useEffect(() => {
 
         /* ══ MOBILE — keep content just below stories bar ══ */
         @media(max-width:600px){
-          .hero-content { padding-top:calc(232px + env(safe-area-inset-top)) !important; }
+          /* گوشی‌های معمولی جا دارند ⇒ محتوا کمی پایین‌تر */
+          .hero-content { padding-top:calc(252px + env(safe-area-inset-top)) !important; }
           .trust-strip  { margin-top:16px !important; }
+        }
+        /* گوشی‌های کوتاه (iPhone SE): جمع‌تر تا باکسِ اعتماد کامل در صفحه‌ی اول دیده شود */
+        @media(max-width:600px) and (max-height:700px){
+          .hero-content { padding-top:calc(196px + env(safe-area-inset-top)) !important; }
+          .trust-box    { margin-top:16px !important; }
         }
 
         /* ══ MOBILE XS ≤400px ══ */
@@ -1369,6 +1376,10 @@ useEffect(() => {
         .mkt-dots { display:none !important; }
         .club-desk-panel { display:flex; }
         .club-mob-panel  { display:none; }
+        /* لمس (بدون هاور واقعی): سایه‌ی هاورِ اینلاین خنثی — سایه‌ی سبک ثابت */
+        @media (hover: none) {
+          .club-card-x { box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important; transform: none !important; }
+        }
         .club-open-btn   { display:flex; }
         @keyframes open-dot-blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.25;transform:scale(0.55)} }
         .open-dot { animation:open-dot-blink 3.5s ease-in-out infinite; }

@@ -1,521 +1,242 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+/* ═════════════════════════════════════════════════════════════
+   بیلیارد بازار — بازطراحی دیواری‌ساختار (نسخه‌ی نهایی، جایگزین /shop)
+   ─────────────────────────────────────────────────────────────
+   ● کاملاً ایزوله: صفحه‌ی فعلی /shop دست‌نخورده است و این مسیر
+     را می‌توان بدون هیچ اثری حذف کرد.
+   ● معماری الهام‌گرفته از تجربه‌ی مارکت‌پلیسِ دیوار (سایدبار
+     دسته‌ها/فیلترها، قیمت از-تا، زمان انتشار) ولی با هویت بصری
+     بیلیارد هاب و کارت‌های «عمودی» همان فرمتِ فعلی بازار.
+   ● دیتا از منابعِ موجود:
+     - محصولات: SHOP_PRODUCTS از app/shop/products.ts (منبع واحد)
+       + آگهی‌های کاربر از localStorage «userProducts»
+     - شهر فروشنده‌های نمونه: MOCK_SELLERS از lib/sellers-data
+     - شهرها: lib/iran-geo (getProvinceNames/getCities) — طبق قانون پروژه
+   ● CATS_M آینه‌ی دقیقِ CATS صفحه‌ی /shop است (آن‌جا local است و
+     export نشده؛ برای دست‌نزدن به صفحه‌ی فعلی این‌جا تکرار شده —
+     بعد از تأیید نهایی در یک فایل مشترک ادغام شود).
+   ═════════════════════════════════════════════════════════════ */
+
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Search, LogIn, ChevronLeft, Timer, LayoutGrid } from 'lucide-react'
-import { useAuthStore } from '../../store/auth.store'
+import {
+  Search, MapPin, X, Check, ChevronDown,
+  Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
+} from 'lucide-react'
 import { SHOP_PRODUCTS } from './products'
+import { MOCK_SELLERS } from '../../lib/sellers-data'
+import { getProvinceNames, getCities } from '../../lib/iran-geo'
 
-const GOLD     = '#C7A66A'
-const GOLD_BOR = 'rgba(199,166,106,0.32)'
-const TEXT     = '#1C1C1A'
-const TEXT_SEC = 'rgba(28,28,26,0.5)'
+const GOLD   = '#C7A66A'
+const GOLD_D = '#9A6E38'
+const TEXT   = '#1C1B17'
+const SEC    = '#5B564B'
+const MUT    = '#8A8474'
+const LINE   = '#E7E2D6'
 
-const LQ = {
-  bg:         'rgba(255,255,255,0.55)',
-  bgGold:     'rgba(199,166,106,0.13)',
-  blur:       'blur(20px) saturate(1.6)',
-  border:     '1px solid rgba(255,255,255,0.65)',
-  borderGold: `1px solid ${GOLD_BOR}`,
-  shadow:     '0 4px 24px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)',
-  shadowGold: '0 4px 20px rgba(199,166,106,0.14), inset 0 1px 0 rgba(255,255,255,0.35)',
-}
-
-// ── Slides (گوی → توپ) ────────────────────────────────────────
-const SLIDES = [
-  {
-    img: '/images/ads/1.gif',
-    badge: 'میز اسنوکر', title: 'میزهای حرفه‌ای',
-    sub: 'بهترین برندهای جهانی — ارسال به سراسر ایران',
-    cta: 'مشاهده میزها', href: '/shop/category/table',
-  },
-  {
-    img: '/images/ads/2.webp',
-    badge: 'چوب بیلیارد', title: 'چوب‌های حرفه‌ای',
-    sub: 'از کلاسیک تا کربن فایبر — برای هر سبک بازی',
-    cta: 'مشاهده چوب‌ها', href: '/shop/category/cue',
-  },
-  {
-    img: '/images/ads/3.webp',
-    badge: 'توپ بیلیارد', title: 'توپ‌های استاندارد',
-    sub: 'توپ‌های Aramith، Cyclop و سایر برندهای معتبر',
-    cta: 'مشاهده توپ‌ها', href: '/shop/category/ball',
-  },
-  {
-    img: '/images/ads/4.webp',
-    badge: 'میز خانگی', title: 'بیلیارد در خانه',
-    sub: 'میزهای کمپکت و زیبا برای منزل و اداره',
-    cta: 'خرید میز خانگی', href: '/shop/category/table',
-  },
-  {
-    img: '/images/ads/5.gif',
-    badge: 'لوازم جانبی', title: 'اکسسوری کامل',
-    sub: 'گچ، نگهدارنده، کیف چوب و بیش از ۵۰۰ محصول',
-    cta: 'مشاهده لوازم', href: '/shop/category/accessory',
-  },
-  {
-    img: '/images/ads/6.gif',
-    badge: 'بیلیارد بازار', title: 'فروشگاه بیلیارد هاب',
-    sub: 'همه‌ی تجهیزات بیلیارد در یک جا',
-    cta: 'ورود به فروشگاه', href: '/shop',
-  },
-]
-
-// ── Category definitions — modern gradient-icon style ─────────
-const CATS = [
-  {
-    id: 'cue', label: 'چوب', g: ['#8B4513','#D2691E'],
-    img: '/images/icon/cue/cue-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="13" width="22" height="3" rx="1.5" fill="currentColor" transform="rotate(-38 3 13)"/>
-      <rect x="18" y="4" width="7" height="3" rx="1.5" fill="currentColor" fillOpacity="0.6" transform="rotate(-38 18 4)"/>
-      <rect x="2" y="19" width="5" height="4" rx="2" fill="currentColor" fillOpacity="0.4" transform="rotate(-38 2 19)"/>
-    </svg>,
-  },
-  {
-    id: 'table', label: 'میز', g: ['#1A6B3A','#28A860'],
-    img: '/images/icon/table/wiraka.png', imgBig: true,
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="7" width="22" height="14" rx="3" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
-      <circle cx="3.5" cy="7.5" r="2.2" fill="currentColor"/>
-      <circle cx="14" cy="7" r="2.2" fill="currentColor"/>
-      <circle cx="24.5" cy="7.5" r="2.2" fill="currentColor"/>
-      <circle cx="3.5" cy="20.5" r="2.2" fill="currentColor"/>
-      <circle cx="14" cy="21" r="2.2" fill="currentColor"/>
-      <circle cx="24.5" cy="20.5" r="2.2" fill="currentColor"/>
-    </svg>,
-  },
-  {
-    id: 'ball', label: 'توپ', g: ['#B71C1C','#E53935'],
-    img: '/images/icon/ball/ballset-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <circle cx="14" cy="14" r="10" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8"/>
-      <path d="M6 11 Q14 7 22 11" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M6 17 Q14 13 22 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
-      <circle cx="10" cy="9" r="2" fill="currentColor" fillOpacity="0.5"/>
-    </svg>,
-  },
-  {
-    id: 'tip', label: 'تیپ', g: ['#0D47A1','#1976D2'],
-    img: '/images/icon/tip/tip-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <ellipse cx="14" cy="12" rx="7" ry="3" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.8"/>
-      <line x1="7" y1="12" x2="7" y2="19" stroke="currentColor" strokeWidth="1.8"/>
-      <line x1="21" y1="12" x2="21" y2="19" stroke="currentColor" strokeWidth="1.8"/>
-      <ellipse cx="14" cy="19" rx="7" ry="3" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.8"/>
-      <ellipse cx="14" cy="10.5" rx="5" ry="2" fill="currentColor" stroke="currentColor" strokeWidth="1.2"/>
-    </svg>,
-  },
-  {
-    id: 'chalk', label: 'گچ', g: ['#4A148C','#7B1FA2'],
-    img: '/images/icon/chalk/chalk-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="7" y="12" width="14" height="11" rx="2" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8"/>
-      <path d="M7 12 L10 8 L24 8 L21 12" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" fill="currentColor" fillOpacity="0.15"/>
-      <line x1="21" y1="12" x2="21" y2="23" stroke="currentColor" strokeWidth="1.8"/>
-      <path d="M9 10 Q14 7.5 20 10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fillOpacity="0"/>
-    </svg>,
-  },
-  {
-    id: 'extension', label: 'اکستنشن', g: ['#004D40','#00897B'],
-    img: '/images/icon/ex/shaft-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <line x1="3" y1="22" x2="13" y2="12" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="13" cy="12" r="2.5" fill="currentColor"/>
-      <circle cx="18" cy="12" r="2.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.5"/>
-      <line x1="18" y1="12" x2="26" y2="7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
-      <rect x="14" y="10.5" width="8" height="3" rx="1.5" stroke="currentColor" strokeWidth="1.4" fill="none" fillOpacity="0"/>
-    </svg>,
-  },
-  {
-    id: 'cue-case', label: 'کیس', g: ['#4527A0','#7C4DFF'],
-    img: '/images/icon/case/case-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      {/* لوله‌ی کیس چوب */}
-      <rect x="4" y="11" width="21" height="7" rx="3.5" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.6"/>
-      <ellipse cx="5" cy="14.5" rx="1.8" ry="3.5" fill="currentColor" fillOpacity="0.35" stroke="currentColor" strokeWidth="1.3"/>
-      <path d="M12 11 L12 18" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55"/>
-      <path d="M19 8 L19 21" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.7"/>
-    </svg>,
-  },
-  {
-    id: 'ball-bag', label: 'کیف توپ', g: ['#00695C','#26A69A'],
-    img: '/images/icon/kif/ballcase-icon-256.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      {/* کیف توپ */}
-      <rect x="5" y="11" width="18" height="12" rx="2.5" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="1.7"/>
-      <path d="M10 11 L10 8.5 Q10 6 14 6 Q18 6 18 8.5 L18 11" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
-      <circle cx="14" cy="17" r="3.2" fill="currentColor" fillOpacity="0.45" stroke="currentColor" strokeWidth="1.3"/>
-    </svg>,
-  },
-  {
-    id: 'rest', label: 'رست', g: ['#1B5E20','#388E3C'],
-    img: '/images/icon/rest/rest.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <line x1="3" y1="25" x2="18" y2="13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="18" cy="13" r="2.2" fill="currentColor"/>
-      <line x1="18" y1="13" x2="24" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <line x1="18" y1="13" x2="26" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <line x1="18" y1="13" x2="24" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M22 7 L24.5 5 L27 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>,
-  },
-  {
-    id: 'cloth', label: 'پارچه', g: ['#006064','#00ACC1'],
-    img: '/images/icon/parche/parche.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="3" y="8" width="22" height="13" rx="2" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8"/>
-      <path d="M3 12 L25 12" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
-      <path d="M3 16 L25 16" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
-      <path d="M9 8 L9 21" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
-      <path d="M16 8 L16 21" stroke="currentColor" strokeWidth="0.9" opacity="0.5"/>
-      <ellipse cx="3.5" cy="14.5" rx="2" ry="6.5" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.4"/>
-    </svg>,
-  },
-  {
-    id: 'oil', label: 'روغن', g: ['#E65100','#F57C00'],
-    img: '/images/icon/oil/oil.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <path d="M11 7 L11 11 Q6 13 6 17 L6 22 Q6 24 8 24 L20 24 Q22 24 22 22 L22 17 Q22 13 17 11 L17 7 Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
-      <rect x="11" y="5" width="6" height="3.5" rx="1.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.4"/>
-      <path d="M14 14 Q12 17 12 19 Q12 21.5 14 21.5 Q16 21.5 16 19 Q16 17 14 14Z" fill="currentColor" opacity="0.6"/>
-    </svg>,
-  },
-  {
-    id: 'towel', label: 'حوله', g: ['#AD1457','#D81B60'],
-    img: '/images/icon/hole/hole.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <rect x="5" y="7" width="18" height="5" rx="2.5" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.7"/>
-      <rect x="5" y="14" width="18" height="5" rx="2.5" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1.7"/>
-      <rect x="5" y="21" width="18" height="4" rx="2" fill="currentColor" fillOpacity="0.55" stroke="currentColor" strokeWidth="1.7"/>
-      <path d="M5 9 Q14 7.5 23 9" stroke="currentColor" strokeWidth="0.8" opacity="0.45" fill="none"/>
-    </svg>,
-  },
-  {
-    id: 'clothing', label: 'پوشاک', g: ['#1A237E','#283593'],
-    img: '/images/icon/pooshak/pooshak.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <path d="M11 5 Q14 9 17 5 L23 9 L20 13 L20 23 L8 23 L8 13 L5 9 Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
-      <path d="M11 5 Q14 8 17 5" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-    </svg>,
-  },
-  {
-    id: 'accessory', label: 'اکسسوری', g: ['#78550A','#B8860B'],
-    img: '/images/icon/accessori/accessori.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <path d="M8 23 L8 13 Q8 11 10 11 L12 11 L12 9 Q12 7 14 7 Q16 7 16 9 L16 11 L18 11 Q20 11 20 13 L20 23 Q20 25 14 25 Q8 25 8 23Z" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
-      <line x1="12" y1="15" x2="12" y2="19" stroke="currentColor" strokeWidth="1.3" opacity="0.6"/>
-      <line x1="16" y1="14" x2="16" y2="19" stroke="currentColor" strokeWidth="1.3" opacity="0.6"/>
-      <path d="M8 20 Q14 22 20 20" stroke="currentColor" strokeWidth="1.3" fill="none" opacity="0.7"/>
-    </svg>,
-  },
-  {
-    id: 'other', label: 'سایر', g: ['#37474F','#546E7A'],
-    img: '/images/icon/other/other.png',
-    icon: <svg viewBox="0 0 28 28" fill="none" width={26} height={26}>
-      <circle cx="8"  cy="8"  r="2.8" fill="currentColor" opacity="0.5"/>
-      <circle cx="14" cy="8"  r="2.8" fill="currentColor"/>
-      <circle cx="20" cy="8"  r="2.8" fill="currentColor" opacity="0.5"/>
-      <circle cx="8"  cy="14" r="2.8" fill="currentColor" opacity="0.5"/>
-      <circle cx="14" cy="14" r="2.8" fill="currentColor" opacity="0.9"/>
-      <circle cx="20" cy="14" r="2.8" fill="currentColor" opacity="0.5"/>
-      <circle cx="8"  cy="20" r="2.8" fill="currentColor" opacity="0.35"/>
-      <circle cx="14" cy="20" r="2.8" fill="currentColor" opacity="0.5"/>
-      <circle cx="20" cy="20" r="2.8" fill="currentColor" opacity="0.35"/>
-    </svg>,
-  },
-]
-
-// ── Products: منبع واحد مشترک با صفحه‌ی جزئیات محصول ──────────
-const PRODUCTS = SHOP_PRODUCTS
-
-const parsePriceInput = (v: string) => {
-  const n = parseInt(v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, ''), 10)
+const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
+const toEn = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+const parsePrice = (v: string) => {
+  const n = parseInt(toEn(v).replace(/[^0-9]/g, ''), 10)
   return Number.isNaN(n) ? null : n
 }
 
-function toFa(v: string | number) {
-  return String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
+/* آینه‌ی CATS صفحه‌ی /shop — همان idها، لیبل‌ها و آیکون‌های تصویری */
+const CATS_M = [
+  { id: 'cue',       label: 'چوب',      img: '/images/icon/cue/cue-icon-256.png' },
+  { id: 'table',     label: 'میز',      img: '/images/icon/table/wiraka.png' },
+  { id: 'ball',      label: 'توپ',      img: '/images/icon/ball/ballset-icon-256.png' },
+  { id: 'tip',       label: 'تیپ',      img: '/images/icon/tip/tip-icon-256.png' },
+  { id: 'chalk',     label: 'گچ',       img: '/images/icon/chalk/chalk-icon-256.png' },
+  { id: 'extension', label: 'اکستنشن',  img: '/images/icon/ex/shaft-icon-256.png' },
+  { id: 'cue-case',  label: 'کیس چوب',  img: '/images/icon/case/case-icon-256.png' },
+  { id: 'ball-bag',  label: 'کیف توپ',  img: '/images/icon/kif/ballcase-icon-256.png' },
+  { id: 'rest',      label: 'رست',      img: '/images/icon/rest/rest.png' },
+  { id: 'cloth',     label: 'پارچه',    img: '/images/icon/parche/parche.png' },
+  /* تصویرِ روغن در فایلش چپ‌نشین است — کمی به راست هل داده می‌شود */
+  { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil.png', imgStyle: { transform: 'translateX(9%)' } as React.CSSProperties },
+  { id: 'towel',     label: 'حوله',     img: '/images/icon/hole/hole.png' },
+  { id: 'clothing',  label: 'پوشاک',    img: '/images/icon/pooshak/pooshak.png' },
+  { id: 'accessory', label: 'اکسسوری',  img: '/images/icon/accessori/accessori.png' },
+  { id: 'other',     label: 'سایر',     img: '/images/icon/other/other.png' },
+]
+const CAT_IDS = new Set(CATS_M.map(c => c.id))
+/* محصولاتِ نمونه cat=case-bag دارند که در CATS با id=cue-case آمده */
+const normCat = (c?: string) => (c === 'case-bag' ? 'cue-case' : c && CAT_IDS.has(c) ? c : 'other')
+const catLabel = (id: string) => CATS_M.find(c => c.id === id)?.label ?? id
+
+type Cond = 'new' | 'like_new' | 'used'
+const COND_LABEL: Record<Cond, string> = { new: 'نو', like_new: 'در حد نو', used: 'کارکرده' }
+
+interface Listing {
+  key: string
+  id: string | number
+  name: string
+  img: string
+  brand: string
+  price: number
+  old: number
+  disc: number
+  cat: string
+  city: string
+  condition: Cond
+  createdAt: number | null   // فقط آگهی‌های کاربر تاریخ دارند
+  source: 'shop' | 'user'
 }
 
-// ── Shop Top Bar ──────────────────────────────────────────────
-function ShopTopBar({
-  searchInput, onSearchInput, onSearch, user,
-}: {
-  searchInput: string
-  onSearchInput: (v: string) => void
-  onSearch: (e: React.FormEvent) => void
-  user: { firstName: string; avatar?: string | null } | null
-}) {
-  const [focused, setFocused] = useState(false)
+/* شهرِ فروشنده‌های نمونه از lib/sellers-data (id → city) */
+const sellerCity = (sellerId: string) => MOCK_SELLERS.find(s => s.id === sellerId)?.city ?? ''
+
+function loadListings(): Listing[] {
+  const base: Listing[] = SHOP_PRODUCTS.map(p => ({
+    key: `s-${p.id}`, id: p.id, name: p.name, img: p.img, brand: p.brand,
+    price: p.price, old: p.old, disc: p.disc, cat: normCat(p.cat),
+    city: sellerCity(p.sellerId), condition: 'new', createdAt: null, source: 'shop',
+  }))
+  let user: Listing[] = []
+  try {
+    const stored = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
+    if (Array.isArray(stored)) {
+      user = stored.map((p: any) => ({
+        key: `u-${p.id}`, id: p.id, name: p.name || 'محصول', img: p.img || (Array.isArray(p.images) ? p.images[0] : ''),
+        brand: p.brand || '', price: Number(p.price) || 0, old: Number(p.old) || Number(p.price) || 0,
+        disc: Number(p.disc) || 0, cat: normCat(p.category),
+        city: p.sellerCity || '', condition: (['new', 'like_new', 'used'].includes(p.condition) ? p.condition : 'new') as Cond,
+        createdAt: typeof p.id === 'number' && p.id > 1e12 ? p.id : null, source: 'user',
+      }))
+    }
+  } catch { /* ignore */ }
+  return [...user, ...base]
+}
+
+/* ── کارت محصول — همان فرمتِ عمودیِ کارت‌های فعلی بازار (ایزوله) ── */
+function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
   return (
-    <div className="bz-topbar" style={{
-      position: 'sticky', top: 0, zIndex: 150,
-      /* PWA اپل: تاپ‌بار نباید زیر ساعت/آنتن برود */
-      paddingTop: 'env(safe-area-inset-top)',
-      background: 'rgba(255,255,255,0.82)',
-      backdropFilter: 'blur(28px) saturate(1.8)',
-      WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
-      borderBottom: '1px solid rgba(255,255,255,0.6)',
-      boxShadow: '0 1px 0 rgba(28,28,26,0.06), 0 4px 28px rgba(28,28,26,0.06)',
-    }}>
-      <div className="bb-row" style={{
-        maxWidth: 1300, margin: '0 auto',
-        padding: '0 clamp(12px,3vw,32px)',
-        height: 60,
-        display: 'flex', alignItems: 'center', gap: 14,
-        direction: 'rtl',
-      }}>
-        {/* Brand */}
-        <Link href="/" className="bb-brandlink" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.28)' }}>
-            <img src="/images/Logo/logo-256x256.png" alt="بیلیارد بازار" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div className="bb-brand" style={{ display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
-            <span style={{ fontWeight: 900, fontSize: 18, letterSpacing: '-0.03em', color: '#1C1C1A', whiteSpace: 'nowrap' }}>بیلیارد <span style={{ color: GOLD }}>هاب</span></span>
-          </div>
-        </Link>
-        {/* دسته‌بندی‌ها — فقط موبایل، روبه‌روی برند. اسکرول نرم به باکس دسته‌بندی‌ها */}
-        <button
-          type="button"
-          className="bb-cats"
-          onClick={() => document.getElementById('bazaar-categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          style={{
-            alignItems: 'center', gap: 7, flexShrink: 0, cursor: 'pointer', fontFamily: 'inherit',
-            background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
-            borderRadius: 10, padding: '8px 12px',
-          }}
-        >
-          <LayoutGrid size={15} color="#9A6E38" strokeWidth={2.2} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#9A6E38', whiteSpace: 'nowrap' }}>دسته‌بندی‌ها</span>
-        </button>
-        {/* شکستِ خط در موبایل: برند+دسته‌بندی‌ها ردیف اول، سرچ+ورود ردیف دوم */}
-        <div className="bb-break" aria-hidden />
-        <div className="bb-divider" style={{ width: 1, height: 28, background: 'rgba(28,28,26,0.08)', flexShrink: 0 }} />
-        {/* Search */}
-        <form onSubmit={onSearch} className="bb-search" style={{ flex: 1, position: 'relative' }}>
-          <button type="submit" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, zIndex: 2, display: 'flex', alignItems: 'center' }}>
-            <Search size={16} color={focused ? GOLD : 'rgba(28,28,26,0.3)'} strokeWidth={2.2} />
-          </button>
-          {!searchInput && !focused && (
-            <div style={{ position: 'absolute', right: 40, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1, fontSize: 14, display: 'flex', alignItems: 'center', gap: 3, direction: 'rtl' }}>
-              <span style={{ color: 'rgba(28,28,26,0.35)' }}>جستجو در بیلیارد </span>
-              <span style={{ color: GOLD, opacity: 0.75, fontWeight: 600 }}>بازار</span>
-            </div>
-          )}
-          <input
-            value={searchInput}
-            onChange={e => onSearchInput(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder=""
-            style={{
-              width: '100%', height: 40,
-              background: focused ? 'rgba(255,255,255,0.85)' : LQ.bg,
-              backdropFilter: LQ.blur, WebkitBackdropFilter: LQ.blur,
-              border: focused ? `1.5px solid ${GOLD}` : LQ.border,
-              borderRadius: 10, padding: '0 40px 0 14px', fontSize: 14, outline: 'none',
-              boxShadow: focused ? `0 0 0 3px rgba(199,166,106,0.12),${LQ.shadow}` : LQ.shadow,
-              transition: 'all 0.25s', direction: 'rtl', fontFamily: 'inherit', color: TEXT,
-            }}
-          />
-        </form>
-        {/* Auth — logged-in profile chip removed; only the guest login button remains */}
-        {!user && (
-          <Link href="/login" className="bb-auth" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, background: LQ.bgGold, backdropFilter: LQ.blur, WebkitBackdropFilter: LQ.blur, border: LQ.borderGold, borderRadius: 10, padding: '8px 16px', boxShadow: LQ.shadowGold, transition: 'all 0.25s' }}>
-            <LogIn size={14} color={GOLD} strokeWidth={2.5} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: GOLD, whiteSpace: 'nowrap' }}>ورود | عضویت</span>
-          </Link>
+    <Link href={`/shop/${l.id}`} className="mk-card" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
+      <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
+        onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
+        <Bookmark size={16} />
+      </button>
+      <div className="mk-img">
+        <img src={l.img} alt={l.name} loading="lazy"
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+        {l.source === 'user' && l.createdAt && Date.now() - l.createdAt < 86400000 * 2 && (
+          <span className="mk-new"><Sparkles size={9} /> جدید</span>
         )}
       </div>
-    </div>
-  )
-}
-
-// ── Hero Slider ───────────────────────────────────────────────
-function HeroSlider() {
-  const [active, setActive] = useState(0)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const next = useCallback(() => setActive(i => (i + 1) % SLIDES.length), [])
-  useEffect(() => {
-    timerRef.current = setTimeout(next, 4500)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [active, next])
-  return (
-    <div className="hero-slider bz-hero" style={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#1C1C1A' }}>
-      {SLIDES.map((s, i) => (
-        <Link key={i} href={s.href} style={{ position: 'absolute', inset: 0, display: 'block', opacity: i === active ? 1 : 0, transform: i === active ? 'scale(1)' : 'scale(1.025)', transition: 'opacity 0.75s ease,transform 0.75s ease', pointerEvents: i === active ? 'auto' : 'none' }}>
-          <img src={s.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </Link>
-      ))}
-    </div>
-  )
-}
-
-// ── Categories Section ────────────────────────────────────────
-function CategoriesSection({ activeCat, onPick }: { activeCat: string | null; onPick: (id: string) => void }) {
-  const scrollRef  = useRef<HTMLDivElement>(null)
-  const dragging   = useRef(false)
-  const startX     = useRef(0)
-  const scrollLeft = useRef(0)
-  const [hovId, setHovId] = useState<string | null>(null)
-
-  const onDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return
-    e.preventDefault()
-    dragging.current   = true
-    startX.current     = e.pageX - scrollRef.current.offsetLeft
-    scrollLeft.current = scrollRef.current.scrollLeft
-    scrollRef.current.style.cursor = 'grabbing'
-    const stop = () => {
-      dragging.current = false
-      if (scrollRef.current) scrollRef.current.style.cursor = 'grab'
-      window.removeEventListener('mouseup', stop)
-      window.removeEventListener('mousemove', move)
-    }
-    const move = (ev: MouseEvent) => {
-      if (!scrollRef.current) return
-      const x = ev.pageX - scrollRef.current.offsetLeft
-      scrollRef.current.scrollLeft = scrollLeft.current - (x - startX.current) * 1.4
-    }
-    window.addEventListener('mouseup', stop)
-    window.addEventListener('mousemove', move)
-  }
-
-  return (
-    <div id="bazaar-categories" className="bz-categories" style={{ background: '#fff', overflow: 'visible', scrollMarginTop: 110 }}>
-      {/* بالا: ۲۰px پدینگ AdBanners + ۲۸ = ۴۸ | پایین: ۲۰ + ۲۸px پدینگ NewestSection = ۴۸
-          (فاصله‌ی باکس با سکشن بالا و پایین، در هر دو طرف قرینه) */}
-      <div className="cat-wrap" style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 20px', direction: 'rtl', overflow: 'visible' }}>
-        <div className="cat-box" style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(28,28,26,0.06)', boxShadow: '0 1px 6px rgba(28,28,26,0.05)', padding: '2px 10px', overflow: 'hidden' }}>
-        <div
-          ref={scrollRef}
-          className="cat-scroll"
-          onMouseDown={onDown}
-          style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 8, paddingTop: 6, cursor: 'grab', userSelect: 'none' }}
-        >
-          {CATS.map(cat => {
-            const active = activeCat === cat.id
-            const hov = hovId === cat.id || active
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                className="cat-tile"
-                onClick={() => onPick(cat.id)}
-                draggable={false}
-                onMouseEnter={() => setHovId(cat.id)}
-                onMouseLeave={() => setHovId(null)}
-                style={{
-                  textDecoration: 'none', flexShrink: 0, fontFamily: 'inherit',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-                  width: 78,
-                  /* white card background removed — just the icon tile + label */
-                  background: 'transparent', border: 'none', boxShadow: 'none',
-                  borderRadius: 21,
-                  padding: '10px 8px 6px',
-                  transform: hov ? 'translateY(-5px)' : 'none',
-                  transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1)',
-                  cursor: 'pointer',
-                  position: 'relative', overflow: 'visible',
-                }}
-              >
-                {/* تست: دایره برداشته شد — زمینه/بوردر/گلوی دایره حذف، فقط خودِ ایکون.
-                   ابعاد ۶۲×۶۲ نگه داشته شد تا چیدمان و جای برچسب تکان نخورد. */}
-                <div className="cat-icn" style={{
-                  width: 62, height: 62, flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: cat.g[1],
-                  position: 'relative', zIndex: 1,
-                  opacity: active ? 1 : 0.9,
-                  transition: 'opacity 0.3s ease',
-                }}>
-                  {/* ایکونِ تصویری (میز/چوب) بدون گلوی رنگی و اسکیل؛ بقیه SVGِ خطی با اسکیل ۱.۵ */}
-                  {(cat as { img?: string }).img ? (
-                    <img className={`cat-img${(cat as { imgBig?: boolean }).imgBig ? ' cat-img-lg' : ''}`} src={(cat as { img?: string }).img} alt={cat.label} draggable={false}
-                      style={{ objectFit: 'contain', display: 'block' }} />
-                  ) : (
-                    <div className="cat-icn-in" style={{ filter: `drop-shadow(0 0 4px ${cat.g[1]}99)`, transform: 'scale(1.5)' }}>
-                      {cat.icon}
-                    </div>
-                  )}
-                </div>
-                <span className="cat-lbl" style={{ fontSize: 14.5, fontWeight: 600, color: TEXT, textAlign: 'center', lineHeight: 1.3, position: 'relative', zIndex: 1 }}>
-                  {cat.label}
-                </span>
-              </button>
-            )
-          })}
+      <div className="mk-body">
+        <span className="mk-name">{l.brand ? `${l.name}` : l.name}</span>
+        <div className="mk-meta">
+          <MapPin size={10} style={{ color: GOLD, flexShrink: 0 }} />
+          <span>{l.city || 'ایران'}</span>
+          <span className="mk-cond">{COND_LABEL[l.condition]}</span>
         </div>
+        <div className="mk-priceline">
+          {l.disc > 0 && <span className="mk-pct" dir="ltr">٪{toFa(l.disc)}</span>}
+          <div style={{ marginInlineStart: 'auto', textAlign: 'left' }}>
+            {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))}</div>}
+            <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></div>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
-// ── Countdown — تایمر معکوس چرخه‌ای بالای کارت‌های محصول ──
-const WEEK_MS = 7 * 24 * 3600 * 1000
-const DAY_MS  = 24 * 3600 * 1000
-/* لنگر چرخه: شمارش معکوس که از این تاریخ تکرار می‌شود (هیچ‌وقت منقضی نمی‌شود) */
-const CYCLE_ANCHOR = Date.UTC(2026, 6, 15, 0, 0, 0)
-
-function WeeklyCountdown({ onScroll, cycleMs = WEEK_MS }: { onScroll: (dir: 'prev' | 'next') => void; cycleMs?: number }) {
-  /* مقدار اولیه ثابت است تا SSR و کلاینت یکی باشند؛ بعد از mount مقدار واقعی محاسبه می‌شود */
-  const [rem, setRem] = useState(Math.floor(cycleMs / 1000))
-
-  useEffect(() => {
-    const tick = () => {
-      const now = Date.now()
-      // همیشه مرزِ بعدیِ چرخه ⇒ مقدار باقی‌مانده همیشه بین ۰ و طول چرخه است
-      const target = CYCLE_ANCHOR + (Math.floor((now - CYCLE_ANCHOR) / cycleMs) + 1) * cycleMs
-      setRem(Math.max(0, Math.floor((target - now) / 1000)))
-    }
-    tick()
-    const t = setInterval(tick, 1000)
-    return () => clearInterval(t)
-  }, [cycleMs])
-
-  const pad2 = (n: number) => toFa(String(n).padStart(2, '0'))
-  /* عرض ثابت برای هر عدد ⇒ با عوض‌شدن ثانیه هیچ‌چیز تکان نمی‌خورد و فاصله‌ها قرینه می‌ماند */
-  const numBox: React.CSSProperties = { display: 'inline-block', minWidth: 20, textAlign: 'center' }
-  /* چرخه‌ی ۲۴ ساعته روز ندارد ⇒ ساعت تا ۲۴ می‌رود و خانه‌ی روز نمایش داده نمی‌شود */
-  const showDays = cycleMs > DAY_MS
-  const d = Math.floor(rem / 86400)
-  const h = showDays ? Math.floor((rem % 86400) / 3600) : Math.floor(rem / 3600)
-  const m = Math.floor((rem % 3600) / 60)
-  const s = rem % 60
-
+/* ── ردیف افقی موبایل — به سبکِ دیوار با هویتِ بازار ── */
+function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
   return (
-    <div className="bz-cd" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap', margin: '42px 0 24px' }}>
-      {/* برچسب — سمت راستِ تایمر */}
-      <div className="bz-cd-label" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-        <span className="bz-blink bz-cd-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, boxShadow: `0 0 8px ${GOLD}`, flexShrink: 0 }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC, whiteSpace: 'nowrap' }}>زمان باقیمانده</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: TEXT_SEC, marginInlineStart: -3 }}>:</span>
-      </div>
-      {/* همه‌ی اعداد در یک باکس — طرح LQ — روز:ساعت:دقیقه:ثانیه */}
-      <div className="bz-cd-box" style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 7, padding: '5px 12px' }}>
-        <span className="bz-cd-num" style={{ fontSize: 15.4, fontWeight: 500, color: '#9A6E38', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums', direction: 'ltr', flexShrink: 0 }}>
-          {showDays && <><span style={numBox}>{pad2(d)}</span>:</>}
-          <span style={numBox}>{pad2(h)}</span>:<span style={numBox}>{pad2(m)}</span>:<span style={numBox}>{pad2(s)}</span>
+    <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
+      <div className="info">
+        <span className="ttl">{l.name}</span>
+        <span className="cnd">{COND_LABEL[l.condition]}</span>
+        {/* پیلِ ٪ کنارِ قیمتِ تخفیف‌خورده؛ قیمتِ اصلیِ خط‌خورده زیرش */}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
+          <span className="prc">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></span>
         </span>
-        {/* خط جداکننده — کل ارتفاع دکمه (marginBlock منفی پدینگ عمودی را خنثی می‌کند) */}
-        <span className="bz-cd-div" style={{ width: 1, alignSelf: 'stretch', marginBlock: -5, background: 'rgba(154,110,56,0.38)', flexShrink: 0 }} />
-        {/* marginInlineEnd منفی = در RTL کمی به سمت چپ (لبه‌ی باکس) */}
-        <Timer size={21.8} color="#F5C518" strokeWidth={2.2} style={{ flexShrink: 0, marginInlineEnd: -6 }} />
+        {l.disc > 0 && <span className="oldp">{toFa(l.old.toLocaleString('en-US'))}</span>}
+        <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
       </div>
-      {/* فلش‌های اسکرول کارت‌ها — سمت چپ */}
-      <div className="bz-cd-arrows" style={{ display: 'flex', gap: 5 }}>
-        {(['prev', 'next'] as const).map(dir => (
-          <button
-            key={dir} type="button" onClick={() => onScroll(dir)}
-            aria-label={dir === 'prev' ? 'کارت‌های قبلی' : 'کارت‌های بعدی'}
-            style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(28,28,26,0.13)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <svg viewBox="0 0 16 16" fill="none" width={13} height={13}>
-              {/* در RTL اولین فرزند سمت راست است ⇒ prev فلشِ راست‌رو و next فلشِ چپ‌رو می‌گیرد تا سرها پشت‌به‌هم (رو به بیرون) باشند */}
-              <path d={dir === 'prev' ? 'M6 3l5 5-5 5' : 'M10 3L5 8l5 5'} stroke={TEXT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+      <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
+        onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
+        <Bookmark size={16} />
+      </button>
+      <span className="pic">
+        <img src={l.img} alt={l.name} loading="lazy"
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+      </span>
+    </Link>
+  )
+}
+
+/* ── آکاردئون سایدبار ── */
+function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div style={{ borderBottom: `1px solid ${LINE}` }}>
+      <button type="button" onClick={() => setOpen(p => !p)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '14px 2px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: TEXT }}>{title}</span>
+        <ChevronDown size={14} style={{ color: MUT, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .3s cubic-bezier(.22,1,.36,1)' }} />
+      </button>
+      <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows .35s cubic-bezier(.22,1,.36,1)' }}>
+        <div style={{ overflow: 'hidden' }}>
+          <div style={{ paddingBottom: 14 }}>{children}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── انتخاب شهر — چندشهره، جستجو روی داده‌ی iran-geo ── */
+function CityPicker({ value, onToggle, onClear }: {
+  value: string[]; onToggle: (c: string) => void; onClear: () => void
+}) {
+  const [q, setQ] = useState('')
+  const all = useMemo(() => getProvinceNames().flatMap(p => getCities(p)), [])
+  const matches = useMemo(() => {
+    const t = q.trim()
+    if (!t) return []
+    return all.filter(c => c.includes(t)).slice(0, 12)
+  }, [q, all])
+  return (
+    <div>
+      {/* شهرهای انتخاب‌شده — با امکان حذفِ تکی */}
+      {value.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          {value.map(c => (
+            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.32)', borderRadius: 999, padding: '4px 10px' }}>
+              {c}
+              <button type="button" onClick={() => onToggle(c)}
+                style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
+                <X size={11} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      {/* ذره‌بین فقط نسبت به اینپوت وسط‌چین می‌شود، نه کلِ لیست */}
+      <div style={{ position: 'relative' }}>
+        <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
+        <input value={q} onChange={e => setQ(e.target.value)}
+          placeholder={value.length ? 'افزودن شهر دیگر…' : 'جستجوی شهر…'}
+          style={{ width: '100%', boxSizing: 'border-box', padding: '9px 30px 9px 10px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 12.5, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+      </div>
+      <div style={{ marginTop: 6, border: `1px solid ${LINE}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
+        {/* گزینه‌ی اول: کل ایران (حذف همه‌ی شهرها) */}
+        <button type="button" onClick={() => { onClear(); setQ('') }}
+          className="mk-cityopt"
+          style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: GOLD_D, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <MapPin size={12} /> کل ایران
+        </button>
+        {matches.map(c => (
+          <button key={c} type="button" onClick={() => { onToggle(c); setQ('') }}
+            className="mk-cityopt"
+            style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: value.includes(c) ? 800 : 600, color: value.includes(c) ? GOLD_D : SEC, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {c}
+            {value.includes(c) && <Check size={13} style={{ color: GOLD_D }} />}
           </button>
         ))}
       </div>
@@ -523,841 +244,557 @@ function WeeklyCountdown({ onScroll, cycleMs = WEEK_MS }: { onScroll: (dir: 'pre
   )
 }
 
-// ── Catalog Section — بخش اصلی فروش: فیلتر + مرتب‌سازی + گرید ──
-/* پوستر «هفته‌های بیلیاردی» — کارت اول ردیف محصولات.
-   نسبت تصویر ۱:۱٫۸۶۶ و کارت ۱:۲٫۲ است؛ با contain چیزی برش نمی‌خورد و
-   نوار بالا/پایین با زردِ خودِ پوستر (نمونه‌برداری‌شده) یکی می‌شود. */
-const PARTY_POSTER    = '/images/bazzar/week.png'
-const PARTY_POSTER_BG = '#FDB805'
-/* حداکثر محصولِ نمایش‌داده‌شده بین دو پوستر */
-const CATALOG_LIMIT = 10
+const SORTS = [
+  { id: 'relevant', label: 'مرتبط‌ترین' },
+  { id: 'newest',   label: 'جدیدترین' },
+  { id: 'cheap',    label: 'ارزان‌ترین' },
+  { id: 'expens',   label: 'گران‌ترین' },
+] as const
+type SortId = typeof SORTS[number]['id']
 
-/* ── فیزیک اسکرول کاروسل — کشیدن + اینرسی + حالت فنری در دو انتها ──────────────
-   scrollLeftِ بومی دست‌نخورده می‌ماند تا position:sticky کارت زرد کار کند؛ کششِ اضافه
-   از دو سر با transform روی خودِ اسکرول‌پورت شبیه‌سازی می‌شود (transform روی خودِ
-   اسکرول‌پورت به sticky دست نمی‌زند، چون sticky نسبت به همین اسکرول‌پورت حساب می‌شود).
-   نکته‌ی RTL: scrollLeft بین ‎-(scrollWidth-clientWidth) (انتها) و ۰ (ابتدا) است. */
-const MAX_OVER = 90                                              // بیشترین کششِ فنری (px)
-const DECAY    = 0.998                                           // اصطکاکِ اینرسی، به ازای هر میلی‌ثانیه
-/* میرایی: هرچه بیشتر بکشی، کمتر جلو می‌رود — به MAX_OVER نزدیک می‌شود ولی هرگز رد نمی‌کند */
-const rubber = (x: number) => (MAX_OVER * x) / (x + MAX_OVER)
+const TIME_OPTS = [
+  { id: 'all',  label: 'همه' },
+  { id: 'day',  label: '۲۴ ساعت اخیر' },
+  { id: 'week', label: 'هفته‌ی اخیر' },
+] as const
+type TimeId = typeof TIME_OPTS[number]['id']
 
-function useDragScroll() {
-  const ref       = useRef<HTMLDivElement>(null)
-  const dragged   = useRef(false)   // آیا واقعاً کشیده شد؟ (نه فقط یک کلیک ساده)
-  const startX    = useRef(0)
-  const startLeft = useRef(0)
-  const lastX     = useRef(0)
-  const lastT     = useRef(0)
-  const vel       = useRef(0)       // px بر میلی‌ثانیه
-  const over      = useRef(0)       // کششِ فعلی از دو سر (px)
-  const raf       = useRef(0)
+export default function MarketNewPage() {
+  const [listings, setListings] = useState<Listing[]>([])
+  const [ready, setReady] = useState(false)
 
-  const setOver = (v: number) => {
-    over.current = v
-    const el = ref.current
-    if (el) el.style.transform = v ? `translateX(${v.toFixed(2)}px)` : ''
+  /* فیلترها */
+  const [cat, setCat]       = useState('')
+  const [cities, setCities] = useState<string[]>([])
+  const [minP, setMinP]     = useState('')
+  const [maxP, setMaxP]     = useState('')
+  const [cond, setCond]     = useState<'' | Cond>('')
+  const [onlyDisc, setOnlyDisc] = useState(false)
+  const [time, setTime]     = useState<TimeId>('all')
+  const [sort, setSort]     = useState<SortId>('relevant')
+  const [q, setQ]           = useState('')
+  const [cityOpen, setCityOpen] = useState(false)
+  /* نشان‌ها — ذخیره‌ی محلی */
+  const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set())
+  const [showSaved, setShowSaved] = useState(false)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const cityRef = useRef<HTMLDivElement>(null)
+  const mCityRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setListings(loadListings())
+    try { setSavedKeys(new Set(JSON.parse(localStorage.getItem('bh_market_saved') ?? '[]'))) } catch {}
+    setReady(true)
+  }, [])
+  useEffect(() => {
+    const fn = (e: MouseEvent) => {
+      const inDesk = cityRef.current?.contains(e.target as Node)
+      const inMob  = mCityRef.current?.contains(e.target as Node)
+      if (!inDesk && !inMob) setCityOpen(false)
+    }
+    document.addEventListener('mousedown', fn)
+    return () => document.removeEventListener('mousedown', fn)
+  }, [])
+  const toggleCity = (c: string) =>
+    setCities(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
+  /* برچسبِ دکمه‌ی لوکیشن: کل ایران / تهران / تهران +۲ */
+  const cityBtnLabel = cities.length === 0 ? 'کل ایران'
+    : cities.length === 1 ? cities[0]
+    : `${cities[0]} +${toFa(cities.length - 1)}`
+
+  const toggleSave = (key: string) => {
+    setSavedKeys(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      try { localStorage.setItem('bh_market_saved', JSON.stringify([...next])) } catch {}
+      return next
+    })
   }
-  const limits = () => {
-    const el = ref.current
-    if (!el) return { min: 0, max: 0 }
-    return { min: -(el.scrollWidth - el.clientWidth), max: 0 }
-  }
-  const stop = () => { if (raf.current) cancelAnimationFrame(raf.current); raf.current = 0 }
 
-  /* بعد از رها کردن ماوس: اول اینرسی، و اگر به انتها خوردیم انرژی باقی‌مانده به کششِ فنری تبدیل و برگردانده می‌شود */
-  const glide = () => {
-    const el = ref.current
-    if (!el) return
-    let prev = performance.now()
-    const step = (now: number) => {
-      const dt = Math.min(32, now - prev)   // سقف dt تا با افت فریم پرش نکند
-      prev = now
-      if (over.current !== 0) {
-        const next = over.current * Math.pow(0.82, dt / 16)
-        setOver(Math.abs(next) < 0.5 ? 0 : next)
-        if (over.current === 0) { raf.current = 0; return }
-      } else {
-        vel.current *= Math.pow(DECAY, dt)
-        if (Math.abs(vel.current) < 0.015) { raf.current = 0; return }
-        const { min, max } = limits()
-        const next = el.scrollLeft + vel.current * dt
-        if (next <= min || next >= max) {
-          el.scrollLeft = next <= min ? min : max
-          setOver((vel.current > 0 ? -1 : 1) * rubber(Math.abs(vel.current) * 30))
-          vel.current = 0
-        } else el.scrollLeft = next
+  const counts = useMemo(() => {
+    const m: Record<string, number> = {}
+    listings.forEach(l => { m[l.cat] = (m[l.cat] ?? 0) + 1 })
+    return m
+  }, [listings])
+
+  const filtered = useMemo(() => {
+    const lo = parsePrice(minP), hi = parsePrice(maxP)
+    const term = q.trim()
+    let out = listings.filter(l => {
+      if (cat && l.cat !== cat) return false
+      if (cities.length > 0 && !cities.includes(l.city)) return false
+      if (lo != null && l.price < lo) return false
+      if (hi != null && l.price > hi) return false
+      if (cond && l.condition !== cond) return false
+      if (onlyDisc && l.disc <= 0) return false
+      if (time !== 'all') {
+        if (!l.createdAt) return false
+        const age = Date.now() - l.createdAt
+        if (time === 'day' && age > 86400000) return false
+        if (time === 'week' && age > 86400000 * 7) return false
       }
-      raf.current = requestAnimationFrame(step)
-    }
-    raf.current = requestAnimationFrame(step)
-  }
-
-  const onDown = (e: React.MouseEvent) => {
-    const el = ref.current
-    if (!el) return
-    e.preventDefault()
-    stop()
-    dragged.current   = false
-    vel.current       = 0
-    startX.current    = e.pageX
-    startLeft.current = el.scrollLeft
-    lastX.current     = e.pageX
-    lastT.current     = performance.now()
-    el.style.cursor   = 'grabbing'
-
-    const move = (ev: MouseEvent) => {
-      const el = ref.current
-      if (!el) return
-      const dx = ev.pageX - startX.current
-      if (Math.abs(dx) > 5) dragged.current = true   // آستانه‌ی ۵px
-      const now = performance.now()
-      const dt  = now - lastT.current
-      if (dt > 0) vel.current = ((ev.pageX - lastX.current) / dt) * -1.4
-      lastX.current = ev.pageX
-      lastT.current = now
-
-      const { min, max } = limits()
-      const target = startLeft.current - dx * 1.4
-      if (target > max)      { el.scrollLeft = max; setOver(-rubber(target - max)) }   // از ابتدا رد شدیم
-      else if (target < min) { el.scrollLeft = min; setOver(rubber(min - target)) }    // از انتها رد شدیم
-      else                   { el.scrollLeft = target; if (over.current) setOver(0) }
-    }
-    const up = () => {
-      if (ref.current) ref.current.style.cursor = 'grab'
-      window.removeEventListener('mousemove', move)
-      window.removeEventListener('mouseup', up)
-      glide()
-    }
-    window.addEventListener('mousemove', move)
-    window.addEventListener('mouseup', up)
-  }
-
-  /* بعد از کشیدن، کلیکِ ناشی از رها کردنِ ماوس نباید صفحه‌ی محصول را باز کند */
-  const onClickCapture = (e: React.MouseEvent) => {
-    if (dragged.current) { e.preventDefault(); e.stopPropagation() }
-  }
-  const scrollBy = (dir: 'prev' | 'next') => {
-    stop()
-    ref.current?.scrollBy({ left: dir === 'next' ? 520 : -520, behavior: 'smooth' })
-  }
-
-  useEffect(() => stop, [])   // پاک‌سازی rAF هنگام unmount
-
-  return { ref, onDown, onClickCapture, scrollBy }
-}
-
-/* کارت پوستر — اولِ ردیف با «مشاهده همه»، آخرِ ردیف با فلش */
-function PartyPosterCard({ href, variant }: { href: string; variant: 'cta' | 'arrow' }) {
-  return (
-    <Link href={href} draggable={false} className={`bz-scroll-card${variant === 'cta' ? ' bz-sticky-first' : ''}`} style={{
-      textDecoration: 'none', flexShrink: 0, borderRadius: 10, overflow: 'hidden',
-      /* کارت اول می‌چسبد (آفست و z-index از کلاس bz-sticky-first می‌آید)؛ کارت آخر عادی است.
-         sticky هم مثل relative برای فرزندانِ absolute کانتینینگ‌بلاک می‌سازد. */
-      position: variant === 'cta' ? 'sticky' : 'relative',
-      display: 'block', background: PARTY_POSTER_BG, border: '1.5px solid rgba(150,100,0,0.22)',
-    }}>
-      <img
-        src={PARTY_POSTER} alt="هفته‌های بیلیاردی — تخفیف‌های این هفته" draggable={false}
-        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-      />
-      {variant === 'cta' ? (
-        <span style={{
-          position: 'absolute', bottom: 16, insetInline: 0, zIndex: 2,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-          fontSize: 12.5, fontWeight: 500, color: '#5A3200',
-        }}>
-          مشاهده همه
-          <ChevronLeft size={13} strokeWidth={2.2} />
-        </span>
-      ) : (
-        /* فلش — کادر و آیکونِ خاکستریِ واضح */
-        <span style={{ position: 'absolute', bottom: 26, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center' }}>
-          <span style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'rgba(255,255,255,0.5)', border: '1.5px solid rgba(28,28,26,0.38)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg viewBox="0 0 16 16" fill="none" width={15} height={15}>
-              <path d="M10 3L5 8l5 5" stroke="rgba(28,28,26,0.62)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </span>
-      )}
-    </Link>
-  )
-}
-
-/* پوسترهای آگهی زیر کارت‌های کاتالوگ — ۲ ردیف × ۲ ستون */
-const CATALOG_AD_POSTERS = [
-  { img: '/images/ads/3.webp', href: '/shop/category/table' },
-  { img: '/images/ads/4.webp', href: '/shop/category/cue' },
-  { img: '/images/ads/2.webp', href: '/shop/category/ball' },
-  { img: '/images/ads/6.gif',  href: '/shop/category/accessory' },
-]
-
-type SortKey = 'newest' | 'price-asc' | 'price-desc' | 'disc'
-
-interface CatalogFilters {
-  cats: Set<string>; sellers: Set<string>
-  priceFrom: string; priceTo: string; discOnly: boolean
-  minRating: number | null
-}
-
-function CatalogSection({
-  products, filters, sort,
-}: {
-  products: typeof PRODUCTS
-  filters: CatalogFilters
-  setFilters: React.Dispatch<React.SetStateAction<CatalogFilters>>
-  sort: SortKey
-  setSort: (v: SortKey) => void
-}) {
-  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
-
-  const visible = (() => {
-    const from = parsePriceInput(filters.priceFrom)
-    const to   = parsePriceInput(filters.priceTo)
-    const list = products.filter(p => {
-      const c = (p as { cat?: string }).cat ?? 'other'
-      if (filters.cats.size && !filters.cats.has(c)) return false
-      if (filters.sellers.size && !filters.sellers.has(p.sellerName)) return false
-      if (filters.discOnly && !(p.disc > 0)) return false
-      if (filters.minRating !== null && p.rating < filters.minRating) return false
-      if (from !== null && p.price < from) return false
-      if (to !== null && p.price > to) return false
+      if (term && !(`${l.name} ${l.brand}`.includes(term))) return false
+      if (showSaved && !savedKeys.has(l.key)) return false
       return true
     })
-    const sorted = [...list]
-    if (sort === 'price-asc')  sorted.sort((a, b) => a.price - b.price)
-    if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price)
-    if (sort === 'disc')       sorted.sort((a, b) => b.disc - a.disc)
-    return sorted
-  })()
+    if (sort === 'cheap')  out = [...out].sort((a, b) => a.price - b.price)
+    if (sort === 'expens') out = [...out].sort((a, b) => b.price - a.price)
+    if (sort === 'newest') out = [...out].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+    return out
+  }, [listings, cat, cities, minP, maxP, cond, onlyDisc, time, q, sort, showSaved, savedKeys])
 
-  const panelCard: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-    border: '1px solid rgba(255,255,255,0.75)', borderRadius: 18,
-    boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 28px rgba(28,28,26,0.07)',
-    padding: '16px 16px 14px',
-  }
+  const chips: { label: string; clear: () => void }[] = []
+  if (cat)      chips.push({ label: catLabel(cat), clear: () => setCat('') })
+  cities.forEach(c => chips.push({ label: c, clear: () => toggleCity(c) }))
+  if (cond)     chips.push({ label: COND_LABEL[cond], clear: () => setCond('') })
+  if (onlyDisc) chips.push({ label: 'تخفیف‌دار', clear: () => setOnlyDisc(false) })
+  if (time !== 'all') chips.push({ label: TIME_OPTS.find(t => t.id === time)!.label, clear: () => setTime('all') })
+  if (parsePrice(minP) != null || parsePrice(maxP) != null)
+    chips.push({ label: 'محدوده‌ی قیمت', clear: () => { setMinP(''); setMaxP('') } })
+  const clearAll = () => { setCat(''); setCities([]); setMinP(''); setMaxP(''); setCond(''); setOnlyDisc(false); setTime('all'); setQ('') }
 
-  const { ref: scrollRef, onDown, onClickCapture, scrollBy } = useDragScroll()
-
-  return (
-    <div id="bazaar-catalog" style={{ background: '#fff' }}>
-      {/* پدینگ پایین صفر: فاصله‌ی این سکشن تا تایمرِ سکشن پارتی را خودِ پارتی می‌سازد
-          (۱۰ پدینگ بالا + ۴۲ مارجین تایمر = ۵۲) — دقیقاً برابرِ فاصله‌ی هیرو تا تایمر همین سکشن.
-          با ۴۰px پدینگِ پایین، فاصله‌ی پارتی ۹۲px می‌شد و با بالایی قرینه نبود. */}
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '10px clamp(16px,3vw,32px) 0', direction: 'rtl' }}>
-
-
-        <WeeklyCountdown onScroll={scrollBy} />
-
-        {/* گرید محصولات */}
-        <div className="bz-catalog">
-          <div>
-            <div ref={scrollRef} onMouseDown={onDown} onClickCapture={onClickCapture} className="bz-grid" style={{ display: 'flex', gap: 21, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none', paddingBottom: 8 }}>
-
-              {/* پوستر — کارت اول از سمت راست */}
-              <PartyPosterCard href="/shop" variant="cta" />
-
-              {visible.slice(0, CATALOG_LIMIT).map(p => (
-                <Link key={p.id} href={`/shop/${p.id}`} draggable={false} className="prod-card bz-scroll-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-                  <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-                    <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div className="pc-body" style={{ padding: '21px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      {p.disc > 0 && (
-                        <span className="pc-disc" dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          ٪{toFa(p.disc)}
-                        </span>
-                      )}
-                      <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
-                        {p.disc > 0 && (
-                          <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3, fontVariantNumeric: 'tabular-nums' }}>
-                            {fmt(p.old)} <span style={{ fontSize: 10.6, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>تومان</span>
-                          </div>
-                        )}
-                        <div style={{ fontSize: 15.5, fontWeight: 700, color: TEXT, fontVariantNumeric: 'tabular-nums' }}>
-                          {fmt(p.price)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-
-              {/* پوستر — کارت آخر (سمت چپ) با فلش. TODO: مقصد نهایی را کاربر بعداً مشخص می‌کند */}
-              <PartyPosterCard href="/shop" variant="arrow" />
-            </div>
-
-            {visible.length === 0 && (
-              <div style={{ ...panelCard, textAlign: 'center', padding: '48px 20px', fontSize: 13.5, color: TEXT_SEC }}>
-                کالایی یافت نشد.
-              </div>
-            )}
-
-            {/* پوسترهای آگهی — ۲ ردیف × ۲ ستون در همه‌ی اندازه‌ها */}
-            <div className="bz-sec1-ads" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginTop: 18 }}>
-              {CATALOG_AD_POSTERS.map((ad, i) => (
-                <Link key={i} href={ad.href} className="cat-ad-poster" style={{ display: 'block', borderRadius: 12, overflow: 'hidden', border: '1.5px solid rgba(28,28,26,0.1)', lineHeight: 0 }}>
-                  <img src={ad.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Deals Section ─────────────────────────────────────────────
-const DEAL_PRODUCTS = [...PRODUCTS, ...PRODUCTS].slice(0, 12)
-
-/* کارت «بیلیارد پارتی» — مثل PartyPosterCard در sec1 دو حالت دارد:
-   cta = کارت اول از راست، arrow = کارت آخر (سمت چپ) */
-function PartyPromoCard({ href, variant }: { href: string; variant: 'cta' | 'arrow' }) {
-  return (
-    <Link href={href} draggable={false} className="bz-scroll-card" style={{
-      textDecoration: 'none', flexShrink: 0,
-      borderRadius: 10,
-      background: 'linear-gradient(155deg,#1A0A30 0%,#2E1060 35%,#6B2FA0 65%,#C7690A 100%)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '22px 12px 18px', gap: 0,
-      position: 'relative', overflow: 'hidden',
-      border: '1.5px solid rgba(199,166,106,0.45)',
-      boxShadow: '0 2px 8px rgba(100,30,160,0.14), inset 0 1px 0 rgba(255,255,255,0.1)',
-    }}>
-      {/* rays SVG */}
-      <svg viewBox="0 0 160 160" width={160} height={160} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-54%)', opacity: 0.18, pointerEvents: 'none' }}>
-        {Array.from({ length: 12 }, (_, i) => {
-          const a = (i * 30) * Math.PI / 180
-          /* گرد می‌کنیم چون Math.cos/sin در Node و مرورگر در رقم‌های آخر فرق دارند ⇒ hydration mismatch */
-          const r = (v: number) => Math.round(v * 1000) / 1000
-          return <line key={i} x1={80} y1={80} x2={r(80 + Math.cos(a) * 90)} y2={r(80 + Math.sin(a) * 90)} stroke="#FFE566" strokeWidth="1.5" />
-        })}
-      </svg>
-      {/* top glow */}
-      <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', width: 120, height: 80, borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(255,210,0,0.28) 0%,transparent 70%)', pointerEvents: 'none' }} />
-      {/* 3D % badge */}
-      <div style={{ position: 'relative', zIndex: 2, marginBottom: 10,
-        width: 60, height: 60, borderRadius: '50%',
-        background: 'linear-gradient(145deg,#2A1400 0%,#0D0D10 100%)',
-        border: '1.5px solid rgba(255,190,30,0.5)',
-        boxShadow: 'inset 0 -3px 8px rgba(255,160,0,0.35), inset 0 2px 4px rgba(255,255,255,0.08), 0 6px 20px rgba(0,0,0,0.55)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <span style={{
-          fontSize: 26, fontWeight: 900, lineHeight: 1,
-          background: 'linear-gradient(160deg,#FFE566 0%,#FFAA00 45%,#FF6500 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))',
-          fontFamily: "'Playfair Display', Georgia, serif",
-        }}>%</span>
-      </div>
-      {/* text */}
-      <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', lineHeight: 1.1 }}>
-        <div style={{
-          fontSize: 16, fontWeight: 700, fontStyle: 'italic',
-          fontFamily: "'Playfair Display', Georgia, serif",
-          background: 'linear-gradient(90deg,#FFD580,#FFB347)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          letterSpacing: '0.01em', marginBottom: 3,
-        }}>بیلیارد</div>
-        <div style={{
-          fontSize: 28, fontWeight: 900, fontStyle: 'italic',
-          fontFamily: "'Playfair Display', Georgia, serif",
-          background: 'linear-gradient(150deg,#fff 0%,#FFE8A0 55%,#FFC200 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          filter: 'drop-shadow(0 2px 8px rgba(255,160,0,0.55))',
-          letterSpacing: '-0.01em',
-        }}>پارتی</div>
-      </div>
-      {/* پایین کارت — مثل sec1: «مشاهده همه» یا فلش */}
-      {variant === 'cta' ? (
-        <span style={{
-          position: 'absolute', bottom: 26, insetInline: 0, zIndex: 2,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-          fontSize: 12.5, fontWeight: 500, color: '#FFE8A0',
-        }}>
-          مشاهده همه
-          <ChevronLeft size={13} strokeWidth={2.2} />
-        </span>
-      ) : (
-        <span style={{ position: 'absolute', bottom: 26, insetInline: 0, zIndex: 2, display: 'flex', justifyContent: 'center' }}>
-          <span style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'rgba(255,255,255,0.12)', border: '1.5px solid rgba(255,255,255,0.45)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg viewBox="0 0 16 16" fill="none" width={15} height={15}>
-              <path d="M10 3L5 8l5 5" stroke="rgba(255,255,255,0.85)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </span>
-      )}
-    </Link>
-  )
-}
-
-function DealsSection({ userProds = [] }: { userProds?: typeof PRODUCTS }) {
-  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
-  const dealProducts = [...userProds, ...DEAL_PRODUCTS]
-
-  const { ref: scrollRef, onDown, onClickCapture, scrollBy } = useDragScroll()
-
-  return (
-    <div style={{ background: '#fff' }}>
-      {/* پدینگ پایین صفر است تا فاصله‌ی کارت‌ها تا بنرهای تبلیغاتی همان ۱۸px سکشن sec1 شود
-          (۱۸px از پدینگ بالای AdBanners می‌آید) */}
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '10px clamp(16px,3vw,32px) 0', direction: 'rtl' }}>
-
-        <WeeklyCountdown onScroll={scrollBy} cycleMs={DAY_MS} />
-
-        {/* گرید محصولات */}
-        <div className="bz-catalog">
-          <div>
-            <div ref={scrollRef} onMouseDown={onDown} onClickCapture={onClickCapture} className="bz-grid" style={{ display: 'flex', gap: 21, overflowX: 'auto', scrollbarWidth: 'none', cursor: 'grab', userSelect: 'none', paddingBottom: 8 }}>
-
-          {/* بیلیارد پارتی — کارت اول از سمت راست */}
-          <PartyPromoCard href="/shop/party" variant="cta" />
-
-          {/* deal product cards — دقیقاً همان مارک‌آپ کارت‌های sec1 */}
-          {dealProducts.map((p, i) => (
-            <Link key={`${p.id}-${i}`} href={`/shop/${p.id}`} draggable={false} className="prod-card bz-scroll-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-              <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-                <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div className="pc-body" style={{ padding: '21px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {p.disc > 0 && (
-                    <span className="pc-disc" dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      ٪{toFa(p.disc)}
-                    </span>
-                  )}
-                  <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
-                    {p.disc > 0 && (
-                      <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3, fontVariantNumeric: 'tabular-nums' }}>
-                        {fmt(p.old)} <span style={{ fontSize: 10.6, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>تومان</span>
-                      </div>
-                    )}
-                    <div style={{ fontSize: 15.5, fontWeight: 700, color: TEXT, fontVariantNumeric: 'tabular-nums' }}>
-                      {fmt(p.price)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-
-          {/* بیلیارد پارتی — کارت آخر (سمت چپ) با فلش. TODO: مقصد نهایی را کاربر بعداً مشخص می‌کند */}
-          <PartyPromoCard href="/shop/party" variant="arrow" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Ad Banners ─────────────────────────────────────────────────
-const AD_BANNERS = [
-  { img: '/images/shop/cue_billiard_2.jpg',  title: 'چوب‌های اصل', sub: 'اینجا پیدا میشه!',        cta: 'خرید',      href: '/shop/category/cue',       overlay: 'linear-gradient(135deg,rgba(80,35,5,0.72),rgba(160,90,20,0.52))' },
-  { img: '/images/shop/Pro_table.jpg',        title: 'به‌وقت با هم بودن', sub: 'میزهای حرفه‌ای',   cta: 'خرید',      href: '/shop/category/table',     overlay: 'linear-gradient(135deg,rgba(5,50,20,0.70),rgba(20,100,50,0.48))' },
-  { img: '/images/shop/Ball-1.jpg',           title: 'هر توپ یک قهرمانی', sub: 'Aramith · Cyclop', cta: 'خرید',      href: '/shop/category/ball',      overlay: 'linear-gradient(135deg,rgba(100,10,10,0.72),rgba(200,40,40,0.46))' },
-  { img: '/images/shop/accessori.png',        title: 'تجهیزات کامل',  sub: 'لوازم جانبی حرفه‌ای',  cta: 'مشاهده',   href: '/shop/category/accessory', overlay: 'linear-gradient(135deg,rgba(100,70,5,0.72),rgba(199,166,106,0.5))' },
-]
-
-function AdBanners() {
-  /* ۱۸px بالا = همان فاصله‌ی کارت‌ها تا پوسترهای آگهی در sec1 */
-  return (
-    <div style={{ background: '#fff', padding: '18px 0 20px' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', direction: 'rtl' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }} className="banner-grid">
-          {AD_BANNERS.map((b, i) => (
-            <Link key={i} href={b.href} className="banner-card" style={{
-              textDecoration: 'none', borderRadius: 14, overflow: 'hidden',
-              height: 135, position: 'relative', display: 'block',
-              border: '1.5px solid rgba(28,28,26,0.1)',
-            }}>
-              <img src={b.img} alt={b.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-              <div style={{ position: 'absolute', inset: 0, background: b.overlay }} />
-              <div style={{ position: 'absolute', inset: 0, padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.3, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>{b.title}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 3, fontWeight: 500 }}>{b.sub}</div>
-                </div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#fff', color: '#1C1C1A', fontSize: 12, fontWeight: 700, borderRadius: 8, padding: '5px 12px', alignSelf: 'flex-start' }}>
-                  {b.cta}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Newest Section ────────────────────────────────────────────
-function NewestSection({ products, userProds = [] }: { products: typeof PRODUCTS; userProds?: typeof PRODUCTS }) {
-  const fmt = (n: number) => toFa(n.toLocaleString('fa-IR'))
-  /* محصولاتِ تازه‌ی کاربر اول، بعد کاتالوگِ نمونه (وارونه، جدیدترین اول) */
-  const newestProducts = [...userProds, ...[...products].reverse()]
-  return (
-    <div style={{ background: '#fff' }}>
-      {/* پدینگ پایین صفر است تا فاصله‌ی کارت‌ها تا بنرهای تبلیغاتیِ زیرش همان ۱۸px سکشن sec1 شود
-          (۱۸px از پدینگ بالای DualBannerSection می‌آید) */}
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px clamp(16px,3vw,32px) 0', direction: 'rtl' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 19, fontWeight: 600, color: TEXT, margin: 0 }}>جدیدترین ها</h2>
-          {/* دکمه — طرح LQ، دقیقاً هم‌رنگ و هم‌فرمِ دکمه‌ی تایمر (radius ۷ و padding یکسان) */}
-          <Link href="/shop/newest" style={{
-            fontSize: 13, fontWeight: 500, color: '#9A6E38', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center', gap: 3,
-            background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
-            borderRadius: 7, padding: '5px 12px',
-          }}>
-            مشاهده همه
-            <ChevronLeft size={13} strokeWidth={2.2} />
-          </Link>
-        </div>
-        {/* گرید و چندسطری می‌ماند (بدون اسکرول افقی)، ولی کارت‌ها دقیقاً هم‌اندازه و هم‌فونتِ sec1 هستند.
-            عرض ستون‌ها از .prod-grid می‌آید که همان ۱۷۶/۱۴۵px کارت‌های sec1 است.
-            gap واحد ⇒ فاصله‌ی بالا/پایین دقیقاً برابرِ فاصله‌ی چپ/راست.
-            space-between فقط در موبایل اثر دارد (آنجا ستون‌ها عرضِ ثابت دارند) تا ته سطر جای خالی نماند. */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 22.8, justifyContent: 'space-between' }} className="prod-grid">
-          {/* aspectRatio ۲.۰۳۷ = ۲.۱۴۴ × ۰.۹۵ — ۵٪ کوتاه‌تر (عرض ثابت مانده، پس کلِ کاهش روی ارتفاع می‌نشیند) */}
-          {newestProducts.map(p => (
-            <Link key={`new-${p.id}`} href={`/shop/${p.id}`} draggable={false} className="prod-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', aspectRatio: '1 / 1.935' }}>
-              <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-                <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
-              </div>
-              <div className="pc-body" style={{ padding: '21px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span className="pc-name" style={{ fontSize: 14.5, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {p.disc > 0 && (
-                    <span className="pc-disc" dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 999, padding: '4px 10px 2px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      ٪{toFa(p.disc)}
-                    </span>
-                  )}
-                  <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
-                    {p.disc > 0 && (
-                      <div style={{ fontSize: 12.3, color: TEXT_SEC, textDecoration: 'line-through', lineHeight: 1.1, marginTop: 3, marginBottom: -3, fontVariantNumeric: 'tabular-nums' }}>
-                        {fmt(p.old)} <span style={{ fontSize: 10.6, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>تومان</span>
-                      </div>
-                    )}
-                    <div style={{ fontSize: 15.5, fontWeight: 700, color: TEXT, fontVariantNumeric: 'tabular-nums' }}>
-                      {fmt(p.price)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Dual Banner Sliders ────────────────────────────────────────
-const DUAL_BANNERS = [
-  {
-    slides: [
-      { img: '/images/shop/cue_billiard_2.jpg', title: 'چوب‌های اصل', sub: 'از کلاسیک تا کربن فایبر', overlay: 'linear-gradient(to top,rgba(50,20,0,0.88) 0%,rgba(50,20,0,0.25) 55%,transparent 100%)' },
-      { img: '/images/shop/cue_billiard.jpg',   title: 'چوب کربن فایبر', sub: 'سبک · مقاوم · دقیق',    overlay: 'linear-gradient(to top,rgba(10,25,60,0.88) 0%,rgba(10,25,60,0.25) 55%,transparent 100%)' },
-      { img: '/images/shop/pool_chalk_1.jpg',   title: 'گچ و لوازم جانبی', sub: 'کامل‌ترین انتخاب',   overlay: 'linear-gradient(to top,rgba(40,5,55,0.88) 0%,rgba(40,5,55,0.25) 55%,transparent 100%)' },
-    ],
-    href: '/shop/category/cue',
-    cta: 'مشاهده',
-  },
-  {
-    slides: [
-      { img: '/images/shop/Pro_table.jpg',      title: 'میزهای حرفه‌ای',  sub: 'برای کلاب و مسابقه',     overlay: 'linear-gradient(to top,rgba(5,40,18,0.88) 0%,rgba(5,40,18,0.25) 55%,transparent 100%)' },
-      { img: '/images/shop/Home_table.jpg',     title: 'میز خانگی',       sub: 'طراحی زیبا · قیمت مناسب', overlay: 'linear-gradient(to top,rgba(40,18,5,0.88) 0%,rgba(40,18,5,0.25) 55%,transparent 100%)' },
-      { img: '/images/shop/snooker-table.jpg',  title: 'میز اسنوکر',      sub: 'استاندارد WPBSA',          overlay: 'linear-gradient(to top,rgba(5,18,50,0.88) 0%,rgba(5,18,50,0.25) 55%,transparent 100%)' },
-    ],
-    href: '/shop/category/table',
-    cta: 'مشاهده',
-  },
-]
-
-function BannerSlideCard({ banner }: { banner: typeof DUAL_BANNERS[0] }) {
-  const [idx, setIdx] = useState(0)
-
-  useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % banner.slides.length), 3500)
-    return () => clearInterval(t)
-  }, [banner.slides.length])
-
-  const slide = banner.slides[idx] ?? banner.slides[0]
-  if (!slide) return null
-
-  return (
-    <div style={{ flex: 1, minWidth: 0, borderRadius: 16, overflow: 'hidden', position: 'relative', height: 173, border: '1.5px solid rgba(28,28,26,0.10)' }}>
-      {/* slides */}
-      {banner.slides.map((s, i) => (
-        <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === idx ? 1 : 0, transition: 'opacity 0.7s ease' }}>
-          <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
-          <div style={{ position: 'absolute', inset: 0, background: s.overlay }} />
-        </div>
-      ))}
-      {/* text + cta */}
-      <div style={{ position: 'absolute', inset: 0, padding: '0 18px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', direction: 'rtl' }}>
-        <div style={{ fontSize: 19, fontWeight: 900, color: '#fff', lineHeight: 1.25, textShadow: '0 2px 10px rgba(0,0,0,0.5)', transition: 'opacity 0.4s', opacity: 1 }}>{slide.title}</div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.78)', marginTop: 5, marginBottom: 14, fontWeight: 500 }}>{slide.sub}</div>
-        <Link href={banner.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#fff', color: '#1C1C1A', fontSize: 12, fontWeight: 700, borderRadius: 8, padding: '6px 14px', textDecoration: 'none', alignSelf: 'flex-start' }}>
-          {banner.cta}
-          <ChevronLeft size={12} strokeWidth={2.5} />
-        </Link>
-      </div>
-      {/* dots */}
-      <div style={{ position: 'absolute', bottom: 14, right: 0, left: 0, display: 'flex', justifyContent: 'center', gap: 5, zIndex: 2 }}>
-        {banner.slides.map((_, i) => (
-          <div key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? 20 : 6, height: 6, borderRadius: 3, background: i === idx ? '#fff' : 'rgba(255,255,255,0.42)', transition: 'width 0.35s, background 0.35s', cursor: 'pointer' }} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function DualBannerSection() {
-  return (
-    <div style={{ background: '#fff', borderBottom: '1px solid rgba(28,28,26,0.07)' }}>
-      {/* ۱۸px بالا = همان فاصله‌ی کارت‌ها تا پوسترهای آگهی در sec1 */}
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) 20px', direction: 'rtl' }}>
-        <div style={{ display: 'flex', gap: 12 }} className="dual-banner">
-          {DUAL_BANNERS.map((b, i) => <BannerSlideCard key={i} banner={b} />)}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Main Page ─────────────────────────────────────────────────
-export default function ShopPage() {
-  const [searchInput, setSearchInput] = useState('')
-  const [userProds, setUserProds] = useState<typeof PRODUCTS>([])
-  const user      = useAuthStore(s => s.user)
-
-  /* فیلترهای کاتالوگ اصلی */
-  const [filters, setFilters] = useState<CatalogFilters>({
-    cats: new Set(), sellers: new Set(), priceFrom: '', priceTo: '', discOnly: false, minRating: null,
-  })
-  const [sort, setSort] = useState<SortKey>('newest')
-
-  /* کلیک روی چیپ دسته‌بندی → فیلتر همان دسته + اسکرول به کاتالوگ */
-  const pickCategory = (id: string) => {
-    setFilters(f => {
-      const isActive = f.cats.size === 1 && f.cats.has(id)
-      return { ...f, cats: isActive ? new Set() : new Set([id]) }
-    })
-    document.getElementById('bazaar-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-  const activeSingleCat = filters.cats.size === 1 ? [...filters.cats][0]! : null
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
-      if (Array.isArray(stored) && stored.length > 0) setUserProds(stored)
-    } catch { /* ignore */ }
-  }, [])
-
-  /* محصولاتِ ثبت‌شده‌ی کاربر بر اساسِ سکشنی که هنگام ثبت انتخاب کرده به سه دسته تقسیم می‌شوند:
-     weekly ⇒ «هفته‌های بیلیاردی» (sec1) | party ⇒ «بیلیارد پارتی» | بقیه ⇒ «جدیدترین‌ها». */
-  const weeklyProds = userProds.filter(p => (p as { section?: string }).section === 'weekly')
-  const partyProds  = userProds.filter(p => (p as { section?: string }).section === 'party')
-  const newestProds = userProds.filter(p => { const s = (p as { section?: string }).section; return !s || s === 'newest' })
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchInput.trim()) {
-      window.location.href = `/shop/search?q=${encodeURIComponent(searchInput.trim())}`
-    }
-  }
-
-  return (
+  /* بدنه‌ی فیلترها — مشترک بین سایدبار دسکتاپ و کشوی موبایل */
+  const FilterBody = (
     <>
+      <Section title="دسته‌بندی">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <button type="button" onClick={() => setCat('')}
+            className={`mk-catrow${cat === '' ? ' on' : ''}`}>
+            <span className="ic" style={{ background: 'rgba(199,166,106,0.13)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Store size={15} style={{ color: GOLD_D }} />
+            </span>
+            <span className="lb">همه‌ی دسته‌ها</span>
+            <span className="ct">{toFa(listings.length)}</span>
+          </button>
+          {CATS_M.map(c => (
+            <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
+              className={`mk-catrow${cat === c.id ? ' on' : ''}`}>
+              <span className="ic"><img src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
+              <span className="lb">{c.label}</span>
+              <span className="ct">{toFa(counts[c.id] ?? 0)}</span>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="شهر">
+        <CityPicker value={cities} onToggle={toggleCity} onClear={() => setCities([])} />
+      </Section>
+
+      <Section title="قیمت (تومان)">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input value={minP} onChange={e => setMinP(e.target.value)} placeholder="از" inputMode="numeric" className="mk-pricein" />
+          <span style={{ color: MUT, fontSize: 12 }}>تا</span>
+          <input value={maxP} onChange={e => setMaxP(e.target.value)} placeholder="تا" inputMode="numeric" className="mk-pricein" />
+        </div>
+      </Section>
+
+      <Section title="وضعیت کالا">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {([['', 'همه'], ['new', 'نو'], ['like_new', 'در حد نو'], ['used', 'کارکرده']] as const).map(([v, lb]) => (
+            <button key={v} type="button" onClick={() => setCond(v as '' | Cond)} className="mk-radio">
+              <span className={`rb${cond === v ? ' on' : ''}`} />
+              <span style={{ fontSize: 12.5, fontWeight: cond === v ? 800 : 600, color: cond === v ? TEXT : SEC }}>{lb}</span>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="فقط تخفیف‌دار">
+        <button type="button" onClick={() => setOnlyDisc(p => !p)}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+          <span className={`mk-toggle${onlyDisc ? ' on' : ''}`}><i /></span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: onlyDisc ? GOLD_D : SEC }}>نمایش آگهی‌های دارای تخفیف</span>
+        </button>
+      </Section>
+
+      <Section title="زمان انتشار" defaultOpen={false}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {TIME_OPTS.map(t => (
+            <button key={t.id} type="button" onClick={() => setTime(t.id)} className="mk-radio">
+              <span className={`rb${time === t.id ? ' on' : ''}`} />
+              <span style={{ fontSize: 12.5, fontWeight: time === t.id ? 800 : 600, color: time === t.id ? TEXT : SEC }}>{t.label}</span>
+            </button>
+          ))}
+        </div>
+        <p style={{ fontSize: 10.5, color: MUT, margin: '10px 0 0', lineHeight: 1.8 }}>
+          فقط آگهی‌های ثبت‌شده‌ی کاربران تاریخ انتشار دارند
+        </p>
+      </Section>
+    </>
+  )
+
+  return (
+    <div dir="rtl" style={{ background: '#F7F5F0', minHeight: '100vh', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,900&display=swap');
-        @keyframes hsIn { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
-        * { box-sizing: border-box; }
-        .hero-slider { aspect-ratio: 2048 / 421; }
-        .cat-scroll::-webkit-scrollbar { display: none; }
-        @keyframes bzBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.18; } }
-        .bz-blink { animation: bzBlink 1.2s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .bz-blink { animation: none; } }
-        /* کارت‌های «جدیدترین‌ها» هم‌اندازه‌ی کارت‌های کاتالوگ (۱۶۸px دسکتاپ / ۱۳۸px موبایل) */
-        /* ۶ ستونِ ۱fr به‌جای عرضِ ثابت: با gap ۲۲.۸ در عرضِ کاملِ کانتینر (۱۲۳۶) هر کارت دقیقاً ۱۸۷px
-           می‌شود و چون ۱fr همه‌ی فضا را می‌خورد، فاصله‌ی افقی هم دقیقاً ۲۲.۸ می‌ماند — یعنی برابرِ
-           فاصله‌ی عمودی. (با عرضِ ثابت + space-between فاصله‌ی افقی محاسباتی می‌شد و با عمودی فرق داشت.) */
-        .prod-grid { grid-template-columns: repeat(6, 1fr) !important; }
-        /* موبایل: ۲ ستونِ ۱fr به‌جای عرضِ ثابتِ ۱۴۵px. با عرضِ ثابت + space-between کلِ فضای اضافه
-           می‌ریخت توی همان یک فاصله (روی گوشی ۳۶۰px حدود ۳۸px شکاف). حالا فاصله ثابتِ ۱۴px است و
-           کارت خودش پهن می‌شود تا سطر را پر کند (۳۶۰px ⇒ کارت ۱۵۷px). */
-        @media(max-width:700px)  {
-          .prod-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 14px !important; }
-          /* ۱.۶۵۴ = ۱.۷۴۱ منهای ۵٪ (روی‌هم ۱۹٪ کوتاه‌تر از ۲.۰۳۷ دسکتاپ) — فقط موبایل و فقط
-             کارت‌های «جدید ترین ها». سلکتورِ نسل‌دار لازم است تا کارت‌های sec1/پارتی
-             (که .prod-card هم دارند) دست‌نخورده بمانند. */
-          .prod-grid .prod-card { aspect-ratio: 1 / 1.571 !important; }
+        @keyframes mkUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+        @keyframes mkSheet { from { transform: translateY(100%); } to { transform: none; } }
+        /* «بازار» — رولِ عمودی: می‌رود بالا، از پایین برمی‌گردد */
+        @keyframes mkWord {
+          0%, 68%   { transform: translateY(0);      opacity: 1; }
+          76%       { transform: translateY(-130%);  opacity: 0; }
+          77%       { transform: translateY(130%);   opacity: 0; }
+          86%, 100% { transform: translateY(0);      opacity: 1; }
         }
-        .prod-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
-        .prod-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12) !important; }
-        .banner-grid { grid-template-columns: repeat(4,1fr) !important; }
-        @media(max-width:900px) { .banner-grid { grid-template-columns: repeat(2,1fr) !important; } }
-        .cat-ad-poster { aspect-ratio: 2048 / 421; }
-        .banner-card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s; }
-        .banner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(28,28,26,0.16) !important; }
-        @media(max-width:600px) { .dual-banner { flex-direction: column !important; } }
-        @media(max-width:600px) {
-          .bb-divider { display: none !important; }
+        /* اورلی پلیس‌هولدر فلکس است ⇒ متن و کلمه‌ی رول‌شونده دقیقاً هم‌مرکز */
+        .mk-ph { display: flex; align-items: center; gap: 4px; }
+        .mk-rollwrap { display: inline-flex; overflow: hidden; height: 1.5em; align-items: center; }
+        .mk-roll { display: inline-block; line-height: 1.5; color: ${GOLD_D}; font-weight: 800;
+          animation: mkWord 3.8s cubic-bezier(.22,1,.36,1) infinite; }
+        @media (prefers-reduced-motion: reduce) { .mk-roll { animation: none; } }
+
+        /* ── کارت — همان فرمتِ عمودی کارت‌های /shop ── */
+        .mk-card { display: flex; flex-direction: column; background: #fff; border: 1.5px solid rgba(28,28,26,0.18);
+          border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit;
+          transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s;
+          animation: mkUp .5s cubic-bezier(.22,1,.36,1) both; }
+        .mk-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(28,28,26,0.12); }
+        .mk-img { position: relative; aspect-ratio: 1 / 0.86; background: #F4F3F1; border-bottom: 1.5px solid rgba(28,28,26,0.18); overflow: hidden; }
+        .mk-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+          transition: transform .6s cubic-bezier(.22,1,.36,1); }
+        .mk-card:hover .mk-img img { transform: scale(1.045); }
+        .mk-new { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 3px;
+          font-size: 9px; font-weight: 800; color: #fff; background: rgba(27,122,75,0.92); border-radius: 999px; padding: '3px 8px'; padding: 3px 8px; }
+        .mk-body { display: flex; flex-direction: column; gap: 6px; padding: 9px 9px 10px; flex: 1; }
+        .mk-name { font-size: 12.5px; color: ${TEXT}; line-height: 1.55; display: -webkit-box;
+          -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 39px; }
+        .mk-meta { display: flex; align-items: center; gap: 4px; font-size: 10px; color: ${MUT}; }
+        .mk-cond { margin-inline-start: auto; background: #F4F3F1; border-radius: 999px; padding: 1.5px 7px; font-weight: 700; }
+        .mk-priceline { margin-top: auto; display: flex; align-items: center; gap: 5px; }
+        .mk-pct { background: #b400ae; color: #fff; font-size: 11.5px; font-weight: 800; border-radius: 999px;
+          padding: 3px 8px 1px; line-height: 1; }
+        .mk-old { font-size: 10px; color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
+        .mk-price { font-size: 13px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
+        .mk-price i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+
+        /* ── سایدبار ── */
+        .mk-catrow { display: flex; align-items: center; gap: 9px; width: 100%; padding: 7px 8px; border-radius: 10px;
+          background: none; border: none; cursor: pointer; font-family: inherit; text-align: right;
+          transition: background .22s, transform .22s; }
+        .mk-catrow:hover { background: rgba(199,166,106,0.07); transform: translateX(-2px); }
+        .mk-catrow.on { background: rgba(199,166,106,0.13); }
+        .mk-catrow .ic { width: 30px; height: 30px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: #F4F3F1; }
+        .mk-catrow .ic img { width: 100%; height: 100%; object-fit: contain; }
+        .mk-catrow .lb { font-size: 12.5px; font-weight: 700; color: ${SEC}; flex: 1; }
+        .mk-catrow.on .lb { color: ${GOLD_D}; font-weight: 800; }
+        .mk-catrow .ct { font-size: 10.5px; color: ${MUT}; font-variant-numeric: tabular-nums; }
+        .mk-cityopt:hover { background: rgba(199,166,106,0.07) !important; }
+        .mk-pricein { flex: 1; min-width: 0; box-sizing: border-box; padding: 9px 10px; border-radius: 10px;
+          border: 1px solid ${LINE}; background: #FAFAF7; font-size: 12.5px; font-family: inherit; outline: none;
+          color: ${TEXT}; text-align: center; transition: border-color .25s, box-shadow .25s; }
+        .mk-pricein:focus { border-color: rgba(199,166,106,0.6); box-shadow: 0 0 0 3px rgba(199,166,106,0.12); }
+        .mk-radio { display: flex; align-items: center; gap: 9px; background: none; border: none; cursor: pointer;
+          padding: 5px 2px; font-family: inherit; }
+        .mk-radio .rb { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid ${LINE}; position: relative;
+          transition: border-color .25s; flex-shrink: 0; }
+        .mk-radio .rb.on { border-color: ${GOLD_D}; }
+        .mk-radio .rb.on::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: ${GOLD_D}; }
+        .mk-toggle { width: 38px; height: 21px; border-radius: 999px; background: ${LINE}; position: relative;
+          transition: background .3s; flex-shrink: 0; display: inline-block; }
+        .mk-toggle i { position: absolute; top: 2.5px; right: 2.5px; width: 16px; height: 16px; border-radius: 50%;
+          background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform .3s cubic-bezier(.22,1,.36,1); }
+        .mk-toggle.on { background: ${GOLD}; }
+        .mk-toggle.on i { transform: translateX(-17px); }
+
+        /* ── چیپ‌های فیلتر فعال ── */
+        .mk-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800;
+          color: ${GOLD_D}; background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.34);
+          border-radius: 999px; padding: 5px 11px; }
+        .mk-chip button { display: flex; background: none; border: none; cursor: pointer; color: inherit; padding: 0; }
+
+        /* ── تاپ‌بار دسکتاپ / سرچ موبایل ── */
+        .mk-topbar { position: sticky; top: 0; z-index: 150; padding-top: env(safe-area-inset-top);
+          background: rgba(255,255,255,0.9); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
+          border-bottom: 1px solid ${LINE}; }
+        .mk-msearch { display: none; position: sticky; top: 0; z-index: 150; padding: calc(16px + env(safe-area-inset-top)) 14px 12px;
+          background: rgba(247,245,240,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid ${LINE}; }
+
+        /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -8px; }
+        .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
+          cursor: pointer; font-family: inherit; padding: 0; }
+        /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
+        .mk-mcat .ic { width: 58px; height: 58px; border-radius: 17px; background: #fff; border: 1px solid ${LINE};
+          display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
+        .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
+        .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
+        .mk-mcat:active .ic { transform: scale(0.93); }
+        .mk-mcat .lb { font-size: 11px; font-weight: 700; color: ${SEC}; }
+        .mk-mcat.on .lb { color: ${GOLD_D}; font-weight: 800; }
+
+        /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
+        .mk-rows { display: none; flex-direction: column; gap: 10px; }
+        .mk-row { display: flex; gap: 12px; background: #fff; border: 1px solid ${LINE}; border-radius: 14px;
+          padding: 11px; text-decoration: none; color: inherit; position: relative;
+          animation: mkUp .45s cubic-bezier(.22,1,.36,1) both; }
+        .mk-row:active { transform: scale(0.99); }
+        .mk-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
+        .mk-row .ttl { font-size: 13px; font-weight: 700; color: ${TEXT}; line-height: 1.6; display: -webkit-box;
+          -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .mk-row .cnd { font-size: 10.5px; color: ${MUT}; }
+        .mk-row .prc { font-size: 13.5px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
+        .mk-row .prc i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
+        .mk-row .cty { font-size: 10.5px; color: ${MUT}; display: flex; align-items: center; gap: 4px; margin-top: auto; }
+        .mk-row .pic { width: 108px; height: 108px; border-radius: 11px; overflow: hidden; flex-shrink: 0;
+          background: #F4F3F1; border: 1px solid ${LINE}; position: relative; }
+        .mk-row .pic img { width: 100%; height: 100%; object-fit: cover; }
+        .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
+          border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
+        .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
+          font-variant-numeric: tabular-nums; margin-top: -2px; }
+        .mk-bk { position: absolute; top: 8px; left: 8px; background: none; border: none; cursor: pointer;
+          color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
+        .mk-bk.on { color: ${GOLD_D}; }
+        .mk-bk.on svg { fill: ${GOLD_D}; }
+
+        /* ── نوار پایین موبایل ── */
+        /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */
+        .mk-bottomnav { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 200; width: 100%; box-sizing: border-box;
+          background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+          border-top: 1px solid ${LINE}; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+          grid-template-columns: repeat(4, 1fr); }
+        .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none;
+          cursor: pointer; font-family: inherit; text-decoration: none; padding: 3px 0; color: ${MUT}; }
+        .mk-bnav .lb { font-size: 10px; font-weight: 700; }
+        .mk-bnav.on { color: ${GOLD_D}; }
+        .mk-bnav.on svg { fill: rgba(199,166,106,0.2); }
+
+        /* ── لی‌آوت ── */
+        .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
+        /* باکسِ فیلترها کاملاً fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
+           ستونِ گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
+           right با %‏ (نه vw) حساب می‌شود تا عرضِ اسکرول‌بار محاسبه را به‌هم نزند. */
+        .mk-sidebar { min-width: 0; }
+        .mk-sidebar-inner { position: fixed; top: 92px; width: 272px;
+          right: calc(max((100% - 1300px) / 2, 0px) + clamp(16px, 3vw, 32px));
+          background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
+          padding: 6px 16px 10px; max-height: calc(100vh - 112px); overflow-y: auto;
+          scrollbar-width: thin; overscroll-behavior: contain; box-sizing: border-box; }
+        /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
+        .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+        .mk-mobilebar { display: none; }
+        .mk-drawer { display: none; }
+        @media (max-width: 900px) {
+          .mk-topbar { display: none; }
+          .mk-msearch { display: block; }
+          /* «همه‌ی آگهی‌ها» — جداسازیِ حرفه‌ای: فاصله‌ی بیشتر + نیم‌خطِ طلاییِ محوشونده */
+          .mk-statusbar { margin: 26px 2px 18px !important; }
+          .mk-stitle { font-size: 14.5px !important; font-weight: 900 !important; }
+          .mk-hr { align-self: center; height: 1px;
+            background: linear-gradient(to left, rgba(154,110,56,0.38), rgba(154,110,56,0.03)); }
+          .mk-mcats { display: grid; }
+          .mk-layout { grid-template-columns: 1fr; }
+          .mk-sidebar { display: none; }
+          .mk-mobilebar { display: flex; }
+          .mk-grid { display: none; }
+          .mk-rows { display: flex; }
+          .mk-drawer { display: block; }
+          .mk-bottomnav { display: grid; }
+          .mk-desk-sort { display: none !important; }
         }
-        /* دکمه‌ی دسته‌بندی‌ها و شکستِ خط فقط در موبایل معنا دارند */
-        .bb-cats, .bb-break { display: none; }
-        /* موبایل — ردیف ۱: برند + دسته‌بندی‌ها (روبه‌روی هم) | ردیف ۲: سرچ + ورود|عضویت.
-           bb-break یک آیتمِ بی‌ارتفاع با basis ۱۰۰٪ است و ردیف را قطعی می‌شکند
-           (به‌جای تکیه بر اینکه عرض‌ها تصادفاً سرریز کنند).
-           در RTL آیتمِ با order بزرگ‌تر سمت چپ می‌نشیند. */
-        @media(max-width:640px) {
-          /* row-gap حتماً !important — وگرنه gap:14 در استایل اینلاینِ .bb-row برنده می‌شود
-             و فاصله‌ی عمودیِ دو ردیف روی ۱۴px می‌ماند. */
-          .bb-row    { height: auto !important; flex-wrap: wrap; padding-top: 9px !important; padding-bottom: 10px !important; row-gap: 6px !important; }
-          .bb-cats   { display: inline-flex; order: 1; margin-inline-start: auto; }
-          .bb-break  { display: block; order: 5; flex: 0 0 100%; height: 0; }
-          /* basis صفر + min-width صفر ⇒ سرچ عرضِ ذاتیِ input را تحمیل نمی‌کند و فقط فضای
-             باقی‌مانده‌ی کنارِ دکمه‌ی ورود را پر می‌کند؛ در نتیجه هر دو در یک سطر می‌مانند.
-             (با flex:1 1 auto سرچ ~۲۳۴px می‌گرفت و دکمه به سطر سوم می‌پرید.) */
-          .bb-search { order: 10; flex: 1 1 0% !important; min-width: 0; }
-          .bb-auth   { order: 11; padding: 8px 12px !important; }
-        }
-        /* کاتالوگ اصلی بازار */
-        .bz-catalog { display: block; }
-        @media(max-width:900px) {
-          .bz-catalog { grid-template-columns: 1fr !important; }
-          .bz-sidebar { display: none !important; }
-        }
-        .bz-filterbtn { display: none !important; }
-        @media(max-width:900px) { .bz-filterbtn { display: flex !important; } }
-        /* موبایل: برچسب «مرتب‌سازی:» حذف تا «ثبت محصول» کنارش جا شود */
-        @media(max-width:640px) { .bz-sort-label { display: none !important; } }
-        .bz-grid::-webkit-scrollbar { display: none; }
-        /* contain: کششِ افقی به صفحه/back-navigation مرورگر نشت نکند.
-           موبایل دست‌نخورده می‌ماند و از اسکرول لمسیِ بومی (که خودش اینرسی دارد) استفاده می‌کند.
-           will-change: transform اینجا نداریم — لایه‌ی کامپوزیتِ دائمی می‌ساخت و متنِ کارت‌ها
-           subpixel antialiasing را از دست می‌داد و کدر می‌شد. کششِ فنری بدونش هم روان است. */
-        .bz-grid { --card-w: 176px; overscroll-behavior-x: contain; }
-        /* ۱.۹۴۴ = ۲.۰۴۶ منهای ۵٪ — کارت‌های sec1 و بیلیارد پارتی */
-        .bz-scroll-card { width: var(--card-w); aspect-ratio: 1 / 1.944; }
-        /* کارت اولِ زرد: با اسکرول ۷۵٪ بیرون می‌رود، بعد قفل می‌شود و ۲۵٪ آن پیدا می‌ماند.
-           آفستِ منفی روی لبه‌ی راست (RTL) ⇒ کارت اجازه دارد ۷۵٪ عرضش از پورت بیرون برود و همان‌جا می‌چسبد.
-           z-index بالا ⇒ بقیه‌ی محصولات از زیرش رد می‌شوند. */
-        /* ۰.۷۷۵ ⇒ ۲۲.۵٪ از کارت پیدا می‌ماند (= ۲۵٪ منهای ۱۰٪) */
-        .bz-sticky-first { position: sticky; right: calc(var(--card-w) * -0.775); z-index: 3; }
-        /* ایکونِ تصویریِ دسته‌بندی (میز/چوب) — دسکتاپ ۵۲px، هم‌وزنِ بصریِ SVGهای خطی */
-        .cat-img { width: 52px; height: 52px; }
-        /* آیکونِ میز ۱۰٪ بزرگ‌تر (تصویرِ WIRAKA لَنداسکِیپ است و کوچک دیده می‌شد) */
-        .cat-img-lg { width: 57px; height: 57px; }
-        @media(max-width:700px) {
-          /* ۱۵۲ = ۱۴۵ + ۵٪ | فاصله ۲۰ = ۲۱ منهای ۵٪.
-             column-gap حتماً !important — وگرنه gap:21 در استایل اینلاینِ ردیف برنده می‌شود. */
-          .bz-grid { --card-w: 152px; column-gap: 20px !important; }
-          /* موبایل: کادرِ ایکون ۵۶×۴۰ ⇒ تصویر ۳۶px تا در ارتفاع جا شود */
-          .cat-img { width: 36px !important; height: 36px !important; }
-          .cat-img-lg { width: 40px !important; height: 40px !important; }
-          /* ۱.۸۴۷ = ۱.۹۴۴ منهای ۵٪ — موبایل کوتاه‌تر از دسکتاپ می‌ماند */
-          .bz-scroll-card { aspect-ratio: 1 / 1.847; }
-          /* فاصله‌ی برچسب تا ایکون: هم gap کم شد، هم ارتفاعِ کادر — کادر ۵۶px برای ایکونِ ~۳۵px
-             فضای مرده داشت و برچسب را دور می‌انداخت. (gap اینلاین است ⇒ !important) */
-          .cat-tile { width: 70px !important; gap: 3px !important; padding: 3px 8px 3px !important; }
-          .cat-icn { width: 56px !important; height: 40px !important; }
-          /* ارتفاع باکس: پدینگ عمودیِ خودِ باکس و پدینگِ سکشن هم جمع شود */
-          .cat-box { padding: 2px 10px !important; }
-          /* padding-top = فاصله‌ی باکس تا اسلایدر بالای صفحه (در موبایل دسته‌بندی‌ها زیر اسلایدر است) */
-          .cat-wrap { padding-top: 26px !important; padding-bottom: 8px !important; }
-          .cat-icn-in { transform: scale(1.356) !important; }   /* ۱.۱۳ + ۲۰٪ */
-          .cat-lbl { font-size: 13px !important; }
-          .hero-slider { aspect-ratio: 2048 / 1052 !important; }
-          /* متن کارت‌ها در موبایل جمع‌تر شود تا قیمت بریده نشود — ولی بالای نام کمی نفس بکشد */
-          .pc-body { padding: 14px 7px 7px !important; gap: 2px !important; }
-          /* ۱۳.۰۵ = ۱۴.۵ منهای ۱۰٪. #666 خاکستریِ کلاسیکِ وب. !important لازم است چون fontSize/color اینلاین‌اند */
-          .pc-name { line-height: 1.35 !important; font-size: 13.05px !important; color: #666 !important; }
-          /* ۱۱۸۵ = ۹۴۸ × ۱.۲۵ ⇒ فقط ارتفاع ۲۵٪ بیشتر؛ عرض و چیدمانِ ۲×۲ دست‌نخورده */
-          .cat-ad-poster { aspect-ratio: 2048 / 1185; }
-          /* بنرهای زیر بیلیارد پارتی هم‌نسبت با پوسترهای بالا ⇒ چون عرضشان هم برابر است، هم‌ارتفاع می‌شوند */
-          .banner-card   { height: auto !important; aspect-ratio: 2048 / 1185; }
-        }
-        /* دکمه‌ی LQ: جاروی نور + لیفت */
-        .lq-sheen { position: relative; overflow: hidden; }
-        .lq-sheen::after {
-          content: ''; position: absolute; inset: 0; pointer-events: none;
-          transform: translateX(-160%) skewX(-15deg);
-          background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
-        }
-        .lq-sheen:hover::after { transition: transform .65s ease; transform: translateX(200%) skewX(-15deg); }
-        .lq-lift { transition: all .3s cubic-bezier(0.22,1,0.36,1); }
-        .lq-lift:hover { transform: translateY(-2px); }
-        .lq-lift:active { transform: scale(0.96); }
-        /* موبایل: تایمر بدون فلش و ۱۵٪ کوچک‌تر. با transform:scale نمی‌سازیم چون لایه‌ی کامپوزیت
-           درست می‌کند و متن دوباره کدر می‌شود — به‌جایش هر اندازه صریح × ۰.۸۵ نوشته شده.
-           جای گروه عوض نمی‌شود: در RTL خودِ justify-content:flex-end یعنی سمت چپِ فیزیکی،
-           و با حذف فلش‌ها بقیه خودبه‌خود به چپ می‌لغزند. */
-        @media(max-width:700px) {
-          .bz-cd-arrows { display: none !important; }
-          /* مارجین بالا ۴۲ ⇒ ۱۶: در موبایل دسته‌بندی‌ها بالای sec1 می‌آید و ۷۲px فاصله زیاد بود */
-          .bz-cd        { gap: 10.2px !important; margin: 16px 0 18px !important; }
-          /* اهرم مستقل برای فاصله‌ی پوسترهای sec1 تا سکشن پارتی — نمی‌شود از مارجینِ تایمر استفاده کرد
-             چون همان عدد، فاصله‌ی دسته‌بندی‌ها تا sec1 را هم تعیین می‌کند. ۱۴+۱۰+۱۶ = ۴۰px */
-          .bz-sec1-ads  { margin-bottom: 14px !important; }
-          .bz-cd-label  { gap: 5.95px !important; }
-          .bz-cd-label span { font-size: 11.05px !important; }
-          .bz-cd-dot    { width: 5.1px !important; height: 5.1px !important; }
-          .bz-cd-box    { gap: 5.95px !important; padding: 4.25px 10.2px !important; }
-          .bz-cd-num    { font-size: 13.09px !important; }
-          .bz-cd-num span { min-width: 17px !important; }
-          .bz-cd-div    { margin-block: -4.25px !important; }
-          .bz-cd-box svg { width: 18.53px !important; height: 18.53px !important; }
-        }
-        /* موبایل: دسته‌بندی‌ها می‌آید بلافاصله بعد از اسلایدر و قبل از sec1.
-           بقیه‌ی سکشن‌ها order بزرگ‌تر می‌گیرند تا ترتیبشان حفظ شود.
-           (order فقط چیدمانِ بصری را عوض می‌کند؛ ترتیب DOM دست‌نخورده می‌ماند.) */
-        @media(max-width:700px) {
-          .bz-page > *              { order: 3; }
-          .bz-page > .bz-topbar     { order: 0; }
-          .bz-page > .bz-hero       { order: 1; }
-          .bz-page > .bz-categories { order: 2; }
+        @media (prefers-reduced-motion: reduce) {
+          .mk-card, .mk-row { animation: none; }
         }
       `}</style>
 
-      {/* فلکسِ ستونی فقط برای اینکه در موبایل بتوانیم با order جای دسته‌بندی‌ها را عوض کنیم
-          بدون دست‌زدن به ترتیب DOM (یعنی بدون تغییر در ترتیب خواندنِ اسکرین‌ریدر و SEO) */}
-      <div className="bz-page" style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', flexDirection: 'column' }}>
-        <ShopTopBar
-          searchInput={searchInput}
-          onSearchInput={setSearchInput}
-          onSearch={handleSearch}
-          user={user}
-        />
-        <HeroSlider />
-        <CatalogSection
-          products={[...weeklyProds, ...PRODUCTS]}
-          filters={filters}
-          setFilters={setFilters}
-          sort={sort}
-          setSort={setSort}
-        />
-        <DealsSection userProds={partyProds} />
-        <AdBanners />
-        <CategoriesSection activeCat={activeSingleCat} onPick={pickCategory} />
-        <NewestSection products={PRODUCTS} userProds={newestProds} />
-        <DualBannerSection />
+      {/* ═══ تاپ‌بار دسکتاپ — به‌جای نوبار و هدر ═══ */}
+      <div className="mk-topbar">
+        <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 clamp(16px,3vw,32px)', height: 76, display: 'flex', alignItems: 'center', gap: 14 }}>
+          {/* برند */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.26)' }}>
+              <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </span>
+            <span style={{ fontWeight: 900, fontSize: 17.5, letterSpacing: '-0.02em', color: TEXT, whiteSpace: 'nowrap' }}>
+              بیلیارد <span style={{ color: GOLD }}>هاب</span>
+            </span>
+          </Link>
+
+          {/* شهر */}
+          <div ref={cityRef} style={{ position: 'relative', flexShrink: 0 }}>
+            <button type="button" onClick={() => setCityOpen(p => !p)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: cities.length ? GOLD_D : SEC }}>
+              <MapPin size={14} style={{ color: GOLD_D }} />
+              {cityBtnLabel}
+              <ChevronDown size={12} style={{ color: MUT, transform: cityOpen ? 'rotate(180deg)' : 'none', transition: 'transform .3s' }} />
+            </button>
+            {cityOpen && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 60, width: 260, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.14)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
+                <CityPicker value={cities} onToggle={toggleCity} onClear={() => setCities([])} />
+              </div>
+            )}
+          </div>
+
+          {/* سرچ — پلیس‌هولدر با «بازار» طلایی */}
+          <div style={{ position: 'relative', flex: 1, minWidth: 0, maxWidth: 520 }}>
+            <Search size={14} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 36px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+            {!q && (
+              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 36, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
+              </span>
+            )}
+          </div>
+
+          <span style={{ flex: 1 }} />
+
+          {/* نشان‌ها */}
+          <button type="button" onClick={() => setShowSaved(p => !p)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 15px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, flexShrink: 0,
+              color: showSaved ? GOLD_D : SEC, background: showSaved ? 'rgba(199,166,106,0.12)' : 'transparent',
+              border: showSaved ? '1px solid rgba(199,166,106,0.34)' : `1px solid ${LINE}`, transition: 'all .22s' }}>
+            <Bookmark size={15} style={showSaved ? { fill: GOLD_D } : undefined} /> نشان‌ها
+            {savedKeys.size > 0 && <span style={{ fontSize: 10, color: MUT }}>{toFa(savedKeys.size)}</span>}
+          </button>
+
+          {/* ثبت آگهی */}
+          <Link href="/shop/new"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 13, fontWeight: 800, color: '#241B08', flexShrink: 0,
+              background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, boxShadow: '0 6px 18px rgba(199,166,106,0.28)' }}>
+            <Plus size={15} /> ثبت آگهی
+          </Link>
+        </div>
       </div>
-    </>
+
+      {/* ═══ سرچ‌بار موبایل — لوکیشن داخل خودِ باکس ═══ */}
+      <div className="mk-msearch" ref={mCityRef}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: '#FAFAF7', border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'visible', position: 'relative' }}>
+          <Search size={15} style={{ color: MUT, flexShrink: 0, margin: '0 12px 0 4px' }} />
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="جستجو در بیلیارد بازار"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
+            {!q && (
+              <span aria-hidden className="mk-ph" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
+              </span>
+            )}
+          </div>
+          {/* لوکیشن — سمت چپ باکس */}
+          <button type="button" onClick={() => setCityOpen(p => !p)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: cities.length ? GOLD_D : SEC, flexShrink: 0 }}>
+            <MapPin size={13} style={{ color: GOLD_D }} />
+            {cityBtnLabel}
+          </button>
+          {cityOpen && (
+            <div className="mk-mcitypop" style={{ position: 'absolute', top: 'calc(100% + 8px)', insetInline: 0, zIndex: 60, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.16)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
+              <CityPicker value={cities} onToggle={toggleCity} onClear={() => setCities([])} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ بدنه ═══ */}
+      <main style={{ maxWidth: 1300, margin: '0 auto', padding: '18px clamp(16px,3vw,32px) calc(96px + env(safe-area-inset-bottom))' }}>
+
+        {/* گرید دسته‌ها — موبایل: ۳ ردیف ۵تایی */}
+        <div className="mk-mcats">
+          {CATS_M.map(c => (
+            <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
+              className={`mk-mcat${cat === c.id ? ' on' : ''}`}>
+              <span className="ic"><img src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
+              <span className="lb">{c.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mk-layout">
+          {/* ── سایدبار دسکتاپ ── */}
+          <aside className="mk-sidebar"><div className="mk-sidebar-inner">{FilterBody}</div></aside>
+
+          {/* ── محتوای اصلی ── */}
+          <section ref={gridRef}>
+            {/* نوار وضعیت: تعداد + مرتب‌سازی + چیپ‌ها */}
+            <div className="mk-statusbar" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+              <span className="mk-stitle" style={{ fontSize: 13, fontWeight: 800 }}>
+                {cat ? catLabel(cat) : 'همه‌ی آگهی‌ها'}
+                {cities.length === 1 ? ` در ${cities[0]}` : cities.length > 1 ? ` در ${toFa(cities.length)} شهر` : ''}
+              </span>
+              <span style={{ fontSize: 11.5, color: MUT }}>{toFa(filtered.length)} آگهی</span>
+              <span className="mk-hr" style={{ flex: 1 }} />
+              <div className="mk-desk-sort" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ fontSize: 11, color: MUT, fontWeight: 700 }}>مرتب‌سازی:</span>
+                {SORTS.map(s => (
+                  <button key={s.id} type="button" onClick={() => setSort(s.id)}
+                    style={{ padding: '6px 12px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: sort === s.id ? 800 : 600,
+                      color: sort === s.id ? GOLD_D : SEC, background: sort === s.id ? 'rgba(199,166,106,0.12)' : 'transparent',
+                      border: sort === s.id ? '1px solid rgba(199,166,106,0.34)' : `1px solid transparent`, transition: 'all .22s' }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {chips.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginBottom: 14 }}>
+                {chips.map(c => (
+                  <span key={c.label} className="mk-chip">
+                    {c.label}
+                    <button type="button" onClick={c.clear}><X size={11} /></button>
+                  </span>
+                ))}
+                <button type="button" onClick={clearAll}
+                  style={{ fontSize: 11, fontWeight: 800, color: MUT, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>
+                  حذف همه
+                </button>
+              </div>
+            )}
+
+            {/* ── گرید کارت‌های عمودی ── */}
+            {ready && filtered.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16 }}>
+                <Store size={34} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
+                <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 6px' }}>آگهی‌ای با این فیلترها پیدا نشد</p>
+                <button type="button" onClick={clearAll}
+                  style={{ marginTop: 10, padding: '9px 20px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)' }}>
+                  حذف فیلترها
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* دسکتاپ: گرید کارت‌های عمودی */}
+                <div className="mk-grid">
+                  {filtered.map((l, i) => (
+                    <MarketCard key={l.key} l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
+                  ))}
+                </div>
+                {/* موبایل: ردیف‌های افقی */}
+                <div className="mk-rows">
+                  {filtered.map((l, i) => (
+                    <MarketRow key={l.key} l={l} i={i} saved={savedKeys.has(l.key)} onSave={() => toggleSave(l.key)} />
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+        </div>
+      </main>
+
+      {/* ═══ نوار پایین موبایل ═══ */}
+      <nav className="mk-bottomnav">
+        <Link href="/" className="mk-bnav">
+          <Home size={19} />
+          <span className="lb">خانه</span>
+        </Link>
+        <button type="button" className={`mk-bnav${!showSaved ? ' on' : ''}`}
+          onClick={() => { setShowSaved(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+          <LayoutGrid size={19} />
+          <span className="lb">آگهی‌ها</span>
+        </button>
+        <button type="button" className={`mk-bnav${showSaved ? ' on' : ''}`}
+          onClick={() => { setShowSaved(p => !p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+          <Bookmark size={19} />
+          <span className="lb">نشان‌ها</span>
+        </button>
+        <Link href="/shop/new" className="mk-bnav">
+          <span style={{ width: 21, height: 21, borderRadius: 8, background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#241B08' }}>
+            <Plus size={14} />
+          </span>
+          <span className="lb">ثبت آگهی</span>
+        </Link>
+      </nav>
+
+    </div>
   )
 }

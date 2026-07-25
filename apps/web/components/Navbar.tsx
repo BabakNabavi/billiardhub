@@ -147,8 +147,6 @@ export default function Navbar() {
   const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
 
   if (isShopPage) return null;
-  /* نسخه‌ی آزمایشی بازار تاپ‌بار اختصاصی خودش را دارد */
-  if (pathname === '/market-new') return null;
 
   return (
     <>
@@ -195,6 +193,12 @@ export default function Navbar() {
         .desk { display:flex !important; }
         .mob  { display:none  !important; }
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
+        /* تبلت (iPad Pro / Surface): منوی «بیشتر» از چپ بیرون می‌زد ⇒ وسطِ ویوپورت فیکس می‌شود */
+        @media(min-width:901px) and (max-width:1240px){
+          .nav-explore-panel { position:fixed !important; left:50% !important; right:auto !important;
+            top:calc(84px + env(safe-area-inset-top)) !important;
+            transform:translateX(-50%); width:min(700px, 94vw) !important; }
+        }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
         /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون */
         @media(max-width:430px) {
@@ -249,7 +253,7 @@ export default function Navbar() {
               </button>
 
               {exploreOpen && (
-                <div style={{
+                <div className="nav-explore-panel" style={{
                   position: 'absolute', top: 'calc(100% + 16px)', right: '-20px',
                   width: '700px', maxWidth: '95vw',
                   background: 'rgba(252,251,249,0.88)',
