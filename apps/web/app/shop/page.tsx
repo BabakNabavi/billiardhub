@@ -464,7 +464,7 @@ export default function MarketNewPage() {
         .mk-pct { background: #b400ae; color: #fff; font-size: 11.5px; font-weight: 800; border-radius: 999px;
           padding: 3px 8px 1px; line-height: 1; }
         .mk-old { font-size: 10px; color: ${MUT}; text-decoration: line-through; font-variant-numeric: tabular-nums; }
-        .mk-price { font-size: 13px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; }
+        .mk-price { font-size: 13px; font-weight: 900; color: ${TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .mk-price i { font-style: normal; font-size: 10px; font-weight: 600; color: ${MUT}; }
 
         /* ── سایدبار ── */

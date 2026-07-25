@@ -442,7 +442,8 @@ function BazaarCard({ p, className, style }: { p: typeof PRODUCTS[0]; className?
                 {p.price.toLocaleString('fa-IR')}
               </div>
             )}
-            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums' }}>
+            {/* nowrap — «تومان» به خط بعد می‌شکست و از مبلغ جدا می‌افتاد */}
+            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
               {p.sale.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}>تومان</span>
             </div>
           </div>
