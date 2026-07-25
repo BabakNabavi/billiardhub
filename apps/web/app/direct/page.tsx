@@ -41,19 +41,28 @@ export default function DirectPage() {
   const [sending, setSending] = useState(false)
   const [kb, setKb] = useState(0)   // ارتفاعِ همپوشانیِ کیبورد
   const scrollRef = useRef<HTMLDivElement>(null)
+  const baseVV = useRef(0)          // ارتفاعِ ویوپورت وقتی کیبورد بسته است
 
-  /* نوارِ پاسخ باید بالای کیبوردِ موبایل بماند (VisualViewport) */
+  const scrollBottom = () => requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight }))
+
+  /* نوارِ پاسخ باید دقیقاً بالای کیبوردِ موبایل بماند — از baselineِ VisualViewport
+     (نه innerHeight که روی iOS بزرگ‌تر است و فاصله می‌انداخت) */
   useEffect(() => {
     const vv = typeof window !== 'undefined' ? window.visualViewport : null
     if (!vv) return
+    baseVV.current = vv.height
     const onResize = () => {
-      const overlap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
+      if (vv.height > baseVV.current) baseVV.current = vv.height   // نوارِ ابزار جمع شد ⇒ baseline بزرگ‌تر
+      const overlap = Math.max(0, baseVV.current - vv.height)
       setKb(overlap)
-      if (overlap > 0) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight }), 60)
+      if (overlap > 0) scrollBottom()
     }
     vv.addEventListener('resize', onResize); vv.addEventListener('scroll', onResize)
     return () => { vv.removeEventListener('resize', onResize); vv.removeEventListener('scroll', onResize) }
   }, [])
+
+  /* هر بار پیام‌ها عوض شدند ⇒ به آخرین پیام اسکرول کن (مثل اینستاگرام) */
+  useEffect(() => { if (active) scrollBottom() }, [msgs.length, active]) // eslint-disable-line
 
   const meKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : ''
   const meName = user ? (`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر') : ''
@@ -62,11 +71,12 @@ export default function DirectPage() {
 
   const loadConvs = async () => { if (meKey) { setConvs(await fetchConversations(meKey)); setReady(true) } }
   useEffect(() => { if (user) loadConvs() }, [user]) // eslint-disable-line
-  /* تازه‌سازیِ دوره‌ای برای پیام‌های تازه */
+  /* تازه‌سازیِ سریع برای پیام‌های تازه (تردِ باز هر ۳ ثانیه، لیست هر ۸ ثانیه) */
   useEffect(() => {
     if (!user) return
-    const iv = setInterval(() => { loadConvs(); if (active) refreshThread(active) }, 12000)
-    return () => clearInterval(iv)
+    const t = setInterval(() => { if (active) refreshThread(active) }, 3000)
+    const l = setInterval(loadConvs, 8000)
+    return () => { clearInterval(t); clearInterval(l) }
   }, [user, active]) // eslint-disable-line
 
   const refreshThread = async (c: ConvIndexItem) => {
@@ -91,6 +101,9 @@ export default function DirectPage() {
     if (!draft.trim() || !active || sending) return
     setSending(true)
     const text = draft.trim(); setDraft('')
+    /* نمایشِ خوش‌بینانه — پیام فوری دیده می‌شود، بعد با پاسخِ سرور جایگزین */
+    const optimistic: DMsg = { id: `tmp-${Date.now()}`, fromKey: meKey, text, kind: 'text', at: Date.now(), readBy: [] }
+    setMsgs(m => [...m, optimistic]); scrollBottom()
     await sendDM({
       from: { key: meKey, name: meName, role: undefined },
       to: { key: active.otherKey, name: active.otherName, role: active.otherRole },
@@ -209,11 +222,15 @@ export default function DirectPage() {
                 <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
                   placeholder="پیام خود را بنویسید…"
                   style={{ flex: 1, minWidth: 0, padding: '11px 15px', borderRadius: 100, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 14, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+                {/* دکمه‌ی ارسال — بزرگ‌تر، طرح LQ (تینت طلایی + بوردر) */}
                 <button onClick={send} disabled={!draft.trim() || sending} aria-label="ارسال"
-                  style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, border: 'none', cursor: draft.trim() ? 'pointer' : 'not-allowed',
-                    background: draft.trim() ? `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)` : '#EFEBE1',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: draft.trim() ? '#241B08' : '#aaa' }}>
-                  <Send size={17} />
+                  style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, cursor: draft.trim() ? 'pointer' : 'not-allowed',
+                    background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, opacity: draft.trim() ? 1 : 0.55,
+                    transition: 'transform .2s, background .2s, box-shadow .2s', boxShadow: draft.trim() ? '0 6px 18px rgba(199,166,106,0.22)' : 'none' }}
+                  onMouseEnter={e => { if (draft.trim()) { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.24)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.14)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}>
+                  <Send size={22} />
                 </button>
               </div>
             </div>

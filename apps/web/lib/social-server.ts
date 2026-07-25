@@ -32,6 +32,7 @@ export async function writeJson(path: string, obj: unknown): Promise<void> {
   const buf = Buffer.from(JSON.stringify(obj), 'utf8')
   await getSupabaseServer().storage.from(BUCKET).upload(path, buf, {
     upsert: true, contentType: 'application/json',
+    cacheControl: '0',   // بدونِ این، خواندنِ بعدی نسخه‌ی کش‌شده‌ی قدیمی را می‌داد (پیام‌ها دیر/گم می‌شدند)
   })
 }
 
