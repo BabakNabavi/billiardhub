@@ -195,9 +195,11 @@ export default function Navbar() {
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
         /* تبلت (iPad Pro / Surface): منوی «بیشتر» از چپ بیرون می‌زد ⇒ وسطِ ویوپورت فیکس می‌شود */
         @media(min-width:901px) and (max-width:1240px){
-          .nav-explore-panel { position:fixed !important; left:50% !important; right:auto !important;
+          /* بدون transform — انیمیشنِ fadeDown خودش transform را پر می‌کند و وسط‌چینی را می‌شکست */
+          .nav-explore-panel { position:fixed !important; right:auto !important;
+            left:calc((100% - min(700px, 94vw)) / 2) !important;
             top:calc(84px + env(safe-area-inset-top)) !important;
-            transform:translateX(-50%); width:min(700px, 94vw) !important; }
+            width:min(700px, 94vw) !important; }
         }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
         /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون */

@@ -1309,8 +1309,13 @@ useEffect(() => {
 
         /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
         @media(max-height:800px) and (min-width:601px){
-          .hero-stories-bar { zoom:0.90; }
-          .hero-content { padding-top:calc(clamp(165px,23vh,205px) + env(safe-area-inset-top)) !important; zoom:0.90; }
+          /* استوری‌ها ۵٪ کوچک‌تر (۰.۹۰ × ۰.۹۵) */
+          .hero-stories-bar { zoom:0.855; }
+          /* کل بلوک کمی پایین‌تر (+۱۲px) */
+          .hero-content { padding-top:calc(clamp(177px,24.5vh,217px) + env(safe-area-inset-top)) !important; zoom:0.90; }
+          /* eyebrow و تیتر ۵٪ کوچک‌تر و فاصله‌ها کمی جمع‌تر */
+          .hero-eyebrow { zoom:0.95; margin-bottom:12px !important; }
+          .hero-h1      { zoom:0.95; margin-bottom:16px !important; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
