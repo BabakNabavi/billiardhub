@@ -501,12 +501,13 @@ export default function MarketNewPage() {
         .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; padding: 6px 4px 4px; }
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
-        .mk-mcat .ic { width: 52px; height: 52px; border-radius: 16px; background: #fff; border: 1px solid ${LINE};
+        /* ۵٪ بزرگ‌تر (۵۲ ⇒ ۵۵) */
+        .mk-mcat .ic { width: 55px; height: 55px; border-radius: 16px; background: #fff; border: 1px solid ${LINE};
           display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
         .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
         .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
         .mk-mcat:active .ic { transform: scale(0.93); }
-        .mk-mcat .lb { font-size: 10px; font-weight: 700; color: ${SEC}; }
+        .mk-mcat .lb { font-size: 10.5px; font-weight: 700; color: ${SEC}; }
         .mk-mcat.on .lb { color: ${GOLD_D}; font-weight: 800; }
 
         /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
@@ -548,8 +549,10 @@ export default function MarketNewPage() {
 
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
+        /* translateZ(0) ⇒ لایه‌ی مستقل برای عنصرِ sticky — لرزشِ ریزِ هنگامِ اسکرولِ سمتِ محصولات رفع می‌شود */
         .mk-sidebar { position: sticky; top: calc(76px + env(safe-area-inset-top)); background: #fff; border: 1px solid ${LINE};
-          border-radius: 16px; padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: thin; }
+          border-radius: 16px; padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto;
+          scrollbar-width: thin; scrollbar-gutter: stable; transform: translateZ(0); overscroll-behavior: contain; }
         /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
         .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
         .mk-mobilebar { display: none; }
