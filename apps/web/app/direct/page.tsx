@@ -52,7 +52,8 @@ export default function DirectPage() {
     return () => window.removeEventListener('resize', measure)
   }, [active])
 
-  const scrollBottom = () => requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight }))
+  /* اسکرول داخلِ کانتینرِ پیام‌ها (نه window) ⇒ بدون لرزش، پیام‌ها هرگز زیرِ هدر نمی‌روند */
+  const scrollBottom = () => requestAnimationFrame(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight })
 
   /* نوارِ پاسخ باید دقیقاً بالای کیبوردِ موبایل بماند — از baselineِ VisualViewport
      (نه innerHeight که روی iOS بزرگ‌تر است و فاصله می‌انداخت) */
@@ -62,7 +63,7 @@ export default function DirectPage() {
     baseVV.current = vv.height
     const onResize = () => {
       if (vv.height > baseVV.current) baseVV.current = vv.height   // نوارِ ابزار جمع شد ⇒ baseline بزرگ‌تر
-      const overlap = Math.max(0, baseVV.current - vv.height)
+      const overlap = Math.max(0, Math.round(baseVV.current - vv.height))
       setKb(overlap)
       if (overlap > 0) scrollBottom()
     }
@@ -83,15 +84,22 @@ export default function DirectPage() {
   /* تازه‌سازیِ سریع برای پیام‌های تازه (تردِ باز هر ۳ ثانیه، لیست هر ۸ ثانیه) */
   useEffect(() => {
     if (!user) return
-    const t = setInterval(() => { if (active) refreshThread(active) }, 3000)
-    const l = setInterval(loadConvs, 8000)
+    const t = setInterval(() => { if (active) refreshThread(active) }, 2500)
+    const l = setInterval(loadConvs, 7000)
     return () => { clearInterval(t); clearInterval(l) }
   }, [user, active]) // eslint-disable-line
 
   const refreshThread = async (c: ConvIndexItem) => {
     const t = await fetchThread(c.convId, meKey)
-    setMsgs(t.messages); setOtherPoll(t.otherPoll || 0); setOtherKey(t.otherKey || c.otherKey)
-    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 60)
+    /* پیامِ خوش‌بینانه‌ی خودم را تا وقتی سرور تأییدش نکرده نگه دار (وگرنه ناپدید می‌شد) */
+    setMsgs(prev => {
+      const server = t.messages
+      const mineTexts = server.filter(m => m.fromKey === meKey).map(m => m.text)
+      const pending = prev.filter(m => m.id.startsWith('tmp-') && !mineTexts.includes(m.text))
+      return [...server, ...pending]
+    })
+    setOtherPoll(t.otherPoll || 0); setOtherKey(t.otherKey || c.otherKey)
+    scrollBottom()
   }
   /* وضعیتِ تیک برای پیام‌های خودم: sent / delivered / read */
   const msgStatus = (m: DMsg): 'sent' | 'delivered' | 'read' => {
@@ -195,11 +203,11 @@ export default function DirectPage() {
           )
         )}
 
-        {/* ── ترد گفتگو ── */}
+        {/* ── ترد گفتگو — ستونِ ثابت: هدر ثابت / پیام‌ها اسکرولِ داخلی / نوار پاسخ بالای کیبورد ── */}
         {active && (
-          <>
-            {/* پیام‌ها در جریانِ عادی؛ padding-bottom برای فاصله از نوارِ فیکس */}
-            <div ref={scrollRef} style={{ padding: '18px clamp(14px,3vw,22px) calc(86px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ position: 'fixed', top: headerH, left: 0, right: 0, bottom: kb, zIndex: 20, display: 'flex', flexDirection: 'column', background: '#F7F5F0', transition: 'bottom .12s ease' }}>
+            {/* پیام‌ها — کانتینرِ اسکرول‌شونده‌ی داخلی */}
+            <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', width: '100%', maxWidth: 760, margin: '0 auto', padding: '18px clamp(14px,3vw,22px) 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {msgs.length === 0 && <p style={{ textAlign: 'center', fontSize: 12.5, color: MUT, marginTop: 30 }}>هنوز پیامی نیست</p>}
               {msgs.map(m => {
                 const mine = m.fromKey === meKey
@@ -227,8 +235,8 @@ export default function DirectPage() {
                 )
               })}
             </div>
-            {/* نوارِ پاسخ — فیکس به کفِ ویوپورت و بالای کیبورد (bottom = ارتفاعِ کیبورد) */}
-            <div style={{ position: 'fixed', left: 0, right: 0, bottom: kb, zIndex: 40, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', transition: 'bottom .12s ease' }}>
+            {/* نوارِ پاسخ — کفِ ستون؛ چون ستون با bottom=kb بالای کیبورد است، همیشه دیده می‌شود */}
+            <div style={{ flexShrink: 0, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
               <div style={{ maxWidth: 760, margin: '0 auto', padding: kb > 0 ? '10px clamp(14px,3vw,22px)' : '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
                   placeholder="پیام خود را بنویسید…"
@@ -245,7 +253,7 @@ export default function DirectPage() {
                 </button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>

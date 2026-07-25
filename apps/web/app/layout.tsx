@@ -25,7 +25,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  interactiveWidget: 'resizes-content',   // کیبورد، محتوا را جمع می‌کند تا نوارِ پاسخ بالای کیبورد بماند
+  /* عمداً بدونِ interactive-widget: می‌خواهیم کیبورد فقط «روی» محتوا بیاید
+     (مثل اینستاگرام)، نه اینکه کلِ صفحه را جمع/بلرزاند. چیدمانِ استوری و دایرکت
+     خودشان با VisualViewport نوارِ پاسخ را بالای کیبورد نگه می‌دارند. */
   themeColor: '#C7A66A',
 };
 

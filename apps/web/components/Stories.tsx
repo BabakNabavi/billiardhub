@@ -190,12 +190,18 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
 
-  /* اندازه‌ی ناحیه‌ی دیدنی (بالای کیبورد) + قفلِ اسکرولِ بدنه ⇒ استوری مثل
-     اینستاگرام دقیقاً بالای کیبورد جمع می‌شود و سایتِ زیر بیرون نمی‌زند */
-  const [vp, setVp] = useState<{ h: number; top: number }>({ h: typeof window !== 'undefined' ? window.innerHeight : 800, top: 0 });
+  /* کیبورد فقط «روی» استوری می‌آید (مثل اینستاگرام): استوری تمام‌صفحه و ثابت
+     می‌ماند، فقط نوارِ پاسخ با bottom=kb بالای کیبورد شناور می‌شود. قفلِ اسکرولِ
+     بدنه ⇒ سایتِ زیر بیرون نمی‌زند و صفحه نمی‌لرزد. */
+  const [kb, setKb] = useState(0);
   useEffect(() => {
     const vv = typeof window !== 'undefined' ? window.visualViewport : null;
-    const apply = () => { if (vv) setVp({ h: vv.height, top: vv.offsetTop }); else setVp({ h: window.innerHeight, top: 0 }); };
+    let base = vv ? vv.height : (typeof window !== 'undefined' ? window.innerHeight : 800);
+    const apply = () => {
+      if (!vv) return;
+      if (vv.height > base) base = vv.height;              // نوارِ ابزار جمع شد ⇒ baseline بزرگ‌تر
+      setKb(Math.max(0, Math.round(base - vv.height)));
+    };
     apply();
     if (vv) { vv.addEventListener('resize', apply); vv.addEventListener('scroll', apply); }
     const sy = window.scrollY;
@@ -239,12 +245,11 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         .story-stk button { background:none;border:none;cursor:pointer;font-size:28px;line-height:1;padding:2px;transition:transform .18s cubic-bezier(.22,1,.36,1); }
         .story-stk button:hover { transform:scale(1.35) translateY(-2px); }
       `}</style>
-      {/* رَپِرِ واحد، دقیقاً هم‌اندازه‌ی ناحیه‌ی دیدنی (بالای کیبورد) — مثل اینستاگرام:
-          استوری بالا جمع می‌شود، نوارِ پاسخ درست بالای کیبورد می‌ماند، هیچ‌چیزِ سایت بیرون نمی‌زند */}
-      <div onClick={onClose} style={{ position:'fixed',top:vp.top,left:0,right:0,height:vp.h,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease',display:'flex',flexDirection:'column',alignItems:'center',padding:'calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 12px)' }}>
+      {/* رَپِرِ تمام‌صفحه و ثابت — استوری جمع نمی‌شود، کیبورد فقط رویش می‌آید */}
+      <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease' }}>
 
-        {/* ── کارتِ استوری ── */}
-        <div onClick={e => e.stopPropagation()} style={{ position:'relative',width:'min(440px,96vw)',flex:'1 1 auto',minHeight:0,maxHeight:'100%',borderRadius:'16px',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:`0 30px 80px rgba(0,0,0,0.6),0 0 60px ${currentGroup.roleColor}22` }}>
+        {/* ── کارتِ استوری: تمام‌ارتفاع و ثابت ── */}
+        <div onClick={e => e.stopPropagation()} style={{ position:'absolute',top:0,bottom:0,left:'50%',transform:'translateX(-50%)',width:'min(440px,100vw)',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:'0 0 80px rgba(0,0,0,0.6)' }}>
 
           {hasMedia ? (
             <div style={{ position:'absolute', inset:0 }}>
@@ -261,7 +266,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           )}
 
           {/* Progress bars */}
-          <div style={{ position:'absolute',top:'12px',left:'12px',right:'12px',display:'flex',gap:'5px',zIndex:50,direction:'ltr' }}>
+          <div style={{ position:'absolute',top:'calc(env(safe-area-inset-top) + 12px)',left:'12px',right:'12px',display:'flex',gap:'5px',zIndex:50,direction:'ltr' }}>
             {currentGroup.stories.map((_: any,si: number) => (
               <div key={si} style={{ flex:1,height:'3px',background:'rgba(255,255,255,0.25)',borderRadius:'3px',overflow:'hidden' }}>
                 {si < activeStory ? (
@@ -274,7 +279,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           </div>
 
           {/* Header */}
-          <div style={{ position:'absolute',top:'26px',left:'12px',right:'12px',display:'flex',alignItems:'center',gap:'10px',zIndex:50 }}>
+          <div style={{ position:'absolute',top:'calc(env(safe-area-inset-top) + 26px)',left:'12px',right:'12px',display:'flex',alignItems:'center',gap:'10px',zIndex:50 }}>
             <div style={{ width:'40px',height:'40px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}90`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize:'17px',overflow:'hidden' }}>
               {currentGroup.logoUrl
                 ? <img src={currentGroup.logoUrl} alt={currentGroup.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
@@ -293,7 +298,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           <button onClick={onPrev} style={{ position:'absolute',left:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
 
           {currentStory.caption && (
-            <div style={{ position:'absolute',bottom:'18px',left:'14px',right:'14px',zIndex:20 }}>
+            <div style={{ position:'absolute',bottom:'calc(env(safe-area-inset-bottom) + 92px)',left:'14px',right:'14px',zIndex:20 }}>
               <div style={{ background:'rgba(0,0,0,0.42)',borderRadius:'16px',padding:'12px 16px',backdropFilter:'blur(14px)' }}>
                 <p style={{ color:'#fff',fontSize:'15.5px',margin:0,lineHeight:1.8,fontWeight:500,direction:'rtl' }}>{currentStory.caption}</p>
               </div>
@@ -303,8 +308,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           {sentReaction && <div className="story-reaction-pop">{sentReaction}</div>}
         </div>
 
-        {/* ── ناحیه‌ی پاسخ — بیرونِ استوری، روی نوارِ مشکی ── */}
-        <div onClick={e => e.stopPropagation()} style={{ width:'min(440px,96vw)',flexShrink:0,paddingTop:'12px' }}>
+        {/* ── ناحیه‌ی پاسخ — شناور، درست بالای کیبورد (مثل اینستاگرام)؛ استوری پشتش کامل می‌ماند ── */}
+        <div onClick={e => e.stopPropagation()} style={{ position:'absolute',left:0,right:0,bottom:kb,zIndex:60,display:'flex',justifyContent:'center',padding: kb>0 ? '0 10px 8px' : '0 10px calc(env(safe-area-inset-bottom) + 10px)',transition:'bottom .12s ease' }}>
+          <div style={{ width:'min(440px,96vw)' }}>
           {replySent && (
             <div style={{ textAlign:'center',marginBottom:10 }}>
               <span style={{ display:'inline-flex',alignItems:'center',gap:6,fontSize:12.5,fontWeight:700,color:'#fff',background:'rgba(16,185,129,0.92)',borderRadius:100,padding:'6px 14px' }}>
@@ -336,6 +342,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
               برای پاسخ به استوری وارد شوید
             </a>
           )}
+          </div>
         </div>
       </div>
     </>,
