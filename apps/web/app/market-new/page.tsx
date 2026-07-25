@@ -522,7 +522,8 @@ export default function MarketNewPage() {
         .mk-bk.on svg { fill: ${GOLD_D}; }
 
         /* ── نوار پایین موبایل ── */
-        .mk-bottomnav { display: none; position: fixed; insetInline: 0; bottom: 0; z-index: 200;
+        /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */
+        .mk-bottomnav { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 200; width: 100%; box-sizing: border-box;
           background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
           border-top: 1px solid ${LINE}; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
           grid-template-columns: repeat(4, 1fr); }
@@ -542,6 +543,11 @@ export default function MarketNewPage() {
         @media (max-width: 900px) {
           .mk-topbar { display: none; }
           .mk-msearch { display: block; }
+          /* «همه‌ی آگهی‌ها» — جداسازیِ حرفه‌ای: فاصله‌ی بیشتر + نیم‌خطِ طلاییِ محوشونده */
+          .mk-statusbar { margin: 26px 2px 18px !important; }
+          .mk-stitle { font-size: 14.5px !important; font-weight: 900 !important; }
+          .mk-hr { align-self: center; height: 1px;
+            background: linear-gradient(to left, rgba(154,110,56,0.38), rgba(154,110,56,0.03)); }
           .mk-mcats { display: grid; }
           .mk-layout { grid-template-columns: 1fr; }
           .mk-sidebar { display: none; }
@@ -665,12 +671,12 @@ export default function MarketNewPage() {
           {/* ── محتوای اصلی ── */}
           <section ref={gridRef}>
             {/* نوار وضعیت: تعداد + مرتب‌سازی + چیپ‌ها */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 800 }}>
+            <div className="mk-statusbar" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+              <span className="mk-stitle" style={{ fontSize: 13, fontWeight: 800 }}>
                 {cat ? catLabel(cat) : 'همه‌ی آگهی‌ها'}{city ? ` در ${city}` : ''}
               </span>
               <span style={{ fontSize: 11.5, color: MUT }}>{toFa(filtered.length)} آگهی</span>
-              <span style={{ flex: 1 }} />
+              <span className="mk-hr" style={{ flex: 1 }} />
               <div className="mk-desk-sort" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <span style={{ fontSize: 11, color: MUT, fontWeight: 700 }}>مرتب‌سازی:</span>
                 {SORTS.map(s => (
