@@ -1312,12 +1312,12 @@ useEffect(() => {
         @media(max-height:900px) and (min-width:601px){
           .hero-stories-bar { zoom:0.90; }
           /* کل بلوک کمی پایین‌تر (+۱۲px) */
-          .hero-content { padding-top:calc(clamp(177px,24.5vh,217px) + env(safe-area-inset-top)) !important; zoom:0.90; }
+          .hero-content { padding-top:calc(clamp(177px,24.5vh,217px) + 60px + env(safe-area-inset-top)) !important; zoom:0.90; }
           .hero-h1      { zoom:0.95; margin-bottom:16px !important; }
           .hero-desc    { display:none !important; }
         }
         @media(max-height:680px) and (min-width:601px){
-          .hero-content { padding-top:calc(clamp(157px,26vh,188px) + env(safe-area-inset-top)) !important; zoom:0.90; }
+          .hero-content { padding-top:calc(clamp(157px,26vh,188px) + 54px + env(safe-area-inset-top)) !important; zoom:0.90; }
           .hero-sub     { display:none !important; }
         }
 
@@ -1492,7 +1492,8 @@ useEffect(() => {
           minHeight: isMobile ? '100dvh' : undefined,
           zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: 'calc(clamp(189px,25vh,236px) + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
+          /* +60px جای eyebrowِ حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
+          padding: 'calc(clamp(189px,25vh,236px) + 60px + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
           {/* Headline — رنگی با spans */}
