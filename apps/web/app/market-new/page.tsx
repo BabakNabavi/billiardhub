@@ -562,12 +562,15 @@ export default function MarketNewPage() {
 
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
-        /* عنصرِ sticky از عنصرِ اسکرول‌شونده جدا شده — منشأ لرزشِ ریز، ترکیبِ sticky+overflow روی یک عنصر بود */
-        .mk-sidebar { position: sticky; top: 76px; will-change: transform; transform: translateZ(0);
-          backface-visibility: hidden; }
-        .mk-sidebar-inner { background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
+        /* باکسِ فیلترها کاملاً fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
+           ستونِ گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
+           right با %‏ (نه vw) حساب می‌شود تا عرضِ اسکرول‌بار محاسبه را به‌هم نزند. */
+        .mk-sidebar { min-width: 0; }
+        .mk-sidebar-inner { position: fixed; top: 76px; width: 272px;
+          right: calc(max((100% - 1300px) / 2, 0px) + clamp(16px, 3vw, 32px));
+          background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
           padding: 6px 16px 10px; max-height: calc(100vh - 96px); overflow-y: auto;
-          scrollbar-width: thin; overscroll-behavior: contain; }
+          scrollbar-width: thin; overscroll-behavior: contain; box-sizing: border-box; }
         /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
         .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
         .mk-mobilebar { display: none; }
