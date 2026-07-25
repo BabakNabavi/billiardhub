@@ -16,7 +16,7 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 ══════════════════════════════════════════ */
 :root {
   /* ── Base font ── */
-  --font-base: 'IRANYekanX', Tahoma, system-ui, sans-serif;
+  --font-base: 'IRANSansX', Tahoma, system-ui, sans-serif;
 
   /* ── Surfaces ── */
   --bg-primary:    #F7F7F5;

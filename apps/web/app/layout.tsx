@@ -38,15 +38,16 @@ export default function RootLayout({
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <style>{`
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Light.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Medium.woff2') format('woff2'); font-weight:500; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-DemiBold.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
-          /* وزن ۹۰۰ چند جا استفاده می‌شد ولی فایلی برایش اعلام نشده بود ⇒ مرورگر faux-bold می‌ساخت
-             (حروف را مصنوعی ضخیم می‌کرد) و متن کدر و بدشکل می‌شد. حالا به فایل واقعی Black وصل است. */
-          @font-face { font-family:'IRANYekanX'; src:url('/fonts/IranYekan/IRANYekanXFaNum-Black.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Thin.woff2') format('woff2'); font-weight:100; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-UltraLight.woff2') format('woff2'); font-weight:200; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Light.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Medium.woff2') format('woff2'); font-weight:500; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-DemiBold.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
+          /* وزن ۹۰۰ همه‌جا استفاده می‌شود — بدون فایلِ واقعی، مرورگر faux-bold کدر می‌سازد */
+          @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Black.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
           /* از ساختنِ وزن/ایتالیکِ مصنوعی جلوگیری کن — اگر وزنی فایل نداشت، نزدیک‌ترین فایل استفاده شود */
           * { font-synthesis-weight: none; font-synthesis-style: none; }
           * { font-family: var(--font-base) !important; box-sizing:border-box; }
