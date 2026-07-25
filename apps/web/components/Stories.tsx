@@ -196,10 +196,20 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
      translateY(offsetTop) در جایش پین می‌شود تا روی iOS جابجا/نصفه نشود. */
   const vp = useVisualViewport();
   useEffect(() => {
-    /* جلوگیریِ نرم از اسکرولِ پس‌زمینه بدونِ position:fixed (که باعثِ پرش می‌شد) */
     const html = document.documentElement, prevH = html.style.overflow, prevB = document.body.style.overflow;
     html.style.overflow = 'hidden'; document.body.style.overflow = 'hidden';
-    return () => { html.style.overflow = prevH; document.body.style.overflow = prevB; };
+    /* روی iOS فقط overflow کافی نیست؛ حرکتِ لمسیِ پس‌زمینه را هم می‌گیریم تا سایتِ
+       زیرِ استوری اصلاً اسکرول/دیده نشود (به‌جز نوشتن در فیلدِ پاسخ). */
+    const block = (e: TouchEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest && t.closest('.story-msg-input')) return;
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', block, { passive: false });
+    return () => {
+      html.style.overflow = prevH; document.body.style.overflow = prevB;
+      document.removeEventListener('touchmove', block);
+    };
   }, []);
 
   if (!currentGroup || !currentStory) return null;
@@ -232,9 +242,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         .story-stk button { background:none;border:none;cursor:pointer;font-size:28px;line-height:1;padding:2px;transition:transform .18s cubic-bezier(.22,1,.36,1); }
         .story-stk button:hover { transform:scale(1.35) translateY(-2px); }
       `}</style>
-      {/* رَپِرِ تمام‌صفحه و کاملاً ثابت — استوری هیچ تغییری نمی‌کند؛ translateY(offsetTop)
-          فقط جابجاییِ iOS را جبران می‌کند تا نصفه/دفرمه نشود */}
-      <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease',transform:`translateY(${vp.offsetTop}px)` }}>
+      {/* رَپِرِ تمام‌صفحه و کاملاً ثابت — بدونِ transform (transform روی iOS فیکس‌بودن را
+          می‌شکند و استوری با اسکرول حرکت می‌کند و سایتِ زیر پیدا می‌شود) */}
+      <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease' }}>
 
         {/* ── کارتِ استوری: تمام‌ارتفاع و ثابت ── */}
         <div onClick={e => e.stopPropagation()} style={{ position:'absolute',top:0,bottom:0,left:'50%',transform:'translateX(-50%)',width:'min(440px,100vw)',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:'0 0 80px rgba(0,0,0,0.6)' }}>
@@ -300,7 +310,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 
       {/* ── لایه‌ی پاسخ: دقیقاً روی ناحیه‌ی دیدنی (بالای کیبورد)؛ pointerEvents:none تا
           لمس‌ها به استوریِ پشت برسند، فقط خودِ نوارِ پاسخ کلیک‌پذیر است ── */}
-      <div style={{ position:'fixed',left:0,right:0,top:0,height:vp.height||'100dvh',transform:`translateY(${vp.offsetTop}px)`,zIndex:100000,pointerEvents:'none',display:'flex',flexDirection:'column',justifyContent:'flex-end',alignItems:'center' }}>
+      <div style={{ position:'fixed',left:0,right:0,top:0,height:vp.height||'100dvh',transform: vp.offsetTop ? `translateY(${vp.offsetTop}px)` : undefined,zIndex:100000,pointerEvents:'none',display:'flex',flexDirection:'column',justifyContent:'flex-end',alignItems:'center' }}>
         <div onClick={e => e.stopPropagation()} style={{ pointerEvents:'auto',width:'min(440px,96vw)',padding: vp.kb>0 ? '0 0 8px' : '0 0 calc(env(safe-area-inset-bottom) + 10px)' }}>
           {replySent && (
             <div style={{ textAlign:'center',marginBottom:10 }}>

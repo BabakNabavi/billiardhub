@@ -193,7 +193,7 @@ export default function DirectPage() {
     <div dir="rtl" style={{
       position: 'fixed', top: 0, left: 0, right: 0,
       height: vp.height || '100dvh',
-      transform: `translateY(${vp.offsetTop}px)`,
+      transform: vp.offsetTop ? `translateY(${vp.offsetTop}px)` : undefined,
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
       background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
     }}>
