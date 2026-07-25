@@ -1,14 +1,19 @@
 /* ─────────────────────────────────────────────────────────────
    هسته‌ی سمت‌سرورِ شبکه‌ی اجتماعی (استوری/دایرکت/نوتیفیکیشن).
-   داده در Supabase Storage به‌صورت فایل‌های JSON نگه‌داری می‌شود
-   (همان الگوی اثبات‌شده‌ی استوریِ باشگاه‌ها). همه‌ی دسترسی‌ها فقط
-   از طریق API با service-role انجام می‌شود.
+
+   دایرکت (نسخه‌ی حرفه‌ای، ضدِ گم‌شدن):
+   - هر «پیام» یک فایلِ مستقل و تغییرناپذیر است (append-only) ⇒ دو ارسالِ
+     هم‌زمان دیگر همدیگر را پاک نمی‌کنند و علامتِ «خوانده‌شد» هم فایلِ پیام‌ها
+     را بازنویسی نمی‌کند (کرسرِ جدا). این ریشه‌ی «پیام گم می‌شد» بود.
+   - Realtime Broadcast (بدونِ نیاز به جدولِ Postgres) پیام را در کمتر از یک
+     ثانیه به گیرنده می‌رساند؛ پولینگ فقط تورِ ایمنیِ افزایشی است.
    ───────────────────────────────────────────────────────────── */
 
 import { getSupabaseServer } from './supabase-server'
 
 export const BUCKET = 'club-media'
 export const DAY = 24 * 60 * 60 * 1000
+const SUPABASE_URL = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
 
 export const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +24,7 @@ export const CORS = {
 /* کلیدها ممکن است شماره/آیدی باشند؛ برای مسیرِ فایل ایمن‌سازی می‌شوند. */
 export const safeKey = (k: string) => (k || 'x').replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 80)
 export const convId = (a: string, b: string) => [safeKey(a), safeKey(b)].sort().join('__')
+export const dmTopic = (userKey: string) => `dm-user-${safeKey(userKey)}`
 
 export async function readJson<T>(path: string, fallback: T): Promise<T> {
   try {
@@ -36,16 +42,66 @@ export async function writeJson(path: string, obj: unknown): Promise<void> {
   })
 }
 
+/* ── Realtime Broadcast (سرور → کلاینت‌ها) ── */
+export async function broadcast(topic: string, event: string, payload: unknown): Promise<void> {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!key) return
+  try {
+    await fetch(`${SUPABASE_URL}/realtime/v1/api/broadcast`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ messages: [{ topic, event, payload, private: false }] }),
+    })
+  } catch { /* شکستِ برادکست حیاتی نیست؛ پولینگ می‌گیردش */ }
+}
+
 /* ── مسیرها ── */
 export const P = {
   stories: 'social/stories/index.json',
-  conv:    (id: string) => `social/dm/${id}.json`,
+  msgDir:  (cid: string) => `social/dm/${cid}/m`,
+  msgFile: (cid: string, name: string) => `social/dm/${cid}/m/${name}`,
+  read:    (cid: string, user: string) => `social/dm/${cid}/read/${safeKey(user)}.json`,
   dmIndex: (user: string) => `social/dm-idx/${safeKey(user)}.json`,
   notif:   (user: string) => `social/notif/${safeKey(user)}.json`,
   poll:    (user: string) => `social/dm-poll/${safeKey(user)}.json`,
 }
 
-/* «آخرین فعالیتِ» هر کاربر — برای تیکِ «رسیده» (وقتی طرفِ مقابل لیست/ترد را گرفت). */
+/* ── پیام‌ها: هر پیام یک فایل، نامش = زمانِ مرتب‌شونده (بدونِ کلوبِر) ── */
+export interface DMsg { id: string; fromKey: string; text: string; kind: string; storyRef?: string; at: number }
+const pad = (n: number) => String(n).padStart(15, '0')
+
+export async function appendMessage(cid: string, m: DMsg): Promise<void> {
+  await writeJson(P.msgFile(cid, `${pad(m.at)}_${m.id}.json`), m)
+}
+
+/* since=0 ⇒ آخرین cap پیام؛ since>0 ⇒ فقط پیام‌های تازه‌تر (بر پایه‌ی نامِ فایل، بدونِ دانلودِ اضافه) */
+export async function readMessages(cid: string, since = 0, cap = 80): Promise<DMsg[]> {
+  try {
+    const { data, error } = await getSupabaseServer().storage.from(BUCKET)
+      .list(P.msgDir(cid), { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
+    if (error || !data) return []
+    const rows = data
+      .filter(f => f.name.endsWith('.json'))
+      .map(f => ({ n: f.name, at: parseInt(f.name.slice(0, 15), 10) || 0 }))
+      .filter(x => x.at > since)
+      .sort((a, b) => a.at - b.at)
+    const take = since > 0 ? rows : rows.slice(-cap)
+    const msgs = await Promise.all(take.map(x => readJson<DMsg | null>(P.msgFile(cid, x.n), null)))
+    return msgs.filter(Boolean) as DMsg[]
+  } catch { return [] }
+}
+
+/* ── کرسرِ «خوانده‌شد» per-user per-conv (فایلِ پیام‌ها را بازنویسی نمی‌کند) ── */
+export async function getReadCursor(cid: string, user: string): Promise<number> {
+  return await readJson<number>(P.read(cid, user), 0)
+}
+export async function setReadCursor(cid: string, user: string, at: number): Promise<boolean> {
+  const cur = await getReadCursor(cid, user)
+  if (at > cur) { await writeJson(P.read(cid, user), at); return true }
+  return false
+}
+
+/* «آخرین فعالیتِ» هر کاربر — برای تیکِ «رسیده». */
 export async function touchPoll(user: string) {
   if (!user) return
   await writeJson(P.poll(user), Date.now())

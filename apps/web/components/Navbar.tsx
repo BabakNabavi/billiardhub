@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
+import { subscribeDM } from '../lib/realtime';
 import { storyLimitFor } from '../lib/story-store';
 import Stories from './Stories';
 
@@ -87,8 +88,10 @@ export default function Navbar() {
       setNotifs(ns);
     };
     tick();
-    const iv = setInterval(tick, 15000);
-    return () => clearInterval(iv);
+    /* Realtime: با هر پیامِ ورودی، نشان‌ها را فوری تازه کن (پول فقط تورِ ایمنی) */
+    const stop = subscribeDM(key, { onMsg: () => tick() });
+    const iv = setInterval(tick, 20000);
+    return () => { clearInterval(iv); stop(); };
   }, [user, dmEligible]);
   useEffect(() => {
     const fn = (e: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false); };

@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../store/auth.store'
 import { fetchConversations, fetchThread, sendDM, type ConvIndexItem, type DMsg } from '../../lib/social'
+import { subscribeDM } from '../../lib/realtime'
 import { ArrowRight, Inbox, Send, Check, CheckCheck } from 'lucide-react'
 
 const GOLD = '#C7A66A'
@@ -34,8 +35,8 @@ export default function DirectPage() {
   const [convs, setConvs] = useState<ConvIndexItem[]>([])
   const [active, setActive] = useState<ConvIndexItem | null>(null)
   const [msgs, setMsgs] = useState<DMsg[]>([])
-  const [otherPoll, setOtherPoll] = useState(0)
-  const [otherKey, setOtherKey] = useState('')
+  const [otherPoll, setOtherPoll] = useState(0)   // آخرین آنلاین‌بودنِ طرف ⇒ «رسیده»
+  const [otherRead, setOtherRead] = useState(0)   // کرسرِ خواندنِ طرف ⇒ «خوانده‌شد»
   const [draft, setDraft] = useState('')
   const [ready, setReady] = useState(false)
   const [sending, setSending] = useState(false)
@@ -44,6 +45,8 @@ export default function DirectPage() {
   const baseVV = useRef(0)          // ارتفاعِ ویوپورت وقتی کیبورد بسته است
   const headerRef = useRef<HTMLElement>(null)
   const [headerH, setHeaderH] = useState(84)   // ارتفاعِ واقعیِ هدرِ fixed (پویا)
+  const activeRef = useRef<ConvIndexItem | null>(null)   // برای هندلرهای Realtime
+  const lastAtRef = useRef(0)                            // آخرین زمانِ پیامِ واقعی (خواندنِ افزایشی)
 
   useEffect(() => {
     const measure = () => { if (headerRef.current) setHeaderH(headerRef.current.offsetHeight) }
@@ -73,6 +76,8 @@ export default function DirectPage() {
 
   /* هر بار پیام‌ها عوض شدند ⇒ به آخرین پیام اسکرول کن (مثل اینستاگرام) */
   useEffect(() => { if (active) scrollBottom() }, [msgs.length, active]) // eslint-disable-line
+  /* activeRef را همگام نگه دار (هندلرهای Realtime از آن می‌خوانند) */
+  useEffect(() => { activeRef.current = active }, [active])
 
   const meKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : ''
   const meName = user ? (`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر') : ''
@@ -81,52 +86,88 @@ export default function DirectPage() {
 
   const loadConvs = async () => { if (meKey) { setConvs(await fetchConversations(meKey)); setReady(true) } }
   useEffect(() => { if (user) loadConvs() }, [user]) // eslint-disable-line
-  /* تازه‌سازیِ سریع برای پیام‌های تازه (تردِ باز هر ۳ ثانیه، لیست هر ۸ ثانیه) */
+
+  /* ادغامِ پیام‌ها بدونِ تکرار؛ tmpِ خوش‌بینانه را با نسخه‌ی واقعیِ هم‌متن جایگزین کن */
+  const mergeMsgs = (prev: DMsg[], incoming: DMsg[]): DMsg[] => {
+    const byId = new Map<string, DMsg>()
+    for (const m of prev) byId.set(m.id, m)
+    for (const m of incoming) byId.set(m.id, m)
+    let arr = [...byId.values()]
+    const realMine = new Set(arr.filter(m => !m.id.startsWith('tmp-') && m.fromKey === meKey).map(m => m.text))
+    arr = arr.filter(m => !(m.id.startsWith('tmp-') && realMine.has(m.text)))
+    arr.sort((a, b) => a.at - b.at)
+    const maxReal = arr.filter(m => !m.id.startsWith('tmp-')).reduce((mx, m) => Math.max(mx, m.at), 0)
+    if (maxReal > lastAtRef.current) lastAtRef.current = maxReal
+    return arr
+  }
+
+  /* Realtime: کانالِ دایرکتِ خودم — پیام و رسیدِ خواندن آنی می‌آیند (بدونِ انتظارِ پول) */
+  useEffect(() => {
+    if (!meKey) return
+    const stop = subscribeDM(meKey, {
+      onMsg: (p) => {
+        loadConvs()
+        const cur = activeRef.current
+        if (cur && p.convId === cur.convId) {
+          setMsgs(prev => mergeMsgs(prev, [p.message]))
+          scrollBottom()
+          /* پیامِ ورودی را «خوانده» علامت بزن (چون ترد باز است) */
+          if (p.message.fromKey !== meKey) fetchThread(cur.convId, meKey, lastAtRef.current)
+        }
+      },
+      onRead: (p) => {
+        const cur = activeRef.current
+        if (cur && p.convId === cur.convId) setOtherRead(r => Math.max(r, p.at || 0))
+      },
+    })
+    return stop
+  }, [meKey]) // eslint-disable-line
+
+  /* تورِ ایمنی: پولِ افزایشیِ آرام (Realtime اصل است) */
   useEffect(() => {
     if (!user) return
-    const t = setInterval(() => { if (active) refreshThread(active) }, 2500)
-    const l = setInterval(loadConvs, 7000)
+    const t = setInterval(() => { const c = activeRef.current; if (c) refreshThread(c) }, 5000)
+    const l = setInterval(loadConvs, 12000)
     return () => { clearInterval(t); clearInterval(l) }
-  }, [user, active]) // eslint-disable-line
+  }, [user]) // eslint-disable-line
 
+  /* خواندنِ افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند */
   const refreshThread = async (c: ConvIndexItem) => {
-    const t = await fetchThread(c.convId, meKey)
-    /* پیامِ خوش‌بینانه‌ی خودم را تا وقتی سرور تأییدش نکرده نگه دار (وگرنه ناپدید می‌شد) */
-    setMsgs(prev => {
-      const server = t.messages
-      const mineTexts = server.filter(m => m.fromKey === meKey).map(m => m.text)
-      const pending = prev.filter(m => m.id.startsWith('tmp-') && !mineTexts.includes(m.text))
-      return [...server, ...pending]
-    })
-    setOtherPoll(t.otherPoll || 0); setOtherKey(t.otherKey || c.otherKey)
-    scrollBottom()
+    const t = await fetchThread(c.convId, meKey, lastAtRef.current)
+    if (t.messages.length) { setMsgs(prev => mergeMsgs(prev, t.messages)); scrollBottom() }
+    setOtherPoll(t.otherPoll || 0); setOtherRead(t.otherRead || 0)
   }
   /* وضعیتِ تیک برای پیام‌های خودم: sent / delivered / read */
   const msgStatus = (m: DMsg): 'sent' | 'delivered' | 'read' => {
-    if (otherKey && m.readBy?.includes(otherKey)) return 'read'
+    if (otherRead >= m.at) return 'read'
     if (otherPoll >= m.at) return 'delivered'
     return 'sent'
   }
   const openConv = async (c: ConvIndexItem) => {
-    setActive(c)
-    await refreshThread(c)
-    /* unread صفر شد ⇒ لیست را تازه کن */
-    loadConvs()
+    setActive(c); activeRef.current = c; lastAtRef.current = 0
+    setMsgs([]); setOtherPoll(0); setOtherRead(0)
+    const t = await fetchThread(c.convId, meKey, 0)
+    setMsgs(mergeMsgs([], t.messages)); setOtherPoll(t.otherPoll || 0); setOtherRead(t.otherRead || 0)
+    scrollBottom()
+    loadConvs()   // unread صفر شد
   }
 
   const send = async () => {
     if (!draft.trim() || !active || sending) return
     setSending(true)
     const text = draft.trim(); setDraft('')
-    /* نمایشِ خوش‌بینانه — پیام فوری دیده می‌شود، بعد با پاسخِ سرور جایگزین */
-    const optimistic: DMsg = { id: `tmp-${Date.now()}`, fromKey: meKey, text, kind: 'text', at: Date.now(), readBy: [] }
+    /* نمایشِ خوش‌بینانه — پیام فوری دیده می‌شود */
+    const tmpId = `tmp-${Date.now()}`
+    const optimistic: DMsg = { id: tmpId, fromKey: meKey, text, kind: 'text', at: Date.now() }
     setMsgs(m => [...m, optimistic]); scrollBottom()
-    await sendDM({
+    const res = await sendDM({
       from: { key: meKey, name: meName, role: undefined },
       to: { key: active.otherKey, name: active.otherName, role: active.otherRole },
       text, kind: 'text',
     })
-    await refreshThread(active)
+    /* tmp را با پیامِ واقعیِ سرور جایگزین کن (چون برادکستِ خودم به خودم نمی‌آید) */
+    const real = (res as { message?: DMsg }).message
+    if (real) setMsgs(prev => mergeMsgs(prev.filter(m => m.id !== tmpId), [real]))
     loadConvs()
     setSending(false)
   }

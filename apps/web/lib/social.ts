@@ -9,8 +9,8 @@ export interface SStory {
   avatar: string; logoUrl?: string; mediaUrl: string; caption: string; createdAt: number
 }
 export interface Party { key: string; name: string; role?: string }
-export interface DMsg { id: string; fromKey: string; text: string; kind: string; storyRef?: string; at: number; readBy?: string[] }
-export interface ThreadResult { messages: DMsg[]; otherKey: string; otherPoll: number }
+export interface DMsg { id: string; fromKey: string; text: string; kind: string; storyRef?: string; at: number }
+export interface ThreadResult { messages: DMsg[]; otherKey: string; otherPoll: number; otherRead: number }
 export interface ConvIndexItem {
   convId: string; otherKey: string; otherName: string; otherRole?: string
   lastText: string; lastKind: string; lastAt: number; unread: number
@@ -43,10 +43,10 @@ export const markSeen = (user: string, ids: string[]) =>
 /* ── دایرکت ── */
 export const fetchConversations = (user: string) =>
   j<ConvIndexItem[]>(fetch(`/api/social/dm?user=${encodeURIComponent(user)}`, { cache: 'no-store' }), [])
-export const fetchThread = (convId: string, user: string) =>
-  j<ThreadResult>(fetch(`/api/social/dm?conv=${encodeURIComponent(convId)}&user=${encodeURIComponent(user)}`, { cache: 'no-store' }), { messages: [], otherKey: '', otherPoll: 0 })
+export const fetchThread = (convId: string, user: string, since = 0) =>
+  j<ThreadResult>(fetch(`/api/social/dm?conv=${encodeURIComponent(convId)}&user=${encodeURIComponent(user)}&since=${since}`, { cache: 'no-store' }), { messages: [], otherKey: '', otherPoll: 0, otherRead: 0 })
 export const sendDM = (body: { from: Party; to: Party; text: string; kind: string; storyRef?: string }) =>
-  j<{ ok?: boolean; convId?: string }>(fetch('/api/social/dm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), {})
+  j<{ ok?: boolean; convId?: string; message?: DMsg }>(fetch('/api/social/dm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), {})
 
 /* ── نوتیفیکیشن ── */
 export const fetchNotifs = (user: string) =>
