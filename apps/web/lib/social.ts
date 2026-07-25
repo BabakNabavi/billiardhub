@@ -46,7 +46,9 @@ export const fetchConversations = (user: string) =>
 export const fetchThread = (convId: string, user: string, since = 0) =>
   j<ThreadResult>(fetch(`/api/social/dm?conv=${encodeURIComponent(convId)}&user=${encodeURIComponent(user)}&since=${since}`, { cache: 'no-store' }), { messages: [], otherKey: '', otherPoll: 0, otherRead: 0 })
 export const sendDM = (body: { from: Party; to: Party; text: string; kind: string; storyRef?: string }) =>
-  j<{ ok?: boolean; convId?: string; message?: DMsg }>(fetch('/api/social/dm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), {})
+  j<{ ok?: boolean; convId?: string; message?: DMsg; otherPoll?: number }>(fetch('/api/social/dm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), {})
+export const deleteConversation = (convId: string, user: string) =>
+  j(fetch(`/api/social/dm?conv=${encodeURIComponent(convId)}&user=${encodeURIComponent(user)}`, { method: 'DELETE' }), { ok: false })
 
 /* ── نوتیفیکیشن ── */
 export const fetchNotifs = (user: string) =>

@@ -8,12 +8,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../store/auth.store'
-import { fetchConversations, fetchThread, sendDM, type ConvIndexItem, type DMsg } from '../../lib/social'
+import { fetchConversations, fetchThread, sendDM, deleteConversation, type ConvIndexItem, type DMsg } from '../../lib/social'
 import { subscribeDM } from '../../lib/realtime'
 import { useVisualViewport } from '../../lib/useVisualViewport'
 import { enablePush, pushPermission } from '../../lib/push-client'
 import { toast } from '../../components/ui/Toast'
-import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell } from 'lucide-react'
+import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell, Trash2 } from 'lucide-react'
 
 const GOLD = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -115,6 +115,11 @@ export default function DirectPage() {
         const cur = activeRef.current
         if (cur && p.convId === cur.convId) setOtherRead(r => Math.max(r, p.at || 0))
       },
+      onPoll: (p) => {
+        /* طرفِ مقابل الان آنلاین است ⇒ تیکِ «رسیده» بدونِ انتظارِ پول */
+        const cur = activeRef.current
+        if (cur && p.convId === cur.convId) setOtherPoll(x => Math.max(x, p.at || 0))
+      },
     })
     return stop
   }, [meKey]) // eslint-disable-line
@@ -183,11 +188,26 @@ export default function DirectPage() {
     /* tmp را با پیامِ واقعیِ سرور جایگزین کن (چون برادکستِ خودم به خودم نمی‌آید) */
     const real = (res as { message?: DMsg }).message
     if (real) setMsgs(prev => mergeMsgs(prev.filter(m => m.id !== tmpId), [real]))
+    /* پاسخِ ارسال، حضورِ گیرنده را هم می‌گوید ⇒ تیکِ «رسیده» همان لحظه */
+    const op = (res as { otherPoll?: number }).otherPoll
+    if (op) setOtherPoll(x => Math.max(x, op))
     loadConvs()
     setSending(false)
     /* تیک‌ها سریع‌تر: کمی بعد از ارسال، وضعیتِ «رسیده/خوانده‌شد» را فوری بگیر */
     setTimeout(() => { const c = activeRef.current; if (c) refreshThread(c) }, 1200)
     setTimeout(() => { const c = activeRef.current; if (c) refreshThread(c) }, 3500)
+  }
+
+  /* پاک‌کردنِ گفتگو — فقط از سمتِ خودِ کاربر (مثل اینستاگرام) */
+  const delConv = async () => {
+    if (!active) return
+    if (!window.confirm('این گفتگو برای شما پاک شود؟ (برای طرفِ مقابل باقی می‌ماند)')) return
+    const cid = active.convId
+    setConvs(cs => cs.filter(c => c.convId !== cid))
+    setActive(null); activeRef.current = null; setMsgs([]); lastAtRef.current = 0
+    await deleteConversation(cid, meKey)
+    loadConvs()
+    toast('گفتگو پاک شد', 'success')
   }
 
   const totalUnread = useMemo(() => convs.reduce((n, c) => n + (c.unread || 0), 0), [convs])
@@ -222,6 +242,14 @@ export default function DirectPage() {
             <span style={{ marginInlineStart: 'auto', fontSize: 11, fontWeight: 800, color: '#fff', background: '#ef4444', borderRadius: 999, padding: '3px 9px' }}>
               {totalUnread.toLocaleString('fa-IR')} جدید
             </span>
+          )}
+          {active && (
+            <button onClick={delConv} aria-label="حذف گفتگو"
+              style={{ marginInlineStart: 'auto', display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: MUT, padding: 8, borderRadius: 10, flexShrink: 0 }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = MUT }}>
+              <Trash2 size={19} />
+            </button>
           )}
         </div>
       </header>

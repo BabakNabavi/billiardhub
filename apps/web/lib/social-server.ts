@@ -61,6 +61,7 @@ export const P = {
   msgDir:  (cid: string) => `social/dm/${cid}/m`,
   msgFile: (cid: string, name: string) => `social/dm/${cid}/m/${name}`,
   read:    (cid: string, user: string) => `social/dm/${cid}/read/${safeKey(user)}.json`,
+  cleared: (cid: string, user: string) => `social/dm/${cid}/cleared/${safeKey(user)}.json`,
   dmIndex: (user: string) => `social/dm-idx/${safeKey(user)}.json`,
   notif:   (user: string) => `social/notif/${safeKey(user)}.json`,
   poll:    (user: string) => `social/dm-poll/${safeKey(user)}.json`,
@@ -99,6 +100,15 @@ export async function setReadCursor(cid: string, user: string, at: number): Prom
   const cur = await getReadCursor(cid, user)
   if (at > cur) { await writeJson(P.read(cid, user), at); return true }
   return false
+}
+
+/* «پاک‌کردنِ گفتگو» per-user (مثل اینستاگرام: فقط از سمتِ خودش؛ پیام‌ها برای طرفِ
+   مقابل می‌مانند). پیام‌های قدیمی‌تر از این زمان برای این کاربر برنمی‌گردند. */
+export async function getClearedAt(cid: string, user: string): Promise<number> {
+  return await readJson<number>(P.cleared(cid, user), 0)
+}
+export async function setClearedAt(cid: string, user: string, at: number): Promise<void> {
+  await writeJson(P.cleared(cid, user), at)
 }
 
 /* «آخرین فعالیتِ» هر کاربر — برای تیکِ «رسیده». */

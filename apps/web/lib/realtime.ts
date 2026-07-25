@@ -7,10 +7,12 @@ const topicOf = (key: string) => `dm-user-${(key || 'x').replace(/[^A-Za-z0-9_-]
 
 export interface MsgEvent { convId: string; message: DMsg; from: { key: string; name: string; role?: string } }
 export interface ReadEvent { convId: string; reader: string; at: number }
+export interface PollEvent { convId: string; at: number }
 
 export interface DMHandlers {
   onMsg?: (p: MsgEvent) => void
   onRead?: (p: ReadEvent) => void
+  onPoll?: (p: PollEvent) => void   // حضورِ طرفِ مقابل ⇒ تیکِ «رسیده»ی آنی
   onStatus?: (s: string) => void
 }
 
@@ -21,6 +23,7 @@ export function subscribeDM(meKey: string, h: DMHandlers): () => void {
   const ch = sb.channel(topicOf(meKey), { config: { broadcast: { self: false } } })
   if (h.onMsg) ch.on('broadcast', { event: 'msg' }, (p: { payload: MsgEvent }) => h.onMsg!(p.payload))
   if (h.onRead) ch.on('broadcast', { event: 'read' }, (p: { payload: ReadEvent }) => h.onRead!(p.payload))
+  if (h.onPoll) ch.on('broadcast', { event: 'poll' }, (p: { payload: PollEvent }) => h.onPoll!(p.payload))
   ch.subscribe((status) => { h.onStatus?.(status) })
   return () => { try { sb.removeChannel(ch) } catch { /* noop */ } }
 }

@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import {
-  CORS, P, safeKey, convId, dmTopic, broadcast, readJson,
+  CORS, P, safeKey, convId, dmTopic, broadcast, readJson, writeJson,
   appendMessage, readMessages, getReadCursor, setReadCursor,
+  getClearedAt, setClearedAt,
   addNotification, bumpConvIndex, clearConvUnread, touchPoll, getPoll,
   type ConvIndexItem, type DMsg,
 } from '@/lib/social-server'
@@ -25,7 +26,9 @@ export async function GET(req: NextRequest) {
     const parts = cid.split('__')
     const otherSafe = parts.find(p => p !== meSafe) || parts[0] || ''
 
-    const messages = await readMessages(cid, since)
+    /* گفتگوی پاک‌شده: پیام‌های قدیمی‌تر از لحظه‌ی پاک‌کردن برای این کاربر برنگردند */
+    const cleared = user ? await getClearedAt(cid, user) : 0
+    const messages = await readMessages(cid, Math.max(since, cleared))
 
     /* کرسرِ خواندنِ من را جلو ببر (بدونِ دستکاریِ فایلِ پیام‌ها) + unread صفر */
     let advancedTo = 0
@@ -40,6 +43,8 @@ export async function GET(req: NextRequest) {
 
     /* اگر تازه چیزی خواندم، به طرفِ مقابل خبر بده تا تیکش فوری آبی شود */
     if (advancedTo && otherSafe) broadcast(dmTopic(otherSafe), 'read', { convId: cid, reader: meSafe, at: advancedTo })
+    /* حضورِ من را هم آنی به طرف بده ⇒ تیکِ «رسیده»اش بدونِ انتظارِ پول به‌روز شود */
+    if (user && otherSafe) broadcast(dmTopic(otherSafe), 'poll', { convId: cid, at: Date.now() })
 
     return NextResponse.json({ messages, otherKey: otherSafe, otherPoll, otherRead }, { headers: CORS })
   }
@@ -66,19 +71,34 @@ export async function POST(req: NextRequest) {
   broadcast(dmTopic(to.key), 'msg', payload)
   broadcast(dmTopic(from.key), 'msg', payload)
 
-  /* بقیه‌ی کارها خارج از مسیرِ بحرانیِ تحویل */
-  await bumpConvIndex(to.key,   { key: from.key, name: from.name, role: from.role }, text, kind, at, true)
-  await bumpConvIndex(from.key, { key: to.key,   name: to.name,   role: to.role   }, text, kind, at, false)
+  /* بقیه‌ی کارها موازی (قبلاً ترتیبی بود و پوش را چند ثانیه عقب می‌انداخت) */
+  const body = kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
+  const tasks: Promise<unknown>[] = [
+    bumpConvIndex(to.key,   { key: from.key, name: from.name, role: from.role }, text, kind, at, true),
+    bumpConvIndex(from.key, { key: to.key,   name: to.name,   role: to.role   }, text, kind, at, false),
+    sendPush(to.key, { title: from.name || 'پیام جدید', body, url: '/direct', tag: id }),
+  ]
   if (kind === 'reply' || kind === 'reaction' || kind === 'like') {
-    await addNotification(to.key, {
+    tasks.push(addNotification(to.key, {
       type: kind === 'reply' ? 'reply' : kind === 'like' ? 'like' : 'reaction',
       fromKey: from.key, fromName: from.name, fromRole: from.role, text, storyId: b?.storyRef,
-    })
+    }))
   }
+  const pollP = getPoll(to.key)
+  await Promise.all(tasks)
+  const otherPoll = await pollP   // فرستنده همان لحظه بداند گیرنده آنلاین بوده ⇒ تیکِ «رسیده» فوری
 
-  /* Web Push برای گیرنده (وقتی اپ بسته/پس‌زمینه است) — best-effort */
-  const body = kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
-  await sendPush(to.key, { title: from.name || 'پیام جدید', body, url: '/direct', tag: id })
+  return NextResponse.json({ ok: true, convId: id, message: msg, otherPoll }, { status: 201, headers: CORS })
+}
 
-  return NextResponse.json({ ok: true, convId: id, message: msg }, { status: 201, headers: CORS })
+/* DELETE ?conv=ID&user=KEY → پاک‌کردنِ گفتگو فقط از سمتِ همین کاربر */
+export async function DELETE(req: NextRequest) {
+  const cid = req.nextUrl.searchParams.get('conv') || ''
+  const user = req.nextUrl.searchParams.get('user') || ''
+  if (!cid || !user) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+  await setClearedAt(cid, user, Date.now())
+  const path = P.dmIndex(user)
+  const list = await readJson<ConvIndexItem[]>(path, [])
+  await writeJson(path, list.filter(c => c.convId !== cid))
+  return NextResponse.json({ ok: true }, { headers: CORS })
 }
