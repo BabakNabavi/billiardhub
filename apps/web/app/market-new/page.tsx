@@ -150,7 +150,12 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
       <div className="info">
         <span className="ttl">{l.name}</span>
         <span className="cnd">{COND_LABEL[l.condition]}</span>
-        <span className="prc">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></span>
+        {/* پیلِ ٪ کنارِ قیمتِ تخفیف‌خورده؛ قیمتِ اصلیِ خط‌خورده زیرش */}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
+          <span className="prc">{toFa(l.price.toLocaleString('en-US'))} <i>تومان</i></span>
+        </span>
+        {l.disc > 0 && <span className="oldp">{toFa(l.old.toLocaleString('en-US'))}</span>}
         <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>
       </div>
       <button type="button" className={`mk-bk${saved ? ' on' : ''}`} aria-label="نشان کردن"
@@ -160,7 +165,6 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
       <span className="pic">
         <img src={l.img} alt={l.name} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-        {l.disc > 0 && <span className="pct" dir="ltr">٪{toFa(l.disc)}</span>}
       </span>
     </Link>
   )
@@ -206,10 +210,13 @@ function CityPicker({ value, onPick }: { value: string; onPick: (c: string) => v
           </button>
         </div>
       ) : (
-        <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT }} />
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجوی شهر…"
-            style={{ width: '100%', boxSizing: 'border-box', padding: '9px 30px 9px 10px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 12.5, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+        <div>
+          {/* ذره‌بین فقط نسبت به اینپوت وسط‌چین می‌شود، نه کلِ لیست */}
+          <div style={{ position: 'relative' }}>
+            <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
+            <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجوی شهر…"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '9px 30px 9px 10px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 12.5, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+          </div>
           <div style={{ marginTop: 6, border: `1px solid ${LINE}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
             {/* گزینه‌ی اول: کل ایران (بدون فیلتر شهر) */}
             <button type="button" onClick={() => { onPick(''); setQ('') }}
@@ -505,8 +512,10 @@ export default function MarketNewPage() {
         .mk-row .pic { width: 108px; height: 108px; border-radius: 11px; overflow: hidden; flex-shrink: 0;
           background: #F4F3F1; border: 1px solid ${LINE}; position: relative; }
         .mk-row .pic img { width: 100%; height: 100%; object-fit: cover; }
-        .mk-row .pct { position: absolute; bottom: 6px; right: 6px; background: #b400ae; color: #fff;
-          font-size: 10px; font-weight: 800; border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; }
+        .mk-row .pctn { background: #b400ae; color: #fff; font-size: 10px; font-weight: 800;
+          border-radius: 999px; padding: 2px 7px 1px; line-height: 1.4; flex-shrink: 0; }
+        .mk-row .oldp { font-size: 10.5px; color: ${MUT}; text-decoration: line-through;
+          font-variant-numeric: tabular-nums; margin-top: -2px; }
         .mk-bk { position: absolute; top: 8px; left: 8px; background: none; border: none; cursor: pointer;
           color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
         .mk-bk.on { color: ${GOLD_D}; }
