@@ -46,7 +46,9 @@ export default function DirectPage() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<ConvIndexItem | null>(null)   // برای هندلرهای Realtime
   const lastAtRef = useRef(0)                            // آخرین زمانِ پیامِ واقعی (خواندنِ افزایشی)
+  const convSeq = useRef(0)                              // فقط آخرین loadConvs اعمال شود (رفعِ برگشتِ چتِ پاک‌شده)
   const [pushState, setPushState] = useState<'granted' | 'denied' | 'default' | 'unsupported'>('unsupported')
+  const [confirmDel, setConfirmDel] = useState(false)
 
   /* منبعِ واحدِ ویوپورت: کلِ صفحه دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height + translateY)
      ⇒ نوارِ پاسخ همیشه بالای کیبورد، پیام‌ها هرگز زیرِ هدر، بدونِ جابجاییِ iOS */
@@ -65,7 +67,14 @@ export default function DirectPage() {
 
   useEffect(() => { if (_hydrated && !user) router.replace('/login') }, [_hydrated, user, router])
 
-  const loadConvs = async () => { if (meKey) { setConvs(await fetchConversations(meKey)); setReady(true) } }
+  /* فقط نتیجه‌ی آخرین درخواست اعمال می‌شود؛ یک loadConvsِ کهنه‌ی در راه نمی‌تواند
+     چتِ تازه‌پاک‌شده را دوباره برگرداند */
+  const loadConvs = async () => {
+    if (!meKey) return
+    const seq = ++convSeq.current
+    const list = await fetchConversations(meKey)
+    if (seq === convSeq.current) { setConvs(list); setReady(true) }
+  }
   useEffect(() => { if (user) loadConvs() }, [user]) // eslint-disable-line
 
   /* Web Push: وضعیتِ مجوز؛ اگر قبلاً granted بوده، اشتراک را بی‌صدا تازه کن */
@@ -208,10 +217,11 @@ export default function DirectPage() {
   }
 
   /* پاک‌کردنِ گفتگو — فقط از سمتِ خودِ کاربر (مثل اینستاگرام) */
-  const delConv = async () => {
+  const doDelConv = async () => {
     if (!active) return
-    if (!window.confirm('این گفتگو برای شما پاک شود؟ (برای طرفِ مقابل باقی می‌ماند)')) return
     const cid = active.convId
+    setConfirmDel(false)
+    convSeq.current++   // هر loadConvsِ در راه را باطل کن تا چت برنگردد
     setConvs(cs => cs.filter(c => c.convId !== cid))
     setActive(null); activeRef.current = null; setMsgs([]); lastAtRef.current = 0
     await deleteConversation(cid, meKey)
@@ -253,7 +263,7 @@ export default function DirectPage() {
             </span>
           )}
           {active && (
-            <button onClick={delConv} aria-label="حذف گفتگو"
+            <button onClick={() => setConfirmDel(true)} aria-label="حذف گفتگو"
               style={{ marginInlineStart: 'auto', display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: MUT, padding: 8, borderRadius: 10, flexShrink: 0 }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = MUT }}>
@@ -372,6 +382,33 @@ export default function DirectPage() {
             </div>
           </div>
         </>
+      )}
+
+      {/* دیالوگِ تأییدِ حذف — مدرن، وسطِ صفحه */}
+      {confirmDel && (
+        <div onClick={() => setConfirmDel(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 22 }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 340, background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, boxShadow: '0 30px 70px rgba(20,18,14,0.28)', padding: '24px 22px 18px', textAlign: 'center' }}>
+            <span style={{ display: 'inline-flex', width: 54, height: 54, borderRadius: 16, background: 'rgba(239,68,68,0.1)', color: '#ef4444', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Trash2 size={24} />
+            </span>
+            <h3 style={{ fontSize: 16.5, fontWeight: 900, margin: '0 0 7px', color: TEXT }}>حذفِ گفتگو</h3>
+            <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: '0 0 20px' }}>
+              این گفتگو فقط برای شما پاک می‌شود؛ برای طرفِ مقابل باقی می‌ماند.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setConfirmDel(false)}
+                style={{ flex: 1, padding: '12px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#F4F3F1', color: SEC, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+                انصراف
+              </button>
+              <button onClick={doDelConv}
+                style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1px solid rgba(239,68,68,0.9)', background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+                حذف
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
