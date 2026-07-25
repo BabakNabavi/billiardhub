@@ -21,7 +21,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  Search, MapPin, SlidersHorizontal, X, Check, ChevronDown,
+  Search, MapPin, X, ChevronDown,
   Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
 } from 'lucide-react'
 import { SHOP_PRODUCTS } from '../shop/products'
@@ -210,17 +210,21 @@ function CityPicker({ value, onPick }: { value: string; onPick: (c: string) => v
           <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT }} />
           <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجوی شهر…"
             style={{ width: '100%', boxSizing: 'border-box', padding: '9px 30px 9px 10px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 12.5, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
-          {matches.length > 0 && (
-            <div style={{ marginTop: 6, border: `1px solid ${LINE}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
-              {matches.map(c => (
-                <button key={c} type="button" onClick={() => { onPick(c); setQ('') }}
-                  className="mk-cityopt"
-                  style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, color: SEC }}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          )}
+          <div style={{ marginTop: 6, border: `1px solid ${LINE}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
+            {/* گزینه‌ی اول: کل ایران (بدون فیلتر شهر) */}
+            <button type="button" onClick={() => { onPick(''); setQ('') }}
+              className="mk-cityopt"
+              style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: GOLD_D, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <MapPin size={12} /> کل ایران
+            </button>
+            {matches.map(c => (
+              <button key={c} type="button" onClick={() => { onPick(c); setQ('') }}
+                className="mk-cityopt"
+                style={{ width: '100%', textAlign: 'right', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, color: SEC }}>
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -256,7 +260,6 @@ export default function MarketNewPage() {
   const [time, setTime]     = useState<TimeId>('all')
   const [sort, setSort]     = useState<SortId>('relevant')
   const [q, setQ]           = useState('')
-  const [drawer, setDrawer] = useState(false)
   const [cityOpen, setCityOpen] = useState(false)
   /* نشان‌ها — ذخیره‌ی محلی */
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set())
@@ -287,10 +290,6 @@ export default function MarketNewPage() {
       return next
     })
   }
-  useEffect(() => {
-    document.body.style.overflow = drawer ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [drawer])
 
   const counts = useMemo(() => {
     const m: Record<string, number> = {}
@@ -567,7 +566,7 @@ export default function MarketNewPage() {
             <button type="button" onClick={() => setCityOpen(p => !p)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: city ? GOLD_D : SEC }}>
               <MapPin size={14} style={{ color: GOLD_D }} />
-              {city || 'همه‌ی شهرها'}
+              {city || 'کل ایران'}
               <ChevronDown size={12} style={{ color: MUT, transform: cityOpen ? 'rotate(180deg)' : 'none', transition: 'transform .3s' }} />
             </button>
             {cityOpen && (
@@ -626,7 +625,7 @@ export default function MarketNewPage() {
           <button type="button" onClick={() => setCityOpen(p => !p)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 12px', margin: '4px 6px 4px 4px', borderRadius: 10, borderInlineStart: `1px solid ${LINE}`, background: 'none', borderTop: 'none', borderBottom: 'none', borderInlineEnd: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: city ? GOLD_D : SEC, flexShrink: 0 }}>
             <MapPin size={13} style={{ color: GOLD_D }} />
-            {city || 'همه شهرها'}
+            {city || 'کل ایران'}
           </button>
           {cityOpen && (
             <div className="mk-mcitypop" style={{ position: 'absolute', top: 'calc(100% + 8px)', insetInline: 0, zIndex: 60, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 12, boxShadow: '0 18px 46px rgba(28,27,23,0.16)', animation: 'mkUp .25s cubic-bezier(.22,1,.36,1) both' }}>
@@ -648,17 +647,6 @@ export default function MarketNewPage() {
               <span className="lb">{c.label}</span>
             </button>
           ))}
-        </div>
-
-        {/* نوار موبایل: فیلتر + مرتب‌سازی */}
-        <div className="mk-mobilebar" style={{ alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <button type="button" onClick={() => setDrawer(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 16px', borderRadius: 12, border: `1px solid rgba(199,166,106,0.34)`, background: 'rgba(199,166,106,0.12)', color: GOLD_D, fontSize: 12.5, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer' }}>
-            <SlidersHorizontal size={14} /> فیلترها {chips.length > 0 && `(${toFa(chips.length)})`}
-          </button>
-          <select value={sort} onChange={e => setSort(e.target.value as SortId)} style={{ flex: 1, minWidth: 0 }}>
-            {SORTS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-          </select>
         </div>
 
         <div className="mk-layout">
@@ -756,36 +744,6 @@ export default function MarketNewPage() {
         </Link>
       </nav>
 
-      {/* ═══ کشوی فیلتر موبایل (bottom sheet) ═══ */}
-      {drawer && (
-        <div className="mk-drawer">
-          <div onClick={() => setDrawer(false)}
-            style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(15,14,11,0.45)', backdropFilter: 'blur(4px)' }} />
-          <div style={{ position: 'fixed', insetInline: 0, bottom: 0, zIndex: 301, maxHeight: '82vh', display: 'flex', flexDirection: 'column',
-            background: '#fff', borderRadius: '22px 22px 0 0', boxShadow: '0 -18px 60px rgba(15,14,11,0.3)',
-            animation: 'mkSheet .35s cubic-bezier(.22,1,.36,1) both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', borderBottom: `1px solid ${LINE}` }}>
-              <span style={{ fontSize: 14.5, fontWeight: 900 }}>فیلترها</span>
-              <span style={{ fontSize: 11, color: MUT }}>{toFa(filtered.length)} آگهی</span>
-              <button type="button" onClick={() => setDrawer(false)}
-                style={{ marginInlineStart: 'auto', display: 'flex', background: '#F4F3F1', border: 'none', borderRadius: 10, padding: 7, cursor: 'pointer', color: SEC }}>
-                <X size={15} />
-              </button>
-            </div>
-            <div style={{ overflowY: 'auto', padding: '2px 18px 8px', flex: 1 }}>{FilterBody}</div>
-            <div style={{ display: 'flex', gap: 10, padding: '12px 18px calc(14px + env(safe-area-inset-bottom))', borderTop: `1px solid ${LINE}` }}>
-              <button type="button" onClick={() => setDrawer(false)}
-                style={{ flex: 1, padding: '13px', borderRadius: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, color: '#241B08', background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)`, boxShadow: '0 8px 22px rgba(199,166,106,0.3)' }}>
-                <Check size={14} style={{ verticalAlign: '-2px', marginLeft: 5 }} /> نمایش {toFa(filtered.length)} آگهی
-              </button>
-              <button type="button" onClick={clearAll}
-                style={{ padding: '13px 18px', borderRadius: 12, border: `1px solid ${LINE}`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, color: SEC, background: '#fff' }}>
-                حذف همه
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
