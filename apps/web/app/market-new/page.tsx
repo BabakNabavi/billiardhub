@@ -429,6 +429,17 @@ export default function MarketNewPage() {
       <style>{`
         @keyframes mkUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         @keyframes mkSheet { from { transform: translateY(100%); } to { transform: none; } }
+        /* «بازار» — رولِ عمودی: می‌رود بالا، از پایین برمی‌گردد */
+        @keyframes mkWord {
+          0%, 68%   { transform: translateY(0);      opacity: 1; }
+          76%       { transform: translateY(-130%);  opacity: 0; }
+          77%       { transform: translateY(130%);   opacity: 0; }
+          86%, 100% { transform: translateY(0);      opacity: 1; }
+        }
+        .mk-rollwrap { display: inline-flex; overflow: hidden; height: 1.4em; align-items: center; vertical-align: -0.35em; }
+        .mk-roll { display: inline-block; color: ${GOLD_D}; font-weight: 800;
+          animation: mkWord 3.8s cubic-bezier(.22,1,.36,1) infinite; }
+        @media (prefers-reduced-motion: reduce) { .mk-roll { animation: none; } }
 
         /* ── کارت — همان فرمتِ عمودی کارت‌های /shop ── */
         .mk-card { display: flex; flex-direction: column; background: #fff; border: 1.5px solid rgba(28,28,26,0.18);
@@ -498,16 +509,16 @@ export default function MarketNewPage() {
           border-bottom: 1px solid ${LINE}; }
 
         /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
-        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; padding: 6px 4px 4px; }
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -8px; }
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
-        /* ۵٪ بزرگ‌تر (۵۲ ⇒ ۵۵) */
-        .mk-mcat .ic { width: 55px; height: 55px; border-radius: 16px; background: #fff; border: 1px solid ${LINE};
+        /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
+        .mk-mcat .ic { width: 58px; height: 58px; border-radius: 17px; background: #fff; border: 1px solid ${LINE};
           display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
         .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
         .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
         .mk-mcat:active .ic { transform: scale(0.93); }
-        .mk-mcat .lb { font-size: 10.5px; font-weight: 700; color: ${SEC}; }
+        .mk-mcat .lb { font-size: 11px; font-weight: 700; color: ${SEC}; }
         .mk-mcat.on .lb { color: ${GOLD_D}; font-weight: 800; }
 
         /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */
@@ -615,7 +626,7 @@ export default function MarketNewPage() {
               style={{ width: '100%', boxSizing: 'border-box', padding: '10px 36px 10px 14px', borderRadius: 12, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
             {!q && (
               <span aria-hidden style={{ position: 'absolute', right: 36, top: '50%', transform: 'translateY(-50%)', fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
-                جستجو در بیلیارد <b style={{ color: GOLD_D, fontWeight: 800 }}>بازار</b>
+                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
               </span>
             )}
           </div>
@@ -649,7 +660,7 @@ export default function MarketNewPage() {
               style={{ width: '100%', boxSizing: 'border-box', padding: '12px 0', background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: TEXT }} />
             {!q && (
               <span aria-hidden style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', fontSize: 12.5, color: MUT, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
-                جستجو در بیلیارد <b style={{ color: GOLD_D, fontWeight: 800 }}>بازار</b>
+                جستجو در بیلیارد <span className="mk-rollwrap"><b className="mk-roll">بازار</b></span>
               </span>
             )}
           </div>
