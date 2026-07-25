@@ -42,6 +42,15 @@ export default function DirectPage() {
   const [kb, setKb] = useState(0)   // ارتفاعِ همپوشانیِ کیبورد
   const scrollRef = useRef<HTMLDivElement>(null)
   const baseVV = useRef(0)          // ارتفاعِ ویوپورت وقتی کیبورد بسته است
+  const headerRef = useRef<HTMLElement>(null)
+  const [headerH, setHeaderH] = useState(84)   // ارتفاعِ واقعیِ هدرِ fixed (پویا)
+
+  useEffect(() => {
+    const measure = () => { if (headerRef.current) setHeaderH(headerRef.current.offsetHeight) }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [active])
 
   const scrollBottom = () => requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight }))
 
@@ -121,7 +130,7 @@ export default function DirectPage() {
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       {/* هدر fixed (sticky روی iOS گلیچ می‌کرد و ردیف زیرش می‌رفت) */}
-      <header style={{ background: '#fff', borderBottom: `1px solid ${LINE}`, position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30, paddingTop: 'env(safe-area-inset-top)' }}>
+      <header ref={headerRef} style={{ background: '#fff', borderBottom: `1px solid ${LINE}`, position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30, paddingTop: 'env(safe-area-inset-top)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '13px clamp(14px,3vw,22px)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <button onClick={() => (active ? setActive(null) : router.back())} aria-label="بازگشت"
             style={{ display: 'flex', background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 8, cursor: 'pointer', color: SEC }}>
@@ -141,8 +150,8 @@ export default function DirectPage() {
         </div>
       </header>
 
-      {/* padding-top = ارتفاعِ هدرِ fixed تا محتوا زیرش نرود */}
-      <main style={{ maxWidth: 760, margin: '0 auto', paddingTop: 'calc(64px + env(safe-area-inset-top))', paddingInline: active ? 0 : 'clamp(14px,3vw,22px)', paddingBottom: active ? 0 : 80 }}>
+      {/* padding-top = ارتفاعِ واقعیِ هدرِ fixed تا محتوا زیرش نرود */}
+      <main style={{ maxWidth: 760, margin: '0 auto', paddingTop: headerH, paddingInline: active ? 0 : 'clamp(14px,3vw,22px)', paddingBottom: active ? 0 : 80 }}>
         {/* ── لیست گفتگوها ── */}
         {!active && (
           ready && convs.length === 0 ? (
