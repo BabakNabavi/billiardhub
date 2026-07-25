@@ -519,7 +519,7 @@ export default function MarketNewPage() {
           border-bottom: 1px solid ${LINE}; }
 
         /* ── گرید دسته‌های موبایل: ۳ ردیف ۵تایی ── */
-        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -8px; }
+        .mk-mcats { display: none; grid-template-columns: repeat(5, 1fr); gap: 11px 6px; padding: 0 4px 4px; margin-top: -20px; }
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
         /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
