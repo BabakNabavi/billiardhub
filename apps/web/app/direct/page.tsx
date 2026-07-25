@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../store/auth.store'
 import { fetchConversations, fetchThread, sendDM, type ConvIndexItem, type DMsg } from '../../lib/social'
 import { subscribeDM } from '../../lib/realtime'
+import { useVisualViewport } from '../../lib/useVisualViewport'
 import { enablePush, pushPermission } from '../../lib/push-client'
 import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell } from 'lucide-react'
 
@@ -41,43 +42,20 @@ export default function DirectPage() {
   const [draft, setDraft] = useState('')
   const [ready, setReady] = useState(false)
   const [sending, setSending] = useState(false)
-  const [kb, setKb] = useState(0)   // ارتفاعِ همپوشانیِ کیبورد
   const scrollRef = useRef<HTMLDivElement>(null)
-  const baseVV = useRef(0)          // ارتفاعِ ویوپورت وقتی کیبورد بسته است
-  const headerRef = useRef<HTMLElement>(null)
-  const [headerH, setHeaderH] = useState(84)   // ارتفاعِ واقعیِ هدرِ fixed (پویا)
   const activeRef = useRef<ConvIndexItem | null>(null)   // برای هندلرهای Realtime
   const lastAtRef = useRef(0)                            // آخرین زمانِ پیامِ واقعی (خواندنِ افزایشی)
   const [pushState, setPushState] = useState<'granted' | 'denied' | 'default' | 'unsupported'>('unsupported')
 
-  useEffect(() => {
-    const measure = () => { if (headerRef.current) setHeaderH(headerRef.current.offsetHeight) }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [active])
+  /* منبعِ واحدِ ویوپورت: کلِ صفحه دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height + translateY)
+     ⇒ نوارِ پاسخ همیشه بالای کیبورد، پیام‌ها هرگز زیرِ هدر، بدونِ جابجاییِ iOS */
+  const vp = useVisualViewport()
 
   /* اسکرول داخلِ کانتینرِ پیام‌ها (نه window) ⇒ بدون لرزش، پیام‌ها هرگز زیرِ هدر نمی‌روند */
   const scrollBottom = () => requestAnimationFrame(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight })
 
-  /* نوارِ پاسخ باید دقیقاً بالای کیبوردِ موبایل بماند — از baselineِ VisualViewport
-     (نه innerHeight که روی iOS بزرگ‌تر است و فاصله می‌انداخت) */
-  useEffect(() => {
-    const vv = typeof window !== 'undefined' ? window.visualViewport : null
-    if (!vv) return
-    baseVV.current = vv.height
-    const onResize = () => {
-      if (vv.height > baseVV.current) baseVV.current = vv.height   // نوارِ ابزار جمع شد ⇒ baseline بزرگ‌تر
-      const overlap = Math.max(0, Math.round(baseVV.current - vv.height))
-      setKb(overlap)
-      if (overlap > 0) scrollBottom()
-    }
-    vv.addEventListener('resize', onResize); vv.addEventListener('scroll', onResize)
-    return () => { vv.removeEventListener('resize', onResize); vv.removeEventListener('scroll', onResize) }
-  }, [])
-
-  /* هر بار پیام‌ها عوض شدند ⇒ به آخرین پیام اسکرول کن (مثل اینستاگرام) */
-  useEffect(() => { if (active) scrollBottom() }, [msgs.length, active]) // eslint-disable-line
+  /* پیام‌ها عوض شد یا کیبورد باز/بسته شد ⇒ به آخرین پیام اسکرول کن */
+  useEffect(() => { if (active) scrollBottom() }, [msgs.length, active, vp.height, vp.kb]) // eslint-disable-line
   /* activeRef را همگام نگه دار (هندلرهای Realtime از آن می‌خوانند) */
   useEffect(() => { activeRef.current = active }, [active])
 
@@ -144,6 +122,25 @@ export default function DirectPage() {
     return () => { clearInterval(t); clearInterval(l) }
   }, [user]) // eslint-disable-line
 
+  /* برگشت به اپ / آنلاین‌شدن ⇒ همگام‌سازیِ فوری. iOS وب‌سوکت را در پس‌زمینه می‌بندد؛
+     این تضمین می‌کند پیام‌هایِ ازدست‌رفته هنگام بستنِ اپ، موقعِ برگشت بیایند. */
+  useEffect(() => {
+    if (!user) return
+    const resync = () => {
+      if (document.visibilityState !== 'visible') return
+      loadConvs()
+      const c = activeRef.current; if (c) refreshThread(c)
+    }
+    document.addEventListener('visibilitychange', resync)
+    window.addEventListener('online', resync)
+    window.addEventListener('focus', resync)
+    return () => {
+      document.removeEventListener('visibilitychange', resync)
+      window.removeEventListener('online', resync)
+      window.removeEventListener('focus', resync)
+    }
+  }, [user]) // eslint-disable-line
+
   /* خواندنِ افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند */
   const refreshThread = async (c: ConvIndexItem) => {
     const t = await fetchThread(c.convId, meKey, lastAtRef.current)
@@ -190,9 +187,18 @@ export default function DirectPage() {
   if (!_hydrated || !user) return null
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-      {/* هدر fixed (sticky روی iOS گلیچ می‌کرد و ردیف زیرش می‌رفت) */}
-      <header ref={headerRef} style={{ background: '#fff', borderBottom: `1px solid ${LINE}`, position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30, paddingTop: 'env(safe-area-inset-top)' }}>
+    /* ستونِ ثابت که دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height=vp.height، translateY=offsetTop).
+       هدر بالا / محتوا وسط با اسکرولِ داخلی / نوارِ پاسخ پایین ⇒ همیشه بالای کیبورد،
+       پیام‌ها هرگز زیرِ هدر، و روی iOS با کیبورد جابجا/نصفه نمی‌شود. */
+    <div dir="rtl" style={{
+      position: 'fixed', top: 0, left: 0, right: 0,
+      height: vp.height || '100dvh',
+      transform: `translateY(${vp.offsetTop}px)`,
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
+    }}>
+      {/* هدر — آیتمِ اولِ ستون (نه fixed) */}
+      <header style={{ flexShrink: 0, background: '#fff', borderBottom: `1px solid ${LINE}`, paddingTop: 'env(safe-area-inset-top)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '13px clamp(14px,3vw,22px)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <button onClick={() => (active ? setActive(null) : router.back())} aria-label="بازگشت"
             style={{ display: 'flex', background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 8, cursor: 'pointer', color: SEC }}>
@@ -212,67 +218,69 @@ export default function DirectPage() {
         </div>
       </header>
 
-      {/* padding-top = ارتفاعِ واقعیِ هدرِ fixed تا محتوا زیرش نرود */}
-      <main style={{ maxWidth: 760, margin: '0 auto', paddingTop: headerH, paddingInline: active ? 0 : 'clamp(14px,3vw,22px)', paddingBottom: active ? 0 : 80 }}>
-        {/* بنرِ فعال‌سازیِ اعلانِ Web Push (وقتی مجوز هنوز پرسیده نشده) */}
-        {!active && pushState === 'default' && (
-          <button onClick={askPush}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'right', marginBottom: 12, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 12, padding: '11px 14px', cursor: 'pointer', fontFamily: 'inherit', color: GOLD_D }}>
-            <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 9, background: 'rgba(199,166,106,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Bell size={17} /></span>
-            <span style={{ minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800, color: TEXT }}>اعلانِ پیام‌ها را روشن کنید</span>
-              <span style={{ display: 'block', fontSize: 11.5, color: MUT, marginTop: 1 }}>تا وقتی اپ بسته است هم از پیام‌های جدید باخبر شوید</span>
-            </span>
-          </button>
-        )}
-        {/* ── لیست گفتگوها ── */}
-        {!active && (
-          ready && convs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
-              <span style={{ display: 'inline-flex', width: 62, height: 62, borderRadius: 18, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)', alignItems: 'center', justifyContent: 'center', color: GOLD_D, marginBottom: 16 }}>
-                <Inbox size={26} />
-              </span>
-              <p style={{ fontSize: 15.5, fontWeight: 800, margin: '0 0 6px' }}>هنوز گفتگویی ندارید</p>
-              <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: 0 }}>
-                وقتی کسی به استوریِ شما پاسخ بدهد، گفتگو اینجا ساخته می‌شود و می‌توانید جواب بدهید.
-              </p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {convs.map(c => (
-                <button key={c.convId} onClick={() => openConv(c)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 14px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right', width: '100%' }}>
-                  <span style={{ width: 46, height: 46, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>
-                    {c.otherName.charAt(0)}
-                  </span>
-                  <span style={{ minWidth: 0, flex: 1 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 14.5, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.otherName}</span>
-                      {c.otherRole && <span style={{ fontSize: 10, color: MUT }}>{c.otherRole}</span>}
-                      <span style={{ marginInlineStart: 'auto', fontSize: 10.5, color: MUT, flexShrink: 0 }}>{timeAgo(c.lastAt)}</span>
+      {/* ── لیست گفتگوها — کانتینرِ اسکرولِ داخلی (ردیف هرگز زیرِ هدر نمی‌رود) ── */}
+      {!active && (
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+          <div style={{ maxWidth: 760, margin: '0 auto', padding: '14px clamp(14px,3vw,22px) calc(24px + env(safe-area-inset-bottom))' }}>
+            {/* بنرِ فعال‌سازیِ اعلانِ Web Push */}
+            {pushState === 'default' && (
+              <button onClick={askPush}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'right', marginBottom: 12, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 12, padding: '11px 14px', cursor: 'pointer', fontFamily: 'inherit', color: GOLD_D }}>
+                <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 9, background: 'rgba(199,166,106,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Bell size={17} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800, color: TEXT }}>اعلانِ پیام‌ها را روشن کنید</span>
+                  <span style={{ display: 'block', fontSize: 11.5, color: MUT, marginTop: 1 }}>تا وقتی اپ بسته است هم از پیام‌های جدید باخبر شوید</span>
+                </span>
+              </button>
+            )}
+            {ready && convs.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
+                <span style={{ display: 'inline-flex', width: 62, height: 62, borderRadius: 18, background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.3)', alignItems: 'center', justifyContent: 'center', color: GOLD_D, marginBottom: 16 }}>
+                  <Inbox size={26} />
+                </span>
+                <p style={{ fontSize: 15.5, fontWeight: 800, margin: '0 0 6px' }}>هنوز گفتگویی ندارید</p>
+                <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: 0 }}>
+                  وقتی کسی به استوریِ شما پاسخ بدهد، گفتگو اینجا ساخته می‌شود و می‌توانید جواب بدهید.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {convs.map(c => (
+                  <button key={c.convId} onClick={() => openConv(c)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 14px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right', width: '100%' }}>
+                    <span style={{ width: 46, height: 46, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>
+                      {c.otherName.charAt(0)}
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
-                      <span style={{ fontSize: 12.5, color: c.unread ? TEXT : MUT, fontWeight: c.unread ? 700 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                        {preview(c.lastKind, c.lastText)}
+                    <span style={{ minWidth: 0, flex: 1 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 14.5, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.otherName}</span>
+                        {c.otherRole && <span style={{ fontSize: 10, color: MUT }}>{c.otherRole}</span>}
+                        <span style={{ marginInlineStart: 'auto', fontSize: 10.5, color: MUT, flexShrink: 0 }}>{timeAgo(c.lastAt)}</span>
                       </span>
-                      {c.unread > 0 && (
-                        <span style={{ fontSize: 10, fontWeight: 800, color: '#fff', background: '#ef4444', borderRadius: 999, minWidth: 18, height: 18, padding: '0 5px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {c.unread.toLocaleString('fa-IR')}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                        <span style={{ fontSize: 12.5, color: c.unread ? TEXT : MUT, fontWeight: c.unread ? 700 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                          {preview(c.lastKind, c.lastText)}
                         </span>
-                      )}
+                        {c.unread > 0 && (
+                          <span style={{ fontSize: 10, fontWeight: 800, color: '#fff', background: '#ef4444', borderRadius: 999, minWidth: 18, height: 18, padding: '0 5px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {c.unread.toLocaleString('fa-IR')}
+                          </span>
+                        )}
+                      </span>
                     </span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          )
-        )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
-        {/* ── ترد گفتگو — ستونِ ثابت: هدر ثابت / پیام‌ها اسکرولِ داخلی / نوار پاسخ بالای کیبورد ── */}
-        {active && (
-          <div style={{ position: 'fixed', top: headerH, left: 0, right: 0, bottom: kb, zIndex: 20, display: 'flex', flexDirection: 'column', background: '#F7F5F0', transition: 'bottom .12s ease' }}>
-            {/* پیام‌ها — کانتینرِ اسکرول‌شونده‌ی داخلی */}
-            <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', width: '100%', maxWidth: 760, margin: '0 auto', padding: '18px clamp(14px,3vw,22px) 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* ── ترد گفتگو ── */}
+      {active && (
+        <>
+          <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+            <div style={{ maxWidth: 760, margin: '0 auto', padding: '18px clamp(14px,3vw,22px) 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {msgs.length === 0 && <p style={{ textAlign: 'center', fontSize: 12.5, color: MUT, marginTop: 30 }}>هنوز پیامی نیست</p>}
               {msgs.map(m => {
                 const mine = m.fromKey === meKey
@@ -300,27 +308,26 @@ export default function DirectPage() {
                 )
               })}
             </div>
-            {/* نوارِ پاسخ — کفِ ستون؛ چون ستون با bottom=kb بالای کیبورد است، همیشه دیده می‌شود */}
-            <div style={{ flexShrink: 0, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-              <div style={{ maxWidth: 760, margin: '0 auto', padding: kb > 0 ? '10px clamp(14px,3vw,22px)' : '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
-                  placeholder="پیام خود را بنویسید…"
-                  style={{ flex: 1, minWidth: 0, padding: '11px 15px', borderRadius: 100, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 14, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
-                {/* دکمه‌ی ارسال — بزرگ‌تر، طرح LQ (تینت طلایی + بوردر) */}
-                <button onClick={send} disabled={!draft.trim() || sending} aria-label="ارسال"
-                  style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, cursor: draft.trim() ? 'pointer' : 'not-allowed',
-                    background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, opacity: draft.trim() ? 1 : 0.55,
-                    transition: 'transform .2s, background .2s, box-shadow .2s', boxShadow: draft.trim() ? '0 6px 18px rgba(199,166,106,0.22)' : 'none' }}
-                  onMouseEnter={e => { if (draft.trim()) { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.24)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.14)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}>
-                  <Send size={22} />
-                </button>
-              </div>
+          </div>
+          {/* نوارِ پاسخ — آیتمِ آخرِ ستون؛ چون ستون هم‌اندازه‌ی ناحیه‌ی دیدنی است، همیشه بالای کیبورد دیده می‌شود */}
+          <div style={{ flexShrink: 0, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+            <div style={{ maxWidth: 760, margin: '0 auto', padding: vp.kb > 0 ? '10px clamp(14px,3vw,22px)' : '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
+                placeholder="پیام خود را بنویسید…"
+                style={{ flex: 1, minWidth: 0, padding: '11px 15px', borderRadius: 100, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 14, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+              <button onClick={send} disabled={!draft.trim() || sending} aria-label="ارسال"
+                style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, cursor: draft.trim() ? 'pointer' : 'not-allowed',
+                  background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, opacity: draft.trim() ? 1 : 0.55,
+                  transition: 'transform .2s, background .2s, box-shadow .2s', boxShadow: draft.trim() ? '0 6px 18px rgba(199,166,106,0.22)' : 'none' }}
+                onMouseEnter={e => { if (draft.trim()) { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.24)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(199,166,106,0.14)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}>
+                <Send size={22} />
+              </button>
             </div>
           </div>
-        )}
-      </main>
+        </>
+      )}
     </div>
   )
 }
