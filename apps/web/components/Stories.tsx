@@ -523,8 +523,10 @@ export default function Stories() {
         />
       )}
 
-      {/* Story composer — any logged-in role can post; appears in the strip instantly */}
-      {mounted && posting && (
+      {/* Story composer — any logged-in role can post; appears in the strip instantly.
+         با portal به body رندر می‌شود: کانتینرِ نوارِ استوری opacity وابسته به اسکرول دارد
+         و stacking-context می‌سازد؛ بدون portal، با بازشدنِ کیبورد مودال محو و پشتِ هرو می‌افتاد. */}
+      {mounted && posting && createPortal(
         <div onClick={() => setPosting(false)} style={{ position:'fixed', inset:0, zIndex:99999, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:16, direction:'rtl' }}>
           <div onClick={e => e.stopPropagation()} style={{ background:'#fff', borderRadius:20, width:'min(420px,94vw)', padding:22, boxShadow:'0 30px 80px rgba(0,0,0,0.4)', fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
@@ -547,7 +549,8 @@ export default function Stories() {
             <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری)..." style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
             <button onClick={publishStory} disabled={!storyImg} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid rgba(199,166,106,0.34)', background: storyImg ? 'rgba(199,166,106,0.14)' : 'rgba(17,17,16,0.05)', color: storyImg ? '#9A6E38' : '#aaa', fontWeight:800, fontSize:14, cursor: storyImg ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>انتشار استوری</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
