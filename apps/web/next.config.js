@@ -2,6 +2,10 @@
 const nextConfig = {
   transpilePackages: ["@repo/ui"],
   serverExternalPackages: ["bcrypt"],
+  // نسخه‌ی build را به کلاینت هم می‌دهیم تا PWA بتواند کدِ کهنه را تشخیص و reload کند
+  env: {
+    NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || 'dev',
+  },
   async redirects() {
     return [
       // «آموزش» به «بیلیارد مدیا» تغییر نام داد — لینک‌های قدیمی منتقل می‌شوند

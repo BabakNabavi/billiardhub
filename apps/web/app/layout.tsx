@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ToastProvider } from '../components/ui/Toast';
 import ScrollToTop from '../components/ScrollToTop';
+import AppBoot from '../components/AppBoot';
 
 export const metadata: Metadata = {
   title: "بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد",
@@ -68,6 +69,7 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
         <ScrollToTop />
+        <AppBoot />
         <Navbar />
         <main>{children}</main>
         <Footer />

@@ -12,6 +12,7 @@ import { fetchConversations, fetchThread, sendDM, type ConvIndexItem, type DMsg 
 import { subscribeDM } from '../../lib/realtime'
 import { useVisualViewport } from '../../lib/useVisualViewport'
 import { enablePush, pushPermission } from '../../lib/push-client'
+import { toast } from '../../components/ui/Toast'
 import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell } from 'lucide-react'
 
 const GOLD = '#C7A66A'
@@ -76,6 +77,10 @@ export default function DirectPage() {
   const askPush = async () => {
     const r = await enablePush(meKey)
     setPushState(r === 'ok' ? 'granted' : r === 'denied' ? 'denied' : pushPermission())
+    if (r === 'ok') toast('اعلانِ پیام‌ها روشن شد ✓', 'success')
+    else if (r === 'denied') toast('اجازه‌ی اعلان داده نشد؛ از تنظیماتِ اپ/مرورگر اجازه دهید', 'warning')
+    else if (r === 'unsupported') toast('روی آیفون اول اپ را به هوم‌اسکرین اضافه کنید و از همان‌جا باز کنید', 'warning')
+    else toast('روشن‌کردنِ اعلان ناموفق بود؛ دوباره تلاش کنید', 'error')
   }
 
   /* ادغامِ پیام‌ها بدونِ تکرار؛ tmpِ خوش‌بینانه را با نسخه‌ی واقعیِ هم‌متن جایگزین کن */
