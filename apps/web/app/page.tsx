@@ -274,7 +274,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           }}
         >
           {/* ── Image: top 60% ── */}
-          <div style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
+          <div className="club-img-x" style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
             <img src={club.img} alt={club.name}
               onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
@@ -1307,14 +1307,12 @@ useEffect(() => {
           .mkt-sub      { grid-template-columns:1fr !important; }
         }
 
-        /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤800px, wider than mobile) ══ */
-        @media(max-height:800px) and (min-width:601px){
-          /* استوری‌ها ۵٪ کوچک‌تر (۰.۹۰ × ۰.۹۵) */
-          .hero-stories-bar { zoom:0.855; }
+        /* ══ 14-15 INCH / SHORT VIEWPORT (height ≤900px, wider than mobile) ══
+           سقف از ۸۰۰ به ۹۰۰ رفت تا لپ‌تاپ‌های ۱۵ اینچ (ویوپورت ~۸۶۴) هم بگیرند */
+        @media(max-height:900px) and (min-width:601px){
+          .hero-stories-bar { zoom:0.90; }
           /* کل بلوک کمی پایین‌تر (+۱۲px) */
           .hero-content { padding-top:calc(clamp(177px,24.5vh,217px) + env(safe-area-inset-top)) !important; zoom:0.90; }
-          /* eyebrow و تیتر ۵٪ کوچک‌تر و فاصله‌ها کمی جمع‌تر */
-          .hero-eyebrow { zoom:0.95; margin-bottom:12px !important; }
           .hero-h1      { zoom:0.95; margin-bottom:16px !important; }
           .hero-desc    { display:none !important; }
         }
@@ -1391,6 +1389,9 @@ useEffect(() => {
         @media(max-width:600px){
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
+          /* پنل جا کم داشت و دکمه به کف می‌چسبید ⇒ عکس ۵۶٪، پنل ۴۴٪ */
+          .club-img-x      { flex:0 0 56% !important; }
+          .club-mob-panel  { flex:0 0 44% !important; }
           .club-open-btn   { display:flex !important; }
           .clubs-desk      { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
@@ -1494,21 +1495,6 @@ useEffect(() => {
           padding: 'calc(clamp(189px,25vh,236px) + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
-          {/* Eyebrow */}
-          <div className="ha hero-eyebrow" style={{
-            display: 'inline-flex', alignItems: 'center', gap: '10px',
-            background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255,255,255,0.11)', borderRadius: '100px',
-            padding: '7px 22px', marginBottom: '28px', transform: 'translateY(-5vh)',
-          }}>
-            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: GOLD,
-              boxShadow: `0 0 10px ${GOLD},0 0 22px ${GOLD}60`,
-              display: 'inline-block', animation: 'pulse2 3s ease-in-out infinite' }} />
-            <span className="eyebrow-text" style={{ color: GOLD_DIM, fontSize: '13px', fontWeight: 600, letterSpacing: '0.32em', whiteSpace: 'nowrap', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-              BILLIARD HUB IRAN
-            </span>
-          </div>
-
           {/* Headline — رنگی با spans */}
           <h1 className="hb hero-h1" style={{
             fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 900, lineHeight: 1.08,
