@@ -60,20 +60,20 @@ export async function POST(req: NextRequest) {
   const msg: DMsg = { id: `m-${at}-${Math.floor(Math.random() * 1e4)}`, fromKey: from.key, text, kind, storyRef: b?.storyRef, at }
   await appendMessage(id, msg)   // فایلِ مستقل ⇒ هیچ‌وقت کلوبِر نمی‌شود
 
+  /* Realtime را همین‌جا (قبل از نوشتن‌های ایندکس/نوتیف) شلیک کن تا تحویل زیرِ یک‌ثانیه بماند */
+  const payload = { convId: id, message: msg, from: { key: from.key, name: from.name, role: from.role } }
+  broadcast(dmTopic(to.key), 'msg', payload)
+  broadcast(dmTopic(from.key), 'msg', payload)
+
+  /* بقیه‌ی کارها خارج از مسیرِ بحرانیِ تحویل */
   await bumpConvIndex(to.key,   { key: from.key, name: from.name, role: from.role }, text, kind, at, true)
   await bumpConvIndex(from.key, { key: to.key,   name: to.name,   role: to.role   }, text, kind, at, false)
-
   if (kind === 'reply' || kind === 'reaction' || kind === 'like') {
     await addNotification(to.key, {
       type: kind === 'reply' ? 'reply' : kind === 'like' ? 'like' : 'reaction',
       fromKey: from.key, fromName: from.name, fromRole: from.role, text, storyId: b?.storyRef,
     })
   }
-
-  /* Realtime: به گیرنده و فرستنده (همگام‌سازیِ دستگاه‌های دیگر) — کلید = safeKey */
-  const payload = { convId: id, message: msg, from: { key: from.key, name: from.name, role: from.role } }
-  broadcast(dmTopic(to.key), 'msg', payload)
-  broadcast(dmTopic(from.key), 'msg', payload)
 
   return NextResponse.json({ ok: true, convId: id, message: msg }, { status: 201, headers: CORS })
 }
