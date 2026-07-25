@@ -1513,7 +1513,14 @@ useEffect(() => {
             color: 'rgba(255,255,255,0.66)', letterSpacing: '0.01em',
             textShadow: '0 1px 16px rgba(0,0,0,0.45)',
           }}>
-            اتصال بی واسطه و خانه‌ی دیجیتال جامعه‌ی بیلیارد کشور
+            اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
+            {/* «ایران» با گرادیانِ عمودیِ پرچم: سبز → سفید → قرمز */}
+            <span style={{
+              fontWeight: 800,
+              background: 'linear-gradient(180deg, #2EAD4F 0%, #2EAD4F 34%, #FFFFFF 44%, #FFFFFF 56%, #E03C31 66%, #E03C31 100%)',
+              WebkitBackgroundClip: 'text', backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent', color: 'transparent',
+            }}>ایران</span>
           </p>
 
           {/* Feature card slider — 7 cards */}
