@@ -10,7 +10,7 @@ import {
   Zap, Crown, LayoutDashboard, Factory, GraduationCap, Home, Store, Clapperboard, Send,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
-import { unreadReplies } from '../lib/story-inbox';
+import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
 import { storyLimitFor } from '../lib/story-store';
 import Stories from './Stories';
 
@@ -71,19 +71,41 @@ const mobileLinks = [
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
-  /* بجِ نخوانده‌ی دایرکتِ استوری — فقط برای نقش‌های واجدِ استوری */
+  /* نوتیف و دایرکتِ سمت‌سرور — فقط برای نقش‌های واجدِ استوری */
   const [dmUnread, setDmUnread] = useState(0);
+  const [notifs, setNotifs] = useState<Notif[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
   const dmEligible = user ? storyLimitFor([user.primaryRole, ...(user.secondaryRoles ?? [])]) > 0 : false;
+  const notifUnread = notifs.filter(n => !n.read).length;
   useEffect(() => {
-    if (!user) { setDmUnread(0); return; }
+    if (!user || !dmEligible) { setDmUnread(0); setNotifs([]); return; }
     const key = user.phone || user.id || (user.firstName ?? 'user');
-    const tick = () => setDmUnread(unreadReplies(key));
+    const tick = async () => {
+      const [convs, ns] = await Promise.all([fetchConversations(key), fetchNotifs(key)]);
+      setDmUnread(convs.reduce((n, c) => n + (c.unread || 0), 0));
+      setNotifs(ns);
+    };
     tick();
-    const iv = setInterval(tick, 8000);
-    const onStorage = (e: StorageEvent) => { if (e.key === 'bh_story_inbox') tick(); };
-    window.addEventListener('storage', onStorage);
-    return () => { clearInterval(iv); window.removeEventListener('storage', onStorage); };
-  }, [user]);
+    const iv = setInterval(tick, 15000);
+    return () => clearInterval(iv);
+  }, [user, dmEligible]);
+  useEffect(() => {
+    const fn = (e: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false); };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, []);
+  const openNotifs = () => {
+    setNotifOpen(o => !o);
+    if (!notifOpen && user && notifUnread > 0) {
+      const key = user.phone || user.id || (user.firstName ?? 'user');
+      markNotifsRead(key).then(() => setNotifs(ns => ns.map(n => ({ ...n, read: true }))));
+    }
+  };
+  const notifText = (n: Notif) =>
+    n.type === 'like' ? 'استوریِ شما را لایک کرد'
+    : n.type === 'reaction' ? `با استیکر ${n.text} واکنش داد`
+    : `به استوریِ شما پاسخ داد: ${n.text}`;
   const router = useRouter();
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -372,14 +394,41 @@ export default function Navbar() {
               <Search size={20} />
             </button>
 
-            {/* Bell — desktop only */}
-            <button className="desk"
-              style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '12px', color: TEXT_MUT, transition: 'color 0.2s', flexShrink: 0 }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = TEXT }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
-              <Bell size={22} />
-              <span style={{ position: 'absolute', top: '9px', right: '9px', width: '6px', height: '6px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 6px #ef4444' }} />
-            </button>
+            {/* Bell — notifications (فقط نقش‌های واجدِ استوری، سمت‌سرور) */}
+            {user && dmEligible && (
+              <div ref={notifRef} className="desk" style={{ position: 'relative', flexShrink: 0 }}>
+                <button onClick={openNotifs} aria-label="اعلان‌ها"
+                  style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: notifOpen ? GOLD_LIGHT : 'none', border: 'none', cursor: 'pointer', borderRadius: '12px', color: notifOpen ? GOLD : TEXT_MUT, transition: 'color 0.2s' }}>
+                  <Bell size={22} />
+                  {notifUnread > 0 && (
+                    <span style={{ position: 'absolute', top: '6px', right: '6px', minWidth: '16px', height: '16px', padding: '0 4px', background: '#ef4444', color: '#fff', fontSize: '9.5px', fontWeight: 800, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #fff', boxShadow: '0 0 8px rgba(239,68,68,0.6)' }}>
+                      {notifUnread > 9 ? '۹+' : notifUnread.toLocaleString('fa-IR')}
+                    </span>
+                  )}
+                </button>
+                {notifOpen && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 10px)', left: 0, width: '320px', maxWidth: '92vw', background: 'rgba(252,251,249,0.98)', border: '1px solid rgba(28,28,26,0.08)', borderRadius: '18px', boxShadow: '0 24px 60px rgba(28,28,26,0.16)', backdropFilter: 'blur(30px)', zIndex: 320, overflow: 'hidden', animation: 'fadeDown 0.2s ease both' }}>
+                    <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid rgba(28,28,26,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 900, color: TEXT }}>اعلان‌ها</span>
+                      <Link href="/direct" onClick={() => setNotifOpen(false)} style={{ marginInlineStart: 'auto', fontSize: 11.5, fontWeight: 700, color: '#9A6E38', textDecoration: 'none' }}>دایرکت</Link>
+                    </div>
+                    <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
+                      {notifs.length === 0 ? (
+                        <div style={{ padding: '30px 18px', textAlign: 'center', fontSize: 12.5, color: 'rgba(28,28,26,0.4)' }}>اعلانی نیست</div>
+                      ) : notifs.slice(0, 20).map(n => (
+                        <Link key={n.id} href="/direct" onClick={() => setNotifOpen(false)}
+                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '11px 16px', textDecoration: 'none', color: 'inherit', borderBottom: '1px solid rgba(28,28,26,0.04)', background: n.read ? 'transparent' : 'rgba(199,166,106,0.06)' }}>
+                          <span style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>{n.fromName.charAt(0)}</span>
+                          <span style={{ minWidth: 0, flex: 1 }}>
+                            <span style={{ fontSize: 12.5, color: '#1C1B17', lineHeight: 1.7 }}><b style={{ fontWeight: 800 }}>{n.fromName}</b> {notifText(n)}</span>
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* دایرکتِ استوری — فقط برای نقش‌های واجدِ استوری، با بجِ نخوانده */}
             {user && dmEligible && (

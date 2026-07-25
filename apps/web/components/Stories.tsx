@@ -7,6 +7,8 @@ import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
 import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
 import { addStoryReply } from '../lib/story-inbox';
+import { uploadFile } from '../lib/supabase';
+import { fetchStories, postStory, sendDM, type SStory } from '../lib/social';
 import { listSellerProfiles } from '../lib/seller-store';
 
 interface StoryItem {
@@ -27,6 +29,7 @@ interface StoryGroup {
   roleLabel: string;
   allSeen: boolean;
   stories: StoryItem[];
+  ownerKey?: string;   // برای هدف‌گذاریِ ریپلای/دایرکت (استوریِ سمت‌سرور)
 }
 
 const sampleGroups: StoryGroup[] = [
@@ -109,6 +112,26 @@ function buildLocalGroups(stories: StoredStory[]): StoryGroup[] {
         mediaUrl: s.mediaUrl,
         mediaType: 'image',
       })),
+    };
+  });
+}
+
+/* استوریِ سمت‌سرور (Supabase) — بین همه‌ی دستگاه‌ها و کاربران دیده می‌شود. */
+function buildServerGroups(stories: SStory[]): StoryGroup[] {
+  const byOwner = new Map<string, SStory[]>();
+  for (const s of stories) {
+    const arr = byOwner.get(s.ownerKey) ?? [];
+    arr.push(s); byOwner.set(s.ownerKey, arr);
+  }
+  return Array.from(byOwner.entries()).map(([ownerKey, arr]): StoryGroup => {
+    const sorted = [...arr].sort((a, b) => a.createdAt - b.createdAt);
+    const first = sorted[0]!;
+    return {
+      userId: `srv-${ownerKey}`, ownerKey,
+      userName: first.userName, userAvatar: first.avatar, logoUrl: first.logoUrl,
+      userRole: first.roleKey, roleColor: first.roleColor, roleLabel: first.roleLabel,
+      allSeen: false,
+      stories: sorted.map(s => ({ id: s.id, caption: s.caption || undefined, createdAt: relativeTimeFrom(s.createdAt), mediaUrl: s.mediaUrl, mediaType: 'image' as const })),
     };
   });
 }
@@ -287,6 +310,7 @@ export default function Stories() {
   const { user } = useAuthStore();
   const [apiGroups, setApiGroups]     = useState<StoryGroup[]>([]);
   const [localGroups, setLocalGroups] = useState<StoryGroup[]>([]);
+  const [serverGroups, setServerGroups] = useState<StoryGroup[]>([]);
   const [storeGroups, setStoreGroups] = useState<StoryGroup[]>([]);
   const [seenGroups, setSeenGroups] = useState<Set<string>>(new Set());
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
@@ -300,44 +324,83 @@ export default function Stories() {
   const [storyImg, setStoryImg] = useState('');
   const [storyCaption, setStoryCaption] = useState('');
 
-  // user-posted stories, then local store-profile stories, then live API stories, then sample
-  const groups: StoryGroup[] = [...localGroups, ...storeGroups, ...apiGroups, ...sampleGroups];
+  // استوریِ سمت‌سرور (بین دستگاه‌ها) اولویت دارد؛ اگر سرور خالی/آفلاین بود، لوکال فالبک
+  const userStoryGroups = serverGroups.length > 0 ? serverGroups : localGroups;
+  const groups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups, ...sampleGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
   const dailyLimit = storyLimitFor(myRoles);   // ۰ = کاربرِ عادی، مجاز نیست
   const canPost = dailyLimit > 0;
   const [postErr, setPostErr] = useState('');
+  const [publishing, setPublishing] = useState(false);
   const [replyFocus, setReplyFocus] = useState(false);
   const [replySent, setReplySent] = useState(false);
   const reloadLocal = () => {
     setLocalGroups(buildLocalGroups(getStoredStories()));
     setStoreGroups(buildSellerStoreGroups());
   };
+  const reloadServer = async () => {
+    const s = await fetchStories();
+    if (Array.isArray(s)) setServerGroups(buildServerGroups(s));
+  };
 
-  useEffect(() => { setMounted(true); reloadLocal(); }, []);
+  useEffect(() => {
+    setMounted(true); reloadLocal(); reloadServer();
+    /* تازه‌سازیِ دوره‌ای تا استوریِ دستگاه‌های دیگر هم بیاید */
+    const iv = setInterval(reloadServer, 25000);
+    return () => clearInterval(iv);
+  }, []);
 
   const onStoryFile = async (file?: File) => { if (file) setStoryImg(await compressStory(file)); };
-  const publishStory = () => {
-    if (!user || !storyImg) return;
+
+  /* dataURL → File برای آپلود در Supabase */
+  const dataUrlToFile = (dataUrl: string, name: string): File | null => {
+    try {
+      const [head, b64] = dataUrl.split(',');
+      const mime = /data:(.*?);/.exec(head || '')?.[1] || 'image/jpeg';
+      const bin = atob(b64 || ''); const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      return new File([arr], name, { type: mime });
+    } catch { return null; }
+  };
+
+  const meName = () => `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کاربر';
+
+  const publishStory = async () => {
+    if (!user || !storyImg || publishing) return;
     if (!canPost) { setPostErr('حساب شما امکان انتشار استوری ندارد'); return; }
-    if (countTodayStories(ownerKey) >= dailyLimit) {
-      setPostErr(`سقف استوریِ امروزِ شما (${dailyLimit.toLocaleString('fa-IR')} عدد) پر شده است`);
-      return;
-    }
-    addStoredStory({
-      id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,
-      ownerKey: user.phone || user.id || (user.firstName ?? 'user'),
-      userName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر',
-      roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
-      avatar: (user.firstName ?? 'ک').charAt(0) || 'ک',
-      logoUrl: user.avatar || undefined,
-      mediaUrl: storyImg,
-      caption: storyCaption.trim(),
-      createdAt: Date.now(),
-    });
-    reloadLocal();
-    setPosting(false); setStoryImg(''); setStoryCaption('');
+    setPublishing(true); setPostErr('');
+    try {
+      const id = `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+      const file = dataUrlToFile(storyImg, `${id}.jpg`);
+      const mediaUrl = file ? (await uploadFile('club-media', file, `social/stories/img/${id}.jpg`)) || '' : '';
+      if (!mediaUrl) throw new Error('upload');   // ⇒ فالبکِ آفلاین
+      const res = await postStory({
+        ownerKey, userName: meName(),
+        roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
+        avatar: (user.firstName ?? 'ک').charAt(0) || 'ک',
+        logoUrl: user.avatar || undefined, mediaUrl, caption: storyCaption.trim(),
+      });
+      if (!res.ok) {
+        /* خطای واقعیِ سرور (سقف/عدم‌مجوز) — فالبکِ لوکال نکن */
+        if (res.status >= 400 && res.status < 500) { setPostErr(res.message || 'انتشار ممکن نشد'); setPublishing(false); return; }
+        throw new Error('server');   // ۵xx/شبکه ⇒ فالبک
+      }
+      await reloadServer();
+      setPosting(false); setStoryImg(''); setStoryCaption('');
+    } catch {
+      /* آفلاین ⇒ ذخیره‌ی محلی (تک‌دستگاهی) */
+      if (countTodayStories(ownerKey) >= dailyLimit) { setPostErr(`سقف استوریِ امروزِ شما (${dailyLimit.toLocaleString('fa-IR')}) پر شده است`); setPublishing(false); return; }
+      addStoredStory({
+        id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`, ownerKey,
+        userName: meName(), roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
+        avatar: (user.firstName ?? 'ک').charAt(0) || 'ک', logoUrl: user.avatar || undefined,
+        mediaUrl: storyImg, caption: storyCaption.trim(), createdAt: Date.now(),
+      });
+      reloadLocal();
+      setPosting(false); setStoryImg(''); setStoryCaption('');
+    } finally { setPublishing(false); }
   };
 
   // Fetch real clubs + sellers with active stories and prepend to groups
@@ -457,22 +520,23 @@ export default function Stories() {
     return () => clearTimeout(timer);
   }, [activeGroup, activeStory, storyPaused]);
 
-  /* ریپلای/استیکر → دایرکتِ صاحبِ استوری */
-  const sendReply = (text: string, kind: 'text' | 'reaction') => {
-    if (activeGroup === null || !text.trim()) return;
+  /* ریپلای/استیکر → دایرکتِ صاحبِ استوری (سمت‌سرور؛ آفلاین ⇒ فالبکِ لوکال) */
+  const sendReply = async (text: string, kind: 'text' | 'reaction') => {
+    if (activeGroup === null || !text.trim() || !user) return;   // مهمان نمی‌تواند پاسخ بدهد
     const g = groups[activeGroup];
     const st = g?.stories[activeStory];
     if (!g || !st) return;
-    const owner = g.userId.startsWith('local-') ? g.userId.slice('local-'.length) : g.userId;
-    addStoryReply({
-      ownerKey: owner,
-      storyId: st.id,
-      fromName: user ? (`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر') : 'مهمان',
-      fromRole: user ? roleInfo.label : undefined,
-      kind,
-      text: text.trim(),
-      caption: st.caption || undefined,
+    const owner = g.ownerKey || g.userId.replace(/^(local|srv|store|api-club|api-seller|sample)-/, '');
+    const dmKind = kind === 'reaction' ? 'reaction' : 'reply';
+    const res = await sendDM({
+      from: { key: ownerKey, name: meName(), role: roleInfo.label },
+      to:   { key: owner,    name: g.userName, role: g.roleLabel },
+      text: text.trim(), kind: dmKind, storyRef: st.id,
     });
+    if (!(res as { ok?: boolean }).ok) {
+      /* آفلاین ⇒ اینباکسِ لوکال */
+      addStoryReply({ ownerKey: owner, storyId: st.id, fromName: meName(), fromRole: roleInfo.label, kind: kind === 'reaction' ? 'reaction' : 'text', text: text.trim(), caption: st.caption || undefined });
+    }
     setReplySent(true);
     setTimeout(() => setReplySent(false), 2000);
   };
@@ -611,7 +675,7 @@ export default function Stories() {
               </label>
             )}
             <input value={storyCaption} onChange={e => setStoryCaption(e.target.value)} placeholder="کپشن (اختیاری)..." style={{ width:'100%', padding:'10px 13px', border:'1px solid rgba(17,17,16,0.14)', borderRadius:10, fontSize:14, fontFamily:'inherit', outline:'none', marginBottom:16, direction:'rtl' }} />
-            <button onClick={publishStory} disabled={!storyImg} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid rgba(199,166,106,0.34)', background: storyImg ? 'rgba(199,166,106,0.14)' : 'rgba(17,17,16,0.05)', color: storyImg ? '#9A6E38' : '#aaa', fontWeight:800, fontSize:14, cursor: storyImg ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>انتشار استوری</button>
+            <button onClick={publishStory} disabled={!storyImg || publishing} style={{ width:'100%', padding:'12px', borderRadius:10, border:'1px solid rgba(199,166,106,0.34)', background: (storyImg && !publishing) ? 'rgba(199,166,106,0.14)' : 'rgba(17,17,16,0.05)', color: (storyImg && !publishing) ? '#9A6E38' : '#aaa', fontWeight:800, fontSize:14, cursor: (storyImg && !publishing) ? 'pointer' : 'not-allowed', fontFamily:'inherit' }}>{publishing ? 'در حال انتشار…' : 'انتشار استوری'}</button>
           </div>
         </div>,
         document.body
