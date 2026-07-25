@@ -368,7 +368,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '17px 7px 16px',
+            padding: '17px 7px 24px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '9px',
           }}>
