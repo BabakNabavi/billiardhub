@@ -184,6 +184,8 @@ export default function Navbar() {
   const SURF      = isLight ? 'rgba(28,28,26,0.05)' : 'rgba(255,255,255,0.10)';
 
   if (isShopPage) return null;
+  /* دایرکت تجربه‌ی تمام‌صفحه‌ی خودش را دارد (هدر + دکمه‌ی بازگشت) */
+  if (pathname === '/direct') return null;
 
   return (
     <>

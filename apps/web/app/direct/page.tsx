@@ -56,7 +56,7 @@ export default function DirectPage() {
   const refreshThread = async (c: ConvIndexItem) => {
     const m = await fetchThread(c.convId, meKey)
     setMsgs(m)
-    setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }), 50)
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 60)
   }
   const openConv = async (c: ConvIndexItem) => {
     setActive(c)
@@ -151,8 +151,9 @@ export default function DirectPage() {
 
         {/* ── ترد گفتگو ── */}
         {active && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 62px - env(safe-area-inset-top))' }}>
-            <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '18px clamp(14px,3vw,22px)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <>
+            {/* پیام‌ها در جریانِ عادی؛ padding-bottom برای فاصله از نوارِ فیکس */}
+            <div ref={scrollRef} style={{ padding: '18px clamp(14px,3vw,22px) calc(86px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {msgs.length === 0 && <p style={{ textAlign: 'center', fontSize: 12.5, color: MUT, marginTop: 30 }}>هنوز پیامی نیست</p>}
               {msgs.map(m => {
                 const mine = m.fromKey === meKey
@@ -170,19 +171,21 @@ export default function DirectPage() {
                 )
               })}
             </div>
-            {/* نوارِ پاسخ */}
-            <div style={{ borderTop: `1px solid ${LINE}`, background: '#fff', padding: '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
-                placeholder="پیام خود را بنویسید…"
-                style={{ flex: 1, minWidth: 0, padding: '11px 15px', borderRadius: 100, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 14, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
-              <button onClick={send} disabled={!draft.trim() || sending} aria-label="ارسال"
-                style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, border: 'none', cursor: draft.trim() ? 'pointer' : 'not-allowed',
-                  background: draft.trim() ? `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)` : '#EFEBE1',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: draft.trim() ? '#241B08' : '#aaa' }}>
-                <Send size={17} />
-              </button>
+            {/* نوارِ پاسخ — فیکس به کفِ ویوپورت (موبایل و دسکتاپ) */}
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div style={{ maxWidth: 760, margin: '0 auto', padding: '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
+                  placeholder="پیام خود را بنویسید…"
+                  style={{ flex: 1, minWidth: 0, padding: '11px 15px', borderRadius: 100, border: `1px solid ${LINE}`, background: '#FAFAF7', fontSize: 14, fontFamily: 'inherit', outline: 'none', color: TEXT }} />
+                <button onClick={send} disabled={!draft.trim() || sending} aria-label="ارسال"
+                  style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, border: 'none', cursor: draft.trim() ? 'pointer' : 'not-allowed',
+                    background: draft.trim() ? `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#A8853F)` : '#EFEBE1',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: draft.trim() ? '#241B08' : '#aaa' }}>
+                  <Send size={17} />
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </main>
     </div>
