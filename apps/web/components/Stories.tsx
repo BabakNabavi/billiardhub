@@ -196,19 +196,30 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
      translateY(offsetTop) در جایش پین می‌شود تا روی iOS جابجا/نصفه نشود. */
   const vp = useVisualViewport();
   useEffect(() => {
-    const html = document.documentElement, prevH = html.style.overflow, prevB = document.body.style.overflow;
-    html.style.overflow = 'hidden'; document.body.style.overflow = 'hidden';
-    /* روی iOS فقط overflow کافی نیست؛ حرکتِ لمسیِ پس‌زمینه را هم می‌گیریم تا سایتِ
-       زیرِ استوری اصلاً اسکرول/دیده نشود (به‌جز نوشتن در فیلدِ پاسخ). */
+    const html = document.documentElement, body = document.body;
+    const prevH = html.style.overflow, prevB = body.style.overflow;
+    const sy = window.scrollY;
+    html.style.overflow = 'hidden'; body.style.overflow = 'hidden';
+    /* iOS هنگام فوکوسِ اینپوت، سند را برنامه‌ای اسکرول می‌کند و overflow:hidden جلویش
+       را نمی‌گیرد ⇒ استوری بالا می‌رفت و سایتِ زیر پیدا می‌شد. body را فیکس می‌کنیم تا
+       سند اصلاً اسکرول‌پذیر نباشد؛ خودِ استوری inset:0 کامل و دست‌نخورده می‌ماند. */
+    body.style.position = 'fixed'; body.style.top = `-${sy}px`;
+    body.style.left = '0'; body.style.right = '0'; body.style.width = '100%';
     const block = (e: TouchEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && t.closest && t.closest('.story-msg-input')) return;
       e.preventDefault();
     };
     document.addEventListener('touchmove', block, { passive: false });
+    /* هر تلاشِ اسکرولِ باقی‌مانده را همان لحظه خنثی کن */
+    const keepTop = () => { if (window.scrollY !== 0) window.scrollTo(0, 0); };
+    window.addEventListener('scroll', keepTop);
     return () => {
-      html.style.overflow = prevH; document.body.style.overflow = prevB;
+      html.style.overflow = prevH; body.style.overflow = prevB;
+      body.style.position = ''; body.style.top = ''; body.style.left = ''; body.style.right = ''; body.style.width = '';
       document.removeEventListener('touchmove', block);
+      window.removeEventListener('scroll', keepTop);
+      window.scrollTo(0, sy);
     };
   }, []);
 

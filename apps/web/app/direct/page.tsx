@@ -185,6 +185,9 @@ export default function DirectPage() {
     if (real) setMsgs(prev => mergeMsgs(prev.filter(m => m.id !== tmpId), [real]))
     loadConvs()
     setSending(false)
+    /* تیک‌ها سریع‌تر: کمی بعد از ارسال، وضعیتِ «رسیده/خوانده‌شد» را فوری بگیر */
+    setTimeout(() => { const c = activeRef.current; if (c) refreshThread(c) }, 1200)
+    setTimeout(() => { const c = activeRef.current; if (c) refreshThread(c) }, 3500)
   }
 
   const totalUnread = useMemo(() => convs.reduce((n, c) => n + (c.unread || 0), 0), [convs])
