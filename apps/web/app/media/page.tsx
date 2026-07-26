@@ -277,7 +277,7 @@ export default function MediaPage() {
 
         /* ── هیرو ── */
         .bm-hero { display:grid; grid-template-columns: 1.55fr 1fr; gap: clamp(20px,3vw,40px); align-items:center;
-          padding: clamp(26px,4vw,54px) 0 clamp(20px,3vw,36px); }
+          padding-block: clamp(26px,4vw,54px) clamp(20px,3vw,36px); }
         .bm-featframe { position:relative; border-radius:22px; overflow:hidden; display:block; text-decoration:none;
           box-shadow: 0 30px 70px rgba(28,27,23,0.18); animation: bmReveal .9s cubic-bezier(.22,1,.36,1) both; }
         .bm-featframe video, .bm-featframe img { width:100%; aspect-ratio:16/9.4; object-fit:cover; display:block; }
@@ -302,7 +302,7 @@ export default function MediaPage() {
         /* ── نویگیشنِ چسبان ── */
         /* پس‌زمینه‌ی تقریباً تو‌پُر (به‌جای blurِ سنگین) ⇒ اسکرول کاملاً نرم، بدونِ جانک */
         .bm-nav { position:sticky; top:60px; z-index:40; background: rgba(250,248,243,0.97); border-top:1px solid ${LINE}; border-bottom:1px solid ${LINE}; }
-        .bm-navrow { display:flex; align-items:center; gap:12px; padding:10px 0; }
+        .bm-navrow { display:flex; align-items:center; gap:12px; padding-block:10px; }
         .bm-chips { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; flex:1; min-width:0; padding:2px; }
         .bm-chips::-webkit-scrollbar { display:none; }
         .bm-chip { flex-shrink:0; display:inline-flex; align-items:center; gap:7px; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:800;
@@ -526,7 +526,7 @@ export default function MediaPage() {
         </div>
       </div>
 
-      <main className="bm-wrap" style={{ padding: 'clamp(26px,3.6vw,44px) clamp(16px,3.2vw,34px) 90px' }}>
+      <main className="bm-wrap" style={{ padding: 'clamp(26px,3.6vw,44px) clamp(20px,3.4vw,36px) 90px' }}>
         {isBrowsing ? (
           <>
             {/* ═══ ترندِ درگ ═══ */}
