@@ -6,14 +6,15 @@
    کانونیکال، توضیحاتِ بازشونده و «ادامهٔ تماشا».
    ───────────────────────────────────────────────────────────── */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   ChevronLeft, Eye, ThumbsUp, Bookmark, Link2, Check, Play,
-  BellPlus, BellRing, ArrowLeft, Clapperboard,
+  BellPlus, BellRing, ArrowLeft, Clapperboard, Loader2,
 } from 'lucide-react'
-import { getVideo, relatedVideos, mediaCategoryOf, compactViews, faNum } from '../../../lib/media-data'
+import { MEDIA_VIDEOS, mediaCategoryOf, compactViews, faNum, type MediaVideo } from '../../../lib/media-data'
+import { fetchUserVideos } from '../../../lib/media-user'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
@@ -21,8 +22,17 @@ const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
 export default function MediaVideoPage() {
   const params = useParams()
   const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
-  const video = useMemo(() => getVideo(id), [id])
-  const related = useMemo(() => (video ? relatedVideos(video, 6) : []), [video])
+  const [userVids, setUserVids] = useState<MediaVideo[]>([])
+  const [uLoaded, setULoaded]   = useState(false)
+  useEffect(() => { fetchUserVideos().then(v => { setUserVids(v); setULoaded(true) }) }, [])
+  const merged  = useMemo(() => [...MEDIA_VIDEOS, ...userVids], [userVids])
+  const video   = useMemo(() => merged.find(v => v.id === id) ?? null, [merged, id])
+  const related = useMemo(() => {
+    if (!video) return []
+    const same = merged.filter(x => x.id !== video.id && x.category === video.category)
+    const rest = merged.filter(x => x.id !== video.id && x.category !== video.category)
+    return [...same, ...rest].slice(0, 6)
+  }, [merged, video])
 
   const [liked, setLiked]         = useState(false)
   const [saved, setSaved]         = useState(false)
@@ -30,6 +40,15 @@ export default function MediaVideoPage() {
   const [copied, setCopied]       = useState(false)
   const [descOpen, setDescOpen]   = useState(false)
 
+  /* ویدیوی کاربر هنوز از سرور نیامده ⇒ به‌جای «پیدا نشد»، لودینگ نشان بده */
+  if (!video && !uLoaded) {
+    return (
+      <div dir="rtl" style={{ minHeight: '70vh', background: GROUND, display: 'flex', alignItems: 'center', justifyContent: 'center', color: MUT }}>
+        <Loader2 size={30} style={{ animation: 'mvspin 1s linear infinite' }} />
+        <style>{`@keyframes mvspin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
   if (!video) {
     return (
       <div dir="rtl" style={{ minHeight: '70vh', background: GROUND, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>

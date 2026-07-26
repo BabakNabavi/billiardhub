@@ -5,17 +5,20 @@
    (نام / هندل / تگ‌لاین) + گریدِ کارت‌ها + CTA ساخت کانال.
    ───────────────────────────────────────────────────────────── */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search, ArrowLeft, ChevronLeft, Users } from 'lucide-react'
-import { listChannels, compactViews, faDigits } from '../../../lib/media-data'
+import { MEDIA_VIDEOS, channelsFrom, compactViews, faDigits, type MediaVideo } from '../../../lib/media-data'
+import { fetchUserVideos } from '../../../lib/media-user'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3', FELT = '#0E7A38'
 
 export default function ChannelsPage() {
   const [query, setQuery] = useState('')
-  const channels = useMemo(() => listChannels(), [])
+  const [userVids, setUserVids] = useState<MediaVideo[]>([])
+  useEffect(() => { fetchUserVideos().then(setUserVids) }, [])
+  const channels = useMemo(() => channelsFrom([...MEDIA_VIDEOS, ...userVids]), [userVids])
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return channels

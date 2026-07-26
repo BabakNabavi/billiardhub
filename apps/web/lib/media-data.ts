@@ -320,15 +320,17 @@ export interface MediaChannel {
   totalViews: number
 }
 
-export function listChannels(): MediaChannel[] {
+/* کانال‌ها را از هر لیستِ ویدیو بساز (برای ادغامِ ویدیوهای کاربران) */
+export function channelsFrom(videos: MediaVideo[]): MediaChannel[] {
   const map = new Map<string, MediaChannel>()
-  for (const v of MEDIA_VIDEOS) {
+  for (const v of videos) {
     const c = map.get(v.creator.id)
     if (c) { c.videoCount++; c.totalViews += v.views }
     else map.set(v.creator.id, { creator: v.creator, tagline: CHANNEL_TAGLINES[v.creator.id] ?? '', videoCount: 1, totalViews: v.views })
   }
   return [...map.values()].sort((a, b) => b.totalViews - a.totalViews)
 }
+export function listChannels(): MediaChannel[] { return channelsFrom(MEDIA_VIDEOS) }
 
 export function getChannel(handle: string): MediaChannel | null {
   return listChannels().find(c => c.creator.handle === handle) ?? null

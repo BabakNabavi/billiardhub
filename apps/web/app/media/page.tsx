@@ -12,13 +12,16 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import {
   Search, Play, Eye, ArrowLeft, Flame, X, TrendingUp,
-  Trophy, Zap, Sparkles, ChevronDown, Clock3, Heart,
+  Trophy, Zap, Sparkles, ChevronDown, Clock3, Heart, UploadCloud,
 } from 'lucide-react'
 import {
-  MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits, faNum, listChannels,
+  MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits, channelsFrom,
   type MediaVideo, type MediaCategoryKey,
 } from '../../lib/media-data'
 import { getHiddenVideoIds, getFeaturedOverride } from '../../lib/media-admin-store'
+import { useAuthStore } from '../../store/auth.store'
+import { fetchUserVideos } from '../../lib/media-user'
+import MediaUpload from '../../components/MediaUpload'
 
 /* ── پالتِ روشن ── */
 const INK   = '#1C1B17'
@@ -142,15 +145,22 @@ export default function MediaPage() {
 
   const isBrowsing = cat === 'all' && !query.trim()
 
-  /* کنترل‌های ادمین */
-  const [pool, setPool] = useState<MediaVideo[]>(MEDIA_VIDEOS)
+  const { user } = useAuthStore()
+  const [uploadOpen, setUploadOpen] = useState(false)
+
+  /* کنترل‌های ادمین + ویدیوهای آپلودیِ کاربران (سمت‌سرور) */
+  const [basePool, setBasePool] = useState<MediaVideo[]>(MEDIA_VIDEOS)
+  const [userVids, setUserVids] = useState<MediaVideo[]>([])
   const [featOverride, setFeatOverride] = useState<string | null>(null)
   useEffect(() => {
     const hidden = new Set(getHiddenVideoIds())
-    setPool(MEDIA_VIDEOS.filter(v => !hidden.has(v.id)))
+    setBasePool(MEDIA_VIDEOS.filter(v => !hidden.has(v.id)))
     setFeatOverride(getFeaturedOverride())
+    fetchUserVideos().then(setUserVids)
     try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')) } catch { /* */ }
   }, [])
+  /* ویدیوهای کاربران اول (تازه‌ترین) + محتوای دستی */
+  const pool = useMemo(() => [...userVids, ...basePool], [userVids, basePool])
 
   const sorted = useMemo(() => {
     const list = [...pool]
@@ -174,7 +184,7 @@ export default function MediaPage() {
   const popular   = [...pool].sort((a, b) => b.likes - a.likes)
   const tourneys  = pool.filter(v => v.category === 'highlights')
   const shorts    = [...pool].sort((a, b) => b.likes - a.likes).slice(0, 10)
-  const channels  = listChannels()
+  const channels  = channelsFrom(pool)
   const spotlight = channels[0]
   const spotVideos = spotlight ? pool.filter(v => v.creator.id === spotlight.creator.id).sort((a, b) => b.ts - a.ts) : []
   const catRows: MediaCategoryKey[] = ['snooker-training', 'techniques', 'interviews']
@@ -313,6 +323,10 @@ export default function MediaPage() {
         .bm-iconbtn { flex-shrink:0; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
           background:#fff; border:1px solid ${LINE}; color:${INK}; cursor:pointer; transition: all .2s; }
         .bm-iconbtn:hover { border-color: rgba(199,166,106,0.6); color:${GOLD_D}; }
+        .bm-uploadbtn { flex-shrink:0; display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 15px; border-radius:12px; cursor:pointer; font-family:inherit;
+          font-size:12.5px; font-weight:800; color:#241B08; background:${GOLD}; border:1px solid ${GOLD}; transition: all .2s; }
+        .bm-uploadbtn:hover { background:#E8CE96; transform: translateY(-1px); }
+        @media (max-width: 620px) { .bm-up-txt { display:none; } .bm-uploadbtn { padding:0 12px; } }
 
         /* ── گریدِ نامتقارن «جدید» ── */
         .bm-mosaic { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; }
@@ -500,6 +514,9 @@ export default function MediaPage() {
       <div className="bm-nav">
         <div className="bm-wrap bm-navrow">
           <button className="bm-iconbtn" onClick={() => setSearchOpen(true)} aria-label="جستجو"><Search size={18} /></button>
+          <button className="bm-uploadbtn" onClick={() => (user ? setUploadOpen(true) : (window.location.href = '/login'))}>
+            <UploadCloud size={16} /><span className="bm-up-txt">آپلودِ ویدیو</span>
+          </button>
           <div className="bm-chips">
             <button className={`bm-chip${cat === 'all' ? ' on' : ''}`} onClick={() => pickCat('all')}>همه</button>
             {MEDIA_CATEGORIES.map(c => (
@@ -624,12 +641,12 @@ export default function MediaPage() {
                       <span className="go">مشاهده کانال <ArrowLeft size={11} /></span>
                     </Link>
                   ))}
-                  <div className="bm-chan bm-chan-cta">
+                  <button className="bm-chan bm-chan-cta" onClick={() => (user ? setUploadOpen(true) : (window.location.href = '/login'))} style={{ cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' }}>
                     <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
                     <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
-                    <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>مربی، بازیکن یا باشگاه هستی؟ ویدیوهایت را منتشر کن.</span>
-                    <Link href="/profile/role" className="go" style={{ color: FELT }}>ساخت کانال <ArrowLeft size={11} /></Link>
-                  </div>
+                    <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>ویدیوهایت را آپلود کن؛ کانالت خودکار ساخته می‌شود.</span>
+                    <span className="go" style={{ color: FELT }}>{user ? 'آپلودِ ویدیو' : 'ورود و آپلود'} <ArrowLeft size={11} /></span>
+                  </button>
                 </div>
               </section>
             </Reveal>
@@ -680,6 +697,9 @@ export default function MediaPage() {
           </section>
         )}
       </main>
+
+      {/* مودالِ آپلودِ ویدیو (فقط کاربرِ لاگین) */}
+      <MediaUpload open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={(v) => { setUserVids(prev => [v, ...prev]); setUploadOpen(false) }} />
     </div>
   )
 }
@@ -709,7 +729,7 @@ function SecMini({ icon, title, action }: { icon: ReactNode; title: string; acti
   )
 }
 
-function SpotlightBlock({ spotlight, video, count }: { spotlight: ReturnType<typeof listChannels>[number]; video: MediaVideo; count: number }) {
+function SpotlightBlock({ spotlight, video, count }: { spotlight: ReturnType<typeof channelsFrom>[number]; video: MediaVideo; count: number }) {
   const [following, setFollowing] = useState(false)
   return (
     <div className="bm-spot">
