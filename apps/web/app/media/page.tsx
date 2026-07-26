@@ -35,18 +35,17 @@ type SortKey = 'newest' | 'likes' | 'views'
 const SORTS: [SortKey, string][] = [['newest', 'جدیدترین'], ['likes', 'محبوب‌ترین'], ['views', 'پربازدیدترین']]
 const RECENT_KEY = 'bh-media-recent'
 
-/* ── نمایانگرِ اسکرول (ورودِ نرمِ سکشن‌ها) ── */
-function Reveal({ children, delay = 0, style, className }: { children: ReactNode; delay?: number; style?: React.CSSProperties; className?: string }) {
+/* ── نمایانگرِ اسکرول: هر سکشن با ورودِ نرم و آشکار بالا می‌آید ── */
+function Reveal({ children, style, className }: { children: ReactNode; style?: React.CSSProperties; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [on, setOn] = useState(false)
   useEffect(() => {
     const el = ref.current; if (!el) return
-    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setOn(true); io.disconnect() } }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' })
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setOn(true); io.disconnect() } }, { threshold: 0, rootMargin: '0px 0px -14% 0px' })
     io.observe(el); return () => io.disconnect()
   }, [])
   return (
-    <div ref={ref} className={className}
-      style={{ ...style, opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(24px)', transition: `opacity .7s ${delay}ms cubic-bezier(.22,1,.36,1), transform .7s ${delay}ms cubic-bezier(.22,1,.36,1)` }}>
+    <div ref={ref} className={`bm-reveal${on ? ' on' : ''}${className ? ' ' + className : ''}`} style={style}>
       {children}
     </div>
   )
@@ -60,7 +59,8 @@ function useDragScroll() {
   const onMouseMove = (e: React.MouseEvent) => { const el = ref.current; if (!el || !st.current.down) return; const dx = e.pageX - st.current.x; if (Math.abs(dx) > 4) st.current.moved = true; el.scrollLeft = st.current.left - dx }
   const stop = () => { const el = ref.current; if (el) el.style.cursor = ''; st.current.down = false }
   const onClickCapture = (e: React.MouseEvent) => { if (st.current.moved) { e.preventDefault(); e.stopPropagation() } }
-  return { ref, handlers: { onMouseDown, onMouseMove, onMouseUp: stop, onMouseLeave: stop, onClickCapture } }
+  const onDragStart = (e: React.DragEvent) => e.preventDefault()   // جلوگیری از درگِ نیتیوِ عکس/لینک (علامتِ ممنوع)
+  return { ref, handlers: { onMouseDown, onMouseMove, onMouseUp: stop, onMouseLeave: stop, onClickCapture, onDragStart } }
 }
 
 /* ── کارتِ ویدیو با پیش‌نمایشِ ویدیوی هاور ── */
@@ -184,6 +184,14 @@ export default function MediaPage() {
 
   const trendDrag = useDragScroll()
 
+  /* ویدیوی محیطیِ هیرو فقط وقتی دیده می‌شود پخش شود (کمترین بارِ CPU ⇒ اسکرولِ نرم) */
+  const heroVidRef = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    const el = heroVidRef.current; if (!el) return
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { const p = el.play(); if (p) p.catch(() => {}) } else el.pause() }, { threshold: 0.15 })
+    io.observe(el); return () => io.disconnect()
+  }, [])
+
   const loadMore = () => { if (loading) return; setLoading(true); window.setTimeout(() => { setShown(s => s + PAGE_STEP); setLoading(false) }, 480) }
   const pickCat = (k: 'all' | MediaCategoryKey) => { setCat(k); setShown(PAGE_STEP); if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' }) }
   const runSearch = (q: string) => {
@@ -199,17 +207,31 @@ export default function MediaPage() {
   }, [pool])
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: GROUND, color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div dir="rtl" style={{ minHeight: '100vh', background: GROUND, color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif', position: 'relative', overflowX: 'clip' }}>
       <style>{`
         @keyframes bmUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
         @keyframes bmReveal { from { clip-path: inset(8% 8% 8% 8% round 22px); opacity:.4; transform: scale(1.04); } to { clip-path: inset(0 0 0 0 round 22px); opacity:1; transform: none; } }
         @keyframes bmMask { from { background-position: 120% 0; } to { background-position: 0 0; } }
         @keyframes bmShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
         @keyframes bmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .bm-wrap { max-width: 1300px; margin: 0 auto; padding: 0 clamp(16px,3.2vw,34px); }
+        .bm-wrap { max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,3.4vw,36px); }
+
+        /* ── نمایانگرِ اسکرول ── */
+        .bm-reveal { opacity:0; transform: translateY(34px); transition: opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
+        .bm-reveal.on { opacity:1; transform:none; }
+        /* استاگرِ کارت‌ها هنگامِ ظاهرشدنِ سکشن (هر بار که اسکرول می‌رسی، واقعاً دیده می‌شود) */
+        .bm-reveal .bm-rail > *, .bm-reveal .bm-grid > *, .bm-reveal .bm-mosaic > * { opacity:0; }
+        .bm-reveal.on .bm-rail > *, .bm-reveal.on .bm-grid > *, .bm-reveal.on .bm-mosaic > * { animation: bmUp .6s cubic-bezier(.22,1,.36,1) both; }
+        .bm-reveal.on .bm-rail > *:nth-child(2), .bm-reveal.on .bm-grid > *:nth-child(2), .bm-reveal.on .bm-mosaic > *:nth-child(2) { animation-delay:.06s; }
+        .bm-reveal.on .bm-rail > *:nth-child(3), .bm-reveal.on .bm-grid > *:nth-child(3), .bm-reveal.on .bm-mosaic > *:nth-child(3) { animation-delay:.12s; }
+        .bm-reveal.on .bm-rail > *:nth-child(4), .bm-reveal.on .bm-grid > *:nth-child(4), .bm-reveal.on .bm-mosaic > *:nth-child(4) { animation-delay:.18s; }
+        .bm-reveal.on .bm-rail > *:nth-child(5), .bm-reveal.on .bm-grid > *:nth-child(5) { animation-delay:.24s; }
+        .bm-reveal.on .bm-rail > *:nth-child(n+6), .bm-reveal.on .bm-grid > *:nth-child(n+6) { animation-delay:.3s; }
 
         /* ── کارت ── */
-        .bm-card { display:block; text-decoration:none; color:inherit; animation: bmUp .55s ease both; }
+        .bm-card { display:block; text-decoration:none; color:inherit; }
+        /* عکس/لینک داخلِ ریل درگِ نیتیو نگیرد (علامتِ ممنوع) */
+        .bm-rail a, .bm-rail img, .bm-rail video, .bm-mosaic img, .bm-grid img, .bm-featframe img, .bm-featframe video { -webkit-user-drag:none; user-select:none; }
         .bm-thumb { position:relative; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#EDE9E1;
           box-shadow: 0 1px 2px rgba(28,27,23,0.05); transition: transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s; }
         .bm-card:hover .bm-thumb { transform: translateY(-4px); box-shadow: 0 22px 42px rgba(28,27,23,0.16); }
@@ -264,9 +286,9 @@ export default function MediaPage() {
           color:${INK}; background: rgba(255,255,255,0.95); box-shadow: 0 12px 34px rgba(20,18,14,0.3); transition: transform .3s cubic-bezier(.22,1,.36,1); }
         .bm-featframe:hover .bm-feat-play { transform: scale(1.08); }
         .bm-eyebrow-hero { display:inline-flex; align-items:center; gap:7px; font-size:10px; font-weight:800; letter-spacing:.24em; color:${GOLD_D};
-          background: rgba(199,166,106,0.12); border:1px solid rgba(199,166,106,0.34); border-radius:999px; padding:5px 13px; }
-        .bm-hero-h1 { font-size: clamp(30px,4.6vw,58px); font-weight:900; line-height:1.08; letter-spacing:-0.03em; margin:16px 0 0; text-wrap:balance;
-          background: linear-gradient(180deg,#2A2822,#141310); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+          background: rgba(199,166,106,0.12); border:1px solid rgba(199,166,106,0.34); border-radius:999px; padding:5px 13px; animation: bmUp .6s .05s ease both; }
+        .bm-hero-h1 { font-size: clamp(32px,4.8vw,60px); font-weight:900; line-height:1.08; letter-spacing:-0.03em; margin:16px 0 0; text-wrap:balance;
+          background: linear-gradient(180deg,#2A2822,#141310); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation: bmUp .7s .14s ease both; }
         .bm-hero-underline { width:76px; height:4px; border-radius:3px; margin:14px 0 16px; background: linear-gradient(90deg, ${FELT}, ${GOLD}); transform-origin:right; animation: bmUp .6s .3s ease both; }
         .bm-trendmini { text-decoration:none; display:flex; gap:11px; align-items:center; padding:9px 8px; border-radius:12px; transition: background .2s, padding-inline-start .25s; }
         .bm-trendmini:hover { background:#fff; padding-inline-start:12px; box-shadow: 0 6px 18px rgba(28,27,23,0.06); }
@@ -278,8 +300,8 @@ export default function MediaPage() {
         .bm-trendmini:hover p { color:${GOLD_D}; }
 
         /* ── نویگیشنِ چسبان ── */
-        .bm-nav { position:sticky; top:60px; z-index:40; background: rgba(250,248,243,0.82); backdrop-filter: blur(18px) saturate(1.3);
-          -webkit-backdrop-filter: blur(18px) saturate(1.3); border-top:1px solid ${LINE}; border-bottom:1px solid ${LINE}; }
+        /* پس‌زمینه‌ی تقریباً تو‌پُر (به‌جای blurِ سنگین) ⇒ اسکرول کاملاً نرم، بدونِ جانک */
+        .bm-nav { position:sticky; top:60px; z-index:40; background: rgba(250,248,243,0.97); border-top:1px solid ${LINE}; border-bottom:1px solid ${LINE}; }
         .bm-navrow { display:flex; align-items:center; gap:12px; padding:10px 0; }
         .bm-chips { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; flex:1; min-width:0; padding:2px; }
         .bm-chips::-webkit-scrollbar { display:none; }
@@ -339,7 +361,7 @@ export default function MediaPage() {
 
         /* ── کانال ── */
         .bm-chan { flex:0 0 210px; scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; text-decoration:none;
-          background:#fff; border:1px solid ${LINE}; border-radius:20px; padding:22px 16px 18px; transition: all .3s cubic-bezier(.22,1,.36,1); animation: bmUp .5s ease both; }
+          background:#fff; border:1px solid ${LINE}; border-radius:20px; padding:22px 16px 18px; transition: all .3s cubic-bezier(.22,1,.36,1); }
         .bm-chan:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(28,27,23,0.12); border-color: rgba(199,166,106,0.4); }
         .bm-chan .av { width:58px; height:58px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:23px; font-weight:900;
           color:#241B08; margin-bottom:5px; background: linear-gradient(135deg,#E8CE96,#8A6020); box-shadow: 0 8px 20px rgba(28,27,23,0.12); }
@@ -369,7 +391,8 @@ export default function MediaPage() {
         }
         @media (max-width: 480px)  { .bm-grid { grid-template-columns: 1fr; } }
         @media (prefers-reduced-motion: reduce) {
-          .bm-card, .bm-chan, .bm-featframe, .bm-hero-underline { animation: none !important; }
+          .bm-card, .bm-chan, .bm-featframe, .bm-hero-underline, .bm-eyebrow-hero, .bm-hero-h1 { animation: none !important; }
+          .bm-reveal, .bm-reveal .bm-rail>*, .bm-reveal .bm-grid>*, .bm-reveal .bm-mosaic>* { opacity:1 !important; transform:none !important; animation:none !important; transition:none !important; }
         }
       `}</style>
 
@@ -423,16 +446,19 @@ export default function MediaPage() {
         </div>
       )}
 
+      {/* هالهٔ محیطیِ گرم — عمقِ پرمیوم در بالای صفحه */}
+      <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 680, pointerEvents: 'none', background: 'radial-gradient(ellipse 66% 100% at 74% -6%, rgba(199,166,106,0.10), transparent 60%), radial-gradient(ellipse 52% 92% at 6% 0%, rgba(14,122,56,0.055), transparent 56%)' }} />
+
       {/* ═══════════ هدر + هیرو ═══════════ */}
-      <div className="bm-wrap bm-hero">
+      <div className="bm-wrap bm-hero" style={{ position: 'relative' }}>
         <Link href={`/media/${featuredV.id}`} className="bm-featframe">
-          <video src={featuredV.src} poster={featuredV.thumb} autoPlay muted loop playsInline preload="metadata" />
+          <video ref={heroVidRef} src={featuredV.src} poster={featuredV.thumb} autoPlay muted loop playsInline preload="metadata" />
           <span className="bm-feat-shade" />
           <span className="bm-feat-play"><Play size={22} fill="currentColor" /></span>
           <span style={{ position: 'absolute', top: 16, insetInlineStart: 16, display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 10, fontWeight: 800, letterSpacing: '0.2em', color: '#fff', background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: 999, padding: '5px 12px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#E0704A', boxShadow: '0 0 8px #E0704A' }} /> NOW SHOWING
           </span>
-          <div style={{ position: 'absolute', insetInline: 0, bottom: 0, padding: 'clamp(16px,2.6vw,30px)' }}>
+          <div style={{ position: 'absolute', insetInline: 0, bottom: 0, padding: 'clamp(18px,2.6vw,30px)' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: '#fff', background: 'rgba(20,18,14,0.4)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: mediaCategoryOf(featuredV.category).dot }} />
               {mediaCategoryOf(featuredV.category).label}
@@ -452,12 +478,12 @@ export default function MediaPage() {
           <span className="bm-eyebrow-hero"><Play size={11} fill="currentColor" /> BILLIARD MEDIA</span>
           <h1 className="bm-hero-h1">خانهٔ محتوای<br />بیلیارد</h1>
           <div className="bm-hero-underline" />
-          <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: '0 0 22px', maxWidth: 380 }}>
+          <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: '0 0 22px', maxWidth: 380, animation: 'bmUp .6s .22s ease both' }}>
             آموزش، هایلایتِ مسابقات، مصاحبه و پشت‌صحنه — همه در یک سالنِ نمایشِ اختصاصی برای دنیای بیلیارد.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {trending.slice(0, 3).map((v, i) => (
-              <Link key={v.id} href={`/media/${v.id}`} className="bm-trendmini">
+              <Link key={v.id} href={`/media/${v.id}`} className="bm-trendmini" style={{ animation: `bmUp .55s ${0.3 + i * 0.08}s ease both` }}>
                 <span className="rk">{faDigits(i + 1)}</span>
                 <span className="tn"><img src={v.thumb} alt={v.title} loading="lazy" /></span>
                 <span style={{ minWidth: 0 }}>
