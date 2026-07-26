@@ -11,8 +11,12 @@ export const metadata: Metadata = {
   description: "اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و برترین تولیدکنندگان تجهیزات بیلیارد در ایران و جهان.",
   manifest: '/manifest.json',
   icons: {
-    icon: '/images/Logo/favicon.ico',
-    apple: '/images/Logo/logo-512x512.png',
+    icon: [
+      { url: '/images/Logo/favicon.ico' },
+      { url: '/images/Logo/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/Logo/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/images/Logo/apple-touch-icon.png',
   },
   appleWebApp: {
     capable: true,
