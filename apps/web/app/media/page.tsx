@@ -1,55 +1,98 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   بیلیارد مدیا — «سالن نمایش» (بازطراحی دوم، ۱۴۰۵)
-   هویتِ اختصاصیِ تیره و لوکس برای تجربه‌ی ویدیویی — متمایز از
-   پلتفرم‌های موجود و از بقیه‌ی صفحاتِ سایت. منطق، داده و
-   فیلترها همان نسخه‌ی قبل است؛ فقط پوسته سینمایی شده:
-   بیلبوردِ درخشانِ ویدیوی ویژه، ریلِ ترندِ شیشه‌ای، گرید و
-   ریل‌های تیره با هاورهای طلایی.
+   بیلیارد مدیا — «خانهٔ محتوای بیلیارد» (بازطراحیِ روشن و سینمایی، ۱۴۰۵)
+   تمِ روشن/پرمیوم/ادیتوریال. تجربهٔ اختصاصی، نه کلونِ پلتفرم‌ها:
+   هیروی سینمایی با ویدیوی محیطی، نویگیشنِ چسبانِ مورفینگ، ترندِ درگ،
+   گریدِ نامتقارن، اسپاتلایتِ سازنده، بندِ مسابقات، ریلِ شورتسِ عمودی و
+   سرچِ تمام‌صفحه. منطق/داده/فیلتر/ادمین همان نسخهٔ قبل است.
    ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
-import { Search, ChevronDown, Play, Eye, Clock3, ArrowLeft, Flame, Clapperboard } from 'lucide-react'
 import {
-  MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits, listChannels,
+  Search, Play, Eye, ArrowLeft, Flame, X, TrendingUp,
+  Trophy, Zap, Sparkles, ChevronDown, Clock3, Heart,
+} from 'lucide-react'
+import {
+  MEDIA_VIDEOS, MEDIA_CATEGORIES, mediaCategoryOf, compactViews, faDigits, faNum, listChannels,
   type MediaVideo, type MediaCategoryKey,
 } from '../../lib/media-data'
 import { getHiddenVideoIds, getFeaturedOverride } from '../../lib/media-admin-store'
 
+/* ── پالتِ روشن ── */
+const INK   = '#1C1B17'
+const SEC   = '#5B564B'
+const MUT   = '#8A8474'
+const LINE  = '#EAE5DA'
 const GOLD  = '#C7A66A'
-const IVORY = '#F2EFE9'
-const SEC   = 'rgba(242,239,233,0.62)'
-const MUT   = 'rgba(242,239,233,0.42)'
-const LINE  = 'rgba(255,255,255,0.09)'
-const BG    = '#0C0B09'
-const PANEL = '#14131076'
+const GOLD_D = '#9A6E38'
+const GROUND = '#FAF8F3'
+const FELT  = '#0E7A38'
 
 const PAGE_STEP = 8
-
 type SortKey = 'newest' | 'likes' | 'views'
 const SORTS: [SortKey, string][] = [['newest', 'جدیدترین'], ['likes', 'محبوب‌ترین'], ['views', 'پربازدیدترین']]
+const RECENT_KEY = 'bh-media-recent'
 
-/* ── کارت ویدیو (تیره) ── */
-function VideoCard({ v, i = 0 }: { v: MediaVideo; i?: number }) {
+/* ── نمایانگرِ اسکرول (ورودِ نرمِ سکشن‌ها) ── */
+function Reveal({ children, delay = 0, style, className }: { children: ReactNode; delay?: number; style?: React.CSSProperties; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    const el = ref.current; if (!el) return
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setOn(true); io.disconnect() } }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' })
+    io.observe(el); return () => io.disconnect()
+  }, [])
   return (
-    <Link href={`/media/${v.id}`} className="mx-card" style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}>
-      <div className="mx-thumb">
+    <div ref={ref} className={className}
+      style={{ ...style, opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(24px)', transition: `opacity .7s ${delay}ms cubic-bezier(.22,1,.36,1), transform .7s ${delay}ms cubic-bezier(.22,1,.36,1)` }}>
+      {children}
+    </div>
+  )
+}
+
+/* ── درگ‌اسکرولِ افقی (دسکتاپ) بدونِ شکستنِ سوایپِ موبایل ── */
+function useDragScroll() {
+  const ref = useRef<HTMLDivElement>(null)
+  const st = useRef({ down: false, x: 0, left: 0, moved: false })
+  const onMouseDown = (e: React.MouseEvent) => { const el = ref.current; if (!el) return; st.current = { down: true, x: e.pageX, left: el.scrollLeft, moved: false }; el.style.cursor = 'grabbing' }
+  const onMouseMove = (e: React.MouseEvent) => { const el = ref.current; if (!el || !st.current.down) return; const dx = e.pageX - st.current.x; if (Math.abs(dx) > 4) st.current.moved = true; el.scrollLeft = st.current.left - dx }
+  const stop = () => { const el = ref.current; if (el) el.style.cursor = ''; st.current.down = false }
+  const onClickCapture = (e: React.MouseEvent) => { if (st.current.moved) { e.preventDefault(); e.stopPropagation() } }
+  return { ref, handlers: { onMouseDown, onMouseMove, onMouseUp: stop, onMouseLeave: stop, onClickCapture } }
+}
+
+/* ── کارتِ ویدیو با پیش‌نمایشِ ویدیوی هاور ── */
+function VideoCard({ v, i = 0, wide = false }: { v: MediaVideo; i?: number; wide?: boolean }) {
+  const [hover, setHover] = useState(false)
+  const vref = useRef<HTMLVideoElement>(null)
+  const c = mediaCategoryOf(v.category)
+  useEffect(() => {
+    const el = vref.current; if (!el) return
+    if (hover) { el.currentTime = 0; const p = el.play(); if (p) p.catch(() => {}) } else el.pause()
+  }, [hover])
+  return (
+    <Link href={`/media/${v.id}`} className={`bm-card${wide ? ' bm-card-wide' : ''}`}
+      style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <div className="bm-thumb">
         <img src={v.thumb} alt={v.title} loading="lazy" />
-        <span className="mx-dur">{v.duration}</span>
-        <span className="mx-play"><Play size={17} fill="currentColor" /></span>
-        <span className="mx-line" />
+        {hover && <video ref={vref} className="bm-vid" src={v.src} muted loop playsInline preload="none" />}
+        <span className="bm-cat" style={{ ['--dot' as never]: c.dot }}>{c.label}</span>
+        <span className="bm-dur">{v.duration}</span>
+        <span className="bm-play"><Play size={16} fill="currentColor" /></span>
+        <span className="bm-prog"><i /></span>
       </div>
-      <div style={{ display: 'flex', gap: 10, padding: '11px 2px 4px' }}>
-        <span className="mx-avatar">{v.creator.name.slice(0, 1)}</span>
+      <div className="bm-meta">
+        <span className="bm-av">{v.creator.name.slice(0, 1)}</span>
         <div style={{ minWidth: 0 }}>
-          <h3 className="mx-title">{v.title}</h3>
-          <div style={{ fontSize: 11.5, color: MUT, marginTop: 4, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '2px 6px' }}>
-            <span style={{ color: SEC, fontWeight: 600 }}>{v.creator.name}</span>
-            <span>·</span>
+          <h3 className="bm-title">{v.title}</h3>
+          <div className="bm-sub">
+            <span style={{ color: SEC, fontWeight: 700 }}>{v.creator.name}</span>
+            <span className="bm-dotsep" />
             <span>{compactViews(v.views)} بازدید</span>
-            <span>·</span>
+            <span className="bm-dotsep" />
             <span>{v.date}</span>
           </div>
         </div>
@@ -58,28 +101,30 @@ function VideoCard({ v, i = 0 }: { v: MediaVideo; i?: number }) {
   )
 }
 
-function SkeletonCard() {
+/* ── کارتِ شورتِ عمودی ── */
+function ShortCard({ v }: { v: MediaVideo }) {
+  const [hover, setHover] = useState(false)
+  const vref = useRef<HTMLVideoElement>(null)
+  useEffect(() => { const el = vref.current; if (!el) return; if (hover) { el.currentTime = 0; const p = el.play(); if (p) p.catch(() => {}) } else el.pause() }, [hover])
   return (
-    <div className="mx-card" style={{ pointerEvents: 'none' }}>
-      <div className="mx-sk" style={{ aspectRatio: '16/9', borderRadius: 14 }} />
-      <div style={{ display: 'flex', gap: 10, padding: '11px 2px 4px' }}>
-        <div className="mx-sk" style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <div className="mx-sk" style={{ height: 12, width: '90%', borderRadius: 6 }} />
-          <div className="mx-sk" style={{ height: 12, width: '55%', borderRadius: 6 }} />
-        </div>
-      </div>
-    </div>
+    <Link href={`/media/${v.id}`} className="bm-short" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <img src={v.thumb} alt={v.title} loading="lazy" />
+      {hover && <video ref={vref} className="bm-vid" src={v.src} muted loop playsInline preload="none" />}
+      <span className="bm-short-shade" />
+      <span className="bm-short-badge"><Zap size={11} /> کوتاه</span>
+      <span className="bm-short-like"><Heart size={13} /> {compactViews(v.likes)}</span>
+      <span className="bm-short-title">{v.title}</span>
+    </Link>
   )
 }
 
-function SecHead({ title, icon, action }: { title: string; icon?: React.ReactNode; action?: React.ReactNode }) {
+function SecHead({ eyebrow, title, icon, action }: { eyebrow?: string; title: string; icon?: ReactNode; action?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-      <span style={{ width: 3, height: 18, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-      {icon}
-      <h2 style={{ fontSize: 16.5, fontWeight: 900, margin: 0, color: IVORY }}>{title}</h2>
-      <span style={{ flex: 1, height: 1, background: LINE }} />
+    <div className="bm-sechead">
+      <div style={{ minWidth: 0 }}>
+        {eyebrow && <span className="bm-eyebrow">{eyebrow}</span>}
+        <h2 className="bm-h2">{icon}{title}</h2>
+      </div>
       {action}
     </div>
   )
@@ -92,16 +137,19 @@ export default function MediaPage() {
   const [sortOpen, setSortOpen] = useState(false)
   const [shown, setShown]     = useState(PAGE_STEP)
   const [loading, setLoading] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [recent, setRecent]   = useState<string[]>([])
 
   const isBrowsing = cat === 'all' && !query.trim()
 
-  /* کنترل‌های ادمین: ویدیوهای مخفی‌شده حذف و ویدیوی ویژه override می‌شود */
+  /* کنترل‌های ادمین */
   const [pool, setPool] = useState<MediaVideo[]>(MEDIA_VIDEOS)
   const [featOverride, setFeatOverride] = useState<string | null>(null)
   useEffect(() => {
     const hidden = new Set(getHiddenVideoIds())
     setPool(MEDIA_VIDEOS.filter(v => !hidden.has(v.id)))
     setFeatOverride(getFeaturedOverride())
+    try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')) } catch { /* */ }
   }, [])
 
   const sorted = useMemo(() => {
@@ -119,410 +167,486 @@ export default function MediaPage() {
     })
   }, [sorted, cat, query])
 
-  const featuredV  = (featOverride ? pool.find(v => v.id === featOverride) : undefined)
+  const featuredV = (featOverride ? pool.find(v => v.id === featOverride) : undefined)
     ?? pool.find(v => v.featured) ?? pool[0] ?? MEDIA_VIDEOS[0]!
-  const trending   = [...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== featuredV.id).slice(0, 4)
-  const newest     = [...pool].sort((a, b) => b.ts - a.ts).filter(v => v.id !== featuredV.id).slice(0, 8)
-  const popular    = [...pool].sort((a, b) => b.likes - a.likes).slice(0, 8)
-  const catRows: MediaCategoryKey[] = ['snooker-training', 'highlights', 'techniques']
+  const trending  = [...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== featuredV.id)
+  const newest    = [...pool].sort((a, b) => b.ts - a.ts).filter(v => v.id !== featuredV.id)
+  const popular   = [...pool].sort((a, b) => b.likes - a.likes)
+  const tourneys  = pool.filter(v => v.category === 'highlights')
+  const shorts    = [...pool].sort((a, b) => b.likes - a.likes).slice(0, 10)
+  const channels  = listChannels()
+  const spotlight = channels[0]
+  const spotVideos = spotlight ? pool.filter(v => v.creator.id === spotlight.creator.id).sort((a, b) => b.ts - a.ts) : []
+  const catRows: MediaCategoryKey[] = ['snooker-training', 'techniques', 'interviews']
 
   const gridItems = filtered.slice(0, shown)
   const hasMore   = filtered.length > shown
 
-  const loadMore = () => {
-    if (loading) return
-    setLoading(true)
-    window.setTimeout(() => { setShown(s => s + PAGE_STEP); setLoading(false) }, 520)
+  const trendDrag = useDragScroll()
+
+  const loadMore = () => { if (loading) return; setLoading(true); window.setTimeout(() => { setShown(s => s + PAGE_STEP); setLoading(false) }, 480) }
+  const pickCat = (k: 'all' | MediaCategoryKey) => { setCat(k); setShown(PAGE_STEP); if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const runSearch = (q: string) => {
+    const t = q.trim(); setQuery(t); setShown(PAGE_STEP); setSearchOpen(false)
+    if (t) { const next = [t, ...recent.filter(r => r !== t)].slice(0, 6); setRecent(next); try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)) } catch { /* */ } }
   }
-  const pickCat = (k: 'all' | MediaCategoryKey) => { setCat(k); setShown(PAGE_STEP) }
+
+  /* سرچِ ترند = پرتکرارترین برچسب‌ها */
+  const trendingTags = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const v of pool) for (const t of v.tags) m.set(t, (m.get(t) || 0) + 1)
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e[0])
+  }, [pool])
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: IVORY, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
+    <div dir="rtl" style={{ minHeight: '100vh', background: GROUND, color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
       <style>{`
-        @keyframes mxFadeUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
-        @keyframes mxScaleX { from { opacity:0; transform: scaleX(0); } to { opacity:1; transform: scaleX(1); } }
-        @keyframes mxShimmer{ from { background-position: 200% 0; } to { background-position: -200% 0; } }
-        .mx-wrap { max-width: 1280px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
+        @keyframes bmUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
+        @keyframes bmReveal { from { clip-path: inset(8% 8% 8% 8% round 22px); opacity:.4; transform: scale(1.04); } to { clip-path: inset(0 0 0 0 round 22px); opacity:1; transform: none; } }
+        @keyframes bmMask { from { background-position: 120% 0; } to { background-position: 0 0; } }
+        @keyframes bmShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        @keyframes bmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .bm-wrap { max-width: 1300px; margin: 0 auto; padding: 0 clamp(16px,3.2vw,34px); }
 
-        /* کارت */
-        .mx-card { display: block; text-decoration: none; color: inherit; animation: mxFadeUp .5s ease both; }
-        .mx-thumb { position: relative; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #191713;
-          border: 1px solid ${LINE};
-          transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; }
-        .mx-card:hover .mx-thumb { transform: translateY(-3px); border-color: rgba(199,166,106,0.45);
-          box-shadow: 0 18px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(199,166,106,0.15); }
-        .mx-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .92;
-          transition: transform .6s cubic-bezier(.22,1,.36,1), opacity .3s; }
-        .mx-card:hover .mx-thumb img { transform: scale(1.06); opacity: 1; }
-        .mx-line { position: absolute; bottom: 0; inset-inline: 0; height: 2.5px;
-          background: linear-gradient(90deg, transparent, ${GOLD}, transparent);
-          transform: scaleX(0); transition: transform .4s cubic-bezier(.22,1,.36,1); }
-        .mx-card:hover .mx-line { transform: scaleX(1); }
-        .mx-dur { position: absolute; bottom: 8px; inset-inline-start: 8px; font-size: 11px; font-weight: 800;
-          color: ${IVORY}; background: rgba(8,7,5,0.82); border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 7px; padding: 2px 8px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
-        .mx-play { position: absolute; inset: 0; margin: auto; width: 46px; height: 46px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center; color: #0C0B09;
-          background: rgba(199,166,106,0.92); box-shadow: 0 8px 24px rgba(199,166,106,0.35);
-          opacity: 0; transform: scale(.8); transition: opacity .22s, transform .3s cubic-bezier(.22,1,.36,1); }
-        .mx-card:hover .mx-play { opacity: 1; transform: scale(1); }
-        .mx-title { font-size: 13.5px; font-weight: 800; line-height: 1.65; margin: 0; color: ${IVORY};
-          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
-        .mx-card:hover .mx-title { color: ${GOLD}; }
-        .mx-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: inline-flex;
-          align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: #241B08;
-          background: linear-gradient(135deg, ${GOLD}, #8A6020); }
+        /* ── کارت ── */
+        .bm-card { display:block; text-decoration:none; color:inherit; animation: bmUp .55s ease both; }
+        .bm-thumb { position:relative; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#EDE9E1;
+          box-shadow: 0 1px 2px rgba(28,27,23,0.05); transition: transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s; }
+        .bm-card:hover .bm-thumb { transform: translateY(-4px); box-shadow: 0 22px 42px rgba(28,27,23,0.16); }
+        .bm-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .7s cubic-bezier(.22,1,.36,1); }
+        .bm-card:hover .bm-thumb img { transform: scale(1.07); }
+        .bm-vid { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; animation: bmUp .4s ease both; }
+        .bm-cat { position:absolute; top:9px; inset-inline-start:9px; z-index:2; display:inline-flex; align-items:center; gap:6px;
+          font-size:10.5px; font-weight:800; color:#fff; background:rgba(20,18,14,0.5); backdrop-filter: blur(8px);
+          border-radius:999px; padding:4px 10px 4px 8px; opacity:0; transform: translateY(-4px); transition: opacity .25s, transform .25s; }
+        .bm-cat::before { content:''; width:6px; height:6px; border-radius:50%; background: var(--dot); box-shadow: 0 0 6px var(--dot); }
+        .bm-card:hover .bm-cat { opacity:1; transform:none; }
+        .bm-dur { position:absolute; bottom:9px; inset-inline-start:9px; z-index:2; font-size:11px; font-weight:800; color:#fff;
+          background:rgba(20,18,14,0.72); border-radius:7px; padding:2px 8px; font-variant-numeric: tabular-nums; letter-spacing:.03em; }
+        .bm-play { position:absolute; inset:0; margin:auto; z-index:2; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+          color:${INK}; background: rgba(255,255,255,0.94); box-shadow: 0 10px 26px rgba(20,18,14,0.28);
+          opacity:0; transform: scale(.82); transition: opacity .22s, transform .3s cubic-bezier(.22,1,.36,1); }
+        .bm-card:hover .bm-play { opacity:1; transform: scale(1); }
+        .bm-prog { position:absolute; left:0; right:0; bottom:0; z-index:2; height:3px; background: rgba(20,18,14,0.18); }
+        .bm-prog i { display:block; height:100%; width:0; background: linear-gradient(90deg, ${GOLD}, ${GOLD_D}); transition: width 3.4s linear; }
+        .bm-card:hover .bm-prog i { width:46%; }
+        .bm-meta { display:flex; gap:10px; padding:12px 2px 4px; }
+        .bm-av { width:32px; height:32px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;
+          font-size:13px; font-weight:900; color:#241B08; background: linear-gradient(135deg, #E8CE96, #8A6020); }
+        .bm-title { font-size:13.5px; font-weight:800; line-height:1.65; margin:0; color:${INK}; letter-spacing:-0.01em;
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition: color .2s; }
+        .bm-card:hover .bm-title { color:${GOLD_D}; }
+        .bm-sub { font-size:11.5px; color:${MUT}; margin-top:4px; display:flex; flex-wrap:wrap; align-items:center; gap:4px; }
+        .bm-dotsep { width:3px; height:3px; border-radius:50%; background:${MUT}; opacity:.6; }
+        .bm-card-wide .bm-title { font-size:15px; }
 
-        /* بیلبورد ویژه */
-        .mx-bill { position: relative; }
-        .mx-bill-glow { position: absolute; inset: -8% -4%; background-image: var(--bb); background-size: cover;
-          background-position: center; filter: blur(46px) saturate(1.3) brightness(0.55); opacity: .55; border-radius: 40px; }
-        .mx-hero { position: relative; display: block; border-radius: 22px; overflow: hidden; text-decoration: none;
-          border: 1px solid rgba(255,255,255,0.13); box-shadow: 0 24px 70px rgba(0,0,0,0.55);
-          animation: mxFadeUp .55s ease both; }
-        .mx-hero .im { aspect-ratio: 16/8.4; width: 100%; object-fit: cover; display: block;
-          transition: transform .8s cubic-bezier(.22,1,.36,1); }
-        .mx-hero:hover .im { transform: scale(1.035); }
-        .mx-hero-shade { position: absolute; inset: 0; background: linear-gradient(185deg, rgba(8,7,5,0.05) 30%, rgba(8,7,5,0.9) 90%); }
-        .mx-hero-play { position: absolute; inset: 0; margin: auto; width: 74px; height: 74px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center; color: #0C0B09;
-          background: rgba(199,166,106,0.94); box-shadow: 0 14px 44px rgba(199,166,106,0.4);
-          transition: transform .3s cubic-bezier(.22,1,.36,1); }
-        .mx-hero:hover .mx-hero-play { transform: scale(1.09); }
+        /* ── سرتیترِ سکشن ── */
+        .bm-sechead { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; }
+        .bm-eyebrow { display:block; font-size:10px; font-weight:800; letter-spacing:.26em; color:${MUT}; margin-bottom:6px; }
+        .bm-h2 { display:flex; align-items:center; gap:9px; font-size:clamp(18px,2.4vw,23px); font-weight:900; margin:0; color:${INK}; letter-spacing:-0.02em; }
+        .bm-more { display:inline-flex; align-items:center; gap:5px; padding:8px 14px; border-radius:999px; text-decoration:none; white-space:nowrap;
+          font-size:12px; font-weight:800; background:#fff; border:1px solid ${LINE}; color:${GOLD_D}; cursor:pointer; font-family:inherit; transition: all .22s; }
+        .bm-more:hover { border-color: rgba(199,166,106,0.6); background: rgba(199,166,106,0.08); gap:8px; }
 
-        /* ریل ترند */
-        .mx-trend { display: flex; gap: 12px; padding: 11px 6px; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.08);
-          border-radius: 10px; transition: background .2s, padding-inline-start .25s; }
-        .mx-trend:last-child { border-bottom: none; }
-        .mx-trend:hover { background: rgba(199,166,106,0.08); padding-inline-start: 12px; }
-        .mx-trend .tn { position: relative; width: 118px; flex-shrink: 0; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; border: 1px solid ${LINE}; }
-        .mx-trend .tn img { width: 100%; height: 100%; object-fit: cover; }
-        .mx-trend-title { font-size: 12.3px; font-weight: 700; color: ${IVORY}; line-height: 1.6; margin: 0;
-          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color .2s; }
-        .mx-trend:hover .mx-trend-title { color: ${GOLD}; }
+        /* ── ریلِ افقی ── */
+        .bm-rail { display:flex; gap:16px; overflow-x:auto; scrollbar-width:none; padding:4px 2px 12px; scroll-snap-type:x proximity; }
+        .bm-rail::-webkit-scrollbar { display:none; }
+        .bm-rail > * { flex:0 0 clamp(230px,26vw,268px); scroll-snap-align:start; }
 
-        /* ریل افقی */
-        .mx-rail { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 10px;
-          scroll-snap-type: x proximity; }
-        .mx-rail::-webkit-scrollbar { display: none; }
-        .mx-rail .mx-card { flex: 0 0 254px; scroll-snap-align: start; }
+        /* ── هیرو ── */
+        .bm-hero { display:grid; grid-template-columns: 1.55fr 1fr; gap: clamp(20px,3vw,40px); align-items:center;
+          padding: clamp(26px,4vw,54px) 0 clamp(20px,3vw,36px); }
+        .bm-featframe { position:relative; border-radius:22px; overflow:hidden; display:block; text-decoration:none;
+          box-shadow: 0 30px 70px rgba(28,27,23,0.18); animation: bmReveal .9s cubic-bezier(.22,1,.36,1) both; }
+        .bm-featframe video, .bm-featframe img { width:100%; aspect-ratio:16/9.4; object-fit:cover; display:block; }
+        .bm-feat-shade { position:absolute; inset:0; background: linear-gradient(190deg, rgba(20,18,14,0) 42%, rgba(20,18,14,0.72) 96%); }
+        .bm-feat-play { position:absolute; top:16px; inset-inline-end:16px; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+          color:${INK}; background: rgba(255,255,255,0.95); box-shadow: 0 12px 34px rgba(20,18,14,0.3); transition: transform .3s cubic-bezier(.22,1,.36,1); }
+        .bm-featframe:hover .bm-feat-play { transform: scale(1.08); }
+        .bm-eyebrow-hero { display:inline-flex; align-items:center; gap:7px; font-size:10px; font-weight:800; letter-spacing:.24em; color:${GOLD_D};
+          background: rgba(199,166,106,0.12); border:1px solid rgba(199,166,106,0.34); border-radius:999px; padding:5px 13px; }
+        .bm-hero-h1 { font-size: clamp(30px,4.6vw,58px); font-weight:900; line-height:1.08; letter-spacing:-0.03em; margin:16px 0 0; text-wrap:balance;
+          background: linear-gradient(180deg,#2A2822,#141310); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .bm-hero-underline { width:76px; height:4px; border-radius:3px; margin:14px 0 16px; background: linear-gradient(90deg, ${FELT}, ${GOLD}); transform-origin:right; animation: bmUp .6s .3s ease both; }
+        .bm-trendmini { text-decoration:none; display:flex; gap:11px; align-items:center; padding:9px 8px; border-radius:12px; transition: background .2s, padding-inline-start .25s; }
+        .bm-trendmini:hover { background:#fff; padding-inline-start:12px; box-shadow: 0 6px 18px rgba(28,27,23,0.06); }
+        .bm-trendmini .rk { font-size:15px; font-weight:900; color:${GOLD}; min-width:18px; font-variant-numeric:tabular-nums; }
+        .bm-trendmini .tn { position:relative; width:98px; flex-shrink:0; aspect-ratio:16/9; border-radius:9px; overflow:hidden; }
+        .bm-trendmini .tn img { width:100%; height:100%; object-fit:cover; }
+        .bm-trendmini p { font-size:12.3px; font-weight:700; color:${INK}; line-height:1.55; margin:0;
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition: color .2s; }
+        .bm-trendmini:hover p { color:${GOLD_D}; }
 
-        /* کارت کانال */
-        .mx-chan { flex: 0 0 208px; scroll-snap-align: start; display: flex; flex-direction: column;
-          align-items: center; gap: 6px; text-align: center; text-decoration: none;
-          background: rgba(255,255,255,0.045); border: 1px solid ${LINE}; border-radius: 18px;
-          padding: 22px 16px 18px; transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s, box-shadow .3s;
-          animation: mxFadeUp .5s ease both; }
-        .mx-chan:hover { transform: translateY(-4px); border-color: rgba(199,166,106,0.45);
-          box-shadow: 0 16px 36px rgba(0,0,0,0.45); }
-        .mx-chan .av { width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center;
-          justify-content: center; font-size: 22px; font-weight: 900; color: #241B08; margin-bottom: 4px;
-          background: linear-gradient(135deg, ${GOLD}, #8A6020); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
-        .mx-chan .go { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
-          font-size: 11.5px; font-weight: 800; color: ${GOLD}; text-decoration: none; transition: gap .25s; }
-        .mx-chan:hover .go { gap: 8px; }
-        .mx-chan-cta { border-color: rgba(167,139,250,0.35); background: rgba(139,92,246,0.08); }
-        .mx-chan-cta:hover { border-color: rgba(167,139,250,0.6); }
+        /* ── نویگیشنِ چسبان ── */
+        .bm-nav { position:sticky; top:60px; z-index:40; background: rgba(250,248,243,0.82); backdrop-filter: blur(18px) saturate(1.3);
+          -webkit-backdrop-filter: blur(18px) saturate(1.3); border-top:1px solid ${LINE}; border-bottom:1px solid ${LINE}; }
+        .bm-navrow { display:flex; align-items:center; gap:12px; padding:10px 0; }
+        .bm-chips { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; flex:1; min-width:0; padding:2px; }
+        .bm-chips::-webkit-scrollbar { display:none; }
+        .bm-chip { flex-shrink:0; display:inline-flex; align-items:center; gap:7px; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:800;
+          padding:8px 15px; border-radius:999px; background:#fff; border:1px solid ${LINE}; color:${SEC}; transition: all .24s cubic-bezier(.22,1,.36,1); white-space:nowrap; }
+        .bm-chip:hover { border-color: rgba(199,166,106,0.5); color:${GOLD_D}; }
+        .bm-chip.on { background: ${INK}; border-color:${INK}; color:#fff; }
+        .bm-chip .cdot { width:7px; height:7px; border-radius:50%; }
+        .bm-iconbtn { flex-shrink:0; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+          background:#fff; border:1px solid ${LINE}; color:${INK}; cursor:pointer; transition: all .2s; }
+        .bm-iconbtn:hover { border-color: rgba(199,166,106,0.6); color:${GOLD_D}; }
 
-        /* چیپ و ابزار */
-        .mx-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
-          font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 8px 14px; border-radius: 10px;
-          background: rgba(255,255,255,0.045); border: 1px solid ${LINE}; color: ${SEC}; transition: all .2s ease; }
-        .mx-chip:hover { border-color: rgba(199,166,106,0.5); color: ${GOLD}; transform: translateY(-1px); }
-        .mx-chip.on { background: rgba(199,166,106,0.16); border-color: rgba(199,166,106,0.45); color: ${GOLD}; }
-        /* ردیفِ چیپ‌ها تا لبه‌ی صفحه bleed می‌شود تا چیپِ آخر «بریده در وسطِ کادر» به نظر نرسد */
-        .mx-chips-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
-          padding: 2px clamp(16px,3vw,28px); margin-inline: calc(clamp(16px,3vw,28px) * -1); }
-        .mx-chips-row::-webkit-scrollbar { display: none; }
-        .mx-search { background: rgba(255,255,255,0.05); border: 1px solid ${LINE}; color: ${IVORY}; }
-        .mx-search::placeholder { color: ${MUT}; }
-        .mx-search:focus { border-color: rgba(199,166,106,0.6) !important; box-shadow: 0 0 0 3px rgba(199,166,106,0.16) !important; outline: none; }
-        .mx-sk { background: linear-gradient(100deg, #1B1915 40%, #262218 50%, #1B1915 60%);
-          background-size: 200% 100%; animation: mxShimmer 1.2s linear infinite; }
+        /* ── گریدِ نامتقارن «جدید» ── */
+        .bm-mosaic { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; }
+        .bm-mosaic > .bm-lead { grid-column: span 2; grid-row: span 2; }
+        .bm-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; }
 
-        .mx-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 356px); gap: 20px; align-items: start; }
-        .mx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        .mx-hero-word { position: absolute; bottom: -6px; inset-inline-start: -4px; font-weight: 900;
-          font-size: clamp(52px, 9vw, 110px); line-height: 1; letter-spacing: .02em;
-          color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.07); user-select: none; pointer-events: none; direction: ltr; }
+        /* ── اسپاتلایتِ سازنده ── */
+        .bm-spot { position:relative; overflow:hidden; border-radius:24px; background: linear-gradient(135deg, #14322A 0%, #0B231D 62%, #0E1C18 100%);
+          color:#EAF2EE; padding: clamp(24px,3.4vw,44px); display:grid; grid-template-columns: 1fr 1.05fr; gap: clamp(20px,3vw,40px); align-items:center; }
+        .bm-spot::before { content:''; position:absolute; top:-30%; inset-inline-end:-10%; width:60%; height:160%;
+          background: radial-gradient(circle, rgba(199,166,106,0.16), transparent 62%); pointer-events:none; }
+        .bm-spot .av { width:74px; height:74px; border-radius:22px; display:inline-flex; align-items:center; justify-content:center;
+          font-size:30px; font-weight:900; color:#241B08; background: linear-gradient(135deg,#E8CE96,#8A6020); box-shadow: 0 14px 34px rgba(0,0,0,0.3); }
+        .bm-spot-vid { position:relative; border-radius:16px; overflow:hidden; display:block; box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
+        .bm-spot-vid img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; transition: transform .6s cubic-bezier(.22,1,.36,1); }
+        .bm-spot-vid:hover img { transform: scale(1.05); }
+        .bm-follow { display:inline-flex; align-items:center; gap:7px; padding:11px 22px; border-radius:999px; cursor:pointer; font-family:inherit;
+          font-size:13px; font-weight:800; background:${GOLD}; color:#241B08; border:none; transition: all .22s; }
+        .bm-follow:hover { background:#E8CE96; transform: translateY(-1px); }
+        .bm-follow.on { background: transparent; color:#EAF2EE; border:1px solid rgba(255,255,255,0.4); }
 
-        /* پوسترِ سینماییِ CSS/SVG — همان صحنه‌ی باندِ صفحه‌ی اصلی */
-        .mx-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 46%; pointer-events: none;
-          -webkit-mask-image: linear-gradient(to right, black 40%, transparent 96%);
-          mask-image: linear-gradient(to right, black 40%, transparent 96%); }
-        .mx-stage { position: absolute; inset: 0;
-          background: radial-gradient(ellipse 70% 62% at 26% 100%, rgba(139,92,246,0.16), transparent 62%),
-                      radial-gradient(ellipse 50% 50% at 20% 6%, rgba(167,139,250,0.09), transparent 60%); }
-        @keyframes mxBeam { 0%,100% { transform: rotate(0deg); opacity: 1; } 50% { transform: rotate(3.5deg); opacity: .85; } }
-        .mx-beam { position: absolute; top: -12%; left: 4%; width: 80%; height: 140%;
-          background: conic-gradient(from 158deg at 18% 0%, transparent 0deg, rgba(196,171,255,0.22) 12deg, rgba(167,139,250,0.08) 26deg, transparent 38deg);
-          filter: blur(5px); animation: mxBeam 9s ease-in-out infinite; transform-origin: 18% 0%; }
-        .mx-cam { position: absolute; left: 4%; bottom: 8%; width: clamp(96px, 10vw, 150px); height: auto; opacity: .95;
-          filter: drop-shadow(0 0 12px rgba(167,139,250,0.4)) drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
-        @keyframes mxFlare { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(1.15); } }
-        .mx-flare { position: absolute; left: 16%; top: 24%; width: 80px; height: 80px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(214,196,255,0.28) 0%, rgba(139,92,246,0.12) 40%, transparent 68%);
-          filter: blur(4px); animation: mxFlare 6s ease-in-out infinite; }
-        @media (max-width: 760px) { .mx-poster { width: 70%; opacity: .7; } .mx-cam { width: 84px; bottom: 6%; } }
+        /* ── بندِ مسابقات ── */
+        .bm-tour { background: linear-gradient(180deg, rgba(14,122,56,0.055), rgba(14,122,56,0.02)); border:1px solid rgba(14,122,56,0.14);
+          border-radius:24px; padding: clamp(22px,3vw,38px); }
+        .bm-tour-grid { display:grid; grid-template-columns: 1.5fr 1fr; gap: clamp(16px,2.4vw,26px); align-items:stretch; }
+        .bm-tour-side { display:flex; flex-direction:column; gap:10px; }
+        .bm-tour-mini { display:flex; gap:12px; align-items:center; text-decoration:none; padding:8px; border-radius:14px; background:#fff; border:1px solid ${LINE}; transition: all .2s; }
+        .bm-tour-mini:hover { border-color: rgba(14,122,56,0.35); transform: translateX(-3px); }
+        .bm-tour-mini .tn { position:relative; width:112px; flex-shrink:0; aspect-ratio:16/9; border-radius:10px; overflow:hidden; }
+        .bm-tour-mini .tn img { width:100%; height:100%; object-fit:cover; }
+        .bm-tour-mini p { font-size:12.5px; font-weight:800; color:${INK}; line-height:1.5; margin:0;
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 
-        @media (max-width: 1080px) { .mx-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 900px)  { .mx-top { grid-template-columns: 1fr; } }
-        @media (max-width: 760px)  { .mx-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px)  {
-          .mx-grid { grid-template-columns: 1fr; gap: 18px; }
-          .mx-rail .mx-card { flex-basis: 218px; }
-          .mx-hide-mob { display: none !important; }
+        /* ── شورتس ── */
+        .bm-short { position:relative; flex:0 0 clamp(150px,20vw,176px); aspect-ratio:9/16; border-radius:18px; overflow:hidden; display:block; text-decoration:none;
+          scroll-snap-align:start; box-shadow: 0 8px 24px rgba(28,27,23,0.12); background:#EDE9E1; }
+        .bm-short img { width:100%; height:100%; object-fit:cover; transition: transform .6s cubic-bezier(.22,1,.36,1); }
+        .bm-short:hover img { transform: scale(1.07); }
+        .bm-short-shade { position:absolute; inset:0; background: linear-gradient(180deg, rgba(20,18,14,0.28) 0%, transparent 34%, transparent 52%, rgba(20,18,14,0.82) 100%); }
+        .bm-short-badge { position:absolute; top:10px; inset-inline-start:10px; display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:800; color:#241B08;
+          background: ${GOLD}; border-radius:999px; padding:3px 9px; }
+        .bm-short-like { position:absolute; top:10px; inset-inline-end:10px; display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:800; color:#fff;
+          background: rgba(20,18,14,0.45); backdrop-filter: blur(6px); border-radius:999px; padding:3px 9px; }
+        .bm-short-title { position:absolute; inset-inline:12px; bottom:12px; font-size:12px; font-weight:800; color:#fff; line-height:1.55;
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+        /* ── کانال ── */
+        .bm-chan { flex:0 0 210px; scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; text-decoration:none;
+          background:#fff; border:1px solid ${LINE}; border-radius:20px; padding:22px 16px 18px; transition: all .3s cubic-bezier(.22,1,.36,1); animation: bmUp .5s ease both; }
+        .bm-chan:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(28,27,23,0.12); border-color: rgba(199,166,106,0.4); }
+        .bm-chan .av { width:58px; height:58px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:23px; font-weight:900;
+          color:#241B08; margin-bottom:5px; background: linear-gradient(135deg,#E8CE96,#8A6020); box-shadow: 0 8px 20px rgba(28,27,23,0.12); }
+        .bm-chan .go { display:inline-flex; align-items:center; gap:5px; margin-top:8px; font-size:11.5px; font-weight:800; color:${GOLD_D}; transition: gap .22s; }
+        .bm-chan:hover .go { gap:8px; }
+        .bm-chan-cta { border-color: rgba(14,122,56,0.28); background: rgba(14,122,56,0.045); }
+
+        /* ── اسکلت ── */
+        .bm-sk { background: linear-gradient(100deg, #EEEAE2 40%, #F6F3EC 50%, #EEEAE2 60%); background-size: 200% 100%; animation: bmShimmer 1.2s linear infinite; }
+
+        /* ── سرچِ تمام‌صفحه ── */
+        .bm-search-ov { position:fixed; inset:0; z-index:2000; background: rgba(250,248,243,0.86); backdrop-filter: blur(22px) saturate(1.2); animation: bmUp .22s ease both; overflow-y:auto; }
+        .bm-search-inner { max-width: 760px; margin: 0 auto; padding: clamp(60px,10vh,120px) clamp(18px,4vw,28px) 60px; }
+        .bm-search-box { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid ${LINE}; border-radius:18px; padding:6px 8px 6px 18px; box-shadow: 0 20px 50px rgba(28,27,23,0.12); }
+        .bm-search-box input { flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:inherit; font-size:17px; color:${INK}; padding:14px 0; }
+        .bm-sug { display:inline-flex; align-items:center; gap:7px; padding:9px 15px; border-radius:999px; background:#fff; border:1px solid ${LINE}; color:${SEC};
+          font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; transition: all .2s; }
+        .bm-sug:hover { border-color: rgba(199,166,106,0.5); color:${GOLD_D}; }
+
+        /* ── واکنش‌گرا ── */
+        @media (max-width: 1080px) { .bm-mosaic, .bm-grid { grid-template-columns: repeat(3, 1fr); } .bm-mosaic > .bm-lead { grid-column: span 2; grid-row: span 2; } }
+        @media (max-width: 900px)  { .bm-hero { grid-template-columns:1fr; } .bm-spot, .bm-tour-grid { grid-template-columns:1fr; } }
+        @media (max-width: 760px)  {
+          .bm-mosaic, .bm-grid { grid-template-columns: repeat(2, 1fr); gap:14px; }
+          .bm-mosaic > .bm-lead { grid-column: span 2; grid-row: auto; }
+          .bm-nav { top:56px; }
         }
-        @media (prefers-reduced-motion: reduce) { .mx-card, .mx-hero { animation: none; } }
+        @media (max-width: 480px)  { .bm-grid { grid-template-columns: 1fr; } }
+        @media (prefers-reduced-motion: reduce) {
+          .bm-card, .bm-chan, .bm-featframe, .bm-hero-underline { animation: none !important; }
+        }
       `}</style>
 
-      {/* ═══ هدر سالن نمایش ═══ */}
-      <header style={{ position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 84% 0%, rgba(199,166,106,0.14), transparent 52%)' }} />
-        <div style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
-        {/* پوسترِ سینمایی — دوربین + نور پروژکتور (CSS/SVG) */}
-        <div className="mx-poster" aria-hidden>
-          <div className="mx-stage" />
-          <div className="mx-beam" />
-          <div className="mx-flare" />
-          <svg className="mx-cam" viewBox="0 0 220 150" fill="none" stroke="#B79CFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="78" cy="28" r="20" opacity=".9" />
-            <circle cx="78" cy="28" r="8" opacity=".55" />
-            <circle cx="122" cy="28" r="20" opacity=".9" />
-            <circle cx="122" cy="28" r="8" opacity=".55" />
-            <rect x="58" y="48" width="86" height="44" rx="8" opacity=".95" />
-            <circle cx="80" cy="70" r="9" opacity=".5" />
-            <path d="M144 60 L172 50 L172 90 L144 80 Z" opacity=".95" />
-            <line x1="172" y1="56" x2="184" y2="52" opacity=".45" />
-            <line x1="172" y1="84" x2="184" y2="88" opacity=".45" />
-            <line x1="101" y1="92" x2="101" y2="104" opacity=".8" />
-            <line x1="101" y1="104" x2="76" y2="142" opacity=".8" />
-            <line x1="101" y1="104" x2="126" y2="142" opacity=".8" />
-            <line x1="101" y1="104" x2="101" y2="140" opacity=".55" />
-          </svg>
-        </div>
-        <div className="mx-hero-word">MEDIA</div>
-        <div className="mx-wrap" style={{ position: 'relative', padding: 'clamp(28px,4.4vw,50px) clamp(16px,3vw,28px) clamp(22px,3.4vw,36px)', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
-          <div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.24em', color: '#B79CFF', background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(167,139,250,0.45)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
-              <Clapperboard size={11} /> BILLIARD MEDIA
-            </span>
-            <h1 style={{ fontSize: 'clamp(26px,4vw,44px)', fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-              بیلیارد <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>مدیا</span>
-            </h1>
-            <div style={{ width: 62, height: 3, borderRadius: 2, marginTop: 10, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'mxScaleX .5s .25s ease both' }} />
-          </div>
-          <p style={{ margin: 0, fontSize: 12.5, color: MUT }}>سالن نمایش دنیای بیلیارد — آموزش، هایلایت، مصاحبه</p>
-        </div>
-      </header>
-
-      {/* ═══ نوار ابزار چسبان (تیره) ═══ */}
-      <div style={{ position: 'sticky', top: 62, zIndex: 40, background: 'rgba(12,11,9,0.88)', backdropFilter: 'blur(18px) saturate(1.4)', WebkitBackdropFilter: 'blur(18px) saturate(1.4)', borderBottom: `1px solid ${LINE}` }}>
-        <div className="mx-wrap" style={{ padding: '10px clamp(16px,3vw,28px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
-              <input
-                className="mx-search"
-                value={query}
-                onChange={e => { setQuery(e.target.value); setShown(PAGE_STEP) }}
-                placeholder="جستجوی ویدیو، سازنده یا برچسب…"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 40px 10px 14px', borderRadius: 12, fontSize: 13, fontFamily: 'inherit', transition: 'border-color .2s, box-shadow .2s' }}
-              />
-              <Search size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: GOLD, pointerEvents: 'none' }} />
+      {/* ═══════════ سرچِ تمام‌صفحه ═══════════ */}
+      {searchOpen && (
+        <div className="bm-search-ov" onClick={() => setSearchOpen(false)}>
+          <div className="bm-search-inner" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18 }}>
+              <button className="bm-iconbtn" onClick={() => setSearchOpen(false)} aria-label="بستن"><X size={18} /></button>
             </div>
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <button
-                onClick={() => setSortOpen(o => !o)}
-                onBlur={() => window.setTimeout(() => setSortOpen(false), 140)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 13px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: 'rgba(255,255,255,0.05)', border: `1px solid ${sortOpen ? 'rgba(199,166,106,0.55)' : LINE}`, color: SEC, transition: 'border-color .2s' }}>
-                <span className="mx-hide-mob" style={{ color: MUT, fontWeight: 500 }}>مرتب‌سازی:</span>
-                {SORTS.find(s => s[0] === sort)![1]}
-                <ChevronDown size={13} style={{ transition: 'transform .2s', transform: sortOpen ? 'rotate(180deg)' : 'none', color: GOLD }} />
-              </button>
-              {sortOpen && (
-                <div style={{ position: 'absolute', insetInlineEnd: 0, top: 'calc(100% + 6px)', minWidth: 160, background: '#171511', border: `1px solid rgba(255,255,255,0.12)`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 18px 44px rgba(0,0,0,0.6)', zIndex: 50 }}>
-                  {SORTS.map(([k, l]) => (
-                    <button key={k} onMouseDown={() => { setSort(k); setSortOpen(false) }}
-                      style={{ display: 'flex', width: '100%', padding: '10px 14px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, textAlign: 'right', background: sort === k ? 'rgba(199,166,106,0.14)' : 'transparent', color: sort === k ? GOLD : SEC, fontWeight: sort === k ? 800 : 500 }}>
-                      {l}
-                    </button>
-                  ))}
+            <SearchBox onSubmit={runSearch} />
+            {recent.length > 0 && (
+              <div style={{ marginTop: 30 }}>
+                <SecMini icon={<Clock3 size={13} />} title="جستجوهای اخیر"
+                  action={<button onClick={() => { setRecent([]); try { localStorage.removeItem(RECENT_KEY) } catch { /* */ } }} style={{ border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, color: MUT }}>پاک کردن</button>} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {recent.map(r => <button key={r} className="bm-sug" onClick={() => runSearch(r)}>{r}</button>)}
                 </div>
-              )}
+              </div>
+            )}
+            <div style={{ marginTop: 30 }}>
+              <SecMini icon={<TrendingUp size={13} />} title="جستجوهای داغ" />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {trendingTags.map(t => <button key={t} className="bm-sug" onClick={() => runSearch(t)}><Flame size={12} style={{ color: GOLD }} /> {t}</button>)}
+              </div>
+            </div>
+            <div style={{ marginTop: 30 }}>
+              <SecMini icon={<Sparkles size={13} />} title="کانال‌های محبوب" />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {channels.slice(0, 5).map(ch => (
+                  <Link key={ch.creator.id} href={`/media/channel/${ch.creator.handle}`} className="bm-sug" onClick={() => setSearchOpen(false)} style={{ textDecoration: 'none' }}>
+                    <span style={{ width: 22, height: 22, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>{ch.creator.name.slice(0, 1)}</span>
+                    {ch.creator.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginTop: 30 }}>
+              <SecMini icon={<Eye size={13} />} title="پربازدیدترین ویدیوها" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {[...pool].sort((a, b) => b.views - a.views).slice(0, 5).map((v, i) => (
+                  <Link key={v.id} href={`/media/${v.id}`} className="bm-trendmini" onClick={() => setSearchOpen(false)}>
+                    <span className="rk">{faDigits(i + 1)}</span>
+                    <span className="tn"><img src={v.thumb} alt={v.title} loading="lazy" /></span>
+                    <span style={{ minWidth: 0 }}><p>{v.title}</p><span style={{ fontSize: 11, color: MUT }}>{v.creator.name} · {compactViews(v.views)} بازدید</span></span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="mx-chips-row">
-            <button className={`mx-chip${cat === 'all' ? ' on' : ''}`} onClick={() => pickCat('all')}>همه ویدیوها</button>
-            {MEDIA_CATEGORIES.map(c => (
-              <button key={c.key} className={`mx-chip${cat === c.key ? ' on' : ''}`} onClick={() => pickCat(c.key)}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.dot, boxShadow: `0 0 6px ${c.dot}88` }} />
-                {c.label}
-              </button>
+        </div>
+      )}
+
+      {/* ═══════════ هدر + هیرو ═══════════ */}
+      <div className="bm-wrap bm-hero">
+        <Link href={`/media/${featuredV.id}`} className="bm-featframe">
+          <video src={featuredV.src} poster={featuredV.thumb} autoPlay muted loop playsInline preload="metadata" />
+          <span className="bm-feat-shade" />
+          <span className="bm-feat-play"><Play size={22} fill="currentColor" /></span>
+          <span style={{ position: 'absolute', top: 16, insetInlineStart: 16, display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 10, fontWeight: 800, letterSpacing: '0.2em', color: '#fff', background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: 999, padding: '5px 12px' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#E0704A', boxShadow: '0 0 8px #E0704A' }} /> NOW SHOWING
+          </span>
+          <div style={{ position: 'absolute', insetInline: 0, bottom: 0, padding: 'clamp(16px,2.6vw,30px)' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: '#fff', background: 'rgba(20,18,14,0.4)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', borderRadius: 999, padding: '4px 12px', marginBottom: 12 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: mediaCategoryOf(featuredV.category).dot }} />
+              {mediaCategoryOf(featuredV.category).label}
+            </span>
+            <h2 style={{ fontSize: 'clamp(18px,2.6vw,30px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', lineHeight: 1.45, letterSpacing: '-0.02em', maxWidth: 680, textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}>
+              {featuredV.title}
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px 14px', flexWrap: 'wrap', fontSize: 12.5, color: 'rgba(255,255,255,0.82)' }}>
+              <span style={{ fontWeight: 800, color: '#fff' }}>{featuredV.creator.name}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={13} /> {compactViews(featuredV.views)} بازدید</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock3 size={13} /> {featuredV.duration}</span>
+            </div>
+          </div>
+        </Link>
+
+        <div>
+          <span className="bm-eyebrow-hero"><Play size={11} fill="currentColor" /> BILLIARD MEDIA</span>
+          <h1 className="bm-hero-h1">خانهٔ محتوای<br />بیلیارد</h1>
+          <div className="bm-hero-underline" />
+          <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: '0 0 22px', maxWidth: 380 }}>
+            آموزش، هایلایتِ مسابقات، مصاحبه و پشت‌صحنه — همه در یک سالنِ نمایشِ اختصاصی برای دنیای بیلیارد.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {trending.slice(0, 3).map((v, i) => (
+              <Link key={v.id} href={`/media/${v.id}`} className="bm-trendmini">
+                <span className="rk">{faDigits(i + 1)}</span>
+                <span className="tn"><img src={v.thumb} alt={v.title} loading="lazy" /></span>
+                <span style={{ minWidth: 0 }}>
+                  <p>{v.title}</p>
+                  <span style={{ fontSize: 11, color: MUT }}>{compactViews(v.views)} بازدید</span>
+                </span>
+              </Link>
             ))}
           </div>
         </div>
       </div>
 
-      <main className="mx-wrap" style={{ padding: 'clamp(24px,3.4vw,36px) clamp(16px,3vw,28px) 80px' }}>
+      {/* ═══════════ نویگیشنِ چسبان ═══════════ */}
+      <div className="bm-nav">
+        <div className="bm-wrap bm-navrow">
+          <button className="bm-iconbtn" onClick={() => setSearchOpen(true)} aria-label="جستجو"><Search size={18} /></button>
+          <div className="bm-chips">
+            <button className={`bm-chip${cat === 'all' ? ' on' : ''}`} onClick={() => pickCat('all')}>همه</button>
+            {MEDIA_CATEGORIES.map(c => (
+              <button key={c.key} className={`bm-chip${cat === c.key ? ' on' : ''}`} onClick={() => pickCat(c.key)}>
+                <span className="cdot" style={{ background: c.dot, boxShadow: `0 0 6px ${c.dot}88` }} />{c.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <button className="bm-iconbtn" style={{ width: 'auto', padding: '0 13px', gap: 6, fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800, color: SEC }}
+              onClick={() => setSortOpen(o => !o)} onBlur={() => window.setTimeout(() => setSortOpen(false), 150)}>
+              <span className="bm-hide-sort" style={{ color: MUT, fontWeight: 500 }}>{SORTS.find(s => s[0] === sort)![1]}</span>
+              <ChevronDown size={14} style={{ transform: sortOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s', color: GOLD_D }} />
+            </button>
+            {sortOpen && (
+              <div style={{ position: 'absolute', insetInlineEnd: 0, top: 'calc(100% + 6px)', minWidth: 150, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 18px 44px rgba(28,27,23,0.14)', zIndex: 50 }}>
+                {SORTS.map(([k, l]) => (
+                  <button key={k} onMouseDown={() => { setSort(k); setSortOpen(false) }}
+                    style={{ display: 'flex', width: '100%', padding: '11px 15px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, textAlign: 'right', background: sort === k ? 'rgba(199,166,106,0.12)' : 'transparent', color: sort === k ? GOLD_D : SEC, fontWeight: sort === k ? 800 : 500 }}>{l}</button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
+      <main className="bm-wrap" style={{ padding: 'clamp(26px,3.6vw,44px) clamp(16px,3.2vw,34px) 90px' }}>
         {isBrowsing ? (
           <>
-            {/* ═══ بیلبورد + ترند ═══ */}
-            <section className="mx-top" style={{ marginBottom: 'clamp(30px,4.4vw,46px)' }}>
-              <div className="mx-bill">
-                <div className="mx-bill-glow" style={{ ['--bb' as never]: `url(${featuredV.thumb})` }} />
-                <Link href={`/media/${featuredV.id}`} className="mx-hero">
-                  <img className="im" src={featuredV.thumb} alt={featuredV.title} />
-                  <div className="mx-hero-shade" />
-                  <span className="mx-hero-play"><Play size={28} fill="currentColor" /></span>
-                  <span className="mx-dur" style={{ position: 'absolute', top: 14, insetInlineStart: 14, bottom: 'auto' }}>{featuredV.duration}</span>
-                  <span style={{ position: 'absolute', top: 14, insetInlineEnd: 14, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.22em', color: GOLD, background: 'rgba(8,7,5,0.6)', border: '1px solid rgba(199,166,106,0.4)', borderRadius: 999, padding: '4px 12px', backdropFilter: 'blur(6px)' }}>
-                    NOW SHOWING
-                  </span>
-                  <div style={{ position: 'absolute', insetInline: 0, bottom: 0, padding: 'clamp(16px,2.6vw,28px)' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: IVORY, background: 'rgba(8,7,5,0.55)', border: '1px solid rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', borderRadius: 999, padding: '4px 11px', marginBottom: 10 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: mediaCategoryOf(featuredV.category).dot }} />
-                      {mediaCategoryOf(featuredV.category).label}
-                    </span>
-                    <h2 style={{ fontSize: 'clamp(17px,2.4vw,26px)', fontWeight: 900, color: '#fff', margin: '0 0 8px', lineHeight: 1.6, maxWidth: 640 }}>
-                      {featuredV.title}
-                    </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px 12px', flexWrap: 'wrap', fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>
-                      <span style={{ fontWeight: 700, color: '#fff' }}>{featuredV.creator.name}</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={12} /> {compactViews(featuredV.views)} بازدید</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock3 size={12} /> {featuredV.date}</span>
+            {/* ═══ ترندِ درگ ═══ */}
+            <Reveal>
+              <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
+                <SecHead eyebrow="TRENDING NOW" title="در حال ترند" icon={<Flame size={20} style={{ color: '#E0704A' }} />} />
+                <div className="bm-rail" ref={trendDrag.ref} {...trendDrag.handlers} style={{ cursor: 'grab' }}>
+                  {trending.slice(0, 10).map((v, i) => (
+                    <div key={v.id} style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', top: -6, insetInlineStart: -6, zIndex: 3, width: 30, height: 30, borderRadius: '50%', background: '#fff', border: `1px solid ${LINE}`, boxShadow: '0 4px 12px rgba(28,27,23,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums' }}>{faDigits(i + 1)}</span>
+                      <VideoCard v={v} i={i} />
                     </div>
-                  </div>
-                </Link>
-              </div>
-
-              {/* در حال ترند */}
-              <aside style={{ background: PANEL, border: `1px solid ${LINE}`, borderRadius: 18, padding: '16px 12px 8px', backdropFilter: 'blur(10px)', animation: 'mxFadeUp .5s .08s ease both' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6, padding: '0 4px' }}>
-                  <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-                  <h2 style={{ fontSize: 14, fontWeight: 900, margin: 0, color: IVORY }}>در حال ترند</h2>
-                  <Flame size={14} style={{ color: '#E0704A' }} />
+                  ))}
                 </div>
-                {trending.map((v, i) => (
-                  <Link key={v.id} href={`/media/${v.id}`} className="mx-trend">
-                    <span style={{ fontSize: 15, fontWeight: 900, color: GOLD, minWidth: 20, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums' }}>{faDigits(i + 1)}</span>
-                    <span className="tn">
-                      <img src={v.thumb} alt={v.title} loading="lazy" />
-                      <span className="mx-dur" style={{ bottom: 5, insetInlineStart: 5, fontSize: 9.5, padding: '1px 6px' }}>{v.duration}</span>
-                    </span>
-                    <span style={{ minWidth: 0 }}>
-                      <p className="mx-trend-title">{v.title}</p>
-                      <span style={{ fontSize: 10.5, color: MUT }}>{v.creator.name} · {compactViews(v.views)} بازدید</span>
-                    </span>
-                  </Link>
-                ))}
-              </aside>
-            </section>
+              </section>
+            </Reveal>
 
-            {/* ═══ ویدیوهای جدید ═══ */}
-            <section style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>
-              <SecHead title="ویدیوهای جدید" />
-              <div className="mx-grid">
-                {newest.map((v, i) => <VideoCard key={v.id} v={v} i={i} />)}
-              </div>
-            </section>
+            {/* ═══ جدید — گریدِ نامتقارن ═══ */}
+            <Reveal>
+              <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
+                <SecHead eyebrow="FRESH" title="تازه‌ترین‌ها" />
+                <div className="bm-mosaic">
+                  {newest.slice(0, 7).map((v, i) => (
+                    <div key={v.id} className={i === 0 ? 'bm-lead' : ''}>
+                      <VideoCard v={v} i={i} wide={i === 0} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </Reveal>
+
+            {/* ═══ اسپاتلایتِ سازنده ═══ */}
+            {spotlight && spotVideos[0] && (
+              <Reveal>
+                <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
+                  <SpotlightBlock spotlight={spotlight} video={spotVideos[0]} count={spotVideos.length} />
+                </section>
+              </Reveal>
+            )}
 
             {/* ═══ محبوب‌ترین ═══ */}
-            <section style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>
-              <SecHead title="محبوب‌ترین ویدیوها" />
-              <div className="mx-rail">
-                {popular.map((v, i) => <VideoCard key={v.id} v={v} i={i} />)}
-              </div>
-            </section>
-
-            {/* ═══ کانال‌ها — سازندگانِ بیلیارد مدیا ═══ */}
-            <section style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>
-              <SecHead
-                title="کانال‌ها"
-                icon={<span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>CHANNELS</span>}
-                action={
-                  <Link href="/media/channels"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 10, textDecoration: 'none', fontSize: 12, fontWeight: 700, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD, transition: 'all .2s' }}>
-                    مشاهده همه <ArrowLeft size={12} />
-                  </Link>
-                }
-              />
-              <div className="mx-rail">
-                {listChannels().map((ch, i) => (
-                  <Link key={ch.creator.id} href={`/media/channel/${ch.creator.handle}`} className="mx-chan" style={{ animationDelay: `${Math.min(i, 6) * 60}ms` }}>
-                    <span className="av">{ch.creator.name.slice(0, 1)}</span>
-                    <span style={{ fontSize: 14, fontWeight: 900, color: IVORY }}>{ch.creator.name}</span>
-                    <span style={{ fontSize: 10.5, color: MUT, direction: 'ltr' }}>@{ch.creator.handle}</span>
-                    <span style={{ fontSize: 11, color: SEC, marginTop: 2 }}>{faDigits(ch.videoCount)} ویدیو · {compactViews(ch.totalViews)} بازدید</span>
-                    <span className="go">مشاهده کانال <ArrowLeft size={11} /></span>
-                  </Link>
-                ))}
-                {/* CTA — کانالِ خودت را بساز */}
-                <div className="mx-chan mx-chan-cta">
-                  <span className="av" style={{ background: 'linear-gradient(135deg,#B79CFF,#7C3AED)', color: '#1B1230' }}>+</span>
-                  <span style={{ fontSize: 14, fontWeight: 900, color: IVORY }}>کانالِ خودت را بساز</span>
-                  <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8, textAlign: 'center' }}>مربی، بازیکن یا باشگاه هستی؟ ویدیوهایت را در بیلیارد مدیا منتشر کن.</span>
-                  <Link href="/profile/role" className="go" style={{ color: '#B79CFF' }}>ساخت کانال <ArrowLeft size={11} /></Link>
+            <Reveal>
+              <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
+                <SecHead eyebrow="MOST LOVED" title="محبوب‌ترین‌ها" icon={<Heart size={19} style={{ color: '#DB2777' }} />} />
+                <div className="bm-rail">
+                  {popular.slice(0, 10).map((v, i) => <VideoCard key={v.id} v={v} i={i} />)}
                 </div>
-              </div>
-            </section>
+              </section>
+            </Reveal>
+
+            {/* ═══ مسابقات ═══ */}
+            {tourneys.length > 0 && (
+              <Reveal>
+                <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }} className="bm-tour">
+                  <SecHead eyebrow="TOURNAMENTS" title="مسابقات و هایلایت" icon={<Trophy size={19} style={{ color: FELT }} />}
+                    action={<button className="bm-more" onClick={() => pickCat('highlights')} style={{ color: FELT, borderColor: 'rgba(14,122,56,0.3)' }}>همه <ArrowLeft size={12} /></button>} />
+                  <div className="bm-tour-grid">
+                    <VideoCard v={tourneys[0]!} wide />
+                    <div className="bm-tour-side">
+                      {tourneys.slice(1, 4).map(v => (
+                        <Link key={v.id} href={`/media/${v.id}`} className="bm-tour-mini">
+                          <span className="tn"><img src={v.thumb} alt={v.title} loading="lazy" /><span className="bm-dur" style={{ bottom: 5, insetInlineStart: 5, fontSize: 9.5, padding: '1px 6px' }}>{v.duration}</span></span>
+                          <span style={{ minWidth: 0 }}><p>{v.title}</p><span style={{ fontSize: 11, color: MUT }}>{v.creator.name} · {compactViews(v.views)} بازدید</span></span>
+                        </Link>
+                      ))}
+                      {tourneys.length < 2 && <p style={{ fontSize: 12.5, color: MUT, padding: 8 }}>به‌زودی هایلایت‌های بیشتری اضافه می‌شود.</p>}
+                    </div>
+                  </div>
+                </section>
+              </Reveal>
+            )}
+
+            {/* ═══ شورتس ═══ */}
+            <Reveal>
+              <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
+                <SecHead eyebrow="IN A FLASH" title="کوتاه و تماشایی" icon={<Zap size={19} style={{ color: GOLD }} />} />
+                <div className="bm-rail" style={{ gap: 12 }}>
+                  {shorts.map(v => <ShortCard key={v.id} v={v} />)}
+                </div>
+              </section>
+            </Reveal>
+
+            {/* ═══ کانال‌ها ═══ */}
+            <Reveal>
+              <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
+                <SecHead eyebrow="CHANNELS" title="کانال‌ها"
+                  action={<Link href="/media/channels" className="bm-more">مشاهده همه <ArrowLeft size={12} /></Link>} />
+                <div className="bm-rail">
+                  {channels.map((ch, i) => (
+                    <Link key={ch.creator.id} href={`/media/channel/${ch.creator.handle}`} className="bm-chan" style={{ animationDelay: `${Math.min(i, 6) * 55}ms` }}>
+                      <span className="av">{ch.creator.name.slice(0, 1)}</span>
+                      <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>{ch.creator.name}</span>
+                      <span style={{ fontSize: 10.5, color: MUT, direction: 'ltr' }}>@{ch.creator.handle}</span>
+                      <span style={{ fontSize: 11, color: SEC, marginTop: 2 }}>{faDigits(ch.videoCount)} ویدیو · {compactViews(ch.totalViews)} بازدید</span>
+                      <span className="go">مشاهده کانال <ArrowLeft size={11} /></span>
+                    </Link>
+                  ))}
+                  <div className="bm-chan bm-chan-cta">
+                    <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
+                    <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>مربی، بازیکن یا باشگاه هستی؟ ویدیوهایت را منتشر کن.</span>
+                    <Link href="/profile/role" className="go" style={{ color: FELT }}>ساخت کانال <ArrowLeft size={11} /></Link>
+                  </div>
+                </div>
+              </section>
+            </Reveal>
 
             {/* ═══ ردیف‌های دسته‌ای ═══ */}
             {catRows.map(k => {
               const c = mediaCategoryOf(k)
-              const vids = pool.filter(v => v.category === k).slice(0, 8)
+              const vids = pool.filter(v => v.category === k).slice(0, 10)
               if (!vids.length) return null
               return (
-                <section key={k} style={{ marginBottom: 'clamp(28px,4vw,42px)' }}>
-                  <SecHead
-                    title={c.label}
-                    icon={<span style={{ width: 8, height: 8, borderRadius: '50%', background: c.dot, boxShadow: `0 0 8px ${c.dot}99` }} />}
-                    action={
-                      <button onClick={() => pickCat(k)}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 13px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD, transition: 'all .2s' }}>
-                        مشاهده همه <ArrowLeft size={12} />
-                      </button>
-                    }
-                  />
-                  <div className="mx-rail">
-                    {vids.map((v, i) => <VideoCard key={v.id} v={v} i={i} />)}
-                  </div>
-                </section>
+                <Reveal key={k}>
+                  <section style={{ marginBottom: 'clamp(30px,4vw,46px)' }}>
+                    <SecHead title={c.label} icon={<span style={{ width: 9, height: 9, borderRadius: '50%', background: c.dot, boxShadow: `0 0 8px ${c.dot}99` }} />}
+                      action={<button className="bm-more" onClick={() => pickCat(k)}>همه <ArrowLeft size={12} /></button>} />
+                    <div className="bm-rail">{vids.map((v, i) => <VideoCard key={v.id} v={v} i={i} />)}</div>
+                  </section>
+                </Reveal>
               )
             })}
           </>
         ) : (
-          /* ═══ حالت فیلتر/جستجو ═══ */
+          /* ═══ حالتِ فیلتر/جستجو ═══ */
           <section>
-            <SecHead
-              title={cat !== 'all' ? mediaCategoryOf(cat as MediaCategoryKey).label : 'نتایج جستجو'}
-              action={<span style={{ fontSize: 12, color: MUT }}>{faDigits(filtered.length)} ویدیو</span>}
-            />
+            <SecHead title={cat !== 'all' ? mediaCategoryOf(cat as MediaCategoryKey).label : `نتایج «${query}»`}
+              action={<span style={{ fontSize: 12.5, color: MUT, fontWeight: 700 }}>{faDigits(filtered.length)} ویدیو</span>} />
             {filtered.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '64px 20px', background: PANEL, border: `1px solid ${LINE}`, borderRadius: 16 }}>
-                <Clapperboard size={38} style={{ color: MUT, opacity: 0.6, marginBottom: 12 }} />
-                <p style={{ fontSize: 15, fontWeight: 800, margin: '0 0 6px', color: IVORY }}>ویدیویی پیدا نشد</p>
-                <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا دسته‌بندی را تغییر دهید.</p>
-                <button onClick={() => { setQuery(''); pickCat('all') }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD }}>
-                  نمایش همه ویدیوها
-                </button>
+              <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 20 }}>
+                <span style={{ display: 'inline-flex', width: 60, height: 60, borderRadius: 18, background: 'rgba(199,166,106,0.1)', color: GOLD_D, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}><Search size={26} /></span>
+                <p style={{ fontSize: 15.5, fontWeight: 900, margin: '0 0 6px' }}>ویدیویی پیدا نشد</p>
+                <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px' }}>عبارتِ دیگری جستجو کنید یا دسته را عوض کنید.</p>
+                <button onClick={() => { setQuery(''); pickCat('all') }} className="bm-more" style={{ padding: '10px 20px' }}>نمایشِ همهٔ ویدیوها</button>
               </div>
             ) : (
               <>
-                <div className="mx-grid">
+                <div className="bm-grid">
                   {gridItems.map((v, i) => <VideoCard key={v.id} v={v} i={i % PAGE_STEP} />)}
-                  {loading && Array.from({ length: 4 }, (_, i) => <SkeletonCard key={`sk-${i}`} />)}
+                  {loading && Array.from({ length: 4 }, (_, i) => (
+                    <div key={`sk-${i}`}><div className="bm-sk" style={{ aspectRatio: '16/9', borderRadius: 16 }} /><div style={{ display: 'flex', gap: 10, padding: '12px 2px' }}><div className="bm-sk" style={{ width: 32, height: 32, borderRadius: '50%' }} /><div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}><div className="bm-sk" style={{ height: 12, width: '88%', borderRadius: 6 }} /><div className="bm-sk" style={{ height: 12, width: '52%', borderRadius: 6 }} /></div></div></div>
+                  ))}
                 </div>
                 {hasMore && !loading && (
-                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 30 }}>
-                    <button onClick={loadMore}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 30px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD, transition: 'all .25s cubic-bezier(.22,1,.36,1)' }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(199,166,106,0.2)' }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(199,166,106,0.14)' }}>
-                      نمایش ویدیوهای بیشتر
-                      <ChevronDown size={15} />
-                    </button>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 34 }}>
+                    <button onClick={loadMore} className="bm-more" style={{ padding: '13px 32px', fontSize: 13.5 }}>نمایشِ بیشتر <ChevronDown size={15} /></button>
                   </div>
                 )}
               </>
@@ -530,6 +654,67 @@ export default function MediaPage() {
           </section>
         )}
       </main>
+    </div>
+  )
+}
+
+/* ── اجزای کمکی ── */
+function SearchBox({ onSubmit }: { onSubmit: (q: string) => void }) {
+  const [v, setV] = useState('')
+  const ref = useRef<HTMLInputElement>(null)
+  useEffect(() => { ref.current?.focus() }, [])
+  return (
+    <div className="bm-search-box">
+      <Search size={20} style={{ color: GOLD_D, flexShrink: 0 }} />
+      <input ref={ref} value={v} onChange={e => setV(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') onSubmit(v) }}
+        placeholder="جستجوی ویدیو، سازنده یا برچسب…" />
+      <button onClick={() => onSubmit(v)} style={{ flexShrink: 0, padding: '11px 20px', borderRadius: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 800, background: GOLD, color: '#241B08' }}>جستجو</button>
+    </div>
+  )
+}
+
+function SecMini({ icon, title, action }: { icon: ReactNode; title: string; action?: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+      <span style={{ color: GOLD_D, display: 'inline-flex' }}>{icon}</span>
+      <span style={{ fontSize: 12.5, fontWeight: 800, color: INK }}>{title}</span>
+      {action && <span style={{ marginInlineStart: 'auto' }}>{action}</span>}
+    </div>
+  )
+}
+
+function SpotlightBlock({ spotlight, video, count }: { spotlight: ReturnType<typeof listChannels>[number]; video: MediaVideo; count: number }) {
+  const [following, setFollowing] = useState(false)
+  return (
+    <div className="bm-spot">
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 800, letterSpacing: '0.24em', color: GOLD, marginBottom: 14 }}>CREATOR SPOTLIGHT</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+          <span className="av">{spotlight.creator.name.slice(0, 1)}</span>
+          <div>
+            <div style={{ fontSize: 'clamp(19px,2.4vw,26px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>{spotlight.creator.name}</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(234,242,238,0.6)', direction: 'ltr', textAlign: 'right' }}>@{spotlight.creator.handle}</div>
+          </div>
+        </div>
+        <p style={{ fontSize: 13.5, lineHeight: 2, color: 'rgba(234,242,238,0.78)', margin: '0 0 18px', maxWidth: 420 }}>{spotlight.tagline}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 22 }}>
+          <div><div style={{ fontSize: 20, fontWeight: 900, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>{faDigits(count)}</div><div style={{ fontSize: 11, color: 'rgba(234,242,238,0.55)' }}>ویدیو</div></div>
+          <div style={{ width: 1, height: 30, background: 'rgba(255,255,255,0.15)' }} />
+          <div><div style={{ fontSize: 20, fontWeight: 900, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>{compactViews(spotlight.totalViews)}</div><div style={{ fontSize: 11, color: 'rgba(234,242,238,0.55)' }}>بازدید</div></div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button className={`bm-follow${following ? ' on' : ''}`} onClick={() => setFollowing(f => !f)}>
+            {following ? '✓ دنبال می‌کنید' : '+ دنبال کردن'}
+          </button>
+          <Link href={`/media/channel/${spotlight.creator.handle}`} className="bm-follow" style={{ background: 'transparent', color: '#EAF2EE', border: '1px solid rgba(255,255,255,0.32)', textDecoration: 'none' }}>مشاهدهٔ کانال</Link>
+        </div>
+      </div>
+      <Link href={`/media/${video.id}`} className="bm-spot-vid">
+        <img src={video.thumb} alt={video.title} />
+        <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.65))' }} />
+        <span style={{ position: 'absolute', inset: 0, margin: 'auto', width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: INK, boxShadow: '0 12px 30px rgba(0,0,0,0.35)' }}><Play size={24} fill="currentColor" /></span>
+        <span style={{ position: 'absolute', bottom: 14, insetInline: 14, fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{video.title}</span>
+      </Link>
     </div>
   )
 }
