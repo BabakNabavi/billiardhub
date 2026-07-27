@@ -17,19 +17,13 @@ import {
 import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
+import MyBookings from '../../components/booking/MyBookings';
 
 /* ══ types ══ */
-interface Booking { id: string; club: string; table: string; date: string; time: string; status: 'confirmed' | 'pending' | 'completed'; price: number; }
 interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
 interface MyReg { id: string; tournamentId: string; tournamentName: string; status: 'pending' | 'approved' | 'rejected'; registeredAt: string; }
 
 /* ══ sample data ══ */
-const bookings: Booking[] = [
-  { id: 'b1', club: 'باشگاه سنچوری تهران', table: 'میز VIP ۱', date: '۱۴۰۴/۰۳/۲۰', time: '۱۸:۰۰–۲۰:۰۰', status: 'confirmed', price: 700000 },
-  { id: 'b2', club: 'باشگاه المپیک مشهد', table: 'میز اسنوکر ۳', date: '۱۴۰۴/۰۳/۲۲', time: '۱۴:۰۰–۱۶:۰۰', status: 'pending', price: 360000 },
-  { id: 'b3', club: 'باشگاه پیروزی اصفهان', table: 'میز پاکت ۲', date: '۱۴۰۴/۰۳/۱۰', time: '۱۰:۰۰–۱۲:۰۰', status: 'completed', price: 300000 },
-];
-
 const notifications: Notif[] = [
   { id: 'n1', type: 'booking', msg: 'رزرو شما در باشگاه سنچوری تأیید شد', time: '۲ دقیقه پیش', read: false },
   { id: 'n2', type: 'tournament', msg: 'ثبت‌نام مسابقات لیگ برتر تا فردا باز است', time: '۱ ساعت پیش', read: false },
@@ -635,48 +629,8 @@ export default function DashboardPage() {
                     </Link>
                   </div>
 
-                  {bookings.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(0,0,0,0.35)', fontSize: '16px' }}>
-                      <Calendar size={32} style={{ margin: '0 auto 12px', opacity: 0.2 }} />
-                      رزروی ندارید
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {bookings.map((b, i) => {
-                        const statusConfig = {
-                          confirmed: { color: '#C7A66A', label: 'تأیید شده', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.20)' },
-                          pending: { color: '#f59e0b', label: 'در انتظار', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)' },
-                          completed: { color: 'rgba(0,0,0,0.40)', label: 'انجام شده', bg: 'rgba(0,0,0,0.03)', border: 'rgba(0,0,0,0.06)' },
-                        }[b.status];
-                        return (
-                          <div key={i} className="booking-row">
-                            {/* Icon */}
-                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: statusConfig.bg, border: `1px solid ${statusConfig.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>🎱</div>
+                  <MyBookings />
 
-                            {/* Info */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '16px', fontWeight: 700, color: '#111111', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.club}</div>
-                              <div style={{ display: 'flex', gap: '10px', fontSize: '13px', color: 'rgba(0,0,0,0.42)', flexWrap: 'wrap' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Clock size={9} /> {b.time}</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Calendar size={9} /> {b.date}</span>
-                                <span>{b.table}</span>
-                              </div>
-                            </div>
-
-                            {/* Status + price */}
-                            <div style={{ textAlign: 'left', flexShrink: 0 }}>
-                              <div style={{ fontSize: '10px', color: statusConfig.color, background: statusConfig.bg, border: `1px solid ${statusConfig.border}`, borderRadius: '20px', padding: '3px 10px', fontWeight: 700, marginBottom: '4px', textAlign: 'center', letterSpacing: '0.04em' }}>
-                                {statusConfig.label}
-                              </div>
-                              <div style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(0,0,0,0.45)', textAlign: 'left' }}>
-                                {toFa(b.price.toLocaleString())} ت
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
 
                   {/* Add booking CTA */}
                   <Link href="/clubs" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '14px', padding: '12px', background: 'rgba(199,166,106,0.06)', border: '1px dashed rgba(199,166,106,0.20)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}
