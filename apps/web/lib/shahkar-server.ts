@@ -18,7 +18,7 @@ export function normName(s: string): string {
    نام‌خانوادگی. پیش‌شرط: شماره با کدِ پیامکی تأیید شده باشد. */
 export async function verifyPerson(
   mobile: string, nationalCode: string, birthDate: string, firstName: string, lastName: string,
-): Promise<{ ok: boolean; match?: boolean; message?: string }> {
+): Promise<{ ok: boolean; match?: boolean; message?: string; unavailable?: boolean }> {
   const m = (mobile || '').replace(/[^0-9]/g, '')
   const nc = (nationalCode || '').replace(/[^0-9]/g, '')
   const bd = (birthDate || '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9/]/g, '')
@@ -35,13 +35,21 @@ export async function verifyPerson(
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
       body: JSON.stringify({ nationalCode: nc, birthDate: bd }),
     })
-    if (r.status === 401 || r.status === 403) return { ok: false, message: 'کلیدِ سرویسِ استعلام پذیرفته نشد' }
-    const j = await r.json().catch(() => null) as { success?: boolean; data?: { firstName?: string; lastName?: string; alive?: boolean } | null; message?: string } | null
+    const j = await r.json().catch(() => null) as { success?: boolean; code?: number; data?: { firstName?: string; lastName?: string; alive?: boolean } | null; message?: string } | null
+
+    /* سرویس در دسترس نیست (سطحِ دسترسی/کلید/اعتبار) ⇒ «نامشخص»، نه «مغایرت».
+       تصمیم‌گیری با فراخوان است: نباید ثبت‌نام را ببندد. */
+    const denied = r.status === 401 || r.status === 403 || j?.code === 401 || j?.code === 403
+      || /trust level|سطح دسترسی|اعتبار|credit/i.test(j?.message || '')
+    if (denied) {
+      console.error('PersonInfo unavailable:', j?.message || r.status)
+      return { ok: false, unavailable: true, message: 'سرویسِ استعلامِ مشخصات در دسترس نیست' }
+    }
     if (!j || j.success !== true || !j.data) {
-      /* تاریخ تولد با کد ملی نخواند ⇒ سرویس داده برنمی‌گرداند */
+      /* پاسخِ معتبرِ منفی ⇒ کد ملی و تاریخ تولد با هم نمی‌خوانند */
       if (j && j.success === false) return { ok: true, match: false, message: 'تاریخ تولد با کد ملی مطابقت ندارد' }
       console.error('PersonInfo failed:', j?.message || r.status)
-      return { ok: false, message: 'استعلامِ مشخصاتِ هویتی ناموفق بود؛ دوباره تلاش کنید' }
+      return { ok: false, unavailable: true, message: 'استعلامِ مشخصاتِ هویتی ناموفق بود' }
     }
     const okName = normName(j.data.firstName || '') === normName(firstName)
       && normName(j.data.lastName || '') === normName(lastName)

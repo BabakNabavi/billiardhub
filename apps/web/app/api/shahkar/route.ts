@@ -14,9 +14,12 @@ export async function POST(req: NextRequest) {
   const shahkar = await verifyIdentity(mobile, nc)
   if (!shahkar.ok || !shahkar.match) return NextResponse.json(shahkar, { status: shahkar.ok ? 200 : 400, headers: CORS })
 
-  /* اگر تاریخ تولد و نام داده شد، نام را هم با ثبت‌احوال تطبیق بده */
+  /* اگر تاریخ تولد و نام داده شد، نام را هم با ثبت‌احوال تطبیق بده.
+     اگر آن سرویس در دسترس نبود (سطحِ دسترسی/اعتبار)، به نتیجه‌ی شاهکار بسنده کن
+     تا ثبت‌نام بسته نشود — هویت با موبایل+کدملی از قبل اثبات شده است. */
   if (b?.birthDate && (b?.firstName || b?.lastName)) {
     const person = await verifyPerson(mobile, nc, String(b.birthDate), String(b.firstName || ''), String(b.lastName || ''))
+    if (person.unavailable) return NextResponse.json({ ...shahkar, nameChecked: false }, { headers: CORS })
     return NextResponse.json(person, { status: person.ok ? 200 : 400, headers: CORS })
   }
   return NextResponse.json(shahkar, { headers: CORS })
