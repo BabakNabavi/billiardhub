@@ -45,10 +45,18 @@ export async function verifyPerson(
       console.error('PersonInfo unavailable:', j?.message || r.status)
       return { ok: false, unavailable: true, message: 'سرویسِ استعلامِ مشخصات در دسترس نیست' }
     }
-    if (!j || j.success !== true || !j.data) {
-      /* پاسخِ معتبرِ منفی ⇒ کد ملی و تاریخ تولد با هم نمی‌خوانند */
-      if (j && j.success === false) return { ok: true, match: false, message: 'تاریخ تولد با کد ملی مطابقت ندارد' }
-      console.error('PersonInfo failed:', j?.message || r.status)
+    if (!j) {
+      console.error('PersonInfo failed: no body', r.status)
+      return { ok: false, unavailable: true, message: 'استعلامِ مشخصاتِ هویتی ناموفق بود' }
+    }
+    /* پاسخِ معتبرِ منفی. توجه: سرویس برای «عدم تطابق» هم success=true برمی‌گرداند
+       و فقط data را خالی می‌گذارد ⇒ این حالت باید «مغایرت» باشد نه «در دسترس نبودن»،
+       وگرنه تاریخ تولدِ اشتباه از تطبیق رد می‌شد. */
+    if (j.success === false || (!j.data && /عدم تطابق|مطابقت|یافت نشد/.test(j.message || ''))) {
+      return { ok: true, match: false, message: 'تاریخ تولد با کد ملی مطابقت ندارد' }
+    }
+    if (!j.data) {
+      console.error('PersonInfo failed:', j.message || r.status)
       return { ok: false, unavailable: true, message: 'استعلامِ مشخصاتِ هویتی ناموفق بود' }
     }
     const okName = normName(j.data.firstName || '') === normName(firstName)
