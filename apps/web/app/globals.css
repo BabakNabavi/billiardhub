@@ -9,7 +9,11 @@
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+/* overflow-x: clip (نه hidden) — اسکرول‌کانتینر نمی‌سازد پس position:sticky
+   سالم می‌ماند، ولی جلوی پهن‌شدنِ صفحه توسط عناصرِ تزئینی را می‌گیرد.
+   بدونِ این، در نمایشگرهای باریک چند پیکسل سرریز، عرضِ لی‌آوت را بزرگ‌تر از
+   صفحه می‌کرد و کلِ محتوا از سمت چپ بیرون می‌زد. */
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 
 /* ══════════════════════════════════════════
    DESIGN TOKENS
