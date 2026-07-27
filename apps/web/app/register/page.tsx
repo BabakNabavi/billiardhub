@@ -102,12 +102,22 @@ export default function RegisterPage() {
     const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
     if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹A-Za-z]/g, '');
     if (key === 'nationalId') return latin.replace(/[^0-9]/g, '').slice(0, 10);
-    /* تاریخ تولدِ شمسی: فقط عدد، «/» خودکار ⇒ 1370/05/12 */
+    /* تاریخ تولدِ شمسی. اگر کاربر خودش «/» بزند، همان را مرزِ ماه و روز
+       می‌گیریم تا «۱۳۶۳/۶/۲» هم درست وارد شود؛ اگر فقط عدد بزند یا پیست
+       کند، «/» خودکار گذاشته می‌شود ⇒ 1363/06/02 */
     if (key === 'birthDate') {
-      const d = latin.replace(/[^0-9]/g, '').slice(0, 8);
-      if (d.length <= 4) return d;
-      if (d.length <= 6) return `${d.slice(0, 4)}/${d.slice(4)}`;
-      return `${d.slice(0, 4)}/${d.slice(4, 6)}/${d.slice(6)}`;
+      const raw = latin.replace(/[^0-9/]/g, '');
+      const parts = raw.split('/');
+      if (parts.length === 1) {
+        const d = parts[0]!.slice(0, 8);
+        if (d.length <= 4) return d;
+        if (d.length <= 6) return `${d.slice(0, 4)}/${d.slice(4)}`;
+        return `${d.slice(0, 4)}/${d.slice(4, 6)}/${d.slice(6)}`;
+      }
+      const y = parts[0]!.slice(0, 4);
+      const m = (parts[1] ?? '').slice(0, 2);
+      if (parts.length === 2) return `${y}/${m}`;
+      return `${y}/${m}/${(parts[2] ?? '').slice(0, 2)}`;
     }
     if (key === 'phone') {
       let d = latin.replace(/[^0-9]/g, '');
