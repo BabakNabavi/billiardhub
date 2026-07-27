@@ -314,6 +314,9 @@ export default function ClubDashboardPage() {
   const [surchargeSaving, setSurchargeSaving] = useState(false);
   const [surchargeSaved, setSurchargeSaved] = useState(false);
   const [surchargeError, setSurchargeError] = useState('');
+  /* استعلامِ شبا از شماره کارت */
+  const [ibanBusy, setIbanBusy] = useState(false);
+  const [ibanMsg, setIbanMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
@@ -661,6 +664,33 @@ export default function ClubDashboardPage() {
     setInfoSaving(true);
     try { await api.put(`/clubs/${selectedClub.id}`, clubInfo); } catch {}
     finally { setInfoSaving(false); }
+  };
+
+  /* شماره کارت ⇒ شبا. نامِ دارنده‌ی حساب سمتِ سرور با هویتِ احرازشده‌ی
+     صاحب باشگاه مقایسه می‌شود؛ فقط در صورتِ تطابق، شبا «تأییدشده» می‌شود. */
+  const fetchIban = async () => {
+    if (!selectedClub || !isValidCard(clubInfo.bankCard)) return;
+    setIbanBusy(true); setIbanMsg(null);
+    try {
+      const token = (() => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } })();
+      const r = await fetch('/api/bank/card-to-iban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ card: clubInfo.bankCard, clubId: selectedClub.id }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j?.iban) { setIbanMsg({ ok: false, text: j?.message || 'استعلام انجام نشد' }); return; }
+      setClubInfo(p => ({
+        ...p, iban: j.iban,
+        bankName: j.bankName || p.bankName,
+        bankCardOwner: j.ownerName || p.bankCardOwner,
+      }));
+      setIbanMsg(j.ownerMatch
+        ? { ok: true, text: `شبا دریافت و به نام «${j.ownerName}» تأیید شد` }
+        : { ok: false, text: j.message || 'نامِ دارنده‌ی حساب با نامِ شما یکسان نیست' });
+    } catch {
+      setIbanMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
+    } finally { setIbanBusy(false); }
   };
 
   /* ذخیره‌ی تنظیمِ هزینه‌ی بازیکنِ اضافه — همین مقدار ملاکِ محاسبه‌ی سروری است */
@@ -1399,6 +1429,27 @@ export default function ClubDashboardPage() {
                 />
                 {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید.</div>}
                 {cardBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {cardBank}</div>}
+
+                {/* استعلامِ شبا از شماره کارت */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+                  <button type="button" onClick={fetchIban}
+                    disabled={ibanBusy || !isValidCard(clubInfo.bankCard) || !selectedClub}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
+                      fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700,
+                      cursor: (ibanBusy || !isValidCard(clubInfo.bankCard)) ? 'not-allowed' : 'pointer',
+                      background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
+                      opacity: (ibanBusy || !isValidCard(clubInfo.bankCard)) ? 0.5 : 1,
+                    }}>
+                    {ibanBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Wallet size={14} />}
+                    {ibanBusy ? 'در حال استعلام…' : 'دریافت شبا از شماره کارت'}
+                  </button>
+                  {ibanMsg && (
+                    <span style={{ fontSize: 11.5, fontWeight: 700, lineHeight: 1.9, color: ibanMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                      {ibanMsg.text}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>

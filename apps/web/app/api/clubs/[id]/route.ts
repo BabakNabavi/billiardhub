@@ -60,6 +60,16 @@ export async function PUT(
   }
 
   const body = await req.json();
+
+  /* شبا فقط از راهِ استعلامِ کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
+     دست‌کاری کند، تأیید باطل می‌گردد تا تسویه به حسابِ تأییدنشده نرود. */
+  if (Object.prototype.hasOwnProperty.call(body, 'iban')) {
+    const { data: cur } = await getSupabaseServer().from('clubs').select('iban').eq('id', id).maybeSingle();
+    const before = String((cur as { iban?: string } | null)?.iban ?? '').replace(/\s/g, '');
+    const after = String(body.iban ?? '').replace(/\s/g, '');
+    if (before !== after) { body.ibanVerified = false; body.ibanOwnerName = null; }
+  }
+
   const { data: updated, error } = await getSupabaseServer()
     .from('clubs')
     .update(body)
