@@ -262,6 +262,9 @@ export default function DashboardPage() {
 
         @media(max-width:900px) {
           .dash-grid    { grid-template-columns: 1fr !important; }
+          /* ستونِ 1fr کوچک‌تر از min-content بچه‌ها نمی‌شود و همین باعث
+             می‌شد کارت‌ها در صفحه‌های باریک از کادر بزنند بیرون */
+          .dash-grid > * { min-width: 0 !important; }
           .stats-row    { grid-template-columns: repeat(2,1fr) !important; }
           .actions-row  { grid-template-columns: repeat(3,1fr) !important; }
         }
