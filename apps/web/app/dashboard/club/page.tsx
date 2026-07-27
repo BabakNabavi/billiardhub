@@ -8,9 +8,10 @@ import {
   LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
   Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
   Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon,
-  Loader2, Wallet,
+  Loader2, Wallet, Radio,
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
+import GoLive from '../../../components/club/GoLive';
 import api from '../../../lib/api';
 import { uploadFile } from '../../../lib/supabase';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
@@ -276,7 +277,7 @@ function SaveBtn({ onClick, loading, label = 'ذخیره تغییرات' }: {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'finance' | 'tournaments' | 'gallery' | 'coaches';
+type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'finance' | 'live' | 'tournaments' | 'gallery' | 'coaches';
 
 export default function ClubDashboardPage() {
   const router = useRouter();
@@ -913,6 +914,7 @@ export default function ClubDashboardPage() {
     { key: 'hours',       label: 'ساعات کاری', Icon: Clock },
     { key: 'bookings',    label: 'رزروها',     Icon: CalendarDays, badge: pendingBookings.length || undefined },
     { key: 'finance',     label: 'مالی',       Icon: Wallet },
+    { key: 'live',        label: 'پخش زنده',   Icon: Radio },
     { key: 'tournaments', label: 'مسابقات',    Icon: Trophy },
     { key: 'gallery',     label: 'گالری',      Icon: ImageIcon },
     { key: 'coaches',     label: 'مربیان',     Icon: GraduationCap },
@@ -2037,6 +2039,11 @@ export default function ClubDashboardPage() {
       {/* ════ Tab: Finance ════ */}
       {activeTab === 'finance' && selectedClub && (
         <ClubFinance clubId={selectedClub.id} />
+      )}
+
+      {/* ════ Tab: Live ════ */}
+      {activeTab === 'live' && selectedClub && (
+        <GoLive clubId={selectedClub.id} clubName={selectedClub.name} ownerKey={user?.phone || user?.id || 'owner'} />
       )}
 
       {/* ════ Tab: Gallery ════ */}

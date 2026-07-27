@@ -1,205 +1,152 @@
-﻿// ==============================
-// FILE: apps/web/app/live/[id]/page.tsx
-// ==============================
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+/* تماشای پخش زنده — تصویر مستقیم از گوشی باشگاه‌دار (WebRTC). */
 
-const STREAMS: Record<string, {
-  id: string; title: string; discipline: string; tournament: string;
-  player1: string; player2: string; score1: number; score2: number;
-  viewers: number; startedAt: string; frame: number; totalFrames: number;
-}> = {
-  '1': {
-    id: '1', title: 'لیگ برتر ایران — هفته ۱۰',
-    discipline: 'اسنوکر', tournament: 'لیگ برتر فصل ۱۴۰۴',
-    player1: 'علیرضا حیدری', player2: 'محمد رضایی',
-    score1: 3, score2: 2, viewers: 1842, startedAt: '۲۱:۳۰',
-    frame: 6, totalFrames: 9,
-  },
-  '2': {
-    id: '2', title: 'قهرمانی ملی اسنوکر',
-    discipline: 'اسنوکر', tournament: 'قهرمانی ملی ۱۴۰۴',
-    player1: 'سینا کریمی', player2: 'داریوش نوری',
-    score1: 1, score2: 1, viewers: 964, startedAt: '۲۰:۰۰',
-    frame: 3, totalFrames: 7,
-  },
-};
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { ArrowRight, Users, Building2, Loader2, Radio, VideoOff, Volume2, VolumeX, Maximize2 } from 'lucide-react';
+import { joinBroadcast, type Viewer } from '../../../lib/live/webrtc';
+import { fetchLiveSession, type LiveSession } from '../../../lib/live/client';
 
-const INITIAL_COMMENTS = [
-  { id: 1, user: 'بیلیاردباز', text: 'چه بازی فوق‌العاده‌ای! حیدری عالیه 🔥', time: '21:42', likes: 24 },
-  { id: 2, user: 'snooker_fan', text: 'بالاخره لایو با کیفیت خوب 👏', time: '21:43', likes: 18 },
-  { id: 3, user: 'تهران_بیلیارد', text: 'رضایی الان باید فشار بیاره وگرنه تموم میشه', time: '21:44', likes: 11 },
-  { id: 4, user: 'کاربر۷۷۷', text: 'خوندم این فریم رو رضایی میبره', time: '21:45', likes: 7 },
-  { id: 5, user: 'masterbreak', text: 'century break در راهه؟ 😯', time: '21:46', likes: 31 },
-  { id: 6, user: 'billiard_ir', text: 'سایت بیلیارد پلاس خیلی حرفه‌ای شده 🎱', time: '21:47', likes: 15 },
-];
+const GOLD_DARK = '#A07840', RED = '#ef4444';
+const fa = (n: number) => Number(n || 0).toLocaleString('fa-IR');
 
-export default function LiveStreamPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const DEFAULT_STREAM = STREAMS['1'] as NonNullable<typeof STREAMS[string]>;
-  const stream: NonNullable<typeof STREAMS[string]> = STREAMS[params.id] ?? DEFAULT_STREAM;
-  const [comments, setComments] = useState(INITIAL_COMMENTS);
-  const [newComment, setNewComment] = useState('');
-  const [chatOpen, setChatOpen] = useState(true);
-  const [viewers] = useState(stream.viewers + Math.floor(Math.random() * 50));
-  const [liked, setLiked] = useState<Record<number, boolean>>({});
-  const chatRef = useRef<HTMLDivElement>(null);
+export default function LiveWatchPage() {
+  const params = useParams();
+  const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? '';
+  const [session, setSession] = useState<LiveSession | null | undefined>(undefined);
+  const [state, setState] = useState<'connecting' | 'live' | 'ended' | 'error'>('connecting');
+  const [muted, setMuted] = useState(true);
+  const [elapsed, setElapsed] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const viewerRef = useRef<Viewer | null>(null);
+
+  /* اطلاعات جلسه + تازه‌سازی دوره‌ای */
+  useEffect(() => {
+    if (!id) return;
+    let alive = true;
+    const load = () => fetchLiveSession(id).then(s => { if (alive) setSession(s); });
+    load();
+    const iv = setInterval(load, 20_000);
+    return () => { alive = false; clearInterval(iv); };
+  }, [id]);
+
+  /* اتصال به پخش */
+  useEffect(() => {
+    if (!id) return;
+    const v = joinBroadcast(id, s => { if (videoRef.current) videoRef.current.srcObject = s; }, setState);
+    viewerRef.current = v;
+    if (!v) setState('error');
+    return () => { viewerRef.current?.leave(); viewerRef.current = null; };
+  }, [id]);
 
   useEffect(() => {
-    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-  }, [comments]);
+    if (!session) return;
+    const t = setInterval(() => setElapsed(Math.floor((Date.now() - session.startedAt) / 1000)), 1000);
+    return () => clearInterval(t);
+  }, [session]);
 
-  const sendComment = () => {
-    if (!newComment.trim()) return;
-    setComments(prev => [...prev, {
-      id: Date.now(), user: 'شما', text: newComment.trim(),
-      time: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-      likes: 0,
-    }]);
-    setNewComment('');
+  const toggleSound = () => {
+    const v = videoRef.current; if (!v) return;
+    v.muted = !v.muted; setMuted(v.muted);
+    if (!v.muted) v.play().catch(() => {});
   };
+  const goFull = () => { videoRef.current?.requestFullscreen?.().catch(() => {}); };
 
-  const toggleLike = (id: number) => {
-    setLiked(prev => ({ ...prev, [id]: !prev[id] }));
-    setComments(prev => prev.map(c =>
-      c.id === id ? { ...c, likes: c.likes + (liked[id] ? -1 : 1) } : c
-    ));
-  };
-
-  const fillPct = Math.round((stream.score1 / stream.totalFrames) * 100);
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0'), ss = String(elapsed % 60).padStart(2, '0');
+  const ended = state === 'ended' || session === null;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F7F7F5', color: '#111111', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+    <div dir="rtl" style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn, sans-serif', color: '#111' }}>
+      <style>{`@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.35 } } @keyframes lwspin { to { transform: rotate(360deg) } }`}</style>
 
-      {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', flexShrink: 0, background: '#050c08', borderBottom: '1px solid rgba(199,166,106,0.15)' }}>
-        <button onClick={() => router.push('/live')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C7A66A', fontSize: 16, fontFamily: 'Vazirmatn, sans-serif', padding: 0, textDecoration: 'none' }}>
-          ← زنده
-        </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 'auto' }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>LIVE</span>
-          <span style={{ fontSize: 13, color: '#6b7280' }}>👁 {viewers.toLocaleString('fa')}</span>
-        </div>
-        <button onClick={() => setChatOpen(o => !o)} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 13, fontFamily: 'Vazirmatn, sans-serif', cursor: 'pointer', background: chatOpen ? 'rgba(199,166,106,0.15)' : 'rgba(107,114,128,0.15)', color: chatOpen ? '#C7A66A' : '#6b7280', border: `1px solid ${chatOpen ? 'rgba(199,166,106,0.3)' : 'rgba(107,114,128,0.2)'}` }}>
-          {chatOpen ? '💬 بستن چت' : '💬 باز کردن چت'}
-        </button>
-      </div>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
+        <Link href="/live" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(0,0,0,0.45)', textDecoration: 'none', marginBottom: 14 }}>
+          <ArrowRight size={14} /> همه‌ی پخش‌های زنده
+        </Link>
 
-      {/* Main */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* پخش‌کننده */}
+        <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', background: '#000', aspectRatio: '16/9', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+          <video ref={videoRef} autoPlay playsInline muted={muted}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: ended ? 'none' : 'block' }} />
 
-          {/* Video */}
-          <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', maxHeight: '56vw' }}>
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at center,#0d3320 0%,#061a0f 60%,#010604 100%)' }}>
-              <div style={{ position: 'relative', width: '70%', height: '55%', borderRadius: 16, background: 'linear-gradient(135deg,#0a5c2e,#0d7a3c)', border: '4px solid #5c3a1e', boxShadow: '0 0 40px rgba(199,166,106,0.2)' }}>
-                <div style={{ position: 'absolute', inset: 8, borderRadius: 12, border: '2px solid rgba(0,0,0,0.06)' }} />
-                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(0,0,0,0.08)' }} />
-                <div style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 12, fontWeight: 700, opacity: 0.4, color: '#C7A66A', letterSpacing: 2 }}>BILLIARDHUB</div>
-                {[
-                  { x: '30%', y: '40%', color: '#ef4444' },
-                  { x: '55%', y: '35%', color: '#f59e0b' },
-                  { x: '65%', y: '55%', color: '#111111' },
-                  { x: '40%', y: '60%', color: '#3b82f6' },
-                ].map((b, i) => (
-                  <div key={i} style={{ position: 'absolute', width: 12, height: 12, borderRadius: '50%', left: b.x, top: b.y, background: b.color, boxShadow: `0 0 6px ${b.color}88`, transform: 'translate(-50%,-50%)' }} />
-                ))}
-              </div>
-              <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.9)' }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block' }} />
-                <span style={{ fontSize: 12, fontWeight: 900, color: '#fff' }}>LIVE</span>
-              </div>
-              <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 8px', borderRadius: 8, background: 'rgba(0,0,0,0.6)', fontSize: 13, color: '#111111', fontFamily: 'monospace' }}>
-                ▶ {stream.startedAt}
-              </div>
+          {(state === 'connecting' && !ended) && (
+            <div style={overlay}>
+              <Loader2 size={30} style={{ animation: 'lwspin 1s linear infinite' }} />
+              <span style={{ fontSize: 13.5, marginTop: 10 }}>در حال اتصال به پخش…</span>
             </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, background: 'linear-gradient(0deg,rgba(0,0,0,0.85),transparent)' }}>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 20, padding: 0 }}>⏸</button>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 18, padding: 0 }}>🔊</button>
-              <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>
-                <div style={{ width: '35%', height: '100%', borderRadius: 2, background: '#ef4444' }} />
-              </div>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 18, padding: 0 }}>⛶</button>
+          )}
+          {ended && (
+            <div style={overlay}>
+              <VideoOff size={30} />
+              <span style={{ fontSize: 15, fontWeight: 800, marginTop: 12 }}>پخش پایان یافته است</span>
+              <Link href="/live" style={{ marginTop: 14, padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+                پخش‌های دیگر
+              </Link>
             </div>
-          </div>
+          )}
+          {state === 'error' && !ended && (
+            <div style={overlay}>
+              <VideoOff size={28} />
+              <span style={{ fontSize: 13.5, marginTop: 10 }}>اتصال برقرار نشد</span>
+            </div>
+          )}
 
-          {/* Scoreboard */}
-          <div style={{ margin: '12px 16px 0', borderRadius: 16, overflow: 'hidden', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
-            <div style={{ textAlign: 'center', padding: '6px 0', fontSize: 13, fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.08)', borderBottom: '1px solid rgba(199,166,106,0.08)' }}>
-              ● LIVE · فریم {stream.frame} از {stream.totalFrames}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', alignItems: 'center', padding: '14px 16px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{stream.player1}</div>
-                <div style={{ fontSize: 44, fontWeight: 900, color: '#C7A66A', lineHeight: 1 }}>{stream.score1}</div>
+          {state === 'live' && !ended && (
+            <>
+              <div style={{ position: 'absolute', top: 12, insetInlineStart: 12, display: 'flex', gap: 8 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: RED, color: '#fff', borderRadius: 999, padding: '4px 11px', fontSize: 11, fontWeight: 900, letterSpacing: '.1em' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#fff', animation: 'pulse 1.4s infinite' }} /> LIVE
+                </span>
+                <span style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', borderRadius: 999, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                  {fa(+mm)}:{fa(+ss)}
+                </span>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}>{stream.discipline}</div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#6b7280' }}>VS</div>
-                <div style={{ marginTop: 8, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 2, width: `${fillPct}%`, background: 'linear-gradient(90deg,#C7A66A,#A07840)', transition: 'width 0.7s' }} />
-                </div>
+              <div style={{ position: 'absolute', bottom: 12, insetInlineEnd: 12, display: 'flex', gap: 8 }}>
+                <button onClick={toggleSound} aria-label="صدا" style={ctrl}>{muted ? <VolumeX size={17} /> : <Volume2 size={17} />}</button>
+                <button onClick={goFull} aria-label="تمام‌صفحه" style={ctrl}><Maximize2 size={17} /></button>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{stream.player2}</div>
-                <div style={{ fontSize: 44, fontWeight: 900, color: '#a78bfa', lineHeight: 1 }}>{stream.score2}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Title */}
-          <div style={{ padding: '12px 16px 16px' }}>
-            <div style={{ fontSize: 18, fontWeight: 900, margin: '0 0 4px', color: '#111111' }}>{stream.title}</div>
-            <div style={{ fontSize: 14, color: '#6b7280' }}>{stream.tournament}</div>
-          </div>
+            </>
+          )}
         </div>
 
-        {/* Chat */}
-        {chatOpen && (
-          <div style={{ display: 'flex', flexDirection: 'column', background: '#050c08', borderTop: '1px solid rgba(199,166,106,0.1)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', flexShrink: 0, borderBottom: '1px solid rgba(199,166,106,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#111111' }}>💬 نظرات زنده</span>
-                <span style={{ fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(199,166,106,0.15)', color: '#C7A66A' }}>{comments.length}</span>
-              </div>
-              <button onClick={() => setChatOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4b5563', fontSize: 15, fontFamily: 'Vazirmatn, sans-serif' }}>
-                ✕ بستن
-              </button>
-            </div>
-
-            <div ref={chatRef} style={{ overflowY: 'auto', padding: '10px 12px', maxHeight: 280, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {comments.map(c => (
-                <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
-                    {c.user[0]}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#C7A66A' }}>{c.user}</span>
-                      <span style={{ fontSize: 12, color: '#4b5563' }}>{c.time}</span>
-                    </div>
-                    <div style={{ fontSize: 15, lineHeight: 1.4, color: '#d1d5db', wordBreak: 'break-word' }}>{c.text}</div>
-                    <button onClick={() => toggleLike(c.id)} style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: liked[c.id] ? '#ef4444' : '#4b5563', fontSize: 13, fontFamily: 'Vazirmatn, sans-serif', padding: 0 }}>
-                      <span>{liked[c.id] ? '❤️' : '🤍'}</span>
-                      <span>{c.likes}</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ padding: '10px 12px', flexShrink: 0, borderTop: '1px solid rgba(199,166,106,0.1)', display: 'flex', gap: 8 }}>
-              <input value={newComment} onChange={e => setNewComment(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendComment()} placeholder="نظر بنویس..." style={{ flex: 1, minWidth: 0, padding: '8px 12px', borderRadius: 12, fontSize: 15, outline: 'none', background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.15)', color: '#111111', fontFamily: 'Vazirmatn, sans-serif' }} />
-              <button onClick={sendComment} style={{ padding: '8px 14px', borderRadius: 12, flexShrink: 0, fontSize: 15, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: 'Vazirmatn, sans-serif', background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#010604' }}>
-                ارسال
-              </button>
-            </div>
-          </div>
+        {muted && state === 'live' && !ended && (
+          <button onClick={toggleSound}
+            style={{ width: '100%', marginTop: 10, padding: '11px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD_DARK }}>
+            🔊 برای شنیدن صدا بزنید
+          </button>
         )}
+
+        {/* اطلاعات */}
+        <div style={{ marginTop: 18, background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 18 }}>
+          {session === undefined ? (
+            <div style={{ height: 54 }} />
+          ) : session ? (
+            <>
+              <h1 style={{ fontSize: 'clamp(17px,2.4vw,22px)', fontWeight: 900, margin: '0 0 10px', lineHeight: 1.6 }}>{session.title}</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13, color: 'rgba(0,0,0,0.45)', flexWrap: 'wrap' }}>
+                <Link href={`/clubs/${session.clubId}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: GOLD_DARK, textDecoration: 'none', fontWeight: 700 }}>
+                  <Building2 size={14} /> {session.clubName}
+                </Link>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Users size={14} /> {fa(session.viewers)} بیننده</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Radio size={14} /> {session.discipline}</span>
+              </div>
+            </>
+          ) : (
+            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: 0 }}>این پخش دیگر در دسترس نیست.</p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
+const overlay: React.CSSProperties = {
+  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+  alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.75)', background: '#000',
+};
+const ctrl: React.CSSProperties = {
+  width: 38, height: 38, borderRadius: '50%', border: 'none', cursor: 'pointer',
+  background: 'rgba(0,0,0,0.5)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)',
+};
