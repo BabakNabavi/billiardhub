@@ -326,14 +326,22 @@ function BookingContent() {
     const endTime   = new Date(`${isoDate}T${String(endH).padStart(2,'0')}:00:00Z`);
     setBooking(true); setError('');
     try {
+      /* مبلغ روی سرور بازمحاسبه می‌شود؛ pricePerHour فقط پشتیبانِ میزهای محلی است */
       const res = await api.post('/bookings',{
         clubId, tableType:selectedTable.type, tableId:selectedTable.id,
         startTime:startTime.toISOString(), endTime:endTime.toISOString(),
-        totalPrice, playerCount, currency:'IRR',
+        pricePerHour:selectedTable.pricePerHour, playerCount, currency:'IRT',
       });
-      const bookingId     = res.data?.id ?? '';
-      const paymentUrl    = res.data?.paymentUrl ?? null;
-      const trackingNumber = `BP-${Date.now().toString(36).toUpperCase().slice(-8)}`;
+      const bookingId      = res.data?.id ?? '';
+      const trackingNumber = res.data?.booking_reference ?? `BP-${Date.now().toString(36).toUpperCase().slice(-8)}`;
+      /* ایجادِ پرداخت و هدایت به درگاه */
+      let paymentUrl: string | null = null;
+      try {
+        const pay = await api.post('/payments/create', { bookingId });
+        paymentUrl = pay.data?.redirectUrl ?? null;
+      } catch (pe: any) {
+        setError(pe?.response?.data?.message || 'اتصال به درگاهِ پرداخت ممکن نشد');
+      }
       /* #16: immediately mark booked slots as reserved in local state */
       setSlots(prev=>prev.map(s=>({...s,isBooked:s.isBooked||selectedSlots.includes(s.hour)})));
       setPendingPayment({bookingId,trackingNumber,paymentUrl});

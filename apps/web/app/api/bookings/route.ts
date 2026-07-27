@@ -1,72 +1,86 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { getSupabaseServer } from '@/lib/supabase-server';
+import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { priceBooking, hoursBetween, bookingReference, type PricedTable } from '@/lib/finance/pricing';
 
+const HOLD_MINUTES = 10;   // رزروِ پرداخت‌نشده پس از ۱۰ دقیقه آزاد می‌شود
+
+/* ثبتِ رزروِ موقت:
+   ۱) قیمت روی سرور بازمحاسبه می‌شود (مبلغِ ارسالیِ کلاینت ملاک نیست)
+   ۲) رزرو و قفلِ ساعت‌ها در یک تراکنشِ اتمیک ⇒ دابل‌بوکینگ ممکن نیست
+   ۳) رزرو با مهلتِ ۱۰ دقیقه ساخته می‌شود و پرداخت‌نشده خودکار آزاد می‌گردد */
 export async function POST(req: NextRequest) {
-  // احراز هویت
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
+  const actor = actorFromRequest(req);
+  if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
+
+  const body = await req.json().catch(() => ({}));
+  const { clubId, tableId, tableType, startTime, endTime, playerCount } = body ?? {};
+  if (!clubId || !tableId || !startTime || !endTime) {
+    return NextResponse.json({ message: 'clubId، tableId، startTime و endTime الزامی هستند' }, { status: 400 });
   }
 
-  let userId: string;
-  try {
-    const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as { sub: string };
-    userId = payload.sub;
-  } catch {
-    return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401 });
+  const start = new Date(startTime), end = new Date(endTime);
+  if (isNaN(+start) || isNaN(+end) || end <= start) {
+    return NextResponse.json({ message: 'بازه‌ی زمانی معتبر نیست' }, { status: 400 });
+  }
+  const bookingDate = start.toISOString().slice(0, 10);
+  const hours = hoursBetween(start.getUTCHours(), end.getUTCHours());
+  if (hours.length === 0) return NextResponse.json({ message: 'بازه‌ی زمانی معتبر نیست' }, { status: 400 });
+  if (start.getTime() < Date.now() - 60_000) {
+    return NextResponse.json({ message: 'امکانِ رزرو در گذشته وجود ندارد' }, { status: 400 });
   }
 
-  const body = await req.json();
-  const { clubId, tableType, tableId, startTime, endTime, totalPrice } = body;
+  /* ── قیمت‌گذاریِ سروری: میز از دیتابیس خوانده می‌شود، نه از کلاینت ── */
+  const { data: tableRow } = await sb().from('tables')
+    .select('id,"pricePerHour","clubId"').eq('id', tableId).maybeSingle();
 
-  if (!clubId || !startTime || !endTime) {
-    return NextResponse.json(
-      { message: 'clubId، startTime و endTime الزامی هستند' },
-      { status: 400 },
-    );
+  let priced: PricedTable | null = null;
+  if (tableRow && (tableRow as { clubId?: string }).clubId === clubId) {
+    const t = tableRow as { id: string; pricePerHour: number | string };
+    priced = { id: t.id, pricePerHour: Math.round(Number(t.pricePerHour) || 0) };
+  }
+  if (!priced || priced.pricePerHour <= 0) {
+    /* میزهای محلیِ باشگاه هنوز در دیتابیس نیستند ⇒ قیمتِ پیشنهادیِ کلاینت
+       فقط به‌عنوانِ پشتیبان و با سقفِ ایمن پذیرفته می‌شود. */
+    const fallback = Math.round(Number(body?.pricePerHour) || 0);
+    if (!fallback || fallback <= 0 || fallback > 50_000_000) {
+      return NextResponse.json({ message: 'میزِ انتخابی معتبر نیست' }, { status: 400 });
+    }
+    priced = { id: String(tableId), pricePerHour: fallback };
   }
 
-  // تبدیل startTime به bookingDate (فقط YYYY-MM-DD)
-  const bookingDate = new Date(startTime).toISOString().slice(0, 10);
+  /* قواعدِ تخفیفِ باشگاه (اگر تعریف شده باشد) */
+  const { data: clubRow } = await sb().from('clubs').select('"discountRules"').eq('id', clubId).maybeSingle();
+  const rules = (clubRow as { discountRules?: unknown } | null)?.discountRules;
+  if (Array.isArray(rules)) priced.discountRules = rules as PricedTable['discountRules'];
 
-  // محاسبه ساعت‌های بین startTime و endTime → timeSlots مثل "10,11,12"
-  const startHour = new Date(startTime).getUTCHours();
-  const endHour   = new Date(endTime).getUTCHours();
-  const hours: number[] = [];
-  for (let h = startHour; h < endHour; h++) {
-    hours.push(h);
-  }
-  const timeSlots  = hours.join(',');
-  const totalHours = hours.length;
+  const breakdown = priceBooking(hours, priced, Math.max(1, Number(playerCount) || 2));
 
-  if (totalHours === 0) {
-    return NextResponse.json({ message: 'بازه زمانی معتبر نیست' }, { status: 400 });
-  }
+  /* ── ساخت اتمیک: اگر یکی از ساعت‌ها گرفته شده باشد، کل تراکنش برمی‌گردد ── */
+  const { data, error } = await rpc<Record<string, unknown>>('bh_create_booking', {
+    p_user_id: actor.id, p_club_id: clubId, p_table_id: String(tableId),
+    p_table_type: tableType ?? null, p_date: bookingDate, p_hours: hours,
+    p_base: breakdown.baseAmount, p_discount: breakdown.discountAmount, p_final: breakdown.finalAmount,
+    p_reference: bookingReference(), p_ttl_minutes: HOLD_MINUTES,
+  });
 
-  const { data: booking, error } = await getSupabaseServer()
-    .from('bookings')
-    .insert({
-      userId,
-      clubId,
-      ...(tableId ? { tableId: String(tableId) } : {}),
-      tableType:   tableType ?? null,
-      bookingDate,
-      timeSlots,
-      totalHours,
-      totalPrice:  totalPrice ?? 0,
-      status:      'pending',
-    })
-    .select()
-    .single();
-
-  if (error || !booking) {
-    return NextResponse.json(
-      { message: 'خطا در ثبت رزرو: ' + (error?.message ?? 'unknown') },
-      { status: 500 },
-    );
+  if (error) {
+    const m = error.message || '';
+    if (/booking_slots_unique|duplicate key/i.test(m)) {
+      return NextResponse.json({ message: 'این ساعت‌ها هم‌اکنون رزرو شده‌اند؛ لطفاً بازه‌ی دیگری انتخاب کنید' }, { status: 409 });
+    }
+    if (/does not exist|schema cache|function/i.test(m)) {
+      return NextResponse.json({ message: 'سیستمِ رزرو هنوز راه‌اندازی نشده است (مایگریشنِ دیتابیس اجرا نشده)' }, { status: 503 });
+    }
+    return NextResponse.json({ message: 'خطا در ثبتِ رزرو: ' + m }, { status: 500 });
   }
 
-  return NextResponse.json(booking, { status: 201 });
+  const booking = (data ?? {}) as Record<string, unknown>;
+  audit({
+    actorId: actor.id, actorRole: actor.role, action: 'BOOKING_CREATED',
+    entityType: 'booking', entityId: String(booking.id ?? ''),
+    newValue: { amount: breakdown.finalAmount, hours }, ip: clientIp(req) ?? undefined,
+  });
+
+  return NextResponse.json({ ...booking, breakdown, holdMinutes: HOLD_MINUTES }, { status: 201 });
 }
