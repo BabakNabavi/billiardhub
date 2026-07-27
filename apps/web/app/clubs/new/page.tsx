@@ -8,6 +8,7 @@ import { uploadFile } from '../../../lib/supabase';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import { useAuthStore } from '../../../store/auth.store';
 import { persianToSlug, isValidSlug } from '../../../lib/slug';
+import VerificationPrompt from '../../../components/VerificationPrompt';
 
 // استان/شهر از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
@@ -381,9 +382,8 @@ export default function NewClubPage() {
           {/* جواز کسب — مدرک رسمی */}
           <div style={{ ...sectionStyle, border: '1px solid rgba(199,166,106,0.35)', background: 'rgba(199,166,106,0.04)' }}>
             <h2 style={headingStyle}>📄 جواز کسب / مدرک رسمی</h2>
-            <div style={{ background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.18)', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px', fontSize: '13px', color: '#1e40af', lineHeight: 1.7 }}>
-              برای دریافت <strong>تیک تأیید رسمی</strong> در پروفایل باشگاه، یک تصویر یا فایل از جواز کسب، کارت شناسایی صاحب امتیاز یا سایر مدارک رسمی آپلود کنید.
-              پس از بررسی توسط ادمین سیستم، تیک آبی تأیید شده به باشگاه شما اعطا خواهد شد.
+            <div style={{ marginBottom: '16px' }}>
+              <VerificationPrompt role="club" done={!!licenseFile} />
             </div>
 
             <label className={labelCls}>آپلود مدرک (JPG، PNG، PDF — حداکثر ۱۰ مگابایت)</label>

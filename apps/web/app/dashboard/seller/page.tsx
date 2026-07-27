@@ -13,6 +13,7 @@ import {
   emptySellerProfile, findSellerByOwner, findUnclaimedSeller, newSellerSlug, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import VerificationPrompt from '../../../components/VerificationPrompt'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
@@ -55,6 +56,7 @@ export default function SellerDashboard() {
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
   const [warn, setWarn]     = useState(false)   // هشدارِ «بدون جواز کسب»
+  const [warnAck, setWarnAck] = useState(false) // کاربر یادآوری را دید و ادامه داد
   const [brandInput, setBrandInput] = useState('')
 
   const logoRef   = useRef<HTMLInputElement>(null)
@@ -168,7 +170,9 @@ export default function SellerDashboard() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) { setErr('نام فروشگاه لازم است.'); return }
-    if (!form.certificate)  { setWarn(true); return }      // جواز کسب اجباری — مثل پنل مربی
+    /* جواز کسب اجباری نیست (فقط داور مدرکش الزامی است) — یک‌بار یادآوری
+       می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدونِ تیکِ تأیید ثبت می‌شود. */
+    if (!form.certificate && !warnAck) { setWarn(true); return }
     try { persist() }
     catch { setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید.') }
   }
@@ -526,12 +530,12 @@ export default function SellerDashboard() {
             <Link href="/dashboard/shop" className={`${LQ_BTN} mt-3`}>{Icon.back} مدیریت محصولات</Link>
           </section>
 
-          {/* ═══ جواز کسب (اجباری) ═══ */}
+          {/* ═══ جواز کسب (اختیاری — برای تیکِ تأیید) ═══ */}
           <section className={CARD}>
-            <h2 className="text-[14.5px] font-bold">جواز کسب <span className="text-[#B23B2E]">*</span></h2>
-            <p className="mb-4 mt-1 text-[12.5px] leading-relaxed text-[#5B564B]">
-              برای انتشار فروشگاه، آپلود جواز کسب الزامی است. بدون آن، اطلاعات فروشگاه ثبت نمی‌شود.
-            </p>
+            <h2 className="text-[14.5px] font-bold">جواز کسب</h2>
+            <div className="mb-4 mt-2">
+              <VerificationPrompt role="seller" done={!!form.certificate} compact />
+            </div>
             {form.certificate ? (
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
                 {form.certificate.url.startsWith('data:image')
@@ -583,12 +587,13 @@ export default function SellerDashboard() {
               </div>
               <h3 className="text-[16px] font-bold">جواز کسب آپلود نشده</h3>
               <p className="mt-2 text-[13px] leading-relaxed text-[#5B564B]">
-                بدون آپلود جواز کسب، اطلاعات فروشگاه شما ثبت و منتشر نمی‌شود. لطفاً ابتدا جواز کسب را آپلود کنید.
+                برای درخواست تیک تأیید و افزایش اعتبار پروفایل، لطفاً جواز کسب فروشگاه خود را آپلود نمایید.
+                آپلود آن اختیاری است و می‌توانید فروشگاه را بدون آن هم ثبت کنید.
               </p>
-              <div className="mt-4 flex justify-center gap-2">
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <button onClick={() => { setWarn(false); certRef.current?.click() }} className={LQ_BTN}>{Icon.upload} آپلود جواز کسب</button>
-                <button onClick={() => setWarn(false)}
-                  className="rounded-[10px] border border-[#E7E2D6] px-4 py-2.5 text-[13px] text-[#5B564B] transition hover:text-[#1C1B17]">انصراف</button>
+                <button onClick={() => { setWarnAck(true); setWarn(false); try { persist() } catch { setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید.') } }}
+                  className="rounded-[10px] border border-[#E7E2D6] px-4 py-2.5 text-[13px] text-[#5B564B] transition hover:text-[#1C1B17]">ثبت بدون جواز کسب</button>
               </div>
             </div>
           </div>

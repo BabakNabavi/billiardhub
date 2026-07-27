@@ -17,6 +17,7 @@ import { uploadFile } from '../../../lib/supabase';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
+import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
   type Tournament, type GameType,
@@ -29,7 +30,7 @@ const DARK = '#1A1A18';
 
 interface Club {
   id: string; name: string; city: string; isActive: boolean;
-  bankCard?: string; bankCardOwner?: string; bankName?: string;
+  bankCard?: string; bankCardOwner?: string; bankName?: string; iban?: string; licenseNumber?: string;
   logo?: string;
 }
 
@@ -328,7 +329,7 @@ export default function ClubDashboardPage() {
     dartBoards: '0', playstations: '0',
     hasCafe: false, hasParking: false, hasWifi: false, hasProfessionalCoach: false,
     specialFeatures: '',
-    bankCard: '', bankCardOwner: '', bankName: '',
+    bankCard: '', bankCardOwner: '', bankName: '', iban: '', licenseNumber: '',
   });
   const [infoSaving, setInfoSaving] = useState(false);
 
@@ -471,6 +472,8 @@ export default function ClubDashboardPage() {
         bankCard: c.bankCard ?? '',
         bankCardOwner: c.bankCardOwner ?? '',
         bankName: c.bankName ?? '',
+        iban: c.iban ?? '',
+        licenseNumber: c.licenseNumber ?? '',
       });
       if (c.workingHours) setHoursForm(c.workingHours);
       setSurcharge({
@@ -949,6 +952,12 @@ export default function ClubDashboardPage() {
   const filteredBookings = bookingFilter === 'all' ? bookings : bookings.filter(b => b.status === bookingFilter);
 
   /* رزروِ آنلاین بسته است؟ (همیشه یا تا زمانِ آینده) */
+  /* اعتبارسنجیِ محلیِ کارت و شبا — پیش از هر استعلامِ بیرونی */
+  const cardBad   = clubInfo.bankCard.replace(/\D/g, '').length === 16 && !isValidCard(clubInfo.bankCard);
+  const cardBank  = isValidCard(clubInfo.bankCard) ? bankOfCard(clubInfo.bankCard) : null;
+  const ibanBad   = clubInfo.iban.length > 2 && clubInfo.iban.length === 26 && !isValidIban(clubInfo.iban);
+  const ibanBank  = isValidIban(clubInfo.iban) ? bankOfIban(clubInfo.iban) : null;
+
   const isReserveClosed = reserveClosedUntil === 'always' || (reserveClosedUntil !== '' && Number(reserveClosedUntil) > Date.now());
   const reserveClosedLabel = reserveClosedUntil === 'always'
     ? 'رزروِ آنلاین همیشه بسته است'
@@ -1293,6 +1302,9 @@ export default function ClubDashboardPage() {
               <InputField label="آدرس"         value={clubInfo.address}     onChange={v => setClubInfo(p => ({...p, address: v}))} placeholder="آدرس کامل" />
               <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))} placeholder="021-..." />
               <InputField label="وبسایت"       value={clubInfo.website}     onChange={v => setClubInfo(p => ({...p, website: v}))} placeholder="https://..." />
+              <InputField label="شماره جواز کسب" value={clubInfo.licenseNumber}
+                onChange={v => setClubInfo(p => ({ ...p, licenseNumber: v.replace(/[^0-9۰-۹]/g, '') }))}
+                placeholder="فقط عدد — برای استعلام و تیک تأیید" />
               <SelectField label="منطقه زمانی" value={clubInfo.timezone}    onChange={v => setClubInfo(p => ({...p, timezone: v}))}
                 options={[{ value: 'Asia/Tehran', label: 'تهران (UTC+3:30)' }]} />
             </div>
@@ -1379,15 +1391,35 @@ export default function ClubDashboardPage() {
                   value={clubInfo.bankCard}
                   maxLength={19}
                   dir="ltr"
-                  onChange={e => {
-                    const digits = e.target.value.replace(/\D/g, '').slice(0, 16);
-                    const formatted = digits.replace(/(.{4})/g, '$1-').replace(/-$/, '');
-                    setClubInfo(p => ({ ...p, bankCard: formatted }));
-                  }}
-                  placeholder="1234-5678-9012-3456"
-                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em', fontSize: 16, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
+                  inputMode="numeric"
+                  onChange={e => setClubInfo(p => ({ ...p, bankCard: formatCard(e.target.value) }))}
+                  placeholder="6037 9911 1234 5678"
+                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em', fontSize: 16, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none',
+                    border: cardBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
                 />
+                {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید.</div>}
+                {cardBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {cardBank}</div>}
               </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>شماره شبا</label>
+                <input
+                  type="text"
+                  value={clubInfo.iban}
+                  maxLength={26}
+                  dir="ltr"
+                  onChange={e => setClubInfo(p => ({ ...p, iban: formatIban(e.target.value) }))}
+                  placeholder="IR820540102680020817909002"
+                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.06em', fontSize: 15, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none',
+                    border: ibanBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
+                />
+                {ibanBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره شبا معتبر نیست — «IR» به‌همراه ۲۴ رقم.</div>}
+                {ibanBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {ibanBank} — {prettyIban(clubInfo.iban)}</div>}
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
+                  تسویه‌ی درآمد رزروها به همین شبا انجام می‌شود و باید به نام صاحب باشگاه باشد.
+                </div>
+              </div>
+
               <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner}
                 onChange={v => setClubInfo(p => ({ ...p, bankCardOwner: v }))} placeholder="نام و نام خانوادگی" />
               <InputField label="نام بانک" value={clubInfo.bankName}
