@@ -312,6 +312,7 @@ export default function ClubDashboardPage() {
   const [surcharge, setSurcharge] = useState({ enabled: true, percent: '15', from: '2' });
   const [surchargeSaving, setSurchargeSaving] = useState(false);
   const [surchargeSaved, setSurchargeSaved] = useState(false);
+  const [surchargeError, setSurchargeError] = useState('');
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
@@ -669,9 +670,14 @@ export default function ClubDashboardPage() {
         playerSurchargePercent: Math.max(0, Math.min(100, parseInt(surcharge.percent, 10) || 0)),
         playerSurchargeFrom:    Math.max(1, Math.min(12,  parseInt(surcharge.from, 10) || 2)),
       });
-      setSurchargeSaved(true);
+      setSurchargeSaved(true); setSurchargeError('');
       setTimeout(() => setSurchargeSaved(false), 2500);
-    } catch { /* پیام در همان کارت نمایش داده می‌شود */ }
+    } catch (e: unknown) {
+      const raw = (e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
+      setSurchargeError(/column|does not exist|schema cache/i.test(raw)
+        ? 'این تنظیم هنوز در دیتابیس ساخته نشده است (مایگریشن ۰۰۳ اجرا نشده).'
+        : raw || 'ذخیره‌ی تنظیمات انجام نشد؛ دوباره تلاش کنید.');
+    }
     finally { setSurchargeSaving(false); }
   };
 
@@ -1463,6 +1469,7 @@ export default function ClubDashboardPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <SaveBtn onClick={saveSurcharge} loading={surchargeSaving} label="ذخیره تنظیمات" />
               {surchargeSaved && <span style={{ fontSize: 12.5, fontWeight: 700, color: '#0E7A38' }}>ذخیره شد ✓</span>}
+              {surchargeError && <span style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', lineHeight: 1.9 }}>{surchargeError}</span>}
             </div>
           </Card>
 

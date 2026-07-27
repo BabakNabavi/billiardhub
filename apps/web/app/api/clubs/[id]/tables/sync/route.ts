@@ -40,10 +40,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const body = await req.json().catch(() => ({}));
   const incoming: InTable[] = Array.isArray(body?.tables) ? body.tables.slice(0, 200) : [];
 
-  const row = (t: InTable) => ({
+  const TYPE_FA: Record<string, string> = {
+    snooker: 'اسنوکر', pocket: 'پاکت', highball: 'هی‌بال',
+    vip_snooker: 'VIP اسنوکر', vipSnooker: 'VIP اسنوکر',
+    vip_pocket: 'VIP پاکت', vipPocket: 'VIP پاکت', airHockey: 'ایرهاکی',
+  };
+
+  const row = (t: InTable, i: number) => ({
     clubId,
-    name: t.name ? String(t.name).slice(0, 120) : null,
-    number: t.number === undefined || t.number === null || t.number === '' ? null : Number(t.number) || null,
+    /* نام و شماره هیچ‌وقت خالی نمی‌مانند تا با اسکیمای قدیمی هم کار کند */
+    name: String(t.name || `میز ${TYPE_FA[String(t.type ?? '')] ?? ''} ${Number(t.number) || i + 1}`).trim().slice(0, 120),
+    number: Number(t.number) || i + 1,
     type: String(t.type || 'snooker').slice(0, 40),
     brand: t.brand ? String(t.brand).slice(0, 80) : null,
     model: t.model ? String(t.model).slice(0, 80) : null,
@@ -54,18 +61,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     isActive: true,
   });
 
+  /* اگر مایگریشنِ ۰۰۳ هنوز اجرا نشده باشد، پیامِ روشن بده نه خطای خام */
+  const msg = (what: string, raw: string) =>
+    /does not exist|schema cache|column/i.test(raw)
+      ? 'ساختارِ جدولِ میزها هنوز به‌روز نشده است (مایگریشن ۰۰۳ اجرا نشده)'
+      : `خطا در ${what} میز: ${raw}`;
+
   const idMap: Record<string, string> = {};
   const keepIds: string[] = [];
 
-  for (const t of incoming) {
+  for (let i = 0; i < incoming.length; i++) {
+    const t = incoming[i]!;
     const existingId = t.id && UUID.test(String(t.id)) ? String(t.id) : null;
     if (existingId) {
-      const { error } = await sb.from('tables').update(row(t)).eq('id', existingId).eq('clubId', clubId);
-      if (error) return NextResponse.json({ message: 'خطا در به‌روزرسانیِ میز: ' + error.message }, { status: 500 });
+      const { error } = await sb.from('tables').update(row(t, i)).eq('id', existingId).eq('clubId', clubId);
+      if (error) return NextResponse.json({ message: msg('به‌روزرسانی', error.message) }, { status: 500 });
       keepIds.push(existingId);
     } else {
-      const { data, error } = await sb.from('tables').insert(row(t)).select('id').single();
-      if (error) return NextResponse.json({ message: 'خطا در ثبتِ میز: ' + error.message }, { status: 500 });
+      const { data, error } = await sb.from('tables').insert(row(t, i)).select('id').single();
+      if (error) return NextResponse.json({ message: msg('ثبت', error.message) }, { status: 500 });
       const newId = String((data as { id: string }).id);
       if (t.id) idMap[String(t.id)] = newId;
       keepIds.push(newId);

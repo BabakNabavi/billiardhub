@@ -12,12 +12,44 @@ ALTER TABLE public.clubs
 COMMENT ON COLUMN public.clubs."playerSurchargePercent" IS 'درصدِ افزایش به ازای هر بازیکنِ اضافه';
 COMMENT ON COLUMN public.clubs."playerSurchargeFrom"    IS 'از این تعداد بازیکن به بالا، هر نفر درصد اضافه می‌شود';
 
--- ── ۲) میزها: فیلدهایی که تا امروز فقط در localStorage بودند ────────
+-- ── ۲) میزها: منبعِ حقیقتِ میزهای قابلِ رزرو ─────────────────────────
+-- تا امروز میزها فقط در localStorageِ مرورگرِ باشگاه‌دار بودند.
+CREATE TABLE IF NOT EXISTS public.tables (
+  id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "clubId"       uuid        NOT NULL,
+  "number"       integer,
+  "name"         text,
+  "type"         text        NOT NULL DEFAULT 'snooker',
+  "brand"        text,
+  "model"        text,
+  "description"  text,
+  "pricePerHour" numeric(12,2) NOT NULL DEFAULT 0,
+  "isActive"     boolean     NOT NULL DEFAULT true,
+  "createdAt"    timestamptz NOT NULL DEFAULT now()
+);
+
 ALTER TABLE public.tables
   ADD COLUMN IF NOT EXISTS "name"            text,
+  ADD COLUMN IF NOT EXISTS "description"     text,
   ADD COLUMN IF NOT EXISTS "morningDiscount" integer DEFAULT 0,
   ADD COLUMN IF NOT EXISTS "discountRules"   jsonb,
   ADD COLUMN IF NOT EXISTS "photoDataUrl"    text;
+
+-- نوعِ میز به text تبدیل می‌شود تا نوع‌های جدید (ایرهاکی و…) هم بپذیرد
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'tables'
+      AND column_name = 'type' AND data_type = 'USER-DEFINED'
+  ) THEN
+    ALTER TABLE public.tables ALTER COLUMN "type" TYPE text USING "type"::text;
+  END IF;
+END $$;
+
+-- نام و شماره اختیاری‌اند (باشگاه‌دار همیشه واردشان نمی‌کند)
+ALTER TABLE public.tables ALTER COLUMN "name"   DROP NOT NULL;
+ALTER TABLE public.tables ALTER COLUMN "number" DROP NOT NULL;
 
 CREATE INDEX IF NOT EXISTS tables_club_active_idx ON public.tables ("clubId") WHERE "isActive";
 
