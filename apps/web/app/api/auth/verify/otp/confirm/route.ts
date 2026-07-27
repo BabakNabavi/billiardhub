@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET!
 const OTP_MAX_ATTEMPTS = 5
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }

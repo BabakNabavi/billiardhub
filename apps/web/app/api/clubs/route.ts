@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };

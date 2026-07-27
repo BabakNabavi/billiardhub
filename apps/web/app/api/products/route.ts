@@ -5,14 +5,15 @@ import jwt from 'jsonwebtoken'
 
 export const dynamic = 'force-dynamic'
 
-const JWT_SECRET = process.env.JWT_SECRET || '***REMOVED-SECRET***'
-
+/* بدونِ fallbackِ هاردکد: اگر JWT_SECRET نباشد باید هیچ توکنی پذیرفته
+   نشود، وگرنه هرکسی با همان رشته‌ی عمومی توکنِ معتبر می‌سازد. */
 function getUserFromRequest(req: NextRequest) {
+  const secret = process.env.JWT_SECRET
+  if (!secret) return null
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) return null
-    const token = authHeader.slice(7)
-    return jwt.verify(token, JWT_SECRET) as { id: string; role: string }
+    return jwt.verify(authHeader.slice(7), secret) as { id: string; role: string }
   } catch {
     return null
   }

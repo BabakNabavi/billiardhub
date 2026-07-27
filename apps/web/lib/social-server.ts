@@ -16,7 +16,7 @@ export const DAY = 24 * 60 * 60 * 1000
 const SUPABASE_URL = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
 
 export const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }

@@ -5,7 +5,7 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { isUUID } from '@/lib/slug';
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };

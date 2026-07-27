@@ -6,7 +6,7 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 const JWT_SECRET = process.env.JWT_SECRET!
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }

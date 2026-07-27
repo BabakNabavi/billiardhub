@@ -4,7 +4,7 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 import { isValidSlug } from '@/lib/slug';
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
