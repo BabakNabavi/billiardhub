@@ -5,11 +5,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, UploadCloud, Film, Image as ImageIcon, Check, Loader2 } from 'lucide-react'
+import { X, UploadCloud, Film, Image as ImageIcon, Check, Loader2, Tv } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
 import { uploadFile } from '../lib/supabase'
-import { postUserVideo } from '../lib/media-user'
+import { postUserVideo, fetchMyChannel, saveChannel, type UserChannel } from '../lib/media-user'
 import { MEDIA_CATEGORIES, faDigits, type MediaVideo } from '../lib/media-data'
+import SelectField from './ui/SelectField'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38'
@@ -53,8 +54,36 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const [err, setErr]           = useState('')
   const vref = useRef<HTMLVideoElement>(null)
 
+  /* کانال — مثل یوتیوب، برای انتشار لازم است و مرحله‌ی صریحی دارد */
+  const [channel, setChannel] = useState<UserChannel | null>(null)
+  const [chLoaded, setChLoaded] = useState(false)
+  const [chName, setChName] = useState('')
+  const [chHandle, setChHandle] = useState('')
+  const [chBio, setChBio] = useState('')
+
+  const ownerKey = user ? (user.phone || user.id || user.firstName || 'user') : ''
+
   useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl) }, [videoUrl])
-  useEffect(() => { if (open) { setErr('') } }, [open])
+  useEffect(() => {
+    if (!open || !ownerKey) return
+    setErr(''); setChLoaded(false)
+    fetchMyChannel(ownerKey).then(c => {
+      setChannel(c); setChLoaded(true)
+      if (!c) {
+        setChName(`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کانالِ من')
+        setChHandle(safeKey(ownerKey).toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 20) || 'channel')
+      }
+    })
+  }, [open, ownerKey, user])
+
+  const createChannel = async () => {
+    if (busy) return
+    setErr(''); setBusy(true)
+    const r = await saveChannel({ ownerKey, name: chName, handle: chHandle, bio: chBio })
+    setBusy(false)
+    if (!r?.ok || !r.channel) { setErr(r?.message || 'ساختِ کانال ناموفق بود'); return }
+    setChannel(r.channel)
+  }
 
   if (!open) return null
 
@@ -81,11 +110,11 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (busy) return
     setErr('')
     if (!user) { setErr('برای آپلود باید وارد شوید'); return }
+    if (!channel) { setErr('ابتدا کانالِ خود را بسازید'); return }
     if (!file) { setErr('ویدیو را انتخاب کنید'); return }
     if (!title.trim()) { setErr('عنوانِ ویدیو را بنویسید'); return }
     setBusy(true)
     try {
-      const ownerKey = user.phone || user.id || user.firstName || 'user'
       const id = `uv-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
       const ext = (file.name.match(/\.[^.]+$/)?.[0] || '.mp4').toLowerCase()
       setPhase('در حال آپلودِ ویدیو…')
@@ -96,8 +125,8 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
       setPhase('در حال انتشار…')
       const res = await postUserVideo({
         id, title: title.trim(), category, ownerKey,
-        creatorName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر',
-        creatorHandle: safeKey(ownerKey),
+        creatorName: channel.name,
+        creatorHandle: channel.handle,
         duration: duration || '۰۰:۰۰', date: todayFa(), thumb, src,
         description: desc.trim() ? desc.trim().split(/\n+/).filter(Boolean).slice(0, 6) : [],
         tags: tags.split(/[،,]/).map(t => t.trim()).filter(Boolean).slice(0, 8),
@@ -125,12 +154,57 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: `1px solid ${LINE}` }}>
           <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 10, background: 'rgba(199,166,106,0.14)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><UploadCloud size={18} /></span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 900, color: INK }}>آپلودِ ویدیو</div>
-            <div style={{ fontSize: 11.5, color: MUT }}>ویدیو منتشر می‌شود و کانالِ شما خودکار ساخته می‌شود</div>
+            <div style={{ fontSize: 15.5, fontWeight: 900, color: INK }}>{channel ? 'آپلودِ ویدیو' : 'ساختِ کانال'}</div>
+            <div style={{ fontSize: 11.5, color: MUT }}>
+              {channel ? <>انتشار در کانالِ <b style={{ color: SEC }}>{channel.name}</b></> : 'برای انتشارِ ویدیو ابتدا کانالِ خود را بسازید'}
+            </div>
           </div>
           <button onClick={() => !busy && onClose()} aria-label="بستن" style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 8, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={17} /></button>
         </div>
 
+        {/* ── مرحله‌ی کانال (اگر هنوز ندارد) ── */}
+        {!channel ? (
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {!chLoaded ? (
+              <div style={{ textAlign: 'center', padding: 30, color: MUT }}><Loader2 size={22} className="bm-spin" /></div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 16, padding: 14 }}>
+                  <span style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>
+                    {(chName || 'ک').slice(0, 1)}
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: INK }}>{chName || 'نامِ کانال'}</div>
+                    <div style={{ fontSize: 11.5, color: MUT, direction: 'ltr', textAlign: 'right' }}>@{chHandle || 'handle'}</div>
+                  </div>
+                </div>
+                <Field label="نامِ کانال">
+                  <input value={chName} onChange={e => { setChName(e.target.value.slice(0, 60)); setErr('') }} placeholder="مثلاً: آکادمی بیلیارد من" style={inp} />
+                </Field>
+                <Field label="هندلِ کانال (انگلیسی)">
+                  <div style={{ ...inp, display: 'flex', alignItems: 'center', gap: 6, padding: '0 13px' }}>
+                    <span style={{ color: MUT, fontSize: 14 }}>@</span>
+                    <input value={chHandle} onChange={e => { setChHandle(e.target.value.replace(/[^A-Za-z0-9._-]/g, '').toLowerCase().slice(0, 30)); setErr('') }}
+                      placeholder="my.channel"
+                      style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', padding: '10px 0', fontSize: 13.5, fontFamily: 'inherit', color: INK, direction: 'ltr', textAlign: 'left' }} />
+                  </div>
+                </Field>
+                <Field label="درباره‌ی کانال (اختیاری)">
+                  <textarea value={chBio} onChange={e => setChBio(e.target.value.slice(0, 200))} rows={2} placeholder="در چه زمینه‌ای ویدیو منتشر می‌کنید؟" style={{ ...inp, resize: 'vertical', lineHeight: 1.9 }} />
+                </Field>
+                {err && <div style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.2)', borderRadius: 10, padding: '9px 12px' }}>{err}</div>}
+                <button onClick={createChannel} disabled={busy}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: 'none', cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: GOLD, color: '#241B08' }}>
+                  {busy ? <><Loader2 size={17} className="bm-spin" /> در حال ساخت…</> : <><Tv size={17} /> ساختِ کانال و ادامه</>}
+                </button>
+                <p style={{ fontSize: 11, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
+                  کانال یک‌بار ساخته می‌شود و همه‌ی ویدیوهای بعدیِ شما زیرِ همان منتشر می‌شود.
+                </p>
+              </>
+            )}
+            <style>{`@keyframes bmspin { to { transform: rotate(360deg); } } .bm-spin { animation: bmspin 1s linear infinite; }`}</style>
+          </div>
+        ) : (
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* ویدیو */}
           {!videoUrl ? (
@@ -156,11 +230,10 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
                 <input value={title} onChange={e => setTitle(e.target.value)} maxLength={160} placeholder="مثلاً: آموزشِ کنترلِ توپِ سفید" style={inp} />
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <Field label="دسته‌بندی">
-                  <select value={category} onChange={e => setCategory(e.target.value)} style={inp}>
-                    {MEDIA_CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
-                  </select>
-                </Field>
+                <div>
+                  <SelectField label="دسته‌بندی" value={category} onChange={setCategory}
+                    options={MEDIA_CATEGORIES.map(c => ({ value: c.key, label: c.label, dot: c.dot }))} />
+                </div>
                 <Field label="تصویرِ شاخص (اختیاری)">
                   <label style={{ ...inp, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: SEC, overflow: 'hidden' }}>
                     {thumbPrev ? <img src={thumbPrev} alt="" style={{ width: 30, height: 20, objectFit: 'cover', borderRadius: 4 }} /> : <ImageIcon size={16} />}
@@ -186,6 +259,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
           </button>
           <style>{`@keyframes bmspin { to { transform: rotate(360deg); } } .bm-spin { animation: bmspin 1s linear infinite; }`}</style>
         </div>
+        )}
       </div>
     </div>,
     document.body,

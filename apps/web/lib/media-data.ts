@@ -5,14 +5,20 @@
    ───────────────────────────────────────────────────────────── */
 
 export const MEDIA_CATEGORIES = [
-  { key: 'snooker-training', label: 'آموزش اسنوکر',        dot: '#14532D' },
-  { key: 'pool-training',    label: 'آموزش پاکت بیلیارد',  dot: '#7C3AED' },
-  { key: 'techniques',       label: 'تکنیک‌ها و ترفندها',   dot: '#C7A66A' },
-  { key: 'highlights',       label: 'مسابقات و هایلایت',    dot: '#B23B2E' },
-  { key: 'backstage',        label: 'پشت صحنه',             dot: '#0891B2' },
-  { key: 'interviews',       label: 'مصاحبه با بازیکنان',   dot: '#1D4ED8' },
-  { key: 'gear',             label: 'معرفی تجهیزات',        dot: '#A07840' },
-  { key: 'clubs-events',     label: 'باشگاه‌ها و رویدادها', dot: '#0E7A38' },
+  { key: 'snooker-training',  label: 'آموزش اسنوکر',         dot: '#14532D' },
+  { key: 'pool-training',     label: 'آموزش پاکت بیلیارد',   dot: '#7C3AED' },
+  { key: 'highball-training', label: 'آموزش هی‌بال',          dot: '#0D9488' },
+  { key: 'techniques',        label: 'تکنیک‌ها و ترفندها',    dot: '#C7A66A' },
+  { key: 'trick-shots',       label: 'ضربات نمایشی',          dot: '#DB2777' },
+  { key: 'entertainment',     label: 'سرگرمی',                dot: '#F59E0B' },
+  { key: 'referee-rules',     label: 'آموزش قوانین داوری',    dot: '#0891B2' },
+  { key: 'highlights',        label: 'مسابقات و هایلایت',     dot: '#B23B2E' },
+  { key: 'backstage',         label: 'پشت صحنه',              dot: '#64748B' },
+  { key: 'interviews',        label: 'مصاحبه با بازیکنان',    dot: '#1D4ED8' },
+  { key: 'gear',              label: 'معرفی تجهیزات',         dot: '#A07840' },
+  { key: 'technical-services',label: 'خدمات فنی',             dot: '#7C2D12' },
+  { key: 'clubs-events',      label: 'باشگاه‌ها و رویدادها',  dot: '#0E7A38' },
+  { key: 'other',             label: 'سایر',                  dot: '#8A8474' },
 ] as const
 
 export type MediaCategoryKey = typeof MEDIA_CATEGORIES[number]['key']

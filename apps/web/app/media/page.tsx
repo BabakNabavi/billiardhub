@@ -650,8 +650,8 @@ export default function MediaPage() {
                   <button className="bm-chan bm-chan-cta" onClick={onUploadClick} style={{ cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' }}>
                     <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
                     <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
-                    <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>ویدیوهایت را آپلود کن؛ کانالت خودکار ساخته می‌شود.</span>
-                    <span className="go" style={{ color: FELT }}>{user ? 'آپلودِ ویدیو' : 'ورود و آپلود'} <ArrowLeft size={11} /></span>
+                    <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>کانالت را بساز و ویدیوهایت را منتشر کن.</span>
+                    <span className="go" style={{ color: FELT }}>{user ? 'شروع' : 'ورود و شروع'} <ArrowLeft size={11} /></span>
                   </button>
                 </div>
               </section>

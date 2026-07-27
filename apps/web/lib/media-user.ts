@@ -36,3 +36,29 @@ export async function postUserVideo(video: Partial<RawUserVideo>): Promise<{ ok?
 export async function deleteUserVideo(id: string, user: string): Promise<boolean> {
   try { await fetch(`/api/media?id=${encodeURIComponent(id)}&user=${encodeURIComponent(user)}`, { method: 'DELETE' }); return true } catch { return false }
 }
+
+/* ── کانالِ کاربر (برای انتشارِ ویدیو لازم است، مثل یوتیوب) ── */
+export interface UserChannel { ownerKey: string; name: string; handle: string; bio: string; avatar: string; createdAt: number }
+
+export async function fetchMyChannel(ownerKey: string): Promise<UserChannel | null> {
+  try {
+    const r = await fetch(`/api/media/channel?owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
+    if (!r.ok) return null
+    return await r.json()
+  } catch { return null }
+}
+
+export async function checkHandle(handle: string, ownerKey: string): Promise<boolean> {
+  try {
+    const r = await fetch(`/api/media/channel?handle=${encodeURIComponent(handle)}&owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
+    if (!r.ok) return false
+    return (await r.json())?.available === true
+  } catch { return false }
+}
+
+export async function saveChannel(c: { ownerKey: string; name: string; handle: string; bio?: string; avatar?: string }): Promise<{ ok?: boolean; channel?: UserChannel; message?: string }> {
+  try {
+    const r = await fetch('/api/media/channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })
+    return await r.json()
+  } catch { return { ok: false, message: 'خطا در ارتباط با سرور' } }
+}
