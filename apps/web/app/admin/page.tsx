@@ -14,7 +14,7 @@ import { useAuthStore } from '../../store/auth.store';
 import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
-  Clapperboard, Factory, Wrench, ShieldCheck, KeyRound,
+  Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -54,6 +54,13 @@ const SECTIONS: AdminSection[] = [
       { title: 'تأیید داوران', desc: 'بررسی پروفایل و مدرک داوران', icon: <Scale size={20} />, link: '/admin/referees' },
       { title: 'رنکینگ بازیکنان', desc: 'ورود و ویرایش رنکینگ رسمی', icon: <TrendingUp size={20} />, link: '/admin/rankings' },
       { title: 'بازیکنان شاخص', desc: 'مدیریت پروفایل بازیکنان بخش «ستارگان»', icon: <UserCheck size={20} />, link: '/admin/players' },
+    ],
+  },
+  {
+    title: 'مالی و تسویه', en: 'FINANCE', dot: '#0E7A38',
+    items: [
+      { title: 'داشبورد مالی', desc: 'درآمد، کمیسیون، پرداخت‌ها و بازپرداخت‌ها', icon: <Wallet size={20} />, link: '/admin/finance' },
+      { title: 'تسویه باشگاه‌ها', desc: 'موجودی باشگاه‌ها و ثبت واریز', icon: <TrendingUp size={20} />, link: '/admin/finance' },
     ],
   },
   {
