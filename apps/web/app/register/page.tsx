@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
-import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp } from '@/lib/otp-client';
+import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp, verifyIdentity as apiVerifyIdentity } from '@/lib/otp-client';
 import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck } from 'lucide-react';
 
 type Step = 1 | 2;
@@ -160,8 +160,11 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      /* nationalId هم ارسال می‌شود — بعداً با وب‌سرویسِ احراز هویت
-         (تطبیقِ موبایل + نام + کد ملی) در بک‌اند بررسی خواهد شد */
+      /* احراز هویتِ شاهکار: کد ملی باید با شماره‌ی موبایلِ تأییدشده مطابقت داشته باشد */
+      const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim());
+      if (!idv.ok) { setLoading(false); setError(idv.message || 'استعلامِ احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
+      if (!idv.match) { setLoading(false); setError('کد ملی با شماره‌ی موبایلِ شما مطابقت ندارد — شماره باید به‌نامِ خودتان باشد'); return; }
+
       const { data } = await api.post('/auth/register', {
         phone: form.phone,
         firstName: form.firstName,

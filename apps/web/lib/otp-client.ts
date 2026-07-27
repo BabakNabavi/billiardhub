@@ -16,3 +16,11 @@ export async function verifyOtp(mobile: string, code: string): Promise<OtpResult
     return await r.json()
   } catch { return { ok: false, message: 'خطا در اتصال' } }
 }
+
+/* احراز هویتِ شاهکار: تطبیقِ کد ملی ↔ موبایل */
+export async function verifyIdentity(mobile: string, nationalCode: string): Promise<{ ok: boolean; match?: boolean; message?: string }> {
+  try {
+    const r = await fetch('/api/shahkar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mobile, nationalCode }) })
+    return await r.json()
+  } catch { return { ok: false, message: 'خطا در اتصال' } }
+}

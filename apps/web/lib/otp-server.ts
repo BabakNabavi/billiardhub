@@ -14,7 +14,8 @@ const TTL = 5 * 60 * 1000             // اعتبارِ کد: ۵ دقیقه (۲ 
 const RESEND = 60 * 1000              // فاصله‌ی مجازِ ارسالِ مجدد: ۶۰ ثانیه
 const MAX_TRIES = 5
 
-interface OtpRec { hash: string; at: number; tries: number }
+interface OtpRec { hash: string; at: number; tries: number; verifiedAt?: number }
+const VERIFIED_WINDOW = 30 * 60 * 1000   // نشانِ «تأییدشده» تا ۳۰ دقیقه برای مرحله‌ی بعدی (شاهکار)
 const otpPath = (mobile: string) => `social/otp/${safeKey(mobile)}.json`
 const normMobile = (m: string) => (m || '').replace(/[^0-9]/g, '')
 
@@ -72,6 +73,12 @@ export async function verifyOtp(mobile: string, code: string): Promise<{ ok: boo
     await writeJson(otpPath(m), { ...rec, tries: rec.tries + 1 })
     return { ok: false, message: 'کد نادرست است' }
   }
-  await writeJson(otpPath(m), { ...rec, tries: MAX_TRIES + 1 })   // مصرف‌شده
+  await writeJson(otpPath(m), { ...rec, tries: MAX_TRIES + 1, verifiedAt: Date.now() })   // مصرف‌شده + نشانِ تأیید
   return { ok: true }
+}
+
+/* آیا این شماره اخیراً کدش را تأیید کرده؟ (پیش‌شرطِ استعلامِ شاهکار) */
+export async function wasOtpVerified(mobile: string): Promise<boolean> {
+  const rec = await readOtp(normMobile(mobile))
+  return !!(rec?.verifiedAt && Date.now() - rec.verifiedAt < VERIFIED_WINDOW)
 }
