@@ -2,7 +2,7 @@ import { readJson, writeJson, safeKey } from './social-server'
 
 /* OTPِ پیامکی — کد را خودمان می‌سازیم/ذخیره/می‌سنجیم و سرویسِ s.api.ir فقط
    پیامک را می‌رساند. ذخیره روی همان Supabase Storage (مثل استوری/دایرکت). */
-const SMS_URL = 'https://s.api.ir/api/swl/SmsOTP'
+const SMS_URL = 'https://s.api.ir/api/sw1/SmsOTP'   // sw1 = s‑w‑یک (نه swl)
 const TEMPLATE = 1                    // ۱ = کدِ تأیید
 const TTL = 2 * 60 * 1000             // اعتبارِ کد: ۲ دقیقه
 const RESEND = 60 * 1000              // فاصله‌ی مجازِ ارسالِ مجدد: ۶۰ ثانیه
@@ -34,11 +34,12 @@ export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: 
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
       body: JSON.stringify({ code, mobile: m, template: TEMPLATE }),
     })
-    if (!r.ok) {
-      const t = await r.text().catch(() => '')
-      return { ok: false, message: r.status === 401 || r.status === 403 ? 'کلیدِ سرویسِ پیامک پذیرفته نشد' : `ارسالِ پیامک ناموفق بود (${r.status})`, ...(t ? {} : {}) }
-    }
-    return { ok: true }
+    /* سرویس همیشه ۲۰۰ می‌دهد؛ نتیجه‌ی واقعی در success/message است. */
+    if (r.status === 401 || r.status === 403) return { ok: false, message: 'کلیدِ سرویسِ پیامک پذیرفته نشد' }
+    const j = await r.json().catch(() => null) as { success?: boolean; data?: boolean; message?: string } | null
+    if (j && (j.success === true || j.data === true)) return { ok: true }
+    console.error('SmsOTP failed:', j?.message || r.status)   // پیامِ خامِ سرویس فقط در لاگِ سرور
+    return { ok: false, message: 'ارسالِ کدِ پیامکی ناموفق بود؛ چند لحظه بعد دوباره تلاش کنید' }
   } catch {
     return { ok: false, message: 'خطا در اتصال به سرویسِ پیامک' }
   }
