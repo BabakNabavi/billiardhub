@@ -641,6 +641,7 @@ export default function NewProductPage() {
   const [errors,   setErrors]   = useState<Record<string, string>>({})
   const [success,  setSuccess]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [acceptRules, setAcceptRules] = useState(false)   // پذیرشِ قوانینِ بیلیارد بازار
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
@@ -755,6 +756,7 @@ export default function NewProductPage() {
       e.sellerPhone = 'شماره موبایل معتبر وارد کنید (09xxxxxxxxx)'
     if (!form.province)           e.province    = 'استان را انتخاب کنید'
     if (!form.city)               e.city        = 'شهر را انتخاب کنید'
+    if (!acceptRules)             e.acceptRules = 'برای ثبت آگهی، قوانین بیلیارد بازار را بپذیرید'
     return e
   }
 
@@ -1284,6 +1286,25 @@ export default function NewProductPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* ── پذیرش قوانین بازار ── */}
+            <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: errors.acceptRules ? '1.5px solid rgba(200,60,60,0.42)' : LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '16px 22px', marginBottom: 14, transition: 'border-color .2s' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+                <input type="checkbox" checked={acceptRules}
+                  onChange={e => { setAcceptRules(e.target.checked); if (e.target.checked) setErrors(p => { const n = { ...p }; delete n.acceptRules; return n }) }}
+                  style={{ width: 17, height: 17, marginTop: 2, accentColor: GOLD, cursor: 'pointer', flexShrink: 0 }} />
+                <span style={{ fontSize: 13, lineHeight: 2, color: 'rgba(28,27,23,0.66)' }}>
+                  با ثبت این آگهی،{' '}
+                  <a href="/terms#market" target="_blank" rel="noopener noreferrer" style={{ color: GOLD_D, fontWeight: 800, textDecoration: 'none' }}>
+                    قوانین و مقررات بیلیارد بازار
+                  </a>
+                  {' '}را مطالعه و می‌پذیرم.
+                </span>
+              </label>
+              {errors.acceptRules && (
+                <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: '#C0392B', paddingRight: 27 }}>{errors.acceptRules}</div>
+              )}
             </div>
 
             {/* ── Submit bar ── */}

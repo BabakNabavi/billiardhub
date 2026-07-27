@@ -23,6 +23,7 @@ import Link from 'next/link'
 import {
   Search, MapPin, X, Check, ChevronDown,
   Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
+  ScrollText, ArrowLeft,
 } from 'lucide-react'
 import { SHOP_PRODUCTS } from './products'
 import { MOCK_SELLERS } from '../../lib/sellers-data'
@@ -569,6 +570,24 @@ export default function MarketNewPage() {
         .mk-bnav.on { color: ${GOLD_D}; }
         .mk-bnav.on svg { fill: rgba(199,166,106,0.2); }
 
+        /* ── نوار قوانین بازار (انتهای لیست) ── */
+        .mk-rules { display: flex; align-items: center; gap: 12px; margin-top: 26px; padding: 14px 16px;
+          background: #fff; border: 1px solid ${LINE}; border-radius: 16px; text-decoration: none;
+          transition: border-color .25s, box-shadow .25s, transform .25s cubic-bezier(.22,1,.36,1); }
+        .mk-rules:hover { border-color: rgba(199,166,106,0.42); transform: translateY(-1px);
+          box-shadow: 0 10px 26px rgba(28,27,23,0.07); }
+        .mk-rules .ic { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px;
+          flex-shrink: 0; border-radius: 11px; color: ${GOLD_D};
+          background: rgba(199,166,106,0.12); border: 1px solid rgba(199,166,106,0.28); }
+        .mk-rules .tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+        .mk-rules .tx b { font-size: 13px; font-weight: 800; color: ${TEXT}; }
+        .mk-rules .tx i { font-size: 11.5px; font-style: normal; font-weight: 500; color: ${MUT}; line-height: 1.8; }
+        .mk-rules .ar { color: ${MUT}; flex-shrink: 0; transition: transform .25s, color .25s; }
+        .mk-rules:hover .ar { color: ${GOLD_D}; transform: translateX(-3px); }
+        @media (max-width: 520px) {
+          .mk-rules .tx i { display: none; }
+        }
+
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
         /* باکسِ فیلترها کاملاً fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
@@ -782,6 +801,15 @@ export default function MarketNewPage() {
                 </div>
               </>
             )}
+            {/* ── نوار قوانین بازار ── */}
+            <Link href="/terms#market" className="mk-rules">
+              <span className="ic"><ScrollText size={17} /></span>
+              <span className="tx">
+                <b>قوانین ثبت آگهی و معاملات در بیلیارد بازار</b>
+                <i>پیش از ثبت آگهی یا انجام معامله، شرایط و مسئولیت‌های طرفین را بخوانید.</i>
+              </span>
+              <ArrowLeft size={16} className="ar" />
+            </Link>
           </section>
         </div>
       </main>

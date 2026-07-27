@@ -249,6 +249,7 @@ function BookingContent() {
   const [slotsLoad, setSlotsLoad]   = useState(false);
   const [booking, setBooking]       = useState(false);
   const [error, setError]           = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);   /* پذیرش قوانین رزرو */
   /* #15/#20: payment + receipt state */
   const [pendingPayment, setPendingPayment] = useState<{
     bookingId: string;
@@ -319,6 +320,7 @@ function BookingContent() {
 
   const handleConfirm = async ()=>{
     if(!selectedTable||selectedSlots.length===0||!isoDate) return;
+    if(!acceptTerms){ setError('برای ادامه، قوانین رزرو و شرایط لغو را بپذیرید.'); return; }
     const sorted    = [...selectedSlots].sort((a,b)=>a-b);
     const startH    = sorted[0]!;
     const endH      = sorted[sorted.length-1]!+1;
@@ -875,6 +877,25 @@ function BookingContent() {
               <div style={{margin:'0 22px 18px',padding:'11px 14px',background:'rgba(245,158,11,0.05)',border:'1px solid rgba(245,158,11,0.13)',borderRadius:'12px',fontSize: '13px',color:'rgba(0,0,0,0.42)',lineHeight:1.7,display:'flex',alignItems:'flex-start',gap:'7px'}}>
                 <Info size={13} style={{color:'#f59e0b',flexShrink:0,marginTop:1}}/>
                 رزروها تنها تا ۲ ساعت پیش از زمان شروع قابل لغو هستند
+              </div>
+
+              {/* پذیرش قوانین — پیش‌شرط ثبت رزرو */}
+              <div style={{padding:'0 22px 12px'}}>
+                <label style={{display:'flex',alignItems:'flex-start',gap:9,cursor:'pointer'}}>
+                  <input type="checkbox" checked={acceptTerms} onChange={e=>{setAcceptTerms(e.target.checked); setError('');}}
+                    style={{width:17,height:17,marginTop:2,accentColor:'#C7A66A',cursor:'pointer',flexShrink:0}}/>
+                  <span style={{fontSize:12.5,lineHeight:2,color:'rgba(0,0,0,0.62)'}}>
+                    با ثبت رزرو،{' '}
+                    <Link href="/terms#cancellation" target="_blank" style={{color:'#9A6E38',fontWeight:800,textDecoration:'none'}}>
+                      قوانین رزرو و شرایط لغو و بازگشت وجه
+                    </Link>
+                    {' '}را مطالعه و می‌پذیرم.
+                  </span>
+                </label>
+                <Link href="/terms#booking" target="_blank"
+                  style={{display:'inline-flex',alignItems:'center',gap:5,marginTop:8,fontSize:12,fontWeight:700,color:'#9A6E38',textDecoration:'none'}}>
+                  مشاهده قوانین رزرو و لغو رزرو
+                </Link>
               </div>
 
               {/* #17: LQ-styled confirm button, new text */}

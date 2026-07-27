@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
     const startsAt = bookingStartsAt(String(r.bookingDate), r.timeSlots as string | null);
     const isPaid = r.payment_status === 'PAID';
     const active = r.booking_status === 'CONFIRMED' || r.booking_status === 'PENDING_PAYMENT';
-    const upcoming = startsAt.getTime() > now.getTime();
+    /* طبق قوانین، لغو فقط تا ۲ ساعت پیش از شروع ممکن است */
+    const upcoming = startsAt.getTime() - now.getTime() > 2 * 3_600_000;
     const club = clubMap.get(String(r.clubId));
     return {
       ...r,

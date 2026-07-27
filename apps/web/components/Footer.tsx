@@ -72,6 +72,16 @@ const nav = [
       { href: '/dashboard', label: 'داشبورد' },
     ],
   },
+  {
+    heading: 'اطلاعات و قوانین',
+    color: '#0E7A38',
+    links: [
+      { href: '/terms',   label: 'قوانین و مقررات' },
+      { href: '/privacy', label: 'حریم خصوصی'      },
+      { href: '/contact', label: 'تماس با ما'      },
+      { href: '/about',   label: 'درباره ما'       },
+    ],
+  },
 ];
 
 export default function Footer() {
@@ -123,7 +133,7 @@ export default function Footer() {
           .ft-brand { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
-          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 14px !important; margin-bottom: 16px !important; }
+          .ft-grid { grid-template-columns: repeat(2,1fr) !important; gap: 16px 14px !important; margin-bottom: 16px !important; }
           .ft-brand { grid-column: 1 / -1 !important; }
           .ft-tagline { margin-bottom: 10px !important; }
           .ft-inner { padding: 26px 18px 12px !important; }
@@ -146,7 +156,8 @@ export default function Footer() {
       <div className="ft-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 7% 22px' }}>
 
         {/* ── Main grid ─────────────────────────────── */}
-        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2.2fr 1fr 1fr 1fr', gap: '36px', marginBottom: '32px' }}>
+        {/* ۴ ستون لینک (با افزودن «اطلاعات و قوانین») + ستون برند */}
+        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1.15fr', gap: '30px', marginBottom: '32px' }}>
 
           {/* Brand column */}
           <div className="ft-brand">
@@ -230,9 +241,10 @@ export default function Footer() {
         <div className="ft-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ fontSize: '13px', color: DIM2 }}>© ۱۴۰۵ BilliardHub</div>
           <div className="ft-bottom-links" style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
+            {/* لینک‌های حقوقی — «درباره ما / تماس با ما» در ستون «اطلاعات و قوانین» بالا هستند */}
             {[
-              { label: 'درباره ما', href: '/about' },
-              { label: 'تماس با ما', href: '/contact' },
+              { label: 'قوانین و مقررات', href: '/terms' },
+              { label: 'حریم خصوصی', href: '/privacy' },
             ].map(item => (
               <Link key={item.href} href={item.href} style={{ fontSize: '13px', color: DIM2, textDecoration: 'none', transition: 'color 0.22s ease' }}
                 onMouseEnter={e => { (e.target as HTMLElement).style.color = GOLD; }}

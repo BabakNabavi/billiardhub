@@ -29,6 +29,14 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (b.booking_status === 'CANCELLED') return NextResponse.json({ message: 'این رزرو قبلاً کنسل شده است' }, { status: 409 });
   if (b.booking_status === 'COMPLETED') return NextResponse.json({ message: 'رزروِ انجام‌شده قابلِ کنسل نیست' }, { status: 409 });
 
+  /* طبق قوانین: لغو فقط تا ۲ ساعت پیش از شروع. مالک باشگاه و ادمین مستثنا هستند
+     (لغو از سوی باشگاه، طبق همان بند، با بازگشت وجه انجام می‌شود). */
+  const startsAt = bookingStartsAt(b.bookingDate, b.timeSlots);
+  const hoursLeft = (startsAt.getTime() - Date.now()) / 3_600_000;
+  if (!admin && !owner && hoursLeft < 2) {
+    return NextResponse.json({ message: 'مهلت لغو گذشته است؛ رزرو تنها تا ۲ ساعت پیش از زمان شروع قابل لغو است' }, { status: 409 });
+  }
+
   const body = await req.json().catch(() => ({}));
   const reason = String(body?.reason || '').slice(0, 300) || 'کنسل توسط کاربر';
 

@@ -5,11 +5,12 @@
 
 export interface CancellationTier { minHoursBefore: number; refundPercent: number; label: string }
 
-/* از بالا به پایین ارزیابی می‌شود؛ اولین موردی که شرطش برقرار شد اعمال می‌گردد. */
+/* از بالا به پایین ارزیابی می‌شود؛ اولین موردی که شرطش برقرار شد اعمال می‌گردد.
+   این جدول باید همیشه با بند «لغو رزرو و بازگشت وجه» در صفحه‌ی قوانین
+   (lib/legal-content.ts → TERMS → cancellation) یکسان بماند. */
 export const CANCELLATION_POLICY: CancellationTier[] = [
-  { minHoursBefore: 24, refundPercent: 100, label: 'بیش از ۲۴ ساعت مانده — بازپرداختِ کامل' },
-  { minHoursBefore: 12, refundPercent: 80,  label: 'بین ۱۲ تا ۲۴ ساعت — ۸۰٪ بازپرداخت' },
-  { minHoursBefore: 0,  refundPercent: 50,  label: 'کمتر از ۱۲ ساعت — ۵۰٪ بازپرداخت' },
+  { minHoursBefore: 2, refundPercent: 100, label: 'بیش از ۲ ساعت مانده — بازپرداخت کامل' },
+  { minHoursBefore: 0, refundPercent: 0,   label: 'کمتر از ۲ ساعت مانده — بدون بازپرداخت' },
 ]
 
 export interface RefundDecision {
