@@ -1,11 +1,13 @@
 'use client'
 
 /* رپرهای کلاینتِ OTP */
-export interface OtpResult { ok: boolean; message?: string; wait?: number }
+export interface OtpResult { ok: boolean; message?: string; wait?: number; exists?: boolean }
 
-export async function sendOtp(mobile: string): Promise<OtpResult> {
+/* purpose='register' ⇒ اگر شماره از قبل حساب داشته باشد، سرور پیامکی
+   نمی‌فرستد و exists را برمی‌گرداند (جلوگیری از هزینه‌ی بیهوده). */
+export async function sendOtp(mobile: string, purpose?: 'register'): Promise<OtpResult> {
   try {
-    const r = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'send', mobile }) })
+    const r = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'send', mobile, purpose }) })
     return await r.json()
   } catch { return { ok: false, message: 'خطا در اتصال' } }
 }

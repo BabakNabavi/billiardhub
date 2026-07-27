@@ -62,6 +62,8 @@ export default function RegisterPage() {
   const [resendIn, setResendIn] = useState(0);
   /* پذیرشِ قوانین — پیش‌شرطِ ساختِ حساب */
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  /* شماره از قبل حساب دارد ⇒ به‌جای پیامک، راهنماییِ ورود */
+  const [phoneTaken, setPhoneTaken] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     phone: '',
@@ -156,11 +158,14 @@ export default function RegisterPage() {
   // ── Step 1: validate phone → ارسالِ کدِ پیامکی ────────────────────
   const handleContinue = async () => {
     if (!/^09[0-9]{9}$/.test(form.phone)) { setError('شماره موبایل معتبر نیست'); return; }
-    setLoading(true); setError('');
-    const r = await apiSendOtp(form.phone);
+    setLoading(true); setError(''); setPhoneTaken(false);
+    /* سرور اول تکراری بودنِ شماره را چک می‌کند؛ اگر حساب داشته باشد
+       اصلاً پیامکی فرستاده نمی‌شود تا هزینه‌ی اضافه ایجاد نشود. */
+    const r = await apiSendOtp(form.phone, 'register');
     setLoading(false);
-    if (r.ok) { setOtpOpen(true); setOtp(''); setOtpMsg(''); setResendIn(60); }
-    else setError(r.message || 'ارسالِ کدِ پیامکی ناموفق بود');
+    if (r.ok) { setOtpOpen(true); setOtp(''); setOtpMsg(''); setResendIn(60); return; }
+    if (r.exists) { setPhoneTaken(true); setError(r.message || 'این شماره قبلاً ثبت‌نام کرده است'); return; }
+    setError(r.message || 'ارسالِ کدِ پیامکی ناموفق بود');
   };
 
   const handleResend = async () => {
@@ -400,7 +405,26 @@ export default function RegisterPage() {
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 یک کدِ تأیید با پیامک به این شماره فرستاده می‌شود
               </p>
-              <button className="au-btn" onClick={handleContinue} disabled={loading}>
+              {/* شماره از قبل حساب دارد ⇒ به‌جای ارسالِ پیامک، مسیرِ ورود */}
+              {phoneTaken && (
+                <div style={{ background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: TEXT, marginBottom: 6 }}>این شماره قبلاً ثبت‌نام کرده است</div>
+                  <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 12px', lineHeight: 2 }}>
+                    برای ادامه وارد حساب خود شوید. اگر رمز عبورتان را فراموش کرده‌اید، از گزینه‌ی بازیابی استفاده کنید.
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 11, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.45)', color: GOLD_D }}>
+                      ورود به حساب <ArrowLeft size={13} />
+                    </Link>
+                    <button type="button" onClick={() => { setPhoneTaken(false); setError(''); setForm(f => ({ ...f, phone: '' })); }}
+                      style={{ padding: '9px 16px', borderRadius: 11, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, background: 'transparent', border: `1px solid ${LINE}`, color: SEC }}>
+                      شماره‌ی دیگری وارد می‌کنم
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <button className="au-btn" onClick={handleContinue} disabled={loading || phoneTaken}>
                 {loading ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> در حال ارسالِ کد…</>) : (<>ادامه <ArrowLeft size={15} /></>)}
               </button>
             </div>
