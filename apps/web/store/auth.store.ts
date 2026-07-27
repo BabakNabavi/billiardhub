@@ -9,6 +9,7 @@ interface User {
   primaryRole: string;
   secondaryRoles: string[];
   isProfileComplete: boolean;
+  verified?: boolean;          // شماره‌ی موبایل با کدِ پیامکی تأیید شده
   phone?: string;
   bio?: string;
   city?: string;

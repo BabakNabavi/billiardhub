@@ -12,7 +12,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
-import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff } from 'lucide-react';
+import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp } from '@/lib/otp-client';
+import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck } from 'lucide-react';
 
 type Step = 1 | 2;
 
@@ -52,6 +53,12 @@ export default function RegisterPage() {
   const [showPw, setShowPw]   = useState(false);
   const [showPw2, setShowPw2] = useState(false);
   const [pwWarn, setPwWarn]   = useState(false);
+  /* مرحله‌ی OTP (بینِ شماره و اطلاعاتِ حساب) */
+  const [otpOpen, setOtpOpen] = useState(false);
+  const [otp, setOtp]         = useState('');
+  const [otpMsg, setOtpMsg]   = useState('');
+  const [otpBusy, setOtpBusy] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
 
   const [form, setForm] = useState<FormData>({
     phone: '',
@@ -95,13 +102,40 @@ export default function RegisterPage() {
     setError('');
   };
 
-  // ── Step 1: validate phone and continue ──────────────────────────
-  const handleContinue = () => {
-    if (!/^09[0-9]{9}$/.test(form.phone)) {
-      setError('شماره موبایل معتبر نیست');
-      return;
-    }
-    setStep(2);
+  /* شمارشِ معکوسِ ارسالِ مجدد */
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  // ── Step 1: validate phone → ارسالِ کدِ پیامکی ────────────────────
+  const handleContinue = async () => {
+    if (!/^09[0-9]{9}$/.test(form.phone)) { setError('شماره موبایل معتبر نیست'); return; }
+    setLoading(true); setError('');
+    const r = await apiSendOtp(form.phone);
+    setLoading(false);
+    if (r.ok) { setOtpOpen(true); setOtp(''); setOtpMsg(''); setResendIn(60); }
+    else setError(r.message || 'ارسالِ کدِ پیامکی ناموفق بود');
+  };
+
+  const handleResend = async () => {
+    if (resendIn > 0 || otpBusy) return;
+    setOtpBusy(true); setOtpMsg('');
+    const r = await apiSendOtp(form.phone);
+    setOtpBusy(false);
+    if (r.ok) { setResendIn(60); setOtpMsg('کدِ جدید ارسال شد'); }
+    else { setOtpMsg(r.message || 'ارسالِ مجدد ناموفق بود'); if (r.wait) setResendIn(r.wait); }
+  };
+
+  const handleVerify = async () => {
+    if (otpBusy) return;
+    if (!/^\d{4,6}$/.test(otp.trim())) { setOtpMsg('کد را کامل وارد کنید'); return; }
+    setOtpBusy(true); setOtpMsg('');
+    const r = await apiVerifyOtp(form.phone, otp.trim());
+    setOtpBusy(false);
+    if (r.ok) { setOtpOpen(false); setStep(2); }
+    else setOtpMsg(r.message || 'کد نادرست است');
   };
 
   // ── Step 2: complete registration ─────────────────────────────────
@@ -136,7 +170,8 @@ export default function RegisterPage() {
         password: form.password,
       });
 
-      setAuth(data.user, data.token);
+      /* شماره در مرحله‌ی OTP تأیید شده ⇒ کاربر verified است */
+      setAuth({ ...data.user, verified: true }, data.token);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err?.response?.data?.message ?? 'خطا در ثبت‌نام، دوباره تلاش کنید');
@@ -292,24 +327,54 @@ export default function RegisterPage() {
           </div>
 
           <h1 style={{ fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-            {step === 1 ? 'ساخت حساب جدید' : 'تکمیل اطلاعات حساب'}
+            {otpOpen ? 'تأیید شماره موبایل' : step === 1 ? 'ساخت حساب جدید' : 'تکمیل اطلاعات حساب'}
           </h1>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
-            {step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `شماره ${form.phone} — حالا اطلاعات حساب را کامل کنید`}
+            {otpOpen ? `کدِ ۵ رقمی به شماره ${form.phone} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `شماره ${form.phone} — حالا اطلاعات حساب را کامل کنید`}
           </p>
 
-          {/* ── مرحله ۱ ── */}
-          {step === 1 && (
+          {/* ── مرحله ۱: شماره ── */}
+          {step === 1 && !otpOpen && (
             <div key="s1" style={{ animation: 'auUp .4s ease both' }}>
               {field('phone', 'شماره موبایل', <Phone size={16} />, { type: 'tel', placeholder: 'مثال: 09121234567', inputMode: 'numeric', maxLength: 11, ltr: true })}
               <p style={{ fontSize: 11.5, color: MUT, margin: '2px 0 18px', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
-                تأیید پیامکی (OTP) در نسخه‌ی بعدی فعال می‌شود
+                یک کدِ تأیید با پیامک به این شماره فرستاده می‌شود
               </p>
-              <button className="au-btn" onClick={handleContinue}>
-                ادامه <ArrowLeft size={15} />
+              <button className="au-btn" onClick={handleContinue} disabled={loading}>
+                {loading ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> در حال ارسالِ کد…</>) : (<>ادامه <ArrowLeft size={15} /></>)}
               </button>
+            </div>
+          )}
+
+          {/* ── مرحله‌ی OTP ── */}
+          {step === 1 && otpOpen && (
+            <div key="otp" style={{ animation: 'auUp .4s ease both' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                <span style={{ display: 'inline-flex', width: 52, height: 52, borderRadius: 16, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.32)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><MessageSquare size={24} /></span>
+              </div>
+              <input
+                className="au-inp" value={otp} inputMode="numeric" maxLength={6} autoFocus
+                onChange={e => { setOtp(e.target.value.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 6)); setOtpMsg(''); }}
+                onKeyDown={e => { if (e.key === 'Enter') handleVerify(); }}
+                placeholder="- - - - -"
+                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', fontSize: 26, fontWeight: 800, direction: 'ltr', padding: '14px', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', color: TEXT, outline: 'none', fontFamily: 'inherit' }}
+              />
+              {otpMsg && <p style={{ fontSize: 12, fontWeight: 700, color: otpMsg.includes('ارسال شد') ? '#0E7A38' : '#B23B2E', margin: '10px 0 0', textAlign: 'center' }}>{otpMsg}</p>}
+              <button className="au-btn" onClick={handleVerify} disabled={otpBusy} style={{ marginTop: 16 }}>
+                {otpBusy ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> بررسی…</>) : (<><ShieldCheck size={16} /> تأیید و ادامه</>)}
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+                <button onClick={handleResend} disabled={resendIn > 0 || otpBusy}
+                  style={{ background: 'none', border: 'none', cursor: resendIn > 0 ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, color: resendIn > 0 ? MUT : GOLD_D, padding: 0 }}>
+                  {resendIn > 0 ? `ارسالِ مجدد تا ${resendIn.toLocaleString('fa-IR')} ثانیه` : 'ارسالِ مجددِ کد'}
+                </button>
+                <button onClick={() => { setOtpOpen(false); setError(''); }} disabled={otpBusy}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, color: SEC, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <ArrowRight size={13} /> ویرایشِ شماره
+                </button>
+              </div>
             </div>
           )}
 
