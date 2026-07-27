@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
 import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp, verifyIdentity as apiVerifyIdentity } from '@/lib/otp-client';
-import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck, CalendarDays } from 'lucide-react';
 
 type Step = 1 | 2;
 
@@ -22,6 +22,7 @@ interface FormData {
   firstName: string;
   lastName: string;
   nationalId: string;
+  birthDate: string;
   password: string;
   confirmPassword: string;
 }
@@ -65,6 +66,7 @@ export default function RegisterPage() {
     firstName: '',
     lastName: '',
     nationalId: '',
+    birthDate: '',
     password: '',
     confirmPassword: '',
   });
@@ -75,6 +77,13 @@ export default function RegisterPage() {
     const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
     if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹A-Za-z]/g, '');
     if (key === 'nationalId') return latin.replace(/[^0-9]/g, '').slice(0, 10);
+    /* تاریخ تولدِ شمسی: فقط عدد، «/» خودکار ⇒ 1370/05/12 */
+    if (key === 'birthDate') {
+      const d = latin.replace(/[^0-9]/g, '').slice(0, 8);
+      if (d.length <= 4) return d;
+      if (d.length <= 6) return `${d.slice(0, 4)}/${d.slice(4)}`;
+      return `${d.slice(0, 4)}/${d.slice(4, 6)}/${d.slice(6)}`;
+    }
     if (key === 'phone') {
       let d = latin.replace(/[^0-9]/g, '');
       if (d && d[0] !== '0') d = d[0] === '9' ? '0' + d : '';
@@ -148,6 +157,10 @@ export default function RegisterPage() {
       setError('کد ملی معتبر نیست');
       return;
     }
+    if (!/^1[23]\d{2}\/\d{1,2}\/\d{1,2}$/.test(form.birthDate.trim())) {
+      setError('تاریخ تولد را کامل و به‌صورتِ ۱۳۷۰/۰۵/۱۲ وارد کنید');
+      return;
+    }
     const pw = form.password;
     if (pw.length < 8 || !/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
       setError('رمز عبور باید حداقل ۸ کاراکتر و شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه (مثل ! یا @) باشد');
@@ -160,16 +173,19 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      /* احراز هویتِ شاهکار: کد ملی باید با شماره‌ی موبایلِ تأییدشده مطابقت داشته باشد */
-      const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim());
+      /* احراز هویت: شاهکار (کد ملی ↔ موبایلِ تأییدشده) + تطبیقِ نام با ثبت‌احوال */
+      const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim(), {
+        birthDate: form.birthDate.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(),
+      });
       if (!idv.ok) { setLoading(false); setError(idv.message || 'استعلامِ احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
-      if (!idv.match) { setLoading(false); setError('کد ملی با شماره‌ی موبایلِ شما مطابقت ندارد — شماره باید به‌نامِ خودتان باشد'); return; }
+      if (!idv.match) { setLoading(false); setError(idv.message || 'اطلاعاتِ هویتی با کد ملی مطابقت ندارد'); return; }
 
       const { data } = await api.post('/auth/register', {
         phone: form.phone,
         firstName: form.firstName,
         lastName: form.lastName,
         nationalId: form.nationalId.trim(),
+        birthDate: form.birthDate.trim(),
         password: form.password,
       });
 
@@ -388,10 +404,13 @@ export default function RegisterPage() {
                 {field('firstName', 'نام', <User size={16} />, { placeholder: 'علی' })}
                 {field('lastName', 'نام خانوادگی', <User size={16} />, { placeholder: 'احمدی' })}
               </div>
-              {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'مثال: 0012345678', inputMode: 'numeric', maxLength: 10, ltr: true })}
+              <div className="au-row2">
+                {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'مثال: 0012345678', inputMode: 'numeric', maxLength: 10, ltr: true })}
+                {field('birthDate', 'تاریخ تولد', <CalendarDays size={16} />, { type: 'tel', placeholder: '۱۳۷۰/۰۵/۱۲', inputMode: 'numeric', maxLength: 10, ltr: true })}
+              </div>
               <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
-                کد ملی برای احراز هویت استفاده می‌شود و باید با نام و شماره موبایل شما مطابقت داشته باشد.
+                نام، نام خانوادگی، کد ملی و تاریخ تولد از ثبت‌احوال استعلام می‌شود و باید با هم و با شماره موبایلِ شما مطابقت داشته باشد.
               </p>
               {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
               {pwWarn && (

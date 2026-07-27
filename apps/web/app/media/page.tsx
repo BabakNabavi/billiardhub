@@ -22,7 +22,6 @@ import { getHiddenVideoIds, getFeaturedOverride } from '../../lib/media-admin-st
 import { useAuthStore } from '../../store/auth.store'
 import { fetchUserVideos } from '../../lib/media-user'
 import MediaUpload from '../../components/MediaUpload'
-import IdentityVerify from '../../components/IdentityVerify'
 
 /* ── پالتِ روشن ── */
 const INK   = '#1C1B17'
@@ -148,11 +147,10 @@ export default function MediaPage() {
 
   const { user } = useAuthStore()
   const [uploadOpen, setUploadOpen] = useState(false)
-  const [verifyOpen, setVerifyOpen] = useState(false)
-  /* آپلود فقط برای کاربرِ احرازشده؛ مهمان → ورود، لاگینِ احرازنشده → مودالِ احراز هویت */
+  /* هر کاربرِ ثبت‌نام‌کرده در همان ثبت‌نام احراز هویت شده (OTP + شاهکار)؛
+     پس مهمان → صفحه‌ی ورود (که خودش گزینه‌ی ساختِ حساب دارد)، لاگین → آپلود */
   const onUploadClick = () => {
     if (!user) { window.location.href = '/login'; return }
-    if (!user.verified) { setVerifyOpen(true); return }
     setUploadOpen(true)
   }
 
@@ -653,7 +651,7 @@ export default function MediaPage() {
                     <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
                     <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
                     <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>ویدیوهایت را آپلود کن؛ کانالت خودکار ساخته می‌شود.</span>
-                    <span className="go" style={{ color: FELT }}>{!user ? 'ورود و آپلود' : !user.verified ? 'احراز هویت و آپلود' : 'آپلودِ ویدیو'} <ArrowLeft size={11} /></span>
+                    <span className="go" style={{ color: FELT }}>{user ? 'آپلودِ ویدیو' : 'ورود و آپلود'} <ArrowLeft size={11} /></span>
                   </button>
                 </div>
               </section>
@@ -706,10 +704,8 @@ export default function MediaPage() {
         )}
       </main>
 
-      {/* مودالِ آپلودِ ویدیو (فقط کاربرِ احرازشده) */}
+      {/* مودالِ آپلودِ ویدیو (کاربرِ لاگین) */}
       <MediaUpload open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={(v) => { setUserVids(prev => [v, ...prev]); setUploadOpen(false) }} />
-      {/* مودالِ احراز هویت — پس از موفقیت، مستقیم آپلود باز می‌شود */}
-      <IdentityVerify open={verifyOpen} onClose={() => setVerifyOpen(false)} onVerified={() => { setVerifyOpen(false); setUploadOpen(true) }} />
     </div>
   )
 }

@@ -1,13 +1,23 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS } from '@/lib/social-server'
-import { verifyIdentity } from '@/lib/shahkar-server'
+import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* POST { mobile, nationalCode } → تطبیقِ کد ملی با شماره (شاهکار) */
+/* POST { mobile, nationalCode }                                  → تطبیقِ کد ملی با شماره (شاهکار)
+   POST { mobile, nationalCode, birthDate, firstName, lastName }  → + تطبیقِ نام از ثبت‌احوال */
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}))
-  const r = await verifyIdentity(String(b?.mobile || ''), String(b?.nationalCode || ''))
-  return NextResponse.json(r, { status: r.ok ? 200 : 400, headers: CORS })
+  const mobile = String(b?.mobile || ''), nc = String(b?.nationalCode || '')
+
+  const shahkar = await verifyIdentity(mobile, nc)
+  if (!shahkar.ok || !shahkar.match) return NextResponse.json(shahkar, { status: shahkar.ok ? 200 : 400, headers: CORS })
+
+  /* اگر تاریخ تولد و نام داده شد، نام را هم با ثبت‌احوال تطبیق بده */
+  if (b?.birthDate && (b?.firstName || b?.lastName)) {
+    const person = await verifyPerson(mobile, nc, String(b.birthDate), String(b.firstName || ''), String(b.lastName || ''))
+    return NextResponse.json(person, { status: person.ok ? 200 : 400, headers: CORS })
+  }
+  return NextResponse.json(shahkar, { headers: CORS })
 }

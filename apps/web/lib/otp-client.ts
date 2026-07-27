@@ -17,10 +17,14 @@ export async function verifyOtp(mobile: string, code: string): Promise<OtpResult
   } catch { return { ok: false, message: 'خطا در اتصال' } }
 }
 
-/* احراز هویتِ شاهکار: تطبیقِ کد ملی ↔ موبایل */
-export async function verifyIdentity(mobile: string, nationalCode: string): Promise<{ ok: boolean; match?: boolean; message?: string }> {
+/* احراز هویت: شاهکار (کد ملی ↔ موبایل) و در صورتِ دادنِ تاریخ تولد و نام،
+   تطبیقِ نام و نام‌خانوادگی با ثبت‌احوال */
+export async function verifyIdentity(
+  mobile: string, nationalCode: string,
+  extra?: { birthDate?: string; firstName?: string; lastName?: string },
+): Promise<{ ok: boolean; match?: boolean; message?: string }> {
   try {
-    const r = await fetch('/api/shahkar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mobile, nationalCode }) })
+    const r = await fetch('/api/shahkar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mobile, nationalCode, ...(extra || {}) }) })
     return await r.json()
   } catch { return { ok: false, message: 'خطا در اتصال' } }
 }
