@@ -22,6 +22,7 @@ import { getHiddenVideoIds, getFeaturedOverride } from '../../lib/media-admin-st
 import { useAuthStore } from '../../store/auth.store'
 import { fetchUserVideos } from '../../lib/media-user'
 import MediaUpload from '../../components/MediaUpload'
+import IdentityVerify from '../../components/IdentityVerify'
 
 /* ── پالتِ روشن ── */
 const INK   = '#1C1B17'
@@ -147,6 +148,13 @@ export default function MediaPage() {
 
   const { user } = useAuthStore()
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [verifyOpen, setVerifyOpen] = useState(false)
+  /* آپلود فقط برای کاربرِ احرازشده؛ مهمان → ورود، لاگینِ احرازنشده → مودالِ احراز هویت */
+  const onUploadClick = () => {
+    if (!user) { window.location.href = '/login'; return }
+    if (!user.verified) { setVerifyOpen(true); return }
+    setUploadOpen(true)
+  }
 
   /* کنترل‌های ادمین + ویدیوهای آپلودیِ کاربران (سمت‌سرور) */
   const [basePool, setBasePool] = useState<MediaVideo[]>(MEDIA_VIDEOS)
@@ -514,7 +522,7 @@ export default function MediaPage() {
       <div className="bm-nav">
         <div className="bm-wrap bm-navrow">
           <button className="bm-iconbtn" onClick={() => setSearchOpen(true)} aria-label="جستجو"><Search size={18} /></button>
-          <button className="bm-uploadbtn" onClick={() => (user ? setUploadOpen(true) : (window.location.href = '/login'))}>
+          <button className="bm-uploadbtn" onClick={onUploadClick}>
             <UploadCloud size={16} /><span className="bm-up-txt">آپلودِ ویدیو</span>
           </button>
           <div className="bm-chips">
@@ -641,11 +649,11 @@ export default function MediaPage() {
                       <span className="go">مشاهده کانال <ArrowLeft size={11} /></span>
                     </Link>
                   ))}
-                  <button className="bm-chan bm-chan-cta" onClick={() => (user ? setUploadOpen(true) : (window.location.href = '/login'))} style={{ cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' }}>
+                  <button className="bm-chan bm-chan-cta" onClick={onUploadClick} style={{ cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' }}>
                     <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
                     <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
                     <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>ویدیوهایت را آپلود کن؛ کانالت خودکار ساخته می‌شود.</span>
-                    <span className="go" style={{ color: FELT }}>{user ? 'آپلودِ ویدیو' : 'ورود و آپلود'} <ArrowLeft size={11} /></span>
+                    <span className="go" style={{ color: FELT }}>{!user ? 'ورود و آپلود' : !user.verified ? 'احراز هویت و آپلود' : 'آپلودِ ویدیو'} <ArrowLeft size={11} /></span>
                   </button>
                 </div>
               </section>
@@ -698,8 +706,10 @@ export default function MediaPage() {
         )}
       </main>
 
-      {/* مودالِ آپلودِ ویدیو (فقط کاربرِ لاگین) */}
+      {/* مودالِ آپلودِ ویدیو (فقط کاربرِ احرازشده) */}
       <MediaUpload open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={(v) => { setUserVids(prev => [v, ...prev]); setUploadOpen(false) }} />
+      {/* مودالِ احراز هویت — پس از موفقیت، مستقیم آپلود باز می‌شود */}
+      <IdentityVerify open={verifyOpen} onClose={() => setVerifyOpen(false)} onVerified={() => { setVerifyOpen(false); setUploadOpen(true) }} />
     </div>
   )
 }

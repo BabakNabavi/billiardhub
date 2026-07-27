@@ -81,6 +81,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (busy) return
     setErr('')
     if (!user) { setErr('برای آپلود باید وارد شوید'); return }
+    if (!user.verified) { setErr('برای آپلود باید حساب‌تان احراز هویت شده باشد'); return }
     if (!file) { setErr('ویدیو را انتخاب کنید'); return }
     if (!title.trim()) { setErr('عنوانِ ویدیو را بنویسید'); return }
     setBusy(true)
