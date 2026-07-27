@@ -5,7 +5,7 @@ import { readJson, writeJson, safeKey } from './social-server'
 const SMS_URL = 'https://s.api.ir/api/sw1/SmsOTP'   // sw1 = s‑w‑یک (نه swl)
 const TEMPLATE = 2                    // قالبِ سرویس: ۲ = «کد تایید» (مناسبِ ثبت‌نام)
                                      // (افزودنِ نامِ «بیلیارد هاب» به تهِ پیامک = تنظیمِ سطحِ حساب از پشتیبانیِ s.api.ir)
-const TTL = 2 * 60 * 1000             // اعتبارِ کد: ۲ دقیقه
+const TTL = 5 * 60 * 1000             // اعتبارِ کد: ۵ دقیقه (۲ دقیقه کوتاه بود و زود منقضی می‌شد)
 const RESEND = 60 * 1000              // فاصله‌ی مجازِ ارسالِ مجدد: ۶۰ ثانیه
 const MAX_TRIES = 5
 
