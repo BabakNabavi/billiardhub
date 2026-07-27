@@ -34,6 +34,20 @@ export async function readJson<T>(path: string, fallback: T): Promise<T> {
   } catch { return fallback }
 }
 
+/* خواندنِ تضمین‌شده‌ی تازه — دانلودِ معمولی گاهی نسخه‌ی کش‌شده‌ی لبه را می‌دهد و
+   اگر روی همان نسخه بنویسیم، تغییرِ همزمان را پاک می‌کند. هرجا نتیجه‌ی خواندن
+   مبنای نوشتن است یا کهنگی برای کاربر دیده می‌شود، از این استفاده کنید.
+   باکت عمومی است، پس آدرسِ عمومی با پارامترِ ضدِکش خوانده می‌شود. */
+export async function readJsonFresh<T>(path: string, fallback: T): Promise<T> {
+  try {
+    const bust = `${Date.now()}_${Math.random().toString(36).slice(2)}`
+    const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}?t=${bust}`
+    const r = await fetch(url, { cache: 'no-store' })
+    if (!r.ok) return fallback
+    return (await r.json()) as T
+  } catch { return fallback }
+}
+
 export async function writeJson(path: string, obj: unknown): Promise<void> {
   const buf = Buffer.from(JSON.stringify(obj), 'utf8')
   await getSupabaseServer().storage.from(BUCKET).upload(path, buf, {

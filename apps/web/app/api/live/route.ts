@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { CORS, BUCKET, safeKey, readJson, writeJson } from '@/lib/social-server'
+import { CORS, BUCKET, safeKey, readJsonFresh, writeJson } from '@/lib/social-server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 
 /* جلسات پخش زنده — هر جلسه یک فایل مستقل (بدون کلوبِر هنگام تپش همزمان).
@@ -29,7 +29,7 @@ export function OPTIONS() { return new NextResponse(null, { status: 204, headers
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id')
   if (id) {
-    const s = await readJson<LiveSession | null>(sPath(id), null)
+    const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
     if (!s || s.ended || Date.now() - s.lastBeat > STALE) {
       return NextResponse.json(null, { headers: { ...CORS, 'Cache-Control': 'no-store' } })
     }
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
   try {
     const { data } = await getSupabaseServer().storage.from(BUCKET).list(DIR, { limit: 200 })
     const files = (data ?? []).filter(f => f.name.endsWith('.json'))
-    const all = await Promise.all(files.map(f => readJson<LiveSession | null>(`${DIR}/${f.name}`, null)))
+    const all = await Promise.all(files.map(f => readJsonFresh<LiveSession | null>(`${DIR}/${f.name}`, null)))
     const now = Date.now()
     const live = (all.filter(Boolean) as LiveSession[])
       .filter(s => !s.ended && now - s.lastBeat <= STALE)
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
   if (action === 'beat' || action === 'stop') {
     const id = String(b?.id || '')
     if (!id) return NextResponse.json({ ok: false }, { status: 400, headers: CORS })
-    const s = await readJson<LiveSession | null>(sPath(id), null)
+    const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
     if (!s) return NextResponse.json({ ok: false, message: 'جلسه یافت نشد' }, { status: 404, headers: CORS })
     /* فقط صاحب پخش می‌تواند تپش/پایان بفرستد */
     if (b?.ownerKey && s.ownerKey !== String(b.ownerKey)) {
