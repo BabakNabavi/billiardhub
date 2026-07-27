@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SessionBridge from "../components/auth/SessionBridge";
 import { ToastProvider } from '../components/ui/Toast';
 import ScrollToTop from '../components/ScrollToTop';
 import AppBoot from '../components/AppBoot';
@@ -74,6 +75,7 @@ export default function RootLayout({
       <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
         <ScrollToTop />
         <AppBoot />
+        <SessionBridge />
         <Navbar />
         <main>{children}</main>
         <Footer />

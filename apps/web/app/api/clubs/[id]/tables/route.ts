@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
-import jwt from 'jsonwebtoken';
+import { sessionFromRequest } from '@/lib/auth/session';
 
 /* فقط میزهایی که باشگاه واقعاً ثبت کرده قابلِ رزرو هستند.
    پیش‌تر اگر جدولِ tables خالی بود، از روی تعدادِ اعلام‌شده در پروفایلِ باشگاه
@@ -29,22 +29,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const token = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-
-  let payload: any;
-  try {
-    payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-  } catch {
-    return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
-  }
+  const payload = sessionFromRequest(req);
+  if (!payload) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
 
   const sb = getSupabaseServer();
 
   // verify ownership or admin
   const { data: club } = await sb.from('clubs').select('ownerId').eq('id', id).single();
-  const role = payload.primaryRole ?? payload.roles?.[0] ?? 'user';
-  if (!club || (club.ownerId !== payload.sub && role !== 'admin')) {
+  if (!club || (club.ownerId !== payload.id && payload.role !== 'admin')) {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
 

@@ -1,22 +1,14 @@
 // apps/web/app/api/products/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
-import jwt from 'jsonwebtoken'
+import { sessionFromRequest } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic'
 
-/* بدونِ fallbackِ هاردکد: اگر JWT_SECRET نباشد باید هیچ توکنی پذیرفته
-   نشود، وگرنه هرکسی با همان رشته‌ی عمومی توکنِ معتبر می‌سازد. */
+/* کوکیِ نشست یا هدرِ Authorization — از منبعِ واحد */
 function getUserFromRequest(req: NextRequest) {
-  const secret = process.env.JWT_SECRET
-  if (!secret) return null
-  try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) return null
-    return jwt.verify(authHeader.slice(7), secret) as { id: string; role: string }
-  } catch {
-    return null
-  }
+  const s = sessionFromRequest(req)
+  return s ? { id: s.id, role: s.role } : null
 }
 
 // GET /api/products

@@ -34,7 +34,7 @@ export default function ClubFinance({ clubId }: { clubId: string }) {
   const load = useCallback(async () => {
     if (!clubId) return
     try {
-      const r = await fetch(`/api/clubs/${clubId}/finance`, { headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
+      const r = await fetch(`/api/clubs/${clubId}/finance`, { credentials: 'include', headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
       if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دریافتِ اطلاعاتِ مالی ممکن نشد'); setLoading(false); return }
       setD(await r.json()); setErr(''); setLoading(false)
     } catch { setErr('خطا در ارتباط با سرور'); setLoading(false) }

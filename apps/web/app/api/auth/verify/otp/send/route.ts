@@ -1,9 +1,8 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 import { getSupabaseServer } from '@/lib/supabase-server'
+import { sessionFromRequest } from '@/lib/auth/session'
 
-const JWT_SECRET = process.env.JWT_SECRET!
 const OTP_EXPIRE_MIN = 2
 
 const CORS_HEADERS = {
@@ -18,18 +17,11 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get('authorization')?.replace('Bearer ', '')
-    if (!token) {
+    const session = sessionFromRequest(req)
+    if (!session) {
       return NextResponse.json({ message: 'وارد نشده‌اید' }, { status: 401, headers: CORS_HEADERS })
     }
-
-    let userId: string
-    try {
-      const payload = jwt.verify(token, JWT_SECRET) as { sub: string }
-      userId = payload.sub
-    } catch {
-      return NextResponse.json({ message: 'توکن نامعتبر' }, { status: 401, headers: CORS_HEADERS })
-    }
+    const userId = session.id
 
     const supabase = getSupabaseServer()
 

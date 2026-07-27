@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
+import { sessionFromRequest } from '@/lib/auth/session';
 import { isUUID } from '@/lib/slug';
 
 const CORS = {
@@ -36,21 +36,13 @@ export async function PUT(
 ) {
   const { id } = await params;
 
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  const payload = sessionFromRequest(req);
+  if (!payload) {
     return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401, headers: CORS });
   }
 
-  let payload: { sub: string; primaryRole?: string; roles?: string[] };
-  try {
-    payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as typeof payload;
-  } catch {
-    return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401, headers: CORS });
-  }
-
-  const userId = payload.sub;
-  const userRole = payload.primaryRole ?? payload.roles?.[0] ?? 'user';
-  const isAdmin = userRole === 'admin';
+  const userId = payload.id;
+  const isAdmin = payload.role === 'admin';
 
   const { data: club } = await getSupabaseServer().from('clubs').select('ownerId').eq('id', id).single();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });
@@ -87,21 +79,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  const payload = sessionFromRequest(req);
+  if (!payload) {
     return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401, headers: CORS });
   }
 
-  let payload: { sub: string; primaryRole?: string; roles?: string[] };
-  try {
-    payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as typeof payload;
-  } catch {
-    return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401, headers: CORS });
-  }
-
-  const userId = payload.sub;
-  const userRole = payload.primaryRole ?? payload.roles?.[0] ?? 'user';
-  const isAdmin = userRole === 'admin';
+  const userId = payload.id;
+  const isAdmin = payload.role === 'admin';
 
   const { data: club } = await getSupabaseServer().from('clubs').select('ownerId').eq('id', id).single();
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404, headers: CORS });

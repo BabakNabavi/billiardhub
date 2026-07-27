@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
+import { sessionFromRequest } from '@/lib/auth/session';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -39,21 +39,10 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const payload = sessionFromRequest(req);
+    if (!payload) {
       return NextResponse.json(
         { message: 'احراز هویت الزامی است' },
-        { status: 401, headers: CORS_HEADERS },
-      );
-    }
-
-    const token = authHeader.slice(7);
-    let payload: { sub: string; phone: string; role: string };
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET!) as typeof payload;
-    } catch {
-      return NextResponse.json(
-        { message: 'توکن نامعتبر است' },
         { status: 401, headers: CORS_HEADERS },
       );
     }
@@ -71,7 +60,7 @@ export async function POST(req: NextRequest) {
     const insertData: Record<string, any> = {
       ...rest,
       name, address, city,
-      ownerId: payload.sub,
+      ownerId: payload.id,
       isActive: true,
       verificationStatus: body.licenseDocumentUrl ? 'pending' : 'unverified',
     };

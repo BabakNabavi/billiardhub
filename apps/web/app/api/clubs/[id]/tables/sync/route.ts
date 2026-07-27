@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
-import jwt from 'jsonwebtoken';
+import { sessionFromRequest } from '@/lib/auth/session';
 
 /* هم‌گام‌سازیِ میزهای باشگاه با دیتابیس.
    تا امروز میزها فقط در localStorageِ مرورگرِ باشگاه‌دار بودند و همین باعث
@@ -22,18 +22,13 @@ interface InTable {
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: clubId } = await params;
 
-  const token = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
-
-  let payload: { sub: string; primaryRole?: string; roles?: string[] };
-  try { payload = jwt.verify(token, process.env.JWT_SECRET!) as typeof payload; }
-  catch { return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401 }); }
+  const payload = sessionFromRequest(req);
+  if (!payload) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
 
   const sb = getSupabaseServer();
   const { data: club } = await sb.from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();
-  const role = payload.primaryRole ?? payload.roles?.[0] ?? 'user';
   if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
-  if ((club as { ownerId?: string }).ownerId !== payload.sub && role !== 'admin') {
+  if ((club as { ownerId?: string }).ownerId !== payload.id && payload.role !== 'admin') {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

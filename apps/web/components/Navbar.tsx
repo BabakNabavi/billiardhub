@@ -71,6 +71,17 @@ const mobileLinks = [
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
+
+  /* خروجِ واقعی: نشست روی سرور هم باطل می‌شود و کوکی‌ها پاک می‌شوند.
+     پیش‌تر فقط localStorage خالی می‌شد و توکن تا ۷ روز معتبر می‌ماند. */
+  const doLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch { /* حتی اگر شبکه قطع بود، سمتِ کلاینت خارج می‌شویم */ }
+    try { localStorage.removeItem('bh_session_migrated'); } catch { /* ignore */ }
+    logout();
+    router.push('/');
+  };
   /* نوتیف و دایرکتِ سمت‌سرور — فقط برای نقش‌های واجدِ استوری */
   const [dmUnread, setDmUnread] = useState(0);
   const [notifs, setNotifs] = useState<Notif[]>([]);
@@ -529,7 +540,7 @@ export default function Navbar() {
                       </Link>
                     ))}
                     <div style={{ height: '1px', background: 'rgba(28,28,26,0.06)', margin: '6px 0' }} />
-                    <button onClick={() => { logout(); setProfileOpen(false); router.push('/'); }}
+                    <button onClick={() => { void doLogout(); setProfileOpen(false); }}
                       style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'right', padding: '9px 12px', borderRadius: '10px', fontSize: '15px', color: 'rgba(239,68,68,0.7)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.06)'; (e.currentTarget as HTMLElement).style.color = '#ef4444' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(239,68,68,0.7)' }}>
@@ -627,7 +638,7 @@ export default function Navbar() {
                   <div style={{ color: '#1C1B17', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
                   <div style={{ color: 'rgba(28,28,26,0.42)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>
                 </div>
-                <button onClick={() => { logout(); router.push('/'); setMobileOpen(false); }}
+                <button onClick={() => { void doLogout(); setMobileOpen(false); }}
                   style={{ padding: '7px 12px', borderRadius: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.22)', color: '#ef4444', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <LogOut size={12} /> خروج
                 </button>

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
+import { issueSession } from '@/lib/auth/store';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    /* توکنِ قدیمی هنوز در body برمی‌گردد تا کلاینت‌های فعلی نشکنند؛
+       در مرحله‌ی «د» حذف می‌شود. منبعِ اصلی از حالا کوکیِ httpOnly است. */
     const token = jwt.sign(
       { sub: user.id, phone: user.phone, role: user.primaryRole },
       process.env.JWT_SECRET!,
@@ -55,10 +58,16 @@ export async function POST(req: NextRequest) {
 
     const { password: _pwd, ...userWithoutPassword } = user;
 
-    return NextResponse.json(
+    const res = NextResponse.json(
       { token, user: userWithoutPassword },
       { status: 200, headers: CORS_HEADERS },
     );
+    await issueSession(res, { id: user.id, role: user.primaryRole, phone: user.phone }, {
+      userAgent: req.headers.get('user-agent'),
+      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+      origin: 'login',
+    });
+    return res;
   } catch {
     return NextResponse.json(
       { message: 'خطای سرور' },

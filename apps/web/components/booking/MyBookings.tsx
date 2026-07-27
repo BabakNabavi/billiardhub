@@ -36,7 +36,7 @@ export default function MyBookings() {
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch('/api/bookings/my', { headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
+      const r = await fetch('/api/bookings/my', { credentials: 'include', headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
       setRows(r.ok ? await r.json() : [])
     } catch { setRows([]) }
   }, [])

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
+import { sessionFromRequest } from '@/lib/auth/session';
 
 const CORS = {
   'Vary': 'Origin',
@@ -14,22 +14,15 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  const payload = sessionFromRequest(req);
+  if (!payload) {
     return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401, headers: CORS });
-  }
-
-  let payload: { sub: string };
-  try {
-    payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as typeof payload;
-  } catch {
-    return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401, headers: CORS });
   }
 
   const { data, error } = await getSupabaseServer()
     .from('clubs')
     .select('*')
-    .eq('ownerId', payload.sub)
+    .eq('ownerId', payload.id)
     .order('createdAt', { ascending: false });
 
   if (error) return NextResponse.json({ message: error.message }, { status: 500, headers: CORS });

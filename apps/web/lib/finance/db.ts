@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken'
 import type { NextRequest } from 'next/server'
 import { getSupabaseServer } from '../supabase-server'
+import { sessionFromRequest } from '../auth/session'
 
 /* دسترسیِ سرور به دیتابیس + احراز هویت + ثبتِ ردِ عملیاتِ مالی.
    همه‌ی نوشتن‌های مالی از توابعِ اتمیکِ Postgres عبور می‌کنند. */
@@ -15,14 +15,11 @@ export async function rpc<T>(fn: string, args: Record<string, unknown>) {
 
 export interface Actor { id: string; role: string }
 
-/** کاربرِ درخواست از روی توکنِ JWT (همان مکانیزمِ فعلیِ سایت) */
+/** کاربرِ درخواست — اول کوکیِ نشست، بعد هدرِ Authorization.
+    در دوره‌ی گذار هر دو پذیرفته‌اند؛ هدر در مرحله‌ی «د» حذف می‌شود. */
 export function actorFromRequest(req: NextRequest): Actor | null {
-  const h = req.headers.get('authorization')
-  if (!h?.startsWith('Bearer ')) return null
-  try {
-    const p = jwt.verify(h.slice(7), process.env.JWT_SECRET!) as { sub: string; role?: string; primaryRole?: string }
-    return { id: p.sub, role: p.role || p.primaryRole || 'user' }
-  } catch { return null }
+  const s = sessionFromRequest(req)
+  return s ? { id: s.id, role: s.role } : null
 }
 
 /** آیا این کاربر مالک/مدیرِ همین باشگاه است؟ (RBAC) */
