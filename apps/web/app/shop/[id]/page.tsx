@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Store, Phone, Heart, ShieldCheck, Truck, ArrowLeftRight } from 'lucide-react'
 import { SHOP_PRODUCTS, CAT_LABELS, type ShopProduct } from '../products'
+import ReportButton from '../../../components/ReportButton'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
 const BG    = '#F7F6F4'
@@ -256,6 +257,8 @@ export default function ProductDetailPage() {
                 <a href={`tel:${product.sellerPhone}`} className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 10, ...lqGold, fontSize: 12.5, textDecoration: 'none' }}>
                   <Phone size={15} strokeWidth={2.2} /> تماس
                 </a>
+                <ReportButton variant="button" targetId={product.id} targetTitle={product.name}
+                  stopPropagation={false} style={{ gridColumn: '1 / -1' }} />
               </div>
             </div>
 

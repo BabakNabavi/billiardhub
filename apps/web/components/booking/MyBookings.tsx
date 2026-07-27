@@ -5,11 +5,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Calendar, Clock3, MapPin, X, Loader2, AlertTriangle, CheckCircle2, CalendarDays } from 'lucide-react'
+import { faDate, faTimeRange, faNum, toFaDigits } from '../../lib/jalali'
+import CancellationPolicy from './CancellationPolicy'
 
 const INK = '#111111', SEC = '#5B564B', MUT = 'rgba(0,0,0,0.42)', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
-const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
-const faD = (s: string) => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
+const fa = faNum
 const token = () => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } }
 
 interface RefundPreview { refundPercent: number; refundAmount: number; label: string; hoursBefore: number }
@@ -70,8 +71,7 @@ export default function MyBookings() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {rows.map(b => {
         const st = STATUS[b.booking_status] ?? STATUS.COMPLETED!
-        const hours = String(b.timeSlots ?? '').split(',').filter(Boolean).map(Number)
-        const timeLabel = hours.length ? `${faD(String(hours[0]))}:۰۰ تا ${faD(String(hours[hours.length - 1]! + 1))}:۰۰` : '—'
+        const timeLabel = faTimeRange(b.timeSlots)
         return (
           <div key={b.id} className="booking-row" style={{ alignItems: 'flex-start' }}>
             <div style={{ width: 42, height: 42, borderRadius: 12, background: st.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🎱</div>
@@ -79,7 +79,7 @@ export default function MyBookings() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 15.5, fontWeight: 700, color: INK, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.clubName}</div>
               <div style={{ display: 'flex', gap: 10, fontSize: 12.5, color: MUT, flexWrap: 'wrap' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={11} /> {faD(b.bookingDate)}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Calendar size={11} /> {faDate(b.bookingDate)}</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Clock3 size={11} /> {timeLabel}</span>
                 {b.clubCity && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={11} /> {b.clubCity}</span>}
               </div>
@@ -110,29 +110,34 @@ export default function MyBookings() {
             <span style={{ display: 'inline-flex', width: 54, height: 54, borderRadius: 17, background: 'rgba(178,59,46,0.09)', color: RED, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
               <AlertTriangle size={25} />
             </span>
-            <h3 style={{ fontSize: 16.5, fontWeight: 900, color: INK, margin: '0 0 8px' }}>لغوِ رزرو</h3>
+            <h3 style={{ fontSize: 16.5, fontWeight: 900, color: INK, margin: '0 0 8px' }}>لغو رزرو</h3>
             <p style={{ fontSize: 13, color: SEC, margin: '0 0 16px', lineHeight: 2 }}>
-              رزروِ <b>{confirm.clubName}</b> در تاریخ {faD(confirm.bookingDate)} لغو شود؟
+              رزرو <b>{confirm.clubName}</b> در تاریخ <b>{faDate(confirm.bookingDate)}</b>،
+              ساعت <b>{faTimeRange(confirm.timeSlots)}</b> لغو شود؟
             </p>
 
             {confirm.refundPreview ? (
-              <div style={{ background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 14, padding: 14, marginBottom: 16, textAlign: 'right' }}>
+              <div style={{ background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 14, padding: 14, marginBottom: 12, textAlign: 'right' }}>
                 <div style={{ fontSize: 11.5, color: MUT, marginBottom: 8 }}>{confirm.refundPreview.label}</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12.5, color: SEC }}>مبلغِ بازگشتی</span>
+                  <span style={{ fontSize: 12.5, color: SEC }}>مبلغ بازگشتی</span>
                   <span style={{ fontSize: 17, fontWeight: 900, color: FELT, fontVariantNumeric: 'tabular-nums' }}>
                     {fa(confirm.refundPreview.refundAmount)} <span style={{ fontSize: 11, color: MUT }}>تومان</span>
                   </span>
                 </div>
                 {confirm.refundPreview.refundPercent < 100 && (
                   <div style={{ fontSize: 11, color: MUT, marginTop: 6 }}>
-                    ({faD(String(confirm.refundPreview.refundPercent))}٪ از {fa(confirm.final_amount)} تومان)
+                    ({toFaDigits(confirm.refundPreview.refundPercent)}٪ از {fa(confirm.final_amount)} تومان)
                   </div>
                 )}
               </div>
             ) : (
-              <p style={{ fontSize: 12, color: MUT, margin: '0 0 16px' }}>این رزرو پرداخت نشده است؛ مبلغی بازگردانده نمی‌شود.</p>
+              <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px' }}>این رزرو پرداخت نشده است؛ مبلغی بازگردانده نمی‌شود.</p>
             )}
+
+            <div style={{ marginBottom: 16, textAlign: 'right' }}>
+              <CancellationPolicy compact />
+            </div>
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setConfirm(null)} disabled={!!busy}

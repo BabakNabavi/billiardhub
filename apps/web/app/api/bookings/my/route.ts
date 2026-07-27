@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
-import { computeRefund, bookingStartsAt } from '@/lib/finance/cancellation';
+import { computeRefund, bookingStartsAt, canCancelAt } from '@/lib/finance/cancellation';
 
 /* رزروهای کاربرِ جاری — همراه با پیش‌نمایشِ سیاستِ کنسلی برای هر رزرو،
    تا کاربر پیش از لغو بداند چقدر بازمی‌گردد. */
@@ -31,16 +31,16 @@ export async function GET(req: NextRequest) {
     const isPaid = r.payment_status === 'PAID';
     const active = r.booking_status === 'CONFIRMED' || r.booking_status === 'PENDING_PAYMENT';
     /* طبق قوانین، لغو فقط تا ۲ ساعت پیش از شروع ممکن است */
-    const upcoming = startsAt.getTime() - now.getTime() > 2 * 3_600_000;
+    const inTime = canCancelAt(startsAt, now);
     const club = clubMap.get(String(r.clubId));
     return {
       ...r,
       clubName: club ? String(club.name) : '—',
       clubCity: club ? String(club.city ?? '') : '',
       startsAt: startsAt.toISOString(),
-      canCancel: active && upcoming,
+      canCancel: active && inTime,
       /* پیش‌نمایشِ بازپرداخت — فقط برای رزروِ پرداخت‌شده معنا دارد */
-      refundPreview: isPaid && upcoming ? computeRefund(Number(r.final_amount) || 0, startsAt, now) : null,
+      refundPreview: isPaid && inTime ? computeRefund(Number(r.final_amount) || 0, startsAt, now) : null,
     };
   });
 

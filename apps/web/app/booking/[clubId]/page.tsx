@@ -6,6 +6,8 @@ import Link from 'next/link';
 import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/auth.store';
 import AuthGuard from '../../../components/AuthGuard';
+import CancellationPolicy from '../../../components/booking/CancellationPolicy';
+import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
 import {
   ChevronRight, ChevronLeft, Check, Clock,
   CheckCircle, AlertCircle, X, Info, CreditCard,
@@ -78,7 +80,12 @@ interface Table {
   morningDiscount?: number; photoDataUrl?: string; discountRules?: DiscountRule[];
 }
 interface Slot { hour: number; isBooked: boolean; }
-interface Club { id: string; name: string; city?: string; managerName?: string; bankCard?: string; bankCardOwner?: string; bankName?: string; }
+interface Club {
+  id: string; name: string; city?: string; managerName?: string; phone?: string;
+  bankCard?: string; bankCardOwner?: string; bankName?: string;
+  /* تنظیمِ هزینه‌ی بازیکنِ اضافه — از پنلِ باشگاه‌دار */
+  playerSurchargeEnabled?: boolean; playerSurchargePercent?: number; playerSurchargeFrom?: number;
+}
 
 const TYPE_LABEL: Record<string, string> = {
   snooker: 'اسنوکر', pocket: 'پاکت بیلیارد',
@@ -89,18 +96,6 @@ const TYPE_COLOR: Record<string, string> = {
   highball: '#a78bfa', vip_snooker: '#f59e0b', vip_pocket: '#f59e0b',
 };
 
-/* #22: morningDiscount added to fallback tables */
-const FALLBACK_TABLES: Table[] = [
-  { id:'t1', number:1, name:'میز اسنوکر ۱',  type:'snooker',     brand:'Viraka',    model:'M1 Gold',      pricePerHour:180000, morningDiscount:20 },
-  { id:'t2', number:2, name:'میز اسنوکر ۲',  type:'snooker',     brand:'BCE',       model:'Heritage',     pricePerHour:180000, morningDiscount:20 },
-  { id:'t3', number:3, name:'میز اسنوکر ۳',  type:'snooker',     brand:'Viraka',    model:'M2 Pro',       pricePerHour:180000, morningDiscount:15 },
-  { id:'t4', number:4, name:'میز پاکت ۱',    type:'pocket',      brand:'Brunswick', model:'Gold Crown',   pricePerHour:150000, morningDiscount:20 },
-  { id:'t5', number:5, name:'میز پاکت ۲',    type:'pocket',      brand:'Diamond',   model:'Pro Am',       pricePerHour:150000, morningDiscount:20 },
-  { id:'t6', number:6, name:'میز هی‌بال ۱',  type:'highball',    brand:'Artis',     model:'Vienna',       pricePerHour:120000, morningDiscount:0  },
-  { id:'t7', number:7, name:'VIP اسنوکر ۱',  type:'vip_snooker', brand:'Viraka',    model:'M1 VIP',       pricePerHour:350000, morningDiscount:10 },
-  { id:'t8', number:8, name:'VIP اسنوکر ۲',  type:'vip_snooker', brand:'Riley',     model:'Renaissance',  pricePerHour:350000, morningDiscount:10 },
-];
-
 function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
   const now = new Date();
   const todayISO = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -108,9 +103,10 @@ function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
   const ch = now.getHours();
   return slots.map(s => ({ ...s, isBooked: s.isBooked || s.hour <= ch }));
 }
-function genFallbackSlots(isoDate: string): Slot[] {
-  const booked = [12,13,17,18];
-  return applyPastHours(Array.from({length:15},(_,i)=>({hour:i+9,isBooked:booked.includes(i+9)})), isoDate);
+/* ساعت‌های کاریِ پیش‌فرض وقتی سرور فهرست را برنگرداند — همه آزاد فرض
+   نمی‌شوند تا هیچ ساعتی الکی «رزروشده» یا «آزاد» نمایش داده نشود. */
+function openSlots(isoDate: string): Slot[] {
+  return applyPastHours(Array.from({length:16},(_,i)=>({hour:i+8,isBooked:false})), isoDate);
 }
 function buildRange(slots: Slot[], start: number, end: number): { range: number[]; blocked: boolean } {
   const lo = Math.min(start,end), hi = Math.max(start,end);
@@ -250,19 +246,9 @@ function BookingContent() {
   const [booking, setBooking]       = useState(false);
   const [error, setError]           = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);   /* پذیرش قوانین رزرو */
-  /* #15/#20: payment + receipt state */
-  const [pendingPayment, setPendingPayment] = useState<{
-    bookingId: string;
-    trackingNumber: string;
-    paymentUrl: string|null;
-  }|null>(null);
-  const [paymentStep, setPaymentStep] = useState<'gateway'|'processing'|'done'|null>(null);
-  const [gwCard, setGwCard] = useState('');
-  const [gwPin2, setGwPin2] = useState('');
-  const [gwMonth, setGwMonth] = useState('');
-  const [gwYear, setGwYear] = useState('');
-  const [gwOtp, setGwOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  /* انتقال به درگاه — تنها حالتِ میانی؛ رسیدِ نهایی را /booking/result
+     پس از تأییدِ سروریِ پرداخت نشان می‌دهد. */
+  const [redirecting, setRedirecting] = useState(false);
 
   const slotsRef = useRef<HTMLDivElement>(null);
 
@@ -276,18 +262,9 @@ function BookingContent() {
     api.get(`/clubs/${clubId}`).catch(()=>({data:{id:clubId,name:'باشگاه',managerName:''}}))
       .then(c=>{ setClub(c.data); });
 
-    // prefer localStorage tables (have discountRules per table), fallback to API
-    try {
-      const stored = localStorage.getItem(`club-tables-${clubId}`);
-      if (stored) {
-        const parsed: Table[] = JSON.parse(stored);
-        const manual = parsed.filter(t => String(t.id).startsWith('local-'));
-        if (manual.length > 0) { setTables(manual); setLoading(false); return; }
-      }
-    } catch {}
-
+    /* فقط میزهایی که باشگاه در سیستم ثبت کرده — هیچ میزِ ساختگی‌ای ساخته نمی‌شود */
     api.get(`/clubs/${clubId}/tables`).catch(()=>({data:[]}))
-      .then(t=>{ setTables(Array.isArray(t.data)&&t.data.length>0?t.data:FALLBACK_TABLES); setLoading(false); });
+      .then(t=>{ setTables(Array.isArray(t.data)?t.data:[]); setLoading(false); });
   },[clubId]);
 
   useEffect(()=>{
@@ -295,18 +272,21 @@ function BookingContent() {
     setSlotsLoad(true); setSlots([]); setSelectedSlots([]); setRangeStart(null); setRangeError('');
     api.get(`/bookings/slots?clubId=${clubId}&tableId=${selectedTable.id}&date=${isoDate}`)
       .then(r=>{
-        const raw:Slot[] = Array.isArray(r.data)&&r.data.length>0?r.data:genFallbackSlots(isoDate);
+        const raw:Slot[] = Array.isArray(r.data)&&r.data.length>0?r.data:openSlots(isoDate);
         setSlots(applyPastHours(raw,isoDate)); setSlotsLoad(false);
         setTimeout(()=>slotsRef.current?.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
       })
-      .catch(()=>{ setSlots(genFallbackSlots(isoDate)); setSlotsLoad(false); });
+      .catch(()=>{ setSlots(openSlots(isoDate)); setSlotsLoad(false); });
   },[selectedTable,isoDate,clubId]);
 
   const handleSlotClick = useCallback((hour:number, isBooked:boolean)=>{
     if(isBooked) return;
     setRangeError('');
+    /* کلیکِ سوم روی همان ساعتِ نهایی‌شده ⇒ لغوِ انتخاب */
+    if(rangeStart===null && selectedSlots.length===1 && selectedSlots[0]===hour){ setSelectedSlots([]); return; }
     if(rangeStart===null){ setRangeStart(hour); setSelectedSlots([hour]); return; }
-    if(hour===rangeStart){ setRangeStart(null); setSelectedSlots([]); return; }
+    /* کلیکِ دوم روی همان ساعت ⇒ یعنی فقط همین یک ساعت رزرو شود */
+    if(hour===rangeStart){ setRangeStart(null); setSelectedSlots([hour]); return; }
     if(hour<rangeStart){ setRangeStart(hour); setSelectedSlots([hour]); setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید'); return; }
     const {range,blocked} = buildRange(slots,rangeStart,hour);
     if(blocked){ setRangeError('این بازه شامل ساعات رزرو شده است. لطفاً بازه دیگری انتخاب کنید'); return; }
@@ -334,9 +314,8 @@ function BookingContent() {
         startTime:startTime.toISOString(), endTime:endTime.toISOString(),
         pricePerHour:selectedTable.pricePerHour, playerCount, currency:'IRT',
       });
-      const bookingId      = res.data?.id ?? '';
-      const trackingNumber = res.data?.booking_reference ?? `BP-${Date.now().toString(36).toUpperCase().slice(-8)}`;
-      /* ایجادِ پرداخت و هدایت به درگاه */
+      const bookingId = res.data?.id ?? '';
+      /* ایجادِ پرداخت و هدایتِ مستقیم به درگاه — هیچ صفحه‌ی میانیِ دیگری نیست */
       let paymentUrl: string | null = null;
       try {
         const pay = await api.post('/payments/create', { bookingId });
@@ -344,11 +323,14 @@ function BookingContent() {
       } catch (pe: any) {
         setError(pe?.response?.data?.message || 'اتصال به درگاهِ پرداخت ممکن نشد');
       }
+      if(!paymentUrl){
+        setError(prev=>prev||'اتصال به درگاهِ پرداخت ممکن نشد؛ رزروِ شما تا ۱۰ دقیقه نگه داشته می‌شود.');
+        return;
+      }
       /* #16: immediately mark booked slots as reserved in local state */
       setSlots(prev=>prev.map(s=>({...s,isBooked:s.isBooked||selectedSlots.includes(s.hour)})));
-      setPendingPayment({bookingId,trackingNumber,paymentUrl});
-      if(paymentUrl) setTimeout(()=>{window.location.href=paymentUrl;},900);
-      setPaymentStep('gateway');
+      setRedirecting(true);
+      window.location.href = paymentUrl;
     } catch(e:any){
       setError(e?.response?.data?.message||'خطا در ثبت رزرو. لطفاً دوباره تلاش کنید.');
     } finally { setBooking(false); }
@@ -361,30 +343,13 @@ function BookingContent() {
   const totalHours   = sorted.length;
   /* #22: per-slot pricing with time-based discount rules */
   const baseTotal    = selectedTable ? selectedSlots.reduce((s,h)=>s+slotPrice(h,selectedTable),0) : 0;
-  /* #21: +15% per extra player */
-  const playerMult   = 1 + Math.max(0,playerCount-2)*0.15;
-  const totalPrice   = Math.round(baseTotal*playerMult);
+  /* هزینه‌ی بازیکنِ اضافه — تنظیمِ خودِ باشگاه (همان فرمولِ سمتِ سرور) */
+  const surcharge    = surchargeOf(club as unknown as Record<string,unknown>);
+  const extraPlayerN = extraPlayers(playerCount, surcharge);
+  const totalPrice   = Math.round(baseTotal*playerMultiplier(playerCount,surcharge));
   const accentColor  = selectedTable?(TYPE_COLOR[selectedTable.type]??'#C7A66A'):'#C7A66A';
   const dateLabel    = jDay?`${toFa(jDay)} ${jMonths[jMonth-1]} ${toFa(jYear)}`:'';
   const canConfirm   = !!selectedTable&&!!jDay&&selectedSlots.length>0;
-
-  /* #20: receipt rows builder */
-  const buildReceiptRows = ():[{l:string;v:string}] => {
-    const surcharge = playerCount>2?` (+${toFa((playerCount-2)*15)}٪ سرانه)`:'';
-    return [
-      {l:'شماره پیگیری',     v: pendingPayment?.trackingNumber??''},
-      {l:'باشگاه',           v: club?.name??''},
-      {l:'میز',              v: selectedTable?.name??''},
-      {l:'نوع میز',          v: TYPE_LABEL[selectedTable?.type??'']??''},
-      {l:'تاریخ',            v: dateLabel},
-      {l:'ساعت',             v: startHour!==undefined&&endHour!==undefined?`${toFa(startHour)}:۰۰ تا ${toFa(endHour)}:۰۰`:''},
-      {l:'مدت',              v:`${toFa(totalHours)} ساعت`},
-      {l:'تعداد بازیکنان',   v:`${toFa(playerCount)} نفر`},
-      {l:'روش پرداخت',      v: 'درگاه بانکی آنلاین'},
-      {l:'وضعیت پرداخت',    v: '✓ پرداخت موفق'},
-      {l:'مبلغ کل',          v:`${toFa(totalPrice.toLocaleString())} تومان${surcharge}`},
-    ] as any;
-  };
 
   /* ── Loading ── */
   if(loading) return (
@@ -394,214 +359,18 @@ function BookingContent() {
     </div>
   );
 
-  /* ── Payment Gateway + Receipt ── */
-  if(pendingPayment) {
-    const receiptRows = buildReceiptRows();
-    const bankRefNumber = `IR${pendingPayment.trackingNumber}${Date.now().toString(36).slice(-4).toUpperCase()}`;
-
-    /* Processing screen */
-    if(paymentStep === 'processing') {
-      return (
-        <div style={{minHeight:'100vh',background:'#0a0e1a',display:'flex',alignItems:'center',justifyContent:'center',direction:'rtl',fontFamily:'var(--font-base)'}}>
-          <div style={{textAlign:'center'}}>
-            <div style={{width:72,height:72,borderRadius:'50%',border:'3px solid rgba(199,166,106,0.15)',borderTop:'3px solid #C7A66A',margin:'0 auto 24px',animation:'spin 0.9s linear infinite'}}/>
-            <div style={{fontSize:18,fontWeight:800,color:'#fff',marginBottom:8}}>در حال پردازش پرداخت...</div>
-            <div style={{fontSize:13,color:'rgba(255,255,255,0.4)'}}>لطفاً صفحه را نبندید</div>
-          </div>
-          <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
-        </div>
-      );
-    }
-
-    /* Receipt screen */
-    if(paymentStep === 'done') {
-      return (
-        <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'var(--font-base)',padding:'clamp(20px,5vh,48px) 16px 48px'}}>
-          <div style={{maxWidth:'520px',margin:'0 auto'}}>
-
-            {/* Success card */}
-            <div style={{background:'#fff',borderRadius:28,overflow:'hidden',border:'1px solid rgba(48,197,90,0.15)',boxShadow:'0 8px 48px rgba(0,0,0,0.08)',marginBottom:12}}>
-              {/* Green header */}
-              <div style={{background:'linear-gradient(135deg,#0f4d24,#166534)',padding:'28px 24px',textAlign:'center',position:'relative',overflow:'hidden'}}>
-                <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% -20%,rgba(48,197,90,0.3),transparent 60%)'}}/>
-                <div style={{position:'relative',zIndex:1}}>
-                  <div style={{width:60,height:60,borderRadius:'50%',background:'rgba(48,197,90,0.25)',border:'2px solid rgba(48,197,90,0.5)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px',backdropFilter:'blur(20px)'}}>
-                    <CheckCircle size={28} style={{color:'#30C55A'}}/>
-                  </div>
-                  <div style={{fontSize:22,fontWeight:900,color:'#fff',marginBottom:4}}>پرداخت موفق</div>
-                  <div style={{fontSize:32,fontWeight:900,color:'#30C55A'}}>{toFa(totalPrice.toLocaleString())} <span style={{fontSize:16,opacity:0.7}}>تومان</span></div>
-                </div>
-              </div>
-
-              {/* Tracking + ref */}
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:1,background:'rgba(0,0,0,0.05)',margin:'0'}}>
-                <div style={{background:'#fff',padding:'14px 18px'}}>
-                  <div style={{fontSize:11,color:'#9ca3af',marginBottom:4}}>شماره پیگیری</div>
-                  <div style={{fontSize:15,fontWeight:800,color:'#C7A66A',fontFamily:'monospace'}}>{pendingPayment.trackingNumber}</div>
-                </div>
-                <div style={{background:'#fff',padding:'14px 18px'}}>
-                  <div style={{fontSize:11,color:'#9ca3af',marginBottom:4}}>مرجع بانکی</div>
-                  <div style={{fontSize:13,fontWeight:700,color:'#374151',fontFamily:'monospace'}}>{bankRefNumber}</div>
-                </div>
-              </div>
-
-              {/* Receipt rows */}
-              <div style={{padding:'4px 20px 8px'}}>
-                {receiptRows.map((r:{l:string,v:string},i:number)=>(
-                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:i<receiptRows.length-1?'1px solid rgba(0,0,0,0.04)':'none',gap:12}}>
-                    <span style={{fontSize:13,color:'rgba(0,0,0,0.40)',flexShrink:0}}>{r.l}</span>
-                    <span style={{fontSize:14,fontWeight:700,color:r.l==='مبلغ کل'?'#30C55A':'#111',textAlign:'left'}}>{r.v}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* LQ action buttons */}
-              <div style={{display:'flex',gap:10,padding:'12px 20px 24px'}}>
-                <button
-                  onClick={()=>printReceipt(receiptRows,`پیگیری: ${pendingPayment.trackingNumber}`,club?.name??'')}
-                  style={{flex:1,padding:'12px 8px',background:'rgba(199,166,106,0.08)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(199,166,106,0.25)',borderRadius:20,color:'#C7A66A',fontSize:14,fontWeight:800,cursor:'pointer',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',gap:7,boxShadow:'inset 0 1px 0 rgba(199,166,106,0.15)'}}>
-                  <Printer size={14}/> چاپ رسید
-                </button>
-                <button
-                  onClick={()=>printReceipt(receiptRows,`پیگیری: ${pendingPayment.trackingNumber}`,club?.name??'')}
-                  style={{flex:1,padding:'12px 8px',background:'rgba(48,197,90,0.08)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(48,197,90,0.25)',borderRadius:20,color:'#30C55A',fontSize:14,fontWeight:800,cursor:'pointer',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',gap:7,boxShadow:'inset 0 1px 0 rgba(48,197,90,0.15)'}}>
-                  <FileDown size={14}/> دانلود PDF
-                </button>
-              </div>
-            </div>
-
-            {/* Nav links — LQ1 */}
-            <div style={{display:'flex',gap:10,justifyContent:'center'}}>
-              <Link href="/dashboard" style={{padding:'10px 22px',background:'rgba(199,166,106,0.08)',border:'1px solid rgba(199,166,106,0.22)',borderRadius:20,color:'#C7A66A',fontSize:14,fontWeight:700,textDecoration:'none'}}>داشبورد</Link>
-              <Link href="/clubs"    style={{padding:'10px 22px',background:'rgba(0,0,0,0.04)',border:'1px solid rgba(0,0,0,0.08)',borderRadius:20,color:'rgba(0,0,0,0.45)',fontSize:14,fontWeight:600,textDecoration:'none'}}>باشگاه‌ها</Link>
-            </div>
-          </div>
-          <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
-        </div>
-      );
-    }
-
-    /* Payment Gateway screen (paymentStep === 'gateway') */
-    const handlePay = async () => {
-      if(gwCard.replace(/\s/g,'').length < 16) return;
-      setPaymentStep('processing');
-      await new Promise(r => setTimeout(r, 2200));
-      setPaymentStep('done');
-    };
-    const handleOtp = () => {
-      setOtpSent(true);
-    };
-    const formatGwCard = (v:string) => v.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
-
-    return (
-      <div style={{minHeight:'100vh',background:'#0a0e1a',direction:'rtl',fontFamily:'var(--font-base)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'24px 16px'}}>
-
-        {/* Gateway card */}
-        <div style={{width:'100%',maxWidth:420,background:'rgba(255,255,255,0.04)',backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',border:'1px solid rgba(255,255,255,0.10)',borderRadius:28,overflow:'hidden',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.08),0 32px 80px rgba(0,0,0,0.5)'}}>
-
-          {/* Gateway header */}
-          <div style={{background:'linear-gradient(135deg,rgba(199,166,106,0.15),rgba(199,166,106,0.05))',borderBottom:'1px solid rgba(255,255,255,0.07)',padding:'20px 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-            <div>
-              <div style={{fontSize:11,color:'rgba(199,166,106,0.6)',fontWeight:700,letterSpacing:'0.2em'}}>BILLIARD HUB PAY</div>
-              <div style={{fontSize:15,fontWeight:800,color:'#fff',marginTop:2}}>درگاه پرداخت امن</div>
-            </div>
-            <div style={{textAlign:'left'}}>
-              <div style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>مبلغ پرداختی</div>
-              <div style={{fontSize:22,fontWeight:900,color:'#C7A66A',fontFamily:'monospace'}}>{toFa(totalPrice.toLocaleString())}</div>
-              <div style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>تومان</div>
-            </div>
-          </div>
-
-          {/* Merchant info */}
-          <div style={{padding:'14px 24px',background:'rgba(255,255,255,0.03)',borderBottom:'1px solid rgba(255,255,255,0.05)',display:'flex',alignItems:'center',gap:12}}>
-            <div style={{width:38,height:38,borderRadius:10,background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.25)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>🎱</div>
-            <div>
-              <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>{club?.name ?? 'باشگاه بیلیارد'}</div>
-              <div style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>رزرو میز · {dateLabel}</div>
-            </div>
-            <div style={{marginRight:'auto',fontSize:11,color:'rgba(255,255,255,0.3)',fontFamily:'monospace'}}>{pendingPayment.trackingNumber}</div>
-          </div>
-
-          {/* Card form */}
-          <div style={{padding:'22px 24px',display:'flex',flexDirection:'column',gap:14}}>
-
-            <div>
-              <label style={{fontSize:11,color:'rgba(255,255,255,0.45)',fontWeight:600,marginBottom:6,display:'block'}}>شماره کارت</label>
-              <input
-                type="text" inputMode="numeric" dir="ltr"
-                value={gwCard}
-                onChange={e => setGwCard(formatGwCard(e.target.value))}
-                placeholder="0000 0000 0000 0000"
-                maxLength={19}
-                style={{width:'100%',background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:12,padding:'12px 14px',fontSize:18,fontWeight:700,color:'#fff',fontFamily:'monospace',letterSpacing:'0.12em',outline:'none',boxSizing:'border-box'}}
-              />
-            </div>
-
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-              <div>
-                <label style={{fontSize:11,color:'rgba(255,255,255,0.45)',fontWeight:600,marginBottom:6,display:'block'}}>ماه / سال انقضا</label>
-                <div style={{display:'flex',gap:6}}>
-                  <input type="text" inputMode="numeric" dir="ltr" placeholder="ماه"
-                    value={gwMonth} onChange={e=>setGwMonth(e.target.value.replace(/\D/g,'').slice(0,2))} maxLength={2}
-                    style={{flex:1,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:10,padding:'10px',fontSize:15,color:'#fff',fontFamily:'monospace',textAlign:'center',outline:'none'}}/>
-                  <input type="text" inputMode="numeric" dir="ltr" placeholder="سال"
-                    value={gwYear} onChange={e=>setGwYear(e.target.value.replace(/\D/g,'').slice(0,2))} maxLength={2}
-                    style={{flex:1,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:10,padding:'10px',fontSize:15,color:'#fff',fontFamily:'monospace',textAlign:'center',outline:'none'}}/>
-                </div>
-              </div>
-              <div>
-                <label style={{fontSize:11,color:'rgba(255,255,255,0.45)',fontWeight:600,marginBottom:6,display:'block'}}>رمز دوم (CVV2)</label>
-                <input type="password" inputMode="numeric" dir="ltr" placeholder="····"
-                  value={gwPin2} onChange={e=>setGwPin2(e.target.value.replace(/\D/g,'').slice(0,4))} maxLength={4}
-                  style={{width:'100%',background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:10,padding:'10px 14px',fontSize:18,color:'#fff',fontFamily:'monospace',letterSpacing:'0.2em',outline:'none',boxSizing:'border-box'}}/>
-              </div>
-            </div>
-
-            {/* OTP */}
-            <div>
-              <label style={{fontSize:11,color:'rgba(255,255,255,0.45)',fontWeight:600,marginBottom:6,display:'block'}}>رمز یکبار مصرف (OTP)</label>
-              <div style={{display:'flex',gap:8}}>
-                <input type="text" inputMode="numeric" dir="ltr" placeholder="کد ارسال شده به موبایل"
-                  value={gwOtp} onChange={e=>setGwOtp(e.target.value.replace(/\D/g,'').slice(0,6))} maxLength={6}
-                  style={{flex:1,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:10,padding:'10px 14px',fontSize:16,color:'#fff',fontFamily:'monospace',letterSpacing:'0.15em',outline:'none'}}/>
-                <button onClick={handleOtp}
-                  style={{padding:'10px 16px',background:otpSent?'rgba(48,197,90,0.15)':'rgba(199,166,106,0.15)',border:`1px solid ${otpSent?'rgba(48,197,90,0.35)':'rgba(199,166,106,0.35)'}`,borderRadius:10,color:otpSent?'#30C55A':'#C7A66A',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'var(--font-base)',whiteSpace:'nowrap',flexShrink:0}}>
-                  {otpSent ? '✓ ارسال شد' : 'ارسال کد'}
-                </button>
-              </div>
-            </div>
-
-            {/* Pay button — full LQ */}
-            <button onClick={handlePay} disabled={gwCard.replace(/\s/g,'').length < 16}
-              style={{width:'100%',marginTop:4,padding:'15px',borderRadius:20,
-                background:'linear-gradient(135deg,rgba(199,166,106,0.18),rgba(199,166,106,0.08))',
-                backdropFilter:'blur(40px) saturate(240%)',WebkitBackdropFilter:'blur(40px) saturate(240%)',
-                border:'1px solid rgba(199,166,106,0.40)',
-                boxShadow:'inset 0 1px 0 rgba(199,166,106,0.25),0 8px 32px rgba(199,166,106,0.15)',
-                color:'#C7A66A',fontSize:17,fontWeight:900,cursor:gwCard.replace(/\s/g,'').length<16?'not-allowed':'pointer',
-                fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',gap:8,
-                opacity:gwCard.replace(/\s/g,'').length<16?0.45:1,transition:'all 0.2s'}}>
-              <CreditCard size={16}/> پرداخت {toFa(totalPrice.toLocaleString())} تومان
-            </button>
-
-            {/* Security notice */}
-            <div style={{display:'flex',alignItems:'center',gap:7,justifyContent:'center'}}>
-              <div style={{width:6,height:6,borderRadius:'50%',background:'#30C55A',flexShrink:0}}/>
-              <span style={{fontSize:11,color:'rgba(255,255,255,0.30)'}}>اتصال امن SSL · رمزنگاری ۲۵۶ بیت</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Cancel */}
-        <button onClick={()=>{setPendingPayment(null);setPaymentStep(null);}}
-          style={{marginTop:16,padding:'9px 24px',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.10)',borderRadius:20,color:'rgba(255,255,255,0.40)',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'var(--font-base)'}}>
-          انصراف از پرداخت
-        </button>
-
-        <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
+  /* ── انتقال به درگاهِ پرداخت ── */
+  if(redirecting) return (
+    <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{textAlign:'center'}}>
+        <div style={{width:52,height:52,border:'2px solid rgba(199,166,106,0.16)',borderTop:'2px solid #C7A66A',borderRadius:'50%',margin:'0 auto 18px',animation:'spin 0.85s linear infinite'}}/>
+        <div style={{fontSize:16,fontWeight:800,color:'#111111',marginBottom:6}}>در حال انتقال به درگاه پرداخت…</div>
+        <div style={{fontSize:13,color:'rgba(0,0,0,0.42)'}}>لطفاً صفحه را نبندید</div>
       </div>
-    );
-  }
+      <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
+    </div>
+  );
+
 
   /* ── رزروِ آنلاین بسته است ── */
   if (reserveClosed) return (
@@ -675,6 +444,20 @@ function BookingContent() {
               <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#C7A66A,#A07840)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               انتخاب میز
             </div>
+            {tables.length===0 && (
+              <div style={{textAlign:'center',padding:'34px 18px',background:'rgba(0,0,0,0.02)',border:'1px dashed rgba(0,0,0,0.10)',borderRadius:16}}>
+                <div style={{fontSize:30,marginBottom:10,opacity:0.35}}>🎱</div>
+                <div style={{fontSize:15,fontWeight:800,color:'#111',marginBottom:6}}>هنوز میزی برای رزرو ثبت نشده است</div>
+                <div style={{fontSize:13,color:'rgba(0,0,0,0.42)',lineHeight:2}}>
+                  این باشگاه میزهایش را در سیستم ثبت نکرده است. برای هماهنگی، مستقیم با باشگاه تماس بگیرید.
+                </div>
+                {club?.phone && (
+                  <a href={`tel:${club.phone}`} style={{display:'inline-flex',marginTop:14,padding:'10px 22px',borderRadius:12,textDecoration:'none',fontSize:13.5,fontWeight:800,background:'rgba(199,166,106,0.14)',border:'1px solid rgba(199,166,106,0.4)',color:'#9A6E38'}}>
+                    تماس با باشگاه
+                  </a>
+                )}
+              </div>
+            )}
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
               {tables.map(table=>{
                 const color = TYPE_COLOR[table.type]??'#C7A66A';
@@ -722,15 +505,15 @@ function BookingContent() {
                 </div>
                 <button className="player-btn" disabled={playerCount>=8} onClick={()=>setPlayerCount(p=>Math.min(8,p+1))}><Plus size={14}/></button>
               </div>
-              {playerCount>2?(
+              {extraPlayerN>0?(
                 <div style={{padding:'10px 16px',background:'rgba(48,197,90,0.07)',border:'1px solid rgba(48,197,90,0.20)',borderRadius:'14px',fontSize: '14px',color:'rgba(0,0,0,0.45)',lineHeight:1.7}}>
-                  <span style={{color:SEL_COLOR,fontWeight:800}}>+{toFa((playerCount-2)*15)}٪</span> اضافه بابت {toFa(playerCount-2)} نفر اضافه
+                  <span style={{color:SEL_COLOR,fontWeight:800}}>+{toFa(extraPlayerN*surcharge.percent)}٪</span> اضافه بابت {toFa(extraPlayerN)} نفر
                 </div>
-              ):(
+              ):surcharge.enabled&&surcharge.percent>0?(
                 <div style={{fontSize: '14px',color:'rgba(0,0,0,0.35)',padding:'10px 16px',background:'rgba(0,0,0,0.03)',borderRadius:'14px'}}>
-                  از ۳ نفر به بالا، هر نفر ۱۵٪ اضافه می‌شود
+                  از {toFa(surcharge.from)} نفر به بالا، هر نفر {toFa(surcharge.percent)}٪ اضافه می‌شود
                 </div>
-              )}
+              ):null}
             </div>
           </div>
 
@@ -857,7 +640,7 @@ function BookingContent() {
                   {l:'شروع',           v:startHour!==undefined?`${toFa(startHour)}:۰۰`:''},
                   {l:'پایان',          v:endHour!==undefined?`${toFa(endHour)}:۰۰`:''},
                   {l:'مدت',            v:`${toFa(totalHours)} ساعت`},
-                  {l:'تعداد بازیکنان', v:`${toFa(playerCount)} نفر${playerCount>2?' (+'+((playerCount-2)*15)+'٪)':''}`},
+                  {l:'تعداد بازیکنان', v:`${toFa(playerCount)} نفر${extraPlayerN>0?' (+'+toFa(extraPlayerN*surcharge.percent)+'٪)':''}`},
                   {l:'نرخ ساعتی',      v:`${toFa((selectedTable?.pricePerHour??0).toLocaleString())} تومان`},
                 ].map((r,i)=>(
                   <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid rgba(0,0,0,0.04)'}}>
@@ -873,10 +656,9 @@ function BookingContent() {
                 </div>
               </div>
 
-              {/* #14: cancellation policy */}
-              <div style={{margin:'0 22px 18px',padding:'11px 14px',background:'rgba(245,158,11,0.05)',border:'1px solid rgba(245,158,11,0.13)',borderRadius:'12px',fontSize: '13px',color:'rgba(0,0,0,0.42)',lineHeight:1.7,display:'flex',alignItems:'flex-start',gap:'7px'}}>
-                <Info size={13} style={{color:'#f59e0b',flexShrink:0,marginTop:1}}/>
-                رزروها تنها تا ۲ ساعت پیش از زمان شروع قابل لغو هستند
+              {/* #14: قوانینِ کاملِ لغو — پیش از پرداخت، نه بعد از آن */}
+              <div style={{margin:'0 22px 18px'}}>
+                <CancellationPolicy />
               </div>
 
               {/* پذیرش قوانین — پیش‌شرط ثبت رزرو */}

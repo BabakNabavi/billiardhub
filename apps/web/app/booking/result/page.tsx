@@ -6,10 +6,12 @@ import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle2, XCircle, Loader2, ArrowLeft, CalendarDays, Clock3 } from 'lucide-react'
+import { faDateLong, faTimeRange, faNum } from '../../../lib/jalali'
+import CancellationPolicy from '../../../components/booking/CancellationPolicy'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38'
-const fa = (n: number) => n.toLocaleString('fa-IR')
+const fa = faNum
 
 interface B {
   id: string; booking_reference?: string | null; final_amount?: number
@@ -43,7 +45,6 @@ function BookingResult() {
   }, [bookingId])
 
   const paid = b?.payment_status === 'PAID'
-  const hours = (b?.timeSlots || '').split(',').filter(Boolean).map(Number)
 
   return (
     <div dir="rtl" style={{ minHeight: '80vh', background: '#F7F5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
@@ -55,13 +56,17 @@ function BookingResult() {
           <>
             <span style={{ display: 'inline-flex', width: 68, height: 68, borderRadius: 22, background: 'rgba(14,122,56,0.1)', color: FELT, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}><CheckCircle2 size={34} /></span>
             <h1 style={{ fontSize: 20, fontWeight: 900, color: INK, margin: '0 0 8px' }}>رزرو شما قطعی شد</h1>
-            <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.9 }}>پرداخت با موفقیت تأیید و زمانِ شما رزرو شد.</p>
+            <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.9 }}>پرداخت با موفقیت تأیید و زمان شما رزرو شد.</p>
 
             <div style={{ background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16, textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {b?.booking_reference && <Row label="کدِ پیگیری" value={b.booking_reference} mono />}
-              {b?.bookingDate && <Row label="تاریخ" value={b.bookingDate} icon={<CalendarDays size={13} />} />}
-              {hours.length > 0 && <Row label="ساعت" value={`${fa(hours[0]!)} تا ${fa(hours[hours.length - 1]! + 1)}`} icon={<Clock3 size={13} />} />}
-              {typeof b?.final_amount === 'number' && <Row label="مبلغِ پرداخت‌شده" value={`${fa(b.final_amount)} تومان`} strong />}
+              {b?.booking_reference && <Row label="کد پیگیری" value={b.booking_reference} mono />}
+              {b?.bookingDate && <Row label="تاریخ" value={faDateLong(b.bookingDate)} icon={<CalendarDays size={13} />} />}
+              {b?.timeSlots && <Row label="ساعت" value={faTimeRange(b.timeSlots)} icon={<Clock3 size={13} />} />}
+              {typeof b?.final_amount === 'number' && <Row label="مبلغ پرداخت‌شده" value={`${fa(b.final_amount)} تومان`} strong />}
+            </div>
+
+            <div style={{ marginTop: 12, textAlign: 'right' }}>
+              <CancellationPolicy compact />
             </div>
           </>
         ) : (

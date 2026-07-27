@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
-import { priceBooking, hoursBetween, bookingReference, type PricedTable } from '@/lib/finance/pricing';
+import { priceBooking, hoursBetween, bookingReference, surchargeOf, type PricedTable } from '@/lib/finance/pricing';
+import { bookingStartsAt } from '@/lib/finance/cancellation';
 
 const HOLD_MINUTES = 10;   // رزروِ پرداخت‌نشده پس از ۱۰ دقیقه آزاد می‌شود
 
@@ -26,35 +27,45 @@ export async function POST(req: NextRequest) {
   const bookingDate = start.toISOString().slice(0, 10);
   const hours = hoursBetween(start.getUTCHours(), end.getUTCHours());
   if (hours.length === 0) return NextResponse.json({ message: 'بازه‌ی زمانی معتبر نیست' }, { status: 400 });
-  if (start.getTime() < Date.now() - 60_000) {
+  /* ساعت‌ها به وقتِ ایران تفسیر می‌شوند — همان مبنایی که سیاستِ لغو با آن کار می‌کند */
+  if (bookingStartsAt(bookingDate, hours.join(',')).getTime() < Date.now() - 60_000) {
     return NextResponse.json({ message: 'امکانِ رزرو در گذشته وجود ندارد' }, { status: 400 });
   }
 
-  /* ── قیمت‌گذاریِ سروری: میز از دیتابیس خوانده می‌شود، نه از کلاینت ── */
+  /* ── قیمت‌گذاریِ سروری: میز باید واقعاً در همین باشگاه ثبت شده باشد ── */
   const { data: tableRow } = await sb().from('tables')
-    .select('id,"pricePerHour","clubId"').eq('id', tableId).maybeSingle();
+    .select('id,"pricePerHour","clubId","isActive","discountRules","morningDiscount"')
+    .eq('id', tableId).maybeSingle();
 
-  let priced: PricedTable | null = null;
-  if (tableRow && (tableRow as { clubId?: string }).clubId === clubId) {
-    const t = tableRow as { id: string; pricePerHour: number | string };
-    priced = { id: t.id, pricePerHour: Math.round(Number(t.pricePerHour) || 0) };
+  const t = tableRow as {
+    id: string; clubId: string; pricePerHour: number | string; isActive?: boolean;
+    discountRules?: unknown; morningDiscount?: number | null;
+  } | null;
+
+  if (!t || t.clubId !== clubId) {
+    return NextResponse.json({ message: 'این میز در باشگاه ثبت نشده است؛ رزرو ممکن نیست' }, { status: 400 });
   }
-  if (!priced || priced.pricePerHour <= 0) {
-    /* میزهای محلیِ باشگاه هنوز در دیتابیس نیستند ⇒ قیمتِ پیشنهادیِ کلاینت
-       فقط به‌عنوانِ پشتیبان و با سقفِ ایمن پذیرفته می‌شود. */
-    const fallback = Math.round(Number(body?.pricePerHour) || 0);
-    if (!fallback || fallback <= 0 || fallback > 50_000_000) {
-      return NextResponse.json({ message: 'میزِ انتخابی معتبر نیست' }, { status: 400 });
-    }
-    priced = { id: String(tableId), pricePerHour: fallback };
+  if (t.isActive === false) {
+    return NextResponse.json({ message: 'این میز در حالِ حاضر غیرفعال است' }, { status: 409 });
+  }
+  const pricePerHour = Math.round(Number(t.pricePerHour) || 0);
+  if (pricePerHour <= 0) {
+    return NextResponse.json({ message: 'برای این میز قیمتی ثبت نشده است؛ با باشگاه تماس بگیرید' }, { status: 409 });
+  }
+  const priced: PricedTable = {
+    id: t.id, pricePerHour,
+    morningDiscount: t.morningDiscount ?? null,
+    discountRules: Array.isArray(t.discountRules) ? t.discountRules as PricedTable['discountRules'] : null,
+  };
+
+  /* قواعدِ تخفیف و تنظیمِ بازیکنِ اضافه‌ی باشگاه */
+  const { data: clubRow } = await sb().from('clubs').select('*').eq('id', clubId).maybeSingle();
+  const club = (clubRow ?? null) as Record<string, unknown> | null;
+  if (!priced.discountRules && Array.isArray(club?.discountRules)) {
+    priced.discountRules = club!.discountRules as PricedTable['discountRules'];
   }
 
-  /* قواعدِ تخفیفِ باشگاه (اگر تعریف شده باشد) */
-  const { data: clubRow } = await sb().from('clubs').select('"discountRules"').eq('id', clubId).maybeSingle();
-  const rules = (clubRow as { discountRules?: unknown } | null)?.discountRules;
-  if (Array.isArray(rules)) priced.discountRules = rules as PricedTable['discountRules'];
-
-  const breakdown = priceBooking(hours, priced, Math.max(1, Number(playerCount) || 2));
+  const breakdown = priceBooking(hours, priced, Math.max(1, Number(playerCount) || 1), surchargeOf(club));
 
   /* ── ساخت اتمیک: اگر یکی از ساعت‌ها گرفته شده باشد، کل تراکنش برمی‌گردد ── */
   const { data, error } = await rpc<Record<string, unknown>>('bh_create_booking', {

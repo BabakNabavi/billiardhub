@@ -42,15 +42,44 @@ export function slotPrice(hour: number, table: PricedTable): number {
   return disc > 0 ? Math.round(base * (1 - disc / 100)) : base
 }
 
+/* ── هزینه‌ی بازیکنِ اضافه — تنظیمِ هر باشگاه ─────────────────────────
+   from = «از این تعداد نفر به بالا، هر نفر percent درصد اضافه می‌شود».
+   با مقادیرِ پیش‌فرض (from=۲، percent=۱۵): دو نفر ⇒ +۱۵٪، سه نفر ⇒ +۳۰٪. */
+export interface PlayerSurcharge { enabled: boolean; percent: number; from: number }
+
+export const DEFAULT_SURCHARGE: PlayerSurcharge = { enabled: true, percent: 15, from: 2 }
+
+/** خواندنِ امنِ تنظیمات از رکوردِ باشگاه (اگر ستون‌ها هنوز نباشند، پیش‌فرض) */
+export function surchargeOf(club: Record<string, unknown> | null | undefined): PlayerSurcharge {
+  const pct = Number(club?.playerSurchargePercent)
+  const from = Number(club?.playerSurchargeFrom)
+  return {
+    enabled: club?.playerSurchargeEnabled === undefined ? DEFAULT_SURCHARGE.enabled : !!club.playerSurchargeEnabled,
+    percent: Number.isFinite(pct) && pct >= 0 && pct <= 100 ? Math.round(pct) : DEFAULT_SURCHARGE.percent,
+    from: Number.isFinite(from) && from >= 1 && from <= 12 ? Math.round(from) : DEFAULT_SURCHARGE.from,
+  }
+}
+
+/** تعدادِ نفراتی که مشمولِ افزایش می‌شوند */
+export function extraPlayers(playerCount: number, s: PlayerSurcharge): number {
+  if (!s.enabled || s.percent <= 0) return 0
+  return Math.max(0, Math.round(playerCount) - (s.from - 1))
+}
+
+/** ضریبِ نهاییِ قیمت بر اساسِ تعدادِ بازیکن */
+export function playerMultiplier(playerCount: number, s: PlayerSurcharge): number {
+  return 1 + extraPlayers(playerCount, s) * (s.percent / 100)
+}
+
 /** محاسبه‌ی کاملِ مبلغِ رزرو — ملاکِ نهاییِ پرداخت */
-export function priceBooking(hours: number[], table: PricedTable, playerCount = 2): PriceBreakdown {
+export function priceBooking(
+  hours: number[], table: PricedTable, playerCount = 1, surcharge: PlayerSurcharge = DEFAULT_SURCHARGE,
+): PriceBreakdown {
   const perHour = hours.map(h => ({ hour: h, price: slotPrice(h, table), discountPct: slotDiscountPct(h, table) }))
   const baseAmount = hours.length * Math.round(table.pricePerHour)
   const afterDiscount = perHour.reduce((s, x) => s + x.price, 0)
   const discountAmount = baseAmount - afterDiscount
-  /* هر بازیکنِ بیش از ۲ نفر ⇒ ۱۵٪ افزایش (همانندِ UI) */
-  const mult = 1 + Math.max(0, playerCount - 2) * 0.15
-  const finalAmount = Math.round(afterDiscount * mult)
+  const finalAmount = Math.round(afterDiscount * playerMultiplier(playerCount, surcharge))
   return { baseAmount, discountAmount, playerExtra: finalAmount - afterDiscount, finalAmount, perHour }
 }
 

@@ -15,6 +15,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
+  CalendarDays, Flag,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -57,8 +58,9 @@ const SECTIONS: AdminSection[] = [
     ],
   },
   {
-    title: 'مالی و تسویه', en: 'FINANCE', dot: '#0E7A38',
+    title: 'رزرو و مالی', en: 'BOOKINGS & FINANCE', dot: '#0E7A38',
     items: [
+      { title: 'مدیریت رزروها', desc: 'مشاهده، جستجو و لغو رزرو با بازپرداخت خودکار', icon: <CalendarDays size={20} />, link: '/admin/bookings' },
       { title: 'داشبورد مالی', desc: 'درآمد، کمیسیون، پرداخت‌ها و بازپرداخت‌ها', icon: <Wallet size={20} />, link: '/admin/finance' },
       { title: 'تسویه باشگاه‌ها', desc: 'موجودی باشگاه‌ها و ثبت واریز', icon: <TrendingUp size={20} />, link: '/admin/finance' },
     ],
@@ -80,6 +82,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
       { title: 'تبلیغات', desc: 'بنرها و کمپین‌های تبلیغاتی سایت', icon: <Megaphone size={20} />, link: '/admin/ads' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
+      { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
     ],
   },
 ];

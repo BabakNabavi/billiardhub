@@ -25,6 +25,7 @@ import {
   Sparkles, Store, Bookmark, Home, Plus, LayoutGrid,
   ScrollText, ArrowLeft,
 } from 'lucide-react'
+import ReportButton from '../../components/ReportButton'
 import { SHOP_PRODUCTS } from './products'
 import { MOCK_SELLERS } from '../../lib/sellers-data'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
@@ -119,6 +120,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
         onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
         <Bookmark size={16} />
       </button>
+      <ReportButton targetId={l.id} targetTitle={l.name} className="mk-rp" />
       <div className="mk-img">
         <img src={l.img} alt={l.name} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
@@ -165,6 +167,7 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         onClick={e => { e.preventDefault(); e.stopPropagation(); onSave() }}>
         <Bookmark size={16} />
       </button>
+      <ReportButton targetId={l.id} targetTitle={l.name} className="mk-rp" />
       <span className="pic">
         <img src={l.img} alt={l.name} loading="lazy"
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
@@ -557,6 +560,11 @@ export default function MarketNewPage() {
           color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
         .mk-bk.on { color: ${GOLD_D}; }
         .mk-bk.on svg { fill: ${GOLD_D}; }
+        /* گزارشِ تخلف — زیرِ آیکونِ نشان، با همان تراز */
+        .mk-rp { position: absolute; top: 34px; left: 8px; z-index: 2;
+          color: rgba(0,0,0,0.22) !important; transition: color .2s; }
+        .mk-rp:hover { color: #B23B2E !important; }
+        .mk-row .mk-rp { top: auto; bottom: 8px; left: 8px; }
 
         /* ── نوار پایین موبایل ── */
         /* left/right صریح — insetInline در CSS معتبر نیست و نوار جمع می‌شد */

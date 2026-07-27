@@ -306,6 +306,12 @@ export default function ClubDashboardPage() {
   const [tableForm, setTableForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '' });
   const [tableLoading, setTableLoading] = useState(false);
   const [tableFormError, setTableFormError] = useState('');
+  const [tablesSaving, setTablesSaving] = useState(false);
+  const [tablesError, setTablesError] = useState('');
+  /* هزینه‌ی بازیکنِ اضافه — تنظیمِ باشگاه */
+  const [surcharge, setSurcharge] = useState({ enabled: true, percent: '15', from: '2' });
+  const [surchargeSaving, setSurchargeSaving] = useState(false);
+  const [surchargeSaved, setSurchargeSaved] = useState(false);
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
@@ -398,10 +404,24 @@ export default function ClubDashboardPage() {
     try { localStorage.setItem(lsKey('photos'), JSON.stringify(next)); } catch {}
   }, [lsKey]);
 
-  const saveTables = useCallback((next: Table[]) => {
+  /* میزها روی سرور ذخیره می‌شوند (نه فقط در مرورگر) تا صفحه‌ی رزرو
+     دقیقاً همین‌ها را ببیند. state خوش‌بینانه به‌روز می‌شود و بعد با
+     ردیف‌های واقعیِ سرور (که شناسه‌ی دائمی دارند) جایگزین می‌گردد. */
+  const saveTables = useCallback(async (next: Table[]) => {
     setTables(next);
-    try { localStorage.setItem(lsKey('tables'), JSON.stringify(next)); } catch {}
-  }, [lsKey]);
+    if (!selectedClub) return;
+    setTablesSaving(true);
+    try {
+      const r = await api.post(`/clubs/${selectedClub.id}/tables/sync`, { tables: next });
+      if (Array.isArray(r.data?.tables)) setTables(r.data.tables as Table[]);
+      setTablesError('');
+      try { localStorage.removeItem(lsKey('tables')); } catch {}
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setTablesError(msg || 'ذخیره‌ی میزها روی سرور انجام نشد؛ دوباره تلاش کنید.');
+      try { localStorage.setItem(lsKey('tables'), JSON.stringify(next)); } catch {}
+    } finally { setTablesSaving(false); }
+  }, [lsKey, selectedClub]);
 
   // ── Effects ───────────────────────────────────────────────────────────────
 
@@ -452,6 +472,11 @@ export default function ClubDashboardPage() {
         bankName: c.bankName ?? '',
       });
       if (c.workingHours) setHoursForm(c.workingHours);
+      setSurcharge({
+        enabled: c.playerSurchargeEnabled === undefined ? true : !!c.playerSurchargeEnabled,
+        percent: String(c.playerSurchargePercent ?? 15),
+        from: String(c.playerSurchargeFrom ?? 2),
+      });
     }).catch(() => {});
 
     // Load localStorage data
@@ -485,19 +510,30 @@ export default function ClubDashboardPage() {
       .then(data => { if (Array.isArray(data)) setStoryList(data); })
       .catch(() => setStoryList([]));
 
-    // Load tables from localStorage — only manually added ones (id starts with 'local-')
-    try {
-      const t = localStorage.getItem(`club-tables-${selectedClub.id}`);
-      if (t) {
-        const parsed: Table[] = JSON.parse(t);
-        const manual = parsed.filter(row => String(row.id).startsWith('local-'));
-        setTables(manual);
-        if (manual.length !== parsed.length)
-          localStorage.setItem(`club-tables-${selectedClub.id}`, JSON.stringify(manual));
-      } else {
+    /* میزها از دیتابیس می‌آیند — همان منبعی که صفحه‌ی رزرو می‌خواند.
+       میزهای قدیمیِ داخلِ مرورگر (id با local-) یک‌بار به سرور منتقل می‌شوند
+       تا میزی که کاربر می‌بیند دقیقاً همان چیزی باشد که قابلِ رزرو است. */
+    (async () => {
+      let legacy: Table[] = [];
+      try {
+        const t = localStorage.getItem(`club-tables-${selectedClub.id}`);
+        if (t) legacy = (JSON.parse(t) as Table[]).filter(r => String(r.id).startsWith('local-'));
+      } catch { /* ignore */ }
+
+      try {
+        const r = await api.get(`/clubs/${selectedClub.id}/tables`);
+        const rows: Table[] = Array.isArray(r.data) ? r.data : [];
+        if (rows.length > 0) { setTables(rows); localStorage.removeItem(`club-tables-${selectedClub.id}`); return; }
+        if (legacy.length > 0) {
+          const s = await api.post(`/clubs/${selectedClub.id}/tables/sync`, { tables: legacy });
+          const synced: Table[] = Array.isArray(s.data?.tables) ? s.data.tables : [];
+          setTables(synced);
+          localStorage.removeItem(`club-tables-${selectedClub.id}`);
+          return;
+        }
         setTables([]);
-      }
-    } catch { setTables([]); }
+      } catch { setTables(legacy); }
+    })();
 
     // وضعیتِ بستنِ رزروِ آنلاین
     try { setReserveClosedUntil(localStorage.getItem(`club-reserveClosedUntil-${selectedClub.id}`) ?? ''); }
@@ -621,6 +657,22 @@ export default function ClubDashboardPage() {
     setInfoSaving(true);
     try { await api.put(`/clubs/${selectedClub.id}`, clubInfo); } catch {}
     finally { setInfoSaving(false); }
+  };
+
+  /* ذخیره‌ی تنظیمِ هزینه‌ی بازیکنِ اضافه — همین مقدار ملاکِ محاسبه‌ی سروری است */
+  const saveSurcharge = async () => {
+    if (!selectedClub) return;
+    setSurchargeSaving(true); setSurchargeSaved(false);
+    try {
+      await api.put(`/clubs/${selectedClub.id}`, {
+        playerSurchargeEnabled: surcharge.enabled,
+        playerSurchargePercent: Math.max(0, Math.min(100, parseInt(surcharge.percent, 10) || 0)),
+        playerSurchargeFrom:    Math.max(1, Math.min(12,  parseInt(surcharge.from, 10) || 2)),
+      });
+      setSurchargeSaved(true);
+      setTimeout(() => setSurchargeSaved(false), 2500);
+    } catch { /* پیام در همان کارت نمایش داده می‌شود */ }
+    finally { setSurchargeSaving(false); }
   };
 
   const saveStats = () => {
@@ -1366,6 +1418,54 @@ export default function ClubDashboardPage() {
       {activeTab === 'tables' && (
         <>
         <div>
+          {/* ── هزینه‌ی بازیکنِ اضافه ── */}
+          <Card style={{ marginBottom: 16 }}>
+            <SectionTitle>هزینه‌ی بازیکن اضافه</SectionTitle>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <button onClick={() => setSurcharge(s => ({ ...s, enabled: !s.enabled }))}
+                aria-label="فعال‌سازی هزینه‌ی بازیکن اضافه"
+                style={{
+                  width: 46, height: 26, borderRadius: 999, border: 'none', cursor: 'pointer', padding: 3,
+                  background: surcharge.enabled ? 'rgba(199,166,106,0.85)' : 'rgba(0,0,0,0.14)',
+                  display: 'flex', justifyContent: surcharge.enabled ? 'flex-start' : 'flex-end',
+                  transition: 'background .2s', flexShrink: 0,
+                }}>
+                <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
+              </button>
+              <span style={{ fontSize: 14, fontWeight: 700, color: DARK }}>
+                {surcharge.enabled ? 'فعال است' : 'غیرفعال است'}
+              </span>
+            </div>
+
+            {surcharge.enabled && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end', marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 6 }}>از چند نفر به بالا</div>
+                  <input value={surcharge.from} inputMode="numeric"
+                    onChange={e => setSurcharge(s => ({ ...s, from: e.target.value.replace(/\D/g, '').slice(0, 2) }))}
+                    style={{ width: 90, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 14, fontFamily: 'var(--font-base)', outline: 'none', textAlign: 'center' }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 6 }}>درصد به ازای هر نفر</div>
+                  <input value={surcharge.percent} inputMode="numeric"
+                    onChange={e => setSurcharge(s => ({ ...s, percent: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
+                    style={{ width: 90, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 14, fontFamily: 'var(--font-base)', outline: 'none', textAlign: 'center' }} />
+                </div>
+              </div>
+            )}
+
+            <div style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginBottom: 14 }}>
+              {surcharge.enabled
+                ? <>از <b style={{ color: DARK }}>{surcharge.from || '۲'}</b> نفر به بالا، هر نفر <b style={{ color: DARK }}>{surcharge.percent || '۰'}٪</b> به مبلغ رزرو اضافه می‌شود. همین متن و همین محاسبه در صفحه‌ی رزرو به کاربر نمایش داده می‌شود.</>
+                : 'تعداد بازیکنان روی مبلغ رزرو اثری نخواهد داشت.'}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <SaveBtn onClick={saveSurcharge} loading={surchargeSaving} label="ذخیره تنظیمات" />
+              {surchargeSaved && <span style={{ fontSize: 12.5, fontWeight: 700, color: '#0E7A38' }}>ذخیره شد ✓</span>}
+            </div>
+          </Card>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DARK }}>میزهای باشگاه</h2>
             <button onClick={() => setShowTableForm(v => !v)} style={{
@@ -1375,6 +1475,21 @@ export default function ClubDashboardPage() {
               padding: '9px 18px', fontSize: 13, fontWeight: 700,
               cursor: 'pointer', fontFamily: 'var(--font-base)',
             }}><Plus size={14} /> میز جدید</button>
+          </div>
+
+          {(tablesSaving || tablesError) && (
+            <div style={{
+              marginBottom: 14, padding: '11px 14px', borderRadius: 12, fontSize: 12.5, lineHeight: 1.9,
+              background: tablesError ? 'rgba(178,59,46,0.07)' : 'rgba(199,166,106,0.10)',
+              border: `1px solid ${tablesError ? 'rgba(178,59,46,0.24)' : 'rgba(199,166,106,0.30)'}`,
+              color: tablesError ? '#B23B2E' : '#A07840', fontWeight: 700,
+            }}>
+              {tablesError || 'در حال ذخیره‌ی میزها روی سرور…'}
+            </div>
+          )}
+
+          <div style={{ marginBottom: 14, padding: '11px 14px', borderRadius: 12, background: 'rgba(0,0,0,0.03)', fontSize: 12.5, lineHeight: 2, color: '#6B7280' }}>
+            فقط میزهایی که در این بخش ثبت می‌کنید در صفحه‌ی رزرو نمایش داده می‌شوند و قابل رزرو هستند.
           </div>
 
           {showTableForm && (
