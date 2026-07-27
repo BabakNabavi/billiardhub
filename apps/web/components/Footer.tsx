@@ -198,7 +198,8 @@ export default function Footer() {
           {/* Nav columns */}
           {nav.map(col => (
             <div key={col.heading}>
-              <div className="ft-heading" style={{ fontSize: '11px', color: col.color, letterSpacing: '0.18em', fontWeight: 700, marginBottom: '13px' }}>{col.heading}</div>
+              {/* letter-spacing فقط برای تیترهای لاتین؛ روی فارسی حروفِ چسبان را باز می‌کند */}
+              <div className="ft-heading" style={{ fontSize: /[A-Z]/.test(col.heading) ? '11px' : '12px', color: col.color, letterSpacing: /[A-Z]/.test(col.heading) ? '0.18em' : 0, fontWeight: 700, marginBottom: '13px' }}>{col.heading}</div>
               {col.links.map(item => (
                 <Link key={item.href} href={item.href} className="ft-link">
                   <ChevronLeft size={10} />
