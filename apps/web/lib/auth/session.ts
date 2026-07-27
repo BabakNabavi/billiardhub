@@ -15,15 +15,13 @@
 import jwt from 'jsonwebtoken'
 import { jwtVerify } from 'jose'
 
-/* ── نام کوکی‌ها و عمرها (مرحله‌ی ب استفاده می‌شوند) ────────────── */
-export const ACCESS_COOKIE  = 'bh_at'
-export const REFRESH_COOKIE = 'bh_rt'
-export const CSRF_COOKIE    = 'bh_csrf'
-
-export const ACCESS_TTL_SEC  = 15 * 60           // ۱۵ دقیقه
-export const REFRESH_TTL_SEC = 30 * 24 * 60 * 60 // ۳۰ روز
-/* عمرِ توکن‌های قدیمیِ داخلِ localStorage — تا این مدت باید پذیرفته شوند */
-export const LEGACY_TTL_SEC  = 7 * 24 * 60 * 60
+/* نام کوکی‌ها و عمرها از فایلِ بدونِ وابستگی می‌آیند تا Edge هم
+   بتواند بخواندشان بدونِ اینکه jsonwebtoken وارد باندلش شود. */
+export {
+  ACCESS_COOKIE, REFRESH_COOKIE, CSRF_COOKIE, CSRF_HEADER,
+  ACCESS_TTL_SEC, REFRESH_TTL_SEC, LEGACY_TTL_SEC,
+} from './constants'
+import { ACCESS_COOKIE, ACCESS_TTL_SEC, REFRESH_TTL_SEC } from './constants'
 
 export interface SessionUser {
   id: string

@@ -31,10 +31,20 @@ export default function LoginPage() {
   const [phoneFocus, setPhoneFocus] = useState(false);
   const [passFocus,  setPassFocus]  = useState(false);
 
-  /* اگه کاربر لاگین هست مستقیم بره dashboard */
+  /* مقصدِ بازگشت. وقتی middleware کاربرِ بدونِ نشست را از یک صفحه‌ی
+     محافظت‌شده به این‌جا می‌فرستد، آدرسِ همان صفحه در next می‌آید تا
+     پس از ورود دقیقاً به جای اولش برگردد — نه به داشبورد. */
+  const nextPath = (() => {
+    if (typeof window === 'undefined') return '/dashboard';
+    const n = new URLSearchParams(window.location.search).get('next');
+    /* فقط مسیرِ داخلی؛ //evil.com یا آدرسِ کامل پذیرفته نمی‌شود */
+    return n && /^\/(?!\/)/.test(n) ? n : '/dashboard';
+  })();
+
+  /* اگه کاربر لاگین هست مستقیم برود سرِ کارش */
   useEffect(() => {
-    if (_hydrated && user) router.replace('/dashboard');
-  }, [_hydrated, user, router]);
+    if (_hydrated && user) router.replace(nextPath);
+  }, [_hydrated, user, router, nextPath]);
 
   /* خطا بعد از چند ثانیه خودش بسته می‌شود */
   useEffect(() => {
@@ -51,7 +61,9 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/login', { phone: phone.trim(), password });
       setAuth(res.data.user, res.data.token);
-      router.replace('/dashboard');
+      /* نشستِ کوکی‌محور تازه ساخته شد ⇒ نشانه‌ی مهاجرت هم دیگر لازم نیست */
+      try { localStorage.setItem('bh_session_migrated', String(Date.now())); } catch { /* ignore */ }
+      router.replace(nextPath);
     } catch (err: any) {
       setError(err.response?.data?.message || 'شماره یا رمز عبور اشتباه است');
     } finally {
