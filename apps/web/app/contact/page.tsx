@@ -28,8 +28,10 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
    در صفحه نمایش داده نمی‌شوند — برای فعال‌کردن فقط همین‌جا مقدار بده. */
 const CONTACT = {
   email: 'info@billiardhub.net',
-  phone: '',        // TODO: شماره‌ی رسمی (مثل 02100000000) — فعلاً نمایش داده نمی‌شود
-  city: 'تهران، ایران',
+  phone: '021-22859551',
+  phoneDial: '02122859551',   // برای لینکِ tel:
+  city: 'تهران',
+  address: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶، طبقه سوم',
   instagram: '',    // TODO: آدرس کامل پروفایل — فعلاً نمایش داده نمی‌شود
   telegram: '',     // TODO: آدرس کامل کانال — فعلاً نمایش داده نمی‌شود
 }
@@ -314,24 +316,24 @@ export default function ContactPage() {
                 </span>
               </button>
 
-              {/* تلفن — فقط وقتی شماره‌ی واقعی ثبت شده باشد */}
+              {/* تلفن */}
               {CONTACT.phone && (
-                <a className="ct-ch" href={`tel:${CONTACT.phone}`} style={{ ['--cc' as never]: BALLS.green }}>
+                <a className="ct-ch" href={`tel:${CONTACT.phoneDial}`} style={{ ['--cc' as never]: BALLS.green }}>
                   <span className="ic"><Headphones size={18} /></span>
                   <span style={{ minWidth: 0 }}>
                     <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>تلفن</span>
-                    <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>{CONTACT.phone}</span>
+                    <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{CONTACT.phone}</span>
                   </span>
                   <span className="hint">تماس مستقیم</span>
                 </a>
               )}
 
-              {/* موقعیت */}
-              <div className="ct-ch" style={{ ['--cc' as never]: BALLS.red, cursor: 'default' }}>
+              {/* نشانی */}
+              <div className="ct-ch" style={{ ['--cc' as never]: BALLS.red, cursor: 'default', alignItems: 'flex-start' }}>
                 <span className="ic"><MapPin size={18} /></span>
                 <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>موقعیت</span>
-                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>{CONTACT.city}</span>
+                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>نشانی دفتر</span>
+                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600, lineHeight: 2, display: 'block' }}>{CONTACT.address}</span>
                 </span>
               </div>
 

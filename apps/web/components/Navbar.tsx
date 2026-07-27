@@ -255,12 +255,27 @@ export default function Navbar() {
             width:min(700px, 94vw) !important; }
         }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
-        /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون */
+        /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون.
+           ردیفِ کاربرِ لاگین‌شده (جستجو + پیام + پروفایل + منو) از لوگو پهن‌تر است،
+           پس هرچه صفحه باریک‌تر می‌شود، همین ردیف پله‌پله جمع‌تر می‌شود. */
         @media(max-width:430px) {
           .nav-inner { padding:0 10px !important; gap:6px !important; }
           .nav-brand { font-size:17px !important; }
           .nav-login-btn { padding:8px 10px !important; font-size:12.5px !important; gap:4px !important; }
+          .nav-actions { gap:5px !important; }
+          .nav-ico { width:40px !important; height:40px !important; }
+          .nav-profile { padding:6px 9px !important; height:40px !important; gap:6px !important; }
+          .nav-chev { display:none !important; }
         }
+        @media(max-width:365px) {
+          .nav-brand { font-size:15px !important; }
+          .nav-actions { gap:4px !important; }
+          .nav-ico { width:36px !important; height:36px !important; }
+          .nav-profile { padding:5px 7px !important; height:36px !important; }
+          .nav-login-btn { padding:7px 9px !important; font-size:12px !important; }
+        }
+        /* باریک‌ترین حالت (گلکسی فولد و…): فقط نشانِ لوگو می‌ماند */
+        @media(max-width:330px) { .nav-brand { display:none !important; } }
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
         .mob-link-item:hover { background: rgba(184,147,58,0.06) !important; }
@@ -402,10 +417,10 @@ export default function Navbar() {
           </div>
 
           {/* Right actions — all icon buttons 44×44px, icon size 22 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+          <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, minWidth: 0 }}>
 
             {/* Search — mobile only */}
-            <button ref={searchBtnRef} className="mob" onClick={() => setSearchOpen(p => !p)}
+            <button ref={searchBtnRef} className="mob nav-ico" onClick={() => setSearchOpen(p => !p)}
               style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: searchOpen ? GOLD_LIGHT : SURF, border: `1px solid ${searchOpen ? GOLD_BORDER : BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: searchOpen ? GOLD : TEXT_MUT, flexShrink: 0, transition: 'all 0.3s' }}>
               <Search size={20} />
             </button>
@@ -448,7 +463,7 @@ export default function Navbar() {
 
             {/* دایرکتِ استوری — همه‌ی کاربرانِ لاگین، با بجِ نخوانده */}
             {user && (
-              <Link href="/direct" aria-label="دایرکت"
+              <Link href="/direct" aria-label="دایرکت" className="nav-ico"
                 style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '12px', color: TEXT_MUT, flexShrink: 0, transition: 'color 0.2s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = TEXT_MUT }}>
@@ -471,12 +486,12 @@ export default function Navbar() {
               </Link>
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
-                <button onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
+                <button className="nav-profile" onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
                   <div style={{ width: '30px', height: '30px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '15px', flexShrink: 0 }}>
                     {user.firstName?.[0]}
                   </div>
                   <span className="desk" style={{ alignItems: 'center', color: TEXT }}>{user.firstName}</span>
-                  <ChevronDown size={13} style={{ transition: 'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', color: TEXT_MUT }} />
+                  <ChevronDown className="nav-chev" size={13} style={{ transition: 'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', color: TEXT_MUT, flexShrink: 0 }} />
                 </button>
 
                 {profileOpen && (
@@ -526,7 +541,7 @@ export default function Navbar() {
             )}
 
             {/* Hamburger */}
-            <button className="mob" onClick={() => setMobileOpen(p => !p)}
+            <button className="mob nav-ico" onClick={() => setMobileOpen(p => !p)}
               style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', flexShrink: 0, transition: 'all 0.3s' }}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>

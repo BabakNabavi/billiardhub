@@ -213,8 +213,8 @@ export default function Footer() {
         {/* ── Contact strip ─────────────────────────── */}
         <div className="ft-contact" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: '13px 0', marginBottom: '16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
           {[
-            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، ایران' },
-            { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: '۰۲۱-۱۲۳۴۵۶۷۸' },
+            { icon: <MapPin size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶، طبقه سوم' },
+            { icon: <Phone  size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: '۰۲۱-۲۲۸۵۹۵۵۱' },
             { icon: <Mail   size={13} style={{ color: GOLD, flexShrink: 0 }} />, text: 'info@billiardhub.net' },
           ].map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: DIM, fontSize: '13.5px' }}>

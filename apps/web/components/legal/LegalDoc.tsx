@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ListOrdered, ChevronDown, FileText, ShieldCheck, ArrowUp } from 'lucide-react'
+import { ChevronLeft, ListOrdered, ChevronDown, FileText, ShieldCheck, ArrowUp, Check } from 'lucide-react'
 import type { LegalDocument } from '../../lib/legal-content'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
@@ -17,6 +17,20 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
   const [active, setActive] = useState<string>('')
   const [tocOpen, setTocOpen] = useState(false)
   const [showTop, setShowTop] = useState(false)
+  /* وقتی کاربر از فرمِ ثبت‌نام به این‌جا آمده، نوارِ تأیید پایین صفحه می‌آید.
+     از window خوانده می‌شود (نه useSearchParams) تا صفحه استاتیک بماند. */
+  const [fromRegister, setFromRegister] = useState(false)
+  const [accepted, setAccepted] = useState(false)
+
+  useEffect(() => {
+    setFromRegister(new URLSearchParams(window.location.search).get('from') === 'register')
+  }, [])
+
+  const acceptTerms = () => {
+    try { localStorage.setItem('bh_terms_accepted', String(Date.now())) } catch { /* ignore */ }
+    setAccepted(true)
+    setTimeout(() => { window.location.href = '/register' }, 550)
+  }
 
   /* بخش فعال در فهرست، بر اساس موقعیت اسکرول */
   useEffect(() => {
@@ -190,11 +204,40 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
       {/* بازگشت به بالا */}
       {showTop && (
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="بازگشت به بالا"
-          style={{ position: 'fixed', insetInlineStart: 20, bottom: 24, zIndex: 50, width: 44, height: 44, borderRadius: '50%',
+          style={{ position: 'fixed', insetInlineStart: 20, bottom: fromRegister ? 92 : 24, zIndex: 50, width: 44, height: 44, borderRadius: '50%',
             border: `1px solid ${LINE}`, background: '#fff', color: GOLD_D, cursor: 'pointer', display: 'flex',
             alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 26px rgba(28,27,23,0.14)' }}>
           <ArrowUp size={18} />
         </button>
+      )}
+
+      {/* نوارِ تأیید — فقط وقتی از فرمِ ثبت‌نام آمده باشد */}
+      {fromRegister && (
+        <div style={{
+          position: 'fixed', insetInline: 0, bottom: 0, zIndex: 60,
+          background: 'rgba(255,255,255,0.94)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
+          borderTop: `1px solid ${LINE}`, boxShadow: '0 -8px 30px rgba(28,27,23,0.07)',
+          padding: '12px clamp(14px,3vw,28px) calc(12px + env(safe-area-inset-bottom))',
+        }}>
+          <div style={{ maxWidth: 1180, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <span style={{ flex: '1 1 200px', minWidth: 0, fontSize: 12.5, color: SEC, lineHeight: 1.9 }}>
+              پس از مطالعه، تأیید کنید تا به فرم ثبت‌نام بازگردید.
+            </span>
+            <button onClick={acceptTerms} disabled={accepted}
+              style={{
+                flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                padding: '12px 22px', borderRadius: 12, cursor: accepted ? 'default' : 'pointer', fontFamily: 'inherit',
+                fontSize: 13.5, fontWeight: 800, transition: 'all .2s',
+                background: accepted ? 'rgba(14,122,56,0.10)' : 'rgba(199,166,106,0.14)',
+                border: `1px solid ${accepted ? 'rgba(14,122,56,0.34)' : 'rgba(199,166,106,0.45)'}`,
+                color: accepted ? FELT : GOLD_D,
+              }}>
+              {accepted
+                ? <><Check size={15} /> تأیید شد — در حال بازگشت…</>
+                : <><Check size={15} /> قوانین را مطالعه کردم و می‌پذیرم</>}
+            </button>
+          </div>
+        </div>
       )}
 
       <style>{`

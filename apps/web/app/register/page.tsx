@@ -60,6 +60,8 @@ export default function RegisterPage() {
   const [otpMsg, setOtpMsg]   = useState('');
   const [otpBusy, setOtpBusy] = useState(false);
   const [resendIn, setResendIn] = useState(0);
+  /* پذیرشِ قوانین — پیش‌شرطِ ساختِ حساب */
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     phone: '',
@@ -70,6 +72,29 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   });
+
+  /* رفتن به صفحه‌ی قوانین و برگشت: اطلاعاتِ پرشده گم نشود.
+     رمز عبور عمداً ذخیره نمی‌شود و کاربر دوباره واردش می‌کند. */
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('bh_terms_accepted')) setAcceptedTerms(true);
+      const draft = sessionStorage.getItem('bh_register_draft');
+      if (draft) {
+        const d = JSON.parse(draft) as Partial<FormData> & { step?: Step };
+        setForm(f => ({ ...f, ...d, password: '', confirmPassword: '' }));
+        if (d.step === 2) setStep(2);
+        sessionStorage.removeItem('bh_register_draft');
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const goToTerms = () => {
+    try {
+      const { password: _p, confirmPassword: _c, ...rest } = form;
+      sessionStorage.setItem('bh_register_draft', JSON.stringify({ ...rest, step }));
+    } catch { /* ignore */ }
+    router.push('/terms?from=register');
+  };
 
   /* سانیتایزِ ورودی‌ها: نام‌ها فقط حروف فارسی (بدون عدد و حروف انگلیسی)؛ کد ملی فقط ۱۰ رقم؛
      موبایل فقط عدد، ۱۱ رقم و حتماً با ۰۹ (اگر با ۹ شروع شد، ۰ اضافه می‌شود) */
@@ -168,6 +193,10 @@ export default function RegisterPage() {
     }
     if (form.password !== form.confirmPassword) {
       setError('رمز عبور و تکرار آن یکسان نیستند');
+      return;
+    }
+    if (!acceptedTerms) {
+      setError('برای ساخت حساب، قوانین و مقررات را مطالعه و تأیید کنید');
       return;
     }
 
@@ -424,6 +453,23 @@ export default function RegisterPage() {
                 باید شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه باشد.
               </p>
               {field('confirmPassword', 'تکرار رمز عبور', <Lock size={16} />, { placeholder: 'رمز عبور را تکرار کنید', reveal: { shown: showPw2, toggle: () => setShowPw2(p => !p) } })}
+
+              {/* پذیرش قوانین — بدون تیکِ آن، ثبت‌نام انجام نمی‌شود */}
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, cursor: 'pointer', margin: '2px 0 14px' }}>
+                <input type="checkbox" checked={acceptedTerms}
+                  onChange={e => {
+                    setAcceptedTerms(e.target.checked); setError('');
+                    try { e.target.checked ? localStorage.setItem('bh_terms_accepted', String(Date.now())) : localStorage.removeItem('bh_terms_accepted') } catch { /* ignore */ }
+                  }}
+                  style={{ width: 17, height: 17, marginTop: 2, accentColor: GOLD, cursor: 'pointer', flexShrink: 0 }} />
+                <span style={{ fontSize: 12.5, lineHeight: 2, color: SEC }}>
+                  <button type="button" onClick={goToTerms}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 800, color: '#1D4ED8', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                    قوانین
+                  </button>
+                  {' '}را مطالعه کردم و می‌پذیرم.
+                </span>
+              </label>
 
               <button className="au-btn" onClick={handleRegister} disabled={loading} style={{ marginTop: 6 }}>
                 {loading ? (
