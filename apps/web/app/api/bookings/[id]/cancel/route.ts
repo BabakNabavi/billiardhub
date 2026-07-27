@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
-import { computeRefund, bookingStartsAt, canCancelAt, MIN_CANCEL_HOURS } from '@/lib/finance/cancellation';
+import { computeRefund, bookingStartsAt, canCancelAt } from '@/lib/finance/cancellation';
 import { getPaymentProvider } from '@/lib/payments';
 
 /* کنسلیِ رزرو — کاربرِ صاحبِ رزرو، مالکِ باشگاه یا ادمین.
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
      (لغو از سوی باشگاه، طبق همان بند، با بازگشت وجه انجام می‌شود). */
   const startsAt = bookingStartsAt(b.bookingDate, b.timeSlots);
   if (!admin && !owner && !canCancelAt(startsAt)) {
-    return NextResponse.json({ message: `مهلت لغو گذشته است؛ رزرو تنها تا ${MIN_CANCEL_HOURS} ساعت پیش از زمان شروع قابل لغو است` }, { status: 409 });
+    return NextResponse.json({ message: 'مهلت لغو گذشته است؛ رزرو تنها تا ۲ ساعت پیش از زمان شروع قابل لغو است' }, { status: 409 });
   }
 
   const body = await req.json().catch(() => ({}));
