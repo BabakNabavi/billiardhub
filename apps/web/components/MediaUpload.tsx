@@ -1,7 +1,7 @@
 'use client'
 
 /* آپلودِ ویدیو + ساختِ خودکارِ کانال (مثل یوتیوب) — فقط کاربرِ لاگین‌کرده.
-   مدتِ ویدیو و تامبنیل خودکار از فریم گرفته می‌شوند؛ آپلود روی Supabase Storage. */
+   مدت ویدیو و تامبنیل خودکار از فریم گرفته می‌شوند؛ آپلود روی Supabase Storage. */
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -78,7 +78,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     setErr(''); setBusy(true)
     const r = await saveChannel({ ownerKey, name: chName, handle: chHandle, bio: chBio })
     setBusy(false)
-    if (!r?.ok || !r.channel) { setErr(r?.message || 'ساختِ کانال ناموفق بود'); return }
+    if (!r?.ok || !r.channel) { setErr(r?.message || 'ساخت کانال ناموفق بود'); return }
     setChannel(r.channel)
   }
 
@@ -87,8 +87,8 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
   const pickVideo = (f?: File) => {
     setErr('')
     if (!f) return
-    if (!f.type.startsWith('video/')) { setErr('لطفاً یک فایلِ ویدیویی انتخاب کنید'); return }
-    if (f.size > MAX_MB * 1024 * 1024) { setErr(`حجمِ ویدیو نباید بیش از ${faDigits(MAX_MB)} مگابایت باشد`); return }
+    if (!f.type.startsWith('video/')) { setErr('لطفاً یک فایل ویدیویی انتخاب کنید'); return }
+    if (f.size > MAX_MB * 1024 * 1024) { setErr(`حجم ویدیو نباید بیش از ${faDigits(MAX_MB)} مگابایت باشد`); return }
     if (videoUrl) URL.revokeObjectURL(videoUrl)
     const url = URL.createObjectURL(f)
     setFile(f); setVideoUrl(url); setDuration(''); setThumbFile(null); setThumbPrev('')
@@ -107,18 +107,18 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (busy) return
     setErr('')
     if (!user) { setErr('برای آپلود باید وارد شوید'); return }
-    if (!channel) { setErr('ابتدا کانالِ خود را بسازید'); return }
+    if (!channel) { setErr('ابتدا کانال خود را بسازید'); return }
     if (!file) { setErr('ویدیو را انتخاب کنید'); return }
-    if (!title.trim()) { setErr('عنوانِ ویدیو را بنویسید'); return }
+    if (!title.trim()) { setErr('عنوان ویدیو را بنویسید'); return }
     setBusy(true)
     try {
       const id = `uv-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
       const ext = (file.name.match(/\.[^.]+$/)?.[0] || '.mp4').toLowerCase()
-      setPhase('در حال آپلودِ ویدیو…')
+      setPhase('در حال آپلود ویدیو…')
       const src = await uploadFile('club-media', file, `social/media/vid/${id}${ext}`)
       if (!src) throw new Error('upload-video')
       let thumb = ''
-      if (thumbFile) { setPhase('در حال آپلودِ تصویر…'); thumb = (await uploadFile('club-media', thumbFile, `social/media/thumb/${id}.jpg`)) || '' }
+      if (thumbFile) { setPhase('در حال آپلود تصویر…'); thumb = (await uploadFile('club-media', thumbFile, `social/media/thumb/${id}.jpg`)) || '' }
       setPhase('در حال انتشار…')
       const res = await postUserVideo({
         id, title: title.trim(), category, ownerKey,
@@ -151,9 +151,9 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: `1px solid ${LINE}` }}>
           <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 10, background: 'rgba(199,166,106,0.14)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><UploadCloud size={18} /></span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 900, color: INK }}>{channel ? 'آپلودِ ویدیو' : 'ساختِ کانال'}</div>
+            <div style={{ fontSize: 15.5, fontWeight: 900, color: INK }}>{channel ? 'آپلود ویدیو' : 'ساخت کانال'}</div>
             <div style={{ fontSize: 11.5, color: MUT }}>
-              {channel ? <>انتشار در کانالِ <b style={{ color: SEC }}>{channel.name}</b></> : 'برای انتشارِ ویدیو ابتدا کانالِ خود را بسازید'}
+              {channel ? <>انتشار در کانال <b style={{ color: SEC }}>{channel.name}</b></> : 'برای انتشار ویدیو ابتدا کانال خود را بسازید'}
             </div>
           </div>
           <button onClick={() => !busy && onClose()} aria-label="بستن" style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 10, padding: 8, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={17} /></button>
@@ -173,14 +173,14 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
                     {chName ? chName.slice(0, 1) : <Tv size={20} />}
                   </span>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 800, color: chName ? INK : MUT }}>{chName || 'نامِ کانال'}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: chName ? INK : MUT }}>{chName || 'نام کانال'}</div>
                     {chHandle && <div style={{ fontSize: 11.5, color: MUT, direction: 'ltr', textAlign: 'right' }}>@{chHandle}</div>}
                   </div>
                 </div>
-                <Field label="نامِ کانال">
+                <Field label="نام کانال">
                   <input value={chName} onChange={e => { setChName(e.target.value.slice(0, 60)); setErr('') }} placeholder="مثلاً: آکادمی بیلیارد من" style={inp} />
                 </Field>
-                <Field label="هندلِ کانال (انگلیسی)">
+                <Field label="هندل کانال (انگلیسی)">
                   <div style={{ ...inp, display: 'flex', alignItems: 'center', gap: 6, padding: '0 13px' }}>
                     <span style={{ color: MUT, fontSize: 14 }}>@</span>
                     <input value={chHandle} onChange={e => { setChHandle(e.target.value.replace(/[^A-Za-z0-9._-]/g, '').toLowerCase().slice(0, 30)); setErr('') }}
@@ -194,10 +194,10 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
                 {err && <div style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.2)', borderRadius: 10, padding: '9px 12px' }}>{err}</div>}
                 <button onClick={createChannel} disabled={busy}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: 'none', cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: GOLD, color: '#241B08' }}>
-                  {busy ? <><Loader2 size={17} className="bm-spin" /> در حال ساخت…</> : <><Tv size={17} /> ساختِ کانال و ادامه</>}
+                  {busy ? <><Loader2 size={17} className="bm-spin" /> در حال ساخت…</> : <><Tv size={17} /> ساخت کانال و ادامه</>}
                 </button>
                 <p style={{ fontSize: 11, color: MUT, textAlign: 'center', margin: 0, lineHeight: 1.9 }}>
-                  کانال یک‌بار ساخته می‌شود و همه‌ی ویدیوهای بعدیِ شما زیرِ همان منتشر می‌شود.
+                  کانال یک‌بار ساخته می‌شود و همه‌ی ویدیوهای بعدی شما زیر همان منتشر می‌شود.
                 </p>
               </>
             )}
@@ -209,7 +209,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
           {!videoUrl ? (
             <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '30px 18px', border: `2px dashed ${LINE}`, borderRadius: 16, cursor: 'pointer', background: '#FAF8F3', textAlign: 'center' }}>
               <span style={{ display: 'inline-flex', width: 46, height: 46, borderRadius: 14, background: 'rgba(199,166,106,0.12)', color: GOLD_D, alignItems: 'center', justifyContent: 'center' }}><Film size={22} /></span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: INK }}>انتخابِ فایلِ ویدیو</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: INK }}>انتخاب فایل ویدیو</span>
               <span style={{ fontSize: 11.5, color: MUT }}>MP4/MOV/WebM — حداکثر {faDigits(MAX_MB)} مگابایت</span>
               <input type="file" accept="video/*" style={{ display: 'none' }} onChange={e => pickVideo(e.target.files?.[0])} />
             </label>
@@ -226,14 +226,14 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
           {videoUrl && (
             <>
               <Field label="عنوان">
-                <input value={title} onChange={e => setTitle(e.target.value)} maxLength={160} placeholder="مثلاً: آموزشِ کنترلِ توپِ سفید" style={inp} />
+                <input value={title} onChange={e => setTitle(e.target.value)} maxLength={160} placeholder="مثلاً: آموزش کنترل توپ سفید" style={inp} />
               </Field>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <SelectField label="دسته‌بندی" value={category} onChange={setCategory}
                     options={MEDIA_CATEGORIES.map(c => ({ value: c.key, label: c.label, dot: c.dot }))} />
                 </div>
-                <Field label="تصویرِ شاخص (اختیاری)">
+                <Field label="تصویر شاخص (اختیاری)">
                   <label style={{ ...inp, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: SEC, overflow: 'hidden' }}>
                     {thumbPrev ? <img src={thumbPrev} alt="" style={{ width: 30, height: 20, objectFit: 'cover', borderRadius: 4 }} /> : <ImageIcon size={16} />}
                     <span style={{ fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{thumbPrev ? 'انتخاب‌شده — تعویض' : 'از فریم ساخته شد'}</span>
@@ -254,7 +254,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
 
           <button onClick={submit} disabled={busy || !videoUrl}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: 'none', cursor: busy || !videoUrl ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: videoUrl ? GOLD : '#EDE9E1', color: videoUrl ? '#241B08' : MUT, transition: 'background .2s' }}>
-            {busy ? <><Loader2 size={17} className="bm-spin" /> {phase || 'در حال آپلود…'}</> : <><Check size={17} /> انتشارِ ویدیو</>}
+            {busy ? <><Loader2 size={17} className="bm-spin" /> {phase || 'در حال آپلود…'}</> : <><Check size={17} /> انتشار ویدیو</>}
           </button>
           <style>{`@keyframes bmspin { to { transform: rotate(360deg); } } .bm-spin { animation: bmspin 1s linear infinite; }`}</style>
         </div>

@@ -1,8 +1,8 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   همه‌ی کانال‌ها — بیلیارد مدیا (تمِ روشن). جستجوی کانال
-   (نام / هندل / تگ‌لاین) + گریدِ کارت‌ها + CTA ساخت کانال.
+   همه‌ی کانال‌ها — بیلیارد مدیا (تم روشن). جستجوی کانال
+   (نام / هندل / تگ‌لاین) + گرید کارت‌ها + CTA ساخت کانال.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useMemo, useState } from 'react'
@@ -64,7 +64,7 @@ export default function ChannelsPage() {
           <h1 style={{ fontSize: 'clamp(22px,3.4vw,38px)', fontWeight: 900, margin: 0, lineHeight: 1.25, letterSpacing: '-0.02em' }}>
             کانال‌های <span style={{ background: `linear-gradient(135deg,#E8CE96,${GOLD} 55%,#8A6020)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>بیلیارد مدیا</span>
           </h1>
-          <p style={{ margin: '10px 0 0', fontSize: 12.5, color: MUT, lineHeight: 1.9 }}>سازندگانِ محتوای دنیای بیلیارد را دنبال کنید — {faDigits(channels.length)} کانالِ فعال</p>
+          <p style={{ margin: '10px 0 0', fontSize: 12.5, color: MUT, lineHeight: 1.9 }}>سازندگان محتوای دنیای بیلیارد را دنبال کنید — {faDigits(channels.length)} کانال فعال</p>
         </div>
       </header>
 
@@ -83,7 +83,7 @@ export default function ChannelsPage() {
             <span style={{ display: 'inline-flex', width: 58, height: 58, borderRadius: 16, background: 'rgba(199,166,106,0.1)', color: GOLD_D, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}><Search size={24} /></span>
             <p style={{ fontSize: 15, fontWeight: 900, margin: '0 0 6px' }}>کانالی پیدا نشد</p>
             <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید.</p>
-            <button onClick={() => setQuery('')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 800, background: GOLD, color: '#241B08', border: 'none' }}>نمایشِ همهٔ کانال‌ها</button>
+            <button onClick={() => setQuery('')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 800, background: GOLD, color: '#241B08', border: 'none' }}>نمایش همهٔ کانال‌ها</button>
           </div>
         ) : (
           <div className="cs-grid">
@@ -99,7 +99,7 @@ export default function ChannelsPage() {
             ))}
             <div className="cs-card cs-cta">
               <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
-              <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
+              <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانال خودت را بساز</span>
               <span style={{ fontSize: 11.5, color: SEC, lineHeight: 1.8 }}>مربی، بازیکن یا باشگاه هستی؟ ویدیوهایت را در بیلیارد مدیا منتشر کن.</span>
               <Link href="/profile/role" className="go" style={{ color: FELT, textDecoration: 'none' }}>ساخت کانال <ArrowLeft size={12} /></Link>
             </div>

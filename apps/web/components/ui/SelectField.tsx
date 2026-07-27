@@ -1,7 +1,7 @@
 'use client'
 
 /* دراپ‌داونِ اختصاصی — روی دسکتاپ پاپ‌آور، روی موبایل شیتِ پایین‌کشویی.
-   جایگزینِ <select> نیتیو که روی موبایل زشت و غیرقابلِ استایل است. */
+   جایگزین <select> نیتیو که روی موبایل زشت و غیرقابل استایل است. */
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'

@@ -1,11 +1,11 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   بیلیارد مدیا — «خانهٔ محتوای بیلیارد» (بازطراحیِ روشن و سینمایی، ۱۴۰۵)
-   تمِ روشن/پرمیوم/ادیتوریال. تجربهٔ اختصاصی، نه کلونِ پلتفرم‌ها:
-   هیروی سینمایی با ویدیوی محیطی، نویگیشنِ چسبانِ مورفینگ، ترندِ درگ،
-   گریدِ نامتقارن، اسپاتلایتِ سازنده، بندِ مسابقات، ریلِ شورتسِ عمودی و
-   سرچِ تمام‌صفحه. منطق/داده/فیلتر/ادمین همان نسخهٔ قبل است.
+   بیلیارد مدیا — «خانهٔ محتوای بیلیارد» (بازطراحی روشن و سینمایی، ۱۴۰۵)
+   تم روشن/پرمیوم/ادیتوریال. تجربهٔ اختصاصی، نه کلون پلتفرم‌ها:
+   هیروی سینمایی با ویدیوی محیطی، نویگیشن چسبان مورفینگ، ترند درگ،
+   گرید نامتقارن، اسپاتلایت سازنده، بند مسابقات، ریل شورتس عمودی و
+   سرچ تمام‌صفحه. منطق/داده/فیلتر/ادمین همان نسخهٔ قبل است.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
@@ -62,7 +62,7 @@ function useDragScroll() {
   const onMouseMove = (e: React.MouseEvent) => { const el = ref.current; if (!el || !st.current.down) return; const dx = e.pageX - st.current.x; if (Math.abs(dx) > 4) st.current.moved = true; el.scrollLeft = st.current.left - dx }
   const stop = () => { const el = ref.current; if (el) el.style.cursor = ''; st.current.down = false }
   const onClickCapture = (e: React.MouseEvent) => { if (st.current.moved) { e.preventDefault(); e.stopPropagation() } }
-  const onDragStart = (e: React.DragEvent) => e.preventDefault()   // جلوگیری از درگِ نیتیوِ عکس/لینک (علامتِ ممنوع)
+  const onDragStart = (e: React.DragEvent) => e.preventDefault()   // جلوگیری از درگ نیتیو عکس/لینک (علامت ممنوع)
   return { ref, handlers: { onMouseDown, onMouseMove, onMouseUp: stop, onMouseLeave: stop, onClickCapture, onDragStart } }
 }
 
@@ -148,7 +148,7 @@ export default function MediaPage() {
   const { user } = useAuthStore()
   const [uploadOpen, setUploadOpen] = useState(false)
   /* هر کاربرِ ثبت‌نام‌کرده در همان ثبت‌نام احراز هویت شده (OTP + شاهکار)؛
-     پس مهمان → صفحه‌ی ورود (که خودش گزینه‌ی ساختِ حساب دارد)، لاگین → آپلود */
+     پس مهمان → صفحه‌ی ورود (که خودش گزینه‌ی ساخت حساب دارد)، لاگین → آپلود */
   const onUploadClick = () => {
     if (!user) { window.location.href = '/login'; return }
     setUploadOpen(true)
@@ -416,7 +416,7 @@ export default function MediaPage() {
         }
       `}</style>
 
-      {/* ═══════════ سرچِ تمام‌صفحه ═══════════ */}
+      {/* ═══════════ سرچ تمام‌صفحه ═══════════ */}
       {searchOpen && (
         <div className="bm-search-ov" onClick={() => setSearchOpen(false)}>
           <div className="bm-search-inner" onClick={e => e.stopPropagation()}>
@@ -466,7 +466,7 @@ export default function MediaPage() {
         </div>
       )}
 
-      {/* هالهٔ محیطیِ گرم — عمقِ پرمیوم در بالای صفحه */}
+      {/* هالهٔ محیطی گرم — عمق پرمیوم در بالای صفحه */}
       <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 680, pointerEvents: 'none', background: 'radial-gradient(ellipse 66% 100% at 74% -6%, rgba(199,166,106,0.10), transparent 60%), radial-gradient(ellipse 52% 92% at 6% 0%, rgba(14,122,56,0.055), transparent 56%)' }} />
 
       {/* ═══════════ هدر + هیرو ═══════════ */}
@@ -499,7 +499,7 @@ export default function MediaPage() {
           <h1 className="bm-hero-h1">خانهٔ محتوای<br />بیلیارد</h1>
           <div className="bm-hero-underline" />
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: '0 0 22px', maxWidth: 380, animation: 'bmUp .6s .22s ease both' }}>
-            آموزش، هایلایتِ مسابقات، مصاحبه و پشت‌صحنه — همه در یک سالنِ نمایشِ اختصاصی برای دنیای بیلیارد.
+            آموزش، هایلایت مسابقات، مصاحبه و پشت‌صحنه — همه در یک سالن نمایش اختصاصی برای دنیای بیلیارد.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {trending.slice(0, 3).map((v, i) => (
@@ -516,12 +516,12 @@ export default function MediaPage() {
         </div>
       </div>
 
-      {/* ═══════════ نویگیشنِ چسبان ═══════════ */}
+      {/* ═══════════ نویگیشن چسبان ═══════════ */}
       <div className="bm-nav">
         <div className="bm-wrap bm-navrow">
           <button className="bm-iconbtn" onClick={() => setSearchOpen(true)} aria-label="جستجو"><Search size={18} /></button>
           <button className="bm-uploadbtn" onClick={onUploadClick}>
-            <UploadCloud size={16} /><span className="bm-up-txt">آپلودِ ویدیو</span>
+            <UploadCloud size={16} /><span className="bm-up-txt">آپلود ویدیو</span>
           </button>
           <div className="bm-chips">
             <button className={`bm-chip${cat === 'all' ? ' on' : ''}`} onClick={() => pickCat('all')}>همه</button>
@@ -552,7 +552,7 @@ export default function MediaPage() {
       <main className="bm-wrap" style={{ padding: 'clamp(26px,3.6vw,44px) clamp(20px,3.4vw,36px) 90px' }}>
         {isBrowsing ? (
           <>
-            {/* ═══ ترندِ درگ ═══ */}
+            {/* ═══ ترند درگ ═══ */}
             <Reveal>
               <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
                 <SecHead eyebrow="TRENDING NOW" title="در حال ترند" icon={<Flame size={20} style={{ color: '#E0704A' }} />} />
@@ -567,7 +567,7 @@ export default function MediaPage() {
               </section>
             </Reveal>
 
-            {/* ═══ جدید — گریدِ نامتقارن ═══ */}
+            {/* ═══ جدید — گرید نامتقارن ═══ */}
             <Reveal>
               <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
                 <SecHead eyebrow="FRESH" title="تازه‌ترین‌ها" />
@@ -581,7 +581,7 @@ export default function MediaPage() {
               </section>
             </Reveal>
 
-            {/* ═══ اسپاتلایتِ سازنده ═══ */}
+            {/* ═══ اسپاتلایت سازنده ═══ */}
             {spotlight && spotVideos[0] && (
               <Reveal>
                 <section style={{ marginBottom: 'clamp(34px,4.6vw,54px)' }}>
@@ -649,7 +649,7 @@ export default function MediaPage() {
                   ))}
                   <button className="bm-chan bm-chan-cta" onClick={onUploadClick} style={{ cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' }}>
                     <span className="av" style={{ background: `linear-gradient(135deg,#3FA46B,${FELT})`, color: '#fff' }}>+</span>
-                    <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانالِ خودت را بساز</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>کانال خودت را بساز</span>
                     <span style={{ fontSize: 11, color: SEC, lineHeight: 1.8 }}>کانالت را بساز و ویدیوهایت را منتشر کن.</span>
                     <span className="go" style={{ color: FELT }}>{user ? 'شروع' : 'ورود و شروع'} <ArrowLeft size={11} /></span>
                   </button>
@@ -682,8 +682,8 @@ export default function MediaPage() {
               <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 20 }}>
                 <span style={{ display: 'inline-flex', width: 60, height: 60, borderRadius: 18, background: 'rgba(199,166,106,0.1)', color: GOLD_D, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}><Search size={26} /></span>
                 <p style={{ fontSize: 15.5, fontWeight: 900, margin: '0 0 6px' }}>ویدیویی پیدا نشد</p>
-                <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px' }}>عبارتِ دیگری جستجو کنید یا دسته را عوض کنید.</p>
-                <button onClick={() => { setQuery(''); pickCat('all') }} className="bm-more" style={{ padding: '10px 20px' }}>نمایشِ همهٔ ویدیوها</button>
+                <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px' }}>عبارت دیگری جستجو کنید یا دسته را عوض کنید.</p>
+                <button onClick={() => { setQuery(''); pickCat('all') }} className="bm-more" style={{ padding: '10px 20px' }}>نمایش همهٔ ویدیوها</button>
               </div>
             ) : (
               <>
@@ -695,7 +695,7 @@ export default function MediaPage() {
                 </div>
                 {hasMore && !loading && (
                   <div style={{ display: 'flex', justifyContent: 'center', marginTop: 34 }}>
-                    <button onClick={loadMore} className="bm-more" style={{ padding: '13px 32px', fontSize: 13.5 }}>نمایشِ بیشتر <ChevronDown size={15} /></button>
+                    <button onClick={loadMore} className="bm-more" style={{ padding: '13px 32px', fontSize: 13.5 }}>نمایش بیشتر <ChevronDown size={15} /></button>
                   </div>
                 )}
               </>
@@ -704,7 +704,7 @@ export default function MediaPage() {
         )}
       </main>
 
-      {/* مودالِ آپلودِ ویدیو (کاربرِ لاگین) */}
+      {/* مودال آپلود ویدیو (کاربر لاگین) */}
       <MediaUpload open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={(v) => { setUserVids(prev => [v, ...prev]); setUploadOpen(false) }} />
     </div>
   )
