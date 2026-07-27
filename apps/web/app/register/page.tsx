@@ -106,18 +106,18 @@ export default function RegisterPage() {
        می‌گیریم تا «۱۳۶۳/۶/۲» هم درست وارد شود؛ اگر فقط عدد بزند یا پیست
        کند، «/» خودکار گذاشته می‌شود ⇒ 1363/06/02 */
     if (key === 'birthDate') {
-      const raw = latin.replace(/[^0-9/]/g, '');
-      const parts = raw.split('/');
-      if (parts.length === 1) {
-        const d = parts[0]!.slice(0, 8);
-        if (d.length <= 4) return d;
-        if (d.length <= 6) return `${d.slice(0, 4)}/${d.slice(4)}`;
-        return `${d.slice(0, 4)}/${d.slice(4, 6)}/${d.slice(6)}`;
-      }
-      const y = parts[0]!.slice(0, 4);
-      const m = (parts[1] ?? '').slice(0, 2);
-      if (parts.length === 2) return `${y}/${m}`;
-      return `${y}/${m}/${(parts[2] ?? '').slice(0, 2)}`;
+      /* «-» و «.» هم جداکننده‌ی رایج‌اند */
+      const seg = latin.replace(/[-.]/g, '/').replace(/[^0-9/]/g, '').split('/');
+      let y = seg[0] ?? '', m = seg[1] ?? '', d = seg.slice(2).join('');
+      /* سرریزِ هر بخش به بخشِ بعدی: تایپِ پیوسته‌ی ۱۳۶۳۰۶۰۲ هم درست جا می‌افتد */
+      if (y.length > 4) { m = y.slice(4) + m; y = y.slice(0, 4); }
+      if (m.length > 2) { d = m.slice(2) + d; m = m.slice(0, 2); }
+      d = d.slice(0, 2);
+      if (y.length < 4) return y;
+      if (seg.length === 1 && !m) return y;
+      if (!m) return `${y}/`;
+      if (seg.length <= 2 && !d) return `${y}/${m}`;
+      return d ? `${y}/${m}/${d}` : `${y}/${m}/`;
     }
     if (key === 'phone') {
       let d = latin.replace(/[^0-9]/g, '');
