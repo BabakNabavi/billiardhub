@@ -3,7 +3,8 @@ import { readJson, writeJson, safeKey } from './social-server'
 /* OTPِ پیامکی — کد را خودمان می‌سازیم/ذخیره/می‌سنجیم و سرویسِ s.api.ir فقط
    پیامک را می‌رساند. ذخیره روی همان Supabase Storage (مثل استوری/دایرکت). */
 const SMS_URL = 'https://s.api.ir/api/sw1/SmsOTP'   // sw1 = s‑w‑یک (نه swl)
-const TEMPLATE = 1                    // ۱ = کدِ تأیید
+const TEMPLATE = 2                    // قالبِ سرویس: ۲ = «کد تایید» (مناسبِ ثبت‌نام)
+                                     // (افزودنِ نامِ «بیلیارد هاب» به تهِ پیامک = تنظیمِ سطحِ حساب از پشتیبانیِ s.api.ir)
 const TTL = 2 * 60 * 1000             // اعتبارِ کد: ۲ دقیقه
 const RESEND = 60 * 1000              // فاصله‌ی مجازِ ارسالِ مجدد: ۶۰ ثانیه
 const MAX_TRIES = 5
