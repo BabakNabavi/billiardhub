@@ -35,6 +35,24 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
     return () => window.removeEventListener('scroll', onScroll)
   }, [doc])
 
+  /* لنگرِ آدرس (/terms#market) — چون محتوا سمتِ کلاینت رندر می‌شود، مرورگر
+     در لحظه‌ی لودِ اول عنصر را پیدا نمی‌کند و اسکرول نمی‌کند؛ پس خودمان انجام می‌دهیم.
+     دو تلاش (rAF و ۳۰۰ms) تا فونت/تصاویر ارتفاع را جابه‌جا نکنند. */
+  useEffect(() => {
+    const go = (behavior: ScrollBehavior) => {
+      const id = decodeURIComponent(window.location.hash.replace('#', ''))
+      if (!id) return
+      const el = document.getElementById(id)
+      if (!el) return
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior })
+    }
+    const raf = requestAnimationFrame(() => go('auto'))
+    const t = setTimeout(() => go('auto'), 300)
+    const onHash = () => go('smooth')
+    window.addEventListener('hashchange', onHash)
+    return () => { cancelAnimationFrame(raf); clearTimeout(t); window.removeEventListener('hashchange', onHash) }
+  }, [doc])
+
   const jump = (id: string) => {
     setTocOpen(false)
     const el = document.getElementById(id)
