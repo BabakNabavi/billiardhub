@@ -15,7 +15,6 @@ import SelectField from './ui/SelectField'
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38'
 const MAX_MB = 200
-const safeKey = (k: string) => (k || 'x').replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 80)
 
 const fmtDur = (sec: number) => {
   if (!isFinite(sec) || sec <= 0) return '۰۰:۰۰'
@@ -69,10 +68,8 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     setErr(''); setChLoaded(false)
     fetchMyChannel(ownerKey).then(c => {
       setChannel(c); setChLoaded(true)
-      if (!c) {
-        setChName(`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کانالِ من')
-        setChHandle(safeKey(ownerKey).toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 20) || 'channel')
-      }
+      /* نام از پروفایل پیشنهاد می‌شود؛ هندل را خودِ کاربر انتخاب می‌کند */
+      if (!c) { setChName(`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()); setChHandle('') }
     })
   }, [open, ownerKey, user])
 
@@ -170,12 +167,14 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
             ) : (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#FAF8F3', border: `1px solid ${LINE}`, borderRadius: 16, padding: 14 }}>
-                  <span style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900, color: '#241B08', background: 'linear-gradient(135deg,#E8CE96,#8A6020)' }}>
-                    {(chName || 'ک').slice(0, 1)}
+                  <span style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 19, fontWeight: 900,
+                    color: chName ? '#241B08' : MUT,
+                    background: chName ? 'linear-gradient(135deg,#E8CE96,#8A6020)' : '#EDE9E1' }}>
+                    {chName ? chName.slice(0, 1) : <Tv size={20} />}
                   </span>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 800, color: INK }}>{chName || 'نامِ کانال'}</div>
-                    <div style={{ fontSize: 11.5, color: MUT, direction: 'ltr', textAlign: 'right' }}>@{chHandle || 'handle'}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: chName ? INK : MUT }}>{chName || 'نامِ کانال'}</div>
+                    {chHandle && <div style={{ fontSize: 11.5, color: MUT, direction: 'ltr', textAlign: 'right' }}>@{chHandle}</div>}
                   </div>
                 </div>
                 <Field label="نامِ کانال">
