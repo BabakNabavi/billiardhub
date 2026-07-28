@@ -10,7 +10,7 @@ import {
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
 import AdSlot from '../components/ads/AdSlot';
-import { useHorizontalScroll } from '../lib/useHorizontalScroll';
+import { useHorizontalScroll, scrollSign, getPos, setPos } from '../lib/useHorizontalScroll';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 
@@ -939,7 +939,6 @@ export default function HomePage() {
   const activeMktRef  = useRef(0);
 
   const mktDeskRef   = useRef<HTMLDivElement>(null);
-  const mktDragRef   = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const mktPausedRef = useRef(false);
   /* چرخِ ماوس و درگ — حرکتِ خودکار حینِ دخالتِ کاربر می‌ایستد */
   useHorizontalScroll(mktDeskRef, busy => { mktPausedRef.current = busy });
@@ -957,13 +956,17 @@ export default function HomePage() {
     const el = mktDeskRef.current;
     if (!el) return;
     const SPEED = 50;
-    el.scrollLeft = el.scrollWidth / 2;
+    /* در RTL موقعیتِ اسکرول منفی است؛ مقدارِ مثبت به ۰ گیر می‌کرد و
+       حرکتِ خودکار اصلاً شروع نمی‌شد. */
+    const sign = scrollSign(el);
+    setPos(el, sign, el.scrollWidth / 2);
     let last = 0;
     const tick = (t: number) => {
       if (last && !mktPausedRef.current) {
         const half = el.scrollWidth / 2;
-        el.scrollLeft -= (SPEED * (t - last)) / 1000;
-        if (el.scrollLeft <= 0) el.scrollLeft += half;
+        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000;
+        if (p <= 0) p += half;
+        setPos(el, sign, p);
       }
       last = t;
       mktTickerRef.current = requestAnimationFrame(tick);
@@ -972,37 +975,9 @@ export default function HomePage() {
     return () => { if (mktTickerRef.current) cancelAnimationFrame(mktTickerRef.current); };
   }, []);
 
-  const onMktMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    mktPausedRef.current = true;
-    mktDragRef.current = { startX: e.pageX, scrollLeft: mktDeskRef.current?.scrollLeft ?? 0, moved: false };
-    if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grabbing';
-    const onMove = (ev: MouseEvent) => {
-      const dx = ev.pageX - mktDragRef.current.startX;
-      if (Math.abs(dx) > 4) mktDragRef.current.moved = true;
-      if (mktDeskRef.current) mktDeskRef.current.scrollLeft = mktDragRef.current.scrollLeft - dx;
-    };
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      if (mktDeskRef.current) mktDeskRef.current.style.cursor = 'grab';
-      // resume auto-scroll only if mouse is no longer hovering
-      if (!(mktDeskRef.current?.matches(':hover') ?? false)) mktPausedRef.current = false;
-      if (mktDragRef.current.moved) {
-        const el = mktDeskRef.current;
-        if (el) {
-          const block = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); el.removeEventListener('click', block, true); };
-          el.addEventListener('click', block, true);
-        }
-      }
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  };
 
   // ── Sellers auto-scroll ──
   const sellersRef      = useRef<HTMLDivElement>(null);
-  const sellersDragRef  = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const sellersPaused   = useRef(false);
   useHorizontalScroll(sellersRef, busy => { sellersPaused.current = busy });
   const sellersTickerR  = useRef<number | null>(null);
@@ -1011,13 +986,17 @@ export default function HomePage() {
     const el = sellersRef.current;
     if (!el) return;
     const SPEED = 45;
-    el.scrollLeft = el.scrollWidth / 2;
+    /* در RTL موقعیتِ اسکرول منفی است؛ مقدارِ مثبت به ۰ گیر می‌کرد و
+       حرکتِ خودکار اصلاً شروع نمی‌شد. */
+    const sign = scrollSign(el);
+    setPos(el, sign, el.scrollWidth / 2);
     let last = 0;
     const tick = (t: number) => {
       if (last && !sellersPaused.current) {
         const half = el.scrollWidth / 2;
-        el.scrollLeft -= (SPEED * (t - last)) / 1000;
-        if (el.scrollLeft <= 0) el.scrollLeft += half;
+        let p = getPos(el, sign) - (SPEED * (t - last)) / 1000;
+        if (p <= 0) p += half;
+        setPos(el, sign, p);
       }
       last = t;
       sellersTickerR.current = requestAnimationFrame(tick);
@@ -1026,32 +1005,6 @@ export default function HomePage() {
     return () => { if (sellersTickerR.current) cancelAnimationFrame(sellersTickerR.current); };
   }, []);
 
-  const onSellersMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    sellersPaused.current = true;
-    sellersDragRef.current = { startX: e.pageX, scrollLeft: sellersRef.current?.scrollLeft ?? 0, moved: false };
-    if (sellersRef.current) sellersRef.current.style.cursor = 'grabbing';
-    const onMove = (ev: MouseEvent) => {
-      const dx = ev.pageX - sellersDragRef.current.startX;
-      if (Math.abs(dx) > 4) sellersDragRef.current.moved = true;
-      if (sellersRef.current) sellersRef.current.scrollLeft = sellersDragRef.current.scrollLeft - dx;
-    };
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      if (sellersRef.current) sellersRef.current.style.cursor = 'grab';
-      if (!(sellersRef.current?.matches(':hover') ?? false)) sellersPaused.current = false;
-      if (sellersDragRef.current.moved) {
-        const el = sellersRef.current;
-        if (el) {
-          const block = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); el.removeEventListener('click', block, true); };
-          el.addEventListener('click', block, true);
-        }
-      }
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  };
 
   // ── Banner slider ──
   const [activeBanner, setActiveBanner] = useState(0);
@@ -1750,7 +1703,6 @@ useEffect(() => {
             ref={mktDeskRef}
             className="mkt-split"
             style={{ display: 'flex', flexWrap: 'nowrap', gap: '14px', overflowX: 'auto', scrollbarWidth: 'none', padding: '4px 2px 16px', cursor: 'grab', userSelect: 'none' }}
-            onMouseDown={onMktMouseDown}
             onMouseEnter={() => { mktPausedRef.current = true; }}
             onMouseLeave={() => { mktPausedRef.current = false; }}
           >
@@ -1825,7 +1777,6 @@ useEffect(() => {
           <div
             ref={sellersRef}
             className="sellers-desk"
-            onMouseDown={onSellersMouseDown}
             onMouseEnter={() => { sellersPaused.current = true; }}
             onMouseLeave={() => { sellersPaused.current = false; }}
           >
