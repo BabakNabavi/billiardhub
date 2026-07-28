@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
+import { notifyBookingConfirmed } from '@/lib/notify';
 
 /* بازگشت از درگاه — هرگز به گفته‌ی کلاینت اعتماد نمی‌شود:
    ۱) پرداخت سمتِ سرور verify می‌شود
@@ -66,6 +67,9 @@ async function handle(req: NextRequest, providerName: string) {
 
   audit({ action: 'PAYMENT_CONFIRMED', entityType: 'payment', entityId: pay.id,
           newValue: { refId: v.refId, amount: pay.amount }, ip: clientIp(req) ?? undefined });
+
+  /* اطلاع‌رسانی — بی‌صدا و بدونِ انتظار؛ نباید ریدایرکتِ کاربر را کند کند */
+  void notifyBookingConfirmed(pay.booking_id).catch(() => { /* بی‌صدا */ });
 
   return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, url.origin));
 }

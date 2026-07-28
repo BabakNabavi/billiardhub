@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, isAdmin, ownsClub, audit, clientIp } from '@/lib/finance/db';
 import { computeRefund, bookingStartsAt, canCancelAt } from '@/lib/finance/cancellation';
 import { getPaymentProvider } from '@/lib/payments';
+import { notifyBookingCancelled } from '@/lib/notify';
 
 /* کنسلیِ رزرو — کاربرِ صاحبِ رزرو، مالکِ باشگاه یا ادمین.
    مبلغِ بازپرداخت طبقِ سیاستِ متمرکز محاسبه و کلِ اثرِ مالی اتمیک ثبت می‌شود. */
@@ -87,6 +88,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   audit({ actorId: actor.id, actorRole: admin ? 'admin' : owner ? 'club_owner' : 'user',
           action: 'BOOKING_CANCELLED', entityType: 'booking', entityId: b.id,
           newValue: { refund, policy: policyLabel, reason }, ip: clientIp(req) ?? undefined });
+
+  /* اطلاع‌رسانیِ لغو — بی‌صدا */
+  void notifyBookingCancelled(b.id, refund).catch(() => { /* بی‌صدا */ });
 
   return NextResponse.json({ ...(data ?? {}), refundAmount: refund, policy: policyLabel });
 }

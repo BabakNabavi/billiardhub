@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
 import { getSettlementProvider } from '@/lib/settlement';
+import { notifySettlementPaid } from '@/lib/notify';
 
 /* تسویه — فقط ادمین. عملیاتِ مالی داخلِ توابعِ اتمیکِ دیتابیس انجام می‌شود. */
 
@@ -39,6 +40,11 @@ export async function POST(req: NextRequest) {
     if (!r.ok) return NextResponse.json({ message: r.message }, { status: 400 });
     audit({ actorId: actor.id, actorRole: 'admin', action: 'SETTLEMENT_COMPLETED',
             entityType: 'settlement', entityId: String(b.id), newValue: { reference: b.reference }, ip });
+
+    /* خبرِ واریز به باشگاه‌دار — بی‌صدا */
+    const st = r.settlement as { club_id?: string; amount?: number } | undefined;
+    if (st?.club_id) void notifySettlementPaid(String(st.club_id), Number(st.amount) || 0).catch(() => { /* بی‌صدا */ });
+
     return NextResponse.json(r.settlement);
   }
 
