@@ -1,0 +1,67 @@
+export const dynamic = 'force-dynamic';
+import { NextRequest, NextResponse } from 'next/server';
+import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+
+/* تنظیماتِ پلتفرم — کلیدهایی که خودِ شما روشن/خاموش می‌کنید.
+
+   عمداً فهرستِ سفید دارد: هر کلیدی که این‌جا نباشد نوشته نمی‌شود، تا
+   یک درخواستِ دستکاری‌شده نتواند تنظیمِ ناشناخته‌ای بسازد. */
+
+const WRITABLE: Record<string, 'bool' | 'json'> = {
+  ads_quota_enabled: 'bool',   // محدودیتِ تعداد آگهی
+  ads_free_quota: 'json',      // { quota, period }
+  ad_slots_enabled: 'bool',    // جایگاه‌های تبلیغاتی
+  platform_bank: 'json',       // حسابی که پولِ بسته‌ها به آن می‌رود
+};
+
+const READABLE = Object.keys(WRITABLE);
+
+async function guard(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor) return { err: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) };
+  if (!(await isAdmin(actor.id))) return { err: NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 }) };
+  return { actor };
+}
+
+export async function GET(req: NextRequest) {
+  const g = await guard(req);
+  if (g.err) return g.err;
+
+  const { data, error } = await sb().from('app_settings').select('key,value').in('key', READABLE);
+  if (error) return NextResponse.json({ settings: {} });
+
+  const settings: Record<string, unknown> = {};
+  for (const r of (data as { key: string; value: unknown }[] ?? [])) settings[r.key] = r.value;
+  return NextResponse.json({ settings }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
+export async function PATCH(req: NextRequest) {
+  const g = await guard(req);
+  if (g.err) return g.err;
+
+  const b = await req.json().catch(() => ({})) as Record<string, unknown>;
+  const applied: Record<string, unknown> = {};
+
+  for (const [key, kind] of Object.entries(WRITABLE)) {
+    if (b[key] === undefined) continue;
+    const value = kind === 'bool' ? !!b[key] : b[key];
+    if (kind === 'json' && (value === null || typeof value !== 'object')) continue;
+
+    const { error } = await sb().from('app_settings').upsert({
+      key, value, updated_at: new Date().toISOString(), updated_by: g.actor!.id,
+    }, { onConflict: 'key' });
+    if (error) return NextResponse.json({ message: `ذخیره‌ی «${key}» انجام نشد` }, { status: 500 });
+    applied[key] = value;
+  }
+
+  if (Object.keys(applied).length === 0) {
+    return NextResponse.json({ message: 'تنظیمِ قابلِ ذخیره‌ای فرستاده نشد' }, { status: 400 });
+  }
+
+  void audit({
+    actorId: g.actor!.id, actorRole: g.actor!.role, action: 'SETTINGS_UPDATED',
+    entityType: 'app_settings', newValue: applied,
+  });
+
+  return NextResponse.json({ settings: applied });
+}

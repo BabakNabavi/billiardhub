@@ -18,6 +18,7 @@ import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
 import MyBookings from '../../components/booking/MyBookings';
+import MyAdPlan from '../../components/ads/MyAdPlan';
 
 /* ══ types ══ */
 interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
@@ -648,6 +649,9 @@ export default function DashboardPage() {
 
             {/* ── RIGHT COLUMN ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '130px' }}>
+
+              {/* بسته‌ی آگهی — چه بسته‌ای، تا کی، چند تا مانده */}
+              <ScrollReveal><MyAdPlan /></ScrollReveal>
 
               {/* Upcoming tournament — synced with SAMPLE_TOURNAMENTS */}
               <ScrollReveal>

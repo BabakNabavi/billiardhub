@@ -15,7 +15,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
-  CalendarDays, Flag,
+  CalendarDays, Flag, Package,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -80,7 +80,8 @@ const SECTIONS: AdminSection[] = [
     items: [
       { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار بیلیارد', icon: <Newspaper size={20} />, link: '/admin/news' },
       { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
-      { title: 'تبلیغات', desc: 'بنرها و کمپین‌های تبلیغاتی سایت', icon: <Megaphone size={20} />, link: '/admin/ads' },
+      { title: 'جایگاه‌های تبلیغاتی', desc: 'بنرهای اجاره‌ای، تعرفه‌ها و درخواست‌های تبلیغ', icon: <Megaphone size={20} />, link: '/admin/ad-slots' },
+      { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروشِ آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
     ],

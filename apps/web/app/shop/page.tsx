@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import ReportButton from '../../components/ReportButton'
 import { apiFetch } from '../../lib/http'
+import AdSlot from '../../components/ads/AdSlot'
 import { SHOP_PRODUCTS } from './products'
 import { MOCK_SELLERS } from '../../lib/sellers-data'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
@@ -891,6 +892,10 @@ export default function MarketNewPage() {
               </span>
               <ArrowLeft size={16} className="ar" />
             </Link>
+
+            {/* دو جایگاه تبلیغاتیِ اجاره‌ای — تا روشن‌شدنِ کلید، هیچ چیزی رندر نمی‌کنند */}
+            <AdSlot slot="market_1" style={{ marginTop: 18 }} />
+            <AdSlot slot="market_2" style={{ marginTop: 12 }} />
           </section>
         </div>
       </main>

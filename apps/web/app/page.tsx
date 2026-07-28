@@ -9,6 +9,7 @@ import {
   Clock, Eye, CheckCircle, X, Calendar,
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
+import AdSlot from '../components/ads/AdSlot';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 
@@ -1973,6 +1974,11 @@ useEffect(() => {
           </div>
         </div>
       </section>
+
+      {/* جایگاه تبلیغاتیِ اجاره‌ای — تا روشن‌شدنِ کلید، هیچ چیزی رندر نمی‌کند */}
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 clamp(16px,3vw,28px)' }}>
+        <AdSlot slot="explore" />
+      </div>
 
       {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
       <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>

@@ -9,7 +9,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
-import { Mail, MapPin, Handshake, Headphones, Check, Copy, Send, ArrowLeft } from 'lucide-react'
+import { Mail, MapPin, Handshake, Headphones, Check, Copy, Send, ArrowLeft, Megaphone } from 'lucide-react'
 import Link from 'next/link'
 
 const GOLD   = '#C7A66A'
@@ -18,7 +18,7 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
-const BALLS = { red: '#C43D2E', green: '#1B7A4B', blue: '#3D63E6', pink: '#F06EAE', yellow: '#E8B93A' }
+const BALLS = { red: '#C43D2E', green: '#1B7A4B', blue: '#3D63E6', pink: '#F06EAE', yellow: '#E8B93A', gold: '#C7A66A' }
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
@@ -346,7 +346,7 @@ export default function ContactPage() {
                 </span>
                 <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
               </button>
-              <button type="button" className="ct-ch" onClick={() => jumpToForm('پشتیبانی')} style={{ ['--cc' as never]: BALLS.pink, borderBottom: 'none' }}>
+              <button type="button" className="ct-ch" onClick={() => jumpToForm('پشتیبانی')} style={{ ['--cc' as never]: BALLS.pink }}>
                 <span className="ic"><Headphones size={18} /></span>
                 <span style={{ minWidth: 0 }}>
                   <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>پشتیبانی</span>
@@ -354,6 +354,15 @@ export default function ContactPage() {
                 </span>
                 <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
               </button>
+              {/* تبلیغات فرمِ خودش را دارد (جایگاه و تعرفه)، پس به /advertise می‌رود نه به فرمِ عمومی */}
+              <Link href="/advertise" className="ct-ch" style={{ ['--cc' as never]: BALLS.gold, borderBottom: 'none', textDecoration: 'none' }}>
+                <span className="ic"><Megaphone size={18} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>تبلیغات در بیلیارد هاب</span>
+                  <span style={{ fontSize: 12.5, color: SEC, fontWeight: 600 }}>جایگاه‌های بنری، تعرفه و درخواست</span>
+                </span>
+                <span className="hint"><ArrowLeft size={12} /> جایگاه‌ها</span>
+              </Link>
 
               {/* شبکه‌های اجتماعی — فقط وقتی آدرسِ واقعی ثبت شده باشد */}
               {(CONTACT.instagram || CONTACT.telegram) && (
