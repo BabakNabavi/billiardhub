@@ -10,7 +10,8 @@ import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 const WRITABLE: Record<string, 'bool' | 'json'> = {
   ads_quota_enabled: 'bool',   // محدودیتِ تعداد آگهی
   ads_free_quota: 'json',      // { quota, period }
-  ad_slots_enabled: 'bool',    // جایگاه‌های تبلیغاتی
+  /* ad_slots_enabled حذف شد (فاز ۲): هیچ کلیدِ سراسری‌ای برای جایگاه‌ها
+     وجود ندارد — نمایشِ هر جایگاه فقط با is_active خودش. */
   platform_bank: 'json',       // حسابی که پولِ بسته‌ها به آن می‌رود
 
   stories_quota_enabled: 'bool',  // فروشِ بسته‌ی استوری

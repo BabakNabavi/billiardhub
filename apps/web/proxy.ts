@@ -29,6 +29,11 @@ const CSRF_EXEMPT = [
   '/api/auth/logout',
   '/api/otp',
   '/api/payments/callback',
+  /* بیکنِ شمارشِ تبلیغات: sendBeacon نمی‌تواند هدرِ x-csrf-token بگذارد و
+     برای کاربرِ واردشده ۴۰۳ می‌شد؛ فقط شمارنده را زیاد می‌کند و بررسیِ
+     Origin همچنان اعمال می‌شود. */
+  '/api/ads/placements',
+  '/api/ads/slots',
 ]
 
 const isUnder = (path: string, prefixes: string[]) =>

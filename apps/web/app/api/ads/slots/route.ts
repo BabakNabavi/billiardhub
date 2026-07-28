@@ -1,48 +1,65 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb } from '@/lib/finance/db';
-import { liveBanners, listSlots } from '@/lib/ads/slots';
-import { getSetting } from '@/lib/ads/quota';
+import { livePlacements, listPlacements, trackCampaign, LEGACY_KEY_MAP } from '@/lib/ads/core';
 
-/* بنرهای زنده‌ی جایگاه‌ها — عمومی.
-   وقتی کلیدِ ad_slots_enabled خاموش باشد، پاسخ خالی برمی‌گردد و هیچ
-   جایگاهی روی صفحه ظاهر نمی‌شود. */
+/* ⚠ سازگاری با نسخه‌ی قدیمی — DEPRECATED.
+
+   سیستم جایگاه‌ها در فاز ۲ به /api/ads/placements منتقل شد (جدول‌های
+   placements/campaigns). این مسیر فقط برای کلاینت‌های کش‌شده‌ای مانده
+   که هنوز باندلِ قدیمی را دارند و با کلیدهای market_1/market_2/footer
+   صدا می‌زنند؛ خروجی از سیستمِ جدید ساخته و به شکلِ قدیمی برگردانده
+   می‌شود. پس از چند دیپلوی می‌توان حذفش کرد. */
+
+const NEW_TO_LEGACY: Record<string, string> = Object.fromEntries(
+  Object.entries(LEGACY_KEY_MAP).map(([legacy, next]) => [next, legacy]),
+);
+
 export async function GET(req: NextRequest) {
   const sp = new URL(req.url).searchParams;
-  const slot = sp.get('slot') ?? undefined;
 
-  /* فهرستِ جایگاه‌ها با قیمت — برای صفحه‌ی درخواستِ تبلیغ */
   if (sp.get('catalog') === '1') {
     try {
-      return NextResponse.json({ slots: (await listSlots()).filter(s => s.isActive) });
+      const all = (await listPlacements()).filter(p => p.contentKind === 'banner');
+      return NextResponse.json({
+        slots: all.map(p => ({
+          key: NEW_TO_LEGACY[p.key] ?? p.key, title: p.title, description: p.description,
+          capacity: p.capacity, price: p.price, durationDays: p.durationDays, isActive: p.isActive,
+        })),
+      });
     } catch {
       return NextResponse.json({ slots: [] });
     }
   }
 
   try {
-    const [banners, enabled] = await Promise.all([
-      liveBanners(slot),
-      getSetting<boolean>('ad_slots_enabled', false),
-    ]);
-    return NextResponse.json({ banners, enabled }, { headers: { 'Cache-Control': 'no-store' } });
+    const rawSlot = sp.get('slot') ?? undefined;
+    const key = rawSlot ? (LEGACY_KEY_MAP[rawSlot] ?? rawSlot) : undefined;
+    const live = await livePlacements(key);
+
+    const banners: Record<string, { id: string; title: string; imageUrl: string; linkUrl: string; advertiser: string }[]> = {};
+    let any = false;
+    for (const [k, v] of Object.entries(live)) {
+      if (v.placement.contentKind !== 'banner') continue;
+      const legacy = NEW_TO_LEGACY[k] ?? k;
+      banners[legacy] = v.campaigns.map(c => ({
+        id: c.id, title: c.title,
+        imageUrl: String((c.content as Record<string, unknown>).image_url ?? ''),
+        linkUrl: String((c.content as Record<string, unknown>).link_url ?? ''),
+        advertiser: c.advertiser,
+      }));
+      if (banners[legacy].length) any = true;
+    }
+    return NextResponse.json({ banners, enabled: any }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return NextResponse.json({ banners: {}, enabled: false });
   }
 }
 
-/* شمارشِ نمایش و کلیک — بی‌صدا؛ شکستش نباید صفحه را خراب کند */
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   const id = String(b?.id ?? '').trim();
-  const kind = b?.kind === 'click' ? 'clicks' : 'impressions';
-  if (!id) return NextResponse.json({ ok: true });
-
-  try {
-    const { data } = await sb().from('ad_placements').select(kind).eq('id', id).maybeSingle();
-    const cur = Number((data as Record<string, unknown> | null)?.[kind] ?? 0);
-    await sb().from('ad_placements').update({ [kind]: cur + 1 }).eq('id', id);
-  } catch { /* شمارنده مهم‌تر از صفحه نیست */ }
-
+  const kind = b?.kind === 'click' ? 'click' : 'impression';
+  /* await عمدی — Promiseِ رهاشده روی سرورلس ممکن است هرگز اجرا نشود */
+  if (/^[0-9a-f-]{36}$/i.test(id)) await trackCampaign(id, kind);
   return NextResponse.json({ ok: true });
 }

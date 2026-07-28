@@ -81,7 +81,7 @@ export default function RootLayout({
         <main>{children}</main>
         {/* جایگاه تبلیغاتیِ بالای فوتر — تا روشن‌شدنِ کلید نامرئی است */}
         <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 clamp(16px,3vw,28px)' }}>
-          <AdSlot slot="footer" />
+          <AdSlot slot="homepage_bottom_banner" />
         </div>
         <Footer />
         <ToastProvider />

@@ -1,90 +1,170 @@
 'use client'
 
-/* یک جایگاهِ تبلیغاتی روی سایت.
+/* ─────────────────────────────────────────────────────────────
+   جایگاهِ تبلیغاتی v2 — روی سیستمِ Placement/Campaign (فاز ۲).
 
-   تا وقتی ادمین کلیدِ جایگاه‌ها را روشن نکرده باشد، این کامپوننت
-   هیچ چیزی رندر نمی‌کند — نه قابِ خالی، نه فاصله‌ی اضافه. یعنی
-   می‌شود همین حالا در همه‌ی صفحات کارش گذاشت بدونِ اینکه ظاهرِ سایت
-   عوض شود، و روزی که خواستید با یک کلید روشن شود. */
+   ● نمایشِ هر جایگاه فقط به is_active خودش وابسته است؛ هیچ کلیدِ
+     سراسری‌ای وجود ندارد.
+   ● جایگاهِ بنری با بیش از یک کمپین «اسلایدری» می‌چرخد (تصمیم D1)؛
+     وزنِ کمپین در ترتیبِ چرخش لحاظ می‌شود.
+   ● جایگاهِ خالی/غیرفعال هیچ‌چیزی رندر نمی‌کند — نه قاب، نه فاصله.
+   ───────────────────────────────────────────────────────────── */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-export type SlotKey = 'market_1' | 'market_2' | 'footer'
+export type PlacementKey =
+  | 'market_featured_products_homepage'
+  | 'featured_clubs_homepage'
+  | 'featured_equipment_stores_homepage'
+  | 'equipment_ads_right'
+  | 'equipment_ads_left'
+  | 'homepage_bottom_banner'
 
-interface Banner {
-  id: string
+export interface EntitySnapshot {
+  entityType: 'product' | 'club' | 'seller'
+  ref: string
   title: string
-  imageUrl: string
-  linkUrl: string
-  advertiser: string
+  image: string
+  subtitle: string
+  href: string
+  price?: number
+  oldPrice?: number
+  discountPercent?: number
+  city?: string
+  badge?: string | null
 }
 
-/* یک‌بار برای کلِ صفحه خوانده می‌شود، نه به‌ازای هر جایگاه */
-let cache: Promise<Record<string, Banner[]>> | null = null
-function loadBanners(): Promise<Record<string, Banner[]>> {
-  cache ??= fetch('/api/ads/slots', { cache: 'no-store' })
-    .then(r => (r.ok ? r.json() : null))
-    .then(j => (j?.banners ?? {}) as Record<string, Banner[]>)
-    .catch(() => ({}))
+export interface LiveCampaign {
+  id: string
+  title: string
+  advertiser: string
+  weight: number
+  banner?: { imageUrl: string; linkUrl: string }
+  entity?: EntitySnapshot
+}
+
+interface PlacementPayload { contentKind: 'banner' | 'entity'; campaigns: LiveCampaign[] }
+
+/* یک fetch برای کلِ صفحه، صرف‌نظر از تعدادِ جایگاه‌ها.
+   شکست کش نمی‌شود — وگرنه یک خطای گذرای شبکه، تبلیغات را تا reload
+   بعدی برای کلِ نشستِ SPA خاموش می‌کرد. */
+let cache: Promise<Record<string, PlacementPayload>> | null = null
+function loadPlacements(): Promise<Record<string, PlacementPayload>> {
+  cache ??= fetch('/api/ads/placements', { cache: 'no-store' })
+    .then(r => (r.ok ? r.json() : Promise.reject(new Error('bad status'))))
+    .then(j => (j?.placements ?? {}) as Record<string, PlacementPayload>)
+    .catch(() => { cache = null; return {} as Record<string, PlacementPayload> })
   return cache
 }
 
+/* فقط http(s) یا مسیرِ داخلی — لایه‌ی دومِ دفاع در برابر javascript: */
+const safeHref = (v: string) => (/^(https?:\/\/|\/)/i.test(v) ? v : '')
+
 const ping = (id: string, kind: 'impression' | 'click') => {
   try {
-    navigator.sendBeacon?.('/api/ads/slots', new Blob([JSON.stringify({ id, kind })], { type: 'application/json' }))
+    navigator.sendBeacon?.('/api/ads/placements', new Blob([JSON.stringify({ id, kind })], { type: 'application/json' }))
   } catch { /* شمارنده مهم‌تر از صفحه نیست */ }
 }
 
-export default function AdSlot({ slot, className, style }: {
-  slot: SlotKey
+/** محتوای زنده‌ی یک جایگاه — برای سکشن‌های «ویژه» که خودشان رندر می‌کنند */
+export function usePlacement(key: PlacementKey): LiveCampaign[] | null {
+  const [items, setItems] = useState<LiveCampaign[] | null>(null)
+  useEffect(() => {
+    let alive = true
+    void loadPlacements().then(all => { if (alive) setItems(all[key]?.campaigns ?? []) })
+    return () => { alive = false }
+  }, [key])
+  return items
+}
+
+/** جایگاهِ بنری — با چرخشِ اسلایدری وقتی بیش از یک کمپین دارد */
+export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
+  slot: PlacementKey
   className?: string
   style?: React.CSSProperties
+  intervalMs?: number
 }) {
-  const [banners, setBanners] = useState<Banner[] | null>(null)
+  const [banners, setBanners] = useState<LiveCampaign[] | null>(null)
+  const [active, setActive] = useState(0)
+  const seenRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     let alive = true
-    void loadBanners().then(all => { if (alive) setBanners(all[slot] ?? []) })
+    void loadPlacements().then(all => {
+      if (!alive) return
+      const payload = all[slot]
+      const list = (payload?.campaigns ?? []).filter(c => c.banner?.imageUrl)
+      /* وزن = سهم در چرخش: کمپینِ وزن‌دار چند بار در حلقه می‌آید */
+      const rotation: LiveCampaign[] = []
+      for (const c of list) for (let i = 0; i < Math.min(5, Math.max(1, c.weight)); i++) rotation.push(c)
+      setBanners(list.length <= 1 ? list : rotation)
+    })
     return () => { alive = false }
   }, [slot])
 
+  /* چرخشِ خودکار */
   useEffect(() => {
-    banners?.forEach(b => ping(b.id, 'impression'))
-  }, [banners])
+    if (!banners || banners.length <= 1) return
+    const t = setInterval(() => setActive(a => (a + 1) % banners.length), intervalMs)
+    return () => clearInterval(t)
+  }, [banners, intervalMs])
 
-  if (!banners || banners.length === 0) return null
+  /* هر کمپین یک‌بار در هر mount نمایش شمرده می‌شود — وقتی واقعاً دیده شد */
+  const current = banners?.[active] ?? null
+  useEffect(() => {
+    if (!current) return
+    if (seenRef.current.has(current.id)) return
+    seenRef.current.add(current.id)
+    ping(current.id, 'impression')
+  }, [current])
+
+  if (!banners || banners.length === 0 || !current?.banner) return null
+
+  const distinct = [...new Set(banners.map(b => b.id))]
+
+  const img = (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={current.banner.imageUrl} alt={current.title || current.advertiser || 'تبلیغ'}
+      loading="lazy"
+      style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 14 }}
+    />
+  )
 
   return (
-    <div className={className} style={{ display: 'grid', gap: 12, ...style }} dir="rtl">
-      {banners.map(b => {
-        const img = (
-          <img
-            src={b.imageUrl} alt={b.title || b.advertiser || 'تبلیغ'}
-            loading="lazy"
-            style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 14 }}
-          />
-        )
-        return (
-          <figure key={b.id} style={{ margin: 0, position: 'relative' }}>
-            {b.linkUrl ? (
-              <a href={b.linkUrl} target="_blank" rel="noopener noreferrer sponsored"
-                onClick={() => ping(b.id, 'click')}
-                style={{ display: 'block', textDecoration: 'none' }}>
-                {img}
-              </a>
-            ) : img}
-            {/* شفافیت با بازدیدکننده: تبلیغ باید تبلیغ به‌نظر برسد */}
-            <figcaption style={{
-              position: 'absolute', top: 8, insetInlineEnd: 8,
-              fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.92)',
-              background: 'rgba(0,0,0,0.42)', borderRadius: 6, padding: '3px 8px',
-              backdropFilter: 'blur(4px)', pointerEvents: 'none',
-            }}>
-              تبلیغ{b.advertiser ? ` · ${b.advertiser}` : ''}
-            </figcaption>
-          </figure>
-        )
-      })}
+    <div className={className} style={style} dir="rtl">
+      <figure style={{ margin: 0, position: 'relative' }}>
+        {safeHref(current.banner.linkUrl) ? (
+          <a href={safeHref(current.banner.linkUrl)} target="_blank" rel="noopener noreferrer sponsored"
+            onClick={() => ping(current.id, 'click')}
+            style={{ display: 'block', textDecoration: 'none' }}>
+            {img}
+          </a>
+        ) : img}
+
+        {/* شفافیت با بازدیدکننده: تبلیغ باید تبلیغ به‌نظر برسد */}
+        <figcaption style={{
+          position: 'absolute', top: 8, insetInlineEnd: 8,
+          fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.92)',
+          background: 'rgba(0,0,0,0.42)', borderRadius: 6, padding: '3px 8px',
+          backdropFilter: 'blur(4px)', pointerEvents: 'none',
+        }}>
+          تبلیغ{current.advertiser ? ` · ${current.advertiser}` : ''}
+        </figcaption>
+
+        {/* نقطه‌های اسلایدر — فقط با بیش از یک کمپینِ متمایز */}
+        {distinct.length > 1 && (
+          <div style={{ position: 'absolute', bottom: 8, insetInline: 0, display: 'flex', justifyContent: 'center', gap: 5, pointerEvents: 'none' }}>
+            {distinct.map(id => (
+              <span key={id} style={{
+                width: id === current.id ? 16 : 5, height: 5, borderRadius: 3,
+                background: id === current.id ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.5)',
+                transition: 'width .25s',
+              }} />
+            ))}
+          </div>
+        )}
+      </figure>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
@@ -9,7 +9,7 @@ import {
   Clock, Eye, CheckCircle, X, Calendar,
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
-import AdSlot from '../components/ads/AdSlot';
+import AdSlot, { usePlacement, type EntitySnapshot } from '../components/ads/AdSlot';
 import { useHorizontalScroll, scrollSign, getPos, setPos } from '../lib/useHorizontalScroll';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
@@ -339,7 +339,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
             <div style={{ fontSize: featured ? '17px' : '14px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>{club.name}</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
-                <MapPin size={10} style={{ color: GOLD }} />{club.city}، {club.dist}
+                <MapPin size={10} style={{ color: GOLD }} />{club.city}{club.dist ? `، ${club.dist}` : ''}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                 <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
@@ -931,6 +931,55 @@ export default function HomePage() {
   const clubsDeskRef = useRef<HTMLDivElement>(null);
   /* چرخِ ماوس و درگ روی نوارِ باشگاه‌ها */
   useHorizontalScroll(clubsDeskRef);
+
+  /* ── سکشن‌های ویژه (فاز ۲): placement-driven با fallback ──
+     اگر ادمین برای جایگاهِ موجودیتی کمپینِ فعال ساخته باشد، همان‌ها
+     نمایش داده می‌شوند؛ وگرنه داده‌ی نمونه‌ی فعلی — تا وقتی جایگاه‌ها
+     پر نشده‌اند ظاهرِ سایت ذره‌ای عوض نشود. */
+  const featProducts = usePlacement('market_featured_products_homepage');
+  const featClubs = usePlacement('featured_clubs_homepage');
+  const featStores = usePlacement('featured_equipment_stores_homepage');
+
+  /* دو کمپین با ارجاع به یک موجودیت ⇒ کلیدِ تکراریِ React و کارتِ دوباره؛
+     تکراری‌ها همین‌جا حذف می‌شوند */
+  const uniqByRef = (snaps: EntitySnapshot[]) => {
+    const seen = new Set<string>();
+    return snaps.filter(e => !seen.has(e.ref) && (seen.add(e.ref), true));
+  };
+
+  const HOME_PRODUCTS = useMemo(() => {
+    const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
+    if (!snaps.length) return PRODUCTS;
+    return snaps.map(e => ({
+      id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: e.image,
+      brand: (e.subtitle || 'BILLIARD').toUpperCase(),
+      price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
+    }));
+  }, [featProducts]);
+
+  const HOME_CLUBS = useMemo(() => {
+    const snaps = uniqByRef((featClubs ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
+    if (!snaps.length) return FEATURED_CLUBS;
+    return snaps.map(e => ({
+      id: e.ref, name: e.title, city: e.city || e.subtitle || '', dist: '', tables: 10,
+      rating: 5, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
+      price: 0, badge: null as string | null, tags: [] as string[], hasStory: false,
+    }));
+  }, [featClubs]);
+
+  const HOME_SELLERS = useMemo(() => {
+    const snaps = uniqByRef((featStores ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
+    if (!snaps.length) return SELLERS;
+    return snaps.map(e => ({
+      id: e.ref, name: e.title, city: e.city || '',
+      specialty: 'تجهیزات بیلیارد', rating: 5, reviews: 0, img: e.image, badge: e.badge ?? null,
+    }));
+  }, [featStores]);
+
+  /* دوبل‌سازی فقط برای حلقه‌ی مارکی و فقط وقتی آیتم کافی هست — با فهرستِ
+     کوتاهِ کمپینی، همان کارت دو بار پشتِ هم زشت می‌شد */
+  const MKT_LOOP = HOME_PRODUCTS.length >= 6 ? [...HOME_PRODUCTS, ...HOME_PRODUCTS] : HOME_PRODUCTS;
+  const SELLERS_LOOP = HOME_SELLERS.length >= 6 ? [...HOME_SELLERS, ...HOME_SELLERS] : HOME_SELLERS;
   const [activeClub, setActiveClub] = useState(0);
   const activeClubRef  = useRef(0);
 
@@ -1393,6 +1442,23 @@ useEffect(() => {
         }
 
         /* ── Sellers ── */
+        /* D1: راست / محتوای اصلی / چپ.
+           gap عمداً صفر است و فاصله روی ستونِ «پر» می‌نشیند — وگرنه دو گپِ
+           ۱۴px حتی با ستون‌های خالی می‌ماند و چیدمانِ امروز جابه‌جا می‌شد.
+           فقط :empty (بدونِ :has): سلکتورِ ناشناخته در لیست، کلِ قاعده را
+           در مرورگرهای قدیمی باطل می‌کرد. AdSlot در حالتِ خالی null
+           برمی‌گرداند پس div واقعاً :empty است. */
+        .equip-grid { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:0; align-items:start; }
+        .equip-side { width:0; }
+        .equip-side:not(:empty) { width:clamp(150px,12.5vw,190px); }
+        .equip-side:first-child:not(:empty) { margin-inline-end:14px; }
+        .equip-side:last-child:not(:empty) { margin-inline-start:14px; }
+        @media (max-width: 900px) {
+          .equip-grid { grid-template-columns:1fr; }
+          .equip-side:not(:empty) { width:100%; max-width:420px; }
+          .equip-side:first-child:not(:empty) { margin:0 auto 14px; }
+          .equip-side:last-child:not(:empty) { margin:14px auto 0; }
+        }
         .sellers-desk { display:flex; flex-wrap:nowrap; gap:14px; overflow-x:auto; scrollbar-width:none; padding:4px 2px 16px; cursor:grab; user-select:none; }
         .sellers-desk::-webkit-scrollbar { display:none; }
         .sellers-mob  { display:none; gap:18px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
@@ -1653,7 +1719,7 @@ useEffect(() => {
           </SR>
           {/* دسکتاپ — نوارِ اسکرولی مثل بازار/فروشندگان؛ کارت ۱۰٪ کوچک‌تر، ۸ باشگاه با اسکرول */}
           <div ref={clubsDeskRef} className="clubs-desk clubs-strip">
-            {CLUBS.map((c, i) => (
+            {HOME_CLUBS.map((c, i) => (
               <div key={c.id} className="club-desk-card">
                 <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(303px,29.16vw,401px)" /></SR>
               </div>
@@ -1661,14 +1727,14 @@ useEffect(() => {
           </div>
           {/* موبایل — ۱۰٪ بزرگ‌تر (۴۳.۰۵ ⇒ ۴۷.۳۶vw) و فاصله‌ی کمتر بین کارت‌ها */}
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
-            {FEATURED_CLUBS.map((c) => (
+            {HOME_CLUBS.map((c) => (
               <div key={c.id} className="club-mob-card" style={{ width: '47.36vw', minWidth: '174px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(261px,75.77vw,352px)" />
               </div>
             ))}
           </div>
           <div className="clubs-dots">
-            {FEATURED_CLUBS.map((_, i) => (
+            {HOME_CLUBS.map((_, i) => (
               <div key={i} style={{
                 height: '5px',
                 width: i === activeClub ? '18px' : '5px',
@@ -1706,13 +1772,13 @@ useEffect(() => {
             onMouseEnter={() => { mktPausedRef.current = true; }}
             onMouseLeave={() => { mktPausedRef.current = false; }}
           >
-            {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
+            {MKT_LOOP.map((p, i) => (
               <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 143, height: 274 }} />
             ))}
           </div>
           {/* موبایل — همان BazaarCard (فرمتِ یکسان با دسکتاپ) */}
           <div ref={mktSliderRef} className="mkt-mobile-slider">
-            {PRODUCTS.map((p) => (
+            {HOME_PRODUCTS.map((p) => (
               <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '36vw', minWidth: 133, scrollSnapAlign: 'center', height: 'clamp(209px,61vw,282px)' }} />
             ))}
           </div>
@@ -1737,17 +1803,13 @@ useEffect(() => {
             />
           </div>
           <div className="mkt-dots">
-            {PRODUCTS.map((_, i) => (
+            {HOME_PRODUCTS.map((_, i) => (
               <div key={i} style={{ height: '5px', width: i === activeMkt ? '18px' : '5px', borderRadius: '3px', background: i === activeMkt ? GOLD : 'rgba(26,25,23,0.22)', transition: 'all 0.3s ease' }} />
             ))}
           </div>
 
-          {/* دو جایگاه تبلیغاتیِ اجاره‌ای — راست و چپ، زیر بیلیارد بازار.
-              تا روشن‌شدنِ کلیدِ ادمین هیچ چیزی رندر نمی‌کنند. */}
-          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', marginTop: 26 }}>
-            <AdSlot slot="market_1" />
-            <AdSlot slot="market_2" />
-          </div>
+          {/* تصمیم D1: سکشن بیلیارد بازار هیچ بنرِ کناری‌ای ندارد؛
+              دو جایگاهِ تبلیغاتی به سکشن فروشندگان تجهیزات منتقل شدند. */}
         </div>
       </section>
 
@@ -1773,27 +1835,42 @@ useEffect(() => {
             </div>
           </SR>
 
-          {/* Desktop auto-scroll row */}
-          <div
-            ref={sellersRef}
-            className="sellers-desk"
-            onMouseEnter={() => { sellersPaused.current = true; }}
-            onMouseLeave={() => { sellersPaused.current = false; }}
-          >
-            {[...SELLERS, ...SELLERS].map((s, i) => (
-              <Link key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
-                <SellerCard s={s} />
-              </Link>
-            ))}
-          </div>
+          {/* تصمیم D1 — چیدمانِ سه‌ستونه: تبلیغِ راست / فروشگاه‌ها / تبلیغِ چپ.
+              جایگاهِ خالی هیچ‌چیزی رندر نمی‌کند و ستونش (auto) صفر می‌شود؛
+              در موبایل ستون‌ها زیرِ هم می‌آیند تا هیچ Overflow ای پیش نیاید. */}
+          <div className="equip-grid">
+            <div className="equip-side">
+              <AdSlot slot="equipment_ads_right" />
+            </div>
 
-          {/* Mobile slider */}
-          <div className="sellers-mob">
-            {SELLERS.map((s) => (
-              <Link key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
-                <SellerCard s={s} />
-              </Link>
-            ))}
+            <div style={{ minWidth: 0 }}>
+              {/* Desktop auto-scroll row */}
+              <div
+                ref={sellersRef}
+                className="sellers-desk"
+                onMouseEnter={() => { sellersPaused.current = true; }}
+                onMouseLeave={() => { sellersPaused.current = false; }}
+              >
+                {SELLERS_LOOP.map((s, i) => (
+                  <Link key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
+                    <SellerCard s={s} />
+                  </Link>
+                ))}
+              </div>
+
+              {/* Mobile slider */}
+              <div className="sellers-mob">
+                {HOME_SELLERS.map((s) => (
+                  <Link key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
+                    <SellerCard s={s} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="equip-side">
+              <AdSlot slot="equipment_ads_left" />
+            </div>
           </div>
 
           {/* ── Ad banners (LQ CTA) ── */}

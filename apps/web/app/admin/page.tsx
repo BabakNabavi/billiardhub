@@ -80,7 +80,7 @@ const SECTIONS: AdminSection[] = [
     items: [
       { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار بیلیارد', icon: <Newspaper size={20} />, link: '/admin/news' },
       { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
-      { title: 'جایگاه‌های تبلیغاتی', desc: 'بنرهای اجاره‌ای، تعرفه‌ها و درخواست‌های تبلیغ', icon: <Megaphone size={20} />, link: '/admin/ad-slots' },
+      { title: 'سیستم تبلیغات', desc: 'شش جایگاهِ مستقل، کمپین‌ها، پلن‌های قیمت و درخواست‌ها', icon: <Megaphone size={20} />, link: '/admin/advertising' },
       { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروشِ آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
       { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوریِ هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },

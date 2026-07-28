@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
-import { isSlotKey } from '@/lib/ads/slots';
+import { isPlacementKey, LEGACY_KEY_MAP } from '@/lib/ads/core';
 
 /* درخواستِ تبلیغ — فرمِ «تبلیغ در بیلیارد هاب».
    ورود لازم نیست؛ اگر کاربر وارد باشد، درخواست به حسابش گره می‌خورد. */
@@ -22,7 +22,10 @@ export async function POST(req: NextRequest) {
   }
 
   const actor = actorFromRequest(req);
-  const slotKey = isSlotKey(b?.slotKey) ? b.slotKey : null;
+  /* کلیدِ قدیمی (کلاینتِ کش‌شده) به معادلِ تازه ترجمه می‌شود */
+  const raw = String(b?.slotKey ?? '');
+  const mapped = LEGACY_KEY_MAP[raw] ?? raw;
+  const slotKey = isPlacementKey(mapped) ? mapped : null;
 
   const { error } = await sb().from('ad_requests').insert({
     user_id: actor?.id ?? null,

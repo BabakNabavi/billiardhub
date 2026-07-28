@@ -51,9 +51,9 @@ export default function AdvertisePage() {
   const locked = !!user
 
   useEffect(() => {
-    void fetch('/api/ads/slots?catalog=1', { cache: 'no-store' })
+    void fetch('/api/ads/placements?catalog=1', { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
-      .then(j => setSlots(j?.slots ?? []))
+      .then(j => setSlots((j?.placements ?? []).filter((p: { mode?: string }) => p.mode === 'paid')))
       .catch(() => { })
   }, [])
 
