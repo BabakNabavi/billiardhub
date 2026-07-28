@@ -16,12 +16,22 @@
 
 import { useEffect, type RefObject } from 'react'
 
-export function useHorizontalScroll(ref: RefObject<HTMLElement | null>, enabled = true) {
+export function useHorizontalScroll(
+  ref: RefObject<HTMLElement | null>,
+  /* نوارهایی که خودکار حرکت می‌کنند باید حینِ دخالتِ کاربر بایستند،
+     وگرنه با دستِ کاربر می‌جنگند و حس می‌شود «قفل است». */
+  onInteract?: (busy: boolean) => void,
+) {
   useEffect(() => {
     const el = ref.current
-    if (!el || !enabled) return
-    /* لمسی‌ها خودشان اسکرولِ افقی دارند */
-    if (window.matchMedia('(hover: none)').matches) return
+    if (!el) return
+
+    let idle: ReturnType<typeof setTimeout> | null = null
+    const busy = () => {
+      onInteract?.(true)
+      if (idle) clearTimeout(idle)
+      idle = setTimeout(() => onInteract?.(false), 900)
+    }
 
     const onWheel = (e: WheelEvent) => {
       /* ژستِ افقیِ ترک‌پد را دست نزن */
@@ -35,6 +45,7 @@ export function useHorizontalScroll(ref: RefObject<HTMLElement | null>, enabled 
       if ((e.deltaY < 0 && el.scrollLeft <= 0) || (e.deltaY > 0 && el.scrollLeft >= max - 1)) return
 
       e.preventDefault()
+      busy()
       el.scrollLeft = Math.max(0, Math.min(max, next))
     }
 
@@ -45,6 +56,7 @@ export function useHorizontalScroll(ref: RefObject<HTMLElement | null>, enabled 
       if (e.pointerType !== 'mouse' || e.button !== 0) return
       down = true; moved = 0
       startX = e.clientX; startLeft = el.scrollLeft
+      busy()
     }
     const onMove = (e: PointerEvent) => {
       if (!down) return
@@ -53,10 +65,12 @@ export function useHorizontalScroll(ref: RefObject<HTMLElement | null>, enabled 
         moved = Math.abs(dx)
         el.style.cursor = 'grabbing'
         el.style.userSelect = 'none'
+        busy()
       }
       el.scrollLeft = startLeft - dx
     }
     const stop = () => {
+      if (down) busy()
       down = false
       el.style.cursor = ''
       el.style.userSelect = ''
@@ -74,11 +88,13 @@ export function useHorizontalScroll(ref: RefObject<HTMLElement | null>, enabled 
     el.addEventListener('click', onClick, true)
 
     return () => {
+      if (idle) clearTimeout(idle)
       el.removeEventListener('wheel', onWheel)
       el.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', stop)
       el.removeEventListener('click', onClick, true)
     }
-  }, [ref, enabled])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref])
 }

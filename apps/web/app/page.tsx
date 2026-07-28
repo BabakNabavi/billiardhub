@@ -941,6 +941,8 @@ export default function HomePage() {
   const mktDeskRef   = useRef<HTMLDivElement>(null);
   const mktDragRef   = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const mktPausedRef = useRef(false);
+  /* چرخِ ماوس و درگ — حرکتِ خودکار حینِ دخالتِ کاربر می‌ایستد */
+  useHorizontalScroll(mktDeskRef, busy => { mktPausedRef.current = busy });
   const mktTickerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -1002,6 +1004,7 @@ export default function HomePage() {
   const sellersRef      = useRef<HTMLDivElement>(null);
   const sellersDragRef  = useRef({ startX: 0, scrollLeft: 0, moved: false });
   const sellersPaused   = useRef(false);
+  useHorizontalScroll(sellersRef, busy => { sellersPaused.current = busy });
   const sellersTickerR  = useRef<number | null>(null);
 
   useEffect(() => {
@@ -1696,7 +1699,7 @@ useEffect(() => {
             </div>
           </SR>
           {/* دسکتاپ — نوارِ اسکرولی مثل بازار/فروشندگان؛ کارت ۱۰٪ کوچک‌تر، ۸ باشگاه با اسکرول */}
-          <div className="clubs-desk clubs-strip">
+          <div ref={clubsDeskRef} className="clubs-desk clubs-strip">
             {CLUBS.map((c, i) => (
               <div key={c.id} className="club-desk-card">
                 <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(303px,29.16vw,401px)" /></SR>
