@@ -10,6 +10,7 @@ import {
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
 import AdSlot from '../components/ads/AdSlot';
+import { useHorizontalScroll } from '../lib/useHorizontalScroll';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 
@@ -182,8 +183,8 @@ const FILTER_DATA: Record<string, { label: string; opts: string[] }[]> = {
 /* ═══════════════════════════════════════════════════════════════
    CONTENT DATA
 ═══════════════════════════════════════════════════════════════ */
-/* شش باشگاهِ پیشنهادیِ صفحه‌ی اصلی — بقیه در /clubs */
-const FEATURED_COUNT = 6
+/* باشگاه‌های پیشنهادیِ صفحه‌ی اصلی */
+const FEATURED_COUNT = 8
 
 const CLUBS = [
   { id:'1', name:'باشگاه ستاره تهران',   city:'تهران',  dist:'ونک',        tables:12, rating:4.9, reviews:284, type:'اسنوکر', img:IMG.club2, img2:IMG.club3,   price:80000, badge:'برترین', tags:['VIP','پارکینگ','کافه'], hasStory:true  },
@@ -209,6 +210,10 @@ const PRODUCTS = [
   { id:'8',  name:'Longoni Laser',       sub:'نگهدارنده حرفه‌ای',  img:IMG.rest,  brand:'LONGONI',  price:1900000,  sale:1615000,  pct:15 },
   { id:'9',  name:'Silver Cup Chalk',    sub:'گچ نقره‌ای',          img:IMG.chalk, brand:'SILVER',   price:420000,   sale:378000,   pct:10 },
   { id:'10', name:'Predator BK Rush',    sub:'چوب بریک',            img:IMG.cue2,  brand:'PREDATOR', price:5400000,  sale:4320000,  pct:20 },
+  { id:'11', name:'Molinari Grip',       sub:'روکش دسته',           img:IMG.cue,   brand:'MOLINARI', price:1250000,  sale:1000000,  pct:20 },
+  { id:'12', name:'Kamui Black Soft',    sub:'تیپ چرمی',            img:IMG.chalk, brand:'KAMUI',    price:1650000,  sale:1485000,  pct:10 },
+  { id:'13', name:'Peradon Ash Cue',     sub:'چوب اسنوکر ماسیو',    img:IMG.cue2,  brand:'PERADON',  price:7200000,  sale:7200000,  pct:0  },
+  { id:'14', name:'Simonis 860',         sub:'ماهوت مسابقات',       img:IMG.rest,  brand:'SIMONIS',  price:9800000,  sale:8330000,  pct:15 },
 ];
 const SELLERS = [
   { id:'1', name:'فروشگاه ستاره تهران',    city:'تهران',   specialty:'چوب و لوازم',     rating:4.9, reviews:312, img:IMG.store1,   badge:'برتر' },
@@ -219,6 +224,10 @@ const SELLERS = [
   { id:'6', name:'گالری بیلیارد نوین',     city:'کرج',     specialty:'میز اسنوکر',       rating:4.7, reviews:134, img:IMG.table,    badge:null   },
   { id:'7', name:'لوازم بیلیارد پرشین',    city:'تهران',   specialty:'توپ آرامیث',       rating:4.8, reviews:267, img:IMG.ball,     badge:'تأیید شده' },
   { id:'8', name:'مرکز چوب و گچ ایران',    city:'اهواز',   specialty:'گچ حرفه‌ای',       rating:4.5, reviews:76,  img:IMG.chalk,    badge:null   },
+  { id:'9',  name:'بیلیارد سنتر قم',       city:'قم',      specialty:'میز و لوازم',      rating:4.6, reviews:112, img:IMG.table,    badge:null   },
+  { id:'10', name:'تجهیزات اسنوکر رشت',    city:'رشت',     specialty:'چوب و کیس',        rating:4.7, reviews:143, img:IMG.cue2,     badge:'تأیید شده' },
+  { id:'11', name:'فروشگاه اسپرت کرمان',   city:'کرمان',   specialty:'پوشاک و اکسسوری',  rating:4.4, reviews:64,  img:IMG.store1,   badge:null   },
+  { id:'12', name:'بیلیارد گلستان',        city:'گرگان',   specialty:'ماهوت و پارچه',    rating:4.8, reviews:157, img:IMG.store2,   badge:'برتر' },
 ];
 
 const SERVICES_LIST = [
@@ -920,6 +929,8 @@ export default function HomePage() {
 
   const clubsSliderRef = useRef<HTMLDivElement>(null);
   const clubsDeskRef = useRef<HTMLDivElement>(null);
+  /* چرخِ ماوس و درگ روی نوارِ باشگاه‌ها */
+  useHorizontalScroll(clubsDeskRef);
   const [activeClub, setActiveClub] = useState(0);
   const activeClubRef  = useRef(0);
 
@@ -1374,10 +1385,12 @@ useEffect(() => {
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
         /* نوارِ اسکرولیِ دسکتاپِ باشگاه‌ها — مثل بازار/فروشندگان */
+        /* بدونِ scroll-snap: با چرخِ ماوس، اسنپ حرکت را تکه‌تکه می‌کرد */
         .clubs-strip { display:flex; gap:14px; overflow-x:auto; scrollbar-width:none;
-          padding:2px 2px 10px; scroll-snap-type:x proximity; }
+          padding:2px 2px 10px; overscroll-behavior-x:contain; cursor:grab; }
+        .clubs-strip:active { cursor:grabbing; }
         .clubs-strip::-webkit-scrollbar { display:none; }
-        .club-desk-card { flex:0 0 290px; scroll-snap-align:start; }
+        .club-desk-card { flex:0 0 261px; }
         .clubs-dots { display:none !important; }
         .clubs-nav { position:absolute; top:44%; transform:translateY(-50%); z-index:3;
           width:36px; height:36px; border-radius:50%; cursor:pointer;
@@ -1686,7 +1699,7 @@ useEffect(() => {
           <div className="clubs-desk clubs-strip">
             {CLUBS.map((c, i) => (
               <div key={c.id} className="club-desk-card">
-                <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(337px,32.4vw,446px)" /></SR>
+                <SR delay={Math.min(i, 4) * 60}><ClubCard club={c} h="clamp(303px,29.16vw,401px)" /></SR>
               </div>
             ))}
           </div>
