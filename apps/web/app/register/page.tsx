@@ -32,6 +32,17 @@ interface FormData {
    ثبت‌احوال و شاهکار ارقامِ فارسی را نمی‌پذیرند. */
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 
+/* قواعدِ رمز عبور — همان‌ها که هنگام ثبت هم بررسی می‌شوند.
+   حین تایپ نشان داده می‌شوند تا کاربر بعد از زدنِ دکمه غافلگیر نشود. */
+const PW_RULES: { label: string; test: (v: string) => boolean }[] = [
+  { label: 'حداقل ۸ کاراکتر',            test: v => v.length >= 8 },
+  { label: 'حرف بزرگ انگلیسی (A-Z)',     test: v => /[A-Z]/.test(v) },
+  { label: 'حرف کوچک انگلیسی (a-z)',     test: v => /[a-z]/.test(v) },
+  { label: 'عدد',                        test: v => /\d/.test(v) },
+  { label: 'کاراکتر ویژه (مثل @ یا !)',  test: v => /[^A-Za-z0-9]/.test(v) },
+];
+const pwOk = (v: string) => PW_RULES.every(r => r.test(v));
+
 /* اعتبارسنجی کد ملی ایران (چک‌سام استاندارد) */
 function isValidNationalId(v: string): boolean {
   if (!/^\d{10}$/.test(v)) return false;
@@ -59,6 +70,8 @@ export default function RegisterPage() {
   const [showPw, setShowPw]   = useState(false);
   const [showPw2, setShowPw2] = useState(false);
   const [pwWarn, setPwWarn]   = useState(false);
+  /* چه کاری در حالِ انجام است — استعلام چند ثانیه طول می‌کشد */
+  const [busyStep, setBusyStep] = useState('');
   /* مرحله‌ی OTP (بینِ شماره و اطلاعاتِ حساب) */
   const [otpOpen, setOtpOpen] = useState(false);
   const [otp, setOtp]         = useState('');
@@ -206,8 +219,7 @@ export default function RegisterPage() {
       setError('تاریخ تولد را کامل و به‌صورتِ ۱۳۷۰/۰۵/۱۲ وارد کنید');
       return;
     }
-    const pw = form.password;
-    if (pw.length < 8 || !/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+    if (!pwOk(form.password)) {
       setError('رمز عبور باید حداقل ۸ کاراکتر و شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه (مثل ! یا @) باشد');
       return;
     }
@@ -221,14 +233,18 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
+    /* استعلام از شاهکار و ثبت‌احوال چند ثانیه طول می‌کشد و بیرون از دستِ
+       ماست. به‌جای اسپینرِ خاموش، بگو الان کجای کار است. */
+    setBusyStep('استعلام از سامانه‌ی شاهکار و ثبت‌احوال…');
     try {
       /* احراز هویت: شاهکار (کد ملی ↔ موبایلِ تأییدشده) + تطبیقِ نام با ثبت‌احوال */
       const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim(), {
         birthDate: form.birthDate.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(),
       });
-      if (!idv.ok) { setLoading(false); setError(idv.message || 'استعلامِ احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
-      if (!idv.match) { setLoading(false); setError(idv.message || 'اطلاعاتِ هویتی با کد ملی مطابقت ندارد'); return; }
+      if (!idv.ok) { setLoading(false); setBusyStep(''); setError(idv.message || 'استعلامِ احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
+      if (!idv.match) { setLoading(false); setBusyStep(''); setError(idv.message || 'اطلاعاتِ هویتی با کد ملی مطابقت ندارد'); return; }
 
+      setBusyStep('ساخت حساب…');
       const { data } = await api.post('/auth/register', {
         phone: form.phone,
         firstName: form.firstName,
@@ -245,6 +261,7 @@ export default function RegisterPage() {
       setError(err?.response?.data?.message ?? 'خطا در ثبت‌نام، دوباره تلاش کنید');
     } finally {
       setLoading(false);
+      setBusyStep('');
     }
   };
 
@@ -401,7 +418,7 @@ export default function RegisterPage() {
           </h1>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
-            {otpOpen ? `کدِ ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `شماره ${toFa(form.phone)}، حالا اطلاعات حساب را کامل کنید`}
+            {otpOpen ? `کدِ ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)}، اکنون اطلاعات حساب را کامل کنید`}
           </p>
 
           {/* ── مرحله ۱: شماره ── */}
@@ -500,11 +517,48 @@ export default function RegisterPage() {
                   کیبورد شما فارسی است — لطفاً زبان کیبورد را انگلیسی کنید.
                 </p>
               )}
-              <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
-                باید شامل حروف بزرگ و کوچک انگلیسی، عدد و کاراکتر ویژه باشد.
-              </p>
+              {/* شرط‌های رمز — حین تایپ سبز می‌شوند تا کاربر بعد از زدنِ دکمه غافلگیر نشود */}
+              <div style={{
+                display: 'grid', gap: 7, margin: '-6px 0 14px',
+                gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))',
+              }}>
+                {PW_RULES.map(r => {
+                  const ok = r.test(form.password)
+                  const idle = form.password.length === 0
+                  return (
+                    <span key={r.label} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, lineHeight: 1.7,
+                      fontWeight: ok ? 800 : 600,
+                      color: idle ? MUT : ok ? '#0E7A38' : '#B23B2E',
+                      transition: 'color .2s',
+                    }}>
+                      <span style={{
+                        width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        background: idle ? 'rgba(0,0,0,0.05)' : ok ? 'rgba(14,122,56,0.13)' : 'rgba(178,59,46,0.10)',
+                        transition: 'background .2s',
+                      }}>
+                        {ok ? <Check size={10} strokeWidth={3.4} /> : <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'currentColor', opacity: idle ? 0.5 : 0.8 }} />}
+                      </span>
+                      {r.label}
+                    </span>
+                  )
+                })}
+              </div>
+
               {field('confirmPassword', 'تکرار رمز عبور', <Lock size={16} />, { placeholder: 'رمز عبور را تکرار کنید', reveal: { shown: showPw2, toggle: () => setShowPw2(p => !p) } })}
+              {form.confirmPassword.length > 0 && form.password !== form.confirmPassword && (
+                <p style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
+                  <AlertCircle size={13} style={{ flexShrink: 0 }} />
+                  رمز عبور و تکرار آن یکسان نیستند.
+                </p>
+              )}
+              {form.confirmPassword.length > 0 && form.password === form.confirmPassword && pwOk(form.password) && (
+                <p style={{ fontSize: 11.5, fontWeight: 800, color: '#0E7A38', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>
+                  <Check size={13} strokeWidth={3} style={{ flexShrink: 0 }} />
+                  رمز عبور تأیید شد.
+                </p>
+              )}
 
               {/* پذیرش قوانین — بدون تیکِ آن، ثبت‌نام انجام نمی‌شود */}
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, cursor: 'pointer', margin: '2px 0 14px' }}>
@@ -527,10 +581,19 @@ export default function RegisterPage() {
                 {loading ? (
                   <>
                     <span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
-                    در حال ساخت حساب…
+                    {busyStep || 'در حال ساخت حساب…'}
                   </>
                 ) : 'ثبت نام'}
               </button>
+
+              {/* استعلام از سامانه‌های دولتی چند ثانیه طول می‌کشد و دستِ ما
+                  نیست؛ صریح بگو تا کاربر فکر نکند صفحه گیر کرده است. */}
+              {loading && (
+                <p style={{ fontSize: 11.5, color: MUT, margin: '9px 0 0', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.9, textAlign: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={13} style={{ flexShrink: 0, marginTop: 3, color: GOLD }} />
+                  استعلام از سامانه‌های شاهکار و ثبت‌احوال معمولاً چند ثانیه طول می‌کشد؛ صفحه را نبندید.
+                </p>
+              )}
 
               <button onClick={() => { setStep(1); setError(''); }} disabled={loading}
                 style={{ width: '100%', marginTop: 10, padding: '11px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'transparent', border: `1px solid ${LINE}`, color: SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>

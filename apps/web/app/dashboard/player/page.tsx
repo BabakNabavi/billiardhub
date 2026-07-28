@@ -21,6 +21,7 @@ import {
   type PlayerProfile,
 } from '../../../lib/player-store'
 import PlayerDisciplines from '../../../components/player/PlayerDisciplines'
+import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Trophy, ArrowLeft, Check } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
@@ -165,6 +166,10 @@ export default function PlayerDashboard() {
         </div>
 
         <form onSubmit={submit} className="space-y-5">
+
+          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          <VerificationBadges />
+
 
           {/* ═══ هویت بازیکن ═══ */}
           <section className={CARD}>

@@ -17,6 +17,7 @@ import {
   emptyTechnicianProfile, findTechnicianByOwner, newTechnicianSlug,
   saveTechnicianProfile, type TechnicianProfile,
 } from '../../../lib/technician-store'
+import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Wrench, ArrowLeft, Check } from 'lucide-react'
 
 const GOLD_D = '#9A6E38'
@@ -169,6 +170,10 @@ export default function TechnicianDashboard() {
         </div>
 
         <form onSubmit={submit} className="space-y-5">
+
+          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          <VerificationBadges />
+
 
           {/* ═══ هویت حرفه‌ای ═══ */}
           <section className={CARD}>

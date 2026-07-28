@@ -15,6 +15,7 @@ import {
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import VerificationPrompt from '../../../components/VerificationPrompt'
+import VerificationBadges from '../../../components/VerificationBadges'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
@@ -248,6 +249,10 @@ export default function SellerDashboard() {
         </div>
 
         <form onSubmit={submit} className="space-y-5">
+
+          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          <VerificationBadges />
+
 
           {/* ═══ هویت فروشگاه ═══ */}
           <section className={CARD}>

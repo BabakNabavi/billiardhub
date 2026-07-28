@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import VerificationBadges from '../../../components/VerificationBadges'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -1093,6 +1094,9 @@ export default function ClubDashboardPage() {
           باشگاه جدید
         </Link>
       </div>
+
+      {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+      <div style={{ marginBottom: 16 }}><VerificationBadges /></div>
 
       {/* Club selector dropdown */}
       {clubs.length > 0 && (

@@ -18,6 +18,7 @@ import {
   saveManufacturerProfile, type ManufacturerProfile,
 } from '../../../lib/manufacturer-store'
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
+import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Factory, ArrowLeft } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
@@ -182,6 +183,10 @@ export default function ManufacturerDashboard() {
         </div>
 
         <form onSubmit={submit} className="space-y-5">
+
+          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          <VerificationBadges />
+
 
           {/* ═══ هویت کارخانه ═══ */}
           <section className={CARD}>

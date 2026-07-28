@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
@@ -344,6 +345,9 @@ export default function CoachDashboardPage() {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          <VerificationBadges />
 
           {/* Stories — publishes to the home stories bar immediately, independent of the profile form */}
           <div style={card}>

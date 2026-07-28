@@ -6,6 +6,8 @@ import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useAuthStore } from '../../../store/auth.store'
 import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { csrfToken, apiFetch } from '../../../lib/http'
+import VerificationBadges from '../../../components/VerificationBadges'
+import ChangePhone from '../../../components/auth/ChangePhone'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -34,6 +36,8 @@ interface UserProfile {
   clubNameManual?: string
   bankCard?: string
   bankCardOwner?: string
+  address?: string
+  workPhone?: string
 }
 
 
@@ -88,6 +92,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   )
 }
+
+/* فیلدهای استعلام‌شده — دیده می‌شوند ولی نوشته نمی‌شوند */
+const lockedStyle: React.CSSProperties = {
+  width: '100%', boxSizing: 'border-box',
+  background: 'rgba(14,122,56,0.04)', border: '1px solid rgba(14,122,56,0.16)',
+  borderRadius: 10, padding: '10px 12px', color: 'rgba(0,0,0,0.62)',
+  fontSize: 15, fontFamily: 'inherit', outline: 'none', cursor: 'not-allowed',
+}
+
+const toEnDigits = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '')
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -170,6 +184,8 @@ export default function ProfileMePage() {
   const [bankCard, setBankCard] = useState('')
   const [bankOwner, setBankOwner] = useState('')
   const [clubName, setClubName] = useState('')
+  const [address, setAddress]   = useState('')
+  const [workPhone, setWorkPhone] = useState('')
 
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -201,6 +217,8 @@ export default function ProfileMePage() {
     setInstagram(j.instagram ?? '')
     setBankOwner(j.bankCardOwner ?? '')
     setClubName(j.clubNameManual ?? '')
+    setAddress(j.address ?? '')
+    setWorkPhone(j.workPhone ?? '')
   }
 
   useEffect(() => {
@@ -209,7 +227,7 @@ export default function ProfileMePage() {
       if (local) applyProfile(local)
       else router.push('/login')
     }
-    apiFetch(`${API}/user/profile/me`, { headers: authHeader() })
+    apiFetch('/api/users/profile', { headers: authHeader(), cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(j => { if (j) applyProfile(j); else fallback() })
       .catch(fallback)
@@ -229,10 +247,12 @@ export default function ProfileMePage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const res = await apiFetch(`${API}/user/profile`, {
-        method: 'PUT',
+      /* فقط فیلدهای قابلِ ویرایش؛ نام، کد ملی و تاریخ تولد اصلاً فرستاده
+         نمی‌شوند — سرور هم اگر بیایند نادیده‌شان می‌گیرد. */
+      const res = await apiFetch('/api/users/profile', {
+        method: 'PATCH',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bio, province, city, birthDate, gender, instagram }),
+        body: JSON.stringify({ bio, province, city, gender, instagram, address, workPhone }),
       })
       if (!res.ok) throw new Error()
       showToast('پروفایل ذخیره شد')
@@ -367,34 +387,74 @@ export default function ProfileMePage() {
               </div>
             </div>
 
-            {/* ── اطلاعات پایه ── */}
-            <Section title="اطلاعات شخصی" icon="ti-user">
+            {/* ── وضعیتِ تأیید ── */}
+            <div style={{ marginBottom: 16 }}><VerificationBadges /></div>
+
+            {/* ── اطلاعات هویتی — استعلام‌شده، قفل ──
+                این‌ها هنگام ثبت‌نام از ثبت‌احوال و شاهکار گرفته شده‌اند.
+                تغییرشان یعنی هویتِ تأییدشده دیگر معنایی ندارد، پس نه این‌جا
+                و نه از راهِ API نوشته نمی‌شوند. */}
+            <Section title="اطلاعات هویتی" icon="ti-shield-check" color="#0E7A38">
+              <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', margin: '0 0 14px', lineHeight: 1.95 }}>
+                این اطلاعات هنگام ثبت‌نام از ثبت‌احوال استعلام شده و قابلِ ویرایش نیست.
+              </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
                 <Field label="نام">
-                  <input value={profile.firstName} disabled style={{ ...inputStyle, opacity: 0.6 }} />
+                  <input value={profile.firstName} disabled style={lockedStyle} />
                 </Field>
                 <Field label="نام خانوادگی">
-                  <input value={profile.lastName} disabled style={{ ...inputStyle, opacity: 0.6 }} />
+                  <input value={profile.lastName} disabled style={lockedStyle} />
                 </Field>
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
+                <Field label="کد ملی">
+                  <input value={toFa(profile.nationalId ?? '—')} disabled style={{ ...lockedStyle, direction: 'ltr', textAlign: 'right' }} />
+                </Field>
+                <Field label="تاریخ تولد">
+                  <input value={toFa(profile.birthDate ?? '—')} disabled style={{ ...lockedStyle, direction: 'ltr', textAlign: 'right' }} />
+                </Field>
+              </div>
+
+              <Field label="شماره موبایل">
+                <ChangePhone
+                  current={profile.phone}
+                  onChanged={p => {
+                    setProfile(prev => (prev ? { ...prev, phone: p } : prev))
+                    useAuthStore.getState().updateUser({ phone: p })
+                    showToast('شماره موبایل شما تغییر کرد')
+                  }}
+                />
+              </Field>
+            </Section>
+
+            {/* ── اطلاعات پایه ── */}
+            <Section title="اطلاعات شخصی" icon="ti-user">
               <Field label="بیوگرافی">
                 <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="چند جمله درباره خودت..." style={{ ...inputStyle, resize: 'vertical', minHeight: 70 }} />
               </Field>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
-                <Field label="جنسیت">
-                  {/* استایلِ حرفه‌ای select از globals.css می‌آید — اینلاین override نکن */}
-                  <select value={gender} onChange={e => setGender(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }}>
-                    <option value="">انتخاب کنید</option>
-                    <option value="male">مرد</option>
-                    <option value="female">زن</option>
-                  </select>
-                </Field>
-                <Field label="تاریخ تولد">
-                  <input value={birthDate} onChange={e => setBirthDate(e.target.value)} placeholder="۱۳۷۰/۰۱/۰۱" style={inputStyle} />
-                </Field>
-              </div>
+              <Field label="جنسیت">
+                {/* استایلِ حرفه‌ای select از globals.css می‌آید — اینلاین override نکن */}
+                <select value={gender} onChange={e => setGender(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }}>
+                  <option value="">انتخاب کنید</option>
+                  <option value="male">مرد</option>
+                  <option value="female">زن</option>
+                </select>
+              </Field>
               <Field label="اینستاگرام">
                 <input value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="https://instagram.com/..." style={inputStyle} />
+              </Field>
+            </Section>
+
+            {/* ── اطلاعات تماس — هر وقت خواستید عوضشان کنید ── */}
+            <Section title="اطلاعات تماس" icon="ti-address-book" color="#3D63E6">
+              <Field label="نشانی">
+                <textarea value={address} onChange={e => setAddress(e.target.value)} rows={2}
+                  placeholder="استان، شهر، خیابان، پلاک…" style={{ ...inputStyle, resize: 'vertical', minHeight: 58 }} />
+              </Field>
+              <Field label="تلفن محل کار">
+                <input value={toFa(workPhone)} onChange={e => setWorkPhone(toEnDigits(e.target.value).slice(0, 15))}
+                  placeholder="۰۲۱۲۲۸۵۹۵۵۱" inputMode="numeric"
+                  style={{ ...inputStyle, direction: 'ltr', textAlign: 'right' }} />
               </Field>
             </Section>
 
