@@ -12,6 +12,10 @@ const WRITABLE: Record<string, 'bool' | 'json'> = {
   ads_free_quota: 'json',      // { quota, period }
   ad_slots_enabled: 'bool',    // جایگاه‌های تبلیغاتی
   platform_bank: 'json',       // حسابی که پولِ بسته‌ها به آن می‌رود
+
+  stories_quota_enabled: 'bool',  // فروشِ بسته‌ی استوری
+  stories_free_quota: 'json',     // سهمیه‌ی رایگانِ استوری، به تفکیکِ نقش
+  story_platform_bank: 'json',
 };
 
 const READABLE = Object.keys(WRITABLE);

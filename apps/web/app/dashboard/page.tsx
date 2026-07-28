@@ -19,6 +19,7 @@ import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
 import MyBookings from '../../components/booking/MyBookings';
 import MyAdPlan from '../../components/ads/MyAdPlan';
+import MyStoryPlan from '../../components/ads/MyStoryPlan';
 
 /* ══ types ══ */
 interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
@@ -652,6 +653,9 @@ export default function DashboardPage() {
 
               {/* بسته‌ی آگهی — چه بسته‌ای، تا کی، چند تا مانده */}
               <ScrollReveal><MyAdPlan /></ScrollReveal>
+
+              {/* بسته‌ی استوری — چه بسته‌ای، تا کی، چند تا مانده */}
+              <ScrollReveal><MyStoryPlan /></ScrollReveal>
 
               {/* Upcoming tournament — synced with SAMPLE_TOURNAMENTS */}
               <ScrollReveal>

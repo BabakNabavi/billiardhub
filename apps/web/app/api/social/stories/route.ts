@@ -1,8 +1,13 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, DAY, P, readJson, writeJson } from '@/lib/social-server'
+import { actorFromRequest } from '@/lib/finance/db'
+import { getStoryQuotaState } from '@/lib/stories/quota'
 
-const LIMITS: Record<string, number> = { player: 2, coach: 2, referee: 1, technician: 2, seller: 4, manufacturer: 2, club_owner: 3 }
+/* سقفِ استوری دیگر هاردکد نیست — از تنظیماتِ ادمین (به تفکیکِ نقش) و
+   بسته‌ی خریداری‌شده می‌آید. اعدادِ قبلی به‌عنوانِ پیش‌فرض در مایگریشنِ
+   ۰۱۳ نشسته‌اند تا رفتارِ امروزِ سایت عوض نشود. */
+const PERIOD_MS: Record<'day' | 'week' | 'month', number> = { day: DAY, week: 7 * DAY, month: 30 * DAY }
 
 interface SStory {
   id: string; ownerKey: string; userName: string
@@ -24,15 +29,28 @@ export async function POST(req: NextRequest) {
   const s = (await req.json()) as Partial<SStory>
   if (!s.ownerKey || !s.mediaUrl) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
 
-  const limit = LIMITS[s.roleKey || 'player'] ?? 0
-  if (limit <= 0) return NextResponse.json({ message: 'حساب شما امکان انتشار استوری ندارد' }, { status: 403, headers: CORS })
-
   const all = await readJson<SStory[]>(P.stories, [])
   const now = Date.now()
   const live = all.filter(x => now - x.createdAt < DAY)
-  const today = new Date().toDateString()
-  const todayCount = live.filter(x => x.ownerKey === s.ownerKey && new Date(x.createdAt).toDateString() === today).length
-  if (todayCount >= limit) return NextResponse.json({ message: `سقف استوریِ امروزِ شما (${limit}) پر شده است` }, { status: 429, headers: CORS })
+
+  /* سقف از تنظیماتِ ادمین و بسته‌ی خریداری‌شده می‌آید، نه از عددِ هاردکد.
+     شمارش هم روی همان ownerKey که استوری با آن ثبت می‌شود. */
+  const actor = actorFromRequest(req)
+  const quota = await getStoryQuotaState(
+    actor?.id ?? '',
+    async period => {
+      const since = now - PERIOD_MS[period]
+      return all.filter(x => x.ownerKey === s.ownerKey && x.createdAt >= since).length
+    },
+    actor ? undefined : (s.roleKey || 'player'),
+  )
+
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { message: quota.message ?? 'سقفِ استوریِ شما پر شده است', quotaExceeded: true },
+      { status: quota.limit <= 0 ? 403 : 429, headers: CORS },
+    )
+  }
 
   const story: SStory = {
     id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,

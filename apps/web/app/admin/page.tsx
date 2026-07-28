@@ -82,6 +82,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
       { title: 'جایگاه‌های تبلیغاتی', desc: 'بنرهای اجاره‌ای، تعرفه‌ها و درخواست‌های تبلیغ', icon: <Megaphone size={20} />, link: '/admin/ad-slots' },
       { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروشِ آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
+      { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوریِ هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
     ],
