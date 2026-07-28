@@ -37,5 +37,11 @@ REVOKE ALL ON TABLE public.tables FROM anon, authenticated;
 -- عمداً عمومی است)؛ ولی گرنت‌های نوشتنِ anon بی‌دلیل باز مانده‌اند.
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.products FROM anon, authenticated;
 
+-- جدول‌های هویت/سهمیه: RLS از مایگریشن ۰۱۶ روشن است و آزمونِ زنده نشان
+-- داد خواندن و نوشتنِ anon را می‌بندد؛ برداشتنِ گرنت‌ها لایه‌ی دوم است تا
+-- اگر روزی policyی اضافه شد، پیش‌فرض همچنان بسته باشد.
+REVOKE ALL ON TABLE public.persons            FROM anon, authenticated;
+REVOKE ALL ON TABLE public.quota_consumptions FROM anon, authenticated;
+
 -- جدولِ دست‌سازِ بعدی نباید این اشتباه را تکرار کند
 ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
