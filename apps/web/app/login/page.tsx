@@ -13,6 +13,9 @@ import api from '../../lib/api';
 import { useAuthStore } from '../../store/auth.store';
 import { Eye, EyeOff, Phone, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 
+/* نمایشِ فارسیِ ارقام — مقدارِ ارسالی به سرور همچنان لاتین می‌ماند */
+const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
+
 const GOLD   = '#C7A66A';
 const GOLD_D = '#9A6E38';
 const TEXT   = '#1C1B17';
@@ -160,7 +163,7 @@ export default function LoginPage() {
             <span className="au-ic"><Phone size={16} /></span>
             <input
               type="tel"
-              value={phone}
+              value={toFa(phone)}
               onChange={e => {
                 /* فقط عدد، ۱۱ رقم، حتماً ۰۹ (۹ اول ⇒ ۰ اضافه می‌شود) */
                 let d = e.target.value.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '');
@@ -172,7 +175,7 @@ export default function LoginPage() {
               onBlur={() => setPhoneFocus(false)}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               className="au-inp"
-              placeholder="09121234567"
+              placeholder="شماره موبایل (۱۱ رقمی)"
               maxLength={11}
               autoComplete="tel"
             />

@@ -28,6 +28,10 @@ interface FormData {
   confirmPassword: string;
 }
 
+/* نمایشِ فارسیِ ارقام. مقدارِ داخلِ فرم همیشه لاتین می‌ماند — استعلامِ
+   ثبت‌احوال و شاهکار ارقامِ فارسی را نمی‌پذیرند. */
+const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
+
 /* اعتبارسنجی کد ملی ایران (چک‌سام استاندارد) */
 function isValidNationalId(v: string): boolean {
   if (!/^\d{10}$/.test(v)) return false;
@@ -248,6 +252,8 @@ export default function RegisterPage() {
   const field = (
     k: keyof FormData, label: string, icon: React.ReactNode,
     opts: { type?: string; placeholder: string; inputMode?: 'numeric'; maxLength?: number; ltr?: boolean;
+      /* ارقام را فارسی نشان بده — مقدارِ ذخیره‌شده همچنان لاتین می‌ماند */
+      faDigits?: boolean;
       reveal?: { shown: boolean; toggle: () => void } },
   ) => (
     <div style={{ marginBottom: 14 }}>
@@ -259,7 +265,7 @@ export default function RegisterPage() {
           style={opts.ltr ? undefined : { direction: 'rtl', textAlign: 'right' }}
           type={opts.reveal ? (opts.reveal.shown ? 'text' : 'password') : (opts.type ?? 'text')}
           placeholder={opts.placeholder}
-          value={form[k]}
+          value={opts.faDigits ? toFa(form[k]) : form[k]}
           onChange={set(k)}
           onFocus={() => setFocusKey(k)}
           onBlur={() => setFocusKey('')}
@@ -395,13 +401,13 @@ export default function RegisterPage() {
           </h1>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
-            {otpOpen ? `کدِ ۵ رقمی به شماره ${form.phone} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `شماره ${form.phone} — حالا اطلاعات حساب را کامل کنید`}
+            {otpOpen ? `کدِ ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `شماره ${toFa(form.phone)}، حالا اطلاعات حساب را کامل کنید`}
           </p>
 
           {/* ── مرحله ۱: شماره ── */}
           {step === 1 && !otpOpen && (
             <div key="s1" style={{ animation: 'auUp .4s ease both' }}>
-              {field('phone', 'شماره موبایل', <Phone size={16} />, { type: 'tel', placeholder: 'مثال: 09121234567', inputMode: 'numeric', maxLength: 11, ltr: true })}
+              {field('phone', 'شماره موبایل', <Phone size={16} />, { type: 'tel', placeholder: 'مثال: ۰۹۱۲۱۲۳۴۵۶۷', inputMode: 'numeric', maxLength: 11, ltr: true, faDigits: true })}
               <p style={{ fontSize: 11.5, color: MUT, margin: '2px 0 18px', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 یک کدِ تأیید با پیامک به این شماره فرستاده می‌شود
@@ -465,11 +471,11 @@ export default function RegisterPage() {
           {step === 2 && (
             <div key="s2" style={{ animation: 'auUp .4s ease both' }}>
               <div className="au-row2">
-                {field('firstName', 'نام', <User size={16} />, { placeholder: 'علی' })}
-                {field('lastName', 'نام خانوادگی', <User size={16} />, { placeholder: 'احمدی' })}
+                {field('firstName', 'نام', <User size={16} />, { placeholder: 'نام' })}
+                {field('lastName', 'نام خانوادگی', <User size={16} />, { placeholder: 'نام خانوادگی' })}
               </div>
               <div className="au-row2">
-                {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'مثال: 0012345678', inputMode: 'numeric', maxLength: 10, ltr: true })}
+                {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'کد ملی (۱۰ رقمی)', inputMode: 'numeric', maxLength: 10, ltr: true, faDigits: true })}
                 {/* تاریخ تولد فقط از تقویم انتخاب می‌شود — تایپِ دستی منبعِ
                     اشتباه بود (ماه و روزِ جابه‌جا، سالِ غلط) و استعلامِ
                     ثبت‌احوال را بی‌دلیل رد می‌کرد. */}
@@ -485,7 +491,7 @@ export default function RegisterPage() {
               </div>
               <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
-                نام، نام خانوادگی، کد ملی و تاریخ تولد از ثبت‌احوال استعلام می‌شود و باید با هم و با شماره موبایلِ شما مطابقت داشته باشد.
+                نام، نام خانوادگی، کد ملی، تاریخ تولد و شماره موبایل باید متعلق به یک نفر باشد.
               </p>
               {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
               {pwWarn && (
