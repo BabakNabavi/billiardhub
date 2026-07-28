@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MANUFACTURERS, type MockManufacturer } from '../../lib/manufacturers-data'
 import { listApprovedManufacturers, profileToManufacturer } from '../../lib/manufacturer-store'
+import type { ManufacturerProfile } from '../../lib/manufacturer-store'
+import { fetchProfiles } from '../../lib/profiles/client'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -399,6 +401,15 @@ export default function ManufacturersPage() {
     )
   }
 
+  /* null یعنی هنوز از سرور نیامده — تا آن‌موقع نسخه‌ی مرورگر نمایش داده می‌شود */
+  const [remoteMfrs, setRemoteMfrs] = useState<ManufacturerProfile[] | null>(null)
+  useEffect(() => {
+    void fetchProfiles<ManufacturerProfile>('manufacturer').then(rows => {
+      setRemoteMfrs(rows.filter(r => r.status === 'approved')
+        .map(r => ({ ...r.data, slug: r.slug } as ManufacturerProfile)))
+    })
+  }, [])
+
   const matchCat = (m: MockManufacturer, term: string) =>
     m.specialties.some(sp => sp.includes(term) || term.includes(sp)) || m.description.includes(term)
   const distOf = (m: MockManufacturer) => {
@@ -407,8 +418,9 @@ export default function ManufacturersPage() {
   }
 
   const filtered = useMemo(() => {
-    /* تولیدکنندگانِ ثبت‌نامی (پنل ⇒ localStorage) اولِ لیست می‌نشینند */
-    const registered = listApprovedManufacturers().map(profileToManufacturer)
+    /* تولیدکنندگانِ ثبت‌نامی اولِ لیست می‌نشینند — از سرور، و تا آمدنِ
+       پاسخ از همین مرورگر */
+    const registered = (remoteMfrs ?? listApprovedManufacturers()).map(profileToManufacturer)
     const ALL = [...registered, ...MANUFACTURERS.filter(m => !registered.some(r => r.id === m.id))]
     const list = ALL
       .filter(m => !search.trim() || m.name.includes(search.trim()) || m.city.includes(search.trim()) || m.specialties.some(sp => sp.includes(search.trim())))
@@ -421,7 +433,7 @@ export default function ManufacturersPage() {
       return a.sinceYear - b.sinceYear   // experience = باسابقه‌ترین (قدیمی‌تر اول)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, status, sort, nearMe, userLoc])
+  }, [search, category, status, sort, nearMe, userLoc, remoteMfrs])
 
   return (
     <>

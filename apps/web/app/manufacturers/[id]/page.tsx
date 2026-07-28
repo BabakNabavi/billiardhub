@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toFa, faNum, MONO, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '../../sellers/[id]/shared'
 import { getManufacturerProfile, profileToManufacturer } from '../../../lib/manufacturer-store'
+import type { ManufacturerProfile } from '../../../lib/manufacturer-store'
+import { fetchProfile } from '../../../lib/profiles/client'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getManufacturer, MANUFACTURERS, type MfrProduct } from '../../../lib/manufacturers-data'
 
@@ -183,10 +185,13 @@ export default function ManufacturerPage() {
   /* اول داده‌ی ایستا؛ اگر نبود، پروفایلِ ثبت‌نامی (پنل ⇒ localStorage) */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
   useEffect(() => {
-    if (!getManufacturer(mfrId)) {
-      const p = getManufacturerProfile(mfrId)
-      setStoredMfr(p ? profileToManufacturer(p) : null)
-    }
+    if (getManufacturer(mfrId)) return
+    const p = getManufacturerProfile(mfrId)
+    setStoredMfr(p ? profileToManufacturer(p) : null)
+    /* تولیدکننده‌ی ثبت‌نامیِ کاربرانِ دیگر فقط روی سرور است */
+    void fetchProfile<ManufacturerProfile>('manufacturer', mfrId).then(r => {
+      if (r) setStoredMfr(profileToManufacturer({ ...r.data, slug: r.slug } as ManufacturerProfile))
+    })
   }, [mfrId])
   const mfr = getManufacturer(mfrId) ?? storedMfr ?? MANUFACTURERS[0]!
 

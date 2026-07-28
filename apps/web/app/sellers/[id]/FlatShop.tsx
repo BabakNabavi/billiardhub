@@ -6,6 +6,7 @@ import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from '
 import { productsBySeller } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
+import { fetchProfile } from '../../../lib/profiles/client'
 import { telPrefix, provinceOfCity } from '../../../lib/iran-geo'
 import { getMockSeller } from '../../../lib/sellers-data'
 
@@ -275,7 +276,13 @@ export default function FlatShop() {
   /* پروفایلِ ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
-  useEffect(() => { setProfile(getSellerProfile(sellerId)) }, [sellerId])
+  useEffect(() => {
+    setProfile(getSellerProfile(sellerId))
+    /* منبعِ حقیقت سرور است — فروشگاهِ کاربرانِ دیگر فقط از این‌جا می‌آید */
+    void fetchProfile<SellerProfile>('seller', sellerId).then(p => {
+      if (p) setProfile({ ...p.data, slug: p.slug, verified: p.verified } as SellerProfile)
+    })
+  }, [sellerId])
 
   /* محصولاتِ همین فروشگاه؛ فروشگاهِ نمونه که محصولِ اختصاصی ندارد، کاتالوگِ دمو را نشان می‌دهد
      تا storefront خالی نماند. */

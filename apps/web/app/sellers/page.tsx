@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
+import { fetchProfiles } from '../../lib/profiles/client'
 import { MOCK_SELLERS } from '../../lib/sellers-data'
 import { productsBySeller } from '../shop/products'
 
@@ -445,7 +446,16 @@ export default function SellersPage() {
   /* فروشگاه‌های تاییدشده‌ی ذخیره‌شده. مقدار اولیه = SELLERS تا SSR و اولین رندرِ کلاینت یکی باشند؛
      بعد از mount، فروشگاه‌های approved از localStorage خوانده و اضافه می‌شوند. */
   const [stores, setStores] = useState<typeof SELLERS>(SELLERS)
-  useEffect(() => { setStores(mergeStores(SELLERS, listApprovedSellers())) }, [])
+  useEffect(() => {
+    /* فوراً هرچه در همین مرورگر هست، بعد فهرستِ سرور که همه‌ی
+       فروشگاه‌ها را دارد نه فقط فروشگاهِ خودِ بیننده. */
+    setStores(mergeStores(SELLERS, listApprovedSellers()))
+    void fetchProfiles<SellerProfile>('seller').then(rows => {
+      const remote = rows.filter(r => r.status === 'approved')
+        .map(r => ({ ...r.data, slug: r.slug, verified: r.verified } as SellerProfile))
+      if (remote.length) setStores(mergeStores(SELLERS, remote))
+    })
+  }, [])
 
   const getLocation = () => {
     if (nearMe) { setNearMe(false); return }

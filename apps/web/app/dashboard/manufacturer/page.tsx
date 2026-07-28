@@ -17,6 +17,7 @@ import {
   emptyManufacturerProfile, findManufacturerByOwner, newManufacturerSlug,
   saveManufacturerProfile, type ManufacturerProfile,
 } from '../../../lib/manufacturer-store'
+import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import { Plus, Trash2, Images, Factory, ArrowLeft } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
@@ -37,6 +38,7 @@ export default function ManufacturerDashboard() {
 
   const bannerRef = useRef<HTMLInputElement>(null)
   const prodImgRef = useRef<HTMLInputElement>(null)
+  const licRef = useRef<HTMLInputElement>(null)
   const [prod, setProd] = useState({ name: '', category: '', description: '', image: '' })
   const [cert, setCert] = useState({ title: '', issuer: '', year: '' })
 
@@ -44,11 +46,29 @@ export default function ManufacturerDashboard() {
 
   useEffect(() => {
     if (!_hydrated) return
-    if (user) {
-      const mine = findManufacturerByOwner(user)
-      setForm(mine ?? emptyManufacturerProfile(newManufacturerSlug(), user.id, user.phone ?? ''))
-    }
+    if (!user) { setLoaded(true); return }
+
+    /* اول نسخه‌ی همین مرورگر تا فرم فوراً پر شود، بعد نسخه‌ی سرور */
+    const mine = findManufacturerByOwner(user)
+    const local = mine ?? emptyManufacturerProfile(newManufacturerSlug(), user.id, user.phone ?? '')
+    setForm(local)
     setLoaded(true)
+
+    void (async () => {
+      const remote = await fetchMyProfile<ManufacturerProfile>('manufacturer')
+      if (!remote) {
+        if (mine) await saveProfileRemote('manufacturer', mine.slug, mine as unknown as Record<string, unknown>,
+          { number: mine.licenseNumber, url: mine.licenseFile?.url ?? '' })
+        return
+      }
+      const merged: ManufacturerProfile = {
+        ...local, ...remote.data,
+        slug: remote.slug, ownerId: remote.ownerId,
+        licenseNumber: remote.licenseNumber ?? '',
+      }
+      setForm(merged)
+      try { saveManufacturerProfile(merged) } catch { /* کشِ مرورگر پر است */ }
+    })()
   }, [_hydrated, user?.id])
 
   const set = <K extends keyof ManufacturerProfile>(k: K, v: ManufacturerProfile[K]) => {
@@ -59,6 +79,23 @@ export default function ManufacturerDashboard() {
     const v = specInput.trim()
     if (!v || form.specialties.includes(v)) { setSpecInput(''); return }
     set('specialties', [...form.specialties, v]); setSpecInput('')
+  }
+
+  /* پروانه — عکس فشرده می‌شود، PDF همان‌طور خوانده می‌شود */
+  const pickLicense = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return
+    setBusy(true)
+    try {
+      const url = f.type.startsWith('image/')
+        ? await compressImage(f, 1400, 0.75)
+        : await new Promise<string>((res, rej) => {
+            const r = new FileReader()
+            r.onload = () => res(String(r.result)); r.onerror = () => rej(new Error('read'))
+            r.readAsDataURL(f)
+          })
+      set('licenseFile', { name: f.name, url })
+    } catch { setErr('فایل خوانده نشد.') }
+    finally { setBusy(false); e.target.value = '' }
   }
 
   const pickBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,17 +131,25 @@ export default function ManufacturerDashboard() {
     if (!form.city)               { setErr('شهر را انتخاب کنید.'); return }
     if (!form.description.trim()) { setErr('توضیح کوتاه لازم است.'); return }
     if (!form.phone.trim())       { setErr('شماره تماس لازم است.'); return }
-    try {
-      saveManufacturerProfile({
-        ...form,
-        ownerId: user?.id || form.ownerId,
-        ownerPhone: user?.phone || form.ownerPhone,
-        status: 'approved',
-      })
-      setSaved(true); setErr('')
-    } catch {
-      setErr('حافظه‌ی مرورگر پر است — چند عکس محصول را حذف کنید و دوباره ذخیره کنید.')
+
+    const next: ManufacturerProfile = {
+      ...form,
+      ownerId: user?.id || form.ownerId,
+      ownerPhone: user?.phone || form.ownerPhone,
+      status: 'approved',
     }
+    setBusy(true)
+    void (async () => {
+      /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند */
+      const res = await saveProfileRemote('manufacturer', next.slug, next as unknown as Record<string, unknown>,
+        { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
+      if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); setBusy(false); return }
+      /* عکس‌ها روی سرور به نشانیِ Storage تبدیل شده‌اند */
+      const saved = (res.profile?.data as ManufacturerProfile | undefined) ?? next
+      try { saveManufacturerProfile({ ...next, ...saved }) } catch { /* کش پر است */ }
+      setForm(f => ({ ...f, ...saved }))
+      setSaved(true); setErr(''); setBusy(false)
+    })()
   }
 
   if (!_hydrated || !loaded) return null
@@ -253,6 +298,37 @@ export default function ManufacturerDashboard() {
                 }}>
                 <Plus size={14} /> افزودن
               </button>
+            </div>
+          </section>
+
+          {/* ═══ پروانه‌ی تولید / جواز کسب ═══ */}
+          <section className={CARD}>
+            <h2 className="mb-1 text-[14.5px] font-bold">پروانه‌ی تولید / جواز کسب</h2>
+            <p className="mb-4 text-[12px] text-[#8A8474]">
+              برای گرفتنِ تیکِ تأیید لازم است. ادمین شماره را با فایلِ آپلودشده تطبیق می‌دهد.
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className={LABEL}>شماره‌ی پروانه</label>
+                <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }}
+                  value={form.licenseNumber}
+                  onChange={e => set('licenseNumber', e.target.value.replace(/[^0-9A-Za-z\-/]/g, '').slice(0, 40))}
+                  placeholder="مثال: 1234567890" />
+              </div>
+              <div>
+                <label className={LABEL}>فایل پروانه (عکس یا PDF)</label>
+                <input ref={licRef} type="file" accept="image/*,.pdf" className="hidden" onChange={pickLicense} />
+                <button type="button" onClick={() => licRef.current?.click()} disabled={busy} className={LQ_BTN}>
+                  <Images size={14} /> {form.licenseFile ? 'تغییر فایل' : 'آپلود فایل'}
+                </button>
+                {form.licenseFile && (
+                  <div className="mt-2 flex items-center gap-2 text-[12px] text-[#5B564B]">
+                    <span className="truncate" dir="ltr">{form.licenseFile.name}</span>
+                    <button type="button" onClick={() => set('licenseFile', null)}
+                      className="rounded-lg p-1 text-[#B23B2E] transition hover:bg-[rgba(178,59,46,0.08)]"><Trash2 size={13} /></button>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 

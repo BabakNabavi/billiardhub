@@ -12,6 +12,7 @@ import {
   type SellerProfile,
   emptySellerProfile, findSellerByOwner, findUnclaimedSeller, newSellerSlug, saveSellerProfile, compressImage,
 } from '../../../lib/seller-store'
+import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import VerificationPrompt from '../../../components/VerificationPrompt'
 
@@ -80,18 +81,40 @@ export default function SellerDashboard() {
        • وگرنه فرمِ خالی با اسلاگِ *یکتای تازه* (نه «۱») تا روی فروشگاهِ دیگری ننویسد. */
   useEffect(() => {
     if (!_hydrated) return
-    if (user) {
-      let mine = findSellerByOwner(user)
-      if (!mine) {
-        const orphan = findUnclaimedSeller()
-        if (orphan) {
-          mine = { ...orphan, ownerId: user.id, ownerPhone: user.phone ?? orphan.ownerPhone }
-          saveSellerProfile(mine)
-        }
+    if (!user) { setLoaded(true); return }
+
+    /* اول همان چیزی که در مرورگر هست تا فرم فوراً پر شود، بعد نسخه‌ی
+       سرور که منبعِ حقیقت است جایش را می‌گیرد. */
+    let mine = findSellerByOwner(user)
+    if (!mine) {
+      const orphan = findUnclaimedSeller()
+      if (orphan) {
+        mine = { ...orphan, ownerId: user.id, ownerPhone: user.phone ?? orphan.ownerPhone }
+        saveSellerProfile(mine)
       }
-      setForm(mine ?? emptySellerProfile(newSellerSlug(), user.phone ?? '', user.id))
     }
+    const local = mine ?? emptySellerProfile(newSellerSlug(), user.phone ?? '', user.id)
+    setForm(local)
     setLoaded(true)
+
+    void (async () => {
+      const remote = await fetchMyProfile<SellerProfile>('seller')
+      if (!remote) {
+        /* هنوز روی سرور نیست — پروفایلِ موجودِ مرورگر یک‌بار منتقل می‌شود */
+        if (mine) await saveProfileRemote('seller', mine.slug, mine as unknown as Record<string, unknown>,
+          { number: mine.licenseNumber, url: mine.certificate?.url ?? '' })
+        return
+      }
+      const merged: SellerProfile = {
+        ...local, ...remote.data,
+        slug: remote.slug, ownerId: remote.ownerId,
+        licenseNumber: remote.licenseNumber ?? '',
+        status: remote.status === 'pending' ? 'pending' : remote.status,
+        verified: remote.verified,
+      }
+      setForm(merged)
+      try { saveSellerProfile(merged) } catch { /* کشِ مرورگر پر است — مهم نیست */ }
+    })()
   }, [_hydrated, user?.id])
 
   const set = <K extends keyof SellerProfile>(k: K, v: SellerProfile[K]) => {
@@ -152,18 +175,28 @@ export default function SellerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
-  const persist = () => {
+  const persist = async () => {
     const ownerName = form.ownerName || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
     /* انتشار هنگام ذخیره: فروشگاه بلافاصله در «فروشگاه‌ها» دیده می‌شود (جواز کسب اجباری است).
        اگر ادمین قبلاً ردش کرده بود، ویرایش دوباره منتشرش می‌کند. */
-    saveSellerProfile({
+    const next: SellerProfile = {
       ...form,
       ownerName,
       ownerId: user?.id || form.ownerId,           // مالکیت به کاربرِ فعلی گره می‌خورد تا همیشه پیدا شود
       ownerPhone: user?.phone || form.ownerPhone,
       status: 'approved',
       submittedAt: form.submittedAt || new Date().toISOString(),
-    })
+    }
+
+    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند */
+    const res = await saveProfileRemote('seller', next.slug, next as unknown as Record<string, unknown>,
+      { number: next.licenseNumber, url: next.certificate?.url ?? '' })
+    if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
+
+    /* عکس‌ها روی سرور به نشانیِ Storage تبدیل شده‌اند — همان را کش کن */
+    const saved = (res.profile?.data as SellerProfile | undefined) ?? next
+    try { saveSellerProfile({ ...next, ...saved, slug: res.profile?.slug ?? next.slug }) } catch { /* کش پر است */ }
+    setForm(f => ({ ...f, ...saved }))
     setSaved(true); setErr(''); setWarn(false)
   }
 
@@ -173,8 +206,10 @@ export default function SellerDashboard() {
     /* جواز کسب اجباری نیست (فقط داور مدرکش الزامی است) — یک‌بار یادآوری
        می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدونِ تیکِ تأیید ثبت می‌شود. */
     if (!form.certificate && !warnAck) { setWarn(true); return }
-    try { persist() }
-    catch { setErr('حافظه‌ی مرورگر پر است — چند عکس از گالری حذف کنید و دوباره ذخیره کنید.') }
+    setBusy(true)
+    void persist()
+      .catch(() => setErr('ذخیره انجام نشد؛ دوباره تلاش کنید.'))
+      .finally(() => setBusy(false))
   }
 
   /* تا وقتی auth هیدریت نشده چیزی رندر نمی‌کنیم تا SSR و کلاینت یکی بمانند */
@@ -536,6 +571,21 @@ export default function SellerDashboard() {
             <div className="mb-4 mt-2">
               <VerificationPrompt role="seller" done={!!form.certificate} compact />
             </div>
+
+            {/* شماره‌ی جواز — بدونِ آن ادمین راهی برای استعلام ندارد */}
+            <div className="mb-4">
+              <label className={LABEL}>شماره‌ی جواز کسب</label>
+              <input
+                className={INPUT} dir="ltr" style={{ textAlign: 'right' }}
+                value={form.licenseNumber}
+                onChange={e => set('licenseNumber', e.target.value.replace(/[^0-9A-Za-z\-/]/g, '').slice(0, 40))}
+                placeholder="مثال: 1234567890"
+              />
+              <p className="mt-1.5 text-[11.5px] text-[#8A8474]">
+                برای گرفتنِ تیکِ تأیید، شماره باید با فایلِ آپلودشده یکی باشد.
+              </p>
+            </div>
+
             {form.certificate ? (
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
                 {form.certificate.url.startsWith('data:image')

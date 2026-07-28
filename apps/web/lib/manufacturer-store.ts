@@ -25,6 +25,9 @@ export interface ManufacturerProfile {
   totalProduced: string
   employees: string
   certificates: { title: string; issuer: string; year: string }[]
+  /* پروانه‌ی تولید / جوازِ کسب — شماره و فایل */
+  licenseNumber: string
+  licenseFile: { name: string; url: string } | null
   phone: string
   whatsapp: string
   instagram: string
@@ -45,7 +48,8 @@ export function emptyManufacturerProfile(slug: string, ownerId = '', ownerPhone 
     slug, ownerId, ownerPhone,
     name: '', city: '', province: '', sinceYear: '', specialties: [],
     description: '', tagline: '', about: '', productionCapability: '',
-    exportCountries: '', totalProduced: '', employees: '', certificates: [], phone: '', whatsapp: '',
+    exportCountries: '', totalProduced: '', employees: '', certificates: [],
+    licenseNumber: '', licenseFile: null, phone: '', whatsapp: '',
     instagram: '', website: '', address: '', hours: '', bannerImage: '',
     products: [],
     status: 'approved', updatedAt: '',

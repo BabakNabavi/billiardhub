@@ -49,6 +49,8 @@ export interface SellerProfile {
 
   /* ── جواز کسب (اجباری — بدون آن فروشگاه منتشر نمی‌شود) ── */
   certificate: { name: string; url: string } | null
+  /* شماره‌ی جوازِ کسب — کنارِ خودِ فایل، تا ادمین بتواند استعلام کند */
+  licenseNumber: string
 
   /* ── وضعیت (ادمین سایت تعیین می‌کند، نه صاحب فروشگاه) ── */
   status: SellerStatus         // فقط approvedها در /sellers دیده می‌شوند
@@ -83,6 +85,7 @@ export function emptySellerProfile(slug: string, ownerPhone = '', ownerId = ''):
     aboutImages: [],
     gallery: [],
     certificate: null,
+    licenseNumber: '',
     status: 'pending',
     verified: false,
     submittedAt: '',
