@@ -98,8 +98,10 @@ export default function PlayersPage() {
   const filtered = useMemo(() => {
     const q = query.trim()
     return ALL.filter(p => {
-      if (seg === 'snooker' && p.discipline !== 'snooker') return false
-      if (seg === 'pool' && p.discipline !== 'pool') return false
+      /* بازیکن می‌تواند چند رشته داشته باشد؛ فیلتر باید همه را ببیند */
+      const plays = (d: string) => p.discipline === d || (p.disciplines ?? []).some(e => e.discipline === d)
+      if (seg === 'snooker' && !plays('snooker')) return false
+      if (seg === 'pool' && !plays('pool')) return false
       if (seg === 'national' && !p.national) return false
       if (seg === 'ranked' && p.ranking == null) return false
       if (seg === 'women' && p.gender !== 'f') return false

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { getPlayer, DISCIPLINE_LABEL, TONES, faDigits, type Player } from '../../../lib/players-data'
 import { getPlayerProfile, profileToPlayer } from '../../../lib/player-store'
+import { entryLabel } from '../../../lib/player-categories'
 import { NEWS_ARTICLES } from '../../../lib/news-data'
 import { MEDIA_VIDEOS } from '../../../lib/media-data'
 
@@ -117,6 +118,8 @@ export default function PlayerProfilePage() {
 
   const d = DISCIPLINE_LABEL[player.discipline]
   const t = TONES[player.tone]
+  /* «اسنوکر — دسته برتر» برای هر رشته‌ای که بازیکن انتخاب کرده */
+  const disciplineLines = (player.disciplines ?? []).map(e => entryLabel(e, player.gender))
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
@@ -219,7 +222,7 @@ export default function PlayerProfilePage() {
                 <MapPin size={14} style={{ color: GOLD }} />
                 <span>{player.city}، {player.country}</span>
                 <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.4)' }} />
-                <span>{d.fa}</span>
+                <span>{disciplineLines.join(' · ') || d.fa}</span>
                 {player.club && (
                   <>
                     <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.4)' }} />
@@ -259,7 +262,7 @@ export default function PlayerProfilePage() {
             {[
               ['نام کامل', player.name],
               ['نام لاتین', player.nameEn],
-              ['رشته', d.fa],
+              ['رشته', disciplineLines.join(' · ') || d.fa],
               ['شهر', `${player.city}، ${player.country}`],
               ['شروع فعالیت', player.careerStart],
               ...(player.club ? [['باشگاه', player.club.name] as [string, string]] : []),

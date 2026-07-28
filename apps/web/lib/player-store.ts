@@ -8,6 +8,7 @@
 import type {
   Player, Discipline, PlayerHighlight, PlayerTournament, PlayerAlbum,
 } from './players-data'
+import { normalizeEntries, type DisciplineEntry } from './player-categories'
 
 export interface PlayerProfile {
   slug: string
@@ -16,7 +17,10 @@ export interface PlayerProfile {
 
   name: string
   nameEn: string
+  /** رشته‌ی اصلی — برای سازگاری با صفحات قدیمی نگه داشته شده */
   discipline: Discipline
+  /** رشته‌ها با رده‌ی سنی و دسته‌ی هرکدام (منبعِ واقعی) */
+  disciplines: DisciplineEntry[]
   province: string
   city: string
   country: string
@@ -44,7 +48,7 @@ const KEY = 'bh_player_profiles'
 export function emptyPlayerProfile(slug: string, ownerId = '', ownerPhone = ''): PlayerProfile {
   return {
     slug, ownerId, ownerPhone,
-    name: '', nameEn: '', discipline: 'snooker', province: '', city: '', country: 'ایران',
+    name: '', nameEn: '', discipline: 'snooker', disciplines: [], province: '', city: '', country: 'ایران',
     ranking: '', national: false, gender: 'm', youth: false, clubName: '',
     tone: 'felt', scene: '', intro: '', bio: [], careerStart: '',
     highlights: [], tournaments: [], albums: [], tags: [],
@@ -55,6 +59,11 @@ export function emptyPlayerProfile(slug: string, ownerId = '', ownerPhone = ''):
 function normalize(raw: Partial<PlayerProfile> & { slug: string }): PlayerProfile {
   const p = { ...emptyPlayerProfile(raw.slug), ...raw }
   if (p.ownerId == null) p.ownerId = ''
+  /* پروفایل‌های قدیمی فقط یک رشته داشتند */
+  p.disciplines = normalizeEntries(p.disciplines, p.discipline)
+  if (p.disciplines[0] && p.disciplines[0].discipline !== 'highball') {
+    p.discipline = p.disciplines[0].discipline as PlayerProfile['discipline']
+  }
   return p
 }
 
@@ -113,6 +122,7 @@ export function profileToPlayer(p: PlayerProfile): Player {
     name: p.name || 'بازیکن',
     nameEn: p.nameEn || 'PLAYER',
     discipline: p.discipline,
+    disciplines: p.disciplines,
     city: p.city || '—',
     country: p.country || 'ایران',
     ranking: Number.isNaN(rank) || rank <= 0 ? undefined : rank,

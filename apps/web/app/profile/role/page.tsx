@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { User, BarChart3, GraduationCap, Scale, Wrench, ShoppingBag, Factory, Store } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { csrfToken, apiFetch } from '../../../lib/http'
+import PlayerDisciplines, { type PlayerDisciplinesValue } from '../../../components/player/PlayerDisciplines'
+import { emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile } from '../../../lib/player-store'
 
 // ─── Types (inline — نیاز به import از lib نیست) ──────────────
 type RoleValue =
@@ -369,6 +371,16 @@ export default function RolePage() {
   const [step, setStep]         = useState<'select' | 'upload'>('select')
   const [toast, setToast]       = useState<string | null>(null)
   const [loading, setLoading]   = useState(true)
+  /* مشخصاتِ بازیکن — همان لحظه‌ی انتخابِ نقش گرفته می‌شود */
+  const [playerInfo, setPlayerInfo] = useState<PlayerDisciplinesValue>({ gender: 'm', entries: [] })
+  const [playerErr, setPlayerErr]   = useState('')
+
+  /* اگر قبلاً پروفایلِ بازیکن ساخته، همان مقادیر پیش‌فرض شوند */
+  useEffect(() => {
+    if (!user) return
+    const mine = findPlayerByOwner(user)
+    if (mine && mine.disciplines.length > 0) setPlayerInfo({ gender: mine.gender, entries: mine.disciplines })
+  }, [user?.id])
 
   // بارگذاری درخواست‌های قبلی از NestJS
   useEffect(() => {
@@ -422,14 +434,45 @@ export default function RolePage() {
   }
 
   const handleSubmitRoles = async () => {
+    /* بازیکن بدونِ رشته معنا ندارد — همان‌جا در جدولِ رنکینگ جایی نمی‌گیرد */
+    if (queued.has('player') && playerInfo.entries.length === 0) {
+      setPlayerErr('برای نقش بازیکن، حداقل یک رشته را انتخاب کنید')
+      return
+    }
+    setPlayerErr('')
+
+    if (queued.has('player')) savePlayerBasics()
+
     for (const roleVal of queuedArr) {
       await apiFetch(`${API}/roles/request`, {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: roleVal }),
+        body: JSON.stringify({
+          role: roleVal,
+          ...(roleVal === 'player' ? { gender: playerInfo.gender, disciplines: playerInfo.entries } : {}),
+        }),
       })
     }
     handleDone()
+  }
+
+  /* رشته/دسته‌ها همان‌جا در پروفایلِ بازیکن می‌نشیند تا پنلِ بازیکن
+     دوباره از صفر نپرسد. */
+  const savePlayerBasics = () => {
+    if (!user) return
+    try {
+      const mine = findPlayerByOwner(user)
+      const base = mine ?? {
+        ...emptyPlayerProfile(newPlayerSlug(), user.id, user.phone ?? ''),
+        name: [user.firstName, user.lastName].filter(Boolean).join(' '),
+      }
+      savePlayerProfile({
+        ...base,
+        gender: playerInfo.gender,
+        disciplines: playerInfo.entries,
+        discipline: (playerInfo.entries.find(e => e.discipline !== 'highball')?.discipline ?? base.discipline) as typeof base.discipline,
+      })
+    } catch { /* حافظه‌ی مرورگر پر است — نباید جلوی گرفتنِ نقش را بگیرد */ }
   }
 
   const showToast = (msg: string) => {
@@ -560,6 +603,28 @@ export default function RolePage() {
                       )
                     })}
                   </div>
+                </div>
+              )}
+
+              {/* مشخصاتِ بازیکن — همان دسته‌بندیِ بخشِ رنکینگ */}
+              {queued.has('player') && (
+                <div style={{
+                  background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
+                  borderRadius: 16, padding: '16px', marginBottom: 16,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
+                    <i className="ti ti-chart-bar" style={{ fontSize: 17, color: '#C7A66A' }} aria-hidden="true" />
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>مشخصات بازیکن</span>
+                  </div>
+                  <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, marginBottom: 14 }}>
+                    این‌ها تعیین می‌کنند در کدام جدولِ رنکینگ قرار بگیرید.
+                  </p>
+                  <PlayerDisciplines
+                    value={playerInfo}
+                    onChange={v => { setPlayerInfo(v); setPlayerErr('') }}
+                    error={playerErr}
+                  />
                 </div>
               )}
 

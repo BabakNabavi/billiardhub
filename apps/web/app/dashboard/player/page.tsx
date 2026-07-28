@@ -20,6 +20,7 @@ import {
   emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile,
   type PlayerProfile,
 } from '../../../lib/player-store'
+import PlayerDisciplines from '../../../components/player/PlayerDisciplines'
 import { Plus, Trash2, Images, Trophy, ArrowLeft, Check } from 'lucide-react'
 
 const CARD   = 'rounded-2xl border border-[#E7E2D6] bg-white p-5 shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
@@ -117,6 +118,7 @@ export default function PlayerDashboard() {
     if (!form.name.trim())   { setErr('نام و نام‌خانوادگی لازم است.'); return }
     if (!form.nameEn.trim()) { setErr('نام لاتین لازم است.'); return }
     if (!form.city)          { setErr('شهر را انتخاب کنید.'); return }
+    if (form.disciplines.length === 0) { setErr('حداقل یک رشته را انتخاب کنید.'); return }
     if (!form.intro.trim())  { setErr('معرفی کوتاه لازم است.'); return }
     try {
       savePlayerProfile({
@@ -176,27 +178,18 @@ export default function PlayerDashboard() {
                 <label className={LABEL}>نام لاتین *</label>
                 <input className={INPUT} dir="ltr" style={{ textAlign: 'right' }} value={form.nameEn} onChange={e => set('nameEn', e.target.value)} placeholder="ARMAN TAVAKOLI" />
               </div>
-              <div>
-                <label className={LABEL}>رشته *</label>
-                <div className="flex gap-2">
-                  {([['snooker', 'اسنوکر'], ['pool', 'پاکت بیلیارد']] as const).map(([k, l]) => (
-                    <button key={k} type="button" onClick={() => set('discipline', k)}
-                      className={`flex-1 rounded-[10px] border px-3 py-2.5 text-[12.5px] font-bold transition ${form.discipline === k ? 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#9A6E38]' : 'border-[#E7E2D6] bg-white text-[#5B564B]'}`}>
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className={LABEL}>جنسیت</label>
-                <div className="flex gap-2">
-                  {([['m', 'آقا'], ['f', 'خانم']] as const).map(([k, l]) => (
-                    <button key={k} type="button" onClick={() => set('gender', k)}
-                      className={`flex-1 rounded-[10px] border px-3 py-2.5 text-[12.5px] font-bold transition ${form.gender === k ? 'border-[rgba(199,166,106,0.4)] bg-[rgba(199,166,106,0.13)] text-[#9A6E38]' : 'border-[#E7E2D6] bg-white text-[#5B564B]'}`}>
-                      {l}
-                    </button>
-                  ))}
-                </div>
+              <div className="sm:col-span-2">
+                <PlayerDisciplines
+                  value={{ gender: form.gender, entries: form.disciplines }}
+                  onChange={v => {
+                    setForm(f => ({
+                      ...f, gender: v.gender, disciplines: v.entries,
+                      /* رشته‌ی اصلی برای صفحاتی که هنوز تک‌رشته‌اند */
+                      discipline: (v.entries.find(e => e.discipline !== 'highball')?.discipline ?? f.discipline) as PlayerProfile['discipline'],
+                    }))
+                    setSaved(false); setErr('')
+                  }}
+                />
               </div>
               <div className="sm:col-span-2">
                 <ProvinceCitySelect

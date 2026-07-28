@@ -29,6 +29,8 @@ export interface Player {
   name: string
   nameEn: string
   discipline: Discipline
+  /** رشته‌ها با رده‌ی سنی و دسته — پروفایل‌های ساخته‌شده توسط کاربر */
+  disciplines?: import('./player-categories').DisciplineEntry[]
   city: string
   country: string
   /** رتبه‌ی رنکینگ ملی — undefined یعنی بدون رنکینگ */
