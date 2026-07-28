@@ -7,10 +7,10 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Flag, Loader2, AlertCircle, ExternalLink, CheckCircle2, XCircle, Eye, RotateCcw } from 'lucide-react'
 import { faDateTime, toFaDigits } from '../../../lib/jalali'
+import { apiFetch } from '../../../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
-const token = () => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } }
 
 interface R {
   id: string; target_type: string; target_id: string; target_title?: string | null; target_url?: string | null
@@ -43,8 +43,8 @@ export default function AdminReports() {
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch(`/api/admin/reports?status=${encodeURIComponent(status)}`, {
-        headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store',
+      const r = await apiFetch(`/api/admin/reports?status=${encodeURIComponent(status)}`, {
+        headers: { }, cache: 'no-store',
       })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message || 'دسترسی مجاز نیست'); setRows([]); return }
@@ -56,8 +56,8 @@ export default function AdminReports() {
   const update = async (id: string, next: string) => {
     setBusy(id)
     try {
-      const r = await fetch('/api/admin/reports', {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      const r = await apiFetch('/api/admin/reports', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status: next, adminNote: note[id] ?? '' }),
       })
       const j = await r.json().catch(() => ({}))

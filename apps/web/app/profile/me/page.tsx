@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useAuthStore } from '../../../store/auth.store'
 import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
+import { csrfToken, apiFetch } from '../../../lib/http'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -49,8 +50,9 @@ function hexToRgba(hex: string, a: number) {
 }
 
 function authHeader(): Record<string,string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  const t = csrfToken()
+  return t ? { 'x-csrf-token': t } : {}
 }
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
@@ -207,7 +209,7 @@ export default function ProfileMePage() {
       if (local) applyProfile(local)
       else router.push('/login')
     }
-    fetch(`${API}/user/profile/me`, { headers: authHeader() })
+    apiFetch(`${API}/user/profile/me`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : null)
       .then(j => { if (j) applyProfile(j); else fallback() })
       .catch(fallback)
@@ -227,7 +229,7 @@ export default function ProfileMePage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const res = await fetch(`${API}/user/profile`, {
+      const res = await apiFetch(`${API}/user/profile`, {
         method: 'PUT',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ bio, province, city, birthDate, gender, instagram }),
@@ -264,7 +266,7 @@ export default function ProfileMePage() {
     try {
       const form = new FormData()
       form.append('file', file)
-      const res = await fetch(`${API}/user/profile/avatar`, { method: 'POST', headers: authHeader(), body: form })
+      const res = await apiFetch(`${API}/user/profile/avatar`, { method: 'POST', headers: authHeader(), body: form })
       if (!res.ok) throw new Error()
       const j = await res.json()
       setProfile(p => p ? { ...p, avatar: j.url } : p)
@@ -286,7 +288,7 @@ export default function ProfileMePage() {
   const handleBankCard = async () => {
     const clean = bankCard.replace(/-/g,'')
     if (clean.length !== 16) { showToast('شماره کارت باید ۱۶ رقم باشد', 'error'); return }
-    const res = await fetch(`${API}/user/profile/bank-card`, {
+    const res = await apiFetch(`${API}/user/profile/bank-card`, {
       method: 'PUT',
       headers: { ...authHeader(), 'Content-Type': 'application/json' },
       body: JSON.stringify({ bankCard: clean, bankCardOwner: bankOwner }),
@@ -299,7 +301,7 @@ export default function ProfileMePage() {
     setClubName(name)
     try { localStorage.setItem('bh_my_club', JSON.stringify({ id: clubId, name })) } catch {}
     try {
-      await fetch(`${API}/user/profile/club`, {
+      await apiFetch(`${API}/user/profile/club`, {
         method: 'PUT',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ clubId }),

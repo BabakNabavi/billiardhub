@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { csrfToken } from '../../../lib/http';
 
 // ─── Helpers ──────────────────────────────────────────────────
 function toFa(v: string | number) {
@@ -13,15 +14,9 @@ function toEn(v: string) {
 }
 
 function authHeader(): Record<string, string> {
-  try {
-    const raw = typeof window !== 'undefined' ? localStorage.getItem('auth-storage') : null
-    if (!raw) return {}
-    const parsed = JSON.parse(raw)
-    const token = parsed?.state?.token
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  } catch {
-    return {}
-  }
+  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  const t = csrfToken()
+  return t ? { 'x-csrf-token': t } : {}
 }
 
 // ─── Steps ────────────────────────────────────────────────────

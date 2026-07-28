@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react'
 import { Flag, X, Loader2, CheckCircle2 } from 'lucide-react'
+import { apiFetch } from '../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -22,7 +23,6 @@ const REASONS = [
   { code: 'other',     label: 'موارد دیگر' },
 ]
 
-const token = () => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } }
 
 interface Props {
   targetType?: 'product' | 'club' | 'user' | 'media' | 'ad'
@@ -58,9 +58,9 @@ export default function ReportButton({
     if (!code) { setErr('لطفاً دلیل گزارش را انتخاب کنید'); return }
     setBusy(true); setErr('')
     try {
-      const r = await fetch('/api/reports', {
+      const r = await apiFetch('/api/reports', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token() ? { Authorization: `Bearer ${token()}` } : {}) },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           targetType, targetId: String(targetId), targetTitle: targetTitle ?? '',
           targetUrl: typeof window !== 'undefined' ? window.location.href : '',

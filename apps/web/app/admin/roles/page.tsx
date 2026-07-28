@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR, STATUS_LABEL } from '@/lib/roles'
+import { csrfToken, apiFetch } from '../../../lib/http'
 
-function authHeader() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-  return token ? { Authorization: `Bearer ${token}` } : {}
+function authHeader(): Record<string,string> {
+  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  const t = csrfToken()
+  return t ? { 'x-csrf-token': t } : {}
 }
 
 interface RoleRequest {
@@ -207,7 +209,7 @@ export default function AdminRolesPage() {
   const load = async (status: RoleStatus) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/roles?status=${status}`, {
+      const res = await apiFetch(`/api/admin/roles?status=${status}`, {
         headers: authHeader() as Record<string, string>,
       })
       if (!res.ok) { setSvcDown(true); setRequests([]); setLoading(false); return }
@@ -223,7 +225,7 @@ export default function AdminRolesPage() {
   useEffect(() => { load(filter) }, [filter])
 
   const handleAction = async (id: string, action: 'approve' | 'reject', note?: string) => {
-    await fetch('/api/admin/roles', {
+    await apiFetch('/api/admin/roles', {
       method: 'PATCH',
       headers: {
         ...(authHeader() as Record<string, string>),

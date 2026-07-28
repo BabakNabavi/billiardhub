@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import { csrfToken, apiFetch } from '../../../lib/http'
 
 // ─── Types ────────────────────────────────────────────────────
 type RoleValue =
@@ -47,8 +48,9 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function authHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  const t = csrfToken()
+  return t ? { 'x-csrf-token': t } : {}
 }
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
@@ -213,7 +215,7 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
 
   useEffect(() => {
     setLoading(true)
-    fetch(`${API}/roles/${role.value}/profile`, {
+    apiFetch(`${API}/roles/${role.value}/profile`, {
       headers: authHeader(),
     })
       .then(r => r.json())
@@ -226,7 +228,7 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
     const missing = role.profileFields.filter(f => f.required && !data[f.key])
     if (missing.length > 0) return
     setSaving(true)
-    await fetch(`${API}/roles/${role.value}/profile`, {
+    await apiFetch(`${API}/roles/${role.value}/profile`, {
       method: 'PUT',
       headers: { ...authHeader(), 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -312,7 +314,7 @@ function ProfileSetupInner() {
   const [toast, setToast]         = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`${API}/roles/my`, { headers: authHeader() })
+    apiFetch(`${API}/roles/my`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then((data: RoleRequest[]) => {
         const approved = data.filter(r => r.status === 'approved')

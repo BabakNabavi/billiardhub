@@ -15,9 +15,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyEdge } from './lib/auth/edge'
 import {
-  ACCESS_COOKIE, REFRESH_COOKIE,
+  ACCESS_COOKIE, REFRESH_COOKIE, CSRF_COOKIE, CSRF_HEADER,
   PROTECTED_PREFIXES, ADMIN_PREFIXES,
 } from './lib/auth/constants'
+
+/* مسیرهایی که پیش از وجودِ نشست صدا زده می‌شوند و نمی‌توانند
+   توکنِ CSRF داشته باشند */
+const CSRF_EXEMPT = [
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/adopt',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+  '/api/otp',
+  '/api/payments/callback',
+]
 
 const isUnder = (path: string, prefixes: string[]) =>
   prefixes.some(p => path === p || path.startsWith(p + '/'))
@@ -52,11 +64,32 @@ export default async function proxy(req: NextRequest) {
 
   /* ── ۱) CSRF روی APIها ── */
   if (pathname.startsWith('/api/')) {
-    if (!SAFE_METHODS.has(req.method) && !sameSite(req)) {
-      return NextResponse.json(
-        { message: 'درخواست از دامنه‌ی نامعتبر رد شد' },
-        { status: 403 },
-      )
+    if (!SAFE_METHODS.has(req.method)) {
+      if (!sameSite(req)) {
+        return NextResponse.json(
+          { message: 'درخواست از دامنه‌ی نامعتبر رد شد' },
+          { status: 403 },
+        )
+      }
+      /* لایه‌ی دوم: توکنِ داخلِ هدر باید با کوکیِ خواندنی یکی باشد.
+         مهاجم می‌تواند درخواست بفرستد ولی نمی‌تواند کوکیِ ما را بخواند،
+         پس هدرِ درست را نمی‌سازد.
+
+         مسیرهایی که خودشان نشست را می‌سازند مستثنا هستند: در اولین
+         ورود هنوز کوکیِ CSRF وجود ندارد. آن‌ها با همان بررسیِ Origin
+         محافظت می‌شوند. */
+      if (!CSRF_EXEMPT.some(p => pathname.startsWith(p))) {
+        const cookie = req.cookies.get(CSRF_COOKIE)?.value
+        const header = req.headers.get(CSRF_HEADER)
+        /* اگر کاربر اصلاً نشست ندارد، این بررسی موضوعیت ندارد */
+        const hasSession = !!req.cookies.get(ACCESS_COOKIE)?.value
+        if (hasSession && (!cookie || !header || cookie !== header)) {
+          return NextResponse.json(
+            { message: 'توکن امنیتی درخواست معتبر نیست؛ صفحه را تازه کنید' },
+            { status: 403 },
+          )
+        }
+      }
     }
     return NextResponse.next()
   }

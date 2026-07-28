@@ -4,6 +4,7 @@
    همه‌ی داده‌ها از /api/admin/finance می‌آید (RBAC سمتِ سرور: فقط ادمین). */
 
 import { useCallback, useEffect, useState } from 'react'
+import { apiFetch } from '../../../lib/http'
 import {
   Wallet, TrendingUp, CreditCard, Landmark, RotateCcw, Loader2,
   ArrowDownToLine, CheckCircle2, AlertCircle, X,
@@ -12,7 +13,6 @@ import {
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', GROUND = '#FAF8F3'
 const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
-const token = () => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } }
 const faDate = (iso?: unknown) => { try { return new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'long' }).format(new Date(String(iso))) } catch { return '—' } }
 
 type Row = Record<string, unknown>
@@ -32,7 +32,7 @@ export default function AdminFinance() {
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch('/api/admin/finance', { credentials: 'include', headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
+      const r = await apiFetch('/api/admin/finance', { credentials: 'include', headers: { }, cache: 'no-store' })
       if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دسترسی مجاز نیست'); setLoading(false); return }
       setD(await r.json()); setErr(''); setLoading(false)
     } catch { setErr('خطا در ارتباط با سرور'); setLoading(false) }
@@ -42,8 +42,8 @@ export default function AdminFinance() {
   const act = async (body: Record<string, unknown>, key: string) => {
     setBusy(key)
     try {
-      const r = await fetch('/api/admin/settlements', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      const r = await apiFetch('/api/admin/settlements', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
       const j = await r.json().catch(() => ({}))

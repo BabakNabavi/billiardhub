@@ -7,11 +7,11 @@ import Link from 'next/link'
 import { Calendar, Clock3, MapPin, X, Loader2, AlertTriangle, CheckCircle2, CalendarDays } from 'lucide-react'
 import { faDate, faTimeRange, faNum, toFaDigits } from '../../lib/jalali'
 import CancellationPolicy from './CancellationPolicy'
+import { apiFetch } from '../../lib/http'
 
 const INK = '#111111', SEC = '#5B564B', MUT = 'rgba(0,0,0,0.42)', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
 const fa = faNum
-const token = () => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } }
 
 interface RefundPreview { refundPercent: number; refundAmount: number; label: string; hoursBefore: number }
 interface B {
@@ -36,7 +36,7 @@ export default function MyBookings() {
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch('/api/bookings/my', { credentials: 'include', headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
+      const r = await apiFetch('/api/bookings/my', { credentials: 'include', headers: { }, cache: 'no-store' })
       setRows(r.ok ? await r.json() : [])
     } catch { setRows([]) }
   }, [])
@@ -45,8 +45,8 @@ export default function MyBookings() {
   const cancel = async (b: B) => {
     setBusy(b.id)
     try {
-      const r = await fetch(`/api/bookings/${b.id}/cancel`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      const r = await apiFetch(`/api/bookings/${b.id}/cancel`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: 'لغو توسط کاربر' }),
       })
       const j = await r.json().catch(() => ({}))

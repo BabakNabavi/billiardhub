@@ -4,6 +4,7 @@ import { useState, useEffect, type ElementType } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, BarChart3, GraduationCap, Scale, Wrench, ShoppingBag, Factory, Store } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
+import { csrfToken, apiFetch } from '../../../lib/http'
 
 // ─── Types (inline — نیاز به import از lib نیست) ──────────────
 type RoleValue =
@@ -45,8 +46,9 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function authHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  const t = csrfToken()
+  return t ? { 'x-csrf-token': t } : {}
 }
 
 // ─── Constants ────────────────────────────────────────────────
@@ -212,7 +214,7 @@ function DocUploadStep({
         formData.append('role', roleVal)
 
         try {
-          const upRes = await fetch(`${API}/roles/upload-doc`, {
+          const upRes = await apiFetch(`${API}/roles/upload-doc`, {
             method: 'POST',
             headers: authHeader(),
             body: formData,
@@ -232,7 +234,7 @@ function DocUploadStep({
       }
 
       // ثبت درخواست نقش
-      await fetch(`${API}/roles/request`, {
+      await apiFetch(`${API}/roles/request`, {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: roleVal, docUrl }),
@@ -370,7 +372,7 @@ export default function RolePage() {
 
   // بارگذاری درخواست‌های قبلی از NestJS
   useEffect(() => {
-    fetch(`${API}/roles/my`, { headers: authHeader() })
+    apiFetch(`${API}/roles/my`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch(() => {})
@@ -412,7 +414,7 @@ export default function RolePage() {
     }
     setQueued(new Set())
     setStep('select')
-    fetch(`${API}/roles/my`, { headers: authHeader() })
+    apiFetch(`${API}/roles/my`, { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch(() => {})
@@ -421,7 +423,7 @@ export default function RolePage() {
 
   const handleSubmitRoles = async () => {
     for (const roleVal of queuedArr) {
-      await fetch(`${API}/roles/request`, {
+      await apiFetch(`${API}/roles/request`, {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: roleVal }),

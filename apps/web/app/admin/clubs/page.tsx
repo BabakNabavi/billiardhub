@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Check, X, ExternalLink, FileText, Clock } from 'lucide-react';
+import { apiFetch } from '../../../lib/http';
 
 const GOLD = '#C7A66A';
 
@@ -26,19 +27,11 @@ async function fetchClubs(): Promise<ClubRow[]> {
 }
 
 async function updateStatus(id: string, status: string) {
-  await fetch(`/api/clubs/${id}`, {
+  await apiFetch(`/api/clubs/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ verificationStatus: status }),
   });
-}
-
-function getToken(): string {
-  try {
-    const raw = localStorage.getItem('auth-storage');
-    if (!raw) return '';
-    return JSON.parse(raw)?.state?.token ?? '';
-  } catch { return ''; }
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {

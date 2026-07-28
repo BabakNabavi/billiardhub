@@ -172,19 +172,19 @@ export const API_BASE =
     ? (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
     : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
 
+/* نشست روی کوکیِ httpOnly است و خودکار ارسال می‌شود؛ این توابع فقط
+   توکنِ CSRF را می‌گذارند. پیش‌تر از localStorage['token'] می‌خواندند
+   که هیچ‌جای پروژه نوشته نمی‌شد — یعنی این مسیرها همیشه بی‌توکن بودند. */
+function csrfHeader(): Record<string, string> {
+  if (typeof document === 'undefined') return {}
+  const m = document.cookie.match(/(?:^|; )bh_csrf=([^;]*)/)
+  return m ? { 'x-csrf-token': decodeURIComponent(m[1]!) } : {}
+}
+
 export function apiHeaders(): Record<string, string> {
-  const token = typeof window !== 'undefined'
-    ? localStorage.getItem('token')
-    : null
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
+  return { 'Content-Type': 'application/json', ...csrfHeader() }
 }
 
 export function apiHeadersNoJson(): Record<string, string> {
-  const token = typeof window !== 'undefined'
-    ? localStorage.getItem('token')
-    : null
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  return csrfHeader()
 }

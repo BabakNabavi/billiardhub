@@ -44,6 +44,10 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
+      /* توکن دیگر ذخیره نمی‌شود. نشست روی کوکیِ httpOnly است و
+         جاوااسکریپت نباید اصلاً به آن دسترسی داشته باشد. فقط اطلاعاتِ
+         نمایشیِ کاربر (نام، نقش، آواتار) در localStorage می‌ماند. */
+      partialize: (state) => ({ user: state.user }) as unknown as AuthStore,
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();
       },

@@ -18,6 +18,7 @@ import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
+import { apiFetch } from '../../../lib/http';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
   type Tournament, type GameType,
@@ -672,10 +673,9 @@ export default function ClubDashboardPage() {
     if (!selectedClub || !isValidCard(clubInfo.bankCard)) return;
     setIbanBusy(true); setIbanMsg(null);
     try {
-      const token = (() => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } })();
-      const r = await fetch('/api/bank/card-to-iban', {
+      const r = await apiFetch('/api/bank/card-to-iban', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ card: clubInfo.bankCard, clubId: selectedClub.id }),
       });
       const j = await r.json().catch(() => ({}));

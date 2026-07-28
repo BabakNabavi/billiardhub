@@ -10,10 +10,10 @@ import {
 } from 'lucide-react'
 import { faDate, faTimeRange, faNum, toFaDigits } from '../../../lib/jalali'
 import CancellationPolicy from '../../../components/booking/CancellationPolicy'
+import { apiFetch } from '../../../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
-const token = () => { try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' } }
 
 interface RefundPreview { refundPercent: number; refundAmount: number; label: string; hoursBefore: number; canCancel: boolean }
 interface B {
@@ -50,7 +50,7 @@ export default function AdminBookings() {
   const load = useCallback(async () => {
     try {
       const url = `/api/admin/bookings?status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`
-      const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
+      const r = await apiFetch(url, { headers: { }, cache: 'no-store' })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message || 'دسترسی مجاز نیست'); setRows([]); return }
       setPending(!!j.pending); setRows(j.rows ?? []); setErr('')
@@ -61,8 +61,8 @@ export default function AdminBookings() {
   const cancel = async (b: B) => {
     setBusy(b.id)
     try {
-      const r = await fetch(`/api/bookings/${b.id}/cancel`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      const r = await apiFetch(`/api/bookings/${b.id}/cancel`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reason.trim() || 'لغو توسط ادمین' }),
       })
       const j = await r.json().catch(() => ({}))

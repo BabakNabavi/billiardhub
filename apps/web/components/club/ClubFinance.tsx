@@ -4,6 +4,7 @@
    داده‌ها فقط از /api/clubs/:id/finance می‌آیند (RBAC سمتِ سرور). */
 
 import { useCallback, useEffect, useState } from 'react'
+import { apiFetch } from '../../lib/http'
 import {
   Wallet, TrendingUp, Clock3, CheckCircle2, Landmark, ShieldCheck,
   AlertCircle, Loader2, ArrowDownToLine, Receipt, X,
@@ -21,9 +22,6 @@ interface Finance {
   settlements: Record<string, unknown>[]
 }
 
-const token = () => {
-  try { return JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token || '' } catch { return '' }
-}
 
 export default function ClubFinance({ clubId }: { clubId: string }) {
   const [d, setD] = useState<Finance | null>(null)
@@ -34,7 +32,7 @@ export default function ClubFinance({ clubId }: { clubId: string }) {
   const load = useCallback(async () => {
     if (!clubId) return
     try {
-      const r = await fetch(`/api/clubs/${clubId}/finance`, { credentials: 'include', headers: { Authorization: `Bearer ${token()}` }, cache: 'no-store' })
+      const r = await apiFetch(`/api/clubs/${clubId}/finance`, { credentials: 'include', headers: { }, cache: 'no-store' })
       if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دریافتِ اطلاعاتِ مالی ممکن نشد'); setLoading(false); return }
       setD(await r.json()); setErr(''); setLoading(false)
     } catch { setErr('خطا در ارتباط با سرور'); setLoading(false) }
@@ -212,8 +210,8 @@ function BankModal({ clubId, current, onClose, onSaved }: { clubId: string; curr
     if (!/^IR\d{24}$/.test(clean)) { setMsg('شماره شبا باید با IR شروع شود و ۲۴ رقم داشته باشد'); return }
     setBusy(true); setMsg('')
     try {
-      const r = await fetch(`/api/clubs/${clubId}/bank-account`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      const r = await apiFetch(`/api/clubs/${clubId}/bank-account`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accountHolderName: holder.trim(), bankName, iban: clean }),
       })
       const j = await r.json().catch(() => ({}))
