@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS } from '@/lib/social-server'
 import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
+import { markIdentityVerified } from '@/lib/otp-server'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -19,8 +20,17 @@ export async function POST(req: NextRequest) {
      تا ثبت‌نام بسته نشود — هویت با موبایل+کدملی از قبل اثبات شده است. */
   if (b?.birthDate && (b?.firstName || b?.lastName)) {
     const person = await verifyPerson(mobile, nc, String(b.birthDate), String(b.firstName || ''), String(b.lastName || ''))
-    if (person.unavailable) return NextResponse.json({ ...shahkar, nameChecked: false }, { headers: CORS })
+    if (person.unavailable) {
+      /* ثبت‌احوال در دسترس نبود ⇒ به شاهکار بسنده می‌کنیم (کد ملی ↔ موبایل
+         اثبات شده) ولی نامش تأییدنشده می‌ماند. */
+      await markIdentityVerified(mobile, nc)
+      return NextResponse.json({ ...shahkar, nameChecked: false }, { headers: CORS })
+    }
+    if (person.ok && person.match) await markIdentityVerified(mobile, nc)
     return NextResponse.json(person, { status: person.ok ? 200 : 400, headers: CORS })
   }
+
+  /* فقط شاهکار: کد ملی با همین موبایل می‌خواند */
+  await markIdentityVerified(mobile, nc)
   return NextResponse.json(shahkar, { headers: CORS })
 }

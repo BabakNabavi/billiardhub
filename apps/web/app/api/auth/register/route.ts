@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
+import { wasIdentityVerified } from '@/lib/otp-server';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -18,7 +19,7 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, phone, password } = body;
+    const { firstName, lastName, phone, password, nationalId, birthDate } = body;
 
     if (!firstName || !lastName || !phone || !password) {
       return NextResponse.json(
@@ -42,6 +43,13 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    /* هویت فقط وقتی ذخیره می‌شود که خودِ سرور استعلامش کرده باشد.
+       مسیرِ /api/shahkar پس از تأییدِ شاهکار/ثبت‌احوال نشانه‌ای می‌گذارد و
+       این‌جا فقط همان بررسی می‌شود؛ پس کسی نمی‌تواند با صدا زدنِ مستقیمِ
+       این مسیر، کد ملیِ دلخواه را «تأییدشده» جا بزند. */
+    const nid = String(nationalId ?? '').replace(/[^0-9]/g, '');
+    const idVerified = nid.length === 10 && await wasIdentityVerified(phone, nid);
+
     const { data: user, error } = await getSupabaseServer()
       .from('users')
       .insert({
@@ -51,11 +59,17 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         primaryRole: 'user',
         secondaryRoles: [],
-        verificationStatus: 'unverified',
+        verificationStatus: idVerified ? 'verified' : 'unverified',
         isProfileComplete: false,
         isActive: true,
         language: 'fa',
         documents: [],
+        phone_verified: true,   // ثبت‌نام فقط با تأییدِ کدِ پیامکی ممکن است
+        ...(idVerified ? {
+          national_id: nid,
+          national_id_verified: true,
+          birth_date: String(birthDate ?? '').slice(0, 12) || null,
+        } : {}),
       })
       .select()
       .single();

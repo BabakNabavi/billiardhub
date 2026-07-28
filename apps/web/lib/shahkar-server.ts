@@ -18,13 +18,18 @@ export function normName(s: string): string {
    نام‌خانوادگی. پیش‌شرط: شماره با کدِ پیامکی تأیید شده باشد. */
 export async function verifyPerson(
   mobile: string, nationalCode: string, birthDate: string, firstName: string, lastName: string,
+  opts: { requireOtp?: boolean } = {},
 ): Promise<{ ok: boolean; match?: boolean; message?: string; unavailable?: boolean }> {
   const m = (mobile || '').replace(/[^0-9]/g, '')
   const nc = (nationalCode || '').replace(/[^0-9]/g, '')
   const bd = (birthDate || '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9/]/g, '')
   if (!/^\d{10}$/.test(nc)) return { ok: false, message: 'کد ملی معتبر نیست' }
   if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(bd)) return { ok: false, message: 'تاریخ تولد را کامل وارد کنید' }
-  if (!(await wasOtpVerified(m))) return { ok: false, message: 'ابتدا شماره را با کد پیامکی تأیید کنید' }
+  /* پیش‌شرطِ کدِ پیامکی فقط در مسیرِ ثبت‌نام لازم است؛ برای کاربرِ
+     واردشده‌ای که شماره‌اش در حسابش ثبت است، تکرارش بی‌مورد است. */
+  if (opts.requireOtp !== false && !(await wasOtpVerified(m))) {
+    return { ok: false, message: 'ابتدا شماره را با کد پیامکی تأیید کنید' }
+  }
 
   const key = process.env.SMS_API_KEY
   if (!key) return { ok: true, match: true }
@@ -67,14 +72,19 @@ export async function verifyPerson(
   }
 }
 
-export async function verifyIdentity(mobile: string, nationalCode: string): Promise<{ ok: boolean; match?: boolean; message?: string }> {
+export async function verifyIdentity(
+  mobile: string, nationalCode: string, opts: { requireOtp?: boolean } = {},
+): Promise<{ ok: boolean; match?: boolean; message?: string }> {
   const m = (mobile || '').replace(/[^0-9]/g, '')
   const nc = (nationalCode || '').replace(/[^0-9]/g, '')
   if (!/^09\d{9}$/.test(m)) return { ok: false, message: 'شماره‌ی موبایل معتبر نیست' }
   if (!/^\d{10}$/.test(nc)) return { ok: false, message: 'کد ملی معتبر نیست' }
 
-  /* پیش‌شرط: شماره باید تازه با پیامک تأیید شده باشد (ضدِ سوءاستفاده/هدررفتِ اعتبار) */
-  if (!(await wasOtpVerified(m))) return { ok: false, message: 'ابتدا شماره را با کد پیامکی تأیید کنید' }
+  /* پیش‌شرط: شماره باید تازه با پیامک تأیید شده باشد (ضدِ سوءاستفاده/هدررفتِ اعتبار).
+     برای کاربرِ واردشده‌ای که شماره‌اش از قبل در حسابش ثبت است، لازم نیست. */
+  if (opts.requireOtp !== false && !(await wasOtpVerified(m))) {
+    return { ok: false, message: 'ابتدا شماره را با کد پیامکی تأیید کنید' }
+  }
 
   const key = process.env.SMS_API_KEY
   if (!key) return { ok: true, match: true }   // محیطِ توسعه بدونِ کلید ⇒ رد نکن

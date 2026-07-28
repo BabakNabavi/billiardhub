@@ -14,7 +14,11 @@ const TTL = 5 * 60 * 1000             // اعتبارِ کد: ۵ دقیقه (۲ 
 const RESEND = 60 * 1000              // فاصله‌ی مجازِ ارسالِ مجدد: ۶۰ ثانیه
 const MAX_TRIES = 5
 
-interface OtpRec { hash: string; at: number; tries: number; verifiedAt?: number }
+interface OtpRec {
+  hash: string; at: number; tries: number; verifiedAt?: number
+  /* هشِ کد ملیِ استعلام‌شده + زمانش (خودِ کد ملی ذخیره نمی‌شود) */
+  idHash?: string; idAt?: number
+}
 const VERIFIED_WINDOW = 30 * 60 * 1000   // نشانِ «تأییدشده» تا ۳۰ دقیقه برای مرحله‌ی بعدی (شاهکار)
 const otpPath = (mobile: string) => `social/otp/${safeKey(mobile)}.json`
 const normMobile = (m: string) => (m || '').replace(/[^0-9]/g, '')
@@ -81,4 +85,25 @@ export async function verifyOtp(mobile: string, code: string): Promise<{ ok: boo
 export async function wasOtpVerified(mobile: string): Promise<boolean> {
   const rec = await readOtp(normMobile(mobile))
   return !!(rec?.verifiedAt && Date.now() - rec.verifiedAt < VERIFIED_WINDOW)
+}
+
+/* ── نشانِ «هویتش استعلام شد» ───────────────────────────────────────
+   وقتی شاهکار و ثبت‌احوال کد ملی را تأیید کردند، اینجا علامت می‌خورد تا
+   مرحله‌ی ساختِ حساب بداند این کد ملی واقعاً استعلام شده است.
+
+   خودِ کد ملی ذخیره نمی‌شود، فقط هشِ HMACش — چون این باکت عمومی است و
+   کد ملی داده‌ی هویتی است. برای تطبیق هم همان هش کافی است. */
+export async function markIdentityVerified(mobile: string, nationalId: string): Promise<void> {
+  const m = normMobile(mobile)
+  const rec = await readOtp(m)
+  if (!rec) return
+  await writeJson(otpPath(m), { ...rec, idHash: hashCode(nationalId), idAt: Date.now() })
+}
+
+/** آیا همین کد ملی برای همین شماره اخیراً استعلام شده؟ */
+export async function wasIdentityVerified(mobile: string, nationalId: string): Promise<boolean> {
+  const rec = await readOtp(normMobile(mobile))
+  if (!rec?.idHash || !rec.idAt) return false
+  if (Date.now() - rec.idAt > VERIFIED_WINDOW) return false
+  return rec.idHash === hashCode(String(nationalId).replace(/[^0-9]/g, ''))
 }
