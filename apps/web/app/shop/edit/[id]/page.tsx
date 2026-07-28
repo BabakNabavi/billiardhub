@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuthStore } from '../../../../store/auth.store';
 import { uploadFile } from '../../../../lib/supabase';
 import { Package, X, Upload, Info, Plus, ChevronDown, Check } from 'lucide-react';
-import api from '../../../../lib/api';
+import { apiFetch } from '../../../../lib/http';
 import ProvinceCitySelect from '../../../../components/ProvinceCitySelect';
 import { provinceOfCity } from '../../../../lib/iran-geo';
 import { compressImage } from '../../../../lib/seller-store';
@@ -123,15 +123,19 @@ export default function EditProductPage() {
 
   useEffect(() => {
     if (!user) return;
-    api.get(`/products/${id}`).then(res => {
-      const p = res.data;
+    fetch(`/api/market/ads/${id}`, { cache: 'no-store' }).then(async r => {
+      if (!r.ok) throw new Error('not found');
+      const p = (await r.json()).ad;
+      const disc = Number(p.discountPercent) || 0;
+      const price = Number(p.price) || 0;
+      const base = disc > 0 ? Math.round(price / (1 - disc / 100)) : price;
       setForm({
         title: p.title || '',
         description: p.description || '',
         brand: p.brand || '',
         model: p.model || '',
-        price: String(p.price || ''),
-        discountPrice: String(p.discountPrice || ''),
+        price: String(base || ''),
+        discountPrice: disc > 0 ? String(price) : '',
         category: p.category || 'table',
         condition: p.condition || 'new',
         province: p.province || provinceOfCity(p.city || ''),   // بک‌فیلِ استان از روی شهر برای محصولات قدیمی
@@ -139,9 +143,13 @@ export default function EditProductPage() {
         stock: String(p.stock || '1'),
         color: p.color || '',
         keywords: p.keywords || '',
-        specs: p.specs?.length > 0 ? p.specs : [{ label: '', value: '' }],
+        specs: Array.isArray(p.specs) && p.specs.length > 0
+          ? p.specs
+          : (p.specs && typeof p.specs === 'object'
+              ? Object.entries(p.specs).map(([label, value]) => ({ label, value: String(value) }))
+              : [{ label: '', value: '' }]),
       });
-      setExistingImages(p.images || []);
+      setExistingImages(Array.isArray(p.images) ? p.images : []);
       setPageLoading(false);
     }).catch(() => {
       /* API ندارد ⇒ محصولِ محلیِ ساخته‌شده در پنل را از userProducts بخوان */
@@ -257,18 +265,38 @@ export default function EditProductPage() {
         const url = await uploadFile('club-media', file, `products/${Date.now()}-${i}-${file.name}`);
         if (url) newUrls.push(url);
       }
-      await api.put(`/products/${id}`, {
-        ...form,
-        price: parseInt(form.price),
-        discountPrice: form.discountPrice ? parseInt(form.discountPrice) : null,
-        discountPercent: calcDiscount(),
-        stock: parseInt(form.stock),
-        images: [...existingImages, ...newUrls],
-        specs: form.specs.filter(s => s.label && s.value),
+      const base = parseInt(form.price) || 0;
+      const final = form.discountPrice ? parseInt(form.discountPrice) : base;
+      const specsObj: Record<string, string> = {};
+      form.specs.filter(s => s.label && s.value).forEach(s => { specsObj[s.label] = s.value; });
+
+      const r = await apiFetch(`/api/market/ads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.title.trim(),
+          description: form.description,
+          brand: form.brand,
+          model: form.model,
+          category: form.category,
+          condition: form.condition,
+          price: final,
+          old: base,
+          province: form.province,
+          city: form.city,
+          images: [...existingImages, ...newUrls],
+          specs: specsObj,
+        }),
       });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        setError(j?.message || 'خطا در ویرایش محصول');
+        setLoading(false);
+        return;
+      }
       router.push('/dashboard/shop');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'خطا در ویرایش محصول');
+    } catch {
+      setError('خطا در ویرایش محصول');
     } finally { setLoading(false); }
   };
 

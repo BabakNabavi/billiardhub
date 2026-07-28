@@ -8,6 +8,7 @@ import { ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import { apiFetch } from '../../../lib/http'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -641,7 +642,8 @@ export default function NewProductPage() {
   const [errors,   setErrors]   = useState<Record<string, string>>({})
   const [success,  setSuccess]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [acceptRules, setAcceptRules] = useState(false)   // پذیرشِ قوانینِ بیلیارد بازار
+  const [acceptRules, setAcceptRules] = useState(false)
+  const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرشِ قوانینِ بیلیارد بازار
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
@@ -787,39 +789,37 @@ export default function NewProductPage() {
     const composedName = [effBrand, effModel].filter(Boolean).join(' ')
       || [catLabel, form.type.trim()].filter(Boolean).join(' ') || 'محصول'
 
-    const product = {
-      id: Date.now(),
-      section,
-      img:       imgList[0] ?? '/images/shop/cue_billiard_2.jpg',
-      images:    imgList.length > 0 ? imgList : ['/images/shop/cue_billiard_2.jpg'],
-      name:      composedName,
-      category:  form.category,
-      type:      form.type.trim(),
-      model:     effModel,
-      price:     rawPrice,
-      old:       rawOld,
-      disc,
-      description:    form.description.trim(),
-      brand:          effBrand,
-      condition:      form.condition,
-      specs:          finalSpecs,
-      sellerId:       storeSlug,
-      sellerName:     form.shopName.trim(),
-      ownerName:      form.ownerName.trim(),
-      sellerPhone:    form.sellerPhone.trim(),
-      sellerWhatsapp: (form.sellerWhatsapp.trim() || form.sellerPhone.trim()).replace(/^0/, '98'),
-      sellerProvince: form.province,
-      sellerCity:     form.city,
-      address:        form.address.trim(),
-    }
+    /* آگهی روی سرور ثبت می‌شود تا بقیه هم ببینندش. پیش‌تر فقط در
+       localStorage می‌ماند و عملاً هیچ‌کس جز خودِ آگهی‌دهنده نمی‌دیدش. */
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/market/ads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: composedName, category: form.category, type: form.type.trim(),
+            brand: effBrand, model: effModel,
+            price: rawPrice, old: rawOld,
+            description: form.description.trim(), condition: form.condition,
+            specs: finalSpecs, images: imgList, section,
+            province: form.province, city: form.city, address: form.address.trim(),
+            sellerName: form.shopName.trim(), sellerPhone: form.sellerPhone.trim(),
+            sellerWhatsapp: (form.sellerWhatsapp.trim() || form.sellerPhone.trim()).replace(/^0/, '98'),
+            storeSlug: storeSlug || undefined,
+          }),
+        })
+        const j = await r.json().catch(() => ({}))
 
-    try {
-      const existing = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
-      localStorage.setItem('userProducts', JSON.stringify([product, ...existing]))
-    } catch { /* ignore */ }
+        if (r.status === 429) { setQuotaMsg(j?.message || 'سهمیه‌ی آگهی شما تمام شده است'); setSubmitting(false); return }
+        if (!r.ok) { setErrors({ submit: j?.message || 'ثبت آگهی روی سرور انجام نشد' }); setSubmitting(false); return }
 
-    setSuccess(true)
-    setTimeout(() => router.push('/shop'), 2000)
+        setSuccess(true)
+        setTimeout(() => router.push('/shop'), 2000)
+      } catch {
+        setErrors({ submit: 'خطا در ارتباط با سرور؛ دوباره تلاش کنید' })
+        setSubmitting(false)
+      }
+    })()
   }
 
   // ── Success screen ─────────────────────────────────────────
@@ -1287,6 +1287,23 @@ export default function NewProductPage() {
                 )}
               </div>
             </div>
+
+            {/* سهمیه تمام شد ⇒ راهنماییِ خریدِ بسته (وقتی ادمین سهمیه را روشن کند) */}
+            {quotaMsg && (
+              <div style={{ background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.38)', borderRadius: 16, padding: '16px 18px', marginBottom: 14 }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: '#A07840', marginBottom: 7 }}>سهمیه‌ی آگهی شما تمام شده است</div>
+                <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.58)', margin: '0 0 12px', lineHeight: 2 }}>{quotaMsg}</p>
+                <Link href="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.18)', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38' }}>
+                  مشاهده بسته‌های آگهی
+                </Link>
+              </div>
+            )}
+
+            {errors.submit && (
+              <div style={{ background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.28)', borderRadius: 14, padding: '13px 16px', marginBottom: 14, fontSize: 13, fontWeight: 700, color: '#B23B2E', lineHeight: 1.9 }}>
+                {errors.submit}
+              </div>
+            )}
 
             {/* ── پذیرش قوانین بازار ── */}
             <div style={{ background: LQ_BG, backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', border: errors.acceptRules ? '1.5px solid rgba(200,60,60,0.42)' : LQ_BOR, borderRadius: 20, boxShadow: LQ_SHAD, padding: '16px 22px', marginBottom: 14, transition: 'border-color .2s' }}>

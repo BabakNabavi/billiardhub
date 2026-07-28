@@ -26,6 +26,7 @@ import {
   ScrollText, ArrowLeft,
 } from 'lucide-react'
 import ReportButton from '../../components/ReportButton'
+import { apiFetch } from '../../lib/http'
 import { SHOP_PRODUCTS } from './products'
 import { MOCK_SELLERS } from '../../lib/sellers-data'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
@@ -89,6 +90,70 @@ interface Listing {
 
 /* شهرِ فروشنده‌های نمونه از lib/sellers-data (id → city) */
 const sellerCity = (sellerId: string) => MOCK_SELLERS.find(s => s.id === sellerId)?.city ?? ''
+
+/* ── آگهی‌های واقعی از سرور ────────────────────────────────────────
+   تا پیش از این، آگهی‌ها فقط در localStorageِ مرورگرِ خودِ آگهی‌دهنده
+   بودند و هیچ‌کسِ دیگری نمی‌دیدشان. */
+function serverAdToListing(a: Record<string, any>): Listing {
+  const imgs = Array.isArray(a.images) ? a.images : []
+  const price = Number(a.price) || 0
+  const disc = Number(a.discountPercent) || 0
+  return {
+    key: `db-${a.id}`, id: a.id,
+    name: a.title || 'محصول',
+    img: imgs[0] || '/images/shop/cue_billiard_2.jpg',
+    brand: a.brand || '',
+    price, old: disc > 0 ? Math.round(price / (1 - disc / 100)) : price, disc,
+    cat: normCat(a.category),
+    city: a.city || '',
+    condition: (['new', 'like_new', 'used'].includes(a.condition) ? a.condition : 'new') as Cond,
+    createdAt: a.createdAt ? new Date(a.createdAt).getTime() : null,
+    source: 'user',
+  }
+}
+
+async function fetchServerAds(): Promise<Listing[] | null> {
+  try {
+    const r = await fetch('/api/market/ads', { cache: 'no-store' })
+    if (!r.ok) return null
+    const j = await r.json()
+    return Array.isArray(j?.ads) ? j.ads.map(serverAdToListing) : null
+  } catch { return null }
+}
+
+/* آگهی‌هایی که از قبل در مرورگر مانده‌اند یک‌بار به سرور منتقل می‌شوند
+   تا با وصل‌شدنِ بازار به سرور چیزی گم نشود. */
+async function migrateLocalAds(): Promise<void> {
+  try {
+    const raw = localStorage.getItem('userProducts')
+    if (!raw) return
+    const list = JSON.parse(raw) as Record<string, any>[]
+    if (!Array.isArray(list) || list.length === 0) { localStorage.removeItem('userProducts'); return }
+
+    for (const p of list) {
+      await apiFetch('/api/market/ads', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: p.name, category: p.category, type: p.type, brand: p.brand, model: p.model,
+          price: p.price, old: p.old, description: p.description, condition: p.condition,
+          specs: p.specs, images: Array.isArray(p.images) ? p.images : (p.img ? [p.img] : []),
+          section: p.section, province: p.sellerProvince, city: p.sellerCity, address: p.address,
+          sellerName: p.sellerName, sellerPhone: p.sellerPhone, sellerWhatsapp: p.sellerWhatsapp,
+          storeSlug: p.sellerId || undefined,
+        }),
+      }).catch(() => null)
+    }
+    localStorage.removeItem('userProducts')
+  } catch { /* ignore */ }
+}
+
+function catalogListings(): Listing[] {
+  return SHOP_PRODUCTS.map(p => ({
+    key: `s-${p.id}`, id: p.id, name: p.name, img: p.img, brand: p.brand,
+    price: p.price, old: p.old, disc: p.disc, cat: normCat(p.cat),
+    city: sellerCity(p.sellerId), condition: 'new' as Cond, createdAt: null, source: 'shop' as const,
+  }))
+}
 
 function loadListings(): Listing[] {
   const base: Listing[] = SHOP_PRODUCTS.map(p => ({
@@ -287,9 +352,17 @@ export default function MarketNewPage() {
   const mCityRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    /* کاتالوگِ نمونه فوراً نمایش داده می‌شود تا صفحه خالی نماند،
+       بعد آگهی‌های واقعیِ سرور جایگزینِ بخشِ کاربران می‌شوند. */
     setListings(loadListings())
     try { setSavedKeys(new Set(JSON.parse(localStorage.getItem('bh_market_saved') ?? '[]'))) } catch {}
     setReady(true)
+
+    void (async () => {
+      await migrateLocalAds()
+      const server = await fetchServerAds()
+      if (server) setListings([...server, ...catalogListings()])
+    })()
   }, [])
   useEffect(() => {
     const fn = (e: MouseEvent) => {

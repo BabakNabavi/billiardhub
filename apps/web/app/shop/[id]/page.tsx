@@ -56,25 +56,35 @@ function Stars({ r, size = 15 }: { r: number; size?: number }) {
   )
 }
 
-/* محصولِ ثبت‌شده‌ی کاربر (localStorage) → شکلِ ShopProduct تا همین صفحه بتواند نمایشش دهد */
-function normalizeUserProduct(up: Record<string, unknown>): ShopProduct {
-  const num = (v: unknown, d = 0) => (typeof v === 'number' ? v : d)
+/* آگهیِ کاربر روی سرور uuid دارد، محصولاتِ کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد */
+type Detail = Omit<ShopProduct, 'id'> & { id: number | string }
+
+/* رکوردِ جدولِ products → شکلِ ShopProduct تا همین صفحه بتواند نمایشش دهد */
+function normalizeUserProduct(up: Record<string, unknown>): Detail {
+  const num = (v: unknown, d = 0) => {
+    const n = Number(v)
+    return Number.isFinite(n) && v !== null && v !== '' ? n : d
+  }
   const str = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
   const imgs = up.images as string[] | undefined
+  const price = num(up.price)
+  const disc  = num(up.disc, num(up.discountPercent))
   return {
-    id:             num(up.id),
+    id:             typeof up.id === 'string' ? up.id : num(up.id),
     cat:            str(up.category, 'other'),
     img:            str(up.img) || imgs?.[0] || '/images/shop/cue_billiard_2.jpg',
-    name:           str(up.name, 'محصول'),
+    name:           str(up.name) || str(up.title, 'محصول'),
     desc:           str(up.description),
     brand:          str(up.brand),
-    price:          num(up.price),
-    old:            num(up.old, num(up.price)),
-    disc:           num(up.disc),
+    price,
+    old:            num(up.old, disc > 0 ? Math.round(price / (1 - disc / 100)) : price),
+    disc,
     rating:         5,
     reviews:        0,
     sales:          0,
-    sellerId:       str(up.sellerId),
+    /* روی سرور sellerId شناسه‌ی کاربر است نه فروشگاه؛ صفحه‌ی فروشگاه
+       فقط وقتی وجود دارد که storeSlug ثبت شده باشد. */
+    sellerId:       str(up.storeSlug) || (typeof up.storeSlug === 'undefined' ? str(up.sellerId) : ''),
     sellerName:     str(up.sellerName),
     sellerPhone:    str(up.sellerPhone),
     sellerWhatsapp: str(up.sellerWhatsapp),
@@ -88,21 +98,34 @@ export default function ProductDetailPage() {
     [id]
   )
 
-  /* اگر در کاتالوگِ نمونه نبود، از محصولاتِ ثبت‌شده‌ی کاربر (localStorage) بخوان.
-     بعد از mount خوانده می‌شود؛ تا آن‌موقع «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
-  const [userProduct, setUserProduct] = useState<ShopProduct | null>(null)
+  /* اگر در کاتالوگِ نمونه نبود، آگهی را از سرور بخوان (و برای آگهی‌های
+     قدیمی که هنوز در همین مرورگر مانده‌اند، از localStorage).
+     تا آمدنِ پاسخ «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
+  const [userProduct, setUserProduct] = useState<Detail | null>(null)
   const [checked, setChecked] = useState(false)
   useEffect(() => {
     if (staticProduct) { setChecked(true); return }
-    try {
-      const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[]
-      const up = list.find(p => String(p.id) === String(id))
-      setUserProduct(up ? normalizeUserProduct(up) : null)
-    } catch { setUserProduct(null) }
-    setChecked(true)
+    let alive = true
+    void (async () => {
+      try {
+        const r = await fetch(`/api/market/ads/${encodeURIComponent(String(id))}`, { cache: 'no-store' })
+        if (r.ok) {
+          const j = await r.json()
+          if (j?.ad && alive) { setUserProduct(normalizeUserProduct(j.ad)); setChecked(true); return }
+        }
+      } catch { /* به مسیرِ محلی برمی‌گردیم */ }
+      if (!alive) return
+      try {
+        const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[]
+        const up = list.find(p => String(p.id) === String(id))
+        setUserProduct(up ? normalizeUserProduct(up) : null)
+      } catch { setUserProduct(null) }
+      setChecked(true)
+    })()
+    return () => { alive = false }
   }, [id, staticProduct])
 
-  const product: ShopProduct | undefined = staticProduct ?? userProduct ?? undefined
+  const product: Detail | undefined = staticProduct ?? userProduct ?? undefined
 
   /* آیا این محصول به یک فروشگاهِ ثبت‌شده تعلق دارد؟
      محصولاتِ کاتالوگ همیشه فروشگاه دارند؛ آگهیِ کاربرِ عادی فقط وقتی

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import api from '../../../lib/api';
+import { apiFetch } from '../../../lib/http';
 import { useAuthStore } from '../../../store/auth.store';
 import { uploadFile } from '../../../lib/supabase';
 import { findSellerByOwner } from '../../../lib/seller-store';
@@ -38,6 +38,32 @@ function mapLocalProduct(up: Record<string, unknown>): Product {
     views: 0,
     requestedVerification: false,
     createdAt: new Date(num(up.id, 0) || Date.now()).toISOString(),
+  };
+}
+
+/* رکوردِ جدولِ products روی سرور → شکلِ Product این صفحه */
+function mapServerAd(a: Record<string, unknown>): Product {
+  const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d; };
+  const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
+  const price = n(a.price);
+  const disc = n(a.discountPercent);
+  return {
+    id: String(a.id),
+    title: s(a.title, 'محصول'),
+    price: disc > 0 ? Math.round(price / (1 - disc / 100)) : price,
+    discountPrice: disc > 0 ? price : undefined,
+    discountPercent: disc > 0 ? disc : undefined,
+    category: s(a.category, 'other'),
+    condition: s(a.condition, 'new'),
+    city: s(a.city),
+    images: Array.isArray(a.images) ? (a.images as string[]) : [],
+    isVerified: !!a.isVerified,
+    isOfficialStore: !!a.isOfficialStore,
+    status: s(a.status, 'active'),
+    stock: n(a.stock, 1),
+    views: n(a.views),
+    requestedVerification: !!a.requestedVerification,
+    createdAt: s(a.createdAt) || new Date().toISOString(),
   };
 }
 
@@ -125,12 +151,18 @@ export default function MyShopPage() {
 
   useEffect(() => {
     if (!user) return;
+    /* آگهی‌های واقعی از سرور می‌آیند؛ آگهی‌های قدیمیِ باقی‌مانده در همین
+       مرورگر هم نشان داده می‌شوند تا تا پیش از مهاجرت چیزی گم‌شده به‌نظر نرسد. */
     const local = loadLocalProducts({ id: user.id, phone: user.phone });
-    api.get('/products/my-products').then(res => {
-      const remote = Array.isArray(res.data) ? res.data : [];
-      setProducts([...local, ...remote]);
-      setLoading(false);
-    }).catch(() => { setProducts(local); setLoading(false); });
+    fetch('/api/market/ads?mine=1', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        const remote: Product[] = Array.isArray(j?.ads) ? j.ads.map(mapServerAd) : [];
+        const remoteTitles = new Set(remote.map(p => p.title));
+        setProducts([...remote, ...local.filter(p => !remoteTitles.has(p.title))]);
+        setLoading(false);
+      })
+      .catch(() => { setProducts(local); setLoading(false); });
   }, [user]);
 
   useEffect(() => {
@@ -144,13 +176,13 @@ export default function MyShopPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('آیا مطمئنی؟')) return;
     setDeleting(id);
-    /* محصولِ محلی را از localStorage هم حذف کن */
+    /* آگهیِ قدیمیِ باقی‌مانده در همین مرورگر را هم پاک کن */
     try {
       const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[];
       const next = list.filter(p => String(p.id) !== String(id));
       if (next.length !== list.length) localStorage.setItem('userProducts', JSON.stringify(next));
     } catch { /* ignore */ }
-    try { await api.delete(`/products/${id}`); } catch { /* remote may not exist for local products */ }
+    try { await apiFetch(`/api/market/ads/${id}`, { method: 'DELETE' }); } catch { /* آگهیِ فقط‌محلی روی سرور نیست */ }
     setProducts(products.filter(p => p.id !== id));
     setDeleting(null);
   };
