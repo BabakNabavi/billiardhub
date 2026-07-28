@@ -104,7 +104,10 @@ export async function getStoryQuotaState(
     limit = plan.quota
   } else {
     const roles = roleHint ? [roleHint] : await rolesOf(userId)
-    const picked = pickRoleQuota(free, roles)
+    /* در استوری، صفر یعنی «این نقش سهمیه ندارد» — نه نامحدود؛ وگرنه
+       نقشِ صفرِ «کاربر عادی» سهمیه‌ی نقشِ واقعی را می‌بلعید و مثلاً
+       بازیکن هم بدونِ استوری می‌ماند. */
+    const picked = pickRoleQuota(free, roles, { zeroMeansNone: true })
     period = picked.quota.period
     limit = picked.quota.quota
     role = picked.role

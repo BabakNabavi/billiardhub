@@ -53,6 +53,21 @@ export async function PUT(
 
   const body = await req.json();
 
+  /* فیلدهای «اعتماد» فقط سرورساید نوشته می‌شوند: تأییدِ جواز از مسیرِ
+     استعلامِ اماکن (verify-license) و تأییدِ شبا از استعلامِ بانکی.
+     پیش‌تر بدنه‌ی خام مستقیم UPDATE می‌شد و مالکِ باشگاه می‌توانست
+     verificationStatus خودش را 'verified' کند — که از فاز ۳ به بعد
+     یعنی گرفتنِ نقشِ تأییدشده‌ی باشگاه‌دار و سهمیه‌ی ۴تاییِ آگهی.
+     ادمین همچنان می‌تواند این فیلدها را تغییر دهد. */
+  if (!isAdmin) {
+    for (const k of [
+      'verificationStatus', 'licenseVerified', 'licenseCheckedAt', 'licenseNumber',
+      'ibanVerified', 'ibanOwnerName', 'ownerId', 'id', 'createdAt',
+    ]) {
+      if (Object.prototype.hasOwnProperty.call(body, k)) delete (body as Record<string, unknown>)[k];
+    }
+  }
+
   /* شبا فقط از راهِ استعلامِ کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
      دست‌کاری کند، تأیید باطل می‌گردد تا تسویه به حسابِ تأییدنشده نرود. */
   if (Object.prototype.hasOwnProperty.call(body, 'iban')) {

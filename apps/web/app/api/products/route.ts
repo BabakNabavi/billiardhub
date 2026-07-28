@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { sessionFromRequest } from '@/lib/auth/session';
+import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 
 export const dynamic = 'force-dynamic'
 
@@ -104,11 +105,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    /* سهمیه (فاز ۳) — این مسیر هم مثل /api/market/ads ردیفِ products
+       می‌سازد؛ بدونِ این دروازه، سقفِ شخص‌محور کاملاً دور زده می‌شد. */
+    const gate = await consumeAdQuota(user.id)
+    if (!gate.ok) {
+      return NextResponse.json(
+        { error: gate.body.message, ...gate.body },
+        { status: gate.status }
+      )
+    }
+
     const { data, error } = await supabase
       .from('products')
       .insert({
         title,
-        description,
+        /* ستونِ description در دیتابیس NOT NULL است؛ نبودنش ۵۰۰ می‌داد */
+        description: description ?? '',
         price: Number(price),
         discountPrice: discountPrice ? Number(discountPrice) : null,
         discountPercent: discountPercent ? Number(discountPercent) : 0,
@@ -130,7 +142,13 @@ export async function POST(req: NextRequest) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      /* درج نشد ⇒ مصرفِ همین درخواست آزاد می‌شود (خطای فنی، نه حذفِ آگهی) */
+      if (gate.consumptionId) await releaseConsumption(gate.consumptionId)
+      throw error
+    }
+
+    if (gate.consumptionId && data?.id) await attachConsumptionRef(gate.consumptionId, String(data.id))
 
     return NextResponse.json({ product: data }, { status: 201 })
   } catch (err: any) {

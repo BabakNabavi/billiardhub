@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { sessionFromRequest } from '@/lib/auth/session'
 import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
+import { ensurePersonForUser } from '@/lib/identity'
 
 /* احرازِ هویتِ کاربرِ فعلی — برای حساب‌هایی که پیش از راه‌اندازیِ استعلام
    ساخته شده‌اند و کد ملی‌شان ثبت نشده است.
@@ -93,6 +94,9 @@ export async function POST(req: NextRequest) {
     ...(birthDate ? { birth_date: birthDate.slice(0, 12) } : {}),
     verificationStatus: 'verified',
   }).eq('id', session.id)
+
+  /* هویت (فاز ۳): اتصال به «شخص» — سهمیه‌ی رایگان از این به بعد شخص‌محور است */
+  await ensurePersonForUser(session.id)
 
   return NextResponse.json(
     { success: true, nameChecked, message: 'کد ملی شما با موفقیت تأیید شد' },

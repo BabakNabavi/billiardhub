@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
-import { getQuotaState } from '@/lib/ads/quota';
+import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگرِ کاربر.
 
@@ -53,14 +53,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'نام، قیمت و دسته‌بندی الزامی است' }, { status: 400 });
   }
 
-  /* سهمیه — تا وقتی ادمین روشنش نکرده، همیشه اجازه می‌دهد */
-  const quota = await getQuotaState(actor.id);
-  if (!quota.allowed) {
-    return NextResponse.json({
-      message: quota.message,
-      quotaExceeded: true,
-      quota: { used: quota.used, limit: quota.limit, period: quota.period, resetAt: quota.resetAt },
-    }, { status: 429 });
+  /* سهمیه — فاز ۳: بررسی و مصرف در یک قدمِ اتمیک، پیش از درجِ آگهی.
+     سهمیه‌ی رایگان به «شخص» (کد ملی) گره خورده و بینِ همه‌ی حساب‌هایش
+     مشترک است؛ مصرف در دفتر ثبت می‌شود و با حذفِ آگهی برنمی‌گردد. */
+  const gate = await consumeAdQuota(actor.id);
+  if (!gate.ok) {
+    return NextResponse.json(gate.body, { status: gate.status });
   }
 
   const old = Math.max(price, Math.round(num(b?.old, price)));
@@ -102,11 +100,15 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error('create ad failed:', error.message);
+    /* آگهی درج نشد ⇒ مصرفِ همین درخواست آزاد می‌شود (خطای فنی است، نه «حذفِ آگهی») */
+    if (gate.consumptionId) await releaseConsumption(gate.consumptionId);
     if (/does not exist|schema cache|column/i.test(error.message)) {
       return NextResponse.json({ message: 'ساختارِ جدولِ آگهی‌ها به‌روز نیست (مایگریشن ۰۰۶ اجرا نشده)' }, { status: 503 });
     }
     return NextResponse.json({ message: 'ثبت آگهی انجام نشد' }, { status: 500 });
   }
 
-  return NextResponse.json({ ad: data, quota: { used: quota.used + 1, limit: quota.limit } }, { status: 201 });
+  if (gate.consumptionId && data?.id) await attachConsumptionRef(gate.consumptionId, String(data.id));
+
+  return NextResponse.json({ ad: data, quota: { used: gate.used, limit: gate.limit } }, { status: 201 });
 }

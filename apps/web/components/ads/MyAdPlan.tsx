@@ -22,6 +22,9 @@ interface Quota {
   enabled: boolean; allowed: boolean; used: number; limit: number
   period: Period; resetAt: string | null
   planName: string | null; planExpiresAt: string | null
+  /* فاز ۳ — سهمیه‌ی شخص‌محور */
+  identityRequired?: boolean
+  role?: string
 }
 interface Order {
   id: string; amount: number; status: string; createdAt: string
@@ -95,6 +98,15 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
       {!quota.enabled && (
         <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '0 0 12px' }}>
           در حال حاضر محدودیتی اعمال نمی‌شود؛ این عدد فقط برای اطلاعِ شماست.
+        </p>
+      )}
+
+      {quota.enabled && quota.identityRequired && (
+        <p style={{ fontSize: 12, color: '#B23B2E', fontWeight: 700, lineHeight: 1.9, margin: '0 0 12px' }}>
+          سهمیه‌ی رایگان به هویتِ تأییدشده تعلق می‌گیرد؛ برای فعال‌شدنش،
+          کد ملیِ خود را از{' '}
+          <Link href="/profile/verify" style={{ color: GOLD_D, textDecoration: 'underline' }}>بخشِ احرازِ هویت</Link>
+          {' '}تأیید کنید.
         </p>
       )}
 

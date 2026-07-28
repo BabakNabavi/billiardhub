@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
+import { backfillPersons } from '@/lib/identity';
 
 /* انقضای خودکار کمپین‌های تبلیغاتی (فاز ۲):
    SCHEDULED ای که زمانش رسیده ⇒ ACTIVE، و ACTIVE ای که تمام شده ⇒ EXPIRED.
@@ -33,5 +34,13 @@ export async function GET(req: NextRequest) {
   if (r.activated > 0 || r.expired > 0) {
     audit({ actorRole: 'system', action: 'CAMPAIGNS_EXPIRED', newValue: r });
   }
-  return NextResponse.json({ ok: true, ...r });
+
+  /* فاز ۳ — بک‌فیلِ اشخاص: عمداً این‌جا (روی سرورِ پروداکشن) اجرا می‌شود
+     تا هشِ کد ملی با secret همین محیط ساخته شود، نه ماشینِ توسعه. */
+  const persons = await backfillPersons();
+  if (persons.linked > 0) {
+    audit({ actorRole: 'system', action: 'PERSONS_BACKFILLED', newValue: persons });
+  }
+
+  return NextResponse.json({ ok: true, ...r, persons });
 }

@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { wasIdentityVerified } from '@/lib/otp-server';
+import { ensurePersonForUser } from '@/lib/identity';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -80,6 +81,11 @@ export async function POST(req: NextRequest) {
         { status: 500, headers: CORS_HEADERS },
       );
     }
+
+    /* هویت (فاز ۳): حساب به «شخص» وصل می‌شود — اگر همین کد ملی قبلاً
+       شخص دارد (حسابِ دیگری از همین فرد)، به همان وصل می‌شود؛ سهمیه‌ی
+       رایگان بینِ همه‌ی حساب‌های یک شخص مشترک است. */
+    if (idVerified) await ensurePersonForUser(user.id);
 
     /* مثلِ login: توکن در body برای سازگاری، نشستِ واقعی روی کوکی */
     const token = jwt.sign(

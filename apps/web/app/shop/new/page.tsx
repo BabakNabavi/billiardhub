@@ -644,6 +644,7 @@ export default function NewProductPage() {
   const [submitting, setSubmitting] = useState(false)
   const [acceptRules, setAcceptRules] = useState(false)
   const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرشِ قوانینِ بیلیارد بازار
+  const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطرِ نبودِ هویتِ تأییدشده
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
@@ -810,7 +811,12 @@ export default function NewProductPage() {
         })
         const j = await r.json().catch(() => ({}))
 
-        if (r.status === 429) { setQuotaMsg(j?.message || 'سهمیه‌ی آگهی شما تمام شده است'); setSubmitting(false); return }
+        if (r.status === 429) {
+          /* دو حالتِ متفاوت: سهمیه تمام شده، یا هویت هنوز تأیید نشده */
+          setQuotaNeedsIdentity(!!j?.identityRequired)
+          setQuotaMsg(j?.message || 'سهمیه‌ی آگهی شما تمام شده است')
+          setSubmitting(false); return
+        }
         if (!r.ok) { setErrors({ submit: j?.message || 'ثبت آگهی روی سرور انجام نشد' }); setSubmitting(false); return }
 
         setSuccess(true)
@@ -1291,10 +1297,12 @@ export default function NewProductPage() {
             {/* سهمیه تمام شد ⇒ راهنماییِ خریدِ بسته (وقتی ادمین سهمیه را روشن کند) */}
             {quotaMsg && (
               <div style={{ background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.38)', borderRadius: 16, padding: '16px 18px', marginBottom: 14 }}>
-                <div style={{ fontSize: 14, fontWeight: 900, color: '#A07840', marginBottom: 7 }}>سهمیه‌ی آگهی شما تمام شده است</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: '#A07840', marginBottom: 7 }}>
+                  {quotaNeedsIdentity ? 'هویتِ شما هنوز تأیید نشده است' : 'سهمیه‌ی آگهی شما تمام شده است'}
+                </div>
                 <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.58)', margin: '0 0 12px', lineHeight: 2 }}>{quotaMsg}</p>
-                <Link href="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.18)', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38' }}>
-                  مشاهده بسته‌های آگهی
+                <Link href={quotaNeedsIdentity ? '/profile/verify' : '/plans'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.18)', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38' }}>
+                  {quotaNeedsIdentity ? 'تأییدِ هویت' : 'مشاهده بسته‌های آگهی'}
                 </Link>
               </div>
             )}

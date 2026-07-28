@@ -130,8 +130,16 @@ async function migrateLocalAds(): Promise<void> {
     const list = JSON.parse(raw) as Record<string, any>[]
     if (!Array.isArray(list) || list.length === 0) { localStorage.removeItem('userProducts'); return }
 
+    /* هر آگهی یک سهمیه مصرف می‌کند و سهمیه برنمی‌گردد؛ پس آگهیِ
+       منتقل‌نشده نباید بی‌صدا پاک شود. هرچه ناموفق ماند در مرورگر
+       می‌ماند تا کاربر خودش تصمیم بگیرد (و با تمام‌شدنِ سهمیه، حلقه
+       همان‌جا می‌ایستد). */
+    const leftover: Record<string, any>[] = []
+    let stop = false
+
     for (const p of list) {
-      await apiFetch('/api/market/ads', {
+      if (stop) { leftover.push(p); continue }
+      const r = await apiFetch('/api/market/ads', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: p.name, category: p.category, type: p.type, brand: p.brand, model: p.model,
@@ -142,8 +150,16 @@ async function migrateLocalAds(): Promise<void> {
           storeSlug: p.sellerId || undefined,
         }),
       }).catch(() => null)
+
+      if (!r || !r.ok) {
+        leftover.push(p)
+        /* سهمیه تمام شد یا سرویس در دسترس نیست ⇒ ادامه بی‌فایده است */
+        if (!r || r.status === 429 || r.status === 503 || r.status === 401) stop = true
+      }
     }
-    localStorage.removeItem('userProducts')
+
+    if (leftover.length === 0) localStorage.removeItem('userProducts')
+    else localStorage.setItem('userProducts', JSON.stringify(leftover))
   } catch { /* ignore */ }
 }
 
