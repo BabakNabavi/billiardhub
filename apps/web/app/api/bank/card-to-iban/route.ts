@@ -1,15 +1,18 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
-import { cardToIban } from '@/lib/bank-server';
-import { normName } from '@/lib/shahkar-server';
+import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
 
-/* شماره کارت ⇒ شبا + نامِ دارنده.
-   فقط کاربرِ واردشده (تا اعتبارِ سرویس هدر نرود) و در صورت دادنِ clubId،
-   فقط مالکِ همان باشگاه یا ادمین.
+/* ثبتِ حسابِ بانکیِ باشگاه — مقصدِ تسویه‌ی درآمدِ رزرو.
 
-   اگر نامِ دارنده‌ی حساب با نامِ احرازشده‌ی درخواست‌دهنده یکی باشد،
-   ownerMatch=true برمی‌گردد و شبا به‌عنوانِ «تأییدشده» ذخیره می‌شود. */
+   زنجیره‌ی اثبات (هر حلقه یک کارِ متفاوت می‌کند):
+     ۱) Luhn محلی      — کارتِ اشتباه‌تایپ‌شده بدونِ مصرفِ اعتبار رد می‌شود
+     ۲) CardMatch      — این کارت واقعاً به همین کد ملی تعلق دارد؟
+     ۳) CardToIban     — شبای همان کارت + نامِ دارنده
+     ۴) IbanMatch      — و همان شبا (مقصدِ واقعیِ پول) هم به همین کد ملی است؟
+
+   حلقه‌ی ۴ ظاهراً از ۲ و ۳ نتیجه می‌شود، ولی چون پول به شبا می‌رود نه به
+   کارت، مقصدِ نهایی مستقیماً هم اثبات می‌شود. */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
@@ -18,9 +21,8 @@ export async function POST(req: NextRequest) {
   const card = String(body?.card || '');
   const clubId = String(body?.clubId || '');
 
-  let admin = false;
   if (clubId) {
-    admin = await isAdmin(actor.id);
+    const admin = await isAdmin(actor.id);
     const { data: club } = await sb().from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();
     if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
     if ((club as { ownerId?: string }).ownerId !== actor.id && !admin) {
@@ -28,35 +30,52 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const r = await cardToIban(card);
-  if (!r.ok) {
-    return NextResponse.json(r, { status: r.unavailable ? 503 : 400 });
+  /* هویتِ احرازشده‌ی درخواست‌دهنده — ورودیِ هر دو استعلامِ تطبیق */
+  const { data: me } = await sb().from('users')
+    .select('national_id, national_id_verified, birth_date').eq('id', actor.id).maybeSingle();
+  const u = (me ?? {}) as { national_id?: string; national_id_verified?: boolean; birth_date?: string };
+
+  if (!u.national_id || !u.national_id_verified || !u.birth_date) {
+    return NextResponse.json({
+      message: 'برای ثبتِ حساب بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود.',
+      needsIdentity: true,
+    }, { status: 409 });
   }
+
+  /* ── ۱+۲ کارت به نامِ خودش است؟ ── */
+  const cm = await matchCard(u.national_id, u.birth_date, card);
+  if (!cm.ok) return NextResponse.json(cm, { status: cm.unavailable ? 503 : 400 });
+  if (!cm.match) {
+    return NextResponse.json({
+      ok: true, match: false,
+      message: 'این کارت بانکی به نام شما نیست. حساب باید متعلق به خودِ صاحب باشگاه باشد.',
+    }, { status: 422 });
+  }
+
+  /* ── ۳ شبای همان کارت ── */
+  const r = await cardToIban(card);
+  if (!r.ok) return NextResponse.json(r, { status: r.unavailable ? 503 : 400 });
   if (!r.found) return NextResponse.json(r, { status: 404 });
 
-  /* تطبیقِ نامِ دارنده‌ی حساب با هویتِ احرازشده‌ی کاربر */
-  const { data: me } = await sb().from('users')
-    .select('"firstName","lastName"').eq('id', actor.id).maybeSingle();
-  const u = (me ?? {}) as { firstName?: string; lastName?: string };
-  const mine = normName(`${u.firstName ?? ''} ${u.lastName ?? ''}`);
-  const theirs = normName(r.ownerName ?? '');
-  const ownerMatch = !!mine && !!theirs && mine === theirs;
+  /* ── ۴ مقصدِ واقعیِ پول هم به نامِ خودش است؟ ── */
+  const im = await matchIban(u.national_id, u.birth_date, r.iban!);
+  if (!im.ok) return NextResponse.json(im, { status: im.unavailable ? 503 : 400 });
+  if (!im.match) {
+    return NextResponse.json({
+      ok: true, match: false,
+      message: 'شبای این کارت به نام شما ثبت نشده است.',
+    }, { status: 422 });
+  }
 
-  /* ذخیره روی باشگاه — شبا فقط وقتی «تأییدشده» می‌شود که نام بخواند */
   if (clubId) {
     await sb().from('clubs').update({
       bankCard: card.replace(/\s/g, ''),
       iban: r.iban,
       ibanOwnerName: r.ownerName ?? null,
       bankName: r.bankName ?? null,
-      ibanVerified: ownerMatch,
+      ibanVerified: true,
     }).eq('id', clubId);
   }
 
-  return NextResponse.json({
-    ...r, ownerMatch,
-    message: ownerMatch
-      ? undefined
-      : 'نامِ دارنده‌ی این حساب با نامِ ثبت‌شده‌ی شما یکسان نیست؛ حساب باید به نامِ خودِ صاحب باشگاه باشد.',
-  });
+  return NextResponse.json({ ...r, match: true, ownerMatch: true });
 }

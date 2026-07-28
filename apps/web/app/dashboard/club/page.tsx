@@ -318,6 +318,7 @@ export default function ClubDashboardPage() {
   /* استعلامِ شبا از شماره کارت */
   const [ibanBusy, setIbanBusy] = useState(false);
   const [ibanMsg, setIbanMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [needsIdentity, setNeedsIdentity] = useState(false);
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
@@ -679,15 +680,34 @@ export default function ClubDashboardPage() {
         body: JSON.stringify({ card: clubInfo.bankCard, clubId: selectedClub.id }),
       });
       const j = await r.json().catch(() => ({}));
+      if (j?.needsIdentity) { setNeedsIdentity(true); setIbanMsg({ ok: false, text: j.message }); return; }
       if (!r.ok || !j?.iban) { setIbanMsg({ ok: false, text: j?.message || 'استعلام انجام نشد' }); return; }
       setClubInfo(p => ({
         ...p, iban: j.iban,
         bankName: j.bankName || p.bankName,
         bankCardOwner: j.ownerName || p.bankCardOwner,
       }));
-      setIbanMsg(j.ownerMatch
-        ? { ok: true, text: `شبا دریافت و به نام «${j.ownerName}» تأیید شد` }
-        : { ok: false, text: j.message || 'نامِ دارنده‌ی حساب با نامِ شما یکسان نیست' });
+      setIbanMsg({ ok: true, text: `تأیید شد — حساب به نام «${j.ownerName ?? '—'}» و متعلق به کد ملی شماست` });
+    } catch {
+      setIbanMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
+    } finally { setIbanBusy(false); }
+  };
+
+  /* ثبتِ مستقیمِ شبا — برای کسی که شماره کارت نمی‌دهد */
+  const verifyIban = async () => {
+    if (!selectedClub || !isValidIban(clubInfo.iban)) return;
+    setIbanBusy(true); setIbanMsg(null);
+    try {
+      const r = await apiFetch('/api/bank/verify-iban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ iban: clubInfo.iban, clubId: selectedClub.id }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (j?.needsIdentity) { setNeedsIdentity(true); setIbanMsg({ ok: false, text: j.message }); return; }
+      if (!r.ok) { setIbanMsg({ ok: false, text: j?.message || 'استعلام انجام نشد' }); return; }
+      if (j.bankName) setClubInfo(p => ({ ...p, bankName: j.bankName }));
+      setIbanMsg({ ok: true, text: 'شبا تأیید شد و متعلق به کد ملی شماست' });
     } catch {
       setIbanMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
     } finally { setIbanBusy(false); }
@@ -1413,6 +1433,19 @@ export default function ClubDashboardPage() {
             <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 16px', lineHeight: 1.7 }}>
               کاربران از طریق <strong>درگاه بانکی امن</strong> پرداخت می‌کنند. درآمد رزروها پس از کسر کارمزد سیستم، در دوره‌های تسویه به حساب بانکی شما واریز می‌شود.
             </p>
+
+            {needsIdentity && (
+              <div style={{ marginBottom: 16, padding: '13px 15px', borderRadius: 13, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.34)' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#A07840', marginBottom: 6 }}>ابتدا هویت خود را تأیید کنید</div>
+                <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 11px', lineHeight: 1.95 }}>
+                  حساب بانکی باید به نام خودِ صاحب باشگاه باشد. برای این بررسی، کد ملی و تاریخ تولد تأییدشده لازم است.
+                </p>
+                <Link href="/profile/verify"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.45)', color: '#A07840' }}>
+                  تأیید کد ملی
+                </Link>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>شماره کارت</label>
@@ -1469,6 +1502,17 @@ export default function ClubDashboardPage() {
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
                   تسویه‌ی درآمد رزروها به همین شبا انجام می‌شود و باید به نام صاحب باشگاه باشد.
                 </div>
+                {isValidIban(clubInfo.iban) && (
+                  <button type="button" onClick={verifyIban} disabled={ibanBusy || !selectedClub}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 9, padding: '8px 15px', borderRadius: 10,
+                      fontFamily: 'var(--font-base)', fontSize: 12, fontWeight: 700, cursor: ibanBusy ? 'not-allowed' : 'pointer',
+                      background: '#fff', border: '1px solid rgba(0,0,0,0.12)', color: '#6B7280', opacity: ibanBusy ? 0.5 : 1,
+                    }}>
+                    {ibanBusy ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={13} />}
+                    تأیید شبا بدون شماره کارت
+                  </button>
+                )}
               </div>
 
               <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner}
