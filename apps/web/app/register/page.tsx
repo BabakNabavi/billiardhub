@@ -9,6 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import JalaliDatePicker from '@/components/ui/JalaliDatePicker';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
@@ -469,7 +470,18 @@ export default function RegisterPage() {
               </div>
               <div className="au-row2">
                 {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'مثال: 0012345678', inputMode: 'numeric', maxLength: 10, ltr: true })}
-                {field('birthDate', 'تاریخ تولد', <CalendarDays size={16} />, { type: 'tel', placeholder: '۱۳۷۰/۰۵/۱۲', inputMode: 'numeric', maxLength: 10, ltr: true })}
+                {/* تاریخ تولد فقط از تقویم انتخاب می‌شود — تایپِ دستی منبعِ
+                    اشتباه بود (ماه و روزِ جابه‌جا، سالِ غلط) و استعلامِ
+                    ثبت‌احوال را بی‌دلیل رد می‌کرد. */}
+                <div style={{ marginBottom: 14 }}>
+                  <JalaliDatePicker
+                    id="birthDate"
+                    label="تاریخ تولد"
+                    value={form.birthDate}
+                    onChange={v => { setForm(f => ({ ...f, birthDate: v })); setError(''); }}
+                    placeholder="انتخاب از تقویم"
+                  />
+                </div>
               </div>
               <p style={{ fontSize: 11.5, color: MUT, margin: '-6px 0 14px', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.8 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />

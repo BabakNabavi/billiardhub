@@ -104,6 +104,12 @@ export default function ProductDetailPage() {
 
   const product: ShopProduct | undefined = staticProduct ?? userProduct ?? undefined
 
+  /* آیا این محصول به یک فروشگاهِ ثبت‌شده تعلق دارد؟
+     محصولاتِ کاتالوگ همیشه فروشگاه دارند؛ آگهیِ کاربرِ عادی فقط وقتی
+     که خودش فروشگاه داشته باشد sellerId می‌گیرد. بدونِ آن، دکمه‌ی
+     «رفتن به فروشگاه» به صفحه‌ی خالی می‌رسید. */
+  const hasStore = !!staticProduct || !!(userProduct && String(userProduct.sellerId ?? '').trim())
+
   const [wished, setWished] = useState(false)
 
   const related = useMemo(
@@ -238,18 +244,33 @@ export default function ProductDetailPage() {
                   <Store size={20} strokeWidth={2} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, color: TMUT, marginBottom: 2 }}>فروشنده این محصول</div>
+                  <div style={{ fontSize: 11, color: TMUT, marginBottom: 2 }}>
+                    {hasStore ? 'فروشنده این محصول' : 'آگهی‌دهنده'}
+                  </div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.sellerName}</div>
                 </div>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#16803C', background: 'rgba(22,128,60,0.10)', border: '1px solid rgba(22,128,60,0.25)', borderRadius: 999, padding: '4px 10px' }}>
-                  <ShieldCheck size={13} strokeWidth={2.2} /> تأییدشده
-                </span>
+                {hasStore && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#16803C', background: 'rgba(22,128,60,0.10)', border: '1px solid rgba(22,128,60,0.25)', borderRadius: 999, padding: '4px 10px' }}>
+                    <ShieldCheck size={13} strokeWidth={2.2} /> فروشگاه
+                  </span>
+                )}
               </div>
 
+              {/* آگهیِ کاربرِ عادی فروشگاهی ندارد ⇒ فقط راه‌های تماس.
+                  نشانِ «فروشگاه» هم نباید روی آگهیِ شخصی دیده شود. */}
+              {!hasStore && (
+                <p style={{ fontSize: 11.5, color: TMUT, lineHeight: 1.95, margin: '0 0 12px' }}>
+                  این یک آگهی شخصی در بیلیارد بازار است. بیلیارد هاب طرف معامله نیست؛
+                  پیش از پرداخت، کالا را از نزدیک بررسی کنید.
+                </p>
+              )}
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
-                <Link href={`/sellers/${product.sellerId}`} className="lq-lift" style={{ gridColumn: '1 / -1', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '12px', borderRadius: 10, ...lqGold, fontSize: 13, textDecoration: 'none' }}>
-                  <Store size={16} strokeWidth={2.2} /> رفتن به صفحه فروشگاه
-                </Link>
+                {hasStore && (
+                  <Link href={`/sellers/${product.sellerId}`} className="lq-lift" style={{ gridColumn: '1 / -1', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '12px', borderRadius: 10, ...lqGold, fontSize: 13, textDecoration: 'none' }}>
+                    <Store size={16} strokeWidth={2.2} /> رفتن به صفحه فروشگاه
+                  </Link>
+                )}
                 <a href={waLink} target="_blank" rel="noopener noreferrer" className="lq-lift" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px', borderRadius: 12, ...lqGreen, fontSize: 12.5, textDecoration: 'none' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
                   واتساپ
