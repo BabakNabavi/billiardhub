@@ -8,6 +8,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
+import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
@@ -307,10 +308,10 @@ export default function TechnicianDashboard() {
 
             <div className="grid grid-cols-1 gap-3 rounded-xl border border-dashed border-[#D8D2C4] p-4 sm:grid-cols-2">
               <input className={INPUT} value={prj.title} onChange={e => setPrj(p => ({ ...p, title: e.target.value }))} placeholder="عنوان پروژه — مثال: بازسازی میز اسنوکر" />
-              <select className={INPUT} value={prj.service} onChange={e => setPrj(p => ({ ...p, service: e.target.value as TechService }))}>
-                <option value="">نوع خدمات…</option>
-                {TECH_SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <Select
+                value={prj.service} ariaLabel="نوع خدمات" placeholder="نوع خدمات…"
+                options={TECH_SERVICES.map(s => ({ value: s, label: s }))}
+                onChange={v => setPrj(p => ({ ...p, service: v as TechService }))} />
               <input className={INPUT} value={prj.city} onChange={e => setPrj(p => ({ ...p, city: e.target.value }))} placeholder={`شهر (پیش‌فرض: ${form.city || '—'})`} />
               <input className={INPUT} value={prj.club} onChange={e => setPrj(p => ({ ...p, club: e.target.value }))} placeholder="باشگاه / محل انجام (اگر بود)" />
               <input className={`${INPUT} sm:col-span-2`} value={prj.desc} onChange={e => setPrj(p => ({ ...p, desc: e.target.value }))} placeholder="توضیح کوتاه پروژه…" />

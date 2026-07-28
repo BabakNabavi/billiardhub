@@ -182,6 +182,9 @@ const FILTER_DATA: Record<string, { label: string; opts: string[] }[]> = {
 /* ═══════════════════════════════════════════════════════════════
    CONTENT DATA
 ═══════════════════════════════════════════════════════════════ */
+/* شش باشگاهِ پیشنهادیِ صفحه‌ی اصلی — بقیه در /clubs */
+const FEATURED_COUNT = 6
+
 const CLUBS = [
   { id:'1', name:'باشگاه ستاره تهران',   city:'تهران',  dist:'ونک',        tables:12, rating:4.9, reviews:284, type:'اسنوکر', img:IMG.club2, img2:IMG.club3,   price:80000, badge:'برترین', tags:['VIP','پارکینگ','کافه'], hasStory:true  },
   { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.clubB, img2:IMG.club1,   price:65000, badge:null,      tags:['مربی','مسابقه'],        hasStory:true  },
@@ -192,6 +195,8 @@ const CLUBS = [
   { id:'7', name:'باشگاه سنچوری تهران',  city:'تهران',  dist:'ولیعصر',     tables:13, rating:4.8, reviews:124, type:'اسنوکر', img:IMG.clubA, img2:IMG.club2,   price:85000, badge:'VIP',     tags:['VIP','مربی'],           hasStory:false },
   { id:'8', name:'باشگاه شاهین اهواز',   city:'اهواز',  dist:'کیانپارس',   tables:9,  rating:4.4, reviews:76,  type:'هی‌بال', img:IMG.clubC, img2:IMG.club1,   price:50000, badge:null,      tags:['کافه'],                 hasStory:false },
 ];
+
+const FEATURED_CLUBS = CLUBS.slice(0, FEATURED_COUNT);
 
 const PRODUCTS = [
   { id:'1',  name:'Predator 314-3',      sub:'چوب حرفه‌ای',        img:IMG.cue,   brand:'PREDATOR', price:12000000, sale:9600000,  pct:20 },
@@ -914,6 +919,7 @@ export default function HomePage() {
   const activeCardRef  = useRef(0);
 
   const clubsSliderRef = useRef<HTMLDivElement>(null);
+  const clubsDeskRef = useRef<HTMLDivElement>(null);
   const [activeClub, setActiveClub] = useState(0);
   const activeClubRef  = useRef(0);
 
@@ -1373,6 +1379,13 @@ useEffect(() => {
         .clubs-strip::-webkit-scrollbar { display:none; }
         .club-desk-card { flex:0 0 290px; scroll-snap-align:start; }
         .clubs-dots { display:none !important; }
+        .clubs-nav { position:absolute; top:44%; transform:translateY(-50%); z-index:3;
+          width:36px; height:36px; border-radius:50%; cursor:pointer;
+          display:flex; align-items:center; justify-content:center;
+          background:rgba(255,255,255,0.92); border:1px solid rgba(28,27,23,0.10);
+          color:#5B564B; box-shadow:0 4px 16px rgba(28,27,23,0.12);
+          transition:transform .2s, color .2s; }
+        .clubs-nav:hover { transform:translateY(-50%) scale(1.06); color:#9A6E38; }
         .mkt-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .mkt-mobile-slider::-webkit-scrollbar { display:none; }
         .mkt-split::-webkit-scrollbar { display:none; }
@@ -1396,6 +1409,7 @@ useEffect(() => {
           .club-mob-panel  { flex:0 0 44% !important; }
           .club-open-btn   { display:flex !important; }
           .clubs-desk      { display:none !important; }
+          .clubs-nav       { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
           /* padding-bottom در موبایل از clamp دسکتاپ ۵۶px می‌گرفت و با ۱۶px پدینگِ خودِ اسلایدر
              ⇒ ۷۲px فضای خالی ته سکشن. حالا ۱۶+۲۴ = ۴۰px. */
@@ -1660,7 +1674,7 @@ useEffect(() => {
             <div className="clubs-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
                 <span className="sec-label" style={{ color: `${GRN}CC` }}>CLUB DISCOVERY</span>
-                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های منتخب</h2>
+                <h2 className="sec-title" style={{ color: TEXT, fontSize: 'clamp(20px,2.84vw,37px)' }}>باشگاه‌های پیشنهادی</h2>
                 <div className="sec-rule" style={{ color: GRN }} />
               </div>
               <Link href="/clubs" className="see-all-lq">
@@ -1678,14 +1692,14 @@ useEffect(() => {
           </div>
           {/* موبایل — ۱۰٪ بزرگ‌تر (۴۳.۰۵ ⇒ ۴۷.۳۶vw) و فاصله‌ی کمتر بین کارت‌ها */}
           <div ref={clubsSliderRef} className="clubs-mobile-slider">
-            {CLUBS.map((c) => (
+            {FEATURED_CLUBS.map((c) => (
               <div key={c.id} className="club-mob-card" style={{ width: '47.36vw', minWidth: '174px', flexShrink: 0, scrollSnapAlign: 'center' }}>
                 <ClubCard club={c} h="clamp(261px,75.77vw,352px)" />
               </div>
             ))}
           </div>
           <div className="clubs-dots">
-            {CLUBS.map((_, i) => (
+            {FEATURED_CLUBS.map((_, i) => (
               <div key={i} style={{
                 height: '5px',
                 width: i === activeClub ? '18px' : '5px',

@@ -1,5 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import Select from '../../../components/ui/Select'
+
+/* ارقامِ فارسی — همه‌ی عددهای این پنل فارسی دیده می‌شوند */
+const faNum = (v: string | number) => String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
@@ -519,11 +523,12 @@ export default function CoachDashboardPage() {
                       <span dir="auto" className={g.label.startsWith('WPBSA') ? 'bh-latin' : undefined} style={{ fontSize: 13.5, fontWeight: on ? 700 : 500, color: on ? TEXT : TEXT_S, unicodeBidi: 'isolate' }}>{g.label}</span>
                     </button>
                     {on && (
-                      <select value={yr} onChange={e => setGradeYear(g.key, e.target.value)}
-                        style={{ ...inp, width: 150, flexShrink: 0, padding: '7px 11px', fontSize: 12.5, direction: 'ltr', textAlign: 'left', cursor: 'pointer' }}>
-                        <option value="">سال دریافت</option>
-                        {YEARS.map(y => <option key={y} value={String(y)}>{y}</option>)}
-                      </select>
+                      <div style={{ width: 150, flexShrink: 0 }}>
+                        <Select
+                          compact value={yr} ariaLabel="سال دریافت" placeholder="سال دریافت"
+                          options={YEARS.map(y => ({ value: String(y), label: faNum(y) }))}
+                          onChange={v => setGradeYear(g.key, v)} />
+                      </div>
                     )}
                   </div>
                 )

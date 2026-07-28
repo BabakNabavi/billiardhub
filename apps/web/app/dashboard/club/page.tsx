@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Select from '../../../components/ui/Select'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -246,16 +247,10 @@ function SelectField({ label, value, onChange, options }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        style={{
-          width: '100%', boxSizing: 'border-box',
-          border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px',
-          fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none',
-          fontFamily: 'var(--font-base)',
-        }}
-      >
-        {options.map(o => <option key={o.value} value={o.value} disabled={o.disabled}>{o.label}</option>)}
-      </select>
+      <Select
+        value={value} ariaLabel={label}
+        options={options.filter(o => !o.disabled).map(o => ({ value: o.value, label: o.label }))}
+        onChange={onChange} />
     </div>
   );
 }

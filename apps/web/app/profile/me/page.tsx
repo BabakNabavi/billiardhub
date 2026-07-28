@@ -8,6 +8,7 @@ import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import VerificationBadges from '../../../components/VerificationBadges'
 import ChangePhone from '../../../components/auth/ChangePhone'
+import Select from '../../../components/ui/Select'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -186,6 +187,7 @@ export default function ProfileMePage() {
   const [clubName, setClubName] = useState('')
   const [address, setAddress]   = useState('')
   const [workPhone, setWorkPhone] = useState('')
+  const [clubMembers, setClubMembers] = useState<number | null>(null)
 
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -317,17 +319,34 @@ export default function ProfileMePage() {
     else showToast('خطا در ثبت کارت', 'error')
   }
 
+  /* انتخابِ باشگاه = عضویت در آن. شمارشِ اعضا از روی همین ردیف‌هاست،
+     پس انتخابِ دوباره‌ی همان باشگاه عدد را بالا نمی‌برد و جابه‌جایی
+     بین دو باشگاه هم خودبه‌خود درست حساب می‌شود. */
   const handleClub = async (clubId: string, name: string) => {
     setClubName(name)
     try { localStorage.setItem('bh_my_club', JSON.stringify({ id: clubId, name })) } catch {}
     try {
-      await apiFetch(`${API}/user/profile/club`, {
-        method: 'PUT',
+      const r = await apiFetch('/api/clubs/membership', {
+        method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ clubId }),
       })
-    } catch {}
-    showToast(`باشگاه ${name} انتخاب شد`)
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { showToast(j?.message || 'ثبتِ عضویت انجام نشد', 'error'); return }
+      setClubMembers(typeof j.members === 'number' ? j.members : null)
+      showToast(`عضو باشگاه ${name} شدید`)
+    } catch {
+      showToast('خطا در ارتباط با سرور', 'error')
+    }
+  }
+
+  const leaveClub = async () => {
+    try {
+      await apiFetch('/api/clubs/membership', { method: 'DELETE', headers: authHeader() })
+      setClubName(''); setClubMembers(null)
+      try { localStorage.removeItem('bh_my_club') } catch {}
+      showToast('عضویت شما لغو شد')
+    } catch { showToast('خطا در ارتباط با سرور', 'error') }
   }
 
   if (loading) return (
@@ -472,9 +491,18 @@ export default function ProfileMePage() {
                 باشگاهی که در آن بازی می‌کنید را از میان باشگاه‌های ثبت‌شده انتخاب کنید
               </p>
               {clubName && (
-                <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 15, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="ti ti-check" style={{ fontSize: 16 }} />
-                  {clubName}
+                <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <i className="ti ti-check" style={{ fontSize: 16, color: '#a78bfa' }} />
+                  <span style={{ fontSize: 15, color: '#a78bfa', fontWeight: 700 }}>{clubName}</span>
+                  {clubMembers !== null && (
+                    <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
+                      · {toFa(clubMembers)} عضو
+                    </span>
+                  )}
+                  <button onClick={leaveClub}
+                    style={{ marginInlineStart: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, color: '#B23B2E' }}>
+                    لغو عضویت
+                  </button>
                 </div>
               )}
               <ClubSearch onSelect={handleClub} />

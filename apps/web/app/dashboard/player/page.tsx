@@ -9,6 +9,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
+import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
@@ -214,15 +215,14 @@ export default function PlayerDashboard() {
               <div>
                 <label className={LABEL}>باشگاه محل تمرین</label>
                 {/* فقط باشگاه‌های ثبت‌شده (همان لیستِ صفحه‌ی /clubs) */}
-                <select value={form.clubName} onChange={e => set('clubName', e.target.value)} style={{ width: '100%' }}>
-                  <option value="">انتخاب باشگاه…</option>
-                  {clubOptions.map(c => (
-                    <option key={c.id} value={c.name}>{c.name} — {c.city}</option>
-                  ))}
-                  {form.clubName && !clubOptions.some(c => c.name === form.clubName) && (
-                    <option value={form.clubName}>{form.clubName}</option>
-                  )}
-                </select>
+                <Select
+                  value={form.clubName} ariaLabel="باشگاه" placeholder="انتخاب باشگاه…"
+                  options={[
+                    ...clubOptions.map(c => ({ value: c.name, label: c.name, hint: c.city })),
+                    ...(form.clubName && !clubOptions.some(c => c.name === form.clubName)
+                      ? [{ value: form.clubName, label: form.clubName }] : []),
+                  ]}
+                  onChange={v => set('clubName', v)} />
               </div>
               <div>
                 <label className={LABEL}>شروع فعالیت</label>

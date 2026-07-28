@@ -26,24 +26,29 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  /* مالکِ استوری از نشست خوانده می‌شود، نه از بدنه‌ی درخواست.
+     پیش‌تر هرکس می‌توانست ownerKey شخصِ دیگری را بفرستد و هم استوری
+     به نامِ او منتشر کند، هم سهمیه‌اش را خرج کند. */
+  const actor = actorFromRequest(req)
+  if (!actor) return NextResponse.json({ message: 'برای انتشار استوری وارد شوید' }, { status: 401, headers: CORS })
+
   const s = (await req.json()) as Partial<SStory>
-  if (!s.ownerKey || !s.mediaUrl) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+  if (!s.mediaUrl) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+
+  const ownerKey = actor.id
 
   const all = await readJson<SStory[]>(P.stories, [])
   const now = Date.now()
   const live = all.filter(x => now - x.createdAt < DAY)
 
   /* سقف از تنظیماتِ ادمین و بسته‌ی خریداری‌شده می‌آید، نه از عددِ هاردکد.
-     شمارش هم روی همان ownerKey که استوری با آن ثبت می‌شود. */
-  const actor = actorFromRequest(req)
-  const quota = await getStoryQuotaState(
-    actor?.id ?? '',
-    async period => {
-      const since = now - PERIOD_MS[period]
-      return all.filter(x => x.ownerKey === s.ownerKey && x.createdAt >= since).length
-    },
-    actor ? undefined : (s.roleKey || 'player'),
-  )
+     کلیدِ قدیمیِ ارسالی هم شمرده می‌شود تا استوری‌های قبلیِ همین کاربر
+     از قلم نیفتند و سهمیه دور زده نشود. */
+  const keys = [ownerKey, ...(s.ownerKey && s.ownerKey !== ownerKey ? [s.ownerKey] : [])]
+  const quota = await getStoryQuotaState(actor.id, async period => {
+    const since = now - PERIOD_MS[period]
+    return Math.max(...keys.map(k => all.filter(x => x.ownerKey === k && x.createdAt >= since).length))
+  })
 
   if (!quota.allowed) {
     return NextResponse.json(
@@ -54,7 +59,7 @@ export async function POST(req: NextRequest) {
 
   const story: SStory = {
     id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`,
-    ownerKey: s.ownerKey, userName: s.userName || 'کاربر',
+    ownerKey, userName: s.userName || 'کاربر',
     roleKey: s.roleKey || 'player', roleLabel: s.roleLabel || 'بازیکن', roleColor: s.roleColor || '#06b6d4',
     avatar: s.avatar || 'ک', logoUrl: s.logoUrl, mediaUrl: s.mediaUrl, caption: s.caption || '', createdAt: now,
   }
