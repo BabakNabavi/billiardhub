@@ -39,7 +39,7 @@ export default function PlansPage() {
 
   const [plans, setPlans] = useState<Plan[] | null>(null)
   const [quotaEnabled, setQuotaEnabled] = useState(false)
-  const [free, setFree] = useState<{ quota: number; period: Period }>({ quota: 3, period: 'week' })
+
   const [mine, setMine] = useState<Quota | null>(null)
   const [buying, setBuying] = useState('')
   const [err, setErr] = useState('')
@@ -47,7 +47,7 @@ export default function PlansPage() {
   useEffect(() => {
     void fetch('/api/ads/plans', { cache: 'no-store' })
       .then(r => r.json())
-      .then(j => { setPlans(j.plans ?? []); setQuotaEnabled(!!j.quotaEnabled); if (j.free) setFree(j.free) })
+      .then(j => { setPlans(j.plans ?? []); setQuotaEnabled(!!j.quotaEnabled) })
       .catch(() => setPlans([]))
   }, [])
 
@@ -133,8 +133,10 @@ export default function PlansPage() {
             background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.26)', borderRadius: 14,
             padding: '13px 17px', marginBottom: 20, fontSize: 13, color: GOLD_D, lineHeight: 2,
           }}>
-            سهمیه‌ی رایگانِ هر کاربر {toFaDigits(free.quota)} آگهی در هر {PERIOD_FA[free.period]} است.
-            برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید.
+            {mine
+              ? `سهمیه‌ی رایگانِ شما ${fa(mine.limit)} آگهی در هر ${PERIOD_FA[mine.period]} است.`
+              : 'سهمیه‌ی رایگانِ هر کاربر بسته به نقشش متفاوت است.'}
+            {' '}برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید.
           </div>
         )}
 

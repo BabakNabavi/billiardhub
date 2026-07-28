@@ -9,6 +9,7 @@ import {
   Clock, Eye, CheckCircle, X, Calendar,
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
+import AdSlot from '../components/ads/AdSlot';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 
@@ -1757,6 +1758,13 @@ useEffect(() => {
             {PRODUCTS.map((_, i) => (
               <div key={i} style={{ height: '5px', width: i === activeMkt ? '18px' : '5px', borderRadius: '3px', background: i === activeMkt ? GOLD : 'rgba(26,25,23,0.22)', transition: 'all 0.3s ease' }} />
             ))}
+          </div>
+
+          {/* دو جایگاه تبلیغاتیِ اجاره‌ای — راست و چپ، زیر بیلیارد بازار.
+              تا روشن‌شدنِ کلیدِ ادمین هیچ چیزی رندر نمی‌کنند. */}
+          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', marginTop: 26 }}>
+            <AdSlot slot="market_1" />
+            <AdSlot slot="market_2" />
           </div>
         </div>
       </section>

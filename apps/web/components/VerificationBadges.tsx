@@ -130,7 +130,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         title="اطلاعات هویتی"
         done={state.identity}
         note={state.identity
-          ? 'نام، کد ملی و تاریخ تولدِ شما هنگام ثبت‌نام از ثبت‌احوال استعلام شده است.'
+          ? 'مشخصات هویتی شما تأیید شده است.'
           : 'اطلاعات هویتیِ شما هنوز استعلام نشده است.'}
       />
 

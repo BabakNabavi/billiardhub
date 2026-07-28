@@ -10,6 +10,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Megaphone, Check, Loader2, Phone, Mail, MapPin, ArrowLeft, Lock } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
+import Select from '../../components/ui/Select'
+import { apiFetch } from '../../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38'
@@ -24,7 +26,12 @@ const LOCKED: React.CSSProperties = {
   ...INPUT, background: 'rgba(14,122,56,0.04)', border: '1px solid rgba(14,122,56,0.16)',
   color: 'rgba(0,0,0,0.62)', cursor: 'not-allowed',
 }
-const LABEL: React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 800, color: SEC, marginBottom: 6 }
+/* ارتفاعِ ثابت، وگرنه لیبلی که آیکون دارد فیلدش را پایین‌تر می‌برد
+   و ردیف به‌هم می‌ریزد */
+const LABEL: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 5, minHeight: 20,
+  fontSize: 12.5, fontWeight: 800, color: SEC, marginBottom: 6,
+}
 
 interface Slot { key: string; title: string; description: string | null }
 
@@ -69,8 +76,8 @@ export default function AdvertisePage() {
 
     setSending(true)
     try {
-      const r = await fetch('/api/ads/requests', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      const r = await apiFetch('/api/ads/requests', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, phone: digits(form.phone) }),
       })
       const j = await r.json().catch(() => ({}))
@@ -127,7 +134,7 @@ export default function AdvertisePage() {
             <div>
               <label style={LABEL}>
                 نام و نام‌خانوادگی *
-                {locked && <Lock size={11} style={{ marginInlineStart: 5, verticalAlign: '-1px', color: MUT }} />}
+                {locked && <Lock size={11} style={{ color: MUT, flexShrink: 0 }} />}
               </label>
               <input style={locked ? LOCKED : INPUT} value={form.name} disabled={locked}
                 onChange={e => set('name', e.target.value)} />
@@ -136,7 +143,7 @@ export default function AdvertisePage() {
             <div>
               <label style={LABEL}>
                 شماره موبایل *
-                {locked && <Lock size={11} style={{ marginInlineStart: 5, verticalAlign: '-1px', color: MUT }} />}
+                {locked && <Lock size={11} style={{ color: MUT, flexShrink: 0 }} />}
               </label>
               <input
                 style={{ ...(locked ? LOCKED : INPUT), direction: 'ltr', textAlign: 'right' }}
@@ -155,11 +162,10 @@ export default function AdvertisePage() {
 
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={LABEL}>جایگاهِ موردِ نظر</label>
-              <select value={form.slotKey} onChange={e => set('slotKey', e.target.value)}
-                style={{ ...INPUT, cursor: 'pointer' }}>
-                <option value="">انتخاب کنید…</option>
-                {slots.map(s => <option key={s.key} value={s.key}>{s.title}</option>)}
-              </select>
+              <Select
+                value={form.slotKey} ariaLabel="جایگاه تبلیغ"
+                options={slots.map(s => ({ value: s.key, label: s.title }))}
+                onChange={v => set('slotKey', v)} />
               {form.slotKey && (
                 <p style={{ fontSize: 11.5, color: MUT, margin: '7px 0 0', lineHeight: 1.9 }}>
                   {slots.find(s => s.key === form.slotKey)?.description}
@@ -173,12 +179,6 @@ export default function AdvertisePage() {
                 placeholder="چه چیزی می‌خواهید تبلیغ کنید؟ چه بازه‌ی زمانی مدِ نظرتان است؟" /></div>
           </div>
 
-          {locked && (
-            <p style={{ fontSize: 11.5, color: MUT, margin: '14px 0 0', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.9 }}>
-              <Lock size={12} style={{ flexShrink: 0, marginTop: 3, color: GOLD }} />
-              نام و شماره‌ی موبایل از حسابِ شما خوانده شده‌اند و این‌جا تغییر نمی‌کنند.
-            </p>
-          )}
 
           {err && (
             <p style={{ fontSize: 12.5, fontWeight: 800, color: '#B23B2E', margin: '14px 0 0' }}>{err}</p>

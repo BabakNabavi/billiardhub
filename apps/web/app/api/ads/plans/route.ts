@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { listPlans } from '@/lib/ads/plans';
-import { getSetting } from '@/lib/ads/quota';
+import { getSetting, normalizeFreeQuota, DEFAULT_FREE_QUOTA } from '@/lib/ads/quota';
 
 /* بسته‌های آگهیِ قابلِ خرید — فقط پلن‌های فعال.
    تا وقتی ادمین سهمیه را روشن نکرده، خریدن پلن اجباری نیست؛ ولی
@@ -11,10 +11,10 @@ export async function GET() {
     const [plans, quotaEnabled, free] = await Promise.all([
       listPlans(true),
       getSetting<boolean>('ads_quota_enabled', false),
-      getSetting<{ quota: number; period: string }>('ads_free_quota', { quota: 3, period: 'week' }),
+      getSetting<unknown>('ads_free_quota', DEFAULT_FREE_QUOTA),
     ]);
-    return NextResponse.json({ plans, quotaEnabled, free }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ plans, quotaEnabled, free: normalizeFreeQuota(free) }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
-    return NextResponse.json({ plans: [], quotaEnabled: false, free: { quota: 3, period: 'week' } });
+    return NextResponse.json({ plans: [], quotaEnabled: false, free: DEFAULT_FREE_QUOTA });
   }
 }

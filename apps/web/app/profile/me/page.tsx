@@ -488,13 +488,13 @@ export default function ProfileMePage() {
               {profile.bankCard && (
                 <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: '8px 14px', marginBottom: 12, fontSize: 15, color: '#fbbf24', fontFamily: 'monospace', letterSpacing: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <i className="ti ti-credit-card" style={{ fontSize: 18 }} />
-                  {profile.bankCard}
+                  {toFa(profile.bankCard)}
                 </div>
               )}
               <Field label="شماره کارت">
                 <input
-                  value={bankCard}
-                  onChange={e => setBankCard(formatCard(e.target.value))}
+                  value={toFa(bankCard)}
+                  onChange={e => setBankCard(formatCard(toEnDigits(e.target.value)))}
                   placeholder="---- ---- ---- ----"
                   inputMode="numeric"
                   style={{ ...inputStyle, letterSpacing: 3, direction: 'ltr', textAlign: 'center' }}

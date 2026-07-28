@@ -43,6 +43,13 @@ const PW_RULES: { label: string; test: (v: string) => boolean }[] = [
 ];
 const pwOk = (v: string) => PW_RULES.every(r => r.test(v));
 
+/* لینک‌های حقوقی درونِ متنِ پذیرش */
+const legalLink: React.CSSProperties = {
+  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+  fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 800,
+  color: '#1D4ED8', textDecoration: 'underline', textUnderlineOffset: 3,
+};
+
 /* اعتبارسنجی کد ملی ایران (چک‌سام استاندارد) */
 function isValidNationalId(v: string): boolean {
   if (!/^\d{10}$/.test(v)) return false;
@@ -108,12 +115,13 @@ export default function RegisterPage() {
     } catch { /* ignore */ }
   }, []);
 
-  const goToTerms = () => {
+  /* رفتن به صفحه‌ی حقوقی و برگشت، بدونِ گم‌شدنِ اطلاعاتِ پرشده */
+  const goToLegal = (path: '/terms' | '/privacy') => {
     try {
       const { password: _p, confirmPassword: _c, ...rest } = form;
       sessionStorage.setItem('bh_register_draft', JSON.stringify({ ...rest, step }));
     } catch { /* ignore */ }
-    router.push('/terms?from=register');
+    router.push(`${path}?from=register`);
   };
 
   /* سانیتایزِ ورودی‌ها: نام‌ها فقط حروف فارسی (بدون عدد و حروف انگلیسی)؛ کد ملی فقط ۱۰ رقم؛
@@ -569,11 +577,15 @@ export default function RegisterPage() {
                   }}
                   style={{ width: 17, height: 17, marginTop: 2, accentColor: GOLD, cursor: 'pointer', flexShrink: 0 }} />
                 <span style={{ fontSize: 12.5, lineHeight: 2, color: SEC }}>
-                  <button type="button" onClick={goToTerms}
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 800, color: '#1D4ED8', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                    قوانین
+                  با ورود به بیلیارد هاب،{' '}
+                  <button type="button" onClick={() => goToLegal('/terms')} style={legalLink}>
+                    شرایط و قوانین استفاده
                   </button>
-                  {' '}را مطالعه کردم و می‌پذیرم.
+                  {' '}و{' '}
+                  <button type="button" onClick={() => goToLegal('/privacy')} style={legalLink}>
+                    سیاست‌نامهٔ حریم خصوصی
+                  </button>
+                  {' '}را می‌پذیرم.
                 </span>
               </label>
 
