@@ -9,7 +9,7 @@
 import { sb } from '../finance/db'
 import { getSetting } from './quota'
 
-export const SLOT_KEYS = ['market_1', 'market_2', 'explore', 'footer'] as const
+export const SLOT_KEYS = ['market_1', 'market_2', 'footer'] as const
 export type SlotKey = typeof SLOT_KEYS[number]
 
 export const isSlotKey = (v: unknown): v is SlotKey => (SLOT_KEYS as readonly string[]).includes(String(v))

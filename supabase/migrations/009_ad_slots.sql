@@ -1,8 +1,8 @@
 -- ═══════════════════════════════════════════════════════════════════
 -- 009 — جایگاه‌های تبلیغاتیِ اجاره‌ای و درخواست تبلیغ
 --
--- چهار جایگاهِ ثابت روی سایت (زیر بیلیارد بازار — دو تا، زیر «بیشتر
--- در بیلیارد هاب کاوش کن»، و بالای فوتر). ادمین برای هر جایگاه تعداد
+-- جایگاه‌های ثابت روی سایت (دو تا زیر بیلیارد بازار، و یکی بالای
+-- فوتر). ادمین برای هر جایگاه تعداد
 -- بنر، قیمت و مدتِ اجاره را تعیین می‌کند.
 --
 -- کلیدِ ad_slots_enabled (مایگریشن ۰۰۶) تعیین می‌کند بنرها اصلاً روی
@@ -16,7 +16,7 @@
 
 -- ── تعریفِ جایگاه‌ها (ادمین قیمت و ظرفیت را تعیین می‌کند) ─────────
 CREATE TABLE IF NOT EXISTS public.ad_slots (
-  key            text PRIMARY KEY,          -- market_1 | market_2 | explore | footer
+  key            text PRIMARY KEY,          -- market_1 | market_2 | footer
   title          text        NOT NULL,
   description    text,
   capacity       integer     NOT NULL DEFAULT 1,   -- چند بنر همزمان
@@ -72,11 +72,12 @@ ALTER TABLE public.ad_slots      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ad_placements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ad_requests   ENABLE ROW LEVEL SECURITY;
 
-/* چهار جایگاهِ سایت — قیمت صفر یعنی «هنوز قیمت‌گذاری نشده»؛
-   ادمین در پنل تکمیل می‌کند. */
+/* جایگاه‌های سایت — قیمت صفر یعنی «هنوز قیمت‌گذاری نشده»؛
+   ادمین در پنل تکمیل می‌کند.
+   (جایگاهِ 'explore' در مایگریشن ۰۱۱ حذف شد — با جایگاهِ بالای فوتر
+   روی صفحه‌ی اصلی یک‌جا می‌افتاد.) */
 INSERT INTO public.ad_slots (key, title, description, capacity, price, duration_days, sort_order) VALUES
   ('market_1', 'بیلیارد بازار — جایگاه اول', 'بنرِ افقی، بلافاصله زیر محصولات بیلیارد بازار', 1, 0, 30, 1),
   ('market_2', 'بیلیارد بازار — جایگاه دوم', 'بنرِ افقی، زیر جایگاه اول',                      1, 0, 30, 2),
-  ('explore',  'زیر «بیشتر در بیلیارد هاب کاوش کن»', 'بنرِ عریضِ صفحه‌ی اصلی',                1, 0, 30, 3),
   ('footer',   'بالای فوتر', 'بنرِ عریض در همه‌ی صفحات، بالای فوتر',                          1, 0, 30, 4)
 ON CONFLICT (key) DO NOTHING;

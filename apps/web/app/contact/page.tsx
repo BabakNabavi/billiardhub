@@ -18,6 +18,9 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
+/* نمایشِ فارسیِ ارقام — مقدارِ لینکِ tel: لاتین می‌ماند */
+const toFaDigits = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
+
 const BALLS = { red: '#C43D2E', green: '#1B7A4B', blue: '#3D63E6', pink: '#F06EAE', yellow: '#E8B93A', gold: '#C7A66A' }
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
@@ -31,12 +34,13 @@ const CONTACT = {
   phone: '021-22859551',
   phoneDial: '02122859551',   // برای لینکِ tel:
   city: 'تهران',
-  address: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶، طبقه سوم',
+  address: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶',
   instagram: '',    // TODO: آدرس کامل پروفایل — فعلاً نمایش داده نمی‌شود
   telegram: '',     // TODO: آدرس کامل کانال — فعلاً نمایش داده نمی‌شود
 }
 
-const SUBJECTS = ['پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد', 'تبلیغات', 'سایر']
+/* «تبلیغات» این‌جا نیست — فرمِ خودش را در /advertise دارد */
+const SUBJECTS = ['پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد', 'سایر']
 
 function useReveal() {
   useEffect(() => {
@@ -301,8 +305,7 @@ export default function ContactPage() {
             {/* ── کانال‌های ارتباطی ── */}
             <div style={{ padding: 'clamp(26px,4vw,44px)' }}>
               <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>CHANNELS</span>
-              <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 4px' }}>کانال‌های ارتباطی</h2>
-              <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 18px', lineHeight: 1.9 }}>مستقیم، بدون واسطه — راهت را انتخاب کن</p>
+              <h2 style={{ fontSize: 'clamp(19px,2.4vw,25px)', fontWeight: 900, margin: '10px 0 18px' }}>کانال‌های ارتباطی</h2>
 
               {/* ایمیل — کلیک = کپی */}
               <button type="button" className="ct-ch" onClick={copyEmail} style={{ ['--cc' as never]: BALLS.blue }}>
@@ -322,7 +325,7 @@ export default function ContactPage() {
                   <span className="ic"><Headphones size={18} /></span>
                   <span style={{ minWidth: 0 }}>
                     <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: TEXT }}>تلفن</span>
-                    <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{CONTACT.phone}</span>
+                    <span dir="ltr" style={{ fontSize: 12.5, color: SEC, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{toFaDigits(CONTACT.phone)}</span>
                   </span>
                   <span className="hint">تماس مستقیم</span>
                 </a>

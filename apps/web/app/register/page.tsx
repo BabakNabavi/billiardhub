@@ -235,7 +235,7 @@ export default function RegisterPage() {
     setLoading(true);
     /* استعلام از شاهکار و ثبت‌احوال چند ثانیه طول می‌کشد و بیرون از دستِ
        ماست. به‌جای اسپینرِ خاموش، بگو الان کجای کار است. */
-    setBusyStep('استعلام از سامانه‌ی شاهکار و ثبت‌احوال…');
+    setBusyStep('در حال بررسی…');
     try {
       /* احراز هویت: شاهکار (کد ملی ↔ موبایلِ تأییدشده) + تطبیقِ نام با ثبت‌احوال */
       const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim(), {
@@ -418,7 +418,7 @@ export default function RegisterPage() {
           </h1>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
-            {otpOpen ? `کدِ ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)}، اکنون اطلاعات حساب را کامل کنید`}
+            {otpOpen ? `کدِ ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
           </p>
 
           {/* ── مرحله ۱: شماره ── */}
@@ -586,14 +586,6 @@ export default function RegisterPage() {
                 ) : 'ثبت نام'}
               </button>
 
-              {/* استعلام از سامانه‌های دولتی چند ثانیه طول می‌کشد و دستِ ما
-                  نیست؛ صریح بگو تا کاربر فکر نکند صفحه گیر کرده است. */}
-              {loading && (
-                <p style={{ fontSize: 11.5, color: MUT, margin: '9px 0 0', display: 'flex', alignItems: 'flex-start', gap: 6, lineHeight: 1.9, textAlign: 'center', justifyContent: 'center' }}>
-                  <ShieldCheck size={13} style={{ flexShrink: 0, marginTop: 3, color: GOLD }} />
-                  استعلام از سامانه‌های شاهکار و ثبت‌احوال معمولاً چند ثانیه طول می‌کشد؛ صفحه را نبندید.
-                </p>
-              )}
 
               <button onClick={() => { setStep(1); setError(''); }} disabled={loading}
                 style={{ width: '100%', marginTop: 10, padding: '11px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, background: 'transparent', border: `1px solid ${LINE}`, color: SEC, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>

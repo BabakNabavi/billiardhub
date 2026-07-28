@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react'
 
-export type SlotKey = 'market_1' | 'market_2' | 'explore' | 'footer'
+export type SlotKey = 'market_1' | 'market_2' | 'footer'
 
 interface Banner {
   id: string
