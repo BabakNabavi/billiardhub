@@ -109,17 +109,10 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
       if (!alive) return
       const payload = all[slot]
       const list = (payload?.campaigns ?? []).filter(c => c.banner?.imageUrl)
-      if (list.length <= 1) { setBanners(list); return }
-
-      /* از فاز ۴، چرخش سمتِ سرور تصمیم‌گیری می‌شود و ترتیبِ آرایه
-         همان است — کلاینت فقط در همان ترتیب می‌چرخد. تنها استثنا
-         حالتِ weighted است که سهمِ بیشتر یعنی حضورِ بیشتر در حلقه. */
-      if (payload?.rotationMode === 'weighted') {
-        const rotation: LiveCampaign[] = []
-        for (const c of list) for (let i = 0; i < Math.min(5, Math.max(1, c.weight)); i++) rotation.push(c)
-        setBanners(rotation)
-        return
-      }
+      /* از فاز ۴، هر چهار حالتِ چرخش سمتِ سرور تصمیم‌گیری می‌شود و
+         ترتیبِ همین آرایه نتیجه‌ی آن است؛ کلاینت فقط در همان ترتیب
+         می‌چرخد. (تکرارِ وزنیِ قبلی حذف شد: هم کارِ سرور را دوباره
+         می‌کرد، هم اسلایدهای تکراریِ پشتِ‌هم می‌ساخت.) */
       setBanners(list)
     })
     return () => { alive = false }
