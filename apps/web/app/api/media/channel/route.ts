@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, readJson, writeJson, safeKey } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
+import { redactList } from '@/lib/privacy'
 
 /* کانال‌های کاربران — مثل یوتیوب، برای انتشارِ ویدیو داشتنِ کانال لازم است و
    کانال یک مرحله‌ی صریح است (نام + هندل)، نه چیزی که پنهانی ساخته شود. */
@@ -33,10 +34,22 @@ export async function GET(req: NextRequest) {
     const taken = list.some(c => c.handle === h && (!owner || c.ownerKey !== owner))
     return NextResponse.json({ handle: h, available: !taken && h.length >= 3 }, { headers: CORS })
   }
+  /* پرس‌وجو با owner فقط برای «کانالِ خودم» است؛ مالکیت از نشست
+     بررسی می‌شود تا کسی با شماره‌ی دیگری کانالِ او را نخواند. */
   if (owner) {
+    const actor = await actorOf(req).catch(() => null)
+    if (!actor || (actor.dmKey !== owner && actor.id !== owner && !actor.isAdmin)) {
+      return NextResponse.json(null, { status: 403, headers: CORS })
+    }
     return NextResponse.json(list.find(c => c.ownerKey === owner) ?? null, { headers: CORS })
   }
-  return NextResponse.json(list, { headers: CORS })
+
+  /* فهرستِ عمومیِ کانال‌ها — ownerKey (که غالباً شماره‌ی موبایل است)
+     هش می‌شود تا از مسیرِ عمومی جمع‌آوری نشود. */
+  return NextResponse.json(
+    redactList(list as unknown as Record<string, unknown>[]),
+    { headers: CORS },
+  )
 }
 
 /* POST { ownerKey, name, handle, bio?, avatar? } → ساخت یا ویرایشِ کانال */

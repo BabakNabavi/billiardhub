@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, readJson, writeJson } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
+import { redactList } from '@/lib/privacy'
 
 /* ویدیوهای آپلودیِ کاربران — مثل یوتیوب، سمت‌سرور روی Supabase Storage.
    هر کاربرِ لاگین‌کرده می‌تواند کانال بسازد و ویدیو بگذارد. */
@@ -27,10 +28,20 @@ export interface UserVideo {
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* GET → همه‌ی ویدیوهای کاربران (تازه‌ترین اول) */
-export async function GET() {
+/* GET → همه‌ی ویدیوهای کاربران (تازه‌ترین اول).
+
+   عمداً عمومی است (فهرستِ ویدیوها مثلِ صفحه‌ی اولِ یوتیوب)، ولی
+   `ownerKey` از `phone || id` ساخته می‌شود و برای بیشترِ کاربران
+   همان شماره‌ی موبایل است؛ پیش‌تر عیناً برمی‌گشت و هر کسی بدونِ ورود
+   می‌توانست شماره‌ها را جمع کند. حالا هشِ پایدار برمی‌گردد. */
+export async function GET(req: NextRequest) {
   const list = await readJson<UserVideo[]>(INDEX, [])
-  return NextResponse.json(list.sort((a, b) => b.ts - a.ts), { headers: CORS })
+  const actor = await actorOf(req).catch(() => null)
+  const sorted = list.sort((a, b) => b.ts - a.ts)
+  return NextResponse.json(
+    redactList(sorted as unknown as Record<string, unknown>[], actor?.dmKey ?? null),
+    { headers: CORS },
+  )
 }
 
 /* POST { video } → افزودنِ ویدیوی جدید (بعد از آپلودِ فایل‌ها در Storage) */

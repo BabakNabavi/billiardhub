@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CORS, DAY, P, readJson, writeJson } from '@/lib/social-server'
 import { actorFromRequest } from '@/lib/finance/db'
 import { getStoryQuotaState } from '@/lib/stories/quota'
+import { redactList } from '@/lib/privacy'
 
 /* سقفِ استوری دیگر هاردکد نیست — از تنظیماتِ ادمین (به تفکیکِ نقش) و
    بسته‌ی خریداری‌شده می‌آید. اعدادِ قبلی به‌عنوانِ پیش‌فرض در مایگریشنِ
@@ -22,7 +23,12 @@ export async function GET() {
   const now = Date.now()
   const live = all.filter(s => now - s.createdAt < DAY)
   if (live.length !== all.length) writeJson(P.stories, live).catch(() => {})
-  return NextResponse.json(live, { headers: CORS })
+  /* ownerKey برای بیشترِ کاربران شماره‌ی موبایل است و این مسیر عمومی
+     است؛ پس هشِ پایدار برمی‌گردد نه خودِ کلید. */
+  return NextResponse.json(
+    redactList(live as unknown as Record<string, unknown>[]),
+    { headers: CORS },
+  )
 }
 
 export async function POST(req: NextRequest) {
