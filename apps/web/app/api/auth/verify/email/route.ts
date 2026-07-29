@@ -3,19 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { checkEmail, normalizeEmail, EMAIL_RE } from '@/lib/email-server';
 
-/* ثبتِ ایمیلِ کاربر.
+/* ثبت و تأییدِ ایمیلِ کاربر — با استعلامِ واقعیِ CheckEmail.
 
-   اختیاری است: نبودش هیچ چیزی را نمی‌بندد.
+   اختیاری است: نبودش هیچ چیزی را نمی‌بندد. ولی اگر ثبت شود، حتماً از
+   سرویس پرسیده می‌شود و نشانیِ نامعتبر با ۴۲۲ رد می‌شود؛ تیکِ سبزِ
+   بی‌پشتوانه داده نمی‌شود.
 
-   **چرا این‌جا «تأیید» اتفاق نمی‌افتد:** سرویسِ CheckEmail فقط می‌گوید
-   این نشانی واقعی و فعال هست یا نه؛ هیچ کدی به صندوقِ کاربر نمی‌فرستد.
-   پس نتیجه‌اش «این ایمیل وجود دارد» است، نه «این ایمیل مالِ این کاربر
-   است». تا امروز همان نتیجه `email_verified = true` می‌شد و هر کسی
-   می‌توانست نشانیِ شخصِ دیگری را وارد کند و تیکِ سبز بگیرد.
-
-   اثباتِ مالکیت به فرستادنِ کد نیاز دارد و پروژه هنوز هیچ سرویسِ
-   ارسالِ ایمیل ندارد. تا آن روز، ایمیل «ثبت‌شده» می‌ماند نه
-   «تأییدشده» — تیکِ سبزِ بی‌پشتوانه از نبودِ تیک بدتر است. */
+   محدودیتی که باید بدانیم: این سرویس «وجود و فعال بودنِ نشانی» را
+   می‌سنجد، نه اینکه نشانی مالِ همین کاربر باشد. اثباتِ مالکیت به
+   فرستادنِ کد نیاز دارد که سرویسِ جداگانه‌ای می‌خواهد. پس این تیک
+   یعنی «ایمیل واقعی است»، نه «ایمیل متعلق به این شخص است». */
 
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -42,20 +39,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: res.message ?? 'این ایمیل فعال نیست', valid: false }, { status: 422 });
   }
 
-  /* ثبت می‌شود، ولی تأییدنشده — مالکیت اثبات نشده است */
+  /* تا این‌جا سرویس گفته این نشانی واقعی و فعال است ⇒ تأیید می‌شود.
+     ایمیلِ نامعتبر بالاتر با ۴۲۲ رد شده و اصلاً به این‌جا نمی‌رسد. */
   const { error } = await sb().from('users')
-    .update({ email, email_verified: false, updatedAt: new Date().toISOString() })
+    .update({ email, email_verified: true, updatedAt: new Date().toISOString() })
     .eq('id', actor.id);
   if (error) return NextResponse.json({ message: 'ذخیره‌ی ایمیل انجام نشد' }, { status: 500 });
 
   void audit({
-    actorId: actor.id, actorRole: actor.role, action: 'EMAIL_RECORDED',
+    actorId: actor.id, actorRole: actor.role, action: 'EMAIL_VERIFIED',
     entityType: 'user', entityId: actor.id, newValue: { email }, ip: clientIp(req) ?? undefined,
   });
 
   return NextResponse.json({
-    ok: true, email, emailVerified: false,
-    message: 'ایمیل ثبت شد. تأییدِ مالکیت پس از راه‌اندازیِ ارسالِ ایمیل انجام می‌شود.',
+    ok: true, email, emailVerified: true,
+    message: 'ایمیل شما بررسی و تأیید شد.',
   });
 }
 
