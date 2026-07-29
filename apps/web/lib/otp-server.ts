@@ -2,8 +2,18 @@ import { createHmac } from 'crypto'
 import { writeJson, safeKey, BUCKET } from './social-server'
 
 const SUPA = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
-/* کد را هش‌شده ذخیره می‌کنیم (باکت عمومی است) تا حتی با خواندنِ فایل هم کد لو نرود */
-const hashCode = (code: string) => createHmac('sha256', process.env.JWT_SECRET || 'bh-otp-secret').update(String(code)).digest('hex')
+/* کد را هش‌شده ذخیره می‌کنیم (باکت عمومی است) تا حتی با خواندنِ فایل هم کد لو نرود.
+
+   کلید عمداً fallback ندارد: پیش‌تر اگر JWT_SECRET تنظیم نبود، کدها با
+   رشته‌ی ثابتِ داخلِ همین فایل هش می‌شدند — یعنی هر کسی که مخزن را
+   می‌خواند می‌توانست کدِ تأیید را از روی هش بسازد. حالا نبودِ کلید
+   صدا می‌کند به‌جای اینکه بی‌صدا امنیت را پایین بیاورد. */
+const otpKey = () => {
+  const s = process.env.JWT_SECRET
+  if (!s) throw new Error('JWT_SECRET is not set — OTP hashing unavailable')
+  return s
+}
+const hashCode = (code: string) => createHmac('sha256', otpKey()).update(String(code)).digest('hex')
 
 /* OTPِ پیامکی — کد را خودمان می‌سازیم/ذخیره/می‌سنجیم و سرویسِ s.api.ir فقط
    پیامک را می‌رساند. ذخیره روی همان Supabase Storage (مثل استوری/دایرکت). */

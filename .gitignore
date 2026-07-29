@@ -6,11 +6,10 @@ node_modules
 .pnp.js
 
 # Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# الگوی عام است تا هر فایلِ env تازه‌ای (.env.production، .env.staging، …)
+# هم خودبه‌خود بیرون بماند — فهرستِ نامیِ قبلی این‌ها را نمی‌گرفت.
+.env*
+!.env.example
 
 # Testing
 coverage

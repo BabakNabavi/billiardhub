@@ -9,7 +9,13 @@ import type {
    authority با HMAC امضا می‌شود تا از جعل جلوگیری شود. */
 export class MockPaymentProvider implements PaymentProvider {
   readonly name = 'mock'
-  private secret = process.env.JWT_SECRET || 'bh-mock-secret'
+  /* بدونِ fallbackِ هاردکد: امضای authority باید به کلیدِ محیط گره بخورد،
+     وگرنه با رشته‌ی ثابتِ داخلِ مخزن قابلِ جعل می‌شد. */
+  private get secret() {
+    const s = process.env.JWT_SECRET
+    if (!s) throw new Error('JWT_SECRET is not set — mock payment signing unavailable')
+    return s
+  }
 
   isConfigured() { return true }
 
