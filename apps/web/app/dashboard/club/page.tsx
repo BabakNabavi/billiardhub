@@ -1739,59 +1739,6 @@ export default function ClubDashboardPage() {
       {activeTab === 'tables' && (
         <>
         <div>
-          {/* ── هزینه‌ی بازیکنِ اضافه ── */}
-          <Card style={{ marginBottom: 16 }}>
-            <SectionTitle>هزینه‌ی بازیکن اضافه — پیش‌فرضِ باشگاه</SectionTitle>
-            <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
-              این تنظیم روی میزهایی اعمال می‌شود که نرخِ اختصاصیِ خودشان را
-              ندارند. برای هر میز می‌توانید در فرمِ همان میز نرخِ جداگانه بگذارید.
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <button onClick={() => setSurcharge(s => ({ ...s, enabled: !s.enabled }))}
-                aria-label="فعال‌سازی هزینه‌ی بازیکن اضافه"
-                style={{
-                  width: 46, height: 26, borderRadius: 999, border: 'none', cursor: 'pointer', padding: 3,
-                  background: surcharge.enabled ? 'rgba(199,166,106,0.85)' : 'rgba(0,0,0,0.14)',
-                  display: 'flex', justifyContent: surcharge.enabled ? 'flex-start' : 'flex-end',
-                  transition: 'background .2s', flexShrink: 0,
-                }}>
-                <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }} />
-              </button>
-              <span style={{ fontSize: 14, fontWeight: 700, color: DARK }}>
-                {surcharge.enabled ? 'فعال است' : 'غیرفعال است'}
-              </span>
-            </div>
-
-            {surcharge.enabled && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end', marginBottom: 12 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 6 }}>از چند نفر به بالا</div>
-                  <input value={surcharge.from} inputMode="numeric"
-                    onChange={e => setSurcharge(s => ({ ...s, from: e.target.value.replace(/\D/g, '').slice(0, 2) }))}
-                    style={{ width: 90, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 14, fontFamily: 'var(--font-base)', outline: 'none', textAlign: 'center' }} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 6 }}>درصد به ازای هر نفر</div>
-                  <input value={surcharge.percent} inputMode="numeric"
-                    onChange={e => setSurcharge(s => ({ ...s, percent: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
-                    style={{ width: 90, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', fontSize: 14, fontFamily: 'var(--font-base)', outline: 'none', textAlign: 'center' }} />
-                </div>
-              </div>
-            )}
-
-            <div style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginBottom: 14 }}>
-              {surcharge.enabled
-                ? <>از <b style={{ color: DARK }}>{surcharge.from || '۲'}</b> نفر به بالا، هر نفر <b style={{ color: DARK }}>{surcharge.percent || '۰'}٪</b> به مبلغ رزرو اضافه می‌شود. همین متن و همین محاسبه در صفحه‌ی رزرو به کاربر نمایش داده می‌شود.</>
-                : 'تعداد بازیکنان روی مبلغ رزرو اثری نخواهد داشت.'}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <SaveBtn onClick={saveSurcharge} loading={surchargeSaving} label="ذخیره تنظیمات" />
-              {surchargeSaved && <span style={{ fontSize: 12.5, fontWeight: 700, color: '#0E7A38' }}>ذخیره شد ✓</span>}
-              {surchargeError && <span style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', lineHeight: 1.9 }}>{surchargeError}</span>}
-            </div>
-          </Card>
-
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: DARK }}>میزهای باشگاه</h2>
             <button onClick={() => setShowTableForm(v => !v)} style={{
