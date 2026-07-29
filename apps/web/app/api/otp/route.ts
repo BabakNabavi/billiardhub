@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS } from '@/lib/social-server'
 import { sendOtp, verifyOtp } from '@/lib/otp-server'
+import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
@@ -26,9 +27,17 @@ export async function POST(req: NextRequest) {
   const mobile = String(b?.mobile || '')
 
   if (b?.action === 'verify') {
+    /* سطلِ جدا از ارسال: حدسِ کد نباید با گرفتنِ کدِ تازه ریست شود */
+    const rl = await hitRateLimit(req, RULES.otpVerify, mobile)
+    if (!rl.ok) return tooMany(rl.retryAfterSec)
+
     const r = await verifyOtp(mobile, String(b?.code || ''))
     return NextResponse.json(r, { status: r.ok ? 200 : 400, headers: CORS })
   }
+
+  /* ارسالِ کد — سطلِ مستقل */
+  const rlSend = await hitRateLimit(req, RULES.otpSend, mobile)
+  if (!rlSend.ok) return tooMany(rlSend.retryAfterSec)
 
   /* فقط در مسیرِ ثبت‌نام: شماره‌ی تکراری ⇒ اصلاً پیامکی فرستاده نمی‌شود */
   if (b?.purpose === 'register' && /^09\d{9}$/.test(mobile) && await phoneTaken(mobile)) {

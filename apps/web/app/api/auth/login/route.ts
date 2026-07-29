@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
+import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -26,6 +27,10 @@ export async function POST(req: NextRequest) {
         { status: 400, headers: CORS_HEADERS },
       );
     }
+
+    /* محدودیتِ نرخ پس از اعتبارسنجیِ شکل، تا درخواستِ ناقص سهمیه نسوزاند */
+    const rl = await hitRateLimit(req, RULES.login, String(phone));
+    if (!rl.ok) return tooMany(rl.retryAfterSec);
 
     const { data: user, error } = await getSupabaseServer()
       .from('users')

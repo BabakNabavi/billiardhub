@@ -8,16 +8,32 @@ import {
   type ConvIndexItem, type DMsg,
 } from '@/lib/social-server'
 import { sendPush } from '@/lib/push-server'
+import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* GET ?user=KEY                    → لیست گفتگوها (+ ثبتِ آنلاین‌بودن برای تیکِ «رسیده»)
-   GET ?conv=ID&user=KEY&since=TS   → { messages, otherKey, otherPoll, otherRead } */
+/* هویتِ فرستنده/خواننده همیشه از نشست می‌آید، نه از کوئری یا بدنه.
+   پیش‌تر `user` و `from.key` را کلاینت می‌گفت و همین یعنی هر کسی
+   می‌توانست مکالمه‌ی دیگران را بخواند یا به‌جای آن‌ها پیام بفرستد. */
+const deny = (s: number, body: unknown) => NextResponse.json(body, { status: s, headers: CORS })
+
+/** آیا این کلید یکی از دو طرفِ همین گفتگوست؟ */
+const isParticipant = (cid: string, key: string) =>
+  cid.split('__').includes(safeKey(key))
+
+/* GET                              → لیست گفتگوهای خودِ کاربر
+   GET ?conv=ID&since=TS            → { messages, otherKey, otherPoll, otherRead } */
 export async function GET(req: NextRequest) {
+  const actor = await actorOf(req)
+  if (!actor) return deny(401, UNAUTHENTICATED)
+
   const cid = req.nextUrl.searchParams.get('conv')
-  const user = req.nextUrl.searchParams.get('user') || ''
+  const user = actor.dmKey                       // ← از نشست، نه از کوئری
   const since = parseInt(req.nextUrl.searchParams.get('since') || '0', 10) || 0
   if (user) await touchPoll(user)   // این کاربر آنلاین است ⇒ پیام‌های او «رسیده»
+
+  /* گفتگویی که کاربر عضوش نیست، برایش وجود ندارد */
+  if (cid && !isParticipant(cid, user)) return deny(403, FORBIDDEN)
 
   if (cid) {
     /* convId از safeKeyها ساخته شده؛ safeKey روی رشته‌ی ایمن idempotent است،
@@ -55,11 +71,24 @@ export async function GET(req: NextRequest) {
 
 /* POST { from:{key,name,role}, to:{key,name,role}, text, kind, storyRef? } */
 export async function POST(req: NextRequest) {
+  const actor = await actorOf(req)
+  if (!actor) return deny(401, UNAUTHENTICATED)
+
   const b = await req.json()
-  const from = b?.from, to = b?.to
+  const to = b?.to
   const text: string = (b?.text ?? '').toString().trim()
   const kind: string = b?.kind || 'text'
-  if (!from?.key || !to?.key || !text) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+  if (!to?.key || !text) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+
+  /* فرستنده همیشه خودِ صاحبِ نشست است. نام و نقشِ نمایشی می‌تواند از
+     بدنه بیاید (فقط تزئینِ رابط)، ولی «کلید» — که مالکیتِ پیام با آن
+     تعیین می‌شود — جعل‌شدنی نیست. */
+  const from = {
+    key: actor.dmKey,
+    name: String(b?.from?.name ?? '').slice(0, 80),
+    role: String(b?.from?.role ?? actor.role).slice(0, 40),
+  }
+  if (!from.key) return deny(403, FORBIDDEN)
 
   const id = convId(from.key, to.key)
   const at = Date.now()
@@ -93,9 +122,14 @@ export async function POST(req: NextRequest) {
 
 /* DELETE ?conv=ID&user=KEY → پاک‌کردنِ گفتگو فقط از سمتِ همین کاربر */
 export async function DELETE(req: NextRequest) {
+  const actor = await actorOf(req)
+  if (!actor) return deny(401, UNAUTHENTICATED)
+
   const cid = req.nextUrl.searchParams.get('conv') || ''
-  const user = req.nextUrl.searchParams.get('user') || ''
+  const user = actor.dmKey                       // ← از نشست، نه از کوئری
   if (!cid || !user) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
+  /* فقط گفتگوی خودش را می‌تواند از سمتِ خودش پاک کند */
+  if (!isParticipant(cid, user)) return deny(403, FORBIDDEN)
   await setClearedAt(cid, user, Date.now())
   const path = P.dmIndex(user)
   const list = await readJson<ConvIndexItem[]>(path, [])

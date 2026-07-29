@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
+import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { wasIdentityVerified } from '@/lib/otp-server';
 import { ensurePersonForUser } from '@/lib/identity';
 
@@ -28,6 +29,10 @@ export async function POST(req: NextRequest) {
         { status: 400, headers: CORS_HEADERS },
       );
     }
+
+    /* سقفِ ساختِ حساب — جلوی ساختِ انبوهِ خودکار را می‌گیرد */
+    const rl = await hitRateLimit(req, RULES.register, String(phone));
+    if (!rl.ok) return tooMany(rl.retryAfterSec);
 
     const { data: existing } = await getSupabaseServer()
       .from('users')
