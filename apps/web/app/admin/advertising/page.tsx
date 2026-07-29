@@ -354,6 +354,11 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
           <label style={LABEL}>ظرفیت</label>
           <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(cap)}
             onChange={e => setCap(digits(e.target.value))} />
+          {Number(cap) === 0 && (
+            <div style={{ fontSize: 10.5, color: RED, marginTop: 4, lineHeight: 1.6 }}>
+              با ظرفیتِ صفر چیزی نمایش داده نمی‌شود.
+            </div>
+          )}
         </div>
         <div style={{ width: 100 }}>
           <label style={LABEL}>تعدادِ نمایش</label>
