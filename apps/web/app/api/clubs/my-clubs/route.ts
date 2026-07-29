@@ -25,6 +25,9 @@ export async function GET(req: NextRequest) {
     .eq('ownerId', payload.id)
     .order('createdAt', { ascending: false });
 
-  if (error) return NextResponse.json({ message: error.message }, { status: 500, headers: CORS });
+  if (error) {
+    console.error('[clubs/my-clubs] db error:', error.message);
+    return NextResponse.json({ message: 'خطای سرور' }, { status: 500, headers: CORS });
+  }
   return NextResponse.json(data ?? [], { headers: CORS });
 }

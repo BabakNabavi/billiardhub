@@ -8,6 +8,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
+import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import {
   GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile, findCoachByOwner, findUnclaimedCoach,
@@ -144,6 +145,18 @@ export default function CoachDashboardPage() {
     } else if (user) {
       setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
     }
+
+    /* نسخه‌ی سرور مقدم است. اگر کاربر پروفایلِ محلیِ قدیمی داشت و روی
+       سرور نبود، همان‌جا بالا فرستاده می‌شود تا داده‌ی موجود از دست نرود. */
+    void (async () => {
+      const remote = await fetchMyProfile<Record<string, unknown>>('coach')
+      if (!remote) {
+        if (mine) await saveProfileRemote('coach', mine.slug, mine as unknown as Record<string, unknown>,
+          { number: '', url: mine.certificate?.url ?? '' })
+        return
+      }
+      setForm(f => ({ ...f, ...(remote.data as Partial<FormState>), slug: remote.slug }))
+    })()
   }, [_hydrated, user])
 
   /* owner key must match the one the home stories bar groups by (Stories.tsx) */
@@ -282,12 +295,23 @@ export default function CoachDashboardPage() {
       ownerId: user?.id || '',
       ownerPhone: user?.phone || '',
     }
-    try {
-      saveCoachProfile(profile)
-    } catch {
-      setTopErr('حجم تصاویر بیش از ظرفیت مجاز مرورگر است. لطفاً تعداد یا حجم تصاویرِ گالری / کاور / مدرک را کمتر کنید و دوباره ثبت کنید.')
+    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
+       تا پیش از این فقط localStorage نوشته می‌شد، یعنی پروفایل هیچ‌وقت
+       به دیتابیس نمی‌رسید و پنلِ ادمین آن را نمی‌دید. */
+    const res = await saveProfileRemote('coach', profile.slug, profile as unknown as Record<string, unknown>,
+      { number: '', url: profile.certificate?.url ?? '' })
+    if (!res.ok) {
+      setTopErr(res.message ?? 'ذخیره روی سرور انجام نشد')
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
       return
+    }
+
+    /* عکس‌ها روی سرور به نشانیِ Storage تبدیل شده‌اند */
+    const saved = (res.profile?.data as typeof profile | undefined) ?? profile
+    try {
+      saveCoachProfile({ ...profile, ...saved })
+    } catch {
+      /* کشِ مرورگر پر است — مهم نیست، داده روی سرور ذخیره شده */
     }
     setSubmitted(true)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })

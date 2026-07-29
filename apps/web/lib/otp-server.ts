@@ -1,5 +1,5 @@
 import { createHmac } from 'crypto'
-import { writeJson, safeKey, BUCKET } from './social-server'
+import { writeJson, readJsonFresh, safeKey } from './social-server'
 
 const SUPA = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
 /* کد را هش‌شده ذخیره می‌کنیم (باکت عمومی است) تا حتی با خواندنِ فایل هم کد لو نرود.
@@ -36,12 +36,12 @@ const normMobile = (m: string) => (m || '').replace(/[^0-9]/g, '')
 /* خواندنِ همیشه‌تازه (cache-busted) — کشِ لبه‌ی Supabase رکوردِ کهنه می‌داد و
    کدِ تازه را «منقضی» نشان می‌داد. باکتِ club-media عمومی است. */
 async function readOtp(m: string): Promise<OtpRec | null> {
-  try {
-    const url = `${SUPA}/storage/v1/object/public/${BUCKET}/${otpPath(m)}?t=${Date.now()}_${Math.random().toString(36).slice(2)}`
-    const r = await fetch(url, { cache: 'no-store' })
-    if (!r.ok) return null
-    return (await r.json()) as OtpRec
-  } catch { return null }
+  /* رکوردِ OTP دیگر در باکتِ عمومی نیست و با URLِ عمومی خوانده
+     نمی‌شود. `readJsonFresh` خودش تشخیص می‌دهد مسیر خصوصی است و با
+     کلیدِ سرویس دانلود می‌کند — دانلودِ مستقیم کشِ لبه ندارد، پس
+     همان تازگی که این‌جا لازم بود حفظ می‌شود. */
+  const rec = await readJsonFresh<OtpRec | null>(otpPath(m), null)
+  return rec ?? null
 }
 
 export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: string; wait?: number }> {

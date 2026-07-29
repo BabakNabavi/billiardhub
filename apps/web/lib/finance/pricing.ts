@@ -50,11 +50,31 @@ export interface PlayerSurcharge { enabled: boolean; percent: number; from: numb
 export const DEFAULT_SURCHARGE: PlayerSurcharge = { enabled: true, percent: 15, from: 2 }
 
 /** خواندنِ امنِ تنظیمات از رکوردِ باشگاه (اگر ستون‌ها هنوز نباشند، پیش‌فرض) */
-export function surchargeOf(club: Record<string, unknown> | null | undefined): PlayerSurcharge {
-  const pct = Number(club?.playerSurchargePercent)
-  const from = Number(club?.playerSurchargeFrom)
+/* تنظیمِ هزینه‌ی بازیکنِ اضافه.
+
+   از فاز ۹ این تنظیم روی **میز** است، نه باشگاه: میزِ VIP اسنوکر با
+   ایرهاکی یک قاعده ندارند. ستون‌های میز NULL-پذیرند و NULL یعنی «از
+   باشگاه ارث ببر»، تا داده‌ی موجود رفتارش عوض نشود. */
+export function surchargeOf(
+  table: Record<string, unknown> | null | undefined,
+  club?: Record<string, unknown> | null | undefined,
+): PlayerSurcharge {
+  /* اگر فقط یک آرگومان بیاید، همان منبعِ تنظیمات است (سازگاریِ عقب‌رو) */
+  const src = club === undefined ? { own: table, fallback: null } : { own: table, fallback: club }
+
+  const pick = <T,>(key: string): T | undefined => {
+    const a = src.own?.[key]
+    if (a !== undefined && a !== null) return a as T
+    const b = src.fallback?.[key]
+    return b === undefined || b === null ? undefined : (b as T)
+  }
+
+  const enabledRaw = pick<boolean>('playerSurchargeEnabled')
+  const pct = Number(pick<number>('playerSurchargePercent'))
+  const from = Number(pick<number>('playerSurchargeFrom'))
+
   return {
-    enabled: club?.playerSurchargeEnabled === undefined ? DEFAULT_SURCHARGE.enabled : !!club.playerSurchargeEnabled,
+    enabled: enabledRaw === undefined ? DEFAULT_SURCHARGE.enabled : !!enabledRaw,
     percent: Number.isFinite(pct) && pct >= 0 && pct <= 100 ? Math.round(pct) : DEFAULT_SURCHARGE.percent,
     from: Number.isFinite(from) && from >= 1 && from <= 12 ? Math.round(from) : DEFAULT_SURCHARGE.from,
   }

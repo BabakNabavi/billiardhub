@@ -84,8 +84,13 @@ export const SMS = {
       ? `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.\nمبلغ ${fa(refund)} تومان تا ۷۲ ساعت آینده بازمی‌گردد.`
       : `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.`,
 
-  newBookingForOwner: (date: string, time: string, table: string) =>
-    `بیلیارد هاب\nرزرو جدید: ${date} ساعت ${time}${table ? ` — ${table}` : ''}`,
+  /* پیامِ باشگاه‌دار عمداً کامل است: مدیر باید بدونِ بازکردنِ سایت
+     بداند کدام میز، چه ساعتی، چه روزی و به نامِ چه کسی رزرو شده. */
+  newBookingForOwner: (club: string, date: string, time: string, table: string, by: string) =>
+    `بیلیارد هاب\n`
+    + `مدیریت محترم باشگاه ${club}\n`
+    + `${table || 'یک میز'} در تاریخ ${date} از ساعت ${time}`
+    + `${by ? ` توسط ${by}` : ''} رزرو شد.`,
 
   settlementPaid: (amount: number) =>
     `بیلیارد هاب\nتسویه به مبلغ ${fa(amount)} تومان به حساب شما واریز شد.`,

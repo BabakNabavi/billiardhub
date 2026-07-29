@@ -6,11 +6,28 @@ import SessionBridge from "../components/auth/SessionBridge";
 import { ToastProvider } from '../components/ui/Toast';
 import ScrollToTop from '../components/ScrollToTop';
 import AppBoot from '../components/AppBoot';
+import PersianDigits from '../components/PersianDigits';
 
 
 export const metadata: Metadata = {
-  title: "بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد",
+  /* بدونِ metadataBase، نشانی‌های نسبیِ canonical و og:url ناقص می‌مانند */
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL
+    || (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
+    || 'https://billiardhub.vercel.app',
+  ),
+  title: {
+    default: 'بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد',
+    template: '%s | بیلیارد هاب',
+  },
   description: "اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و برترین تولیدکنندگان تجهیزات بیلیارد در ایران و جهان.",
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد',
+    description: 'اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و تولیدکنندگان تجهیزات بیلیارد.',
+    url: '/', siteName: 'بیلیارد هاب', locale: 'fa_IR', type: 'website',
+  },
+  twitter: { card: 'summary_large_image' },
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -76,6 +93,8 @@ export default function RootLayout({
       <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
         <ScrollToTop />
         <AppBoot />
+        {/* همه‌ی ارقامِ رندرشده فارسی می‌شوند — ورودی‌ها و کد دست‌نخورده */}
+        <PersianDigits />
         <SessionBridge />
         <Navbar />
         <main>{children}</main>

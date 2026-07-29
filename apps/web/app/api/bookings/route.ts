@@ -32,14 +32,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'امکانِ رزرو در گذشته وجود ندارد' }, { status: 400 });
   }
 
+  /* ── «رزروِ امروز بسته است» ──
+     باشگاه‌دار می‌تواند فقط روزِ جاری را ببندد و روزهای آینده باز
+     بمانند. «امروز» به وقتِ تهران حساب می‌شود؛ با UTC از ۲۰:۳۰ به بعد
+     «فردا»ی سرور شروع می‌شد و قفل پیش از نیمه‌شبِ محلی برداشته می‌شد. */
+  const { data: clubFlags } = await sb().from('clubs')
+    .select('"closeTodayReservations"').eq('id', clubId).maybeSingle();
+  if ((clubFlags as { closeTodayReservations?: boolean } | null)?.closeTodayReservations) {
+    const todayTehran = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date());
+    if (bookingDate === todayTehran) {
+      return NextResponse.json(
+        { message: 'این باشگاه رزروِ آنلاین برای امروز را بسته است. لطفاً روزهای آینده را انتخاب کنید.' },
+        { status: 409 },
+      );
+    }
+  }
+
   /* ── قیمت‌گذاریِ سروری: میز باید واقعاً در همین باشگاه ثبت شده باشد ── */
   const { data: tableRow } = await sb().from('tables')
-    .select('id,"pricePerHour","clubId","isActive","discountRules","morningDiscount"')
+    .select('id,"pricePerHour","clubId","isActive","discountRules","morningDiscount","playerSurchargeEnabled","playerSurchargePercent","playerSurchargeFrom"')
     .eq('id', tableId).maybeSingle();
 
   const t = tableRow as {
     id: string; clubId: string; pricePerHour: number | string; isActive?: boolean;
     discountRules?: unknown; morningDiscount?: number | null;
+    playerSurchargeEnabled?: boolean | null;
+    playerSurchargePercent?: number | null;
+    playerSurchargeFrom?: number | null;
   } | null;
 
   if (!t || t.clubId !== clubId) {
@@ -65,7 +86,11 @@ export async function POST(req: NextRequest) {
     priced.discountRules = club!.discountRules as PricedTable['discountRules'];
   }
 
-  const breakdown = priceBooking(hours, priced, Math.max(1, Number(playerCount) || 1), surchargeOf(club));
+  /* تنظیمِ میز مقدم است؛ اگر میز نداشت از باشگاه ارث می‌برد */
+  const breakdown = priceBooking(
+    hours, priced, Math.max(1, Number(playerCount) || 1),
+    surchargeOf(t as unknown as Record<string, unknown>, club),
+  );
 
   /* ── ساخت اتمیک: اگر یکی از ساعت‌ها گرفته شده باشد، کل تراکنش برمی‌گردد ── */
   const { data, error } = await rpc<Record<string, unknown>>('bh_create_booking', {
@@ -83,7 +108,8 @@ export async function POST(req: NextRequest) {
     if (/does not exist|schema cache|function/i.test(m)) {
       return NextResponse.json({ message: 'سیستمِ رزرو هنوز راه‌اندازی نشده است (مایگریشنِ دیتابیس اجرا نشده)' }, { status: 503 });
     }
-    return NextResponse.json({ message: 'خطا در ثبتِ رزرو: ' + m }, { status: 500 });
+    console.error('[bookings] create error:', m);
+    return NextResponse.json({ message: 'خطا در ثبتِ رزرو' }, { status: 500 });
   }
 
   const booking = (data ?? {}) as Record<string, unknown>;

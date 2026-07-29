@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Newspaper, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
+import { listContent, createContent, updateContent, deleteContent } from '../../../lib/admin/content-client';
+
+/* شکلِ ردیفِ دیتابیس (snake_case) — جدولِ `news` در مهاجرتِ ۰۲۵ */
+interface DbNews {
+  id: string;
+  title?: string; excerpt?: string; body?: string; category?: string;
+  tags?: string[]; status?: string; published_at?: string | null; created_at?: string;
+  [k: string]: unknown;
+}
 
 interface NewsItem {
   id: string;
@@ -24,17 +33,17 @@ const categories = [
   { value: 'general', label: 'عمومی' },
 ];
 
-const sampleNews: NewsItem[] = [
-  { id: '1', title: 'برگزاری مسابقات قهرمانی اسنوکر ایران ۱۴۰۳', summary: 'مسابقات قهرمانی...', content: '', category: 'tournament', tags: 'مسابقات,اسنوکر', published: true, date: '۱۴۰۳/۰۳/۱۵' },
-  { id: '2', title: 'رنکینگ جدید بازیکنان دسته برتر', summary: 'فدراسیون...', content: '', category: 'ranking', tags: 'رنکینگ', published: true, date: '۱۴۰۳/۰۳/۱۰' },
-];
 
 const emptyForm = { title: '', summary: '', content: '', category: 'general', tags: '', published: false };
 
 export default function AdminNewsPage() {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
-  const [news, setNews] = useState<NewsItem[]>(sampleNews);
+  /* خالی شروع می‌شود و از دیتابیس پر می‌شود. پیش‌تر دو خبرِ ساختگی
+     («قهرمانی اسنوکر ۱۴۰۳» و «رنکینگ جدید») نشان داده می‌شد که
+     هیچ‌وقت واقعی نبودند. */
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [err, setErr] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -45,6 +54,26 @@ export default function AdminNewsPage() {
     if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
   }, [_hydrated, user, router]);
 
+  const refresh = async () => {
+    const rows = await listContent<DbNews>('news');
+    setNews(rows.map(r => ({
+      id: r.id,
+      title: r.title ?? '',
+      summary: r.excerpt ?? '',
+      content: r.body ?? '',
+      category: r.category ?? 'general',
+      tags: (r.tags ?? []).join('، '),
+      published: r.status === 'published',
+      date: r.published_at
+        ? new Date(r.published_at).toLocaleDateString('fa-IR')
+        : new Date(String(r.created_at ?? Date.now())).toLocaleDateString('fa-IR'),
+    })));
+  };
+
+  useEffect(() => {
+    if (_hydrated && user?.primaryRole === 'admin') void refresh();
+  }, [_hydrated, user?.primaryRole]);
+
   if (!_hydrated) return null;
   if (!user || user.primaryRole !== 'admin') return null;
 
@@ -54,18 +83,34 @@ export default function AdminNewsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('حذف شود؟')) return;
-    setNews(news.filter(n => n.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('این خبر حذف شود؟')) return;
+    if (await deleteContent('news', id)) setNews(rows => rows.filter(n => n.id !== id));
+    else setErr('حذف انجام نشد');
   };
 
-  const handleSave = () => {
-    if (!form.title) return;
-    if (editingId) {
-      setNews(news.map(n => n.id === editingId ? { ...n, ...form } : n));
-    } else {
-      setNews([{ id: Date.now().toString(), ...form, date: new Date().toLocaleDateString('fa-IR') }, ...news]);
-    }
+  const handleSave = async () => {
+    if (!form.title.trim()) { setErr('عنوان خبر الزامی است'); return; }
+    setErr('');
+
+    /* ستون‌های جدول snake_case‌اند و tags آرایه است، نه رشته‌ی جداشده با ویرگول */
+    const payload = {
+      title: form.title,
+      excerpt: form.summary,
+      body: form.content,
+      category: form.category,
+      tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+      status: form.published ? 'published' : 'draft',
+      published_at: form.published ? new Date().toISOString() : null,
+    };
+
+    const res = editingId
+      ? await updateContent<DbNews>('news', editingId, payload)
+      : await createContent<DbNews>('news', payload);
+
+    if (!res.ok) { setErr(res.message ?? 'ذخیره انجام نشد'); return; }
+
+    await refresh();
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
@@ -86,6 +131,13 @@ export default function AdminNewsPage() {
           خبر جدید
         </button>
       </div>
+
+      {err && (
+        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+          style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+          {err}
+        </div>
+      )}
 
       {/* فرم */}
       {showForm && (

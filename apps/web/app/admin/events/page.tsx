@@ -5,6 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { Trophy, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
+import { listContent, createContent, updateContent, deleteContent } from '../../../lib/admin/content-client';
+
+/* شکلِ ردیفِ دیتابیس (snake_case) — جدولِ `events` در مهاجرتِ ۰۲۵ */
+interface DbEvent {
+  id: string;
+  title?: string; description?: string; category?: string; sport?: string;
+  location?: string; province?: string; city?: string;
+  start_date?: string; end_date?: string;
+  max_participants?: number; prize?: string; organizer?: string;
+  registration_open?: boolean; status?: string;
+  [k: string]: unknown;
+}
 
 interface EventItem {
   id: string;
@@ -46,23 +58,45 @@ const emptyForm = {
   maxParticipants: 32, prize: '', organizer: '', registrationOpen: true, status: 'upcoming',
 };
 
-const sampleEvents: EventItem[] = [
-  { id: '1', title: 'مسابقات قهرمانی اسنوکر ایران ۱۴۰۳', description: '...', category: 'national', sport: 'snooker', location: 'سالن المپیک', city: 'تهران', startDate: '1403-06-15', endDate: '1403-06-22', maxParticipants: 128, prize: '۵۰۰ میلیون تومان', organizer: 'فدراسیون بیلیارد', registrationOpen: true, status: 'upcoming' },
-  { id: '2', title: 'لیگ پاکت بیلیارد دسته برتر', description: '...', category: 'national', sport: 'pocket', location: 'باشگاه مرکزی', city: 'تهران', startDate: '1403-05-01', endDate: '1403-05-30', maxParticipants: 32, prize: '۲۰۰ میلیون تومان', organizer: 'فدراسیون بیلیارد', registrationOpen: false, status: 'ongoing' },
-];
 
 export default function AdminEventsPage() {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
-  const [events, setEvents] = useState<EventItem[]>(sampleEvents);
+  /* خالی شروع می‌شود. پیش‌تر با دو مسابقه‌ی ساختگی («قهرمانی اسنوکر
+     ایران ۱۴۰۳» و «لیگ پاکت دسته برتر») پر می‌شد که هیچ‌وقت در
+     دیتابیس نبودند و ادمین فکر می‌کرد داده‌ی واقعی است. */
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<typeof emptyForm>(emptyForm);
+  const [err, setErr] = useState('');
 
   /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
   useEffect(() => {
     if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
   }, [_hydrated, user, router]);
+
+  /* ستون‌های دیتابیس snake_case‌اند و این صفحه camelCase */
+  const fromDb = (r: DbEvent): EventItem => ({
+    id: r.id,
+    title: r.title ?? '', description: r.description ?? '',
+    category: r.category ?? 'national', sport: r.sport ?? 'snooker',
+    location: r.location ?? '', province: r.province ?? '', city: r.city ?? '',
+    startDate: r.start_date ?? '', endDate: r.end_date ?? '',
+    maxParticipants: Number(r.max_participants) || 0,
+    prize: r.prize ?? '', organizer: r.organizer ?? '',
+    registrationOpen: r.registration_open !== false,
+    status: r.status ?? 'upcoming',
+  });
+
+  const refresh = async () => {
+    const rows = await listContent<DbEvent>('events');
+    setEvents(rows.map(fromDb));
+  };
+
+  useEffect(() => {
+    if (_hydrated && user?.primaryRole === 'admin') void refresh();
+  }, [_hydrated, user?.primaryRole]);
 
   if (!_hydrated) return null;
   if (!user || user.primaryRole !== 'admin') return null;
@@ -75,18 +109,35 @@ export default function AdminEventsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('حذف شود؟')) return;
-    setEvents(events.filter(e => e.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('این مسابقه حذف شود؟')) return;
+    if (await deleteContent('events', id)) setEvents(evts => evts.filter(e => e.id !== id));
+    else setErr('حذف انجام نشد');
   };
 
-  const handleSave = () => {
-    if (!form.title || !form.startDate) return;
-    if (editingId) {
-      setEvents(events.map(e => e.id === editingId ? { ...e, ...form } : e));
-    } else {
-      setEvents([{ id: Date.now().toString(), ...form }, ...events]);
-    }
+  const handleSave = async () => {
+    if (!form.title.trim()) { setErr('عنوان مسابقه الزامی است'); return; }
+    if (!form.startDate)    { setErr('تاریخ شروع الزامی است'); return; }
+    setErr('');
+
+    /* نامِ ستون‌های دیتابیس snake_case است؛ فرم camelCase */
+    const payload = {
+      title: form.title, description: form.description,
+      category: form.category, sport: form.sport,
+      location: form.location, province: form.province, city: form.city,
+      start_date: form.startDate, end_date: form.endDate || null,
+      max_participants: form.maxParticipants, prize: form.prize,
+      organizer: form.organizer, registration_open: form.registrationOpen,
+      status: form.status,
+    };
+
+    const res = editingId
+      ? await updateContent<DbEvent>('events', editingId, payload)
+      : await createContent<DbEvent>('events', payload);
+
+    if (!res.ok) { setErr(res.message ?? 'ذخیره انجام نشد'); return; }
+
+    await refresh();
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
@@ -117,6 +168,13 @@ export default function AdminEventsPage() {
           مسابقه جدید
         </button>
       </div>
+
+      {err && (
+        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+          style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+          {err}
+        </div>
+      )}
 
       {/* فرم */}
       {showForm && (

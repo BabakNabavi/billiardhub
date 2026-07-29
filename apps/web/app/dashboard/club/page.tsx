@@ -64,6 +64,10 @@ interface Table {
   brand: string; model: string; pricePerHour: number; isActive: boolean;
   photoDataUrl?: string;
   discountRules?: DiscountRule[];
+  /* هزینه‌ی بازیکنِ اضافه در سطحِ میز — undefined یعنی از باشگاه ارث می‌برد */
+  playerSurchargeEnabled?: boolean;
+  playerSurchargePercent?: number;
+  playerSurchargeFrom?: number;
 }
 
 interface WorkingDay { isOpen: boolean; open: string; close: string; }
@@ -297,11 +301,16 @@ export default function ClubDashboardPage() {
   const [bookingFilter, setBookingFilter] = useState('all');
   /* بستنِ رزروِ آنلاین: '' = باز | 'always' = همیشه بسته | عدد = بسته تا آن timestamp */
   const [reserveClosedUntil, setReserveClosedUntil] = useState<string>('');
+  /* «رزروِ امروز بسته» — برخلافِ بالایی روی سرور ذخیره می‌شود */
+  const [closeToday, setCloseToday] = useState(false);
+  const [closeTodayBusy, setCloseTodayBusy] = useState(false);
+  const [closeTodayMsg, setCloseTodayMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   // Tables
   const [tables, setTables] = useState<Table[]>([]);
   const [showTableForm, setShowTableForm] = useState(false);
-  const [tableForm, setTableForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '' });
+  /* surchargeFrom/Percent خالی ⇒ «از باشگاه ارث ببر» */
+  const [tableForm, setTableForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', surchargeFrom: '', surchargePercent: '' });
   const [tableLoading, setTableLoading] = useState(false);
   const [tableFormError, setTableFormError] = useState('');
   const [tablesSaving, setTablesSaving] = useState(false);
@@ -547,6 +556,12 @@ export default function ClubDashboardPage() {
     try { setReserveClosedUntil(localStorage.getItem(`club-reserveClosedUntil-${selectedClub.id}`) ?? ''); }
     catch { setReserveClosedUntil(''); }
 
+    // «رزروِ امروز بسته» از سرور می‌آید، نه از این مرورگر
+    void apiFetch(`/api/clubs/${selectedClub.id}/settings`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (j) setCloseToday(!!j.closeTodayReservations); })
+      .catch(() => { /* بی‌صدا */ });
+
     // مسابقاتِ ساخته‌شده — قبلاً فقط در state بودند و با رفرش می‌پریدند
     try {
       const t = localStorage.getItem(`club-tournaments-${selectedClub.id}`);
@@ -601,6 +616,10 @@ export default function ClubDashboardPage() {
       isActive: true,
       photoDataUrl: tablePhotoDataUrl || undefined,
       discountRules: discounts.length > 0 ? discounts : undefined,
+      /* خالی ⇒ undefined ⇒ در دیتابیس NULL ⇒ «از باشگاه ارث ببر» */
+      playerSurchargeFrom: tableForm.surchargeFrom ? parseInt(tableForm.surchargeFrom, 10) : undefined,
+      playerSurchargePercent: tableForm.surchargePercent ? parseInt(tableForm.surchargePercent, 10) : undefined,
+      playerSurchargeEnabled: (tableForm.surchargeFrom || tableForm.surchargePercent) ? true : undefined,
     };
     saveTables([...tables, newTable]);
     setShowTableForm(false);
@@ -608,7 +627,7 @@ export default function ClubDashboardPage() {
     setTablePhotoDataUrl('');
     setDiscounts([]);
     setDiscountForm({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
-    setTableForm({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '' });
+    setTableForm({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', surchargeFrom: '', surchargePercent: '' });
   };
 
   const deleteTable = (id: string) => {
@@ -1036,6 +1055,25 @@ export default function ClubDashboardPage() {
     : isReserveClosed
       ? `رزروِ آنلاین تا ${new Date(Number(reserveClosedUntil)).toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })} بسته است`
       : 'رزروِ آنلاین باز است';
+  /* ذخیره‌ی «بستنِ رزروِ امروز» روی سرور */
+  const saveCloseToday = async (next: boolean) => {
+    if (!selectedClub) return;
+    const prev = closeToday;
+    setCloseToday(next);          // خوش‌بینانه، تا تیک بلافاصله جواب بدهد
+    setCloseTodayBusy(true);
+    try {
+      const r = await apiFetch(`/api/clubs/${selectedClub.id}/settings`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ closeTodayReservations: next }),
+      });
+      if (!r.ok) throw new Error();
+      setCloseTodayMsg({ ok: true, text: next ? 'رزروِ امروز بسته شد' : 'رزروِ امروز باز شد' });
+    } catch {
+      setCloseToday(prev);        // برگرداندن به حالتِ قبل
+      setCloseTodayMsg({ ok: false, text: 'ذخیره‌ی تنظیمات انجام نشد' });
+    } finally { setCloseTodayBusy(false); }
+  };
+
   const setReservationClosure = (opt: number | 'always' | 'open') => {
     if (!selectedClub) return;
     const val = opt === 'open' ? '' : opt === 'always' ? 'always' : String(Date.now() + opt * 3600_000);
@@ -1599,7 +1637,11 @@ export default function ClubDashboardPage() {
         <div>
           {/* ── هزینه‌ی بازیکنِ اضافه ── */}
           <Card style={{ marginBottom: 16 }}>
-            <SectionTitle>هزینه‌ی بازیکن اضافه</SectionTitle>
+            <SectionTitle>هزینه‌ی بازیکن اضافه — پیش‌فرضِ باشگاه</SectionTitle>
+            <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
+              این تنظیم روی میزهایی اعمال می‌شود که نرخِ اختصاصیِ خودشان را
+              ندارند. برای هر میز می‌توانید در فرمِ همان میز نرخِ جداگانه بگذارید.
+            </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <button onClick={() => setSurcharge(s => ({ ...s, enabled: !s.enabled }))}
                 aria-label="فعال‌سازی هزینه‌ی بازیکن اضافه"
@@ -1791,7 +1833,7 @@ export default function ClubDashboardPage() {
               <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 18 }}>
                 <SectionTitle>تخفیف‌های زمانی میزها</SectionTitle>
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
-                  تخفیف زمانی روی قیمت همه میزها اعمال می‌شود (مثلاً صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
+                  تخفیف زمانی فقط روی قیمتِ همین میز اعمال می‌شود (مثلاً صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 110px', minWidth: 100 }}>
@@ -1847,6 +1889,37 @@ export default function ClubDashboardPage() {
                       </div>
                     ))}
                   </div>
+                )}
+              </div>
+
+              {/* ── هزینه‌ی بازیکنِ اضافه — برای همین میز ──
+                  پیش‌تر یک تنظیمِ واحد برای کلِ باشگاه بود، ولی میزِ VIP
+                  اسنوکر و ایرهاکی یک قاعده ندارند. خالی‌گذاشتن یعنی
+                  «از تنظیمِ باشگاه پیروی کن». */}
+              <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 18 }}>
+                <SectionTitle>هزینه‌ی بازیکن اضافه — برای این میز</SectionTitle>
+                <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
+                  اگر خالی بماند، تنظیمِ عمومیِ باشگاه روی این میز اعمال می‌شود.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
+                  <div style={{ flex: '1 1 120px', minWidth: 110 }}>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از چند نفر به بالا</div>
+                    <input value={tableForm.surchargeFrom} inputMode="numeric" placeholder="پیش‌فرضِ باشگاه"
+                      onChange={e => setTableForm(p => ({ ...p, surchargeFrom: e.target.value.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).slice(0, 2) }))}
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
+                  </div>
+                  <div style={{ flex: '1 1 120px', minWidth: 110 }}>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>درصد به ازای هر نفر</div>
+                    <input value={tableForm.surchargePercent} inputMode="numeric" placeholder="پیش‌فرضِ باشگاه"
+                      onChange={e => setTableForm(p => ({ ...p, surchargePercent: e.target.value.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).slice(0, 3) }))}
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
+                  </div>
+                </div>
+                {(tableForm.surchargeFrom || tableForm.surchargePercent) && (
+                  <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginTop: 10, marginBottom: 0 }}>
+                    از <b style={{ color: DARK }}>{tableForm.surchargeFrom || '۲'}</b> نفر به بالا،
+                    هر نفر <b style={{ color: DARK }}>{tableForm.surchargePercent || '۰'}٪</b> به مبلغِ رزروِ همین میز اضافه می‌شود.
+                  </p>
                 )}
               </div>
 
@@ -2091,7 +2164,35 @@ export default function ClubDashboardPage() {
       {/* ════ Tab: Bookings ════ */}
       {activeTab === 'bookings' && (
         <div>
-          {/* ── بستن/بازکردنِ رزروِ آنلاین ── */}
+          {/* ── بستنِ رزروِ روزِ جاری ──
+              این با «بستنِ موقتِ» پایین فرق دارد: آن یک بازه‌ی ساعتی است،
+              این یک قاعده‌ی ماندگار که هر روز خودش را تکرار می‌کند و
+              سرِ نیمه‌شبِ تهران روزِ بعد آزاد می‌شود. در دیتابیس ذخیره
+              می‌شود و خودِ API جلوی رزرو را می‌گیرد — نسخه‌ی قبلی فقط
+              در localStorage بود، یعنی روی مرورگرِ مشتری اثری نداشت. */}
+          <Card style={{ marginBottom: 16, padding: 16 }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+              <input type="checkbox" checked={closeToday} disabled={closeTodayBusy}
+                onChange={e => void saveCloseToday(e.target.checked)}
+                style={{ width: 17, height: 17, accentColor: '#C7A66A', flexShrink: 0, marginTop: 2 }} />
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: '#1C1C1A' }}>
+                  بستن رزرو امروز
+                </span>
+                <span style={{ display: 'block', fontSize: 12, color: '#6B7280', lineHeight: 1.95, marginTop: 4 }}>
+                  با فعال کردن این گزینه، به‌صورت دایمی امکان رزرو میز برای روز جاری غیرفعال
+                  می‌شود ولی رزرو برای روزهای آینده همچنان فعال خواهد بود.
+                </span>
+              </span>
+            </label>
+            {closeTodayMsg && (
+              <p style={{ margin: '10px 0 0', fontSize: 12, fontWeight: 700, color: closeTodayMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                {closeTodayMsg.text}
+              </p>
+            )}
+          </Card>
+
+          {/* ── بستن/بازکردنِ موقتِ رزروِ آنلاین ── */}
           <Card style={{ marginBottom: 16, padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
               <span style={{ width: 9, height: 9, borderRadius: '50%', background: isReserveClosed ? '#DC2626' : '#16A34A', flexShrink: 0 }} />

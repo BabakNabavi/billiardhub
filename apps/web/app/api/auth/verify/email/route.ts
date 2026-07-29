@@ -3,10 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { checkEmail, normalizeEmail, EMAIL_RE } from '@/lib/email-server';
 
-/* ثبت و تأییدِ ایمیلِ کاربر.
+/* ثبتِ ایمیلِ کاربر.
 
-   اختیاری است: نبودش هیچ چیزی را نمی‌بندد. ولی اگر ثبت شود، حتماً
-   استعلام می‌شود — تیکِ سبزِ بی‌پشتوانه بدتر از نبودِ تیک است. */
+   اختیاری است: نبودش هیچ چیزی را نمی‌بندد.
+
+   **چرا این‌جا «تأیید» اتفاق نمی‌افتد:** سرویسِ CheckEmail فقط می‌گوید
+   این نشانی واقعی و فعال هست یا نه؛ هیچ کدی به صندوقِ کاربر نمی‌فرستد.
+   پس نتیجه‌اش «این ایمیل وجود دارد» است، نه «این ایمیل مالِ این کاربر
+   است». تا امروز همان نتیجه `email_verified = true` می‌شد و هر کسی
+   می‌توانست نشانیِ شخصِ دیگری را وارد کند و تیکِ سبز بگیرد.
+
+   اثباتِ مالکیت به فرستادنِ کد نیاز دارد و پروژه هنوز هیچ سرویسِ
+   ارسالِ ایمیل ندارد. تا آن روز، ایمیل «ثبت‌شده» می‌ماند نه
+   «تأییدشده» — تیکِ سبزِ بی‌پشتوانه از نبودِ تیک بدتر است. */
 
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -33,17 +42,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: res.message ?? 'این ایمیل فعال نیست', valid: false }, { status: 422 });
   }
 
+  /* ثبت می‌شود، ولی تأییدنشده — مالکیت اثبات نشده است */
   const { error } = await sb().from('users')
-    .update({ email, email_verified: true, updatedAt: new Date().toISOString() })
+    .update({ email, email_verified: false, updatedAt: new Date().toISOString() })
     .eq('id', actor.id);
   if (error) return NextResponse.json({ message: 'ذخیره‌ی ایمیل انجام نشد' }, { status: 500 });
 
   void audit({
-    actorId: actor.id, actorRole: actor.role, action: 'EMAIL_VERIFIED',
+    actorId: actor.id, actorRole: actor.role, action: 'EMAIL_RECORDED',
     entityType: 'user', entityId: actor.id, newValue: { email }, ip: clientIp(req) ?? undefined,
   });
 
-  return NextResponse.json({ ok: true, email, emailVerified: true });
+  return NextResponse.json({
+    ok: true, email, emailVerified: false,
+    message: 'ایمیل ثبت شد. تأییدِ مالکیت پس از راه‌اندازیِ ارسالِ ایمیل انجام می‌شود.',
+  });
 }
 
 /* حذفِ ایمیل — کاربر باید بتواند برش دارد */

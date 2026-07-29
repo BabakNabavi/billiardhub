@@ -17,6 +17,18 @@ const WRITABLE: Record<string, 'bool' | 'json'> = {
   stories_quota_enabled: 'bool',  // فروشِ بسته‌ی استوری
   stories_free_quota: 'json',     // سهمیه‌ی رایگانِ استوری، به تفکیکِ نقش
   story_platform_bank: 'json',
+
+  /* بیلیارد مدیا — این دو تا امروز در localStorage بودند، یعنی هر
+     ادمین روی مرورگرِ خودش چیزِ دیگری می‌دید و انتخابش برای کاربران
+     هیچ اثری نداشت. */
+  media_hidden_ids: 'json',       // شناسه‌ی ویدیوهای مخفی‌شده — string[]
+  media_featured_id: 'json',      // ویدیوی «NOW SHOWING» — string | null
+
+  /* جدولِ رنکینگ. ساختارش تودرتوست (رشته × جنسیت × دسته × بازیکنان) و
+     همان‌طور هم مصرف می‌شود، پس یک‌جا به‌صورت JSON نگه داشته می‌شود.
+     جدولِ نرمالِ `rankings` (مهاجرتِ ۰۲۵) برای مدلِ ردیف‌به‌ردیفِ آینده
+     آماده است ولی این صفحه هنوز از آن استفاده نمی‌کند. */
+  rankings_board: 'json',
 };
 
 const READABLE = Object.keys(WRITABLE);

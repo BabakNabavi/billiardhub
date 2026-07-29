@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
+import { apiFetch } from '../../lib/http';
 import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
@@ -89,23 +90,34 @@ const SECTIONS: AdminSection[] = [
   },
 ];
 
-const STATS = [
-  { label: 'کاربران', value: 124, link: '/admin/users' },
-  { label: 'محصولات', value: 87, link: '/admin/products' },
-  { label: 'باشگاه‌ها', value: 43, link: '/admin/clubs' },
-  { label: 'مسابقات', value: 12, link: '/admin/events' },
-  { label: 'اخبار', value: 36, link: '/admin/news' },
-  { label: 'در انتظار تأیید', value: 8, link: '/admin/verifications' },
+/* اعداد از `/api/admin/stats` می‌آیند. پیش‌تر این‌جا شش عددِ ثابت بود
+   (۱۲۴، ۸۷، ۴۳، …) که هیچ‌وقت با دیتابیس نمی‌خواند. */
+const STAT_CARDS: { key: string; label: string; link: string }[] = [
+  { key: 'users',        label: 'کاربران',        link: '/admin/users' },
+  { key: 'products',     label: 'محصولات',        link: '/admin/products' },
+  { key: 'clubs',        label: 'باشگاه‌ها',       link: '/admin/clubs' },
+  { key: 'bookings',     label: 'رزروها',         link: '/admin/bookings' },
+  { key: 'news',         label: 'اخبار',          link: '/admin/news' },
+  { key: 'pendingClubs', label: 'در انتظار تأیید', link: '/admin/clubs' },
 ];
 
 export default function AdminPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [checked, setChecked] = useState(false);
+  const [stats, setStats] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setChecked(true), 500);
     return () => clearTimeout(timer);
+  }, []);
+
+  /* شمارشِ واقعیِ ردیف‌ها؛ تا رسیدنش «—» نشان داده می‌شود */
+  useEffect(() => {
+    void apiFetch('/api/admin/stats', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (j) setStats(j as Record<string, number>); })
+      .catch(() => { /* بی‌صدا */ });
   }, []);
 
   useEffect(() => {
@@ -159,9 +171,11 @@ export default function AdminPage() {
 
         {/* آمار سریع */}
         <div className="ad-stats" style={{ marginBottom: 28 }}>
-          {STATS.map((s, i) => (
-            <Link key={i} href={s.link} className="ad-stat" style={{ animation: `adUp .4s ${i * 40}ms ease both` }}>
-              <div style={{ fontSize: 20, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums' }}>{s.value.toLocaleString('fa-IR')}</div>
+          {STAT_CARDS.map((s, i) => (
+            <Link key={s.key} href={s.link} className="ad-stat" style={{ animation: `adUp .4s ${i * 40}ms ease both` }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums' }}>
+                {stats ? (stats[s.key] ?? 0).toLocaleString('fa-IR') : '—'}
+              </div>
               <div style={{ fontSize: 11, color: SEC, marginTop: 3, fontWeight: 700 }}>{s.label}</div>
             </Link>
           ))}

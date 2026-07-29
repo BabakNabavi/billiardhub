@@ -33,9 +33,11 @@ export default function ProfileAdmin({
   en: string;
   desc: string;
   panelHint: string;         // توضیحِ حالت خالی — پروفایل‌ها از کدام پنل ساخته می‌شوند
-  load: () => AdminRow[];
-  toggle: (slug: string) => void;
-  remove: (slug: string) => void;
+  /* از فاز ۹ این سه می‌توانند Promise برگردانند: منبعِ داده از
+     localStorage به دیتابیس منتقل شد و خواندن/نوشتن شبکه‌ای است. */
+  load: () => AdminRow[] | Promise<AdminRow[]>;
+  toggle: (slug: string) => void | Promise<void>;
+  remove: (slug: string) => void | Promise<void>;
 }) {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
@@ -43,9 +45,11 @@ export default function ProfileAdmin({
   const [ready, setReady] = useState(false);
   const [toast, setToast] = useState('');
 
-  const refresh = () => setRows(load());
+  const refresh = async () => {
+    try { setRows(await load()); } catch { setRows([]); }
+  };
 
-  useEffect(() => { refresh(); setReady(true); }, []);
+  useEffect(() => { void refresh().finally(() => setReady(true)); }, []);
 
   useEffect(() => {
     if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
@@ -103,7 +107,7 @@ export default function ProfileAdmin({
                   {r.status === 'approved' ? 'منتشر شده' : 'معلق'}
                 </span>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                  <button onClick={() => { toggle(r.slug); refresh(); flash(r.status === 'approved' ? 'پروفایل معلق شد' : 'پروفایل منتشر شد'); }}
+                  <button onClick={async () => { await toggle(r.slug); await refresh(); flash(r.status === 'approved' ? 'پروفایل معلق شد' : 'پروفایل منتشر شد'); }}
                     title={r.status === 'approved' ? 'تعلیق' : 'انتشار'}
                     style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.status === 'approved' ? '#B23B2E' : '#0E7A38' }}>
                     {r.status === 'approved' ? <ShieldOff size={15} /> : <ShieldCheck size={15} />}
@@ -112,7 +116,7 @@ export default function ProfileAdmin({
                     style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: SEC }}>
                     <Eye size={15} />
                   </Link>
-                  <button onClick={() => { remove(r.slug); refresh(); flash('پروفایل حذف شد'); }}
+                  <button onClick={async () => { await remove(r.slug); await refresh(); flash('پروفایل حذف شد'); }}
                     title="حذف"
                     style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${LINE}`, background: '#FAFAF7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#B23B2E' }}>
                     <Trash2 size={15} />

@@ -94,4 +94,8 @@ export const RULES = {
   register:  { action: 'register',  max: 5,  windowSec: 3600 }, // ۵ در ساعت
   otpSend:   { action: 'otp_send',  max: 5,  windowSec: 900 },  // ۵ در ۱۵ دقیقه
   otpVerify: { action: 'otp_check', max: 10, windowSec: 900 },  // ۱۰ در ۱۵ دقیقه
+  /* استعلامِ شاهکار/ثبت‌احوال: سرویسِ پولیِ بیرونی است و بدونِ سقف هم
+     اعتبارِ حساب را می‌سوزاند و هم به یک اوراکلِ «این کد ملی مالِ این
+     شماره هست یا نه» تبدیل می‌شود. */
+  shahkar:   { action: 'shahkar',   max: 5,  windowSec: 900 },  // ۵ در ۱۵ دقیقه
 } as const satisfies Record<string, RateRule>

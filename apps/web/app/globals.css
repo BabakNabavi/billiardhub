@@ -924,7 +924,15 @@ h1                               { font-weight: 800; }
   }
 }
 
-/* ═══ Selectهای بومی — ظاهرِ حرفه‌ایِ یکدست در کل سایت (دسکتاپ و موبایل) ═══ */
+/* ═══ Selectهای بومی — ظاهرِ حرفه‌ایِ یکدست در کل سایت (دسکتاپ و موبایل) ═══
+
+   چرا !important: انتخابگرِ عنصری (`select`) از هر کلاسی ضعیف‌تر است، پس
+   هر جای سایت که روی <select> کلاسِ Tailwind مثل
+   `border border-gray-200 rounded-xl px-4 py-3` نشسته بود، این قاعده را
+   خنثی می‌کرد و همان دراپ‌داونِ خاکستریِ ساده باقی می‌ماند. پنلِ ادمین
+   از قبل همین کار را در `.admin-scope` کرده بود؛ حالا کلِ سایت یکدست است.
+   (رنگ و فونت بدونِ !important می‌مانند تا صفحه‌ای که عمداً تمِ دیگری
+   می‌خواهد بتواند عوضشان کند.) */
 select {
   appearance: none;
   -webkit-appearance: none;
@@ -934,10 +942,10 @@ select {
   background-repeat: no-repeat;
   background-position: left 12px center;
   background-size: 14px;
-  border: 1px solid #E7E2D6;
-  border-radius: 11px;
-  padding: 9px 14px;
-  padding-left: 36px;
+  border: 1px solid #E7E2D6 !important;
+  border-radius: 11px !important;
+  padding: 9px 14px !important;
+  padding-left: 36px !important;
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -945,10 +953,10 @@ select {
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-select:hover { border-color: rgba(199, 166, 106, 0.5); }
+select:hover { border-color: rgba(199, 166, 106, 0.5) !important; }
 select:focus {
   outline: none;
-  border-color: rgba(199, 166, 106, 0.65);
+  border-color: rgba(199, 166, 106, 0.65) !important;
   box-shadow: 0 0 0 3px rgba(199, 166, 106, 0.14);
 }
 select:disabled { opacity: 0.55; cursor: not-allowed; }

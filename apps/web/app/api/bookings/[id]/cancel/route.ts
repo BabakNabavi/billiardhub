@@ -58,7 +58,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     if (/does not exist|schema cache|function/i.test(error.message || '')) {
       return NextResponse.json({ message: 'سیستمِ مالی هنوز راه‌اندازی نشده است' }, { status: 503 });
     }
-    return NextResponse.json({ message: 'خطا در کنسلِ رزرو: ' + (error.message ?? '') }, { status: 500 });
+    console.error('[bookings/:id/cancel] db error:', error.message);
+    return NextResponse.json({ message: 'خطا در کنسلِ رزرو' }, { status: 500 });
   }
 
   /* ثبتِ درخواستِ بازپرداخت + تلاش برای بازگشتِ خودکار از طریقِ درگاه */

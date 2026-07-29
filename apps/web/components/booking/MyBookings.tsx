@@ -18,7 +18,7 @@ interface B {
   id: string; booking_reference?: string | null; clubName: string; clubCity?: string
   bookingDate: string; timeSlots: string | null; totalHours: number; final_amount: number
   booking_status: string; payment_status: string; refund_amount?: number; refund_status?: string
-  canCancel: boolean; refundPreview: RefundPreview | null
+  canCancel: boolean; cancelBlockedReason?: string | null; refundPreview: RefundPreview | null
 }
 
 const STATUS: Record<string, { label: string; color: string; bg: string }> = {
@@ -86,12 +86,18 @@ export default function MyBookings() {
               {b.booking_status === 'CANCELLED' && Number(b.refund_amount) > 0 && (
                 <div style={{ fontSize: 11.5, color: FELT, marginTop: 5 }}>بازپرداخت: {fa(b.refund_amount)} تومان</div>
               )}
-              {b.canCancel && (
+              {b.canCancel ? (
                 <button onClick={() => setConfirm(b)} disabled={busy === b.id}
                   style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: RED }}>
                   <X size={12} /> لغوِ رزرو
                 </button>
-              )}
+              ) : b.cancelBlockedReason && b.booking_status !== 'CANCELLED' ? (
+                /* دلیل نوشته می‌شود؛ نبودِ دکمه به‌تنهایی یعنی «اصلاً
+                   امکانِ لغو نیست» که پیامِ درستی نبود. */
+                <div style={{ marginTop: 8, fontSize: 11, color: MUT, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <X size={11} style={{ flexShrink: 0 }} /> {b.cancelBlockedReason}
+                </div>
+              ) : null}
             </div>
 
             <div style={{ textAlign: 'left', flexShrink: 0 }}>

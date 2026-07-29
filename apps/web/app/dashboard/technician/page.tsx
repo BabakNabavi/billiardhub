@@ -17,7 +17,9 @@ import { TECH_SERVICES, type TechService, type TechProject, type TechAlbum } fro
 import {
   emptyTechnicianProfile, findTechnicianByOwner, newTechnicianSlug,
   saveTechnicianProfile, type TechnicianProfile,
+  // (منبعِ حقیقت از این پس سرور است؛ این‌ها فقط کشِ محلی‌اند)
 } from '../../../lib/technician-store'
+import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Wrench, ArrowLeft, Check } from 'lucide-react'
 
@@ -62,6 +64,18 @@ export default function TechnicianDashboard() {
       const base = mine ?? { ...emptyTechnicianProfile(newTechnicianSlug(), user.id, user.phone ?? ''), name: authName }
       setForm(base)
       setAboutText(base.about.join('\n\n'))
+
+      /* نسخه‌ی سرور مقدم است؛ پروفایلِ محلیِ قدیمی یک‌بار بالا می‌رود */
+      void (async () => {
+        const remote = await fetchMyProfile<TechnicianProfile>('technician')
+        if (!remote) {
+          if (mine) await saveProfileRemote('technician', mine.slug, mine as unknown as Record<string, unknown>)
+          return
+        }
+        const merged = { ...base, ...remote.data, slug: remote.slug }
+        setForm(merged)
+        setAboutText((merged.about ?? []).join('\n\n'))
+      })()
     }
     setLoaded(true)
   }, [_hydrated, user?.id])
@@ -118,26 +132,33 @@ export default function TechnicianDashboard() {
     set('albums', form.albums.map(a => a.id === albumId ? { ...a, photos: a.photos.filter((_, i) => i !== idx) } : a))
 
   /* ── ذخیره = انتشار ── */
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim())  { setErr('نام و نام‌خانوادگی لازم است.'); return }
     if (!form.title.trim()) { setErr('عنوان تخصصی لازم است.'); return }
     if (!form.city)         { setErr('شهر را انتخاب کنید.'); return }
     if (!form.services.length) { setErr('حداقل یک نوع خدمات را انتخاب کنید.'); return }
     if (!form.phone.trim()) { setErr('شماره تماس لازم است.'); return }
-    try {
-      saveTechnicianProfile({
-        ...form,
-        ownerId: user?.id || form.ownerId,
-        ownerPhone: user?.phone || form.ownerPhone,
-        about: aboutText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean),
-        coverage: form.coverage.length ? form.coverage : [form.city],
-        status: 'approved',
-      })
-      setSaved(true); setErr('')
-    } catch {
-      setErr('حافظه‌ی مرورگر پر است — چند عکس از آلبوم‌ها حذف کنید و دوباره ذخیره کنید.')
+
+    const profile = {
+      ...form,
+      ownerId: user?.id || form.ownerId,
+      ownerPhone: user?.phone || form.ownerPhone,
+      about: aboutText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean),
+      coverage: form.coverage.length ? form.coverage : [form.city],
+      status: 'approved' as const,
     }
+
+    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
+       تا پیش از این فقط localStorage نوشته می‌شد و پنلِ ادمین پروفایل را
+       اصلاً نمی‌دید. */
+    const res = await saveProfileRemote('technician', profile.slug, profile as unknown as Record<string, unknown>)
+    if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
+
+    const saved = (res.profile?.data as typeof profile | undefined) ?? profile
+    try { saveTechnicianProfile({ ...profile, ...saved }) } catch { /* کشِ مرورگر پر است */ }
+    setForm(f => ({ ...f, ...saved }))
+    setSaved(true); setErr('')
   }
 
   if (!_hydrated || !loaded) return null

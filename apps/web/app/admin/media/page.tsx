@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useAuthStore } from '../../../store/auth.store';
 import { MEDIA_VIDEOS, listChannels, mediaCategoryOf, compactViews, faDigits } from '../../../lib/media-data';
 import { getHiddenVideoIds, toggleHiddenVideo, getFeaturedOverride, setFeaturedOverride } from '../../../lib/media-admin-store';
+import { apiFetch } from '../../../lib/http';
 import { ArrowLeft, Eye, EyeOff, Star, Clapperboard } from 'lucide-react';
 
 const GOLD_D = '#9A6E38';
@@ -26,11 +27,36 @@ export default function AdminMediaPage() {
   const [featured, setFeatured] = useState<string>('');
   const [ready, setReady] = useState(false);
 
+  /* منبع: `app_settings` روی سرور. تا امروز این دو تنظیم در
+     localStorage بود، پس انتخابِ ادمین فقط روی مرورگرِ خودش اثر
+     داشت و کاربران هیچ‌وقت آن را نمی‌دیدند. کشِ محلی به‌عنوان
+     نسخه‌ی اولیه می‌ماند تا صفحه لحظه‌ی اول خالی نباشد. */
   useEffect(() => {
     setHidden(getHiddenVideoIds());
     setFeatured(getFeaturedOverride() ?? '');
     setReady(true);
+
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/admin/settings', { cache: 'no-store' });
+        if (!r.ok) return;
+        const j = await r.json().catch(() => null) as { settings?: Record<string, unknown> } | null;
+        const s = j?.settings ?? {};
+        if (Array.isArray(s.media_hidden_ids)) setHidden(s.media_hidden_ids.map(String));
+        if (typeof s.media_featured_id === 'string') setFeatured(s.media_featured_id);
+      } catch { /* کشِ محلی می‌ماند */ }
+    })();
   }, []);
+
+  /* نوشتنِ تنظیم روی سرور + هم‌گام نگه‌داشتنِ کشِ محلی */
+  const persist = async (patch: Record<string, unknown>) => {
+    try {
+      await apiFetch('/api/admin/settings', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+    } catch { /* بی‌صدا */ }
+  };
 
   useEffect(() => {
     if (_hydrated && (!user || user.primaryRole !== 'admin')) router.push('/');
@@ -68,7 +94,12 @@ export default function AdminMediaPage() {
           </p>
           <select
             value={featured}
-            onChange={e => { setFeatured(e.target.value); setFeaturedOverride(e.target.value || null); }}
+            onChange={e => {
+              const v = e.target.value;
+              setFeatured(v);
+              setFeaturedOverride(v || null);          // کشِ محلی
+              void persist({ media_featured_id: v || null });
+            }}
             style={{ width: '100%', maxWidth: 460 }}>
             <option value="">پیش‌فرض ({defaultFeatured.title})</option>
             {MEDIA_VIDEOS.map(v => (
@@ -100,7 +131,12 @@ export default function AdminMediaPage() {
                     <Eye size={14} />
                   </Link>
                   <button
-                    onClick={() => { toggleHiddenVideo(v.id); setHidden(getHiddenVideoIds()); }}
+                    onClick={() => {
+                      toggleHiddenVideo(v.id);                 // کشِ محلی
+                      const next = getHiddenVideoIds();
+                      setHidden(next);
+                      void persist({ media_hidden_ids: next });
+                    }}
                     title={isHidden ? 'نمایش' : 'مخفی کردن'}
                     style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 12px', borderRadius: 9, border: `1px solid ${isHidden ? 'rgba(14,122,56,0.3)' : 'rgba(178,59,46,0.3)'}`, background: isHidden ? 'rgba(14,122,56,0.06)' : 'rgba(178,59,46,0.05)', color: isHidden ? '#0E7A38' : '#B23B2E', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 800 }}>
                     {isHidden ? <><Eye size={13} /> نمایش</> : <><EyeOff size={13} /> مخفی</>}

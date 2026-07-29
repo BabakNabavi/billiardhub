@@ -7,6 +7,13 @@ import { sb } from './finance/db'
 import { notify, SMS } from './sms-server'
 import { faDate, faTimeRange } from './jalali'
 
+/* نامِ فارسیِ نوعِ میز — برای متنِ پیامک */
+const TABLE_LABEL: Record<string, string> = {
+  snooker: 'میز اسنوکر', pocket: 'میز پاکت', highball: 'میز هی‌بال',
+  vip_snooker: 'میز VIP اسنوکر', vip_pocket: 'میز VIP پاکت',
+  airhockey: 'ایرهاکی', dart: 'دارت', playstation: 'پلی‌استیشن',
+}
+
 interface BookingRow {
   id: string
   userId: string
@@ -29,11 +36,18 @@ async function phoneOf(userId: string): Promise<string | null> {
   return (data as { phone?: string } | null)?.phone ?? null
 }
 
-async function clubOf(clubId: string): Promise<{ name: string; ownerId: string | null } | null> {
-  const { data } = await sb().from('clubs').select('name,"ownerId"').eq('id', clubId).maybeSingle()
+async function clubOf(clubId: string): Promise<{ name: string; ownerId: string | null; notifyPhone: string | null } | null> {
+  const { data } = await sb().from('clubs').select('name,"ownerId","notifyPhone"').eq('id', clubId).maybeSingle()
   if (!data) return null
-  const c = data as { name?: string; ownerId?: string }
-  return { name: c.name ?? 'باشگاه', ownerId: c.ownerId ?? null }
+  const c = data as { name?: string; ownerId?: string; notifyPhone?: string }
+  return { name: c.name ?? 'باشگاه', ownerId: c.ownerId ?? null, notifyPhone: c.notifyPhone || null }
+}
+
+/** نامِ نمایشیِ کاربر — برای پیامکِ باشگاه‌دار */
+async function nameOf(userId: string): Promise<string> {
+  const { data } = await sb().from('users').select('"firstName","lastName"').eq('id', userId).maybeSingle()
+  const u = (data ?? {}) as { firstName?: string; lastName?: string }
+  return `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
 }
 
 /** رزرو قطعی شد — به کاربر، و خبرِ رزروِ جدید به باشگاه‌دار */
@@ -47,15 +61,23 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   const userPhone = await phoneOf(b.userId)
   notify(userPhone, SMS.bookingConfirmed(club?.name ?? 'باشگاه', date, time, b.booking_reference ?? '—'))
 
-  /* باشگاه‌دار هم باید بداند میزش پر شده */
-  if (club?.ownerId && club.ownerId !== b.userId) {
+  /* باشگاه‌دار هم باید بداند میزش پر شده.
+
+     مقصد لزوماً شماره‌ی خودِ مالک نیست: بسیاری از باشگاه‌ها به نامِ یک
+     نفر ثبت‌اند ولی کسِ دیگری اداره‌شان می‌کند. اگر «شماره‌ی
+     اطلاع‌رسانی» تنظیم شده باشد، پیامک به همان می‌رود. */
+  if (club && club.ownerId !== b.userId) {
     let tableName = ''
     if (b.tableId) {
-      const { data } = await sb().from('tables').select('name,number').eq('id', b.tableId).maybeSingle()
-      const t = data as { name?: string; number?: number } | null
-      tableName = t?.name ?? (t?.number ? `میز ${t.number}` : '')
+      const { data } = await sb().from('tables').select('name,number,type').eq('id', b.tableId).maybeSingle()
+      const t = data as { name?: string; number?: number; type?: string } | null
+      const kind = TABLE_LABEL[t?.type ?? ''] ?? ''
+      tableName = t?.name
+        || [kind, t?.number ? `شماره ${t.number}` : ''].filter(Boolean).join(' ')
+        || ''
     }
-    notify(await phoneOf(club.ownerId), SMS.newBookingForOwner(date, time, tableName))
+    const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
+    notify(target, SMS.newBookingForOwner(club.name, date, time, tableName, await nameOf(b.userId)))
   }
 }
 

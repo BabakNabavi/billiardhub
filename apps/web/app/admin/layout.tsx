@@ -4,10 +4,20 @@
    می‌شوند: بدون ظاهرِ بومی، شورونِ طلایی، رینگِ فوکِس برند.
    ───────────────────────────────────────────────────────────── */
 
+import type { Metadata } from 'next';
+import AdminBack from '../../components/admin/AdminBack';
+
+/* پنلِ مدیریت هرگز نباید ایندکس شود */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="admin-scope">
       <style>{`
+        .admin-back-btn:hover { border-color: rgba(199,166,106,0.55) !important; color: #9A6E38 !important; }
+
         .admin-scope select {
           appearance: none; -webkit-appearance: none; -moz-appearance: none;
           background-color: #fff;
@@ -31,6 +41,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
         .admin-scope select:disabled { opacity: .55; cursor: not-allowed; }
       `}</style>
+      {/* یک‌بار این‌جا، پس هر صفحه‌ی ادمین — از جمله صفحه‌های آینده — دارد */}
+      <AdminBack />
       {children}
     </div>
   );

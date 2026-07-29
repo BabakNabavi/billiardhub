@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import { listSellerProfiles, updateSellerProfile, type SellerProfile } from '../../../lib/seller-store'
+import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
 
 const ADMIN_PHONE = '09121327283'
 
@@ -36,10 +37,21 @@ export default function AdminSellersPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
 
-  useEffect(() => { setList(listSellerProfiles()) }, [tick])
+  /* منبع: جدولِ `profiles` روی سرور — نه localStorage. داشبوردِ فروشنده
+     از قبل روی سرور می‌نوشت ولی این صفحه هنوز از مرورگر می‌خواند. */
+  useEffect(() => {
+    void (async () => {
+      const rows = await fetchAdminProfiles<SellerProfile>('seller')
+      setList(rows.length ? rows : listSellerProfiles())
+    })()
+  }, [tick])
 
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
-  const act = (slug: string, patch: Partial<SellerProfile>) => { updateSellerProfile(slug, patch); setTick(t => t + 1) }
+  const act = async (slug: string, patch: Partial<SellerProfile>) => {
+    await patchAdminProfile(slug, patch as Record<string, unknown>)
+    updateSellerProfile(slug, patch)   // کشِ محلی هم هم‌گام بماند
+    setTick(t => t + 1)
+  }
 
   if (!_hydrated) {
     return <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh' }} />

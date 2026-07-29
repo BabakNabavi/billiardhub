@@ -63,14 +63,33 @@ const EXT: Record<string, string> = {
 
 let uploadSeq = 0
 
+/* امضای بایتیِ قالب‌های مجاز. اعلامِ نوع در خودِ data:URL حرفِ کاربر است
+   و قابلِ جعل؛ این‌جا خودِ بایت‌ها سنجیده می‌شوند. */
+function sniff(b: Buffer): string | null {
+  if (b.length < 12) return null
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg'
+  if (b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png'
+  if (b.subarray(0, 3).toString('latin1') === 'GIF') return 'image/gif'
+  if (b.subarray(0, 4).toString('latin1') === 'RIFF' && b.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp'
+  /* AVIF/HEIF: جعبه‌ی ftyp با برندِ avif */
+  if (b.subarray(4, 8).toString('latin1') === 'ftyp' && b.subarray(8, 12).toString('latin1').startsWith('avi')) return 'image/avif'
+  return null
+}
+
 async function uploadDataUrl(value: string, prefix: string): Promise<string> {
   const m = DATA_URL.exec(value)
   if (!m) return value
-  const mime = m[1]!.toLowerCase()
   const bytes = Buffer.from(m[2]!, 'base64')
   if (bytes.byteLength > MAX_IMAGE_BYTES) return ''   // عکسِ بیش‌ازحد بزرگ کنار گذاشته می‌شود
 
-  const path = `${prefix}/${Date.now()}-${uploadSeq++}.${EXT[mime] ?? 'jpg'}`
+  /* نوعِ واقعی از روی بایت‌ها، نه از روی برچسبِ data:URL.
+     الگوی قبلی هر image/* را می‌پذیرفت — از جمله image/svg+xml — و آن را
+     با همان contentType در باکتِ عمومی می‌گذاشت؛ یعنی هر کسی می‌توانست
+     یک SVGِ حاوی اسکریپت را به‌عنوانِ «عکسِ پروفایل» بالا بدهد. */
+  const mime = sniff(bytes)
+  if (!mime || !EXT[mime]) return ''
+
+  const path = `${prefix}/${Date.now()}-${uploadSeq++}.${EXT[mime]}`
   const { error } = await getSupabaseServer().storage
     .from(BUCKET)
     .upload(path, bytes, { contentType: mime, upsert: false })

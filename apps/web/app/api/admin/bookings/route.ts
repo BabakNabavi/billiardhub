@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
     if (/does not exist|schema cache/i.test(error.message)) {
       return NextResponse.json({ rows: [], pending: true }, { headers: { 'Cache-Control': 'no-store' } });
     }
-    return NextResponse.json({ message: 'خطا در دریافتِ رزروها: ' + error.message }, { status: 500 });
+    console.error('[admin/bookings] db error:', error.message);
+    return NextResponse.json({ message: 'خطا در دریافتِ رزروها' }, { status: 500 });
   }
 
   const rows = (data ?? []) as Record<string, unknown>[];

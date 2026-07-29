@@ -17,6 +17,7 @@ import {
   STORY_ROLES, addStoredStory, getOwnerStories, removeStoredStory, type StoredStory,
 } from '../../../lib/story-store'
 import { isValidSlug } from '../../../lib/slug'
+import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 
 /* ─── Tokens ─── */
 const GOLD   = '#C7A66A'
@@ -143,6 +144,17 @@ function RefereeDashboardInner() {
     } else if (user) {
       setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
     }
+
+    /* نسخه‌ی سرور مقدم است؛ پروفایلِ محلیِ قدیمی یک‌بار بالا فرستاده می‌شود */
+    void (async () => {
+      const remote = await fetchMyProfile<Record<string, unknown>>('referee')
+      if (!remote) {
+        if (mine) await saveProfileRemote('referee', mine.slug, mine as unknown as Record<string, unknown>,
+          { number: '', url: mine.certificate?.url ?? '' })
+        return
+      }
+      setForm(f => ({ ...f, ...(remote.data as Partial<FormState>), slug: remote.slug }))
+    })()
   }, [_hydrated, user])
 
   /* owner key must match the one the home stories bar groups by (Stories.tsx) */
@@ -284,12 +296,22 @@ function RefereeDashboardInner() {
       ownerId: user?.id || '',
       ownerPhone: user?.phone || '',
     }
-    try {
-      saveRefereeProfile(profile)
-    } catch {
-      setTopErr('حجم تصاویر بیش از ظرفیت مجاز مرورگر است. لطفاً تعداد یا حجم تصاویرِ گالری / کاور / مدرک را کمتر کنید و دوباره ثبت کنید.')
+    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
+       تا پیش از این فقط localStorage نوشته می‌شد و پروفایل هیچ‌وقت به
+       دیتابیس نمی‌رسید، پس پنلِ ادمین آن را نمی‌دید. */
+    const res = await saveProfileRemote('referee', profile.slug, profile as unknown as Record<string, unknown>,
+      { number: '', url: profile.certificate?.url ?? '' })
+    if (!res.ok) {
+      setTopErr(res.message ?? 'ذخیره روی سرور انجام نشد')
       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
       return
+    }
+
+    const saved = (res.profile?.data as typeof profile | undefined) ?? profile
+    try {
+      saveRefereeProfile({ ...profile, ...saved })
+    } catch {
+      /* کشِ مرورگر پر است — داده روی سرور ذخیره شده */
     }
     setSubmitted(true)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })

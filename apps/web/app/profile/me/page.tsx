@@ -8,6 +8,7 @@ import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import VerificationBadges from '../../../components/VerificationBadges'
 import ChangePhone from '../../../components/auth/ChangePhone'
+import ChangePassword from '../../../components/auth/ChangePassword'
 import Select from '../../../components/ui/Select'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -441,6 +442,20 @@ export default function ProfileMePage() {
                     setProfile(prev => (prev ? { ...prev, phone: p } : prev))
                     useAuthStore.getState().updateUser({ phone: p })
                     showToast('شماره موبایل شما تغییر کرد')
+                  }}
+                />
+              </Field>
+
+              <Field label="رمز عبور">
+                {/* سرور همه‌ی نشست‌ها را باطل می‌کند؛ پس این‌جا هم حسابِ محلی
+                    را پاک می‌کنیم و کاربر را به صفحه‌ی ورود می‌فرستیم. */}
+                <ChangePassword
+                  onChanged={() => {
+                    showToast('رمز عبور تغییر کرد؛ دوباره وارد شوید')
+                    setTimeout(() => {
+                      useAuthStore.getState().logout()
+                      router.replace('/login')
+                    }, 1800)
                   }}
                 />
               </Field>

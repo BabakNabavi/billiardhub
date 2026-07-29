@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
+import { loginGuard, loginFailed, loginSucceeded, lockMessage, GENERIC_LOGIN_ERROR } from '@/lib/auth/login-guard';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -32,26 +33,42 @@ export async function POST(req: NextRequest) {
     const rl = await hitRateLimit(req, RULES.login, String(phone));
     if (!rl.ok) return tooMany(rl.retryAfterSec);
 
+    /* قفلِ تدریجیِ حساب/IP — لایه‌ی دوم در برابرِ حدسِ رمز */
+    const guard = await loginGuard(req, String(phone));
+    if (guard.locked) {
+      return NextResponse.json(
+        { message: lockMessage(guard.retryAfter), retryAfter: guard.retryAfter },
+        { status: 429, headers: { ...CORS_HEADERS, 'Retry-After': String(guard.retryAfter) } },
+      );
+    }
+
     const { data: user, error } = await getSupabaseServer()
       .from('users')
       .select('*')
       .eq('phone', phone)
       .single();
 
+    /* پیامِ یکسان برای «شماره وجود ندارد» و «رمز غلط» — وگرنه مهاجم با
+       همین تفاوت می‌فهمد کدام شماره‌ها در سایت حساب دارند. */
     if (error || !user) {
+      await loginFailed(req, String(phone));
       return NextResponse.json(
-        { message: 'کاربر با این شماره موبایل یافت نشد' },
+        { message: GENERIC_LOGIN_ERROR },
         { status: 401, headers: CORS_HEADERS },
       );
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
+      await loginFailed(req, String(phone));
       return NextResponse.json(
-        { message: 'رمز عبور اشتباه است' },
+        { message: GENERIC_LOGIN_ERROR },
         { status: 401, headers: CORS_HEADERS },
       );
     }
+
+    /* ورودِ موفق ⇒ شمارنده‌ی همین حساب پاک می‌شود */
+    await loginSucceeded(String(phone));
 
     /* توکنِ قدیمی هنوز در body برمی‌گردد تا کلاینت‌های فعلی نشکنند؛
        در مرحله‌ی «د» حذف می‌شود. منبعِ اصلی از حالا کوکیِ httpOnly است. */

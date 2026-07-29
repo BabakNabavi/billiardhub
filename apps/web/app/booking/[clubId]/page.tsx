@@ -343,9 +343,25 @@ function BookingContent() {
   const totalHours   = sorted.length;
   /* #22: per-slot pricing with time-based discount rules */
   const baseTotal    = selectedTable ? selectedSlots.reduce((s,h)=>s+slotPrice(h,selectedTable),0) : 0;
-  /* هزینه‌ی بازیکنِ اضافه — تنظیمِ خودِ باشگاه (همان فرمولِ سمتِ سرور) */
-  const surcharge    = surchargeOf(club as unknown as Record<string,unknown>);
+  /* هزینه‌ی بازیکنِ اضافه — تنظیمِ خودِ میز، و اگر نداشت از باشگاه.
+     همان فرمولِ سمتِ سرور، تا عددِ روی صفحه با مبلغِ پرداختی یکی باشد. */
+  const surcharge    = surchargeOf(selectedTable as unknown as Record<string,unknown>, club as unknown as Record<string,unknown>);
   const extraPlayerN = extraPlayers(playerCount, surcharge);
+
+  /* میزها بر اساسِ نوع، با ترتیبِ ثابتِ TYPE_LABEL */
+  const groupedTables = (() => {
+    const order = Object.keys(TYPE_LABEL);
+    const by = new Map<string, typeof tables>();
+    for (const t of tables) {
+      const k = t.type ?? 'other';
+      if (!by.has(k)) by.set(k, [] as unknown as typeof tables);
+      (by.get(k) as unknown as typeof tables[number][]).push(t);
+    }
+    return [...by.entries()].sort((a, b) => {
+      const ia = order.indexOf(a[0]), ib = order.indexOf(b[0]);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+  })();
   const totalPrice   = Math.round(baseTotal*playerMultiplier(playerCount,surcharge));
   const accentColor  = selectedTable?(TYPE_COLOR[selectedTable.type]??'#C7A66A'):'#C7A66A';
   const dateLabel    = jDay?`${toFa(jDay)} ${jMonths[jMonth-1]} ${toFa(jYear)}`:'';
@@ -458,8 +474,23 @@ function BookingContent() {
                 )}
               </div>
             )}
+            {/* میزها بر اساسِ نوع دسته می‌شوند — اسنوکرها زیرِ هم، پاکت‌ها
+                زیرِ هم و… . قبلاً به همان ترتیبی که از دیتابیس می‌آمدند
+                پشتِ سر هم می‌نشستند و انتخابشان گیج‌کننده بود. */}
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
-              {tables.map(table=>{
+              {groupedTables.map(([type, group])=>(
+                <div key={type} style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+                  <div style={{
+                    display:'flex',alignItems:'center',gap:8,margin:'6px 2px 0',
+                    fontSize:12.5,fontWeight:800,color:TYPE_COLOR[type]??'#9A6E38',
+                  }}>
+                    <span style={{width:6,height:6,borderRadius:3,background:TYPE_COLOR[type]??'#C7A66A',flexShrink:0}}/>
+                    {TYPE_LABEL[type]??type}
+                    <span style={{fontSize:11,fontWeight:700,color:'rgba(0,0,0,0.35)'}}>
+                      ({toFa(group.length)} میز)
+                    </span>
+                  </div>
+                  {group.map(table=>{
                 const color = TYPE_COLOR[table.type]??'#C7A66A';
                 const isSel = selectedTable?.id===table.id;
                 const disc  = table.morningDiscount??0;
@@ -486,7 +517,9 @@ function BookingContent() {
                     {isSel&&<div style={{width:'26px',height:'26px',borderRadius:'50%',background:color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><Check size={13} style={{color:'#fff'}}/></div>}
                   </div>
                 );
-              })}
+                  })}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -606,14 +639,18 @@ function BookingContent() {
               {selectedSlots.length>0&&startHour!==undefined&&endHour!==undefined&&(
                 <div style={{marginTop:'14px',padding:'13px 16px',background:`rgba(${SEL_RGB},0.08)`,border:`1px solid rgba(${SEL_RGB},0.25)`,borderRadius:'13px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'10px',animation:'fadeUp 0.3s ease both'}}>
                   <div style={{display:'flex',alignItems:'center',gap:'8px',color:SEL_COLOR,fontSize: '16px',fontWeight:700}}>
-                    <Clock size={14}/> {toFa(startHour)}:۰۰ — {toFa(endHour)}:۰۰
+                    <Clock size={14}/> ساعت {toFa(startHour)}:۰۰ تا {toFa(endHour)}:۰۰
                   </div>
                   {(()=>{
                     const hasAnyDisc = selectedTable && selectedSlots.some(h=>getSlotDiscountPct(h,selectedTable)>0);
                     return (
                       <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
                         <span style={{fontSize: '14px',color:'rgba(0,0,0,0.45)',background:'rgba(0,0,0,0.05)',padding:'4px 12px',borderRadius:'20px',fontWeight:600}}>{toFa(totalHours)} ساعت</span>
-                        {playerCount>2&&<span style={{fontSize: '14px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa((playerCount-2)*15)}٪</span>}
+                        {/* درصد از همان محاسبه‌ای می‌آید که مبلغ را می‌سازد.
+                            قبلاً این‌جا «>۲» و «۱۵٪» هاردکد بود و با نرخِ
+                            واقعیِ باشگاه نمی‌خواند: کاربر نفرِ دوم را اضافه
+                            می‌کرد، برچسبی نمی‌دید ولی مبلغ بالا می‌رفت. */}
+                        {extraPlayerN>0&&<span style={{fontSize: '14px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa(extraPlayerN*surcharge.percent)}٪</span>}
                         {hasAnyDisc&&<span style={{fontSize: '14px',color:SEL_COLOR,background:`rgba(${SEL_RGB},0.08)`,border:`1px solid rgba(${SEL_RGB},0.25)`,padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>تخفیف اعمال شد ✓</span>}
                         <span style={{fontSize: '14px',color:SEL_COLOR,fontWeight:800,background:`rgba(${SEL_RGB},0.10)`,padding:'4px 12px',borderRadius:'20px'}}>{toFa(totalPrice.toLocaleString())} تومان</span>
                       </div>

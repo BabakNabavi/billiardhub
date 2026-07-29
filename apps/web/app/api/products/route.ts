@@ -66,9 +66,9 @@ export async function GET(req: NextRequest) {
       page,
       totalPages: Math.ceil((count || 0) / limit),
     })
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/products error:', err)
-    return NextResponse.json({ error: err.message || 'خطای سرور' }, { status: 500 })
+    return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
   }
 }
 
@@ -151,8 +151,8 @@ export async function POST(req: NextRequest) {
     if (gate.consumptionId && data?.id) await attachConsumptionRef(gate.consumptionId, String(data.id))
 
     return NextResponse.json({ product: data }, { status: 201 })
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/products error:', err)
-    return NextResponse.json({ error: err.message || 'خطای سرور' }, { status: 500 })
+    return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
   }
 }

@@ -15,6 +15,34 @@ export const BUCKET = 'club-media'
 export const DAY = 24 * 60 * 60 * 1000
 const SUPABASE_URL = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
 
+/* ── تفکیکِ محتوای خصوصی از عمومی ─────────────────────────────
+
+   باکتِ `club-media` عمومی است — و باید بماند، چون عکسِ باشگاه،
+   محصول و استوری از همان‌جا سرو می‌شوند.
+
+   ولی دایرکت، اعلان، اشتراکِ Push، رکوردِ OTP و مدارکِ هویتی هم در
+   همان باکت می‌نشستند. یعنی هر کسی بدونِ هیچ کلیدی می‌توانست
+   `/object/public/club-media/social/dm/<شماره>.json` را بخواند و
+   کلِ باکت را هم فهرست کند. نامِ فایل‌ها خودِ شماره‌ی موبایل بود.
+
+   این‌ها حالا به یک باکتِ **خصوصی** می‌روند. مسیرها عوض نمی‌شوند،
+   فقط باکت — پس همه‌ی فراخوان‌های موجود بدونِ تغییر کار می‌کنند. */
+export const PRIVATE_BUCKET = 'bh-private'
+
+const PRIVATE_PREFIXES = [
+  'social/dm/', 'social/dm-idx/', 'social/dm-poll/',
+  'social/notif/', 'social/push/', 'social/otp/', 'social/seen/',
+  'documents/',
+]
+
+/** کدام باکت برای این مسیر؟ */
+export function bucketFor(path: string): string {
+  return PRIVATE_PREFIXES.some(p => path.startsWith(p)) ? PRIVATE_BUCKET : BUCKET
+}
+
+/** آیا این مسیر خصوصی است؟ (برای تصمیمِ خواندن با URL عمومی) */
+export const isPrivatePath = (path: string) => bucketFor(path) === PRIVATE_BUCKET
+
 export const CORS = {
   'Vary': 'Origin',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -28,7 +56,7 @@ export const dmTopic = (userKey: string) => `dm-user-${safeKey(userKey)}`
 
 export async function readJson<T>(path: string, fallback: T): Promise<T> {
   try {
-    const { data, error } = await getSupabaseServer().storage.from(BUCKET).download(path)
+    const { data, error } = await getSupabaseServer().storage.from(bucketFor(path)).download(path)
     if (error || !data) return fallback
     return JSON.parse(await data.text()) as T
   } catch { return fallback }
@@ -40,6 +68,14 @@ export async function readJson<T>(path: string, fallback: T): Promise<T> {
    باکت عمومی است، پس آدرسِ عمومی با پارامترِ ضدِکش خوانده می‌شود. */
 export async function readJsonFresh<T>(path: string, fallback: T): Promise<T> {
   try {
+    /* مسیرِ خصوصی هرگز از URLِ عمومی خوانده نمی‌شود — آن باکت public
+       نیست و اصلاً پاسخ نمی‌دهد. با کلیدِ سرویس دانلود می‌شود؛ دانلودِ
+       مستقیم کشِ لبه ندارد، پس همان تازگیِ موردِ نظر را هم می‌دهد. */
+    if (isPrivatePath(path)) {
+      const { data, error } = await getSupabaseServer().storage.from(PRIVATE_BUCKET).download(path)
+      if (error || !data) return fallback
+      return JSON.parse(await data.text()) as T
+    }
     const bust = `${Date.now()}_${Math.random().toString(36).slice(2)}`
     const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}?t=${bust}`
     const r = await fetch(url, { cache: 'no-store' })
@@ -50,7 +86,7 @@ export async function readJsonFresh<T>(path: string, fallback: T): Promise<T> {
 
 export async function writeJson(path: string, obj: unknown): Promise<void> {
   const buf = Buffer.from(JSON.stringify(obj), 'utf8')
-  await getSupabaseServer().storage.from(BUCKET).upload(path, buf, {
+  await getSupabaseServer().storage.from(bucketFor(path)).upload(path, buf, {
     upsert: true, contentType: 'application/json',
     cacheControl: '0',   // بدونِ این، خواندنِ بعدی نسخه‌ی کش‌شده‌ی قدیمی را می‌داد (پیام‌ها دیر/گم می‌شدند)
   })
@@ -92,8 +128,9 @@ export async function appendMessage(cid: string, m: DMsg): Promise<void> {
 /* since=0 ⇒ آخرین cap پیام؛ since>0 ⇒ فقط پیام‌های تازه‌تر (بر پایه‌ی نامِ فایل، بدونِ دانلودِ اضافه) */
 export async function readMessages(cid: string, since = 0, cap = 80): Promise<DMsg[]> {
   try {
-    const { data, error } = await getSupabaseServer().storage.from(BUCKET)
-      .list(P.msgDir(cid), { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
+    const dir = P.msgDir(cid)
+    const { data, error } = await getSupabaseServer().storage.from(bucketFor(dir + '/'))
+      .list(dir, { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
     if (error || !data) return []
     const rows = data
       .filter(f => f.name.endsWith('.json'))

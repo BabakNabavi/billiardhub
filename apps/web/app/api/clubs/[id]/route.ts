@@ -63,9 +63,20 @@ export async function PUT(
     for (const k of [
       'verificationStatus', 'licenseVerified', 'licenseCheckedAt', 'licenseNumber',
       'ibanVerified', 'ibanOwnerName', 'ownerId', 'id', 'createdAt',
+      /* انتشار هم دستِ ادمین است؛ وگرنه مالک می‌توانست خودش باشگاهِ
+         تأییدنشده را در فهرستِ عمومی بنشاند. */
+      'isActive',
     ]) {
       if (Object.prototype.hasOwnProperty.call(body, k)) delete (body as Record<string, unknown>)[k];
     }
+  }
+
+  /* تأییدِ ادمین = انتشار. رد کردن = برداشتن از فهرستِ عمومی.
+     این دو تا امروز از هم جدا بودند و «تأیید شده» هیچ اثری روی دیده‌شدنِ
+     باشگاه نداشت. */
+  if (isAdmin && typeof body.verificationStatus === 'string') {
+    if (body.verificationStatus === 'verified') body.isActive = true;
+    else if (body.verificationStatus === 'rejected') body.isActive = false;
   }
 
   /* شبا فقط از راهِ استعلامِ کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
@@ -84,7 +95,10 @@ export async function PUT(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ message: error.message }, { status: 500, headers: CORS });
+  if (error) {
+    console.error('[clubs/:id] update error:', error.message);
+    return NextResponse.json({ message: 'به‌روزرسانیِ باشگاه انجام نشد' }, { status: 500, headers: CORS });
+  }
   return NextResponse.json(updated, { headers: CORS });
 }
 
@@ -110,7 +124,10 @@ export async function DELETE(
   }
 
   const { error } = await getSupabaseServer().from('clubs').delete().eq('id', id);
-  if (error) return NextResponse.json({ message: error.message }, { status: 500, headers: CORS });
+  if (error) {
+    console.error('[clubs/:id] delete error:', error.message);
+    return NextResponse.json({ message: 'حذفِ باشگاه انجام نشد' }, { status: 500, headers: CORS });
+  }
 
   return NextResponse.json({ success: true }, { headers: CORS });
 }

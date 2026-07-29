@@ -21,6 +21,7 @@ import {
   emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile,
   type PlayerProfile,
 } from '../../../lib/player-store'
+import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import PlayerDisciplines from '../../../components/player/PlayerDisciplines'
 import VerificationBadges from '../../../components/VerificationBadges'
 import { Plus, Trash2, Images, Trophy, ArrowLeft, Check } from 'lucide-react'
@@ -66,6 +67,18 @@ export default function PlayerDashboard() {
       const base = mine ?? { ...emptyPlayerProfile(newPlayerSlug(), user.id, user.phone ?? ''), name: authName }
       setForm(base)
       setBioText(base.bio.join('\n\n'))
+
+      /* نسخه‌ی سرور مقدم است؛ پروفایلِ محلیِ قدیمی یک‌بار بالا می‌رود */
+      void (async () => {
+        const remote = await fetchMyProfile<PlayerProfile>('player')
+        if (!remote) {
+          if (mine) await saveProfileRemote('player', mine.slug, mine as unknown as Record<string, unknown>)
+          return
+        }
+        const merged = { ...base, ...remote.data, slug: remote.slug }
+        setForm(merged)
+        setBioText((merged.bio ?? []).join('\n\n'))
+      })()
     }
     setLoaded(true)
   }, [_hydrated, user?.id])
@@ -115,26 +128,33 @@ export default function PlayerDashboard() {
     finally { setBusy(false) }
   }
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim())   { setErr('نام و نام‌خانوادگی لازم است.'); return }
     if (!form.nameEn.trim()) { setErr('نام لاتین لازم است.'); return }
     if (!form.city)          { setErr('شهر را انتخاب کنید.'); return }
     if (form.disciplines.length === 0) { setErr('حداقل یک رشته را انتخاب کنید.'); return }
     if (!form.intro.trim())  { setErr('معرفی کوتاه لازم است.'); return }
-    try {
-      savePlayerProfile({
-        ...form,
-        ownerId: user?.id || form.ownerId,
-        ownerPhone: user?.phone || form.ownerPhone,
-        nameEn: form.nameEn.trim().toUpperCase(),
-        bio: bioText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean),
-        status: 'approved',
-      })
-      setSaved(true); setErr('')
-    } catch {
-      setErr('حافظه‌ی مرورگر پر است — چند عکس از آلبوم‌ها حذف کنید و دوباره ذخیره کنید.')
+
+    const profile = {
+      ...form,
+      ownerId: user?.id || form.ownerId,
+      ownerPhone: user?.phone || form.ownerPhone,
+      nameEn: form.nameEn.trim().toUpperCase(),
+      bio: bioText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean),
+      status: 'approved' as const,
     }
+
+    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
+       تا پیش از این فقط localStorage نوشته می‌شد و پنلِ ادمین پروفایل را
+       اصلاً نمی‌دید. */
+    const res = await saveProfileRemote('player', profile.slug, profile as unknown as Record<string, unknown>)
+    if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
+
+    const saved = (res.profile?.data as typeof profile | undefined) ?? profile
+    try { savePlayerProfile({ ...profile, ...saved }) } catch { /* کشِ مرورگر پر است */ }
+    setForm(f => ({ ...f, ...saved }))
+    setSaved(true); setErr('')
   }
 
   if (!_hydrated || !loaded) return null

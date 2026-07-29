@@ -120,6 +120,10 @@ export default function LoginPage() {
         .au-btn:not(:disabled):active { transform: scale(0.985); }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
+        .au-forgot { font-size: 12px; font-weight: 700; color: ${GOLD_D}; text-decoration: none;
+          border-bottom: 1px solid rgba(199,166,106,0.45); padding-bottom: 1px; transition: border-color .2s, color .2s; }
+        .au-forgot:hover { color: #7E5723; border-bottom-color: ${GOLD_D}; }
+
         /* ── خطای مرکزی: وسطِ صفحه، جلوی چشمِ کاربر ── */
         @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
@@ -183,7 +187,10 @@ export default function LoginPage() {
         </div>
 
         <div style={{ marginBottom: 22 }}>
-          <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>رمز عبور</label>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+            <label style={{ fontSize: 12.5, fontWeight: 700, color: SEC }}>رمز عبور</label>
+            <Link href="/forgot-password" className="au-forgot">فراموشی رمز عبور؟</Link>
+          </div>
           <div className={`au-wrap${passFocus ? ' on' : ''}${error && !password ? ' err' : ''}`}>
             <span className="au-ic"><Lock size={16} /></span>
             <input

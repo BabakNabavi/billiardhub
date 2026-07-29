@@ -17,6 +17,7 @@ interface InTable {
   id?: string; name?: string; number?: number | string | null; type?: string;
   brand?: string | null; model?: string | null; pricePerHour?: number | string;
   morningDiscount?: number | null; discountRules?: unknown; photoDataUrl?: string | null;
+  playerSurchargeEnabled?: boolean; playerSurchargePercent?: number | string; playerSurchargeFrom?: number | string;
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -53,14 +54,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     morningDiscount: Math.max(0, Math.min(100, Math.round(Number(t.morningDiscount) || 0))),
     discountRules: Array.isArray(t.discountRules) && t.discountRules.length > 0 ? t.discountRules : null,
     photoDataUrl: typeof t.photoDataUrl === 'string' ? t.photoDataUrl.slice(0, 400_000) : null,
+    /* هزینه‌ی بازیکنِ اضافه در سطحِ میز. NULL معنادار است: یعنی «تنظیمِ
+       باشگاه اعمال شود»، پس نبودِ مقدار نباید صفر ذخیره شود. */
+    playerSurchargeEnabled: t.playerSurchargeEnabled === undefined ? null : !!t.playerSurchargeEnabled,
+    playerSurchargePercent: Number.isFinite(Number(t.playerSurchargePercent))
+      ? Math.max(0, Math.min(100, Math.round(Number(t.playerSurchargePercent)))) : null,
+    playerSurchargeFrom: Number.isFinite(Number(t.playerSurchargeFrom))
+      ? Math.max(1, Math.min(12, Math.round(Number(t.playerSurchargeFrom)))) : null,
     isActive: true,
   });
 
   /* اگر مایگریشنِ ۰۰۳ هنوز اجرا نشده باشد، پیامِ روشن بده نه خطای خام */
-  const msg = (what: string, raw: string) =>
-    /does not exist|schema cache|column/i.test(raw)
+  /* متنِ خامِ خطای دیتابیس فقط در لاگِ سرور می‌ماند؛ به کاربر پیامِ
+     قابل‌فهم می‌رسد. تنها استثنا خطای «مایگریشن اجرا نشده» است که
+     پیامش راهنمای خودِ ماست، نه نشتِ داده. */
+  const msg = (what: string, raw: string) => {
+    console.error(`[clubs/:id/tables/sync] ${what}:`, raw);
+    return /does not exist|schema cache|column/i.test(raw)
       ? 'ساختارِ جدولِ میزها هنوز به‌روز نشده است (مایگریشن ۰۰۳ اجرا نشده)'
-      : `خطا در ${what} میز: ${raw}`;
+      : `خطا در ${what} میز`;
+  };
 
   const idMap: Record<string, string> = {};
   const keepIds: string[] = [];

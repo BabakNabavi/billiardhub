@@ -18,8 +18,8 @@ import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
 import MyBookings from '../../components/booking/MyBookings';
-import MyAdPlan from '../../components/ads/MyAdPlan';
-import MyStoryPlan from '../../components/ads/MyStoryPlan';
+
+
 
 /* ══ types ══ */
 interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
@@ -651,11 +651,25 @@ export default function DashboardPage() {
             {/* ── RIGHT COLUMN ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '130px' }}>
 
-              {/* بسته‌ی آگهی — چه بسته‌ای، تا کی، چند تا مانده */}
-              <ScrollReveal><MyAdPlan /></ScrollReveal>
-
-              {/* بسته‌ی استوری — چه بسته‌ای، تا کی، چند تا مانده */}
-              <ScrollReveal><MyStoryPlan /></ScrollReveal>
+              {/* «بسته‌ی آگهیِ من» و «بسته‌ی استوریِ من» برداشته شدند.
+                  آن‌ها رابطِ سیستمِ قدیمیِ سهمیه‌ای بودند که در فازهای ۲ تا ۶
+                  جایش را به معماریِ Placement/Campaign داد؛ سهمیه هم اکنون
+                  خاموش است (ads_quota_enabled=false). نگه‌داشتنشان یعنی نشان
+                  دادنِ بسته‌ای که کاربر نه خریده و نه می‌تواند بخرد. */}
+              <ScrollReveal>
+                <div className="dash-card">
+                  <div className="card-label">
+                    <span style={{ background: 'linear-gradient(180deg,#C7A66A,#A07840)' }} />
+                    تبلیغات
+                  </div>
+                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 2, margin: '0 0 14px' }}>
+                    جایگاه‌های تبلیغاتیِ سایت، کمپین‌های فعال و گزارشِ نمایش و کلیک.
+                  </p>
+                  <Link href="/advertise/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
+                    پنل تبلیغات من
+                  </Link>
+                </div>
+              </ScrollReveal>
 
               {/* Upcoming tournament — synced with SAMPLE_TOURNAMENTS */}
               <ScrollReveal>

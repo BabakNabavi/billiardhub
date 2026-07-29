@@ -604,17 +604,20 @@ export default function Navbar() {
           background: '#F7F5F0',
           overflowY: 'auto',
           display: 'flex', flexDirection: 'column',
+          /* بدونِ این، منو از خطِ صفر باز می‌شد و دکمه‌ی بستن زیرِ نوارِ
+             وضعیت (ساعت و نشانِ شارژ) می‌رفت و قابلِ زدن نبود. */
+          paddingTop: 'env(safe-area-inset-top)',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
           {/* Header row — centered brand */}
-          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 20px 16px' }}>
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 20px 16px' }}>
             <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', margin: '6px 0 8px' }} />
             <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
               <span style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.28), 0 -1px 0 rgba(255,255,255,0.45)' }}>بیلیارد</span>{' '}
               <span style={{ color: GOLD }}>هاب</span>
             </span>
-            <button onClick={() => setMobileOpen(false)}
-              style={{ position: 'absolute', top: '16px', insetInlineStart: '20px', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
+            <button onClick={() => setMobileOpen(false)} aria-label="بستن منو"
+              style={{ position: 'absolute', top: '24px', insetInlineStart: '20px', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
               <X size={20} />
             </button>
           </div>

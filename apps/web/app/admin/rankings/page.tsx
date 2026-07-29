@@ -8,6 +8,7 @@ import {
   buildEmptyRankings, getStoredRankings, saveRankings, categorySize,
   type RankingPlayer, type RankingsStructure,
 } from '../../../lib/rankings-store';
+import { apiFetch } from '../../../lib/http';
 
 export default function AdminRankingsPage() {
   const router = useRouter();
@@ -17,9 +18,24 @@ export default function AdminRankingsPage() {
   const [category, setCategory] = useState('دسته برتر');
   const [rankings, setRankings] = useState<RankingsStructure>(() => buildEmptyRankings());
   const [saved, setSaved] = useState(false);
+  const [err, setErr] = useState('');
 
-  /* داده‌ی ذخیره‌شده بعد از mount لود می‌شود */
-  useEffect(() => { setRankings(getStoredRankings()); }, []);
+  /* منبع: `app_settings.rankings_board` روی سرور. تا امروز این جدول
+     فقط در localStorage بود، پس رنکینگی که ادمین وارد می‌کرد روی
+     دستگاهِ دیگری — و برای کاربران — اصلاً وجود نداشت. کشِ محلی
+     به‌عنوان نسخه‌ی اولیه می‌ماند تا صفحه لحظه‌ی اول خالی نباشد. */
+  useEffect(() => {
+    setRankings(getStoredRankings());
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/admin/settings', { cache: 'no-store' });
+        if (!r.ok) return;
+        const j = await r.json().catch(() => null) as { settings?: Record<string, unknown> } | null;
+        const board = j?.settings?.rankings_board;
+        if (board && typeof board === 'object') setRankings(board as RankingsStructure);
+      } catch { /* کشِ محلی می‌ماند */ }
+    })();
+  }, []);
 
   /* گارد بعد از hydrate — وگرنه ادمین موقع رفرش بی‌دلیل bounce می‌شد */
   useEffect(() => {
@@ -41,8 +57,16 @@ export default function AdminRankingsPage() {
   };
 
   /* ذخیره‌ی واقعی — همین داده در /ranking سایت نمایش داده می‌شود */
-  const handleSave = () => {
-    saveRankings(rankings);
+  const handleSave = async () => {
+    saveRankings(rankings);            // کشِ محلی
+    try {
+      const r = await apiFetch('/api/admin/settings', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rankings_board: rankings }),
+      });
+      if (!r.ok) { setErr('ذخیره روی سرور انجام نشد'); return; }
+    } catch { setErr('خطا در ارتباط با سرور'); return; }
+    setErr('');
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -62,6 +86,13 @@ export default function AdminRankingsPage() {
           {saved ? '✅ ذخیره شد' : 'ذخیره'}
         </button>
       </div>
+
+      {err && (
+        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+          style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+          {err}
+        </div>
+      )}
 
       {/* انتخاب رشته */}
       <div className="flex gap-3 mb-5">

@@ -51,6 +51,9 @@ export async function POST(
     isActive: true,
   }).select().single();
 
-  if (error) return NextResponse.json({ message: error.message }, { status: 500 });
+  if (error) {
+    console.error('[clubs/:id/tables] insert error:', error.message);
+    return NextResponse.json({ message: 'ثبتِ میز انجام نشد' }, { status: 500 });
+  }
   return NextResponse.json(data, { status: 201 });
 }

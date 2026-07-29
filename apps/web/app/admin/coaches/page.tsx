@@ -6,6 +6,7 @@ import {
   listCoachProfiles, updateCoachProfile, badgeFromGrades, disciplineLabel,
   certificationLines, type CoachProfile,
 } from '../../../lib/coach-store'
+import { fetchAdminProfiles, patchAdminProfile } from '../../../lib/admin/profile-rows'
 
 const ADMIN_PHONE = '09121327283'
 
@@ -34,10 +35,23 @@ export default function AdminCoachesPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
 
-  useEffect(() => { setList(listCoachProfiles()) }, [tick])
+  /* منبع: جدولِ `profiles` روی سرور — نه localStorage. تا امروز این
+     فهرست از مرورگرِ خودِ ادمین خوانده می‌شد، پس پروفایلی که مربی روی
+     دستگاهِ خودش ساخته بود اصلاً این‌جا دیده نمی‌شد. */
+  useEffect(() => {
+    void (async () => {
+      const rows = await fetchAdminProfiles<CoachProfile>('coach')
+      /* اگر سرور در دسترس نبود، کشِ محلی بهتر از فهرستِ خالی است */
+      setList(rows.length ? rows : listCoachProfiles())
+    })()
+  }, [tick])
 
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
-  const act = (slug: string, patch: Partial<CoachProfile>) => { updateCoachProfile(slug, patch); setTick(t => t + 1) }
+  const act = async (slug: string, patch: Partial<CoachProfile>) => {
+    await patchAdminProfile(slug, patch as Record<string, unknown>)
+    updateCoachProfile(slug, patch)   // کشِ محلی هم هم‌گام بماند
+    setTick(t => t + 1)
+  }
 
   if (!_hydrated) {
     return <div style={{ direction: 'rtl', fontFamily: "'Vazirmatn',Tahoma,sans-serif", background: BG, minHeight: '100vh' }} />
