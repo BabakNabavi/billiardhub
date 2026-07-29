@@ -345,6 +345,10 @@ export default function ClubDashboardPage() {
   const [closeToday, setCloseToday] = useState(false);
   const [closeTodayBusy, setCloseTodayBusy] = useState(false);
   const [closeTodayMsg, setCloseTodayMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  /* شماره‌ی دریافتِ پیامک — می‌تواند با شماره‌ی مالک فرق کند */
+  const [notifyPhone, setNotifyPhone] = useState('');
+  const [notifyBusy, setNotifyBusy] = useState(false);
+  const [notifyMsg, setNotifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   // Tables
   const [tables, setTables] = useState<Table[]>([]);
@@ -599,7 +603,11 @@ export default function ClubDashboardPage() {
     // «رزروِ امروز بسته» از سرور می‌آید، نه از این مرورگر
     void apiFetch(`/api/clubs/${selectedClub.id}/settings`, { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
-      .then(j => { if (j) setCloseToday(!!j.closeTodayReservations); })
+      .then(j => {
+        if (!j) return;
+        setCloseToday(!!j.closeTodayReservations);
+        setNotifyPhone(String(j.notifyPhone ?? ''));
+      })
       .catch(() => { /* بی‌صدا */ });
 
     /* مسابقات از سرور می‌آیند. کشِ محلی به‌عنوان نمایشِ اولیه می‌ماند
@@ -1148,6 +1156,26 @@ export default function ClubDashboardPage() {
       setCloseToday(prev);        // برگرداندن به حالتِ قبل
       setCloseTodayMsg({ ok: false, text: 'ذخیره‌ی تنظیمات انجام نشد' });
     } finally { setCloseTodayBusy(false); }
+  };
+
+  /* ذخیره‌ی شماره‌ی دریافتِ پیامک */
+  const saveNotifyPhone = async () => {
+    if (!selectedClub) return;
+    if (notifyPhone && !/^09\d{9}$/.test(notifyPhone)) {
+      setNotifyMsg({ ok: false, text: 'شماره موبایل معتبر نیست' });
+      return;
+    }
+    setNotifyBusy(true);
+    try {
+      const r = await apiFetch(`/api/clubs/${selectedClub.id}/settings`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notifyPhone }),
+      });
+      if (!r.ok) throw new Error();
+      setNotifyMsg({ ok: true, text: notifyPhone ? 'ذخیره شد' : 'برداشته شد — پیامک به شماره‌ی خودتان می‌رود' });
+    } catch {
+      setNotifyMsg({ ok: false, text: 'ذخیره انجام نشد' });
+    } finally { setNotifyBusy(false); }
   };
 
   const setReservationClosure = (opt: number | 'always' | 'open') => {
@@ -2266,6 +2294,41 @@ export default function ClubDashboardPage() {
                 {closeTodayMsg.text}
               </p>
             )}
+
+            {/* شماره‌ی اطلاع‌رسانی — بسیاری از باشگاه‌ها به نامِ یک نفرند
+                ولی کسِ دیگری اداره‌شان می‌کند؛ پیامکِ رزرو باید به دستِ
+                همان کسی برسد که واقعاً میز را آماده می‌کند. */}
+            <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 16, paddingTop: 16 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A', marginBottom: 4 }}>
+                شماره‌ی دریافت پیامک‌ها
+              </div>
+              <p style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.95, margin: '0 0 10px' }}>
+                پیامکِ رزروها و اطلاع‌رسانی‌ها به این شماره فرستاده می‌شود.
+                اگر خالی بماند، به شماره‌ی خودِ شما می‌رود.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <input
+                  value={notifyPhone}
+                  onChange={e => setNotifyPhone(
+                    e.target.value.replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).replace(/[^0-9]/g, '').slice(0, 11),
+                  )}
+                  placeholder="۰۹۱۲۳۴۵۶۷۸۹" inputMode="numeric" dir="ltr"
+                  style={{ ...inputStyle, width: 200, marginTop: 0, textAlign: 'right' }}
+                />
+                <button type="button" onClick={() => void saveNotifyPhone()} disabled={notifyBusy}
+                  style={{
+                    padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 800,
+                    cursor: 'pointer', fontFamily: 'var(--font-base)',
+                    border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)',
+                    color: '#9A6E38', opacity: notifyBusy ? 0.6 : 1,
+                  }}>ذخیره</button>
+                {notifyMsg && (
+                  <span style={{ fontSize: 12, fontWeight: 700, color: notifyMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                    {notifyMsg.text}
+                  </span>
+                )}
+              </div>
+            </div>
           </Card>
 
           {/* ── بستن/بازکردنِ موقتِ رزروِ آنلاین ── */}

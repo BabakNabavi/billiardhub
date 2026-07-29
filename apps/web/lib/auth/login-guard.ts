@@ -19,8 +19,8 @@ const num = (v: string | undefined, d: number) => {
 /** پس از این تعداد تلاشِ ناموفق، حسابِ همان شماره موقتاً قفل می‌شود */
 export const LOGIN_THRESHOLD = num(process.env.LOGIN_FAIL_THRESHOLD, 3)
 
-/** پله‌های قفلِ حساب (ثانیه): ۵د → ۱۵د → ۱س → ۶س → ۱۲س → ۱ روز */
-export const LOGIN_WINDOWS: number[] = (process.env.LOGIN_LOCK_WINDOWS ?? '300,900,3600,21600,43200,86400')
+/** پله‌های قفلِ حساب (ثانیه): ۵د → ۱۵د → ۱س → ۴س (سقف) */
+export const LOGIN_WINDOWS: number[] = (process.env.LOGIN_LOCK_WINDOWS ?? '300,900,3600,14400')
   .split(',').map(s => num(s.trim(), 300))
 
 /* قفلِ IP عمداً آستانه‌ی خیلی بالاتری دارد.
