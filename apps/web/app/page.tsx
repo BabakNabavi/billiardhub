@@ -950,12 +950,20 @@ export default function HomePage() {
   const featClubs = clubSlot.items;
   const featStores = storeSlot.items;
 
-  /* «غیرفعال ⇒ اصلاً نمایش داده نشود» (قانونِ فاز ۵). حالتِ loading عمداً
-     سکشن را نگه می‌دارد تا صفحه هنگامِ بارگذاری نپرد؛ فقط جایگاهی که
-     ادمین واقعاً خاموشش کرده حذف می‌شود. */
-  const showProducts = prodSlot.status !== 'off';
-  const showClubs = clubSlot.status !== 'off';
-  const showStores = storeSlot.status !== 'off';
+  /* «غیرفعال ⇒ اصلاً نمایش داده نشود» (قانونِ فاز ۵).
+     حالتِ loading عمداً سکشن را نگه می‌دارد تا صفحه هنگامِ بارگذاری نپرد.
+     در حالتِ «دستی/پولی» اگر ادمین هنوز چیزی انتخاب نکرده، سکشن حذف
+     می‌شود و به داده‌ی نمونه برنمی‌گردد — وگرنه ادمین فکر می‌کند
+     جایگاه خالی است ولی کاربر یک فهرستِ نمونه‌ی پر می‌بیند. */
+  const sectionVisible = (p: { status: string; mode: string | null; items: unknown[] | null }) => {
+    if (p.status === 'loading') return true;
+    if (p.status === 'off') return false;
+    if (p.mode === 'free') return true;
+    return (p.items?.length ?? 0) > 0;
+  };
+  const showProducts = sectionVisible(prodSlot);
+  const showClubs = sectionVisible(clubSlot);
+  const showStores = sectionVisible(storeSlot);
 
   /* دو بنرِ کناری در همان سکشنِ فروشندگان‌اند ولی جایگاهِ مستقل‌اند:
      خاموش‌کردنِ فهرستِ فروشگاه‌ها نباید تبلیغِ فروخته‌شده را حذف کند و
@@ -974,19 +982,23 @@ export default function HomePage() {
     return snaps.filter(e => !seen.has(e.ref) && (seen.add(e.ref), true));
   };
 
+  /* بازگشت به داده‌ی نمونه فقط وقتی جایگاه «رایگان» است (یا هنوز
+     بارگذاری نشده): جایگاهِ دستی/پولیِ خالی باید واقعاً خالی بماند. */
+  const demoOk = (mode: string | null, status: string) => status === 'loading' || mode === 'free';
+
   const HOME_PRODUCTS = useMemo(() => {
     const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return PRODUCTS;
+    if (!snaps.length) return demoOk(prodSlot.mode, prodSlot.status) ? PRODUCTS : [];
     return snaps.map(e => ({
       id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: e.image,
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
     }));
-  }, [featProducts]);
+  }, [featProducts, prodSlot.mode, prodSlot.status]);
 
   const HOME_CLUBS = useMemo(() => {
     const snaps = uniqByRef((featClubs ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return FEATURED_CLUBS;
+    if (!snaps.length) return demoOk(clubSlot.mode, clubSlot.status) ? FEATURED_CLUBS : [];
     /* اعدادِ ساختگی (امتیازِ ۵، ۱۰ میز) برای باشگاهِ واقعی جعلِ اطلاعات
        است: تعدادِ میز از ستون‌های واقعی می‌آید و امتیاز/نظر تا وقتی
        سیستمِ نظر نداریم صفر می‌ماند و روی کارت نمایش داده نمی‌شود. */
@@ -996,16 +1008,16 @@ export default function HomePage() {
       rating: 0, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
       price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
     }));
-  }, [featClubs]);
+  }, [featClubs, clubSlot.mode, clubSlot.status]);
 
   const HOME_SELLERS = useMemo(() => {
     const snaps = uniqByRef((featStores ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return SELLERS;
+    if (!snaps.length) return demoOk(storeSlot.mode, storeSlot.status) ? SELLERS : [];
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || '',
       specialty: 'تجهیزات بیلیارد', rating: 5, reviews: 0, img: e.image, badge: e.badge ?? null,
     }));
-  }, [featStores]);
+  }, [featStores, storeSlot.mode, storeSlot.status]);
 
   /* دوبل‌سازی فقط برای حلقه‌ی مارکی و فقط وقتی آیتم کافی هست — با فهرستِ
      کوتاهِ کمپینی، همان کارت دو بار پشتِ هم زشت می‌شد */
