@@ -32,18 +32,41 @@ export function verificationText(role: VerifiableRole): string {
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', LINE = '#EAE5DA'
 
 export default function VerificationPrompt({
-  role, done = false, compact = false, style,
-}: { role: VerifiableRole; done?: boolean; compact?: boolean; style?: React.CSSProperties }) {
+  role, done = false, verified = false, compact = false, style,
+}: {
+  role: VerifiableRole
+  /** مدرک انتخاب/ارسال شده — یعنی «در انتظار بررسی»، نه «تأییدشده» */
+  done?: boolean
+  /** واقعاً توسطِ کارشناس تأیید شده — تنها حالتی که سبز می‌شود */
+  verified?: boolean
+  compact?: boolean
+  style?: React.CSSProperties
+}) {
   const required = DOC_REQUIRED[role]
 
-  if (done) return (
+  /* فقط تأییدِ واقعیِ کارشناس سبز می‌شود.
+     پیش‌تر همین حالت با انتخابِ فایل هم فعال می‌شد و کاربر فکر می‌کرد
+     مدرکش تأیید شده، در حالی که هنوز حتی ارسال نشده بود. */
+  if (verified) return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 9, padding: compact ? '10px 13px' : '13px 16px',
       borderRadius: 13, background: 'rgba(14,122,56,0.07)', border: '1px solid rgba(14,122,56,0.24)',
       fontSize: compact ? 12 : 12.5, fontWeight: 700, color: FELT, lineHeight: 1.9, ...style,
     }}>
       <ShieldCheck size={16} style={{ flexShrink: 0 }} />
-      مدرک شما ثبت شد و پس از بررسی کارشناسان، تیک تأیید روی پروفایل‌تان قرار می‌گیرد.
+      مدرک شما تأیید شد و تیک تأیید روی پروفایل‌تان قرار گرفت.
+    </div>
+  )
+
+  /* مدرک انتخاب شده ولی هنوز بررسی نشده — رنگِ انتظار، نه سبز */
+  if (done) return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 9, padding: compact ? '10px 13px' : '13px 16px',
+      borderRadius: 13, background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.32)',
+      fontSize: compact ? 12 : 12.5, fontWeight: 700, color: GOLD_D, lineHeight: 1.9, ...style,
+    }}>
+      <ShieldCheck size={16} style={{ flexShrink: 0 }} />
+      مدرک شما ثبت شد و در انتظارِ بررسیِ کارشناسان است. تیکِ تأیید پس از تأیید آن‌ها می‌آید.
     </div>
   )
 
