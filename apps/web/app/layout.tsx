@@ -6,7 +6,7 @@ import SessionBridge from "../components/auth/SessionBridge";
 import { ToastProvider } from '../components/ui/Toast';
 import ScrollToTop from '../components/ScrollToTop';
 import AppBoot from '../components/AppBoot';
-import AdSlot from '../components/ads/AdSlot';
+
 
 export const metadata: Metadata = {
   title: "بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد",
@@ -79,10 +79,9 @@ export default function RootLayout({
         <SessionBridge />
         <Navbar />
         <main>{children}</main>
-        {/* جایگاه تبلیغاتیِ بالای فوتر — تا روشن‌شدنِ کلید نامرئی است */}
-        <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 clamp(16px,3vw,28px)' }}>
-          <AdSlot slot="homepage_bottom_banner" />
-        </div>
+        {/* جایگاهِ «بنرِ پایینِ صفحه‌ی اصلی» عمداً این‌جا نیست: در layout
+            روی همه‌ی مسیرها می‌نشست، در حالی که کلیدش و مشخصاتِ فاز ۵
+            می‌گویند فقط پایینِ صفحه‌ی اصلی. حالا در app/page.tsx است. */}
         <Footer />
         <ToastProvider />
       </body>

@@ -9,7 +9,7 @@ import {
   Clock, Eye, CheckCircle, X, Calendar,
   Hammer, Scissors, Settings, Truck, Radio, Scale, Play, Clapperboard,
 } from 'lucide-react';
-import AdSlot, { usePlacement, type EntitySnapshot } from '../components/ads/AdSlot';
+import AdSlot, { usePlacementState, type EntitySnapshot } from '../components/ads/AdSlot';
 import { useHorizontalScroll, scrollSign, getPos, setPos } from '../lib/useHorizontalScroll';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
@@ -341,12 +341,16 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(0,0,0,0.40)', fontSize: '12px' }}>
                 <MapPin size={10} style={{ color: GOLD }} />{club.city}{club.dist ? `، ${club.dist}` : ''}
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
-                <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 500 }}>{club.rating}</span>
-                <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
-              </span>
+              {/* امتیاز فقط وقتی واقعاً داریمش — صفر یعنی «هنوز نظری نیست» */}
+              {club.rating > 0 && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
+                  <span style={{ color: '#1a1a1a', fontSize: '13px', fontWeight: 500 }}>{club.rating}</span>
+                  <span style={{ color: 'rgba(0,0,0,0.26)', fontSize: '11px' }}>({club.reviews})</span>
+                </span>
+              )}
             </div>
+            {club.tables > 0 && (
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '4px' }}>
               {[
                 { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
@@ -358,6 +362,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                   borderRadius: '20px', padding: '2px 8px' }}>{t.n} {t.label}</span>
               ))}
             </div>
+            )}
             <div style={{ flex: 1 }} />
             <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '6px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -391,7 +396,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
-            {/* تعداد میزها به‌جای امتیاز */}
+            {/* تعداد میزها به‌جای امتیاز — فقط وقتی باشگاه اعلامش کرده */}
+            {club.tables > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
               {[
                 { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
@@ -405,6 +411,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
                 </span>
               ))}
             </div>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
               <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
@@ -936,9 +943,29 @@ export default function HomePage() {
      اگر ادمین برای جایگاهِ موجودیتی کمپینِ فعال ساخته باشد، همان‌ها
      نمایش داده می‌شوند؛ وگرنه داده‌ی نمونه‌ی فعلی — تا وقتی جایگاه‌ها
      پر نشده‌اند ظاهرِ سایت ذره‌ای عوض نشود. */
-  const featProducts = usePlacement('market_featured_products_homepage');
-  const featClubs = usePlacement('featured_clubs_homepage');
-  const featStores = usePlacement('featured_equipment_stores_homepage');
+  const prodSlot = usePlacementState('market_featured_products_homepage');
+  const clubSlot = usePlacementState('featured_clubs_homepage');
+  const storeSlot = usePlacementState('featured_equipment_stores_homepage');
+  const featProducts = prodSlot.items;
+  const featClubs = clubSlot.items;
+  const featStores = storeSlot.items;
+
+  /* «غیرفعال ⇒ اصلاً نمایش داده نشود» (قانونِ فاز ۵). حالتِ loading عمداً
+     سکشن را نگه می‌دارد تا صفحه هنگامِ بارگذاری نپرد؛ فقط جایگاهی که
+     ادمین واقعاً خاموشش کرده حذف می‌شود. */
+  const showProducts = prodSlot.status !== 'off';
+  const showClubs = clubSlot.status !== 'off';
+  const showStores = storeSlot.status !== 'off';
+
+  /* دو بنرِ کناری در همان سکشنِ فروشندگان‌اند ولی جایگاهِ مستقل‌اند:
+     خاموش‌کردنِ فهرستِ فروشگاه‌ها نباید تبلیغِ فروخته‌شده را حذف کند و
+     برعکس. پس سکشن تا وقتی یکی از این سه چیزی برای نشان‌دادن دارد
+     می‌ماند. */
+  const rightAd = usePlacementState('equipment_ads_right');
+  const leftAd = usePlacementState('equipment_ads_left');
+  const hasAd = (p: { status: string; items: unknown[] | null }) =>
+    p.status === 'on' && (p.items?.length ?? 0) > 0;
+  const showSellersSection = showStores || hasAd(rightAd) || hasAd(leftAd);
 
   /* دو کمپین با ارجاع به یک موجودیت ⇒ کلیدِ تکراریِ React و کارتِ دوباره؛
      تکراری‌ها همین‌جا حذف می‌شوند */
@@ -960,10 +987,14 @@ export default function HomePage() {
   const HOME_CLUBS = useMemo(() => {
     const snaps = uniqByRef((featClubs ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
     if (!snaps.length) return FEATURED_CLUBS;
+    /* اعدادِ ساختگی (امتیازِ ۵، ۱۰ میز) برای باشگاهِ واقعی جعلِ اطلاعات
+       است: تعدادِ میز از ستون‌های واقعی می‌آید و امتیاز/نظر تا وقتی
+       سیستمِ نظر نداریم صفر می‌ماند و روی کارت نمایش داده نمی‌شود. */
     return snaps.map(e => ({
-      id: e.ref, name: e.title, city: e.city || e.subtitle || '', dist: '', tables: 10,
-      rating: 5, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
-      price: 0, badge: null as string | null, tags: [] as string[], hasStory: false,
+      id: e.ref, name: e.title, city: e.city || e.subtitle || '', dist: '',
+      tables: e.stats?.tables ?? 0,
+      rating: 0, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
+      price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
     }));
   }, [featClubs]);
 
@@ -1699,7 +1730,9 @@ useEffect(() => {
 
       </div>
 
-      {/* §2 CLUB DISCOVERY ══════════════════════════════════════ */}
+      {/* §2 CLUB DISCOVERY ══════════════════════════════════════
+          جایگاهِ featured_clubs_homepage غیرفعال ⇒ کلِ سکشن حذف */}
+      {showClubs && (
       <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-hair" style={{ left: '28%', background: 'linear-gradient(180deg,transparent,rgba(20,83,45,0.28),transparent)' }} />
@@ -1746,8 +1779,11 @@ useEffect(() => {
           </div>
         </div>
       </section>
+      )}
 
-      {/* §3 MARKETPLACE ═════════════════════════════════════════ */}
+      {/* §3 MARKETPLACE ═════════════════════════════════════════
+          جایگاهِ market_featured_products_homepage غیرفعال ⇒ حذفِ سکشن */}
+      {showProducts && (
       <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
@@ -1812,11 +1848,15 @@ useEffect(() => {
               دو جایگاهِ تبلیغاتی به سکشن فروشندگان تجهیزات منتقل شدند. */}
         </div>
       </section>
+      )}
 
       {/* §3.5 MEDIA BAND — پوسترِ سینماییِ بیلیارد مدیا ═══════ */}
       <HomeMediaBand />
 
-      {/* §4 SELLERS ═════════════════════════════════════════════ */}
+      {/* §4 SELLERS ═════════════════════════════════════════════
+          سکشن تا وقتی «فهرستِ فروشگاه‌ها» یا یکی از دو بنرِ کناری
+          محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
+      {showSellersSection && (
       <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.13) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
@@ -1844,28 +1884,31 @@ useEffect(() => {
             </div>
 
             <div style={{ minWidth: 0 }}>
-              {/* Desktop auto-scroll row */}
-              <div
-                ref={sellersRef}
-                className="sellers-desk"
-                onMouseEnter={() => { sellersPaused.current = true; }}
-                onMouseLeave={() => { sellersPaused.current = false; }}
-              >
-                {SELLERS_LOOP.map((s, i) => (
-                  <Link key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
-                    <SellerCard s={s} />
-                  </Link>
-                ))}
-              </div>
+              {/* فهرستِ فروشگاه‌ها جدا از دو بنرِ کناری خاموش/روشن می‌شود */}
+              {showStores && <>
+                {/* Desktop auto-scroll row */}
+                <div
+                  ref={sellersRef}
+                  className="sellers-desk"
+                  onMouseEnter={() => { sellersPaused.current = true; }}
+                  onMouseLeave={() => { sellersPaused.current = false; }}
+                >
+                  {SELLERS_LOOP.map((s, i) => (
+                    <Link key={`${s.id}-${i}`} href={`/sellers/${s.id}`} style={{ width: '220px', flexShrink: 0, textDecoration: 'none', display: 'block' }}>
+                      <SellerCard s={s} />
+                    </Link>
+                  ))}
+                </div>
 
-              {/* Mobile slider */}
-              <div className="sellers-mob">
-                {HOME_SELLERS.map((s) => (
-                  <Link key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
-                    <SellerCard s={s} />
-                  </Link>
-                ))}
-              </div>
+                {/* Mobile slider */}
+                <div className="sellers-mob">
+                  {HOME_SELLERS.map((s) => (
+                    <Link key={s.id} href={`/sellers/${s.id}`} style={{ width: '53vw', minWidth: '176px', flexShrink: 0, scrollSnapAlign: 'center', textDecoration: 'none', display: 'block' }}>
+                      <SellerCard s={s} />
+                    </Link>
+                  ))}
+                </div>
+              </>}
             </div>
 
             <div className="equip-side">
@@ -1897,6 +1940,7 @@ useEffect(() => {
           </div>
         </div>
       </section>
+      )}
 
       {/* §4 SERVICES ════════════════════════════════════════════ */}
       <section className="svc-section" style={{ position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 82% 0%, rgba(199,166,106,0.14), transparent 46%), linear-gradient(145deg, #0B0A08 0%, #171208 55%, #0B0A08 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(44px,4.2vw,68px)' }}>
@@ -2085,6 +2129,11 @@ useEffect(() => {
         </button>
       </div>
 
+      {/* §6 بنرِ بزرگِ پایینِ صفحه — بالای فوتر، فقط همین صفحه.
+          جایگاهِ مستقل: خالی/غیرفعال باشد هیچ فضایی اشغال نمی‌کند. */}
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 clamp(16px,3vw,28px)' }}>
+        <AdSlot slot="homepage_bottom_banner" />
+      </div>
 
     </>
   );

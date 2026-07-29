@@ -5,6 +5,7 @@ import {
   isPlacementKey, LEGACY_KEY_MAP, type EntityType,
 } from '@/lib/ads/core';
 import { resolveEntities, type EntitySnapshot } from '@/lib/ads/resolve';
+import { freeContent } from '@/lib/ads/free';
 
 /* محتوای زنده‌ی جایگاه‌های تبلیغاتی — عمومی.
 
@@ -17,6 +18,8 @@ interface LiveOut {
   /* ترتیبِ آرایه همان چرخشِ سرور است؛ کلاینت نباید دوباره مرتبش کند */
   rotationMode: 'fixed' | 'weighted' | 'fair' | 'random';
   displayCount: number;
+  /* رایگان = محتوای پیش‌فرضِ سایت، دستی/پولی = کمپین‌های ادمین */
+  mode: 'free' | 'manual' | 'paid';
   campaigns: {
     id: string; title: string; advertiser: string; weight: number;
     banner?: { imageUrl: string; linkUrl: string };
@@ -70,8 +73,25 @@ export async function GET(req: NextRequest) {
         contentKind: v.placement.contentKind,
         rotationMode: v.placement.rotationMode,
         displayCount: v.placement.displayCount,
+        mode: v.placement.mode,
         campaigns: [],
       };
+
+      /* ── حالتِ رایگان: محتوا از داده‌ی واقعیِ سایت، نه کمپین ──
+         (جایگاهِ بنری در حالتِ رایگان محتوایی ندارد و خالی می‌ماند) */
+      if (v.placement.mode === 'free') {
+        if (v.placement.contentKind === 'entity') {
+          const snaps = await freeContent(
+            (v.placement.entityType ?? 'product') as EntityType,
+            v.placement.displayCount,
+          );
+          item.campaigns = snaps.map(e => ({
+            id: `free:${e.ref}`, title: e.title, advertiser: '', weight: 1, entity: e,
+          }));
+        }
+        out[k] = item;
+        continue;
+      }
 
       if (v.placement.contentKind === 'banner') {
         for (const c of v.campaigns) {

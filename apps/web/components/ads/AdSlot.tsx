@@ -32,6 +32,8 @@ export interface EntitySnapshot {
   discountPercent?: number
   city?: string
   badge?: string | null
+  /** آمارِ واقعیِ موجودیت (مثلاً تعدادِ میزِ باشگاه)؛ نبودنش = نداریم */
+  stats?: { tables?: number }
 }
 
 export interface LiveCampaign {
@@ -48,6 +50,7 @@ interface PlacementPayload {
   /* ترتیبِ campaigns همان چرخشِ سرور است (فاز ۴) */
   rotationMode?: 'fixed' | 'weighted' | 'fair' | 'random'
   displayCount?: number
+  mode?: 'free' | 'manual' | 'paid'
   campaigns: LiveCampaign[]
 }
 
@@ -83,13 +86,39 @@ const ping = (id: string, kind: 'impression' | 'click') => {
 
 /** محتوای زنده‌ی یک جایگاه — برای سکشن‌های «ویژه» که خودشان رندر می‌کنند */
 export function usePlacement(key: PlacementKey): LiveCampaign[] | null {
-  const [items, setItems] = useState<LiveCampaign[] | null>(null)
+  return usePlacementState(key).items
+}
+
+export type PlacementStatus = 'loading' | 'off' | 'on'
+
+export interface PlacementState {
+  /** off یعنی ادمین جایگاه را غیرفعال کرده ⇒ سکشن اصلاً نباید رندر شود */
+  status: PlacementStatus
+  items: LiveCampaign[] | null
+  mode: 'free' | 'manual' | 'paid' | null
+}
+
+/**
+ * وضعیتِ کاملِ یک جایگاه.
+ *
+ * مسیرِ عمومی فقط جایگاه‌های فعال را برمی‌گرداند، پس نبودنِ کلید در
+ * پاسخ یعنی «غیرفعال». تفکیکِ این حالت از «فعال ولی خالی» لازم است:
+ * اولی باید کلِ سکشن را حذف کند، دومی فقط محتوا ندارد.
+ */
+export function usePlacementState(key: PlacementKey): PlacementState {
+  const [state, setState] = useState<PlacementState>({ status: 'loading', items: null, mode: null })
   useEffect(() => {
     let alive = true
-    void loadPlacements().then(all => { if (alive) setItems(all[key]?.campaigns ?? []) })
+    void loadPlacements().then(all => {
+      if (!alive) return
+      const payload = all[key]
+      setState(payload
+        ? { status: 'on', items: payload.campaigns ?? [], mode: payload.mode ?? null }
+        : { status: 'off', items: [], mode: null })
+    })
     return () => { alive = false }
   }, [key])
-  return items
+  return state
 }
 
 /** جایگاهِ بنری — با چرخشِ اسلایدری وقتی بیش از یک کمپین دارد */

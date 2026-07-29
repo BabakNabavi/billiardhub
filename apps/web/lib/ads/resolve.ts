@@ -24,6 +24,8 @@ export interface EntitySnapshot {
   discountPercent?: number
   city?: string
   badge?: string | null
+  /** آمارِ واقعیِ موجودیت — نبودنش یعنی «نداریم»، نه صفر */
+  stats?: { tables?: number }
 }
 
 const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
