@@ -262,7 +262,7 @@ export default function SellerDashboard() {
             <div className="mb-5 flex flex-wrap items-center gap-4">
               <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white shadow-md">
                 {form.logo
-                  ? <img src={form.logo} alt="" className="h-full w-full object-cover"/>
+                  ? <img loading="lazy" decoding="async" src={form.logo} alt="" className="h-full w-full object-cover"/>
                   : Icon.store}
               </span>
               <div>
@@ -344,7 +344,7 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-3 gap-3">
                 {form.banners.map((url, i) => (
                   <div key={i} className="relative aspect-[16/7] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
-                    <img src={url} alt="" className="h-full w-full object-cover"/>
+                    <img loading="lazy" decoding="async" src={url} alt="" className="h-full w-full object-cover"/>
                     <button type="button" aria-label="حذف بنر"
                       onClick={() => set('banners', form.banners.filter((_, j) => j !== i))}
                       className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
@@ -456,7 +456,7 @@ export default function SellerDashboard() {
               <div className="shrink-0">
                 <div className="flex h-28 w-20 items-center justify-center overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
                   {form.storyImage
-                    ? <img src={form.storyImage} alt="" className="h-full w-full object-cover"/>
+                    ? <img loading="lazy" decoding="async" src={form.storyImage} alt="" className="h-full w-full object-cover"/>
                     : <span className="text-[11px] text-[#A69F8E]">بدون عکس</span>}
                 </div>
                 <div className="mt-2 flex gap-2">
@@ -509,7 +509,7 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-3 gap-3">
                 {form.aboutImages.map((url, i) => (
                   <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
-                    <img src={url} alt="" className="h-full w-full object-cover"/>
+                    <img loading="lazy" decoding="async" src={url} alt="" className="h-full w-full object-cover"/>
                     <button type="button" aria-label="حذف عکس"
                       onClick={() => set('aboutImages', form.aboutImages.filter((_, j) => j !== i))}
                       className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
@@ -549,7 +549,7 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                 {form.gallery.map((shot, i) => (
                   <div key={shot.id} className="relative aspect-square overflow-hidden rounded-xl border border-[#E7E2D6] bg-[#F7F5F0]">
-                    <img src={shot.url} alt="" className="h-full w-full object-cover"/>
+                    <img loading="lazy" decoding="async" src={shot.url} alt="" className="h-full w-full object-cover"/>
                     <button type="button" aria-label="حذف عکس"
                       onClick={() => set('gallery', form.gallery.filter((_, j) => j !== i))}
                       className="absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/85 text-[#5B564B] backdrop-blur-md transition hover:text-[#B23B2E]">
@@ -594,7 +594,7 @@ export default function SellerDashboard() {
             {form.certificate ? (
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#E7E2D6] bg-[#FAFAF7] p-3">
                 {form.certificate.url.startsWith('data:image')
-                  ? <img src={form.certificate.url} alt="" className="h-16 w-16 shrink-0 rounded-lg border border-[#E7E2D6] object-cover"/>
+                  ? <img loading="lazy" decoding="async" src={form.certificate.url} alt="" className="h-16 w-16 shrink-0 rounded-lg border border-[#E7E2D6] object-cover"/>
                   : <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[#E7E2D6] bg-white text-[#9A6E38]">{Icon.doc}</span>}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[#14532D]">

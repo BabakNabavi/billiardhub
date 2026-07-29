@@ -1098,7 +1098,7 @@ export default function NewProductPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(90px,1fr))', gap: 8, marginBottom: 10 }}>
                         {images.map((img, i) => (
                           <div key={i} className="img-thumb" style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', aspectRatio: '1', border: i === 0 ? `2px solid ${GOLD}` : '1.5px solid rgba(28,28,26,0.1)' }}>
-                            <img src={img.data} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            <img loading="lazy" decoding="async" src={img.data} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                             {i === 0 && (
                               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: `linear-gradient(to top,rgba(199,166,106,0.85),transparent)`, padding: '10px 4px 4px', textAlign: 'center', fontSize: 10, fontWeight: 800, color: '#fff' }}>اصلی</div>
                             )}
@@ -1272,7 +1272,7 @@ export default function NewProductPage() {
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px', background: '#fff', borderRadius: 12, border: '1.5px solid rgba(28,28,26,0.08)' }}>
                       <div style={{ width: 64, height: 64, borderRadius: 10, overflow: 'hidden', background: '#F4F3F1', flexShrink: 0 }}>
                         {images.length > 0 && images[0]
-                          ? <img src={images[0].data} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ? <img loading="lazy" decoding="async" src={images[0].data} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, opacity: 0.3 }}>🎱</div>
                         }
                       </div>

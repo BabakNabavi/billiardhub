@@ -181,7 +181,7 @@ export default function TechnicianProfilePage() {
                 <span style={{ position: 'absolute', inset: -9, borderRadius: '50%', border: '1px solid rgba(199,166,106,0.55)' }} />
                 <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '1px dashed rgba(199,166,106,0.35)' }} />
                 {tech.photo
-                  ? <img src={tech.photo} alt={tech.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ? <img loading="lazy" decoding="async" src={tech.photo} alt={tech.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                   : tech.name.slice(0, 1)}
               </span>
               <div style={{ marginTop: 16, fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', color: 'rgba(154,110,56,0.65)' }}>BILLIARD HUB</div>
@@ -326,7 +326,7 @@ export default function TechnicianProfilePage() {
 
           {/* تصویر */}
           <div onClick={e => e.stopPropagation()} style={{ maxWidth: '92vw', maxHeight: '84vh', overflow: zoomed ? 'auto' : 'hidden', borderRadius: 14 }}>
-            <img
+            <img loading="lazy" decoding="async" 
               src={photos[lightbox]}
               alt=""
               onClick={() => setZoomed(z => !z)}

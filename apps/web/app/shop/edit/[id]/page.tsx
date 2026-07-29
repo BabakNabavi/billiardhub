@@ -440,7 +440,7 @@ export default function EditProductPage() {
           <div className="grid grid-cols-4 gap-3 mb-3">
             {existingImages.map((src, i) => (
               <div key={`ex-${i}`} className="relative aspect-square">
-                <img src={src} alt="" className="w-full h-full object-cover rounded-xl" />
+                <img loading="lazy" decoding="async" src={src} alt="" className="w-full h-full object-cover rounded-xl" />
                 {i === 0 && <div className="absolute top-1 right-1 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded">اصلی</div>}
                 <button onClick={() => removeExistingImage(i)} className="absolute top-1 left-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                   <X size={12} />
@@ -449,7 +449,7 @@ export default function EditProductPage() {
             ))}
             {newImagePreviews.map((src, i) => (
               <div key={`new-${i}`} className="relative aspect-square">
-                <img src={src} alt="" className="w-full h-full object-cover rounded-xl" />
+                <img loading="lazy" decoding="async" src={src} alt="" className="w-full h-full object-cover rounded-xl" />
                 <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">جدید</div>
                 <button onClick={() => removeNewImage(i)} className="absolute top-1 left-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                   <X size={12} />

@@ -77,7 +77,7 @@ export default function ClubStoryModal({ club, onClose }: Props) {
         {/* Media */}
         {club.storyType === 'video'
           ? <video src={club.storyMediaUrl} autoPlay muted playsInline loop style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <img src={club.storyMediaUrl} alt="story" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
+          : <img loading="lazy" decoding="async" src={club.storyMediaUrl} alt="story" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
 
         {/* Gradient overlays */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 55%, rgba(0,0,0,0.65) 100%)', pointerEvents: 'none' }} />
@@ -98,7 +98,7 @@ export default function ClubStoryModal({ club, onClose }: Props) {
             boxShadow: '0 0 16px rgba(199,166,106,0.5)',
           }}>
             {club.logo
-              ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img loading="lazy" decoding="async" src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : club.name[0]}
           </div>
           <div style={{ flex: 1 }}>

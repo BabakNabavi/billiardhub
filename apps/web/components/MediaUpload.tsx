@@ -235,7 +235,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
                 </div>
                 <Field label="تصویر شاخص (اختیاری)">
                   <label style={{ ...inp, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: SEC, overflow: 'hidden' }}>
-                    {thumbPrev ? <img src={thumbPrev} alt="" style={{ width: 30, height: 20, objectFit: 'cover', borderRadius: 4 }} /> : <ImageIcon size={16} />}
+                    {thumbPrev ? <img loading="lazy" decoding="async" src={thumbPrev} alt="" style={{ width: 30, height: 20, objectFit: 'cover', borderRadius: 4 }} /> : <ImageIcon size={16} />}
                     <span style={{ fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{thumbPrev ? 'انتخاب‌شده — تعویض' : 'از فریم ساخته شد'}</span>
                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => pickThumb(e.target.files?.[0])} />
                   </label>

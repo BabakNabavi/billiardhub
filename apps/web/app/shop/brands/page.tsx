@@ -124,7 +124,7 @@ function BrandCard({ brand, featured=false }: { brand: Brand; featured?: boolean
 
         {/* Cover */}
         <div style={{ height:'180px', position:'relative', overflow:'hidden', flexShrink:0 }}>
-          <img src={brand.coverImg} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.18) saturate(0.4)', transition:'transform 0.7s ease', transform: hovered?'scale(1.06)':'scale(1)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
+          <img loading="lazy" decoding="async" src={brand.coverImg} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.18) saturate(0.4)', transition:'transform 0.7s ease', transform: hovered?'scale(1.06)':'scale(1)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
           <div style={{ position:'absolute', inset:0, background:`linear-gradient(135deg,${brand.accentColor}20,transparent 60%)` }}/>
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,transparent 40%,rgba(6,13,10,0.9) 100%)' }}/>
 

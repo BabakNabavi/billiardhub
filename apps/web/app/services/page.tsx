@@ -34,7 +34,7 @@ function TechCard({ t, i }: { t: Technician; i: number }) {
         {t.photo ? (
           <span className="sv-mono sv-mono-photo">
             <span className="sv-mono-ring" />
-            <img src={t.photo} alt={t.name} />
+            <img loading="lazy" decoding="async" src={t.photo} alt={t.name} />
           </span>
         ) : (
           <span className="sv-mono">

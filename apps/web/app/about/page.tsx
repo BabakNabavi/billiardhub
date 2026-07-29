@@ -184,7 +184,7 @@ export default function AboutPage() {
       <section className="ab-hero">
         {/* تصویر با پارالاکسِ سبک */}
         <div aria-hidden style={{ position: 'absolute', inset: '-12% 0', transform: `translateY(${sy * 0.16}px)`, willChange: 'transform' }}>
-          <img src="/images/about/5.png" alt=""
+          <img loading="lazy" decoding="async" src="/images/about/5.png" alt=""
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club1.png' }}
             style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.34, filter: 'saturate(0.72) brightness(0.72)' }} />
         </div>
@@ -300,8 +300,8 @@ export default function AboutPage() {
         }}>
           <div aria-hidden style={{ position: 'absolute', top: 0, insetInline: 0, height: 3, background: `linear-gradient(90deg,#8A6020,${GOLD},#8A6020)` }} />
           {/* دو لوگو — چپ: آرتا تجارت، راست: بیلیارد هاب، هم‌تراز و هم‌اندازه */}
-          <img className="ab-clogo l" src="/images/Logo/Arta.svg" alt="شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا" />
-          <img className="ab-clogo r" src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" />
+          <img loading="lazy" decoding="async" className="ab-clogo l" src="/images/Logo/Arta.svg" alt="شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا" />
+          <img loading="lazy" decoding="async" className="ab-clogo r" src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" />
           <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>COMPANY &amp; BRAND</span>
 
           {/* مُهرِ برندِ ثبت‌شده — متنِ چرخانِ آهسته */}

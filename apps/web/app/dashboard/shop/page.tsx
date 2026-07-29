@@ -296,7 +296,7 @@ export default function MyShopPage() {
                 style={{ width: 120, height: 213, background: '#1a1a1a' }}>
                 {storyDraft.file.type.startsWith('video')
                   ? <video src={storyDraft.previewUrl} muted autoPlay loop playsInline style={{ width:'100%',height:'100%',objectFit:'cover' }} />
-                  : <img src={storyDraft.previewUrl} alt="" style={{ width:'100%',height:'100%',objectFit:'cover' }} />}
+                  : <img loading="lazy" decoding="async" src={storyDraft.previewUrl} alt="" style={{ width:'100%',height:'100%',objectFit:'cover' }} />}
                 {storyDraft.text && (
                   <div style={{
                     position:'absolute', bottom:16, left:8, right:8, textAlign:'center',
@@ -382,7 +382,7 @@ export default function MyShopPage() {
                   <div className="rounded-xl overflow-hidden relative shadow-sm" style={{ width: 72, height: 128, background: '#1a1a1a' }}>
                     {story.mediaType === 'video'
                       ? <video src={story.mediaUrl} muted loop playsInline style={{ width:'100%',height:'100%',objectFit:'cover' }} />
-                      : <img src={story.mediaUrl} alt="" style={{ width:'100%',height:'100%',objectFit:'cover' }} />}
+                      : <img loading="lazy" decoding="async" src={story.mediaUrl} alt="" style={{ width:'100%',height:'100%',objectFit:'cover' }} />}
                     {/* Amber ring (active) */}
                     <div className="absolute inset-0 rounded-xl" style={{ border:'2px solid #f59e0b' }} />
                     <button
@@ -463,7 +463,7 @@ export default function MyShopPage() {
                   {/* عکس */}
                   <div className="w-20 h-20 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {product.images?.length > 0 ? (
-                      <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                      <img loading="lazy" decoding="async" src={product.images[0]} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <Package size={28} className="text-gray-300" />
                     )}

@@ -350,7 +350,7 @@ export default function CheckoutPage() {
                         const fp = item.discountPrice ?? item.price
                         return (
                           <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: 12 }}>
-                            <img src={item.image || '/images/billiadr-club-3.jpg'} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }}
+                            <img loading="lazy" decoding="async" src={item.image || '/images/billiadr-club-3.jpg'} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }}
                               onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <p style={{ fontSize: 15, fontWeight: 600, color: '#111111', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 16, borderBottom: '1px solid rgba(0,0,0,0.04)', marginBottom: 16 }}>
                     {items.slice(0, 4).map(item => (
                       <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <img src={item.image || '/images/billiadr-club-3.jpg'} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
+                        <img loading="lazy" decoding="async" src={item.image || '/images/billiadr-club-3.jpg'} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
                           onError={e => { (e.target as HTMLImageElement).src = '/images/billiadr-club-3.jpg' }} />
                         <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
                         <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', flexShrink: 0 }}>×{toFa(item.quantity)}</span>

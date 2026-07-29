@@ -1886,7 +1886,7 @@ export default function ClubDashboardPage() {
                     }} />
                   {tablePhotoDataUrl ? (
                     <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <img src={tablePhotoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
+                      <img loading="lazy" decoding="async" src={tablePhotoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
                       <button onClick={e => { e.preventDefault(); setTablePhotoDataUrl(''); }}
                         style={{ position: 'absolute', top: -6, left: -6, width: 20, height: 20, borderRadius: '50%', background: '#ef4444', border: 'none', color: '#fff', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
                     </div>
@@ -2033,7 +2033,7 @@ export default function ClubDashboardPage() {
                 <Card key={t.id} style={{ padding: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     {t.photoDataUrl ? (
-                      <img src={t.photoDataUrl} alt="" style={{ width: 72, height: 52, objectFit: 'cover', borderRadius: 10, flexShrink: 0, border: `1.5px solid ${cs.border}` }} />
+                      <img loading="lazy" decoding="async" src={t.photoDataUrl} alt="" style={{ width: 72, height: 52, objectFit: 'cover', borderRadius: 10, flexShrink: 0, border: `1.5px solid ${cs.border}` }} />
                     ) : (
                       <div style={{ width: 52, height: 52, borderRadius: 12, background: cs.bg, border: `1.5px solid ${cs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Grid3X3 size={22} color={cs.color} strokeWidth={1.5} /></div>
                     )}
@@ -2100,7 +2100,7 @@ export default function ClubDashboardPage() {
                             }} />
                           {editForm.photoDataUrl ? (
                             <div style={{ position: 'relative', display: 'inline-block' }}>
-                              <img src={editForm.photoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
+                              <img loading="lazy" decoding="async" src={editForm.photoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
                               <button onClick={e => { e.preventDefault(); setEditForm(p => ({...p, photoDataUrl: ''})); }}
                                 style={{ position: 'absolute', top: -6, left: -6, width: 20, height: 20, borderRadius: '50%', background: '#ef4444', border: 'none', color: '#fff', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                             </div>
@@ -2534,7 +2534,7 @@ export default function ClubDashboardPage() {
                   fontSize: 32, fontWeight: 900, color: GOLD,
                 }}>
                   {selectedClub?.logo
-                    ? <img src={selectedClub.logo} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img loading="lazy" decoding="async" src={selectedClub.logo} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : (selectedClub?.name?.[0] ?? '🎱')}
                 </div>
                 <label style={{
@@ -2589,7 +2589,7 @@ export default function ClubDashboardPage() {
             {storyDraft && (
               <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap', direction: 'ltr', marginBottom: 16 }}>
                 <div style={{ position: 'relative', width: 130, flexShrink: 0, aspectRatio: '9/16', borderRadius: 14, overflow: 'hidden', border: `2px solid ${GOLD}55`, background: '#111', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-                  <img src={storyDraft.previewUrl} alt="پیش‌نمایش" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img loading="lazy" decoding="async" src={storyDraft.previewUrl} alt="پیش‌نمایش" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   {storyDraft.text && (
                     <div style={{
                       position: 'absolute',
@@ -2647,7 +2647,7 @@ export default function ClubDashboardPage() {
                   <div key={s.id} style={{ position: 'relative', width: 88, flexShrink: 0, aspectRatio: '9/16', borderRadius: 12, overflow: 'hidden', border: `1.5px solid ${GOLD}55`, background: '#111', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
                     {s.mediaType === 'video'
                       ? <video src={s.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline />
-                      : <img src={s.mediaUrl} alt={`story-${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                      : <img loading="lazy" decoding="async" src={s.mediaUrl} alt={`story-${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                     {s.text && (
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.6)', padding: '4px 5px', fontSize: 8, color: s.textColor || '#fff', textAlign: 'center', lineHeight: 1.3 }}>{s.text}</div>
                     )}
@@ -2686,7 +2686,7 @@ export default function ClubDashboardPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
                 {singlePhotos.map(photo => (
                   <div key={photo.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden' }}>
-                    <img src={photo.dataUrl} alt={photo.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img loading="lazy" decoding="async" src={photo.dataUrl} alt={photo.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button onClick={() => deleteSinglePhoto(photo.id)} style={{
                       position: 'absolute', top: 4, left: 4,
                       background: 'rgba(0,0,0,0.65)', color: '#fff', border: 'none',
@@ -2744,7 +2744,7 @@ export default function ClubDashboardPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
                       }}>
                         {cover
-                          ? <img src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ? <img loading="lazy" decoding="async" src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           : '🖼'}
                       </div>
                       <div style={{ flex: 1 }}>
@@ -2786,7 +2786,7 @@ export default function ClubDashboardPage() {
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
                             {album.items.map(item => (
                               <div key={item.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden' }}>
-                                <img src={item.dataUrl} alt={item.name}
+                                <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name}
                                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 <button
                                   onClick={() => deletePhotoFromAlbum(album.id, item.id)}

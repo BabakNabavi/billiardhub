@@ -299,7 +299,7 @@ function SellerContent() {
                       <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: i<2?'12px':'0', padding:'10px', background:'rgba(255,255,255,0.02)', borderRadius:'12px' }}>
                         <div style={{ fontSize: '15px', fontWeight:800, color:'rgba(0,0,0,0.30)', width:'16px', flexShrink:0 }}>{toFa(i+1)}</div>
                         <div style={{ width:'36px', height:'36px', borderRadius:'10px', overflow:'hidden', flexShrink:0 }}>
-                          <img src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.5)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}} />
+                          <img loading="lazy" decoding="async" src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.5)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}} />
                         </div>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ fontSize: '14px', fontWeight:600, color: '#111111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.title}</div>
@@ -355,7 +355,7 @@ function SellerContent() {
                 {filteredProds.map(p => (
                   <div key={p.id} className="prod-row">
                     <div style={{ width:'52px', height:'52px', borderRadius:'12px', overflow:'hidden', flexShrink:0, background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.05)' }}>
-                      <img src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.55)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
+                      <img loading="lazy" decoding="async" src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.55)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', flexWrap:'wrap' }}>

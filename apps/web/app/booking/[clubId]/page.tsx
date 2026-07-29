@@ -498,7 +498,7 @@ function BookingContent() {
                   <div key={table.id} className="tbl-card" onClick={()=>handleTableSelect(table)}
                     style={{borderColor:isSel?`${color}45`:'rgba(0,0,0,0.06)',background:isSel?`${color}0d`:'rgba(0,0,0,0.03)',boxShadow:isSel?`0 0 0 1px ${color}20,0 8px 24px rgba(0,0,0,0.06)`:'none',transform:isSel?'translateY(-1px)':'none'}}>
                     {table.photoDataUrl
-                      ? <img src={table.photoDataUrl} alt="" style={{width:52,height:42,objectFit:'cover',borderRadius:10,flexShrink:0,border:`1.5px solid ${color}33`}}/>
+                      ? <img loading="lazy" decoding="async" src={table.photoDataUrl} alt="" style={{width:52,height:42,objectFit:'cover',borderRadius:10,flexShrink:0,border:`1.5px solid ${color}33`}}/>
                       : <div style={{width:'42px',height:'42px',borderRadius:'12px',background:`${color}12`,border:`1px solid ${color}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'22px',flexShrink:0}}>🎱</div>
                     }
                     <div style={{flex:1,minWidth:0}}>

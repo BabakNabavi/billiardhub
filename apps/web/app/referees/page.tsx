@@ -236,7 +236,7 @@ function RefereeAvatar({ referee, onStory, size }: { referee: Referee; onStory: 
         border:'2.5px solid #FFFFFF', background:'#E7ECF1',
         display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
         {referee.photo ? (
-          <img src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+          <img loading="lazy" decoding="async" src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
         ) : (
           <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
             <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
@@ -293,7 +293,7 @@ function RefereeCard({ referee, view, idx, onStory }: { referee: Referee; view: 
         <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'14px 14px' }}/>
         <div style={{ position:'absolute', left:'-12%', top:'-40%', width:'52%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.20) 0%, transparent 64%)', filter:'blur(14px)', pointerEvents:'none' }}/>
         <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'56%', width:'1px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform:'rotate(-12deg)', pointerEvents:'none' }}/>
-        <img src="/images/Logo/BH.png" alt="" style={{ position:'absolute', top:'9px', insetInlineEnd:'10px', height:'22%', width:'auto', opacity:0.9 }}/>
+        <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="" style={{ position:'absolute', top:'9px', insetInlineEnd:'10px', height:'22%', width:'auto', opacity:0.9 }}/>
         <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'2px', background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
       </div>
       {/* avatar */}

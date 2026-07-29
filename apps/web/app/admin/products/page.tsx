@@ -149,7 +149,7 @@ export default function AdminProductsPage() {
                 <div className="col-span-4 flex items-center gap-3">
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {product.images?.length > 0 ? (
-                      <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                      <img loading="lazy" decoding="async" src={product.images[0]} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <ShoppingBag size={20} className="text-gray-400" />
                     )}

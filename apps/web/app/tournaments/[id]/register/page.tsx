@@ -289,7 +289,7 @@ export default function RegisterPage() {
       border: '1px solid rgba(199,166,106,0.22)',
       display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16,
     }}>
-      <img src={t.banner} alt="" style={{
+      <img loading="lazy" decoding="async" src={t.banner} alt="" style={{
         width: 54, height: 54, objectFit: 'cover', borderRadius: 12, flexShrink: 0,
       }} />
       <div style={{ flex: 1, minWidth: 0 }}>

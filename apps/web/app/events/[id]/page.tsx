@@ -269,7 +269,7 @@ export default function TournamentPage() {
         <div style={{ position: 'relative', height: 'clamp(500px,68vh,740px)', overflow: 'hidden' }}>
 
           {/* BG */}
-          <img src={t.image} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.14) saturate(0.4) contrast(1.2)' }} />
+          <img loading="lazy" decoding="async" src={t.image} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.14) saturate(0.4) contrast(1.2)' }} />
 
           {/* Overlays */}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(2,8,6,0.6) 0%, transparent 25%, transparent 40%, rgba(2,8,6,0.97) 100%)' }} />

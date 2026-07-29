@@ -293,13 +293,13 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
         >
           {/* ── Image: top 60% ── */}
           <div className="club-img-x" style={{ flex: '0 0 60%', position: 'relative', overflow: 'hidden', borderRadius: `${rad} ${rad} 0 0` }}>
-            <img src={club.img} alt={club.name}
+            <img loading="lazy" decoding="async" src={club.img} alt={club.name}
               onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club3.jpg'; }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
                 filter: hov ? 'brightness(0.65) saturate(0.82)' : 'brightness(0.82) saturate(0.88)',
                 transition: 'filter 0.7s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
                 transform: hov ? 'scale(1.07)' : 'scale(1.01)' }} />
-            <img src={club.img2} alt=""
+            <img loading="lazy" decoding="async" src={club.img2} alt=""
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
                 opacity: hov ? 1 : 0, filter: 'brightness(0.65) saturate(0.82)',
                 transition: 'opacity 0.85s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)',
@@ -451,7 +451,7 @@ function BazaarCard({ p, className, style }: { p: typeof PRODUCTS[0]; className?
     <Link href={`/shop/${p.id}`} className={`prod-hover${className ? ` ${className}` : ''}`}
       style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0, ...style }}>
       <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-        <img src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <img loading="lazy" decoding="async" src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       </div>
       <div style={{ padding: '9px 8px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden' }}>
         <span style={{ fontSize: '12.5px', color: '#1C1B17', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name} — {p.sub}</span>
@@ -499,7 +499,7 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
     >
       {/* Image area — curved bottom via border-radius clip */}
       <div style={{ position: 'relative', height: '150px', overflow: 'hidden', borderRadius: '0 0 60% 60% / 0 0 42px 42px' }}>
-        <img src={s.img} alt={s.name}
+        <img loading="lazy" decoding="async" src={s.img} alt={s.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease', transform: hov ? 'scale(1.07)' : 'scale(1)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         {/* gradient overlay */}
@@ -548,7 +548,7 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
   return (
     <Link href={href} style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
       {slides.map((img, i) => (
-        <img key={i} src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: i === idx ? 1 : 0, transition: 'opacity 0.85s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <img loading="lazy" decoding="async" key={i} src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: i === idx ? 1 : 0, transition: 'opacity 0.85s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       ))}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.18) 100%)' }} />
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 20px' }}>
@@ -2127,7 +2127,7 @@ useEffect(() => {
               pointerEvents: i === activeBanner ? 'auto' : 'none',
             }}
           >
-            <img src={slide.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === activeBanner ? 'scale(1.03)' : 'scale(1)', transition: 'transform 5s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <img loading="lazy" decoding="async" src={slide.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === activeBanner ? 'scale(1.03)' : 'scale(1)', transition: 'transform 5s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 clamp(20px,5%,80px)' }}>
               <div style={{ maxWidth: '420px', textAlign: 'right' }}>

@@ -762,7 +762,7 @@ function SpotlightBlock({ spotlight, video, count }: { spotlight: ReturnType<typ
         </div>
       </div>
       <Link href={`/media/${video.id}`} className="bm-spot-vid">
-        <img src={video.thumb} alt={video.title} />
+        <img loading="lazy" decoding="async" src={video.thumb} alt={video.title} />
         <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.65))' }} />
         <span style={{ position: 'absolute', inset: 0, margin: 'auto', width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: INK, boxShadow: '0 12px 30px rgba(0,0,0,0.35)' }}><Play size={24} fill="currentColor" /></span>
         <span style={{ position: 'absolute', bottom: 14, insetInline: 14, fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{video.title}</span>

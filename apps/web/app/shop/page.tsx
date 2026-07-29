@@ -463,7 +463,7 @@ export default function MarketNewPage() {
           {CATS_M.map(c => (
             <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
               className={`mk-catrow${cat === c.id ? ' on' : ''}`}>
-              <span className="ic"><img src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
+              <span className="ic"><img loading="lazy" decoding="async" src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
               <span className="lb">{c.label}</span>
               <span className="ct">{toFa(counts[c.id] ?? 0)}</span>
             </button>
@@ -737,7 +737,7 @@ export default function MarketNewPage() {
           {/* برند */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
             <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.26)' }}>
-              <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </span>
             <span style={{ fontWeight: 900, fontSize: 17.5, letterSpacing: '-0.02em', color: TEXT, whiteSpace: 'nowrap' }}>
               بیلیارد <span style={{ color: GOLD }}>هاب</span>
@@ -824,7 +824,7 @@ export default function MarketNewPage() {
           {CATS_M.map(c => (
             <button key={c.id} type="button" onClick={() => setCat(cat === c.id ? '' : c.id)}
               className={`mk-mcat${cat === c.id ? ' on' : ''}`}>
-              <span className="ic"><img src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
+              <span className="ic"><img loading="lazy" decoding="async" src={c.img} alt="" style={(c as { imgStyle?: React.CSSProperties }).imgStyle} /></span>
               <span className="lb">{c.label}</span>
             </button>
           ))}

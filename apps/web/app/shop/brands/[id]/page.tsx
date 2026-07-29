@@ -108,7 +108,7 @@ export default function BrandProfilePage() {
 
         {/* ══ HERO ══ */}
         <div style={{ position:'relative', height:'clamp(440px,58vh,620px)', overflow:'hidden' }}>
-          <img src={brand.coverImg} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.14) saturate(0.4) contrast(1.2)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
+          <img loading="lazy" decoding="async" src={brand.coverImg} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.14) saturate(0.4) contrast(1.2)' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
           <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse 60% 60% at 20% 70%,${brand.accentColor}12,transparent 100%)` }}/>
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(2,8,6,0.5) 0%,transparent 30%,rgba(2,8,6,0.97) 100%)' }}/>
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left,rgba(2,8,6,0.6) 0%,transparent 55%)' }}/>
@@ -284,7 +284,7 @@ export default function BrandProfilePage() {
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'4px', padding:'0 4px 4px' }}>
                       {brand.gallery.map((img: string, i: number) => (
                         <div key={i} style={{ aspectRatio:'16/9', overflow:'hidden', borderRadius:'10px', position:'relative', cursor:'pointer' }}>
-                          <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.4)', transition:'transform 0.4s ease, filter 0.4s' }}
+                          <img loading="lazy" decoding="async" src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.4)', transition:'transform 0.4s ease, filter 0.4s' }}
                             onMouseEnter={e=>{(e.target as HTMLImageElement).style.filter='brightness(0.65)';(e.target as HTMLImageElement).style.transform='scale(1.07)';}}
                             onMouseLeave={e=>{(e.target as HTMLImageElement).style.filter='brightness(0.4)';(e.target as HTMLImageElement).style.transform='none';}}
                             onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
@@ -306,7 +306,7 @@ export default function BrandProfilePage() {
                       <Link key={p.id} href={`/shop/${p.id}`} style={{ textDecoration:'none' }}>
                         <div className="prod-card">
                           <div style={{ height:'120px', position:'relative', overflow:'hidden' }}>
-                            <img src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.35)', transition:'transform 0.5s' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
+                            <img loading="lazy" decoding="async" src={p.img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.35)', transition:'transform 0.5s' }} onError={e=>{(e.target as HTMLImageElement).style.display='none';}}/>
                             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,transparent 30%,rgba(6,13,10,0.9) 100%)' }}/>
                             {p.tag && <div style={{ position:'absolute', top:'8px', right:'8px', background:`${brand.accentColor}85`, backdropFilter:'blur(6px)', color:'#fff', fontSize: '10px', fontWeight:700, padding:'2px 8px', borderRadius:'20px' }}>{p.tag}</div>}
                           </div>

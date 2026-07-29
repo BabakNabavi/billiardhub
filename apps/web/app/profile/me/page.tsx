@@ -386,7 +386,7 @@ export default function ProfileMePage() {
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 <div style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid #FFFFFF', overflow: 'hidden', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 31, fontWeight: 700, color: '#FFFFFF' }}>
                   {profile.avatar
-                    ? <img src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img loading="lazy" decoding="async" src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : fullName.trim()[0]
                   }
                 </div>

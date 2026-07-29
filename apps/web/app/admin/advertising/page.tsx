@@ -514,7 +514,7 @@ function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
               <div key={c.id} style={{ display: 'flex', gap: 11, alignItems: 'center', flexWrap: 'wrap', border: `1px solid ${LINE}`, borderRadius: 13, padding: '11px 13px' }}>
                 {banner
                   ? /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={banner} alt="" style={{ width: 68, height: 40, objectFit: 'cover', borderRadius: 8, border: `1px solid ${LINE}`, flexShrink: 0 }} />
+                    <img loading="lazy" decoding="async" src={banner} alt="" style={{ width: 68, height: 40, objectFit: 'cover', borderRadius: 8, border: `1px solid ${LINE}`, flexShrink: 0 }} />
                   : <span style={{ width: 68, height: 40, borderRadius: 8, background: 'rgba(199,166,106,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: GOLD_D, flexShrink: 0 }}>
                       {String(c.content?.ref ?? '').slice(0, 8) || '—'}
                     </span>}

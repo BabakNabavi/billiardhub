@@ -415,7 +415,7 @@ export default function PlayerProfilePage() {
             </div>
           </div>
           <div onClick={e => e.stopPropagation()} style={{ maxWidth: '92vw', maxHeight: '84vh', overflow: zoomed ? 'auto' : 'hidden', borderRadius: 14 }}>
-            <img
+            <img loading="lazy" decoding="async" 
               src={photos[lightbox]}
               alt=""
               onClick={() => setZoomed(z => !z)}

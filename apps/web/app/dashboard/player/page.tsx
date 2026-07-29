@@ -287,7 +287,7 @@ export default function PlayerDashboard() {
               </button>
               {form.scene && (
                 <>
-                  <img src={form.scene} alt="" className="h-14 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                  <img loading="lazy" decoding="async" src={form.scene} alt="" className="h-14 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
                   <button type="button" onClick={() => set('scene', '')} className="text-[11.5px] font-bold text-[#B23B2E]">حذف</button>
                 </>
               )}
@@ -396,7 +396,7 @@ export default function PlayerDashboard() {
                   <div className="flex flex-wrap gap-2">
                     {a.photos.map((ph, i) => (
                       <span key={i} className="relative">
-                        <img src={ph} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                        <img loading="lazy" decoding="async" src={ph} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
                         <button type="button"
                           onClick={() => set('albums', form.albums.map(x => x.id === a.id ? { ...x, photos: x.photos.filter((_, pi) => pi !== i) } : x))}
                           className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>

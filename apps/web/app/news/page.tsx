@@ -475,7 +475,7 @@ export default function NewsPage() {
               {/* خبرِ سرخط — ادیتوریالِ متن‌زیرِ‌تصویر */}
               <Link href={`/news/${lead.id}`} className="nw-lead">
                 <div className="nw-lead-img">
-                  <img src={lead.image} alt={lead.title} />
+                  <img loading="lazy" decoding="async" src={lead.image} alt={lead.title} />
                   <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8 }}>
                     <CatPill k={lead.category} onImage />
                     {lead.breaking && (

@@ -122,7 +122,7 @@ export default function NewsDetailPage() {
 
             {/* تصویر هیرو */}
             <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 6px 26px rgba(28,27,23,0.09)', marginBottom: 22, animation: 'ndFadeUp .5s .1s ease both' }}>
-              <img src={article.image} alt={article.title} style={{ width: '100%', display: 'block', aspectRatio: '16/8.2', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src={article.image} alt={article.title} style={{ width: '100%', display: 'block', aspectRatio: '16/8.2', objectFit: 'cover' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 30%)' }} />
             </div>
 

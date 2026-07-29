@@ -443,7 +443,7 @@ export default function NewClubPage() {
                  تیکِ سبز فقط پس از بررسیِ کارشناس داده می‌شود. */
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: '10px', padding: '10px 14px' }}>
                 {licensePreview ? (
-                  <img src={licensePreview} alt="پیش‌نمایش مدرک" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }} />
+                  <img loading="lazy" decoding="async" src={licensePreview} alt="پیش‌نمایش مدرک" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }} />
                 ) : (
                   <div style={{ width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(199,166,106,0.14)', borderRadius: 8, fontSize: 24, flexShrink: 0 }}>📄</div>
                 )}
@@ -529,7 +529,7 @@ export default function NewClubPage() {
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
                 {imagePreviews.map((src, i) => (
                   <div key={i} style={{ position: 'relative' }}>
-                    <img src={src} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }} />
+                    <img loading="lazy" decoding="async" src={src} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }} />
                     <button type="button" onClick={() => removeImage(i)} aria-label="حذف عکس"
                       style={{
                         position: 'absolute', top: 4, left: 4, background: 'rgba(178,59,46,0.85)',

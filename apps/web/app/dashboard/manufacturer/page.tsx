@@ -202,7 +202,7 @@ export default function ManufacturerDashboard() {
                 </button>
                 {form.bannerImage && (
                   <>
-                    <img src={form.bannerImage} alt="" className="h-14 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                    <img loading="lazy" decoding="async" src={form.bannerImage} alt="" className="h-14 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
                     <button type="button" onClick={() => set('bannerImage', '')} className="text-[11.5px] font-bold text-[#B23B2E]">حذف</button>
                   </>
                 )}
@@ -377,7 +377,7 @@ export default function ManufacturerDashboard() {
               <div className="mb-4 space-y-2">
                 {form.products.map(p => (
                   <div key={p.id} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-2.5">
-                    <img src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
+                    <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-bold">{p.name}</div>
                       <div className="text-[11px] text-[#8A8474]">{p.category}</div>
@@ -398,7 +398,7 @@ export default function ManufacturerDashboard() {
                 <button type="button" onClick={() => prodImgRef.current?.click()} className={LQ_BTN} disabled={busy}>
                   <Images size={14} /> {prod.image ? 'تغییر عکس' : 'عکس محصول'}
                 </button>
-                {prod.image && <img src={prod.image} alt="" className="h-11 w-16 rounded-lg border border-[#E7E2D6] object-cover" />}
+                {prod.image && <img loading="lazy" decoding="async" src={prod.image} alt="" className="h-11 w-16 rounded-lg border border-[#E7E2D6] object-cover" />}
                 <button type="button" onClick={addProduct} className={`${LQ_BTN} mr-auto`} disabled={busy}><Plus size={14} /> افزودن محصول</button>
               </div>
             </div>

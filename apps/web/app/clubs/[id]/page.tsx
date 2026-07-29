@@ -294,7 +294,7 @@ export default function ClubProfilePage() {
         {/* ══ HERO ══ */}
         <div style={{ position: 'relative', height: 'min(clamp(320px,44vw,510px),65vh)', overflow: 'hidden', background: '#0A0806' }}>
           {images.map((img, i) => (
-            <img key={i} src={img} alt=""
+            <img loading="lazy" decoding="async" key={i} src={img} alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.46) saturate(0.68) contrast(1.06)', opacity: i === slide ? 1 : 0, transition: 'opacity 1.4s cubic-bezier(0.4,0,0.2,1)', transform: i === slide ? 'scale(1.03)' : 'scale(1.0)', transitionProperty: 'opacity, transform' }} />
           ))}
@@ -331,7 +331,7 @@ export default function ClubProfilePage() {
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' }} />}
                 {hasStory && <div style={{ position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1, border: '3px solid rgba(10,8,6,0.92)' }} />}
                 <div onClick={() => { if (hasStory) setStoryViewer(true); }} style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
-                  {club.logo ? <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : club.name[0]}
+                  {club.logo ? <img loading="lazy" decoding="async" src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : club.name[0]}
                 </div>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
                 {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
@@ -788,7 +788,7 @@ export default function ClubProfilePage() {
                             style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}>
                             <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', flexShrink: 0, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
                               {album.items.find(i => i.type === 'image')
-                                ? <img src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ? <img loading="lazy" decoding="async" src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 : '🏆'}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
@@ -835,7 +835,7 @@ export default function ClubProfilePage() {
                                   {album.items.map(item => (
                                     <div key={item.id} style={{ aspectRatio: '1', borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#f5f5f5', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                                       {item.type === 'image' ? (
-                                        <img src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                       ) : (
                                         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.06)', gap: 6 }}>
                                           <div style={{ fontSize: 28 }}>🎬</div>
@@ -903,7 +903,7 @@ export default function ClubProfilePage() {
                       <div key={album.id} style={{ flexShrink: 0, width: 110, cursor: 'pointer' }}>
                         <div style={{ width: 110, height: 110, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: '0 4px 18px rgba(0,0,0,0.12)', background: 'rgba(199,166,106,0.12)' }}>
                           {cover
-                            ? <img src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)' }} />
+                            ? <img loading="lazy" decoding="async" src={cover} alt={album.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.62) saturate(0.80)' }} />
                             : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>🖼</div>
                           }
                           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.82) 100%)' }} />
@@ -928,7 +928,7 @@ export default function ClubProfilePage() {
                   <div className="gallery-grid">
                     {clubAlbums.flatMap(a => a.items).map((item, i) => (
                       <div key={item.id || i} style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-                        <img src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
+                        <img loading="lazy" decoding="async" src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.82) saturate(0.78)' }} />
                       </div>
                     ))}
                   </div>

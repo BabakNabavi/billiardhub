@@ -370,7 +370,7 @@ export default function TournamentsPage() {
                   </span>
                 </div>
               </div>
-              <div className="tn-main-img"><img src={mainEvent.banner} alt={mainEvent.name} /></div>
+              <div className="tn-main-img"><img loading="lazy" decoding="async" src={mainEvent.banner} alt={mainEvent.name} /></div>
             </Link>
           </section>
         )}

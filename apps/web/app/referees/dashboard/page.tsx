@@ -398,7 +398,7 @@ function RefereeDashboardInner() {
             {storyDraft && (
               <div style={{ border: CBOR, borderRadius: 12, padding: 12, marginBottom: 14, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ width: 108, height: 168, borderRadius: 10, overflow: 'hidden', background: '#000', flexShrink: 0 }}>
-                  <img src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img loading="lazy" decoding="async" src={storyDraft.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <textarea value={storyDraft.caption} onChange={e => setStoryDraft(d => (d ? { ...d, caption: e.target.value } : d))}
@@ -415,7 +415,7 @@ function RefereeDashboardInner() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: 10 }}>
                 {storyList.map(s => (
                   <div key={s.id} style={{ position: 'relative', aspectRatio: '9/16', borderRadius: 10, overflow: 'hidden', border: CBOR, background: 'rgba(17,17,16,0.04)' }}>
-                    <img src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img loading="lazy" decoding="async" src={s.mediaUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     {s.caption && (
                       <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '12px 7px 6px', background: 'linear-gradient(to top,rgba(0,0,0,0.72),transparent)', color: '#fff', fontSize: 10.5, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.caption}</div>
                     )}
@@ -482,7 +482,7 @@ function RefereeDashboardInner() {
                 <label style={lbl}>عکس پروفایل</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
-                    {form.photo && <img src={form.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    {form.photo && <img loading="lazy" decoding="async" src={form.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
                     <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
@@ -497,7 +497,7 @@ function RefereeDashboardInner() {
                 <label style={lbl}>عکس بکگراند (کاور پروفایل)</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 100, height: 60, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.05)', flexShrink: 0, border: CBOR }}>
-                    {form.coverImage && <img src={form.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    {form.coverImage && <img loading="lazy" decoding="async" src={form.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
                     <label style={{ ...lqBtn, background: 'transparent', border: '1px solid rgba(17,17,16,0.14)', color: TEXT_S, fontSize: 13, padding: '9px 16px' }}>
@@ -565,7 +565,7 @@ function RefereeDashboardInner() {
               {form.gallery.map(g => (
                 <div key={g.id} style={{ border: CBOR, borderRadius: 10, overflow: 'hidden', background: 'rgba(17,17,16,0.04)' }}>
                   <div style={{ position: 'relative', aspectRatio: '1' }}>
-                    <img src={g.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    <img loading="lazy" decoding="async" src={g.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     <button type="button" onClick={() => removeGallery(g.id)} aria-label="حذف" style={{ position: 'absolute', top: 6, left: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     </button>
@@ -585,7 +585,7 @@ function RefereeDashboardInner() {
               {form.videos.map(v => (
                 <div key={v.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', border: CBOR, borderRadius: 10, padding: 10 }}>
                   <div style={{ width: 76, height: 46, borderRadius: 8, overflow: 'hidden', background: 'rgba(17,17,16,0.06)', flexShrink: 0 }}>
-                    {v.thumbnail && <img src={v.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    {v.thumbnail && <img loading="lazy" decoding="async" src={v.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
                   <input value={v.title} onChange={e => setVideo(v.id, { title: e.target.value })} placeholder="عنوان ویدیو" style={{ ...inp, flex: 1, minWidth: 140, padding: '8px 11px', fontSize: 13 }} />
                   <input value={v.duration} onChange={e => setVideo(v.id, { duration: e.target.value })} placeholder="مدت (۱۲:۳۴)" style={{ ...inp, width: 110, padding: '8px 11px', fontSize: 13 }} />

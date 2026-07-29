@@ -82,7 +82,7 @@ export default function UserProfilePage() {
         <div className="flex items-start gap-6">
           <div className="w-24 h-24 bg-green-700 rounded-full flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
             {profile.avatar ? (
-              <img src={profile.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+              <img loading="lazy" decoding="async" src={profile.avatar} alt="" className="w-full h-full rounded-full object-cover" />
             ) : profile.firstName?.[0]}
           </div>
           <div className="flex-1">

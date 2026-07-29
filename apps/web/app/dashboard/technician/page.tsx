@@ -205,7 +205,7 @@ export default function TechnicianDashboard() {
             <div className="mb-5 flex items-center gap-4">
               <div className="relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-full border-2 border-[rgba(199,166,106,0.45)] bg-gradient-to-bl from-[#FFFDF9] to-[#F5EFE4] shadow-[0_8px_22px_rgba(154,110,56,0.16)]">
                 {form.photo
-                  ? <img src={form.photo} alt="" className="h-full w-full object-cover" />
+                  ? <img loading="lazy" decoding="async" src={form.photo} alt="" className="h-full w-full object-cover" />
                   : <span className="flex h-full w-full items-center justify-center text-[30px] font-black text-[#9A6E38]">{(form.name || 'م').slice(0, 1)}</span>}
               </div>
               <div className="flex flex-col gap-2">
@@ -315,7 +315,7 @@ export default function TechnicianDashboard() {
               <div className="mb-4 space-y-2">
                 {form.projects.map(p => (
                   <div key={p.id} className="flex items-center gap-3 rounded-xl border border-[#EFEBE1] bg-[#FAFAF7] p-2.5">
-                    <img src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
+                    <img loading="lazy" decoding="async" src={p.image} alt="" className="h-12 w-16 rounded-lg border border-[#E7E2D6] object-cover" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-bold">{p.title}</div>
                       <div className="text-[11px] text-[#8A8474]">{p.service} · {p.city}{p.club ? ` — ${p.club}` : ''}</div>
@@ -339,7 +339,7 @@ export default function TechnicianDashboard() {
               <div className="flex items-center gap-3 sm:col-span-2">
                 <input ref={prjImgRef} type="file" accept="image/*" className="hidden" onChange={pickPrjImage} />
                 <button type="button" onClick={() => prjImgRef.current?.click()} className={LQ_BTN}><Images size={14} /> {prj.image ? 'تغییر عکس' : 'عکس پروژه'}</button>
-                {prj.image && <img src={prj.image} alt="" className="h-11 w-16 rounded-lg border border-[#E7E2D6] object-cover" />}
+                {prj.image && <img loading="lazy" decoding="async" src={prj.image} alt="" className="h-11 w-16 rounded-lg border border-[#E7E2D6] object-cover" />}
                 <button type="button" onClick={addProject} className={`${LQ_BTN} mr-auto`} disabled={busy}><Plus size={14} /> افزودن پروژه</button>
               </div>
             </div>
@@ -371,7 +371,7 @@ export default function TechnicianDashboard() {
                   <div className="flex flex-wrap gap-2">
                     {a.photos.map((ph, i) => (
                       <span key={i} className="relative">
-                        <img src={ph} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
+                        <img loading="lazy" decoding="async" src={ph} alt="" className="h-16 w-24 rounded-lg border border-[#E7E2D6] object-cover" />
                         <button type="button" onClick={() => removeAlbumPhoto(a.id, i)}
                           className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#B23B2E] text-[11px] text-white">×</button>
                       </span>

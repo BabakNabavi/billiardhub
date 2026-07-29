@@ -96,7 +96,7 @@ function ImageSlider({ images }: { images: string[] }) {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
       {shots.map((src, k) => (
-        <img
+        <img loading="lazy" decoding="async" 
           key={k} src={src} alt="" draggable={false}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
             opacity: k === active ? 1 : 0, transition: 'opacity 0.9s ease' }}
@@ -149,7 +149,7 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
         {layers}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(7px,1.2vw,12px)', padding: 'clamp(12px,2vw,22px) 16px', textAlign: 'center' }}>
-          <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
+          <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
           {title && <div style={{ fontSize: 'clamp(14px,2.5vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.28, maxWidth: '94%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
           {subtitleRow(true)}
         </div>
@@ -162,7 +162,7 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
       {layers}
       {/* وردمارک BILLIARD HUB + نامِ فروشگاه + زیرنویس (راست‌چین) */}
       <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 9, maxWidth: 'min(62%,520px)' }}>
-        <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
+        <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
         {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
         {subtitleRow(false)}
       </div>
@@ -442,7 +442,7 @@ export default function FlatShop() {
             >
               <span className="flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-gradient-to-bl from-[#14532D] to-[#1E6B3C] text-white sm:h-[94px] sm:w-[94px]">
                 {store.logo
-                  ? <img src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
+                  ? <img loading="lazy" decoding="async" src={store.logo} alt={store.title} className="h-full w-full object-cover"/>
                   : Icon.storefront}
               </span>
             </button>

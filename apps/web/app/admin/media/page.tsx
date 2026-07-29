@@ -120,7 +120,7 @@ export default function AdminMediaPage() {
               const isHidden = hidden.includes(v.id);
               return (
                 <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 13, padding: '9px 12px', opacity: isHidden ? 0.55 : 1 }}>
-                  <img src={v.thumb} alt="" style={{ width: 74, aspectRatio: '16/9', objectFit: 'cover', borderRadius: 8, flexShrink: 0, border: `1px solid ${LINE}` }} />
+                  <img loading="lazy" decoding="async" src={v.thumb} alt="" style={{ width: 74, aspectRatio: '16/9', objectFit: 'cover', borderRadius: 8, flexShrink: 0, border: `1px solid ${LINE}` }} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.title}</div>
                     <div style={{ fontSize: 10.5, color: MUT, marginTop: 3 }}>

@@ -348,7 +348,7 @@ export default function RefereeProfilePage() {
               <div style={{ position:'relative', height:'clamp(120px,20vw,200px)', overflow:'hidden', background:'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)' }}>
                 {referee.coverImage ? (
                   <>
-                    <img src={referee.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
+                    <img loading="lazy" decoding="async" src={referee.coverImage} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
                     <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(6,12,22,0.62) 0%, rgba(6,12,22,0.18) 55%, rgba(6,12,22,0.05) 100%)' }}/>
                   </>
                 ) : (
@@ -359,7 +359,7 @@ export default function RefereeProfilePage() {
                   </>
                 )}
                 <div style={{ position:'absolute', top:'50%', insetInlineEnd:'clamp(20px,4vw,40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'10px' }}>
-                  <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
+                  <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
                   <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                     <span style={{ width:'22px', height:'1.5px', background:'linear-gradient(90deg,#C7A66A,transparent)', display:'inline-block' }}/>
                     <span style={{ fontSize:'clamp(9px,1.4vw,12px)', fontWeight:800, letterSpacing:'0.3em', color:'rgba(199,166,106,0.9)' }}>PROFESSIONAL REFEREE</span>
@@ -377,7 +377,7 @@ export default function RefereeProfilePage() {
                       boxShadow: referee.hasStory ? '0 0 16px rgba(214,41,118,0.40), 0 2px 8px rgba(0,0,0,0.14)' : '0 2px 8px rgba(0,0,0,0.14)' }}>
                       <div style={{ width:'100%', height:'100%', borderRadius:'50%', border:'3px solid #fff', overflow:'hidden', background:'#E7ECF1', display:'flex', alignItems:'flex-end', justifyContent:'center' }}>
                         {referee.photo ? (
-                          <img src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                          <img loading="lazy" decoding="async" src={referee.photo} alt={referee.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                         ) : (
                           <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display:'block' }} aria-hidden="true">
                             <circle cx="50" cy="37" r="19" fill="#93A3B8"/>
@@ -453,7 +453,7 @@ export default function RefereeProfilePage() {
               <div className="gphotos" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10 }}>
                 {referee.gallery.map(g => (
                   <div key={g.id} className="gcard" onClick={() => setLightbox(g)} style={{ aspectRatio:'1', background:'rgba(17,17,16,0.05)' }}>
-                    <img src={g.url} alt={g.caption} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                    <img loading="lazy" decoding="async" src={g.url} alt={g.caption} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                   </div>
                 ))}
               </div>
@@ -464,7 +464,7 @@ export default function RefereeProfilePage() {
               <div className="gvideos" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
                 {referee.videos.map(v => (
                   <div key={v.id} className="gcard" style={{ aspectRatio:'16/9', background:'rgba(17,17,16,0.05)', position:'relative' }}>
-                    <img src={v.thumbnail} alt={v.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                    <img loading="lazy" decoding="async" src={v.thumbnail} alt={v.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                     <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 55%)', borderRadius:'inherit' }} />
                     {/* Play */}
                     <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-58%)', width:38, height:38, borderRadius:'50%', background:'rgba(255,255,255,0.22)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -502,7 +502,7 @@ export default function RefereeProfilePage() {
                       <button onClick={() => setExpandedAlbum(isExp ? null : album.id)}
                         style={{ width:'100%', aspectRatio:'1', borderRadius:14, overflow:'hidden', position:'relative', cursor:'pointer', border:CBOR, background:'rgba(17,17,16,0.05)' }}>
                         {preview && (
-                          <img src={preview.url} alt={album.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                          <img loading="lazy" decoding="async" src={preview.url} alt={album.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                         )}
                         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,0.62) 0%,transparent 55%)' }} />
                         <div style={{ position:'absolute', bottom:10, right:10, left:10, color:'#fff', fontWeight:700, fontSize:12, display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
@@ -519,7 +519,7 @@ export default function RefereeProfilePage() {
                         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                           {album.imageIds.map(imgId => {
                             const g = referee.gallery.find(x => x.id === imgId)
-                            return g ? <img key={imgId} src={g.url} alt={g.caption} onClick={() => setLightbox(g)} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', borderRadius:7, display:'block', cursor:'pointer' }} /> : null
+                            return g ? <img loading="lazy" decoding="async" key={imgId} src={g.url} alt={g.caption} onClick={() => setLightbox(g)} style={{ width:'100%', aspectRatio:'1', objectFit:'cover', borderRadius:7, display:'block', cursor:'pointer' }} /> : null
                           })}
                         </div>
                       )}
@@ -634,7 +634,7 @@ export default function RefereeProfilePage() {
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
             <div onClick={e => e.stopPropagation()} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, maxWidth:'min(940px,94vw)', maxHeight:'90vh' }}>
-              <img src={lightbox.url} alt={lightbox.caption} style={{ maxWidth:'100%', maxHeight:'82vh', objectFit:'contain', borderRadius:14, boxShadow:'0 24px 70px rgba(0,0,0,0.55)' }} />
+              <img loading="lazy" decoding="async" src={lightbox.url} alt={lightbox.caption} style={{ maxWidth:'100%', maxHeight:'82vh', objectFit:'contain', borderRadius:14, boxShadow:'0 24px 70px rgba(0,0,0,0.55)' }} />
               {lightbox.caption && (
                 <div style={{ color:'rgba(255,255,255,0.86)', fontSize:14, fontWeight:600, textAlign:'center', maxWidth:640 }}>{lightbox.caption}</div>
               )}

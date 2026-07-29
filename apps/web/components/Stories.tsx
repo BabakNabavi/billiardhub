@@ -264,7 +264,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
             <div style={{ position:'absolute', inset:0 }}>
               {currentStory.mediaType === 'video'
                 ? <video src={currentStory.mediaUrl} autoPlay muted playsInline loop style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                : <img src={currentStory.mediaUrl} alt="story" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+                : <img loading="lazy" decoding="async" src={currentStory.mediaUrl} alt="story" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
               <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%)' }} />
             </div>
           ) : (
@@ -291,7 +291,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           <div style={{ position:'absolute',top:'calc(env(safe-area-inset-top) + 26px)',left:'12px',right:'12px',display:'flex',alignItems:'center',gap:'10px',zIndex:50 }}>
             <div style={{ width:'40px',height:'40px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}90`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize:'17px',overflow:'hidden' }}>
               {currentGroup.logoUrl
-                ? <img src={currentGroup.logoUrl} alt={currentGroup.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
+                ? <img loading="lazy" decoding="async" src={currentGroup.logoUrl} alt={currentGroup.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
                 : currentGroup.userAvatar}
             </div>
             <div style={{ flex:1,minWidth:0 }}>
@@ -687,7 +687,7 @@ export default function Stories() {
               }}>
                 <div className="st-inner" style={{ background: `linear-gradient(135deg,${g.roleColor}28,${g.roleColor}0E)` }}>
                   {g.logoUrl
-                    ? <img src={g.logoUrl} alt={g.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
+                    ? <img loading="lazy" decoding="async" src={g.logoUrl} alt={g.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
                     : g.userAvatar}
                 </div>
               </div>
@@ -738,7 +738,7 @@ export default function Stories() {
             )}
             {storyImg ? (
               <div style={{ position:'relative', borderRadius:14, overflow:'hidden', marginBottom:14, maxHeight:340, background:'#000', display:'flex', justifyContent:'center' }}>
-                <img src={storyImg} alt="" style={{ maxWidth:'100%', maxHeight:340, objectFit:'contain' }} />
+                <img loading="lazy" decoding="async" src={storyImg} alt="" style={{ maxWidth:'100%', maxHeight:340, objectFit:'contain' }} />
                 <button onClick={() => setStoryImg('')} aria-label="حذف" style={{ position:'absolute', top:8, insetInlineStart:8, width:30, height:30, borderRadius:'50%', background:'rgba(0,0,0,0.6)', border:'none', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><X size={15} /></button>
               </div>
             ) : (
