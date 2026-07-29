@@ -56,11 +56,16 @@ function authHeader(): Record<string, string> {
 
 | | |
 |---|---|
-| **Project ID** | `bxnomfjjvhdtbnqvgjmh` |
-| **URL** | `https://bxnomfjjvhdtbnqvgjmh.supabase.co` |
-| **JWT Secret** | `***REMOVED-SECRET***` |
-| **DATABASE_URL** | `postgresql://postgres.bxnomfjjvhdtbnqvgjmh:***REMOVED-SECRET***@aws-1-eu-central-1.pooler.supabase.com:6543/postgres` |
+| **Project ID** | در `.env.local` / تنظیماتِ Vercel |
+| **URL** | `NEXT_PUBLIC_SUPABASE_URL` |
+| **JWT Secret** | `JWT_SECRET` — ⚠️ هرگز در این فایل نوشته نشود |
+| **DATABASE_URL** | `DATABASE_URL` — ⚠️ هرگز در این فایل نوشته نشود |
 | **API** | Next.js API routes وصل به Supabase (`NEXT_PUBLIC_API_URL=/api`) |
+
+> **قاعده:** این سند در مخزنِ **عمومیِ** گیت‌هاب است. هیچ رمز، کلید،
+> توکن یا رشته‌ی اتصالی نباید این‌جا نوشته شود — فقط **نامِ** متغیرِ
+> محیطی. مقادیرِ واقعی جای‌شان `.env.local` (محلی) و Environment
+> Variables در Vercel (پروداکشن) است.
 | **جداول** | `users`, `clubs`, `products`, `bookings`, `role_requests` |
 | **داده** | 4 باشگاه، 8 محصول نمونه |
 
