@@ -8,17 +8,18 @@
    «رویداد اصلی»، و کارت‌های پریمیوم با نوارِ قهرمان.
    ───────────────────────────────────────────────────────────── */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Trophy, Calendar, Search, ChevronLeft, MapPin, Crown, Users, ArrowLeft,
   LayoutGrid, List,
 } from 'lucide-react'
 import {
-  SAMPLE_TOURNAMENTS, GAME_TYPE_LABELS, GAME_TYPE_COLORS,
+  GAME_TYPE_LABELS, GAME_TYPE_COLORS,
   STATUS_LABELS, STATUS_COLORS, formatFee, toFa,
   type Tournament, type TournamentStatus,
 } from '../../lib/mock-tournaments'
+import { fetchTournaments } from '../../lib/tournaments/client'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -127,18 +128,25 @@ export default function TournamentsPage() {
   const [search, setSearch] = useState('')
   const [view, setView]     = useState<'grid' | 'list'>('grid')
 
-  const filtered = SAMPLE_TOURNAMENTS.filter(t => {
+  /* مسابقاتِ واقعی از سرور. پیش‌تر این صفحه از یک آرایه‌ی هاردکد
+     می‌خواند، یعنی کاربر مسابقه‌هایی می‌دید که وجود نداشتند و
+     ثبت‌نامشان هم به جایی وصل نبود. */
+  const [rows, setRows] = useState<Tournament[] | null>(null)
+  useEffect(() => { void fetchTournaments().then(setRows) }, [])
+  const all = rows ?? []
+
+  const filtered = all.filter(t => {
     const matchTab    = tab === 'all' || t.status === tab
     const matchSearch = !search || t.name.includes(search) || t.clubName.includes(search)
     return matchTab && matchSearch
   })
 
   const isBrowsing = tab === 'all' && !search
-  const mainEvent  = SAMPLE_TOURNAMENTS.find(t => t.status === 'registration_open')
+  const mainEvent  = all.find(t => t.status === 'registration_open')
   const gridItems  = isBrowsing && mainEvent ? filtered.filter(t => t.id !== mainEvent.id) : filtered
 
-  const liveCount = SAMPLE_TOURNAMENTS.filter(t => t.status === 'live').length
-  const openCount = SAMPLE_TOURNAMENTS.filter(t => t.status === 'registration_open').length
+  const liveCount = all.filter(t => t.status === 'live').length
+  const openCount = all.filter(t => t.status === 'registration_open').length
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
@@ -277,7 +285,7 @@ export default function TournamentsPage() {
 
           {/* آمارِ زنده‌ی رویدادها — از همان داده */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(14px,2.4vw,26px)', animation: 'tnFadeUp .55s .2s ease both' }}>
-            <div className="tn-stat"><b>{toFa(SAMPLE_TOURNAMENTS.length)}</b><span>رویداد</span></div>
+            <div className="tn-stat"><b>{toFa(all.length)}</b><span>رویداد</span></div>
             <div className="tn-stat-sep" />
             <div className="tn-stat"><b style={{ color: '#7ED9A0' }}>{toFa(openCount)}</b><span>ثبت‌نام باز</span></div>
             <div className="tn-stat-sep" />
@@ -304,7 +312,7 @@ export default function TournamentsPage() {
                 {t.label}
                 {t.key !== 'all' && (
                   <span style={{ fontSize: 10.5, fontWeight: 800, color: tab === t.key ? GOLD_D : MUT, fontVariantNumeric: 'tabular-nums' }}>
-                    {toFa(SAMPLE_TOURNAMENTS.filter(x => x.status === t.key).length)}
+                    {toFa(all.filter(x => x.status === t.key).length)}
                   </span>
                 )}
               </button>

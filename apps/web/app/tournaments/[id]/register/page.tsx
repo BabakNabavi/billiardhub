@@ -6,8 +6,9 @@ import {
   ChevronRight, CheckCircle2, AlertCircle, User, CreditCard, Loader2, Download,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, formatFee, toFa,
+  formatFee, toFa, type Tournament,
 } from '../../../../lib/mock-tournaments';
+import { fetchTournament } from '../../../../lib/tournaments/client';
 import { useAuthStore } from '../../../../store/auth.store';
 import Link from 'next/link';
 import { apiFetch } from '../../../../lib/http';
@@ -38,13 +39,24 @@ function nowShamsi(): string {
 export default function RegisterPage() {
   const { id }  = useParams() as { id: string };
   const router  = useRouter();
-  const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
+  /* مسابقه‌ی واقعی از سرور — پیش‌تر اگر شناسه پیدا نمی‌شد، اولین
+     مسابقه‌ی آرایه‌ی ساختگی نشان داده می‌شد و کاربر برای مسابقه‌ای
+     ثبت‌نام می‌کرد که اصلاً وجود نداشت. */
+  const [t, setT] = useState<Tournament | null>(null);
+  const [loadingT, setLoadingT] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    void fetchTournament(id)
+      .then(row => { if (alive) { setT(row); setLoadingT(false); } })
+      .catch(() => alive && setLoadingT(false));
+    return () => { alive = false; };
+  }, [id]);
 
   const { user, _hydrated } = useAuthStore();
   const isLoggedIn = !!user;
   const userName   = user ? `${user.firstName} ${user.lastName}` : '';
 
-  const full = t.registeredCount >= t.maxPlayers;
+  const full = !!t && t.registeredCount >= t.maxPlayers;
 
   const [step, setStep]           = useState<Step>('confirm');
   const [showAlert, setAlert]     = useState(false);
@@ -130,6 +142,7 @@ export default function RegisterPage() {
   };
 
   const downloadReceipt = () => {
+    if (!t) return;
     const html = `<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -203,13 +216,30 @@ export default function RegisterPage() {
   };
 
   /* ─── Loading ─────────────────────────────────────────────────── */
-  if (!_hydrated) return (
+  if (!_hydrated || loadingT) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex',
       alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 36, height: 36, borderRadius: '50%',
         border: '2px solid rgba(199,166,106,0.15)',
         borderTop: '2px solid #C7A66A', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  /* مسابقه‌ی ناموجود ⇒ صریح بگو، نه اینکه مسابقه‌ی دیگری را نشان بده */
+  if (!t) return (
+    <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F7F5', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 14, padding: 20, textAlign: 'center',
+      fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
+      <div style={{ fontSize: 19, fontWeight: 900, color: '#1C1B17' }}>این مسابقه پیدا نشد</div>
+      <p style={{ fontSize: 13.5, color: '#8A8474', margin: 0, lineHeight: 2 }}>
+        ممکن است برگزار شده باشد یا برگزارکننده آن را برداشته باشد.
+      </p>
+      <Link href="/tournaments" style={{ padding: '11px 22px', borderRadius: 12, textDecoration: 'none',
+        fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)',
+        border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+        همه‌ی مسابقات
+      </Link>
     </div>
   );
 

@@ -7,15 +7,30 @@ import {
   ChevronRight, Star, ClipboardList,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, formatFee, toFa,
+  formatFee, toFa, type Tournament,
 } from '../../../lib/mock-tournaments';
+import { fetchTournament } from '../../../lib/tournaments/client';
 
 export default function TournamentPublicPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const t = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
 
-  const [matchFormat, setMatchFormat] = useState(t.matchFormat ?? 'bo3');
+  /* مسابقه‌ی واقعی از سرور. پیش‌تر اگر شناسه پیدا نمی‌شد، **اولین
+     مسابقه‌ی آرایه‌ی ساختگی** نشان داده می‌شد — یعنی کاربر روی یک
+     نشانیِ نامعتبر هم صفحه‌ی پر می‌دید. حالا تا آمدنِ داده صبر
+     می‌کنیم و اگر نبود «پیدا نشد» می‌گوییم. */
+  const [t, setT] = useState<Tournament | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    void fetchTournament(id)
+      .then(row => { if (alive) { setT(row); setLoading(false); } })
+      .catch(() => alive && setLoading(false));
+    return () => { alive = false; };
+  }, [id]);
+
+  const [matchFormat, setMatchFormat] = useState('bo3');
 
   useEffect(() => {
     try {
@@ -27,6 +42,24 @@ export default function TournamentPublicPage() {
   const FORMAT_LABELS: Record<string, string> = {
     bo3: 'Best of 3', bo5: 'Best of 5', bo7: 'Best of 7', bo9: 'Best of 9', bo11: 'Best of 11',
   };
+
+  if (loading) return (
+    <div dir="rtl" style={{ minHeight: '60vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, sans-serif', color: '#8A8474', fontSize: 14 }}>
+      در حال بارگذاری…
+    </div>
+  );
+
+  if (!t) return (
+    <div dir="rtl" style={{ minHeight: '60vh', background: '#F7F7F5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, fontFamily: 'Vazirmatn, sans-serif', padding: 20, textAlign: 'center' }}>
+      <h1 style={{ fontSize: 19, fontWeight: 900, color: '#1C1B17', margin: 0 }}>این مسابقه پیدا نشد</h1>
+      <p style={{ fontSize: 13.5, color: '#8A8474', margin: 0, lineHeight: 2 }}>
+        ممکن است برگزار شده باشد یا برگزارکننده آن را برداشته باشد.
+      </p>
+      <Link href="/tournaments" style={{ padding: '11px 22px', borderRadius: 12, textDecoration: 'none', fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+        همه‌ی مسابقات
+      </Link>
+    </div>
+  );
 
   const pct  = Math.round((t.registeredCount / t.maxPlayers) * 100);
   const full = t.registeredCount >= t.maxPlayers;
