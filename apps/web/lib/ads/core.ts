@@ -40,6 +40,12 @@ export type PlacementMode = 'free' | 'manual' | 'paid'
 export type ContentKind = 'banner' | 'entity'
 export type EntityType = 'product' | 'club' | 'seller'
 
+/* حالتِ چرخشِ کمپین‌های یک جایگاه (فاز ۴) */
+export const ROTATION_MODES = ['fixed', 'weighted', 'fair', 'random'] as const
+export type RotationMode = typeof ROTATION_MODES[number]
+export const isRotationMode = (v: unknown): v is RotationMode =>
+  (ROTATION_MODES as readonly string[]).includes(String(v))
+
 export interface Placement {
   key: PlacementKey
   title: string
@@ -50,6 +56,11 @@ export interface Placement {
   contentKind: ContentKind
   entityType: EntityType | null
   capacity: number
+  /** چند کمپین هم‌زمان دیده شود (۰ = به‌اندازه‌ی ظرفیت) */
+  displayCount: number
+  rotationMode: RotationMode
+  /** اولویتِ جایگاه — بزرگ‌تر مهم‌تر */
+  priority: number
   price: number
   durationDays: number
   sortOrder: number
@@ -60,6 +71,7 @@ type DbPlacement = {
   is_active: boolean; mode: PlacementMode; content_kind: ContentKind
   entity_type: EntityType | null; capacity: number; price: number
   duration_days: number; sort_order: number
+  display_count?: number | null; rotation_mode?: RotationMode | null; priority?: number | null
 }
 
 const toPlacement = (r: DbPlacement): Placement => ({
@@ -67,7 +79,22 @@ const toPlacement = (r: DbPlacement): Placement => ({
   isActive: r.is_active, mode: r.mode, contentKind: r.content_kind,
   entityType: r.entity_type, capacity: r.capacity, price: Number(r.price) || 0,
   durationDays: r.duration_days, sortOrder: r.sort_order,
+  /* ستون‌های فاز ۴ — پیش از مایگریشنِ ۰۱۸ ممکن است نباشند */
+  displayCount: Number(r.display_count ?? 0) || 0,
+  rotationMode: isRotationMode(r.rotation_mode) ? r.rotation_mode : 'fair',
+  priority: Number(r.priority ?? 0) || 0,
 })
+
+/** عددِ صحیحِ محدودشده — ورودیِ ادمین نباید از بازه‌ی integerِ دیتابیس بیرون بزند */
+const clampInt = (v: number, min: number, max: number): number => {
+  const n = Math.round(Number(v))
+  if (!Number.isFinite(n)) return min
+  return Math.max(min, Math.min(max, n))
+}
+
+/** چند کمپین واقعاً نمایش داده می‌شود: display_count، وگرنه ظرفیت */
+export const shownCount = (p: Pick<Placement, 'capacity' | 'displayCount'>): number =>
+  p.displayCount > 0 ? Math.min(p.displayCount, p.capacity) : Math.max(0, p.capacity)
 
 const missing = (m?: string) => /does not exist|schema cache/i.test(m ?? '')
 
@@ -77,7 +104,9 @@ export async function listPlacements(): Promise<Placement[]> {
     if (missing(error.message)) return []
     throw new Error(error.message)
   }
-  return (data as DbPlacement[] ?? []).map(toPlacement)
+  const rows = (data as DbPlacement[] ?? []).map(toPlacement)
+  /* اولویتِ بالاتر اول؛ در تساوی، ترتیبِ فهرستِ ادمین */
+  return rows.sort((a, b) => (b.priority - a.priority) || (a.sortOrder - b.sortOrder))
 }
 
 export async function getPlacement(key: string): Promise<Placement | null> {
@@ -90,15 +119,19 @@ export async function getPlacement(key: string): Promise<Placement | null> {
 export async function updatePlacement(key: string, patch: Partial<{
   isActive: boolean; mode: PlacementMode; capacity: number; price: number
   durationDays: number; title: string; description: string
+  displayCount: number; rotationMode: RotationMode; priority: number
 }>): Promise<Placement | null> {
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (patch.isActive !== undefined) row.is_active = patch.isActive
   if (patch.mode !== undefined && ['free', 'manual', 'paid'].includes(patch.mode)) row.mode = patch.mode
-  if (patch.capacity !== undefined) row.capacity = Math.max(0, Math.round(patch.capacity))
+  if (patch.capacity !== undefined) row.capacity = clampInt(patch.capacity, 0, 500)
   if (patch.price !== undefined) row.price = Math.max(0, Math.round(patch.price))
-  if (patch.durationDays !== undefined) row.duration_days = Math.max(1, Math.round(patch.durationDays))
+  if (patch.durationDays !== undefined) row.duration_days = clampInt(patch.durationDays, 1, 3650)
   if (patch.title !== undefined) row.title = patch.title
   if (patch.description !== undefined) row.description = patch.description
+  if (patch.displayCount !== undefined) row.display_count = clampInt(patch.displayCount, 0, 500)
+  if (patch.rotationMode !== undefined && isRotationMode(patch.rotationMode)) row.rotation_mode = patch.rotationMode
+  if (patch.priority !== undefined) row.priority = clampInt(patch.priority, -10000, 10000)
 
   const { data, error } = await sb().from('placements').update(row).eq('key', key).select().single()
   if (error || !data) return null
@@ -142,6 +175,7 @@ type DbCampaign = {
   advertiser: string; title: string; content: Record<string, unknown>
   status: CampaignStatus; starts_at: string; ends_at: string
   weight: number; sort_order: number; impressions: number; clicks: number
+  serves?: number | null
   admin_note: string | null; created_at: string
 }
 
@@ -276,10 +310,90 @@ export interface LiveCampaign {
   weight: number
 }
 
+/* ── چرخشِ عادلانه (فاز ۴) ─────────────────────────────────────
+   هدف: «جایگاهِ ثابتِ اول یا دوم فروخته نشود». ترتیبِ کمپین‌های یک
+   جایگاه در هر درخواست بازچیده می‌شود تا تحویل میانِ همه پخش شود.
+
+     fixed    — ترتیبِ ثابتِ sort_order (چیدمانِ انتخابیِ ادمین)
+     weighted — قرعه‌کشیِ وزنی: شانسِ هر کمپین به وزنش
+     fair     — کم‌تحویل‌ترین اول + نویزِ تصادفیِ کنترل‌شده
+     random   — بُرزدنِ کامل
+
+   مبنای عدالت عمداً `serves` است (شمارنده‌ای که فقط سرور هنگامِ تحویلِ
+   واقعی زیاد می‌کند) نه `impressions` که بیکنِ بدونِ احرازِ هویت آن را
+   می‌نویسد؛ وگرنه هر کسی می‌توانست رقیبش را ته صف بفرستد.
+
+   ضمناً مبنا «نرخِ تحویل» است نه شمارشِ خام: کمپینی که یک ماه است
+   می‌چرخد طبیعتاً تحویلِ بیشتری دارد و اگر خام مقایسه می‌شد، با
+   پیوستنِ هر کمپینِ تازه تا مدت‌ها صفر می‌گرفت — یعنی تبلیغ‌کننده‌ای
+   که پول داده بود از چرخه بیرون می‌افتاد. نرخ با گذشتِ زمان خودش
+   تصحیح می‌شود و هیچ‌کس برای همیشه گرسنه نمی‌ماند. */
+type Rotatable = { id: string; weight: number; serves: number; startsAtMs: number; sortOrder: number }
+
+const HOUR = 3600_000
+
+export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationMode): T[] {
+  if (items.length <= 1) return items.slice()
+
+  if (mode === 'fixed') return items.slice().sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const shuffle = (arr: T[]): T[] => {
+    const out = arr.slice()
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[out[i], out[j]] = [out[j]!, out[i]!]
+    }
+    return out
+  }
+
+  if (mode === 'random') return shuffle(items)
+
+  if (mode === 'weighted') {
+    /* قرعه‌کشیِ بدونِ جایگذاری: هر بار یکی به‌نسبتِ وزن انتخاب می‌شود */
+    const pool = items.slice()
+    const out: T[] = []
+    while (pool.length) {
+      const total = pool.reduce((s, x) => s + Math.max(1, x.weight), 0)
+      let t = Math.random() * total
+      let idx = pool.length - 1
+      for (let i = 0; i < pool.length; i++) {
+        t -= Math.max(1, pool[i]!.weight)
+        if (t <= 0) { idx = i; break }
+      }
+      out.push(pool.splice(idx, 1)[0]!)
+    }
+    return out
+  }
+
+  /* fair — نرخِ تحویل به‌ازای هر ساعتِ عمرِ کمپین، تقسیم بر وزن */
+  const now = Date.now()
+  const keyed = items.map(x => {
+    const hours = Math.max(1, (now - x.startsAtMs) / HOUR)
+    return { x, k: Math.max(0, x.serves) / hours / Math.max(1, x.weight) }
+  })
+
+  const ks = keyed.map(r => r.k)
+  const spread = Math.max(...ks) - Math.min(...ks)
+  /* همه هم‌رده (مثلاً همه تازه) ⇒ ترتیبِ کاملاً تصادفی، نه ترتیبِ جدول */
+  if (spread <= 0) return shuffle(items)
+
+  /* نویز نسبت به پراکندگیِ همان کلیدها مقیاس می‌گیرد: تساوی‌ها را
+     تصادفی می‌کند ولی عقب‌ماندگیِ واقعی را پنهان نمی‌کند */
+  const jitter = spread * 0.25
+  return keyed
+    .map(r => ({ x: r.x, k: r.k + Math.random() * jitter }))
+    .sort((a, b) => a.k - b.k)
+    .map(r => r.x)
+}
+
 /** کمپین‌های قابلِ نمایشِ هر جایگاهِ فعال.
     فقط ACTIVE در پنجره‌ی زمانی؛ جایگاهِ غیرفعال اصلاً برنمی‌گردد —
     نمایش هیچ وابستگی‌ای به هیچ کلیدِ سراسری‌ای ندارد. */
-export async function livePlacements(onlyKey?: string): Promise<Record<string, { placement: Pick<Placement, 'key' | 'contentKind' | 'entityType' | 'capacity' | 'mode'>; campaigns: LiveCampaign[] }>> {
+export type LivePlacementMeta = Pick<Placement,
+  'key' | 'contentKind' | 'entityType' | 'capacity' | 'mode' | 'rotationMode' | 'priority'
+> & { displayCount: number }
+
+export async function livePlacements(onlyKey?: string): Promise<Record<string, { placement: LivePlacementMeta; campaigns: LiveCampaign[] }>> {
   const placements = (await listPlacements()).filter(p => p.isActive && (!onlyKey || p.key === onlyKey))
   if (placements.length === 0) return {}
 
@@ -293,21 +407,48 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
   const { data, error } = await q
   if (error) return {}
 
-  const out: Record<string, { placement: Pick<Placement, 'key' | 'contentKind' | 'entityType' | 'capacity' | 'mode'>; campaigns: LiveCampaign[] }> = {}
+  /* اول همه‌ی نامزدهای هر جایگاه جمع می‌شوند، بعد چرخش اعمال و در
+     پایان به تعدادِ نمایش بریده می‌شود — اگر مثلِ قبل حینِ جمع‌آوری
+     بریده می‌شد، همان چند کمپینِ اولِ sort_order همیشه برنده بودند و
+     چرخشِ عادلانه بی‌اثر می‌شد. */
+  const pool: Record<string, (LiveCampaign & Rotatable)[]> = {}
+  for (const p of placements) pool[p.key] = []
+  for (const r of (data as DbCampaign[] ?? [])) {
+    const bucket = pool[r.placement_key]
+    if (!bucket) continue                                   // جایگاهِ غیرفعال
+    bucket.push({
+      id: r.id, title: r.title, advertiser: r.advertiser,
+      content: r.content ?? {}, weight: Math.max(1, r.weight),
+      serves: Number(r.serves ?? 0) || 0,
+      startsAtMs: new Date(r.starts_at).getTime() || Date.now(),
+      sortOrder: r.sort_order,
+    })
+  }
+
+  const out: Record<string, { placement: LivePlacementMeta; campaigns: LiveCampaign[] }> = {}
+  const served: string[] = []
   for (const p of placements) {
+    const limit = shownCount(p)
+    const ordered = rotateCampaigns(pool[p.key] ?? [], p.rotationMode).slice(0, Math.max(0, limit))
+    /* فقط جایی که چرخش واقعاً تصمیم می‌گیرد، شمارنده‌ی تحویل لازم است */
+    if (p.rotationMode === 'fair') for (const c of ordered) served.push(c.id)
     out[p.key] = {
-      placement: { key: p.key, contentKind: p.contentKind, entityType: p.entityType, capacity: p.capacity, mode: p.mode },
-      campaigns: [],
+      placement: {
+        key: p.key, contentKind: p.contentKind, entityType: p.entityType,
+        capacity: p.capacity, displayCount: limit, mode: p.mode,
+        rotationMode: p.rotationMode, priority: p.priority,
+      },
+      campaigns: ordered.map(c => ({
+        id: c.id, title: c.title, advertiser: c.advertiser, content: c.content, weight: c.weight,
+      })),
     }
   }
-  for (const r of (data as DbCampaign[] ?? [])) {
-    const bucket = out[r.placement_key]
-    if (!bucket) continue                                   // جایگاهِ غیرفعال
-    if (bucket.campaigns.length >= bucket.placement.capacity) continue
-    bucket.campaigns.push({
-      id: r.id, title: r.title, advertiser: r.advertiser,
-      content: r.content ?? {}, weight: r.weight,
-    })
+
+  /* شمارنده‌ی سرورمحورِ تحویل — همان چیزی که چرخشِ عادلانه بر پایه‌اش
+     تصمیم می‌گیرد؛ یک رفت‌وبرگشت برای کلِ صفحه. await عمدی است چون
+     روی سرورلس کارِ رهاشده بعد از پاسخ ممکن است اجرا نشود. */
+  if (served.length) {
+    try { await sb().rpc('bh_bump_serves', { p_ids: served }) } catch { /* شمارنده مهم‌تر از صفحه نیست */ }
   }
   return out
 }
@@ -334,6 +475,8 @@ export interface PricingPlan {
   price: number
   durationDays: number
   adQuantity: number
+  /** اعتبارِ کمپینی که با خریدِ پلن داده می‌شود (فاز ۵ مصرفش می‌کند) */
+  creditAmount: number
   isActive: boolean
   sortOrder: number
   badge: string | null
@@ -343,7 +486,7 @@ export interface PricingPlan {
 
 type DbPricingPlan = {
   id: string; name: string; description: string | null; placement_key: string | null
-  price: number; duration_days: number; ad_quantity: number
+  price: number; duration_days: number; ad_quantity: number; credit_amount?: number | null
   is_active: boolean; sort_order: number; badge: string | null
   created_at: string; updated_at: string
 }
@@ -351,6 +494,7 @@ type DbPricingPlan = {
 const toPricingPlan = (r: DbPricingPlan): PricingPlan => ({
   id: r.id, name: r.name, description: r.description, placementKey: r.placement_key,
   price: Number(r.price) || 0, durationDays: r.duration_days, adQuantity: r.ad_quantity,
+  creditAmount: Number(r.credit_amount ?? 0) || 0,
   isActive: r.is_active, sortOrder: r.sort_order, badge: r.badge,
   createdAt: r.created_at, updatedAt: r.updated_at,
 })
@@ -368,17 +512,23 @@ export async function listPricingPlans(onlyActive: boolean): Promise<PricingPlan
 
 export async function updatePricingPlan(id: string, patch: Partial<{
   name: string; description: string; price: number; durationDays: number
-  adQuantity: number; isActive: boolean; sortOrder: number; badge: string
+  adQuantity: number; creditAmount: number; isActive: boolean; sortOrder: number
+  badge: string; placementKey: string | null
 }>): Promise<PricingPlan | null> {
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (patch.name !== undefined) row.name = patch.name
   if (patch.description !== undefined) row.description = patch.description || null
   if (patch.price !== undefined) row.price = Math.max(0, Math.round(patch.price))
-  if (patch.durationDays !== undefined) row.duration_days = Math.max(1, Math.round(patch.durationDays))
-  if (patch.adQuantity !== undefined) row.ad_quantity = Math.max(0, Math.round(patch.adQuantity))
+  if (patch.durationDays !== undefined) row.duration_days = clampInt(patch.durationDays, 1, 3650)
+  if (patch.adQuantity !== undefined) row.ad_quantity = clampInt(patch.adQuantity, 0, 100000)
+  if (patch.creditAmount !== undefined) row.credit_amount = clampInt(patch.creditAmount, 0, 100000)
   if (patch.isActive !== undefined) row.is_active = patch.isActive
   if (patch.sortOrder !== undefined) row.sort_order = Math.round(patch.sortOrder)
   if (patch.badge !== undefined) row.badge = patch.badge || null
+  /* جابه‌جاییِ پلن بینِ جایگاه‌ها؛ null یعنی پلنِ عمومیِ آگهی */
+  if (patch.placementKey !== undefined) {
+    row.placement_key = patch.placementKey && isPlacementKey(patch.placementKey) ? patch.placementKey : null
+  }
 
   const { data, error } = await sb().from('ad_pricing_plans').update(row).eq('id', id).select().single()
   if (error || !data) return null
@@ -387,17 +537,147 @@ export async function updatePricingPlan(id: string, patch: Partial<{
 
 export async function createPricingPlan(input: {
   name: string; description?: string; placementKey?: string | null
-  price: number; durationDays: number; adQuantity: number; sortOrder?: number; badge?: string
+  price: number; durationDays: number; adQuantity: number; creditAmount?: number
+  sortOrder?: number; badge?: string
 }): Promise<PricingPlan | null> {
   const { data, error } = await sb().from('ad_pricing_plans').insert({
     name: input.name, description: input.description ?? null,
     placement_key: input.placementKey ?? null,
     price: Math.max(0, Math.round(input.price)),
-    duration_days: Math.max(1, Math.round(input.durationDays)),
-    ad_quantity: Math.max(0, Math.round(input.adQuantity)),
-    sort_order: Math.round(input.sortOrder ?? 0),
+    duration_days: clampInt(input.durationDays, 1, 3650),
+    ad_quantity: clampInt(input.adQuantity, 0, 100000),
+    credit_amount: clampInt(input.creditAmount ?? 0, 0, 100000),
+    sort_order: clampInt(input.sortOrder ?? 0, -10000, 10000),
     badge: input.badge ?? null,
   }).select().single()
   if (error || !data) return null
   return toPricingPlan(data as DbPricingPlan)
+}
+
+/**
+ * حذفِ واقعیِ پلن — فقط وقتی هیچ سفارشی به آن ارجاع ندارد.
+ * پلنِ فروخته‌شده هرگز حذف نمی‌شود (سفارش‌ها و اعتبارها به آن اشاره
+ * دارند)؛ در آن حالت فقط غیرفعال می‌شود.
+ */
+export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deactivated?: boolean; message?: string }> {
+  const used = await sb().from('campaign_orders').select('id', { count: 'exact', head: true }).eq('plan_id', id)
+  const credited = await sb().from('ad_credits').select('id', { count: 'exact', head: true }).eq('plan_id', id)
+
+  /* اگر نتوانستیم مطمئن شویم که ارجاعی نیست، حذف نمی‌کنیم — تاریخچه‌ی
+     مالی ارزشِ fail-open ندارد. (FK دیتابیس هم لایه‌ی آخر است.) */
+  if (used.error || credited.error) {
+    const plan = await updatePricingPlan(id, { isActive: false })
+    return plan
+      ? { ok: true, deactivated: true, message: 'بررسیِ سفارش‌ها ممکن نشد؛ برای احتیاط پلن فقط غیرفعال شد.' }
+      : { ok: false, message: 'انجام نشد' }
+  }
+
+  const refCount = (used.count ?? 0) + (credited.count ?? 0)
+
+  if (refCount > 0) {
+    const plan = await updatePricingPlan(id, { isActive: false })
+    return plan
+      ? { ok: true, deactivated: true, message: 'این پلن سفارشِ ثبت‌شده دارد؛ به‌جای حذف، غیرفعال شد.' }
+      : { ok: false, message: 'غیرفعال‌سازی انجام نشد' }
+  }
+
+  const { error } = await sb().from('ad_pricing_plans').delete().eq('id', id)
+  return error ? { ok: false, message: 'حذف انجام نشد' } : { ok: true }
+}
+
+/** پلن‌های فعالِ یک جایگاه — پله‌های مدت که کاربر می‌تواند بخرد */
+export async function plansForPlacement(key: string): Promise<PricingPlan[]> {
+  const { data, error } = await sb().from('ad_pricing_plans').select('*')
+    .eq('placement_key', key).eq('is_active', true).order('sort_order', { ascending: true })
+  if (error) return []
+  return (data as DbPricingPlan[] ?? []).map(toPricingPlan)
+}
+
+/* ── آمارِ پنل ادمین (فاز ۴) ─────────────────────────────────── */
+
+export interface AdStats {
+  campaigns: { total: number; active: number; pending: number; expired: number; scheduled: number; draft: number; rejected: number; cancelled: number }
+  impressions: number
+  clicks: number
+  ctr: number                       // درصد
+  revenue: { total: number; orders: number; pendingOrders: number }
+  byPlacement: { key: string; title: string; active: number; impressions: number; clicks: number; ctr: number }[]
+}
+
+/**
+ * آمارِ کلیِ تبلیغات — کمپین‌ها، نمایش/کلیک/CTR و درآمد.
+ *
+ * عمداً روی فهرستِ صفحه‌بندی‌شده‌ی پنل حساب نمی‌شود: آن فهرست سقفِ
+ * ۵۰۰ ردیف دارد و با رشدِ کمپین‌ها، آمار بی‌صدا کمتر از واقعیت
+ * گزارش می‌شد. این تابع خودش همه‌ی ردیف‌های لازم را می‌خواند.
+ */
+export async function adStats(placements: Placement[]): Promise<AdStats> {
+  const rows: { placement_key: string; status: string; impressions: number; clicks: number }[] = []
+  /* خواندنِ صفحه‌به‌صفحه تا ته جدول — نه یک برشِ ثابت */
+  const PAGE = 1000
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await sb().from('campaigns')
+      .select('placement_key,status,impressions,clicks')
+      .order('created_at', { ascending: true })
+      .range(from, from + PAGE - 1)
+    if (error) break
+    const chunk = (data as typeof rows | null) ?? []
+    rows.push(...chunk)
+    if (chunk.length < PAGE) break
+    if (from > 200_000) break                    // مهارِ ایمنی
+  }
+
+  const countOf = (...st: string[]) => rows.filter(r => st.includes(r.status)).length
+  const c = {
+    total: rows.length,
+    active: countOf('ACTIVE'),
+    /* «در انتظار» یعنی هر چیزی که هنوز تصمیم‌گیری نشده */
+    pending: countOf('PENDING_PAYMENT', 'PENDING_REVIEW'),
+    expired: countOf('EXPIRED'),
+    scheduled: countOf('SCHEDULED'),
+    draft: countOf('DRAFT'),
+    rejected: countOf('REJECTED'),
+    cancelled: countOf('CANCELLED'),
+  }
+
+  const impressions = rows.reduce((s, x) => s + (Number(x.impressions) || 0), 0)
+  const clicks = rows.reduce((s, x) => s + (Number(x.clicks) || 0), 0)
+  const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0
+
+  /* درآمد از سفارش‌های پرداخت‌شده‌ی جایگاه؛ جریانِ خریدش در فاز ۵ کامل
+     می‌شود، پس تا آن‌وقت طبیعی است که صفر باشد. */
+  let revenue = { total: 0, orders: 0, pendingOrders: 0 }
+  try {
+    const paidRows: { amount: number }[] = []
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await sb().from('campaign_orders')
+        .select('amount').eq('status', 'PAID').range(from, from + PAGE - 1)
+      if (error) break
+      const chunk = (data as { amount: number }[] | null) ?? []
+      paidRows.push(...chunk)
+      if (chunk.length < PAGE) break
+      if (from > 200_000) break
+    }
+    const { count: pendingCount } = await sb().from('campaign_orders')
+      .select('id', { count: 'exact', head: true }).eq('status', 'PENDING')
+    revenue = {
+      total: paidRows.reduce((s, r) => s + (Number(r.amount) || 0), 0),
+      orders: paidRows.length,
+      pendingOrders: pendingCount ?? 0,
+    }
+  } catch { /* جدول هنوز خالی/نساخته — صفر می‌ماند */ }
+
+  const byPlacement = placements.map(p => {
+    const list = rows.filter(x => x.placement_key === p.key)
+    const imp = list.reduce((s, x) => s + (Number(x.impressions) || 0), 0)
+    const clk = list.reduce((s, x) => s + (Number(x.clicks) || 0), 0)
+    return {
+      key: p.key, title: p.title,
+      active: list.filter(x => x.status === 'ACTIVE').length,
+      impressions: imp, clicks: clk,
+      ctr: imp > 0 ? (clk / imp) * 100 : 0,
+    }
+  })
+
+  return { campaigns: c, impressions, clicks, ctr, revenue, byPlacement }
 }

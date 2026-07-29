@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Megaphone, Save, Power, Loader2, AlertCircle, Plus, Trash2, Inbox, Phone, Package, LayoutGrid,
+  BarChart3, Eye, MousePointerClick, Wallet, RotateCw,
 } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits, faDateTime, faDate } from '../../../lib/jalali'
@@ -48,10 +49,21 @@ const STATUS_FA: Record<string, { label: string; color: string; bg: string }> = 
 }
 const STATUS_OPTS = Object.entries(STATUS_FA).map(([v, m]) => ({ value: v, label: m.label }))
 
+type Rotation = 'fixed' | 'weighted' | 'fair' | 'random'
+const ROTATION_FA: Record<Rotation, string> = {
+  fair: 'عادلانه', weighted: 'وزنی', random: 'تصادفی', fixed: 'ثابت',
+}
+const ROTATION_HINT: Record<Rotation, string> = {
+  fair: 'کم‌نمایش‌ترین اول', weighted: 'به‌نسبتِ وزن', random: 'بُرخورده', fixed: 'ترتیبِ ثابت',
+}
+const ROTATION_OPTS = (['fair', 'weighted', 'random', 'fixed'] as Rotation[])
+  .map(r => ({ value: r, label: ROTATION_FA[r], hint: ROTATION_HINT[r] }))
+
 interface Placement {
   key: string; title: string; description: string | null; section: string
   isActive: boolean; mode: Mode; contentKind: 'banner' | 'entity'
   entityType: string | null; capacity: number; price: number; durationDays: number
+  displayCount: number; rotationMode: Rotation; priority: number
 }
 interface Campaign {
   id: string; placementKey: string; advertiser: string; title: string
@@ -60,7 +72,14 @@ interface Campaign {
 }
 interface Plan {
   id: string; name: string; description: string | null; placementKey: string | null
-  price: number; durationDays: number; adQuantity: number; isActive: boolean; badge: string | null
+  price: number; durationDays: number; adQuantity: number; creditAmount: number
+  isActive: boolean; badge: string | null; sortOrder?: number
+}
+interface Stats {
+  campaigns: { total: number; active: number; pending: number; expired: number; scheduled: number; draft: number; rejected: number; cancelled: number }
+  impressions: number; clicks: number; ctr: number
+  revenue: { total: number; orders: number; pendingOrders: number }
+  byPlacement: { key: string; title: string; active: number; impressions: number; clicks: number; ctr: number }[]
 }
 interface AdRequest {
   id: string; name: string; phone: string; email: string | null; company: string | null
@@ -74,6 +93,7 @@ export default function AdminAdvertising() {
   const [placements, setPlacements] = useState<Placement[] | null>(null)
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
+  const [stats, setStats] = useState<Stats | null>(null)
   const [requests, setRequests] = useState<AdRequest[]>([])
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState('')
@@ -89,6 +109,7 @@ export default function AdminAdvertising() {
       setPlacements(j.placements ?? [])
       setCampaigns(j.campaigns ?? [])
       setPlans(j.plans ?? [])
+      setStats(j.stats ?? null)
       setRequests(j.requests ?? [])
       setErr('')
     } catch { setErr('خطا در ارتباط با سرور'); setPlacements([]) }
@@ -135,6 +156,9 @@ export default function AdminAdvertising() {
         </div>
       )}
 
+      {/* ── آمار ── */}
+      {stats && <StatsSection s={stats} />}
+
       {/* ── جایگاه‌ها ── */}
       {placements === null ? (
         <div style={{ ...CARD, display: 'flex', gap: 9, alignItems: 'center', color: MUT }}>
@@ -162,21 +186,7 @@ export default function AdminAdvertising() {
       />
 
       {/* ── پلن‌های قیمت‌گذاری ── */}
-      <section style={CARD}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-          <Package size={17} style={{ color: GOLD_D }} />
-          <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>پلن‌های قیمت‌گذاری</h2>
-        </div>
-        <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.95 }}>
-          قیمت‌ها از دیتابیس خوانده می‌شوند، نه از کد — همین‌جا تغییرشان بدهید.
-          پلنِ حذف‌شده فقط غیرفعال می‌شود چون سفارش‌های آینده به آن ارجاع خواهند داشت.
-        </p>
-        <div style={{ display: 'grid', gap: 10 }}>
-          {plans.map(p => (
-            <PlanRow key={p.id} p={p} onChanged={load} flash={flash} call={call} />
-          ))}
-        </div>
-      </section>
+      <PlansSection plans={plans} placements={placements ?? []} onChanged={load} flash={flash} call={call} />
 
       {/* ── درخواست‌های تبلیغ ── */}
       <section style={CARD}>
@@ -225,6 +235,71 @@ export default function AdminAdvertising() {
   )
 }
 
+/* ── آمارِ تبلیغات ───────────────────────────────────────────── */
+function StatsSection({ s }: { s: Stats }) {
+  const KPI = ({ icon, label, value, hint, color }: {
+    icon: React.ReactNode; label: string; value: string; hint?: string; color?: string
+  }) => (
+    <div style={{ border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 15px', background: '#FAFAF7', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7, color: color ?? MUT }}>
+        {icon}<span style={{ fontSize: 11.5, fontWeight: 800, color: SEC }}>{label}</span>
+      </div>
+      <div style={{ fontSize: 19, fontWeight: 900, color: color ?? INK, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      {hint && <div style={{ fontSize: 11, color: MUT, marginTop: 3, lineHeight: 1.7 }}>{hint}</div>}
+    </div>
+  )
+
+  return (
+    <section style={CARD}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <BarChart3 size={17} style={{ color: GOLD_D }} />
+        <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>آمار تبلیغات</h2>
+      </div>
+
+      <div style={{ display: 'grid', gap: 11, gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', marginBottom: 14 }}>
+        <KPI icon={<Power size={14} />} label="کمپین فعال" value={fa(s.campaigns.active)} color={FELT}
+          hint={`از ${fa(s.campaigns.total)} کمپین`} />
+        <KPI icon={<Loader2 size={14} />} label="در انتظار" value={fa(s.campaigns.pending)}
+          hint={`${fa(s.campaigns.scheduled)} زمان‌بندی‌شده · ${fa(s.campaigns.draft)} پیش‌نویس`} />
+        <KPI icon={<AlertCircle size={14} />} label="منقضی" value={fa(s.campaigns.expired)}
+          hint={`${fa(s.campaigns.rejected + s.campaigns.cancelled)} رد/لغو`} />
+        <KPI icon={<Eye size={14} />} label="نمایش" value={fa(s.impressions)} />
+        <KPI icon={<MousePointerClick size={14} />} label="کلیک" value={fa(s.clicks)}
+          hint={`نرخ کلیک ${toFaDigits(s.ctr.toFixed(2))}٪`} />
+        <KPI icon={<Wallet size={14} />} label="درآمد (تومان)" value={fa(s.revenue.total)} color={GOLD_D}
+          hint={s.revenue.orders > 0
+            ? `${fa(s.revenue.orders)} سفارشِ پرداخت‌شده`
+            : 'فروشِ آنلاینِ جایگاه در فاز بعد فعال می‌شود'} />
+      </div>
+
+      {s.byPlacement.some(b => b.impressions > 0 || b.active > 0) && (
+        <div style={{ border: `1px solid ${LINE}`, borderRadius: 13, overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 460 }}>
+            <thead>
+              <tr style={{ background: '#FAFAF7' }}>
+                {['جایگاه', 'فعال', 'نمایش', 'کلیک', 'CTR'].map(h => (
+                  <th key={h} style={{ textAlign: h === 'جایگاه' ? 'right' : 'center', padding: '9px 12px', fontSize: 11.5, fontWeight: 800, color: SEC, borderBottom: `1px solid ${LINE}` }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {s.byPlacement.map(b => (
+                <tr key={b.key}>
+                  <td style={{ padding: '9px 12px', fontWeight: 700, color: INK, borderBottom: `1px solid ${LINE}` }}>{b.title}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', color: b.active > 0 ? FELT : MUT, fontWeight: 800, borderBottom: `1px solid ${LINE}` }}>{fa(b.active)}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{fa(b.impressions)}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{fa(b.clicks)}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', color: SEC, fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${LINE}` }}>{toFaDigits(b.ctr.toFixed(2))}٪</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
+
 /* ── ردیفِ جایگاه — Active و Mode مستقل ─────────────────────── */
 function PlacementRow({ p, busy, campaignCount, onPatch }: {
   p: Placement; busy: boolean; campaignCount: number
@@ -233,9 +308,15 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
   const [cap, setCap] = useState(String(p.capacity))
   const [price, setPrice] = useState(String(p.price))
   const [days, setDays] = useState(String(p.durationDays))
-  useEffect(() => { setCap(String(p.capacity)); setPrice(String(p.price)); setDays(String(p.durationDays)) }, [p.capacity, p.price, p.durationDays])
+  const [shown, setShown] = useState(String(p.displayCount))
+  const [prio, setPrio] = useState(String(p.priority))
+  useEffect(() => {
+    setCap(String(p.capacity)); setPrice(String(p.price)); setDays(String(p.durationDays))
+    setShown(String(p.displayCount)); setPrio(String(p.priority))
+  }, [p.capacity, p.price, p.durationDays, p.displayCount, p.priority])
 
   const changed = Number(cap) !== p.capacity || Number(price) !== p.price || Number(days) !== p.durationDays
+    || Number(shown) !== p.displayCount || Number(prio) !== p.priority
 
   return (
     <div style={{ border: `1px solid ${LINE}`, borderRadius: 14, padding: 15, opacity: p.isActive ? 1 : 0.72, background: '#FAFAF7' }}>
@@ -274,8 +355,28 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
           <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(cap)}
             onChange={e => setCap(digits(e.target.value))} />
         </div>
+        <div style={{ width: 100 }}>
+          <label style={LABEL}>تعدادِ نمایش</label>
+          <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(shown)}
+            onChange={e => setShown(digits(e.target.value))} title="۰ = به‌اندازه‌ی ظرفیت" />
+          {Number(shown) > Number(cap) && Number(cap) >= 0 && (
+            <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 4, lineHeight: 1.6 }}>
+              بیش از ظرفیت است؛ عملاً {fa(cap)} نمایش داده می‌شود.
+            </div>
+          )}
+        </div>
+        <div style={{ width: 138 }}>
+          <label style={LABEL}>چرخش</label>
+          <Select<Rotation> compact value={p.rotationMode} options={ROTATION_OPTS} ariaLabel={`چرخشِ ${p.title}`}
+            onChange={r => void onPatch(p.key, { rotationMode: r })} />
+        </div>
+        <div style={{ width: 88 }}>
+          <label style={LABEL}>اولویت</label>
+          <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(prio)}
+            onChange={e => setPrio(digits(e.target.value))} title="بزرگ‌تر = مهم‌تر" />
+        </div>
         <div style={{ width: 150 }}>
-          <label style={LABEL}>قیمت (تومان)</label>
+          <label style={LABEL}>قیمت پایه (تومان)</label>
           <input style={{ ...INPUT, background: '#fff' }} inputMode="numeric"
             value={price ? toFaDigits(Number(price).toLocaleString('en-US')) : ''}
             onChange={e => setPrice(digits(e.target.value))} />
@@ -285,12 +386,21 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
           <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(days)}
             onChange={e => setDays(digits(e.target.value))} />
         </div>
-        <button onClick={() => onPatch(p.key, { capacity: Number(cap) || 0, price: Number(price) || 0, durationDays: Number(days) || 30 })}
+        <button onClick={() => onPatch(p.key, {
+          capacity: Number(cap) || 0, price: Number(price) || 0, durationDays: Number(days) || 30,
+          displayCount: Number(shown) || 0, priority: Number(prio) || 0,
+        })}
           disabled={busy || !changed}
           style={{ ...BTN, opacity: changed ? 1 : 0.45, cursor: changed ? 'pointer' : 'default' }}>
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} ذخیره
         </button>
       </div>
+
+      {p.mode === 'paid' && (
+        <div style={{ marginTop: 10, fontSize: 11.5, color: FELT, background: 'rgba(14,122,56,0.07)', borderRadius: 9, padding: '7px 11px', lineHeight: 1.8 }}>
+          این جایگاه در صفحه‌ی «درخواست تبلیغات» قابلِ خرید است. پله‌های قیمتش را در بخشِ پلن‌ها تنظیم کنید.
+        </div>
+      )}
     </div>
   )
 }
@@ -429,23 +539,147 @@ function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
   )
 }
 
+/* ── پلن‌های قیمت‌گذاری: ساخت، ویرایش، جابه‌جایی، حذف ────────── */
+function PlansSection({ plans, placements, onChanged, flash, call }: {
+  plans: Plan[]; placements: Placement[]
+  onChanged: () => Promise<void>; flash: (m: string) => void
+  call: (method: string, body?: Record<string, unknown>, query?: string) => Promise<Record<string, unknown> | null>
+}) {
+  const [busy, setBusy] = useState('')
+  const [open, setOpen] = useState(false)
+  const [draft, setDraft] = useState({
+    name: '', description: '', placementKey: '', price: '', durationDays: '30', adQuantity: '1', creditAmount: '1', badge: '',
+  })
+
+  const create = async () => {
+    if (!draft.name.trim()) { flash('نامِ پلن لازم است'); return }
+    setBusy('new')
+    try {
+      const ok = await call('POST', {
+        type: 'plan', name: draft.name, description: draft.description,
+        placementKey: draft.placementKey || undefined,
+        price: Number(draft.price) || 0, durationDays: Number(draft.durationDays) || 30,
+        adQuantity: Number(draft.adQuantity) || 0, creditAmount: Number(draft.creditAmount) || 0,
+        badge: draft.badge,
+      })
+      if (ok) {
+        setDraft({ name: '', description: '', placementKey: '', price: '', durationDays: '30', adQuantity: '1', creditAmount: '1', badge: '' })
+        setOpen(false); await onChanged(); flash('پلن ساخته شد')
+      }
+    } finally { setBusy('') }
+  }
+
+  /* گروه‌بندی بر اساسِ جایگاه تا پله‌های مدتِ هر جایگاه کنار هم باشند */
+  const groups: { key: string; title: string; items: Plan[] }[] = []
+  for (const p of placements) {
+    const items = plans.filter(x => x.placementKey === p.key)
+    if (items.length) groups.push({ key: p.key, title: p.title, items })
+  }
+  const general = plans.filter(x => !x.placementKey || !placements.some(p => p.key === x.placementKey))
+  if (general.length) groups.push({ key: '', title: 'پلن‌های عمومیِ آگهی (بدونِ جایگاه)', items: general })
+
+  return (
+    <section style={CARD}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5, flexWrap: 'wrap' }}>
+        <Package size={17} style={{ color: GOLD_D }} />
+        <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>پلن‌های قیمت‌گذاری</h2>
+        <button onClick={() => setOpen(o => !o)} style={{ ...BTN, marginInlineStart: 'auto', padding: '7px 13px', fontSize: 12 }}>
+          <Plus size={13} /> پلنِ تازه
+        </button>
+      </div>
+      <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.95 }}>
+        قیمت‌ها از دیتابیس خوانده می‌شوند، نه از کد. هر جایگاه می‌تواند چند پله‌ی مدت داشته باشد
+        (مثلاً ۷ روزه، ۳۰ روزه، ۳ ماهه). پلنی که سفارشِ ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد.
+      </p>
+
+      {open && (
+        <div style={{ border: `1px dashed ${LINE}`, borderRadius: 14, padding: 15, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))' }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={LABEL}>نامِ پلن *</label>
+              <input style={INPUT} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+                placeholder="مثلاً بنر کناری راست — ۳۰ روزه" />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={LABEL}>جایگاه</label>
+              <Select value={draft.placementKey} ariaLabel="جایگاهِ پلن"
+                options={[{ value: '', label: 'بدونِ جایگاه (پلنِ عمومیِ آگهی)' },
+                  ...placements.map(p => ({ value: p.key, label: p.title, hint: MODE_FA[p.mode] }))]}
+                onChange={v => setDraft(d => ({ ...d, placementKey: v }))} />
+            </div>
+            <div><label style={LABEL}>قیمت (تومان)</label>
+              <input style={INPUT} inputMode="numeric"
+                value={draft.price ? toFaDigits(Number(draft.price).toLocaleString('en-US')) : ''}
+                onChange={e => setDraft(d => ({ ...d, price: digits(e.target.value) }))} /></div>
+            <div><label style={LABEL}>مدت (روز)</label>
+              <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(draft.durationDays)}
+                onChange={e => setDraft(d => ({ ...d, durationDays: digits(e.target.value) }))} /></div>
+            <div><label style={LABEL}>تعدادِ آگهی</label>
+              <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(draft.adQuantity)}
+                onChange={e => setDraft(d => ({ ...d, adQuantity: digits(e.target.value) }))} /></div>
+            <div><label style={LABEL}>اعتبار</label>
+              <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(draft.creditAmount)}
+                onChange={e => setDraft(d => ({ ...d, creditAmount: digits(e.target.value) }))} /></div>
+            <div><label style={LABEL}>برچسب</label>
+              <input style={INPUT} value={draft.badge} onChange={e => setDraft(d => ({ ...d, badge: e.target.value }))}
+                placeholder="مثلاً پرمیوم" /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label style={LABEL}>توضیح</label>
+              <input style={INPUT} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} /></div>
+          </div>
+          <button onClick={create} disabled={busy === 'new'} style={{ ...BTN, marginTop: 14 }}>
+            {busy === 'new' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساختِ پلن
+          </button>
+        </div>
+      )}
+
+      {groups.length === 0 ? (
+        <p style={{ fontSize: 13, color: MUT, margin: 0, textAlign: 'center', padding: 14 }}>هنوز پلنی تعریف نشده است.</p>
+      ) : groups.map(g => (
+        <div key={g.key || 'general'} style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 900, color: SEC, marginBottom: 8 }}>{g.title}</div>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {g.items.map(p => (
+              <PlanRow key={p.id} p={p} placements={placements} onChanged={onChanged} flash={flash} call={call} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  )
+}
+
 /* ── ردیفِ پلنِ قیمت ─────────────────────────────────────────── */
-function PlanRow({ p, onChanged, flash, call }: {
-  p: Plan; onChanged: () => Promise<void>; flash: (m: string) => void
+function PlanRow({ p, placements, onChanged, flash, call }: {
+  p: Plan; placements: Placement[]
+  onChanged: () => Promise<void>; flash: (m: string) => void
   call: (method: string, body?: Record<string, unknown>, query?: string) => Promise<Record<string, unknown> | null>
 }) {
   const [busy, setBusy] = useState(false)
   const [price, setPrice] = useState(String(p.price))
   const [qty, setQty] = useState(String(p.adQuantity))
   const [days, setDays] = useState(String(p.durationDays))
-  useEffect(() => { setPrice(String(p.price)); setQty(String(p.adQuantity)); setDays(String(p.durationDays)) }, [p.price, p.adQuantity, p.durationDays])
+  const [credit, setCredit] = useState(String(p.creditAmount))
+  useEffect(() => {
+    setPrice(String(p.price)); setQty(String(p.adQuantity))
+    setDays(String(p.durationDays)); setCredit(String(p.creditAmount))
+  }, [p.price, p.adQuantity, p.durationDays, p.creditAmount])
 
-  const changed = Number(price) !== p.price || Number(qty) !== p.adQuantity || Number(days) !== p.durationDays
+  const changed = Number(price) !== p.price || Number(qty) !== p.adQuantity
+    || Number(days) !== p.durationDays || Number(credit) !== p.creditAmount
 
   const save = async (body: Record<string, unknown>) => {
     setBusy(true)
     try { if (await call('PATCH', { planId: p.id, ...body })) { await onChanged(); flash('ذخیره شد') } }
     finally { setBusy(false) }
+  }
+
+  const remove = async () => {
+    if (!confirm(`پلنِ «${p.name}» حذف شود؟ اگر سفارشی داشته باشد فقط غیرفعال می‌شود.`)) return
+    setBusy(true)
+    try {
+      const r = await call('DELETE', undefined, `?plan=${p.id}`)
+      if (r) { await onChanged(); flash(r.deactivated ? 'سفارش داشت؛ غیرفعال شد' : 'پلن حذف شد') }
+    } finally { setBusy(false) }
   }
 
   return (
@@ -458,14 +692,25 @@ function PlanRow({ p, onChanged, flash, call }: {
         </div>
         <div style={{ fontSize: 11.5, color: MUT, marginTop: 4, lineHeight: 1.85 }}>
           {p.adQuantity === 0 ? 'طبق سهمیه‌ی نقش' : `${fa(p.adQuantity)} آگهی`} · اعتبار {fa(p.durationDays)} روز
+          {p.creditAmount > 0 ? ` · ${fa(p.creditAmount)} اعتبار` : ''}
           {p.description ? ` · ${p.description}` : ''}
         </div>
+        <div style={{ marginTop: 7, maxWidth: 260 }}>
+          <Select compact value={p.placementKey ?? ''} ariaLabel={`جایگاهِ ${p.name}`}
+            options={[{ value: '', label: 'بدونِ جایگاه (عمومی)' },
+              ...placements.map(x => ({ value: x.key, label: x.title }))]}
+            onChange={v => void save({ placementKey: v })} />
+        </div>
       </div>
-      <div style={{ width: 88 }}>
+      <div style={{ width: 84 }}>
         <label style={LABEL}>تعداد</label>
         <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(qty)} onChange={e => setQty(digits(e.target.value))} />
       </div>
-      <div style={{ width: 88 }}>
+      <div style={{ width: 84 }}>
+        <label style={LABEL}>اعتبار</label>
+        <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(credit)} onChange={e => setCredit(digits(e.target.value))} />
+      </div>
+      <div style={{ width: 84 }}>
         <label style={LABEL}>مدت</label>
         <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(days)} onChange={e => setDays(digits(e.target.value))} />
       </div>
@@ -474,7 +719,7 @@ function PlanRow({ p, onChanged, flash, call }: {
         <input style={INPUT} inputMode="numeric" value={price ? toFaDigits(Number(price).toLocaleString('en-US')) : '۰'}
           onChange={e => setPrice(digits(e.target.value))} />
       </div>
-      <button onClick={() => void save({ price: Number(price) || 0, adQuantity: Number(qty) || 0, durationDays: Number(days) || 30 })}
+      <button onClick={() => void save({ price: Number(price) || 0, adQuantity: Number(qty) || 0, durationDays: Number(days) || 30, creditAmount: Number(credit) || 0 })}
         disabled={busy || !changed}
         style={{ ...BTN, opacity: changed ? 1 : 0.45, cursor: changed ? 'pointer' : 'default' }}>
         {busy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} ذخیره
@@ -486,6 +731,10 @@ function PlanRow({ p, onChanged, flash, call }: {
         color: p.isActive ? SEC : FELT,
       }}>
         <Power size={14} /> {p.isActive ? 'غیرفعال کن' : 'فعال کن'}
+      </button>
+      <button onClick={() => void remove()} disabled={busy} title="حذف"
+        style={{ ...BTN, padding: '9px 11px', background: 'rgba(178,59,46,0.08)', borderColor: 'rgba(178,59,46,0.28)', color: RED }}>
+        <Trash2 size={13} />
       </button>
     </div>
   )

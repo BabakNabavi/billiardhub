@@ -43,17 +43,32 @@ export interface LiveCampaign {
   entity?: EntitySnapshot
 }
 
-interface PlacementPayload { contentKind: 'banner' | 'entity'; campaigns: LiveCampaign[] }
+interface PlacementPayload {
+  contentKind: 'banner' | 'entity'
+  /* ترتیبِ campaigns همان چرخشِ سرور است (فاز ۴) */
+  rotationMode?: 'fixed' | 'weighted' | 'fair' | 'random'
+  displayCount?: number
+  campaigns: LiveCampaign[]
+}
 
 /* یک fetch برای کلِ صفحه، صرف‌نظر از تعدادِ جایگاه‌ها.
    شکست کش نمی‌شود — وگرنه یک خطای گذرای شبکه، تبلیغات را تا reload
-   بعدی برای کلِ نشستِ SPA خاموش می‌کرد. */
+   بعدی برای کلِ نشستِ SPA خاموش می‌کرد.
+   کش عمرِ کوتاه دارد: چرخشِ عادلانه سمتِ سرور تصمیم‌گیری می‌شود، پس
+   کشِ همیشگی یعنی کاربری که ساعت‌ها در SPA می‌ماند تا آخر همان یک
+   ترتیب را می‌بیند و عدالتِ چرخش برایش اتفاق نمی‌افتد. */
+const CACHE_TTL = 90_000
 let cache: Promise<Record<string, PlacementPayload>> | null = null
+let cachedAt = 0
 function loadPlacements(): Promise<Record<string, PlacementPayload>> {
-  cache ??= fetch('/api/ads/placements', { cache: 'no-store' })
-    .then(r => (r.ok ? r.json() : Promise.reject(new Error('bad status'))))
-    .then(j => (j?.placements ?? {}) as Record<string, PlacementPayload>)
-    .catch(() => { cache = null; return {} as Record<string, PlacementPayload> })
+  if (cache && Date.now() - cachedAt > CACHE_TTL) cache = null
+  if (!cache) {
+    cachedAt = Date.now()
+    cache = fetch('/api/ads/placements', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('bad status'))))
+      .then(j => (j?.placements ?? {}) as Record<string, PlacementPayload>)
+      .catch(() => { cache = null; return {} as Record<string, PlacementPayload> })
+  }
   return cache
 }
 
@@ -94,10 +109,18 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
       if (!alive) return
       const payload = all[slot]
       const list = (payload?.campaigns ?? []).filter(c => c.banner?.imageUrl)
-      /* وزن = سهم در چرخش: کمپینِ وزن‌دار چند بار در حلقه می‌آید */
-      const rotation: LiveCampaign[] = []
-      for (const c of list) for (let i = 0; i < Math.min(5, Math.max(1, c.weight)); i++) rotation.push(c)
-      setBanners(list.length <= 1 ? list : rotation)
+      if (list.length <= 1) { setBanners(list); return }
+
+      /* از فاز ۴، چرخش سمتِ سرور تصمیم‌گیری می‌شود و ترتیبِ آرایه
+         همان است — کلاینت فقط در همان ترتیب می‌چرخد. تنها استثنا
+         حالتِ weighted است که سهمِ بیشتر یعنی حضورِ بیشتر در حلقه. */
+      if (payload?.rotationMode === 'weighted') {
+        const rotation: LiveCampaign[] = []
+        for (const c of list) for (let i = 0; i < Math.min(5, Math.max(1, c.weight)); i++) rotation.push(c)
+        setBanners(rotation)
+        return
+      }
+      setBanners(list)
     })
     return () => { alive = false }
   }, [slot])

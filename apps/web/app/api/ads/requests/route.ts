@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
-import { isPlacementKey, LEGACY_KEY_MAP } from '@/lib/ads/core';
+import { isPlacementKey, LEGACY_KEY_MAP, getPlacement } from '@/lib/ads/core';
 
 /* درخواستِ تبلیغ — فرمِ «تبلیغ در بیلیارد هاب».
    ورود لازم نیست؛ اگر کاربر وارد باشد، درخواست به حسابش گره می‌خورد. */
@@ -25,7 +25,15 @@ export async function POST(req: NextRequest) {
   /* کلیدِ قدیمی (کلاینتِ کش‌شده) به معادلِ تازه ترجمه می‌شود */
   const raw = String(b?.slotKey ?? '');
   const mapped = LEGACY_KEY_MAP[raw] ?? raw;
-  const slotKey = isPlacementKey(mapped) ? mapped : null;
+  let slotKey = isPlacementKey(mapped) ? mapped : null;
+
+  /* گیتِ Paid سمتِ سرور هم اعمال می‌شود: درخواست برای جایگاهی که ادمین
+     پولی‌اش نکرده، بدونِ جایگاه ثبت می‌شود (نه ردِ کاملِ فرم) تا متقاضی
+     از دست نرود ولی جایگاهِ غیرقابلِ‌فروش هم به پنل نرود. */
+  if (slotKey) {
+    const placement = await getPlacement(slotKey);
+    if (!placement || placement.mode !== 'paid') slotKey = null;
+  }
 
   const { error } = await sb().from('ad_requests').insert({
     user_id: actor?.id ?? null,

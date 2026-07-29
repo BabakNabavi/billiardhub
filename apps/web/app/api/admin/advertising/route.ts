@@ -4,9 +4,10 @@ import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 import {
   listPlacements, updatePlacement, getPlacement,
   listCampaigns, createCampaign, updateCampaign, deleteCampaign,
-  listPricingPlans, updatePricingPlan, createPricingPlan,
+  listPricingPlans, updatePricingPlan, createPricingPlan, deletePricingPlan,
   validateContent, isPlacementKey, isCampaignStatus, expireCampaigns,
-  type PlacementMode,
+  isRotationMode, adStats,
+  type PlacementMode, type RotationMode,
 } from '@/lib/ads/core';
 
 /* پنلِ ادمینِ سیستمِ تبلیغات (فاز ۲) — جایگاه‌ها، کمپین‌ها، پلن‌های
@@ -15,9 +16,19 @@ import {
    هر جایگاه مستقل است: is_active و mode جدا؛ هیچ کلیدِ سراسری‌ای
    خوانده یا نوشته نمی‌شود. */
 
+/* اعدادِ ورودی ممکن است فارسی باشند. علامتِ منفی عمداً حفظ می‌شود:
+   «اولویتِ ‎−۳» یعنی پایین‌ترین اولویت، نه ‎+۳. سقف هم لازم است چون
+   عددِ بزرگ‌تر از integerِ پستگرس، خطای ۵۰۰ می‌داد. */
+const MAX_INT = 2_000_000_000;
 const num = (v: unknown, d = 0) => {
-  const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
-  return Number.isFinite(n) ? n : d;
+  if (v !== null && typeof v === 'object') return d;          // آرایه/آبجکت عدد نیست
+  const raw = String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)));
+  const neg = /^\s*-/.test(raw);
+  const cleaned = raw.replace(/[^0-9.]/g, '');
+  if (!cleaned) return d;                                     // ورودیِ بی‌عدد ⇒ پیش‌فرض
+  const n = Number(cleaned);
+  if (!Number.isFinite(n)) return d;
+  return Math.max(-MAX_INT, Math.min(MAX_INT, neg ? -n : n));
 };
 const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
 
@@ -44,9 +55,12 @@ export async function GET(req: NextRequest) {
       sb().from('ad_requests').select('*').order('created_at', { ascending: false }).limit(200)
         .then(r => (r.error ? [] : (r.data ?? []))),
     ]);
-    return NextResponse.json({ placements, campaigns, plans, requests }, { headers: { 'Cache-Control': 'no-store' } });
+    /* آمار جداگانه و روی همه‌ی ردیف‌ها حساب می‌شود؛ فهرستِ بالا برای
+       نمایشِ پنل صفحه‌بندی شده و مبنای درستی برای KPI نیست. */
+    const stats = await adStats(placements);
+    return NextResponse.json({ placements, campaigns, plans, requests, stats }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
-    return NextResponse.json({ placements: [], campaigns: [], plans: [], requests: [] });
+    return NextResponse.json({ placements: [], campaigns: [], plans: [], requests: [], stats: null });
   }
 }
 
@@ -65,7 +79,8 @@ export async function POST(req: NextRequest) {
       name, description: str(b?.description, 400),
       placementKey: isPlacementKey(b?.placementKey) ? b.placementKey : null,
       price: num(b?.price), durationDays: num(b?.durationDays, 30),
-      adQuantity: num(b?.adQuantity), sortOrder: num(b?.sortOrder), badge: str(b?.badge, 40),
+      adQuantity: num(b?.adQuantity), creditAmount: num(b?.creditAmount),
+      sortOrder: num(b?.sortOrder), badge: str(b?.badge, 40),
     });
     if (!plan) return NextResponse.json({ message: 'ساختِ پلن انجام نشد' }, { status: 500 });
     void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'AD_PRICING_PLAN_CREATED', entityType: 'ad_pricing_plan', entityId: plan.id, newValue: { name, price: plan.price } });
@@ -129,6 +144,17 @@ export async function PATCH(req: NextRequest) {
     if (b.capacity !== undefined) patch.capacity = num(b.capacity);
     if (b.price !== undefined) patch.price = num(b.price);
     if (b.durationDays !== undefined) patch.durationDays = num(b.durationDays, 30);
+    /* کنترل‌های فاز ۴ — هر کدام مستقل */
+    if (b.displayCount !== undefined) patch.displayCount = num(b.displayCount);
+    if (b.rotationMode !== undefined) {
+      /* مقدارِ نرمال‌شده ذخیره می‌شود، نه ورودیِ خام: ['fair'] هم
+         String() را رد می‌کند ولی آرایه به ستونِ text نمی‌رود و ۵۰۰ می‌داد */
+      if (typeof b.rotationMode !== 'string' || !isRotationMode(b.rotationMode)) {
+        return NextResponse.json({ message: 'حالتِ چرخش نامعتبر است' }, { status: 400 });
+      }
+      patch.rotationMode = b.rotationMode as RotationMode;
+    }
+    if (b.priority !== undefined) patch.priority = num(b.priority);
 
     const placement = await updatePlacement(b.placementKey, patch);
     if (!placement) return NextResponse.json({ message: 'ویرایشِ جایگاه انجام نشد' }, { status: 500 });
@@ -144,9 +170,14 @@ export async function PATCH(req: NextRequest) {
     if (b.price !== undefined) patch.price = num(b.price);
     if (b.durationDays !== undefined) patch.durationDays = num(b.durationDays, 30);
     if (b.adQuantity !== undefined) patch.adQuantity = num(b.adQuantity);
+    if (b.creditAmount !== undefined) patch.creditAmount = num(b.creditAmount);
     if (b.isActive !== undefined) patch.isActive = !!b.isActive;
     if (b.sortOrder !== undefined) patch.sortOrder = num(b.sortOrder);
     if (b.badge !== undefined) patch.badge = str(b.badge, 40);
+    /* جابه‌جاییِ پلن بینِ جایگاه‌ها — رشته‌ی خالی یعنی پلنِ عمومی */
+    if (b.placementKey !== undefined) {
+      patch.placementKey = isPlacementKey(b.placementKey) ? String(b.placementKey) : null;
+    }
 
     const plan = await updatePricingPlan(str(b.planId, 60), patch);
     if (!plan) return NextResponse.json({ message: 'ویرایشِ پلن انجام نشد' }, { status: 500 });
@@ -188,11 +219,24 @@ export async function DELETE(req: NextRequest) {
     return error ? NextResponse.json({ message: 'انجام نشد' }, { status: 500 }) : NextResponse.json({ ok: true });
   }
 
-  /* پلن حذف نمی‌شود — فقط غیرفعال (سفارش‌ها به آن ارجاع خواهند داشت) */
+  /* پلن: اگر سفارشی به آن ارجاع دارد فقط غیرفعال می‌شود، وگرنه واقعاً
+     حذف. با ?mode=disable همیشه فقط غیرفعال می‌شود. */
   const planId = sp.get('plan') ?? '';
   if (planId) {
-    const plan = await updatePricingPlan(planId, { isActive: false });
-    return plan ? NextResponse.json({ ok: true }) : NextResponse.json({ message: 'انجام نشد' }, { status: 500 });
+    if (sp.get('mode') === 'disable') {
+      const plan = await updatePricingPlan(planId, { isActive: false });
+      if (!plan) return NextResponse.json({ message: 'انجام نشد' }, { status: 500 });
+      void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'AD_PRICING_PLAN_DISABLED', entityType: 'ad_pricing_plan', entityId: planId });
+      return NextResponse.json({ ok: true, deactivated: true });
+    }
+    const res = await deletePricingPlan(planId);
+    if (!res.ok) return NextResponse.json({ message: res.message ?? 'انجام نشد' }, { status: 500 });
+    void audit({
+      actorId: g.actor!.id, actorRole: g.actor!.role,
+      action: res.deactivated ? 'AD_PRICING_PLAN_DISABLED' : 'AD_PRICING_PLAN_DELETED',
+      entityType: 'ad_pricing_plan', entityId: planId,
+    });
+    return NextResponse.json(res);
   }
 
   return NextResponse.json({ message: 'شناسه لازم است' }, { status: 400 });

@@ -19,7 +19,9 @@ export async function GET(req: NextRequest) {
 
   if (sp.get('catalog') === '1') {
     try {
-      const all = (await listPlacements()).filter(p => p.contentKind === 'banner');
+      /* همان گیتِ فاز ۴ که در مسیرِ جدید هست: فقط جایگاهِ «پولی» قابلِ
+         خرید است. بدونِ این شرط، کلاینتِ قدیمی راهِ دورزدنِ گیت می‌شد. */
+      const all = (await listPlacements()).filter(p => p.contentKind === 'banner' && p.mode === 'paid');
       return NextResponse.json({
         slots: all.map(p => ({
           key: NEW_TO_LEGACY[p.key] ?? p.key, title: p.title, description: p.description,

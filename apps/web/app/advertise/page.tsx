@@ -33,7 +33,8 @@ const LABEL: React.CSSProperties = {
   fontSize: 12.5, fontWeight: 800, color: SEC, marginBottom: 6,
 }
 
-interface Slot { key: string; title: string; description: string | null }
+interface PlanTier { id: string; name: string; price: number; durationDays: number; badge: string | null }
+interface Slot { key: string; title: string; description: string | null; plans?: PlanTier[] }
 
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 const digits = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '')
@@ -51,9 +52,11 @@ export default function AdvertisePage() {
   const locked = !!user
 
   useEffect(() => {
+    /* کاتالوگ از سرور فقط جایگاه‌های «پولی» را برمی‌گرداند — جایگاهی که
+       ادمین پولی‌اش نکرده اصلاً گزینه‌ی خرید ندارد (گیتِ فاز ۴). */
     void fetch('/api/ads/placements?catalog=1', { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
-      .then(j => setSlots((j?.placements ?? []).filter((p: { mode?: string }) => p.mode === 'paid')))
+      .then(j => setSlots(j?.placements ?? []))
       .catch(() => { })
   }, [])
 
@@ -162,15 +165,51 @@ export default function AdvertisePage() {
 
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={LABEL}>جایگاهِ موردِ نظر</label>
+              {slots.length === 0 ? (
+                /* هیچ جایگاهی روی حالتِ «پولی» نیست ⇒ کشوی خالی بن‌بست است؛
+                   به‌جایش توضیح می‌دهیم که درخواست همچنان ثبت می‌شود. */
+                <p style={{
+                  fontSize: 12, color: MUT, lineHeight: 1.95, margin: 0,
+                  border: `1px dashed ${LINE}`, borderRadius: 12, padding: '11px 14px',
+                }}>
+                  در حال حاضر جایگاهِ آماده‌ی فروشی روی سایت تعریف نشده است. درخواستتان را ثبت کنید؛
+                  به‌محضِ فعال‌شدنِ جایگاه‌ها، تعرفه‌ها برای شما فرستاده می‌شود.
+                </p>
+              ) : (
               <Select
                 value={form.slotKey} ariaLabel="جایگاه تبلیغ"
                 options={slots.map(s => ({ value: s.key, label: s.title }))}
                 onChange={v => set('slotKey', v)} />
-              {form.slotKey && (
-                <p style={{ fontSize: 11.5, color: MUT, margin: '7px 0 0', lineHeight: 1.9 }}>
-                  {slots.find(s => s.key === form.slotKey)?.description}
-                </p>
               )}
+              {form.slotKey && (() => {
+                const s = slots.find(x => x.key === form.slotKey)
+                const tiers = s?.plans ?? []
+                return (
+                  <>
+                    {s?.description && (
+                      <p style={{ fontSize: 11.5, color: MUT, margin: '7px 0 0', lineHeight: 1.9 }}>{s.description}</p>
+                    )}
+                    {tiers.length > 0 && (
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                        {tiers.map(t => (
+                          <div key={t.id} style={{
+                            border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.08)',
+                            borderRadius: 12, padding: '9px 13px', minWidth: 128,
+                          }}>
+                            <div style={{ fontSize: 11.5, fontWeight: 800, color: '#5B564B' }}>
+                              {toFa(String(t.durationDays))} روزه
+                              {t.badge ? <span style={{ color: '#9A6E38' }}> · {t.badge}</span> : ''}
+                            </div>
+                            <div style={{ fontSize: 13.5, fontWeight: 900, color: '#9A6E38', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+                              {toFa(t.price.toLocaleString('en-US'))} تومان
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </div>
 
             <div style={{ gridColumn: '1 / -1' }}><label style={LABEL}>توضیح</label>

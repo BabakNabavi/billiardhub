@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  livePlacements, trackCampaign, listPlacements, expireCampaigns,
+  livePlacements, trackCampaign, listPlacements, expireCampaigns, listPricingPlans,
   isPlacementKey, LEGACY_KEY_MAP, type EntityType,
 } from '@/lib/ads/core';
 import { resolveEntities, type EntitySnapshot } from '@/lib/ads/resolve';
@@ -14,6 +14,9 @@ import { resolveEntities, type EntitySnapshot } from '@/lib/ads/resolve';
 
 interface LiveOut {
   contentKind: 'banner' | 'entity';
+  /* ترتیبِ آرایه همان چرخشِ سرور است؛ کلاینت نباید دوباره مرتبش کند */
+  rotationMode: 'fixed' | 'weighted' | 'fair' | 'random';
+  displayCount: number;
   campaigns: {
     id: string; title: string; advertiser: string; weight: number;
     banner?: { imageUrl: string; linkUrl: string };
@@ -27,14 +30,24 @@ export async function GET(req: NextRequest) {
   const key = rawKey ? (LEGACY_KEY_MAP[rawKey] ?? rawKey) : undefined;
   if (key && !isPlacementKey(key)) return NextResponse.json({ placements: {} });
 
-  /* فهرستِ جایگاه‌ها با تعرفه — برای فرمِ درخواستِ تبلیغ */
+  /* کاتالوگِ خرید — فقط جایگاه‌هایی که ادمین روی «پولی» گذاشته است.
+     گیتِ فاز ۴: جایگاهِ رایگان/دستی اصلاً در فهرستِ خرید دیده نمی‌شود، و
+     پولی‌شدنِ یک جایگاه هیچ جایگاهِ دیگری را قابلِ خرید نمی‌کند. */
   if (sp.get('catalog') === '1') {
     try {
-      const all = (await listPlacements()).filter(p => p.isActive || p.mode === 'paid');
+      const paid = (await listPlacements()).filter(p => p.mode === 'paid');
+      const plans = paid.length ? await listPricingPlans(true) : [];
       return NextResponse.json({
-        placements: all.map(p => ({
+        placements: paid.map(p => ({
           key: p.key, title: p.title, description: p.description,
           mode: p.mode, price: p.price, durationDays: p.durationDays, isActive: p.isActive,
+          /* پله‌های مدت/قیمتِ همان جایگاه — از دیتابیس، نه هاردکد */
+          plans: plans
+            .filter(pl => pl.placementKey === p.key)
+            .map(pl => ({
+              id: pl.id, name: pl.name, description: pl.description,
+              price: pl.price, durationDays: pl.durationDays, badge: pl.badge,
+            })),
         })),
       }, { headers: { 'Cache-Control': 'no-store' } });
     } catch {
@@ -53,7 +66,12 @@ export async function GET(req: NextRequest) {
     const out: Record<string, LiveOut> = {};
 
     for (const [k, v] of Object.entries(live)) {
-      const item: LiveOut = { contentKind: v.placement.contentKind, campaigns: [] };
+      const item: LiveOut = {
+        contentKind: v.placement.contentKind,
+        rotationMode: v.placement.rotationMode,
+        displayCount: v.placement.displayCount,
+        campaigns: [],
+      };
 
       if (v.placement.contentKind === 'banner') {
         for (const c of v.campaigns) {
