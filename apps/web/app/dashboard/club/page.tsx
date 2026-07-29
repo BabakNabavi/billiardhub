@@ -281,6 +281,46 @@ function SaveBtn({ onClick, loading, label = 'ذخیره تغییرات' }: {
 
 type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'finance' | 'live' | 'tournaments' | 'gallery' | 'coaches';
 
+/* ردیفِ مسابقه در دیتابیس (snake_case) — جدولِ tournaments، مهاجرتِ ۰۲۶ */
+interface DbTournament {
+  id: string; club_id: string; title: string; description?: string | null;
+  discipline?: string; max_players: number; entry_fee: number;
+  prize?: string | null; venue?: string | null; city?: string | null;
+  starts_at?: string | null; registration_ends_at?: string | null;
+  status: string; seatsLeft?: number;
+}
+
+/* نگاشتِ وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
+const T_STATUS: Record<string, Tournament['status']> = {
+  draft: 'upcoming', published: 'upcoming',
+  registration_open: 'registration_open',
+  registration_closed: 'bracket_ready',
+  ongoing: 'live',
+  completed: 'finished', cancelled: 'finished',
+};
+
+function fromDbTournament(r: DbTournament): Tournament {
+  const starts = r.starts_at ? new Date(r.starts_at) : null;
+  return {
+    id: r.id,
+    clubId: r.club_id, clubName: r.venue ?? '',
+    banner: '/images/clubs/club1.png',
+    name: r.title, description: r.description ?? '',
+    gameType: (r.discipline ?? 'snooker') as Tournament['gameType'],
+    date: starts ? starts.toISOString().slice(0, 10) : '',
+    startTime: starts ? starts.toISOString().slice(11, 16) : '',
+    registrationDeadline: r.registration_ends_at ?? '',
+    maxPlayers: (r.max_players as Tournament['maxPlayers']),
+    entryFee: r.entry_fee,
+    prizeInfo: r.prize ?? '', rules: '', matchFormat: '',
+    paymentMethod: 'online',
+    cardNumber: '', cardHolder: '', bankName: '',
+    status: T_STATUS[r.status] ?? 'upcoming',
+    /* ظرفیتِ پرشده از سرور می‌آید — شمارشِ محلی قابلِ اتکا نیست */
+    registeredCount: Math.max(0, r.max_players - (r.seatsLeft ?? r.max_players)),
+  } as Tournament;
+}
+
 export default function ClubDashboardPage() {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
@@ -562,11 +602,15 @@ export default function ClubDashboardPage() {
       .then(j => { if (j) setCloseToday(!!j.closeTodayReservations); })
       .catch(() => { /* بی‌صدا */ });
 
-    // مسابقاتِ ساخته‌شده — قبلاً فقط در state بودند و با رفرش می‌پریدند
+    /* مسابقات از سرور می‌آیند. کشِ محلی به‌عنوان نمایشِ اولیه می‌ماند
+       تا صفحه لحظه‌ی اول خالی نباشد، ولی بلافاصله با دادهٔ سرور
+       جایگزین می‌شود — پیش‌تر تنها منبع همین localStorage بود، یعنی
+       مسابقه‌ای که روی یک دستگاه ساخته می‌شد جای دیگر وجود نداشت. */
     try {
       const t = localStorage.getItem(`club-tournaments-${selectedClub.id}`);
       setMyTournaments(t ? JSON.parse(t) : []);
     } catch { setMyTournaments([]); }
+    void loadTournaments(selectedClub.id);
 
     api.get(`/bookings/club/${selectedClub.id}`)
       .then(r => setBookings(r.data))
@@ -811,7 +855,32 @@ export default function ClubDashboardPage() {
     finally { setHoursSaving(false); }
   };
 
-  const deleteTournament = (id: string) => {
+  /* بارگذاریِ مسابقات از سرور — منبعِ حقیقت دیگر localStorage نیست.
+     مسابقه‌های محلیِ قدیمی (شناسه‌ی `t_…`) تا وقتی هستند نمایش داده
+     می‌شوند ولی چیزِ تازه‌ای آن‌جا نوشته نمی‌شود. */
+  const loadTournaments = useCallback(async (clubId: string) => {
+    try {
+      const r = await apiFetch(`/api/tournaments?mine=1&clubId=${clubId}`, { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json().catch(() => null) as { tournaments?: DbTournament[] } | null;
+      const rows = j?.tournaments ?? [];
+      setMyTournaments(rows.map(fromDbTournament));
+    } catch { /* کشِ محلی می‌ماند */ }
+  }, []);
+
+  const deleteTournament = async (id: string) => {
+    /* مسابقه‌ی سرور فقط لغو می‌شود، نه حذف — سابقه‌ی مالی و ثبت‌نام‌ها
+       باید بماند. رکوردِ محلیِ قدیمی همان‌جا پاک می‌شود. */
+    if (/^[0-9a-f-]{36}$/i.test(id)) {
+      try {
+        await apiFetch(`/api/tournaments/${id}/status`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'cancelled' }),
+        });
+      } catch { /* بی‌صدا */ }
+      if (selectedClub) await loadTournaments(selectedClub.id);
+      return;
+    }
     setMyTournaments(ts => {
       const next = ts.filter(t => t.id !== id);
       try { localStorage.setItem(lsKey('tournaments'), JSON.stringify(next)); } catch {}
@@ -826,25 +895,32 @@ export default function ClubDashboardPage() {
     if (!tForm.startTime) { alert('ساعت شروع الزامی است'); return; }
     setTLoading(true);
     try {
-      const newT: Tournament = {
-        id: `t_${uid()}`,
-        clubId: selectedClub.id, clubName: selectedClub.name,
-        banner: '/images/clubs/club1.png',
-        name: tForm.name, description: tForm.description,
-        gameType: tForm.gameType, date: tForm.date, startTime: tForm.startTime,
-        registrationDeadline: tForm.registrationDeadline,
-        maxPlayers: parseInt(tForm.maxPlayers) as 8 | 16 | 32 | 64,
-        entryFee: parseFloat(tForm.entryFee) || 0,
-        prizeInfo: tForm.prizeInfo, rules: tForm.rules, matchFormat: tForm.matchFormat,
-        paymentMethod: tForm.paymentMethod,
-        cardNumber: tForm.cardNumber, cardHolder: tForm.cardHolder, bankName: tForm.bankName,
-        status: 'upcoming', registeredCount: 0,
-      };
-      setMyTournaments(ts => {
-        const next = [newT, ...ts];
-        try { localStorage.setItem(lsKey('tournaments'), JSON.stringify(next)); } catch {}
-        return next;
+      /* روی سرور ساخته می‌شود؛ مالکیتِ باشگاه آن‌جا از دیتابیس اثبات
+         می‌شود، نه از clubId که این‌جا می‌فرستیم.
+
+         شماره‌ی کارت عمداً فرستاده نمی‌شود: حسابِ تسویه از پروفایلِ
+         تأییدشده‌ی باشگاه می‌آید، نه از فرمِ هر مسابقه. */
+      const r = await apiFetch('/api/tournaments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clubId: selectedClub.id,
+          title: tForm.name,
+          description: tForm.description,
+          discipline: tForm.gameType,
+          maxPlayers: parseInt(tForm.maxPlayers) || 16,
+          entryFee: parseFloat(tForm.entryFee) || 0,
+          prize: tForm.prizeInfo,
+          venue: selectedClub.name,
+          city: (selectedClub as { city?: string }).city ?? '',
+          startsAt: tForm.date ? `${tForm.date}T${tForm.startTime || '00:00'}:00+03:30` : null,
+          /* پیش‌نویس ساخته می‌شود؛ باز کردنِ ثبت‌نام یک اقدامِ جداست */
+          status: 'draft',
+        }),
       });
+      const j = await r.json().catch(() => ({} as Record<string, unknown>));
+      if (!r.ok) { alert(String(j.message ?? 'ثبتِ مسابقه انجام نشد')); return; }
+
+      await loadTournaments(selectedClub.id);
       setTournamentTab('list');
       setTForm({
         name: '', description: '', gameType: 'snooker', date: '', startTime: '',
