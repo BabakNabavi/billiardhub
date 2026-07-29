@@ -10,6 +10,7 @@ import {
 } from '../../../../lib/mock-tournaments';
 import { useAuthStore } from '../../../../store/auth.store';
 import Link from 'next/link';
+import { apiFetch } from '../../../../lib/http';
 
 type Step = 'confirm' | 'pay-loading' | 'receipt';
 
@@ -48,8 +49,9 @@ export default function RegisterPage() {
   const [step, setStep]           = useState<Step>('confirm');
   const [showAlert, setAlert]     = useState(false);
   const [alreadyReg, setAlreadyReg] = useState(false);
-  /* پرداختِ آنلاین هنوز فعال نیست — پیامِ صادقانه به‌جای رسیدِ ساختگی */
-  const [payUnavailable, setPayUnavailable] = useState(false);
+  /* پیامِ سرور وقتی پرداخت ممکن نیست — به‌جای رسیدِ ساختگی */
+  const [payUnavailable, setPayUnavailable] = useState('');
+  const [busy, setBusy] = useState(false);
   const [receiptDate]             = useState(nowShamsi);
 
   const [trackingCode] = useState(
@@ -88,17 +90,43 @@ export default function RegisterPage() {
     } catch {}
   }, [step, id, userName, trackingCode, receiptDate, user?.phone]);
 
-  /* ⚠ پرداختِ آنلاینِ ثبت‌نام هنوز فعال نیست.
+  /* ثبت‌نام از راهِ سرور.
 
-     نسخه‌ی قبلیِ این تابع «در حال اتصال به درگاه…» نشان می‌داد، ۲.۴
-     ثانیه صبر می‌کرد و بعد رسید با کدِ پیگیری صادر می‌کرد — بدونِ هیچ
-     درگاه، سفارش، مبلغ یا تراکنشی. کاربر باور می‌کرد پول داده و رسید
-     دارد. تا وقتی درگاهِ واقعی و ماژولِ سفارش آماده شود، این مسیر
-     صادقانه بسته است. */
-  const handlePay = () => {
+     نسخه‌ی قبلی «در حال اتصال به درگاه…» نشان می‌داد، ۲.۴ ثانیه صبر
+     می‌کرد و بعد رسیدِ ساختگی می‌ساخت. حالا سفارشِ واقعی در دیتابیس
+     ساخته می‌شود، مبلغ **سمتِ سرور** از خودِ مسابقه خوانده می‌شود، و
+     تنها اگر درگاهِ واقعی پیکربندی شده باشد به آن منتقل می‌شویم.
+
+     تا فعال‌شدنِ درگاه، سرور ۵۰۳ می‌دهد و ما همان را صادقانه نشان
+     می‌دهیم — نه رسید. */
+  const handlePay = async () => {
     if (!isLoggedIn) { setAlert(true); return; }
-    setAlert(false);
-    setPayUnavailable(true);
+    setAlert(false); setPayUnavailable(''); setBusy(true);
+    try {
+      const r = await apiFetch(`/api/tournaments/${id}/register`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),   // مبلغ عمداً فرستاده نمی‌شود
+      });
+      const j = await r.json().catch(() => ({} as Record<string, unknown>));
+
+      if (r.status === 401) { setAlert(true); return; }
+      if (r.status === 409) { setAlreadyReg(true); return; }
+
+      /* درگاه هنوز فعال نیست — سفارش ساخته شد ولی پرداختی در کار نیست */
+      if (r.status === 503 || j.pendingPayment) {
+        setPayUnavailable(String(j.message ?? 'پرداخت آنلاین هنوز فعال نشده است'));
+        return;
+      }
+      if (!r.ok) { setPayUnavailable(String(j.message ?? 'ثبت‌نام انجام نشد')); return; }
+
+      /* مسابقه‌ی رایگان ⇒ همان‌جا قطعی شد */
+      if (j.free) { setStep('receipt'); return; }
+
+      if (typeof j.redirectUrl === 'string') { window.location.href = j.redirectUrl; return; }
+      setPayUnavailable('اتصال به درگاه انجام نشد');
+    } catch {
+      setPayUnavailable('خطا در ارتباط با سرور');
+    } finally { setBusy(false); }
   };
 
   const downloadReceipt = () => {
@@ -471,11 +499,10 @@ export default function RegisterPage() {
             <AlertCircle size={18} color="#9A6E38" style={{ flexShrink: 0, marginTop: 2 }} />
             <div>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 4 }}>
-                پرداخت آنلاین هنوز فعال نشده است
+                فعلاً امکان پرداخت آنلاین نیست
               </div>
               <div style={{ fontSize: 14, color: '#777', lineHeight: 1.9 }}>
-                ثبت‌نام و پرداختِ ورودیِ مسابقات به‌زودی از راهِ درگاهِ بانکی فعال می‌شود.
-                فعلاً برای ثبت‌نام مستقیماً با باشگاهِ برگزارکننده تماس بگیرید.
+                {payUnavailable}
               </div>
             </div>
           </div>
