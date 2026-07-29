@@ -36,6 +36,10 @@ const CSRF_EXEMPT = [
   '/api/ads/campaigns/callback',
   '/api/ads/plans/callback',
   '/api/stories/plans/callback',
+  /* بازگشتِ درگاه برای ثبت‌نامِ مسابقه — همان دلیل: درگاه کوکیِ CSRFِ
+     ما را ندارد. امنیت از راهِ verifyِ سرورساید و تطبیقِ authority
+     می‌آید، نه از توکن. */
+  '/api/tournaments/callback',
   /* بیکنِ شمارشِ تبلیغات: sendBeacon نمی‌تواند هدرِ x-csrf-token بگذارد و
      برای کاربرِ واردشده ۴۰۳ می‌شد؛ فقط شمارنده را زیاد می‌کند و بررسیِ
      Origin همچنان اعمال می‌شود. */

@@ -1,4 +1,7 @@
 export const dynamic = 'force-dynamic';
+/* این کران علاوه بر رزروها، سفارش‌های نیمه‌کاره‌ی ثبت‌نامِ مسابقه را هم
+   منقضی می‌کند: کاربری که به درگاه رفت و برنگشت نباید ظرفیت را برای
+   همیشه اشغال کند. عملیات Idempotent است. */
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc, audit } from '@/lib/finance/db';
 
@@ -28,5 +31,21 @@ export async function GET(req: NextRequest) {
   const freed = Number(data) || 0;
   if (freed > 0) audit({ actorRole: 'system', action: 'BOOKINGS_EXPIRED', newValue: { freedSlots: freed } });
 
-  return NextResponse.json({ ok: true, freedSlots: freed }, { headers: { 'Cache-Control': 'no-store' } });
+  /* سفارش‌های نیمه‌کاره‌ی ثبت‌نامِ مسابقه — کاربری که به درگاه رفت و
+     برنگشت نباید ظرفیت را برای همیشه نگه دارد. */
+  let expiredRegs = 0;
+  try {
+    const { data: n } = await rpc<number>('bh_tournament_expire_pending', { p_minutes: 30 });
+    expiredRegs = Number(n) || 0;
+    if (expiredRegs > 0) {
+      audit({ actorRole: 'system', action: 'TOURNAMENT_REGS_EXPIRED', newValue: { count: expiredRegs } });
+    }
+  } catch (e) {
+    console.error('[cron] tournament expire failed:', e);
+  }
+
+  return NextResponse.json(
+    { ok: true, freedSlots: freed, expiredRegistrations: expiredRegs },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 }

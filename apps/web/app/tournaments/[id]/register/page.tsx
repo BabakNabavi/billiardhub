@@ -48,6 +48,8 @@ export default function RegisterPage() {
   const [step, setStep]           = useState<Step>('confirm');
   const [showAlert, setAlert]     = useState(false);
   const [alreadyReg, setAlreadyReg] = useState(false);
+  /* پرداختِ آنلاین هنوز فعال نیست — پیامِ صادقانه به‌جای رسیدِ ساختگی */
+  const [payUnavailable, setPayUnavailable] = useState(false);
   const [receiptDate]             = useState(nowShamsi);
 
   const [trackingCode] = useState(
@@ -86,15 +88,17 @@ export default function RegisterPage() {
     } catch {}
   }, [step, id, userName, trackingCode, receiptDate, user?.phone]);
 
+  /* ⚠ پرداختِ آنلاینِ ثبت‌نام هنوز فعال نیست.
+
+     نسخه‌ی قبلیِ این تابع «در حال اتصال به درگاه…» نشان می‌داد، ۲.۴
+     ثانیه صبر می‌کرد و بعد رسید با کدِ پیگیری صادر می‌کرد — بدونِ هیچ
+     درگاه، سفارش، مبلغ یا تراکنشی. کاربر باور می‌کرد پول داده و رسید
+     دارد. تا وقتی درگاهِ واقعی و ماژولِ سفارش آماده شود، این مسیر
+     صادقانه بسته است. */
   const handlePay = () => {
     if (!isLoggedIn) { setAlert(true); return; }
-    try {
-      const existing = JSON.parse(localStorage.getItem(`tournament-regs-${id}`) ?? '[]') as Array<{ phone?: string }>;
-      if (existing.some(r => r.phone === user?.phone)) { setAlreadyReg(true); return; }
-    } catch {}
     setAlert(false);
-    setStep('pay-loading');
-    setTimeout(() => setStep('receipt'), 2400);
+    setPayUnavailable(true);
   };
 
   const downloadReceipt = () => {
@@ -456,6 +460,26 @@ export default function RegisterPage() {
       fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
       <Header />
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '24px clamp(16px,4vw,32px)' }}>
+
+        {/* پرداختِ آنلاین هنوز فعال نیست */}
+        {payUnavailable && (
+          <div style={{
+            background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.28)',
+            borderRadius: 16, padding: '18px', marginBottom: 16,
+            display: 'flex', alignItems: 'flex-start', gap: 12,
+          }}>
+            <AlertCircle size={18} color="#9A6E38" style={{ flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 4 }}>
+                پرداخت آنلاین هنوز فعال نشده است
+              </div>
+              <div style={{ fontSize: 14, color: '#777', lineHeight: 1.9 }}>
+                ثبت‌نام و پرداختِ ورودیِ مسابقات به‌زودی از راهِ درگاهِ بانکی فعال می‌شود.
+                فعلاً برای ثبت‌نام مستقیماً با باشگاهِ برگزارکننده تماس بگیرید.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Not-logged-in alert */}
         {showAlert && (
