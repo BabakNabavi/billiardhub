@@ -45,7 +45,7 @@ export interface LiveCampaign {
   entity?: EntitySnapshot
 }
 
-interface PlacementPayload {
+export interface PlacementPayload {
   contentKind: 'banner' | 'entity'
   /* ترتیبِ campaigns همان چرخشِ سرور است (فاز ۴) */
   rotationMode?: 'fixed' | 'weighted' | 'fair' | 'random'
@@ -107,16 +107,31 @@ export interface PlacementState {
  * پاسخ یعنی «غیرفعال». تفکیکِ این حالت از «فعال ولی خالی» لازم است:
  * اولی باید کلِ سکشن را حذف کند، دومی فقط محتوا ندارد.
  */
-export function usePlacementState(key: PlacementKey): PlacementState {
-  const [state, setState] = useState<PlacementState>({ status: 'loading', items: null, mode: null })
+/** تبدیلِ payloadِ خام به وضعیتِ جایگاه — مشترکِ سرور و کلاینت */
+export function toPlacementState(payload: PlacementPayload | undefined): PlacementState {
+  return payload
+    ? { status: 'on', items: payload.campaigns ?? [], mode: payload.mode ?? null, displayCount: payload.displayCount }
+    : { status: 'off', items: [], mode: null }
+}
+
+/* `initial` از سرور می‌آید.
+
+   بدونِ آن، سه سکشنِ اصلیِ صفحه (محصولاتِ ویژه، باشگاه‌های پیشنهادی،
+   فروشگاه‌های تجهیزات) در HTMLِ اولیه خالی بودند و فقط بعد از اجرای
+   جاوااسکریپت پر می‌شدند — یعنی خزنده‌ها محتوایی نمی‌دیدند و کاربر هم
+   یک پرشِ چیدمان تجربه می‌کرد.
+
+   با مقدارِ اولیه، همان داده در رندرِ سرور هست و کلاینت فقط در صورتِ
+   تازه‌شدن به‌روزش می‌کند. */
+export function usePlacementState(key: PlacementKey, initial?: PlacementState): PlacementState {
+  const [state, setState] = useState<PlacementState>(
+    initial ?? { status: 'loading', items: null, mode: null },
+  )
   useEffect(() => {
     let alive = true
     void loadPlacements().then(all => {
       if (!alive) return
-      const payload = all[key]
-      setState(payload
-        ? { status: 'on', items: payload.campaigns ?? [], mode: payload.mode ?? null, displayCount: payload.displayCount }
-        : { status: 'off', items: [], mode: null })
+      setState(toPlacementState(all[key]))
     })
     return () => { alive = false }
   }, [key])
