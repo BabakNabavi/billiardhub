@@ -78,17 +78,17 @@ export async function GET(req: NextRequest) {
       };
 
       /* ── حالتِ رایگان: محتوا از داده‌ی واقعیِ سایت، نه کمپین ──
-         (جایگاهِ بنری در حالتِ رایگان محتوایی ندارد و خالی می‌ماند) */
-      if (v.placement.mode === 'free') {
-        if (v.placement.contentKind === 'entity') {
-          const snaps = await freeContent(
-            (v.placement.entityType ?? 'product') as EntityType,
-            v.placement.displayCount,
-          );
-          item.campaigns = snaps.map(e => ({
-            id: `free:${e.ref}`, title: e.title, advertiser: '', weight: 1, entity: e,
-          }));
-        }
+         فقط برای جایگاهِ موجودیتی معنا دارد. جایگاهِ بنری «محتوای
+         رایگان» ندارد، پس اگر ادمین اشتباهاً رویش free گذاشت، به‌جای
+         خالی‌کردنِ بی‌صدای بنرِ فروخته‌شده، همان کمپین‌ها سرو می‌شوند. */
+      if (v.placement.mode === 'free' && v.placement.contentKind === 'entity') {
+        const snaps = await freeContent(
+          (v.placement.entityType ?? 'product') as EntityType,
+          v.placement.displayCount,
+        );
+        item.campaigns = snaps.map(e => ({
+          id: `free:${e.ref}`, title: e.title, advertiser: '', weight: 1, entity: e,
+        }));
         out[k] = item;
         continue;
       }

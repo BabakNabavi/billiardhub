@@ -33,7 +33,7 @@ export interface EntitySnapshot {
   city?: string
   badge?: string | null
   /** آمارِ واقعیِ موجودیت (مثلاً تعدادِ میزِ باشگاه)؛ نبودنش = نداریم */
-  stats?: { tables?: number }
+  stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }
 
 export interface LiveCampaign {
@@ -96,6 +96,8 @@ export interface PlacementState {
   status: PlacementStatus
   items: LiveCampaign[] | null
   mode: 'free' | 'manual' | 'paid' | null
+  /** چند آیتم قرار است دیده شود (۰ یعنی ادمین عمداً هیچ خواسته) */
+  displayCount?: number
 }
 
 /**
@@ -113,7 +115,7 @@ export function usePlacementState(key: PlacementKey): PlacementState {
       if (!alive) return
       const payload = all[key]
       setState(payload
-        ? { status: 'on', items: payload.campaigns ?? [], mode: payload.mode ?? null }
+        ? { status: 'on', items: payload.campaigns ?? [], mode: payload.mode ?? null, displayCount: payload.displayCount }
         : { status: 'off', items: [], mode: null })
     })
     return () => { alive = false }

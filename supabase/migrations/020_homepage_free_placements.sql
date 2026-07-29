@@ -25,3 +25,11 @@ UPDATE public.placements
 INSERT INTO public.app_settings (key, value)
 VALUES ('mig_020_data_done', 'true'::jsonb)
 ON CONFLICT (key) DO NOTHING;
+
+-- توضیحِ جایگاهِ بنرِ پایین می‌گفت «در همه‌ی صفحات» چون قبلاً در layout
+-- بود. حالا فقط پایینِ صفحه‌ی اصلی است و متنِ فروشش هم باید همین را
+-- بگوید (این UPDATE ذاتاً ایدمپوتنت است و مارکر نمی‌خواهد).
+UPDATE public.placements
+   SET description = 'بنرِ عریضِ انتهای صفحه‌ی اصلی، بالای فوتر'
+ WHERE key = 'homepage_bottom_banner'
+   AND description IS DISTINCT FROM 'بنرِ عریضِ انتهای صفحه‌ی اصلی، بالای فوتر';

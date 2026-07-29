@@ -260,9 +260,12 @@ const NEWS = [
 function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[0]; h?: string; featured?: boolean }) {
   const [hov, setHov]       = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-  const snookerTables = Math.floor(club.tables * 0.5);
-  const pocketTables  = Math.floor(club.tables * 0.3);
-  const hiballTables  = club.tables - snookerTables - pocketTables;
+  /* تفکیکِ واقعی اگر باشگاه اعلامش کرده باشد؛ وگرنه (کارت‌های نمونه)
+     همان تقسیمِ تقریبیِ قبلی. جعلِ عدد برای باشگاهِ واقعی ممنوع است. */
+  const brk = (club as { breakdown?: { snooker: number; pocket: number; highball: number } }).breakdown;
+  const snookerTables = brk ? brk.snooker : Math.floor(club.tables * 0.5);
+  const pocketTables  = brk ? brk.pocket  : Math.floor(club.tables * 0.3);
+  const hiballTables  = brk ? brk.highball : club.tables - Math.floor(club.tables * 0.5) - Math.floor(club.tables * 0.3);
   const rad = featured ? '16px' : '12px';
 
   return (
@@ -514,11 +517,14 @@ function SellerCard({ s }: { s: typeof SELLERS[0] }) {
           <MapPin size={9} style={{ color: GOLD }} />{s.city}
         </div>
         <div style={{ fontSize: '11px', color: TEXT_M, marginTop: '1px' }}>{s.specialty}</div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '6px' }}>
-          <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
-          <span style={{ fontSize: '12px', fontWeight: 700, color: TEXT }}>{s.rating}</span>
-          <span style={{ fontSize: '10px', color: TEXT_M }}>({s.reviews})</span>
-        </div>
+        {/* امتیاز فقط وقتی واقعی باشد — برای فروشگاهِ تازه چیزی جعل نمی‌شود */}
+        {s.rating > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '6px' }}>
+            <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
+            <span style={{ fontSize: '12px', fontWeight: 700, color: TEXT }}>{s.rating}</span>
+            <span style={{ fontSize: '10px', color: TEXT_M }}>({s.reviews})</span>
+          </div>
+        )}
         <div style={{ marginTop: '12px', padding: '8px 0', borderRadius: '10px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, color: GOLD, fontSize: '12px', fontWeight: 700 }}>
           مشاهده فروشگاه
         </div>
@@ -983,12 +989,15 @@ export default function HomePage() {
   };
 
   /* بازگشت به داده‌ی نمونه فقط وقتی جایگاه «رایگان» است (یا هنوز
-     بارگذاری نشده): جایگاهِ دستی/پولیِ خالی باید واقعاً خالی بماند. */
-  const demoOk = (mode: string | null, status: string) => status === 'loading' || mode === 'free';
+     بارگذاری نشده): جایگاهِ دستی/پولیِ خالی باید واقعاً خالی بماند.
+     ظرفیتِ صفر هم یعنی «عمداً هیچ» — پس آن‌جا هم نمونه نمی‌آید،
+     وگرنه صفرکردنِ ظرفیت بیشتر محتوا نشان می‌داد نه کمتر. */
+  const demoOk = (p: { mode: string | null; status: string; displayCount?: number }) =>
+    p.status === 'loading' || (p.mode === 'free' && (p.displayCount ?? 1) > 0);
 
   const HOME_PRODUCTS = useMemo(() => {
     const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(prodSlot.mode, prodSlot.status) ? PRODUCTS : [];
+    if (!snaps.length) return demoOk(prodSlot) ? PRODUCTS : [];
     return snaps.map(e => ({
       id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: e.image,
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
@@ -998,13 +1007,17 @@ export default function HomePage() {
 
   const HOME_CLUBS = useMemo(() => {
     const snaps = uniqByRef((featClubs ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(clubSlot.mode, clubSlot.status) ? FEATURED_CLUBS : [];
+    if (!snaps.length) return demoOk(clubSlot) ? FEATURED_CLUBS : [];
     /* اعدادِ ساختگی (امتیازِ ۵، ۱۰ میز) برای باشگاهِ واقعی جعلِ اطلاعات
        است: تعدادِ میز از ستون‌های واقعی می‌آید و امتیاز/نظر تا وقتی
        سیستمِ نظر نداریم صفر می‌ماند و روی کارت نمایش داده نمی‌شود. */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || e.subtitle || '', dist: '',
       tables: e.stats?.tables ?? 0,
+      /* تفکیکِ واقعیِ نوعِ میز — کارت دیگر خودش عدد نمی‌سازد */
+      ...(e.stats?.tables
+        ? { breakdown: { snooker: e.stats.snooker ?? 0, pocket: e.stats.pocket ?? 0, highball: e.stats.highball ?? 0 } }
+        : {}),
       rating: 0, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
       price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
     }));
@@ -1012,10 +1025,12 @@ export default function HomePage() {
 
   const HOME_SELLERS = useMemo(() => {
     const snaps = uniqByRef((featStores ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(storeSlot.mode, storeSlot.status) ? SELLERS : [];
+    if (!snaps.length) return demoOk(storeSlot) ? SELLERS : [];
+    /* امتیازِ ۵ برای فروشگاهِ واقعی جعلِ اطلاعات بود — تا نداشتنِ سیستمِ
+       نظر، امتیاز صفر می‌ماند و کارت اصلاً نشانش نمی‌دهد */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || '',
-      specialty: 'تجهیزات بیلیارد', rating: 5, reviews: 0, img: e.image, badge: e.badge ?? null,
+      specialty: 'تجهیزات بیلیارد', rating: 0, reviews: 0, img: e.image, badge: e.badge ?? null,
     }));
   }, [featStores, storeSlot.mode, storeSlot.status]);
 
@@ -1874,6 +1889,9 @@ useEffect(() => {
         <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          {/* عنوان فقط وقتی فهرستی زیرش هست — اگر جایگاهِ فروشگاه‌ها
+              خاموش باشد و فقط بنرِ کناری بماند، تیترِ بی‌محتوا نمی‌آید */}
+          {showStores && (
           <SR>
             <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
               <div>
@@ -1886,6 +1904,7 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
+          )}
 
           {/* تصمیم D1 — چیدمانِ سه‌ستونه: تبلیغِ راست / فروشگاه‌ها / تبلیغِ چپ.
               جایگاهِ خالی هیچ‌چیزی رندر نمی‌کند و ستونش (auto) صفر می‌شود؛
@@ -2142,9 +2161,11 @@ useEffect(() => {
       </div>
 
       {/* §6 بنرِ بزرگِ پایینِ صفحه — بالای فوتر، فقط همین صفحه.
-          جایگاهِ مستقل: خالی/غیرفعال باشد هیچ فضایی اشغال نمی‌کند. */}
+          جایگاهِ مستقل: خالی/غیرفعال باشد هیچ فضایی اشغال نمی‌کند
+          (فاصله روی خودِ AdSlot است، نه این قاب — قابِ خالی نباید
+          بینِ اسلایدرِ تیره و فوتر شکاف بیندازد). */}
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 clamp(16px,3vw,28px)' }}>
-        <AdSlot slot="homepage_bottom_banner" />
+        <AdSlot slot="homepage_bottom_banner" style={{ margin: 'clamp(20px,3vw,32px) 0' }} />
       </div>
 
     </>

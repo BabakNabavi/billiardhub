@@ -38,7 +38,8 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
-      oldPrice: disc > 0 ? Math.round(price / (1 - disc / 100)) : price,
+      /* تخفیفِ ۱۰۰٪ تقسیم بر صفر می‌شد و قیمتِ خط‌خورده Infinity می‌داد */
+      oldPrice: disc > 0 && disc < 100 ? Math.round(price / (1 - disc / 100)) : price,
       discountPercent: disc,
       city: s(r.city),
     }
@@ -70,9 +71,13 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
 
   return rows.slice(0, limit).map(r => {
     const imgs = Array.isArray(r.images) ? r.images as string[] : []
-    /* تعدادِ میز از ستون‌های واقعیِ باشگاه جمع می‌شود — نه عددِ ساختگی */
-    const tables = n(r.snookerTables) + n(r.pocketTables) + n(r.highballTables)
-      + n(r.vipSnookerTables) + n(r.vipPocketTables)
+    /* تفکیکِ واقعیِ میزها (میزِ VIP هم از جنسِ همان نوع است).
+       ایرهاکی عمداً بیرون است: میزِ بیلیارد نیست و کارت هم فقط سه
+       نوعِ اسنوکر/پاکت/هی‌بال را نشان می‌دهد. */
+    const snooker = n(r.snookerTables) + n(r.vipSnookerTables)
+    const pocket = n(r.pocketTables) + n(r.vipPocketTables)
+    const highball = n(r.highballTables)
+    const tables = snooker + pocket + highball
     return {
       entityType: 'club' as const, ref: s(r.id),
       title: s(r.name, 'باشگاه'),
@@ -81,7 +86,7 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
       href: `/clubs/${s(r.id)}`,
       city: s(r.city),
       badge: s(r.verificationStatus) === 'verified' ? 'تأیید شده' : null,
-      ...(tables > 0 ? { stats: { tables } } : {}),
+      ...(tables > 0 ? { stats: { tables, snooker, pocket, highball } } : {}),
     }
   })
 }
@@ -119,7 +124,10 @@ export async function freeContent(entityType: EntityType, limit: number): Promis
     if (entityType === 'product') return await freeProducts(take)
     if (entityType === 'club') return await freeClubs(take)
     return await freeSellers(take)
-  } catch {
-    return []                       // داده‌ی رایگان نداریم ⇒ سکشن خالی می‌ماند
+  } catch (e) {
+    /* خطا را بی‌صدا رد نکن: بدونِ لاگ، یک کوئریِ خرابِ دائمی از بیرون
+       دقیقاً شبیهِ «محتوایی نداریم» دیده می‌شود */
+    console.error('freeContent failed', entityType, e)
+    return []
   }
 }

@@ -25,7 +25,7 @@ export interface EntitySnapshot {
   city?: string
   badge?: string | null
   /** آمارِ واقعیِ موجودیت — نبودنش یعنی «نداریم»، نه صفر */
-  stats?: { tables?: number }
+  stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }
 
 const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
@@ -53,7 +53,8 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
-      oldPrice: disc > 0 ? Math.round(price / (1 - disc / 100)) : price,
+      /* تخفیفِ ۱۰۰٪ تقسیم بر صفر می‌شد و قیمتِ خط‌خورده Infinity می‌داد */
+      oldPrice: disc > 0 && disc < 100 ? Math.round(price / (1 - disc / 100)) : price,
       discountPercent: disc,
       city: s(r.city),
     })
