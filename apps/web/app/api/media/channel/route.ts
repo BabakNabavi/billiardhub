@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, readJson, writeJson, safeKey } from '@/lib/social-server'
+import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
 
 /* کانال‌های کاربران — مثل یوتیوب، برای انتشارِ ویدیو داشتنِ کانال لازم است و
    کانال یک مرحله‌ی صریح است (نام + هندل)، نه چیزی که پنهانی ساخته شود. */
@@ -40,8 +41,13 @@ export async function GET(req: NextRequest) {
 
 /* POST { ownerKey, name, handle, bio?, avatar? } → ساخت یا ویرایشِ کانال */
 export async function POST(req: NextRequest) {
+  /* مالکِ کانال از نشست می‌آید: پیش‌تر ownerKey را کلاینت می‌گفت و
+     یعنی می‌شد کانالِ دیگری را ساخت، تصاحب یا بازنویسی کرد. */
+  const actor = await actorOf(req)
+  if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
+
   const b = await req.json().catch(() => ({}))
-  const ownerKey = String(b?.ownerKey || '')
+  const ownerKey = actor.dmKey || actor.id
   const name = String(b?.name || '').trim().slice(0, 60)
   const handle = normHandle(b?.handle)
 

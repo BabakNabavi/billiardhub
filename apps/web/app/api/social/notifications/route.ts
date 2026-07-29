@@ -1,20 +1,32 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, P, readJson, writeJson, type Notif } from '@/lib/social-server'
+import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* GET ?user=KEY → لیستِ نوتیف‌های کاربر (تازه‌ترین اول) */
+/* اعلان‌ها داده‌ی خصوصی‌اند: پیش‌تر `user` از کوئری/بدنه خوانده می‌شد و
+   یعنی هر کسی می‌توانست اعلان‌های دیگری را بخواند یا خوانده‌شده کند.
+   حالا صاحبِ اعلان‌ها همیشه خودِ صاحبِ نشست است. */
+const deny = (s: number, body: unknown) => NextResponse.json(body, { status: s, headers: CORS })
+
+/* GET → لیستِ نوتیف‌های خودِ کاربر (تازه‌ترین اول) */
 export async function GET(req: NextRequest) {
-  const user = req.nextUrl.searchParams.get('user') || ''
+  const actor = await actorOf(req)
+  if (!actor) return deny(401, UNAUTHENTICATED)
+
+  const user = actor.dmKey || actor.id
   const list = await readJson<Notif[]>(P.notif(user), [])
   return NextResponse.json(list.sort((a, b) => b.at - a.at), { headers: CORS })
 }
 
-/* POST { user, action:'read' } → همه خوانده‌شده */
+/* POST { action:'read' } → همه‌ی اعلان‌های خودِ کاربر خوانده‌شده */
 export async function POST(req: NextRequest) {
-  const b = await req.json()
-  const user: string = b?.user || ''
+  const actor = await actorOf(req)
+  if (!actor) return deny(401, UNAUTHENTICATED)
+
+  const b = await req.json().catch(() => ({}))
+  const user: string = actor.dmKey || actor.id
   if (!user) return NextResponse.json({ message: 'کاربر نامشخص' }, { status: 400, headers: CORS })
   if (b?.action === 'read') {
     const list = await readJson<Notif[]>(P.notif(user), [])

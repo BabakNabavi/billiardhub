@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, BUCKET, safeKey, readJsonFresh, writeJson } from '@/lib/social-server'
 import { getSupabaseServer } from '@/lib/supabase-server'
+import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 
 /* جلسات پخش زنده — هر جلسه یک فایل مستقل (بدون کلوبِر هنگام تپش همزمان).
    جلسه‌ای که ۴۵ ثانیه تپش نفرستد، پایان‌یافته حساب می‌شود. */
@@ -55,9 +56,16 @@ export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}))
   const action = String(b?.action || '')
 
+  /* پخشِ زنده به باشگاه گره خورده: فقط مالکِ همان باشگاه (یا ادمین)
+     می‌تواند شروع کند، و فقط صاحبِ جلسه تپش/پایان بفرستد. */
+  const actor = await actorOf(req)
+  if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
+
   if (action === 'start') {
-    const clubId = String(b?.clubId || ''), ownerKey = String(b?.ownerKey || '')
-    if (!clubId || !ownerKey) return NextResponse.json({ ok: false, message: 'داده ناقص' }, { status: 400, headers: CORS })
+    const clubId = String(b?.clubId || '')
+    const ownerKey = actor.dmKey || actor.id
+    if (!clubId) return NextResponse.json({ ok: false, message: 'داده ناقص' }, { status: 400, headers: CORS })
+    if (!(await ownsClub(actor, clubId))) return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
     const id = `lv-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
     const s: LiveSession = {
       id, clubId, ownerKey,
@@ -75,9 +83,12 @@ export async function POST(req: NextRequest) {
     if (!id) return NextResponse.json({ ok: false }, { status: 400, headers: CORS })
     const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
     if (!s) return NextResponse.json({ ok: false, message: 'جلسه یافت نشد' }, { status: 404, headers: CORS })
-    /* فقط صاحب پخش می‌تواند تپش/پایان بفرستد */
-    if (b?.ownerKey && s.ownerKey !== String(b.ownerKey)) {
-      return NextResponse.json({ ok: false, message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS })
+    /* فقط صاحبِ پخش می‌تواند تپش/پایان بفرستد.
+       شرطِ قبلی به `b.ownerKey` نگاه می‌کرد و با **حذفِ** آن از بدنه
+       کاملاً دور زده می‌شد؛ حالا مبنا نشست است. */
+    const me = actor.dmKey || actor.id
+    if (s.ownerKey !== me && !actor.isAdmin) {
+      return NextResponse.json(FORBIDDEN, { status: 403, headers: CORS })
     }
     const next: LiveSession = {
       ...s, lastBeat: Date.now(),

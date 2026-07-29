@@ -1,4 +1,5 @@
 'use client'
+import { apiFetch } from './http'
 import type { MediaVideo, MediaCategoryKey } from './media-data'
 
 /* ویدیوهای آپلودیِ کاربران — رپرهای کلاینت + تبدیل به MediaVideo برای نمایش
@@ -19,7 +20,7 @@ export const toMedia = (v: RawUserVideo): MediaVideo => ({
 
 export async function fetchUserVideos(): Promise<MediaVideo[]> {
   try {
-    const r = await fetch('/api/media', { cache: 'no-store' })
+    const r = await apiFetch('/api/media', { cache: 'no-store' })
     if (!r.ok) return []
     const list = await r.json()
     return (Array.isArray(list) ? list : []).map(toMedia)
@@ -28,13 +29,13 @@ export async function fetchUserVideos(): Promise<MediaVideo[]> {
 
 export async function postUserVideo(video: Partial<RawUserVideo>): Promise<{ ok?: boolean; video?: RawUserVideo; message?: string }> {
   try {
-    const r = await fetch('/api/media', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ video }) })
+    const r = await apiFetch('/api/media', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ video }) })
     return await r.json()
   } catch { return { ok: false } }
 }
 
 export async function deleteUserVideo(id: string, user: string): Promise<boolean> {
-  try { await fetch(`/api/media?id=${encodeURIComponent(id)}&user=${encodeURIComponent(user)}`, { method: 'DELETE' }); return true } catch { return false }
+  try { await apiFetch(`/api/media?id=${encodeURIComponent(id)}&user=${encodeURIComponent(user)}`, { method: 'DELETE' }); return true } catch { return false }
 }
 
 /* ── کانالِ کاربر (برای انتشارِ ویدیو لازم است، مثل یوتیوب) ── */
@@ -42,7 +43,7 @@ export interface UserChannel { ownerKey: string; name: string; handle: string; b
 
 export async function fetchMyChannel(ownerKey: string): Promise<UserChannel | null> {
   try {
-    const r = await fetch(`/api/media/channel?owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
+    const r = await apiFetch(`/api/media/channel?owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
     if (!r.ok) return null
     return await r.json()
   } catch { return null }
@@ -50,7 +51,7 @@ export async function fetchMyChannel(ownerKey: string): Promise<UserChannel | nu
 
 export async function checkHandle(handle: string, ownerKey: string): Promise<boolean> {
   try {
-    const r = await fetch(`/api/media/channel?handle=${encodeURIComponent(handle)}&owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
+    const r = await apiFetch(`/api/media/channel?handle=${encodeURIComponent(handle)}&owner=${encodeURIComponent(ownerKey)}`, { cache: 'no-store' })
     if (!r.ok) return false
     return (await r.json())?.available === true
   } catch { return false }
@@ -58,7 +59,7 @@ export async function checkHandle(handle: string, ownerKey: string): Promise<boo
 
 export async function saveChannel(c: { ownerKey: string; name: string; handle: string; bio?: string; avatar?: string }): Promise<{ ok?: boolean; channel?: UserChannel; message?: string }> {
   try {
-    const r = await fetch('/api/media/channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })
+    const r = await apiFetch('/api/media/channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })
     return await r.json()
   } catch { return { ok: false, message: 'خطا در ارتباط با سرور' } }
 }

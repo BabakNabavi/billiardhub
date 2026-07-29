@@ -1,4 +1,5 @@
 'use client'
+import { apiFetch } from './http'
 import { VAPID_PUBLIC_KEY } from './push-public'
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
@@ -37,7 +38,7 @@ export async function enablePush(user: string, silent = false): Promise<'ok' | '
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     })
-    await fetch('/api/social/push', {
+    await apiFetch('/api/social/push', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user, subscription: sub.toJSON() }),
     })
