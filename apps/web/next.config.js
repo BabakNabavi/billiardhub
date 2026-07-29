@@ -28,10 +28,6 @@ const nextConfig = {
       },
       {
         // هدرهای امنیتیِ پایه — تا امروز هیچ‌کدام ست نمی‌شدند.
-        // عمداً بدونِ Content-Security-Policy: این پروژه پر از استایلِ
-        // اینلاین و <style> داخلِ کامپوننت است و یک CSPِ سخت‌گیرانه
-        // بدونِ تستِ کامل صفحه‌ها را می‌شکند. افزودنش کارِ جداگانه‌ای
-        // است با report-only در مرحله‌ی اول.
         source: '/:path*',
         headers: [
           // HTTPS اجباری برای یک سال (ورسل خودش HTTPS می‌دهد)
@@ -46,6 +42,38 @@ const nextConfig = {
           // باشگاه» لازم‌اند، پس فقط برای خودِ دامنه باز می‌مانند؛ سایتِ
           // جاسازی‌شده‌ی ثالث نمی‌تواند از آن‌ها استفاده کند.
           { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self), payment=()' },
+
+          /* ── Content-Security-Policy ──
+             عمداً `'unsafe-inline'` برای style باز است: کلِ این پروژه با
+             استایلِ اینلاین و <style> داخلِ کامپوننت نوشته شده و بستنش
+             یعنی شکستنِ همه‌ی صفحه‌ها. برای script هم Next به inline
+             نیاز دارد (بوت‌استرپ و داده‌ی صفحه).
+
+             پس این CSP «سخت‌گیرترین ممکن» نیست، ولی چیزهای واقعی را
+             می‌بندد: تزریقِ <object>/<embed>، بازنویسیِ <base>، فرم به
+             دامنه‌ی بیگانه، و قاب‌شدن در سایتِ دیگر. مقصدهای شبکه هم
+             به خودمان و Supabase محدود می‌شوند.
+
+             سفت‌کردنِ بیشتر (nonce به‌جای unsafe-inline) نیازمندِ
+             بازنویسیِ استایل‌هاست و کارِ جداگانه‌ای است. */
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "frame-ancestors 'self'",
+              "form-action 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://*.supabase.co",
+              "media-src 'self' data: blob: https://*.supabase.co",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              "worker-src 'self' blob:",
+              "manifest-src 'self'",
+            ].join('; '),
+          },
         ],
       },
     ];

@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import { CheckCircle2, XCircle, Loader2, ArrowLeft, CalendarDays, Clock3 } from 'lucide-react'
 import { faDateLong, faTimeRange, faNum } from '../../../lib/jalali'
 import CancellationPolicy from '../../../components/booking/CancellationPolicy'
+import { apiFetch } from '../../../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38'
@@ -37,7 +38,9 @@ function BookingResult() {
   useEffect(() => {
     if (!bookingId) return
     let alive = true
-    fetch(`/api/bookings/${bookingId}`, { cache: 'no-store' })
+    /* با نشست — این مسیر دیگر عمومی نیست. بازگشتِ درگاه یک ناوبریِ
+       سطحِ‌بالا است، پس کوکیِ SameSite=Lax همراه می‌آید. */
+    apiFetch(`/api/bookings/${bookingId}`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (alive) { setB(d); setLoading(false) } })
       .catch(() => alive && setLoading(false))
