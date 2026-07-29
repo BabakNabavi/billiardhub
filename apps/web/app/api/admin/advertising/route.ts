@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 import {
   listPlacements, updatePlacement, getPlacement,
   listCampaigns, createCampaign, updateCampaign, deleteCampaign,
@@ -192,6 +192,26 @@ export async function PATCH(req: NextRequest) {
   if (b?.status !== undefined && !isCampaignStatus(b.status)) {
     return NextResponse.json({ message: 'وضعیتِ کمپین نامعتبر است' }, { status: 400 });
   }
+
+  /* تأییدِ کمپینِ خریداری‌شده: پنجره‌ی زمانی از لحظه‌ی تأیید شروع شود،
+     نه از لحظه‌ی پرداخت — وگرنه تأخیرِ بررسیِ ادمین از مدتی که
+     تبلیغ‌دهنده پول داده کم می‌کرد. */
+  if (b?.status === 'ACTIVE' || b?.status === 'SCHEDULED') {
+    const { data: cur } = await sb().from('campaigns').select('status').eq('id', id).maybeSingle();
+    if ((cur as { status?: string } | null)?.status === 'PENDING_REVIEW') {
+      const startsAt = b?.startsAt ? new Date(String(b.startsAt)).toISOString() : null;
+      const { error } = await rpc('bh_approve_campaign', { p_campaign_id: id, p_start: startsAt });
+      if (!error) {
+        void audit({
+          actorId: g.actor!.id, actorRole: g.actor!.role, action: 'CAMPAIGN_APPROVED',
+          entityType: 'campaign', entityId: id, newValue: { startsAt },
+        });
+        const fresh = await listCampaigns({ placementKey: undefined });
+        return NextResponse.json({ campaign: fresh.find(c => c.id === id) ?? null });
+      }
+    }
+  }
+
   const campaign = await updateCampaign(id, b);
   if (!campaign) return NextResponse.json({ message: 'ویرایشِ کمپین انجام نشد' }, { status: 500 });
   void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'CAMPAIGN_UPDATED', entityType: 'campaign', entityId: id, newValue: { status: campaign.status } });

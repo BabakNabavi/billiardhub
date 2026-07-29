@@ -397,11 +397,18 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
   const placements = (await listPlacements()).filter(p => p.isActive && (!onlyKey || p.key === onlyKey))
   if (placements.length === 0) return {}
 
-  const now = new Date().toISOString()
+  /* مهلتِ کوچکِ اختلافِ ساعت: زمانِ شروع/پایان را دیتابیس می‌نویسد ولی
+     این فیلتر با ساعتِ سرورِ اپ اجرا می‌شود. حتی چند ثانیه اختلاف یعنی
+     کمپینی که همین حالا تأیید و ACTIVE شده، تا آن چند ثانیه نامرئی
+     بماند — برای تبلیغِ پولی پذیرفتنی نیست. دو دقیقه ارفاق این را
+     می‌بندد و در عوض حداکثر دو دقیقه زودتر شروع‌شدن هزینه‌ای ندارد. */
+  const SKEW = 120_000
+  const startBound = new Date(Date.now() + SKEW).toISOString()
+  const endBound = new Date(Date.now() - SKEW).toISOString()
   let q = sb().from('campaigns').select('*')
     .eq('status', 'ACTIVE')
-    .lte('starts_at', now)
-    .gt('ends_at', now)
+    .lte('starts_at', startBound)
+    .gt('ends_at', endBound)
     .order('sort_order', { ascending: true })
   if (onlyKey) q = q.eq('placement_key', onlyKey)
   const { data, error } = await q

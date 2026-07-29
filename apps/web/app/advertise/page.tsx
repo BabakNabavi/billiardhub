@@ -128,6 +128,18 @@ export default function AdvertisePage() {
             مخاطبِ ما دقیقاً همان‌هایی هستند که دنبالِ بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدارِ تجهیزات.
             جایگاهِ موردِ نظرتان را انتخاب کنید تا تعرفه را برایتان بفرستیم.
           </p>
+
+          {/* کاربرِ واردشده کمپین‌های خودش را همین‌جا دنبال می‌کند */}
+          {user && (
+            <Link href="/advertise/dashboard" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16,
+              background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
+              color: '#9A6E38', borderRadius: 10, padding: '9px 16px',
+              fontSize: 13, fontWeight: 800, textDecoration: 'none',
+            }}>
+              تبلیغاتِ من <ArrowLeft size={14} />
+            </Link>
+          )}
         </div>
 
         <form onSubmit={submit} style={CARD}>

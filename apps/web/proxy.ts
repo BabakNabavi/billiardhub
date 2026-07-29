@@ -29,6 +29,13 @@ const CSRF_EXEMPT = [
   '/api/auth/logout',
   '/api/otp',
   '/api/payments/callback',
+  /* کالبکِ درگاه از دامنه‌ی خودِ درگاه برمی‌گردد و کوکیِ CSRF ما را
+     ندارد. زرین‌پال با GET برمی‌گردد و مشکلی نداشت، ولی هر درگاهی که
+     با POSTِ مرورگری برگردد بدونِ این معافیت ۴۰۳ می‌گرفت. امنیت از
+     راهِ verifyِ سرورساید تأمین می‌شود، نه CSRF. */
+  '/api/ads/campaigns/callback',
+  '/api/ads/plans/callback',
+  '/api/stories/plans/callback',
   /* بیکنِ شمارشِ تبلیغات: sendBeacon نمی‌تواند هدرِ x-csrf-token بگذارد و
      برای کاربرِ واردشده ۴۰۳ می‌شد؛ فقط شمارنده را زیاد می‌کند و بررسیِ
      Origin همچنان اعمال می‌شود. */
