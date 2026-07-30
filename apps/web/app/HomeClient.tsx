@@ -127,7 +127,9 @@ const IMG = {
 ═══════════════════════════════════════════════════════════════ */
 const HERO_SLIDES = [
   { bg: '/images/hero/1.jpg',   accent: GRN,  label: 'باشگاه‌ها' },
-  { bg: '/images/hero/2.png',   accent: GOLD, label: 'تجهیزات'   },
+  /* اسلاید دوم عوض شد و پسوندش هم از png به jpg تغییر کرد؛ مسیرِ قبلی
+     دیگر وجود نداشت و ۴۰۴ می‌داد. */
+  { bg: '/images/hero/2.jpg',   accent: GOLD, label: 'تجهیزات'   },
   { bg: '/images/hero/3.png',   accent: BLU,  label: 'مربیان'    },
   /* ?v=2 — فایل هم‌نام عوض شده؛ بدونِ ورژن، کش CDN/مرورگر عکسِ قبلی را می‌داد */
   { bg: '/images/hero/4.png?v=2', accent: BRN, label: 'رقابت' },
@@ -186,49 +188,44 @@ const FILTER_DATA: Record<string, { label: string; opts: string[] }[]> = {
 /* باشگاه‌های پیشنهادیِ صفحه‌ی اصلی */
 const FEATURED_COUNT = 8
 
-const CLUBS = [
-  { id:'1', name:'باشگاه ستاره تهران',   city:'تهران',  dist:'ونک',        tables:12, rating:4.9, reviews:284, type:'اسنوکر', img:IMG.club2, img2:IMG.club3,   price:80000, badge:'برترین', tags:['VIP','پارکینگ','کافه'], hasStory:true  },
-  { id:'2', name:'باشگاه المپیک مشهد',   city:'مشهد',   dist:'احمدآباد',   tables:8,  rating:4.7, reviews:156, type:'پاکت',   img:IMG.clubB, img2:IMG.club1,   price:65000, badge:null,      tags:['مربی','مسابقه'],        hasStory:true  },
-  { id:'3', name:'باشگاه پیروزی اصفهان', city:'اصفهان', dist:'چهارباغ',    tables:10, rating:4.8, reviews:198, type:'هی‌بال', img:IMG.club6, img2:IMG.club2,   price:75000, badge:'جدید',    tags:['آموزش','مبتدی'],        hasStory:false },
-  { id:'4', name:'باشگاه حافظ شیراز',    city:'شیراز',  dist:'لطفعلی‌خان', tables:6,  rating:4.6, reviews:89,  type:'اسنوکر', img:IMG.club1, img2:IMG.snooker, price:55000, badge:null,      tags:['هفت روز'],              hasStory:false },
-  { id:'5', name:'باشگاه آریا تبریز',    city:'تبریز',  dist:'شریعتی',     tables:14, rating:4.5, reviews:143, type:'اسنوکر', img:IMG.club4, img2:IMG.club5,   price:70000, badge:null,      tags:['پارکینگ','کافه'],       hasStory:false },
-  { id:'6', name:'باشگاه مروارید کرج',   city:'کرج',    dist:'توحید',      tables:8,  rating:4.1, reviews:34,  type:'پاکت',   img:IMG.club5, img2:IMG.club6,   price:60000, badge:null,      tags:['مبتدی'],                hasStory:false },
-  { id:'7', name:'باشگاه سنچوری تهران',  city:'تهران',  dist:'ولیعصر',     tables:13, rating:4.8, reviews:124, type:'اسنوکر', img:IMG.clubA, img2:IMG.club2,   price:85000, badge:'VIP',     tags:['VIP','مربی'],           hasStory:false },
-  { id:'8', name:'باشگاه شاهین اهواز',   city:'اهواز',  dist:'کیانپارس',   tables:9,  rating:4.4, reviews:76,  type:'هی‌بال', img:IMG.clubC, img2:IMG.club1,   price:50000, badge:null,      tags:['کافه'],                 hasStory:false },
-];
+/* شکلِ داده‌ای که کارت‌های صفحه‌ی اصلی انتظار دارند. سه آرایه‌ی
+   هاردکد (باشگاه‌ها، محصولات، فروشگاه‌ها) که این‌جا بودند حذف شدند:
+   هیچ‌کدام وجود خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید. حالا از
+   /api/clubs، /api/products و /api/sellers پر می‌شوند. */
+export interface RealClub {
+  id: string; name: string; city: string; dist: string; tables: number
+  breakdown?: { snooker: number; pocket: number; highball: number }
+  rating: number; reviews: number; type: string
+  img: string; img2: string; price: number
+  badge: string | null; tags: string[]; hasStory: boolean
+}
+export interface RealProduct {
+  id: string; name: string; sub: string; img: string
+  brand: string; price: number; sale: number; pct: number
+}
+export interface RealStore {
+  id: string; name: string; city: string; specialty: string
+  rating: number; reviews: number; img: string; badge: string | null
+}
 
-const FEATURED_CLUBS = CLUBS.slice(0, FEATURED_COUNT);
+/* پاسخِ خامِ APIها */
+interface ApiClub {
+  id: string; name: string; city?: string; images?: string[]; hasActiveStory?: boolean
+  snookerTables?: number; pocketTables?: number; highballTables?: number
+  vipSnookerTables?: number; vipPocketTables?: number
+}
+interface ApiProduct {
+  id: string; title: string; brand?: string | null; category?: string | null
+  images?: string[]; price?: number; discountPrice?: number | null; discountPercent?: number | null
+}
+interface ApiStore {
+  id: string; name?: string; storeName?: string; city?: string
+  specialty?: string; logo?: string; images?: string[]
+}
 
-const PRODUCTS = [
-  { id:'1',  name:'Predator 314-3',      sub:'چوب حرفه‌ای',        img:IMG.cue,   brand:'PREDATOR', price:12000000, sale:9600000,  pct:20 },
-  { id:'2',  name:'Aramith Pro Cup',     sub:'ست توپ اسنوکر',      img:IMG.ball,  brand:'ARAMITH',  price:4500000,  sale:3825000,  pct:15 },
-  { id:'3',  name:'Longoni Elite',       sub:'نگهدارنده کربن',     img:IMG.rest,  brand:'LONGONI',  price:2200000,  sale:1980000,  pct:10 },
-  { id:'4',  name:'Master Blue Diamond', sub:'گچ حرفه‌ای',          img:IMG.chalk, brand:'MASTER',   price:850000,   sale:680000,   pct:20 },
-  { id:'5',  name:'Riley Renaissance',   sub:'چوب کلاسیک',         img:IMG.cue2,  brand:'RILEY',    price:6800000,  sale:6800000,  pct:0  },
-  { id:'6',  name:'Aramith Super Pro',   sub:'توپ پاکت',            img:IMG.ball,  brand:'ARAMITH',  price:3200000,  sale:2720000,  pct:15 },
-  { id:'7',  name:'Predator Revo',       sub:'شفت کربن',            img:IMG.cue,   brand:'PREDATOR', price:8500000,  sale:8500000,  pct:0  },
-  { id:'8',  name:'Longoni Laser',       sub:'نگهدارنده حرفه‌ای',  img:IMG.rest,  brand:'LONGONI',  price:1900000,  sale:1615000,  pct:15 },
-  { id:'9',  name:'Silver Cup Chalk',    sub:'گچ نقره‌ای',          img:IMG.chalk, brand:'SILVER',   price:420000,   sale:378000,   pct:10 },
-  { id:'10', name:'Predator BK Rush',    sub:'چوب بریک',            img:IMG.cue2,  brand:'PREDATOR', price:5400000,  sale:4320000,  pct:20 },
-  { id:'11', name:'Molinari Grip',       sub:'روکش دسته',           img:IMG.cue,   brand:'MOLINARI', price:1250000,  sale:1000000,  pct:20 },
-  { id:'12', name:'Kamui Black Soft',    sub:'تیپ چرمی',            img:IMG.chalk, brand:'KAMUI',    price:1650000,  sale:1485000,  pct:10 },
-  { id:'13', name:'Peradon Ash Cue',     sub:'چوب اسنوکر ماسیو',    img:IMG.cue2,  brand:'PERADON',  price:7200000,  sale:7200000,  pct:0  },
-  { id:'14', name:'Simonis 860',         sub:'ماهوت مسابقات',       img:IMG.rest,  brand:'SIMONIS',  price:9800000,  sale:8330000,  pct:15 },
-];
-const SELLERS = [
-  { id:'1', name:'فروشگاه ستاره تهران',    city:'تهران',   specialty:'چوب و لوازم',     rating:4.9, reviews:312, img:IMG.store1,   badge:'برتر' },
-  { id:'2', name:'بیلیارد کاسپین مشهد',    city:'مشهد',    specialty:'میز و تجهیزات',   rating:4.7, reviews:189, img:IMG.store2,   badge:null   },
-  { id:'3', name:'لوازم اسنوکر پارسیان',   city:'اصفهان',  specialty:'توپ و گچ',         rating:4.8, reviews:241, img:IMG.snooker2, badge:'تأیید شده' },
-  { id:'4', name:'مرکز بیلیارد آریا',      city:'شیراز',   specialty:'تجهیزات حرفه‌ای', rating:4.6, reviews:98,  img:IMG.proTable, badge:null   },
-  { id:'5', name:'فروشگاه چمپیون تبریز',   city:'تبریز',   specialty:'چوب برند',         rating:4.9, reviews:178, img:IMG.cue,      badge:'برتر' },
-  { id:'6', name:'گالری بیلیارد نوین',     city:'کرج',     specialty:'میز اسنوکر',       rating:4.7, reviews:134, img:IMG.table,    badge:null   },
-  { id:'7', name:'لوازم بیلیارد پرشین',    city:'تهران',   specialty:'توپ آرامیث',       rating:4.8, reviews:267, img:IMG.ball,     badge:'تأیید شده' },
-  { id:'8', name:'مرکز چوب و گچ ایران',    city:'اهواز',   specialty:'گچ حرفه‌ای',       rating:4.5, reviews:76,  img:IMG.chalk,    badge:null   },
-  { id:'9',  name:'بیلیارد سنتر قم',       city:'قم',      specialty:'میز و لوازم',      rating:4.6, reviews:112, img:IMG.table,    badge:null   },
-  { id:'10', name:'تجهیزات اسنوکر رشت',    city:'رشت',     specialty:'چوب و کیس',        rating:4.7, reviews:143, img:IMG.cue2,     badge:'تأیید شده' },
-  { id:'11', name:'فروشگاه اسپرت کرمان',   city:'کرمان',   specialty:'پوشاک و اکسسوری',  rating:4.4, reviews:64,  img:IMG.store1,   badge:null   },
-  { id:'12', name:'بیلیارد گلستان',        city:'گرگان',   specialty:'ماهوت و پارچه',    rating:4.8, reviews:157, img:IMG.store2,   badge:'برتر' },
-];
+/* وقتی باشگاهِ واقعی عکس ندارد — تصویرِ عمومیِ بیلیارد، نه عکسِ باشگاهِ
+   دیگری که القا کند مالِ همین باشگاه است */
+const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5, IMG.club6];
 
 const SERVICES_LIST = [
   { id:'1', icon: Wrench,    title:'نصب میز',          desc:'نصب حرفه‌ای انواع میزهای بیلیارد در محل شما', color:'#C7A66A' },
@@ -257,15 +254,19 @@ const NEWS = [
 /* ═══════════════════════════════════════════════════════════════
    CLUB CARD
 ═══════════════════════════════════════════════════════════════ */
-function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[0]; h?: string; featured?: boolean }) {
+function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?: string; featured?: boolean }) {
   const [hov, setHov]       = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-  /* تفکیکِ واقعی اگر باشگاه اعلامش کرده باشد؛ وگرنه (کارت‌های نمونه)
-     همان تقسیمِ تقریبیِ قبلی. جعلِ عدد برای باشگاهِ واقعی ممنوع است. */
-  const brk = (club as { breakdown?: { snooker: number; pocket: number; highball: number } }).breakdown;
-  const snookerTables = brk ? brk.snooker : Math.floor(club.tables * 0.5);
-  const pocketTables  = brk ? brk.pocket  : Math.floor(club.tables * 0.3);
-  const hiballTables  = brk ? brk.highball : club.tables - Math.floor(club.tables * 0.5) - Math.floor(club.tables * 0.3);
+  /* تفکیکِ میزها فقط از عددِ اعلام‌شده‌ی خودِ باشگاه.
+
+     پیش‌تر اگر تفکیک نبود، از رویِ جمعِ کل یک تقسیمِ تقریبی می‌ساخت
+     (۵۰٪ اسنوکر، ۳۰٪ پاکت، بقیه هی‌بال). برای کارت‌های نمونه بی‌ضرر
+     بود، ولی حالا که همه‌ی باشگاه‌ها واقعی‌اند یعنی به بازدیدکننده
+     عددی گفته می‌شود که باشگاه هیچ‌وقت اعلامش نکرده. */
+  const brk = club.breakdown;
+  const snookerTables = brk?.snooker ?? 0;
+  const pocketTables  = brk?.pocket  ?? 0;
+  const hiballTables  = brk?.highball ?? 0;
   const rad = featured ? '16px' : '12px';
 
   return (
@@ -449,7 +450,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
    یک کارت برای دسکتاپ و موبایل (کارت سفید، حاشیه‌ی نازک،
    پیلِ ٪ بنفش، قیمتِ خط‌خورده).
 ═══════════════════════════════════════════════════════════════ */
-function BazaarCard({ p, className, style }: { p: typeof PRODUCTS[0]; className?: string; style?: React.CSSProperties }) {
+function BazaarCard({ p, className, style }: { p: RealProduct; className?: string; style?: React.CSSProperties }) {
   return (
     <Link href={`/shop/${p.id}`} className={`prod-hover${className ? ` ${className}` : ''}`}
       style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0, ...style }}>
@@ -484,7 +485,7 @@ function BazaarCard({ p, className, style }: { p: typeof PRODUCTS[0]; className?
 /* ═══════════════════════════════════════════════════════════════
    SELLER CARD
 ═══════════════════════════════════════════════════════════════ */
-function SellerCard({ s }: { s: typeof SELLERS[0] }) {
+function SellerCard({ s }: { s: RealStore }) {
   const [hov, setHov] = useState(false);
   return (
     <div
@@ -991,6 +992,72 @@ export default function HomeClient({ initialPlacements }: { initialPlacements?: 
     return snaps.filter(e => !seen.has(e.ref) && (seen.add(e.ref), true));
   };
 
+  /* ── پشتوانه‌ی سه سکشن وقتی جایگاهِ تبلیغاتی خالی است ──
+
+     پیش‌تر این نقش را سه آرایه‌ی هاردکد بازی می‌کردند (هشت باشگاه،
+     چهارده محصول، دوازده فروشگاه) که هیچ‌کدام وجود نداشتند. یعنی
+     تا وقتی کسی جایگاه را نخریده بود، صفحه‌ی اصلی پر بود از
+     «باشگاه ستاره تهران» و «فروشگاه چمپیون تبریز»ی که کلیک‌شان
+     به هیچ‌جا نمی‌رسید.
+
+     حالا همان جای خالی با موجودیت‌های واقعیِ سایت پر می‌شود. اگر
+     چیزی هم نباشد، سکشن خالی می‌ماند — که درست است. */
+  const [realClubs, setRealClubs] = useState<RealClub[]>([]);
+  const [realProducts, setRealProducts] = useState<RealProduct[]>([]);
+  const [realStores, setRealStores] = useState<RealStore[]>([]);
+
+  useEffect(() => {
+    const grab = async <T,>(url: string, pick: (j: unknown) => T[]): Promise<T[]> => {
+      try {
+        const r = await fetch(url, { cache: 'no-store' });
+        if (!r.ok) return [];
+        return pick(await r.json()) ?? [];
+      } catch { return []; }
+    };
+
+    void (async () => {
+      const [cl, pr, st] = await Promise.all([
+        grab<ApiClub>('/api/clubs', j => (Array.isArray(j) ? j : [])),
+        grab<ApiProduct>('/api/products', j => ((j as { products?: ApiProduct[] })?.products ?? [])),
+        grab<ApiStore>('/api/sellers', j => (Array.isArray(j) ? j : [])),
+      ]);
+
+      /* امتیاز و تعدادِ نظر صفر می‌ماند تا سیستمِ نظر واقعاً وجود داشته
+         باشد — کارت خودش صفر را نمایش نمی‌دهد. */
+      setRealClubs(cl.slice(0, FEATURED_COUNT).map((c, i) => ({
+        id: c.id, name: c.name, city: c.city ?? '', dist: '',
+        tables: (c.snookerTables ?? 0) + (c.pocketTables ?? 0) + (c.highballTables ?? 0)
+              + (c.vipSnookerTables ?? 0) + (c.vipPocketTables ?? 0),
+        breakdown: {
+          snooker: (c.snookerTables ?? 0) + (c.vipSnookerTables ?? 0),
+          pocket: (c.pocketTables ?? 0) + (c.vipPocketTables ?? 0),
+          highball: c.highballTables ?? 0,
+        },
+        rating: 0, reviews: 0, type: 'اسنوکر',
+        img: c.images?.[0] || CLUB_IMG_FALLBACK[i % CLUB_IMG_FALLBACK.length]!,
+        img2: c.images?.[1] || CLUB_IMG_FALLBACK[(i + 1) % CLUB_IMG_FALLBACK.length]!,
+        price: 0, badge: null as string | null, tags: [] as string[],
+        hasStory: !!c.hasActiveStory,
+      })));
+
+      setRealProducts(pr.slice(0, 14).map(p => ({
+        id: p.id, name: p.title, sub: p.brand || p.category || 'بیلیارد بازار',
+        img: p.images?.[0] || IMG.cue,
+        brand: (p.brand || 'BILLIARD').toUpperCase(),
+        price: p.price ?? 0, sale: p.discountPrice ?? p.price ?? 0,
+        pct: p.discountPercent ?? 0,
+      })));
+
+      setRealStores(st.slice(0, 12).map(s => ({
+        id: s.id, name: s.name ?? s.storeName ?? '', city: s.city ?? '',
+        specialty: s.specialty || 'تجهیزات بیلیارد',
+        rating: 0, reviews: 0,
+        img: s.logo || s.images?.[0] || IMG.store1,
+        badge: null as string | null,
+      })));
+    })();
+  }, []);
+
   /* بازگشت به داده‌ی نمونه فقط وقتی جایگاه «رایگان» است (یا هنوز
      بارگذاری نشده): جایگاهِ دستی/پولیِ خالی باید واقعاً خالی بماند.
      ظرفیتِ صفر هم یعنی «عمداً هیچ» — پس آن‌جا هم نمونه نمی‌آید،
@@ -1000,17 +1067,17 @@ export default function HomeClient({ initialPlacements }: { initialPlacements?: 
 
   const HOME_PRODUCTS = useMemo(() => {
     const snaps = uniqByRef((featProducts ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(prodSlot) ? PRODUCTS : [];
+    if (!snaps.length) return demoOk(prodSlot) ? realProducts : [];
     return snaps.map(e => ({
       id: e.ref, name: e.title, sub: e.subtitle || 'بیلیارد بازار', img: e.image,
       brand: (e.subtitle || 'BILLIARD').toUpperCase(),
       price: e.oldPrice ?? e.price ?? 0, sale: e.price ?? 0, pct: e.discountPercent ?? 0,
     }));
-  }, [featProducts, prodSlot.mode, prodSlot.status]);
+  }, [featProducts, prodSlot.mode, prodSlot.status, realProducts]);
 
   const HOME_CLUBS = useMemo(() => {
     const snaps = uniqByRef((featClubs ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(clubSlot) ? FEATURED_CLUBS : [];
+    if (!snaps.length) return demoOk(clubSlot) ? realClubs : [];
     /* اعدادِ ساختگی (امتیازِ ۵، ۱۰ میز) برای باشگاهِ واقعی جعلِ اطلاعات
        است: تعدادِ میز از ستون‌های واقعی می‌آید و امتیاز/نظر تا وقتی
        سیستمِ نظر نداریم صفر می‌ماند و روی کارت نمایش داده نمی‌شود. */
@@ -1024,18 +1091,18 @@ export default function HomeClient({ initialPlacements }: { initialPlacements?: 
       rating: 0, reviews: 0, type: 'اسنوکر', img: e.image, img2: e.image,
       price: 0, badge: e.badge ?? null as string | null, tags: [] as string[], hasStory: false,
     }));
-  }, [featClubs, clubSlot.mode, clubSlot.status]);
+  }, [featClubs, clubSlot.mode, clubSlot.status, realClubs]);
 
   const HOME_SELLERS = useMemo(() => {
     const snaps = uniqByRef((featStores ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
-    if (!snaps.length) return demoOk(storeSlot) ? SELLERS : [];
+    if (!snaps.length) return demoOk(storeSlot) ? realStores : [];
     /* امتیازِ ۵ برای فروشگاهِ واقعی جعلِ اطلاعات بود — تا نداشتنِ سیستمِ
        نظر، امتیاز صفر می‌ماند و کارت اصلاً نشانش نمی‌دهد */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || '',
       specialty: 'تجهیزات بیلیارد', rating: 0, reviews: 0, img: e.image, badge: e.badge ?? null,
     }));
-  }, [featStores, storeSlot.mode, storeSlot.status]);
+  }, [featStores, storeSlot.mode, storeSlot.status, realStores]);
 
   /* دوبل‌سازی فقط برای حلقه‌ی مارکی و فقط وقتی آیتم کافی هست — با فهرستِ
      کوتاهِ کمپینی، همان کارت دو بار پشتِ هم زشت می‌شد */
