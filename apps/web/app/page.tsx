@@ -3,6 +3,7 @@ import HomeClient from './HomeClient'
 import { buildLivePlacements } from '../lib/ads/live-payload'
 import { loadHomeFeatured } from '../lib/home-featured'
 import { EMPTY_FEATURED } from '../lib/home-types'
+import ServicesSection from '../components/home/ServicesSection'
 /* از ماژولِ مشترک، نه از AdSlot که 'use client' است — صداکردنِ تابعِ
    یک فایلِ کلاینت از Server Component همان چیزی بود که صفحه را ۵۰۰ کرد */
 import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../lib/ads/placement-state'
@@ -63,6 +64,7 @@ export default async function HomePage() {
     <HomeClient
       initialPlacements={initialPlacements}
       initialFeatured={featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED}
+      servicesSlot={<ServicesSection />}
     />
   )
 }

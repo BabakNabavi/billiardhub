@@ -217,14 +217,7 @@ interface ApiStore {
    دیگری که القا کند مالِ همین باشگاه است */
 const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5, IMG.club6];
 
-const SERVICES_LIST = [
-  { id:'1', icon: Wrench,    title:'نصب میز',          desc:'نصب حرفه‌ای انواع میزهای بیلیارد در محل شما', color:'#C7A66A' },
-  { id:'2', icon: Hammer,    title:'تعمیر و بازسازی',  desc:'تعمیرات تخصصی چوب، تعویض تیپ و فرول',    color:'#4A9EFF' },
-  { id:'3', icon: Scissors,  title:'تعویض ماهوت',      desc:'تعویض پارچه‌ی انواع میزهای بیلیاردی',     color:'#30C55A' },
-  { id:'4', icon: Settings,  title:'تنظیم باند و میز', desc:'تراز و تنظیم انواع باند، میز و پاکت', color:'#B97BFF' },
-  { id:'5', icon: Truck,     title:'حمل و نقل',        desc:'جابجایی تخصصی تجهیزات بیلیارد با بیمه کامل بار',           color:'#FF6B9D' },
-  { id:'6', icon: GraduationCap, title:'آموزش نگهداری',   desc:'آموزش سرویس دوره‌ای و نگهداری صحیح از تجهیزات بیلیارد',   color:'#06b6d4' },
-];
+/* SERVICES_LIST به components/home/ServicesSection.tsx منتقل شد */
 
 const BANNER_SLIDES = [
   { img:IMG.wall1,  title:'بزرگترین پلتفرم بیلیارد ایران', sub:'بهترین باشگاه‌ها را کشف و رزرو کن',  link:'/clubs',       cta:'رزرو میز',       accent:GRN  },
@@ -919,11 +912,13 @@ function HomeMediaBand() {
    PAGE
 ═══════════════════════════════════════════════════════════════ */
 
-export default function HomeClient({ initialPlacements, initialFeatured }: {
+export default function HomeClient({ initialPlacements, initialFeatured, servicesSlot }: {
   initialPlacements?: Partial<Record<PlacementKey, PlacementState>>
   /* باشگاه/محصول/فروشگاهِ واقعی، خوانده‌شده روی سرور — تا کارت‌ها در
      HTMLِ اولیه باشند و صفحه هنگامِ لود نپرد. */
   initialFeatured?: { clubs: RealClub[]; products: RealProduct[]; stores: RealStore[] }
+  /* Server Component که این‌جا فقط رندر می‌شود — هیچ JSای همراهش نیست */
+  servicesSlot?: React.ReactNode
 }) {
   const [slide, setSlide]     = useState(0);
   const [scrollY, setScrollY] = useState(0);
@@ -2157,80 +2152,10 @@ useEffect(() => {
       </section>
       )}
 
-      {/* §4 SERVICES ════════════════════════════════════════════ */}
-      <section className="svc-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 82% 0%, rgba(199,166,106,0.14), transparent 46%), linear-gradient(145deg, #0B0A08 0%, #171208 55%, #0B0A08 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(44px,4.2vw,68px)' }}>
-        <div aria-hidden className="sec-hair" style={{ left: '30%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)' }} />
-        <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(255,255,255,0.055)' }}>SERVICE</div>
-        <div aria-hidden style={{ position: 'absolute', bottom: 0, insetInline: 0, height: 3, display: 'flex' }}>
-          <i style={{ flex: 2.6, background: 'linear-gradient(90deg,#8A6020,#C7A66A)' }} />
-          <i style={{ flex: 1, background: '#B23B2E' }} />
-          <i style={{ flex: 1.6, background: '#14532D' }} />
-        </div>
-        <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <SR>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '52px', flexWrap: 'wrap', gap: '20px' }}>
-              <div>
-                <span className="sec-label" style={{ color: 'rgba(199,166,106,0.70)' }}>TECHNICAL SERVICES</span>
-                <h2 className="sec-title" style={{ color: '#FFFFFF', fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات فنی و تخصصی</h2>
-                <div className="sec-rule" style={{ color: 'rgba(199,166,106,0.60)' }} />
-              </div>
-              <Link href="/services" className="see-all-lq on-dark">
-                مشاهده همه <ArrowLeft size={12} />
-              </Link>
-            </div>
-          </SR>
-
-          <div className="services-grid" style={{ alignItems: 'stretch' }}>
-            {SERVICES_LIST.map((svc, i) => {
-              const Icon = svc.icon;
-              return (
-                <SR key={svc.id} delay={i * 60}>
-                  <div style={{
-                    position: 'relative', overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.04)',
-                    borderRadius: '18px',
-                    padding: 'clamp(14px,1.4vw,20px) clamp(12px,1.2vw,18px)',
-                    border: '1px solid rgba(255,255,255,0.09)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                    gap: '10px', textAlign: 'center', height: '100%', boxSizing: 'border-box',
-                    transition: 'transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
-                    cursor: 'pointer',
-                  }}
-                    onMouseEnter={e => {
-                      const el = e.currentTarget as HTMLElement;
-                      el.style.transform = 'translateY(-5px)';
-                      el.style.boxShadow = `0 20px 50px ${svc.color}28`;
-                      el.style.borderColor = `${svc.color}50`;
-                    }}
-                    onMouseLeave={e => {
-                      const el = e.currentTarget as HTMLElement;
-                      el.style.transform = 'none';
-                      el.style.boxShadow = 'none';
-                      el.style.borderColor = 'rgba(255,255,255,0.09)';
-                    }}
-                  >
-                    {/* decorative step number */}
-                    <div style={{ position: 'absolute', top: '-6px', left: '8px', fontSize: 'clamp(42px,4.5vw,58px)', fontWeight: 900, color: 'rgba(255,255,255,0.04)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none' }}>
-                      {String(i + 1).padStart(2, '0')}
-                    </div>
-                    {/* icon — centered */}
-                    <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: `linear-gradient(135deg, ${svc.color}35 0%, ${svc.color}10 100%)`, border: `1px solid ${svc.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon size={20} color={svc.color} />
-                    </div>
-                    <div style={{ fontSize: 'clamp(12px,1.1vw,15px)', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{svc.title}</div>
-                    <div style={{ fontSize: 'clamp(10px,0.85vw,12px)', color: 'rgba(255,255,255,0.46)', lineHeight: 1.65, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>{svc.desc}</div>
-                    <div style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', gap: '4px', color: svc.color, fontSize: '11px', fontWeight: 700 }}>
-                      درخواست خدمت <ArrowLeft size={9} />
-                    </div>
-                    {/* bottom accent */}
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, height: '2px', background: `linear-gradient(90deg, transparent, ${svc.color}55, transparent)` }} />
-                  </div>
-                </SR>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* §4 SERVICES — Server Component، از page.tsx به‌عنوان prop می‌آید.
+          هیچ حالت و رویدادی ندارد، پس نباید جاوااسکریپت به مرورگر بفرستد.
+          هاورش با CSS خالص بازسازی شد. */}
+      {servicesSlot}
 
       {/* §5 EXPLORE STRIP ══════════════════════════════════════ */}
       <section style={{ position: 'relative', background: 'linear-gradient(140deg,#EDE9E2 0%,#F4F1EC 45%,#E8E4DD 100%)', padding: 'clamp(36px,3.8vw,56px) clamp(16px,5%,80px)', overflow: 'hidden' }}>
