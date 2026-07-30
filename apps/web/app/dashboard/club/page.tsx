@@ -21,6 +21,8 @@ import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import { apiFetch } from '../../../lib/http';
+import FaTimeSelect from '../../../components/ui/FaTimeSelect';
+import FaNumberInput, { toFa as faDigit, groupFa, amountInWords } from '../../../components/ui/FaNumberInput';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
   type Tournament, type GameType,
@@ -223,9 +225,34 @@ function SectionTitle({ children, style }: { children: React.ReactNode; style?: 
   );
 }
 
-function InputField({ label, value, onChange, type = 'text', placeholder = '', ltr = false }: {
+function InputField({ label, value, onChange, type = 'text', placeholder = '', ltr = false, grouped = false }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; ltr?: boolean;
+  /** جداکننده‌ی سه‌رقمی — برای مبلغ */
+  grouped?: boolean;
 }) {
+  const box: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box',
+    border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px',
+    fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none',
+    fontFamily: 'var(--font-base)',
+  };
+
+  /* فیلدِ عددی با ورودیِ فارسی جایگزین می‌شود: کاربر فارسی می‌بیند و
+     فارسی هم می‌تواند تایپ کند، ولی آنچه بالا می‌رود همیشه لاتین است.
+     `type="number"`ِ بومی هیچ‌وقت ارقامِ فارسی نشان نمی‌داد. */
+  if (type === 'number') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+        <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
+        <FaNumberInput
+          value={value} onChange={onChange} placeholder={placeholder}
+          grouped={grouped} ariaLabel={label}
+          style={{ ...box, textAlign: 'center' }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
@@ -1827,15 +1854,13 @@ export default function ClubDashboardPage() {
                 {/* price with thousands + words */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
-                  <input
-                    type="text" inputMode="numeric"
-                    value={tableForm.pricePerHour ? Number(tableForm.pricePerHour).toLocaleString('en-US') : ''}
-                    placeholder="50,000"
-                    onChange={e => {
-                      const raw = e.target.value.replace(/[^0-9]/g, '');
-                      setTableForm(p => ({...p, pricePerHour: raw}));
-                    }}
-                    style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)' }}
+                  {/* `toLocaleString('en-US')` جداکننده می‌گذاشت ولی ارقام
+                      لاتین می‌ماندند — همان چیزی که در فرم دیده می‌شد. */}
+                  <FaNumberInput
+                    value={tableForm.pricePerHour}
+                    onChange={v => setTableForm(p => ({ ...p, pricePerHour: v }))}
+                    placeholder="۵۰٬۰۰۰" grouped ariaLabel="قیمت هر ساعت"
+                    style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)', width: '100%', boxSizing: 'border-box' }}
                   />
                   {tableForm.pricePerHour && parseInt(tableForm.pricePerHour) > 0 && (
                     <div style={{ fontSize: 11, color: GOLD, marginTop: 1, paddingRight: 2 }}>
@@ -1889,15 +1914,11 @@ export default function ClubDashboardPage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 110px', minWidth: 100 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از ساعت</div>
-                    <input type="time" value={discountForm.startTime}
-                      onChange={e => setDiscountForm(p => ({ ...p, startTime: e.target.value }))}
-                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                    <FaTimeSelect value={discountForm.startTime} onChange={v => setDiscountForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع تخفیف" compact />
                   </div>
                   <div style={{ flex: '1 1 110px', minWidth: 100 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>تا ساعت</div>
-                    <input type="time" value={discountForm.endTime}
-                      onChange={e => setDiscountForm(p => ({ ...p, endTime: e.target.value }))}
-                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                    <FaTimeSelect value={discountForm.endTime} onChange={v => setDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
                   </div>
                   <div style={{ flex: '0 0 70px', minWidth: 60 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>٪</div>
@@ -2048,16 +2069,17 @@ export default function ClubDashboardPage() {
                           onChange={v => setEditForm(p => ({...p, number: v}))} placeholder="1" />
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
-                          <input
-                            type="text" inputMode="numeric"
-                            value={editForm.pricePerHour ? Number(editForm.pricePerHour).toLocaleString('en-US') : ''}
-                            placeholder="50,000"
-                            onChange={e => {
-                              const raw = e.target.value.replace(/[^0-9]/g, '');
-                              setEditForm(p => ({...p, pricePerHour: raw}));
-                            }}
-                            style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)' }}
+                          <FaNumberInput
+                            value={editForm.pricePerHour}
+                            onChange={v => setEditForm(p => ({ ...p, pricePerHour: v }))}
+                            placeholder="۵۰٬۰۰۰" grouped ariaLabel="قیمت هر ساعت"
+                            style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)', width: '100%', boxSizing: 'border-box' }}
                           />
+                          {editForm.pricePerHour && parseInt(editForm.pricePerHour) > 0 && (
+                            <div style={{ fontSize: 11, color: GOLD, marginTop: 1, paddingRight: 2 }}>
+                              {numberToFarsi(parseInt(editForm.pricePerHour))} تومان
+                            </div>
+                          )}
                         </div>
                         <InputField label="برند" value={editForm.brand} ltr
                           onChange={v => setEditForm(p => ({...p, brand: v}))} placeholder="Viraka" />
@@ -2093,15 +2115,11 @@ export default function ClubDashboardPage() {
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10, alignItems: 'flex-end' }}>
                           <div style={{ flex: '1 1 100px', minWidth: 90 }}>
                             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>از ساعت</div>
-                            <input type="time" value={editDiscountForm.startTime}
-                              onChange={e => setEditDiscountForm(p => ({ ...p, startTime: e.target.value }))}
-                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                            <FaTimeSelect value={editDiscountForm.startTime} onChange={v => setEditDiscountForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع تخفیف" compact />
                           </div>
                           <div style={{ flex: '1 1 100px', minWidth: 90 }}>
                             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>تا ساعت</div>
-                            <input type="time" value={editDiscountForm.endTime}
-                              onChange={e => setEditDiscountForm(p => ({ ...p, endTime: e.target.value }))}
-                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                            <FaTimeSelect value={editDiscountForm.endTime} onChange={v => setEditDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
                           </div>
                           <div style={{ flex: '0 0 60px', minWidth: 55 }}>
                             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>٪</div>
@@ -2195,11 +2213,9 @@ export default function ClubDashboardPage() {
                   {dh.isOpen ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 12, color: '#6B7280' }}>از</span>
-                      <input type="time" value={dh.open} onChange={e => setDay({ open: e.target.value })}
-                        style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '6px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, background: '#fff' }} />
+                      <FaTimeSelect value={dh.open} onChange={v => setDay({ open: v })} ariaLabel="شروع" />
                       <span style={{ fontSize: 12, color: '#6B7280' }}>تا</span>
-                      <input type="time" value={dh.close} onChange={e => setDay({ close: e.target.value })}
-                        style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '6px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, background: '#fff' }} />
+                      <FaTimeSelect value={dh.close} onChange={v => setDay({ close: v })} ariaLabel="پایان" />
                     </div>
                   ) : (
                     <span style={{ fontSize: 13, color: '#9CA3AF' }}>تعطیل</span>
