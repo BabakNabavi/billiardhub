@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import HomeClient from './HomeClient'
 import { buildLivePlacements } from '../lib/ads/live-payload'
-import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../components/ads/AdSlot'
+import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../lib/ads/placement-state'
 
 /* ─────────────────────────────────────────────────────────────
    پوسته‌ی سرورِ صفحه‌ی اصلی.

@@ -12,47 +12,26 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-export type PlacementKey =
-  | 'market_featured_products_homepage'
-  | 'featured_clubs_homepage'
-  | 'featured_equipment_stores_homepage'
-  | 'equipment_ads_right'
-  | 'equipment_ads_left'
-  | 'homepage_bottom_banner'
+/* تایپ‌ها و `toPlacementState` به `lib/ads/placement-state` منتقل شدند.
 
-export interface EntitySnapshot {
-  entityType: 'product' | 'club' | 'seller'
-  ref: string
-  title: string
-  image: string
-  subtitle: string
-  href: string
-  price?: number
-  oldPrice?: number
-  discountPercent?: number
-  city?: string
-  badge?: string | null
-  /** آمارِ واقعیِ موجودیت (مثلاً تعدادِ میزِ باشگاه)؛ نبودنش = نداریم */
-  stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
-}
+   دلیل: این فایل `'use client'` است، پس هرچه از آن export شود یک
+   «ارجاعِ کلاینت» می‌شود و Server Component نمی‌تواند صدایش بزند.
+   `app/page.tsx` دقیقاً همین کار را می‌کرد و صفحه‌ی اصلی ۵۰۰ داد:
 
-export interface LiveCampaign {
-  id: string
-  title: string
-  advertiser: string
-  weight: number
-  banner?: { imageUrl: string; linkUrl: string }
-  entity?: EntitySnapshot
-}
+     Attempted to call toPlacementState() from the server but
+     toPlacementState is on the client.
 
-export interface PlacementPayload {
-  contentKind: 'banner' | 'entity'
-  /* ترتیبِ campaigns همان چرخشِ سرور است (فاز ۴) */
-  rotationMode?: 'fixed' | 'weighted' | 'fair' | 'random'
-  displayCount?: number
-  mode?: 'free' | 'manual' | 'paid'
-  campaigns: LiveCampaign[]
-}
+   این‌جا فقط دوباره export می‌شوند تا مصرف‌کننده‌های قبلی نشکنند. */
+export type {
+  PlacementKey, EntitySnapshot, LiveCampaign,
+  PlacementPayload, PlacementStatus, PlacementState,
+} from '../../lib/ads/placement-state'
+export { toPlacementState } from '../../lib/ads/placement-state'
+
+import type {
+  PlacementKey, LiveCampaign, PlacementPayload, PlacementState,
+} from '../../lib/ads/placement-state'
+import { toPlacementState as toState } from '../../lib/ads/placement-state'
 
 /* یک fetch برای کلِ صفحه، صرف‌نظر از تعدادِ جایگاه‌ها.
    شکست کش نمی‌شود — وگرنه یک خطای گذرای شبکه، تبلیغات را تا reload
@@ -89,31 +68,6 @@ export function usePlacement(key: PlacementKey): LiveCampaign[] | null {
   return usePlacementState(key).items
 }
 
-export type PlacementStatus = 'loading' | 'off' | 'on'
-
-export interface PlacementState {
-  /** off یعنی ادمین جایگاه را غیرفعال کرده ⇒ سکشن اصلاً نباید رندر شود */
-  status: PlacementStatus
-  items: LiveCampaign[] | null
-  mode: 'free' | 'manual' | 'paid' | null
-  /** چند آیتم قرار است دیده شود (۰ یعنی ادمین عمداً هیچ خواسته) */
-  displayCount?: number
-}
-
-/**
- * وضعیتِ کاملِ یک جایگاه.
- *
- * مسیرِ عمومی فقط جایگاه‌های فعال را برمی‌گرداند، پس نبودنِ کلید در
- * پاسخ یعنی «غیرفعال». تفکیکِ این حالت از «فعال ولی خالی» لازم است:
- * اولی باید کلِ سکشن را حذف کند، دومی فقط محتوا ندارد.
- */
-/** تبدیلِ payloadِ خام به وضعیتِ جایگاه — مشترکِ سرور و کلاینت */
-export function toPlacementState(payload: PlacementPayload | undefined): PlacementState {
-  return payload
-    ? { status: 'on', items: payload.campaigns ?? [], mode: payload.mode ?? null, displayCount: payload.displayCount }
-    : { status: 'off', items: [], mode: null }
-}
-
 /* `initial` از سرور می‌آید.
 
    بدونِ آن، سه سکشنِ اصلیِ صفحه (محصولاتِ ویژه، باشگاه‌های پیشنهادی،
@@ -131,7 +85,7 @@ export function usePlacementState(key: PlacementKey, initial?: PlacementState): 
     let alive = true
     void loadPlacements().then(all => {
       if (!alive) return
-      setState(toPlacementState(all[key]))
+      setState(toState(all[key]))
     })
     return () => { alive = false }
   }, [key])
