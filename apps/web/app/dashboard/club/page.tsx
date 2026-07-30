@@ -37,6 +37,7 @@ const DARK = '#1A1A18';
 
 interface Club {
   id: string; name: string; city: string; isActive: boolean;
+  verificationStatus?: string; rejectionReason?: string | null;
   bankCard?: string; bankCardOwner?: string; bankName?: string; iban?: string; licenseNumber?: string;
   logo?: string;
 }
@@ -1412,6 +1413,41 @@ export default function ClubDashboardPage() {
                     {selectedClub?.id === c.id && <Check size={16} color={GOLD} />}
                   </button>
                 ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── وضعیتِ بررسیِ باشگاه ──
+          مالک باید بداند باشگاهش منتشر شده یا نه، و اگر رد شده چرا.
+          پیش‌تر هیچ‌کدام نمایش داده نمی‌شد: باشگاه ثبت می‌شد، در سایت
+          دیده نمی‌شد، و مالک دلیلش را نمی‌دانست. */}
+      {selectedClub && selectedClub.verificationStatus !== 'verified' && (
+        <div style={{
+          marginBottom: 16, padding: '13px 16px', borderRadius: 14, lineHeight: 2,
+          fontSize: 12.5, fontWeight: 600,
+          background: selectedClub.verificationStatus === 'rejected' ? 'rgba(178,59,46,0.06)' : 'rgba(199,166,106,0.09)',
+          border: `1px solid ${selectedClub.verificationStatus === 'rejected' ? 'rgba(178,59,46,0.26)' : 'rgba(199,166,106,0.32)'}`,
+          color: selectedClub.verificationStatus === 'rejected' ? '#B23B2E' : '#9A6E38',
+        }}>
+          {selectedClub.verificationStatus === 'rejected' ? (
+            <>
+              <b>ثبتِ این باشگاه تأیید نشد.</b>
+              {selectedClub.rejectionReason && (
+                <div style={{ marginTop: 4, color: '#1C1B17', fontWeight: 500 }}>
+                  علت: {selectedClub.rejectionReason}
+                </div>
+              )}
+              <div style={{ marginTop: 6, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>
+                پس از اصلاح، همین‌جا ذخیره کنید — باشگاه خودکار دوباره به صفِ بررسی می‌رود.
+              </div>
+            </>
+          ) : (
+            <>
+              <b>باشگاه در انتظارِ بررسیِ کارشناسان است.</b>
+              <div style={{ marginTop: 4, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>
+                تا تأیید، در فهرستِ عمومیِ سایت نمایش داده نمی‌شود. اطلاعات و مدارک را کامل کنید تا بررسی سریع‌تر انجام شود.
               </div>
             </>
           )}

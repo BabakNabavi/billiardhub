@@ -529,11 +529,23 @@ export default function ClubsPage() {
      هم‌نام با آن‌ها **حذف** می‌شدند. یعنی صاحبِ «باشگاه المپیک مشهد»
      که واقعاً ثبت‌نام کرده بود، نسخه‌ی ساختگی به‌جای باشگاهش نمایش
      داده می‌شد و صفحه‌ی خودش اصلاً دیده نمی‌شد. */
+  /* فیلترها به سرور می‌روند، نه اینکه کلِ جدول دانلود و در مرورگر فیلتر
+     شود. جستجو با تأخیرِ کوتاه فرستاده می‌شود تا هر حرفِ تایپ‌شده یک
+     درخواست نسازد. */
   useEffect(() => {
-    api.get('/clubs')
-      .then(r => { setClubs(Array.isArray(r.data) ? r.data : []); setLoading(false); })
-      .catch(() => { setClubs([]); setLoading(false); });
-  }, []);
+    const p = new URLSearchParams();
+    if (city !== 'همه شهرها') p.set('city', city);
+    if (search.trim()) p.set('q', search.trim());
+    for (const t of selectedTypes) p.set(t, '1');
+    for (const a of selectedAmens) p.set(a, '1');
+
+    const t = setTimeout(() => {
+      api.get(`/clubs${p.toString() ? `?${p}` : ''}`)
+        .then(r => { setClubs(Array.isArray(r.data) ? r.data : []); setLoading(false); })
+        .catch(() => { setClubs([]); setLoading(false); });
+    }, search.trim() ? 300 : 0);
+    return () => clearTimeout(t);
+  }, [city, search, selectedTypes, selectedAmens]);
 
   /* مسابقاتِ عمومی، یک‌بار برای کلِ فهرست — تا هر کارت جداگانه
      درخواست نفرستد. کلید `club_id` است، نه نامِ باشگاه. */

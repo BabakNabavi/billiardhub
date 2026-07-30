@@ -76,6 +76,8 @@ export function notify(mobile: string | null | undefined, message: string): void
 const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
 export const SMS = {
+  /* سرصفحه‌ی همه‌ی پیامک‌ها — تا نامِ برند در یک جا بماند */
+  brand: 'بیلیارد هاب',
   bookingConfirmed: (club: string, date: string, time: string, ref: string) =>
     `بیلیارد هاب\nرزرو شما در ${club} برای ${date} ساعت ${time} قطعی شد.\nکد پیگیری: ${ref}`,
 

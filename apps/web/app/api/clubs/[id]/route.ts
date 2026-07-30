@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
+import { notifyClubApproved, notifyClubRejected } from '@/lib/notify';
+import { audit, clientIp } from '@/lib/finance/db';
 import { isUUID } from '@/lib/slug';
 
 const CORS = {
@@ -74,9 +76,42 @@ export async function PUT(
   /* تأییدِ ادمین = انتشار. رد کردن = برداشتن از فهرستِ عمومی.
      این دو تا امروز از هم جدا بودند و «تأیید شده» هیچ اثری روی دیده‌شدنِ
      باشگاه نداشت. */
-  if (isAdmin && typeof body.verificationStatus === 'string') {
-    if (body.verificationStatus === 'verified') body.isActive = true;
-    else if (body.verificationStatus === 'rejected') body.isActive = false;
+  const decision = isAdmin && typeof body.verificationStatus === 'string'
+    ? String(body.verificationStatus) : null;
+
+  if (decision) {
+    if (decision === 'verified') {
+      body.isActive = true;
+      body.rejectionReason = null;      // ردِ قبلی دیگر معتبر نیست
+    } else if (decision === 'rejected') {
+      body.isActive = false;
+      /* علتِ رد اجباری است: بدونِ آن مالک فقط می‌بیند «رد شد» و
+         نمی‌داند چه چیزی را باید اصلاح کند. */
+      const reason = String(body.rejectionReason ?? '').trim();
+      if (!reason) {
+        return NextResponse.json(
+          { message: 'برای رد کردن، علت را بنویسید' }, { status: 400, headers: CORS });
+      }
+      body.rejectionReason = reason.slice(0, 500);
+    }
+    body.reviewedAt = new Date().toISOString();
+    body.reviewedBy = userId;
+  }
+
+  /* ارسالِ دوباره پس از اصلاح: مالک که باشگاهِ ردشده را ویرایش می‌کند،
+     دوباره به صفِ بررسی می‌رود. بدونِ این، باشگاهِ ردشده تا ابد ردشده
+     می‌ماند و راهی برای بازبینی وجود ندارد. */
+  let resubmitted = false;
+  if (!isAdmin) {
+    const { data: cur } = await getSupabaseServer()
+      .from('clubs').select('"verificationStatus","submissionCount"').eq('id', id).maybeSingle();
+    const c = cur as { verificationStatus?: string; submissionCount?: number } | null;
+    if (c?.verificationStatus === 'rejected') {
+      body.verificationStatus = 'pending';
+      body.rejectionReason = null;
+      body.submissionCount = (c.submissionCount ?? 1) + 1;
+      resubmitted = true;
+    }
   }
 
   /* شبا فقط از راهِ استعلامِ کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
@@ -99,7 +134,30 @@ export async function PUT(
     console.error('[clubs/:id] update error:', error.message);
     return NextResponse.json({ message: 'به‌روزرسانیِ باشگاه انجام نشد' }, { status: 500, headers: CORS });
   }
-  return NextResponse.json(updated, { headers: CORS });
+
+  /* اعلان و ردِ ممیزی — بی‌صدا، چون شکستِ پیامک نباید تصمیمِ ادمین را
+     برگرداند. تا امروز هیچ‌کدام از این دو وجود نداشت. */
+  if (decision === 'verified') {
+    void notifyClubApproved(id).catch(() => { /* بی‌صدا */ });
+    void audit({
+      actorId: userId, actorRole: 'admin', action: 'CLUB_APPROVED',
+      entityType: 'club', entityId: id, ip: clientIp(req) ?? undefined,
+    });
+  } else if (decision === 'rejected') {
+    void notifyClubRejected(id, String(body.rejectionReason ?? '')).catch(() => { /* بی‌صدا */ });
+    void audit({
+      actorId: userId, actorRole: 'admin', action: 'CLUB_REJECTED',
+      entityType: 'club', entityId: id,
+      newValue: { reason: body.rejectionReason }, ip: clientIp(req) ?? undefined,
+    });
+  } else if (resubmitted) {
+    void audit({
+      actorId: userId, actorRole: 'club_owner', action: 'CLUB_RESUBMITTED',
+      entityType: 'club', entityId: id, ip: clientIp(req) ?? undefined,
+    });
+  }
+
+  return NextResponse.json({ ...updated, resubmitted }, { headers: CORS });
 }
 
 export async function DELETE(

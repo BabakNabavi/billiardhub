@@ -95,3 +95,76 @@ export async function notifySettlementPaid(clubId: string, amount: number): Prom
   if (!club?.ownerId) return
   notify(await phoneOf(club.ownerId), SMS.settlementPaid(amount))
 }
+
+/* ─────────────────────────────────────────────────────────────
+   رویدادهای ماژولِ باشگاه — تأیید، رد، و مسابقات.
+
+   تا امروز هیچ‌کدام اعلانی نداشتند: ادمین باشگاهی را رد می‌کرد و
+   مالک هیچ‌وقت خبردار نمی‌شد؛ فقط اگر تصادفاً به داشبوردش سر می‌زد
+   وضعیت را می‌دید — آن‌هم بدونِ علت.
+   ───────────────────────────────────────────────────────────── */
+
+async function ownerPhoneOf(clubId: string): Promise<{ phone: string | null; name: string }> {
+  const c = await clubOf(clubId)
+  if (!c) return { phone: null, name: 'باشگاه' }
+  /* شماره‌ی اعلانِ باشگاه اگر ثبت شده، وگرنه موبایلِ مالک */
+  if (c.notifyPhone) return { phone: c.notifyPhone, name: c.name }
+  const phone = c.ownerId ? await phoneOf(c.ownerId) : null
+  return { phone, name: c.name }
+}
+
+/** باشگاه تأیید و منتشر شد */
+export async function notifyClubApproved(clubId: string): Promise<void> {
+  const { phone, name } = await ownerPhoneOf(clubId)
+  if (!phone) return
+  notify(phone, `${SMS.brand}\nباشگاه «${name}» تأیید شد و از این پس در سایت نمایش داده می‌شود.`)
+}
+
+/** باشگاه رد شد — علت حتماً گفته می‌شود، وگرنه مالک نمی‌داند چه را اصلاح کند */
+export async function notifyClubRejected(clubId: string, reason: string): Promise<void> {
+  const { phone, name } = await ownerPhoneOf(clubId)
+  if (!phone) return
+  const why = reason?.trim() ? `\nعلت: ${reason.trim()}` : ''
+  notify(phone, `${SMS.brand}\nثبتِ باشگاه «${name}» تأیید نشد.${why}\nپس از اصلاح، از داشبورد دوباره ارسال کنید.`)
+}
+
+/** مسابقه‌ی تازه‌ای در باشگاه ثبت شد — به مالک، به‌عنوانِ رسیدِ ثبت */
+export async function notifyTournamentCreated(clubId: string, title: string): Promise<void> {
+  const { phone, name } = await ownerPhoneOf(clubId)
+  if (!phone) return
+  notify(phone, `${SMS.brand}\nمسابقه «${title}» در باشگاه ${name} ثبت شد.`)
+}
+
+/** مسابقه لغو شد — به همه‌ی ثبت‌نام‌کننده‌های قطعی */
+export async function notifyTournamentCancelled(tournamentId: string): Promise<void> {
+  const { data: t } = await sb().from('tournaments').select('title').eq('id', tournamentId).maybeSingle()
+  const title = (t as { title?: string } | null)?.title ?? 'مسابقه'
+
+  const { data: regs } = await sb().from('tournament_registrations')
+    .select('user_id,payment_status').eq('tournament_id', tournamentId).eq('status', 'CONFIRMED')
+
+  for (const r of (regs ?? []) as { user_id: string; payment_status: string }[]) {
+    const phone = await phoneOf(r.user_id)
+    if (!phone) continue
+    const money = r.payment_status === 'PAID'
+      ? '\nمبلغِ پرداختی طیِ روزهای آینده بازگردانده می‌شود.' : ''
+    notify(phone, `${SMS.brand}\nمسابقه «${title}» لغو شد.${money}`)
+  }
+}
+
+/** ثبت‌نامِ مسابقه قطعی شد */
+export async function notifyTournamentRegistered(registrationId: string): Promise<void> {
+  const { data: r } = await sb().from('tournament_registrations')
+    .select('user_id,tournament_id').eq('id', registrationId).maybeSingle()
+  const reg = r as { user_id?: string; tournament_id?: string } | null
+  if (!reg?.user_id) return
+
+  const { data: t } = await sb().from('tournaments')
+    .select('title,starts_at').eq('id', reg.tournament_id!).maybeSingle()
+  const tt = (t ?? {}) as { title?: string; starts_at?: string }
+
+  const phone = await phoneOf(reg.user_id)
+  if (!phone) return
+  const when = tt.starts_at ? `\nتاریخ: ${faDate(tt.starts_at)}` : ''
+  notify(phone, `${SMS.brand}\nثبت‌نامِ شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`)
+}

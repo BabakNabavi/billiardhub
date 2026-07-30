@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, audit, clientIp } from '@/lib/finance/db';
+import { notifyTournamentRegistered } from '@/lib/notify';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
 import { confirmRegistrationPayment } from '@/lib/tournaments/server';
 
@@ -117,6 +118,10 @@ async function handle(req: NextRequest, providerName: string) {
     entityId: reg.id, newValue: { amount: reg.amount, refId: v.refId },
     ip: clientIp(req) ?? undefined,
   });
+
+  /* ثبت‌نام قطعی شد ⇒ رسیدِ پیامکی. بی‌صدا، چون شکستِ پیامک نباید
+     پرداختِ موفق را به صفحه‌ی خطا ببرد. */
+  void notifyTournamentRegistered(reg.id).catch(() => { /* بی‌صدا */ });
 
   return back('ok', `&r=${reg.id}`);
 }

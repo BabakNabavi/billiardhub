@@ -26,12 +26,16 @@ async function fetchClubs(): Promise<ClubRow[]> {
   return Array.isArray(data) ? data : [];
 }
 
-async function updateStatus(id: string, status: string) {
-  await apiFetch(`/api/clubs/${id}`, {
+async function updateStatus(id: string, status: string, rejectionReason?: string) {
+  const r = await apiFetch(`/api/clubs/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ verificationStatus: status }),
+    body: JSON.stringify({ verificationStatus: status, ...(rejectionReason ? { rejectionReason } : {}) }),
   });
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({})) as { message?: string };
+    throw new Error(j.message ?? 'عملیات انجام نشد');
+  }
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
@@ -55,11 +59,30 @@ export default function AdminClubsPage() {
     fetchClubs().then(data => { setClubs(data); setLoading(false); });
   }, [user]);
 
+  const [err, setErr] = useState('');
+
   const setStatus = async (id: string, status: string) => {
-    setActionLoading(id + status);
-    await updateStatus(id, status);
-    setClubs(cs => cs.map(c => c.id === id ? { ...c, verificationStatus: status } : c));
-    setActionLoading(null);
+    /* رد کردن بدونِ علت پذیرفته نمی‌شود — مالک باید بداند چه را اصلاح کند.
+       سرور هم همین را اجبار می‌کند؛ این‌جا فقط زودتر پرسیده می‌شود. */
+    let reason: string | undefined;
+    if (status === 'rejected') {
+      const r = window.prompt('علتِ رد را بنویسید (برای مالکِ باشگاه پیامک می‌شود):');
+      if (r === null) return;                 // انصراف
+      if (!r.trim()) { setErr('علتِ رد نمی‌تواند خالی باشد'); return; }
+      reason = r.trim();
+    }
+
+    setActionLoading(id + status); setErr('');
+    try {
+      await updateStatus(id, status, reason);
+      setClubs(cs => cs.map(c => c.id === id
+        ? { ...c, verificationStatus: status, rejectionReason: reason ?? null }
+        : c));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'عملیات انجام نشد');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const filtered = filter === 'all' ? clubs : clubs.filter(c => c.verificationStatus === filter);
@@ -71,8 +94,17 @@ export default function AdminClubsPage() {
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, letterSpacing: '0.2em', marginBottom: 6 }}>ADMIN</div>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#111', margin: 0 }}>تأیید باشگاه‌ها</h1>
-        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>بررسی مدارک و صدور تیک تأیید</p>
+        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
+          بررسی مدارک و صدور تیک تأیید — تأیید یعنی انتشار در سایت، رد یعنی برداشتن از فهرست
+        </p>
       </div>
+
+      {err && (
+        <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+          background: '#FEE2E2', border: '1px solid rgba(220,38,38,0.28)', color: '#991B1B' }}>
+          {err}
+        </div>
+      )}
 
       {/* فیلتر */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
@@ -137,7 +169,7 @@ export default function AdminClubsPage() {
                 </div>
 
                 {/* دکمه‌های اقدام */}
-                {club.licenseDocumentUrl && club.verificationStatus !== 'verified' && (
+                {club.verificationStatus !== 'verified' && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f3f4f6' }}>
                     <button
                       disabled={!!actionLoading}

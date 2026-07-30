@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { listPublicTournaments, listClubTournaments, seatsLeft } from '@/lib/tournaments/server';
+import { notifyTournamentCreated } from '@/lib/notify';
 
 /* فهرستِ مسابقات + ساختِ مسابقه توسطِ باشگاه.
 
@@ -106,6 +107,8 @@ export async function POST(req: NextRequest) {
     entityType: 'tournament', entityId: String((data as { id?: string })?.id ?? ''),
     newValue: { clubId, title, entryFee }, ip: clientIp(req) ?? undefined,
   });
+
+  void notifyTournamentCreated(clubId, title).catch(() => { /* بی‌صدا */ });
 
   return NextResponse.json({ tournament: data }, { status: 201 });
 }

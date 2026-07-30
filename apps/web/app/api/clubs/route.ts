@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
+import { actorFromRequest, isAdmin } from '@/lib/finance/db';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -14,13 +15,65 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
 }
 
-export async function GET() {
+/* شهر/استان/نام از کاربر می‌آید و مستقیم به PostgREST می‌رود؛ کاراکترهای
+   کنترلیِ فیلتر (`,` و `%` و `*`) باید بی‌اثر شوند وگرنه می‌شود شرط تزریق کرد. */
+const clean = (v: string | null, max = 60) =>
+  String(v ?? '').replace(/[,%*()"'\\]/g, '').trim().slice(0, max);
+
+export async function GET(req: NextRequest) {
   try {
-    const { data: clubs, error } = await getSupabaseServer()
-      .from('clubs')
-      .select('*')
-      .eq('isActive', true)
-      .order('createdAt', { ascending: false });
+    const sp = req.nextUrl.searchParams;
+
+    /* `?all=true` فهرستِ کامل (شاملِ در انتظار و ردشده) را می‌دهد و **فقط**
+       برای ادمین است.
+
+       تا امروز این پارامتر اصلاً خوانده نمی‌شد: پنلِ ادمین آن را می‌فرستاد
+       ولی همان فهرستِ عمومی برمی‌گشت. چون باشگاهِ تازه‌ثبت‌شده
+       `isActive=false` است، هیچ‌وقت در صفِ تأیید ظاهر نمی‌شد و عملاً
+       امکانِ تأییدش وجود نداشت — کلِ فلوی ثبت → تأیید → انتشار قطع بود. */
+    const wantsAll = sp.get('all') === 'true';
+    let isAdminReq = false;
+    if (wantsAll) {
+      const actor = actorFromRequest(req);
+      isAdminReq = !!actor && (await isAdmin(actor.id));
+      if (!isAdminReq) {
+        return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403, headers: CORS_HEADERS });
+      }
+    }
+
+    let q = getSupabaseServer().from('clubs').select('*');
+
+    if (!isAdminReq) {
+      /* دیده‌شدنِ عمومی = هم منتشرشده، هم تأییدشده.
+         `isActive` تنها کافی نیست: داده‌ی قدیمی با وضعیتِ pending هم
+         isActive=true داشت و در فهرستِ عمومی می‌نشست. */
+      q = q.eq('isActive', true).eq('verificationStatus', 'verified');
+
+      /* ── فیلترهای سمتِ سرور ──
+         پیش‌تر همه‌ی فیلترها روی کلاینت بودند: کلِ جدول دانلود می‌شد و
+         مرورگر فیلتر می‌کرد. با رشدِ تعدادِ باشگاه‌ها هم کند می‌شود هم
+         پهنای‌باند هدر می‌دهد. */
+      const city = clean(sp.get('city'));
+      if (city && city !== 'همه شهرها') q = q.eq('city', city);
+
+      const province = clean(sp.get('province'));
+      if (province) q = q.eq('province', province);
+
+      const search = clean(sp.get('q'), 80);
+      if (search) q = q.or(`name.ilike.%${search}%,address.ilike.%${search}%,city.ilike.%${search}%`);
+
+      /* نوعِ میز: «حداقل یکی داشته باشد» */
+      for (const t of ['snookerTables', 'pocketTables', 'highballTables', 'vipSnookerTables']) {
+        if (sp.get(t) === '1') q = q.gt(t, 0);
+      }
+      /* امکانات */
+      for (const a of ['hasCafe', 'hasParking', 'hasWifi', 'hasProfessionalCoach']) {
+        if (sp.get(a) === '1') q = q.eq(a, true);
+      }
+      if (sp.get('playstations') === '1') q = q.gt('playstations', 0);
+    }
+
+    const { data: clubs, error } = await q.order('createdAt', { ascending: false }).limit(500);
 
     if (error) {
       console.error('[clubs] db error:', error.message);
