@@ -41,3 +41,7 @@ Color code.txt
 
 # گزارش‌های موقتِ Lighthouse
 ._lh-*.json
+._x.json
+._p*.json
+._r*.json
+._d*.json
