@@ -23,6 +23,7 @@ import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIba
 import { apiFetch } from '../../../lib/http';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
+import { toJalali, jalaliToGregorian } from '../../../lib/jalali';
 import FaNumberInput, { toFa as faDigit, groupFa, amountInWords } from '../../../components/ui/FaNumberInput';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
@@ -315,7 +316,7 @@ interface DbTournament {
   discipline?: string; max_players: number; entry_fee: number;
   prize?: string | null; venue?: string | null; city?: string | null;
   starts_at?: string | null; registration_ends_at?: string | null;
-  status: string; seatsLeft?: number;
+  status: string; seatsLeft?: number; match_format?: string | null;
 }
 
 /* نگاشتِ وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
@@ -327,20 +328,39 @@ const T_STATUS: Record<string, Tournament['status']> = {
   completed: 'finished', cancelled: 'finished',
 };
 
+/* `starts_at` یک timestamptz است. برای فرم باید دوباره به همان قالبی
+   برگردد که `JalaliDatePicker` می‌فهمد («۱۴۰۵/۵/۱۵»)، وگرنه ویرایشِ یک
+   مسابقه‌ی موجود تاریخش را خالی نشان می‌دهد.
+
+   تفکیکِ اجزا در وقتِ تهران انجام می‌شود، نه UTC: مسابقه‌ی ساعتِ ۱ بامداد
+   با `toISOString()` روزِ قبل خوانده می‌شد. */
+function isoToTehranParts(iso: string): { jy: number; jm: number; jd: number; hh: string; mm: string } | null {
+  try {
+    const p = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Tehran', calendar: 'gregory',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(new Date(iso)).reduce<Record<string, string>>((a, x) => (a[x.type] = x.value, a), {});
+    const [jy, jm, jd] = toJalali(Number(p.year), Number(p.month), Number(p.day));
+    return { jy, jm, jd, hh: (p.hour === '24' ? '00' : p.hour!), mm: p.minute! };
+  } catch { return null; }
+}
+
 function fromDbTournament(r: DbTournament): Tournament {
-  const starts = r.starts_at ? new Date(r.starts_at) : null;
+  const parts = r.starts_at ? isoToTehranParts(r.starts_at) : null;
+  const deadline = r.registration_ends_at ? isoToTehranParts(r.registration_ends_at) : null;
   return {
     id: r.id,
     clubId: r.club_id, clubName: r.venue ?? '',
     banner: '/images/clubs/club1.png',
     name: r.title, description: r.description ?? '',
     gameType: (r.discipline ?? 'snooker') as Tournament['gameType'],
-    date: starts ? starts.toISOString().slice(0, 10) : '',
-    startTime: starts ? starts.toISOString().slice(11, 16) : '',
-    registrationDeadline: r.registration_ends_at ?? '',
+    date: parts ? `${parts.jy}/${parts.jm}/${parts.jd}` : '',
+    startTime: parts ? `${parts.hh}:${parts.mm}` : '',
+    registrationDeadline: deadline ? `${deadline.jy}/${deadline.jm}/${deadline.jd}` : '',
     maxPlayers: (r.max_players as Tournament['maxPlayers']),
     entryFee: r.entry_fee,
-    prizeInfo: r.prize ?? '', rules: '', matchFormat: '',
+    prizeInfo: r.prize ?? '', rules: '', matchFormat: r.match_format ?? '',
     paymentMethod: 'online',
     cardNumber: '', cardHolder: '', bankName: '',
     status: T_STATUS[r.status] ?? 'upcoming',
@@ -924,6 +944,20 @@ export default function ClubDashboardPage() {
     });
   };
 
+  /* `JalaliDatePicker` مقدارش را «۱۴۰۵/۵/۱۵» می‌دهد، ولی ستونِ
+     `starts_at` در دیتابیس timestamptz است. بدونِ این تبدیل، همان رشته‌ی
+     شمسی مستقیم به Postgres می‌رفت و یا خطا می‌داد یا تاریخِ بی‌معنیِ
+     میلادی می‌ساخت. */
+  const jalaliToIso = (jalali: string, time: string): string | null => {
+    const m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(String(jalali || '').trim());
+    if (!m) return null;
+    const [gy, gm, gd] = jalaliToGregorian(Number(m[1]), Number(m[2]), Number(m[3]));
+    const [hh = '00', mm = '00'] = String(time || '00:00').split(':');
+    const p = (n: number | string) => String(n).padStart(2, '0');
+    /* +03:30 ثابت است: ایران از ۱۴۰۱ ساعتِ تابستانی ندارد */
+    return `${gy}-${p(gm)}-${p(gd)}T${p(hh)}:${p(mm)}:00+03:30`;
+  };
+
   const createTournament = async () => {
     if (!selectedClub) return;
     if (!tForm.name.trim()) { alert('نام مسابقه الزامی است'); return; }
@@ -948,7 +982,10 @@ export default function ClubDashboardPage() {
           prize: tForm.prizeInfo,
           venue: selectedClub.name,
           city: (selectedClub as { city?: string }).city ?? '',
-          startsAt: tForm.date ? `${tForm.date}T${tForm.startTime || '00:00'}:00+03:30` : null,
+          startsAt: jalaliToIso(tForm.date, tForm.startTime || '00:00'),
+          /* مهلتِ ثبت‌نام پیش‌تر اصلاً فرستاده نمی‌شد و همیشه NULL می‌ماند */
+          registrationEndsAt: jalaliToIso(tForm.registrationDeadline, '23:59'),
+          matchFormat: tForm.matchFormat,
           /* پیش‌نویس ساخته می‌شود؛ باز کردنِ ثبت‌نام یک اقدامِ جداست */
           status: 'draft',
         }),

@@ -16,6 +16,20 @@ const STATUSES = new Set([
   'ongoing', 'completed', 'cancelled',
 ]);
 
+/* فرمتِ مسابقه از فهرستِ بسته می‌آید، نه متنِ آزاد — پیش‌تر هرچه کاربر
+   تایپ می‌کرد ذخیره می‌شد و «bo5» و «Best of 5» و «حذفی» کنار هم
+   می‌نشستند و قابلِ گروه‌بندی نبودند. */
+const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
+
+/* تاریخ باید واقعاً تاریخ باشد. رشته‌ی بی‌معنی به‌جای خطای Postgres،
+   همین‌جا NULL می‌شود. */
+const isoOrNull = (v: unknown): string | null => {
+  const s = String(v ?? '').trim();
+  if (!s) return null;
+  const t = Date.parse(s);
+  return Number.isFinite(t) ? new Date(t).toISOString() : null;
+};
+
 export async function GET(req: NextRequest) {
   const clubId = req.nextUrl.searchParams.get('clubId') ?? undefined;
   const mine = req.nextUrl.searchParams.get('mine') === '1';
@@ -70,10 +84,16 @@ export async function POST(req: NextRequest) {
     venue: String(b?.venue ?? '').slice(0, 200) || null,
     province: String(b?.province ?? '').slice(0, 80) || null,
     city: String(b?.city ?? '').slice(0, 80) || null,
-    starts_at: b?.startsAt || null,
-    registration_ends_at: b?.registrationEndsAt || null,
+    starts_at: isoOrNull(b?.startsAt),
+    registration_ends_at: isoOrNull(b?.registrationEndsAt),
+    match_format: FORMATS.has(String(b?.matchFormat)) ? String(b.matchFormat) : null,
     status,
   };
+
+  /* مهلتِ ثبت‌نام نباید بعد از خودِ مسابقه باشد */
+  if (row.starts_at && row.registration_ends_at && row.registration_ends_at > row.starts_at) {
+    return NextResponse.json({ message: 'مهلتِ ثبت‌نام نمی‌تواند بعد از تاریخِ برگزاری باشد' }, { status: 400 });
+  }
 
   const { data, error } = await sb().from('tournaments').insert(row).select().single();
   if (error) {
