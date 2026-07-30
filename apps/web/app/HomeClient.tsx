@@ -391,11 +391,14 @@ function ClubCard({ club, h = '360px', featured = false }: { club: typeof CLUBS[
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            padding: '17px 7px 24px',
+            /* پدینگِ پایین از ۲۴ به ۱۶ آمد تا دکمه‌ی «مشاهده و رزرو»
+               کمی بالاتر بنشیند — فاصله‌ی spacer پایین را می‌گیرد. */
+            padding: '17px 7px 16px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '9px',
           }}>
-            <div style={{ fontSize: '13px', fontWeight: 800, color: '#1a1a1a',
+            {/* ۱۰٪ بزرگ‌تر از ۱۳px */}
+            <div style={{ fontSize: '14.3px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
