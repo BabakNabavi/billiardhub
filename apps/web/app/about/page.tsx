@@ -35,7 +35,7 @@ const ECO_NODES = [
   { label: 'بازیکنان',   en: 'PLAYERS',     href: '/players',     clr: BALLS.red    },
   { label: 'باشگاه‌ها',  en: 'CLUBS',       href: '/clubs',       clr: BALLS.green  },
   { label: 'مسابقات',    en: 'TOURNAMENTS', href: '/tournaments', clr: BALLS.blue   },
-  { label: 'رویدادها',   en: 'EVENTS',      href: '/events',      clr: BALLS.yellow },
+  { label: 'رویدادها',   en: 'EVENTS',      href: '/tournaments', clr: BALLS.yellow },
   { label: 'بازار',      en: 'MARKETPLACE', href: '/shop',        clr: BALLS.pink   },
   { label: 'تجهیزات',    en: 'EQUIPMENT',   href: '/sellers',     clr: BALLS.brown  },
   { label: 'مدیا',       en: 'MEDIA',       href: '/media',       clr: '#8b5cf6'    },

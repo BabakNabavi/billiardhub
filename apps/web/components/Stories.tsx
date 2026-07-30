@@ -33,27 +33,9 @@ interface StoryGroup {
   ownerKey?: string;   // برای هدف‌گذاریِ ریپلای/دایرکت (استوریِ سمت‌سرور)
 }
 
-const sampleGroups: StoryGroup[] = [
-  { userId:'shop-procue', userName:'پروکیو', userAvatar:'پ', userRole:'shop', roleColor:'#f59e0b', roleLabel:'فروشگاه', allSeen:false, stories:[{id:'procue-s1', caption:'جدیدترین کالکشن چوب‌های کربنی Predator رسید — همین حالا ببینید!', createdAt:'۱ ساعت پیش', mediaUrl:'/images/shop/Pro_table.jpg', mediaType:'image'}] },
-  { userId:'1',   userName:'باشگاه ستاره',  userAvatar:'س', userRole:'club',    roleColor:'#C7A66A', roleLabel:'باشگاه',  allSeen:false, stories:[{id:'1',   caption:'میز جدید اسنوکر نصب شد 🎱',           createdAt:'۲ ساعت پیش', mediaUrl:'/images/shop/snooker-table.jpg', mediaType:'image'},{id:'1b',caption:'رزرو آنلاین فعال شد ✅',createdAt:'۲ ساعت پیش'}] },
-  { userId:'c1',  userName:'احمد رضایی',    userAvatar:'ا', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c1s1', caption:'کلاس خصوصی اسنوکر فردا ساعت ۱۰ 🎱', createdAt:'۱ ساعت پیش', mediaUrl:'/images/shop/snooker-table.jpg', mediaType:'image'}] },
-  { userId:'c7',  userName:'نیلوفر صادقی',  userAvatar:'ن', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c7s1', caption:'مسابقات بانوان این هفته 🏆',        createdAt:'۲ ساعت پیش', mediaUrl:'/images/shop/Ball-1.jpg',        mediaType:'image'}] },
-  { userId:'c2',  userName:'حسین نوری',     userAvatar:'ح', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c2s1', caption:'تمرین گروهی امشب در باشگاه 🎱',    createdAt:'۲ ساعت پیش', mediaUrl:'/images/shop/cue_billiard_2.jpg',mediaType:'image'}] },
-  { userId:'c3',  userName:'مریم کاظمی',    userAvatar:'م', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c3s1', caption:'کلاس پاکت بیلیارد بانوان شروع شد 🎱', createdAt:'۱ ساعت پیش', mediaUrl:'/images/shop/Ball-1.jpg',        mediaType:'image'}] },
-  { userId:'c5',  userName:'علی حسینی',     userAvatar:'ع', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c5s1', caption:'تکنیک‌های پیشرفته هی‌بال 🎱',       createdAt:'۲ ساعت پیش', mediaUrl:'/images/shop/pool_chalk_1.jpg',  mediaType:'image'}] },
-  { userId:'c9',  userName:'زهرا شریفی',    userAvatar:'ز', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c9s1', caption:'آموزش گام‌به‌گام پاکت بیلیارد ✅',   createdAt:'۳ ساعت پیش', mediaUrl:'/images/shop/Ball-1.jpg',        mediaType:'image'}] },
-  { userId:'r1',  userName:'کاوه طالبی',    userAvatar:'ک', userRole:'referee', roleColor:'#0891b2', roleLabel:'داور',    allSeen:false, stories:[{id:'r1s1', caption:'آماده قضاوت فینال هفته آینده 🏆',  createdAt:'۱ ساعت پیش', mediaUrl:'/images/shop/snooker-table.jpg', mediaType:'image'}] },
-  { userId:'2',   userName:'علی محمدی',     userAvatar:'ع', userRole:'player',  roleColor:'#06b6d4', roleLabel:'بازیکن',  allSeen:false, stories:[{id:'2a',   caption:'تمرین امروز 💪',                  createdAt:'۳ ساعت پیش'},{id:'2b',caption:'آماده مسابقه‌ام!',createdAt:'۳ ساعت پیش'}] },
-  { userId:'3',   userName:'Predator Shop',  userAvatar:'P', userRole:'shop',    roleColor:'#f59e0b', roleLabel:'فروشگاه', allSeen:false, stories:[{id:'3',    caption:'تخفیف ۳۰٪ چوب‌های حرفه‌ای 🔥',      createdAt:'۴ ساعت پیش'}] },
-  { userId:'c10', userName:'محسن طاهری',    userAvatar:'م', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:false, stories:[{id:'c10s1',caption:'آموزش تکنیک‌های پیشرفته هی‌بال 🎱',createdAt:'۶ ساعت پیش', mediaUrl:'/images/shop/pool_chalk_1.jpg',  mediaType:'image'}] },
-  { userId:'r5',  userName:'حامد موسوی',    userAvatar:'ح', userRole:'referee', roleColor:'#0891b2', roleLabel:'داور',    allSeen:false, stories:[{id:'r5s1', caption:'گواهینامه بین‌المللی تمدید شد ✅',  createdAt:'۳ ساعت پیش', mediaUrl:'/images/shop/cue_billiard_2.jpg',mediaType:'image'}] },
-  { userId:'c4',  userName:'سینا محمدی',    userAvatar:'س', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:true,  stories:[{id:'c4s1', caption:'برنامه هفتگی کلاس‌ها آپدیت شد ✅',  createdAt:'۳ ساعت پیش', mediaUrl:'/images/shop/pool_chalk_1.jpg',  mediaType:'image'}] },
-  { userId:'c6',  userName:'رضا ابراهیمی',  userAvatar:'ر', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:true,  stories:[{id:'c6s1', caption:'مسابقات ماه آینده آماده می‌شویم 🏆',createdAt:'۴ ساعت پیش', mediaUrl:'/images/shop/cue_billiard_2.jpg',mediaType:'image'}] },
-  { userId:'c8',  userName:'کامران یوسفی',  userAvatar:'ک', userRole:'coach',   roleColor:'#a78bfa', roleLabel:'مربی',    allSeen:true,  stories:[{id:'c8s1', caption:'تمرین امروز عالی بود 💪',           createdAt:'۵ ساعت پیش', mediaUrl:'/images/shop/cue_billiard_2.jpg',mediaType:'image'}] },
-  { userId:'5',   userName:'باشگاه المپیک', userAvatar:'ا', userRole:'club',    roleColor:'#C7A66A', roleLabel:'باشگاه',  allSeen:true,  stories:[{id:'5',    caption:'مسابقات هفتگی جمعه',              createdAt:'۶ ساعت پیش'}] },
-  { userId:'r2',  userName:'نیلوفر حسینی',  userAvatar:'ن', userRole:'referee', roleColor:'#0891b2', roleLabel:'داور',    allSeen:true,  stories:[{id:'r2s1', caption:'مسابقات پاکت بیلیارد بانوان 🎱',   createdAt:'۷ ساعت پیش', mediaUrl:'/images/shop/Ball-1.jpg',        mediaType:'image'}] },
-  { userId:'6',   userName:'کاوه موسوی',    userAvatar:'ک', userRole:'player',  roleColor:'#06b6d4', roleLabel:'بازیکن',  allSeen:true,  stories:[{id:'6',    caption:'قهرمان هفته 🏆',                  createdAt:'۸ ساعت پیش'}] },
-];
+/* استوری‌های نمونه حذف شدند — نوزده کاربرِ ساختگی (مربی، داور،
+   فروشگاه) که روی صفحه‌ی اصلی کنارِ استوری‌های واقعی نشان داده
+   می‌شدند و هیچ‌کدام وجود خارجی نداشتند. */
 
 const emojis = ['❤️','🔥','👏','😮','😂','🎱','💪','🏆'];
 /* استیکرهای سریعِ پاسخِ استوری — ست مدرن و به‌روز */
@@ -383,7 +365,7 @@ export default function Stories() {
 
   // استوریِ سمت‌سرور (بین دستگاه‌ها) اولویت دارد؛ اگر سرور خالی/آفلاین بود، لوکال فالبک
   const userStoryGroups = serverGroups.length > 0 ? serverGroups : localGroups;
-  const groups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups, ...sampleGroups];
+  const groups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
@@ -626,6 +608,10 @@ export default function Stories() {
     sendReply(comment, 'text');
     setComment('');
   };
+
+  /* نه استوری‌ای هست و نه کاربر اجازه‌ی ساختن دارد ⇒ نوارِ خالی نشان
+     نده. پیش‌تر این حالت پیش نمی‌آمد چون همیشه استوری‌های نمونه بودند. */
+  if (groups.length === 0 && !(user && canPost)) return null;
 
   return (
     <>

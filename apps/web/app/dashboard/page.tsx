@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/api';
 import { apiFetch } from '../../lib/http';
+import { fetchNotifs, markNotifsRead, type Notif as SocialNotif } from '../../lib/social';
 import { findCoachByOwner } from '../../lib/coach-store';
 import { findRefereeByOwner } from '../../lib/referee-store';
 import {
@@ -24,16 +25,23 @@ import MyBookings from '../../components/booking/MyBookings';
 
 
 /* ══ types ══ */
-interface Notif { id: string; type: 'booking' | 'tournament' | 'achievement' | 'system'; msg: string; time: string; read: boolean; }
 interface MyReg { id: string; tournamentId: string; tournamentName: string; status: 'pending' | 'approved' | 'rejected'; registeredAt: string; }
 
-/* ══ sample data ══ */
-const notifications: Notif[] = [
-  { id: 'n1', type: 'booking', msg: 'رزرو شما در باشگاه سنچوری تأیید شد', time: '۲ دقیقه پیش', read: false },
-  { id: 'n2', type: 'tournament', msg: 'ثبت‌نام مسابقات لیگ برتر تا فردا باز است', time: '۱ ساعت پیش', read: false },
-  { id: 'n3', type: 'achievement', msg: 'مدال ۵۰ مسابقه را دریافت کردید!', time: '۳ ساعت پیش', read: true },
-  { id: 'n4', type: 'system', msg: 'پروفایل شما توسط فدراسیون تأیید شد', time: 'دیروز', read: true },
-];
+/* اعلان‌های نمونه حذف شدند: چهار اعلانِ ساختگی («رزرو شما در باشگاه
+   سنچوری تأیید شد»، «مدال ۵۰ مسابقه را دریافت کردید») به هر کاربری
+   نشان داده می‌شد، حتی کاربرِ تازه‌ای که هیچ رزروی نداشت. */
+
+/* «۲ دقیقه پیش» از زمانِ واقعی */
+function timeAgo(at: number): string {
+  const s = Math.max(0, Math.floor((Date.now() - at) / 1000));
+  if (s < 60) return 'همین حالا';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${toFa(m)} دقیقه پیش`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${toFa(h)} ساعت پیش`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? 'دیروز' : `${toFa(d)} روز پیش`;
+}
 
 
 function toFa(v: string | number) {
@@ -74,7 +82,24 @@ export default function DashboardPage() {
   const [hasCoachProfile, setHasCoachProfile] = useState(false);
   const [hasRefereeProfile, setHasRefereeProfile] = useState(false);
   const rafRef = useRef<number>(0);
+
+  /* اعلان‌های واقعیِ کاربر */
+  const [notifications, setNotifications] = useState<SocialNotif[]>([]);
   const unread = notifications.filter(n => !n.read).length;
+
+  useEffect(() => {
+    const key = user?.id ?? user?.phone;
+    if (!key) return;
+    void (async () => setNotifications(await fetchNotifs(key)))();
+  }, [user?.id, user?.phone]);
+
+  /* بازکردنِ پنل یعنی خوانده شدند */
+  useEffect(() => {
+    const key = user?.id ?? user?.phone;
+    if (!notifOpen || !key || unread === 0) return;
+    void markNotifsRead(key);
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, [notifOpen]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* مسابقه‌ی پیشِ‌رو از سرور می‌آید. پیش‌تر از آرایه‌ی نمونه خوانده
      می‌شد و `?? SAMPLE_TOURNAMENTS[0]` تضمین می‌کرد همیشه یک مسابقه‌ی
@@ -330,14 +355,20 @@ export default function DashboardPage() {
                       {unread > 0 && <span style={{ fontSize: '12px', color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '2px 9px', fontWeight: 700 }}>{toFa(unread)} جدید</span>}
                     </div>
                     <div style={{ maxHeight: '320px', overflowY: 'auto', padding: '8px' }}>
-                      {notifications.map((n, i) => (
-                        <div key={i} style={{ display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: n.read ? 'transparent' : 'rgba(199,166,106,0.06)', marginBottom: '4px', cursor: 'pointer', transition: 'background 0.2s' }}>
-                          <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: { booking: 'rgba(199,166,106,0.10)', tournament: 'rgba(245,158,11,0.1)', achievement: 'rgba(167,139,250,0.1)', system: 'rgba(0,0,0,0.04)' }[n.type], border: `1px solid ${{ 'booking': 'rgba(199,166,106,0.20)', 'tournament': 'rgba(245,158,11,0.2)', 'achievement': 'rgba(167,139,250,0.2)', 'system': 'rgba(0,0,0,0.07)' }[n.type]}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            {{ 'booking': <Calendar size={14} style={{ color: '#C7A66A' }} />, 'tournament': <Trophy size={14} style={{ color: '#f59e0b' }} />, 'achievement': <Award size={14} style={{ color: '#a78bfa' }} />, 'system': <Shield size={14} style={{ color: 'rgba(0,0,0,0.42)' }} /> }[n.type]}
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '34px 16px', textAlign: 'center', fontSize: '14px', color: 'rgba(0,0,0,0.35)' }}>
+                          اعلانی ندارید
+                        </div>
+                      ) : notifications.map(n => (
+                        <div key={n.id} style={{ display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: n.read ? 'transparent' : 'rgba(199,166,106,0.06)', marginBottom: '4px', transition: 'background 0.2s' }}>
+                          <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Bell size={14} style={{ color: '#C7A66A' }} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '14px', color: n.read ? 'rgba(0,0,0,0.45)' : '#111111', fontWeight: n.read ? 400 : 600, lineHeight: 1.5, marginBottom: '3px' }}>{n.msg}</div>
-                            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{n.time}</div>
+                            <div style={{ fontSize: '14px', color: n.read ? 'rgba(0,0,0,0.45)' : '#111111', fontWeight: n.read ? 400 : 600, lineHeight: 1.5, marginBottom: '3px' }}>
+                              <b>{n.fromName}</b> {n.text}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.30)' }}>{timeAgo(n.at)}</div>
                           </div>
                           {!n.read && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C7A66A', flexShrink: 0, marginTop: '6px', boxShadow: '0 0 6px rgba(199,166,106,0.60)' }} />}
                         </div>
