@@ -56,17 +56,27 @@ export default function AdminRankingsPage() {
     setRankings(newRankings);
   };
 
-  /* ذخیره‌ی واقعی — همین داده در /ranking سایت نمایش داده می‌شود */
+  /* ذخیره‌ی واقعی — همین داده در /ranking سایت نمایش داده می‌شود.
+
+     کشِ محلی فقط **بعد از** موفقیتِ سرور نوشته می‌شود. پیش‌تر برعکس
+     بود و اگر سرور رد می‌کرد، ادمین همچنان تغییرش را روی مرورگرِ خودش
+     می‌دید و فکر می‌کرد ذخیره شده — در حالی که برای بقیه هیچ اتفاقی
+     نیفتاده بود. */
   const handleSave = async () => {
-    saveRankings(rankings);            // کشِ محلی
+    setErr('');
     try {
       const r = await apiFetch('/api/admin/settings', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rankings_board: rankings }),
       });
-      if (!r.ok) { setErr('ذخیره روی سرور انجام نشد'); return; }
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({})) as { message?: string };
+        setErr(j.message ?? `ذخیره روی سرور انجام نشد (کد ${r.status})`);
+        return;
+      }
     } catch { setErr('خطا در ارتباط با سرور'); return; }
-    setErr('');
+
+    saveRankings(rankings);            // کشِ محلی، حالا که سرور تأیید کرد
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

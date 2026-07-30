@@ -56,11 +56,9 @@ export function buildEmptyRankings(): RankingsStructure {
 }
 
 /* ساختارِ ذخیره‌شده را روی ساختارِ خالی سوار می‌کند تا اندازه‌ها همیشه درست باشند */
-export function getStoredRankings(): RankingsStructure {
+export function mergeIntoEmpty(raw: RankingsStructure | null | undefined): RankingsStructure {
   const base = buildEmptyRankings()
-  if (typeof window === 'undefined') return base
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? 'null') as RankingsStructure | null
     if (!raw) return base
     for (const sport of Object.keys(base)) {
       const genders = base[sport]!
@@ -83,13 +81,38 @@ export function getStoredRankings(): RankingsStructure {
   } catch { return base }
 }
 
+/* کشِ محلی — فقط برای اینکه صفحه لحظه‌ی اول خالی نباشد.
+   منبعِ حقیقت `app_settings.rankings_board` روی سرور است. */
+export function getStoredRankings(): RankingsStructure {
+  if (typeof window === 'undefined') return buildEmptyRankings()
+  try {
+    return mergeIntoEmpty(JSON.parse(localStorage.getItem(KEY) ?? 'null') as RankingsStructure | null)
+  } catch { return buildEmptyRankings() }
+}
+
 export function saveRankings(data: RankingsStructure) {
   if (typeof window === 'undefined') return
   localStorage.setItem(KEY, JSON.stringify(data))
 }
 
+/* جدولِ رنکینگ از سرور. `null` یعنی هنوز چیزی ثبت نشده — با «خالی»
+   یکی نیست و صفحه باید فرقشان را بداند. */
+export async function fetchRankingsBoard(): Promise<RankingsStructure | null> {
+  try {
+    const r = await fetch('/api/rankings', { cache: 'no-store' })
+    if (!r.ok) return null
+    const j = await r.json() as { board?: RankingsStructure | null }
+    return j?.board ? mergeIntoEmpty(j.board) : null
+  } catch { return null }
+}
+
 /* بازیکنانِ واقعاً واردشده‌ی یک دسته (نامِ خالی حذف می‌شود) */
-export function getCategoryPlayers(sport: string, gender: string, category: string): RankingPlayer[] {
-  const all = getStoredRankings()
+export function categoryPlayersOf(
+  all: RankingsStructure, sport: string, gender: string, category: string,
+): RankingPlayer[] {
   return (all[sport]?.[gender]?.[category] ?? []).filter(p => p.name.trim() !== '')
+}
+
+export function getCategoryPlayers(sport: string, gender: string, category: string): RankingPlayer[] {
+  return categoryPlayersOf(getStoredRankings(), sport, gender, category)
 }

@@ -1,19 +1,20 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   رنکینگ بازیکنان — بازطراحیِ صرفاً UI/UX (۱۴۰۵).
-   داده‌ها، منطق، فیلترها و مسیرها عیناً حفظ شده‌اند:
-   samplePlayers / sports / genders / categories / رفتارِ ریستِ
-   دسته هنگام تغییرِ رشته/جنسیت / محاسبه‌ی صعود-نزول / لینک به
-   پروفایل بازیکن. فقط پوسته عوض شده: هدرِ ادیتوریالِ رسمی،
-   سگمنت‌های مدرن، سکویِ Top 3 و لیستِ ردیف‌های ادیتوریال با
-   شماره‌ی گرافیکیِ محو — نه جدولِ اکسلی.
+   رنکینگ بازیکنان.
+
+   داده از `/api/rankings` می‌آید — همان جدولی که ادمین در
+   /admin/rankings پر می‌کند. پیش‌تر این صفحه فقط از localStorage
+   می‌خواند، پس رنکینگِ ادمین برای هیچ کاربرِ دیگری وجود نداشت و
+   جای خالی‌اش با فهرستِ نمونه‌ی داخلِ کد پر می‌شد.
+
+   فیلترها و منطقِ صعود-نزول همان قبلی است.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Trophy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { getCategoryPlayers, categorySize } from '../../lib/rankings-store'
+import { fetchRankingsBoard, categoryPlayersOf, categorySize, type RankingsStructure } from '../../lib/rankings-store'
 
 interface RankingPlayer {
   rank: number
@@ -25,28 +26,8 @@ interface RankingPlayer {
   avatar?: string
 }
 
-const samplePlayers: RankingPlayer[] = [
-  { rank: 1, previousRank: 2, name: 'علی محمدی', city: 'تهران', points: 12500 },
-  { rank: 2, previousRank: 1, name: 'رضا احمدی', city: 'مشهد', points: 11800 },
-  { rank: 3, previousRank: 3, name: 'محمد حسینی', city: 'اصفهان', points: 10900 },
-  { rank: 4, previousRank: 6, name: 'امیر کریمی', city: 'تهران', points: 10200 },
-  { rank: 5, previousRank: 4, name: 'سعید رضایی', city: 'شیراز', points: 9800 },
-  { rank: 6, previousRank: 5, name: 'حسین علوی', city: 'تبریز', points: 9400 },
-  { rank: 7, previousRank: 9, name: 'مجید صادقی', city: 'کرج', points: 8900 },
-  { rank: 8, previousRank: 7, name: 'داود نظری', city: 'تهران', points: 8500 },
-  { rank: 9, previousRank: 8, name: 'کاوه موسوی', city: 'اهواز', points: 8100 },
-  { rank: 10, previousRank: 12, name: 'بهروز طاهری', city: 'قم', points: 7800 },
-  { rank: 11, previousRank: 10, name: 'فرهاد جعفری', city: 'مشهد', points: 7400 },
-  { rank: 12, previousRank: 11, name: 'نادر قاسمی', city: 'تهران', points: 7100 },
-  { rank: 13, previousRank: 15, name: 'وحید ابراهیمی', city: 'اصفهان', points: 6800 },
-  { rank: 14, previousRank: 13, name: 'مهدی شریفی', city: 'رشت', points: 6500 },
-  { rank: 15, previousRank: 14, name: 'پیمان کمالی', city: 'تهران', points: 6200 },
-  { rank: 16, previousRank: 16, name: 'آرش ولی‌زاده', city: 'کرمانشاه', points: 5900 },
-  { rank: 17, previousRank: 18, name: 'سینا حیدری', city: 'تهران', points: 5600 },
-  { rank: 18, previousRank: 17, name: 'امین رستمی', city: 'تبریز', points: 5300 },
-  { rank: 19, previousRank: 20, name: 'شاهین نوری', city: 'شیراز', points: 5000 },
-  { rank: 20, previousRank: 19, name: 'کیان صفوی', city: 'مشهد', points: 4700 },
-]
+/* فهرستِ نمونه حذف شد: وقتی رنکینگی ثبت نشده باشد باید همان را
+   بگوییم، نه اینکه بیست نامِ ساختگی به‌جای داده‌ی واقعی نشان دهیم. */
 
 const sports = [
   { value: 'snooker', label: 'اسنوکر' },
@@ -126,16 +107,27 @@ export default function RankingsPage() {
   const [gender, setGender]     = useState('آقایان')
   const [category, setCategory] = useState('دسته برتر')
 
-  /* داده‌ی واقعیِ واردشده در پنل ادمین (localStorage) بعد از mount خوانده می‌شود */
-  const [adminPlayers, setAdminPlayers] = useState<RankingPlayer[] | null>(null)
+  /* جدول از سرور خوانده می‌شود، نه از localStorage.
+     پیش‌تر فقط محلی بود، پس رنکینگی که ادمین وارد می‌کرد برای هیچ‌کسِ
+     دیگری وجود نداشت و صفحه به فهرستِ نمونه‌ی داخلِ کد برمی‌گشت — همان
+     «داده‌ی فیکِ قبلی» که دوباره ظاهر می‌شد. */
+  const [board, setBoard] = useState<RankingsStructure | null>(null)
+  const [loaded, setLoaded] = useState(false)
+
   useEffect(() => {
-    setAdminPlayers(getCategoryPlayers(sport, gender, category))
-  }, [sport, gender, category])
+    let alive = true
+    void (async () => {
+      const remote = await fetchRankingsBoard()
+      if (!alive) return
+      setBoard(remote)
+      setLoaded(true)
+    })()
+    return () => { alive = false }
+  }, [])
 
   const currentCategories = categories[sport]?.[gender] ?? []
-  /* اگر ادمین برای این دسته اسم وارد کرده باشد همان نمایش داده می‌شود؛ وگرنه داده‌ی نمونه */
-  const players = sport !== 'highball'
-    ? (adminPlayers && adminPlayers.length > 0 ? adminPlayers : samplePlayers)
+  const players = sport !== 'highball' && board
+    ? categoryPlayersOf(board, sport, gender, category)
     : []
   const capacity = categorySize(sport, category)
 
@@ -276,9 +268,13 @@ export default function RankingsPage() {
 
         {sport !== 'highball' ? (
           players.length === 0 ? (
+            /* «در حال بارگذاری» با «اعلام نشده» یکی نیست — پیش‌تر هر دو
+               حالت یک متن می‌دیدند و لحظه‌ی اول به‌غلط «اعلام نشده» بود. */
             <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Trophy size={38} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
-              <p style={{ fontSize: 15.5, fontWeight: 800, margin: 0 }}>رنکینگ این دسته هنوز اعلام نشده</p>
+              <p style={{ fontSize: 15.5, fontWeight: 800, margin: 0 }}>
+                {loaded ? 'رنکینگ این دسته هنوز اعلام نشده' : 'در حال دریافتِ رنکینگ…'}
+              </p>
             </div>
           ) : (
             <>
