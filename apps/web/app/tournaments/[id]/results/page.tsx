@@ -1,273 +1,183 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Trophy, Medal, Share2, Star, Target } from 'lucide-react';
+/* ─────────────────────────────────────────────────────────────
+   نتایجِ پایانیِ مسابقه.
+
+   قهرمان و نایب‌قهرمان از خودِ فینال خوانده می‌شوند.
+
+   نفرِ سوم عمداً «حدس» زده نمی‌شود: در حذفیِ یک‌طرفه دو بازنده‌ی
+   نیمه‌نهایی هر دو در یک رده‌اند و تا وقتی بازیِ رده‌بندی برگزار نشود
+   هیچ‌کدام سومِ رسمی نیست. پس هر دو با عنوانِ «سومِ مشترک» می‌آیند —
+   نه اینکه یکی را دلبخواهی بالاتر بگذاریم.
+   ───────────────────────────────────────────────────────────── */
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { ChevronRight, Trophy, Medal, Loader2, GitBranch } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, SAMPLE_LIVE_BRACKET, SAMPLE_PLAYERS,
-  toFa, GAME_TYPE_LABELS,
-} from '../../../../lib/mock-tournaments';
+  fetchBracket, faDigits, slotLabel,
+  type Bracket, type Match,
+} from '../../../../lib/tournaments/bracket-client';
 
-const PODIUM_CONFIG = [
-  { place: 1, label: 'قهرمان', icon: '🏆', bg: 'linear-gradient(135deg,#C7A66A,#A07840)',
-    color: '#fff', size: 130, borderColor: '#C7A66A', glow: 'rgba(199,166,106,0.35)' },
-  { place: 2, label: 'نایب قهرمان', icon: '🥈', bg: 'linear-gradient(135deg,#94a3b8,#64748b)',
-    color: '#fff', size: 108, borderColor: '#94a3b8', glow: 'rgba(148,163,184,0.25)' },
-  { place: 3, label: 'مقام سوم', icon: '🥉', bg: 'linear-gradient(135deg,#cd7f32,#b5651d)',
-    color: '#fff', size: 96, borderColor: '#cd7f32', glow: 'rgba(205,127,50,0.20)' },
-] as const;
-
-function toFaDigits(n: number) { return toFa(n); }
+const GOLD_D = '#9A6E38', INK = '#1C1B17';
+const MUT = '#8A8474', LINE = '#EAE5DA', FELT = '#0E7A38';
 
 export default function ResultsPage() {
-  const { id }  = useParams() as { id: string };
-  const router  = useRouter();
-  const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id)
-               ?? SAMPLE_TOURNAMENTS.find(x => x.status === 'finished')
-               ?? SAMPLE_TOURNAMENTS[2]!;
+  const params = useParams();
+  const id = String(params?.id ?? '');
 
-  /* Build podium from sample bracket's completed matches */
-  const matches = SAMPLE_LIVE_BRACKET;
-  const totalRounds = Math.log2(t.maxPlayers <= 16 ? t.maxPlayers : 16);
+  const [b, setB] = useState<Bracket | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const finalMatch = matches.find(m => m.round === totalRounds);
-  const sfMatches  = matches.filter(m => m.round === totalRounds - 1);
+  useEffect(() => {
+    void (async () => { setB(await fetchBracket(id)); setLoading(false); })();
+  }, [id]);
 
-  const champion = finalMatch?.winner ?? SAMPLE_PLAYERS[0]!;
-  const runner   = finalMatch
-    ? (finalMatch.winner?.id === finalMatch.player1?.id ? finalMatch.player2 : finalMatch.player1)
-    : SAMPLE_PLAYERS[1]!;
-  const thirds   = sfMatches.flatMap(m =>
-    m.player1 && m.player2 ? [m.player1, m.player2].filter(p => p?.id !== m.winner?.id) : []
-  );
-  const third = thirds[0] ?? SAMPLE_PLAYERS[2]!;
+  if (loading) return <Center><Loader2 size={28} style={{ animation: 'rsspin 1s linear infinite' }} /></Center>;
+  if (!b) return <Center><p style={{ fontWeight: 800, color: INK }}>این مسابقه پیدا نشد</p></Center>;
 
-  const podiumPlayers = [
-    { ...PODIUM_CONFIG[0], player: champion },
-    { ...PODIUM_CONFIG[1], player: runner },
-    { ...PODIUM_CONFIG[2], player: third },
-  ];
+  const played = b.matches.filter(m => m.winner !== null && m.p1_name && m.p2_name);
+  const finished = !!b.champion;
 
-  /* All-results table (round by round) */
-  const roundGroups = Array.from({ length: totalRounds }, (_, i) => i + 1)
-    .map(r => ({
-      round: r,
-      label: (() => {
-        const fe = totalRounds - r + 1;
-        if (fe === 1) return 'فینال';
-        if (fe === 2) return 'نیمه‌نهایی';
-        if (fe === 3) return 'یک‌چهارم';
-        return `مرحله ${toFa(r)}`;
-      })(),
-      ms: matches.filter(m => m.round === r),
-    }));
-
-  /* Stats */
-  const completedMatches = matches.filter(m => m.status === 'completed');
-  const highestBreak = 147; // mock
-  const avgScore = completedMatches.length
-    ? Math.round(completedMatches.reduce((s, m) => s + (m.score1 ?? 0) + (m.score2 ?? 0), 0) / completedMatches.length)
-    : 0;
-
-  const [showShare, setShowShare] = useState(false);
+  /* بازنده‌های نیمه‌نهایی — رده‌ی سومِ مشترک */
+  const semiLosers = b.totalRounds >= 2
+    ? b.matches
+        .filter(m => m.round === b.totalRounds - 1 && m.winner !== null)
+        .map(m => (m.winner === 1 ? m.p2_name : m.p1_name))
+        .filter((n): n is string => !!n)
+    : [];
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif' }}>
+    <div dir="rtl" style={{ maxWidth: 860, margin: '0 auto', padding: '0 16px 70px' }}>
 
-      {/* Hero */}
-      <div style={{ background: 'linear-gradient(160deg,#0a0a0a 0%,#1a1209 60%,#2a1800 100%)',
-        position: 'relative', marginTop: -72, paddingTop: 72, overflow: 'hidden', paddingBottom: 48 }}>
-        {/* glow orbs */}
-        <div style={{ position: 'absolute', top: -80, right: -80, width: 320, height: 320,
-          borderRadius: '50%', background: 'rgba(199,166,106,0.07)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -60, left: 60, width: 240, height: 240,
-          borderRadius: '50%', background: 'rgba(199,166,106,0.05)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '18px 0 6px', flexWrap: 'wrap' }}>
+        <Link href={`/tournaments/${id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
+          <ChevronRight size={14} /> صفحه‌ی مسابقه
+        </Link>
+        <span style={{ color: LINE }}>/</span>
+        <h1 style={{ fontSize: 17, fontWeight: 900, color: INK, margin: 0 }}>نتایج</h1>
+      </div>
+      <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px' }}>{b.tournament.title}</p>
 
-        <div style={{ position: 'relative', zIndex: 1, padding: '0 clamp(16px,4vw,48px)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: 32 }}>
-            <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
-              display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.50)',
-              fontFamily: 'inherit',
-            }}>
-              <ChevronRight size={15} /> بازگشت
-            </button>
-            <button onClick={() => setShowShare(v => !v)} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-              borderRadius: 20, border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.06)', color: '#fff',
-              fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-            }}>
-              <Share2 size={14} /> اشتراک‌گذاری
-            </button>
+      {!finished ? (
+        <div style={{ ...card, textAlign: 'center', padding: '55px 20px' }}>
+          <Trophy size={34} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
+          <p style={{ fontSize: 15, fontWeight: 800, color: INK, margin: '0 0 6px' }}>
+            {b.matches.length === 0 ? 'هنوز قرعه‌کشی نشده' : 'مسابقه هنوز تمام نشده'}
+          </p>
+          <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 2 }}>
+            {b.matches.length === 0
+              ? 'نتایج پس از برگزاریِ بازی‌ها اینجا اعلام می‌شود.'
+              : `${faDigits(played.length)} از ${faDigits(b.matches.length)} بازی انجام شده است.`}
+          </p>
+          {b.matches.length > 0 && (
+            <Link href={`/tournaments/${id}/bracket`} style={btnGhost}><GitBranch size={14} /> دیدنِ براکت</Link>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* ── سکو ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 22 }}>
+            <PodiumRow place={1} label="قهرمان" name={b.champion!.name} />
+            {b.runnerUp && <PodiumRow place={2} label="نایب‌قهرمان" name={b.runnerUp.name} />}
+            {semiLosers.map((n, i) => (
+              <PodiumRow key={n + i} place={3} label="سومِ مشترک" name={n} />
+            ))}
           </div>
 
-          {/* Title */}
-          <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>🏆</div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#C7A66A',
-              letterSpacing: '0.16em', marginBottom: 8 }}>
-              نتایج نهایی
-            </div>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', margin: '0 0 6px' }}>
-              {t.name}
-            </h1>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.40)', margin: 0 }}>
-              {t.date} • {GAME_TYPE_LABELS[t.gameType]} • {toFa(t.registeredCount)} شرکت‌کننده
+          {semiLosers.length === 2 && (
+            <p style={{ fontSize: 11.5, color: MUT, margin: '-10px 0 22px', lineHeight: 2 }}>
+              در جدولِ حذفیِ یک‌طرفه، هر دو بازنده‌ی نیمه‌نهایی هم‌رده‌اند. تعیینِ نفرِ سوم
+              نیازمندِ بازیِ رده‌بندی است که در این مسابقه برگزار نشده.
             </p>
-          </div>
+          )}
 
-          {/* Podium */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-            gap: 12, maxWidth: 600, margin: '0 auto', flexWrap: 'wrap' }}>
-            {/* Reorder: 2nd, 1st, 3rd */}
-            {[podiumPlayers[1]!, podiumPlayers[0]!, podiumPlayers[2]!].map((entry) => {
-              const isChamp = entry.place === 1;
+          {/* ── همه‌ی نتایج به تفکیکِ دور ── */}
+          <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: '0 0 12px' }}>همه‌ی بازی‌ها</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[...b.rounds].reverse().map(r => {
+              const done = r.matches.filter(m => m.winner !== null && m.p1_name && m.p2_name);
+              if (done.length === 0) return null;
               return (
-                <div key={entry.place} style={{ display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 12 }}>
-                  {/* Avatar */}
-                  <div style={{ position: 'relative' }}>
-                    {isChamp && (
-                      <div style={{ position: 'absolute', top: -28, left: '50%',
-                        transform: 'translateX(-50%)', fontSize: 24 }}>👑</div>
-                    )}
-                    <div style={{
-                      width: entry.size, height: entry.size, borderRadius: '50%',
-                      background: entry.bg,
-                      border: `4px solid ${entry.borderColor}`,
-                      boxShadow: `0 0 40px ${entry.glow}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: entry.size * 0.36, fontWeight: 900, color: '#fff',
-                    }}>
-                      {entry.player?.name[0] ?? '?'}
-                    </div>
-                    <div style={{ position: 'absolute', bottom: 4, right: 4,
-                      width: 26, height: 26, borderRadius: '50%',
-                      background: '#111', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', fontSize: 15 }}>
-                      {entry.icon}
-                    </div>
+                <section key={r.round}>
+                  <h3 style={{ fontSize: 13, fontWeight: 900, color: GOLD_D, margin: '0 0 8px' }}>{r.label}</h3>
+                  <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+                    {done.map((m, i) => <ResultRow key={m.id} m={m} first={i === 0} />)}
                   </div>
-
-                  {/* Name */}
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: isChamp ? 17 : 14, fontWeight: 900,
-                      color: '#fff', marginBottom: 3 }}>
-                      {entry.player?.name ?? '—'}
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: entry.borderColor }}>
-                      {entry.label}
-                    </div>
-                  </div>
-
-                  {/* Podium bar */}
-                  <div style={{
-                    width: entry.size, borderRadius: '8px 8px 0 0',
-                    height: isChamp ? 72 : entry.place === 2 ? 52 : 36,
-                    background: `linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))`,
-                    border: `1px solid ${entry.borderColor}40`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22, fontWeight: 900, color: entry.borderColor,
-                  }}>
-                    {toFa(entry.place)}
-                  </div>
-                </div>
+                </section>
               );
             })}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Stats strip */}
-      <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '20px clamp(16px,4vw,48px)' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 1,
-          background: 'rgba(0,0,0,0.06)', borderRadius: 16, overflow: 'hidden' }}>
-          {[
-            { label: 'کل بازی‌ها', val: toFa(completedMatches.length), icon: <Target size={16} color="#3b82f6" /> },
-            { label: 'شرکت‌کنندگان', val: toFa(t.registeredCount), icon: <Star size={16} color="#C7A66A" /> },
-            { label: 'بالاترین بریک', val: toFa(highestBreak), icon: <Trophy size={16} color="#C7A66A" /> },
-          ].map(s => (
-            <div key={s.label} style={{ padding: '16px 20px', background: '#fff',
-              display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-              {s.icon}
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#111' }}>{s.val}</div>
-              <div style={{ fontSize: 12, color: '#aaa', fontWeight: 600 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <style>{`@keyframes rsspin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+}
 
-      {/* Full results */}
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px clamp(16px,4vw,48px)' }}>
-        <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: '0 0 24px' }}>
-          نتایج کامل
-        </h2>
+function PodiumRow({ place, label, name }: { place: 1 | 2 | 3; label: string; name: string }) {
+  const style = place === 1
+    ? { border: 'rgba(199,166,106,0.5)', bg: 'linear-gradient(135deg,rgba(199,166,106,0.13),rgba(199,166,106,0.03))', color: GOLD_D }
+    : place === 2
+      ? { border: 'rgba(148,163,184,0.5)', bg: 'rgba(148,163,184,0.08)', color: '#64748B' }
+      : { border: 'rgba(205,127,50,0.45)', bg: 'rgba(205,127,50,0.07)', color: '#B5651D' };
 
-        {[...roundGroups].reverse().map(({ round, label, ms }) => (
-          <div key={round} style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#C7A66A',
-              letterSpacing: '0.08em', marginBottom: 14 }}>
-              {label}
-            </div>
-            {ms.map(m => {
-              const isDone = m.status === 'completed';
-              return (
-                <div key={m.id} style={{ background: '#fff', borderRadius: 16,
-                  padding: '16px', marginBottom: 10,
-                  border: '1px solid rgba(0,0,0,0.07)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {[m.player1, m.player2].map((p, i) => {
-                      const s  = i === 0 ? m.score1 : m.score2;
-                      const win = isDone && m.winner?.id === p?.id;
-                      return (
-                        <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center',
-                          gap: 10, flexDirection: i === 1 ? 'row-reverse' : 'row' }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 15, fontWeight: win ? 900 : 700,
-                              color: win ? '#111' : '#666' }}>
-                              {p?.name ?? '—'}
-                              {win && <Trophy size={12} color="#C7A66A" style={{
-                                verticalAlign: 'middle', marginRight: 5 }} />}
-                            </div>
-                          </div>
-                          {s != null && (
-                            <div style={{ fontSize: 24, fontWeight: 900,
-                              color: win ? '#111' : '#ccc' }}>
-                              {toFa(s)}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    <div style={{ fontSize: 16, fontWeight: 900, color: '#e5e7eb',
-                      padding: '0 8px' }}>:</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
-
-        {/* Champion highlight card */}
-        <div style={{ background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 24,
-          padding: '28px', color: '#fff', textAlign: 'center', marginTop: 12 }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🏆</div>
-          <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '0.15em', opacity: 0.75,
-            marginBottom: 6 }}>قهرمان مسابقه</div>
-          <div style={{ fontSize: 28, fontWeight: 900, marginBottom: 4 }}>
-            {champion?.name}
-          </div>
-          <div style={{ fontSize: 14, opacity: 0.75 }}>
-            {t.name} — {t.date}
-          </div>
+  return (
+    <div style={{
+      ...card, display: 'flex', alignItems: 'center', gap: 12,
+      borderColor: style.border, background: style.bg,
+      padding: place === 1 ? '18px 18px' : '13px 16px',
+    }}>
+      {place === 1 ? <Trophy size={24} style={{ color: style.color }} /> : <Medal size={19} style={{ color: style.color }} />}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, color: style.color, letterSpacing: '0.1em' }}>{label}</div>
+        <div style={{ fontSize: place === 1 ? 19 : 15, fontWeight: 900, color: INK, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {name}
         </div>
       </div>
     </div>
   );
 }
+
+function ResultRow({ m, first }: { m: Match; first: boolean }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px',
+      borderTop: first ? 'none' : `1px solid ${LINE}`, flexWrap: 'wrap',
+    }}>
+      <span style={{
+        flex: '1 1 90px', minWidth: 0, textAlign: 'start', fontSize: 13,
+        fontWeight: m.winner === 1 ? 900 : 700, color: m.winner === 1 ? FELT : INK,
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>{slotLabel(m, 1)}</span>
+
+      <span style={{ fontSize: 14, fontWeight: 900, color: INK, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+        {faDigits(m.score1)} – {faDigits(m.score2)}
+      </span>
+
+      <span style={{
+        flex: '1 1 90px', minWidth: 0, textAlign: 'end', fontSize: 13,
+        fontWeight: m.winner === 2 ? 900 : 700, color: m.winner === 2 ? FELT : INK,
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>{slotLabel(m, 2)}</span>
+    </div>
+  );
+}
+
+function Center({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ padding: 80, textAlign: 'center', color: MUT }}>
+      {children}
+      <style>{`@keyframes rsspin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+}
+
+const card: React.CSSProperties = { background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 15 };
+const btnGhost: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 15px', borderRadius: 10,
+  border: `1px solid ${LINE}`, background: '#fff', color: GOLD_D,
+  fontSize: 12.5, fontWeight: 800, textDecoration: 'none',
+};

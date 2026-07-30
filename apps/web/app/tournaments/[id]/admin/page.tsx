@@ -1,593 +1,412 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+/* ─────────────────────────────────────────────────────────────
+   پنلِ برگزارکننده‌ی مسابقه.
+
+   تا پیش از این روی داده‌ی ساختگیِ داخلِ کد کار می‌کرد. حالا از
+   /api/tournaments/:id/matches می‌خواند و می‌نویسد:
+     • فهرستِ ثبت‌نام‌های تأییدشده
+     • قرعه‌کشی (یک‌بار، اتمیک)
+     • ثبتِ نتیجه‌ی هر بازی و صعودِ خودکارِ برنده
+
+   دسترسی سمتِ سرور با `ownsClub` سنجیده می‌شود؛ این صفحه فقط UI است.
+   ───────────────────────────────────────────────────────────── */
+
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
-  Trophy, Users, Check, X, Clock, Search, ChevronRight,
-  Plus, GitBranch, Image, Radio, Star, Trash2, UserPlus,
-  BarChart2, CheckCircle, XCircle, AlertCircle, ChevronDown,
-  Share2, Camera, Zap,
+  Trophy, ChevronRight, GitBranch, Shuffle, AlertCircle,
+  Loader2, CheckCircle2, RotateCcw, Radio, Save, Table2,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, SAMPLE_REGISTRATIONS, SAMPLE_PLAYERS,
-  STATUS_LABELS, formatFee, toFa,
-  type Registration, type RegistrationStatus,
-} from '../../../../lib/mock-tournaments';
+  fetchBracket, drawBracket, resetBracket, reportResult, patchMatch,
+  faDigits, slotLabel, isBye,
+  type Bracket, type Match,
+} from '../../../../lib/tournaments/bracket-client';
+import { apiFetch } from '../../../../lib/http';
 
-type AdminTab = 'overview' | 'registrations' | 'participants' | 'story';
+const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17';
+const MUT = '#8A8474', LINE = '#EAE5DA', FELT = '#0E7A38', RED = '#B23B2E';
+const GROUND = '#FAF8F3';
 
-function StatusBadge({ status }: { status: RegistrationStatus }) {
-  const map = {
-    pending:  { label: 'در انتظار', color: '#f59e0b', bg: 'rgba(245,158,11,0.10)',  icon: <Clock size={11} /> },
-    approved: { label: 'تایید شده', color: '#30C55A', bg: 'rgba(48,197,90,0.10)',   icon: <CheckCircle size={11} /> },
-    rejected: { label: 'رد شده',    color: '#ef4444', bg: 'rgba(239,68,68,0.10)',   icon: <XCircle size={11} /> },
-  };
-  const s = map[status];
-  return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-      background: s.bg, borderRadius: 20, padding: '5px 10px',
-      fontSize: 12, fontWeight: 700, color: s.color,
-      animation: status === 'pending' ? 'pendingPulse 1.5s ease-in-out infinite' : undefined,
-    }}>
-      {s.icon} {s.label}
-    </div>
-  );
-}
+type AdminTab = 'overview' | 'draw' | 'matches';
 
-function StoryCard({ type, label, desc }: { type: string; label: string; desc: string }) {
-  const [gen, setGen]       = useState(false);
-  const [published, setPub] = useState(false);
-  return (
-    <div style={{
-      background: '#fff', borderRadius: 20, overflow: 'hidden',
-      border: '1px solid rgba(0,0,0,0.07)',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-    }}>
-      {/* Story preview — Instagram aspect ratio 9:16 scaled down */}
-      <div style={{
-        background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)',
-        height: 200, position: 'relative', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {/* Billiard Hub watermark */}
-        <div style={{ position: 'absolute', top: 12, right: 12, left: 12,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Trophy size={14} color="#C7A66A" />
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#C7A66A', letterSpacing: '0.08em' }}>
-              BILLIARD HUB
-            </span>
-          </div>
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>@billiard.hub</span>
-        </div>
-
-        {type === 'registration' && (
-          <>
-            <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.80)',
-              letterSpacing: '0.16em', marginBottom: 8 }}>TOURNAMENT</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#fff',
-              textAlign: 'center', lineHeight: 1.2, padding: '0 16px' }}>
-              ثبت‌نام<br />باز شد!
-            </div>
-            <div style={{ marginTop: 12, background: 'rgba(199,166,106,0.20)',
-              border: '1px solid rgba(199,166,106,0.40)', borderRadius: 20,
-              padding: '6px 16px', fontSize: 13, fontWeight: 700, color: '#C7A66A' }}>
-              ثبت‌نام آنلاین
-            </div>
-          </>
-        )}
-        {type === 'bracket' && (
-          <>
-            <div style={{ fontSize: 12, color: 'rgba(199,166,106,0.80)',
-              letterSpacing: '0.16em', marginBottom: 8 }}>BRACKET</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', textAlign: 'center' }}>
-              جدول مسابقات
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              {[0,1,2].map(i => (
-                <div key={i} style={{ width: 48, height: 32, borderRadius: 8,
-                  border: '1px solid rgba(199,166,106,0.30)',
-                  background: 'rgba(199,166,106,0.10)' }} />
-              ))}
-            </div>
-          </>
-        )}
-        {type === 'semifinal' && (
-          <>
-            <div style={{ fontSize: 12, color: '#ef4444', letterSpacing: '0.16em', marginBottom: 8 }}>SEMI-FINAL</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', textAlign: 'center' }}>
-              نیمه‌نهایی
-            </div>
-            <div style={{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>علی رضایی</span>
-              <div style={{ width: 30, height: 30, borderRadius: '50%',
-                background: 'rgba(239,68,68,0.20)', border: '1px solid rgba(239,68,68,0.40)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 700, color: '#ef4444' }}>vs</div>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>رضا کاظمی</span>
-            </div>
-          </>
-        )}
-        {type === 'champion' && (
-          <>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
-            <div style={{ fontSize: 12, color: '#C7A66A', letterSpacing: '0.16em', marginBottom: 6 }}>CHAMPION</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>علی رضایی</div>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.60)', marginTop: 4 }}>قهرمان مسابقه</div>
-          </>
-        )}
-
-        <div style={{ position: 'absolute', bottom: 12, right: 12, left: 12, textAlign: 'center',
-          fontSize: 10, color: 'rgba(255,255,255,0.30)' }}>billiardhub.net</div>
-      </div>
-
-      <div style={{ padding: '16px 18px' }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 4 }}>{label}</div>
-        <div style={{ fontSize: 13, color: '#888', marginBottom: 14 }}>{desc}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button onClick={() => setGen(true)} style={{
-            width: '100%', padding: '10px', borderRadius: 20,
-            border: `1px solid rgba(199,166,106,${gen ? '0' : '0.30'})`,
-            background: gen ? 'rgba(48,197,90,0.10)' : 'rgba(199,166,106,0.12)',
-            color: gen ? '#30C55A' : '#C7A66A', fontSize: 14, fontWeight: 800,
-            cursor: 'pointer', fontFamily: 'inherit',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-          }}>
-            {gen ? <><Check size={13} /> دانلود آماده</> : <><Camera size={13} /> تولید استوری</>}
-          </button>
-          {gen && (
-            <button onClick={() => setPub(true)} style={{
-              width: '100%', padding: '10px', borderRadius: 20,
-              border: `1px solid rgba(${published ? '48,197,90' : '139,92,246'},0.30)`,
-              background: `rgba(${published ? '48,197,90' : '139,92,246'},0.10)`,
-              color: published ? '#30C55A' : '#8b5cf6', fontSize: 14, fontWeight: 800,
-              cursor: published ? 'default' : 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-            }}>
-              {published
-                ? <><Check size={13} /> منتشر شد در استوری‌های سایت</>
-                : <><Share2 size={13} /> انتشار در استوری‌های سایت</>}
-            </button>
-          )}
-          {published && (
-            <div style={{ padding: '8px 12px', borderRadius: 12,
-              background: 'rgba(48,197,90,0.06)', border: '1px solid rgba(48,197,90,0.18)',
-              fontSize: 12, color: '#065f46', fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>
-              این استوری در بخش استوری‌های سایت <strong>billiardhub.net</strong> منتشر شد
-              و بازدیدکنندگان می‌توانند آن را ببینند.
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+interface Registration {
+  id: string; player_name: string | null; status: string;
+  payment_status: string; amount: number; created_at: string;
 }
 
 export default function TournamentAdminPage() {
-  const { id }  = useParams() as { id: string };
-  const router  = useRouter();
-  const t       = SAMPLE_TOURNAMENTS.find(x => x.id === id) ?? SAMPLE_TOURNAMENTS[0]!;
-  const regs    = SAMPLE_REGISTRATIONS.filter(r => r.tournamentId === id || r.tournamentId === 't1');
+  const params = useParams();
+  const id = String(params?.id ?? '');
 
-  const [tab, setTab]          = useState<AdminTab>('overview');
-  const [search, setSearch]    = useState('');
-  const [statusFilter, setSF]  = useState<RegistrationStatus | 'all'>('all');
-  const [regsState, setRegs]   = useState<Registration[]>(regs);
-  const [addingPlayer, setAP]  = useState(false);
+  const [b, setB] = useState<Bracket | null>(null);
+  const [regs, setRegs] = useState<Registration[]>([]);
+  const [tab, setTab] = useState<AdminTab>('overview');
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
 
-  /* Merge registrations submitted via the online payment flow */
-  useEffect(() => {
-    try {
-      const key = `tournament-regs-${id}`;
-      const saved = localStorage.getItem(key);
-      if (!saved) return;
-      const raw = JSON.parse(saved) as Registration[];
-      // deduplicate by phone — keep last entry per phone
-      const seen = new Map<string, Registration>();
-      for (const r of raw) seen.set(r.phone ?? r.id, r);
-      const deduped = Array.from(seen.values());
-      if (deduped.length !== raw.length) localStorage.setItem(key, JSON.stringify(deduped));
-      setRegs(prev => {
-        const existing = new Set(prev.map(r => r.id));
-        const fresh = deduped.filter(r => !existing.has(r.id));
-        return fresh.length > 0 ? [...fresh, ...prev] : prev;
-      });
-    } catch {}
+  const load = useCallback(async () => {
+    const [bracket, regRes] = await Promise.all([
+      fetchBracket(id),
+      apiFetch(`/api/tournaments/${id}/registrations`, { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    setB(bracket);
+    setRegs((regRes?.registrations ?? []) as Registration[]);
+    if (!bracket) setErr('اطلاعاتِ این مسابقه در دسترس نیست');
+    setLoading(false);
   }, [id]);
-  const [manualName, setMN]    = useState('');
-  const [manualPhone, setMP]   = useState('');
 
-  const approved  = regsState.filter(r => r.status === 'approved');
-  const pending   = regsState.filter(r => r.status === 'pending');
-  const rejected  = regsState.filter(r => r.status === 'rejected');
+  useEffect(() => { void load(); }, [load]);
 
-  const updateStatus = (regId: string, status: RegistrationStatus) => {
-    setRegs(prev => prev.map(r => r.id === regId ? { ...r, status } : r));
-    /* Write status change back to localStorage so user dashboard reflects it */
-    try {
-      const key = `tournament-regs-${id}`;
-      const raw = localStorage.getItem(key);
-      if (!raw) return;
-      const list: Registration[] = JSON.parse(raw);
-      const updated = list.map(r => r.id === regId ? { ...r, status } : r);
-      localStorage.setItem(key, JSON.stringify(updated));
-    } catch {}
-  };
-  const remove = (regId: string) => {
-    setRegs(prev => prev.filter(r => r.id !== regId));
-    /* Remove from localStorage as well */
-    try {
-      const key = `tournament-regs-${id}`;
-      const raw = localStorage.getItem(key);
-      if (!raw) return;
-      const list: Registration[] = JSON.parse(raw);
-      localStorage.setItem(key, JSON.stringify(list.filter(r => r.id !== regId)));
-    } catch {}
+  const confirmed = regs.filter(r => r.status === 'CONFIRMED');
+  const pending = regs.filter(r => r.status === 'PENDING_PAYMENT');
+  const hasBracket = (b?.matches.length ?? 0) > 0;
+
+  const flash = (t: string) => { setNote(t); setTimeout(() => setNote(''), 3500); };
+
+  const doDraw = async () => {
+    setBusy(true); setErr('');
+    const { ok, body } = await drawBracket(id, true);
+    setBusy(false);
+    if (!ok) { setErr(body.message ?? 'قرعه‌کشی انجام نشد'); return; }
+    flash(`براکت ساخته شد — ${faDigits(body.matches ?? 0)} بازی`);
+    setTab('matches');
+    await load();
   };
 
-  const filtered = regsState.filter(r => {
-    const ms = statusFilter === 'all' || r.status === statusFilter;
-    const mq = !search || r.playerName.includes(search) || r.phone.includes(search);
-    return ms && mq;
-  });
+  const doReset = async () => {
+    if (!window.confirm('کلِ براکت و همه‌ی نتایجِ ثبت‌شده پاک می‌شود. مطمئنید؟')) return;
+    setBusy(true); setErr('');
+    const { ok, body } = await resetBracket(id);
+    setBusy(false);
+    if (!ok) { setErr(body.message ?? 'حذفِ براکت انجام نشد'); return; }
+    flash('براکت حذف شد');
+    await load();
+  };
 
-  const inputStyle: React.CSSProperties = {
-    padding: '10px 14px', borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.09)',
-    background: '#fff', fontSize: 15, fontFamily: 'Vazirmatn, sans-serif',
-    color: '#111', outline: 'none',
+  if (loading) return (
+    <div style={{ padding: 80, textAlign: 'center', color: MUT }}>
+      <Loader2 size={28} style={{ animation: 'taspin 1s linear infinite' }} />
+      <style>{`@keyframes taspin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  return (
+    <div dir="rtl" style={{ maxWidth: 1000, margin: '0 auto', padding: '0 16px 70px', fontFamily: 'inherit' }}>
+
+      {/* ── سربرگ ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '18px 0 14px', flexWrap: 'wrap' }}>
+        <Link href="/dashboard/club" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: MUT, textDecoration: 'none' }}>
+          <ChevronRight size={14} /> داشبورد باشگاه
+        </Link>
+        <span style={{ color: LINE }}>/</span>
+        <h1 style={{ fontSize: 17, fontWeight: 900, color: INK, margin: 0 }}>
+          {b?.tournament.title ?? 'مسابقه'}
+        </h1>
+      </div>
+
+      {note && (
+        <div style={{ ...banner, background: 'rgba(14,122,56,0.07)', borderColor: 'rgba(14,122,56,0.25)', color: FELT }}>
+          <CheckCircle2 size={15} /> {note}
+        </div>
+      )}
+      {err && (
+        <div style={{ ...banner, background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.25)', color: RED }}>
+          <AlertCircle size={15} /> {err}
+        </div>
+      )}
+
+      {/* ── تب‌ها ── */}
+      <div style={{ display: 'flex', gap: 7, marginBottom: 18, flexWrap: 'wrap' }}>
+        {([
+          { k: 'overview', label: 'خلاصه', Icon: Trophy },
+          { k: 'draw', label: 'قرعه‌کشی', Icon: Shuffle },
+          { k: 'matches', label: `بازی‌ها${hasBracket ? ` (${faDigits(b!.matches.length)})` : ''}`, Icon: GitBranch },
+        ] as const).map(t => (
+          <button key={t.k} onClick={() => setTab(t.k)} style={chip(tab === t.k)}>
+            <t.Icon size={13} /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ══ خلاصه ══ */}
+      {tab === 'overview' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 12 }}>
+          <Stat label="ثبت‌نامِ تأییدشده" value={confirmed.length} unit="نفر" tone="felt" />
+          <Stat label="در انتظارِ پرداخت" value={pending.length} unit="نفر" />
+          <Stat label="ظرفیت" value={b?.tournament.max_players ?? 0} unit="نفر" />
+          <Stat label="بازی‌های براکت" value={b?.matches.length ?? 0} unit="بازی" tone={hasBracket ? 'gold' : undefined} />
+          {hasBracket && (
+            <>
+              <Stat label="انجام‌شده" value={b!.matches.filter(m => m.winner).length} unit="بازی" />
+              <Stat label="در حالِ اجرا" value={b!.matches.filter(m => m.status === 'in_progress').length} unit="بازی" tone="red" />
+            </>
+          )}
+          {b?.champion && (
+            <div style={{ ...card, gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 11, flexWrap: 'wrap', borderColor: 'rgba(199,166,106,0.45)', background: 'rgba(199,166,106,0.07)' }}>
+              <Trophy size={20} style={{ color: GOLD_D }} />
+              <span style={{ fontSize: 14.5, fontWeight: 900, color: INK }}>قهرمان: {b.champion.name}</span>
+              {b.runnerUp && <span style={{ fontSize: 12.5, color: MUT }}>نایب‌قهرمان: {b.runnerUp.name}</span>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ قرعه‌کشی ══ */}
+      {tab === 'draw' && (
+        <div style={card}>
+          {!hasBracket ? (
+            <>
+              <h3 style={h3}>قرعه‌کشیِ براکت</h3>
+              <p style={pStyle}>
+                {faDigits(confirmed.length)} بازیکنِ تأییدشده وارد براکت می‌شوند.
+                {confirmed.length >= 2 && (() => {
+                  let size = 2; while (size < confirmed.length) size *= 2;
+                  const byes = size - confirmed.length;
+                  return ` براکتِ ${faDigits(size)} تایی ساخته می‌شود${byes ? ` و ${faDigits(byes)} بازیکن در دورِ اول بای می‌گیرند` : ''}.`;
+                })()}
+              </p>
+              <p style={{ ...pStyle, color: RED }}>
+                قرعه‌کشی یک‌بار انجام می‌شود. برای تکرارش باید کلِ براکت و نتایج پاک شود.
+              </p>
+              {pending.length > 0 && (
+                <p style={{ ...pStyle, color: GOLD_D }}>
+                  {faDigits(pending.length)} ثبت‌نام هنوز پرداخت نشده و وارد براکت نمی‌شود.
+                </p>
+              )}
+              <button onClick={doDraw} disabled={busy || confirmed.length < 2} style={btnGold(busy || confirmed.length < 2)}>
+                {busy ? <Loader2 size={15} style={{ animation: 'taspin 1s linear infinite' }} /> : <Shuffle size={15} />}
+                قرعه‌کشی و ساختِ براکت
+              </button>
+              {confirmed.length < 2 && (
+                <p style={{ ...pStyle, marginTop: 10 }}>حداقل دو ثبت‌نامِ تأییدشده لازم است.</p>
+              )}
+            </>
+          ) : (
+            <>
+              <h3 style={h3}>براکت ساخته شده است</h3>
+              <p style={pStyle}>
+                {faDigits(b!.totalRounds)} دور، {faDigits(b!.matches.length)} بازی.
+                نتایج را از تبِ «بازی‌ها» ثبت کنید.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                <Link href={`/tournaments/${id}/bracket`} style={btnGhostLink}>
+                  <GitBranch size={14} /> دیدنِ براکت
+                </Link>
+                <button onClick={doReset} disabled={busy} style={btnDanger(busy)}>
+                  <RotateCcw size={14} /> حذفِ براکت و قرعه‌کشیِ دوباره
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ══ بازی‌ها ══ */}
+      {tab === 'matches' && (
+        !hasBracket ? (
+          <div style={{ ...card, textAlign: 'center', padding: '50px 20px' }}>
+            <GitBranch size={30} style={{ color: MUT, opacity: 0.4, marginBottom: 10 }} />
+            <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 6px', color: INK }}>هنوز براکتی ساخته نشده</p>
+            <p style={{ ...pStyle, margin: 0 }}>از تبِ «قرعه‌کشی» شروع کنید.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {b!.rounds.map(r => (
+              <section key={r.round}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <span style={{ width: 3, height: 16, borderRadius: 2, background: GOLD }} />
+                  <h3 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>{r.label}</h3>
+                  <span style={{ fontSize: 11.5, color: MUT }}>
+                    {faDigits(r.matches.filter(m => m.winner).length)} از {faDigits(r.matches.length)} انجام‌شده
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {r.matches.map(m => (
+                    <MatchEditor key={m.id} tournamentId={id} match={m}
+                      onDone={async (msg) => { flash(msg); await load(); }}
+                      onError={setErr} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )
+      )}
+
+      <style>{`@keyframes taspin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+}
+
+/* ── ویرایشگرِ یک بازی ──
+   بای و بازیِ نامشخص ورودیِ امتیاز نمی‌گیرند: اولی حریف ندارد و دومی
+   هنوز بازیکنش معلوم نیست. */
+function MatchEditor({
+  tournamentId, match, onDone, onError,
+}: {
+  tournamentId: string; match: Match;
+  onDone: (msg: string) => Promise<void>; onError: (m: string) => void;
+}) {
+  const [s1, setS1] = useState(String(match.score1));
+  const [s2, setS2] = useState(String(match.score2));
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { setS1(String(match.score1)); setS2(String(match.score2)); },
+    [match.score1, match.score2]);
+
+  const ready = !!match.p1_name && !!match.p2_name;
+  const bye = isBye(match);
+
+  const save = async () => {
+    const a = parseInt(s1, 10), c = parseInt(s2, 10);
+    if (!Number.isFinite(a) || !Number.isFinite(c)) { onError('امتیاز را وارد کنید'); return; }
+    setBusy(true); onError('');
+    const { ok, body } = await reportResult(tournamentId, match.id, a, c);
+    setBusy(false);
+    if (!ok) { onError(body.message ?? 'ثبتِ نتیجه انجام نشد'); return; }
+    await onDone('نتیجه ثبت شد');
+  };
+
+  const toggleLive = async () => {
+    setBusy(true); onError('');
+    const wasLive = match.status === 'in_progress';
+    const { ok, body } = await patchMatch(tournamentId, match.id, {
+      status: wasLive ? 'waiting' : 'in_progress',
+    });
+    setBusy(false);
+    if (!ok) { onError(body.message ?? 'تغییرِ وضعیت انجام نشد'); return; }
+    await onDone(wasLive ? 'بازی متوقف شد' : 'بازی روی آنتن رفت');
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl',
-      fontFamily: 'Vazirmatn, sans-serif', paddingBottom: 60 }}>
-      <style>{`@keyframes pendingPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
+    <div style={{
+      ...card, padding: '12px 14px',
+      borderColor: match.status === 'in_progress' ? 'rgba(178,59,46,0.4)'
+        : match.winner ? 'rgba(14,122,56,0.28)' : LINE,
+      background: match.status === 'in_progress' ? 'rgba(178,59,46,0.03)' : '#fff',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11, color: MUT, minWidth: 30 }}>#{faDigits(match.match_index + 1)}</span>
 
-      {/* Header */}
-      <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        padding: '0 clamp(16px,4vw,48px)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '20px 0 0' }}>
-            <button onClick={() => router.push(`/tournaments/${t.id}`)} style={{
-              display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-              cursor: 'pointer', fontSize: 14, color: '#888', fontFamily: 'inherit',
-            }}>
-              <ChevronRight size={15} /> {t.name}
-            </button>
-            <span style={{ color: 'rgba(0,0,0,0.15)' }}>›</span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>پنل مدیریت</span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '16px 0 0', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <h1 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: 0 }}>{t.name}</h1>
-              <p style={{ fontSize: 14, color: '#888', margin: '4px 0 0' }}>
-                {t.date} • {STATUS_LABELS[t.status]}
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <Link href={`/tournaments/${t.id}/bracket`} style={{ textDecoration: 'none' }}>
-                <button style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '10px 18px', borderRadius: 12,
-                  border: '1.5px solid rgba(199,166,106,0.30)',
-                  background: 'rgba(199,166,106,0.07)', color: '#A07840',
-                  fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                }}>
-                  <GitBranch size={14} /> براکت
-                </button>
-              </Link>
-              <Link href={`/tournaments/${t.id}/live`} style={{ textDecoration: 'none' }}>
-                <button style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '10px 18px', borderRadius: 12, border: 'none',
-                  background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-                  color: '#fff', fontSize: 14, fontWeight: 700,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}>
-                  <Radio size={14} /> نمای زنده
-                </button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Admin tabs */}
-          <div style={{ display: 'flex', gap: 4, marginTop: 16, overflowX: 'auto' }}>
-            {([
-              ['overview', 'نمای کلی', <BarChart2 size={14} />],
-              ['registrations', `ثبت‌نام‌ها (${pending.length} در انتظار)`, <Users size={14} />],
-              ['participants', `شرکت‌کنندگان (${approved.length})`, <CheckCircle size={14} />],
-              ['story', 'استوری‌ساز', <Share2 size={14} />],
-            ] as [AdminTab, string, React.ReactNode][]).map(([key, label, icon]) => (
-              <button key={key} onClick={() => setTab(key)} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '10px 16px', borderRadius: '10px 10px 0 0',
-                border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
-                background: tab === key ? '#F7F7F5' : 'transparent',
-                color: tab === key ? '#111' : '#888',
-                borderBottom: tab === key ? '2px solid #C7A66A' : '2px solid transparent',
-              }}>
-                {icon} {label}
-              </button>
-            ))}
-          </div>
+        <div style={{ flex: '1 1 190px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <PlayerLine name={slotLabel(match, 1)} win={match.winner === 1} dim={!match.p1_name} />
+          <PlayerLine name={slotLabel(match, 2)} win={match.winner === 2} dim={!match.p2_name} />
         </div>
-      </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px clamp(16px,4vw,48px)' }}>
-
-        {/* ── Overview ── */}
-        {tab === 'overview' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Stat cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 14 }}>
-              {[
-                { label: 'در انتظار تایید', value: pending.length,   color: '#f59e0b', icon: <Clock size={20} />      },
-                { label: 'تایید شده',        value: approved.length,  color: '#30C55A', icon: <CheckCircle size={20} /> },
-                { label: 'رد شده',           value: rejected.length,  color: '#ef4444', icon: <XCircle size={20} />    },
-                { label: 'ظرفیت باقی‌مانده', value: t.maxPlayers - approved.length, color: '#3b82f6', icon: <Users size={20} /> },
-              ].map(s => (
-                <div key={s.label} style={{
-                  background: '#fff', borderRadius: 20, padding: '20px 22px',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                }}>
-                  <div style={{ color: s.color, marginBottom: 12 }}>{s.icon}</div>
-                  <div style={{ fontSize: 32, fontWeight: 900, color: '#111' }}>{toFa(s.value)}</div>
-                  <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Quick actions */}
-            <div style={{ background: '#fff', borderRadius: 20, padding: '22px 24px',
-              border: '1px solid rgba(0,0,0,0.06)' }}>
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 16px' }}>
-                دسترسی سریع
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 12 }}>
-                {[
-                  { label: 'مدیریت ثبت‌نام‌ها',    icon: <Users size={18} />,   tab: 'registrations' as AdminTab, color: '#f59e0b' },
-                  { label: 'ایجاد براکت',            icon: <GitBranch size={18} />, href: `/tournaments/${t.id}/bracket`, color: '#C7A66A' },
-                  { label: 'نمای زنده',              icon: <Radio size={18} />,    href: `/tournaments/${t.id}/live`,    color: '#ef4444' },
-                  { label: 'استوری‌ساز',             icon: <Camera size={18} />,   tab: 'story' as AdminTab,         color: '#8b5cf6' },
-                ].map(a => (
-                  <button key={a.label} onClick={() => a.tab ? setTab(a.tab) : a.href && router.push(a.href)} style={{
-                    display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
-                    background: 'rgba(0,0,0,0.02)', borderRadius: 14,
-                    border: '1.5px solid rgba(0,0,0,0.07)', cursor: 'pointer',
-                    fontFamily: 'inherit', textAlign: 'right', transition: 'all 0.18s',
-                  }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12,
-                      background: `${a.color}15`, border: `1px solid ${a.color}30`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: a.color, flexShrink: 0 }}>
-                      {a.icon}
-                    </div>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>{a.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Registrations ── */}
-        {tab === 'registrations' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Filters */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-              <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
-                <Search size={14} style={{ position: 'absolute', right: 12, top: '50%',
-                  transform: 'translateY(-50%)', color: '#bbb', pointerEvents: 'none' }} />
-                <input value={search} onChange={e => setSearch(e.target.value)}
-                  placeholder="جستجوی نام یا تلفن..."
-                  style={{ ...inputStyle, paddingRight: 38, width: '100%', boxSizing: 'border-box' }} />
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {(['all','pending','approved','rejected'] as const).map(s => (
-                  <button key={s} onClick={() => setSF(s)} style={{
-                    padding: '8px 14px', borderRadius: 10, border: 'none',
-                    cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700,
-                    background: statusFilter === s ? '#111' : 'rgba(0,0,0,0.05)',
-                    color: statusFilter === s ? '#fff' : '#666',
-                  }}>
-                    {s === 'all' ? 'همه' : s === 'pending' ? 'در انتظار' : s === 'approved' ? 'تایید' : 'رد'}
-                    {' '}{toFa(regsState.filter(r => s === 'all' || r.status === s).length)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Table */}
-            <div style={{ background: '#fff', borderRadius: 20, overflow: 'hidden',
-              border: '1px solid rgba(0,0,0,0.06)' }}>
-              {filtered.map((r, i) => (
-                <div key={r.id} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
-                  borderBottom: i < filtered.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                }}>
-                  {/* Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, color: '#111', fontSize: 15, marginBottom: 3 }}>{r.playerName}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 13, color: '#888', direction: 'ltr' }}>{r.phone}</span>
-                      <span style={{ fontSize: 12, color: '#bbb' }}>{r.registeredAt}</span>
-                    </div>
-                    {r.playerInfo && (
-                      <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>{r.playerInfo}</div>
-                    )}
-                    {r.receiptNote && (
-                      <div style={{ fontSize: 13, color: '#aaa', marginTop: 4 }}>{r.receiptNote}</div>
-                    )}
-                  </div>
-
-                  {/* Status + Actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0, alignItems: 'flex-end' }}>
-                    <StatusBadge status={r.status} />
-                    <div style={{ display: 'flex', gap: 5 }}>
-                      {r.status !== 'approved' && (
-                        <button onClick={() => updateStatus(r.id, 'approved')} title="تایید" style={{
-                          display: 'flex', alignItems: 'center', gap: 4,
-                          padding: '5px 10px', borderRadius: 8, border: 'none',
-                          background: 'rgba(48,197,90,0.10)', color: '#30C55A',
-                          cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-                        }}>
-                          <Check size={12} /> تایید
-                        </button>
-                      )}
-                      {r.status !== 'rejected' && (
-                        <button onClick={() => updateStatus(r.id, 'rejected')} title="رد" style={{
-                          display: 'flex', alignItems: 'center', gap: 4,
-                          padding: '5px 10px', borderRadius: 8, border: 'none',
-                          background: 'rgba(239,68,68,0.10)', color: '#ef4444',
-                          cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-                        }}>
-                          <X size={12} /> رد
-                        </button>
-                      )}
-                      <button onClick={() => remove(r.id)} title="حذف" style={{
-                        width: 28, height: 28, borderRadius: 8, border: 'none',
-                        background: 'rgba(0,0,0,0.05)', color: '#bbb',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {filtered.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '40px 20px', color: '#bbb' }}>
-                  <Users size={32} style={{ opacity: 0.3, marginBottom: 10 }} />
-                  <p style={{ margin: 0, fontSize: 15 }}>ثبت‌نامی یافت نشد</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── Participants ── */}
-        {tab === 'participants' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: 18, fontWeight: 900, color: '#111', margin: 0 }}>
-                شرکت‌کنندگان تایید شده
-                <span style={{ fontSize: 15, color: '#C7A66A', marginRight: 8 }}>
-                  {toFa(approved.length)} / {toFa(t.maxPlayers)}
-                </span>
-              </h2>
-              <button onClick={() => setAP(v => !v)} style={{
-                display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px',
-                borderRadius: 12, border: 'none',
-                background: 'linear-gradient(135deg,#C7A66A,#A07840)',
-                color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-              }}>
-                <UserPlus size={14} /> افزودن دستی
+        {bye ? (
+          <span style={{ fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 999, padding: '4px 11px' }}>
+            بای — صعودِ خودکار
+          </span>
+        ) : !ready ? (
+          <span style={{ fontSize: 11.5, color: MUT }}>در انتظارِ دورِ قبل</span>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <ScoreBox value={s1} onChange={setS1} label="امتیازِ بازیکنِ اول" />
+            <span style={{ color: MUT, fontWeight: 800 }}>–</span>
+            <ScoreBox value={s2} onChange={setS2} label="امتیازِ بازیکنِ دوم" />
+            <button onClick={save} disabled={busy} style={btnSmall(busy, GOLD_D)}>
+              {busy ? <Loader2 size={12} style={{ animation: 'taspin 1s linear infinite' }} /> : <Save size={12} />}
+              {match.winner ? 'اصلاح' : 'ثبت'}
+            </button>
+            {!match.winner && (
+              <button onClick={toggleLive} disabled={busy}
+                style={btnSmall(busy, match.status === 'in_progress' ? RED : MUT)}>
+                <Radio size={12} /> {match.status === 'in_progress' ? 'پایانِ پخش' : 'شروعِ زنده'}
               </button>
-            </div>
-
-            {addingPlayer && (
-              <div style={{ background: '#fff', borderRadius: 20, padding: '20px 24px',
-                border: '1px solid rgba(199,166,106,0.25)',
-                boxShadow: '0 4px 20px rgba(199,166,106,0.12)' }}>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 16px' }}>
-                  افزودن بازیکن دستی
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 12, alignItems: 'end' }}>
-                  <div>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: '#666',
-                      display: 'block', marginBottom: 6 }}>نام و نام خانوادگی</label>
-                    <input value={manualName} onChange={e => setMN(e.target.value)}
-                      placeholder="نام کامل" style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: '#666',
-                      display: 'block', marginBottom: 6 }}>شماره موبایل</label>
-                    <input value={manualPhone} onChange={e => setMP(e.target.value)}
-                      placeholder="09xx" dir="ltr" style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
-                  </div>
-                  <button onClick={() => {
-                    if (manualName && manualPhone) {
-                      const newReg: Registration = {
-                        id: `r_${Date.now()}`, tournamentId: t.id,
-                        playerName: manualName, phone: manualPhone,
-                        playerInfo: 'افزوده شده توسط مدیر',
-                        receiptNote: 'پرداخت نقدی', status: 'approved',
-                        registeredAt: '۱۴۰۵/۰۴/۱۰',
-                      };
-                      setRegs(prev => [...prev, newReg]);
-                      setMN(''); setMP(''); setAP(false);
-                    }
-                  }} style={{
-                    padding: '11px 20px', borderRadius: 12, border: 'none',
-                    background: '#111', color: '#fff', fontSize: 14, fontWeight: 700,
-                    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                  }}>
-                    <Plus size={14} style={{ verticalAlign: 'middle' }} /> افزودن
-                  </button>
-                </div>
-              </div>
             )}
-
-            <div style={{ background: '#fff', borderRadius: 20, overflow: 'hidden',
-              border: '1px solid rgba(0,0,0,0.06)' }}>
-              {approved.map((r, i) => (
-                <div key={r.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
-                  borderBottom: i < approved.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                }}>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: '#C7A66A',
-                    width: 28, textAlign: 'center' }}>
-                    {toFa(i + 1)}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: '#111', fontSize: 15 }}>{r.playerName}</div>
-                    <div style={{ fontSize: 13, color: '#aaa', direction: 'ltr', display: 'inline-block' }}>
-                      {r.phone}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 13, color: '#bbb' }}>{r.registeredAt}</div>
-                  <button onClick={() => updateStatus(r.id, 'rejected')} style={{
-                    width: 32, height: 32, borderRadius: 9, border: 'none',
-                    background: 'rgba(239,68,68,0.08)', color: '#ef4444',
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
-        {/* ── Story Generator ── */}
-        {tab === 'story' && (
-          <div>
-            <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#111', margin: '0 0 6px' }}>
-                استوری‌ساز اینستاگرام
-              </h2>
-              <p style={{ fontSize: 15, color: '#777', margin: 0 }}>
-                استوری‌های حرفه‌ای با برندینگ بیلیارد هاب برای مسابقات شما
-              </p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16 }}>
-              <StoryCard type="registration" label="اعلام ثبت‌نام"
-                desc="جذب شرکت‌کنندگان جدید" />
-              <StoryCard type="bracket" label="جدول مسابقات"
-                desc="اعلام براکت به شرکت‌کنندگان" />
-              <StoryCard type="semifinal" label="نیمه‌نهایی"
-                desc="اعلام بازی‌های نیمه‌نهایی" />
-              <StoryCard type="champion" label="اعلام قهرمان"
-                desc="معرفی برنده مسابقه" />
-            </div>
-          </div>
+        {match.table_number != null && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: MUT }}>
+            <Table2 size={11} /> میز {faDigits(match.table_number)}
+          </span>
         )}
       </div>
     </div>
   );
 }
+
+function PlayerLine({ name, win, dim }: { name: string; win: boolean; dim: boolean }) {
+  return (
+    <span style={{
+      fontSize: 13.5, fontWeight: win ? 900 : 700,
+      color: dim ? MUT : win ? FELT : INK,
+      display: 'flex', alignItems: 'center', gap: 5,
+      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+    }}>
+      {win && <Trophy size={12} style={{ flexShrink: 0 }} />}{name}
+    </span>
+  );
+}
+
+/* ورودیِ امتیاز: نمایشِ فارسی، مقدارِ لاتین */
+function ScoreBox({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
+  const FA = '۰۱۲۳۴۵۶۷۸۹';
+  const fa = (v: string) => v.replace(/[0-9]/g, d => FA[+d]!);
+  const latin = (v: string) => v.replace(/[۰-۹]/g, ch => String(FA.indexOf(ch))).replace(/[^0-9]/g, '');
+  return (
+    <input aria-label={label} type="text" inputMode="numeric" value={fa(value)}
+      onChange={e => onChange(latin(e.target.value).slice(0, 2))}
+      style={{
+        width: 44, textAlign: 'center', padding: '7px 4px', borderRadius: 9,
+        border: `1px solid ${LINE}`, background: GROUND, fontFamily: 'inherit',
+        fontSize: 14, fontWeight: 800, color: INK, outline: 'none',
+      }} />
+  );
+}
+
+function Stat({ label, value, unit, tone }: { label: string; value: number; unit: string; tone?: 'gold' | 'felt' | 'red' }) {
+  const color = tone === 'gold' ? GOLD_D : tone === 'felt' ? FELT : tone === 'red' ? RED : INK;
+  return (
+    <div style={{ ...card, padding: '13px 15px' }}>
+      <div style={{ fontSize: 11.5, color: MUT, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontSize: 19, fontWeight: 900, color, fontVariantNumeric: 'tabular-nums' }}>
+        {faDigits(value)}<span style={{ fontSize: 10.5, fontWeight: 700, color: MUT, marginInlineStart: 4 }}>{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── استایل‌ها ── */
+const card: React.CSSProperties = { background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16 };
+const h3: React.CSSProperties = { fontSize: 15, fontWeight: 900, color: INK, margin: '0 0 8px' };
+const pStyle: React.CSSProperties = { fontSize: 12.5, color: MUT, margin: '0 0 6px', lineHeight: 2 };
+const banner: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px',
+  border: '1px solid', borderRadius: 12, fontSize: 12.5, fontWeight: 700, marginBottom: 14,
+};
+const chip = (on: boolean): React.CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 15px', borderRadius: 999,
+  border: `1px solid ${on ? 'rgba(199,166,106,0.5)' : LINE}`,
+  background: on ? 'rgba(199,166,106,0.12)' : '#fff',
+  color: on ? GOLD_D : MUT, fontSize: 12.5, fontWeight: 800,
+  cursor: 'pointer', fontFamily: 'inherit',
+});
+const btnGold = (dis: boolean): React.CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+  marginTop: 12, padding: '11px 20px', borderRadius: 11, border: 'none',
+  background: dis ? '#DDD8CC' : GOLD, color: dis ? MUT : '#241B08',
+  fontSize: 13.5, fontWeight: 800, cursor: dis ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+});
+const btnDanger = (dis: boolean): React.CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 15px', borderRadius: 10,
+  border: '1px solid rgba(178,59,46,0.3)', background: 'rgba(178,59,46,0.06)', color: RED,
+  fontSize: 12.5, fontWeight: 800, cursor: dis ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+});
+const btnGhostLink: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 15px', borderRadius: 10,
+  border: `1px solid ${LINE}`, background: '#fff', color: GOLD_D,
+  fontSize: 12.5, fontWeight: 800, textDecoration: 'none',
+};
+const btnSmall = (dis: boolean, color: string): React.CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '7px 11px', borderRadius: 9,
+  border: `1px solid ${color}44`, background: `${color}0F`, color,
+  fontSize: 11.5, fontWeight: 800, cursor: dis ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+});
