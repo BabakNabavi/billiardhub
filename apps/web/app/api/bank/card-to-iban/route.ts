@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
-import { cardToIban, matchCard, matchIban } from '@/lib/bank-server';
+import { cardToIban, matchCard, matchIban, syncClubSettlementAccount } from '@/lib/bank-server';
 
 /* ثبتِ حسابِ بانکیِ باشگاه — مقصدِ تسویه‌ی درآمدِ رزرو.
 
@@ -68,13 +68,22 @@ export async function POST(req: NextRequest) {
   }
 
   if (clubId) {
+    const cleanCard = card.replace(/\D/g, '');
     await sb().from('clubs').update({
-      bankCard: card.replace(/\s/g, ''),
+      bankCard: cleanCard,
       iban: r.iban,
       ibanOwnerName: r.ownerName ?? null,
       bankName: r.bankName ?? null,
       ibanVerified: true,
     }).eq('id', clubId);
+
+    /* جدولِ تسویه هم همین‌جا به‌روز می‌شود، وگرنه تبِ مالی حساب را
+       ثبت‌نشده می‌بیند و فرمِ دومی برای همان شبا نشان می‌دهد. */
+    await syncClubSettlementAccount({
+      sb, clubId, actorId: actor.id, iban: r.iban!,
+      bankName: r.bankName ?? null, holderName: r.ownerName ?? null,
+      cardLast4: cleanCard.length >= 4 ? cleanCard.slice(-4) : null,
+    });
   }
 
   return NextResponse.json({ ...r, match: true, ownerMatch: true });

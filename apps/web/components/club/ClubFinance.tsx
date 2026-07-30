@@ -6,12 +6,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
 import {
-  Wallet, TrendingUp, Clock3, CheckCircle2, Landmark, ShieldCheck,
+  Wallet, TrendingUp, Clock3, Landmark, ShieldCheck,
   AlertCircle, Loader2, ArrowDownToLine, Receipt, X,
 } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38', GROUND = '#FAF8F3'
+const GOLD_D = '#9A6E38', FELT = '#0E7A38', GROUND = '#FAF8F3'
 const fa = (n: number) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
 interface Finance {
@@ -23,11 +23,10 @@ interface Finance {
 }
 
 
-export default function ClubFinance({ clubId }: { clubId: string }) {
+export default function ClubFinance({ clubId, onEditBank }: { clubId: string; onEditBank?: () => void }) {
   const [d, setD] = useState<Finance | null>(null)
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
-  const [bankOpen, setBankOpen] = useState(false)
 
   const load = useCallback(async () => {
     if (!clubId) return
@@ -49,47 +48,57 @@ export default function ClubFinance({ clubId }: { clubId: string }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* ── درآمد ── */}
+      {/* ── درآمد ──
+          هر عدد یک زیرنویس دارد. بدونِ آن، «امروز / این هفته / این ماه»
+          معلوم نبود مجموعِ چه چیزی است و از کجا می‌آید. */}
       <section>
-        <Head icon={<TrendingUp size={17} style={{ color: FELT }} />} title="درآمد" />
+        <Head icon={<TrendingUp size={17} style={{ color: FELT }} />} title="درآمد"
+          desc="مجموعِ مبلغِ رزروهای پرداخت‌شده‌ی این باشگاه، پیش از کسرِ کمیسیون." />
         <div className="cf-grid">
-          <Stat label="امروز" value={d.revenue.today} tone="felt" />
-          <Stat label="این هفته" value={d.revenue.week} />
-          <Stat label="این ماه" value={d.revenue.month} />
-          <Stat label="کلِ درآمد" value={d.revenue.total} strong />
+          <Stat label="امروز" value={d.revenue.today} tone="felt" hint="رزروهای پرداخت‌شده‌ی امروز" />
+          <Stat label="این هفته" value={d.revenue.week} hint="از شنبه تا امروز" />
+          <Stat label="این ماه" value={d.revenue.month} hint="از اولِ ماهِ جاری" />
+          <Stat label="کلِ درآمد" value={d.revenue.total} strong hint="از آغازِ فعالیتِ باشگاه" />
         </div>
       </section>
 
       {/* ── موجودی ── */}
       <section>
-        <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="موجودی" />
+        <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="گردشِ مالی"
+          desc="سهمِ شما از هر رزرو، و سهمِ پلتفرم که به‌صورتِ کمیسیون کسر می‌شود." />
         <div className="cf-grid">
-          <Stat label="قابلِ تسویه" value={d.balance.available} tone="gold" strong />
-          <Stat label="در انتظارِ تسویه" value={d.balance.pending} />
-          <Stat label="تسویه‌شده" value={d.balance.totalSettled} />
-          <Stat label="کمیسیونِ پلتفرم" value={d.balance.totalCommission} muted />
+          <Stat label="سهمِ شما — آماده" value={d.balance.available} tone="gold" strong hint="رزروهای انجام‌شده، پس از کسرِ کمیسیون" />
+          <Stat label="سهمِ شما — در جریان" value={d.balance.pending} hint="رزروهایی که هنوز برگزار نشده‌اند" />
+          <Stat label="پرداخت‌شده به شما" value={d.balance.totalSettled} hint="آنچه تا امروز به حسابتان رسیده" />
+          <Stat label="کمیسیونِ پلتفرم" value={d.balance.totalCommission} muted hint="سهمِ بیلیارد هاب از رزروها" />
         </div>
       </section>
 
       {/* ── رزروها ── */}
       <section>
-        <Head icon={<Clock3 size={17} style={{ color: SEC }} />} title="رزروها" />
+        <Head icon={<Clock3 size={17} style={{ color: SEC }} />} title="رزروها"
+          desc="تعدادِ رزرو — نه مبلغ." />
         <div className="cf-grid">
-          <Stat label="امروز" value={d.bookings.today} count />
-          <Stat label="پیشِ‌رو" value={d.bookings.upcoming} count />
-          <Stat label="انجام‌شده" value={d.bookings.completed} count />
-          <Stat label="کنسل‌شده" value={d.bookings.cancelled} count muted />
+          <Stat label="امروز" value={d.bookings.today} count unit="رزرو" />
+          <Stat label="پیشِ‌رو" value={d.bookings.upcoming} count unit="رزرو" />
+          <Stat label="انجام‌شده" value={d.bookings.completed} count unit="رزرو" />
+          <Stat label="کنسل‌شده" value={d.bookings.cancelled} count muted unit="رزرو" />
         </div>
       </section>
 
-      {/* ── حسابِ بانکی ── */}
+      {/* ── حسابِ بانکی ──
+          این بخش فقط نمایش است. ثبت و تغییرِ شبا تنها یک‌جا انجام می‌شود —
+          تبِ «اطلاعات» — چون آن‌جا شبا با استعلامِ بانکی و کد ملیِ مالک
+          تطبیق داده می‌شود. فرمِ دومی که این‌جا بود همان شبا را بدونِ هیچ
+          استعلامی می‌گرفت و کاربر دو جای متفاوت برای یک کار می‌دید. */}
       <section>
         <Head icon={<Landmark size={17} style={{ color: GOLD_D }} />} title="حسابِ بانکیِ تسویه"
-          action={<button onClick={() => setBankOpen(true)} style={btnGhost}>{bank ? 'تغییرِ حساب' : 'ثبتِ حساب'}</button>} />
+          action={onEditBank ? <button onClick={onEditBank} style={btnGhost}>{bank ? 'تغییرِ حساب' : 'ثبتِ حساب'}</button> : undefined} />
         <div style={card}>
           {!bank ? (
             <p style={{ fontSize: 13, color: MUT, margin: 0, lineHeight: 2 }}>
-              برای دریافتِ تسویه، ابتدا شماره شبای خود را ثبت کنید. تا تأییدِ حساب، تسویه انجام نمی‌شود.
+              برای دریافتِ تسویه، شماره شبای خود را در تبِ <b style={{ color: GOLD_D }}>اطلاعات</b> ثبت
+              و با استعلامِ بانکی تأیید کنید. حساب باید به نامِ خودِ صاحبِ باشگاه باشد.
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -129,8 +138,6 @@ export default function ClubFinance({ clubId }: { clubId: string }) {
         )}
       </section>
 
-      {bankOpen && <BankModal clubId={clubId} current={bank} onClose={() => setBankOpen(false)} onSaved={() => { setBankOpen(false); load() }} />}
-
       <style>{`
         .cf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         @media (max-width: 860px) { .cf-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -143,23 +150,28 @@ export default function ClubFinance({ clubId }: { clubId: string }) {
 const card: React.CSSProperties = { background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16 }
 const btnGhost: React.CSSProperties = { padding: '7px 14px', borderRadius: 10, border: `1px solid ${LINE}`, background: '#fff', color: GOLD_D, fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }
 
-function Head({ icon, title, action }: { icon: React.ReactNode; title: string; action?: React.ReactNode }) {
+function Head({ icon, title, action, desc }: { icon: React.ReactNode; title: string; action?: React.ReactNode; desc?: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11 }}>
-      {icon}<h3 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>{title}</h3>
-      {action && <span style={{ marginInlineStart: 'auto' }}>{action}</span>}
+    <div style={{ marginBottom: 11 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        {icon}<h3 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>{title}</h3>
+        {action && <span style={{ marginInlineStart: 'auto' }}>{action}</span>}
+      </div>
+      {desc && <p style={{ fontSize: 11.5, color: MUT, margin: '6px 0 0', lineHeight: 1.9 }}>{desc}</p>}
     </div>
   )
 }
 
-function Stat({ label, value, tone, strong, muted, count }: { label: string; value: number; tone?: 'gold' | 'felt'; strong?: boolean; muted?: boolean; count?: boolean }) {
+function Stat({ label, value, tone, strong, muted, count, hint, unit }: { label: string; value: number; tone?: 'gold' | 'felt'; strong?: boolean; muted?: boolean; count?: boolean; hint?: string; unit?: string }) {
   const color = tone === 'gold' ? GOLD_D : tone === 'felt' ? FELT : muted ? MUT : INK
   return (
     <div style={{ background: '#fff', border: `1px solid ${tone === 'gold' ? 'rgba(199,166,106,0.4)' : LINE}`, borderRadius: 16, padding: '14px 16px' }}>
       <div style={{ fontSize: 11.5, color: MUT, marginBottom: 6 }}>{label}</div>
       <div style={{ fontSize: strong ? 21 : 18, fontWeight: 900, color, fontVariantNumeric: 'tabular-nums', lineHeight: 1.3 }}>
-        {fa(value)}{!count && <span style={{ fontSize: 10.5, fontWeight: 700, color: MUT, marginInlineStart: 4 }}>تومان</span>}
+        {fa(value)}
+        <span style={{ fontSize: 10.5, fontWeight: 700, color: MUT, marginInlineStart: 4 }}>{count ? (unit ?? '') : 'تومان'}</span>
       </div>
+      {hint && <div style={{ fontSize: 10.5, color: MUT, marginTop: 6, lineHeight: 1.7 }}>{hint}</div>}
     </div>
   )
 }
@@ -196,62 +208,6 @@ const settleBadge = (s: string): React.CSSProperties => ({
 const settleLabel = (s: string) => s === 'COMPLETED' ? 'واریز شد' : s === 'PROCESSING' ? 'در حالِ انجام' : s === 'FAILED' ? 'ناموفق' : 'در انتظار'
 const faDate = (iso: string) => { try { return new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'long' }).format(new Date(iso)) } catch { return '—' } }
 
-/* ── مودالِ ثبت/تغییرِ حسابِ بانکی ── */
-function BankModal({ clubId, current, onClose, onSaved }: { clubId: string; current: Finance['bankAccount']; onClose: () => void; onSaved: () => void }) {
-  const [holder, setHolder] = useState(current?.account_holder_name || '')
-  const [bankName, setBankName] = useState(current?.bank_name || '')
-  const [iban, setIban] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [msg, setMsg] = useState('')
-
-  const save = async () => {
-    const clean = iban.toUpperCase().replace(/[^A-Z0-9]/g, '')
-    if (!holder.trim()) { setMsg('نامِ صاحبِ حساب را وارد کنید'); return }
-    if (!/^IR\d{24}$/.test(clean)) { setMsg('شماره شبا باید با IR شروع شود و ۲۴ رقم داشته باشد'); return }
-    setBusy(true); setMsg('')
-    try {
-      const r = await apiFetch(`/api/clubs/${clubId}/bank-account`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountHolderName: holder.trim(), bankName, iban: clean }),
-      })
-      const j = await r.json().catch(() => ({}))
-      if (!r.ok) { setMsg(j?.message || 'ثبت ناموفق بود'); setBusy(false); return }
-      onSaved()
-    } catch { setMsg('خطا در ارتباط با سرور'); setBusy(false) }
-  }
-
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18 }}>
-      <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 420, background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, boxShadow: '0 30px 70px rgba(20,18,14,0.28)', overflow: 'hidden' }}>
-        <div style={{ padding: '15px 18px', borderBottom: `1px solid ${LINE}`, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Landmark size={18} style={{ color: GOLD_D }} />
-          <span style={{ fontSize: 15, fontWeight: 900, color: INK, flex: 1 }}>حسابِ بانکیِ تسویه</span>
-          <button onClick={onClose} style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 9, padding: 7, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
-        </div>
-        <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Field label="نامِ صاحبِ حساب" value={holder} onChange={setHolder} placeholder="مطابقِ کارتِ بانکی" />
-          <Field label="نامِ بانک" value={bankName} onChange={setBankName} placeholder="مثلاً ملت" />
-          <Field label="شماره شبا" value={iban} onChange={v => setIban(v.toUpperCase())} placeholder="IR000000000000000000000000" ltr />
-          <p style={{ fontSize: 11.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
-            پس از ثبت، حساب در وضعیتِ «در انتظارِ تأیید» قرار می‌گیرد و تسویه فقط پس از تأییدِ مدیرِ پلتفرم انجام می‌شود.
-          </p>
-          {msg && <p style={{ fontSize: 12.5, fontWeight: 700, color: '#B23B2E', margin: 0 }}>{msg}</p>}
-          <button onClick={save} disabled={busy}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 13, borderRadius: 12, border: 'none', cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: GOLD, color: '#241B08' }}>
-            {busy ? <Loader2 size={16} style={{ animation: 'cfspin 1s linear infinite' }} /> : <CheckCircle2 size={16} />} ثبتِ حساب
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Field({ label, value, onChange, placeholder, ltr }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; ltr?: boolean }) {
-  return (
-    <label style={{ display: 'block' }}>
-      <span style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: SEC, marginBottom: 6 }}>{label}</span>
-      <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: GROUND, fontSize: 13.5, fontFamily: 'inherit', color: INK, outline: 'none', direction: ltr ? 'ltr' : 'rtl', textAlign: ltr ? 'left' : 'right' }} />
-    </label>
-  )
-}
+/* `BankModal` و `Field` حذف شدند: ثبتِ شبا تنها از تبِ «اطلاعات» انجام
+   می‌شود، جایی که با استعلامِ بانکی و کد ملیِ مالک تطبیق داده می‌شود.
+   نگه‌داشتنِ فرمِ دوم یعنی مسیری برای ثبتِ شبای تأییدنشده. */

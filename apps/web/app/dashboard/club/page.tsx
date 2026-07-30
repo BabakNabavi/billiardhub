@@ -22,6 +22,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import { apiFetch } from '../../../lib/http';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
+import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
 import FaNumberInput, { toFa as faDigit, groupFa, amountInWords } from '../../../components/ui/FaNumberInput';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
@@ -433,7 +434,7 @@ export default function ClubDashboardPage() {
   const [tForm, setTForm] = useState({
     name: '', description: '', gameType: 'snooker' as GameType,
     date: '', startTime: '', registrationDeadline: '',
-    maxPlayers: '16', entryFee: '', prizeInfo: '', rules: '', matchFormat: '',
+    maxPlayers: '16', entryFee: '', prizeInfo: '', rules: '', matchFormat: 'bo5',
     paymentMethod: 'card_transfer' as 'online' | 'card_transfer',
     cardNumber: '', cardHolder: '', bankName: '',
   });
@@ -1160,12 +1161,29 @@ export default function ClubDashboardPage() {
   const ibanBad   = clubInfo.iban.length > 2 && clubInfo.iban.length === 26 && !isValidIban(clubInfo.iban);
   const ibanBank  = isValidIban(clubInfo.iban) ? bankOfIban(clubInfo.iban) : null;
 
-  const isReserveClosed = reserveClosedUntil === 'always' || (reserveClosedUntil !== '' && Number(reserveClosedUntil) > Date.now());
-  const reserveClosedLabel = reserveClosedUntil === 'always'
-    ? 'رزروِ آنلاین همیشه بسته است'
-    : isReserveClosed
-      ? `رزروِ آنلاین تا ${new Date(Number(reserveClosedUntil)).toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })} بسته است`
-      : 'رزروِ آنلاین باز است';
+  /* دو سازوکارِ بستنِ رزرو وجود دارد و باید یک وضعیتِ واحد نشان دهند،
+     وگرنه کاربر «رزروِ امروز بسته» را تیک می‌زند و همان بالا می‌خواند
+     «رزروِ آنلاین باز است» — که هر دو درست‌اند ولی با هم متناقض به‌نظر
+     می‌رسند:
+
+       • closeToday          → همیشه، فقط روزِ جاری
+       • reserveClosedUntil  → موقت، همه‌ی روزها تا یک زمانِ مشخص
+
+     پس متن هر دو را با هم می‌گوید. */
+  const tempClosed = reserveClosedUntil === 'always' || (reserveClosedUntil !== '' && Number(reserveClosedUntil) > Date.now());
+  const isReserveClosed = tempClosed || closeToday;
+
+  const reserveClosedLabel = (() => {
+    if (reserveClosedUntil === 'always') return 'رزروِ آنلاین همیشه بسته است';
+    if (tempClosed) {
+      const until = new Date(Number(reserveClosedUntil)).toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+      return closeToday
+        ? `رزروِ آنلاین تا ${until} بسته است — و امروز همیشه بسته می‌ماند`
+        : `رزروِ آنلاین تا ${until} بسته است`;
+    }
+    if (closeToday) return 'رزروِ امروز بسته است — روزهای آینده باز';
+    return 'رزروِ آنلاین باز است';
+  })();
   /* ذخیره‌ی «بستنِ رزروِ امروز» روی سرور */
   const saveCloseToday = async (next: boolean) => {
     if (!selectedClub) return;
@@ -2474,13 +2492,49 @@ export default function ClubDashboardPage() {
                   options={[{ value:'snooker',label:'اسنوکر' },{ value:'8ball',label:'ایت بال' },{ value:'9ball',label:'ناین بال' },{ value:'other',label:'سایر' }]} />
                 <SelectField label="ظرفیت (نفر)" value={tForm.maxPlayers} onChange={v => setTForm(p => ({...p, maxPlayers: v}))}
                   options={['8','16','32','64'].map(v => ({ value: v, label: v + ' نفر' }))} />
-                <InputField label="تاریخ برگزاری" value={tForm.date} onChange={v => setTForm(p => ({...p, date: v}))} placeholder="۱۵ مرداد ۱۴۰۵" />
-                <InputField label="ساعت شروع" value={tForm.startTime} onChange={v => setTForm(p => ({...p, startTime: v}))} placeholder="۱۴:۰۰" />
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <InputField label="مهلت ثبت‌نام" value={tForm.registrationDeadline} onChange={v => setTForm(p => ({...p, registrationDeadline: v}))} placeholder="۱۰ مرداد ۱۴۰۵" />
+                {/* تاریخ‌ها با همان تقویمِ شمسیِ تاریخِ تولد انتخاب می‌شوند،
+                    نه تایپِ آزاد — تایپِ آزاد یعنی هر کسی هر قالبی بنویسد
+                    و بعد قابلِ مرتب‌سازی و مقایسه نباشد.
+                    maxYear جلو گذاشته شده چون مسابقه در آینده است. */}
+                <JalaliDatePicker label="تاریخ برگزاری" value={tForm.date}
+                  onChange={v => setTForm(p => ({ ...p, date: v }))}
+                  minYear={1404} maxYear={1410} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>ساعت شروع</label>
+                  <FaTimeSelect value={tForm.startTime || '14:00'}
+                    onChange={v => setTForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع مسابقه" />
                 </div>
-                <InputField label="حق ثبت‌نام (تومان)" type="number" value={tForm.entryFee} onChange={v => setTForm(p => ({...p, entryFee: v}))} placeholder="500000" />
-                <InputField label="فرمت مسابقه" value={tForm.matchFormat} onChange={v => setTForm(p => ({...p, matchFormat: v}))} placeholder="bo3 / bo5 / حذفی" />
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <JalaliDatePicker label="مهلت ثبت‌نام" value={tForm.registrationDeadline}
+                    onChange={v => setTForm(p => ({ ...p, registrationDeadline: v }))}
+                    minYear={1404} maxYear={1410} />
+                </div>
+
+                {/* مبلغ: سه‌رقم‌جدا، فارسی، و به حروف زیرش */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>حق ثبت‌نام (تومان)</label>
+                  <FaNumberInput value={tForm.entryFee} grouped ariaLabel="حق ثبت‌نام"
+                    onChange={v => setTForm(p => ({ ...p, entryFee: v }))}
+                    placeholder="۵۰۰٬۰۰۰"
+                    style={{ ...inputStyle, marginTop: 0, textAlign: 'center' }} />
+                  {tForm.entryFee && parseInt(tForm.entryFee) > 0 && (
+                    <div style={{ fontSize: 11, color: GOLD, paddingRight: 2 }}>
+                      {numberToFarsi(parseInt(tForm.entryFee))} تومان
+                    </div>
+                  )}
+                </div>
+
+                <SelectField label="فرمت مسابقه" value={tForm.matchFormat}
+                  onChange={v => setTForm(p => ({ ...p, matchFormat: v }))}
+                  options={[
+                    { value: 'bo3',  label: 'Best Of ۳'  },
+                    { value: 'bo5',  label: 'Best Of ۵'  },
+                    { value: 'bo7',  label: 'Best Of ۷'  },
+                    { value: 'bo9',  label: 'Best Of ۹'  },
+                    { value: 'bo11', label: 'Best Of ۱۱' },
+                  ]} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
                 {[
@@ -2536,7 +2590,7 @@ export default function ClubDashboardPage() {
 
       {/* ════ Tab: Finance ════ */}
       {activeTab === 'finance' && selectedClub && (
-        <ClubFinance clubId={selectedClub.id} />
+        <ClubFinance clubId={selectedClub.id} onEditBank={() => setActiveTab('info')} />
       )}
 
       {/* ════ Tab: Live ════ */}

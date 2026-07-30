@@ -151,3 +151,61 @@ export async function matchIban(nationalCode: string, birthDate: string, rawIban
   if (!isValidIban(iban)) return { ok: false, message: 'شماره شبا معتبر نیست' }
   return callMatch(IBAN_MATCH_URL, { nationalCode: digitsOnly(nationalCode), birthDate, iban }, 'IbanMatch')
 }
+
+/* ─────────────────────────────────────────────────────────────
+   همگام‌سازیِ شبای تأییدشده با جدولِ تسویه.
+
+   دو جدول همزمان شبا نگه می‌دارند و هرکدام مصرف‌کننده‌ی خودش را دارد:
+     • `clubs.iban`          → نمایش در تبِ «اطلاعات» و صفحه‌ی عمومی
+     • `club_bank_accounts`  → مبنای واقعیِ تسویه و تبِ «مالی»
+
+   پیش‌تر فقط اولی نوشته می‌شد، پس باشگاه‌دار شبایش را با استعلام تأیید
+   می‌کرد ولی تبِ مالی همچنان می‌گفت «حسابی ثبت نشده» و فرمِ دومی برای
+   وارد کردنِ همان شبا نشان می‌داد. این تابع همان دوگانگی را می‌بندد.
+
+   وضعیت مستقیم VERIFIED است، چون هر دو مسیرِ فراخوان پیش از رسیدن به
+   این‌جا با IbanMatch اثبات کرده‌اند حساب به نامِ کد ملیِ تأییدشده‌ی
+   همین کاربر است — سنجه‌ای قوی‌تر از بازبینیِ چشمیِ ادمین.
+   ───────────────────────────────────────────────────────────── */
+export async function syncClubSettlementAccount(opts: {
+  sb: () => any
+  clubId: string
+  actorId: string
+  iban: string
+  bankName?: string | null
+  holderName?: string | null
+  cardLast4?: string | null
+}): Promise<void> {
+  const { sb, clubId, actorId, iban } = opts
+  if (!clubId || !isValidIban(iban)) return
+
+  const holder = String(opts.holderName || '').trim()
+    || await sb().from('users').select('name').eq('id', actorId).maybeSingle()
+      .then((r: { data: { name?: string } | null }) => String(r.data?.name || '').trim())
+      .catch(() => '')
+
+  const { data: prev } = await sb().from('club_bank_accounts')
+    .select('id,iban,verification_status').eq('club_id', clubId).eq('is_active', true).maybeSingle()
+
+  const p = prev as { id: string; iban?: string; verification_status?: string } | null
+
+  /* همان شبا و همان وضعیت ⇒ کاری لازم نیست؛ رکوردِ تکراری نساز */
+  if (p && p.iban === iban && p.verification_status === 'VERIFIED') return
+
+  if (p) {
+    await sb().from('club_bank_accounts')
+      .update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', p.id)
+  }
+
+  await sb().from('club_bank_accounts').insert({
+    club_id: clubId,
+    account_holder_name: holder || 'صاحبِ باشگاه',
+    bank_name: opts.bankName ?? null,
+    iban,
+    card_number_last4: opts.cardLast4 ?? null,
+    verification_status: 'VERIFIED',
+    verified_at: new Date().toISOString(),
+    verified_by: actorId,
+    is_active: true,
+  })
+}

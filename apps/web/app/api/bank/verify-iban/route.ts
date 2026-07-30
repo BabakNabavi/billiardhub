@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
-import { matchIban } from '@/lib/bank-server';
+import { matchIban, syncClubSettlementAccount } from '@/lib/bank-server';
 import { formatIban, isValidIban, bankOfIban } from '@/lib/bank';
 
 /* ثبتِ شبا به‌صورتِ مستقیم — برای باشگاه‌داری که شبایش را دارد ولی
@@ -55,6 +55,12 @@ export async function POST(req: NextRequest) {
       ibanVerified: true,
       ...(bankName ? { bankName } : {}),
     }).eq('id', clubId);
+
+    /* همین شبا باید در `club_bank_accounts` هم بنشیند — تسویه از آن جدول
+       خوانده می‌شود، نه از `clubs`. */
+    await syncClubSettlementAccount({
+      sb, clubId, actorId: actor.id, iban, bankName,
+    });
   }
 
   return NextResponse.json({ ok: true, match: true, iban, bankName: bankName ?? undefined });
