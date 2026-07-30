@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import HomeClient from './HomeClient'
 import { buildLivePlacements } from '../lib/ads/live-payload'
-import { loadHomeFeatured, EMPTY_FEATURED } from '../lib/home-featured'
 import { toPlacementState, type PlacementKey, type PlacementState, type PlacementPayload } from '../components/ads/AdSlot'
 
 /* ─────────────────────────────────────────────────────────────
@@ -39,27 +38,14 @@ const KEYS: PlacementKey[] = [
 export default async function HomePage() {
   let initialPlacements: Partial<Record<PlacementKey, PlacementState>> | undefined
 
-  /* پشتوانه‌ی سه سکشن هم همین‌جا خوانده می‌شود، نه در مرورگر.
-
-     وقتی این داده را با useEffect گرفتم، کارت‌ها از HTMLِ اولیه بیرون
-     افتادند و همان مشکلی که این لایه حل کرده بود برگشت — خزنده چیزی
-     نمی‌دید و کاربر یک پرشِ چیدمان داشت. */
-  const [placements, featured] = await Promise.allSettled([
-    buildLivePlacements(),
-    loadHomeFeatured(),
-  ])
-
-  if (placements.status === 'fulfilled') {
-    const live = placements.value
+  try {
+    const live = await buildLivePlacements()
     initialPlacements = Object.fromEntries(
       KEYS.map(k => [k, toPlacementState(live[k] as PlacementPayload | undefined)]),
     ) as Partial<Record<PlacementKey, PlacementState>>
+  } catch {
+    /* بی‌صدا — کلاینت خودش می‌خواند */
   }
 
-  return (
-    <HomeClient
-      initialPlacements={initialPlacements}
-      initialFeatured={featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED}
-    />
-  )
+  return <HomeClient initialPlacements={initialPlacements} />
 }
