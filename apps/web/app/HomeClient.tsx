@@ -192,21 +192,11 @@ const FEATURED_COUNT = 8
    هاردکد (باشگاه‌ها، محصولات، فروشگاه‌ها) که این‌جا بودند حذف شدند:
    هیچ‌کدام وجود خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید. حالا از
    /api/clubs، /api/products و /api/sellers پر می‌شوند. */
-export interface RealClub {
-  id: string; name: string; city: string; dist: string; tables: number
-  breakdown?: { snooker: number; pocket: number; highball: number }
-  rating: number; reviews: number; type: string
-  img: string; img2: string; price: number
-  badge: string | null; tags: string[]; hasStory: boolean
-}
-export interface RealProduct {
-  id: string; name: string; sub: string; img: string
-  brand: string; price: number; sale: number; pct: number
-}
-export interface RealStore {
-  id: string; name: string; city: string; specialty: string
-  rating: number; reviews: number; img: string; badge: string | null
-}
+/* تایپ‌ها در `lib/home-types.ts` زندگی می‌کنند تا `lib/home-featured.ts`
+   (که روی سرور اجرا می‌شود) بتواند بدونِ کشیدنِ این فایلِ 'use client'
+   به گرافِ سرور از آن‌ها استفاده کند. */
+export type { RealClub, RealProduct, RealStore } from '../lib/home-types';
+import type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 
 /* پاسخِ خامِ APIها */
 interface ApiClub {
@@ -219,8 +209,8 @@ interface ApiProduct {
   images?: string[]; price?: number; discountPrice?: number | null; discountPercent?: number | null
 }
 interface ApiStore {
-  id: string; name?: string; storeName?: string; city?: string
-  specialty?: string; logo?: string; images?: string[]
+  id: string; firstName?: string; lastName?: string; avatar?: string
+  sellerProfile?: { storeName?: string; city?: string; logo?: string; specialty?: string } | null
 }
 
 /* وقتی باشگاهِ واقعی عکس ندارد — تصویرِ عمومیِ بیلیارد، نه عکسِ باشگاهِ
@@ -392,14 +382,15 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            /* پدینگِ پایین از ۲۴ به ۱۶ آمد تا دکمه‌ی «مشاهده و رزرو»
-               کمی بالاتر بنشیند — فاصله‌ی spacer پایین را می‌گیرد. */
-            padding: '17px 7px 16px',
+            /* پدینگِ پایین: ۲۴ → ۱۶ → ۱۰، تا دکمه‌ی «مشاهده و رزرو»
+               بالاتر بنشیند. spacerِ `flex:1` دکمه را به کف می‌چسباند،
+               پس تنها راهِ بالا آوردنش کم‌کردنِ همین پدینگ است. */
+            padding: '17px 7px 10px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             overflow: 'hidden', gap: '9px',
           }}>
-            {/* ۱۰٪ بزرگ‌تر از ۱۳px */}
-            <div style={{ fontSize: '14.3px', fontWeight: 800, color: '#1a1a1a',
+            {/* ۱۳px → ۱۴٫۳ (۱۰٪) → ۱۵ (۵٪ دیگر) */}
+            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
@@ -430,7 +421,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               borderRadius: rad,
               padding: '6px 0',
               color: GOLD,
-              fontSize: '10px', fontWeight: 700,
+              /* متنِ دکمه ۱۰٪ بزرگ‌تر: ۱۰ → ۱۱px */
+              fontSize: '11px', fontWeight: 700,
               fontFamily: 'var(--font-base)',
               transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
               transform: hov ? 'translateY(-1px)' : 'none',
@@ -927,7 +919,12 @@ function HomeMediaBand() {
    PAGE
 ═══════════════════════════════════════════════════════════════ */
 
-export default function HomeClient({ initialPlacements }: { initialPlacements?: Partial<Record<PlacementKey, PlacementState>> }) {
+export default function HomeClient({ initialPlacements, initialFeatured }: {
+  initialPlacements?: Partial<Record<PlacementKey, PlacementState>>
+  /* باشگاه/محصول/فروشگاهِ واقعی، خوانده‌شده روی سرور — تا کارت‌ها در
+     HTMLِ اولیه باشند و صفحه هنگامِ لود نپرد. */
+  initialFeatured?: { clubs: RealClub[]; products: RealProduct[]; stores: RealStore[] }
+}) {
   const [slide, setSlide]     = useState(0);
   const [scrollY, setScrollY] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -1002,11 +999,20 @@ export default function HomeClient({ initialPlacements }: { initialPlacements?: 
 
      حالا همان جای خالی با موجودیت‌های واقعیِ سایت پر می‌شود. اگر
      چیزی هم نباشد، سکشن خالی می‌ماند — که درست است. */
-  const [realClubs, setRealClubs] = useState<RealClub[]>([]);
-  const [realProducts, setRealProducts] = useState<RealProduct[]>([]);
-  const [realStores, setRealStores] = useState<RealStore[]>([]);
+  const [realClubs, setRealClubs] = useState<RealClub[]>(initialFeatured?.clubs ?? []);
+  const [realProducts, setRealProducts] = useState<RealProduct[]>(initialFeatured?.products ?? []);
+  const [realStores, setRealStores] = useState<RealStore[]>(initialFeatured?.stores ?? []);
+
+  /* اگر سرور داده را رسانده، دوباره از مرورگر نمی‌پرسیم — همان مقدارِ
+     اولیه کافی است و یک رفت‌وبرگشتِ اضافه صرفه ندارد. */
+  const needClientFetch = !initialFeatured || (
+    initialFeatured.clubs.length === 0 &&
+    initialFeatured.products.length === 0 &&
+    initialFeatured.stores.length === 0
+  );
 
   useEffect(() => {
+    if (!needClientFetch) return;
     const grab = async <T,>(url: string, pick: (j: unknown) => T[]): Promise<T[]> => {
       try {
         const r = await fetch(url, { cache: 'no-store' });
@@ -1048,15 +1054,23 @@ export default function HomeClient({ initialPlacements }: { initialPlacements?: 
         pct: p.discountPercent ?? 0,
       })));
 
-      setRealStores(st.slice(0, 12).map(s => ({
-        id: s.id, name: s.name ?? s.storeName ?? '', city: s.city ?? '',
-        specialty: s.specialty || 'تجهیزات بیلیارد',
-        rating: 0, reviews: 0,
-        img: s.logo || s.images?.[0] || IMG.store1,
-        badge: null as string | null,
-      })));
+      /* «فروشگاه» جدولِ جدا ندارد: /api/sellers کاربرانِ با نقشِ seller
+         را برمی‌گرداند، پس نام و شهر داخلِ sellerProfile است. */
+      setRealStores(st.slice(0, 12).map(s => {
+        const sp = s.sellerProfile ?? {};
+        const person = [s.firstName, s.lastName].filter(Boolean).join(' ').trim();
+        return {
+          id: s.id,
+          name: sp.storeName || person || 'فروشگاه',
+          city: sp.city ?? '',
+          specialty: sp.specialty || 'تجهیزات بیلیارد',
+          rating: 0, reviews: 0,
+          img: sp.logo || s.avatar || IMG.store1,
+          badge: null as string | null,
+        };
+      }));
     })();
-  }, []);
+  }, [needClientFetch]);
 
   /* بازگشت به داده‌ی نمونه فقط وقتی جایگاه «رایگان» است (یا هنوز
      بارگذاری نشده): جایگاهِ دستی/پولیِ خالی باید واقعاً خالی بماند.
