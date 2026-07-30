@@ -1202,38 +1202,93 @@ export default function HomeClient({ initialPlacements, initialFeatured }: {
   const bannerTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startBannerTimer = () => {
     if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
+    if (document.hidden) return;
     bannerTimerRef.current = setInterval(() => setActiveBanner(p => (p + 1) % BANNER_SLIDES.length), 4500);
   };
-  useEffect(() => { startBannerTimer(); return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); }; }, []);
+  /* تایمر در تبِ پنهان می‌ایستد. چرخاندنِ اسلایدی که کسی نمی‌بیند فقط
+     باتری و نخِ اصلی می‌خورد، و هر تیک یک رندرِ کاملِ React است. */
+  useEffect(() => {
+    startBannerTimer();
+    const onVis = () => {
+      if (document.hidden) { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); bannerTimerRef.current = null; }
+      else startBannerTimer();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
+    };
+  }, []);
 
 
   /* تشخیصِ کارتِ وسط با rAF (به‌جای رویدادِ اسکرول) — چون در دسکتاپ ترک با
      انیمیشنِ CSS می‌چرخد و اسکرول رخ نمی‌دهد. کارتِ نزدیک به مرکز نرم بزرگ می‌شود
      و activeCard همیشه اندیسِ منطقیِ ۰..۶ است (محتوا برای حلقه ×۲ رندر می‌شود). */
   useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    /* این حلقه بزرگ‌ترین هزینه‌ی نخِ اصلیِ صفحه بود.
+
+       نسخه‌ی قبلی بی‌قیدوشرط هر فریم اجرا می‌شد و برای هر کارت
+       `getBoundingClientRect()` می‌خواند — یعنی Forced Reflow در هر
+       فریم، برای همیشه، حتی وقتی سکشن اصلاً روی صفحه نبود یا کاربر
+       تبِ دیگری باز کرده بود. در Lighthouse این می‌شد
+       Style & Layout ≈ ۱۰ ثانیه.
+
+       سه شرط اضافه شد:
+         • فقط وقتی سکشن در دید است (IntersectionObserver)
+         • فقط وقتی تب فعال است (visibilitychange)
+         • اگر کاربر «کاهشِ حرکت» خواسته، اصلاً اجرا نمی‌شود
+
+       نوشتنِ transform هم فقط وقتی مقدار واقعاً عوض شده انجام می‌شود؛
+       نوشتنِ تکراری همان مقدار، لایه را بی‌دلیل باطل می‌کرد. */
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+
     let raf = 0;
+    let visible = false;
+    const lastScale = new WeakMap<HTMLElement, string>();
+
     const loop = () => {
-      const slider = sliderRef.current;
-      if (slider) {
-        const rect = slider.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const cards = slider.querySelectorAll<HTMLElement>('.feat-card');
-        let minDist = Infinity, newActive = 0;
-        cards.forEach((card, i) => {
-          const r = card.getBoundingClientRect();
-          if (r.width === 0) return;                       // کپیِ مخفیِ موبایل
-          const dist = Math.abs(r.left + r.width / 2 - centerX);
-          const t = Math.max(0, 1 - dist / (rect.width * 0.55));
-          card.style.transform = `scale(${(1 + t * 0.15).toFixed(3)})`;
-          if (dist < minDist) { minDist = dist; newActive = i; }
-        });
-        const feat = newActive % FEATURE_CARDS.length;
-        if (feat !== activeCardRef.current) { activeCardRef.current = feat; setActiveCard(feat); }
-      }
+      if (!visible || document.hidden) { raf = 0; return; }   // حلقه می‌ایستد، نه اینکه بی‌کار بچرخد
+      const rect = slider.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const cards = slider.querySelectorAll<HTMLElement>('.feat-card');
+      let minDist = Infinity, newActive = 0;
+      cards.forEach((card, i) => {
+        const r = card.getBoundingClientRect();
+        if (r.width === 0) return;                       // کپیِ مخفیِ موبایل
+        const dist = Math.abs(r.left + r.width / 2 - centerX);
+        const t = Math.max(0, 1 - dist / (rect.width * 0.55));
+        const next = `scale(${(1 + t * 0.15).toFixed(3)})`;
+        if (lastScale.get(card) !== next) { card.style.transform = next; lastScale.set(card, next); }
+        if (dist < minDist) { minDist = dist; newActive = i; }
+      });
+      const feat = newActive % FEATURE_CARDS.length;
+      if (feat !== activeCardRef.current) { activeCardRef.current = feat; setActiveCard(feat); }
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+
+    const start = () => { if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop); };
+    const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible = !!e?.isIntersecting;
+        /* همین کلاس، انیمیشنِ CSSِ مارکِی و `will-change` را هم
+           روشن/خاموش می‌کند (پایین‌تر در استایل). */
+        slider.classList.toggle('in-view', visible);
+        visible ? start() : stop();
+      },
+      { threshold: 0 },
+    );
+    io.observe(slider);
+
+    const onVis = () => (document.hidden ? stop() : start());
+    document.addEventListener('visibilitychange', onVis);
+
+    return () => { io.disconnect(); document.removeEventListener('visibilitychange', onVis); stop(); };
   }, []);
 
   const clubsRafRef = useRef<number>(0);
@@ -1409,6 +1464,25 @@ useEffect(() => {
 
         .sec-label{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;margin-bottom:14px;padding:5px 13px;border-radius:999px;border:1px solid currentColor;}
         .sec-label::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+        /* ── مهارِ رندرِ سکشن‌های پایینِ صفحه ──
+           «content-visibility:auto» به مرورگر می‌گوید محتوای بیرونِ دید
+           را اصلاً چیدمان و رنگ نکند. «contain-intrinsic-size» ارتفاعِ
+           حدسی می‌دهد تا نوارِ اسکرول نپرد (CLS).
+           این بزرگ‌ترین برنده‌ی «Style & Layout» است، چون صفحه‌ی اصلی
+           چندین سکشنِ سنگین دارد که کاربر شاید هیچ‌وقت به آن‌ها نرسد. */
+        .hm-defer { content-visibility: auto; contain-intrinsic-size: auto 700px; }
+
+        /* احترام به «کاهشِ حرکت» — تنظیمِ سیستمیِ کاربر، نه سلیقه‌ی ما.
+           همه‌ی حلقه‌های بی‌پایان خاموش می‌شوند. */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
+
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارکِ outline پس‌زمینه‌ی هر سکشن — امضای هویتِ جدید */
@@ -1518,7 +1592,14 @@ useEffect(() => {
           -webkit-mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
           mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
         }
-        .feat-track { display:flex; gap:0; width:max-content; align-items:stretch; animation: heroLoop 44s linear infinite; will-change: transform; }
+        /* «will-change: transform» دائمی نیست: یک لایه‌ی کامپوزیت را
+           برای همیشه زنده نگه می‌داشت حتی وقتی سکشن دیده نمی‌شد.
+           حالا فقط وقتی انیمیشن واقعاً در جریان است اعمال می‌شود. */
+        .feat-track { display:flex; gap:0; width:max-content; align-items:stretch; animation: heroLoop 44s linear infinite; }
+        .feat-slider.in-view .feat-track { will-change: transform; }
+        /* خارج از دید، انیمیشن متوقف می‌شود — مرورگر برای اسلایدری که
+           کسی نمی‌بیند هر فریم کامپوزیت نمی‌کند. */
+        .feat-slider:not(.in-view) .feat-track { animation-play-state: paused; }
         .feat-track .feat-card { margin-left:18px; }
         .feat-slider:hover .feat-track, .feat-slider:active .feat-track { animation-play-state: paused; }
         @media(min-width:901px){
@@ -1632,13 +1713,27 @@ useEffect(() => {
           ╚══════════════════════════════════════════════════════╝ */}
       <div style={{ position: 'relative', height: isMobile ? 'auto' : '100dvh', minHeight: isMobile ? '100dvh' : '640px', overflow: 'hidden', background: '#04020A' }}>
 
-        {/* ── Layer 1: video (continuous motion background) ── */}
-        <video ref={videoRef} autoPlay muted loop playsInline preload="auto"
+        {/* ── Layer 1: video (continuous motion background) ──
+
+            سه هزینه‌ی این ویدیو اندازه‌گیری و کم شد:
+
+            ۱) `preload="auto"` کلِ ۱٫۴ مگابایت را پیش از هر چیزِ دیگری
+               دانلود می‌کرد و با تصویرِ هیرو (که LCP است) رقابت می‌کرد.
+               حالا `metadata` است: مرورگر خودش هنگام پخش می‌گیردش.
+            ۲) `poster` گذاشته شد تا تا آمدنِ ویدیو، همان تصویرِ سبکِ
+               WebP دیده شود — نه پس‌زمینه‌ی مشکی.
+            ۳) `willChange:'transform'` دائمی یک لایه‌ی کامپوزیتِ
+               تمام‌صفحه را همیشه زنده نگه می‌داشت. حالا فقط وقتی
+               اسکرول واقعاً هیرو را تغییر می‌دهد اعمال می‌شود. */}
+        <video ref={videoRef} autoPlay muted loop playsInline preload="metadata"
+          poster="/images/hero/1.webp"
+          aria-hidden="true"
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', zIndex: 1,
             filter: 'brightness(0.52) saturate(0.62) contrast(1.08)',
-            transform: `scale(${heroS})`, transformOrigin: 'center', willChange: 'transform',
+            transform: `scale(${heroS})`, transformOrigin: 'center',
+            willChange: scrollY > 0 && scrollY < 700 ? 'transform' : 'auto',
           }}>
           <source src="/images/video/hero.mp4" type="video/mp4" />
         </video>
@@ -1651,7 +1746,12 @@ useEffect(() => {
             transition: 'opacity 3.6s cubic-bezier(0.33,0,0.15,1)',
             pointerEvents: 'none',
           }}>
-            <img src={s.bg} alt="" loading={i === 0 ? 'eager' : 'lazy'}
+            {/* اسلاید اول LCP است ⇒ اولویتِ صریح. بقیه تا نوبتشان
+                نرسد اصلاً درخواست نمی‌شوند (`lazy` روی عنصرِ نامرئی). */}
+            <img src={s.bg} alt=""
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={i === 0 ? 'high' : 'low'}
+              decoding="async"
               style={{ width: '100%', height: '100%', objectFit: 'cover',
                 filter: 'brightness(0.78) saturate(0.85) contrast(1.06) blur(1.5px)',
                 transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
@@ -1844,7 +1944,7 @@ useEffect(() => {
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════
           جایگاهِ featured_clubs_homepage غیرفعال ⇒ کلِ سکشن حذف */}
       {showClubs && (
-      <section className="clubs-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
+      <section className="clubs-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-hair" style={{ left: '28%', background: 'linear-gradient(180deg,transparent,rgba(20,83,45,0.28),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(20,83,45,0.07)' }}>CLUBS</div>
@@ -1895,7 +1995,7 @@ useEffect(() => {
       {/* §3 MARKETPLACE ═════════════════════════════════════════
           جایگاهِ market_featured_products_homepage غیرفعال ⇒ حذفِ سکشن */}
       {showProducts && (
-      <section className="marketplace-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="marketplace-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.035) 1px, transparent 1px)', backgroundSize: '20px 20px', WebkitMaskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', maskImage: 'linear-gradient(100deg, transparent 55%, black 90%)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(160,120,64,0.09)' }}>BAZAAR</div>
@@ -1968,7 +2068,7 @@ useEffect(() => {
           سکشن تا وقتی «فهرستِ فروشگاه‌ها» یا یکی از دو بنرِ کناری
           محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
       {showSellersSection && (
-      <section className="sellers-section" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
+      <section className="sellers-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-20%', right: '10%', width: 'min(500px,48vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(199,166,106,0.13) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
         <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
@@ -2058,7 +2158,7 @@ useEffect(() => {
       )}
 
       {/* §4 SERVICES ════════════════════════════════════════════ */}
-      <section className="svc-section" style={{ position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 82% 0%, rgba(199,166,106,0.14), transparent 46%), linear-gradient(145deg, #0B0A08 0%, #171208 55%, #0B0A08 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(44px,4.2vw,68px)' }}>
+      <section className="svc-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 82% 0%, rgba(199,166,106,0.14), transparent 46%), linear-gradient(145deg, #0B0A08 0%, #171208 55%, #0B0A08 100%)', padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(44px,4.2vw,68px)' }}>
         <div aria-hidden className="sec-hair" style={{ left: '30%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(255,255,255,0.055)' }}>SERVICE</div>
         <div aria-hidden style={{ position: 'absolute', bottom: 0, insetInline: 0, height: 3, display: 'flex' }}>
