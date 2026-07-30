@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import FooterGate from "../components/FooterGate";
 import SessionBridge from "../components/auth/SessionBridge";
 import { ToastProvider } from '../components/ui/Toast';
 import ScrollToTop from '../components/ScrollToTop';
@@ -105,7 +106,9 @@ export default function RootLayout({
         {/* جایگاهِ «بنرِ پایینِ صفحه‌ی اصلی» عمداً این‌جا نیست: در layout
             روی همه‌ی مسیرها می‌نشست، در حالی که کلیدش و مشخصاتِ فاز ۵
             می‌گویند فقط پایینِ صفحه‌ی اصلی. حالا در app/page.tsx است. */}
-        <Footer />
+        {/* گیتِ ده‌خطیِ کلاینتی تصمیم می‌گیرد فوتر دیده شود یا نه؛ خودِ
+            فوتر Server Component است و هیچ JSای همراهش نمی‌رود. */}
+        <FooterGate><Footer /></FooterGate>
         <ToastProvider />
       </body>
     </html>

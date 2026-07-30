@@ -50,6 +50,10 @@ function SR({
 ═══════════════════════════════════════════════════════════════ */
 const GOLD     = '#C7A66A';
 const GOLD_D   = '#A07840';
+/* رنگِ متنِ دکمه‌های طلایی. GOLD_D روی پس‌زمینه‌ی rgba(199,166,106,0.12)
+   فقط ۳٫۵۵:۱ می‌داد که زیرِ حدِ ۴٫۵:۱ است؛ این یکی ۴٫۹۵:۱ می‌دهد.
+   حدس زدن جواب نداد — محاسبه شد. */
+const CTA_INK  = '#8A6020';
 const GOLD_DIM = 'rgba(199,166,106,0.60)';
 const GOLD_BOR = 'rgba(199,166,106,0.22)';
 const TEXT     = '#1A1917';
@@ -359,7 +363,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
                 border: `1px solid ${GOLD_BOR}`,
                 borderRadius: rad,
                 padding: '9px 0',
-                color: GOLD_D,
+                color: CTA_INK,
                 fontSize: '13px', fontWeight: 700,
                 fontFamily: 'var(--font-base)',
                 transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
@@ -413,7 +417,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               border: `1px solid ${GOLD_BOR}`,
               borderRadius: rad,
               padding: '6px 0',
-              color: GOLD_D,
+              color: CTA_INK,
               /* متنِ دکمه ۱۰٪ بزرگ‌تر: ۱۰ → ۱۱px */
               fontSize: '11px', fontWeight: 700,
               fontFamily: 'var(--font-base)',
@@ -453,7 +457,7 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
           <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
             {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمتِ اصلی جا برای مبلغ + پیلِ تخفیف داشته باشد */}
             {p.pct > 0 && (
-              <div style={{ fontSize: '10px', color: '#8A8474', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '10px', color: '#6E695C', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
                 {p.price.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500 }}>تومان</span>
               </div>
             )}

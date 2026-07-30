@@ -1,7 +1,4 @@
-'use client';
-
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD    = '#C7A66A';
@@ -85,10 +82,8 @@ const nav = [
 ];
 
 export default function Footer() {
-  const pathname = usePathname();
   /* صفحات ورود/ثبت‌نام فوتر ندارند */
   /* بازار اپ‌شل است و دایرکت تمام‌صفحه — فوتر ندارند */
-  if (pathname === '/login' || pathname === '/register' || pathname === '/shop' || pathname === '/direct') return null;
   return (
     <footer style={{ background: '#F5F3EF', borderTop: `1px solid ${BORDER}`, position: 'relative', overflow: 'hidden', direction: 'rtl' }}>
 
@@ -103,11 +98,18 @@ export default function Footer() {
           display: flex;
           align-items: center;
           gap: 5px;
-          padding: 3px 0;
+          /* هدفِ لمسی حداقل ۲۴px — استانداردِ WCAG 2.2.
+             پیش‌تر ~۱۹px بود و روی گوشی به‌سختی زده می‌شد. */
+          min-height: 24px;
+          padding: 4px 0;
           transition: color 0.22s ease;
           line-height: 1.45;
         }
         .ft-link:hover { color: ${GOLD}; }
+        /* هاورِ لینک‌های حقوقی — پیش‌تر با رویدادِ JS بود و همین دو خط
+           کلِ فوتر را کلاینتی می‌کرد */
+        .ft-legal { font-size:13px; color:${DIM2}; text-decoration:none; transition:color .22s ease; min-height:24px; display:inline-flex; align-items:center; }
+        .ft-legal:hover { color:${GOLD}; }
         .ft-link svg { opacity: 0; transition: opacity 0.22s ease; flex-shrink: 0; }
         .ft-link:hover svg { opacity: 1; }
         .ft-social {
@@ -147,7 +149,7 @@ export default function Footer() {
           .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
           .ft-dev-desk { display: none !important; }
           .ft-dev-mob { display: block !important; margin-top: 3px; }
-          .ft-link { font-size: 12px !important; padding: 2.5px 0 !important; }
+          .ft-link { font-size: 12px !important; padding: 4px 0 !important; min-height: 24px !important; }
           .ft-link svg { display: none; }
           .ft-heading { margin-bottom: 10px !important; }
         }
@@ -247,9 +249,7 @@ export default function Footer() {
               { label: 'قوانین و مقررات', href: '/terms' },
               { label: 'حریم خصوصی', href: '/privacy' },
             ].map(item => (
-              <Link key={item.href} href={item.href} style={{ fontSize: '13px', color: DIM2, textDecoration: 'none', transition: 'color 0.22s ease' }}
-                onMouseEnter={e => { (e.target as HTMLElement).style.color = GOLD; }}
-                onMouseLeave={e => { (e.target as HTMLElement).style.color = DIM2; }}>
+              <Link key={item.href} href={item.href} className="ft-legal">
                 {item.label}
               </Link>
             ))}
