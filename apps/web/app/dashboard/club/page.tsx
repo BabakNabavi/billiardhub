@@ -9,7 +9,7 @@ import {
   ChevronDown, Check,
   LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
   Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
-  Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon,
+  Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon, Settings,
   Loader2, Wallet, Radio,
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
@@ -2515,11 +2515,15 @@ export default function ClubDashboardPage() {
                     {t.status === 'live' && (
                       <Link href={`/tournaments/${t.id}/live`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.28)', color: '#dc2626' }}>● لایو</Link>
                     )}
-                    <button style={{
+                    {/* پنلِ برگزاری — قرعه‌کشی و ثبتِ نتیجه. بدونِ این لینک،
+                        هیچ راهی برای رسیدن به صفحه‌ی مدیریتِ مسابقه نبود.
+                        جای دکمه‌ی «ویرایش» را گرفت که هیچ‌وقت onClick نداشت. */}
+                    <Link href={`/tournaments/${t.id}/admin`} style={{
                       display: 'inline-flex', alignItems: 'center', gap: 5,
-                      padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                      border: '1px solid rgba(199,166,106,0.32)', background: 'rgba(199,166,106,0.08)', color: '#A07840', cursor: 'pointer', fontFamily: 'var(--font-base)',
-                    }}><Pencil size={12} /> ویرایش</button>
+                      padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                      textDecoration: 'none',
+                      border: '1px solid rgba(199,166,106,0.32)', background: 'rgba(199,166,106,0.08)', color: '#A07840',
+                    }}><Settings size={12} /> مدیریت و قرعه‌کشی</Link>
                     <button onClick={() => { if (confirm(`مسابقه «${t.name}» حذف شود؟`)) deleteTournament(t.id); }} style={{
                       display: 'inline-flex', alignItems: 'center', gap: 5,
                       padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600,
