@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import api from '../../../lib/api';
 import { useAuthStore } from '../../../store/auth.store';
@@ -10,8 +11,9 @@ import {
   Camera, Plus, Trophy, Users, Medal,
 } from 'lucide-react';
 import {
-  SAMPLE_TOURNAMENTS, STATUS_LABELS, STATUS_COLORS, GAME_TYPE_LABELS,
+  STATUS_LABELS, STATUS_COLORS, GAME_TYPE_LABELS, type Tournament,
 } from '../../../lib/mock-tournaments';
+import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
 
 interface Club {
@@ -27,28 +29,25 @@ interface Club {
   verificationStatus?: string;
 }
 
+/* قالبِ خالی — فقط برای اینکه state پیش از رسیدنِ پاسخ تایپِ درست
+   داشته باشد. هیچ مقدارِ هویتی ندارد.
+
+   پیش‌تر این یک باشگاهِ کاملِ ساختگی بود («باشگاه سنچوری تهران» با
+   تلفن، نشانی و وب‌سایتِ جعلی) و هر بار که درخواست شکست می‌خورد یا
+   شناسه اشتباه بود، همان به‌عنوانِ باشگاهِ واقعی نمایش داده می‌شد. */
 const sampleClub: Club = {
-  id: '1', name: 'باشگاه سنچوری تهران', managerName: 'محمد احمدی',
-  description: 'یکی از مجهزترین و معتبرترین باشگاه‌های بیلیارد تهران با بیش از ۱۵ سال سابقه درخشان. دارای میزهای حرفه‌ای با استانداردهای بین‌المللی، فضای VIP اختصاصی، و مربیان مجاز فدراسیون بیلیارد ایران.',
-  address: 'خیابان ولیعصر، بالاتر از میدان ونک، پلاک ۱۲۰', city: 'تهران', country: 'ایران',
-  latitude: 35.7219, longitude: 51.3347, phone: '021-88001234', website: 'https://centuryclub.ir',
-  snookerTables: 4, pocketTables: 3, highballTables: 2, vipSnookerTables: 2,
-  vipPocketTables: 1, airHockeyTables: 1, dartBoards: 3, playstations: 4,
-  hasCafe: true, hasParking: true, hasWifi: true, hasProfessionalCoach: true,
-  specialFeatures: 'سالن VIP اختصاصی، امکان برگزاری مسابقات خصوصی، آموزش توسط مربیان فدراسیون',
-  workingHours: {
-    saturday:  { isOpen: true,  open: '10:00', close: '24:00' },
-    sunday:    { isOpen: true,  open: '10:00', close: '24:00' },
-    monday:    { isOpen: true,  open: '10:00', close: '24:00' },
-    tuesday:   { isOpen: true,  open: '10:00', close: '24:00' },
-    wednesday: { isOpen: true,  open: '10:00', close: '24:00' },
-    thursday:  { isOpen: true,  open: '10:00', close: '24:00' },
-    friday:    { isOpen: true,  open: '14:00', close: '24:00' },
-  },
-  images: ['/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg'],
+  id: '', name: '', managerName: '', description: '',
+  address: '', city: '', country: 'ایران',
+  latitude: 35.6892, longitude: 51.3890, phone: '', website: '',
+  snookerTables: 0, pocketTables: 0, highballTables: 0, vipSnookerTables: 0,
+  vipPocketTables: 0, airHockeyTables: 0, dartBoards: 0, playstations: 0,
+  hasCafe: false, hasParking: false, hasWifi: false, hasProfessionalCoach: false,
+  specialFeatures: '',
+  workingHours: {},
+  images: [],
   videos: [],
   logo: undefined,
-  hasActiveStory: true,
+  hasActiveStory: false,
 };
 
 interface CoachEntry { id: string; name: string; title: string; exp: string; rating: string; bio: string; }
@@ -66,7 +65,7 @@ const tableTypes = [
   { key: 'airHockeyTables',  label: 'ایرهاکی',       model: 'Carrom Air Striker',  isVip: false, color: '#ef4444', rgb: '239,68,68',    price: '۱۰۰,۰۰۰' },
 ];
 
-// Tournaments are loaded dynamically from SAMPLE_TOURNAMENTS in the component
+// مسابقات از /api/tournaments?clubId=... خوانده می‌شوند
 
 const DEFAULT_STATS: ClubStats = { members: '', tournaments: '', yearsActive: '', dailyCapacity: '' };
 
@@ -101,6 +100,7 @@ export default function ClubProfilePage() {
   const { user } = useAuthStore();
 
   const [club, setClub]               = useState<Club>(sampleClub);
+  const [notFound, setNotFound]       = useState(false);
   const [loading, setLoading]         = useState(true);
   const [slide, setSlide]             = useState(0);
   const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
@@ -124,21 +124,27 @@ export default function ClubProfilePage() {
   const [tournAlbums, setTournAlbums] = useState<TournAlbum[]>([]);
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
 
+  /* مسابقاتِ این باشگاه — `null` یعنی هنوز نیامده، `[]` یعنی واقعاً هیچ */
+  const [clubTournaments, setClubTournaments] = useState<Tournament[] | null>(null);
   useEffect(() => {
+    if (!id) return;
+    void (async () => setClubTournaments(await fetchTournaments(id)))();
+  }, [id]);
+
+  /* آلبومِ عکسِ مسابقات — بر پایه‌ی همان مسابقاتِ واقعی، نه اسکنِ کورِ
+     کلیدهای `tournament-album-t1..t20` که فقط با شناسه‌های نمونه جور بود. */
+  useEffect(() => {
+    if (!clubTournaments) return;
     const albums: TournAlbum[] = [];
-    for (let i = 1; i <= 20; i++) {
+    for (const t of clubTournaments) {
       try {
-        const raw = localStorage.getItem(`tournament-album-t${i}`);
+        const raw = localStorage.getItem(`tournament-album-${t.id}`);
         if (!raw) continue;
-        const album = JSON.parse(raw) as TournAlbum;
-        const tournament = SAMPLE_TOURNAMENTS.find(t => t.id === album.tournamentId);
-        if (tournament && (tournament.clubId === id || tournament.clubName === club.name)) {
-          albums.push(album);
-        }
+        albums.push(JSON.parse(raw) as TournAlbum);
       } catch {}
     }
     setTournAlbums(albums);
-  }, [tab, id, club.name]);
+  }, [clubTournaments]);
 
   useEffect(() => {
     if (!id) return;
@@ -190,10 +196,13 @@ export default function ClubProfilePage() {
 
   const isOwner = !!(user?.primaryRole === 'admin' || user?.primaryRole === 'club_owner');
 
+  /* اگر باشگاه نیامد باید همان را بگوییم. پیش‌تر state با یک باشگاهِ
+     ساختگی مقداردهی شده بود، پس شکستِ درخواست یا شناسه‌ی اشتباه به
+     نمایشِ «باشگاه سنچوری تهران» با تلفن و نشانیِ جعلی ختم می‌شد. */
   useEffect(() => {
     api.get(`/clubs/${id}`)
-      .then(r => { if (r.data) setClub(r.data); })
-      .catch(() => {})
+      .then(r => { if (r.data?.id) setClub(r.data); else setNotFound(true); })
+      .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
@@ -229,6 +238,19 @@ export default function ClubProfilePage() {
       <div style={{ width: 48, height: 48, border: '2px solid rgba(199,166,106,0.10)', borderTop: '2px solid #C7A66A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.35)', fontFamily: 'Vazirmatn, sans-serif' }}>در حال بارگذاری...</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  if (notFound) return (
+    <div dir="rtl" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, padding: '80px 24px', textAlign: 'center' }}>
+      <div style={{ fontSize: 44, opacity: 0.15 }}>🎱</div>
+      <h1 style={{ fontSize: 19, fontWeight: 800, color: '#111', margin: 0 }}>این باشگاه پیدا نشد</h1>
+      <p style={{ fontSize: 14.5, color: 'rgba(0,0,0,0.42)', margin: 0, lineHeight: 2 }}>
+        ممکن است حذف شده باشد یا نشانی اشتباه باشد.
+      </p>
+      <Link href="/clubs" style={{ marginTop: 6, padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
+        فهرست باشگاه‌ها
+      </Link>
     </div>
   );
 
@@ -683,10 +705,25 @@ export default function ClubProfilePage() {
 
           {/* ── #8: TOURNAMENTS TAB ── */}
           {tab === 'tournaments' && (() => {
-            /* Match by URL id first (works for mock clubs '1'–'6').
-               Fall back to clubName match for real Supabase clubs with UUIDs. */
-            const clubTournaments = SAMPLE_TOURNAMENTS.filter(
-              t => t.clubId === id || t.clubName === club.name
+            /* مسابقاتِ واقعیِ همین باشگاه از سرور — پیش‌تر از آرایه‌ی
+               نمونه فیلتر می‌شد و باشگاه‌های واقعی همیشه فهرستِ خالی
+               می‌دیدند، مگر نامشان اتفاقاً با یکی از نمونه‌ها یکی بود. */
+            if (clubTournaments === null) return (
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.35)' }}>
+                در حال دریافتِ مسابقات…
+              </div>
+            );
+            if (clubTournaments.length === 0) return (
+              <div style={{ animation: 'fadeUp 0.4s ease both', textAlign: 'center', padding: '54px 20px', background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20 }}>
+                <Trophy size={32} style={{ color: 'rgba(0,0,0,0.18)', marginBottom: 12 }} />
+                <p style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>هنوز مسابقه‌ای برگزار نشده</p>
+                <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: '0 0 18px', lineHeight: 2 }}>
+                  مسابقاتِ این باشگاه پس از ثبت توسطِ مدیرِ باشگاه اینجا نمایش داده می‌شود.
+                </p>
+                <button onClick={() => router.push('/tournaments')} style={{ padding: '11px 20px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.45)', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <Trophy size={13} /> مشاهده همه مسابقات
+                </button>
+              </div>
             );
             return (
             <div style={{ animation: 'fadeUp 0.4s ease both' }}>

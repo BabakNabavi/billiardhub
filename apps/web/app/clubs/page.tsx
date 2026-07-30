@@ -9,8 +9,9 @@ import {
   X, SlidersHorizontal, Users, Check, Navigation,
   ChevronDown, Grid3X3, AlignJustify, Gamepad2,
 } from 'lucide-react';
-import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
-import { SAMPLE_CLUBS, type Club } from '../../lib/clubs-data';
+import { type Club } from '../../lib/clubs-data';
+import { fetchTournaments } from '../../lib/tournaments/client';
+import type { Tournament } from '../../lib/mock-tournaments';
 
 const TABLE_TYPES = [
   { key:'snookerTables',    label:'اسنوکر',     color:'#30C55A' },
@@ -177,7 +178,7 @@ const CLUB_IMG_POOL = [
 ];
 
 /* ── CARD ── */
-function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; idx?: number }) {
+function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view: 'grid' | 'list'; idx?: number; tournaments?: Tournament[] }) {
   const [hov, setHov] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
   const poolImg = CLUB_IMG_POOL[idx % CLUB_IMG_POOL.length]!;
@@ -185,9 +186,10 @@ function ClubCard({ club, view, idx = 0 }: { club: Club; view: 'grid' | 'list'; 
   const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
   const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
 
-  const activeTournament = SAMPLE_TOURNAMENTS.find(
-    t => (t.clubId === club.id || t.clubName === club.name) &&
-         (t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming')
+  /* نشانِ مسابقه از مسابقاتِ واقعیِ همین باشگاه می‌آید — نه از آرایه‌ی
+     نمونه که با نامِ باشگاه تطبیق داده می‌شد. */
+  const activeTournament = tournaments.find(
+    t => t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming'
   );
   const tournBadge = activeTournament ? ({
     registration_open: { label: '● در حال ثبت‌نام مسابقه', color: '#C7A66A', bg: 'rgba(199,166,106,0.10)', border: 'rgba(199,166,106,0.30)', pulse: true  },
@@ -521,20 +523,32 @@ export default function ClubsPage() {
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef   = useRef<HTMLDivElement>(null);
 
+  /* فقط باشگاه‌های واقعی.
+
+     پیش‌تر شش باشگاهِ نمونه همیشه اولِ فهرست بودند و باشگاه‌های واقعیِ
+     هم‌نام با آن‌ها **حذف** می‌شدند. یعنی صاحبِ «باشگاه المپیک مشهد»
+     که واقعاً ثبت‌نام کرده بود، نسخه‌ی ساختگی به‌جای باشگاهش نمایش
+     داده می‌شد و صفحه‌ی خودش اصلاً دیده نمی‌شد. */
   useEffect(() => {
-    /* SAMPLE_CLUBS always leads — their ids ('1'–'6') match SAMPLE_TOURNAMENTS.
-       Real Supabase clubs have UUIDs that don't match mock tournament data,
-       so we keep them separate and always show mock clubs first. */
     api.get('/clubs')
-      .then(r => {
-        const apiClubs: Club[] = Array.isArray(r.data) ? r.data : [];
-        const mockNames = new Set(SAMPLE_CLUBS.map(c => c.name));
-        // Only append real API clubs whose names aren't already in mock data
-        const extras = apiClubs.filter((c: Club) => !mockNames.has(c.name));
-        setClubs([...SAMPLE_CLUBS, ...extras]);
-        setLoading(false);
-      })
-      .catch(() => { setClubs(SAMPLE_CLUBS); setLoading(false); });
+      .then(r => { setClubs(Array.isArray(r.data) ? r.data : []); setLoading(false); })
+      .catch(() => { setClubs([]); setLoading(false); });
+  }, []);
+
+  /* مسابقاتِ عمومی، یک‌بار برای کلِ فهرست — تا هر کارت جداگانه
+     درخواست نفرستد. کلید `club_id` است، نه نامِ باشگاه. */
+  const [tournByClub, setTournByClub] = useState<Map<string, Tournament[]>>(new Map());
+  useEffect(() => {
+    void (async () => {
+      const all = await fetchTournaments();
+      const m = new Map<string, Tournament[]>();
+      for (const t of all) {
+        const list = m.get(t.clubId) ?? [];
+        list.push(t);
+        m.set(t.clubId, list);
+      }
+      setTournByClub(m);
+    })();
   }, []);
 
   useEffect(() => {
@@ -572,7 +586,7 @@ export default function ClubsPage() {
     if (city !== 'همه شهرها' && c.city !== city) return false;
     if (onlyOpen && !c.isOpen) return false;
     if (onlyVerified && !c.isVerified) return false;
-    if (onlyTournament && !SAMPLE_TOURNAMENTS.some(t => (t.clubId === c.id || t.clubName === c.name) && t.status === 'registration_open')) return false;
+    if (onlyTournament && !(tournByClub.get(c.id) ?? []).some(t => t.status === 'registration_open')) return false;
     if (selectedTypes.length > 0 && !selectedTypes.every(t => (c as any)[t] > 0)) return false;
     if (selectedAmens.length > 0 && !selectedAmens.every(a => (c as any)[a])) return false;
     return true;
@@ -752,17 +766,33 @@ export default function ClubsPage() {
               در حال بارگذاری...
             </div>
           ) : filtered.length === 0 ? (
+            /* «هیچ باشگاهی ثبت نشده» با «فیلتر چیزی پیدا نکرد» فرق دارد؛
+               پیشنهادِ «فیلترها را پاک کنید» وقتی فیلتری فعال نیست بی‌معنی است. */
             <div style={{ textAlign: 'center', padding: '80px 24px' }}>
               <div style={{ fontSize: 44, opacity: 0.15, marginBottom: 14 }}>🎱</div>
-              <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>باشگاهی یافت نشد</h3>
-              <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px' }}>فیلترها یا جستجو را تغییر دهید</div>
-              <button onClick={clearFilters} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>پاک کردن فیلترها</button>
+              {clubs.length === 0 ? (
+                <>
+                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>هنوز باشگاهی ثبت نشده</h3>
+                  <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px', lineHeight: 2 }}>
+                    اگر باشگاه دارید، می‌توانید همین حالا ثبتش کنید.
+                  </div>
+                  <Link href="/dashboard/club" style={{ display: 'inline-block', padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
+                    ثبت باشگاه
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#111111', margin: '0 0 8px' }}>باشگاهی یافت نشد</h3>
+                  <div style={{ fontSize: 15, color: 'rgba(0,0,0,0.40)', margin: '0 0 20px' }}>فیلترها یا جستجو را تغییر دهید</div>
+                  <button onClick={clearFilters} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#C7A66A,#A07840)', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>پاک کردن فیلترها</button>
+                </>
+              )}
             </div>
           ) : view === 'grid' ? (
             <div className="clubs-grid">
               {filtered.map((club, i) => (
                 <div key={club.id} style={{ animation: `fadeUp 0.5s ease ${i * 0.05}s both` }}>
-                  <ClubCard club={club} view="grid" idx={i} />
+                  <ClubCard club={club} view="grid" idx={i} tournaments={tournByClub.get(club.id) ?? []} />
                 </div>
               ))}
             </div>
@@ -770,7 +800,7 @@ export default function ClubsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {filtered.map((club, i) => (
                 <div key={club.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.04}s both` }}>
-                  <ClubCard club={club} view="list" idx={i} />
+                  <ClubCard club={club} view="list" idx={i} tournaments={tournByClub.get(club.id) ?? []} />
                 </div>
               ))}
             </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/api';
+import { apiFetch } from '../../lib/http';
 import { findCoachByOwner } from '../../lib/coach-store';
 import { findRefereeByOwner } from '../../lib/referee-store';
 import {
@@ -14,7 +15,8 @@ import {
   ShoppingBag, Play, Plus, Shield, ShieldCheck,
   ClipboardList,
 } from 'lucide-react';
-import { SAMPLE_TOURNAMENTS } from '../../lib/mock-tournaments';
+import { fetchTournaments } from '../../lib/tournaments/client';
+import type { Tournament } from '../../lib/mock-tournaments';
 import ScrollReveal from '../../components/ScrollReveal/ScrollReveal';
 import AuthGuard from '../../components/AuthGuard';
 import MyBookings from '../../components/booking/MyBookings';
@@ -74,45 +76,56 @@ export default function DashboardPage() {
   const rafRef = useRef<number>(0);
   const unread = notifications.filter(n => !n.read).length;
 
-  const upcomingTournament = SAMPLE_TOURNAMENTS.find(
-    t => t.status === 'registration_open' || t.status === 'upcoming'
-  ) ?? SAMPLE_TOURNAMENTS[0]!;
+  /* مسابقه‌ی پیشِ‌رو از سرور می‌آید. پیش‌تر از آرایه‌ی نمونه خوانده
+     می‌شد و `?? SAMPLE_TOURNAMENTS[0]` تضمین می‌کرد همیشه یک مسابقه‌ی
+     ساختگی نمایش داده شود — حتی وقتی هیچ مسابقه‌ای وجود نداشت.
+     حالا اگر چیزی نباشد، کارت اصلاً نمایش داده نمی‌شود. */
+  const [upcomingTournament, setUpcoming] = useState<Tournament | null>(null);
+  useEffect(() => {
+    void (async () => {
+      const all = await fetchTournaments();
+      setUpcoming(
+        all.find(t => t.status === 'registration_open')
+        ?? all.find(t => t.status === 'upcoming')
+        ?? null,
+      );
+    })();
+  }, []);
 
   useEffect(() => {
     const h = new Date().getHours();
     setGreeting(h < 12 ? 'صبح بخیر' : h < 18 ? 'عصر بخیر' : 'شب بخیر');
   }, []);
 
+  /* ثبت‌نام‌های من از سرور خوانده می‌شود، نه از localStorage.
+
+     نسخه‌ی قبلی همه‌ی کلیدهای `tournament-regs-*` مرورگر را می‌خواند و
+     با شماره‌ی تلفن فیلتر می‌کرد. یعنی روی دستگاهِ دیگر هیچ ثبت‌نامی
+     دیده نمی‌شد، و وضعیتِ پرداخت هم هرچه آخرین‌بار محلی ذخیره شده بود
+     می‌ماند — نه آنچه واقعاً روی سرور است. */
   useEffect(() => {
-    if (!user?.phone) return;
-    const collected: MyReg[] = [];
-    const keys: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k?.startsWith('tournament-regs-')) keys.push(k);
-    }
-    for (const key of keys) {
-      const tId = key.replace('tournament-regs-', '');
+    if (!user) return;
+    void (async () => {
       try {
-        const list = JSON.parse(localStorage.getItem(key) ?? '[]') as Array<{ id: string; status: string; registeredAt: string; phone?: string; }>;
-        // deduplicate: keep only one entry per phone (the last one saved)
-        const seen = new Map<string, typeof list[0]>();
-        for (const reg of list) {
-          seen.set(reg.phone ?? '', reg);
-        }
-        const deduped = Array.from(seen.values());
-        if (deduped.length !== list.length) {
-          localStorage.setItem(key, JSON.stringify(deduped));
-        }
-        const t = SAMPLE_TOURNAMENTS.find(x => x.id === tId);
-        for (const reg of deduped) {
-          if (reg.phone !== user.phone) continue;
-          collected.push({ id: reg.id, tournamentId: tId, tournamentName: t?.name ?? tId, status: reg.status as MyReg['status'], registeredAt: reg.registeredAt });
-        }
-      } catch {}
-    }
-    setMyRegs(collected);
-  }, [user?.phone]);
+        const r = await apiFetch('/api/tournaments/my', { cache: 'no-store' });
+        if (!r.ok) return;
+        const j = await r.json() as { registrations?: Array<{
+          id: string; tournamentId: string; tournamentTitle: string;
+          status: string; createdAt: string;
+        }> };
+        setMyRegs((j.registrations ?? []).map(x => ({
+          id: x.id,
+          tournamentId: x.tournamentId,
+          tournamentName: x.tournamentTitle,
+          /* واژگانِ سرور به همانی که این صفحه می‌شناسد */
+          status: x.status === 'CONFIRMED' ? 'approved'
+            : x.status === 'PENDING_PAYMENT' ? 'pending'
+            : 'rejected',
+          registeredAt: x.createdAt,
+        })));
+      } catch { /* آفلاین ⇒ فهرست خالی می‌ماند، نه داده‌ی کهنه */ }
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (user?.primaryRole === 'admin') { router.replace('/admin'); }
@@ -671,7 +684,8 @@ export default function DashboardPage() {
                 </div>
               </ScrollReveal>
 
-              {/* Upcoming tournament — synced with SAMPLE_TOURNAMENTS */}
+              {/* مسابقه‌ی پیشِ‌رو — فقط وقتی واقعاً مسابقه‌ای هست */}
+              {upcomingTournament && (
               <ScrollReveal>
                 <div className="dash-card" style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)' }}>
                   <div className="card-label">
@@ -694,6 +708,7 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </ScrollReveal>
+              )}
 
               {/* Profile completion */}
               <ScrollReveal>
