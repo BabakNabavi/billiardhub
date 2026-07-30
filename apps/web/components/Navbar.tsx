@@ -431,7 +431,7 @@ export default function Navbar() {
           <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, minWidth: 0 }}>
 
             {/* Search — mobile only */}
-            <button ref={searchBtnRef} className="mob nav-ico" onClick={() => setSearchOpen(p => !p)}
+            <button ref={searchBtnRef} aria-label="جستجو" className="mob nav-ico" onClick={() => setSearchOpen(p => !p)}
               style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: searchOpen ? GOLD_LIGHT : SURF, border: `1px solid ${searchOpen ? GOLD_BORDER : BORDER_C}`, borderRadius: '12px', cursor: 'pointer', color: searchOpen ? GOLD : TEXT_MUT, flexShrink: 0, transition: 'all 0.3s' }}>
               <Search size={20} />
             </button>
@@ -552,7 +552,7 @@ export default function Navbar() {
             )}
 
             {/* Hamburger */}
-            <button className="mob nav-ico" onClick={() => setMobileOpen(p => !p)}
+            <button aria-label="منو" className="mob nav-ico" onClick={() => setMobileOpen(p => !p)}
               style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: mobileOpen ? GOLD_LIGHT : SURF, border: `1px solid ${mobileOpen ? GOLD_BORDER : BORDER_C}`, color: mobileOpen ? GOLD : TEXT_MUT, cursor: 'pointer', flexShrink: 0, transition: 'all 0.3s' }}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>

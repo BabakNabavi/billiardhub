@@ -47,7 +47,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  /* `maximumScale: 1` برداشته شد.
+     بزرگ‌نماییِ دومرحله‌ای را برای همه می‌بست — کاربرِ کم‌بینا اصلاً
+     نمی‌توانست متن را بزرگ کند. تنها دلیلِ رایجِ گذاشتنش، زومِ خودکارِ
+     iOS هنگامِ فوکوسِ ورودی است که این‌جا از قبل با
+     `input,textarea,select { font-size:16px }` زیرِ ۹۰۰px حل شده. */
   viewportFit: 'cover',
   /* عمداً بدونِ interactive-widget: می‌خواهیم کیبورد فقط «روی» محتوا بیاید
      (مثل اینستاگرام)، نه اینکه کلِ صفحه را جمع/بلرزاند. چیدمانِ استوری و دایرکت

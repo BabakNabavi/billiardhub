@@ -147,7 +147,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۱۰:۵۸',
     views: 19300, likes: 940,
     date: '۲۳ تیر ۱۴۰۵', ts: 930,
-    thumb: '/images/hero/4.png',
+    thumb: '/images/hero/4.webp',
     src: DEMO_SRC,
     description: [
       'از نصب پارچه‌ی میزِ فینال تا تمرینِ بسته‌ی فینالیست‌ها — دوربینِ ما ۴۸ ساعت در سالن ماند.',

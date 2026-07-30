@@ -65,10 +65,10 @@ const PRP = '#4A2D8A';
 ═══════════════════════════════════════════════════════════════ */
 const IMG = {
   // Hero wallpapers — now in /images/clubs/
-  wall1: '/images/clubs/wallpaper1.png',
+  wall1: '/images/clubs/wallpaper1.webp',
   wall2: '/images/clubs/wallpaper2.jpeg',
-  wall3: '/images/clubs/wallpaper3.png',
-  wall4:  '/images/clubs/wallpaper4.png',
+  wall3: '/images/clubs/wallpaper3.webp',
+  wall4:  '/images/clubs/wallpaper4.webp',
   wall5:  '/images/clubs/wallpaper5.jfif',
   wall12: '/images/clubs/wallpaper12.jpg',
   wall6: '/images/clubs/wallpaper12.jpg',
@@ -126,13 +126,13 @@ const IMG = {
    HERO SLIDES — all 5 wallpapers, each with an accent colour
 ═══════════════════════════════════════════════════════════════ */
 const HERO_SLIDES = [
-  { bg: '/images/hero/1.jpg',   accent: GRN,  label: 'باشگاه‌ها' },
+  { bg: '/images/hero/1.webp',   accent: GRN,  label: 'باشگاه‌ها' },
   /* اسلاید دوم عوض شد و پسوندش هم از png به jpg تغییر کرد؛ مسیرِ قبلی
      دیگر وجود نداشت و ۴۰۴ می‌داد. */
-  { bg: '/images/hero/2.jpg',   accent: GOLD, label: 'تجهیزات'   },
-  { bg: '/images/hero/3.png',   accent: BLU,  label: 'مربیان'    },
+  { bg: '/images/hero/2.webp',   accent: GOLD, label: 'تجهیزات'   },
+  { bg: '/images/hero/3.webp',   accent: BLU,  label: 'مربیان'    },
   /* ?v=2 — فایل هم‌نام عوض شده؛ بدونِ ورژن، کش CDN/مرورگر عکسِ قبلی را می‌داد */
-  { bg: '/images/hero/4.png?v=2', accent: BRN, label: 'رقابت' },
+  { bg: '/images/hero/4.webp', accent: BRN, label: 'رقابت' },
 ];
 
 const FEATURE_CARDS = [
@@ -347,9 +347,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             {club.tables > 0 && (
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '4px' }}>
               {[
-                { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
-                { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
-                { label: 'هی‌بال', n: hiballTables,  clr: '#8b5cf6' },
+                { label: 'اسنوکر', n: snookerTables, clr: '#1B7A38' },
+                { label: 'پاکت',   n: pocketTables,  clr: '#1D4ED8' },
+                { label: 'هی‌بال', n: hiballTables,  clr: '#6D28D9' },
               ].map(t => (
                 <span key={t.label} style={{ fontSize: '11px', fontWeight: 600, color: t.clr,
                   background: `${t.clr}14`, border: `1px solid ${t.clr}28`,
@@ -366,7 +366,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
                 border: `1px solid ${GOLD_BOR}`,
                 borderRadius: rad,
                 padding: '9px 0',
-                color: GOLD,
+                color: GOLD_D,
                 fontSize: '13px', fontWeight: 700,
                 fontFamily: 'var(--font-base)',
                 transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
@@ -398,9 +398,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             {club.tables > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
               {[
-                { label: 'اسنوکر', n: snookerTables, clr: '#30C55A' },
-                { label: 'پاکت',   n: pocketTables,  clr: '#3b82f6' },
-                { label: 'هی‌بال', n: hiballTables,  clr: '#8b5cf6' },
+                { label: 'اسنوکر', n: snookerTables, clr: '#1B7A38' },
+                { label: 'پاکت',   n: pocketTables,  clr: '#1D4ED8' },
+                { label: 'هی‌بال', n: hiballTables,  clr: '#6D28D9' },
               ].map(t => (
                 <span key={t.label} style={{ fontSize: '9px', fontWeight: 700, color: t.clr,
                   background: `${t.clr}12`, border: `1px solid ${t.clr}26`,
@@ -420,7 +420,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               border: `1px solid ${GOLD_BOR}`,
               borderRadius: rad,
               padding: '6px 0',
-              color: GOLD,
+              color: GOLD_D,
               /* متنِ دکمه ۱۰٪ بزرگ‌تر: ۱۰ → ۱۱px */
               fontSize: '11px', fontWeight: 700,
               fontFamily: 'var(--font-base)',
@@ -2228,17 +2228,30 @@ useEffect(() => {
         ))}
         {/* Dots */}
         <div style={{ position: 'absolute', bottom: '18px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
+          {/* نقطه‌ی ۷پیکسلی هم بی‌نام بود هم برای انگشت خیلی کوچک.
+              حالا دکمه ۲۴px هدفِ لمسی دارد و نقطه فقط نشانه‌ی درونش است. */}
           {BANNER_SLIDES.map((_, i) => (
             <button key={i} onClick={() => { setActiveBanner(i); startBannerTimer(); }}
-              style={{ width: i === activeBanner ? '22px' : '7px', height: '7px', borderRadius: '4px', border: 'none', cursor: 'pointer', padding: 0, background: i === activeBanner ? '#fff' : 'rgba(255,255,255,0.35)', transition: 'all 0.3s ease' }} />
+              aria-label={`اسلاید ${i + 1}`}
+              aria-current={i === activeBanner ? 'true' : undefined}
+              style={{
+                width: 24, height: 24, padding: 0, border: 'none', background: 'none',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+              <span style={{
+                display: 'block', width: i === activeBanner ? 22 : 7, height: 7, borderRadius: 4,
+                background: i === activeBanner ? '#fff' : 'rgba(255,255,255,0.35)',
+                transition: 'all 0.3s ease',
+              }} />
+            </button>
           ))}
         </div>
         {/* Arrow prev/next */}
-        <button onClick={() => { setActiveBanner(p => (p - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length); startBannerTimer(); }}
+        <button aria-label="اسلاید قبلی" onClick={() => { setActiveBanner(p => (p - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length); startBannerTimer(); }}
           style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
           <ArrowRight size={16} />
         </button>
-        <button onClick={() => { setActiveBanner(p => (p + 1) % BANNER_SLIDES.length); startBannerTimer(); }}
+        <button aria-label="اسلاید بعدی" onClick={() => { setActiveBanner(p => (p + 1) % BANNER_SLIDES.length); startBannerTimer(); }}
           style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
           <ArrowLeft size={16} />
         </button>
