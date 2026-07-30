@@ -319,6 +319,13 @@ interface DbTournament {
   status: string; seatsLeft?: number; match_format?: string | null;
 }
 
+/* برچسبِ فرمتِ مسابقه — همان فهرستی که دراپ‌داونِ ساخت نشان می‌دهد،
+   تا کارتِ فهرست و فرم یک زبان داشته باشند. */
+const FORMAT_LABELS: Record<string, string> = {
+  bo3: 'Best Of ۳', bo5: 'Best Of ۵', bo7: 'Best Of ۷',
+  bo9: 'Best Of ۹', bo11: 'Best Of ۱۱',
+};
+
 /* نگاشتِ وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
 const T_STATUS: Record<string, Tournament['status']> = {
   draft: 'upcoming', published: 'upcoming',
@@ -2489,7 +2496,13 @@ export default function ClubDashboardPage() {
                       </div>
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
                         {t.registeredCount}/{t.maxPlayers} بازیکن | {formatFee(t.entryFee)}
+                        {t.matchFormat && ` | ${FORMAT_LABELS[t.matchFormat] ?? t.matchFormat}`}
                       </div>
+                      {t.registrationDeadline && (
+                        <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 2 }}>
+                          مهلت ثبت‌نام تا {t.registrationDeadline}
+                        </div>
+                      )}
                     </div>
                     <span style={{
                       fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
