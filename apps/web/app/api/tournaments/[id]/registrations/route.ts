@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 import { rpc, audit, clientIp } from '@/lib/finance/db';
 import { getTournament, registrationsOf, forOrganizer, seatsLeft } from '@/lib/tournaments/server';
+import { promoteWaitlist } from '@/lib/tournaments/waitlist';
 
 /* فهرستِ ثبت‌نام‌کنندگانِ یک مسابقه — فقط برای برگزارکننده.
 
@@ -97,8 +98,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     newValue: { amount }, ip: clientIp(req) ?? undefined,
   });
 
+  /* یک صندلی آزاد شد ⇒ نفرِ اولِ صفِ انتظار بالا می‌آید.
+     بدونِ این، لیستِ انتظار فقط یک فهرستِ بی‌اثر می‌بود. */
+  const promoted = await promoteWaitlist(id);
+
   return NextResponse.json({
     ok: true, idempotent: data.idempotent ?? false,
+    promoted,
     message: 'وضعیتِ بازپرداخت ثبت شد. انتقالِ وجه پس از فعال‌شدنِ درگاه انجام می‌شود.',
   });
 }

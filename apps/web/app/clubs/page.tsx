@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import api from '../../lib/api';
 import ClubStoryModal from '../../components/ClubStoryModal';
+import FavoriteButton from '../../components/FavoriteButton';
 import {
   Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
   X, SlidersHorizontal, Users, Check, Navigation,
@@ -307,6 +308,11 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
                 <Check size={13} color="#fff" strokeWidth={3} />
               </div>
             )}
+          </div>
+          {/* علاقه‌مندی — سمتِ چپ تا با تیکِ تأیید تداخل نکند.
+              خودش کلیک را متوقف می‌کند وگرنه کارت باز می‌شود. */}
+          <div style={{ position: 'absolute', top: 10, left: 10 }}>
+            <FavoriteButton type="club" id={club.id} size={15} />
           </div>
           {/* open/close — same pill style as table type badges */}
           <div style={{

@@ -168,3 +168,26 @@ export async function notifyTournamentRegistered(registrationId: string): Promis
   const when = tt.starts_at ? `\nتاریخ: ${faDate(tt.starts_at)}` : ''
   notify(phone, `${SMS.brand}\nثبت‌نامِ شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`)
 }
+
+/** نوبتِ کسی که در لیستِ انتظار بود رسید */
+export async function notifyWaitlistPromoted(registrationId: string, needsPayment: boolean): Promise<void> {
+  const { data: r } = await sb().from('tournament_registrations')
+    .select('user_id,tournament_id,amount').eq('id', registrationId).maybeSingle()
+  const reg = r as { user_id?: string; tournament_id?: string; amount?: number } | null
+  if (!reg?.user_id) return
+
+  const { data: t } = await sb().from('tournaments')
+    .select('title').eq('id', reg.tournament_id!).maybeSingle()
+  const title = (t as { title?: string } | null)?.title ?? 'مسابقه'
+
+  const phone = await phoneOf(reg.user_id)
+  if (!phone) return
+
+  /* پیامِ پولی حتماً باید فوریت را برساند: صندلی نگه داشته شده ولی
+     تا پرداخت‌نشدن قطعی نیست. */
+  const body = needsPayment
+    ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید.`
+    : `جا در «${title}» برای شما باز شد و ثبت‌نامتان قطعی شد.`
+
+  notify(phone, `${SMS.brand}\n${body}`)
+}

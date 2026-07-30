@@ -15,6 +15,8 @@ import {
 } from '../../../lib/mock-tournaments';
 import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
+import ClubReviews from '../../../components/club/ClubReviews';
+import FavoriteButton from '../../../components/FavoriteButton';
 
 interface Club {
   id: string; name: string; managerName: string; description: string;
@@ -415,6 +417,12 @@ export default function ClubProfilePage() {
 
               {/* Main column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+                {/* امتیاز و نظرها — پیش‌تر امتیاز فقط عددِ ثابتی بود که
+                    هیچ‌کس نمی‌توانست ثبتش کند */}
+                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
+                  <ClubReviews clubId={id} />
+                </div>
 
                 {/* About */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>

@@ -58,6 +58,47 @@ export default function RegisterPage() {
 
   const full = !!t && t.registeredCount >= t.maxPlayers;
 
+  /* ── لیستِ انتظار ──
+     فقط وقتی ظرفیت پر است معنی دارد، پس تا آن موقع درخواستی هم
+     فرستاده نمی‌شود. */
+  const [wlPosition, setWlPosition] = useState<number | null>(null);
+  const [wlBusy, setWlBusy] = useState(false);
+  const [wlErr, setWlErr] = useState('');
+
+  useEffect(() => {
+    if (!full || !id || !isLoggedIn) return;
+    void (async () => {
+      try {
+        const r = await apiFetch(`/api/tournaments/${id}/waitlist`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const j = await r.json() as { myPosition: number | null };
+        setWlPosition(j.myPosition);
+      } catch { /* بی‌صدا */ }
+    })();
+  }, [full, id, isLoggedIn]);
+
+  const joinWaitlist = async () => {
+    if (!isLoggedIn) { router.push('/login'); return; }
+    setWlBusy(true); setWlErr('');
+    try {
+      const r = await apiFetch(`/api/tournaments/${id}/waitlist`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: userName, phone: user?.phone ?? '' }),
+      });
+      const j = await r.json().catch(() => ({})) as { ok?: boolean; position?: number; message?: string };
+      if (!r.ok || !j.ok) { setWlErr(j.message ?? 'ثبت در لیستِ انتظار انجام نشد'); return; }
+      setWlPosition(j.position ?? null);
+    } catch { setWlErr('خطا در ارتباط با سرور'); } finally { setWlBusy(false); }
+  };
+
+  const leaveWaitlist = async () => {
+    setWlBusy(true); setWlErr('');
+    try {
+      const r = await apiFetch(`/api/tournaments/${id}/waitlist`, { method: 'DELETE' });
+      if (r.ok) setWlPosition(null);
+    } catch { /* بی‌صدا */ } finally { setWlBusy(false); }
+  };
+
   const [step, setStep]           = useState<Step>('confirm');
   const [showAlert, setAlert]     = useState(false);
   const [alreadyReg, setAlreadyReg] = useState(false);
@@ -638,17 +679,53 @@ export default function RegisterPage() {
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 8, lineHeight: 1.7 }}>
                 {userName ? `${userName} گرامی` : 'کاربر گرامی'} متاسفانه لیست {toFa(t.maxPlayers)} نفر بازیکنان تکمیل شد
               </div>
-              <div style={{ fontSize: 14, color: '#777', marginBottom: 18, lineHeight: 1.8 }}>
-                در مسابقات آینده منتظر حضور با ارزشتان هستیم
+              {/* لیستِ انتظار — پیش‌تر ظرفیتِ تکمیل یعنی بن‌بست و کاربر
+                  باید دستی سر می‌زد ببیند جا باز شده یا نه. */}
+              {wlPosition !== null ? (
+                <>
+                  <div style={{ fontSize: 14, color: '#0E7A38', fontWeight: 800, marginBottom: 8, lineHeight: 1.8 }}>
+                    شما در لیستِ انتظار هستید — نفرِ {toFa(wlPosition)}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#777', marginBottom: 16, lineHeight: 1.8 }}>
+                    اگر جا باز شود، پیامک می‌شود و صندلی برایتان نگه داشته می‌شود.
+                  </div>
+                  <button onClick={leaveWaitlist} disabled={wlBusy} style={{
+                    padding: '10px 24px', borderRadius: 12,
+                    background: 'transparent', color: '#B23B2E',
+                    border: '1px solid rgba(178,59,46,0.28)',
+                    fontSize: 14, fontWeight: 800, cursor: wlBusy ? 'wait' : 'pointer', fontFamily: 'inherit',
+                  }}>
+                    خروج از لیستِ انتظار
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 14, color: '#777', marginBottom: 18, lineHeight: 1.8 }}>
+                    می‌توانید در لیستِ انتظار بنشینید — اگر کسی انصراف دهد، نوبت به شما می‌رسد.
+                  </div>
+                  {wlErr && (
+                    <div style={{ fontSize: 13, color: '#B23B2E', fontWeight: 700, marginBottom: 12 }}>{wlErr}</div>
+                  )}
+                  <button onClick={joinWaitlist} disabled={wlBusy} style={{
+                    padding: '11px 28px', borderRadius: 12,
+                    background: 'rgba(199,166,106,0.14)', color: '#9A6E38',
+                    border: '1px solid rgba(199,166,106,0.42)',
+                    fontSize: 15, fontWeight: 800, cursor: wlBusy ? 'wait' : 'pointer', fontFamily: 'inherit',
+                  }}>
+                    {wlBusy ? 'در حال ثبت…' : 'ثبت در لیستِ انتظار'}
+                  </button>
+                </>
+              )}
+              <div style={{ marginTop: 14 }}>
+                <button onClick={() => router.push('/tournaments')} style={{
+                  padding: '9px 22px', borderRadius: 12,
+                  background: 'transparent', color: '#777',
+                  border: '1px solid rgba(0,0,0,0.10)',
+                  fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
+                  بقیه‌ی مسابقات
+                </button>
               </div>
-              <button onClick={() => router.push('/tournaments')} style={{
-                padding: '11px 28px', borderRadius: 12,
-                background: 'rgba(199,166,106,0.10)', color: '#C7A66A',
-                border: '1px solid rgba(199,166,106,0.35)',
-                fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-              }}>
-                مسابقات
-              </button>
             </div>
           ) : (
             <>
