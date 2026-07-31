@@ -661,9 +661,10 @@ export default function MarketNewPage() {
           background: rgba(255,255,255,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
           border-top: 1px solid ${LINE}; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
           grid-template-columns: repeat(4, 1fr); }
-        .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none;
-          cursor: pointer; font-family: inherit; text-decoration: none; padding: 3px 0; color: ${MUT}; }
-        .mk-bnav .lb { font-size: 10px; font-weight: 700; }
+        /* اندازه‌ها ۲۰٪ بزرگ‌تر از قبل: آیکون ۱۹→۲۳، برچسب ۱۰→۱۲ */
+        .mk-bnav { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none;
+          cursor: pointer; font-family: inherit; text-decoration: none; padding: 4px 0; color: ${MUT}; }
+        .mk-bnav .lb { font-size: 12px; font-weight: 700; }
         .mk-bnav.on { color: ${GOLD_D}; }
         .mk-bnav.on svg { fill: rgba(199,166,106,0.2); }
 
@@ -914,23 +915,23 @@ export default function MarketNewPage() {
       {/* ═══ نوار پایین موبایل ═══ */}
       <nav className="mk-bottomnav">
         <Link href="/" className="mk-bnav">
-          <Home size={19} />
+          <Home size={23} />
           <span className="lb">خانه</span>
         </Link>
         <button type="button" className={`mk-bnav${!showSaved ? ' on' : ''}`}
           onClick={() => { setShowSaved(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-          <LayoutGrid size={19} />
+          <LayoutGrid size={23} />
           <span className="lb">آگهی‌ها</span>
         </button>
         <button type="button" className={`mk-bnav${showSaved ? ' on' : ''}`}
           onClick={() => { setShowSaved(p => !p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-          <Bookmark size={19} />
+          <Bookmark size={23} />
           <span className="lb">نشان‌ها</span>
         </button>
         <Link href="/shop/new" className="mk-bnav">
           {/* گرد + بوردر، طرح LQ */}
-          <span style={{ width: 23, height: 23, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, boxSizing: 'border-box' }}>
-            <Plus size={14} />
+          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD_D, boxSizing: 'border-box' }}>
+            <Plus size={17} />
           </span>
           <span className="lb">ثبت آگهی</span>
         </Link>
