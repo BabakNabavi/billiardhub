@@ -4,6 +4,7 @@ import { CORS, DAY, P, readJson, writeJson } from '@/lib/social-server'
 import { actorFromRequest } from '@/lib/finance/db'
 import { getStoryQuotaState } from '@/lib/stories/quota'
 import { redactList } from '@/lib/privacy'
+import { getSupabaseServer } from '@/lib/supabase-server'
 
 /* سقف استوری دیگر هاردکد نیست — از تنظیمات ادمین (به تفکیک نقش) و
    بسته‌ی خریداری‌شده می‌آید. اعداد قبلی به‌عنوان پیش‌فرض در مایگریشن
@@ -23,10 +24,40 @@ export async function GET() {
   const now = Date.now()
   const live = all.filter(s => now - s.createdAt < DAY)
   if (live.length !== all.length) writeJson(P.stories, live).catch(() => {})
+
+  /* عکس پروفایل *زنده* به هر استوری وصل می‌شود.
+
+     `logoUrl` عکسی است که لحظه‌ی انتشار ذخیره شده. اگر کاربر بعداً عکس
+     پروفایلش را عوض کند یا اصلاً موقع انتشار عکسی نداشته باشد، آن مقدار
+     تا ابد قدیمی/خالی می‌ماند — و کاربر در نوار استوری به‌جای عکسش
+     آدمک می‌دید.
+
+     تطبیق سمت کلاینت ممکن نبود: `ownerKey` در پاسخ عمومی هش می‌شود، پس
+     مرورگر نمی‌تواند بفهمد کدام گروه مال خودش است. این‌جا هنوز کلید خام
+     را داریم، پس درست همین‌جا حل می‌شود — و برای *همه‌ی* کاربران، نه
+     فقط صاحب نشست. */
+  const keys = [...new Set(live.map(s => s.ownerKey).filter(Boolean))]
+  const avatarOf = new Map<string, string>()
+  if (keys.length) {
+    try {
+      const ids = keys.filter(k => /^[0-9a-f-]{36}$/i.test(k))
+      const phones = keys.filter(k => /^09\d{9}$/.test(k))
+      const sb = getSupabaseServer()
+      const [byId, byPhone] = await Promise.all([
+        ids.length ? sb.from('users').select('id,avatar').in('id', ids) : Promise.resolve({ data: [] }),
+        phones.length ? sb.from('users').select('phone,avatar').in('phone', phones) : Promise.resolve({ data: [] }),
+      ])
+      for (const u of (byId.data ?? []) as { id: string; avatar?: string }[]) if (u.avatar) avatarOf.set(u.id, u.avatar)
+      for (const u of (byPhone.data ?? []) as { phone: string; avatar?: string }[]) if (u.avatar) avatarOf.set(u.phone, u.avatar)
+    } catch { /* خواندن آواتار شکست خورد ⇒ همان logoUrl قبلی */ }
+  }
+
+  const withAvatar = live.map(s => ({ ...s, logoUrl: avatarOf.get(s.ownerKey) || s.logoUrl }))
+
   /* ownerKey برای بیشتر کاربران شماره‌ی موبایل است و این مسیر عمومی
      است؛ پس هش پایدار برمی‌گردد نه خود کلید. */
   return NextResponse.json(
-    redactList(live as unknown as Record<string, unknown>[]),
+    redactList(withAvatar as unknown as Record<string, unknown>[]),
     { headers: CORS },
   )
 }

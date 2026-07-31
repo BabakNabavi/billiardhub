@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
-import { REFRESH_COOKIE, verifyToken, signAccessToken, signRefreshToken } from '@/lib/auth/session';
+import { REFRESH_COOKIE, ACCESS_COOKIE, ACCESS_TTL_SEC, verifyToken, signAccessToken, signRefreshToken } from '@/lib/auth/session';
 import { checkRefresh, setSessionRefresh, setSessionCookies, clearSessionCookies } from '@/lib/auth/store';
 
 const CORS_HEADERS = {
@@ -53,6 +53,21 @@ export async function POST(req: NextRequest) {
   }
 
   const access = signAccessToken({ id: u.id, role: u.primaryRole ?? 'user', phone: u.phone, sid: claims.sid });
+
+  /* مسابقه (دو تب، رفرش وسط چرخش) ⇒ فقط توکن دسترسی تازه می‌شود.
+
+     اگر این‌جا هم می‌چرخاندیم، توکنی که تب اول همین حالا گرفته بی‌اعتبار
+     می‌شد و دفعه‌ی بعد *آن* «سرقت» تشخیص داده می‌شد — یعنی مسابقه به
+     یک حلقه‌ی بی‌پایانِ خروج از حساب تبدیل می‌شد. */
+  if (check.raced) {
+    const res = NextResponse.json({ ok: true, raced: true }, { headers: CORS_HEADERS });
+    res.cookies.set(ACCESS_COOKIE, access, {
+      httpOnly: true, secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', path: '/', maxAge: ACCESS_TTL_SEC,
+    });
+    return res;
+  }
+
   const refresh = signRefreshToken({ id: u.id, sid: claims.sid });
   await setSessionRefresh(claims.sid, refresh);
 

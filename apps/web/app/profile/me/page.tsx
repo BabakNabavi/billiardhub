@@ -14,7 +14,7 @@ import Avatar from '../../../components/ui/Avatar'
 import { uploadFile } from '../../../lib/supabase'
 import {
   ArrowRight, Camera, Loader2, Search, ShieldCheck, Check, CreditCard, Save,
-  User, Contact, MapPin, Store, LockOpen, Grid2x2, ShoppingBag, Eye, Plus,
+  User, Contact, MapPin, Store, LockOpen, Grid2x2, ShoppingBag, Eye, Plus, Trash2,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -320,6 +320,30 @@ export default function ProfileMePage() {
      ───────────────────────────────────────────────────────────── */
   const [avatarBusy, setAvatarBusy] = useState(false)
 
+  /* حذف عکس = نوشتن رشته‌ی خالی در همان ستون. فایل روی استوریج دست
+     نمی‌خورد (ممکن است جای دیگری هم به آن ارجاع باشد) — فقط پیوندش از
+     پروفایل برداشته می‌شود. */
+  const handleRemoveAvatar = async () => {
+    if (!profile?.avatar || avatarBusy) return
+    if (!window.confirm('عکس پروفایل حذف شود؟')) return
+    setAvatarBusy(true)
+    try {
+      const res = await apiFetch('/api/users/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: '' }),
+      })
+      if (!res.ok) throw new Error('save')
+      setProfile(p => p ? { ...p, avatar: '' } : p)
+      useAuthStore.getState().updateUser({ avatar: '' })
+      showToast('عکس پروفایل حذف شد')
+    } catch {
+      showToast('حذف عکس انجام نشد؛ دوباره تلاش کنید', 'error')
+    } finally {
+      setAvatarBusy(false)
+    }
+  }
+
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ''
@@ -468,6 +492,27 @@ export default function ProfileMePage() {
                 }}>
                   <Camera size={14} />
                 </span>
+
+                {/* حذف عکس — فقط وقتی عکسی هست.
+                    تا امروز راهی برای برداشتن عکس وجود نداشت؛ کاربر
+                    می‌توانست عوضش کند ولی نه پاکش. */}
+                {profile.avatar && !avatarBusy && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    aria-label="حذف عکس پروفایل"
+                    title="حذف عکس پروفایل"
+                    style={{
+                      position: 'absolute', bottom: 0, right: 0,
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: '#FFFFFF', border: '1.5px solid rgba(178,59,46,0.35)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#B23B2E', cursor: 'pointer', padding: 0,
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.14)',
+                    }}>
+                    <Trash2 size={13} />
+                  </button>
+                )}
 
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
               </div>

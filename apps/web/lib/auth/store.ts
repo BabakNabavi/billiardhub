@@ -31,7 +31,11 @@ export interface SessionRow {
   refresh_hash: string | null
   expires_at: string
   revoked_at: string | null
+  last_used_at: string | null
 }
+
+/* پنجره‌ی مهلت چرخش رفرش‌توکن — دلیلش در checkRefresh آمده */
+const ROTATION_GRACE_MS = 60_000
 
 /* ── چرخه‌ی عمر نشست ──────────────────────────────────────────── */
 
@@ -73,13 +77,14 @@ export async function revokeAllSessions(userId: string, reason: string): Promise
 }
 
 export type RefreshCheck =
-  | { ok: true; row: SessionRow }
+  /* raced: توکن قدیمی بود ولی داخل پنجره‌ی مهلت — نباید دوباره چرخانده شود */
+  | { ok: true; row: SessionRow; raced?: boolean }
   | { ok: false; reason: 'missing' | 'revoked' | 'expired' | 'reused' | 'unavailable' }
 
 /** اعتبارسنجی رفرش‌توکن در برابر نشست ذخیره‌شده (با تشخیص استفاده‌ی مجدد) */
 export async function checkRefresh(sid: string, presented: string): Promise<RefreshCheck> {
   const { data, error } = await sb().from('sessions')
-    .select('id,user_id,refresh_hash,expires_at,revoked_at').eq('id', sid).maybeSingle()
+    .select('id,user_id,refresh_hash,expires_at,revoked_at,last_used_at').eq('id', sid).maybeSingle()
 
   if (error) {
     if (/does not exist|schema cache/i.test(error.message)) return { ok: false, reason: 'unavailable' }
@@ -90,8 +95,27 @@ export async function checkRefresh(sid: string, presented: string): Promise<Refr
   if (row.revoked_at) return { ok: false, reason: 'revoked' }
   if (new Date(row.expires_at).getTime() < Date.now()) return { ok: false, reason: 'expired' }
 
-  /* توکنی که با هش فعلی نمی‌خواند یعنی نسخه‌ی قدیمی چرخیده ⇒ سرقت */
+  /* توکنی که با هش فعلی نمی‌خواند یعنی نسخه‌ی قدیمی چرخیده ⇒ سرقت.
+
+     ولی یک استثنا لازم است، وگرنه کاربران واقعی بیرون انداخته می‌شوند:
+
+     چرخش با هر استفاده انجام می‌شود، پس اگر دو درخواست *هم‌زمان* برسند
+     (دو تب باز، رفرش صفحه وسط چرخش، یا focus و visibilitychange که پشت
+     سر هم شلیک می‌کنند)، درخواست دوم توکن قدیمی را می‌فرستد — چون کوکی
+     تازه هنوز به مرورگر نرسیده. این مسابقه است، نه سرقت.
+
+     در جدول sessions چند نشست واقعی با
+     `revoked_reason = 'refresh token reuse detected'` ثبت شده بود؛ همان
+     چیزی که کاربر گزارش کرد: «هر بار برمی‌گردم باید دوباره لاگین کنم».
+
+     پس اگر آخرین چرخش کمتر از یک دقیقه پیش بوده، رد نمی‌کنیم و نشست را
+     هم باطل نمی‌کنیم. بعد از این پنجره، همان توکن دوباره سرقت حساب
+     می‌شود و رفتار امنیتی سر جایش می‌ماند. */
   if (!row.refresh_hash || !sameHash(row.refresh_hash, hashToken(presented))) {
+    const rotatedAgo = Date.now() - new Date(row.last_used_at ?? 0).getTime()
+    if (rotatedAgo >= 0 && rotatedAgo < ROTATION_GRACE_MS) {
+      return { ok: true, row, raced: true }
+    }
     await revokeSession(sid, 'refresh token reuse detected')
     return { ok: false, reason: 'reused' }
   }

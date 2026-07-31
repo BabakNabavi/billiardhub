@@ -394,7 +394,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
                می‌برد نه بالاتر. پدینگ ۲۴→۱۶→۱۰ کم شده بود و دکمه هر بار
                به کف نزدیک‌تر می‌شد. حالا زیادش می‌کنیم تا واقعاً بالا
                بیاید و کف کارت نفس بکشد. */
-            padding: '17px 7px 20px',
+            padding: '19px 7px 12px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
             /* gap ۹ → ۶: اندازه‌گیری نشان داد مجموع محتوا دقیقاً ۱۲px از
                پنل بلندتر بود، پس spacer `flex:1` صفر می‌شد و پدینگ
@@ -409,7 +409,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             </div>
             {/* تعداد میزها به‌جای امتیاز — فقط وقتی باشگاه اعلامش کرده */}
             {club.tables > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap', marginTop: '5px' }}>
               {[
                 { label: 'اسنوکر', n: snookerTables, clr: '#1B7A38' },
                 { label: 'پاکت',   n: pocketTables,  clr: '#1D4ED8' },
@@ -1712,8 +1712,8 @@ useEffect(() => {
              نمی‌شد؛ دکمه ۸px از کف پنل بیرون می‌زد و overflow:hidden
              پایینش را می‌برید. حالا پنل بلندتر است تا پدینگ ۲۰px واقعاً
              دکمه را بالا بیاورد، نه اینکه از کادر بیرونش کند. */
-          .club-img-x      { flex:0 0 52% !important; }
-          .club-mob-panel  { flex:0 0 48% !important; }
+          .club-img-x      { flex:0 0 48% !important; }
+          .club-mob-panel  { flex:0 0 52% !important; }
           .club-open-btn   { display:flex !important; }
           .clubs-desk      { display:none !important; }
           .clubs-nav       { display:none !important; }

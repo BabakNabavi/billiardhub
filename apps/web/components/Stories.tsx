@@ -248,10 +248,29 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
         <div onClick={e => e.stopPropagation()} style={{ position:'absolute',top:0,bottom:0,left:'50%',transform:'translateX(-50%)',width:'min(440px,100vw)',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:'0 0 80px rgba(0,0,0,0.6)' }}>
 
           {hasMedia ? (
-            <div style={{ position:'absolute', inset:0 }}>
+            <div style={{ position:'absolute', inset:0, background:'#0B0B0C' }}>
+              {/* ── پس‌زمینه‌ی محو ──
+                  همان عکس، بزرگ‌شده و بلور‌شده، فقط برای پرکردن قاب.
+                  بدون این، عکسی که نسبت ابعادش با قاب فرق دارد یا باید
+                  بریده شود یا کنارش نوار سیاه بیفتد. */}
+              <img aria-hidden="true" src={currentStory.mediaUrl} alt=""
+                style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover',
+                         filter:'blur(28px) brightness(0.55)', transform:'scale(1.15)' }} />
+
+              {/* ── خود عکس ──
+                  `contain` به‌جای `cover`: کل تصویر دیده می‌شود. پیش‌تر
+                  `cover` بود و هر عکسی که عمودی/افقی‌تر از قاب بود، نیمی
+                  از آن بریده می‌شد.
+
+                  `loading="eager"` عمدی است: این عکس همان لحظه‌ی باز شدن
+                  دیده می‌شود. با lazy مرورگر گاهی بارگذاری را عقب
+                  می‌انداخت و کاربر چند لحظه صفحه‌ی سیاه می‌دید. */}
               {currentStory.mediaType === 'video'
-                ? <video src={currentStory.mediaUrl} autoPlay muted playsInline loop style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                : <img loading="lazy" decoding="async" src={currentStory.mediaUrl} alt="story" style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
+                ? <video src={currentStory.mediaUrl} autoPlay muted playsInline loop
+                    style={{ position:'relative', width:'100%', height:'100%', objectFit:'contain' }} />
+                : <img loading="eager" decoding="async" fetchPriority="high"
+                    src={currentStory.mediaUrl} alt="story"
+                    style={{ position:'relative', width:'100%', height:'100%', objectFit:'contain' }} />}
               <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%)' }} />
             </div>
           ) : (
@@ -738,7 +757,7 @@ export default function Stories() {
                   <Avatar
                     src={avatarOf(g)}
                     alt={g.userName}
-                    size={54}
+                    size={63}
                     background="transparent"
                     iconColor={isSeen ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.88)'}
                   />

@@ -620,17 +620,17 @@ export default function Navbar() {
           paddingTop: 'env(safe-area-inset-top)',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
-          {/* Header row — centered brand */}
-          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 20px 16px' }}>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', margin: '6px 0 8px' }} />
-            <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '-0.02em' }}>
-              <span style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.28), 0 -1px 0 rgba(255,255,255,0.45)' }}>بیلیارد</span>{' '}
-              <span style={{ color: GOLD }}>هاب</span>
-            </span>
+          {/* Header row — لوگو و دکمه‌ی بستن روبه‌روی هم، در یک ردیف.
+
+              نوشته‌ی فارسی «بیلیارد هاب» حذف شد: خود لوگو همان را
+              نوشته دارد و تکرارش فقط ارتفاع می‌گرفت. با چیدمان ردیفی،
+              لوگو و ضربدر هر دو بالا آمدند و هم‌تراز شدند. */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 20px 12px' }}>
             <button onClick={() => setMobileOpen(false)} aria-label="بستن منو"
-              style={{ position: 'absolute', top: '24px', insetInlineStart: '20px', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
+              style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex', flexShrink: 0 }}>
               <X size={20} />
             </button>
+            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', flexShrink: 0 }} />
           </div>
 
           {/* Gold separator */}

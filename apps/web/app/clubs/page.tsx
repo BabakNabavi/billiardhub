@@ -630,11 +630,14 @@ export default function ClubsPage() {
         .city-scroll::-webkit-scrollbar { height:0 }
         .dd-item:hover { background:rgba(199,166,106,0.08)!important;color:#A07840!important }
 
-        /* grid */
-        .clubs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
+        /* grid — ۴ ستون روی نمایشگر بزرگ (پیش‌تر ۳ بود) */
+        .clubs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
+
+        /* ۳ ستون در بازه‌ی میانی، تا کارت‌ها روی لپ‌تاپ باریک نشوند */
+        @media(max-width:1500px) { .clubs-grid { grid-template-columns:repeat(3,1fr); gap:15px } }
 
         /* 14-inch / small laptop ≤1366px → 2 columns */
-        @media(max-width:1366px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
+        @media(max-width:1100px) { .clubs-grid { grid-template-columns:repeat(2,1fr); gap:14px } }
 
         /* mobile — 1 ستون */
         @media(max-width:560px)  {

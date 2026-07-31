@@ -52,9 +52,12 @@ export default function Avatar({
   className,
   style,
 }: AvatarProps) {
+  /* `line-height: 0` لازم است: بدون آن، فضای زیر خط پایه‌ی SVG درون
+     کادر حساب می‌شود و آدمک چند پیکسل بالاتر از مرکز می‌نشیند — همان
+     چیزی که در چیپ نوار بار دیده می‌شد. */
   const box: React.CSSProperties = {
     width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0,
     background: src ? '#EFEAE0' : background,
     ...style,
   }

@@ -53,7 +53,7 @@ console.log('\nB — «متوجه شدم» ⇒ رفرش')
   const s = JSON.stringify(nextState(null, 'ok', NOW))
   t('بلافاصله بعد از رفرش پنهان', verdict(env({ stored: s })), 'hide:muted')
   t('یک ماه بعد هنوز پنهان', verdict(env({ stored: s, now: NOW + 30 * DAY })), 'hide:muted')
-  t('۱۸۱ روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 181 * DAY })), 'show:iphone')
+  t('۶۱ روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 61 * DAY })), 'show:iphone')
 }
 
 console.log('\nC — «بعداً» ⇒ رفرش (cooldown دوروزه)')
@@ -82,7 +82,7 @@ console.log('\nسقف نمایش — بعد از ۳ بار «بعداً» دیگ
   for (let i = 0; i < 3; i++) s = nextState(s, 'later', NOW)
   t('شمارنده = ۳', s.n, 3)
   t('چهار روز بعد هم پنهان (سقف)', verdict(env({ stored: JSON.stringify(s), now: NOW + 4 * DAY })), 'hide:muted')
-  t('۱۸۱ روز بعد آزاد', verdict(env({ stored: JSON.stringify(s), now: NOW + 181 * DAY })), 'show:iphone')
+  t('۶۱ روز بعد آزاد', verdict(env({ stored: JSON.stringify(s), now: NOW + 61 * DAY })), 'show:iphone')
 }
 
 console.log('\nD — نصب‌شده / standalone')
@@ -115,7 +115,7 @@ t('isMuted روی null', isMuted(null, NOW), false)
 t('detectIosDevice با UA خالی', detectIosDevice('', 0), null)
 
 console.log('\nتنظیمات')
-t('کلید ذخیره‌سازی', mod.A2HS_STORAGE_KEY, 'bh_a2hs_ios')
+t('کلید ذخیره‌سازی', mod.A2HS_STORAGE_KEY, 'bh_a2hs_ios_v2')
 t('تأخیر نمایش ≥ ۱ ثانیه', A2HS_CONFIG.showDelayMs >= 1000, true)
 t('تأخیر نمایش ≤ ۲ ثانیه', A2HS_CONFIG.showDelayMs <= 2000, true)
 

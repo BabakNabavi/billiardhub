@@ -269,6 +269,11 @@ try {
   head('مهمان با پرچم روشن — همچنان نباید تعامل کند')
   {
     const p = await browser.newPage(); await p.setViewport({ width: 1280, height: 900 })
+    /* localStorage بین صفحه‌های یک مرورگر مشترک است، پس نشستی که
+       بلاک‌های قبلی کاشتند این‌جا هم زنده می‌ماند و «مهمان» دیگر مهمان
+       نیست. باید صریحاً پاک شود. */
+    await p.evaluateOnNewDocument(() => { try { localStorage.clear() } catch {} })
+    await p.deleteCookie({ name: 'bh_at', domain: 'localhost' }, { name: 'bh_csrf', domain: 'localhost' })
     await openStrip(p)
     await p.evaluate(() => {
       const btn = [...document.querySelectorAll('.st-item')].find(b => b.textContent?.includes('کاربر آزمایشی'))

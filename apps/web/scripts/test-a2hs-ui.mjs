@@ -122,7 +122,7 @@ console.log('\n■ چرخه‌ی رد کردن روی مرورگر واقعی')
   await new Promise(r => setTimeout(r, 300))
   t('بعد از «بعداً» بسته شد', (await p.$$('.bh-a2hs-sheet')).length === 0)
 
-  const stored = await p.evaluate(() => localStorage.getItem('bh_a2hs_ios'))
+  const stored = await p.evaluate(() => localStorage.getItem('bh_a2hs_ios_v2'))
   t('در localStorage ثبت شد', !!stored && JSON.parse(stored).s === 'later', String(stored))
 
   await p.reload({ waitUntil: 'networkidle2' })
@@ -130,12 +130,12 @@ console.log('\n■ چرخه‌ی رد کردن روی مرورگر واقعی')
   t('بعد از رفرش دوباره ظاهر نشد', (await p.$$('.bh-a2hs-sheet')).length === 0)
 
   /* «متوجه شدم» ⇒ سکوت بلند */
-  await p.evaluate(() => localStorage.removeItem('bh_a2hs_ios'))
+  await p.evaluate(() => localStorage.removeItem('bh_a2hs_ios_v2'))
   await p.reload({ waitUntil: 'networkidle2' })
   await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 })
   await p.evaluate(() => document.querySelector('.bh-a2hs-primary').click())
   await new Promise(r => setTimeout(r, 300))
-  const ok = await p.evaluate(() => JSON.parse(localStorage.getItem('bh_a2hs_ios') || '{}').s)
+  const ok = await p.evaluate(() => JSON.parse(localStorage.getItem('bh_a2hs_ios_v2') || '{}').s)
   t('«متوجه شدم» ثبت شد', ok === 'ok', String(ok))
   await p.close()
 }

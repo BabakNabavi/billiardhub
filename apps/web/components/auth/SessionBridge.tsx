@@ -16,6 +16,8 @@ import { useEffect } from 'react'
 import { useAuthStore } from '../../store/auth.store'
 
 const DONE_KEY = 'bh_session_migrated'
+/* مهر زمانی آخرین تمدید — مشترک بین همه‌ی تب‌ها */
+const LAST_REFRESH_KEY = 'bh_last_refresh'
 const REFRESH_EVERY_MS = 12 * 60 * 1000   // کوکی ۱۵ دقیقه‌ای، با حاشیه‌ی امن
 const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمدید پشت‌هم
 
@@ -66,11 +68,28 @@ export default function SessionBridge() {
       } catch { /* شبکه قطع بود؛ دفعه‌ی بعد */ }
     }
 
-    /* ── تمدید ── */
+    /* ── تمدید ──
+
+       مهر زمانی در localStorage است، نه فقط در متغیر محلی. رفرش‌توکن با
+       هر استفاده می‌چرخد، پس اگر دو تب هم‌زمان تمدید کنند، تب دوم توکنِ
+       دیگر بی‌اعتبار را می‌فرستد و سرور آن را «سرقت» می‌بیند.
+
+       متغیر محلی فقط داخل یک تب کار می‌کند و همین باعث می‌شد کاربری که
+       دو تب باز دارد از حساب خودش بیرون بیفتد. localStorage بین تب‌ها
+       مشترک است و همان یک محافظ را سراسری می‌کند. (سمت سرور هم پنجره‌ی
+       مهلت گذاشته شد تا اگر باز هم مسابقه‌ای رخ داد، نشست باطل نشود.) */
+    const readLast = (): number => {
+      try { return Number(localStorage.getItem(LAST_REFRESH_KEY)) || 0 } catch { return last }
+    }
+    const writeLast = (t: number) => {
+      last = t
+      try { localStorage.setItem(LAST_REFRESH_KEY, String(t)) } catch { /* ignore */ }
+    }
+
     const refresh = async () => {
       if (stopped || !user) return
-      if (Date.now() - last < MIN_GAP_MS) return
-      last = Date.now()
+      if (Date.now() - Math.max(last, readLast()) < MIN_GAP_MS) return
+      writeLast(Date.now())
       try {
         const r = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
         if (stopped || r.ok || r.status === 503) return
