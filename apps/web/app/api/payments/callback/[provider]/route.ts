@@ -5,10 +5,10 @@ import { getPaymentProvider } from '@/lib/payments';
 import { notifyBookingConfirmed } from '@/lib/notify';
 
 /* بازگشت از درگاه — هرگز به گفته‌ی کلاینت اعتماد نمی‌شود:
-   ۱) پرداخت سمتِ سرور verify می‌شود
-   ۲) مبلغِ پرداخت‌شده با مبلغِ موردِ انتظار مقایسه می‌شود
-   ۳) تأیید idempotent است (کالبکِ تکراری هیچ اثرِ مالیِ دوباره ندارد)
-   ۴) همه‌ی اثراتِ مالی در یک تراکنشِ اتمیکِ دیتابیس ثبت می‌شوند */
+   ۱) پرداخت سمت سرور verify می‌شود
+   ۲) مبلغ پرداخت‌شده با مبلغ مورد انتظار مقایسه می‌شود
+   ۳) تأیید idempotent است (کالبک تکراری هیچ اثر مالی دوباره ندارد)
+   ۴) همه‌ی اثرات مالی در یک تراکنش اتمیک دیتابیس ثبت می‌شوند */
 
 async function handle(req: NextRequest, providerName: string) {
   const url = req.nextUrl;
@@ -24,7 +24,7 @@ async function handle(req: NextRequest, providerName: string) {
   if (!pRow) return fail('پرداخت یافت نشد');
   const pay = pRow as { id: string; booking_id: string; amount: number; status: string; provider: string; provider_authority: string | null };
 
-  /* قبلاً تأیید شده ⇒ فقط به نتیجه هدایت کن (بدونِ هیچ عملیاتِ مالیِ تکراری) */
+  /* قبلاً تأیید شده ⇒ فقط به نتیجه هدایت کن (بدون هیچ عملیات مالی تکراری) */
   if (pay.status === 'PAID') {
     return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, url.origin));
   }
@@ -47,28 +47,28 @@ async function handle(req: NextRequest, providerName: string) {
     return fail(v.message || 'پرداخت تأیید نشد');
   }
 
-  /* بررسیِ مبلغ — اگر مبلغِ واقعی با موردِ انتظار نخواند، هرگز تأیید نکن */
+  /* بررسی مبلغ — اگر مبلغ واقعی با مورد انتظار نخواند، هرگز تأیید نکن */
   if (typeof v.amount === 'number' && v.amount !== pay.amount) {
     await sb().from('payments').update({ status: 'FAILED', raw_response: { reason: 'amount_mismatch', got: v.amount, want: pay.amount }, updated_at: new Date().toISOString() }).eq('id', pay.id);
     audit({ action: 'PAYMENT_AMOUNT_MISMATCH', entityType: 'payment', entityId: pay.id, newValue: { got: v.amount, want: pay.amount }, ip: clientIp(req) ?? undefined });
-    return fail('مبلغِ پرداخت با مبلغِ رزرو مطابقت ندارد');
+    return fail('مبلغ پرداخت با مبلغ رزرو مطابقت ندارد');
   }
 
-  /* تأییدِ اتمیک: پرداخت + رزرو + دفترِ مالی + کمیسیون + موجودیِ باشگاه */
+  /* تأیید اتمیک: پرداخت + رزرو + دفتر مالی + کمیسیون + موجودی باشگاه */
   const { error } = await rpc('bh_confirm_payment', {
     p_payment_id: pay.id, p_provider_ref: v.refId ?? '', p_amount: pay.amount,
   });
   if (error) {
     const m = error.message || '';
     audit({ action: 'PAYMENT_CONFIRM_FAILED', entityType: 'payment', entityId: pay.id, newValue: { error: m } });
-    if (/amount_mismatch/.test(m)) return fail('مغایرتِ مبلغ');
-    return fail('خطا در نهایی‌کردنِ رزرو — با پشتیبانی تماس بگیرید');
+    if (/amount_mismatch/.test(m)) return fail('مغایرت مبلغ');
+    return fail('خطا در نهایی‌کردن رزرو — با پشتیبانی تماس بگیرید');
   }
 
   audit({ action: 'PAYMENT_CONFIRMED', entityType: 'payment', entityId: pay.id,
           newValue: { refId: v.refId, amount: pay.amount }, ip: clientIp(req) ?? undefined });
 
-  /* اطلاع‌رسانی — بی‌صدا و بدونِ انتظار؛ نباید ریدایرکتِ کاربر را کند کند */
+  /* اطلاع‌رسانی — بی‌صدا و بدون انتظار؛ نباید ریدایرکت کاربر را کند کند */
   void notifyBookingConfirmed(pay.booking_id).catch(() => { /* بی‌صدا */ });
 
   return NextResponse.redirect(new URL(`/booking/result?ok=1&booking=${pay.booking_id}`, url.origin));

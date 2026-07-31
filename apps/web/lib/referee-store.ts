@@ -30,8 +30,8 @@ export interface RefereeProfile {
   status: 'pending' | 'approved' | 'rejected'
   verified: boolean                      // blue check (admin grants)
   submittedAt: string
-  ownerId: string                        // کلیدِ مالکیت = user.id (همیشه موجود؛ phone اختیاری است)
-  ownerPhone: string                     // شماره‌ی مالک — فقط fallbackِ رکوردهای قدیمی
+  ownerId: string                        // کلید مالکیت = user.id (همیشه موجود؛ phone اختیاری است)
+  ownerPhone: string                     // شماره‌ی مالک — فقط fallback رکوردهای قدیمی
 }
 
 /* Refereeing grades — ordered from the first (entry) certificate upward.
@@ -102,7 +102,7 @@ export function updateRefereeProfile(slug: string, patch: Partial<RefereeProfile
   localStorage.setItem(KEY, JSON.stringify(all))
 }
 
-/* «پروفایلِ من» — مبنا user.id (همیشه موجود)؛ شماره fallbackِ رکوردهای قدیمی است.
+/* «پروفایل من» — مبنا user.id (همیشه موجود)؛ شماره fallback رکوردهای قدیمی است.
    بدون این، پروفایلی که با شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد. */
 export function findRefereeByOwner(
   owner: string | { id?: string; phone?: string } | null | undefined,
@@ -115,7 +115,7 @@ export function findRefereeByOwner(
   ) ?? null
 }
 
-/* رکوردِ قدیمیِ بی‌صاحب (بدونِ ownerId و ownerPhone) — امن برای تصاحبِ کاربرِ فعلی. */
+/* رکورد قدیمی بی‌صاحب (بدون ownerId و ownerPhone) — امن برای تصاحب کاربر فعلی. */
 export function findUnclaimedReferee(): RefereeProfile | null {
   return listRefereeProfiles().find(p => !p.ownerId && !p.ownerPhone) ?? null
 }

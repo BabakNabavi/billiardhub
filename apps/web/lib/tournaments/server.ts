@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────
-   منطقِ سمت‌سرورِ مسابقات و ثبت‌نام.
+   منطق سمت‌سرور مسابقات و ثبت‌نام.
 
-   عمداً هیچ سیستمِ پرداختِ تازه‌ای ساخته نشده: همان
+   عمداً هیچ سیستم پرداخت تازه‌ای ساخته نشده: همان
    `PaymentProvider`ی که رزرو و تبلیغات استفاده می‌کنند این‌جا هم به
-   کار می‌رود، پس افزودنِ درگاهِ واقعی فقط یک فایلِ Adapter است.
+   کار می‌رود، پس افزودن درگاه واقعی فقط یک فایل Adapter است.
 
    قاعده‌ی طلایی: مبلغ هرگز از کلاینت گرفته نمی‌شود. کلاینت فقط
    شناسه‌ی مسابقه را می‌فرستد و مبلغ از دیتابیس خوانده و در سفارش
@@ -57,7 +57,7 @@ const PUBLIC_STATUSES: TournamentStatus[] = [
   'published', 'registration_open', 'registration_closed', 'ongoing', 'completed',
 ]
 
-/** فهرستِ عمومیِ مسابقات — پیش‌نویس و لغوشده دیده نمی‌شوند */
+/** فهرست عمومی مسابقات — پیش‌نویس و لغوشده دیده نمی‌شوند */
 export async function listPublicTournaments(clubId?: string): Promise<TournamentRow[]> {
   let q = sb().from('tournaments').select('*').in('status', PUBLIC_STATUSES)
   if (clubId) q = q.eq('club_id', clubId)
@@ -66,7 +66,7 @@ export async function listPublicTournaments(clubId?: string): Promise<Tournament
   return (data ?? []) as TournamentRow[]
 }
 
-/** مسابقات یک باشگاه برای پنلِ خودش — شاملِ پیش‌نویس */
+/** مسابقات یک باشگاه برای پنل خودش — شامل پیش‌نویس */
 export async function listClubTournaments(clubId: string): Promise<TournamentRow[]> {
   const { data, error } = await sb().from('tournaments').select('*')
     .eq('club_id', clubId).order('created_at', { ascending: false }).limit(200)
@@ -79,7 +79,7 @@ export async function getTournament(id: string): Promise<TournamentRow | null> {
   return (data ?? null) as TournamentRow | null
 }
 
-/** ظرفیتِ باقی‌مانده — از تابعِ دیتابیس، نه شمارشِ سمتِ برنامه */
+/** ظرفیت باقی‌مانده — از تابع دیتابیس، نه شمارش سمت برنامه */
 export async function seatsLeft(tournamentId: string): Promise<number> {
   const { data } = await rpc<number>('bh_tournament_seats_left', { p_tournament: tournamentId })
   return Number(data) || 0
@@ -95,7 +95,7 @@ export interface RegisterOutcome {
   status?: string
 }
 
-/** ساختِ سفارشِ ثبت‌نام — مبلغ از دیتابیس، ظرفیت اتمیک */
+/** ساخت سفارش ثبت‌نام — مبلغ از دیتابیس، ظرفیت اتمیک */
 export async function registerForTournament(
   tournamentId: string, userId: string, playerName: string, phone: string,
 ): Promise<RegisterOutcome> {
@@ -110,7 +110,7 @@ export async function registerForTournament(
   return (data ?? { ok: false, reason: 'server_error' }) as RegisterOutcome
 }
 
-/** تأییدِ پرداخت — Idempotent، با بررسیِ دوباره‌ی مبلغ و ظرفیت */
+/** تأیید پرداخت — Idempotent، با بررسی دوباره‌ی مبلغ و ظرفیت */
 export async function confirmRegistrationPayment(args: {
   registrationId: string
   expectedAmount: number
@@ -141,7 +141,7 @@ export async function myRegistrations(userId: string) {
   return (data ?? []) as RegistrationRow[]
 }
 
-/** ثبت‌نام‌های یک مسابقه — فقط برای مالکِ باشگاه/ادمین */
+/** ثبت‌نام‌های یک مسابقه — فقط برای مالک باشگاه/ادمین */
 export async function registrationsOf(tournamentId: string) {
   const { data } = await sb().from('tournament_registrations')
     .select('*').eq('tournament_id', tournamentId).order('created_at', { ascending: true }).limit(600)
@@ -150,7 +150,7 @@ export async function registrationsOf(tournamentId: string) {
 
 /* اطلاعاتی که باشگاه مجاز است از یک ثبت‌نام ببیند. شماره‌ی تماس
    می‌ماند (برگزارکننده باید بتواند هماهنگ کند) ولی هیچ داده‌ی بانکی
-   یا شناسه‌ی داخلیِ پرداخت بیرون نمی‌رود. */
+   یا شناسه‌ی داخلی پرداخت بیرون نمی‌رود. */
 export function forOrganizer(r: RegistrationRow) {
   return {
     id: r.id,
@@ -158,7 +158,7 @@ export function forOrganizer(r: RegistrationRow) {
     status: r.status,
     paymentStatus: r.payment_status,
     amount: r.amount,
-    refId: r.provider_ref_id,      // شماره‌ی پیگیری — نه اطلاعاتِ کارت
+    refId: r.provider_ref_id,      // شماره‌ی پیگیری — نه اطلاعات کارت
     paidAt: r.paid_at,
     refundAmount: r.refund_amount,
     createdAt: r.created_at,

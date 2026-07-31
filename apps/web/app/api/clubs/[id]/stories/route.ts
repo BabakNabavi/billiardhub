@@ -45,9 +45,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   return NextResponse.json(active, { headers: CORS });
 }
 
-/* خواندن عمومی است (استوریِ باشگاه محتوای عمومی است) ولی نوشتن و حذف
-   فقط برای مالکِ همان باشگاه یا ادمین. پیش‌تر هیچ گاردی نبود و هر کسی
-   با داشتنِ شناسه‌ی عمومیِ باشگاه می‌توانست استوری منتشر یا پاک کند. */
+/* خواندن عمومی است (استوری باشگاه محتوای عمومی است) ولی نوشتن و حذف
+   فقط برای مالک همان باشگاه یا ادمین. پیش‌تر هیچ گاردی نبود و هر کسی
+   با داشتن شناسه‌ی عمومی باشگاه می‌توانست استوری منتشر یا پاک کند. */
 async function guardOwner(req: NextRequest, clubId: string) {
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS });

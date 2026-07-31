@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────
-   نشست‌ها در دیتابیس + ست/پاک‌کردنِ کوکی‌ها.
-   فقط سمتِ سرور. هیچ‌کدام از این‌ها نباید در کامپوننتِ کلاینت import شود.
+   نشست‌ها در دیتابیس + ست/پاک‌کردن کوکی‌ها.
+   فقط سمت سرور. هیچ‌کدام از این‌ها نباید در کامپوننت کلاینت import شود.
    ───────────────────────────────────────────────────────────── */
 
 import { createHmac, timingSafeEqual } from 'crypto'
@@ -14,8 +14,8 @@ import {
 
 const sb = () => getSupabaseServer()
 
-/* رفرش‌توکن خودش در دیتابیس ذخیره نمی‌شود؛ فقط هشِ HMACش. اگر روزی
-   دیتابیس لو برود، از روی این هش نمی‌توان توکنِ معتبر ساخت. */
+/* رفرش‌توکن خودش در دیتابیس ذخیره نمی‌شود؛ فقط هش HMACش. اگر روزی
+   دیتابیس لو برود، از روی این هش نمی‌توان توکن معتبر ساخت. */
 export function hashToken(token: string): string {
   return createHmac('sha256', process.env.JWT_SECRET!).update(token).digest('hex')
 }
@@ -33,9 +33,9 @@ export interface SessionRow {
   revoked_at: string | null
 }
 
-/* ── چرخه‌ی عمرِ نشست ──────────────────────────────────────────── */
+/* ── چرخه‌ی عمر نشست ──────────────────────────────────────────── */
 
-/** نشستِ تازه. اگر جدول هنوز نباشد، null برمی‌گردد و فراخوان تصمیم می‌گیرد. */
+/** نشست تازه. اگر جدول هنوز نباشد، null برمی‌گردد و فراخوان تصمیم می‌گیرد. */
 export async function createSession(
   userId: string,
   meta: { userAgent?: string | null; ip?: string | null; origin?: 'login' | 'register' | 'adopt' },
@@ -53,7 +53,7 @@ export async function createSession(
   return String((data as { id: string }).id)
 }
 
-/** ثبتِ هشِ رفرش‌توکنِ فعلی روی نشست */
+/** ثبت هش رفرش‌توکن فعلی روی نشست */
 export async function setSessionRefresh(sid: string, refreshToken: string): Promise<void> {
   await sb().from('sessions')
     .update({ refresh_hash: hashToken(refreshToken), last_used_at: new Date().toISOString() })
@@ -76,7 +76,7 @@ export type RefreshCheck =
   | { ok: true; row: SessionRow }
   | { ok: false; reason: 'missing' | 'revoked' | 'expired' | 'reused' | 'unavailable' }
 
-/** اعتبارسنجیِ رفرش‌توکن در برابرِ نشستِ ذخیره‌شده (با تشخیصِ استفاده‌ی مجدد) */
+/** اعتبارسنجی رفرش‌توکن در برابر نشست ذخیره‌شده (با تشخیص استفاده‌ی مجدد) */
 export async function checkRefresh(sid: string, presented: string): Promise<RefreshCheck> {
   const { data, error } = await sb().from('sessions')
     .select('id,user_id,refresh_hash,expires_at,revoked_at').eq('id', sid).maybeSingle()
@@ -90,7 +90,7 @@ export async function checkRefresh(sid: string, presented: string): Promise<Refr
   if (row.revoked_at) return { ok: false, reason: 'revoked' }
   if (new Date(row.expires_at).getTime() < Date.now()) return { ok: false, reason: 'expired' }
 
-  /* توکنی که با هشِ فعلی نمی‌خواند یعنی نسخه‌ی قدیمیِ چرخیده ⇒ سرقت */
+  /* توکنی که با هش فعلی نمی‌خواند یعنی نسخه‌ی قدیمی چرخیده ⇒ سرقت */
   if (!row.refresh_hash || !sameHash(row.refresh_hash, hashToken(presented))) {
     await revokeSession(sid, 'refresh token reuse detected')
     return { ok: false, reason: 'reused' }
@@ -100,18 +100,18 @@ export async function checkRefresh(sid: string, presented: string): Promise<Refr
 
 /* ── کوکی‌ها ──────────────────────────────────────────────────── */
 
-/* Secure فقط در production: روی http://localhost کوکیِ Secure اصلاً
+/* Secure فقط در production: روی http://localhost کوکی Secure اصلاً
    ست نمی‌شود و توسعه از کار می‌افتد. بقیه‌ی صفات یکسان می‌مانند تا
-   رفتارِ dev و prod از هم دور نشود. */
+   رفتار dev و prod از هم دور نشود. */
 const isProd = () => process.env.NODE_ENV === 'production'
 
-/** یک رشته‌ی تصادفی برای توکنِ CSRF (مرحله‌ی ج اعمالش می‌کند) */
+/** یک رشته‌ی تصادفی برای توکن CSRF (مرحله‌ی ج اعمالش می‌کند) */
 export function newCsrfToken(): string {
   return createHmac('sha256', process.env.JWT_SECRET!)
     .update(`${Date.now()}:${Math.random()}`).digest('hex').slice(0, 32)
 }
 
-/** ست‌کردنِ کوکی‌های نشست روی پاسخ */
+/** ست‌کردن کوکی‌های نشست روی پاسخ */
 export function setSessionCookies(
   res: NextResponse,
   tokens: { access: string; refresh: string; csrf?: string },
@@ -132,7 +132,7 @@ export function setSessionCookies(
   return res
 }
 
-/** پاک‌کردنِ کوکی‌ها — Path باید دقیقاً همانی باشد که موقعِ ست استفاده شد */
+/** پاک‌کردن کوکی‌ها — Path باید دقیقاً همانی باشد که موقع ست استفاده شد */
 export function clearSessionCookies(res: NextResponse): NextResponse {
   const secure = isProd()
   const kill = (name: string, path: string) =>
@@ -144,7 +144,7 @@ export function clearSessionCookies(res: NextResponse): NextResponse {
   return res
 }
 
-/** ساخت نشست + توکن‌ها + ست‌کردنِ کوکی‌ها — مسیرِ مشترکِ login/register/adopt */
+/** ساخت نشست + توکن‌ها + ست‌کردن کوکی‌ها — مسیر مشترک login/register/adopt */
 export async function issueSession(
   res: NextResponse,
   user: { id: string; role: string; phone?: string },
@@ -152,7 +152,7 @@ export async function issueSession(
 ): Promise<{ sid: string | null; access: string }> {
   const sid = await createSession(user.id, meta)
 
-  /* اگر ساختِ نشست ممکن نشد (مثلاً مایگریشن اجرا نشده) باز هم کوکیِ
+  /* اگر ساخت نشست ممکن نشد (مثلاً مایگریشن اجرا نشده) باز هم کوکی
      access داده می‌شود تا کاربر بیرون نیفتد؛ فقط رفرش نخواهد داشت. */
   const access = signAccessToken({ id: user.id, role: user.role, phone: user.phone, sid: sid ?? undefined })
   if (!sid) {

@@ -13,13 +13,13 @@ export type SellerStatus = 'pending' | 'approved' | 'rejected'
 
 export interface SellerProfile {
   slug: string                 // = seller id in the URL, /sellers/<slug>
-  ownerId: string              // کلیدِ مالکیت = user.id (همیشه موجود). مبنای «فروشگاهِ من».
+  ownerId: string              // کلید مالکیت = user.id (همیشه موجود). مبنای «فروشگاه من».
   ownerPhone: string           // شماره‌ی مالک (اختیاری در حساب — نباید مبنای مالکیت باشد)
-  ownerName: string            // نام و نام‌خانوادگیِ مالک (از احراز هویت) — روی فرم ثبت محصول قفل می‌شود
+  ownerName: string            // نام و نام‌خانوادگی مالک (از احراز هویت) — روی فرم ثبت محصول قفل می‌شود
 
   /* ── هدر ── */
   logo: string                 // data URL; خالی ⇒ آیکون پیش‌فرض فروشگاه
-  banners: string[]            // اسلایدرِ بنرِ هدر (حداکثر ۳)؛ خالی ⇒ بنر پیش‌فرض
+  banners: string[]            // اسلایدر بنر هدر (حداکثر ۳)؛ خالی ⇒ بنر پیش‌فرض
   title: string                // نام فروشگاه — تیتر اصلی
   province: string             // استان (کنار شهر)
   city: string                 // شهر — کنار آیکون لوکیشن
@@ -42,20 +42,20 @@ export interface SellerProfile {
   storyText: string
 
   /* ── «درباره ما» ── */
-  aboutImages: string[]        // اسلایدرِ باکس درباره ما (حداکثر ۳)؛ متنش همان desc است
+  aboutImages: string[]        // اسلایدر باکس درباره ما (حداکثر ۳)؛ متنش همان desc است
 
   /* ── گالری تصاویر فروشگاه ── */
   gallery: SellerShot[]
 
   /* ── جواز کسب (اجباری — بدون آن فروشگاه منتشر نمی‌شود) ── */
   certificate: { name: string; url: string } | null
-  /* شماره‌ی جوازِ کسب — کنارِ خودِ فایل، تا ادمین بتواند استعلام کند */
+  /* شماره‌ی جواز کسب — کنار خود فایل، تا ادمین بتواند استعلام کند */
   licenseNumber: string
 
   /* ── وضعیت (ادمین سایت تعیین می‌کند، نه صاحب فروشگاه) ── */
   status: SellerStatus         // فقط approvedها در /sellers دیده می‌شوند
   verified: boolean            // تیک آبی (ادمین می‌دهد)
-  submittedAt: string          // زمانِ ارسال برای تایید
+  submittedAt: string          // زمان ارسال برای تایید
   updatedAt: string
 }
 
@@ -96,12 +96,12 @@ export function emptySellerProfile(slug: string, ownerPhone = '', ownerId = ''):
 const KEY = 'bh_seller_profiles'
 
 /* فیلدهای تازه (ownerName/certificate/status/province/...) در پروفایل‌های قدیمی نیستند؛
-   اینجا با پیش‌فرض پر می‌شوند تا هیچ‌جای کد undefined نبیند. استانِ خالی از روی شهر بک‌فیل می‌شود. */
+   اینجا با پیش‌فرض پر می‌شوند تا هیچ‌جای کد undefined نبیند. استان خالی از روی شهر بک‌فیل می‌شود. */
 function normalize(raw: Partial<SellerProfile> & { slug: string }): SellerProfile {
   const p = { ...emptySellerProfile(raw.slug, raw.ownerPhone ?? ''), ...raw }
   if (!p.province && p.city) p.province = provinceOfCity(p.city)
-  /* مدلِ جدید: فروشگاه هنگام ذخیره منتشر می‌شود. رکوردهای قدیمیِ pending (که در مدلِ قبلی
-     منتظرِ تاییدِ دستیِ ادمین مانده بودند) به approved مهاجرت می‌کنند؛ rejected دست‌نخورده. */
+  /* مدل جدید: فروشگاه هنگام ذخیره منتشر می‌شود. رکوردهای قدیمی pending (که در مدل قبلی
+     منتظر تایید دستی ادمین مانده بودند) به approved مهاجرت می‌کنند؛ rejected دست‌نخورده. */
   if (p.status === 'pending') p.status = 'approved'
   return p
 }
@@ -129,7 +129,7 @@ export function listApprovedSellers(): SellerProfile[] {
   return listSellerProfiles().filter(p => p.status === 'approved')
 }
 
-/* «فروشگاهِ من» را پیدا کن. مبنا user.id است (همیشه موجود)؛ ولی شماره هم چک می‌شود
+/* «فروشگاه من» را پیدا کن. مبنا user.id است (همیشه موجود)؛ ولی شماره هم چک می‌شود
    تا رکوردهای قدیمی که فقط با ownerPhone ذخیره شده بودند هم پیدا شوند. */
 export function findSellerByOwner(
   owner: string | { id?: string; phone?: string } | null | undefined,
@@ -142,8 +142,8 @@ export function findSellerByOwner(
   ) ?? null
 }
 
-/* رکوردِ قدیمیِ بی‌صاحب (پیش از افزودنِ ownerId ذخیره شده و بدونِ شماره) —
-   امن برای تصاحب توسط کاربرِ فعلی؛ فروشگاه‌های جدید همیشه ownerId دارند. */
+/* رکورد قدیمی بی‌صاحب (پیش از افزودن ownerId ذخیره شده و بدون شماره) —
+   امن برای تصاحب توسط کاربر فعلی؛ فروشگاه‌های جدید همیشه ownerId دارند. */
 export function findUnclaimedSeller(): SellerProfile | null {
   return listSellerProfiles().find(p => !p.ownerId && !p.ownerPhone) ?? null
 }
@@ -151,9 +151,9 @@ export function findUnclaimedSeller(): SellerProfile | null {
 /* اسلاگ‌های ۱ تا ۶ برای فروشگاه‌های نمونه (lib/sellers-data) رزرو است. */
 const RESERVED_SLUGS = new Set(['1', '2', '3', '4', '5', '6'])
 
-/* یک اسلاگِ یکتا برای یک فروشگاهِ تازه — نه با پروفایل‌های موجود تصادم می‌کند
-   نه با idهای رزروشده‌ی فروشگاه‌های نمونه. بدون این، هر فروشگاهِ جدید اسلاگِ
-   پیش‌فرض («۱») را می‌گرفت و روی فروشگاهِ قبلی می‌نوشت (آن را حذف می‌کرد). */
+/* یک اسلاگ یکتا برای یک فروشگاه تازه — نه با پروفایل‌های موجود تصادم می‌کند
+   نه با idهای رزروشده‌ی فروشگاه‌های نمونه. بدون این، هر فروشگاه جدید اسلاگ
+   پیش‌فرض («۱») را می‌گرفت و روی فروشگاه قبلی می‌نوشت (آن را حذف می‌کرد). */
 export function newSellerSlug(): string {
   const taken = new Set([...Object.keys(getSellerProfiles()), ...RESERVED_SLUGS])
   let n = 7
@@ -164,8 +164,8 @@ export function newSellerSlug(): string {
 export function saveSellerProfile(p: SellerProfile) {
   if (typeof window === 'undefined') return
   const all = getSellerProfiles()
-  /* dedupe مالک — مثل بقیه‌ی storeها: هر مالک فقط یک فروشگاه (رکوردِ سرگردانِ
-     قبلی با اسلاگِ متفاوت حذف می‌شود تا دوتایی نشود) */
+  /* dedupe مالک — مثل بقیه‌ی storeها: هر مالک فقط یک فروشگاه (رکورد سرگردان
+     قبلی با اسلاگ متفاوت حذف می‌شود تا دوتایی نشود) */
   const ownerKeys = [p.ownerId, p.ownerPhone].filter(Boolean) as string[]
   if (ownerKeys.length) {
     for (const slug of Object.keys(all)) {
@@ -192,7 +192,7 @@ export function updateSellerProfile(slug: string, patch: Partial<SellerProfile>)
 }
 
 /* ── فشرده‌سازی عکس ─────────────────────────────────────────────
-   بدون این، چند عکسِ گوشی سهمیه‌ی localStorage را پر می‌کند و
+   بدون این، چند عکس گوشی سهمیه‌ی localStorage را پر می‌کند و
    saveSellerProfile با QuotaExceededError می‌افتد. */
 export function compressImage(file: File, maxDim = 1280, quality = 0.72): Promise<string> {
   return new Promise((resolve, reject) => {

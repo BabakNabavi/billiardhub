@@ -8,9 +8,9 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
 /* آیا این شماره از قبل حساب دارد؟
-   پیش از ارسالِ پیامک بررسی می‌شود تا برای شماره‌ی تکراری هزینه‌ی پیامک
+   پیش از ارسال پیامک بررسی می‌شود تا برای شماره‌ی تکراری هزینه‌ی پیامک
    ایجاد نشود. خطای دیتابیس نباید ثبت‌نام را ببندد ⇒ در آن حالت مثل
-   «وجود ندارد» رفتار می‌کنیم و مرحله‌ی ساختِ حساب خودش تکراری بودن را می‌گیرد. */
+   «وجود ندارد» رفتار می‌کنیم و مرحله‌ی ساخت حساب خودش تکراری بودن را می‌گیرد. */
 async function phoneTaken(mobile: string): Promise<boolean> {
   try {
     const { data, error } = await getSupabaseServer()
@@ -20,14 +20,14 @@ async function phoneTaken(mobile: string): Promise<boolean> {
   } catch { return false }
 }
 
-/* POST { action:'send', mobile, purpose? }  → ارسالِ کدِ پیامکی
-   POST { action:'verify', mobile, code }    → تأییدِ کد */
+/* POST { action:'send', mobile, purpose? }  → ارسال کد پیامکی
+   POST { action:'verify', mobile, code }    → تأیید کد */
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}))
   const mobile = String(b?.mobile || '')
 
   if (b?.action === 'verify') {
-    /* سطلِ جدا از ارسال: حدسِ کد نباید با گرفتنِ کدِ تازه ریست شود */
+    /* سطل جدا از ارسال: حدس کد نباید با گرفتن کد تازه ریست شود */
     const rl = await hitRateLimit(req, RULES.otpVerify, mobile)
     if (!rl.ok) return tooMany(rl.retryAfterSec)
 
@@ -35,11 +35,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(r, { status: r.ok ? 200 : 400, headers: CORS })
   }
 
-  /* ارسالِ کد — سطلِ مستقل */
+  /* ارسال کد — سطل مستقل */
   const rlSend = await hitRateLimit(req, RULES.otpSend, mobile)
   if (!rlSend.ok) return tooMany(rlSend.retryAfterSec)
 
-  /* فقط در مسیرِ ثبت‌نام: شماره‌ی تکراری ⇒ اصلاً پیامکی فرستاده نمی‌شود */
+  /* فقط در مسیر ثبت‌نام: شماره‌ی تکراری ⇒ اصلاً پیامکی فرستاده نمی‌شود */
   if (b?.purpose === 'register' && /^09\d{9}$/.test(mobile) && await phoneTaken(mobile)) {
     return NextResponse.json({
       ok: false, exists: true,

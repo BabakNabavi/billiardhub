@@ -3,22 +3,22 @@ import { getSupabaseServer } from './supabase-server'
 import type { RealClub, RealProduct, RealStore, HomeFeatured } from './home-types'
 
 /* ─────────────────────────────────────────────────────────────
-   پشتوانه‌ی سه سکشنِ صفحه‌ی اصلی — خوانده‌شده روی سرور.
+   پشتوانه‌ی سه سکشن صفحه‌ی اصلی — خوانده‌شده روی سرور.
 
    چرا سرور و نه کلاینت: `app/page.tsx` عمداً وجود دارد تا این سه
-   سکشن در HTMLِ اولیه باشند (خزنده‌ها و رندرِ اول). وقتی این داده را
+   سکشن در HTML اولیه باشند (خزنده‌ها و رندر اول). وقتی این داده را
    با useEffect در مرورگر گرفتم، کارت‌ها از HTML بیرون افتادند و همان
    مشکلی که آن لایه حل کرده بود برگشت.
 
-   کلاینت همچنان خودش هم می‌خواند؛ این فقط مقدارِ اولیه است.
+   کلاینت همچنان خودش هم می‌خواند؛ این فقط مقدار اولیه است.
    ───────────────────────────────────────────────────────────── */
 
 const FEATURED_CLUBS_MAX = 8
 const FEATURED_PRODUCTS_MAX = 14
 const FEATURED_STORES_MAX = 12
 
-/* عکسِ عمومیِ بیلیارد وقتی موجودیت عکس ندارد — نه عکسِ یک باشگاهِ
-   دیگر که القا کند مالِ همین باشگاه است */
+/* عکس عمومی بیلیارد وقتی موجودیت عکس ندارد — نه عکس یک باشگاه
+   دیگر که القا کند مال همین باشگاه است */
 const CLUB_IMG = [
   '/images/clubs/club6.jpeg', '/images/clubs/club7.jpeg', '/images/clubs/club8.jpg',
   '/images/clubs/club9.jpeg', '/images/clubs/club5.jpeg', '/images/clubs/club4.png',
@@ -36,7 +36,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
     sb.from('products')
       .select('id,title,brand,category,images,price,discountPrice,discountPercent')
       .eq('status', 'active').order('createdAt', { ascending: false }).limit(FEATURED_PRODUCTS_MAX),
-    /* «فروشگاه» جدولِ جدا ندارد — کاربرِ با نقشِ seller است،
+    /* «فروشگاه» جدول جدا ندارد — کاربر با نقش seller است،
        دقیقاً همان چیزی که /api/sellers هم می‌خواند. */
     sb.from('users')
       .select('id,firstName,lastName,avatar,sellerProfile')
@@ -62,7 +62,7 @@ export async function loadHomeFeatured(): Promise<HomeFeatured> {
 
   const n = (v: number | null | undefined) => v ?? 0
 
-  /* امتیاز و تعدادِ نظر صفر می‌ماند تا سیستمِ نظر واقعاً وجود داشته باشد؛
+  /* امتیاز و تعداد نظر صفر می‌ماند تا سیستم نظر واقعاً وجود داشته باشد؛
      کارت خودش صفر را نمایش نمی‌دهد. */
   const clubs: RealClub[] = rows<C>(clubsRes).map((c, i) => ({
     id: c.id,

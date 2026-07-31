@@ -1,6 +1,6 @@
 'use client'
 
-/* دراپ‌داونِ اختصاصی — روی دسکتاپ پاپ‌آور، روی موبایل شیتِ پایین‌کشویی.
+/* دراپ‌داون اختصاصی — روی دسکتاپ پاپ‌آور، روی موبایل شیت پایین‌کشویی.
    جایگزین <select> نیتیو که روی موبایل زشت و غیرقابل استایل است. */
 
 import { useEffect, useRef, useState } from 'react'
@@ -43,7 +43,7 @@ export default function SelectField({
     return () => { window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place) }
   }, [open, mobile])
 
-  /* بازبودنِ شیتِ موبایل نباید صفحه را اسکرول کند */
+  /* بازبودن شیت موبایل نباید صفحه را اسکرول کند */
   useEffect(() => {
     if (!open || !mobile) return
     const prev = document.body.style.overflow
@@ -95,7 +95,7 @@ export default function SelectField({
 
       {open && typeof document !== 'undefined' && createPortal(
         mobile ? (
-          /* ── شیتِ موبایل ── */
+          /* ── شیت موبایل ── */
           <div onClick={() => setOpen(false)} dir="rtl"
             style={{ position: 'fixed', inset: 0, zIndex: 4000, background: 'rgba(20,18,14,0.45)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', animation: 'sfFade .2s ease' }}>
             <div onClick={e => e.stopPropagation()}
@@ -112,7 +112,7 @@ export default function SelectField({
             </div>
           </div>
         ) : (
-          /* ── پاپ‌آورِ دسکتاپ ── */
+          /* ── پاپ‌آور دسکتاپ ── */
           <>
             <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 3999 }} />
             <div dir="rtl" style={{

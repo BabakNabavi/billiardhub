@@ -1,23 +1,23 @@
 'use client'
 
-/* پلِ نشست — دو کار می‌کند:
+/* پل نشست — دو کار می‌کند:
 
-   ۱) مهاجرتِ بی‌صدا: کاربرانی که توکنشان در localStorage است، بدونِ
-      اینکه چیزی ببینند به نشستِ کوکی‌محور منتقل می‌شوند.
+   ۱) مهاجرت بی‌صدا: کاربرانی که توکنشان در localStorage است، بدون
+      اینکه چیزی ببینند به نشست کوکی‌محور منتقل می‌شوند.
 
-   ۲) تازه‌سازیِ توکنِ دسترسی: کوکیِ access فقط ۱۵ دقیقه عمر دارد، پس
+   ۲) تازه‌سازی توکن دسترسی: کوکی access فقط ۱۵ دقیقه عمر دارد، پس
       باید پیش از انقضا تمدید شود؛ وگرنه کاربری که نیم‌ساعت روی سایت
-      بماند ناگهان ۴۰۱ می‌گیرد. چون بیشترِ فراخوان‌ها fetchِ ساده‌اند و
+      بماند ناگهان ۴۰۱ می‌گیرد. چون بیشتر فراخوان‌ها fetch ساده‌اند و
       اینترسپتور ندارند، تمدید را «پیش‌دستانه» انجام می‌دهیم نه واکنشی.
 
-   این کامپوننت پس از پایانِ دوره‌ی گذار ساده‌تر می‌شود (بخشِ adopt حذف). */
+   این کامپوننت پس از پایان دوره‌ی گذار ساده‌تر می‌شود (بخش adopt حذف). */
 
 import { useEffect } from 'react'
 import { useAuthStore } from '../../store/auth.store'
 
 const DONE_KEY = 'bh_session_migrated'
 const REFRESH_EVERY_MS = 12 * 60 * 1000   // کوکی ۱۵ دقیقه‌ای، با حاشیه‌ی امن
-const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمدیدِ پشتِ‌هم
+const MIN_GAP_MS = 4 * 60 * 1000          // برای جلوگیری از تمدید پشت‌هم
 
 const readRaw = () => { try { return localStorage.getItem('auth-storage') } catch { return null } }
 const legacyToken = (): string | null => {
@@ -51,8 +51,8 @@ export default function SessionBridge() {
 
         if (r.ok) {
           localStorage.setItem(DONE_KEY, String(Date.now()))
-          /* توکن از localStorage برداشته می‌شود؛ خودِ کاربر (نام/نقش)
-             برای نمایش می‌ماند. از این پس کوکی منبعِ حقیقت است. */
+          /* توکن از localStorage برداشته می‌شود؛ خود کاربر (نام/نقش)
+             برای نمایش می‌ماند. از این پس کوکی منبع حقیقت است. */
           try {
             const parsed = JSON.parse(readRaw() || '{}')
             if (parsed?.state) {
@@ -75,8 +75,8 @@ export default function SessionBridge() {
         const r = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
         if (stopped || r.ok || r.status === 503) return
         if (r.status === 401) {
-          /* اگر هنوز توکنِ قدیمی داریم، هدر کار می‌کند و نباید کاربر را
-             بیرون بیندازیم. در غیرِ این صورت نشست واقعاً تمام شده است. */
+          /* اگر هنوز توکن قدیمی داریم، هدر کار می‌کند و نباید کاربر را
+             بیرون بیندازیم. در غیر این صورت نشست واقعاً تمام شده است. */
           if (legacyToken()) return
           logout()
           try { localStorage.removeItem(DONE_KEY) } catch { /* ignore */ }

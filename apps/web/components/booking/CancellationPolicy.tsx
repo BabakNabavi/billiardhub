@@ -1,8 +1,8 @@
 'use client'
 
-/* جدولِ قوانینِ لغو رزرو — یک کامپوننت برای همه‌ی صفحه‌ها.
+/* جدول قوانین لغو رزرو — یک کامپوننت برای همه‌ی صفحه‌ها.
    متن و درصدها از lib/finance/cancellation.ts می‌آید تا نمایش و
-   محاسبه‌ی واقعیِ بازپرداخت هیچ‌وقت از هم جدا نشوند. */
+   محاسبه‌ی واقعی بازپرداخت هیچ‌وقت از هم جدا نشوند. */
 
 import { CANCELLATION_POLICY, CANCELLATION_TITLE, BOOKING_TITLE, BOOKING_RULES } from '../../lib/finance/cancellation'
 import { toFaDigits } from '../../lib/jalali'
@@ -51,7 +51,7 @@ export default function CancellationPolicy({ compact = false }: { compact?: bool
         ))}
       </div>
 
-      {/* قوانینِ عمومیِ رزرو — کاربر باید هر دو دسته را پیش از پرداخت دیده باشد */}
+      {/* قوانین عمومی رزرو — کاربر باید هر دو دسته را پیش از پرداخت دیده باشد */}
       {!compact && (
         <>
           <div style={{

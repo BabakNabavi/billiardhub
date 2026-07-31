@@ -4,7 +4,7 @@ import { listStoryPlans } from '@/lib/stories/plans';
 import { getSetting, normalizeFreeQuota } from '@/lib/ads/quota';
 import { DEFAULT_STORY_QUOTA } from '@/lib/stories/quota';
 
-/* بسته‌های استوریِ قابلِ خرید — فقط بسته‌های فعال */
+/* بسته‌های استوری قابل خرید — فقط بسته‌های فعال */
 export async function GET() {
   try {
     const [plans, quotaEnabled, free] = await Promise.all([

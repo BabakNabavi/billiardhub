@@ -1,25 +1,25 @@
 /* ─────────────────────────────────────────────────────────────
-   دایرکتِ استوری (نمونه‌ی سمت‌کلاینت — localStorage).
-   وقتی کسی به استوریِ یک صاحب‌استوری ریپلای یا استیکر می‌فرستد،
-   اینجا زیرِ ownerKey همان استوری ذخیره می‌شود تا صاحبِ استوری
-   بعداً در «دایرکت» ببیند. مثل دایرکتِ اینستاگرام برای پاسخِ استوری.
+   دایرکت استوری (نمونه‌ی سمت‌کلاینت — localStorage).
+   وقتی کسی به استوری یک صاحب‌استوری ریپلای یا استیکر می‌فرستد،
+   اینجا زیر ownerKey همان استوری ذخیره می‌شود تا صاحب استوری
+   بعداً در «دایرکت» ببیند. مثل دایرکت اینستاگرام برای پاسخ استوری.
    ───────────────────────────────────────────────────────────── */
 
 export interface StoryReply {
   id: string
-  ownerKey: string        // گیرنده = صاحبِ استوری
+  ownerKey: string        // گیرنده = صاحب استوری
   storyId: string
   fromName: string
-  fromRole?: string       // برچسبِ نقشِ فرستنده (اختیاری)
+  fromRole?: string       // برچسب نقش فرستنده (اختیاری)
   kind: 'text' | 'reaction'
-  text: string            // متنِ پیام یا ایموجیِ استیکر
-  caption?: string        // کپشنِ همان استوری (برای نمایشِ زمینه)
+  text: string            // متن پیام یا ایموجی استیکر
+  caption?: string        // کپشن همان استوری (برای نمایش زمینه)
   at: number              // epoch ms
   read: boolean
 }
 
 const KEY = 'bh_story_inbox'
-const MAX = 300            // سقفِ ذخیره تا از quota نگذرد
+const MAX = 300            // سقف ذخیره تا از quota نگذرد
 
 function readAll(): StoryReply[] {
   if (typeof window === 'undefined') return []
@@ -29,7 +29,7 @@ function writeAll(list: StoryReply[]) {
   try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX))) } catch { /* quota */ }
 }
 
-/* ثبتِ یک ریپلای/استیکر برای صاحبِ استوری. */
+/* ثبت یک ریپلای/استیکر برای صاحب استوری. */
 export function addStoryReply(r: Omit<StoryReply, 'id' | 'at' | 'read'>) {
   if (!r.ownerKey || !r.text.trim()) return
   const all = readAll()
@@ -57,7 +57,7 @@ export function markInboxRead(ownerKey: string) {
   if (changed) writeAll(all)
 }
 
-/* حذفِ یک پیام. */
+/* حذف یک پیام. */
 export function removeReply(id: string) {
   writeAll(readAll().filter(r => r.id !== id))
 }

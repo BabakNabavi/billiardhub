@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-/* متادیتای این بخش. خودِ صفحه Client Component است و نمی‌تواند
+/* متادیتای این بخش. خود صفحه Client Component است و نمی‌تواند
    metadata صادر کند، پس این لایه فقط برای SEO اضافه شده و
    چیزی جز children رندر نمی‌کند. */
 export const metadata: Metadata = {

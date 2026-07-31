@@ -29,8 +29,8 @@ export interface CoachProfile {
   verified: boolean                     // blue check (admin grants — only with certificate)
   freeCoach: boolean                    // «مربی آزاد» (no certificate)
   submittedAt: string
-  ownerId: string                       // کلیدِ مالکیت = user.id (همیشه موجود؛ phone اختیاری است)
-  ownerPhone: string                    // شماره‌ی مالک — فقط fallbackِ رکوردهای قدیمی
+  ownerId: string                       // کلید مالکیت = user.id (همیشه موجود؛ phone اختیاری است)
+  ownerPhone: string                    // شماره‌ی مالک — فقط fallback رکوردهای قدیمی
 }
 
 /* Coaching grades — ordered from the first (entry) certificate upward. */
@@ -103,7 +103,7 @@ export function updateCoachProfile(slug: string, patch: Partial<CoachProfile>) {
   localStorage.setItem(KEY, JSON.stringify(all))
 }
 
-/* «پروفایلِ من» — مبنا user.id (همیشه موجود)؛ شماره fallbackِ رکوردهای قدیمی است.
+/* «پروفایل من» — مبنا user.id (همیشه موجود)؛ شماره fallback رکوردهای قدیمی است.
    بدون این، پروفایلی که با شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد. */
 export function findCoachByOwner(
   owner: string | { id?: string; phone?: string } | null | undefined,
@@ -116,7 +116,7 @@ export function findCoachByOwner(
   ) ?? null
 }
 
-/* رکوردِ قدیمیِ بی‌صاحب (بدونِ ownerId و ownerPhone) — امن برای تصاحبِ کاربرِ فعلی. */
+/* رکورد قدیمی بی‌صاحب (بدون ownerId و ownerPhone) — امن برای تصاحب کاربر فعلی. */
 export function findUnclaimedCoach(): CoachProfile | null {
   return listCoachProfiles().find(p => !p.ownerId && !p.ownerPhone) ?? null
 }

@@ -31,12 +31,12 @@ interface Club {
   verificationStatus?: string;
 }
 
-/* قالبِ خالی — فقط برای اینکه state پیش از رسیدنِ پاسخ تایپِ درست
-   داشته باشد. هیچ مقدارِ هویتی ندارد.
+/* قالب خالی — فقط برای اینکه state پیش از رسیدن پاسخ تایپ درست
+   داشته باشد. هیچ مقدار هویتی ندارد.
 
-   پیش‌تر این یک باشگاهِ کاملِ ساختگی بود («باشگاه سنچوری تهران» با
-   تلفن، نشانی و وب‌سایتِ جعلی) و هر بار که درخواست شکست می‌خورد یا
-   شناسه اشتباه بود، همان به‌عنوانِ باشگاهِ واقعی نمایش داده می‌شد. */
+   پیش‌تر این یک باشگاه کامل ساختگی بود («باشگاه سنچوری تهران» با
+   تلفن، نشانی و وب‌سایت جعلی) و هر بار که درخواست شکست می‌خورد یا
+   شناسه اشتباه بود، همان به‌عنوان باشگاه واقعی نمایش داده می‌شد. */
 const sampleClub: Club = {
   id: '', name: '', managerName: '', description: '',
   address: '', city: '', country: 'ایران',
@@ -126,14 +126,14 @@ export default function ClubProfilePage() {
   const [tournAlbums, setTournAlbums] = useState<TournAlbum[]>([]);
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
 
-  /* مسابقاتِ این باشگاه — `null` یعنی هنوز نیامده، `[]` یعنی واقعاً هیچ */
+  /* مسابقات این باشگاه — `null` یعنی هنوز نیامده، `[]` یعنی واقعاً هیچ */
   const [clubTournaments, setClubTournaments] = useState<Tournament[] | null>(null);
   useEffect(() => {
     if (!id) return;
     void (async () => setClubTournaments(await fetchTournaments(id)))();
   }, [id]);
 
-  /* آلبومِ عکسِ مسابقات — بر پایه‌ی همان مسابقاتِ واقعی، نه اسکنِ کورِ
+  /* آلبوم عکس مسابقات — بر پایه‌ی همان مسابقات واقعی، نه اسکن کور
      کلیدهای `tournament-album-t1..t20` که فقط با شناسه‌های نمونه جور بود. */
   useEffect(() => {
     if (!clubTournaments) return;
@@ -198,9 +198,9 @@ export default function ClubProfilePage() {
 
   const isOwner = !!(user?.primaryRole === 'admin' || user?.primaryRole === 'club_owner');
 
-  /* اگر باشگاه نیامد باید همان را بگوییم. پیش‌تر state با یک باشگاهِ
-     ساختگی مقداردهی شده بود، پس شکستِ درخواست یا شناسه‌ی اشتباه به
-     نمایشِ «باشگاه سنچوری تهران» با تلفن و نشانیِ جعلی ختم می‌شد. */
+  /* اگر باشگاه نیامد باید همان را بگوییم. پیش‌تر state با یک باشگاه
+     ساختگی مقداردهی شده بود، پس شکست درخواست یا شناسه‌ی اشتباه به
+     نمایش «باشگاه سنچوری تهران» با تلفن و نشانی جعلی ختم می‌شد. */
   useEffect(() => {
     api.get(`/clubs/${id}`)
       .then(r => { if (r.data?.id) setClub(r.data); else setNotFound(true); })
@@ -418,7 +418,7 @@ export default function ClubProfilePage() {
               {/* Main column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                {/* امتیاز و نظرها — پیش‌تر امتیاز فقط عددِ ثابتی بود که
+                {/* امتیاز و نظرها — پیش‌تر امتیاز فقط عدد ثابتی بود که
                     هیچ‌کس نمی‌توانست ثبتش کند */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                   <ClubReviews clubId={id} />
@@ -713,12 +713,12 @@ export default function ClubProfilePage() {
 
           {/* ── #8: TOURNAMENTS TAB ── */}
           {tab === 'tournaments' && (() => {
-            /* مسابقاتِ واقعیِ همین باشگاه از سرور — پیش‌تر از آرایه‌ی
-               نمونه فیلتر می‌شد و باشگاه‌های واقعی همیشه فهرستِ خالی
+            /* مسابقات واقعی همین باشگاه از سرور — پیش‌تر از آرایه‌ی
+               نمونه فیلتر می‌شد و باشگاه‌های واقعی همیشه فهرست خالی
                می‌دیدند، مگر نامشان اتفاقاً با یکی از نمونه‌ها یکی بود. */
             if (clubTournaments === null) return (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(0,0,0,0.35)' }}>
-                در حال دریافتِ مسابقات…
+                در حال دریافت مسابقات…
               </div>
             );
             if (clubTournaments.length === 0) return (
@@ -726,7 +726,7 @@ export default function ClubProfilePage() {
                 <Trophy size={32} style={{ color: 'rgba(0,0,0,0.18)', marginBottom: 12 }} />
                 <p style={{ fontSize: 16, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>هنوز مسابقه‌ای برگزار نشده</p>
                 <p style={{ fontSize: 13.5, color: 'rgba(0,0,0,0.42)', margin: '0 0 18px', lineHeight: 2 }}>
-                  مسابقاتِ این باشگاه پس از ثبت توسطِ مدیرِ باشگاه اینجا نمایش داده می‌شود.
+                  مسابقات این باشگاه پس از ثبت توسط مدیر باشگاه اینجا نمایش داده می‌شود.
                 </p>
                 <button onClick={() => router.push('/tournaments')} style={{ padding: '11px 20px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.45)', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <Trophy size={13} /> مشاهده همه مسابقات

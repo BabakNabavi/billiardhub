@@ -1,10 +1,10 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   براکت — سمتِ کلاینت.
+   براکت — سمت کلاینت.
 
    چهار صفحه‌ی bracket / live / results / admin همگی از همین‌جا
-   می‌خوانند تا شکلِ داده و نامِ دورها در همه‌جا یکی باشد.
+   می‌خوانند تا شکل داده و نام دورها در همه‌جا یکی باشد.
    ───────────────────────────────────────────────────────────── */
 
 import { apiFetch } from '../http'
@@ -88,13 +88,13 @@ export const faDigits = (v: string | number) =>
   String(v ?? '').replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]!)
 
 /* «هنوز مشخص نشده» با «بای» فرق دارد و کاربر باید بفهمد کدام است:
-   بای یعنی حریفی وجود ندارد، نامشخص یعنی دورِ قبل هنوز تمام نشده. */
+   بای یعنی حریفی وجود ندارد، نامشخص یعنی دور قبل هنوز تمام نشده. */
 export function slotLabel(match: Match, slot: 1 | 2): string {
   const name = slot === 1 ? match.p1_name : match.p2_name
   if (name) return name
   const other = slot === 1 ? match.p2_name : match.p1_name
-  if (match.round === 1) return other ? 'بای — بدونِ حریف' : '—'
-  return 'در انتظارِ دورِ قبل'
+  if (match.round === 1) return other ? 'بای — بدون حریف' : '—'
+  return 'در انتظار دور قبل'
 }
 
 export const isBye = (m: Match) =>

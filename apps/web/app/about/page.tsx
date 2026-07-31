@@ -2,9 +2,9 @@
 
 /* ─────────────────────────────────────────────────────────────
    درباره ما — تجربه‌ی برندینگ Billiard Hub (بازطراحی ۱۴۰۵)
-   هیروی سینمایی با مسیرِ نورِ توپ → استیتمنتِ تایپوگرافیک →
-   معرفی ادیتوریالِ پلتفرم → کارت رسمی شرکت + مُهرِ برند ثبت‌شده →
-   اکوسیستمِ مداری (دسکتاپ: orbit / موبایل: ستونِ عمودی) → CTA
+   هیروی سینمایی با مسیر نور توپ → استیتمنت تایپوگرافیک →
+   معرفی ادیتوریال پلتفرم → کارت رسمی شرکت + مُهر برند ثبت‌شده →
+   اکوسیستم مداری (دسکتاپ: orbit / موبایل: ستون عمودی) → CTA
    بدون هیچ آمار/تیم/تاریخچه‌ی ساختگی.
    ───────────────────────────────────────────────────────────── */
 
@@ -42,7 +42,7 @@ const ECO_NODES = [
   { label: 'جامعه',      en: 'COMMUNITY',   href: '/coaches',     clr: GOLD         },
 ]
 
-/* ریویلِ اسکرول — IntersectionObserver ساده و سبک */
+/* ریویل اسکرول — IntersectionObserver ساده و سبک */
 function useReveal() {
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.ab-rev'))
@@ -138,7 +138,7 @@ export default function AboutPage() {
           60% { box-shadow: 0 0 0 26px rgba(199,166,106,0), 0 18px 50px rgba(28,27,23,0.25); } }
         .ab-orbit-lines { position: absolute; inset: 0; pointer-events: none; }
 
-        /* موبایل: همان مدار، فشرده — نه لیستِ ساده */
+        /* موبایل: همان مدار، فشرده — نه لیست ساده */
         @media (max-width: 760px) {
           .ab-orbit-stage { width: min(94vw, 390px); }
           .ab-node { width: 78px; margin: -39px; gap: 3px; }
@@ -152,8 +152,8 @@ export default function AboutPage() {
           .ab-node:active .dot { transform: scale(1.12); border-color: var(--nc); }
         }
 
-        /* ── لوگوهای گوشه‌ی کارتِ شرکت — هم‌قد و هم‌تراز ──
-           لوگوی آرتا واژه‌نگاشتِ پهن است؛ ارتفاعش دقیقاً برابرِ لوگوی بیلیارد هاب */
+        /* ── لوگوهای گوشه‌ی کارت شرکت — هم‌قد و هم‌تراز ──
+           لوگوی آرتا واژه‌نگاشت پهن است؛ ارتفاعش دقیقاً برابر لوگوی بیلیارد هاب */
         .ab-clogo { position: absolute; top: 24px; height: 54px; object-fit: contain; }
         .ab-clogo.l { left: 28px; width: auto; max-width: 170px; }
         .ab-clogo.r { right: 28px; width: 54px; border-radius: 13px; border: 1px solid ${LINE}; box-shadow: 0 4px 12px rgba(28,27,23,0.08); }
@@ -164,7 +164,7 @@ export default function AboutPage() {
 
         /* ── مُهر برند ثبت‌شده ── */
         @keyframes abSealSpin { to { transform: rotate(360deg); } }
-        /* origin بر حسبِ مختصاتِ viewBox — با درصد، دورِ مبدأ (0,0) می‌چرخید و متن از کادر بیرون می‌رفت */
+        /* origin بر حسب مختصات viewBox — با درصد، دور مبدأ (0,0) می‌چرخید و متن از کادر بیرون می‌رفت */
         .ab-seal-text { animation: abSealSpin 26s linear infinite; transform-origin: 60px 60px; }
 
         /* ── CTA ── */
@@ -180,9 +180,9 @@ export default function AboutPage() {
         }
       `}</style>
 
-      {/* ═══ HERO — سینمایی با مسیرِ نورِ توپ ═══ */}
+      {/* ═══ HERO — سینمایی با مسیر نور توپ ═══ */}
       <section className="ab-hero">
-        {/* تصویر با پارالاکسِ سبک */}
+        {/* تصویر با پارالاکس سبک */}
         <div aria-hidden style={{ position: 'absolute', inset: '-12% 0', transform: `translateY(${sy * 0.16}px)`, willChange: 'transform' }}>
           <img loading="lazy" decoding="async" src="/images/about/5.png" alt=""
             onError={e => { const el = e.target as HTMLImageElement; el.onerror = null; el.src = '/images/clubs/club1.png' }}
@@ -190,10 +190,10 @@ export default function AboutPage() {
         </div>
         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(11,10,8,0.72) 0%, rgba(11,10,8,0.28) 45%, rgba(11,10,8,0.92) 100%)' }} />
         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 78% 18%, rgba(199,166,106,0.16), transparent 46%)' }} />
-        {/* خطِ موربِ طلایی — امضای برند */}
+        {/* خط مورب طلایی — امضای برند */}
         <div aria-hidden style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
 
-        {/* مسیرِ حرکتِ توپ — خطِ نور + توپ‌های رنگی در نقاطِ برخورد */}
+        {/* مسیر حرکت توپ — خط نور + توپ‌های رنگی در نقاط برخورد */}
         <svg aria-hidden viewBox="0 0 1440 420" preserveAspectRatio="xMidYMid slice"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.9, pointerEvents: 'none' }}>
           <defs>
@@ -211,7 +211,7 @@ export default function AboutPage() {
           <circle cx="700" cy="300" r="6" fill={BALLS.blue}  style={{ animation: 'abGlowPulse 3.4s .6s ease-in-out infinite' }} />
           <circle cx="1030" cy="120" r="7" fill={BALLS.pink} style={{ animation: 'abGlowPulse 3.4s 1.2s ease-in-out infinite' }} />
         </svg>
-        {/* توپِ سفید — روی مسیرِ نور حرکت می‌کند */}
+        {/* توپ سفید — روی مسیر نور حرکت می‌کند */}
         <span aria-hidden className="ab-cue" style={{ position: 'absolute', top: 0, left: 0, width: 15, height: 15, borderRadius: '50%',
           background: 'radial-gradient(circle at 34% 30%, #fff, #cfcbc2 78%)',
           boxShadow: '0 0 16px rgba(255,255,255,0.65), 0 0 40px rgba(199,166,106,0.35)' }} />
@@ -226,7 +226,7 @@ export default function AboutPage() {
           </h1>
           <p style={{ fontSize: 'clamp(13.5px,1.6vw,17px)', color: 'rgba(255,255,255,0.62)', lineHeight: 2.1, margin: '18px 0 0', maxWidth: 520 }}>
             بیلیارد هاب، پلتفرم تخصصی جامعه‌ی بیلیارد — جایی که بازیکنان، باشگاه‌ها،
-            مسابقات و بازارِ تجهیزات در یک خانه‌ی دیجیتال به هم می‌رسند
+            مسابقات و بازار تجهیزات در یک خانه‌ی دیجیتال به هم می‌رسند
           </p>
           <div style={{ width: 64, height: 3, borderRadius: 2, marginTop: 24, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
           <div style={{ marginTop: 'clamp(36px,6vh,64px)', display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 700, letterSpacing: '0.14em' }}>
@@ -236,7 +236,7 @@ export default function AboutPage() {
         <div className="ab-hero-word">BILLIARD HUB</div>
       </section>
 
-      {/* ═══ BRAND STATEMENT — تایپوگرافیکِ بزرگ ═══ */}
+      {/* ═══ BRAND STATEMENT — تایپوگرافیک بزرگ ═══ */}
       <section style={{ position: 'relative', padding: 'clamp(80px,12vw,150px) clamp(20px,4vw,32px)', overflow: 'hidden' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-30%', bottom: '-30%', left: '18%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.3),transparent)', transform: 'rotate(14deg)' }} />
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
@@ -255,24 +255,24 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ═══ ABOUT THE PLATFORM — ادیتوریالِ نامتقارن ═══ */}
+      {/* ═══ ABOUT THE PLATFORM — ادیتوریال نامتقارن ═══ */}
       <section style={{ background: '#fff', borderTop: `1px solid ${LINE}`, borderBottom: `1px solid ${LINE}`, padding: 'clamp(64px,9vw,120px) clamp(20px,4vw,32px)' }}>
         <div className="ab-plat-grid" style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,5fr) minmax(0,7fr)', gap: 'clamp(28px,6vw,90px)', alignItems: 'start' }}>
           <div className="ab-rev">
             <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>THE PLATFORM</span>
             <h2 style={{ fontSize: 'clamp(22px,3vw,34px)', fontWeight: 900, lineHeight: 1.5, margin: '14px 0 0' }}>
-              پلتفرم تخصصیِ<br />جامعه‌ی بیلیارد
+              پلتفرم تخصصی<br />جامعه‌ی بیلیارد
             </h2>
             <div style={{ width: 52, height: 3, borderRadius: 2, marginTop: 16, background: `linear-gradient(90deg,${GOLD},#8A6020)` }} />
             <p style={{ fontSize: 14.5, color: SEC, lineHeight: 2.2, margin: '18px 0 0' }}>
-              فضایی برای جستجو، ارتباط و تجربه‌ی بهترِ دنیای اسنوکر و پاکت بیلیارد
+              فضایی برای جستجو، ارتباط و تجربه‌ی بهتر دنیای اسنوکر و پاکت بیلیارد
             </p>
           </div>
           <div>
             {[
               { t: 'جستجو',  d: 'باشگاه‌ها، مربیان، بازیکنان و رویدادهای دنیای بیلیارد — همه در یک‌جا و در دسترس', c: BALLS.red,   en: 'SEARCH' },
               { t: 'ارتباط', d: 'شبکه‌ای که بازیکن، باشگاه، مربی و فروشنده را بی‌واسطه به هم وصل می‌کند',            c: BALLS.blue,  en: 'CONNECT'  },
-              { t: 'تجربه',  d: 'از رزرو میز و رنکینگ رسمی تا بازارِ تجهیزات — یک تجربه‌ی یکپارچه و مدرن',           c: BALLS.green, en: 'EXPERIENCE' },
+              { t: 'تجربه',  d: 'از رزرو میز و رنکینگ رسمی تا بازار تجهیزات — یک تجربه‌ی یکپارچه و مدرن',           c: BALLS.green, en: 'EXPERIENCE' },
             ].map((f, i) => (
               <div key={f.t} className={`ab-rev d${i + 1}`} style={{ display: 'flex', gap: 18, padding: '22px 0', borderBottom: i < 2 ? `1px solid ${LINE}` : 'none', alignItems: 'flex-start' }}>
                 <span style={{ width: 15, height: 15, borderRadius: '50%', flexShrink: 0, marginTop: 6, background: f.c, boxShadow: 'inset 0 -2px 3px rgba(0,0,0,0.28), inset 0 2px 2px rgba(255,255,255,0.5)' }} />
@@ -304,7 +304,7 @@ export default function AboutPage() {
           <img loading="lazy" decoding="async" className="ab-clogo r" src="/images/Logo/logo-256x256.webp" alt="بیلیارد هاب" />
           <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>COMPANY &amp; BRAND</span>
 
-          {/* مُهرِ برندِ ثبت‌شده — متنِ چرخانِ آهسته */}
+          {/* مُهر برند ثبت‌شده — متن چرخان آهسته */}
           <div style={{ margin: '26px auto 22px', width: 120, height: 120 }}>
             <svg viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="برند ثبت‌شده">
               <defs>
@@ -312,7 +312,7 @@ export default function AboutPage() {
               </defs>
               <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(199,166,106,0.35)" strokeWidth="1" />
               <circle cx="60" cy="60" r="33" fill="none" stroke="rgba(199,166,106,0.5)" strokeWidth="1" />
-              {/* direction:ltr لازم است — در سندِ RTL متنِ روی مسیر رندر نمی‌شد */}
+              {/* direction:ltr لازم است — در سند RTL متن روی مسیر رندر نمی‌شد */}
               <g className="ab-seal-text">
                 <text direction="ltr" style={{ fontSize: 8.2, fontWeight: 700, letterSpacing: '0.2em', fill: GOLD_D, direction: 'ltr' }}>
                   <textPath href="#abSealPath">REGISTERED BRAND · BILLIARD HUB · REGISTERED BRAND ·</textPath>
@@ -334,14 +334,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ═══ ECOSYSTEM — هابِ مداری ═══ */}
+      {/* ═══ ECOSYSTEM — هاب مداری ═══ */}
       <section style={{ background: '#fff', borderTop: `1px solid ${LINE}`, borderBottom: `1px solid ${LINE}`, padding: 'clamp(64px,9vw,120px) clamp(20px,4vw,32px)', position: 'relative', overflow: 'hidden' }}>
         <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(28,27,23,0.03) 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1080, margin: '0 auto', position: 'relative' }}>
           <div className="ab-rev" style={{ textAlign: 'center', marginBottom: 'clamp(36px,6vw,64px)' }}>
             <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>ONE ECOSYSTEM</span>
             <h2 style={{ fontSize: 'clamp(22px,3.4vw,38px)', fontWeight: 900, margin: '12px 0 0' }}>
-              همه‌ی دنیای بیلیارد، <span style={{ color: GOLD_D }}>گِردِ یک هاب</span>
+              همه‌ی دنیای بیلیارد، <span style={{ color: GOLD_D }}>گرد یک هاب</span>
             </h2>
           </div>
 
@@ -358,7 +358,7 @@ export default function AboutPage() {
             </svg>
             {ECO_NODES.map((n, i) => {
               const a = (i / ECO_NODES.length) * Math.PI * 2 - Math.PI / 2
-              /* موقعیتِ درصدی روی شعاعِ ۴۰٪ — با هر سایزِ استیج دقیق می‌ماند */
+              /* موقعیت درصدی روی شعاع ۴۰٪ — با هر سایز استیج دقیق می‌ماند */
               const x = 50 + Math.cos(a) * 40, y = 50 + Math.sin(a) * 40
               return (
                 <Link key={n.en} href={n.href} className="ab-node"

@@ -5,8 +5,8 @@ import { sb, rpc } from '@/lib/finance/db';
 /* ساعت‌های آزاد/اشغال یک میز در یک روز.
    ۱) ابتدا رزروهای پرداخت‌نشده‌ی منقضی آزاد می‌شوند (انقضای تنبل، دقیقاً در
       لحظه‌ای که کاربر ساعت‌ها را می‌بیند) تا هیچ ساعتی الکی قفل نماند.
-   ۲) منبعِ اشغال، جدولِ booking_slots است (همان که یکتاییِ ضدِ دابل‌بوکینگ دارد)
-      و در صورتِ نبودِ آن، به روشِ قدیمیِ timeSlots برمی‌گردیم. */
+   ۲) منبع اشغال، جدول booking_slots است (همان که یکتایی ضد دابل‌بوکینگ دارد)
+      و در صورت نبود آن، به روش قدیمی timeSlots برمی‌گردیم. */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const clubId  = searchParams.get('clubId');
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: 'clubId، tableId و date الزامی هستند' }, { status: 400 });
   }
 
-  /* آزادسازیِ رزروهای منقضی — خطایش نباید نمایشِ ساعت‌ها را متوقف کند */
+  /* آزادسازی رزروهای منقضی — خطایش نباید نمایش ساعت‌ها را متوقف کند */
   await rpc('bh_expire_bookings', {}).catch(() => null);
 
   const bookedHours = new Set<number>();

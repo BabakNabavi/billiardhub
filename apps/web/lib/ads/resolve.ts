@@ -1,11 +1,11 @@
 /* ─────────────────────────────────────────────────────────────
-   تبدیلِ ارجاعِ موجودیت به اسنپ‌شاتِ قابلِ نمایش.
+   تبدیل ارجاع موجودیت به اسنپ‌شات قابل نمایش.
 
    کمپین‌های «موجودیتی» فقط ref نگه می‌دارند (شناسه‌ی محصول/باشگاه/
-   نامکِ فروشگاه). سمتِ سرور همین‌جا به داده‌ی کارتِ سبک تبدیل می‌شود
+   نامک فروشگاه). سمت سرور همین‌جا به داده‌ی کارت سبک تبدیل می‌شود
    تا کلاینت نه join بزند و نه به اسکیمای جدول‌ها وابسته شود.
 
-   موجودیتی که پیدا نشود (حذف‌شده) بی‌صدا کنار گذاشته می‌شود — کمپینِ
+   موجودیتی که پیدا نشود (حذف‌شده) بی‌صدا کنار گذاشته می‌شود — کمپین
    یتیم نباید سکشن را بشکند.
    ───────────────────────────────────────────────────────────── */
 
@@ -24,7 +24,7 @@ export interface EntitySnapshot {
   discountPercent?: number
   city?: string
   badge?: string | null
-  /** آمارِ واقعیِ موجودیت — نبودنش یعنی «نداریم»، نه صفر */
+  /** آمار واقعی موجودیت — نبودنش یعنی «نداریم»، نه صفر */
   stats?: { tables?: number; snooker?: number; pocket?: number; highball?: number }
 }
 
@@ -34,7 +34,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySnapshot>> {
   const out = new Map<string, EntitySnapshot>()
-  /* یک refِ غیر-uuid کوئریِ in() را با 22P02 می‌شکست و «همه‌ی» کمپین‌های
+  /* یک ref غیر-uuid کوئری in() را با 22P02 می‌شکست و «همه‌ی» کمپین‌های
      جایگاه بی‌صدا ناپدید می‌شدند */
   const refs = rawRefs.filter(x => UUID.test(x))
   if (!refs.length) return out
@@ -53,7 +53,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
-      /* تخفیفِ ۱۰۰٪ تقسیم بر صفر می‌شد و قیمتِ خط‌خورده Infinity می‌داد */
+      /* تخفیف ۱۰۰٪ تقسیم بر صفر می‌شد و قیمت خط‌خورده Infinity می‌داد */
       oldPrice: disc > 0 && disc < 100 ? Math.round(price / (1 - disc / 100)) : price,
       discountPercent: disc,
       city: s(r.city),
@@ -108,7 +108,7 @@ async function resolveSellers(refs: string[]): Promise<Map<string, EntitySnapsho
   return out
 }
 
-/** یک دسته ارجاعِ هم‌نوع → اسنپ‌شات‌ها، با حفظِ ترتیبِ ورودی */
+/** یک دسته ارجاع هم‌نوع → اسنپ‌شات‌ها، با حفظ ترتیب ورودی */
 export async function resolveEntities(entityType: EntityType, refs: string[]): Promise<EntitySnapshot[]> {
   const map = entityType === 'product' ? await resolveProducts(refs)
     : entityType === 'club' ? await resolveClubs(refs)

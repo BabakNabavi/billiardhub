@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
 import { PROFILE_KINDS, listProfiles, reviewProfile, type ProfileKind } from '@/lib/profiles/server';
 
-/* بررسیِ پروفایل‌ها توسط ادمین — تأیید/رد، تیکِ آبی و تأییدِ جوازِ کسب */
+/* بررسی پروفایل‌ها توسط ادمین — تأیید/رد، تیک آبی و تأیید جواز کسب */
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);

@@ -1,10 +1,10 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پنل بازیکن — تکمیلِ پروفایلِ حرفه‌ای.
-   تک‌تکِ فیلدهایی که در صفحه‌ی نمایشِ پروفایل بازیکن دیده می‌شوند
+   پنل بازیکن — تکمیل پروفایل حرفه‌ای.
+   تک‌تک فیلدهایی که در صفحه‌ی نمایش پروفایل بازیکن دیده می‌شوند
    این‌جا از کاربر گرفته می‌شود: هویت، رشته، رنکینگ، پرچم‌ها،
-   باشگاه، تمِ کارت، تصویرِ پس‌زمینه، معرفی/بیوگرافی، شروع فعالیت،
+   باشگاه، تم کارت، تصویر پس‌زمینه، معرفی/بیوگرافی، شروع فعالیت،
    افتخارات (تایم‌لاین)، مسابقات، آلبوم‌ها و برچسب‌ها.
    ───────────────────────────────────────────────────────────── */
 
@@ -33,7 +33,7 @@ const LABEL  = 'mb-1.5 block text-[12.5px] font-bold text-[#5B564B]'
 const rid = () => Math.random().toString(36).slice(2, 9)
 
 const TONE_LABEL: Record<keyof typeof TONES, string> = {
-  felt: 'نمدِ سبز', night: 'شبِ سرمه‌ای', bronze: 'برنزِ طلایی',
+  felt: 'نمد سبز', night: 'شب سرمه‌ای', bronze: 'برنز طلایی',
 }
 
 export default function PlayerDashboard() {
@@ -68,7 +68,7 @@ export default function PlayerDashboard() {
       setForm(base)
       setBioText(base.bio.join('\n\n'))
 
-      /* نسخه‌ی سرور مقدم است؛ پروفایلِ محلیِ قدیمی یک‌بار بالا می‌رود */
+      /* نسخه‌ی سرور مقدم است؛ پروفایل محلی قدیمی یک‌بار بالا می‌رود */
       void (async () => {
         const remote = await fetchMyProfile<PlayerProfile>('player')
         if (!remote) {
@@ -102,7 +102,7 @@ export default function PlayerDashboard() {
   }
 
   const addHighlight = () => {
-    if (!hl.year.trim() || !hl.title.trim()) { setErr('سال و عنوانِ افتخار لازم است.'); return }
+    if (!hl.year.trim() || !hl.title.trim()) { setErr('سال و عنوان افتخار لازم است.'); return }
     const item: PlayerHighlight = { year: hl.year.trim(), title: hl.title.trim() }
     set('highlights', [...form.highlights, item]); setHl({ year: '', title: '' })
   }
@@ -145,14 +145,14 @@ export default function PlayerDashboard() {
       status: 'approved' as const,
     }
 
-    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
-       تا پیش از این فقط localStorage نوشته می‌شد و پنلِ ادمین پروفایل را
+    /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
+       تا پیش از این فقط localStorage نوشته می‌شد و پنل ادمین پروفایل را
        اصلاً نمی‌دید. */
     const res = await saveProfileRemote('player', profile.slug, profile as unknown as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
-    try { savePlayerProfile({ ...profile, ...saved }) } catch { /* کشِ مرورگر پر است */ }
+    try { savePlayerProfile({ ...profile, ...saved }) } catch { /* کش مرورگر پر است */ }
     setForm(f => ({ ...f, ...saved }))
     setSaved(true); setErr('')
   }
@@ -188,7 +188,7 @@ export default function PlayerDashboard() {
 
         <form onSubmit={submit} className="space-y-5">
 
-          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
 
@@ -234,7 +234,7 @@ export default function PlayerDashboard() {
               </div>
               <div>
                 <label className={LABEL}>باشگاه محل تمرین</label>
-                {/* فقط باشگاه‌های ثبت‌شده (همان لیستِ صفحه‌ی /clubs) */}
+                {/* فقط باشگاه‌های ثبت‌شده (همان لیست صفحه‌ی /clubs) */}
                 <Select
                   value={form.clubName} ariaLabel="باشگاه" placeholder="انتخاب باشگاه…"
                   options={[
@@ -265,7 +265,7 @@ export default function PlayerDashboard() {
           {/* ═══ ظاهر کارت ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">ظاهر کارت و پس‌زمینه</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">تمِ رنگیِ کارت و تصویرِ پس‌زمینه‌ی سینماییِ پروفایل شما.</p>
+            <p className="mb-4 text-[12px] text-[#8A8474]">تم رنگی کارت و تصویر پس‌زمینه‌ی سینمایی پروفایل شما.</p>
             <div className="mb-4 flex flex-wrap gap-2">
               {(Object.keys(TONES) as (keyof typeof TONES)[]).map(k => {
                 const t = TONES[k]
@@ -300,7 +300,7 @@ export default function PlayerDashboard() {
             <div className="space-y-4">
               <div>
                 <label className={LABEL}>معرفی کوتاه (یک خط) *</label>
-                <input className={INPUT} value={form.intro} onChange={e => set('intro', e.target.value)} placeholder="مثال: مردِ شماره‌ی یکِ اسنوکر ایران…" />
+                <input className={INPUT} value={form.intro} onChange={e => set('intro', e.target.value)} placeholder="مثال: مرد شماره‌ی یک اسنوکر ایران…" />
               </div>
               <div>
                 <label className={LABEL}>بیوگرافی <span className="font-normal text-[#A69F8E]">— هر پاراگراف با یک خط خالی جدا شود</span></label>

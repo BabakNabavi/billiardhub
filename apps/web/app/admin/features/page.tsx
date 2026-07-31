@@ -4,15 +4,15 @@ import { Power, ShieldCheck, Loader2, Info } from 'lucide-react'
 import { toast } from '../../../components/ui/Toast'
 
 /* ─────────────────────────────────────────────────────────────
-   مدیریتِ Feature Flagها.
+   مدیریت Feature Flagها.
 
    مقدار از `/api/admin/settings` خوانده و همان‌جا نوشته می‌شود — همان
-   مسیری که بقیه‌ی تنظیماتِ پلتفرم از آن می‌گذرند. آن مسیر ادمین‌بودن را
+   مسیری که بقیه‌ی تنظیمات پلتفرم از آن می‌گذرند. آن مسیر ادمین‌بودن را
    از نشست و دیتابیس تأیید می‌کند (نه از هیچ چیزی که کلاینت بفرستد) و هر
    تغییر را در audit ثبت می‌کند.
 
-   این صفحه فقط رابط است: هیچ تصمیمِ امنیتی این‌جا گرفته نمی‌شود. اگر
-   کاربرِ غیرادمین هم به این آدرس برسد، درخواستش با ۴۰۳ برمی‌گردد.
+   این صفحه فقط رابط است: هیچ تصمیم امنیتی این‌جا گرفته نمی‌شود. اگر
+   کاربر غیرادمین هم به این آدرس برسد، درخواستش با ۴۰۳ برمی‌گردد.
    ───────────────────────────────────────────────────────────── */
 
 const GOLD_D = '#9A6E38'
@@ -26,7 +26,7 @@ interface Flag {
   desc: string
   /** چیزهایی که این پرچم خاموششان می‌کند */
   covers: string[]
-  /** چیزهایی که عمداً زیرِ این پرچم نیستند */
+  /** چیزهایی که عمداً زیر این پرچم نیستند */
   unaffected: string[]
 }
 
@@ -66,7 +66,7 @@ export default function AdminFeaturesPage() {
         for (const f of FLAGS) next[f.key] = s[f.key] === true
         setState(next)
       } catch {
-        toast('خواندنِ تنظیمات انجام نشد', 'error')
+        toast('خواندن تنظیمات انجام نشد', 'error')
       } finally {
         setLoading(false)
       }
@@ -99,20 +99,20 @@ export default function AdminFeaturesPage() {
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '22px 18px 60px', direction: 'rtl' }}>
-      {/* دکمه‌ی بازگشت را خودِ app/admin/layout.tsx می‌گذارد — این‌جا تکرار نشود */}
+      {/* دکمه‌ی بازگشت را خود app/admin/layout.tsx می‌گذارد — این‌جا تکرار نشود */}
       <header style={{ margin: '10px 0 22px' }}>
         <h1 style={{ margin: '0 0 6px', fontSize: 19, fontWeight: 900, color: '#111', display: 'flex', alignItems: 'center', gap: 9 }}>
           <ShieldCheck size={20} style={{ color: GOLD_D }} /> قابلیت‌های پلتفرم
         </h1>
         <p style={{ margin: 0, fontSize: 13, lineHeight: 1.9, color: SEC }}>
-          روشن یا خاموش کردنِ قابلیت‌ها بدونِ حذفِ داده. خاموش‌کردن فقط رابط را پنهان نمی‌کند —
+          روشن یا خاموش کردن قابلیت‌ها بدون حذف داده. خاموش‌کردن فقط رابط را پنهان نمی‌کند —
           سرور هم درخواست‌های مربوط را رد می‌کند.
         </p>
       </header>
 
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: 30, color: SEC, fontSize: 13 }}>
-          <Loader2 size={16} className="spin" /> در حالِ خواندن…
+          <Loader2 size={16} className="spin" /> در حال خواندن…
         </div>
       ) : FLAGS.map(f => {
         const on = state[f.key] === true
@@ -148,7 +148,7 @@ export default function AdminFeaturesPage() {
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', marginTop: 16, paddingTop: 15, borderTop: `1px dashed ${LINE}` }}>
               <div>
                 <div style={{ fontSize: 11.5, fontWeight: 800, color: on ? FELT : '#B23B2E', marginBottom: 7 }}>
-                  {on ? 'در حالِ حاضر فعال:' : 'در حالِ حاضر غیرفعال:'}
+                  {on ? 'در حال حاضر فعال:' : 'در حال حاضر غیرفعال:'}
                 </div>
                 <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 5 }}>
                   {f.covers.map(c => (
@@ -172,7 +172,7 @@ export default function AdminFeaturesPage() {
               <Info size={14} style={{ flexShrink: 0, marginTop: 3 }} />
               <span>
                 خاموش‌کردن هیچ داده‌ای را حذف نمی‌کند. گفتگوها، پاسخ‌ها و اعلان‌های قبلی
-                دست‌نخورده می‌مانند و با روشن‌کردنِ دوباره سرِ جای خودشان‌اند.
+                دست‌نخورده می‌مانند و با روشن‌کردن دوباره سر جای خودشان‌اند.
                 تغییر بلافاصله برای همه اعمال می‌شود.
               </span>
             </p>

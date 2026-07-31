@@ -3,23 +3,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 import { sb, isAdmin, audit, clientIp } from '@/lib/finance/db';
 
-/* امتیاز و نظرِ باشگاه.
+/* امتیاز و نظر باشگاه.
 
-   ── ضدِ تقلب، سه لایه ──
+   ── ضد تقلب، سه لایه ──
    ۱) هر کاربر فقط یک نظر برای هر باشگاه (UNIQUE در دیتابیس)
-   ۲) فقط کسی که واقعاً در آن باشگاه رزروِ قطعی داشته
-   ۳) مالکِ باشگاه به باشگاهِ خودش امتیاز نمی‌دهد
+   ۲) فقط کسی که واقعاً در آن باشگاه رزرو قطعی داشته
+   ۳) مالک باشگاه به باشگاه خودش امتیاز نمی‌دهد
 
-   لایه‌ی دوم مهم‌ترین است: بدونِ آن هر حسابِ تازه‌ساخته می‌تواند به
-   رقیب یک‌ستاره بدهد. با آن، هر نظرِ جعلی به یک رزروِ پرداخت‌شده نیاز
-   دارد — که هزینه‌ی تقلب را از صفر به مبلغِ واقعیِ رزرو می‌برد.
+   لایه‌ی دوم مهم‌ترین است: بدون آن هر حساب تازه‌ساخته می‌تواند به
+   رقیب یک‌ستاره بدهد. با آن، هر نظر جعلی به یک رزرو پرداخت‌شده نیاز
+   دارد — که هزینه‌ی تقلب را از صفر به مبلغ واقعی رزرو می‌برد.
 
    میانگین در `clubs.ratingAvg` با تریگر نگه داشته می‌شود، پس این مسیر
    خودش چیزی محاسبه نمی‌کند. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** آیا این کاربر واقعاً در این باشگاه رزروِ قطعی داشته؟ */
+/** آیا این کاربر واقعاً در این باشگاه رزرو قطعی داشته؟ */
 async function hasStayed(userId: string, clubId: string): Promise<boolean> {
   const { count } = await sb().from('bookings')
     .select('id', { count: 'exact', head: true })
@@ -27,7 +27,7 @@ async function hasStayed(userId: string, clubId: string): Promise<boolean> {
   return (count ?? 0) > 0;
 }
 
-/* GET — نظرهای عمومیِ یک باشگاه */
+/* GET — نظرهای عمومی یک باشگاه */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     created_at: string; updated_at: string;
   }[];
 
-  /* نامِ نویسنده لازم است ولی شماره و ایمیلش نه — فقط نامِ کوتاه */
+  /* نام نویسنده لازم است ولی شماره و ایمیلش نه — فقط نام کوتاه */
   const ids = [...new Set(rows.map(r => r.user_id))];
   const names = new Map<string, string>();
   if (ids.length) {
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     }
   }
 
-  /* توزیعِ ستاره‌ها — «۴.۲ از ۵» بدونِ توزیع، گمراه‌کننده است */
+  /* توزیع ستاره‌ها — «۴.۲ از ۵» بدون توزیع، گمراه‌کننده است */
   const breakdown: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   for (const r of rows) breakdown[r.rating] = (breakdown[r.rating] ?? 0) + 1;
 
@@ -77,13 +77,13 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       count: rows.length,
       breakdown,
     },
-    /* آیا کاربرِ فعلی می‌تواند نظر بدهد — تا UI دکمه‌ی بی‌فایده نشان ندهد */
+    /* آیا کاربر فعلی می‌تواند نظر بدهد — تا UI دکمه‌ی بی‌فایده نشان ندهد */
     canReview: actor ? (mine ? false : await hasStayed(actor.id, id)) : false,
     myReview: mine ? { id: mine.id, rating: mine.rating, comment: mine.comment } : null,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* POST { rating, comment } — ثبت یا ویرایشِ نظرِ خودم */
+/* POST { rating, comment } — ثبت یا ویرایش نظر خودم */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
@@ -97,13 +97,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   /* لایه‌ی ۳ */
   if (c.ownerId === actor.id) {
-    return NextResponse.json({ message: 'به باشگاهِ خودتان نمی‌توانید امتیاز بدهید' }, { status: 403 });
+    return NextResponse.json({ message: 'به باشگاه خودتان نمی‌توانید امتیاز بدهید' }, { status: 403 });
   }
 
   /* لایه‌ی ۲ */
   if (!(await hasStayed(actor.id, id))) {
     return NextResponse.json({
-      message: 'برای ثبتِ نظر باید حداقل یک رزروِ قطعی در این باشگاه داشته باشید',
+      message: 'برای ثبت نظر باید حداقل یک رزرو قطعی در این باشگاه داشته باشید',
       code: 'no_booking',
     }, { status: 403 });
   }
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
   const comment = String(b?.comment ?? '').trim().slice(0, 1000) || null;
 
-  /* لایه‌ی ۱ — UNIQUE؛ ارسالِ دوباره یعنی ویرایش، نه نظرِ جدید */
+  /* لایه‌ی ۱ — UNIQUE؛ ارسال دوباره یعنی ویرایش، نه نظر جدید */
   const { data, error } = await sb().from('club_reviews')
     .upsert({
       club_id: id, user_id: actor.id, rating, comment,
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   if (error) {
     console.error('[club_reviews] upsert:', error.message);
-    return NextResponse.json({ message: 'ثبتِ نظر انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'ثبت نظر انجام نشد' }, { status: 500 });
   }
 
   void audit({
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   return NextResponse.json({ ok: true, id: (data as { id: string }).id }, { status: 201 });
 }
 
-/* DELETE — حذفِ نظرِ خودم (یا هر نظری، توسطِ ادمین) */
+/* DELETE — حذف نظر خودم (یا هر نظری، توسط ادمین) */
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
@@ -149,7 +149,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
 
   let q = sb().from('club_reviews').delete().eq('club_id', id);
   if (admin && target && UUID.test(target)) q = q.eq('id', target);
-  else q = q.eq('user_id', actor.id);      // غیرادمین فقط نظرِ خودش
+  else q = q.eq('user_id', actor.id);      // غیرادمین فقط نظر خودش
 
   const { error } = await q;
   if (error) return NextResponse.json({ message: 'حذف انجام نشد' }, { status: 500 });

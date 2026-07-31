@@ -10,22 +10,22 @@ import {
   type PlacementMode, type RotationMode,
 } from '@/lib/ads/core';
 
-/* پنلِ ادمینِ سیستمِ تبلیغات (فاز ۲) — جایگاه‌ها، کمپین‌ها، پلن‌های
-   قیمت‌گذاری و درخواست‌های تبلیغ. جایگزینِ /api/admin/ad-slots.
+/* پنل ادمین سیستم تبلیغات (فاز ۲) — جایگاه‌ها، کمپین‌ها، پلن‌های
+   قیمت‌گذاری و درخواست‌های تبلیغ. جایگزین /api/admin/ad-slots.
 
-   هر جایگاه مستقل است: is_active و mode جدا؛ هیچ کلیدِ سراسری‌ای
+   هر جایگاه مستقل است: is_active و mode جدا؛ هیچ کلید سراسری‌ای
    خوانده یا نوشته نمی‌شود. */
 
-/* اعدادِ ورودی ممکن است فارسی باشند. علامتِ منفی عمداً حفظ می‌شود:
-   «اولویتِ ‎−۳» یعنی پایین‌ترین اولویت، نه ‎+۳. سقف هم لازم است چون
-   عددِ بزرگ‌تر از integerِ پستگرس، خطای ۵۰۰ می‌داد. */
+/* اعداد ورودی ممکن است فارسی باشند. علامت منفی عمداً حفظ می‌شود:
+   «اولویت ‎−۳» یعنی پایین‌ترین اولویت، نه ‎+۳. سقف هم لازم است چون
+   عدد بزرگ‌تر از integer پستگرس، خطای ۵۰۰ می‌داد. */
 const MAX_INT = 2_000_000_000;
 const num = (v: unknown, d = 0) => {
   if (v !== null && typeof v === 'object') return d;          // آرایه/آبجکت عدد نیست
   const raw = String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)));
   const neg = /^\s*-/.test(raw);
   const cleaned = raw.replace(/[^0-9.]/g, '');
-  if (!cleaned) return d;                                     // ورودیِ بی‌عدد ⇒ پیش‌فرض
+  if (!cleaned) return d;                                     // ورودی بی‌عدد ⇒ پیش‌فرض
   const n = Number(cleaned);
   if (!Number.isFinite(n)) return d;
   return Math.max(-MAX_INT, Math.min(MAX_INT, neg ? -n : n));
@@ -44,8 +44,8 @@ export async function GET(req: NextRequest) {
   if (g.err) return g.err;
 
   try {
-    /* قبل از نمایش، وضعیت‌ها با واقعیت همگام می‌شوند تا کمپینِ تمام‌شده
-       در پنل «ACTIVE» دیده نشود — نقصِ سیستمِ قبلی */
+    /* قبل از نمایش، وضعیت‌ها با واقعیت همگام می‌شوند تا کمپین تمام‌شده
+       در پنل «ACTIVE» دیده نشود — نقص سیستم قبلی */
     await expireCampaigns();
 
     const [placements, campaigns, plans, requests] = await Promise.all([
@@ -55,8 +55,8 @@ export async function GET(req: NextRequest) {
       sb().from('ad_requests').select('*').order('created_at', { ascending: false }).limit(200)
         .then(r => (r.error ? [] : (r.data ?? []))),
     ]);
-    /* آمار جداگانه و روی همه‌ی ردیف‌ها حساب می‌شود؛ فهرستِ بالا برای
-       نمایشِ پنل صفحه‌بندی شده و مبنای درستی برای KPI نیست. */
+    /* آمار جداگانه و روی همه‌ی ردیف‌ها حساب می‌شود؛ فهرست بالا برای
+       نمایش پنل صفحه‌بندی شده و مبنای درستی برای KPI نیست. */
     const stats = await adStats(placements);
     return NextResponse.json({ placements, campaigns, plans, requests, stats }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
@@ -64,17 +64,17 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/* ساختِ کمپین یا پلنِ تازه */
+/* ساخت کمپین یا پلن تازه */
 export async function POST(req: NextRequest) {
   const g = await guard(req);
   if (g.err) return g.err;
 
   const b = await req.json().catch(() => ({}));
 
-  /* ── پلنِ قیمت‌گذاری ── */
+  /* ── پلن قیمت‌گذاری ── */
   if (b?.type === 'plan') {
     const name = str(b?.name, 80);
-    if (!name) return NextResponse.json({ message: 'نامِ پلن لازم است' }, { status: 400 });
+    if (!name) return NextResponse.json({ message: 'نام پلن لازم است' }, { status: 400 });
     const plan = await createPricingPlan({
       name, description: str(b?.description, 400),
       placementKey: isPlacementKey(b?.placementKey) ? b.placementKey : null,
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       adQuantity: num(b?.adQuantity), creditAmount: num(b?.creditAmount),
       sortOrder: num(b?.sortOrder), badge: str(b?.badge, 40),
     });
-    if (!plan) return NextResponse.json({ message: 'ساختِ پلن انجام نشد' }, { status: 500 });
+    if (!plan) return NextResponse.json({ message: 'ساخت پلن انجام نشد' }, { status: 500 });
     void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'AD_PRICING_PLAN_CREATED', entityType: 'ad_pricing_plan', entityId: plan.id, newValue: { name, price: plan.price } });
     return NextResponse.json({ plan }, { status: 201 });
   }
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
   if (!placement) return NextResponse.json({ message: 'جایگاه پیدا نشد' }, { status: 404 });
 
   const content = (b?.content && typeof b.content === 'object' ? b.content : {}) as Record<string, unknown>;
-  /* بنر می‌تواند با فیلدهای تختِ فرم هم بیاید */
+  /* بنر می‌تواند با فیلدهای تخت فرم هم بیاید */
   if (placement.contentKind === 'banner' && !content.image_url && b?.imageUrl) {
     content.image_url = str(b.imageUrl, 800);
     content.link_url = str(b?.linkUrl, 800);
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     weight: num(b?.weight, 1), sortOrder: num(b?.sortOrder),
     adminNote: str(b?.adminNote, 500),
   });
-  if (!campaign) return NextResponse.json({ message: 'ساختِ کمپین انجام نشد' }, { status: 500 });
+  if (!campaign) return NextResponse.json({ message: 'ساخت کمپین انجام نشد' }, { status: 500 });
 
   void audit({
     actorId: g.actor!.id, actorRole: g.actor!.role, action: 'CAMPAIGN_CREATED',
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ campaign }, { status: 201 });
 }
 
-/* ویرایشِ جایگاه، کمپین یا پلن */
+/* ویرایش جایگاه، کمپین یا پلن */
 export async function PATCH(req: NextRequest) {
   const g = await guard(req);
   if (g.err) return g.err;
@@ -147,22 +147,22 @@ export async function PATCH(req: NextRequest) {
     /* کنترل‌های فاز ۴ — هر کدام مستقل */
     if (b.displayCount !== undefined) patch.displayCount = num(b.displayCount);
     if (b.rotationMode !== undefined) {
-      /* مقدارِ نرمال‌شده ذخیره می‌شود، نه ورودیِ خام: ['fair'] هم
-         String() را رد می‌کند ولی آرایه به ستونِ text نمی‌رود و ۵۰۰ می‌داد */
+      /* مقدار نرمال‌شده ذخیره می‌شود، نه ورودی خام: ['fair'] هم
+         String() را رد می‌کند ولی آرایه به ستون text نمی‌رود و ۵۰۰ می‌داد */
       if (typeof b.rotationMode !== 'string' || !isRotationMode(b.rotationMode)) {
-        return NextResponse.json({ message: 'حالتِ چرخش نامعتبر است' }, { status: 400 });
+        return NextResponse.json({ message: 'حالت چرخش نامعتبر است' }, { status: 400 });
       }
       patch.rotationMode = b.rotationMode as RotationMode;
     }
     if (b.priority !== undefined) patch.priority = num(b.priority);
 
     const placement = await updatePlacement(b.placementKey, patch);
-    if (!placement) return NextResponse.json({ message: 'ویرایشِ جایگاه انجام نشد' }, { status: 500 });
+    if (!placement) return NextResponse.json({ message: 'ویرایش جایگاه انجام نشد' }, { status: 500 });
     void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'PLACEMENT_UPDATED', entityType: 'placement', entityId: b.placementKey, newValue: patch });
     return NextResponse.json({ placement });
   }
 
-  /* ── پلنِ قیمت‌گذاری ── */
+  /* ── پلن قیمت‌گذاری ── */
   if (b?.planId) {
     const patch: Parameters<typeof updatePricingPlan>[1] = {};
     if (b.name !== undefined) patch.name = str(b.name, 80);
@@ -174,27 +174,27 @@ export async function PATCH(req: NextRequest) {
     if (b.isActive !== undefined) patch.isActive = !!b.isActive;
     if (b.sortOrder !== undefined) patch.sortOrder = num(b.sortOrder);
     if (b.badge !== undefined) patch.badge = str(b.badge, 40);
-    /* جابه‌جاییِ پلن بینِ جایگاه‌ها — رشته‌ی خالی یعنی پلنِ عمومی */
+    /* جابه‌جایی پلن بین جایگاه‌ها — رشته‌ی خالی یعنی پلن عمومی */
     if (b.placementKey !== undefined) {
       patch.placementKey = isPlacementKey(b.placementKey) ? String(b.placementKey) : null;
     }
 
     const plan = await updatePricingPlan(str(b.planId, 60), patch);
-    if (!plan) return NextResponse.json({ message: 'ویرایشِ پلن انجام نشد' }, { status: 500 });
+    if (!plan) return NextResponse.json({ message: 'ویرایش پلن انجام نشد' }, { status: 500 });
     void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'AD_PRICING_PLAN_UPDATED', entityType: 'ad_pricing_plan', entityId: plan.id, newValue: patch });
     return NextResponse.json({ plan });
   }
 
-  /* ── کمپین (شاملِ تغییرِ وضعیت) ── */
+  /* ── کمپین (شامل تغییر وضعیت) ── */
   const id = str(b?.campaignId, 60);
   if (!id) return NextResponse.json({ message: 'شناسه لازم است' }, { status: 400 });
 
   if (b?.status !== undefined && !isCampaignStatus(b.status)) {
-    return NextResponse.json({ message: 'وضعیتِ کمپین نامعتبر است' }, { status: 400 });
+    return NextResponse.json({ message: 'وضعیت کمپین نامعتبر است' }, { status: 400 });
   }
 
-  /* تأییدِ کمپینِ خریداری‌شده: پنجره‌ی زمانی از لحظه‌ی تأیید شروع شود،
-     نه از لحظه‌ی پرداخت — وگرنه تأخیرِ بررسیِ ادمین از مدتی که
+  /* تأیید کمپین خریداری‌شده: پنجره‌ی زمانی از لحظه‌ی تأیید شروع شود،
+     نه از لحظه‌ی پرداخت — وگرنه تأخیر بررسی ادمین از مدتی که
      تبلیغ‌دهنده پول داده کم می‌کرد. */
   if (b?.status === 'ACTIVE' || b?.status === 'SCHEDULED') {
     const { data: cur } = await sb().from('campaigns').select('status').eq('id', id).maybeSingle();
@@ -213,7 +213,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   const campaign = await updateCampaign(id, b);
-  if (!campaign) return NextResponse.json({ message: 'ویرایشِ کمپین انجام نشد' }, { status: 500 });
+  if (!campaign) return NextResponse.json({ message: 'ویرایش کمپین انجام نشد' }, { status: 500 });
   void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'CAMPAIGN_UPDATED', entityType: 'campaign', entityId: id, newValue: { status: campaign.status } });
   return NextResponse.json({ campaign });
 }
@@ -232,7 +232,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  /* بستنِ درخواستِ تبلیغ (حذف نیست) */
+  /* بستن درخواست تبلیغ (حذف نیست) */
   const reqId = sp.get('request') ?? '';
   if (reqId) {
     const { error } = await sb().from('ad_requests').update({ status: 'CLOSED' }).eq('id', reqId);

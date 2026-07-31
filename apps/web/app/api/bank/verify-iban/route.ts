@@ -4,9 +4,9 @@ import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 import { matchIban, syncClubSettlementAccount } from '@/lib/bank-server';
 import { formatIban, isValidIban, bankOfIban } from '@/lib/bank';
 
-/* ثبتِ شبا به‌صورتِ مستقیم — برای باشگاه‌داری که شبایش را دارد ولی
+/* ثبت شبا به‌صورت مستقیم — برای باشگاه‌داری که شبایش را دارد ولی
    نمی‌خواهد شماره کارت بدهد. یک استعلام بیشتر لازم نیست: IbanMatch
-   خودش ثابت می‌کند مقصدِ پول به نامِ همین شخص است. */
+   خودش ثابت می‌کند مقصد پول به نام همین شخص است. */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
   if (!u.national_id || !u.national_id_verified || !u.birth_date) {
     return NextResponse.json({
-      message: 'برای ثبتِ حساب بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود.',
+      message: 'برای ثبت حساب بانکی، ابتدا باید کد ملی و تاریخ تولدتان تأیید شود.',
       needsIdentity: true,
     }, { status: 409 });
   }
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   if (!im.match) {
     return NextResponse.json({
       ok: true, match: false,
-      message: 'این شبا به نام شما ثبت نشده است. حساب باید متعلق به خودِ صاحب باشگاه باشد.',
+      message: 'این شبا به نام شما ثبت نشده است. حساب باید متعلق به خود صاحب باشگاه باشد.',
     }, { status: 422 });
   }
 

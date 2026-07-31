@@ -2,7 +2,7 @@
 
 /* امتیاز و نظرهای باشگاه.
 
-   قاعده‌ی صریح: فقط کسی که در همین باشگاه رزروِ قطعی داشته می‌تواند
+   قاعده‌ی صریح: فقط کسی که در همین باشگاه رزرو قطعی داشته می‌تواند
    نظر بدهد. سرور این را اجبار می‌کند؛ این‌جا هم علتش نوشته می‌شود تا
    کاربر دکمه‌ی غیرفعال ببیند و ندانَد چرا.
    ───────────────────────────────────────────────────────────── */
@@ -55,13 +55,13 @@ export default function ClubReviews({ clubId }: { clubId: string }) {
         body: JSON.stringify({ rating, comment }),
       })
       const j = await r.json().catch(() => ({})) as { message?: string }
-      if (!r.ok) { setErr(j.message ?? 'ثبتِ نظر انجام نشد'); return }
+      if (!r.ok) { setErr(j.message ?? 'ثبت نظر انجام نشد'); return }
       setOpen(false); await load()
     } catch { setErr('خطا در ارتباط با سرور') } finally { setBusy(false) }
   }
 
   const remove = async () => {
-    if (!window.confirm('نظرِ شما حذف شود؟')) return
+    if (!window.confirm('نظر شما حذف شود؟')) return
     setBusy(true)
     try {
       await apiFetch(`/api/clubs/${clubId}/reviews`, { method: 'DELETE' })
@@ -88,7 +88,7 @@ export default function ClubReviews({ clubId }: { clubId: string }) {
         )}
       </div>
 
-      {/* توزیعِ ستاره‌ها — «۴٫۲ از ۵» بدونِ توزیع گمراه‌کننده است */}
+      {/* توزیع ستاره‌ها — «۴٫۲ از ۵» بدون توزیع گمراه‌کننده است */}
       {summary.count > 0 && (
         <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 14, marginBottom: 14 }}>
           {[5, 4, 3, 2, 1].map(s => {
@@ -107,11 +107,11 @@ export default function ClubReviews({ clubId }: { clubId: string }) {
         </div>
       )}
 
-      {/* ثبت / ویرایشِ نظرِ من */}
+      {/* ثبت / ویرایش نظر من */}
       {canWrite ? (
         !open ? (
           <button onClick={() => setOpen(true)} style={btn}>
-            {d.myReview ? <><Pencil size={13} /> ویرایشِ نظرِ من</> : <><Star size={13} /> ثبتِ نظر</>}
+            {d.myReview ? <><Pencil size={13} /> ویرایش نظر من</> : <><Star size={13} /> ثبت نظر</>}
           </button>
         ) : (
           <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 16, marginBottom: 14 }}>
@@ -148,11 +148,11 @@ export default function ClubReviews({ clubId }: { clubId: string }) {
         )
       ) : (
         <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px' }}>
-          برای ثبتِ نظر باید حداقل یک رزروِ قطعی در این باشگاه داشته باشید.
+          برای ثبت نظر باید حداقل یک رزرو قطعی در این باشگاه داشته باشید.
         </p>
       )}
 
-      {/* فهرستِ نظرها */}
+      {/* فهرست نظرها */}
       {d.reviews.length === 0 ? (
         <p style={{ fontSize: 13, color: MUT, margin: 0 }}>هنوز نظری ثبت نشده است.</p>
       ) : (
@@ -164,7 +164,7 @@ export default function ClubReviews({ clubId }: { clubId: string }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                 <b style={{ fontSize: 13.5, color: INK }}>{r.author}</b>
-                {r.isMine && <span style={{ fontSize: 10.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 999, padding: '2px 8px' }}>نظرِ شما</span>}
+                {r.isMine && <span style={{ fontSize: 10.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 999, padding: '2px 8px' }}>نظر شما</span>}
                 <span style={{ marginInlineStart: 'auto', display: 'inline-flex', gap: 1, direction: 'ltr' }}>
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={12} style={{ color: '#F5A623' }} fill={s <= r.rating ? '#F5A623' : 'none'} />

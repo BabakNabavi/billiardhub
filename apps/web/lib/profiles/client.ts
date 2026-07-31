@@ -1,12 +1,12 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پلِ پروفایل‌ها به سرور.
+   پل پروفایل‌ها به سرور.
 
-   فرم‌های موجود (پنلِ فروشگاه، تولیدکننده و…) همان شکلِ داده‌ی
-   قبلیِ خودشان را می‌دهند؛ این‌جا فقط به سرور می‌رود و برمی‌گردد.
-   localStorage به‌عنوان کشِ آفلاین می‌ماند تا اگر شبکه قطع بود
-   صفحه خالی نشود، ولی منبعِ حقیقت دیگر سرور است.
+   فرم‌های موجود (پنل فروشگاه، تولیدکننده و…) همان شکل داده‌ی
+   قبلی خودشان را می‌دهند؛ این‌جا فقط به سرور می‌رود و برمی‌گردد.
+   localStorage به‌عنوان کش آفلاین می‌ماند تا اگر شبکه قطع بود
+   صفحه خالی نشود، ولی منبع حقیقت دیگر سرور است.
    ───────────────────────────────────────────────────────────── */
 
 import { apiFetch } from '../http'
@@ -33,7 +33,7 @@ async function json<T>(r: Response): Promise<T | null> {
   try { return await r.json() as T } catch { return null }
 }
 
-/** پروفایلِ خودِ کاربر (نیازمندِ نشست) */
+/** پروفایل خود کاربر (نیازمند نشست) */
 export async function fetchMyProfile<T>(kind: ProfileKind): Promise<RemoteProfile<T> | null> {
   const r = await apiFetch(`/api/profiles/${kind}?mine=1`).catch(() => null)
   if (!r) return null
@@ -41,7 +41,7 @@ export async function fetchMyProfile<T>(kind: ProfileKind): Promise<RemoteProfil
   return j?.profile ?? null
 }
 
-/** یک پروفایلِ عمومی با نامک */
+/** یک پروفایل عمومی با نامک */
 export async function fetchProfile<T>(kind: ProfileKind, slug: string): Promise<RemoteProfile<T> | null> {
   const r = await fetch(`/api/profiles/${kind}?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' }).catch(() => null)
   if (!r) return null
@@ -59,7 +59,7 @@ export async function fetchProfiles<T>(kind: ProfileKind): Promise<RemoteProfile
 
 export interface SaveResult<T> { ok: boolean; profile: RemoteProfile<T> | null; message?: string }
 
-/** ذخیره‌ی پروفایلِ خودِ کاربر */
+/** ذخیره‌ی پروفایل خود کاربر */
 export async function saveProfileRemote<T extends Record<string, unknown>>(
   kind: ProfileKind,
   slug: string,

@@ -1,12 +1,12 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   تیک‌های تأییدِ پروفایل — یک نوار برای همه‌ی نقش‌ها.
+   تیک‌های تأیید پروفایل — یک نوار برای همه‌ی نقش‌ها.
 
    سه چیز: اطلاعات هویتی (هنگام ثبت‌نام استعلام شده)، مدارک (ادمین
-   تأیید می‌کند)، و ایمیل (خودِ کاربر ثبت و استعلام می‌کند).
+   تأیید می‌کند)، و ایمیل (خود کاربر ثبت و استعلام می‌کند).
 
-   ایمیل اجباری نیست، ولی عمداً برچسبِ «اختیاری» نمی‌خورد: نوشتنش
+   ایمیل اجباری نیست، ولی عمداً برچسب «اختیاری» نمی‌خورد: نوشتنش
    کاربر را از انجامش منصرف می‌کند. اگر ثبت نشده باشد، فقط دعوت به
    ثبت می‌بیند — نه اخطار.
    ───────────────────────────────────────────────────────────── */
@@ -22,7 +22,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/
 
 export interface VerificationState {
   identity: boolean       // کد ملی و مشخصات، استعلام‌شده
-  documents: boolean      // مدرکِ نقش، تأییدِ ادمین
+  documents: boolean      // مدرک نقش، تأیید ادمین
   email: boolean
   emailAddress?: string
 }
@@ -82,13 +82,13 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         emailAddress: j.email || '',
       })
       setEmail(j.email || '')
-    } catch { /* پنل نباید به‌خاطرِ این بخش خالی بماند */ }
+    } catch { /* پنل نباید به‌خاطر این بخش خالی بماند */ }
   }, [])
   useEffect(() => { void load() }, [load])
 
   const saveEmail = async () => {
     const e = email.trim().toLowerCase()
-    if (!EMAIL_RE.test(e)) { setMsg({ text: 'نشانیِ ایمیل معتبر نیست', bad: true }); return }
+    if (!EMAIL_RE.test(e)) { setMsg({ text: 'نشانی ایمیل معتبر نیست', bad: true }); return }
     setBusy(true); setMsg(null)
     try {
       const r = await apiFetch('/api/auth/verify/email', {
@@ -96,7 +96,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         body: JSON.stringify({ email: e }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { setMsg({ text: j?.message || 'تأییدِ ایمیل انجام نشد', bad: true }); return }
+      if (!r.ok) { setMsg({ text: j?.message || 'تأیید ایمیل انجام نشد', bad: true }); return }
       setMsg({ text: 'ایمیل شما تأیید شد', bad: false })
       setEditing(false)
       await load()
@@ -122,7 +122,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <BadgeCheck size={17} style={{ color: GOLD_D }} />
-        <h2 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>وضعیتِ تأیید</h2>
+        <h2 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>وضعیت تأیید</h2>
       </div>
 
       <Row
@@ -131,7 +131,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         done={state.identity}
         note={state.identity
           ? 'مشخصات هویتی شما تأیید شده است.'
-          : 'اطلاعات هویتیِ شما هنوز استعلام نشده است.'}
+          : 'اطلاعات هویتی شما هنوز استعلام نشده است.'}
       />
 
       <Row
@@ -139,8 +139,8 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         title="تأیید مدارک"
         done={state.documents}
         note={state.documents
-          ? 'مدارکِ شما بررسی و تأیید شده است.'
-          : 'مدرکِ مربوط به نقشتان را در پنلِ همان نقش آپلود کنید تا کارشناسان بررسی کنند.'}
+          ? 'مدارک شما بررسی و تأیید شده است.'
+          : 'مدرک مربوط به نقشتان را در پنل همان نقش آپلود کنید تا کارشناسان بررسی کنند.'}
       />
 
       <Row
@@ -148,8 +148,8 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
         title="تأیید ایمیل"
         done={state.email}
         note={state.email
-          ? `نشانیِ ${state.emailAddress} ثبت و اعتبارسنجی شده است.`
-          : 'نشانیِ ایمیلتان را ثبت کنید تا اطلاع‌رسانی‌های مهم به دستتان برسد.'}
+          ? `نشانی ${state.emailAddress} ثبت و اعتبارسنجی شده است.`
+          : 'نشانی ایمیلتان را ثبت کنید تا اطلاع‌رسانی‌های مهم به دستتان برسد.'}
       >
         {(!state.email || editing) ? (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 9 }}>
@@ -190,7 +190,7 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
                 borderRadius: 10, border: `1px solid ${LINE}`, background: 'rgba(0,0,0,0.03)',
                 color: SEC, fontSize: 12, fontWeight: 800, fontFamily: 'inherit',
                 padding: '7px 13px', cursor: 'pointer',
-              }}>تغییرِ ایمیل</button>
+              }}>تغییر ایمیل</button>
             <button type="button" onClick={() => void removeEmail()} disabled={busy}
               style={{
                 borderRadius: 10, border: '1px solid rgba(178,59,46,0.24)', background: 'rgba(178,59,46,0.06)',

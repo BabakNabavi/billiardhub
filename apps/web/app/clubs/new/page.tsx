@@ -14,9 +14,9 @@ import BankCardVerify, { type BankResult } from '../../../components/club/BankCa
 
 // استان/شهر از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
-/* شمارنده‌ی تعدادِ میز.
+/* شمارنده‌ی تعداد میز.
 
-   پیش‌تر `type="number"` با مقدارِ عددیِ ۰ بود، پس هر فیلد یک «۰» توی
+   پیش‌تر `type="number"` با مقدار عددی ۰ بود، پس هر فیلد یک «۰» توی
    خودش داشت که کاربر باید پاکش می‌کرد و اگر پاک می‌کرد NaN می‌شد.
    حالا خالی یعنی صفر و چیزی در فیلد نوشته نیست. */
 function CountField({ label, value, onChange }: {
@@ -68,11 +68,11 @@ export default function NewClubPage() {
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const [licensePreview, setLicensePreview] = useState<string | null>(null);
 
-  // اطلاعات بانکی — فقط از راهِ استعلام پر می‌شود
+  // اطلاعات بانکی — فقط از راه استعلام پر می‌شود
   const [bank, setBank] = useState<BankResult | null>(null);
 
-  /* نامِ مدیر از هویتِ ثبت‌شده‌ی کاربر می‌آید و دستی نیست: باشگاه باید
-     به نامِ همان کسی ثبت شود که حسابش احراز شده. */
+  /* نام مدیر از هویت ثبت‌شده‌ی کاربر می‌آید و دستی نیست: باشگاه باید
+     به نام همان کسی ثبت شود که حسابش احراز شده. */
   const managerName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
 
   const [form, setForm] = useState({
@@ -175,7 +175,7 @@ export default function NewClubPage() {
     if (slug && slugStatus === 'taken')   { setError('نام سایت انتخابی قبلاً رزرو شده؛ نام دیگری بگذارید'); return; }
     if (slug && slugStatus === 'invalid') { setError('نام سایت فقط می‌تواند حروف انگلیسی کوچک، عدد و خط تیره داشته باشد'); return; }
     /* اگر کارت استعلام شده، تأییدش هم باید گرفته شده باشد — پول به همان شبا می‌رود */
-    if (bank && !bank.confirmed) { setError('لطفاً درستیِ اطلاعات بانکی را تأیید کنید'); return; }
+    if (bank && !bank.confirmed) { setError('لطفاً درستی اطلاعات بانکی را تأیید کنید'); return; }
 
     setLoading(true);
     setError('');
@@ -264,9 +264,9 @@ export default function NewClubPage() {
         @keyframes ncPop  { from { opacity: 0; transform: scale(.9) translateY(12px) } to { opacity: 1; transform: none } }
       `}</style>
 
-      {/* خطا — وسطِ صفحه.
+      {/* خطا — وسط صفحه.
           قبلاً خطا بالای فرم می‌نشست و در فرمی به این بلندی کاربر باید
-          کلِ صفحه را بالا می‌رفت تا بفهمد چه شده. */}
+          کل صفحه را بالا می‌رفت تا بفهمد چه شده. */}
       {error && (
         <div onClick={() => setError('')} role="alert"
           style={{
@@ -326,13 +326,13 @@ export default function NewClubPage() {
               </div>
               <div>
                 <label className={labelCls} style={labelStyle}>نام مدیر باشگاه</label>
-                {/* از هویتِ احرازشده می‌آید و قابلِ تغییر نیست */}
+                {/* از هویت احرازشده می‌آید و قابل تغییر نیست */}
                 <div style={{ position: 'relative' }}>
                   <input type="text" value={managerName || '—'} disabled
                     className={inputCls} style={{ ...lockedStyle, paddingInlineEnd: 34 }} />
                   <Lock size={13} style={{ position: 'absolute', insetInlineEnd: 11, top: '50%', transform: 'translateY(-50%)', color: '#B7B0A0' }} />
                 </div>
-                <p style={{ fontSize: 11, color: '#8A8474', marginTop: 4 }}>از اطلاعات هویتیِ حساب شما خوانده می‌شود</p>
+                <p style={{ fontSize: 11, color: '#8A8474', marginTop: 4 }}>از اطلاعات هویتی حساب شما خوانده می‌شود</p>
               </div>
             </div>
             <div className="mb-4">
@@ -353,7 +353,7 @@ export default function NewClubPage() {
               </div>
             </div>
 
-            {/* نامِ سایتِ باشگاه */}
+            {/* نام سایت باشگاه */}
             <div>
               <label className={labelCls} style={labelStyle}>نام سایت باشگاه شما</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -384,7 +384,7 @@ export default function NewClubPage() {
                 {slugStatus === 'ok'       && <span style={{ color: '#0E7A38' }}>✓ این نشانی در دسترس است</span>}
                 {slugStatus === 'taken'    && <span style={{ color: '#B23B2E' }}>✗ این نشانی قبلاً رزرو شده</span>}
                 {slugStatus === 'invalid'  && <span style={{ color: '#B23B2E' }}>فقط حروف انگلیسی کوچک، عدد و خط تیره مجاز است</span>}
-                {slugStatus === 'idle' && slug && <span style={{ color: 'rgba(0,0,0,0.35)' }}>نشانی اختصاصیِ صفحه‌ی باشگاه شما — مثلاً hafez-shiraz</span>}
+                {slugStatus === 'idle' && slug && <span style={{ color: 'rgba(0,0,0,0.35)' }}>نشانی اختصاصی صفحه‌ی باشگاه شما — مثلاً hafez-shiraz</span>}
               </div>
             </div>
           </div>
@@ -393,7 +393,7 @@ export default function NewClubPage() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>آدرس باشگاه</h2>
             <div className="mb-4">
-              {/* تمِ روشن — پس‌زمینه‌ی این صفحه روشن است و تمِ تیره متن را نامرئی می‌کرد */}
+              {/* تم روشن — پس‌زمینه‌ی این صفحه روشن است و تم تیره متن را نامرئی می‌کرد */}
               <ProvinceCitySelect
                 theme="light"
                 value={{ province: form.province, city: form.city }}
@@ -439,8 +439,8 @@ export default function NewClubPage() {
               className="dark-file w-full text-sm mb-3" style={{ color: 'rgba(0,0,0,0.45)' }} />
 
             {licenseFile && (
-              /* انتخابِ فایل یعنی «آماده‌ی ارسال»، نه «تأییدشده».
-                 تیکِ سبز فقط پس از بررسیِ کارشناس داده می‌شود. */
+              /* انتخاب فایل یعنی «آماده‌ی ارسال»، نه «تأییدشده».
+                 تیک سبز فقط پس از بررسی کارشناس داده می‌شود. */
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: '10px', padding: '10px 14px' }}>
                 {licensePreview ? (
                   <img loading="lazy" decoding="async" src={licensePreview} alt="پیش‌نمایش مدرک" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0 }} />
@@ -510,7 +510,7 @@ export default function NewClubPage() {
             <h2 style={headingStyle}>امکانات ویژه</h2>
             <textarea name="specialFeatures" value={form.specialFeatures} onChange={handleChange}
               className={`${inputCls} dark-input`} style={inputStyle}
-              rows={3} placeholder="هر امکاناتِ ویژه‌ای که باشگاه دارد را این‌جا بنویسید…" />
+              rows={3} placeholder="هر امکانات ویژه‌ای که باشگاه دارد را این‌جا بنویسید…" />
           </div>
 
           {/* ساعات کاری */}
@@ -558,7 +558,7 @@ export default function NewClubPage() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>اطلاعات بانکی — تسویه حساب</h2>
             <p style={{ fontSize: '13px', color: '#5B564B', lineHeight: 1.9, marginBottom: 16 }}>
-              کاربران از راهِ درگاهِ بانکیِ امن پرداخت می‌کنند. درآمدِ رزروها پس از کسرِ کارمزد،
+              کاربران از راه درگاه بانکی امن پرداخت می‌کنند. درآمد رزروها پس از کسر کارمزد،
               در دوره‌های تسویه به همین حساب واریز می‌شود.
             </p>
             <BankCardVerify value={bank} onChange={setBank} />

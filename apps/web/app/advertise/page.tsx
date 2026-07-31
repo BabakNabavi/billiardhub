@@ -1,10 +1,10 @@
 'use client'
 
-/* درخواستِ تبلیغ در بیلیارد هاب.
+/* درخواست تبلیغ در بیلیارد هاب.
 
-   جایگاه‌ها از پنلِ ادمین می‌آیند (جدولِ ad_slots) و در همان کشویِ
+   جایگاه‌ها از پنل ادمین می‌آیند (جدول ad_slots) و در همان کشوی
    فرم انتخاب می‌شوند. قیمت روی صفحه نوشته نمی‌شود: تعرفه بعد از
-   ثبتِ درخواست برای متقاضی فرستاده می‌شود. */
+   ثبت درخواست برای متقاضی فرستاده می‌شود. */
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -21,12 +21,12 @@ const INPUT: React.CSSProperties = {
   width: '100%', border: `1px solid ${LINE}`, borderRadius: 11, padding: '11px 14px',
   fontSize: 13.5, fontFamily: 'inherit', color: INK, background: '#FAFAF7', outline: 'none',
 }
-/* فیلدهایی که از حسابِ کاربر می‌آیند و دستِ او نیست */
+/* فیلدهایی که از حساب کاربر می‌آیند و دست او نیست */
 const LOCKED: React.CSSProperties = {
   ...INPUT, background: 'rgba(14,122,56,0.04)', border: '1px solid rgba(14,122,56,0.16)',
   color: 'rgba(0,0,0,0.62)', cursor: 'not-allowed',
 }
-/* ارتفاعِ ثابت، وگرنه لیبلی که آیکون دارد فیلدش را پایین‌تر می‌برد
+/* ارتفاع ثابت، وگرنه لیبلی که آیکون دارد فیلدش را پایین‌تر می‌برد
    و ردیف به‌هم می‌ریزد */
 const LABEL: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 5, minHeight: 20,
@@ -47,13 +47,13 @@ export default function AdvertisePage() {
   const [done, setDone] = useState(false)
   const [err, setErr] = useState('')
 
-  /* کاربرِ واردشده هویتش استعلام شده — نام و شماره‌اش از حساب می‌آید
+  /* کاربر واردشده هویتش استعلام شده — نام و شماره‌اش از حساب می‌آید
      و دستی عوض نمی‌شود؛ ایمیل ولی آزاد است. */
   const locked = !!user
 
   useEffect(() => {
     /* کاتالوگ از سرور فقط جایگاه‌های «پولی» را برمی‌گرداند — جایگاهی که
-       ادمین پولی‌اش نکرده اصلاً گزینه‌ی خرید ندارد (گیتِ فاز ۴). */
+       ادمین پولی‌اش نکرده اصلاً گزینه‌ی خرید ندارد (گیت فاز ۴). */
     void fetch('/api/ads/placements?catalog=1', { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
       .then(j => setSlots(j?.placements ?? []))
@@ -84,7 +84,7 @@ export default function AdvertisePage() {
         body: JSON.stringify({ ...form, phone: digits(form.phone) }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { setErr(j?.message || 'ثبتِ درخواست انجام نشد'); return }
+      if (!r.ok) { setErr(j?.message || 'ثبت درخواست انجام نشد'); return }
       setDone(true)
     } catch { setErr('خطا در ارتباط با سرور') }
     finally { setSending(false) }
@@ -125,11 +125,11 @@ export default function AdvertisePage() {
             تبلیغ در بیلیارد هاب
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
-            مخاطبِ ما دقیقاً همان‌هایی هستند که دنبالِ بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدارِ تجهیزات.
-            جایگاهِ موردِ نظرتان را انتخاب کنید تا تعرفه را برایتان بفرستیم.
+            مخاطب ما دقیقاً همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات.
+            جایگاه مورد نظرتان را انتخاب کنید تا تعرفه را برایتان بفرستیم.
           </p>
 
-          {/* کاربرِ واردشده کمپین‌های خودش را همین‌جا دنبال می‌کند */}
+          {/* کاربر واردشده کمپین‌های خودش را همین‌جا دنبال می‌کند */}
           {user && (
             <Link href="/advertise/dashboard" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16,
@@ -137,7 +137,7 @@ export default function AdvertisePage() {
               color: '#9A6E38', borderRadius: 10, padding: '9px 16px',
               fontSize: 13, fontWeight: 800, textDecoration: 'none',
             }}>
-              تبلیغاتِ من <ArrowLeft size={14} />
+              تبلیغات من <ArrowLeft size={14} />
             </Link>
           )}
         </div>
@@ -172,20 +172,20 @@ export default function AdvertisePage() {
               <input style={{ ...INPUT, direction: 'ltr', textAlign: 'right' }} type="email"
                 value={form.email} onChange={e => set('email', e.target.value)} /></div>
 
-            <div><label style={LABEL}>نامِ برند / شرکت</label>
+            <div><label style={LABEL}>نام برند / شرکت</label>
               <input style={INPUT} value={form.company} onChange={e => set('company', e.target.value)} /></div>
 
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={LABEL}>جایگاهِ موردِ نظر</label>
+              <label style={LABEL}>جایگاه مورد نظر</label>
               {slots.length === 0 ? (
-                /* هیچ جایگاهی روی حالتِ «پولی» نیست ⇒ کشوی خالی بن‌بست است؛
+                /* هیچ جایگاهی روی حالت «پولی» نیست ⇒ کشوی خالی بن‌بست است؛
                    به‌جایش توضیح می‌دهیم که درخواست همچنان ثبت می‌شود. */
                 <p style={{
                   fontSize: 12, color: MUT, lineHeight: 1.95, margin: 0,
                   border: `1px dashed ${LINE}`, borderRadius: 12, padding: '11px 14px',
                 }}>
-                  در حال حاضر جایگاهِ آماده‌ی فروشی روی سایت تعریف نشده است. درخواستتان را ثبت کنید؛
-                  به‌محضِ فعال‌شدنِ جایگاه‌ها، تعرفه‌ها برای شما فرستاده می‌شود.
+                  در حال حاضر جایگاه آماده‌ی فروشی روی سایت تعریف نشده است. درخواستتان را ثبت کنید؛
+                  به‌محض فعال‌شدن جایگاه‌ها، تعرفه‌ها برای شما فرستاده می‌شود.
                 </p>
               ) : (
               <Select
@@ -227,7 +227,7 @@ export default function AdvertisePage() {
             <div style={{ gridColumn: '1 / -1' }}><label style={LABEL}>توضیح</label>
               <textarea style={{ ...INPUT, minHeight: 110, resize: 'vertical' }}
                 value={form.message} onChange={e => set('message', e.target.value)}
-                placeholder="چه چیزی می‌خواهید تبلیغ کنید؟ چه بازه‌ی زمانی مدِ نظرتان است؟" /></div>
+                placeholder="چه چیزی می‌خواهید تبلیغ کنید؟ چه بازه‌ی زمانی مد نظرتان است؟" /></div>
           </div>
 
 
@@ -241,11 +241,11 @@ export default function AdvertisePage() {
             borderRadius: 10, padding: '13px', fontSize: 14.5, fontWeight: 800, fontFamily: 'inherit',
             cursor: sending ? 'not-allowed' : 'pointer',
           }}>
-            {sending ? <><Loader2 size={15} className="animate-spin" /> در حال ارسال…</> : 'ثبتِ درخواستِ تبلیغ'}
+            {sending ? <><Loader2 size={15} className="animate-spin" /> در حال ارسال…</> : 'ثبت درخواست تبلیغ'}
           </button>
         </form>
 
-        {/* راه‌های تماسِ مستقیم — همان‌هایی که در «تماس با ما» هست */}
+        {/* راه‌های تماس مستقیم — همان‌هایی که در «تماس با ما» هست */}
         <div style={{ ...CARD, marginTop: 16, display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))' }}>
           {[
             { icon: <Phone size={16} />, label: 'تلفن', value: '۰۲۱-۲۲۸۵۹۵۵۱' },

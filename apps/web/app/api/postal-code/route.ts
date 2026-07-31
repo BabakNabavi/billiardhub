@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest } from '@/lib/finance/db';
 
-/* استعلامِ نشانی از کد پستی — برای پرکردنِ خودکارِ آدرسِ تحویل.
+/* استعلام نشانی از کد پستی — برای پرکردن خودکار آدرس تحویل.
 
    باز هم همان قرارداد: «پیدا نشد» با success=true برمی‌گردد و فقط
    فیلدهای data خالی‌اند؛ آن حالت یعنی «کد پستی وجود ندارد»، نه خطا. */
@@ -17,7 +17,7 @@ interface Addr {
 interface Envelope { success?: boolean; code?: number; message?: string | null; data?: Addr | null }
 
 export async function POST(req: NextRequest) {
-  /* فقط کاربرِ واردشده — تا اعتبارِ سرویس با درخواستِ ناشناس هدر نرود */
+  /* فقط کاربر واردشده — تا اعتبار سرویس با درخواست ناشناس هدر نرود */
   if (!actorFromRequest(req)) {
     return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
   }
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   }
 
   const key = process.env.SMS_API_KEY;
-  if (!key) return NextResponse.json({ message: 'سرویسِ استعلام پیکربندی نشده است' }, { status: 503 });
+  if (!key) return NextResponse.json({ message: 'سرویس استعلام پیکربندی نشده است' }, { status: 503 });
 
   let r: Response;
   try {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ postalCode }),
     });
   } catch {
-    return NextResponse.json({ message: 'خطا در اتصال به سرویسِ استعلام' }, { status: 503 });
+    return NextResponse.json({ message: 'خطا در اتصال به سرویس استعلام' }, { status: 503 });
   }
 
   const j = await r.json().catch(() => null) as Envelope | null;
@@ -51,15 +51,15 @@ export async function POST(req: NextRequest) {
     || /trust level|سطح دسترسی|اعتبار|credit|unauthorized/i.test(j?.message || '');
   if (denied) {
     console.error('PostalCodeInfo unavailable:', j?.message || r.status);
-    return NextResponse.json({ message: 'سرویسِ استعلام در دسترس نیست' }, { status: 503 });
+    return NextResponse.json({ message: 'سرویس استعلام در دسترس نیست' }, { status: 503 });
   }
-  if (!j) return NextResponse.json({ message: 'پاسخِ سرویس خوانده نشد' }, { status: 503 });
+  if (!j) return NextResponse.json({ message: 'پاسخ سرویس خوانده نشد' }, { status: 503 });
 
   if (j.success === false) {
     return NextResponse.json({ message: 'کد پستی معتبر نیست' }, { status: 400 });
   }
 
-  /* success=true ولی بدونِ استان/شهر ⇒ چنین کد پستی‌ای ثبت نشده است */
+  /* success=true ولی بدون استان/شهر ⇒ چنین کد پستی‌ای ثبت نشده است */
   const d = j.data;
   if (!d || (!d.province && !d.city && !d.address)) {
     return NextResponse.json({ found: false, message: 'نشانی‌ای برای این کد پستی یافت نشد' }, { status: 404 });

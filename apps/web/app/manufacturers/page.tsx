@@ -156,7 +156,7 @@ const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) =>
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// ── Logo — آیکون مدرنِ کارخانه (تولیدکنندگان لوگوی آپلودی ندارند) ──
+// ── Logo — آیکون مدرن کارخانه (تولیدکنندگان لوگوی آپلودی ندارند) ──
 function MfrLogo({ name, size = 62 }: { name: string; size?: number }) {
   return (
     <div style={{
@@ -418,7 +418,7 @@ export default function ManufacturersPage() {
   }
 
   const filtered = useMemo(() => {
-    /* تولیدکنندگانِ ثبت‌نامی اولِ لیست می‌نشینند — از سرور، و تا آمدنِ
+    /* تولیدکنندگان ثبت‌نامی اول لیست می‌نشینند — از سرور، و تا آمدن
        پاسخ از همین مرورگر */
     const registered = (remoteMfrs ?? listApprovedManufacturers()).map(profileToManufacturer)
     const ALL = [...registered, ...MANUFACTURERS.filter(m => !registered.some(r => r.id === m.id))]
@@ -515,7 +515,7 @@ export default function ManufacturersPage() {
             </div>
 
             <p style={{ fontSize: 'clamp(12.5px,1.4vw,15px)', color: TEXT_SEC, marginTop: 10, maxWidth: 460, animation: 'lineReveal .5s .46s ease both' }}>
-              کارخانه‌ها و کارگاه‌های تخصصیِ ساختِ میز، چوب، پارچه و تجهیزات بیلیارد در ایران
+              کارخانه‌ها و کارگاه‌های تخصصی ساخت میز، چوب، پارچه و تجهیزات بیلیارد در ایران
             </p>
           </div>
         </section>

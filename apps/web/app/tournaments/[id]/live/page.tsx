@@ -3,10 +3,10 @@
 /* ─────────────────────────────────────────────────────────────
    بازی‌های زنده‌ی یک مسابقه.
 
-   «زنده» یعنی برگزارکننده در پنلِ خودش دکمه‌ی «شروعِ زنده» را زده و
-   وضعیتِ بازی روی `in_progress` است — نه اینکه ما حدس بزنیم.
+   «زنده» یعنی برگزارکننده در پنل خودش دکمه‌ی «شروع زنده» را زده و
+   وضعیت بازی روی `in_progress` است — نه اینکه ما حدس بزنیم.
 
-   تا وقتی بازیِ زنده‌ای هست هر ۱۵ ثانیه تازه می‌شود. وقتی چیزی زنده
+   تا وقتی بازی زنده‌ای هست هر ۱۵ ثانیه تازه می‌شود. وقتی چیزی زنده
    نیست پولینگ متوقف می‌شود؛ صفحه‌ای که کسی تماشا نمی‌کند نباید
    بی‌دلیل به سرور بزند.
    ───────────────────────────────────────────────────────────── */
@@ -51,12 +51,12 @@ export default function LivePage() {
   if (loading) return <Center><Loader2 size={28} style={{ animation: 'lvspin 1s linear infinite' }} /></Center>;
   if (!b) return <Center><p style={{ fontWeight: 800, color: INK }}>این مسابقه پیدا نشد</p></Center>;
 
-  /* بازیِ بعدی: هر دو بازیکنش معلوم است ولی هنوز شروع نشده */
+  /* بازی بعدی: هر دو بازیکنش معلوم است ولی هنوز شروع نشده */
   const upNext = b.matches.filter(m => m.winner === null && m.status === 'waiting' && m.p1_name && m.p2_name);
   const recent = b.matches.filter(m => m.winner !== null && m.completed_at)
     .sort((x, y) => String(y.completed_at).localeCompare(String(x.completed_at))).slice(0, 6);
 
-  /* «تا چند برد» — از فرمتِ ثبت‌شده‌ی مسابقه، نه حدس */
+  /* «تا چند برد» — از فرمت ثبت‌شده‌ی مسابقه، نه حدس */
   const best = FORMAT_BEST[String(b.tournament.match_format ?? '')] ?? 0;
   const target = best ? Math.ceil(best / 2) : 0;
 
@@ -68,17 +68,17 @@ export default function LivePage() {
           <ChevronRight size={14} /> صفحه‌ی مسابقه
         </Link>
         <span style={{ color: LINE }}>/</span>
-        <h1 style={{ fontSize: 17, fontWeight: 900, color: INK, margin: 0 }}>پخشِ زنده</h1>
+        <h1 style={{ fontSize: 17, fontWeight: 900, color: INK, margin: 0 }}>پخش زنده</h1>
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px' }}>
         {b.tournament.title}
-        {target > 0 && <> — هر بازی تا {faDigits(target)} برد ({faDigits(best)} فریمِ حداکثر)</>}
+        {target > 0 && <> — هر بازی تا {faDigits(target)} برد ({faDigits(best)} فریم حداکثر)</>}
       </p>
 
       {/* ── زنده ── */}
       {hasLive ? (
         <section style={{ marginBottom: 24 }}>
-          <Head icon={<Radio size={16} style={{ color: RED }} />} title={`در حالِ اجرا (${faDigits(live.length)})`} />
+          <Head icon={<Radio size={16} style={{ color: RED }} />} title={`در حال اجرا (${faDigits(live.length)})`} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {live.map(m => <LiveCard key={m.id} m={m} rounds={b.totalRounds} target={target} />)}
           </div>
@@ -86,7 +86,7 @@ export default function LivePage() {
       ) : (
         <div style={{ ...card, textAlign: 'center', padding: '50px 20px', marginBottom: 24 }}>
           <Radio size={32} style={{ color: MUT, opacity: 0.4, marginBottom: 11 }} />
-          <p style={{ fontSize: 15, fontWeight: 800, color: INK, margin: '0 0 6px' }}>الان بازیِ زنده‌ای نیست</p>
+          <p style={{ fontSize: 15, fontWeight: 800, color: INK, margin: '0 0 6px' }}>الان بازی زنده‌ای نیست</p>
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
             {b.matches.length === 0
               ? 'هنوز قرعه‌کشی نشده است.'
@@ -95,7 +95,7 @@ export default function LivePage() {
         </div>
       )}
 
-      {/* ── بازیِ بعدی ── */}
+      {/* ── بازی بعدی ── */}
       {upNext.length > 0 && (
         <section style={{ marginBottom: 24 }}>
           <Head icon={<Clock3 size={16} style={{ color: GOLD_D }} />} title={`در نوبت (${faDigits(upNext.length)})`} />
@@ -144,7 +144,7 @@ export default function LivePage() {
       )}
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <Link href={`/tournaments/${id}/bracket`} style={btnGhost}><GitBranch size={14} /> براکتِ کامل</Link>
+        <Link href={`/tournaments/${id}/bracket`} style={btnGhost}><GitBranch size={14} /> براکت کامل</Link>
         <Link href={`/tournaments/${id}/results`} style={btnGhost}><Trophy size={14} /> نتایج</Link>
       </div>
 
@@ -203,7 +203,7 @@ function PlayerBig({ name, score, lead, target }: { name: string; score: number;
 
 function roundName(round: number, total: number): string {
   const d = total - round;
-  return d === 0 ? 'فینال' : d === 1 ? 'نیمه‌نهایی' : d === 2 ? 'یک‌چهارم' : d === 3 ? 'یک‌هشتم' : `دورِ ${faDigits(round)}`;
+  return d === 0 ? 'فینال' : d === 1 ? 'نیمه‌نهایی' : d === 2 ? 'یک‌چهارم' : d === 3 ? 'یک‌هشتم' : `دور ${faDigits(round)}`;
 }
 
 function Head({ icon, title }: { icon: React.ReactNode; title: string }) {

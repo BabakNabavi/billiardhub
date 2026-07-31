@@ -1,12 +1,12 @@
 /* ─────────────────────────────────────────────────────────────
    هسته‌ی سیستم تبلیغات (فاز ۲) — Placement / Campaign / Pricing Plan.
 
-   جایگزینِ lib/ads/slots.ts. سه اصل:
-   ● شش جایگاهِ مستقل؛ نمایش فقط با placement.is_active — «هیچ کلیدِ
+   جایگزین lib/ads/slots.ts. سه اصل:
+   ● شش جایگاه مستقل؛ نمایش فقط با placement.is_active — «هیچ کلید
      سراسری‌ای وجود ندارد».
    ● کمپین یا «بنر» است یا «ارجاع به موجودیت» (محصول/باشگاه/فروشگاه)
      برای سکشن‌های ویژه‌ی صفحه‌ی اصلی.
-   ● انقضا دو لایه است: فیلترِ پنجره‌ی زمانی هنگامِ خواندن (هیچ بنرِ
+   ● انقضا دو لایه است: فیلتر پنجره‌ی زمانی هنگام خواندن (هیچ بنر
      تمام‌شده‌ای هرگز نمایش داده نمی‌شود) + cron که status را به
      EXPIRED می‌برد تا پنل ادمین هم واقعیت را نشان دهد.
    ───────────────────────────────────────────────────────────── */
@@ -28,8 +28,8 @@ export type PlacementKey = typeof PLACEMENT_KEYS[number]
 export const isPlacementKey = (v: unknown): v is PlacementKey =>
   (PLACEMENT_KEYS as readonly string[]).includes(String(v))
 
-/* کلیدهای قدیمیِ ad_slots → معادلِ تازه؛ برای کلاینت‌های کش‌شده و
-   درخواست‌های تبلیغِ قبلی */
+/* کلیدهای قدیمی ad_slots → معادل تازه؛ برای کلاینت‌های کش‌شده و
+   درخواست‌های تبلیغ قبلی */
 export const LEGACY_KEY_MAP: Record<string, PlacementKey> = {
   market_1: 'equipment_ads_right',
   market_2: 'equipment_ads_left',
@@ -40,7 +40,7 @@ export type PlacementMode = 'free' | 'manual' | 'paid'
 export type ContentKind = 'banner' | 'entity'
 export type EntityType = 'product' | 'club' | 'seller'
 
-/* حالتِ چرخشِ کمپین‌های یک جایگاه (فاز ۴) */
+/* حالت چرخش کمپین‌های یک جایگاه (فاز ۴) */
 export const ROTATION_MODES = ['fixed', 'weighted', 'fair', 'random'] as const
 export type RotationMode = typeof ROTATION_MODES[number]
 export const isRotationMode = (v: unknown): v is RotationMode =>
@@ -59,7 +59,7 @@ export interface Placement {
   /** چند کمپین هم‌زمان دیده شود (۰ = به‌اندازه‌ی ظرفیت) */
   displayCount: number
   rotationMode: RotationMode
-  /** اولویتِ جایگاه — بزرگ‌تر مهم‌تر */
+  /** اولویت جایگاه — بزرگ‌تر مهم‌تر */
   priority: number
   price: number
   durationDays: number
@@ -79,13 +79,13 @@ const toPlacement = (r: DbPlacement): Placement => ({
   isActive: r.is_active, mode: r.mode, contentKind: r.content_kind,
   entityType: r.entity_type, capacity: r.capacity, price: Number(r.price) || 0,
   durationDays: r.duration_days, sortOrder: r.sort_order,
-  /* ستون‌های فاز ۴ — پیش از مایگریشنِ ۰۱۸ ممکن است نباشند */
+  /* ستون‌های فاز ۴ — پیش از مایگریشن ۰۱۸ ممکن است نباشند */
   displayCount: Number(r.display_count ?? 0) || 0,
   rotationMode: isRotationMode(r.rotation_mode) ? r.rotation_mode : 'fair',
   priority: Number(r.priority ?? 0) || 0,
 })
 
-/** عددِ صحیحِ محدودشده — ورودیِ ادمین نباید از بازه‌ی integerِ دیتابیس بیرون بزند */
+/** عدد صحیح محدودشده — ورودی ادمین نباید از بازه‌ی integer دیتابیس بیرون بزند */
 const clampInt = (v: number, min: number, max: number): number => {
   const n = Math.round(Number(v))
   if (!Number.isFinite(n)) return min
@@ -105,7 +105,7 @@ export async function listPlacements(): Promise<Placement[]> {
     throw new Error(error.message)
   }
   const rows = (data as DbPlacement[] ?? []).map(toPlacement)
-  /* اولویتِ بالاتر اول؛ در تساوی، ترتیبِ فهرستِ ادمین */
+  /* اولویت بالاتر اول؛ در تساوی، ترتیب فهرست ادمین */
   return rows.sort((a, b) => (b.priority - a.priority) || (a.sortOrder - b.sortOrder))
 }
 
@@ -115,7 +115,7 @@ export async function getPlacement(key: string): Promise<Placement | null> {
   return toPlacement(data as DbPlacement)
 }
 
-/** تنظیماتِ مستقلِ هر جایگاه — is_active و mode جدا از هم (بدون کلیدِ سراسری) */
+/** تنظیمات مستقل هر جایگاه — is_active و mode جدا از هم (بدون کلید سراسری) */
 export async function updatePlacement(key: string, patch: Partial<{
   isActive: boolean; mode: PlacementMode; capacity: number; price: number
   durationDays: number; title: string; description: string
@@ -220,19 +220,19 @@ export interface CampaignInput {
   adminNote?: string
 }
 
-/** اعتبارسنجیِ محتوا نسبت به نوعِ جایگاه — بنر برای جایگاهِ بنری، ارجاع برای موجودیتی */
+/** اعتبارسنجی محتوا نسبت به نوع جایگاه — بنر برای جایگاه بنری، ارجاع برای موجودیتی */
 export function validateContent(placement: Placement, content: Record<string, unknown>): string | null {
   if (placement.contentKind === 'banner') {
     const img = String(content.image_url ?? '').trim()
-    if (!img) return 'تصویرِ بنر لازم است'
-    if (!/^(https?:\/\/|\/)/i.test(img)) return 'نشانیِ تصویر باید با https یا / شروع شود'
-    /* جلوی XSS ذخیره‌شده: فقط لینکِ http(s) یا مسیرِ داخلی — نه javascript: */
+    if (!img) return 'تصویر بنر لازم است'
+    if (!/^(https?:\/\/|\/)/i.test(img)) return 'نشانی تصویر باید با https یا / شروع شود'
+    /* جلوی XSS ذخیره‌شده: فقط لینک http(s) یا مسیر داخلی — نه javascript: */
     const link = String(content.link_url ?? '').trim()
-    if (link && !/^(https?:\/\/|\/)/i.test(link)) return 'لینکِ مقصد باید با https یا / شروع شود'
+    if (link && !/^(https?:\/\/|\/)/i.test(link)) return 'لینک مقصد باید با https یا / شروع شود'
     return null
   }
   const t = String(content.entity_type ?? placement.entityType ?? '')
-  if (!['product', 'club', 'seller'].includes(t)) return 'نوعِ موجودیت نامعتبر است'
+  if (!['product', 'club', 'seller'].includes(t)) return 'نوع موجودیت نامعتبر است'
   if (!String(content.ref ?? '').trim()) return 'شناسه‌ی موجودیت (ref) لازم است'
   return null
 }
@@ -277,9 +277,9 @@ export async function updateCampaign(id: string, patch: Record<string, unknown>)
   if (patch.sortOrder !== undefined) row.sort_order = Math.round(Number(patch.sortOrder) || 0)
   if (patch.adminNote !== undefined) row.admin_note = String(patch.adminNote ?? '').slice(0, 500) || null
   if (patch.extendDays !== undefined) {
-    /* «تمدید» یعنی افزودن به پایانِ فعلی، نه جایگزینی با «الان + روز» —
-       وگرنه کمپینِ جاری کوتاه می‌شد و کمپینِ زمان‌بندی‌شده با شروعِ آینده
-       قیدِ ends_at > starts_at را می‌شکست. */
+    /* «تمدید» یعنی افزودن به پایان فعلی، نه جایگزینی با «الان + روز» —
+       وگرنه کمپین جاری کوتاه می‌شد و کمپین زمان‌بندی‌شده با شروع آینده
+       قید ends_at > starts_at را می‌شکست. */
     const days = Math.max(1, Math.round(Number(patch.extendDays) || 30))
     const { data: cur } = await sb().from('campaigns').select('starts_at,ends_at').eq('id', id).maybeSingle()
     const base = Math.max(
@@ -300,7 +300,7 @@ export async function deleteCampaign(id: string): Promise<boolean> {
   return !error
 }
 
-/* ── محتوای زنده‌ی جایگاه‌ها (مسیرِ عمومی) ───────────────────── */
+/* ── محتوای زنده‌ی جایگاه‌ها (مسیر عمومی) ───────────────────── */
 
 export interface LiveCampaign {
   id: string
@@ -310,23 +310,23 @@ export interface LiveCampaign {
   weight: number
 }
 
-/* ── چرخشِ عادلانه (فاز ۴) ─────────────────────────────────────
-   هدف: «جایگاهِ ثابتِ اول یا دوم فروخته نشود». ترتیبِ کمپین‌های یک
-   جایگاه در هر درخواست بازچیده می‌شود تا تحویل میانِ همه پخش شود.
+/* ── چرخش عادلانه (فاز ۴) ─────────────────────────────────────
+   هدف: «جایگاه ثابت اول یا دوم فروخته نشود». ترتیب کمپین‌های یک
+   جایگاه در هر درخواست بازچیده می‌شود تا تحویل میان همه پخش شود.
 
-     fixed    — ترتیبِ ثابتِ sort_order (چیدمانِ انتخابیِ ادمین)
-     weighted — قرعه‌کشیِ وزنی: شانسِ هر کمپین به وزنش
-     fair     — کم‌تحویل‌ترین اول + نویزِ تصادفیِ کنترل‌شده
-     random   — بُرزدنِ کامل
+     fixed    — ترتیب ثابت sort_order (چیدمان انتخابی ادمین)
+     weighted — قرعه‌کشی وزنی: شانس هر کمپین به وزنش
+     fair     — کم‌تحویل‌ترین اول + نویز تصادفی کنترل‌شده
+     random   — بُرزدن کامل
 
-   مبنای عدالت عمداً `serves` است (شمارنده‌ای که فقط سرور هنگامِ تحویلِ
-   واقعی زیاد می‌کند) نه `impressions` که بیکنِ بدونِ احرازِ هویت آن را
+   مبنای عدالت عمداً `serves` است (شمارنده‌ای که فقط سرور هنگام تحویل
+   واقعی زیاد می‌کند) نه `impressions` که بیکن بدون احراز هویت آن را
    می‌نویسد؛ وگرنه هر کسی می‌توانست رقیبش را ته صف بفرستد.
 
-   ضمناً مبنا «نرخِ تحویل» است نه شمارشِ خام: کمپینی که یک ماه است
-   می‌چرخد طبیعتاً تحویلِ بیشتری دارد و اگر خام مقایسه می‌شد، با
-   پیوستنِ هر کمپینِ تازه تا مدت‌ها صفر می‌گرفت — یعنی تبلیغ‌کننده‌ای
-   که پول داده بود از چرخه بیرون می‌افتاد. نرخ با گذشتِ زمان خودش
+   ضمناً مبنا «نرخ تحویل» است نه شمارش خام: کمپینی که یک ماه است
+   می‌چرخد طبیعتاً تحویل بیشتری دارد و اگر خام مقایسه می‌شد، با
+   پیوستن هر کمپین تازه تا مدت‌ها صفر می‌گرفت — یعنی تبلیغ‌کننده‌ای
+   که پول داده بود از چرخه بیرون می‌افتاد. نرخ با گذشت زمان خودش
    تصحیح می‌شود و هیچ‌کس برای همیشه گرسنه نمی‌ماند. */
 type Rotatable = { id: string; weight: number; serves: number; startsAtMs: number; sortOrder: number }
 
@@ -349,7 +349,7 @@ export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationM
   if (mode === 'random') return shuffle(items)
 
   if (mode === 'weighted') {
-    /* قرعه‌کشیِ بدونِ جایگذاری: هر بار یکی به‌نسبتِ وزن انتخاب می‌شود */
+    /* قرعه‌کشی بدون جایگذاری: هر بار یکی به‌نسبت وزن انتخاب می‌شود */
     const pool = items.slice()
     const out: T[] = []
     while (pool.length) {
@@ -365,7 +365,7 @@ export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationM
     return out
   }
 
-  /* fair — نرخِ تحویل به‌ازای هر ساعتِ عمرِ کمپین، تقسیم بر وزن */
+  /* fair — نرخ تحویل به‌ازای هر ساعت عمر کمپین، تقسیم بر وزن */
   const now = Date.now()
   const keyed = items.map(x => {
     const hours = Math.max(1, (now - x.startsAtMs) / HOUR)
@@ -374,11 +374,11 @@ export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationM
 
   const ks = keyed.map(r => r.k)
   const spread = Math.max(...ks) - Math.min(...ks)
-  /* همه هم‌رده (مثلاً همه تازه) ⇒ ترتیبِ کاملاً تصادفی، نه ترتیبِ جدول */
+  /* همه هم‌رده (مثلاً همه تازه) ⇒ ترتیب کاملاً تصادفی، نه ترتیب جدول */
   if (spread <= 0) return shuffle(items)
 
-  /* نویز نسبت به پراکندگیِ همان کلیدها مقیاس می‌گیرد: تساوی‌ها را
-     تصادفی می‌کند ولی عقب‌ماندگیِ واقعی را پنهان نمی‌کند */
+  /* نویز نسبت به پراکندگی همان کلیدها مقیاس می‌گیرد: تساوی‌ها را
+     تصادفی می‌کند ولی عقب‌ماندگی واقعی را پنهان نمی‌کند */
   const jitter = spread * 0.25
   return keyed
     .map(r => ({ x: r.x, k: r.k + Math.random() * jitter }))
@@ -386,9 +386,9 @@ export function rotateCampaigns<T extends Rotatable>(items: T[], mode: RotationM
     .map(r => r.x)
 }
 
-/** کمپین‌های قابلِ نمایشِ هر جایگاهِ فعال.
-    فقط ACTIVE در پنجره‌ی زمانی؛ جایگاهِ غیرفعال اصلاً برنمی‌گردد —
-    نمایش هیچ وابستگی‌ای به هیچ کلیدِ سراسری‌ای ندارد. */
+/** کمپین‌های قابل نمایش هر جایگاه فعال.
+    فقط ACTIVE در پنجره‌ی زمانی؛ جایگاه غیرفعال اصلاً برنمی‌گردد —
+    نمایش هیچ وابستگی‌ای به هیچ کلید سراسری‌ای ندارد. */
 export type LivePlacementMeta = Pick<Placement,
   'key' | 'contentKind' | 'entityType' | 'capacity' | 'mode' | 'rotationMode' | 'priority'
 > & { displayCount: number }
@@ -397,10 +397,10 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
   const placements = (await listPlacements()).filter(p => p.isActive && (!onlyKey || p.key === onlyKey))
   if (placements.length === 0) return {}
 
-  /* مهلتِ کوچکِ اختلافِ ساعت: زمانِ شروع/پایان را دیتابیس می‌نویسد ولی
-     این فیلتر با ساعتِ سرورِ اپ اجرا می‌شود. حتی چند ثانیه اختلاف یعنی
+  /* مهلت کوچک اختلاف ساعت: زمان شروع/پایان را دیتابیس می‌نویسد ولی
+     این فیلتر با ساعت سرور اپ اجرا می‌شود. حتی چند ثانیه اختلاف یعنی
      کمپینی که همین حالا تأیید و ACTIVE شده، تا آن چند ثانیه نامرئی
-     بماند — برای تبلیغِ پولی پذیرفتنی نیست. دو دقیقه ارفاق این را
+     بماند — برای تبلیغ پولی پذیرفتنی نیست. دو دقیقه ارفاق این را
      می‌بندد و در عوض حداکثر دو دقیقه زودتر شروع‌شدن هزینه‌ای ندارد. */
   const SKEW = 120_000
   const startBound = new Date(Date.now() + SKEW).toISOString()
@@ -415,14 +415,14 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
   if (error) return {}
 
   /* اول همه‌ی نامزدهای هر جایگاه جمع می‌شوند، بعد چرخش اعمال و در
-     پایان به تعدادِ نمایش بریده می‌شود — اگر مثلِ قبل حینِ جمع‌آوری
-     بریده می‌شد، همان چند کمپینِ اولِ sort_order همیشه برنده بودند و
-     چرخشِ عادلانه بی‌اثر می‌شد. */
+     پایان به تعداد نمایش بریده می‌شود — اگر مثل قبل حین جمع‌آوری
+     بریده می‌شد، همان چند کمپین اول sort_order همیشه برنده بودند و
+     چرخش عادلانه بی‌اثر می‌شد. */
   const pool: Record<string, (LiveCampaign & Rotatable)[]> = {}
   for (const p of placements) pool[p.key] = []
   for (const r of (data as DbCampaign[] ?? [])) {
     const bucket = pool[r.placement_key]
-    if (!bucket) continue                                   // جایگاهِ غیرفعال
+    if (!bucket) continue                                   // جایگاه غیرفعال
     bucket.push({
       id: r.id, title: r.title, advertiser: r.advertiser,
       content: r.content ?? {}, weight: Math.max(1, r.weight),
@@ -451,16 +451,16 @@ export async function livePlacements(onlyKey?: string): Promise<Record<string, {
     }
   }
 
-  /* شمارنده‌ی سرورمحورِ تحویل — همان چیزی که چرخشِ عادلانه بر پایه‌اش
-     تصمیم می‌گیرد؛ یک رفت‌وبرگشت برای کلِ صفحه. await عمدی است چون
-     روی سرورلس کارِ رهاشده بعد از پاسخ ممکن است اجرا نشود. */
+  /* شمارنده‌ی سرورمحور تحویل — همان چیزی که چرخش عادلانه بر پایه‌اش
+     تصمیم می‌گیرد؛ یک رفت‌وبرگشت برای کل صفحه. await عمدی است چون
+     روی سرورلس کار رهاشده بعد از پاسخ ممکن است اجرا نشود. */
   if (served.length) {
     try { await sb().rpc('bh_bump_serves', { p_ids: served }) } catch { /* شمارنده مهم‌تر از صفحه نیست */ }
   }
   return out
 }
 
-/** شمارشِ اتمیک — جایگزینِ read-then-update قبلی */
+/** شمارش اتمیک — جایگزین read-then-update قبلی */
 export async function trackCampaign(id: string, kind: 'impression' | 'click'): Promise<void> {
   try { await sb().rpc('bh_track_campaign', { p_campaign_id: id, p_kind: kind }) } catch { /* شمارنده مهم‌تر از صفحه نیست */ }
 }
@@ -482,7 +482,7 @@ export interface PricingPlan {
   price: number
   durationDays: number
   adQuantity: number
-  /** اعتبارِ کمپینی که با خریدِ پلن داده می‌شود (فاز ۵ مصرفش می‌کند) */
+  /** اعتبار کمپینی که با خرید پلن داده می‌شود (فاز ۵ مصرفش می‌کند) */
   creditAmount: number
   isActive: boolean
   sortOrder: number
@@ -532,7 +532,7 @@ export async function updatePricingPlan(id: string, patch: Partial<{
   if (patch.isActive !== undefined) row.is_active = patch.isActive
   if (patch.sortOrder !== undefined) row.sort_order = Math.round(patch.sortOrder)
   if (patch.badge !== undefined) row.badge = patch.badge || null
-  /* جابه‌جاییِ پلن بینِ جایگاه‌ها؛ null یعنی پلنِ عمومیِ آگهی */
+  /* جابه‌جایی پلن بین جایگاه‌ها؛ null یعنی پلن عمومی آگهی */
   if (patch.placementKey !== undefined) {
     row.placement_key = patch.placementKey && isPlacementKey(patch.placementKey) ? patch.placementKey : null
   }
@@ -562,8 +562,8 @@ export async function createPricingPlan(input: {
 }
 
 /**
- * حذفِ واقعیِ پلن — فقط وقتی هیچ سفارشی به آن ارجاع ندارد.
- * پلنِ فروخته‌شده هرگز حذف نمی‌شود (سفارش‌ها و اعتبارها به آن اشاره
+ * حذف واقعی پلن — فقط وقتی هیچ سفارشی به آن ارجاع ندارد.
+ * پلن فروخته‌شده هرگز حذف نمی‌شود (سفارش‌ها و اعتبارها به آن اشاره
  * دارند)؛ در آن حالت فقط غیرفعال می‌شود.
  */
 export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deactivated?: boolean; message?: string }> {
@@ -571,11 +571,11 @@ export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deac
   const credited = await sb().from('ad_credits').select('id', { count: 'exact', head: true }).eq('plan_id', id)
 
   /* اگر نتوانستیم مطمئن شویم که ارجاعی نیست، حذف نمی‌کنیم — تاریخچه‌ی
-     مالی ارزشِ fail-open ندارد. (FK دیتابیس هم لایه‌ی آخر است.) */
+     مالی ارزش fail-open ندارد. (FK دیتابیس هم لایه‌ی آخر است.) */
   if (used.error || credited.error) {
     const plan = await updatePricingPlan(id, { isActive: false })
     return plan
-      ? { ok: true, deactivated: true, message: 'بررسیِ سفارش‌ها ممکن نشد؛ برای احتیاط پلن فقط غیرفعال شد.' }
+      ? { ok: true, deactivated: true, message: 'بررسی سفارش‌ها ممکن نشد؛ برای احتیاط پلن فقط غیرفعال شد.' }
       : { ok: false, message: 'انجام نشد' }
   }
 
@@ -584,7 +584,7 @@ export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deac
   if (refCount > 0) {
     const plan = await updatePricingPlan(id, { isActive: false })
     return plan
-      ? { ok: true, deactivated: true, message: 'این پلن سفارشِ ثبت‌شده دارد؛ به‌جای حذف، غیرفعال شد.' }
+      ? { ok: true, deactivated: true, message: 'این پلن سفارش ثبت‌شده دارد؛ به‌جای حذف، غیرفعال شد.' }
       : { ok: false, message: 'غیرفعال‌سازی انجام نشد' }
   }
 
@@ -592,7 +592,7 @@ export async function deletePricingPlan(id: string): Promise<{ ok: boolean; deac
   return error ? { ok: false, message: 'حذف انجام نشد' } : { ok: true }
 }
 
-/** پلن‌های فعالِ یک جایگاه — پله‌های مدت که کاربر می‌تواند بخرد */
+/** پلن‌های فعال یک جایگاه — پله‌های مدت که کاربر می‌تواند بخرد */
 export async function plansForPlacement(key: string): Promise<PricingPlan[]> {
   const { data, error } = await sb().from('ad_pricing_plans').select('*')
     .eq('placement_key', key).eq('is_active', true).order('sort_order', { ascending: true })
@@ -600,7 +600,7 @@ export async function plansForPlacement(key: string): Promise<PricingPlan[]> {
   return (data as DbPricingPlan[] ?? []).map(toPricingPlan)
 }
 
-/* ── آمارِ پنل ادمین (فاز ۴) ─────────────────────────────────── */
+/* ── آمار پنل ادمین (فاز ۴) ─────────────────────────────────── */
 
 export interface AdStats {
   campaigns: { total: number; active: number; pending: number; expired: number; scheduled: number; draft: number; rejected: number; cancelled: number }
@@ -612,15 +612,15 @@ export interface AdStats {
 }
 
 /**
- * آمارِ کلیِ تبلیغات — کمپین‌ها، نمایش/کلیک/CTR و درآمد.
+ * آمار کلی تبلیغات — کمپین‌ها، نمایش/کلیک/CTR و درآمد.
  *
- * عمداً روی فهرستِ صفحه‌بندی‌شده‌ی پنل حساب نمی‌شود: آن فهرست سقفِ
- * ۵۰۰ ردیف دارد و با رشدِ کمپین‌ها، آمار بی‌صدا کمتر از واقعیت
+ * عمداً روی فهرست صفحه‌بندی‌شده‌ی پنل حساب نمی‌شود: آن فهرست سقف
+ * ۵۰۰ ردیف دارد و با رشد کمپین‌ها، آمار بی‌صدا کمتر از واقعیت
  * گزارش می‌شد. این تابع خودش همه‌ی ردیف‌های لازم را می‌خواند.
  */
 export async function adStats(placements: Placement[]): Promise<AdStats> {
   const rows: { placement_key: string; status: string; impressions: number; clicks: number }[] = []
-  /* خواندنِ صفحه‌به‌صفحه تا ته جدول — نه یک برشِ ثابت */
+  /* خواندن صفحه‌به‌صفحه تا ته جدول — نه یک برش ثابت */
   const PAGE = 1000
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await sb().from('campaigns')
@@ -631,7 +631,7 @@ export async function adStats(placements: Placement[]): Promise<AdStats> {
     const chunk = (data as typeof rows | null) ?? []
     rows.push(...chunk)
     if (chunk.length < PAGE) break
-    if (from > 200_000) break                    // مهارِ ایمنی
+    if (from > 200_000) break                    // مهار ایمنی
   }
 
   const countOf = (...st: string[]) => rows.filter(r => st.includes(r.status)).length
@@ -651,7 +651,7 @@ export async function adStats(placements: Placement[]): Promise<AdStats> {
   const clicks = rows.reduce((s, x) => s + (Number(x.clicks) || 0), 0)
   const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0
 
-  /* درآمد از سفارش‌های پرداخت‌شده‌ی جایگاه؛ جریانِ خریدش در فاز ۵ کامل
+  /* درآمد از سفارش‌های پرداخت‌شده‌ی جایگاه؛ جریان خریدش در فاز ۵ کامل
      می‌شود، پس تا آن‌وقت طبیعی است که صفر باشد. */
   let revenue = { total: 0, orders: 0, pendingOrders: 0 }
   try {

@@ -50,16 +50,16 @@ function SR({
 ═══════════════════════════════════════════════════════════════ */
 const GOLD     = '#C7A66A';
 const GOLD_D   = '#A07840';
-/* رنگِ متنِ دکمه‌های طلایی. GOLD_D روی پس‌زمینه‌ی rgba(199,166,106,0.12)
-   فقط ۳٫۵۵:۱ می‌داد که زیرِ حدِ ۴٫۵:۱ است؛ این یکی ۴٫۹۵:۱ می‌دهد.
+/* رنگ متن دکمه‌های طلایی. GOLD_D روی پس‌زمینه‌ی rgba(199,166,106,0.12)
+   فقط ۳٫۵۵:۱ می‌داد که زیر حد ۴٫۵:۱ است؛ این یکی ۴٫۹۵:۱ می‌دهد.
    حدس زدن جواب نداد — محاسبه شد. */
 const CTA_INK  = '#8A6020';
 const GOLD_DIM = 'rgba(199,166,106,0.60)';
 const GOLD_BOR = 'rgba(199,166,106,0.22)';
 
-/* لرزشِ کوتاه هنگام تعویضِ کارت.
+/* لرزش کوتاه هنگام تعویض کارت.
 
-   مرورگر `navigator.vibrate` را پیش از اولین لمسِ کاربر مسدود می‌کند و
+   مرورگر `navigator.vibrate` را پیش از اولین لمس کاربر مسدود می‌کند و
    هر بار یک خطا در کنسول می‌گذارد — همان چیزی که نمره‌ی Best Practices
    را پایین نگه داشته بود. این کمکی تا وقتی کاربر واقعاً چیزی لمس نکرده
    اصلاً صدایش نمی‌زند. */
@@ -146,14 +146,14 @@ const IMG = {
 ═══════════════════════════════════════════════════════════════ */
 const HERO_SLIDES = [
   { bg: '/images/hero/1.webp',   accent: GRN,  label: 'باشگاه‌ها' },
-  /* اسلاید دوم عوض شد و پسوندش هم از png به jpg تغییر کرد؛ مسیرِ قبلی
+  /* اسلاید دوم عوض شد و پسوندش هم از png به jpg تغییر کرد؛ مسیر قبلی
      دیگر وجود نداشت و ۴۰۴ می‌داد. */
   /* ?v=2 — تصویر با همان نام عوض شد. چون تصاویر یک هفته کش می‌شوند،
-     بدونِ این پارامتر مرورگرِ بازدیدکننده‌های قبلی تا هفته‌ی بعد نسخه‌ی
+     بدون این پارامتر مرورگر بازدیدکننده‌های قبلی تا هفته‌ی بعد نسخه‌ی
      قدیمی را نشان می‌داد. هر بار که این فایل عوض شد، عدد را جلو ببرید. */
   { bg: '/images/hero/2.webp?v=2', accent: GOLD, label: 'تجهیزات'   },
   { bg: '/images/hero/3.webp',   accent: BLU,  label: 'مربیان'    },
-  /* ?v=2 — فایل هم‌نام عوض شده؛ بدونِ ورژن، کش CDN/مرورگر عکسِ قبلی را می‌داد */
+  /* ?v=2 — فایل هم‌نام عوض شده؛ بدون ورژن، کش CDN/مرورگر عکس قبلی را می‌داد */
   { bg: '/images/hero/4.webp', accent: BRN, label: 'رقابت' },
 ];
 
@@ -207,20 +207,20 @@ const FILTER_DATA: Record<string, { label: string; opts: string[] }[]> = {
 /* ═══════════════════════════════════════════════════════════════
    CONTENT DATA
 ═══════════════════════════════════════════════════════════════ */
-/* باشگاه‌های پیشنهادیِ صفحه‌ی اصلی */
+/* باشگاه‌های پیشنهادی صفحه‌ی اصلی */
 const FEATURED_COUNT = 8
 
-/* شکلِ داده‌ای که کارت‌های صفحه‌ی اصلی انتظار دارند. سه آرایه‌ی
+/* شکل داده‌ای که کارت‌های صفحه‌ی اصلی انتظار دارند. سه آرایه‌ی
    هاردکد (باشگاه‌ها، محصولات، فروشگاه‌ها) که این‌جا بودند حذف شدند:
    هیچ‌کدام وجود خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید. حالا از
    /api/clubs، /api/products و /api/sellers پر می‌شوند. */
 /* تایپ‌ها در `lib/home-types.ts` زندگی می‌کنند تا `lib/home-featured.ts`
-   (که روی سرور اجرا می‌شود) بتواند بدونِ کشیدنِ این فایلِ 'use client'
-   به گرافِ سرور از آن‌ها استفاده کند. */
+   (که روی سرور اجرا می‌شود) بتواند بدون کشیدن این فایل 'use client'
+   به گراف سرور از آن‌ها استفاده کند. */
 export type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 import type { RealClub, RealProduct, RealStore } from '../lib/home-types';
 
-/* پاسخِ خامِ APIها */
+/* پاسخ خام APIها */
 interface ApiClub {
   id: string; name: string; city?: string; images?: string[]; hasActiveStory?: boolean
   snookerTables?: number; pocketTables?: number; highballTables?: number
@@ -235,8 +235,8 @@ interface ApiStore {
   sellerProfile?: { storeName?: string; city?: string; logo?: string; specialty?: string } | null
 }
 
-/* وقتی باشگاهِ واقعی عکس ندارد — تصویرِ عمومیِ بیلیارد، نه عکسِ باشگاهِ
-   دیگری که القا کند مالِ همین باشگاه است */
+/* وقتی باشگاه واقعی عکس ندارد — تصویر عمومی بیلیارد، نه عکس باشگاه
+   دیگری که القا کند مال همین باشگاه است */
 const CLUB_IMG_FALLBACK = [IMG.club1, IMG.club2, IMG.club3, IMG.club4, IMG.club5, IMG.club6];
 
 /* SERVICES_LIST به components/home/ServicesSection.tsx منتقل شد */
@@ -262,9 +262,9 @@ const NEWS = [
 function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?: string; featured?: boolean }) {
   const [hov, setHov]       = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-  /* تفکیکِ میزها فقط از عددِ اعلام‌شده‌ی خودِ باشگاه.
+  /* تفکیک میزها فقط از عدد اعلام‌شده‌ی خود باشگاه.
 
-     پیش‌تر اگر تفکیک نبود، از رویِ جمعِ کل یک تقسیمِ تقریبی می‌ساخت
+     پیش‌تر اگر تفکیک نبود، از روی جمع کل یک تقسیم تقریبی می‌ساخت
      (۵۰٪ اسنوکر، ۳۰٪ پاکت، بقیه هی‌بال). برای کارت‌های نمونه بی‌ضرر
      بود، ولی حالا که همه‌ی باشگاه‌ها واقعی‌اند یعنی به بازدیدکننده
      عددی گفته می‌شود که باشگاه هیچ‌وقت اعلامش نکرده. */
@@ -375,9 +375,9 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             <div style={{ flex: 1 }} />
             <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '6px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              {/* هاور با CSS انجام می‌شود، نه با stateِ `hov`.
-                  دو سود: استایلِ تکراری از HTML بیرون می‌رود، و هر
-                  ورود/خروجِ ماوس دیگر یک رندرِ React راه نمی‌اندازد. */}
+              {/* هاور با CSS انجام می‌شود، نه با state `hov`.
+                  دو سود: استایل تکراری از HTML بیرون می‌رود، و هر
+                  ورود/خروج ماوس دیگر یک رندر React راه نمی‌اندازد. */}
               <div className="cta-lq" style={{ borderRadius: rad }}>
                 مشاهده و رزرو
               </div>
@@ -388,16 +388,16 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            /* پدینگِ پایین ۲۰px.
-               کامنتِ قبلی اینجا وارونه بود: چون spacerِ `flex:1` دکمه را
-               به کفِ پنل می‌چسباند، *کم‌کردن* پدینگ دکمه را پایین‌تر
+            /* پدینگ پایین ۲۰px.
+               کامنت قبلی اینجا وارونه بود: چون spacer `flex:1` دکمه را
+               به کف پنل می‌چسباند، *کم‌کردن* پدینگ دکمه را پایین‌تر
                می‌برد نه بالاتر. پدینگ ۲۴→۱۶→۱۰ کم شده بود و دکمه هر بار
                به کف نزدیک‌تر می‌شد. حالا زیادش می‌کنیم تا واقعاً بالا
-               بیاید و کفِ کارت نفس بکشد. */
+               بیاید و کف کارت نفس بکشد. */
             padding: '17px 7px 20px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-            /* gap ۹ → ۶: اندازه‌گیری نشان داد مجموعِ محتوا دقیقاً ۱۲px از
-               پنل بلندتر بود، پس spacerِ `flex:1` صفر می‌شد و پدینگِ
+            /* gap ۹ → ۶: اندازه‌گیری نشان داد مجموع محتوا دقیقاً ۱۲px از
+               پنل بلندتر بود، پس spacer `flex:1` صفر می‌شد و پدینگ
                پایین بلعیده می‌شد — دکمه فقط ۴px از کف فاصله داشت.
                چهار gap × ۳px همان ۱۲px را آزاد می‌کند. */
             overflow: 'hidden', gap: '6px',
@@ -438,15 +438,15 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   BAZAAR CARD — دقیقاً فرمتِ کارتِ صفحه‌ی بیلیارد بازار (/shop)؛
+   BAZAAR CARD — دقیقاً فرمت کارت صفحه‌ی بیلیارد بازار (/shop)؛
    یک کارت برای دسکتاپ و موبایل (کارت سفید، حاشیه‌ی نازک،
-   پیلِ ٪ بنفش، قیمتِ خط‌خورده).
+   پیل ٪ بنفش، قیمت خط‌خورده).
 ═══════════════════════════════════════════════════════════════ */
-/* استایل‌های ثابتِ این کارت به کلاس رفتند، نه `style` اینلاین.
+/* استایل‌های ثابت این کارت به کلاس رفتند، نه `style` اینلاین.
 
-   چرا: این کارت ۲۴ بار روی صفحه رندر می‌شود (محصولات × دو کپیِ مارکی).
+   چرا: این کارت ۲۴ بار روی صفحه رندر می‌شود (محصولات × دو کپی مارکی).
    هر بار همان رشته‌ی استایل عیناً در HTML تکرار می‌شد. اندازه‌گیری روی
-   HTMLِ واقعیِ سایت: ۸۴۰ ویژگیِ style اینلاین، ۱۰۱KB، که ۶۲KBاش
+   HTML واقعی سایت: ۸۴۰ ویژگی style اینلاین، ۱۰۱KB، که ۶۲KBاش
    صرفاً تکرار بود — همین کارت بزرگ‌ترین سهم را داشت.
 
    کلاس یک‌بار در CSS می‌آید و بی‌نهایت بار استفاده می‌شود؛ مرورگر هم
@@ -488,7 +488,7 @@ function BazaarCard({ p, className, style }: { p: RealProduct; className?: strin
             <span dir="ltr" className="bz-pct">٪{p.pct.toLocaleString('fa-IR')}</span>
           )}
           <div className="bz-prices">
-            {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمتِ اصلی جا برای مبلغ + پیلِ تخفیف داشته باشد */}
+            {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل تخفیف داشته باشد */}
             {p.pct > 0 && (
               <div className="bz-old">
                 {p.price.toLocaleString('fa-IR')} <span className="bz-unit">تومان</span>
@@ -544,7 +544,7 @@ function SellerCard({ s }: { s: RealStore }) {
           <MapPin size={9} style={{ color: GOLD }} />{s.city}
         </div>
         <div style={{ fontSize: '11px', color: TEXT_M, marginTop: '1px' }}>{s.specialty}</div>
-        {/* امتیاز فقط وقتی واقعی باشد — برای فروشگاهِ تازه چیزی جعل نمی‌شود */}
+        {/* امتیاز فقط وقتی واقعی باشد — برای فروشگاه تازه چیزی جعل نمی‌شود */}
         {s.rating > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '6px' }}>
             <Star size={10} style={{ color: '#F5A623', fill: '#F5A623' }} />
@@ -737,9 +737,9 @@ function DiscoveryPanel() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOME MEDIA BAND — پوسترِ سینماییِ «بیلیارد مدیا» بین بازار و
-   فروشندگان. بریکِ تیره بین دو سکشنِ روشن، به هویتِ «سالن نمایش»
-   (/media): شارکُل-برنزی، پرفراژِ فیلم، پلیِ طلایی، دیوارِ پوستر.
+   HOME MEDIA BAND — پوستر سینمایی «بیلیارد مدیا» بین بازار و
+   فروشندگان. بریک تیره بین دو سکشن روشن، به هویت «سالن نمایش»
+   (/media): شارکُل-برنزی، پرفراژ فیلم، پلی طلایی، دیوار پوستر.
 ═══════════════════════════════════════════════════════════════ */
 const MEDIA_FEAT  = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0]!;
 const MEDIA_MINIS = [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== MEDIA_FEAT.id).slice(0, 3);
@@ -767,7 +767,7 @@ function HomeMediaBand() {
         .hm-band::before, .hm-band::after { content: ''; position: absolute; inset-inline: 0; height: 1px; z-index: 7;
           background: linear-gradient(90deg, transparent, rgba(199,166,106,0.5), transparent); }
         .hm-band::before { top: 0; } .hm-band::after { bottom: 0; }
-        /* پرفراژِ فیلم — امضای سالن نمایش */
+        /* پرفراژ فیلم — امضای سالن نمایش */
         .hm-perf { position: absolute; inset-inline: 0; height: 7px; z-index: 6; opacity: .95; pointer-events: none;
           background: repeating-linear-gradient(90deg, rgba(183,156,255,0.4) 0 14px, transparent 14px 32px); }
         .hm-perf-t { top: 5px; } .hm-perf-b { bottom: 5px; }
@@ -777,12 +777,12 @@ function HomeMediaBand() {
         .hm-poster { position: absolute; top: 0; bottom: 0; left: 0; width: 52%; z-index: 0; overflow: hidden;
           -webkit-mask-image: linear-gradient(to right, black 44%, transparent 96%);
           mask-image: linear-gradient(to right, black 44%, transparent 96%); }
-        /* صحنه‌ی سینمایی — تماماً CSS/SVG، بدون عکس؛ المان‌ها بنفشِ درخشان */
+        /* صحنه‌ی سینمایی — تماماً CSS/SVG، بدون عکس؛ المان‌ها بنفش درخشان */
         .hm-stage { position: absolute; inset: 0;
           background: radial-gradient(ellipse 70% 62% at 26% 100%, rgba(139,92,246,0.18), transparent 62%),
                       radial-gradient(ellipse 50% 50% at 20% 6%, rgba(167,139,250,0.10), transparent 60%),
                       linear-gradient(120deg, #0D0B12 0%, #16121D 60%, #0D0B10 100%); }
-        /* پرتوی نورِ پروژکتور از بالا-چپ */
+        /* پرتوی نور پروژکتور از بالا-چپ */
         .hm-beam { position: absolute; top: -12%; left: 6%; width: 68%; height: 130%;
           background: conic-gradient(from 158deg at 18% 0%, transparent 0deg, rgba(196,171,255,0.26) 12deg, rgba(167,139,250,0.10) 26deg, transparent 38deg);
           filter: blur(5px); animation: hmBeam 9s ease-in-out infinite; transform-origin: 18% 0%; }
@@ -807,7 +807,7 @@ function HomeMediaBand() {
           animation: hmPlayPulse 2.1s ease-out infinite;
           transition: transform .3s cubic-bezier(.22,1,.36,1), background .25s; }
         .hm-play:hover { transform: translate(-50%,-50%) scale(1.09); background: rgba(139,92,246,0.26); }
-        /* نقطه‌ی بنفشِ چشمک‌زنِ NOW SHOWING */
+        /* نقطه‌ی بنفش چشمک‌زن NOW SHOWING */
         @keyframes hmDot { 0%,100% { opacity: 1; box-shadow: 0 0 7px rgba(183,156,255,0.8); } 50% { opacity: .2; box-shadow: none; } }
         .hm-nsdot { width: 6px; height: 6px; border-radius: 50%; background: #B79CFF; flex-shrink: 0;
           animation: hmDot 1.6s ease-in-out infinite; }
@@ -831,7 +831,7 @@ function HomeMediaBand() {
         .hm-feat-title { font-size: clamp(12.5px, 1.35vw, 15px); font-weight: 800; color: rgba(255,255,255,0.88);
           line-height: 1.7; margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .hm-cta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-        /* دکمه‌ها — طرح LQ با تینتِ بنفش (هم‌رنگِ پوستر) */
+        /* دکمه‌ها — طرح LQ با تینت بنفش (هم‌رنگ پوستر) */
         .hm-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px;
           text-decoration: none; font-size: 13px; font-weight: 800; color: #B79CFF;
           background: rgba(139,92,246,0.14); border: 1px solid rgba(167,139,250,0.45);
@@ -842,7 +842,7 @@ function HomeMediaBand() {
           border: 1px solid rgba(167,139,250,0.4); border-radius: 10px; padding: 9px 16px;
           transition: transform .25s cubic-bezier(.22,1,.36,1), background .2s, box-shadow .25s; }
         .hm-all:hover { transform: translateY(-2px); background: rgba(139,92,246,0.22); box-shadow: 0 8px 22px rgba(139,92,246,0.24); }
-        /* دیوارِ پوستر — سه ویدیوی پربازدید */
+        /* دیوار پوستر — سه ویدیوی پربازدید */
         .hm-minis { display: flex; gap: 10px; margin-top: 10px; }
         .hm-mini { position: relative; width: 118px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
           border: 1px solid rgba(255,255,255,0.12); flex-shrink: 0;
@@ -854,7 +854,7 @@ function HomeMediaBand() {
           font-variant-numeric: tabular-nums; }
         .hm-anim { animation: hmIn .6s cubic-bezier(.22,1,.36,1) both; }
         @media (max-width: 760px) {
-          /* صحنه‌ی بنفش تمام‌پهنا؛ دوربین پایین، زیرِ پرتوی نور */
+          /* صحنه‌ی بنفش تمام‌پهنا؛ دوربین پایین، زیر پرتوی نور */
           .hm-poster { width: 100%; opacity: .85;
             -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
@@ -867,12 +867,12 @@ function HomeMediaBand() {
             width: 44px; height: 44px; }
           .hm-play:hover { transform: scale(1.08); }
           .hm-wrap { min-height: 0; padding-block: 26px 24px; }
-          /* NOW SHOWING: بدونِ بازدید؛ عنوانِ ریزتر زیرِ لیبل */
+          /* NOW SHOWING: بدون بازدید؛ عنوان ریزتر زیر لیبل */
           .hm-views, .hm-featdot { display: none; }
           .hm-feat { flex-wrap: wrap; gap: 6px; }
           .hm-feat-title { flex-basis: 100%; font-size: 11px; line-height: 1.8; color: rgba(255,255,255,0.7);
             -webkit-line-clamp: 2; }
-          /* فقط «همه ویدیوها»، سمتِ راست (جای قبلیِ تماشای ویدیو) */
+          /* فقط «همه ویدیوها»، سمت راست (جای قبلی تماشای ویدیو) */
           .hm-cta { display: none; }
           .hm-all { padding: 8px 14px; font-size: 11.5px; gap: 5px; border-radius: 9px; }
         }
@@ -882,12 +882,12 @@ function HomeMediaBand() {
       <div className="hm-perf hm-perf-t" aria-hidden />
       <div className="hm-perf hm-perf-b" aria-hidden />
 
-      {/* پوسترِ سینمایی — صحنه‌ی CSS/SVG: دوربین فیلم‌برداری + نور پروژکتور */}
+      {/* پوستر سینمایی — صحنه‌ی CSS/SVG: دوربین فیلم‌برداری + نور پروژکتور */}
       <div className="hm-poster" aria-hidden>
         <div className="hm-stage" />
         <div className="hm-beam" />
         <div className="hm-flare" />
-        {/* دوربین سینمایی — لاین‌آرتِ طلایی */}
+        {/* دوربین سینمایی — لاین‌آرت طلایی */}
         <svg className="hm-cam" viewBox="0 0 220 150" fill="none" stroke="#B79CFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           {/* حلقه‌های فیلم */}
           <circle cx="78" cy="28" r="20" opacity=".9" />
@@ -918,10 +918,10 @@ function HomeMediaBand() {
       <div className="hm-wrap">
         <span className="hm-kicker hm-anim"><Clapperboard size={11} /> BILLIARD MEDIA</span>
         <h3 className="hm-title hm-anim" style={{ animationDelay: '60ms' }}>
-          بیلیارد <b>مدیا</b> — سالنِ نمایشِ دنیای بیلیارد
+          بیلیارد <b>مدیا</b> — سالن نمایش دنیای بیلیارد
         </h3>
         <p className="hm-tag hm-anim" style={{ animationDelay: '110ms' }}>
-          آموزش‌های حرفه‌ای، هایلایتِ مسابقات و مصاحبه‌های اختصاصی — در پلتفرم ویدیویی بیلیارد هاب
+          آموزش‌های حرفه‌ای، هایلایت مسابقات و مصاحبه‌های اختصاصی — در پلتفرم ویدیویی بیلیارد هاب
         </p>
         <div className="hm-feat hm-anim" style={{ animationDelay: '160ms' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 9.5, fontWeight: 800, letterSpacing: '0.18em', color: '#E8CE96', flexShrink: 0 }}><span className="hm-nsdot" /> NOW SHOWING</span>
@@ -952,8 +952,8 @@ function HomeMediaBand() {
 
 export default function HomeClient({ initialPlacements, initialFeatured, servicesSlot, exploreSlot }: {
   initialPlacements?: Partial<Record<PlacementKey, PlacementState>>
-  /* باشگاه/محصول/فروشگاهِ واقعی، خوانده‌شده روی سرور — تا کارت‌ها در
-     HTMLِ اولیه باشند و صفحه هنگامِ لود نپرد. */
+  /* باشگاه/محصول/فروشگاه واقعی، خوانده‌شده روی سرور — تا کارت‌ها در
+     HTML اولیه باشند و صفحه هنگام لود نپرد. */
   initialFeatured?: { clubs: RealClub[]; products: RealProduct[]; stores: RealStore[] }
   /* Server Component که این‌جا فقط رندر می‌شود — هیچ JSای همراهش نیست */
   servicesSlot?: React.ReactNode
@@ -977,13 +977,13 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
   const clubsSliderRef = useRef<HTMLDivElement>(null);
   const clubsDeskRef = useRef<HTMLDivElement>(null);
-  /* چرخِ ماوس و درگ روی نوارِ باشگاه‌ها */
+  /* چرخ ماوس و درگ روی نوار باشگاه‌ها */
   useHorizontalScroll(clubsDeskRef);
 
   /* ── سکشن‌های ویژه (فاز ۲): placement-driven با fallback ──
-     اگر ادمین برای جایگاهِ موجودیتی کمپینِ فعال ساخته باشد، همان‌ها
+     اگر ادمین برای جایگاه موجودیتی کمپین فعال ساخته باشد، همان‌ها
      نمایش داده می‌شوند؛ وگرنه داده‌ی نمونه‌ی فعلی — تا وقتی جایگاه‌ها
-     پر نشده‌اند ظاهرِ سایت ذره‌ای عوض نشود. */
+     پر نشده‌اند ظاهر سایت ذره‌ای عوض نشود. */
   const prodSlot = usePlacementState('market_featured_products_homepage', initialPlacements?.market_featured_products_homepage);
   const clubSlot = usePlacementState('featured_clubs_homepage', initialPlacements?.featured_clubs_homepage);
   const storeSlot = usePlacementState('featured_equipment_stores_homepage', initialPlacements?.featured_equipment_stores_homepage);
@@ -991,11 +991,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const featClubs = clubSlot.items;
   const featStores = storeSlot.items;
 
-  /* «غیرفعال ⇒ اصلاً نمایش داده نشود» (قانونِ فاز ۵).
-     حالتِ loading عمداً سکشن را نگه می‌دارد تا صفحه هنگامِ بارگذاری نپرد.
-     در حالتِ «دستی/پولی» اگر ادمین هنوز چیزی انتخاب نکرده، سکشن حذف
+  /* «غیرفعال ⇒ اصلاً نمایش داده نشود» (قانون فاز ۵).
+     حالت loading عمداً سکشن را نگه می‌دارد تا صفحه هنگام بارگذاری نپرد.
+     در حالت «دستی/پولی» اگر ادمین هنوز چیزی انتخاب نکرده، سکشن حذف
      می‌شود و به داده‌ی نمونه برنمی‌گردد — وگرنه ادمین فکر می‌کند
-     جایگاه خالی است ولی کاربر یک فهرستِ نمونه‌ی پر می‌بیند. */
+     جایگاه خالی است ولی کاربر یک فهرست نمونه‌ی پر می‌بیند. */
   const sectionVisible = (p: { status: string; mode: string | null; items: unknown[] | null }) => {
     if (p.status === 'loading') return true;
     if (p.status === 'off') return false;
@@ -1006,8 +1006,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const showClubs = sectionVisible(clubSlot);
   const showStores = sectionVisible(storeSlot);
 
-  /* دو بنرِ کناری در همان سکشنِ فروشندگان‌اند ولی جایگاهِ مستقل‌اند:
-     خاموش‌کردنِ فهرستِ فروشگاه‌ها نباید تبلیغِ فروخته‌شده را حذف کند و
+  /* دو بنر کناری در همان سکشن فروشندگان‌اند ولی جایگاه مستقل‌اند:
+     خاموش‌کردن فهرست فروشگاه‌ها نباید تبلیغ فروخته‌شده را حذف کند و
      برعکس. پس سکشن تا وقتی یکی از این سه چیزی برای نشان‌دادن دارد
      می‌ماند. */
   const rightAd = usePlacementState('equipment_ads_right');
@@ -1016,14 +1016,14 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     p.status === 'on' && (p.items?.length ?? 0) > 0;
   const showSellersSection = showStores || hasAd(rightAd) || hasAd(leftAd);
 
-  /* دو کمپین با ارجاع به یک موجودیت ⇒ کلیدِ تکراریِ React و کارتِ دوباره؛
+  /* دو کمپین با ارجاع به یک موجودیت ⇒ کلید تکراری React و کارت دوباره؛
      تکراری‌ها همین‌جا حذف می‌شوند */
   const uniqByRef = (snaps: EntitySnapshot[]) => {
     const seen = new Set<string>();
     return snaps.filter(e => !seen.has(e.ref) && (seen.add(e.ref), true));
   };
 
-  /* ── پشتوانه‌ی سه سکشن وقتی جایگاهِ تبلیغاتی خالی است ──
+  /* ── پشتوانه‌ی سه سکشن وقتی جایگاه تبلیغاتی خالی است ──
 
      پیش‌تر این نقش را سه آرایه‌ی هاردکد بازی می‌کردند (هشت باشگاه،
      چهارده محصول، دوازده فروشگاه) که هیچ‌کدام وجود نداشتند. یعنی
@@ -1031,14 +1031,14 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
      «باشگاه ستاره تهران» و «فروشگاه چمپیون تبریز»ی که کلیک‌شان
      به هیچ‌جا نمی‌رسید.
 
-     حالا همان جای خالی با موجودیت‌های واقعیِ سایت پر می‌شود. اگر
+     حالا همان جای خالی با موجودیت‌های واقعی سایت پر می‌شود. اگر
      چیزی هم نباشد، سکشن خالی می‌ماند — که درست است. */
   const [realClubs, setRealClubs] = useState<RealClub[]>(initialFeatured?.clubs ?? []);
   const [realProducts, setRealProducts] = useState<RealProduct[]>(initialFeatured?.products ?? []);
   const [realStores, setRealStores] = useState<RealStore[]>(initialFeatured?.stores ?? []);
 
-  /* اگر سرور داده را رسانده، دوباره از مرورگر نمی‌پرسیم — همان مقدارِ
-     اولیه کافی است و یک رفت‌وبرگشتِ اضافه صرفه ندارد. */
+  /* اگر سرور داده را رسانده، دوباره از مرورگر نمی‌پرسیم — همان مقدار
+     اولیه کافی است و یک رفت‌وبرگشت اضافه صرفه ندارد. */
   const needClientFetch = !initialFeatured || (
     initialFeatured.clubs.length === 0 &&
     initialFeatured.products.length === 0 &&
@@ -1062,7 +1062,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         grab<ApiStore>('/api/sellers', j => (Array.isArray(j) ? j : [])),
       ]);
 
-      /* امتیاز و تعدادِ نظر صفر می‌ماند تا سیستمِ نظر واقعاً وجود داشته
+      /* امتیاز و تعداد نظر صفر می‌ماند تا سیستم نظر واقعاً وجود داشته
          باشد — کارت خودش صفر را نمایش نمی‌دهد. */
       setRealClubs(cl.slice(0, FEATURED_COUNT).map((c, i) => ({
         id: c.id, name: c.name, city: c.city ?? '', dist: '',
@@ -1088,8 +1088,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
         pct: p.discountPercent ?? 0,
       })));
 
-      /* «فروشگاه» جدولِ جدا ندارد: /api/sellers کاربرانِ با نقشِ seller
-         را برمی‌گرداند، پس نام و شهر داخلِ sellerProfile است. */
+      /* «فروشگاه» جدول جدا ندارد: /api/sellers کاربران با نقش seller
+         را برمی‌گرداند، پس نام و شهر داخل sellerProfile است. */
       setRealStores(st.slice(0, 12).map(s => {
         const sp = s.sellerProfile ?? {};
         const person = [s.firstName, s.lastName].filter(Boolean).join(' ').trim();
@@ -1107,9 +1107,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   }, [needClientFetch]);
 
   /* بازگشت به داده‌ی نمونه فقط وقتی جایگاه «رایگان» است (یا هنوز
-     بارگذاری نشده): جایگاهِ دستی/پولیِ خالی باید واقعاً خالی بماند.
-     ظرفیتِ صفر هم یعنی «عمداً هیچ» — پس آن‌جا هم نمونه نمی‌آید،
-     وگرنه صفرکردنِ ظرفیت بیشتر محتوا نشان می‌داد نه کمتر. */
+     بارگذاری نشده): جایگاه دستی/پولی خالی باید واقعاً خالی بماند.
+     ظرفیت صفر هم یعنی «عمداً هیچ» — پس آن‌جا هم نمونه نمی‌آید،
+     وگرنه صفرکردن ظرفیت بیشتر محتوا نشان می‌داد نه کمتر. */
   const demoOk = (p: { mode: string | null; status: string; displayCount?: number }) =>
     p.status === 'loading' || (p.mode === 'free' && (p.displayCount ?? 1) > 0);
 
@@ -1126,13 +1126,13 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const HOME_CLUBS = useMemo(() => {
     const snaps = uniqByRef((featClubs ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
     if (!snaps.length) return demoOk(clubSlot) ? realClubs : [];
-    /* اعدادِ ساختگی (امتیازِ ۵، ۱۰ میز) برای باشگاهِ واقعی جعلِ اطلاعات
-       است: تعدادِ میز از ستون‌های واقعی می‌آید و امتیاز/نظر تا وقتی
-       سیستمِ نظر نداریم صفر می‌ماند و روی کارت نمایش داده نمی‌شود. */
+    /* اعداد ساختگی (امتیاز ۵، ۱۰ میز) برای باشگاه واقعی جعل اطلاعات
+       است: تعداد میز از ستون‌های واقعی می‌آید و امتیاز/نظر تا وقتی
+       سیستم نظر نداریم صفر می‌ماند و روی کارت نمایش داده نمی‌شود. */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || e.subtitle || '', dist: '',
       tables: e.stats?.tables ?? 0,
-      /* تفکیکِ واقعیِ نوعِ میز — کارت دیگر خودش عدد نمی‌سازد */
+      /* تفکیک واقعی نوع میز — کارت دیگر خودش عدد نمی‌سازد */
       ...(e.stats?.tables
         ? { breakdown: { snooker: e.stats.snooker ?? 0, pocket: e.stats.pocket ?? 0, highball: e.stats.highball ?? 0 } }
         : {}),
@@ -1144,7 +1144,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const HOME_SELLERS = useMemo(() => {
     const snaps = uniqByRef((featStores ?? []).map(c => c.entity).filter((e): e is EntitySnapshot => !!e));
     if (!snaps.length) return demoOk(storeSlot) ? realStores : [];
-    /* امتیازِ ۵ برای فروشگاهِ واقعی جعلِ اطلاعات بود — تا نداشتنِ سیستمِ
+    /* امتیاز ۵ برای فروشگاه واقعی جعل اطلاعات بود — تا نداشتن سیستم
        نظر، امتیاز صفر می‌ماند و کارت اصلاً نشانش نمی‌دهد */
     return snaps.map(e => ({
       id: e.ref, name: e.title, city: e.city || '',
@@ -1152,8 +1152,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     }));
   }, [featStores, storeSlot.mode, storeSlot.status, realStores]);
 
-  /* دوبل‌سازی فقط برای حلقه‌ی مارکی و فقط وقتی آیتم کافی هست — با فهرستِ
-     کوتاهِ کمپینی، همان کارت دو بار پشتِ هم زشت می‌شد */
+  /* دوبل‌سازی فقط برای حلقه‌ی مارکی و فقط وقتی آیتم کافی هست — با فهرست
+     کوتاه کمپینی، همان کارت دو بار پشت هم زشت می‌شد */
   const MKT_LOOP = HOME_PRODUCTS.length >= 6 ? [...HOME_PRODUCTS, ...HOME_PRODUCTS] : HOME_PRODUCTS;
   const SELLERS_LOOP = HOME_SELLERS.length >= 6 ? [...HOME_SELLERS, ...HOME_SELLERS] : HOME_SELLERS;
   const [activeClub, setActiveClub] = useState(0);
@@ -1165,7 +1165,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
   const mktDeskRef   = useRef<HTMLDivElement>(null);
   const mktPausedRef = useRef(false);
-  /* چرخِ ماوس و درگ — حرکتِ خودکار حینِ دخالتِ کاربر می‌ایستد */
+  /* چرخ ماوس و درگ — حرکت خودکار حین دخالت کاربر می‌ایستد */
   useHorizontalScroll(mktDeskRef, busy => { mktPausedRef.current = busy });
   const mktTickerRef = useRef<number | null>(null);
 
@@ -1181,8 +1181,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     const el = mktDeskRef.current;
     if (!el) return;
     const SPEED = 50;
-    /* در RTL موقعیتِ اسکرول منفی است؛ مقدارِ مثبت به ۰ گیر می‌کرد و
-       حرکتِ خودکار اصلاً شروع نمی‌شد. */
+    /* در RTL موقعیت اسکرول منفی است؛ مقدار مثبت به ۰ گیر می‌کرد و
+       حرکت خودکار اصلاً شروع نمی‌شد. */
     const sign = scrollSign(el);
     setPos(el, sign, el.scrollWidth / 2);
     let last = 0;
@@ -1211,8 +1211,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     const el = sellersRef.current;
     if (!el) return;
     const SPEED = 45;
-    /* در RTL موقعیتِ اسکرول منفی است؛ مقدارِ مثبت به ۰ گیر می‌کرد و
-       حرکتِ خودکار اصلاً شروع نمی‌شد. */
+    /* در RTL موقعیت اسکرول منفی است؛ مقدار مثبت به ۰ گیر می‌کرد و
+       حرکت خودکار اصلاً شروع نمی‌شد. */
     const sign = scrollSign(el);
     setPos(el, sign, el.scrollWidth / 2);
     let last = 0;
@@ -1239,8 +1239,8 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     if (document.hidden) return;
     bannerTimerRef.current = setInterval(() => setActiveBanner(p => (p + 1) % BANNER_SLIDES.length), 4500);
   };
-  /* تایمر در تبِ پنهان می‌ایستد. چرخاندنِ اسلایدی که کسی نمی‌بیند فقط
-     باتری و نخِ اصلی می‌خورد، و هر تیک یک رندرِ کاملِ React است. */
+  /* تایمر در تب پنهان می‌ایستد. چرخاندن اسلایدی که کسی نمی‌بیند فقط
+     باتری و نخ اصلی می‌خورد، و هر تیک یک رندر کامل React است. */
   useEffect(() => {
     startBannerTimer();
     const onVis = () => {
@@ -1255,28 +1255,28 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   }, []);
 
 
-  /* تشخیصِ کارتِ وسط با rAF (به‌جای رویدادِ اسکرول) — چون در دسکتاپ ترک با
-     انیمیشنِ CSS می‌چرخد و اسکرول رخ نمی‌دهد. کارتِ نزدیک به مرکز نرم بزرگ می‌شود
-     و activeCard همیشه اندیسِ منطقیِ ۰..۶ است (محتوا برای حلقه ×۲ رندر می‌شود). */
+  /* تشخیص کارت وسط با rAF (به‌جای رویداد اسکرول) — چون در دسکتاپ ترک با
+     انیمیشن CSS می‌چرخد و اسکرول رخ نمی‌دهد. کارت نزدیک به مرکز نرم بزرگ می‌شود
+     و activeCard همیشه اندیس منطقی ۰..۶ است (محتوا برای حلقه ×۲ رندر می‌شود). */
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
-    /* این حلقه بزرگ‌ترین هزینه‌ی نخِ اصلیِ صفحه بود.
+    /* این حلقه بزرگ‌ترین هزینه‌ی نخ اصلی صفحه بود.
 
        نسخه‌ی قبلی بی‌قیدوشرط هر فریم اجرا می‌شد و برای هر کارت
        `getBoundingClientRect()` می‌خواند — یعنی Forced Reflow در هر
        فریم، برای همیشه، حتی وقتی سکشن اصلاً روی صفحه نبود یا کاربر
-       تبِ دیگری باز کرده بود. در Lighthouse این می‌شد
+       تب دیگری باز کرده بود. در Lighthouse این می‌شد
        Style & Layout ≈ ۱۰ ثانیه.
 
        سه شرط اضافه شد:
          • فقط وقتی سکشن در دید است (IntersectionObserver)
          • فقط وقتی تب فعال است (visibilitychange)
-         • اگر کاربر «کاهشِ حرکت» خواسته، اصلاً اجرا نمی‌شود
+         • اگر کاربر «کاهش حرکت» خواسته، اصلاً اجرا نمی‌شود
 
-       نوشتنِ transform هم فقط وقتی مقدار واقعاً عوض شده انجام می‌شود؛
-       نوشتنِ تکراری همان مقدار، لایه را بی‌دلیل باطل می‌کرد. */
+       نوشتن transform هم فقط وقتی مقدار واقعاً عوض شده انجام می‌شود؛
+       نوشتن تکراری همان مقدار، لایه را بی‌دلیل باطل می‌کرد. */
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduced) return;
 
@@ -1292,7 +1292,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       let minDist = Infinity, newActive = 0;
       cards.forEach((card, i) => {
         const r = card.getBoundingClientRect();
-        if (r.width === 0) return;                       // کپیِ مخفیِ موبایل
+        if (r.width === 0) return;                       // کپی مخفی موبایل
         const dist = Math.abs(r.left + r.width / 2 - centerX);
         const t = Math.max(0, 1 - dist / (rect.width * 0.55));
         const next = `scale(${(1 + t * 0.15).toFixed(3)})`;
@@ -1310,7 +1310,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     const io = new IntersectionObserver(
       ([e]) => {
         visible = !!e?.isIntersecting;
-        /* همین کلاس، انیمیشنِ CSSِ مارکِی و `will-change` را هم
+        /* همین کلاس، انیمیشن CSS مارکی و `will-change` را هم
            روشن/خاموش می‌کند (پایین‌تر در استایل). */
         slider.classList.toggle('in-view', visible);
         visible ? start() : stop();
@@ -1419,15 +1419,15 @@ useEffect(() => {
 
   return (
     <>
-      {/* فونتِ Cormorant Garamond و دو preconnectش حذف شدند.
+      {/* فونت Cormorant Garamond و دو preconnectش حذف شدند.
 
           سه دلیل، هر سه با اندازه‌گیری:
-            • CSPِ خودِ ما بارگذاری‌اش را مسدود می‌کرد ⇒ هیچ‌وقت لود
+            • CSP خود ما بارگذاری‌اش را مسدود می‌کرد ⇒ هیچ‌وقت لود
               نمی‌شد و فقط یک خطای امنیتی در کنسول می‌ساخت (که نمره‌ی
               Best Practices را پایین می‌آورد)
             • هیچ‌جای پروژه به این فونت ارجاع نمی‌داد
             • دو `preconnect` به دامنه‌ای که هرگز استفاده نمی‌شد، فقط
-              اتصالِ بی‌مصرف باز می‌کرد */}
+              اتصال بی‌مصرف باز می‌کرد */}
       <style>{`
         :root { --hero-bottom-gap: 5px; }
         @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }
@@ -1489,7 +1489,7 @@ useEffect(() => {
         }
         .btn-ghost-dark:hover { background:rgba(255,255,255,0.12); }
 
-        /* «مشاهده همه» — دکمه به طرح LQ (تینتِ طلایی برند) */
+        /* «مشاهده همه» — دکمه به طرح LQ (تینت طلایی برند) */
         .see-all-lq {
           display:inline-flex; align-items:center; gap:6px;
           background:rgba(199,166,106,0.12); color:#9A6E38;
@@ -1499,20 +1499,20 @@ useEffect(() => {
         }
         .see-all-lq:hover { background:rgba(199,166,106,0.18); transform:translateY(-2px); box-shadow:0 8px 20px rgba(199,166,106,0.20); }
         @media(max-width:640px){ .see-all-lq { padding:6px 12px; font-size:11.5px; gap:4px; border-radius:8px; } }
-        /* روی سکشن‌های تیره متنِ طلاییِ روشن‌تر تا خوانا بماند */
+        /* روی سکشن‌های تیره متن طلایی روشن‌تر تا خوانا بماند */
         .see-all-lq.on-dark { color:${GOLD}; border-color:rgba(199,166,106,0.42); }
 
         .sec-label{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;margin-bottom:14px;padding:5px 13px;border-radius:999px;border:1px solid currentColor;}
         .sec-label::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
-        /* ── مهارِ رندرِ سکشن‌های پایینِ صفحه ──
-           «content-visibility:auto» به مرورگر می‌گوید محتوای بیرونِ دید
-           را اصلاً چیدمان و رنگ نکند. «contain-intrinsic-size» ارتفاعِ
-           حدسی می‌دهد تا نوارِ اسکرول نپرد (CLS).
+        /* ── مهار رندر سکشن‌های پایین صفحه ──
+           «content-visibility:auto» به مرورگر می‌گوید محتوای بیرون دید
+           را اصلاً چیدمان و رنگ نکند. «contain-intrinsic-size» ارتفاع
+           حدسی می‌دهد تا نوار اسکرول نپرد (CLS).
            این بزرگ‌ترین برنده‌ی «Style & Layout» است، چون صفحه‌ی اصلی
-           چندین سکشنِ سنگین دارد که کاربر شاید هیچ‌وقت به آن‌ها نرسد. */
+           چندین سکشن سنگین دارد که کاربر شاید هیچ‌وقت به آن‌ها نرسد. */
         .hm-defer { content-visibility: auto; contain-intrinsic-size: auto 700px; }
 
-        /* احترام به «کاهشِ حرکت» — تنظیمِ سیستمیِ کاربر، نه سلیقه‌ی ما.
+        /* احترام به «کاهش حرکت» — تنظیم سیستمی کاربر، نه سلیقه‌ی ما.
            همه‌ی حلقه‌های بی‌پایان خاموش می‌شوند. */
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
@@ -1525,7 +1525,7 @@ useEffect(() => {
 
         ${BAZAAR_CSS}
         /* دکمه‌ی «مشاهده و رزرو» — هشت بار روی صفحه تکرار می‌شد و هر بار
-           رشته‌ی کاملِ استایل در HTML می‌آمد. هاورش از کارتِ والد می‌آید. */
+           رشته‌ی کامل استایل در HTML می‌آمد. هاورش از کارت والد می‌آید. */
         .cta-lq {
           width:90%; text-align:center; padding:9px 0;
           background:rgba(199,166,106,0.12);
@@ -1546,11 +1546,11 @@ useEffect(() => {
         }
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
-        /* وردمارکِ outline پس‌زمینه‌ی هر سکشن — امضای هویتِ جدید */
+        /* وردمارک outline پس‌زمینه‌ی هر سکشن — امضای هویت جدید */
         .sec-word{position:absolute;top:2px;inset-inline-end:-6px;font-weight:900;font-size:clamp(56px,9vw,120px);line-height:1;letter-spacing:0.03em;color:transparent;-webkit-text-stroke:1px var(--wc,rgba(28,27,23,0.06));user-select:none;pointer-events:none;direction:ltr;}
-        /* خطِ موییِ اریب — امضای برند */
+        /* خط مویی اریب — امضای برند */
         .sec-hair{position:absolute;top:-25%;bottom:-25%;width:1px;transform:rotate(14deg);pointer-events:none;}
-        /* لبه‌های محوِ مارکی فروشندگان */
+        /* لبه‌های محو مارکی فروشندگان */
         .sellers-desk{-webkit-mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,black 4%,black 96%,transparent 100%);}
 
         .prod-hover{transition:transform .4s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;}
@@ -1628,7 +1628,7 @@ useEffect(() => {
           .hero-content { padding-top:calc(252px + env(safe-area-inset-top)) !important; }
           .trust-strip  { margin-top:16px !important; }
         }
-        /* گوشی‌های کوتاه (iPhone SE): جمع‌تر تا باکسِ اعتماد کامل در صفحه‌ی اول دیده شود */
+        /* گوشی‌های کوتاه (iPhone SE): جمع‌تر تا باکس اعتماد کامل در صفحه‌ی اول دیده شود */
         @media(max-width:600px) and (max-height:700px){
           .hero-content { padding-top:calc(196px + env(safe-area-inset-top)) !important; }
           .trust-box    { margin-top:16px !important; }
@@ -1640,14 +1640,14 @@ useEffect(() => {
         }
         .feat-slider::-webkit-scrollbar { display: none; }
         .feat-card { transition: transform 0.22s ease; transform-origin: center; position: relative; }
-        /* ── چرخشِ بی‌نهایتِ نرمِ کارت‌ها (فقط دسکتاپ) ──
-           مارکِیِ transform: محتوا دوبار رندر می‌شود و ترک ۵۰٪ جابه‌جا می‌شود ⇒ حلقه‌ی بی‌درز.
+        /* ── چرخش بی‌نهایت نرم کارت‌ها (فقط دسکتاپ) ──
+           مارکی transform: محتوا دوبار رندر می‌شود و ترک ۵۰٪ جابه‌جا می‌شود ⇒ حلقه‌ی بی‌درز.
            gap صفر است و فاصله با margin-left هر کارت ساخته می‌شود تا نقطه‌ی ۵۰٪ دقیقاً
-           هم‌ارزِ یک کپیِ کامل باشد (وگرنه هر دور یک پرشِ نیم‌gap دیده می‌شد). */
+           هم‌ارز یک کپی کامل باشد (وگرنه هر دور یک پرش نیم‌gap دیده می‌شد). */
         @keyframes heroLoop { from { transform: translateX(0); } to { transform: translateX(50%); } }
-        /* «باکسِ» کارت‌ها: ۷ کارت دائم داخلِ یک پنجره‌ی محدود می‌چرخند (دسکتاپ ~۶ کارت پیدا)
-           ⇒ چون پنجره از تعدادِ کارت‌ها کوچک‌تر است، هیچ کارتِ تکراری هم‌زمان دیده نمی‌شود.
-           لبه‌های باکس با ماسک محو می‌شوند تا ورود/خروجِ کارت‌ها نرم و شیک باشد. */
+        /* «باکس» کارت‌ها: ۷ کارت دائم داخل یک پنجره‌ی محدود می‌چرخند (دسکتاپ ~۶ کارت پیدا)
+           ⇒ چون پنجره از تعداد کارت‌ها کوچک‌تر است، هیچ کارت تکراری هم‌زمان دیده نمی‌شود.
+           لبه‌های باکس با ماسک محو می‌شوند تا ورود/خروج کارت‌ها نرم و شیک باشد. */
         .feat-slider {
           overflow:hidden !important; scroll-snap-type:none !important; justify-content:flex-start !important;
           -webkit-mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
@@ -1667,14 +1667,14 @@ useEffect(() => {
           .feat-slider { max-width:860px; margin:0 auto; }   /* ≈ ۶ کارت */
         }
         @media(max-width:900px){
-          .feat-track { animation-duration: 30s; }           /* موبایل هم همان چرخشِ نرم */
+          .feat-track { animation-duration: 30s; }           /* موبایل هم همان چرخش نرم */
         }
         @media (prefers-reduced-motion: reduce){ .feat-track { animation:none !important; } }
         .clubs-mobile-slider { display:none; gap:10px; overflow-x:auto; scrollbar-width:none; padding:2px 18px 16px; scroll-snap-type:x proximity; }
         .clubs-mobile-slider::-webkit-scrollbar { display:none; }
         .club-mob-card { transform-origin:center; position:relative; }
-        /* نوارِ اسکرولیِ دسکتاپِ باشگاه‌ها — مثل بازار/فروشندگان */
-        /* بدونِ scroll-snap: با چرخِ ماوس، اسنپ حرکت را تکه‌تکه می‌کرد */
+        /* نوار اسکرولی دسکتاپ باشگاه‌ها — مثل بازار/فروشندگان */
+        /* بدون scroll-snap: با چرخ ماوس، اسنپ حرکت را تکه‌تکه می‌کرد */
         .clubs-strip { display:flex; gap:14px; overflow-x:auto; scrollbar-width:none;
           padding:2px 2px 10px; overscroll-behavior-x:contain; cursor:grab; }
         .clubs-strip:active { cursor:grabbing; }
@@ -1696,7 +1696,7 @@ useEffect(() => {
         .mkt-dots { display:none !important; }
         .club-desk-panel { display:flex; }
         .club-mob-panel  { display:none; }
-        /* لمس (بدون هاور واقعی): سایه‌ی هاورِ اینلاین خنثی — سایه‌ی سبک ثابت */
+        /* لمس (بدون هاور واقعی): سایه‌ی هاور اینلاین خنثی — سایه‌ی سبک ثابت */
         @media (hover: none) {
           .club-card-x { box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important; transform: none !important; }
         }
@@ -1707,10 +1707,10 @@ useEffect(() => {
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
           /* پنل جا کم داشت و دکمه به کف می‌چسبید ⇒ عکس ۵۲٪، پنل ۴۸٪.
-             اندازه‌گیری شد: با ۴۴٪ ارتفاعِ پنل ۱۲۹px بود و مجموعِ محتوا
-             (تیتر + چیپ‌های میز + شهر + دکمه) با پدینگِ کافی در آن جا
-             نمی‌شد؛ دکمه ۸px از کفِ پنل بیرون می‌زد و overflow:hidden
-             پایینش را می‌برید. حالا پنل بلندتر است تا پدینگِ ۲۰px واقعاً
+             اندازه‌گیری شد: با ۴۴٪ ارتفاع پنل ۱۲۹px بود و مجموع محتوا
+             (تیتر + چیپ‌های میز + شهر + دکمه) با پدینگ کافی در آن جا
+             نمی‌شد؛ دکمه ۸px از کف پنل بیرون می‌زد و overflow:hidden
+             پایینش را می‌برید. حالا پنل بلندتر است تا پدینگ ۲۰px واقعاً
              دکمه را بالا بیاورد، نه اینکه از کادر بیرونش کند. */
           .club-img-x      { flex:0 0 52% !important; }
           .club-mob-panel  { flex:0 0 48% !important; }
@@ -1718,7 +1718,7 @@ useEffect(() => {
           .clubs-desk      { display:none !important; }
           .clubs-nav       { display:none !important; }
           .clubs-mobile-slider { display:flex !important; }
-          /* padding-bottom در موبایل از clamp دسکتاپ ۵۶px می‌گرفت و با ۱۶px پدینگِ خودِ اسلایدر
+          /* padding-bottom در موبایل از clamp دسکتاپ ۵۶px می‌گرفت و با ۱۶px پدینگ خود اسلایدر
              ⇒ ۷۲px فضای خالی ته سکشن. حالا ۱۶+۲۴ = ۴۰px. */
           .clubs-section { padding-top:36px !important; padding-bottom:24px !important; padding-left:0 !important; padding-right:0 !important; }
           .clubs-hd { padding-left:14px !important; padding-right:14px !important; flex-wrap:nowrap !important; align-items:flex-end !important; margin-bottom:22px !important; }
@@ -1732,10 +1732,10 @@ useEffect(() => {
 
         /* ── Sellers ── */
         /* D1: راست / محتوای اصلی / چپ.
-           gap عمداً صفر است و فاصله روی ستونِ «پر» می‌نشیند — وگرنه دو گپِ
-           ۱۴px حتی با ستون‌های خالی می‌ماند و چیدمانِ امروز جابه‌جا می‌شد.
-           فقط :empty (بدونِ :has): سلکتورِ ناشناخته در لیست، کلِ قاعده را
-           در مرورگرهای قدیمی باطل می‌کرد. AdSlot در حالتِ خالی null
+           gap عمداً صفر است و فاصله روی ستون «پر» می‌نشیند — وگرنه دو گپ
+           ۱۴px حتی با ستون‌های خالی می‌ماند و چیدمان امروز جابه‌جا می‌شد.
+           فقط :empty (بدون :has): سلکتور ناشناخته در لیست، کل قاعده را
+           در مرورگرهای قدیمی باطل می‌کرد. AdSlot در حالت خالی null
            برمی‌گرداند پس div واقعاً :empty است. */
         .equip-grid { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:0; align-items:start; }
         .equip-side { width:0; }
@@ -1783,12 +1783,12 @@ useEffect(() => {
 
             سه هزینه‌ی این ویدیو اندازه‌گیری و کم شد:
 
-            ۱) `preload="auto"` کلِ ۱٫۴ مگابایت را پیش از هر چیزِ دیگری
-               دانلود می‌کرد و با تصویرِ هیرو (که LCP است) رقابت می‌کرد.
+            ۱) `preload="auto"` کل ۱٫۴ مگابایت را پیش از هر چیز دیگری
+               دانلود می‌کرد و با تصویر هیرو (که LCP است) رقابت می‌کرد.
                حالا `metadata` است: مرورگر خودش هنگام پخش می‌گیردش.
-            ۲) `poster` گذاشته شد تا تا آمدنِ ویدیو، همان تصویرِ سبکِ
+            ۲) `poster` گذاشته شد تا تا آمدن ویدیو، همان تصویر سبک
                WebP دیده شود — نه پس‌زمینه‌ی مشکی.
-            ۳) `willChange:'transform'` دائمی یک لایه‌ی کامپوزیتِ
+            ۳) `willChange:'transform'` دائمی یک لایه‌ی کامپوزیت
                تمام‌صفحه را همیشه زنده نگه می‌داشت. حالا فقط وقتی
                اسکرول واقعاً هیرو را تغییر می‌دهد اعمال می‌شود. */}
         <video ref={videoRef} autoPlay muted loop playsInline preload="metadata"
@@ -1812,8 +1812,8 @@ useEffect(() => {
             transition: 'opacity 3.6s cubic-bezier(0.33,0,0.15,1)',
             pointerEvents: 'none',
           }}>
-            {/* اسلاید اول LCP است ⇒ اولویتِ صریح. بقیه تا نوبتشان
-                نرسد اصلاً درخواست نمی‌شوند (`lazy` روی عنصرِ نامرئی). */}
+            {/* اسلاید اول LCP است ⇒ اولویت صریح. بقیه تا نوبتشان
+                نرسد اصلاً درخواست نمی‌شوند (`lazy` روی عنصر نامرئی). */}
             <img src={s.bg} alt=""
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchPriority={i === 0 ? 'high' : 'low'}
@@ -1851,7 +1851,7 @@ useEffect(() => {
           minHeight: isMobile ? '100dvh' : undefined,
           zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          /* +60px جای eyebrowِ حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
+          /* +60px جای eyebrow حذف‌شده — وگرنه تیتر می‌رفت زیر نوار استوری */
           padding: 'calc(clamp(189px,25vh,236px) + 60px + env(safe-area-inset-top)) clamp(16px,5%,80px) 0',
           opacity: heroO, transform: `translateY(${scrollY * 0.055}px)`,
         }}>
@@ -1865,7 +1865,7 @@ useEffect(() => {
           </h1>
 
           {/* Subtitle — نقطه‌ی اتصال؛ عمداً کم‌وزن‌تر از تیتر */}
-          {/* letter-spacing حذف شد: روی متنِ فارسی اتصالِ حروفِ چسبان (مثل «اتصال») را باز می‌کرد */}
+          {/* letter-spacing حذف شد: روی متن فارسی اتصال حروف چسبان (مثل «اتصال») را باز می‌کرد */}
           <p className="hc hero-subtitle" style={{
             fontSize: 'clamp(14px, 1.9vw, 21px)', fontWeight: 500,
             margin: '0 0 24px', textAlign: 'center', lineHeight: 1.7,
@@ -1873,7 +1873,7 @@ useEffect(() => {
             textShadow: '0 1px 16px rgba(0,0,0,0.45)',
           }}>
             اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
-            {/* «ایران» با گرادیانِ عمودیِ پرچم: سبز → سفید → قرمز */}
+            {/* «ایران» با گرادیان عمودی پرچم: سبز → سفید → قرمز */}
             <span style={{
               fontWeight: 800,
               background: 'linear-gradient(180deg, #2EAD4F 0%, #2EAD4F 34%, #FFFFFF 44%, #FFFFFF 56%, #E03C31 66%, #E03C31 100%)',
@@ -1890,7 +1890,7 @@ useEffect(() => {
               justifyContent: 'center', alignItems: 'stretch',
               scrollSnapType: 'x mandatory',
             }}>
-              {/* ترکِ حلقه — دسکتاپ: محتوا ×۲ + مارکِیِ CSS؛ موبایل: کپیِ دوم مخفی و سوایپ عادی */}
+              {/* ترک حلقه — دسکتاپ: محتوا ×۲ + مارکی CSS؛ موبایل: کپی دوم مخفی و سوایپ عادی */}
               <div className="feat-track">
                 {[...FEATURE_CARDS, ...FEATURE_CARDS].map((card, i) => {
                   const isDup  = i >= FEATURE_CARDS.length;
@@ -1935,7 +1935,7 @@ useEffect(() => {
                 })}
               </div>
             </div>
-            {/* نقطه‌های کاروسل — همیشه دقیقاً ۷ تا، یکنواخت (بدونِ محوِ فاصله‌ای که «سوراخ» می‌ساخت) */}
+            {/* نقطه‌های کاروسل — همیشه دقیقاً ۷ تا، یکنواخت (بدون محو فاصله‌ای که «سوراخ» می‌ساخت) */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '18px' }}>
               {FEATURE_CARDS.map((_, i) => (
                 <div key={i} style={{
@@ -2008,7 +2008,7 @@ useEffect(() => {
       </div>
 
       {/* §2 CLUB DISCOVERY ══════════════════════════════════════
-          جایگاهِ featured_clubs_homepage غیرفعال ⇒ کلِ سکشن حذف */}
+          جایگاه featured_clubs_homepage غیرفعال ⇒ کل سکشن حذف */}
       {showClubs && (
       <section className="clubs-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#EEECE6 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(56px,5.5vw,80px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-18%', right: '-6%', width: 'min(520px,50vw)', height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,83,45,0.10) 0%, transparent 62%)', filter: 'blur(52px)', pointerEvents: 'none' }} />
@@ -2027,7 +2027,7 @@ useEffect(() => {
               </Link>
             </div>
           </SR>
-          {/* دسکتاپ — نوارِ اسکرولی مثل بازار/فروشندگان؛ کارت ۱۰٪ کوچک‌تر، ۸ باشگاه با اسکرول */}
+          {/* دسکتاپ — نوار اسکرولی مثل بازار/فروشندگان؛ کارت ۱۰٪ کوچک‌تر، ۸ باشگاه با اسکرول */}
           <div ref={clubsDeskRef} className="clubs-desk clubs-strip">
             {HOME_CLUBS.map((c, i) => (
               <div key={c.id} className="club-desk-card">
@@ -2059,7 +2059,7 @@ useEffect(() => {
       )}
 
       {/* §3 MARKETPLACE ═════════════════════════════════════════
-          جایگاهِ market_featured_products_homepage غیرفعال ⇒ حذفِ سکشن */}
+          جایگاه market_featured_products_homepage غیرفعال ⇒ حذف سکشن */}
       {showProducts && (
       <section className="marketplace-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#FFFFFF 0%,#FBF9F5 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
         <div aria-hidden style={{ position: 'absolute', top: '-16%', left: '-5%', width: 'min(480px,46vw)', height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,120,64,0.09) 0%, transparent 62%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
@@ -2089,7 +2089,7 @@ useEffect(() => {
               <BazaarCard key={`${p.id}-${i}`} p={p} style={{ width: 143, height: 274 }} />
             ))}
           </div>
-          {/* موبایل — همان BazaarCard (فرمتِ یکسان با دسکتاپ) */}
+          {/* موبایل — همان BazaarCard (فرمت یکسان با دسکتاپ) */}
           <div ref={mktSliderRef} className="mkt-mobile-slider">
             {HOME_PRODUCTS.map((p) => (
               <BazaarCard key={p.id} p={p} className="mkt-mob-card" style={{ width: '36vw', minWidth: 133, scrollSnapAlign: 'center', height: 'clamp(209px,61vw,282px)' }} />
@@ -2121,17 +2121,17 @@ useEffect(() => {
             ))}
           </div>
 
-          {/* تصمیم D1: سکشن بیلیارد بازار هیچ بنرِ کناری‌ای ندارد؛
-              دو جایگاهِ تبلیغاتی به سکشن فروشندگان تجهیزات منتقل شدند. */}
+          {/* تصمیم D1: سکشن بیلیارد بازار هیچ بنر کناری‌ای ندارد؛
+              دو جایگاه تبلیغاتی به سکشن فروشندگان تجهیزات منتقل شدند. */}
         </div>
       </section>
       )}
 
-      {/* §3.5 MEDIA BAND — پوسترِ سینماییِ بیلیارد مدیا ═══════ */}
+      {/* §3.5 MEDIA BAND — پوستر سینمایی بیلیارد مدیا ═══════ */}
       <HomeMediaBand />
 
       {/* §4 SELLERS ═════════════════════════════════════════════
-          سکشن تا وقتی «فهرستِ فروشگاه‌ها» یا یکی از دو بنرِ کناری
+          سکشن تا وقتی «فهرست فروشگاه‌ها» یا یکی از دو بنر کناری
           محتوایی دارد رندر می‌شود — هر سه جایگاه مستقل‌اند. */}
       {showSellersSection && (
       <section className="sellers-section hm-defer" style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(180deg,#F3F1ED 0%,#F0EDE7 100%)', padding: 'clamp(36px,3.5vw,52px) clamp(16px,5%,80px) clamp(20px,2vw,32px)' }}>
@@ -2139,8 +2139,8 @@ useEffect(() => {
         <div aria-hidden className="sec-hair" style={{ left: '34%', background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.35),transparent)' }} />
         <div aria-hidden className="sec-word" style={{ ['--wc' as never]: 'rgba(154,110,56,0.08)' }}>SELLERS</div>
         <div style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* عنوان فقط وقتی فهرستی زیرش هست — اگر جایگاهِ فروشگاه‌ها
-              خاموش باشد و فقط بنرِ کناری بماند، تیترِ بی‌محتوا نمی‌آید */}
+          {/* عنوان فقط وقتی فهرستی زیرش هست — اگر جایگاه فروشگاه‌ها
+              خاموش باشد و فقط بنر کناری بماند، تیتر بی‌محتوا نمی‌آید */}
           {showStores && (
           <SR>
             <div className="sellers-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '44px', flexWrap: 'wrap', gap: '20px' }}>
@@ -2156,16 +2156,16 @@ useEffect(() => {
           </SR>
           )}
 
-          {/* تصمیم D1 — چیدمانِ سه‌ستونه: تبلیغِ راست / فروشگاه‌ها / تبلیغِ چپ.
-              جایگاهِ خالی هیچ‌چیزی رندر نمی‌کند و ستونش (auto) صفر می‌شود؛
-              در موبایل ستون‌ها زیرِ هم می‌آیند تا هیچ Overflow ای پیش نیاید. */}
+          {/* تصمیم D1 — چیدمان سه‌ستونه: تبلیغ راست / فروشگاه‌ها / تبلیغ چپ.
+              جایگاه خالی هیچ‌چیزی رندر نمی‌کند و ستونش (auto) صفر می‌شود؛
+              در موبایل ستون‌ها زیر هم می‌آیند تا هیچ Overflow ای پیش نیاید. */}
           <div className="equip-grid">
             <div className="equip-side">
               <AdSlot slot="equipment_ads_right" />
             </div>
 
             <div style={{ minWidth: 0 }}>
-              {/* فهرستِ فروشگاه‌ها جدا از دو بنرِ کناری خاموش/روشن می‌شود */}
+              {/* فهرست فروشگاه‌ها جدا از دو بنر کناری خاموش/روشن می‌شود */}
               {showStores && <>
                 {/* Desktop auto-scroll row */}
                 <div
@@ -2228,7 +2228,7 @@ useEffect(() => {
           هاورش با CSS خالص بازسازی شد. */}
       {servicesSlot}
 
-      {/* §5 EXPLORE STRIP — Server Component (هشت لینکِ ثابت، هاور با CSS) */}
+      {/* §5 EXPLORE STRIP — Server Component (هشت لینک ثابت، هاور با CSS) */}
       {exploreSlot}
 
       {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
@@ -2261,7 +2261,7 @@ useEffect(() => {
         {/* Dots */}
         <div style={{ position: 'absolute', bottom: '18px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
           {/* نقطه‌ی ۷پیکسلی هم بی‌نام بود هم برای انگشت خیلی کوچک.
-              حالا دکمه ۲۴px هدفِ لمسی دارد و نقطه فقط نشانه‌ی درونش است. */}
+              حالا دکمه ۲۴px هدف لمسی دارد و نقطه فقط نشانه‌ی درونش است. */}
           {BANNER_SLIDES.map((_, i) => (
             <button key={i} onClick={() => { setActiveBanner(i); startBannerTimer(); }}
               aria-label={`اسلاید ${i + 1}`}
@@ -2289,10 +2289,10 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* §6 بنرِ بزرگِ پایینِ صفحه — بالای فوتر، فقط همین صفحه.
-          جایگاهِ مستقل: خالی/غیرفعال باشد هیچ فضایی اشغال نمی‌کند
-          (فاصله روی خودِ AdSlot است، نه این قاب — قابِ خالی نباید
-          بینِ اسلایدرِ تیره و فوتر شکاف بیندازد). */}
+      {/* §6 بنر بزرگ پایین صفحه — بالای فوتر، فقط همین صفحه.
+          جایگاه مستقل: خالی/غیرفعال باشد هیچ فضایی اشغال نمی‌کند
+          (فاصله روی خود AdSlot است، نه این قاب — قاب خالی نباید
+          بین اسلایدر تیره و فوتر شکاف بیندازد). */}
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 clamp(16px,3vw,28px)' }}>
         <AdSlot slot="homepage_bottom_banner" style={{ margin: 'clamp(20px,3vw,32px) 0' }} />
       </div>

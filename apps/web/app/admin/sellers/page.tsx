@@ -37,7 +37,7 @@ export default function AdminSellersPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
 
-  /* منبع: جدولِ `profiles` روی سرور — نه localStorage. داشبوردِ فروشنده
+  /* منبع: جدول `profiles` روی سرور — نه localStorage. داشبورد فروشنده
      از قبل روی سرور می‌نوشت ولی این صفحه هنوز از مرورگر می‌خواند. */
   useEffect(() => {
     void (async () => {
@@ -49,7 +49,7 @@ export default function AdminSellersPage() {
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
   const act = async (slug: string, patch: Partial<SellerProfile>) => {
     await patchAdminProfile(slug, patch as Record<string, unknown>)
-    updateSellerProfile(slug, patch)   // کشِ محلی هم هم‌گام بماند
+    updateSellerProfile(slug, patch)   // کش محلی هم هم‌گام بماند
     setTick(t => t + 1)
   }
 

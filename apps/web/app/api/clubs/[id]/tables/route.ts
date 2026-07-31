@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 
-/* فقط میزهایی که باشگاه واقعاً ثبت کرده قابلِ رزرو هستند.
-   پیش‌تر اگر جدولِ tables خالی بود، از روی تعدادِ اعلام‌شده در پروفایلِ باشگاه
-   میزهای ساختگی با قیمتِ هاردکد ساخته می‌شد و همان‌ها رزرو می‌شدند. */
+/* فقط میزهایی که باشگاه واقعاً ثبت کرده قابل رزرو هستند.
+   پیش‌تر اگر جدول tables خالی بود، از روی تعداد اعلام‌شده در پروفایل باشگاه
+   میزهای ساختگی با قیمت هاردکد ساخته می‌شد و همان‌ها رزرو می‌شدند. */
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -53,7 +53,7 @@ export async function POST(
 
   if (error) {
     console.error('[clubs/:id/tables] insert error:', error.message);
-    return NextResponse.json({ message: 'ثبتِ میز انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'ثبت میز انجام نشد' }, { status: 500 });
   }
   return NextResponse.json(data, { status: 201 });
 }

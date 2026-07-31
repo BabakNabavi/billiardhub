@@ -1,7 +1,7 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   ورود — فرمِ تمیزِ وسط‌چین (بدون پنل تصویری، طبق درخواست).
+   ورود — فرم تمیز وسط‌چین (بدون پنل تصویری، طبق درخواست).
    نوبار سر جای خودش است؛ فوتر در این صفحه نیست.
    منطق (api/store/redirect) عیناً حفظ شده.
    ───────────────────────────────────────────────────────────── */
@@ -14,7 +14,7 @@ import { useAuthStore } from '../../store/auth.store';
 import { Eye, EyeOff, Phone, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 import { toAuthError } from '../../lib/auth/error-message';
 
-/* نمایشِ فارسیِ ارقام — مقدارِ ارسالی به سرور همچنان لاتین می‌ماند */
+/* نمایش فارسی ارقام — مقدار ارسالی به سرور همچنان لاتین می‌ماند */
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 
 const GOLD   = '#C7A66A';
@@ -33,30 +33,30 @@ export default function LoginPage() {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
   const [phoneFocus, setPhoneFocus] = useState(false);
-  /* آیا خطا مربوط به ورودیِ کاربر بود؟ خطای شبکه نباید فیلدها را قرمز کند */
+  /* آیا خطا مربوط به ورودی کاربر بود؟ خطای شبکه نباید فیلدها را قرمز کند */
   const [errIsCred, setErrIsCred] = useState(true);
   const [passFocus,  setPassFocus]  = useState(false);
 
-  /* مقصدِ بازگشت. وقتی middleware کاربرِ بدونِ نشست را از یک صفحه‌ی
-     محافظت‌شده به این‌جا می‌فرستد، آدرسِ همان صفحه در next می‌آید تا
+  /* مقصد بازگشت. وقتی middleware کاربر بدون نشست را از یک صفحه‌ی
+     محافظت‌شده به این‌جا می‌فرستد، آدرس همان صفحه در next می‌آید تا
      پس از ورود دقیقاً به جای اولش برگردد — نه به داشبورد. */
   const nextPath = (() => {
     if (typeof window === 'undefined') return '/dashboard';
     const n = new URLSearchParams(window.location.search).get('next');
-    /* فقط مسیرِ داخلی؛ //evil.com یا آدرسِ کامل پذیرفته نمی‌شود */
+    /* فقط مسیر داخلی؛ //evil.com یا آدرس کامل پذیرفته نمی‌شود */
     return n && /^\/(?!\/)/.test(n) ? n : '/dashboard';
   })();
 
-  /* اگه کاربر لاگین هست مستقیم برود سرِ کارش */
+  /* اگه کاربر لاگین هست مستقیم برود سر کارش */
   useEffect(() => {
     if (_hydrated && user) router.replace(nextPath);
   }, [_hydrated, user, router, nextPath]);
 
-  /* پیامِ خطا دیگر خودش بسته نمی‌شود.
+  /* پیام خطا دیگر خودش بسته نمی‌شود.
 
      پیش‌تر بعد از ۶٫۵ ثانیه ناپدید می‌شد؛ کاربری که سرش را بالا می‌آورد
      یا متن را کامل نخوانده بود، پیام را از دست می‌داد و نمی‌فهمید چه
-     شده. حالا تا زدنِ «متوجه شدم» یا تغییرِ ورودی می‌ماند. */
+     شده. حالا تا زدن «متوجه شدم» یا تغییر ورودی می‌ماند. */
 
   const handleLogin = async () => {
     if (!phone.trim())    { setError('لطفاً شماره موبایل را وارد کنید'); return; }
@@ -66,7 +66,7 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/login', { phone: phone.trim(), password });
       setAuth(res.data.user, res.data.token);
-      /* نشستِ کوکی‌محور تازه ساخته شد ⇒ نشانه‌ی مهاجرت هم دیگر لازم نیست */
+      /* نشست کوکی‌محور تازه ساخته شد ⇒ نشانه‌ی مهاجرت هم دیگر لازم نیست */
       try { localStorage.setItem('bh_session_migrated', String(Date.now())); } catch { /* ignore */ }
       router.replace(nextPath);
     } catch (err) {
@@ -130,7 +130,7 @@ export default function LoginPage() {
           border-bottom: 1px solid rgba(199,166,106,0.45); padding-bottom: 1px; transition: border-color .2s, color .2s; }
         .au-forgot:hover { color: #7E5723; border-bottom-color: ${GOLD_D}; }
 
-        /* ── خطای مرکزی: وسطِ صفحه، جلوی چشمِ کاربر ── */
+        /* ── خطای مرکزی: وسط صفحه، جلوی چشم کاربر ── */
         @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
         .au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
@@ -151,7 +151,7 @@ export default function LoginPage() {
         .au-erbox button:hover { background: rgba(178,59,46,0.11); }
       `}</style>
 
-      {/* خطا — وسطِ صفحه */}
+      {/* خطا — وسط صفحه */}
       {error && (
         <div className="au-erlay" onClick={() => setError('')} role="alert">
           <div className="au-erbox" onClick={e => e.stopPropagation()}>

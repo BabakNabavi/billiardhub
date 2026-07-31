@@ -1,15 +1,15 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   فراخوانِ APIهای خودمان از سمتِ کلاینت.
+   فراخوان APIهای خودمان از سمت کلاینت.
 
    دو چیز را همیشه درست می‌کند:
-     • کوکیِ نشست همراهِ درخواست می‌رود (credentials)
-     • برای متدهای تغییردهنده، توکنِ CSRF از کوکیِ خواندنی برداشته و
+     • کوکی نشست همراه درخواست می‌رود (credentials)
+     • برای متدهای تغییردهنده، توکن CSRF از کوکی خواندنی برداشته و
        در هدر گذاشته می‌شود (الگوی double-submit)
 
-   دیگر هیچ‌جای کلاینت نباید هدرِ Authorization بسازد؛ توکن اصلاً در
-   دسترسِ جاوااسکریپت نیست.
+   دیگر هیچ‌جای کلاینت نباید هدر Authorization بسازد؛ توکن اصلاً در
+   دسترس جاوااسکریپت نیست.
    ───────────────────────────────────────────────────────────── */
 
 import { CSRF_COOKIE, CSRF_HEADER } from './auth/constants'
@@ -26,7 +26,7 @@ export function csrfToken(): string | null {
   return readCookie(CSRF_COOKIE)
 }
 
-/** fetch با کوکی و توکنِ CSRF */
+/** fetch با کوکی و توکن CSRF */
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
   const method = (init.method ?? 'GET').toUpperCase()
   const headers = new Headers(init.headers)

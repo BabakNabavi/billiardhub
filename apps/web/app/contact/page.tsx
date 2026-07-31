@@ -1,10 +1,10 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   تماس با ما — تجربه‌ی ارتباطِ دیجیتال Billiard Hub (بازطراحی ۱۴۰۵)
-   هیروی سینمایی با میزِ مینیمالِ SVG → کامپوزیشنِ واحد:
-   کانال‌های تعاملی (کپی ایمیل، میان‌بُرِ موضوع) + فرمِ فلوتینگ‌لیبل
-   با ولیدیشن، لودینگ و انیمیشنِ موفقیت. فرم واقعی است:
+   تماس با ما — تجربه‌ی ارتباط دیجیتال Billiard Hub (بازطراحی ۱۴۰۵)
+   هیروی سینمایی با میز مینیمال SVG → کامپوزیشن واحد:
+   کانال‌های تعاملی (کپی ایمیل، میان‌بُر موضوع) + فرم فلوتینگ‌لیبل
+   با ولیدیشن، لودینگ و انیمیشن موفقیت. فرم واقعی است:
    ابتدا API، درنبودش ذخیره‌ی محلی (bh_contact_messages).
    ───────────────────────────────────────────────────────────── */
 
@@ -18,28 +18,28 @@ const TEXT   = '#1C1B17'
 const SEC    = '#5B564B'
 const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
-/* نمایشِ فارسیِ ارقام — مقدارِ لینکِ tel: لاتین می‌ماند */
+/* نمایش فارسی ارقام — مقدار لینک tel: لاتین می‌ماند */
 const toFaDigits = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
 const BALLS = { red: '#C43D2E', green: '#1B7A4B', blue: '#3D63E6', pink: '#F06EAE', yellow: '#E8B93A', gold: '#C7A66A' }
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
-/* ── اطلاعات تماسِ رسمی ──
+/* ── اطلاعات تماس رسمی ──
    ایمیل همان است که در فوتر سایت استفاده می‌شود.
    فیلدهای خالی «placeholder» هستند: تا وقتی مقدار واقعی نگیرند
    در صفحه نمایش داده نمی‌شوند — برای فعال‌کردن فقط همین‌جا مقدار بده. */
 const CONTACT = {
   email: 'info@billiardhub.net',
   phone: '021-22859551',
-  phoneDial: '02122859551',   // برای لینکِ tel:
+  phoneDial: '02122859551',   // برای لینک tel:
   city: 'تهران',
   address: 'تهران، پاسداران، خیابان شهید محمود گل نبی، پلاک ۳۶',
   instagram: '',    // TODO: آدرس کامل پروفایل — فعلاً نمایش داده نمی‌شود
   telegram: '',     // TODO: آدرس کامل کانال — فعلاً نمایش داده نمی‌شود
 }
 
-/* «تبلیغات» این‌جا نیست — فرمِ خودش را در /advertise دارد */
+/* «تبلیغات» این‌جا نیست — فرم خودش را در /advertise دارد */
 const SUBJECTS = ['پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد', 'سایر']
 
 function useReveal() {
@@ -54,7 +54,7 @@ function useReveal() {
   }, [])
 }
 
-/* دراپ‌داونِ سفارشیِ موضوع — پنلِ شیشه‌ای با انیمیشن، هماهنگ با فرم */
+/* دراپ‌داون سفارشی موضوع — پنل شیشه‌ای با انیمیشن، هماهنگ با فرم */
 function SubjectSelect({ value, onChange, options, error }: {
   value: string; onChange: (v: string) => void; options: string[]; error?: string
 }) {
@@ -104,7 +104,7 @@ function SubjectSelect({ value, onChange, options, error }: {
   )
 }
 
-/* فیلدِ فلوتینگ‌لیبل با خطِ زیرینِ انیمیت‌شونده */
+/* فیلد فلوتینگ‌لیبل با خط زیرین انیمیت‌شونده */
 function FloatField({ label, value, onChange, type = 'text', ltr = false, textarea = false, error, inputMode, maxLength }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; ltr?: boolean
   textarea?: boolean; error?: string; inputMode?: 'numeric' | 'email'; maxLength?: number
@@ -200,7 +200,7 @@ export default function ContactPage() {
         localStorage.setItem('bh_contact_messages', JSON.stringify([{ id: Date.now(), ...payload }, ...all]))
       } catch {}
     }
-    /* مکثِ کوتاه برای حسِ واقعی لودینگ */
+    /* مکث کوتاه برای حس واقعی لودینگ */
     await new Promise(r => setTimeout(r, 700))
     setLoading(false)
     setSent(true)
@@ -255,13 +255,13 @@ export default function ContactPage() {
         }
       `}</style>
 
-      {/* ═══ HERO — کوتاه و سینمایی با میزِ مینیمال ═══ */}
+      {/* ═══ HERO — کوتاه و سینمایی با میز مینیمال ═══ */}
       <section style={{ position: 'relative', background: '#0B0A08', color: '#fff', overflow: 'hidden' }}>
         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 14%, rgba(199,166,106,0.15), transparent 46%)' }} />
         <div aria-hidden style={{ position: 'absolute', top: '-20%', bottom: '-20%', left: '30%', width: 1, background: 'linear-gradient(180deg,transparent,rgba(199,166,106,0.4),transparent)', transform: 'rotate(14deg)' }} />
         <div aria-hidden style={{ position: 'absolute', bottom: '-1vw', insetInlineStart: -8, fontWeight: 900, fontSize: 'clamp(56px,11vw,150px)', lineHeight: .9, direction: 'ltr', color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.06)', userSelect: 'none', pointerEvents: 'none' }}>CONTACT</div>
 
-        {/* میزِ مینیمال — پاکت‌ها نقاطِ ارتباط */}
+        {/* میز مینیمال — پاکت‌ها نقاط ارتباط */}
         <svg aria-hidden viewBox="0 0 520 300" style={{ position: 'absolute', top: '50%', left: 'clamp(-60px,2vw,60px)', transform: 'translateY(-50%)', width: 'min(46vw, 520px)', opacity: 0.55, pointerEvents: 'none' }}>
           <rect x="20" y="30" width="480" height="240" rx="18" fill="none" stroke="rgba(199,166,106,0.4)" strokeWidth="1.4" />
           <rect x="44" y="54" width="432" height="192" rx="8" fill="none" stroke="rgba(199,166,106,0.16)" strokeWidth="1" />
@@ -290,7 +290,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ═══ کامپوزیشنِ واحد: کانال‌ها + فرم ═══ */}
+      {/* ═══ کامپوزیشن واحد: کانال‌ها + فرم ═══ */}
       <section style={{ padding: 'clamp(40px,7vw,90px) clamp(16px,4vw,32px) clamp(70px,9vw,120px)' }}>
         <div className="ct-rev" style={{
           maxWidth: 1080, margin: '0 auto', position: 'relative',
@@ -340,7 +340,7 @@ export default function ContactPage() {
                 </span>
               </div>
 
-              {/* میان‌بُرهای موضوع — می‌پرد به فرم با موضوعِ ازپیش‌انتخاب‌شده */}
+              {/* میان‌بُرهای موضوع — می‌پرد به فرم با موضوع ازپیش‌انتخاب‌شده */}
               <button type="button" className="ct-ch" onClick={() => jumpToForm('همکاری')} style={{ ['--cc' as never]: BALLS.yellow }}>
                 <span className="ic"><Handshake size={18} /></span>
                 <span style={{ minWidth: 0 }}>
@@ -357,7 +357,7 @@ export default function ContactPage() {
                 </span>
                 <span className="hint"><ArrowLeft size={12} /> برو به فرم</span>
               </button>
-              {/* تبلیغات فرمِ خودش را دارد (جایگاه و تعرفه)، پس به /advertise می‌رود نه به فرمِ عمومی */}
+              {/* تبلیغات فرم خودش را دارد (جایگاه و تعرفه)، پس به /advertise می‌رود نه به فرم عمومی */}
               <Link href="/advertise" className="ct-ch" style={{ ['--cc' as never]: BALLS.gold, borderBottom: 'none', textDecoration: 'none' }}>
                 <span className="ic"><Megaphone size={18} /></span>
                 <span style={{ minWidth: 0 }}>
@@ -367,7 +367,7 @@ export default function ContactPage() {
                 <span className="hint"><ArrowLeft size={12} /> جایگاه‌ها</span>
               </Link>
 
-              {/* شبکه‌های اجتماعی — فقط وقتی آدرسِ واقعی ثبت شده باشد */}
+              {/* شبکه‌های اجتماعی — فقط وقتی آدرس واقعی ثبت شده باشد */}
               {(CONTACT.instagram || CONTACT.telegram) && (
                 <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
                   {CONTACT.instagram && (

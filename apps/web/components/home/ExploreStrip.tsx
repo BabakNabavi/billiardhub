@@ -1,12 +1,12 @@
 /* ─────────────────────────────────────────────────────────────
-   نوارِ «کاوش بیشتر» — Server Component.
+   نوار «کاوش بیشتر» — Server Component.
 
-   هشت لینکِ ثابت بود که هیچ حالتی نداشت؛ تنها چیزی که کلاینتی‌اش
-   می‌کرد `onMouseEnter/onMouseLeave` برای افکتِ هاور بود. همان افکت
+   هشت لینک ثابت بود که هیچ حالتی نداشت؛ تنها چیزی که کلاینتی‌اش
+   می‌کرد `onMouseEnter/onMouseLeave` برای افکت هاور بود. همان افکت
    با CSS خالص بازسازی شد، پس این سکشن دیگر هیچ جاوااسکریپتی به
    مرورگر نمی‌فرستد.
 
-   رنگِ هر کارت با متغیرِ `--rgb` می‌آید تا یک قانونِ CSS برای هر هشت
+   رنگ هر کارت با متغیر `--rgb` می‌آید تا یک قانون CSS برای هر هشت
    کارت کافی باشد.
    ───────────────────────────────────────────────────────────── */
 
@@ -70,7 +70,7 @@ export default function ExploreStrip() {
         }
       `}</style>
 
-      {/* لکه‌های محیطی — پالتِ کنترل‌شده: فقط طلایی و سبزِ نمدی */}
+      {/* لکه‌های محیطی — پالت کنترل‌شده: فقط طلایی و سبز نمدی */}
       <div aria-hidden style={{ position: 'absolute', top: '-80px', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.28) 0%,transparent 65%)', filter: 'blur(48px)', pointerEvents: 'none' }} />
       <div aria-hidden style={{ position: 'absolute', bottom: '-60px', left: '12%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle,rgba(20,83,45,0.14) 0%,transparent 65%)', filter: 'blur(44px)', pointerEvents: 'none' }} />
       <div aria-hidden style={{ position: 'absolute', top: '30%', left: '38%', width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle,rgba(199,166,106,0.12) 0%,transparent 65%)', filter: 'blur(42px)', pointerEvents: 'none' }} />

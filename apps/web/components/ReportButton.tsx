@@ -1,7 +1,7 @@
 'use client'
 
-/* گزارشِ تخلف — مثلِ دیوار: یک آیکونِ کوچک کنارِ هر آگهی، یک پنجره‌ی
-   انتخابِ دلیل، و ثبت در پنلِ ادمین. برای استفاده در کارتِ آگهی
+/* گزارش تخلف — مثل دیوار: یک آیکون کوچک کنار هر آگهی، یک پنجره‌ی
+   انتخاب دلیل، و ثبت در پنل ادمین. برای استفاده در کارت آگهی
    (variant="icon") و در صفحه‌ی جزئیات (variant="link" یا "button"). */
 
 import { useEffect, useState } from 'react'
@@ -29,7 +29,7 @@ interface Props {
   targetId: string | number
   targetTitle?: string
   variant?: 'icon' | 'link' | 'button'
-  /* برای کارت‌هایی که خودشان داخلِ <Link> هستند */
+  /* برای کارت‌هایی که خودشان داخل <Link> هستند */
   stopPropagation?: boolean
   className?: string
   style?: React.CSSProperties
@@ -46,7 +46,7 @@ export default function ReportButton({
   const [done, setDone] = useState(false)
   const [err, setErr] = useState('')
 
-  /* قفلِ اسکرولِ پس‌زمینه وقتی پنجره باز است */
+  /* قفل اسکرول پس‌زمینه وقتی پنجره باز است */
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow

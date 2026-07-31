@@ -1,14 +1,14 @@
 'use client'
 
-/* دعوت به آپلودِ مدرک برای گرفتنِ تیکِ تأیید.
+/* دعوت به آپلود مدرک برای گرفتن تیک تأیید.
    جز داور که مدرکش اجباری است، برای بقیه‌ی نقش‌ها اختیاری است و فقط
-   همین پیام — با نامِ مدرکِ همان شغل — نشان داده می‌شود. */
+   همین پیام — با نام مدرک همان شغل — نشان داده می‌شود. */
 
 import { ShieldCheck, Upload } from 'lucide-react'
 
 export type VerifiableRole = 'coach' | 'club' | 'seller' | 'manufacturer' | 'installer' | 'referee'
 
-/* نامِ مدرکِ هر شغل — هرجای سایت باید از همین‌جا خوانده شود */
+/* نام مدرک هر شغل — هرجای سایت باید از همین‌جا خوانده شود */
 export const DOC_LABEL: Record<VerifiableRole, string> = {
   coach:        'آخرین مدرک مربیگری خود',
   club:         'جواز کسب باشگاه خود',
@@ -18,7 +18,7 @@ export const DOC_LABEL: Record<VerifiableRole, string> = {
   referee:      'مدرک داوری خود',
 }
 
-/* داور تنها نقشی است که بدونِ مدرک ثبت نمی‌شود */
+/* داور تنها نقشی است که بدون مدرک ثبت نمی‌شود */
 export const DOC_REQUIRED: Record<VerifiableRole, boolean> = {
   coach: false, club: false, seller: false, manufacturer: false, installer: false, referee: true,
 }
@@ -37,15 +37,15 @@ export default function VerificationPrompt({
   role: VerifiableRole
   /** مدرک انتخاب/ارسال شده — یعنی «در انتظار بررسی»، نه «تأییدشده» */
   done?: boolean
-  /** واقعاً توسطِ کارشناس تأیید شده — تنها حالتی که سبز می‌شود */
+  /** واقعاً توسط کارشناس تأیید شده — تنها حالتی که سبز می‌شود */
   verified?: boolean
   compact?: boolean
   style?: React.CSSProperties
 }) {
   const required = DOC_REQUIRED[role]
 
-  /* فقط تأییدِ واقعیِ کارشناس سبز می‌شود.
-     پیش‌تر همین حالت با انتخابِ فایل هم فعال می‌شد و کاربر فکر می‌کرد
+  /* فقط تأیید واقعی کارشناس سبز می‌شود.
+     پیش‌تر همین حالت با انتخاب فایل هم فعال می‌شد و کاربر فکر می‌کرد
      مدرکش تأیید شده، در حالی که هنوز حتی ارسال نشده بود. */
   if (verified) return (
     <div style={{
@@ -58,7 +58,7 @@ export default function VerificationPrompt({
     </div>
   )
 
-  /* مدرک انتخاب شده ولی هنوز بررسی نشده — رنگِ انتظار، نه سبز */
+  /* مدرک انتخاب شده ولی هنوز بررسی نشده — رنگ انتظار، نه سبز */
   if (done) return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 9, padding: compact ? '10px 13px' : '13px 16px',
@@ -66,7 +66,7 @@ export default function VerificationPrompt({
       fontSize: compact ? 12 : 12.5, fontWeight: 700, color: GOLD_D, lineHeight: 1.9, ...style,
     }}>
       <ShieldCheck size={16} style={{ flexShrink: 0 }} />
-      مدرک شما ثبت شد و در انتظارِ بررسیِ کارشناسان است. تیکِ تأیید پس از تأیید آن‌ها می‌آید.
+      مدرک شما ثبت شد و در انتظار بررسی کارشناسان است. تیک تأیید پس از تأیید آن‌ها می‌آید.
     </div>
   )
 
@@ -91,7 +91,7 @@ export default function VerificationPrompt({
           <>
             {' '}
             <span style={{ color: 'rgba(0,0,0,0.45)' }}>
-              آپلود مدرک اختیاری است و نبودِ آن مانع ثبت پروفایل شما نمی‌شود.
+              آپلود مدرک اختیاری است و نبود آن مانع ثبت پروفایل شما نمی‌شود.
             </span>
           </>
         )}

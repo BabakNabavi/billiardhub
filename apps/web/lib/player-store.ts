@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────────
-   Player profile store — پروتوتایپِ کلاینتی (localStorage).
+   Player profile store — پروتوتایپ کلاینتی (localStorage).
    مشترک بین /dashboard/player (پنل بازیکن) و /players (لیست+پروفایل).
    مالکیت با user.id — همان الگوی seller/coach/referee/technician.
-   ذخیره = انتشار. تک‌تکِ فیلدهای صفحه‌ی نمایشِ پروفایل این‌جا
+   ذخیره = انتشار. تک‌تک فیلدهای صفحه‌ی نمایش پروفایل این‌جا
    گرفته می‌شوند.
    ───────────────────────────────────────────────────────────── */
 import type {
@@ -19,7 +19,7 @@ export interface PlayerProfile {
   nameEn: string
   /** رشته‌ی اصلی — برای سازگاری با صفحات قدیمی نگه داشته شده */
   discipline: Discipline
-  /** رشته‌ها با رده‌ی سنی و دسته‌ی هرکدام (منبعِ واقعی) */
+  /** رشته‌ها با رده‌ی سنی و دسته‌ی هرکدام (منبع واقعی) */
   disciplines: DisciplineEntry[]
   province: string
   city: string
@@ -30,7 +30,7 @@ export interface PlayerProfile {
   youth: boolean
   clubName: string
   tone: Player['tone']
-  scene: string              // تصویرِ پس‌زمینه‌ی دوتون (آپلودی)
+  scene: string              // تصویر پس‌زمینه‌ی دوتون (آپلودی)
   intro: string
   bio: string[]
   careerStart: string
@@ -114,7 +114,7 @@ export function newPlayerSlug(): string {
   return `p-${Date.now().toString(36)}`
 }
 
-/* پروفایلِ ذخیره‌شده → شکلِ Player تا صفحات /players مستقیم رندرش کنند */
+/* پروفایل ذخیره‌شده → شکل Player تا صفحات /players مستقیم رندرش کنند */
 export function profileToPlayer(p: PlayerProfile): Player {
   const rank = parseInt(p.ranking.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
   return {

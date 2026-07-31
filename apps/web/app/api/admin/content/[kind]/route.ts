@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
 import { CONTENT, isContentKind, sanitize } from '@/lib/admin/content';
 
-/* CRUDِ محتوای پنلِ ادمین — اخبار، رویدادها، رنکینگ و رسانه.
+/* CRUD محتوای پنل ادمین — اخبار، رویدادها، رنکینگ و رسانه.
 
    یک مسیر برای هر چهار نوع، چون ساختارشان یکی است و نقشه‌شان در
-   `lib/admin/content.ts` تعریف شده. هر چهار جدول در مهاجرتِ ۰۲۵ ساخته
-   شدند و از anon بسته‌اند؛ تنها راهِ دسترسی همین مسیر است. */
+   `lib/admin/content.ts` تعریف شده. هر چهار جدول در مهاجرت ۰۲۵ ساخته
+   شدند و از anon بسته‌اند؛ تنها راه دسترسی همین مسیر است. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

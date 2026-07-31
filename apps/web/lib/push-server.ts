@@ -2,7 +2,7 @@ import webpush from 'web-push'
 import { readJson, writeJson, safeKey } from './social-server'
 import { VAPID_PUBLIC_KEY } from './push-public'
 
-/* Web Push سمت‌سرور — اشتراک‌ها در Storage نگهداری می‌شوند. کلیدِ خصوصی فقط از env. */
+/* Web Push سمت‌سرور — اشتراک‌ها در Storage نگهداری می‌شوند. کلید خصوصی فقط از env. */
 let configured = false
 function ensure(): boolean {
   if (configured) return true
@@ -37,12 +37,12 @@ export async function sendPush(
   payload: { title: string; body: string; url?: string; tag?: string },
 ): Promise<void> {
   if (!ensure() || !user) return
-  /* لایه‌ی دوم برای پرچمِ «تعاملاتِ اجتماعی».
+  /* لایه‌ی دوم برای پرچم «تعاملات اجتماعی».
 
-     امروز تنها صداکننده‌ی این تابع POSTِ دایرکت است که خودش گیت شده، پس
-     این خط عملاً تکراری است. عمداً هست: اگر فردا مسیرِ دیگری از پوش
-     استفاده کند و یادمان برود گیتش کند، پوشِ تعاملات بی‌صدا برنمی‌گردد.
-     اگر روزی پوشِ غیرِتعاملی (رزرو، پرداخت) اضافه شد، باید همان‌جا از
+     امروز تنها صداکننده‌ی این تابع POST دایرکت است که خودش گیت شده، پس
+     این خط عملاً تکراری است. عمداً هست: اگر فردا مسیر دیگری از پوش
+     استفاده کند و یادمان برود گیتش کند، پوش تعاملات بی‌صدا برنمی‌گردد.
+     اگر روزی پوش غیرتعاملی (رزرو، پرداخت) اضافه شد، باید همان‌جا از
      این تابع جدا شود — نه اینکه این شرط برداشته شود. */
   const { socialInteractionsEnabled } = await import('./features')
   if (!(await socialInteractionsEnabled())) return
@@ -54,7 +54,7 @@ export async function sendPush(
     try { await webpush.sendNotification(s, data) }
     catch (e) {
       const code = (e as { statusCode?: number })?.statusCode
-      if (code === 404 || code === 410) dead.push(s.endpoint)   // اشتراکِ منقضی
+      if (code === 404 || code === 410) dead.push(s.endpoint)   // اشتراک منقضی
     }
   }))
   if (dead.length) await writeJson(subPath(user), list.filter(s => !dead.includes(s.endpoint)))

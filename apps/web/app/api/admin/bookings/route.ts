@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 import { computeRefund, bookingStartsAt, canCancelAt } from '@/lib/finance/cancellation';
 
-/* فهرستِ رزروها برای ادمین — با فیلترِ وضعیت/جستجو و پیش‌نمایشِ بازپرداخت.
-   لغوِ خودِ رزرو از همان مسیرِ /api/bookings/[id]/cancel انجام می‌شود تا
-   کلِ اثرِ مالی (بازپرداخت، دفترِ کل، رکوردِ refund) یکجا و اتمیک بماند. */
+/* فهرست رزروها برای ادمین — با فیلتر وضعیت/جستجو و پیش‌نمایش بازپرداخت.
+   لغو خود رزرو از همان مسیر /api/bookings/[id]/cancel انجام می‌شود تا
+   کل اثر مالی (بازپرداخت، دفتر کل، رکورد refund) یکجا و اتمیک بماند. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
@@ -29,12 +29,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ rows: [], pending: true }, { headers: { 'Cache-Control': 'no-store' } });
     }
     console.error('[admin/bookings] db error:', error.message);
-    return NextResponse.json({ message: 'خطا در دریافتِ رزروها' }, { status: 500 });
+    return NextResponse.json({ message: 'خطا در دریافت رزروها' }, { status: 500 });
   }
 
   const rows = (data ?? []) as Record<string, unknown>[];
 
-  /* نامِ باشگاه و کاربر — دو کوئریِ گروهی، نه N کوئری */
+  /* نام باشگاه و کاربر — دو کوئری گروهی، نه N کوئری */
   const clubIds = [...new Set(rows.map(r => String(r.clubId)).filter(Boolean))];
   const userIds = [...new Set(rows.map(r => String(r.userId)).filter(Boolean))];
 

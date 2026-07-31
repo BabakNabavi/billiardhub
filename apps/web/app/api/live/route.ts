@@ -4,7 +4,7 @@ import { CORS, BUCKET, safeKey, readJsonFresh, writeJson } from '@/lib/social-se
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 
-/* جلسات پخش زنده — هر جلسه یک فایل مستقل (بدون کلوبِر هنگام تپش همزمان).
+/* جلسات پخش زنده — هر جلسه یک فایل مستقل (بدون کلوبر هنگام تپش همزمان).
    جلسه‌ای که ۴۵ ثانیه تپش نفرستد، پایان‌یافته حساب می‌شود. */
 const DIR = 'social/live/s'
 const sPath = (id: string) => `${DIR}/${safeKey(id)}.json`
@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}))
   const action = String(b?.action || '')
 
-  /* پخشِ زنده به باشگاه گره خورده: فقط مالکِ همان باشگاه (یا ادمین)
-     می‌تواند شروع کند، و فقط صاحبِ جلسه تپش/پایان بفرستد. */
+  /* پخش زنده به باشگاه گره خورده: فقط مالک همان باشگاه (یا ادمین)
+     می‌تواند شروع کند، و فقط صاحب جلسه تپش/پایان بفرستد. */
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
 
@@ -83,8 +83,8 @@ export async function POST(req: NextRequest) {
     if (!id) return NextResponse.json({ ok: false }, { status: 400, headers: CORS })
     const s = await readJsonFresh<LiveSession | null>(sPath(id), null)
     if (!s) return NextResponse.json({ ok: false, message: 'جلسه یافت نشد' }, { status: 404, headers: CORS })
-    /* فقط صاحبِ پخش می‌تواند تپش/پایان بفرستد.
-       شرطِ قبلی به `b.ownerKey` نگاه می‌کرد و با **حذفِ** آن از بدنه
+    /* فقط صاحب پخش می‌تواند تپش/پایان بفرستد.
+       شرط قبلی به `b.ownerKey` نگاه می‌کرد و با **حذف** آن از بدنه
        کاملاً دور زده می‌شد؛ حالا مبنا نشست است. */
     const me = actor.dmKey || actor.id
     if (s.ownerKey !== me && !actor.isAdmin) {

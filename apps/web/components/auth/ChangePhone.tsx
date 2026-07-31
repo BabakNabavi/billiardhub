@@ -1,12 +1,12 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   تغییرِ شماره‌ی موبایلِ حساب.
+   تغییر شماره‌ی موبایل حساب.
 
    سیم‌کارت فروخته می‌شود و کاربر باید بتواند شماره‌اش را عوض کند.
-   ولی شماره‌ی تازه دقیقاً مثل روزِ ثبت‌نام استعلام می‌شود — کدِ پیامکی
-   و بعد شاهکار با همان کد ملیِ حساب — وگرنه می‌شد هویتِ تأییدشده را
-   به شماره‌ی شخصِ دیگری وصل کرد.
+   ولی شماره‌ی تازه دقیقاً مثل روز ثبت‌نام استعلام می‌شود — کد پیامکی
+   و بعد شاهکار با همان کد ملی حساب — وگرنه می‌شد هویت تأییدشده را
+   به شماره‌ی شخص دیگری وصل کرد.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
@@ -63,7 +63,7 @@ export default function ChangePhone({ current, onChanged }: {
     try {
       const { r, j } = await post({ phone })
       if (!r.ok) {
-        setMsg({ text: String(j.message ?? 'ارسالِ کد انجام نشد'), bad: true })
+        setMsg({ text: String(j.message ?? 'ارسال کد انجام نشد'), bad: true })
         if (typeof j.wait === 'number') setWait(j.wait)
         return
       }
@@ -77,7 +77,7 @@ export default function ChangePhone({ current, onChanged }: {
     setBusy(true); setMsg(null)
     try {
       const { r, j } = await post({ phone, code })
-      if (!r.ok) { setMsg({ text: String(j.message ?? 'تغییرِ شماره انجام نشد'), bad: true }); return }
+      if (!r.ok) { setMsg({ text: String(j.message ?? 'تغییر شماره انجام نشد'), bad: true }); return }
       onChanged?.(phone)
       reset()
     } catch { setMsg({ text: 'خطا در ارتباط با سرور', bad: true }) }
@@ -102,7 +102,7 @@ export default function ChangePhone({ current, onChanged }: {
         </span>
         <button type="button" onClick={() => setOpen(true)}
           style={{ ...BTN, marginInlineStart: 'auto', padding: '8px 14px', fontSize: 12.5 }}>
-          تغییرِ شماره
+          تغییر شماره
         </button>
       </div>
     )
@@ -111,15 +111,15 @@ export default function ChangePhone({ current, onChanged }: {
   return (
     <div style={{ border: `1px solid ${LINE}`, borderRadius: 13, padding: 14, background: '#FAFAF7' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 900, color: INK }}>تغییرِ شماره‌ی موبایل</span>
+        <span style={{ fontSize: 13.5, fontWeight: 900, color: INK }}>تغییر شماره‌ی موبایل</span>
         <button type="button" onClick={reset} aria-label="بستن"
           style={{ marginInlineStart: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex' }}>
           <X size={15} />
         </button>
       </div>
       <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px', lineHeight: 1.95 }}>
-        شماره‌ی تازه باید به نامِ خودتان باشد؛ با کد پیامکی و استعلامِ شاهکار بررسی می‌شود.
-        بعد از تأیید، شماره‌ی قبلی از حسابتان حذف می‌شود و ورودِ بعدی با شماره‌ی تازه است.
+        شماره‌ی تازه باید به نام خودتان باشد؛ با کد پیامکی و استعلام شاهکار بررسی می‌شود.
+        بعد از تأیید، شماره‌ی قبلی از حسابتان حذف می‌شود و ورود بعدی با شماره‌ی تازه است.
       </p>
 
       <div style={{ display: 'grid', gap: 10 }}>
@@ -139,7 +139,7 @@ export default function ChangePhone({ current, onChanged }: {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {!sent ? (
             <button type="button" onClick={() => void send()} disabled={busy} style={{ ...BTN, opacity: busy ? 0.6 : 1 }}>
-              {busy ? <Loader2 size={14} className="animate-spin" /> : null} ارسالِ کد
+              {busy ? <Loader2 size={14} className="animate-spin" /> : null} ارسال کد
             </button>
           ) : (
             <>
@@ -151,7 +151,7 @@ export default function ChangePhone({ current, onChanged }: {
                   ...BTN, background: 'rgba(0,0,0,0.03)', borderColor: LINE, color: SEC,
                   opacity: wait > 0 ? 0.5 : 1, cursor: wait > 0 ? 'default' : 'pointer',
                 }}>
-                {wait > 0 ? `ارسالِ دوباره (${toFa(String(wait))})` : 'ارسالِ دوباره'}
+                {wait > 0 ? `ارسال دوباره (${toFa(String(wait))})` : 'ارسال دوباره'}
               </button>
             </>
           )}

@@ -1,4 +1,4 @@
-/* تأییدِ توکن در محیطِ Edge (middleware).
+/* تأیید توکن در محیط Edge (middleware).
    فقط jose — که وب‌استاندارد است. اینجا هیچ‌وقت نباید چیزی از
    jsonwebtoken یا ماژول‌های نود import شود. */
 
@@ -22,8 +22,8 @@ interface RawClaims {
 let cached: Uint8Array | null = null
 const key = () => (cached ??= new TextEncoder().encode(process.env.JWT_SECRET ?? ''))
 
-/** امضا و انقضا را بررسی می‌کند. ابطالِ نشست اینجا چک نمی‌شود
-    (نیازمندِ دیتابیس است) و در /api/auth/refresh و خودِ APIها انجام می‌شود. */
+/** امضا و انقضا را بررسی می‌کند. ابطال نشست اینجا چک نمی‌شود
+    (نیازمند دیتابیس است) و در /api/auth/refresh و خود APIها انجام می‌شود. */
 export async function verifyEdge(token: string | undefined | null): Promise<EdgeClaims | null> {
   if (!token) return null
   if (!process.env.JWT_SECRET) return null

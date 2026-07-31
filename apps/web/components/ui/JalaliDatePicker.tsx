@@ -1,15 +1,15 @@
 'use client'
 
-/* انتخابگرِ تاریخِ شمسی — با کشویِ سال و ماه.
+/* انتخابگر تاریخ شمسی — با کشوی سال و ماه.
 
-   تایپِ دستیِ تاریخ منبعِ اشتباه بود (ماه و روزِ یک‌رقمی، جابه‌جاییِ
-   ماه و روز، سالِ اشتباه). این‌جا کاربر فقط انتخاب می‌کند؛ خروجی همیشه
-   «۱۳۶۳/۶/۲» با ارقامِ لاتین است تا سرویس‌های استعلام همان را بپذیرند.
+   تایپ دستی تاریخ منبع اشتباه بود (ماه و روز یک‌رقمی، جابه‌جایی
+   ماه و روز، سال اشتباه). این‌جا کاربر فقط انتخاب می‌کند؛ خروجی همیشه
+   «۱۳۶۳/۶/۲» با ارقام لاتین است تا سرویس‌های استعلام همان را بپذیرند.
 
-   پنلِ تقویم در portal روی <body> رندر می‌شود، نه داخلِ فرم: کارتِ
+   پنل تقویم در portal روی <body> رندر می‌شود، نه داخل فرم: کارت
    ثبت‌نام `overflow: hidden` دارد و تقویم را از وسط می‌بُرید. با
    position: fixed و محاسبه‌ی جا، هیچ والدی نمی‌تواند ببُردش و اگر
-   زیرِ فیلد جا نباشد، خودش بالای فیلد باز می‌شود. */
+   زیر فیلد جا نباشد، خودش بالای فیلد باز می‌شود. */
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -20,20 +20,20 @@ const GOLD = '#C7A66A', GOLD_D = '#9A6E38', INK = '#1C1B17', MUT = '#8A8474', LI
 const WD = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']
 
 const PANEL_W = 320
-const PANEL_H = 396      // تقریبِ ارتفاع، فقط تا اندازه‌گیریِ واقعی
-const LIST_H  = 208      // ارتفاعِ کشویِ ماه/سال
+const PANEL_H = 396      // تقریب ارتفاع، فقط تا اندازه‌گیری واقعی
+const LIST_H  = 208      // ارتفاع کشوی ماه/سال
 
-/* روزهای هر ماهِ شمسی (اسفندِ کبیسه ۳۰) */
+/* روزهای هر ماه شمسی (اسفند کبیسه ۳۰) */
 function daysInJMonth(jy: number, jm: number): number {
   if (jm <= 6) return 31
   if (jm <= 11) return 30
-  /* اسفند: اگر ۱ فروردینِ سالِ بعد یک روز بعد از ۳۰ اسفند باشد ⇒ کبیسه */
+  /* اسفند: اگر ۱ فروردین سال بعد یک روز بعد از ۳۰ اسفند باشد ⇒ کبیسه */
   const [gy, gm, gd] = jalaliToGregorian(jy, 12, 30)
   const [, , backDay] = toJalali(gy, gm, gd)
   return backDay === 30 ? 30 : 29
 }
 
-/* شمسی → روزِ هفته (شنبه = ۰) */
+/* شمسی → روز هفته (شنبه = ۰) */
 function firstWeekday(jy: number, jm: number): number {
   const [gy, gm, gd] = jalaliToGregorian(jy, jm, 1)
   return (new Date(gy, gm - 1, gd).getDay() + 1) % 7
@@ -45,7 +45,7 @@ const parse = (v: string): { y: number; m: number; d: number } | null => {
   return { y: +m[1]!, m: +m[2]!, d: +m[3]! }
 }
 
-/* ── کشویِ سفارشی — به‌جای <select> بومیِ سیستم ────────────────── */
+/* ── کشوی سفارشی — به‌جای <select> بومی سیستم ────────────────── */
 function Picker({ value, options, onChange, ariaLabel, width }: {
   value: number
   options: { v: number; label: string }[]
@@ -54,7 +54,7 @@ function Picker({ value, options, onChange, ariaLabel, width }: {
   width?: number
 }) {
   const [open, setOpen] = useState(false)
-  /* اگر زیرِ دکمه جا نبود، لیست رو به بالا باز می‌شود — لیستِ سال بلند است */
+  /* اگر زیر دکمه جا نبود، لیست رو به بالا باز می‌شود — لیست سال بلند است */
   const [up, setUp] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -73,7 +73,7 @@ function Picker({ value, options, onChange, ariaLabel, width }: {
     if (b) setUp(window.innerHeight - b.bottom < LIST_H + 16 && b.top > window.innerHeight - b.bottom)
   }, [open])
 
-  /* گزینه‌ی انتخاب‌شده باید در دید باشد — لیستِ سال ۱۰۰ ردیف دارد */
+  /* گزینه‌ی انتخاب‌شده باید در دید باشد — لیست سال ۱۰۰ ردیف دارد */
   useEffect(() => {
     if (!open || !listRef.current) return
     const el = listRef.current.querySelector('[data-on="1"]') as HTMLElement | null
@@ -144,7 +144,7 @@ export interface JalaliDatePickerProps {
   onChange: (v: string) => void
   label?: string
   placeholder?: string
-  /* بازه‌ی سال‌های قابلِ انتخاب — پیش‌فرض مناسبِ تاریخِ تولد */
+  /* بازه‌ی سال‌های قابل انتخاب — پیش‌فرض مناسب تاریخ تولد */
   minYear?: number
   maxYear?: number
   error?: string
@@ -161,7 +161,7 @@ export default function JalaliDatePicker({
   }, [])
 
   const loYear = minYear ?? today.y - 100
-  const hiYear = maxYear ?? today.y            // تاریخِ تولدِ آینده بی‌معناست
+  const hiYear = maxYear ?? today.y            // تاریخ تولد آینده بی‌معناست
 
   const sel = parse(value)
   const [open, setOpen] = useState(false)
@@ -177,8 +177,8 @@ export default function JalaliDatePicker({
 
   /* جای پنل نسبت به فیلد.
 
-     ارتفاعِ واقعیِ پنل اندازه گرفته می‌شود، نه تخمینِ ثابت: با تخمین،
-     وقتی زیرِ فیلد جا نبود پنل بالا می‌رفت و از بالای صفحه می‌زد بیرون.
+     ارتفاع واقعی پنل اندازه گرفته می‌شود، نه تخمین ثابت: با تخمین،
+     وقتی زیر فیلد جا نبود پنل بالا می‌رفت و از بالای صفحه می‌زد بیرون.
      ترتیب: اول پایین، اگر جا نبود بالا، اگر بالا هم جا نبود همان‌جا
      که جا می‌شود — و پنل خودش داخلی اسکرول می‌کند. */
   const place = useCallback(() => {
@@ -194,7 +194,7 @@ export default function JalaliDatePicker({
       top = above >= 8 ? above : Math.max(8, vh - h - 8)
     }
 
-    /* در RTL پنل از لبه‌ی راستِ فیلد شروع می‌شود */
+    /* در RTL پنل از لبه‌ی راست فیلد شروع می‌شود */
     let left = b.right - w
     left = Math.max(8, Math.min(left, vw - w - 8))
 
@@ -209,7 +209,7 @@ export default function JalaliDatePicker({
     if (s) { setViewY(s.y); setViewM(s.m) }
   }, [open, value])
 
-  /* کلیکِ بیرون، Escape، اسکرول و تغییرِ اندازه */
+  /* کلیک بیرون، Escape، اسکرول و تغییر اندازه */
   useEffect(() => {
     if (!open) return
     const onDoc = (e: MouseEvent) => {
@@ -278,7 +278,7 @@ export default function JalaliDatePicker({
         </button>
       </div>
 
-      {/* کشویِ ماه و سال — رسیدن به سالِ تولد بدونِ کلیکِ پیاپی */}
+      {/* کشوی ماه و سال — رسیدن به سال تولد بدون کلیک پیاپی */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         <Picker value={viewM} options={months} onChange={setViewM} ariaLabel="ماه" />
         <Picker value={viewY} options={years} onChange={setViewY} ariaLabel="سال" />

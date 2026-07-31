@@ -97,7 +97,7 @@ export default function EditProductPage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
-  /* محصولاتِ ساخته‌شده در پنل، در localStorage (userProducts) هستند نه API */
+  /* محصولات ساخته‌شده در پنل، در localStorage (userProducts) هستند نه API */
   const [isLocal, setIsLocal] = useState(false);
   const localRef = useRef<any>(null);
 
@@ -138,7 +138,7 @@ export default function EditProductPage() {
         discountPrice: disc > 0 ? String(price) : '',
         category: p.category || 'table',
         condition: p.condition || 'new',
-        province: p.province || provinceOfCity(p.city || ''),   // بک‌فیلِ استان از روی شهر برای محصولات قدیمی
+        province: p.province || provinceOfCity(p.city || ''),   // بک‌فیل استان از روی شهر برای محصولات قدیمی
         city: p.city || '',
         stock: String(p.stock || '1'),
         color: p.color || '',
@@ -152,7 +152,7 @@ export default function EditProductPage() {
       setExistingImages(Array.isArray(p.images) ? p.images : []);
       setPageLoading(false);
     }).catch(() => {
-      /* API ندارد ⇒ محصولِ محلیِ ساخته‌شده در پنل را از userProducts بخوان */
+      /* API ندارد ⇒ محصول محلی ساخته‌شده در پنل را از userProducts بخوان */
       try {
         const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]');
         const p = Array.isArray(list) ? list.find((x: any) => String(x.id) === String(id)) : null;
@@ -220,7 +220,7 @@ export default function EditProductPage() {
     if (!form.title || !form.price || !form.city) { setError('لطفاً فیلدهای اجباری را پر کنید'); return; }
     setLoading(true); setError('');
 
-    /* مسیرِ محلی: همان رکوردِ userProducts آپدیت می‌شود (با همان شکلِ داده) */
+    /* مسیر محلی: همان رکورد userProducts آپدیت می‌شود (با همان شکل داده) */
     if (isLocal) {
       try {
         const newUrls = await Promise.all(newImageFiles.map(f => compressImage(f, 1200, 0.7)));

@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 
-/* عضویتِ کاربر در باشگاه.
+/* عضویت کاربر در باشگاه.
 
    تعداد اعضا از روی ردیف‌های عضویت شمرده می‌شود، نه یک شمارنده‌ی
-   دستی: انتخابِ دوباره‌ی همان باشگاه عدد را بالا نمی‌برد و جابه‌جایی
+   دستی: انتخاب دوباره‌ی همان باشگاه عدد را بالا نمی‌برد و جابه‌جایی
    بین دو باشگاه خودبه‌خود درست حساب می‌شود. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ members: await countMembers(clubId) }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/** پیوستن به یک باشگاه (و ترکِ باشگاهِ قبلی) */
+/** پیوستن به یک باشگاه (و ترک باشگاه قبلی) */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -36,9 +36,9 @@ export async function POST(req: NextRequest) {
   if (!club) return NextResponse.json({ message: 'این باشگاه ثبت نشده است' }, { status: 404 });
 
   try {
-    /* یک کاربر در یک زمان عضوِ یک باشگاه است */
+    /* یک کاربر در یک زمان عضو یک باشگاه است */
     await sb().from('club_members').delete().eq('user_id', actor.id).neq('club_id', id);
-    /* عضویتِ تکراری خطا نیست — همان ردیفِ قبلی می‌ماند */
+    /* عضویت تکراری خطا نیست — همان ردیف قبلی می‌ماند */
     await sb().from('club_members').upsert(
       { club_id: id, user_id: actor.id },
       { onConflict: 'club_id,user_id', ignoreDuplicates: true },
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date().toISOString(),
     }).eq('id', actor.id);
   } catch {
-    return NextResponse.json({ message: 'ثبتِ عضویت انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'ثبت عضویت انجام نشد' }, { status: 500 });
   }
 
   return NextResponse.json({
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-/** ترکِ باشگاه */
+/** ترک باشگاه */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });

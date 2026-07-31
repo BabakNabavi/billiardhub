@@ -9,16 +9,16 @@ import { freeContent } from '@/lib/ads/free';
 
 /* محتوای زنده‌ی جایگاه‌های تبلیغاتی — عمومی.
 
-   هر جایگاه فقط با is_active خودش دیده می‌شود؛ هیچ کلیدِ سراسری‌ای
-   وجود ندارد. کمپین‌های «موجودیتی» همین‌جا سمتِ سرور به اسنپ‌شاتِ
+   هر جایگاه فقط با is_active خودش دیده می‌شود؛ هیچ کلید سراسری‌ای
+   وجود ندارد. کمپین‌های «موجودیتی» همین‌جا سمت سرور به اسنپ‌شات
    کارت تبدیل می‌شوند تا کلاینت به اسکیمای جدول‌ها وابسته نباشد. */
 
 interface LiveOut {
   contentKind: 'banner' | 'entity';
-  /* ترتیبِ آرایه همان چرخشِ سرور است؛ کلاینت نباید دوباره مرتبش کند */
+  /* ترتیب آرایه همان چرخش سرور است؛ کلاینت نباید دوباره مرتبش کند */
   rotationMode: 'fixed' | 'weighted' | 'fair' | 'random';
   displayCount: number;
-  /* رایگان = محتوای پیش‌فرضِ سایت، دستی/پولی = کمپین‌های ادمین */
+  /* رایگان = محتوای پیش‌فرض سایت، دستی/پولی = کمپین‌های ادمین */
   mode: 'free' | 'manual' | 'paid';
   campaigns: {
     id: string; title: string; advertiser: string; weight: number;
@@ -33,9 +33,9 @@ export async function GET(req: NextRequest) {
   const key = rawKey ? (LEGACY_KEY_MAP[rawKey] ?? rawKey) : undefined;
   if (key && !isPlacementKey(key)) return NextResponse.json({ placements: {} });
 
-  /* کاتالوگِ خرید — فقط جایگاه‌هایی که ادمین روی «پولی» گذاشته است.
-     گیتِ فاز ۴: جایگاهِ رایگان/دستی اصلاً در فهرستِ خرید دیده نمی‌شود، و
-     پولی‌شدنِ یک جایگاه هیچ جایگاهِ دیگری را قابلِ خرید نمی‌کند. */
+  /* کاتالوگ خرید — فقط جایگاه‌هایی که ادمین روی «پولی» گذاشته است.
+     گیت فاز ۴: جایگاه رایگان/دستی اصلاً در فهرست خرید دیده نمی‌شود، و
+     پولی‌شدن یک جایگاه هیچ جایگاه دیگری را قابل خرید نمی‌کند. */
   if (sp.get('catalog') === '1') {
     try {
       const paid = (await listPlacements()).filter(p => p.mode === 'paid');
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
         placements: paid.map(p => ({
           key: p.key, title: p.title, description: p.description,
           mode: p.mode, price: p.price, durationDays: p.durationDays, isActive: p.isActive,
-          /* پله‌های مدت/قیمتِ همان جایگاه — از دیتابیس، نه هاردکد */
+          /* پله‌های مدت/قیمت همان جایگاه — از دیتابیس، نه هاردکد */
           plans: plans
             .filter(pl => pl.placementKey === p.key)
             .map(pl => ({
@@ -59,9 +59,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    /* انقضای lazy: هیچ کمپینِ تمام‌شده‌ای حتی اگر cron عقب باشد نمایش
+    /* انقضای lazy: هیچ کمپین تمام‌شده‌ای حتی اگر cron عقب باشد نمایش
        داده نمی‌شود (پنجره‌ی زمانی هم فیلتر می‌شود؛ این فقط status را با
-       واقعیت همگام می‌کند). await عمدی است: روی سرورلسِ Vercel، کارِ
+       واقعیت همگام می‌کند). await عمدی است: روی سرورلس Vercel، کار
        رهاشده بعد از پاسخ ممکن است هرگز اجرا نشود. */
     await expireCampaigns();
 
@@ -77,10 +77,10 @@ export async function GET(req: NextRequest) {
         campaigns: [],
       };
 
-      /* ── حالتِ رایگان: محتوا از داده‌ی واقعیِ سایت، نه کمپین ──
-         فقط برای جایگاهِ موجودیتی معنا دارد. جایگاهِ بنری «محتوای
+      /* ── حالت رایگان: محتوا از داده‌ی واقعی سایت، نه کمپین ──
+         فقط برای جایگاه موجودیتی معنا دارد. جایگاه بنری «محتوای
          رایگان» ندارد، پس اگر ادمین اشتباهاً رویش free گذاشت، به‌جای
-         خالی‌کردنِ بی‌صدای بنرِ فروخته‌شده، همان کمپین‌ها سرو می‌شوند. */
+         خالی‌کردن بی‌صدای بنر فروخته‌شده، همان کمپین‌ها سرو می‌شوند. */
       if (v.placement.mode === 'free' && v.placement.contentKind === 'entity') {
         const snaps = await freeContent(
           (v.placement.entityType ?? 'product') as EntityType,
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
         const byRef = new Map(snaps.map(s => [s.ref, s]));
         for (const c of v.campaigns) {
           const snap = byRef.get(String((c.content as Record<string, unknown>).ref ?? ''));
-          if (!snap) continue;               // موجودیتِ حذف‌شده — کمپینِ یتیم نمایش داده نمی‌شود
+          if (!snap) continue;               // موجودیت حذف‌شده — کمپین یتیم نمایش داده نمی‌شود
           item.campaigns.push({ id: c.id, title: c.title, advertiser: c.advertiser, weight: c.weight, entity: snap });
         }
       }
@@ -124,9 +124,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/* شمارشِ نمایش/کلیک — اتمیک در دیتابیس؛ شکستش نباید صفحه را خراب کند.
-   await عمدی است: روی سرورلسِ Vercel، Promiseِ رهاشده بعد از پاسخ ممکن
-   است هرگز اجرا نشود و شمارنده گم شود؛ sendBeacon هم منتظرِ پاسخ نمی‌ماند
+/* شمارش نمایش/کلیک — اتمیک در دیتابیس؛ شکستش نباید صفحه را خراب کند.
+   await عمدی است: روی سرورلس Vercel، Promise رهاشده بعد از پاسخ ممکن
+   است هرگز اجرا نشود و شمارنده گم شود؛ sendBeacon هم منتظر پاسخ نمی‌ماند
    پس این await هیچ هزینه‌ای برای کاربر ندارد. */
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));

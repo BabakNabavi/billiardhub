@@ -1,4 +1,4 @@
-/* تستِ منطقِ راهنمای «افزودن به صفحه‌ی اصلی» — با UAهای واقعیِ دستگاه‌ها.
+/* تست منطق راهنمای «افزودن به صفحه‌ی اصلی» — با UAهای واقعی دستگاه‌ها.
    اجرا:  node scripts/test-a2hs.mjs
    (منطق در lib/pwa/a2hs.ts عمداً از DOM جدا است تا همین‌جا تست شود.) */
 
@@ -31,7 +31,7 @@ const UA = {
 const NOW = 1_800_000_000_000
 const DAY = 86_400_000
 
-/** محیطِ پیش‌فرض: سافاریِ آیفون، نصب‌نشده، بدونِ سابقه‌ی رد کردن */
+/** محیط پیش‌فرض: سافاری آیفون، نصب‌نشده، بدون سابقه‌ی رد کردن */
 const env = (o = {}) => ({
   ua: UA.iphoneSafari, maxTouchPoints: 5, standaloneFlag: false,
   displayModeApp: false, now: NOW, stored: null, ...o,
@@ -64,19 +64,19 @@ console.log('\nC — «بعداً» ⇒ رفرش (cooldown دوروزه)')
   t('سه روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 3 * DAY })), 'show:iphone')
 }
 
-console.log('\nبستنِ ساده (× / پس‌زمینه / Escape) ⇒ فقط همین بازدید')
+console.log('\nبستن ساده (× / پس‌زمینه / Escape) ⇒ فقط همین بازدید')
 {
   const s = nextState(null, 'dismiss', NOW)
   t('شمارنده بالا نمی‌رود', s.n, 0)
-  t('رفرشِ بعدی دوباره نشان می‌دهد', verdict(env({ stored: JSON.stringify(s), now: NOW + 1000 })), 'show:iphone')
-  /* سه بار بستنِ اتفاقی نباید به سکوتِ شش‌ماهه برسد */
+  t('رفرش بعدی دوباره نشان می‌دهد', verdict(env({ stored: JSON.stringify(s), now: NOW + 1000 })), 'show:iphone')
+  /* سه بار بستن اتفاقی نباید به سکوت شش‌ماهه برسد */
   let acc = null
   for (let i = 0; i < 5; i++) acc = nextState(acc, 'dismiss', NOW)
   t('پنج بار بستن هم سقف را پر نمی‌کند', acc.n, 0)
   t('و هنوز نمایش داده می‌شود', verdict(env({ stored: JSON.stringify(acc), now: NOW + 1000 })), 'show:iphone')
 }
 
-console.log('\nسقفِ نمایش — بعد از ۳ بار «بعداً» دیگر اصرار نمی‌کند')
+console.log('\nسقف نمایش — بعد از ۳ بار «بعداً» دیگر اصرار نمی‌کند')
 {
   let s = null
   for (let i = 0; i < 3; i++) s = nextState(s, 'later', NOW)
@@ -93,31 +93,31 @@ t('هر دو همزمان', verdict(env({ standaloneFlag: true, displayModeApp: 
 console.log('\nE/F — اندروید و دسکتاپ')
 t('اندروید کروم', verdict(env({ ua: UA.androidChrome, maxTouchPoints: 5 })), 'hide:not-ios')
 t('دسکتاپ کروم (ویندوز)', verdict(env({ ua: UA.desktopChrome, maxTouchPoints: 0, standaloneFlag: undefined })), 'hide:not-ios')
-t('سافاریِ مک (بدونِ لمس)', verdict(env({ ua: UA.macSafari, maxTouchPoints: 0 })), 'hide:not-ios')
+t('سافاری مک (بدون لمس)', verdict(env({ ua: UA.macSafari, maxTouchPoints: 0 })), 'hide:not-ios')
 
 console.log('\nG — آیپد')
-t('آیپدِ قدیمی (UA دارای iPad)', verdict(env({ ua: UA.ipadSafari13 })), 'show:ipad')
+t('آیپد قدیمی (UA دارای iPad)', verdict(env({ ua: UA.ipadSafari13 })), 'show:ipad')
 t('iPadOS 17 که خود را Macintosh می‌نامد', verdict(env({ ua: UA.ipadOS17, maxTouchPoints: 5 })), 'show:ipad')
-t('مکِ واقعی با همان UA ولی بدونِ لمس', verdict(env({ ua: UA.ipadOS17, maxTouchPoints: 0 })), 'hide:not-ios')
+t('مک واقعی با همان UA ولی بدون لمس', verdict(env({ ua: UA.ipadOS17, maxTouchPoints: 0 })), 'hide:not-ios')
 
-console.log('\nمرورگرهای غیرِ سافاری روی iOS')
-t('کرومِ iOS', verdict(env({ ua: UA.iosChrome })), 'hide:not-safari')
-t('فایرفاکسِ iOS', verdict(env({ ua: UA.iosFirefox })), 'hide:not-safari')
-t('وب‌ویوِ اینستاگرام', verdict(env({ ua: UA.instagram })), 'hide:not-safari')
+console.log('\nمرورگرهای غیر سافاری روی iOS')
+t('کروم iOS', verdict(env({ ua: UA.iosChrome })), 'hide:not-safari')
+t('فایرفاکس iOS', verdict(env({ ua: UA.iosFirefox })), 'hide:not-safari')
+t('وب‌ویو اینستاگرام', verdict(env({ ua: UA.instagram })), 'hide:not-safari')
 
-console.log('\nمقاومت در برابرِ داده‌ی خراب')
-t('JSON خراب ⇒ مثلِ نبودِ رکورد', verdict(env({ stored: '{{{' })), 'show:iphone')
+console.log('\nمقاومت در برابر داده‌ی خراب')
+t('JSON خراب ⇒ مثل نبود رکورد', verdict(env({ stored: '{{{' })), 'show:iphone')
 t('رشته‌ی بی‌ربط', verdict(env({ stored: 'true' })), 'show:iphone')
-t('کلیدِ ناشناخته', verdict(env({ stored: '{"s":"maybe","t":1}' })), 'show:iphone')
-t('زمانِ آینده (ساعتِ عقب‌کشیده)', verdict(env({ stored: '{"s":"ok","t":' + (NOW + 5 * DAY) + ',"n":1}' })), 'hide:muted')
+t('کلید ناشناخته', verdict(env({ stored: '{"s":"maybe","t":1}' })), 'show:iphone')
+t('زمان آینده (ساعت عقب‌کشیده)', verdict(env({ stored: '{"s":"ok","t":' + (NOW + 5 * DAY) + ',"n":1}' })), 'hide:muted')
 t('parseState روی null', parseState(null), null)
 t('isMuted روی null', isMuted(null, NOW), false)
 t('detectIosDevice با UA خالی', detectIosDevice('', 0), null)
 
 console.log('\nتنظیمات')
-t('کلیدِ ذخیره‌سازی', mod.A2HS_STORAGE_KEY, 'bh_a2hs_ios')
-t('تأخیرِ نمایش ≥ ۱ ثانیه', A2HS_CONFIG.showDelayMs >= 1000, true)
-t('تأخیرِ نمایش ≤ ۲ ثانیه', A2HS_CONFIG.showDelayMs <= 2000, true)
+t('کلید ذخیره‌سازی', mod.A2HS_STORAGE_KEY, 'bh_a2hs_ios')
+t('تأخیر نمایش ≥ ۱ ثانیه', A2HS_CONFIG.showDelayMs >= 1000, true)
+t('تأخیر نمایش ≤ ۲ ثانیه', A2HS_CONFIG.showDelayMs <= 2000, true)
 
 console.log(`\n${'─'.repeat(46)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)

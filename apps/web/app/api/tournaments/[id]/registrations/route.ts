@@ -5,11 +5,11 @@ import { rpc, audit, clientIp } from '@/lib/finance/db';
 import { getTournament, registrationsOf, forOrganizer, seatsLeft } from '@/lib/tournaments/server';
 import { promoteWaitlist } from '@/lib/tournaments/waitlist';
 
-/* فهرستِ ثبت‌نام‌کنندگانِ یک مسابقه — فقط برای برگزارکننده.
+/* فهرست ثبت‌نام‌کنندگان یک مسابقه — فقط برای برگزارکننده.
 
    مالکیت از دیتابیس اثبات می‌شود (`ownsClub`)، نه از هر شناسه‌ای که
    کلاینت بفرستد. `forOrganizer` هم فقط فیلدهای مجاز را بیرون می‌دهد:
-   شماره‌ی پیگیریِ تراکنش می‌آید ولی هیچ اطلاعاتِ بانکی در کار نیست —
+   شماره‌ی پیگیری تراکنش می‌آید ولی هیچ اطلاعات بانکی در کار نیست —
    اصلاً چنین چیزی ذخیره نمی‌شود. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       pending: rows.filter(r => r.status === 'PENDING_PAYMENT').length,
       refunded: rows.filter(r => r.status === 'REFUNDED').length,
     },
-    /* جمعِ مالی — بر پایه‌ی ثبت‌نام‌های قطعی */
+    /* جمع مالی — بر پایه‌ی ثبت‌نام‌های قطعی */
     totals: {
       gross: confirmed.reduce((s, r) => s + r.amount, 0),
       refunded: rows.reduce((s, r) => s + r.refund_amount, 0),
@@ -60,10 +60,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* بازپرداختِ یک ثبت‌نام توسطِ برگزارکننده.
+/* بازپرداخت یک ثبت‌نام توسط برگزارکننده.
 
-   خودِ انتقالِ پول به عهده‌ی درگاه است و تا نبودِ API رسمیِ آن انجام
-   نمی‌شود؛ این‌جا فقط وضعیت و دفترِ مالی به‌روز می‌شوند. عمداً وانمود
+   خود انتقال پول به عهده‌ی درگاه است و تا نبود API رسمی آن انجام
+   نمی‌شود؛ این‌جا فقط وضعیت و دفتر مالی به‌روز می‌شوند. عمداً وانمود
    نمی‌کنیم پولی برگشته است. */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
@@ -76,8 +76,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ message: 'شناسه‌ی ثبت‌نام معتبر نیست' }, { status: 400 });
   }
 
-  /* ثبت‌نام باید متعلق به همین مسابقه باشد — وگرنه مالکِ یک باشگاه
-     می‌توانست ثبت‌نامِ باشگاهِ دیگری را بازپرداخت کند. */
+  /* ثبت‌نام باید متعلق به همین مسابقه باشد — وگرنه مالک یک باشگاه
+     می‌توانست ثبت‌نام باشگاه دیگری را بازپرداخت کند. */
   const rows = await registrationsOf(id);
   const target = rows.find(r => r.id === registrationId);
   if (!target) return NextResponse.json({ message: 'ثبت‌نام در این مسابقه پیدا نشد' }, { status: 404 });
@@ -98,13 +98,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     newValue: { amount }, ip: clientIp(req) ?? undefined,
   });
 
-  /* یک صندلی آزاد شد ⇒ نفرِ اولِ صفِ انتظار بالا می‌آید.
-     بدونِ این، لیستِ انتظار فقط یک فهرستِ بی‌اثر می‌بود. */
+  /* یک صندلی آزاد شد ⇒ نفر اول صف انتظار بالا می‌آید.
+     بدون این، لیست انتظار فقط یک فهرست بی‌اثر می‌بود. */
   const promoted = await promoteWaitlist(id);
 
   return NextResponse.json({
     ok: true, idempotent: data.idempotent ?? false,
     promoted,
-    message: 'وضعیتِ بازپرداخت ثبت شد. انتقالِ وجه پس از فعال‌شدنِ درگاه انجام می‌شود.',
+    message: 'وضعیت بازپرداخت ثبت شد. انتقال وجه پس از فعال‌شدن درگاه انجام می‌شود.',
   });
 }

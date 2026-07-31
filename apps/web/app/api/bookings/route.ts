@@ -4,12 +4,12 @@ import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { priceBooking, hoursBetween, bookingReference, surchargeOf, type PricedTable } from '@/lib/finance/pricing';
 import { bookingStartsAt } from '@/lib/finance/cancellation';
 
-const HOLD_MINUTES = 10;   // رزروِ پرداخت‌نشده پس از ۱۰ دقیقه آزاد می‌شود
+const HOLD_MINUTES = 10;   // رزرو پرداخت‌نشده پس از ۱۰ دقیقه آزاد می‌شود
 
-/* ثبتِ رزروِ موقت:
-   ۱) قیمت روی سرور بازمحاسبه می‌شود (مبلغِ ارسالیِ کلاینت ملاک نیست)
-   ۲) رزرو و قفلِ ساعت‌ها در یک تراکنشِ اتمیک ⇒ دابل‌بوکینگ ممکن نیست
-   ۳) رزرو با مهلتِ ۱۰ دقیقه ساخته می‌شود و پرداخت‌نشده خودکار آزاد می‌گردد */
+/* ثبت رزرو موقت:
+   ۱) قیمت روی سرور بازمحاسبه می‌شود (مبلغ ارسالی کلاینت ملاک نیست)
+   ۲) رزرو و قفل ساعت‌ها در یک تراکنش اتمیک ⇒ دابل‌بوکینگ ممکن نیست
+   ۳) رزرو با مهلت ۱۰ دقیقه ساخته می‌شود و پرداخت‌نشده خودکار آزاد می‌گردد */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
@@ -27,15 +27,15 @@ export async function POST(req: NextRequest) {
   const bookingDate = start.toISOString().slice(0, 10);
   const hours = hoursBetween(start.getUTCHours(), end.getUTCHours());
   if (hours.length === 0) return NextResponse.json({ message: 'بازه‌ی زمانی معتبر نیست' }, { status: 400 });
-  /* ساعت‌ها به وقتِ ایران تفسیر می‌شوند — همان مبنایی که سیاستِ لغو با آن کار می‌کند */
+  /* ساعت‌ها به وقت ایران تفسیر می‌شوند — همان مبنایی که سیاست لغو با آن کار می‌کند */
   if (bookingStartsAt(bookingDate, hours.join(',')).getTime() < Date.now() - 60_000) {
-    return NextResponse.json({ message: 'امکانِ رزرو در گذشته وجود ندارد' }, { status: 400 });
+    return NextResponse.json({ message: 'امکان رزرو در گذشته وجود ندارد' }, { status: 400 });
   }
 
-  /* ── «رزروِ امروز بسته است» ──
-     باشگاه‌دار می‌تواند فقط روزِ جاری را ببندد و روزهای آینده باز
-     بمانند. «امروز» به وقتِ تهران حساب می‌شود؛ با UTC از ۲۰:۳۰ به بعد
-     «فردا»ی سرور شروع می‌شد و قفل پیش از نیمه‌شبِ محلی برداشته می‌شد. */
+  /* ── «رزرو امروز بسته است» ──
+     باشگاه‌دار می‌تواند فقط روز جاری را ببندد و روزهای آینده باز
+     بمانند. «امروز» به وقت تهران حساب می‌شود؛ با UTC از ۲۰:۳۰ به بعد
+     «فردا»ی سرور شروع می‌شد و قفل پیش از نیمه‌شب محلی برداشته می‌شد. */
   const { data: clubFlags } = await sb().from('clubs')
     .select('"closeTodayReservations"').eq('id', clubId).maybeSingle();
   if ((clubFlags as { closeTodayReservations?: boolean } | null)?.closeTodayReservations) {
@@ -44,13 +44,13 @@ export async function POST(req: NextRequest) {
     }).format(new Date());
     if (bookingDate === todayTehran) {
       return NextResponse.json(
-        { message: 'این باشگاه رزروِ آنلاین برای امروز را بسته است. لطفاً روزهای آینده را انتخاب کنید.' },
+        { message: 'این باشگاه رزرو آنلاین برای امروز را بسته است. لطفاً روزهای آینده را انتخاب کنید.' },
         { status: 409 },
       );
     }
   }
 
-  /* ── قیمت‌گذاریِ سروری: میز باید واقعاً در همین باشگاه ثبت شده باشد ── */
+  /* ── قیمت‌گذاری سروری: میز باید واقعاً در همین باشگاه ثبت شده باشد ── */
   const { data: tableRow } = await sb().from('tables')
     .select('id,"pricePerHour","clubId","isActive","discountRules","morningDiscount","playerSurchargeEnabled","playerSurchargePercent","playerSurchargeFrom"')
     .eq('id', tableId).maybeSingle();
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'این میز در باشگاه ثبت نشده است؛ رزرو ممکن نیست' }, { status: 400 });
   }
   if (t.isActive === false) {
-    return NextResponse.json({ message: 'این میز در حالِ حاضر غیرفعال است' }, { status: 409 });
+    return NextResponse.json({ message: 'این میز در حال حاضر غیرفعال است' }, { status: 409 });
   }
   const pricePerHour = Math.round(Number(t.pricePerHour) || 0);
   if (pricePerHour <= 0) {
@@ -79,14 +79,14 @@ export async function POST(req: NextRequest) {
     discountRules: Array.isArray(t.discountRules) ? t.discountRules as PricedTable['discountRules'] : null,
   };
 
-  /* قواعدِ تخفیف و تنظیمِ بازیکنِ اضافه‌ی باشگاه */
+  /* قواعد تخفیف و تنظیم بازیکن اضافه‌ی باشگاه */
   const { data: clubRow } = await sb().from('clubs').select('*').eq('id', clubId).maybeSingle();
   const club = (clubRow ?? null) as Record<string, unknown> | null;
   if (!priced.discountRules && Array.isArray(club?.discountRules)) {
     priced.discountRules = club!.discountRules as PricedTable['discountRules'];
   }
 
-  /* تنظیمِ میز مقدم است؛ اگر میز نداشت از باشگاه ارث می‌برد */
+  /* تنظیم میز مقدم است؛ اگر میز نداشت از باشگاه ارث می‌برد */
   const breakdown = priceBooking(
     hours, priced, Math.max(1, Number(playerCount) || 1),
     surchargeOf(t as unknown as Record<string, unknown>, club),
@@ -106,10 +106,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'این ساعت‌ها هم‌اکنون رزرو شده‌اند؛ لطفاً بازه‌ی دیگری انتخاب کنید' }, { status: 409 });
     }
     if (/does not exist|schema cache|function/i.test(m)) {
-      return NextResponse.json({ message: 'سیستمِ رزرو هنوز راه‌اندازی نشده است (مایگریشنِ دیتابیس اجرا نشده)' }, { status: 503 });
+      return NextResponse.json({ message: 'سیستم رزرو هنوز راه‌اندازی نشده است (مایگریشن دیتابیس اجرا نشده)' }, { status: 503 });
     }
     console.error('[bookings] create error:', m);
-    return NextResponse.json({ message: 'خطا در ثبتِ رزرو' }, { status: 500 });
+    return NextResponse.json({ message: 'خطا در ثبت رزرو' }, { status: 500 });
   }
 
   const booking = (data ?? {}) as Record<string, unknown>;

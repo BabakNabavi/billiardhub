@@ -124,11 +124,11 @@ function SellerPosterBg() {
 }
 
 // ── Mock Data ─────────────────────────────────────────────────
-/* فروشگاه‌های نمونه از منبعِ واحد؛ FlatShop هم از همین می‌خواند */
+/* فروشگاه‌های نمونه از منبع واحد؛ FlatShop هم از همین می‌خواند */
 const SELLERS = MOCK_SELLERS
 
-/* یک فروشگاهِ ذخیره‌شده (از /dashboard/seller، تاییدشده) را به شکلِ کارتِ همین لیست در می‌آورد.
-   فیلدهایی که فروشنده وارد نکرده با پیش‌فرضِ خنثی پر می‌شوند تا کارت نشکند. */
+/* یک فروشگاه ذخیره‌شده (از /dashboard/seller، تاییدشده) را به شکل کارت همین لیست در می‌آورد.
+   فیلدهایی که فروشنده وارد نکرده با پیش‌فرض خنثی پر می‌شوند تا کارت نشکند. */
 function profileToSeller(p: SellerProfile): typeof SELLERS[0] {
   const phones = p.phones.filter(x => x.trim())
   return {
@@ -194,7 +194,7 @@ const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) =>
 }
 
 
-// ── Logo — لوگوی آپلودشده، وگرنه آیکون مدرنِ فروشگاه (نه حرف اول اسم) ──
+// ── Logo — لوگوی آپلودشده، وگرنه آیکون مدرن فروشگاه (نه حرف اول اسم) ──
 function SellerLogo({ name, logo, size = 62 }: { name: string; logo?: string; size?: number }) {
   return (
     <div style={{
@@ -301,7 +301,7 @@ function SellerCard({ seller, view }: { seller: typeof SELLERS[0]; view: 'grid' 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0 }}>{seller.name}</h3>
           </div>
-          {/* ارتفاعِ ثابت برای توضیح و برندها ⇒ همه‌ی ردیف‌ها هم‌اندازه */}
+          {/* ارتفاع ثابت برای توضیح و برندها ⇒ همه‌ی ردیف‌ها هم‌اندازه */}
           <p className="sel-list-desc" style={{ fontSize: 12.5, color: TEXT_SEC, margin: 0, lineHeight: 1.6, height: 40, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{seller.description}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>{metaRow}</div>
           <div className="sel-list-brands" style={{ height: 24, overflow: 'hidden' }}>{brandsRow}</div>
@@ -443,12 +443,12 @@ export default function SellersPage() {
   const [locLoading, setLocLoading] = useState(false)
   const [locError,  setLocError]  = useState(false)
 
-  /* فروشگاه‌های تاییدشده‌ی ذخیره‌شده. مقدار اولیه = SELLERS تا SSR و اولین رندرِ کلاینت یکی باشند؛
+  /* فروشگاه‌های تاییدشده‌ی ذخیره‌شده. مقدار اولیه = SELLERS تا SSR و اولین رندر کلاینت یکی باشند؛
      بعد از mount، فروشگاه‌های approved از localStorage خوانده و اضافه می‌شوند. */
   const [stores, setStores] = useState<typeof SELLERS>(SELLERS)
   useEffect(() => {
-    /* فوراً هرچه در همین مرورگر هست، بعد فهرستِ سرور که همه‌ی
-       فروشگاه‌ها را دارد نه فقط فروشگاهِ خودِ بیننده. */
+    /* فوراً هرچه در همین مرورگر هست، بعد فهرست سرور که همه‌ی
+       فروشگاه‌ها را دارد نه فقط فروشگاه خود بیننده. */
     setStores(mergeStores(SELLERS, listApprovedSellers()))
     void fetchProfiles<SellerProfile>('seller').then(rows => {
       const remote = rows.filter(r => r.status === 'approved')

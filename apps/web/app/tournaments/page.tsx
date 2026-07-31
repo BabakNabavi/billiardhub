@@ -3,9 +3,9 @@
 /* ─────────────────────────────────────────────────────────────
    مسابقات — بازطراحی Championship (۱۴۰۵)
    منطق و داده‌ی قبلی عیناً حفظ شده (تب‌های وضعیت + جستجو +
-   شمارنده‌ها + لینک‌ها). پوسته‌ی جدید: پوسترِ سینماییِ قهرمانی
-   (عکسِ واقعیِ میز + گریدینگ و اسپات‌لایتِ CSS)، بیلبوردِ
-   «رویداد اصلی»، و کارت‌های پریمیوم با نوارِ قهرمان.
+   شمارنده‌ها + لینک‌ها). پوسته‌ی جدید: پوستر سینمایی قهرمانی
+   (عکس واقعی میز + گریدینگ و اسپات‌لایت CSS)، بیلبورد
+   «رویداد اصلی»، و کارت‌های پریمیوم با نوار قهرمان.
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect } from 'react'
@@ -37,7 +37,7 @@ const TABS: { key: TournamentStatus | 'all'; label: string; pulse?: boolean }[] 
   { key: 'finished',          label: 'پایان یافته' },
 ]
 
-/* پیلِ وضعیت روی تصویر */
+/* پیل وضعیت روی تصویر */
 function StatusPill({ t }: { t: Tournament }) {
   const c = STATUS_COLORS[t.status]
   return (
@@ -89,7 +89,7 @@ function TournamentCard({ t, i }: { t: Tournament; i: number }) {
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.prizeInfo}</span>
         </div>
 
-        {/* نوارِ قهرمان برای پایان‌یافته‌ها / ظرفیت برای بقیه */}
+        {/* نوار قهرمان برای پایان‌یافته‌ها / ظرفیت برای بقیه */}
         {t.status === 'finished' && t.champion ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.24)', borderRadius: 11, padding: '8px 12px' }}>
             <Crown size={14} style={{ color: GOLD_D }} />
@@ -128,7 +128,7 @@ export default function TournamentsPage() {
   const [search, setSearch] = useState('')
   const [view, setView]     = useState<'grid' | 'list'>('grid')
 
-  /* مسابقاتِ واقعی از سرور. پیش‌تر این صفحه از یک آرایه‌ی هاردکد
+  /* مسابقات واقعی از سرور. پیش‌تر این صفحه از یک آرایه‌ی هاردکد
      می‌خواند، یعنی کاربر مسابقه‌هایی می‌دید که وجود نداشتند و
      ثبت‌نامشان هم به جایی وصل نبود. */
   const [rows, setRows] = useState<Tournament[] | null>(null)
@@ -263,7 +263,7 @@ export default function TournamentsPage() {
         @media (prefers-reduced-motion: reduce) { .tn-hero::after { animation: none; display: none; } .tn-card, .tn-main { animation: none; } }
       `}</style>
 
-      {/* ═══ پوسترِ قهرمانی ═══ */}
+      {/* ═══ پوستر قهرمانی ═══ */}
       <header className="tn-hero">
         <div className="tn-hero-img" />
         <div className="tn-hero-grade" />
@@ -283,7 +283,7 @@ export default function TournamentsPage() {
             </p>
           </div>
 
-          {/* آمارِ زنده‌ی رویدادها — از همان داده */}
+          {/* آمار زنده‌ی رویدادها — از همان داده */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(14px,2.4vw,26px)', animation: 'tnFadeUp .55s .2s ease both' }}>
             <div className="tn-stat"><b>{toFa(all.length)}</b><span>رویداد</span></div>
             <div className="tn-stat-sep" />

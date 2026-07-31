@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 
-/* نمای کلیِ مالیِ پلتفرم — فقط ادمین.
-   ارقام از ledger (منبعِ حقیقت) محاسبه می‌شوند، نه از کَشِ موجودی. */
+/* نمای کلی مالی پلتفرم — فقط ادمین.
+   ارقام از ledger (منبع حقیقت) محاسبه می‌شوند، نه از کَش موجودی. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor || !(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });

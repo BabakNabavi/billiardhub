@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { firstName, lastName, phone: rawPhone, password, nationalId, birthDate } = body;
-    /* همان قالبِ واحدِ ورود — وگرنه کاربری که با +98 ثبت‌نام کند
+    /* همان قالب واحد ورود — وگرنه کاربری که با +98 ثبت‌نام کند
        دیگر هرگز نمی‌تواند با 09 وارد شود. */
     const phone = normalizePhone(rawPhone);
 
@@ -34,10 +34,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    /* پیشوند باید به اپراتورِ واقعی تعلق داشته باشد.
-       بدونِ این شرط، حسابی با شماره‌ی ناموجود (مثلاً ۰۹۰۰…) ساخته
-       می‌شد و بعد هیچ‌وقت کدِ تأیید یا بازیابیِ رمز به دستش نمی‌رسید،
-       چون سرویسِ پیامک چنین شماره‌ای را می‌پذیرد ولی جایی نمی‌رساند. */
+    /* پیشوند باید به اپراتور واقعی تعلق داشته باشد.
+       بدون این شرط، حسابی با شماره‌ی ناموجود (مثلاً ۰۹۰۰…) ساخته
+       می‌شد و بعد هیچ‌وقت کد تأیید یا بازیابی رمز به دستش نمی‌رسید،
+       چون سرویس پیامک چنین شماره‌ای را می‌پذیرد ولی جایی نمی‌رساند. */
     if (!hasAssignedPrefix(phone)) {
       return NextResponse.json(
         { message: INVALID_MOBILE_MESSAGE },
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    /* سقفِ ساختِ حساب — جلوی ساختِ انبوهِ خودکار را می‌گیرد */
+    /* سقف ساخت حساب — جلوی ساخت انبوه خودکار را می‌گیرد */
     const rl = await hitRateLimit(req, RULES.register, String(phone));
     if (!rl.ok) return tooMany(rl.retryAfterSec);
 
@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    /* هویت فقط وقتی ذخیره می‌شود که خودِ سرور استعلامش کرده باشد.
-       مسیرِ /api/shahkar پس از تأییدِ شاهکار/ثبت‌احوال نشانه‌ای می‌گذارد و
-       این‌جا فقط همان بررسی می‌شود؛ پس کسی نمی‌تواند با صدا زدنِ مستقیمِ
-       این مسیر، کد ملیِ دلخواه را «تأییدشده» جا بزند. */
+    /* هویت فقط وقتی ذخیره می‌شود که خود سرور استعلامش کرده باشد.
+       مسیر /api/shahkar پس از تأیید شاهکار/ثبت‌احوال نشانه‌ای می‌گذارد و
+       این‌جا فقط همان بررسی می‌شود؛ پس کسی نمی‌تواند با صدا زدن مستقیم
+       این مسیر، کد ملی دلخواه را «تأییدشده» جا بزند. */
     const nid = String(nationalId ?? '').replace(/[^0-9]/g, '');
     const idVerified = nid.length === 10 && await wasIdentityVerified(phone, nid);
 
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         isActive: true,
         language: 'fa',
         documents: [],
-        phone_verified: true,   // ثبت‌نام فقط با تأییدِ کدِ پیامکی ممکن است
+        phone_verified: true,   // ثبت‌نام فقط با تأیید کد پیامکی ممکن است
         ...(idVerified ? {
           national_id: nid,
           national_id_verified: true,
@@ -103,11 +103,11 @@ export async function POST(req: NextRequest) {
     }
 
     /* هویت (فاز ۳): حساب به «شخص» وصل می‌شود — اگر همین کد ملی قبلاً
-       شخص دارد (حسابِ دیگری از همین فرد)، به همان وصل می‌شود؛ سهمیه‌ی
-       رایگان بینِ همه‌ی حساب‌های یک شخص مشترک است. */
+       شخص دارد (حساب دیگری از همین فرد)، به همان وصل می‌شود؛ سهمیه‌ی
+       رایگان بین همه‌ی حساب‌های یک شخص مشترک است. */
     if (idVerified) await ensurePersonForUser(user.id);
 
-    /* مثلِ login: توکن در body برای سازگاری، نشستِ واقعی روی کوکی */
+    /* مثل login: توکن در body برای سازگاری، نشست واقعی روی کوکی */
     const token = jwt.sign(
       { sub: user.id, phone: user.phone, role: user.primaryRole },
       process.env.JWT_SECRET!,

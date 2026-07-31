@@ -1,7 +1,7 @@
 'use client'
 
-/* مودالِ احراز هویت — هر کاربرِ لاگین می‌تواند خودش را verified کند:
-   تأییدِ شماره با کدِ پیامکی (OTP) + تطبیقِ کد ملی با شماره (شاهکار). */
+/* مودال احراز هویت — هر کاربر لاگین می‌تواند خودش را verified کند:
+   تأیید شماره با کد پیامکی (OTP) + تطبیق کد ملی با شماره (شاهکار). */
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -42,7 +42,7 @@ export default function IdentityVerify({ open, onClose, onVerified }: { open: bo
     setBusy(true); setMsg('')
     const r = await sendOtp(p); setBusy(false)
     if (r.ok) { setPhase('otp'); setOtp(''); setResendIn(60); setMsg('') }
-    else setMsg(r.message || 'ارسالِ کد ناموفق بود')
+    else setMsg(r.message || 'ارسال کد ناموفق بود')
   }
   const doVerifyOtp = async () => {
     if (!/^\d{4,6}$/.test(otp.trim())) { setMsg('کد را کامل وارد کنید'); return }
@@ -55,17 +55,17 @@ export default function IdentityVerify({ open, onClose, onVerified }: { open: bo
     if (!isValidNationalId(n)) { setMsg('کد ملی معتبر نیست'); return }
     setBusy(true); setMsg('')
     const r = await verifyIdentity(digits(phone, 11), n); setBusy(false)
-    if (!r.ok) { setMsg(r.message || 'استعلامِ احراز هویت ناموفق بود'); return }
-    if (!r.match) { setMsg('کد ملی با این شماره مطابقت ندارد — شماره باید به‌نامِ خودتان باشد'); return }
+    if (!r.ok) { setMsg(r.message || 'استعلام احراز هویت ناموفق بود'); return }
+    if (!r.match) { setMsg('کد ملی با این شماره مطابقت ندارد — شماره باید به‌نام خودتان باشد'); return }
     updateUser({ verified: true, phone: digits(phone, 11) })
     onVerified()
   }
 
   const titles: Record<Phase, string> = { phone: 'احراز هویت', otp: 'تأیید شماره', nid: 'تطبیق کد ملی' }
   const subs: Record<Phase, string> = {
-    phone: 'برای فعال‌سازیِ امکاناتِ ویژه (مثل انتشارِ ویدیو) شماره و کد ملی‌ات را تأیید کن',
-    otp: `کدِ پیامک‌شده به ${digits(phone, 11)} را وارد کن`,
-    nid: 'کد ملی باید به‌نامِ همین شماره باشد (استعلامِ سامانه‌ی شاهکار)',
+    phone: 'برای فعال‌سازی امکانات ویژه (مثل انتشار ویدیو) شماره و کد ملی‌ات را تأیید کن',
+    otp: `کد پیامک‌شده به ${digits(phone, 11)} را وارد کن`,
+    nid: 'کد ملی باید به‌نام همین شماره باشد (استعلام سامانه‌ی شاهکار)',
   }
 
   return createPortal(
@@ -84,7 +84,7 @@ export default function IdentityVerify({ open, onClose, onVerified }: { open: bo
           {phase === 'phone' && (
             <>
               <Field icon={<MessageSquare size={16} />} value={phone} onChange={v => setPhone(digits(v, 11))} placeholder="مثال: 09121234567" ltr onEnter={doSend} />
-              <Btn onClick={doSend} busy={busy} label="ارسالِ کدِ پیامکی" />
+              <Btn onClick={doSend} busy={busy} label="ارسال کد پیامکی" />
             </>
           )}
           {phase === 'otp' && (
@@ -93,7 +93,7 @@ export default function IdentityVerify({ open, onClose, onVerified }: { open: bo
                 style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', fontSize: 24, fontWeight: 800, direction: 'ltr', padding: '13px', borderRadius: 13, border: `1px solid ${LINE}`, background: '#FAF8F3', color: INK, outline: 'none', fontFamily: 'inherit' }} />
               <Btn onClick={doVerifyOtp} busy={busy} label="تأیید کد" icon={<Check size={16} />} />
               <button onClick={doSend} disabled={resendIn > 0 || busy} style={{ background: 'none', border: 'none', cursor: resendIn > 0 ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, color: resendIn > 0 ? MUT : GOLD_D, padding: 0 }}>
-                {resendIn > 0 ? `ارسالِ مجدد تا ${resendIn.toLocaleString('fa-IR')} ثانیه` : 'ارسالِ مجددِ کد'}
+                {resendIn > 0 ? `ارسال مجدد تا ${resendIn.toLocaleString('fa-IR')} ثانیه` : 'ارسال مجدد کد'}
               </button>
             </>
           )}

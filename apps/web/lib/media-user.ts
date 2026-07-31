@@ -2,8 +2,8 @@
 import { apiFetch } from './http'
 import type { MediaVideo, MediaCategoryKey } from './media-data'
 
-/* ویدیوهای آپلودیِ کاربران — رپرهای کلاینت + تبدیل به MediaVideo برای نمایش
-   کنارِ محتوای دستیِ بیلیارد مدیا. */
+/* ویدیوهای آپلودی کاربران — رپرهای کلاینت + تبدیل به MediaVideo برای نمایش
+   کنار محتوای دستی بیلیارد مدیا. */
 export interface RawUserVideo {
   id: string; title: string; category: string; ownerKey: string
   creatorName: string; creatorHandle: string
@@ -38,7 +38,7 @@ export async function deleteUserVideo(id: string, user: string): Promise<boolean
   try { await apiFetch(`/api/media?id=${encodeURIComponent(id)}&user=${encodeURIComponent(user)}`, { method: 'DELETE' }); return true } catch { return false }
 }
 
-/* ── کانالِ کاربر (برای انتشارِ ویدیو لازم است، مثل یوتیوب) ── */
+/* ── کانال کاربر (برای انتشار ویدیو لازم است، مثل یوتیوب) ── */
 export interface UserChannel { ownerKey: string; name: string; handle: string; bio: string; avatar: string; createdAt: number }
 
 export async function fetchMyChannel(ownerKey: string): Promise<UserChannel | null> {

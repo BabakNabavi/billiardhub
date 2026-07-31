@@ -8,13 +8,13 @@ export function OPTIONS() { return new NextResponse(null, { status: 204, headers
 
 /* اعلان‌ها داده‌ی خصوصی‌اند: پیش‌تر `user` از کوئری/بدنه خوانده می‌شد و
    یعنی هر کسی می‌توانست اعلان‌های دیگری را بخواند یا خوانده‌شده کند.
-   حالا صاحبِ اعلان‌ها همیشه خودِ صاحبِ نشست است. */
+   حالا صاحب اعلان‌ها همیشه خود صاحب نشست است. */
 const deny = (s: number, body: unknown) => NextResponse.json(body, { status: s, headers: CORS })
 
-/* GET → لیستِ نوتیف‌های خودِ کاربر (تازه‌ترین اول) */
+/* GET → لیست نوتیف‌های خود کاربر (تازه‌ترین اول) */
 export async function GET(req: NextRequest) {
-  /* نوعِ Notif فقط reply|reaction|like است — یعنی این مسیر
-     صددرصد مالِ تعاملاتِ اجتماعی است و هیچ اعلانِ دیگری (تأییدِ باشگاه،
+  /* نوع Notif فقط reply|reaction|like است — یعنی این مسیر
+     صددرصد مال تعاملات اجتماعی است و هیچ اعلان دیگری (تأیید باشگاه،
      رزرو، پرداخت، تبلیغات) از این‌جا نمی‌گذرد. */
   const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
@@ -25,10 +25,10 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(list.sort((a, b) => b.at - a.at), { headers: CORS })
 }
 
-/* POST { action:'read' } → همه‌ی اعلان‌های خودِ کاربر خوانده‌شده */
+/* POST { action:'read' } → همه‌ی اعلان‌های خود کاربر خوانده‌شده */
 export async function POST(req: NextRequest) {
-  /* نوعِ Notif فقط reply|reaction|like است — یعنی این مسیر
-     صددرصد مالِ تعاملاتِ اجتماعی است و هیچ اعلانِ دیگری (تأییدِ باشگاه،
+  /* نوع Notif فقط reply|reaction|like است — یعنی این مسیر
+     صددرصد مال تعاملات اجتماعی است و هیچ اعلان دیگری (تأیید باشگاه،
      رزرو، پرداخت، تبلیغات) از این‌جا نمی‌گذرد. */
   const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)

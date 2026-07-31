@@ -5,10 +5,10 @@
 
    داده از `/api/rankings` می‌آید — همان جدولی که ادمین در
    /admin/rankings پر می‌کند. پیش‌تر این صفحه فقط از localStorage
-   می‌خواند، پس رنکینگِ ادمین برای هیچ کاربرِ دیگری وجود نداشت و
-   جای خالی‌اش با فهرستِ نمونه‌ی داخلِ کد پر می‌شد.
+   می‌خواند، پس رنکینگ ادمین برای هیچ کاربر دیگری وجود نداشت و
+   جای خالی‌اش با فهرست نمونه‌ی داخل کد پر می‌شد.
 
-   فیلترها و منطقِ صعود-نزول همان قبلی است.
+   فیلترها و منطق صعود-نزول همان قبلی است.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
@@ -26,8 +26,8 @@ interface RankingPlayer {
   avatar?: string
 }
 
-/* فهرستِ نمونه حذف شد: وقتی رنکینگی ثبت نشده باشد باید همان را
-   بگوییم، نه اینکه بیست نامِ ساختگی به‌جای داده‌ی واقعی نشان دهیم. */
+/* فهرست نمونه حذف شد: وقتی رنکینگی ثبت نشده باشد باید همان را
+   بگوییم، نه اینکه بیست نام ساختگی به‌جای داده‌ی واقعی نشان دهیم. */
 
 const sports = [
   { value: 'snooker', label: 'اسنوکر' },
@@ -58,7 +58,7 @@ const BG     = '#F7F7F5'
 
 const faDigits = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
-/* رنگ‌بندیِ رتبه‌ها — به سبکِ جدول رنکینگ فدراسیون جهانی:
+/* رنگ‌بندی رتبه‌ها — به سبک جدول رنکینگ فدراسیون جهانی:
    ۱ مشکی، ۲–۸ صورتی، ۹–۱۶ آبی، ۱۷–۳۲ قهوه‌ای، ۳۳–۶۴ سبز (دسته یک)، بقیه خاکستری */
 const rankColor = (r: number): string =>
   r === 1 ? '#111111'
@@ -68,7 +68,7 @@ const rankColor = (r: number): string =>
   : r <= 64 ? '#229A47'
   : '#8A8474'
 
-/* چیپِ تغییرِ رتبه — همان منطقِ قبلی (previousRank - rank) */
+/* چیپ تغییر رتبه — همان منطق قبلی (previousRank - rank) */
 function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean }) {
   if (diff > 0) return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 800, color: '#22B45A', background: onDark ? 'rgba(34,180,90,0.16)' : 'rgba(34,180,90,0.10)', border: '1px solid rgba(34,180,90,0.3)', borderRadius: 999, padding: '2.5px 8px', fontVariantNumeric: 'tabular-nums' }}>
@@ -83,7 +83,7 @@ function TrendChip({ diff, onDark = false }: { diff: number; onDark?: boolean })
   return <Minus size={12} style={{ color: onDark ? 'rgba(255,255,255,0.3)' : 'rgba(28,27,23,0.22)' }} />
 }
 
-/* پرتره: عکسِ واقعی اگر بود (ساختار آماده)، وگرنه مونوگرام */
+/* پرتره: عکس واقعی اگر بود (ساختار آماده)، وگرنه مونوگرام */
 function Portrait({ p, size, onDark = false }: { p: RankingPlayer; size: number; onDark?: boolean }) {
   return (
     <span style={{
@@ -108,9 +108,9 @@ export default function RankingsPage() {
   const [category, setCategory] = useState('دسته برتر')
 
   /* جدول از سرور خوانده می‌شود، نه از localStorage.
-     پیش‌تر فقط محلی بود، پس رنکینگی که ادمین وارد می‌کرد برای هیچ‌کسِ
-     دیگری وجود نداشت و صفحه به فهرستِ نمونه‌ی داخلِ کد برمی‌گشت — همان
-     «داده‌ی فیکِ قبلی» که دوباره ظاهر می‌شد. */
+     پیش‌تر فقط محلی بود، پس رنکینگی که ادمین وارد می‌کرد برای هیچ‌کس
+     دیگری وجود نداشت و صفحه به فهرست نمونه‌ی داخل کد برمی‌گشت — همان
+     «داده‌ی فیک قبلی» که دوباره ظاهر می‌شد. */
   const [board, setBoard] = useState<RankingsStructure | null>(null)
   const [loaded, setLoaded] = useState(false)
 
@@ -138,7 +138,7 @@ export default function RankingsPage() {
         @keyframes rkScaleX { from { opacity:0; transform: scaleX(0); } to { opacity:1; transform: scaleX(1); } }
         .rk-wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px,3vw,28px); }
 
-        /* هدرِ رسمیِ تیره */
+        /* هدر رسمی تیره */
         .rk-hero { position: relative; overflow: hidden; background: #0D0C0A; color: #fff; }
         .rk-hero-word { position: absolute; bottom: -8px; inset-inline-start: -4px; font-weight: 900;
           font-size: clamp(56px, 10vw, 128px); line-height: 1; letter-spacing: .02em;
@@ -164,7 +164,7 @@ export default function RankingsPage() {
         .rk-chip.on { background: rgba(199,166,106,0.12); border-color: rgba(199,166,106,0.38); color: ${GOLD_D}; }
 
         /* ردیف‌های جدول — به سبک جدول فدراسیون جهانی:
-           مربعِ رنگیِ رتبه چسبیده به لبه‌ی راست + پخِ برش‌خورده در گوشه‌ی پایین-چپ */
+           مربع رنگی رتبه چسبیده به لبه‌ی راست + پخ برش‌خورده در گوشه‌ی پایین-چپ */
         .rk-rowwrap { animation: rkFadeUp .5s ease both;
           filter: drop-shadow(0 1px 2px rgba(28,27,23,0.05));
           transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s; }
@@ -173,7 +173,7 @@ export default function RankingsPage() {
           background: #fff; border: 1px solid ${LINE}; border-radius: 16px 16px 16px 0; overflow: hidden;
           padding: 0 0 0 18px; min-height: 74px; text-decoration: none; color: inherit;
           clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%, 0 calc(100% - 14px)); }
-        /* مربعِ رتبه — لیکویید گلسِ کریستالی (iOS): هایلایت شیشه‌ای + عددِ نورانی */
+        /* مربع رتبه — لیکویید گلس کریستالی (iOS): هایلایت شیشه‌ای + عدد نورانی */
         .rk-row .chip { align-self: stretch; width: 56px; flex-shrink: 0; position: relative;
           display: flex; align-items: center; justify-content: center; gap: 1px; direction: ltr;
           color: #fff; font-weight: 900; font-size: 16.5px; font-variant-numeric: tabular-nums;
@@ -184,20 +184,20 @@ export default function RankingsPage() {
             inset 0 -2px 5px rgba(0,0,0,0.2);
           text-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 12px rgba(255,255,255,0.5); }
         .rk-row .chip i { font-style: normal; font-size: 0.7em; font-weight: 800; opacity: .85; }
-        /* بلوکِ نام عرضِ ثابت دارد تا ستونِ شهرها در همه‌ی ردیف‌ها دقیقاً هم‌راستا بماند */
+        /* بلوک نام عرض ثابت دارد تا ستون شهرها در همه‌ی ردیف‌ها دقیقاً هم‌راستا بماند */
         .rk-name { flex: 0 0 clamp(130px, 20vw, 210px); min-width: 0; padding: 11px 0; }
         .rk-city { flex-shrink: 0; margin-inline-start: clamp(18px, 3vw, 34px);
           font-size: 12px; color: ${MUT}; white-space: nowrap; }
-        /* ترکِ گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
+        /* ترک گرید نباید با min-content ردیف‌ها بازتر از کانتینر شود */
         .rk-rowwrap { min-width: 0; }
         @media (max-width: 640px) {
-          /* جای تبِ امتیاز در لبه‌ی چپ رزرو می‌شود — چیپِ صعود/نزول چسبیده به تب */
+          /* جای تب امتیاز در لبه‌ی چپ رزرو می‌شود — چیپ صعود/نزول چسبیده به تب */
           .rk-row { gap: 8px; padding-left: 70px; min-height: 64px; }
           .rk-row .chip { width: 44px; font-size: 14px; }
           .rk-name { flex-basis: 86px; }
           .rk-city { margin-inline-start: 8px; font-size: 10.5px; max-width: 60px;
             overflow: hidden; text-overflow: ellipsis; }
-          /* امتیاز = تبِ چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
+          /* امتیاز = تب چسبیده به لبه‌ی چپ کارت — ضلع چپش دیده نمی‌شود،
              فقط گوشه‌های راست گرد است */
           .rk-row .rk-pts { position: absolute; left: 0; top: 50%; transform: translateY(-50%);
             border-radius: 0 12px 12px 0 !important; border-left: none !important;
@@ -273,7 +273,7 @@ export default function RankingsPage() {
             <div style={{ textAlign: 'center', padding: '70px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
               <Trophy size={38} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
               <p style={{ fontSize: 15.5, fontWeight: 800, margin: 0 }}>
-                {loaded ? 'رنکینگ این دسته هنوز اعلام نشده' : 'در حال دریافتِ رنکینگ…'}
+                {loaded ? 'رنکینگ این دسته هنوز اعلام نشده' : 'در حال دریافت رنکینگ…'}
               </p>
             </div>
           ) : (
@@ -290,7 +290,7 @@ export default function RankingsPage() {
                 </span>
               </div>
 
-              {/* ═══ جدول کامل — مربعِ رنگیِ رتبه با عدد سفید ═══ */}
+              {/* ═══ جدول کامل — مربع رنگی رتبه با عدد سفید ═══ */}
               <section style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10 }}>
                 {players.map((p, i) => {
                   const diff = p.previousRank ? p.previousRank - p.rank : 0
@@ -324,7 +324,7 @@ export default function RankingsPage() {
                 })}
               </section>
 
-              {/* پانوشت — همان متنِ قبلی */}
+              {/* پانوشت — همان متن قبلی */}
               <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '13px 16px' }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
                 <span style={{ fontSize: 12.5, color: SEC }}>

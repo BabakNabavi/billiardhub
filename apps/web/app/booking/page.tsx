@@ -1,7 +1,7 @@
 'use client'
 
 /* `/booking` صفحه نداشت و فقط `[clubId]` و `result` زیرش بودند؛ ولی
-   لینکِ «همه» کنارِ «رزروهای شما» در داشبورد به همین‌جا می‌رفت و کاربر
+   لینک «همه» کنار «رزروهای شما» در داشبورد به همین‌جا می‌رفت و کاربر
    به صفحه‌ی خطا می‌خورد. این‌جا همان فهرست، ولی تمام‌عرض. */
 
 import Link from 'next/link'
@@ -27,7 +27,7 @@ export default function MyBookingsPage() {
             </h1>
           </div>
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 2 }}>
-            رزروهای گذشته و پیشِ‌رو، وضعیتِ پرداخت و امکانِ لغو.
+            رزروهای گذشته و پیش‌رو، وضعیت پرداخت و امکان لغو.
           </p>
 
           <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: 'clamp(14px,3vw,20px)' }}>

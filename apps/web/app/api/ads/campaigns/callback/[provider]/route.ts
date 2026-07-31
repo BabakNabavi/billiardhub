@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
 
-/* بازگشت از درگاهِ خریدِ تبلیغ.
+/* بازگشت از درگاه خرید تبلیغ.
 
-   هرگز به گفته‌ی کلاینت اعتماد نمی‌شود: پرداخت سمتِ سرور verify
-   می‌شود، مبلغِ واقعی با مبلغِ سفارش مقایسه می‌شود، و فعال‌سازی در یک
-   تراکنشِ اتمیک انجام می‌گیرد که کالبکِ تکراری دو بار اثر نمی‌گذارد و
-   ظرفیتِ جایگاه را هم در همان تراکنش می‌سنجد. */
+   هرگز به گفته‌ی کلاینت اعتماد نمی‌شود: پرداخت سمت سرور verify
+   می‌شود، مبلغ واقعی با مبلغ سفارش مقایسه می‌شود، و فعال‌سازی در یک
+   تراکنش اتمیک انجام می‌گیرد که کالبک تکراری دو بار اثر نمی‌گذارد و
+   ظرفیت جایگاه را هم در همان تراکنش می‌سنجد. */
 
 async function handle(req: NextRequest, providerName: string) {
   const url = req.nextUrl;
@@ -31,7 +31,7 @@ async function handle(req: NextRequest, providerName: string) {
     status: string; provider: string; provider_authority: string | null;
   };
 
-  /* قبلاً پرداخت شده ⇒ فقط نتیجه، بدونِ اثرِ دوباره */
+  /* قبلاً پرداخت شده ⇒ فقط نتیجه، بدون اثر دوباره */
   if (o.status === 'PAID') return done(true, `&order=${o.id}`);
 
   if (status && /nok|cancel/i.test(status)) {
@@ -50,14 +50,14 @@ async function handle(req: NextRequest, providerName: string) {
     return fail(v.message || 'پرداخت تأیید نشد');
   }
 
-  /* مبلغِ واقعیِ پرداخت‌شده باید با قیمتِ سرور یکی باشد */
+  /* مبلغ واقعی پرداخت‌شده باید با قیمت سرور یکی باشد */
   if (typeof v.amount === 'number' && v.amount !== o.amount) {
     await sb().from('campaign_orders').update({ status: 'FAILED' }).eq('id', o.id);
     void audit({
       action: 'CAMPAIGN_AMOUNT_MISMATCH', entityType: 'campaign_order', entityId: o.id,
       newValue: { got: v.amount, want: o.amount }, ip: clientIp(req) ?? undefined,
     });
-    return fail('مبلغِ پرداخت با قیمتِ تبلیغ مطابقت ندارد');
+    return fail('مبلغ پرداخت با قیمت تبلیغ مطابقت ندارد');
   }
 
   const { data: act, error } = await rpc('bh_activate_campaign', { p_order_id: o.id, p_ref: v.refId ?? '' });
@@ -66,12 +66,12 @@ async function handle(req: NextRequest, providerName: string) {
       action: 'CAMPAIGN_ACTIVATE_FAILED', entityType: 'campaign_order', entityId: o.id,
       newValue: { error: error.message },
     });
-    return fail('خطا در ثبتِ تبلیغ — با پشتیبانی تماس بگیرید');
+    return fail('خطا در ثبت تبلیغ — با پشتیبانی تماس بگیرید');
   }
 
-  /* ظرفیتِ جایگاه در همان تراکنش پر شده بود. تابع عمداً استثنا پرتاب
-     نمی‌کند (وگرنه علامت‌گذاریِ سفارش هم برمی‌گشت) و نتیجه را
-     برمی‌گرداند؛ این‌جا فقط پیامِ روشن به کاربر داده می‌شود. */
+  /* ظرفیت جایگاه در همان تراکنش پر شده بود. تابع عمداً استثنا پرتاب
+     نمی‌کند (وگرنه علامت‌گذاری سفارش هم برمی‌گشت) و نتیجه را
+     برمی‌گرداند؛ این‌جا فقط پیام روشن به کاربر داده می‌شود. */
   const res = (act ?? {}) as { ok?: boolean; reason?: string };
   if (res.ok === false) {
     void audit({
@@ -79,9 +79,9 @@ async function handle(req: NextRequest, providerName: string) {
       newValue: { reason: res.reason },
     });
     if (res.reason === 'placement_full') {
-      return fail('ظرفیتِ این جایگاه پیش از تکمیلِ پرداختِ شما پر شد؛ مبلغ قابلِ بازگشت است — با پشتیبانی تماس بگیرید');
+      return fail('ظرفیت این جایگاه پیش از تکمیل پرداخت شما پر شد؛ مبلغ قابل بازگشت است — با پشتیبانی تماس بگیرید');
     }
-    return fail('ثبتِ تبلیغ ممکن نشد — با پشتیبانی تماس بگیرید');
+    return fail('ثبت تبلیغ ممکن نشد — با پشتیبانی تماس بگیرید');
   }
 
   void audit({

@@ -13,28 +13,28 @@ import { guardSocialInteractions } from '@/lib/features'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
-/* ── پرچمِ «تعاملاتِ اجتماعی» ──────────────────────────────────
-   وقتی خاموش است، این مسیر کاملاً بسته می‌شود — نه فقط رابطِ کاربری.
-   مخفی‌کردنِ دکمه جلوی درخواستِ مستقیم را نمی‌گیرد.
+/* ── پرچم «تعاملات اجتماعی» ──────────────────────────────────
+   وقتی خاموش است، این مسیر کاملاً بسته می‌شود — نه فقط رابط کاربری.
+   مخفی‌کردن دکمه جلوی درخواست مستقیم را نمی‌گیرد.
 
    POST هر چهار قابلیت را می‌سازد (پیام، پاسخ به استوری، لایک و
    ری‌اکشن همه با همین مسیر و فقط با `kind` متفاوت می‌آیند)، پس
-   بستنِ آن یعنی هیچ تعاملِ جدیدی ساخته نمی‌شود.
+   بستن آن یعنی هیچ تعامل جدیدی ساخته نمی‌شود.
 
-   GET و DELETE هم بسته می‌شوند چون خودِ «پیام خصوصی» خاموش است.
-   داده‌ها دست‌نخورده می‌مانند و با روشن‌شدنِ دوباره‌ی پرچم، همان
-   گفتگوهای قبلی سرِ جایشان‌اند. */
+   GET و DELETE هم بسته می‌شوند چون خود «پیام خصوصی» خاموش است.
+   داده‌ها دست‌نخورده می‌مانند و با روشن‌شدن دوباره‌ی پرچم، همان
+   گفتگوهای قبلی سر جایشان‌اند. */
 
-/* هویتِ فرستنده/خواننده همیشه از نشست می‌آید، نه از کوئری یا بدنه.
+/* هویت فرستنده/خواننده همیشه از نشست می‌آید، نه از کوئری یا بدنه.
    پیش‌تر `user` و `from.key` را کلاینت می‌گفت و همین یعنی هر کسی
    می‌توانست مکالمه‌ی دیگران را بخواند یا به‌جای آن‌ها پیام بفرستد. */
 const deny = (s: number, body: unknown) => NextResponse.json(body, { status: s, headers: CORS })
 
-/** آیا این کلید یکی از دو طرفِ همین گفتگوست؟ */
+/** آیا این کلید یکی از دو طرف همین گفتگوست؟ */
 const isParticipant = (cid: string, key: string) =>
   cid.split('__').includes(safeKey(key))
 
-/* GET                              → لیست گفتگوهای خودِ کاربر
+/* GET                              → لیست گفتگوهای خود کاربر
    GET ?conv=ID&since=TS            → { messages, otherKey, otherPoll, otherRead } */
 export async function GET(req: NextRequest) {
   const off = await guardSocialInteractions(CORS); if (off) return off
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 
   if (cid) {
     /* convId از safeKeyها ساخته شده؛ safeKey روی رشته‌ی ایمن idempotent است،
-       پس طرفِ مقابل را مستقیم از خودِ id می‌گیریم و همان را همه‌جا می‌دهیم. */
+       پس طرف مقابل را مستقیم از خود id می‌گیریم و همان را همه‌جا می‌دهیم. */
     const meSafe = safeKey(user)
     const parts = cid.split('__')
     const otherSafe = parts.find(p => p !== meSafe) || parts[0] || ''
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     const cleared = user ? await getClearedAt(cid, user) : 0
     const messages = await readMessages(cid, Math.max(since, cleared))
 
-    /* کرسرِ خواندنِ من را جلو ببر (بدونِ دستکاریِ فایلِ پیام‌ها) + unread صفر */
+    /* کرسر خواندن من را جلو ببر (بدون دستکاری فایل پیام‌ها) + unread صفر */
     let advancedTo = 0
     if (user && messages.length) {
       const lastIncoming = messages.filter(m => m.fromKey !== user).reduce((mx, m) => Math.max(mx, m.at), 0)
@@ -71,9 +71,9 @@ export async function GET(req: NextRequest) {
     const otherPoll = otherSafe ? await getPoll(otherSafe) : 0
     const otherRead = otherSafe ? await getReadCursor(cid, otherSafe) : 0
 
-    /* اگر تازه چیزی خواندم، به طرفِ مقابل خبر بده تا تیکش فوری آبی شود */
+    /* اگر تازه چیزی خواندم، به طرف مقابل خبر بده تا تیکش فوری آبی شود */
     if (advancedTo && otherSafe) broadcast(dmTopic(otherSafe), 'read', { convId: cid, reader: meSafe, at: advancedTo })
-    /* حضورِ من را هم آنی به طرف بده ⇒ تیکِ «رسیده»اش بدونِ انتظارِ پول به‌روز شود */
+    /* حضور من را هم آنی به طرف بده ⇒ تیک «رسیده»اش بدون انتظار پول به‌روز شود */
     if (user && otherSafe) broadcast(dmTopic(otherSafe), 'poll', { convId: cid, at: Date.now() })
 
     return NextResponse.json({ messages, otherKey: otherSafe, otherPoll, otherRead }, { headers: CORS })
@@ -95,8 +95,8 @@ export async function POST(req: NextRequest) {
   const kind: string = b?.kind || 'text'
   if (!to?.key || !text) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
 
-  /* فرستنده همیشه خودِ صاحبِ نشست است. نام و نقشِ نمایشی می‌تواند از
-     بدنه بیاید (فقط تزئینِ رابط)، ولی «کلید» — که مالکیتِ پیام با آن
+  /* فرستنده همیشه خود صاحب نشست است. نام و نقش نمایشی می‌تواند از
+     بدنه بیاید (فقط تزئین رابط)، ولی «کلید» — که مالکیت پیام با آن
      تعیین می‌شود — جعل‌شدنی نیست. */
   const from = {
     key: actor.dmKey,
@@ -108,9 +108,9 @@ export async function POST(req: NextRequest) {
   const id = convId(from.key, to.key)
   const at = Date.now()
   const msg: DMsg = { id: `m-${at}-${Math.floor(Math.random() * 1e4)}`, fromKey: from.key, text, kind, storyRef: b?.storyRef, at }
-  await appendMessage(id, msg)   // فایلِ مستقل ⇒ هیچ‌وقت کلوبِر نمی‌شود
+  await appendMessage(id, msg)   // فایل مستقل ⇒ هیچ‌وقت کلوبر نمی‌شود
 
-  /* Realtime را همین‌جا (قبل از نوشتن‌های ایندکس/نوتیف) شلیک کن تا تحویل زیرِ یک‌ثانیه بماند */
+  /* Realtime را همین‌جا (قبل از نوشتن‌های ایندکس/نوتیف) شلیک کن تا تحویل زیر یک‌ثانیه بماند */
   const payload = { convId: id, message: msg, from: { key: from.key, name: from.name, role: from.role } }
   broadcast(dmTopic(to.key), 'msg', payload)
   broadcast(dmTopic(from.key), 'msg', payload)
@@ -130,12 +130,12 @@ export async function POST(req: NextRequest) {
   }
   const pollP = getPoll(to.key)
   await Promise.all(tasks)
-  const otherPoll = await pollP   // فرستنده همان لحظه بداند گیرنده آنلاین بوده ⇒ تیکِ «رسیده» فوری
+  const otherPoll = await pollP   // فرستنده همان لحظه بداند گیرنده آنلاین بوده ⇒ تیک «رسیده» فوری
 
   return NextResponse.json({ ok: true, convId: id, message: msg, otherPoll }, { status: 201, headers: CORS })
 }
 
-/* DELETE ?conv=ID&user=KEY → پاک‌کردنِ گفتگو فقط از سمتِ همین کاربر */
+/* DELETE ?conv=ID&user=KEY → پاک‌کردن گفتگو فقط از سمت همین کاربر */
 export async function DELETE(req: NextRequest) {
   const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
@@ -144,7 +144,7 @@ export async function DELETE(req: NextRequest) {
   const cid = req.nextUrl.searchParams.get('conv') || ''
   const user = actor.dmKey                       // ← از نشست، نه از کوئری
   if (!cid || !user) return NextResponse.json({ message: 'داده ناقص' }, { status: 400, headers: CORS })
-  /* فقط گفتگوی خودش را می‌تواند از سمتِ خودش پاک کند */
+  /* فقط گفتگوی خودش را می‌تواند از سمت خودش پاک کند */
   if (!isParticipant(cid, user)) return deny(403, FORBIDDEN)
   await setClearedAt(cid, user, Date.now())
   const path = P.dmIndex(user)

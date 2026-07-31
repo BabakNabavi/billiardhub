@@ -1,7 +1,7 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پنل متخصص خدمات فنی — تکمیلِ پروفایلِ حرفه‌ای.
+   پنل متخصص خدمات فنی — تکمیل پروفایل حرفه‌ای.
    هرچه این‌جا ذخیره شود، همان در /services (دایرکتوری) و
    /services/<slug> (پروفایل عمومی) نمایش داده می‌شود.
    مالکیت با user.id — همان الگوی پنل فروشگاه/مربی/داور.
@@ -17,7 +17,7 @@ import { TECH_SERVICES, type TechService, type TechProject, type TechAlbum } fro
 import {
   emptyTechnicianProfile, findTechnicianByOwner, newTechnicianSlug,
   saveTechnicianProfile, type TechnicianProfile,
-  // (منبعِ حقیقت از این پس سرور است؛ این‌ها فقط کشِ محلی‌اند)
+  // (منبع حقیقت از این پس سرور است؛ این‌ها فقط کش محلی‌اند)
 } from '../../../lib/technician-store'
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import VerificationBadges from '../../../components/VerificationBadges'
@@ -45,11 +45,11 @@ export default function TechnicianDashboard() {
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
 
-  /* فرمِ پروژه‌ی جدید */
+  /* فرم پروژه‌ی جدید */
   const [prj, setPrj] = useState({ title: '', desc: '', city: '', club: '', service: '' as TechService | '', image: '' })
   const prjImgRef = useRef<HTMLInputElement>(null)
   const photoRef  = useRef<HTMLInputElement>(null)
-  /* آلبومِ جدید */
+  /* آلبوم جدید */
   const [albTitle, setAlbTitle] = useState('')
   const [albDesc, setAlbDesc]   = useState('')
   const albImgRefs = useRef<Record<string, HTMLInputElement | null>>({})
@@ -65,7 +65,7 @@ export default function TechnicianDashboard() {
       setForm(base)
       setAboutText(base.about.join('\n\n'))
 
-      /* نسخه‌ی سرور مقدم است؛ پروفایلِ محلیِ قدیمی یک‌بار بالا می‌رود */
+      /* نسخه‌ی سرور مقدم است؛ پروفایل محلی قدیمی یک‌بار بالا می‌رود */
       void (async () => {
         const remote = await fetchMyProfile<TechnicianProfile>('technician')
         if (!remote) {
@@ -102,7 +102,7 @@ export default function TechnicianDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
   const addProject = () => {
-    if (!prj.title.trim() || !prj.service) { setErr('عنوان و نوعِ خدماتِ پروژه لازم است.'); return }
+    if (!prj.title.trim() || !prj.service) { setErr('عنوان و نوع خدمات پروژه لازم است.'); return }
     const p: TechProject = {
       id: rid(), title: prj.title.trim(), desc: prj.desc.trim(),
       city: prj.city.trim() || form.city, club: prj.club.trim() || undefined,
@@ -149,14 +149,14 @@ export default function TechnicianDashboard() {
       status: 'approved' as const,
     }
 
-    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
-       تا پیش از این فقط localStorage نوشته می‌شد و پنلِ ادمین پروفایل را
+    /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
+       تا پیش از این فقط localStorage نوشته می‌شد و پنل ادمین پروفایل را
        اصلاً نمی‌دید. */
     const res = await saveProfileRemote('technician', profile.slug, profile as unknown as Record<string, unknown>)
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
-    try { saveTechnicianProfile({ ...profile, ...saved }) } catch { /* کشِ مرورگر پر است */ }
+    try { saveTechnicianProfile({ ...profile, ...saved }) } catch { /* کش مرورگر پر است */ }
     setForm(f => ({ ...f, ...saved }))
     setSaved(true); setErr('')
   }
@@ -193,7 +193,7 @@ export default function TechnicianDashboard() {
 
         <form onSubmit={submit} className="space-y-5">
 
-          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
 

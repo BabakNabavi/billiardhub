@@ -6,7 +6,7 @@ import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR
 import { csrfToken, apiFetch } from '../../../lib/http'
 
 function authHeader(): Record<string,string> {
-  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
   const t = csrfToken()
   return t ? { 'x-csrf-token': t } : {}
 }
@@ -205,7 +205,7 @@ export default function AdminRolesPage() {
 
   const [svcDown, setSvcDown] = useState(false)
 
-  /* اگر سرویس در دسترس نبود، به‌جای برگرداندنِ کاربر، صفحه با پیامِ خالی می‌ماند */
+  /* اگر سرویس در دسترس نبود، به‌جای برگرداندن کاربر، صفحه با پیام خالی می‌ماند */
   const load = async (status: RoleStatus) => {
     setLoading(true)
     try {
@@ -293,7 +293,7 @@ export default function AdminRolesPage() {
           {/* سرویس در دسترس نیست */}
           {svcDown && !loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 12, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#A03428' }}>
-              سرویسِ درخواست‌های نقش فعلاً در دسترس نیست — بعداً دوباره تلاش کنید. (تأیید/لغو نقش‌ها به بک‌اند متصل است)
+              سرویس درخواست‌های نقش فعلاً در دسترس نیست — بعداً دوباره تلاش کنید. (تأیید/لغو نقش‌ها به بک‌اند متصل است)
             </div>
           )}
 

@@ -1,6 +1,6 @@
 import { apiFetch } from './http'
 /* ─────────────────────────────────────────────────────────────
-   رپرهای کلاینتِ شبکه‌ی اجتماعی — همه از مسیرهای /api/social روی
+   رپرهای کلاینت شبکه‌ی اجتماعی — همه از مسیرهای /api/social روی
    همان اوریجین می‌خوانند (سمت‌سرور، بین همه‌ی دستگاه‌ها و کاربران).
    ───────────────────────────────────────────────────────────── */
 
@@ -35,7 +35,7 @@ export async function postStory(s: Partial<SStory>): Promise<{ ok: boolean; stat
   } catch { return { ok: false, status: 0, message: 'offline' } }
 }
 
-/* ── دیده‌شدنِ استوری (per-viewer، ماندگار روی سرور) ── */
+/* ── دیده‌شدن استوری (per-viewer، ماندگار روی سرور) ── */
 export const fetchSeen = (user: string) =>
   j<string[]>(apiFetch(`/api/social/seen?user=${encodeURIComponent(user)}`, { cache: 'no-store' }), [])
 export const markSeen = (user: string, ids: string[]) =>

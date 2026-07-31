@@ -4,10 +4,10 @@ import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/owners
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { getTournament } from '@/lib/tournaments/server';
 
-/* یک بازیِ براکت — ثبتِ نتیجه، شروع/توقف، و شماره‌ی میز.
+/* یک بازی براکت — ثبت نتیجه، شروع/توقف، و شماره‌ی میز.
 
-   ثبتِ نتیجه از تابعِ اتمیکِ `bh_match_report` می‌گذرد چون سه کار با هم
-   انجام می‌شود (امتیاز، برنده، صعود به دورِ بعد) و نصفه‌کاره ماندنشان
+   ثبت نتیجه از تابع اتمیک `bh_match_report` می‌گذرد چون سه کار با هم
+   انجام می‌شود (امتیاز، برنده، صعود به دور بعد) و نصفه‌کاره ماندنشان
    براکت را ناسازگار می‌کند. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -27,7 +27,7 @@ export async function PATCH(
   if (!t) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
   if (!(await ownsClub(actor, t.club_id))) return NextResponse.json(FORBIDDEN, { status: 403 });
 
-  /* بازی باید واقعاً مالِ همین مسابقه باشد — matchId از کلاینت می‌آید */
+  /* بازی باید واقعاً مال همین مسابقه باشد — matchId از کلاینت می‌آید */
   const { data: m } = await sb().from('tournament_matches')
     .select('id,tournament_id,status').eq('id', matchId).maybeSingle();
   const match = m as { id: string; tournament_id: string; status: string } | null;
@@ -37,7 +37,7 @@ export async function PATCH(
 
   const b = await req.json().catch(() => ({}));
 
-  /* ── ثبتِ نتیجه ── */
+  /* ── ثبت نتیجه ── */
   if (b?.score1 !== undefined || b?.score2 !== undefined) {
     const s1 = Math.round(Number(b?.score1));
     const s2 = Math.round(Number(b?.score2));
@@ -50,7 +50,7 @@ export async function PATCH(
     });
     if (error) {
       console.error('[matches/report]', error.message);
-      return NextResponse.json({ message: 'ثبتِ نتیجه انجام نشد' }, { status: 500 });
+      return NextResponse.json({ message: 'ثبت نتیجه انجام نشد' }, { status: 500 });
     }
     const res = data as { ok: boolean; message?: string; code?: string };
     if (!res?.ok) return NextResponse.json(res, { status: 409 });
@@ -65,16 +65,16 @@ export async function PATCH(
     return NextResponse.json(res);
   }
 
-  /* ── شروع/توقفِ بازی و شماره‌ی میز ──
-     این‌ها برنده تعیین نمی‌کنند، پس تابعِ اتمیک لازم ندارند. */
+  /* ── شروع/توقف بازی و شماره‌ی میز ──
+     این‌ها برنده تعیین نمی‌کنند، پس تابع اتمیک لازم ندارند. */
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
 
   if (b?.status === 'in_progress' || b?.status === 'waiting') {
-    /* بازیِ تمام‌شده با این مسیر باز نمی‌شود — برای اصلاحِ نتیجه باید
-       امتیازِ جدید فرستاده شود تا صعودِ دورِ بعد هم درست شود. */
+    /* بازی تمام‌شده با این مسیر باز نمی‌شود — برای اصلاح نتیجه باید
+       امتیاز جدید فرستاده شود تا صعود دور بعد هم درست شود. */
     if (match.status === 'completed') {
       return NextResponse.json(
-        { message: 'برای تغییرِ بازیِ تمام‌شده، نتیجه‌ی جدید را ثبت کنید' }, { status: 409 });
+        { message: 'برای تغییر بازی تمام‌شده، نتیجه‌ی جدید را ثبت کنید' }, { status: 409 });
     }
     patch.status = b.status;
     if (b.status === 'in_progress') patch.started_at = new Date().toISOString();

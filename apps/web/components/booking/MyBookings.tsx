@@ -1,6 +1,6 @@
 'use client'
 
-/* رزروهای کاربر — با لغوِ رزرو و نمایشِ شفافِ سیاستِ بازپرداخت پیش از تأیید. */
+/* رزروهای کاربر — با لغو رزرو و نمایش شفاف سیاست بازپرداخت پیش از تأیید. */
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ interface B {
 
 const STATUS: Record<string, { label: string; color: string; bg: string }> = {
   CONFIRMED:       { label: 'قطعی',            color: FELT,   bg: 'rgba(14,122,56,0.09)' },
-  PENDING_PAYMENT: { label: 'در انتظارِ پرداخت', color: GOLD_D, bg: 'rgba(199,166,106,0.13)' },
+  PENDING_PAYMENT: { label: 'در انتظار پرداخت', color: GOLD_D, bg: 'rgba(199,166,106,0.13)' },
   COMPLETED:       { label: 'انجام‌شده',        color: MUT,    bg: 'rgba(0,0,0,0.05)' },
   CANCELLED:       { label: 'کنسل‌شده',         color: RED,    bg: 'rgba(178,59,46,0.08)' },
   EXPIRED:         { label: 'منقضی',            color: MUT,    bg: 'rgba(0,0,0,0.05)' },
@@ -50,7 +50,7 @@ export default function MyBookings() {
         body: JSON.stringify({ reason: 'لغو توسط کاربر' }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) alert(j?.message || 'لغوِ رزرو ممکن نشد')
+      if (!r.ok) alert(j?.message || 'لغو رزرو ممکن نشد')
       setConfirm(null); await load()
     } finally { setBusy('') }
   }
@@ -62,7 +62,7 @@ export default function MyBookings() {
       <CalendarDays size={30} style={{ color: 'rgba(0,0,0,0.2)', marginBottom: 10 }} />
       <p style={{ fontSize: 15, color: MUT, margin: '0 0 14px' }}>هنوز رزروی ثبت نکرده‌اید</p>
       <Link href="/clubs" style={{ display: 'inline-flex', padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13.5, fontWeight: 800, background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.4)', color: GOLD_D }}>
-        رزروِ میز
+        رزرو میز
       </Link>
     </div>
   )
@@ -89,11 +89,11 @@ export default function MyBookings() {
               {b.canCancel ? (
                 <button onClick={() => setConfirm(b)} disabled={busy === b.id}
                   style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: RED }}>
-                  <X size={12} /> لغوِ رزرو
+                  <X size={12} /> لغو رزرو
                 </button>
               ) : b.cancelBlockedReason && b.booking_status !== 'CANCELLED' ? (
-                /* دلیل نوشته می‌شود؛ نبودِ دکمه به‌تنهایی یعنی «اصلاً
-                   امکانِ لغو نیست» که پیامِ درستی نبود. */
+                /* دلیل نوشته می‌شود؛ نبود دکمه به‌تنهایی یعنی «اصلاً
+                   امکان لغو نیست» که پیام درستی نبود. */
                 <div style={{ marginTop: 8, fontSize: 11, color: MUT, display: 'flex', alignItems: 'center', gap: 4 }}>
                   <X size={11} style={{ flexShrink: 0 }} /> {b.cancelBlockedReason}
                 </div>
@@ -152,7 +152,7 @@ export default function MyBookings() {
               </button>
               <button onClick={() => cancel(confirm)} disabled={!!busy}
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12, borderRadius: 12, border: 'none', background: RED, color: '#fff', fontSize: 13.5, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
-                {busy ? <Loader2 size={15} style={{ animation: 'mbspin 1s linear infinite' }} /> : <CheckCircle2 size={15} />} لغوِ رزرو
+                {busy ? <Loader2 size={15} style={{ animation: 'mbspin 1s linear infinite' }} /> : <CheckCircle2 size={15} />} لغو رزرو
               </button>
             </div>
           </div>

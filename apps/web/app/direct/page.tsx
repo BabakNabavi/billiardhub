@@ -1,8 +1,8 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   دایرکت — گفتگوی دوطرفه‌ی واقعیِ سمت‌سرور (Supabase).
-   پاسخِ استوری‌ها اینجا می‌آید و صاحب‌استوری می‌تواند جواب بدهد.
+   دایرکت — گفتگوی دوطرفه‌ی واقعی سمت‌سرور (Supabase).
+   پاسخ استوری‌ها اینجا می‌آید و صاحب‌استوری می‌تواند جواب بدهد.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -34,14 +34,14 @@ function timeAgo(ts: number): string {
 const preview = (kind: string, text: string) =>
   kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
 
-/* پرچمِ تعاملات خاموش ⇒ کلِ صفحه‌ی دایرکت اصلاً mount نمی‌شود.
-   مهم است که گیت *بیرونِ* کامپوننت باشد، نه یک return زودهنگام داخلش:
-   با return زودهنگام، همه‌ی useEffectها (خواندنِ گفتگوها، Realtime،
-   ثبتِ اشتراکِ پوش) باز هم اجرا می‌شدند. */
+/* پرچم تعاملات خاموش ⇒ کل صفحه‌ی دایرکت اصلاً mount نمی‌شود.
+   مهم است که گیت *بیرون* کامپوننت باشد، نه یک return زودهنگام داخلش:
+   با return زودهنگام، همه‌ی useEffectها (خواندن گفتگوها، Realtime،
+   ثبت اشتراک پوش) باز هم اجرا می‌شدند. */
 export default function DirectPage() {
   return useSocialInteractions()
     ? <DirectInner />
-    : <FeatureDisabled title="پیام خصوصی موقتاً غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدنِ دوباره‌ی این بخش در دسترس خواهند بود." />
+    : <FeatureDisabled title="پیام خصوصی موقتاً غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدن دوباره‌ی این بخش در دسترس خواهند بود." />
 }
 
 function DirectInner() {
@@ -50,23 +50,23 @@ function DirectInner() {
   const [convs, setConvs] = useState<ConvIndexItem[]>([])
   const [active, setActive] = useState<ConvIndexItem | null>(null)
   const [msgs, setMsgs] = useState<DMsg[]>([])
-  const [otherPoll, setOtherPoll] = useState(0)   // آخرین آنلاین‌بودنِ طرف ⇒ «رسیده»
-  const [otherRead, setOtherRead] = useState(0)   // کرسرِ خواندنِ طرف ⇒ «خوانده‌شد»
+  const [otherPoll, setOtherPoll] = useState(0)   // آخرین آنلاین‌بودن طرف ⇒ «رسیده»
+  const [otherRead, setOtherRead] = useState(0)   // کرسر خواندن طرف ⇒ «خوانده‌شد»
   const [draft, setDraft] = useState('')
   const [ready, setReady] = useState(false)
   const [sending, setSending] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<ConvIndexItem | null>(null)   // برای هندلرهای Realtime
-  const lastAtRef = useRef(0)                            // آخرین زمانِ پیامِ واقعی (خواندنِ افزایشی)
-  const convSeq = useRef(0)                              // فقط آخرین loadConvs اعمال شود (رفعِ برگشتِ چتِ پاک‌شده)
+  const lastAtRef = useRef(0)                            // آخرین زمان پیام واقعی (خواندن افزایشی)
+  const convSeq = useRef(0)                              // فقط آخرین loadConvs اعمال شود (رفع برگشت چت پاک‌شده)
   const [pushState, setPushState] = useState<'granted' | 'denied' | 'default' | 'unsupported'>('unsupported')
   const [confirmDel, setConfirmDel] = useState(false)
 
-  /* منبعِ واحدِ ویوپورت: کلِ صفحه دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height + translateY)
-     ⇒ نوارِ پاسخ همیشه بالای کیبورد، پیام‌ها هرگز زیرِ هدر، بدونِ جابجاییِ iOS */
+  /* منبع واحد ویوپورت: کل صفحه دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height + translateY)
+     ⇒ نوار پاسخ همیشه بالای کیبورد، پیام‌ها هرگز زیر هدر، بدون جابجایی iOS */
   const vp = useVisualViewport()
 
-  /* اسکرول داخلِ کانتینرِ پیام‌ها (نه window) ⇒ بدون لرزش، پیام‌ها هرگز زیرِ هدر نمی‌روند */
+  /* اسکرول داخل کانتینر پیام‌ها (نه window) ⇒ بدون لرزش، پیام‌ها هرگز زیر هدر نمی‌روند */
   const scrollBottom = () => requestAnimationFrame(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight })
 
   /* پیام‌ها عوض شد یا کیبورد باز/بسته شد ⇒ به آخرین پیام اسکرول کن */
@@ -79,8 +79,8 @@ function DirectInner() {
 
   useEffect(() => { if (_hydrated && !user) router.replace('/login') }, [_hydrated, user, router])
 
-  /* فقط نتیجه‌ی آخرین درخواست اعمال می‌شود؛ یک loadConvsِ کهنه‌ی در راه نمی‌تواند
-     چتِ تازه‌پاک‌شده را دوباره برگرداند */
+  /* فقط نتیجه‌ی آخرین درخواست اعمال می‌شود؛ یک loadConvs کهنه‌ی در راه نمی‌تواند
+     چت تازه‌پاک‌شده را دوباره برگرداند */
   const loadConvs = async () => {
     if (!meKey) return
     const seq = ++convSeq.current
@@ -89,7 +89,7 @@ function DirectInner() {
   }
   useEffect(() => { if (user) loadConvs() }, [user]) // eslint-disable-line
 
-  /* Web Push: وضعیتِ مجوز؛ اگر قبلاً granted بوده، اشتراک را بی‌صدا تازه کن */
+  /* Web Push: وضعیت مجوز؛ اگر قبلاً granted بوده، اشتراک را بی‌صدا تازه کن */
   useEffect(() => {
     if (!meKey) return
     const p = pushPermission(); setPushState(p)
@@ -98,13 +98,13 @@ function DirectInner() {
   const askPush = async () => {
     const r = await enablePush(meKey)
     setPushState(r === 'ok' ? 'granted' : r === 'denied' ? 'denied' : pushPermission())
-    if (r === 'ok') toast('اعلانِ پیام‌ها روشن شد ✓', 'success')
-    else if (r === 'denied') toast('اجازه‌ی اعلان داده نشد؛ از تنظیماتِ اپ/مرورگر اجازه دهید', 'warning')
+    if (r === 'ok') toast('اعلان پیام‌ها روشن شد ✓', 'success')
+    else if (r === 'denied') toast('اجازه‌ی اعلان داده نشد؛ از تنظیمات اپ/مرورگر اجازه دهید', 'warning')
     else if (r === 'unsupported') toast('روی آیفون اول اپ را به هوم‌اسکرین اضافه کنید و از همان‌جا باز کنید', 'warning')
-    else toast('روشن‌کردنِ اعلان ناموفق بود؛ دوباره تلاش کنید', 'error')
+    else toast('روشن‌کردن اعلان ناموفق بود؛ دوباره تلاش کنید', 'error')
   }
 
-  /* ادغامِ پیام‌ها بدونِ تکرار؛ tmpِ خوش‌بینانه را با نسخه‌ی واقعیِ هم‌متن جایگزین کن */
+  /* ادغام پیام‌ها بدون تکرار؛ tmp خوش‌بینانه را با نسخه‌ی واقعی هم‌متن جایگزین کن */
   const mergeMsgs = (prev: DMsg[], incoming: DMsg[]): DMsg[] => {
     const byId = new Map<string, DMsg>()
     for (const m of prev) byId.set(m.id, m)
@@ -118,7 +118,7 @@ function DirectInner() {
     return arr
   }
 
-  /* Realtime: کانالِ دایرکتِ خودم — پیام و رسیدِ خواندن آنی می‌آیند (بدونِ انتظارِ پول) */
+  /* Realtime: کانال دایرکت خودم — پیام و رسید خواندن آنی می‌آیند (بدون انتظار پول) */
   useEffect(() => {
     if (!meKey) return
     const stop = subscribeDM(meKey, {
@@ -128,7 +128,7 @@ function DirectInner() {
         if (cur && p.convId === cur.convId) {
           setMsgs(prev => mergeMsgs(prev, [p.message]))
           scrollBottom()
-          /* پیامِ ورودی را «خوانده» علامت بزن (چون ترد باز است) */
+          /* پیام ورودی را «خوانده» علامت بزن (چون ترد باز است) */
           if (p.message.fromKey !== meKey) fetchThread(cur.convId, meKey, lastAtRef.current)
         }
       },
@@ -137,7 +137,7 @@ function DirectInner() {
         if (cur && p.convId === cur.convId) setOtherRead(r => Math.max(r, p.at || 0))
       },
       onPoll: (p) => {
-        /* طرفِ مقابل الان آنلاین است ⇒ تیکِ «رسیده» بدونِ انتظارِ پول */
+        /* طرف مقابل الان آنلاین است ⇒ تیک «رسیده» بدون انتظار پول */
         const cur = activeRef.current
         if (cur && p.convId === cur.convId) setOtherPoll(x => Math.max(x, p.at || 0))
       },
@@ -149,7 +149,7 @@ function DirectInner() {
     return stop
   }, [meKey]) // eslint-disable-line
 
-  /* تورِ ایمنی: پولِ افزایشیِ آرام (Realtime اصل است) */
+  /* تور ایمنی: پول افزایشی آرام (Realtime اصل است) */
   useEffect(() => {
     if (!user) return
     const t = setInterval(() => { const c = activeRef.current; if (c) refreshThread(c) }, 5000)
@@ -157,8 +157,8 @@ function DirectInner() {
     return () => { clearInterval(t); clearInterval(l) }
   }, [user]) // eslint-disable-line
 
-  /* برگشت به اپ / آنلاین‌شدن ⇒ همگام‌سازیِ فوری. iOS وب‌سوکت را در پس‌زمینه می‌بندد؛
-     این تضمین می‌کند پیام‌هایِ ازدست‌رفته هنگام بستنِ اپ، موقعِ برگشت بیایند. */
+  /* برگشت به اپ / آنلاین‌شدن ⇒ همگام‌سازی فوری. iOS وب‌سوکت را در پس‌زمینه می‌بندد؛
+     این تضمین می‌کند پیام‌های ازدست‌رفته هنگام بستن اپ، موقع برگشت بیایند. */
   useEffect(() => {
     if (!user) return
     const resync = () => {
@@ -176,16 +176,16 @@ function DirectInner() {
     }
   }, [user]) // eslint-disable-line
 
-  /* خواندنِ افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند.
-     کرسرهای رسید فقط جلو می‌روند (Math.max) — قبلاً پاسخِ کهنه‌ی storage مقدارِ
-     realtime را بازنویسی می‌کرد و تیکِ آبی برمی‌گشت به یک تیک. */
+  /* خواندن افزایشی: فقط پیام‌های تازه‌تر از آخرین‌چه‌داریم را می‌گیرد و ادغام می‌کند.
+     کرسرهای رسید فقط جلو می‌روند (Math.max) — قبلاً پاسخ کهنه‌ی storage مقدار
+     realtime را بازنویسی می‌کرد و تیک آبی برمی‌گشت به یک تیک. */
   const refreshThread = async (c: ConvIndexItem) => {
     const t = await fetchThread(c.convId, meKey, lastAtRef.current)
     if (t.messages.length) { setMsgs(prev => mergeMsgs(prev, t.messages)); scrollBottom() }
     setOtherPoll(x => Math.max(x, t.otherPoll || 0))
     setOtherRead(x => Math.max(x, t.otherRead || 0))
   }
-  /* وضعیتِ تیک برای پیام‌های خودم: sent / delivered / read */
+  /* وضعیت تیک برای پیام‌های خودم: sent / delivered / read */
   const msgStatus = (m: DMsg): 'sent' | 'delivered' | 'read' => {
     if (otherRead >= m.at) return 'read'
     if (otherPoll >= m.at) return 'delivered'
@@ -206,7 +206,7 @@ function DirectInner() {
     if (!draft.trim() || !active || sending) return
     setSending(true)
     const text = draft.trim(); setDraft('')
-    /* نمایشِ خوش‌بینانه — پیام فوری دیده می‌شود */
+    /* نمایش خوش‌بینانه — پیام فوری دیده می‌شود */
     const tmpId = `tmp-${Date.now()}`
     const optimistic: DMsg = { id: tmpId, fromKey: meKey, text, kind: 'text', at: Date.now() }
     setMsgs(m => [...m, optimistic]); scrollBottom()
@@ -215,25 +215,25 @@ function DirectInner() {
       to: { key: active.otherKey, name: active.otherName, role: active.otherRole },
       text, kind: 'text',
     })
-    /* tmp را با پیامِ واقعیِ سرور جایگزین کن (چون برادکستِ خودم به خودم نمی‌آید) */
+    /* tmp را با پیام واقعی سرور جایگزین کن (چون برادکست خودم به خودم نمی‌آید) */
     const real = (res as { message?: DMsg }).message
     if (real) setMsgs(prev => mergeMsgs(prev.filter(m => m.id !== tmpId), [real]))
-    /* پاسخِ ارسال، حضورِ گیرنده را هم می‌گوید ⇒ تیکِ «رسیده» همان لحظه */
+    /* پاسخ ارسال، حضور گیرنده را هم می‌گوید ⇒ تیک «رسیده» همان لحظه */
     const op = (res as { otherPoll?: number }).otherPoll
     if (op) setOtherPoll(x => Math.max(x, op))
     loadConvs()
     setSending(false)
-    /* تیک‌ها سریع‌تر: کمی بعد از ارسال، وضعیتِ «رسیده/خوانده‌شد» را فوری بگیر */
+    /* تیک‌ها سریع‌تر: کمی بعد از ارسال، وضعیت «رسیده/خوانده‌شد» را فوری بگیر */
     setTimeout(() => { const c = activeRef.current; if (c) refreshThread(c) }, 1200)
     setTimeout(() => { const c = activeRef.current; if (c) refreshThread(c) }, 3500)
   }
 
-  /* پاک‌کردنِ گفتگو — فقط از سمتِ خودِ کاربر (مثل اینستاگرام) */
+  /* پاک‌کردن گفتگو — فقط از سمت خود کاربر (مثل اینستاگرام) */
   const doDelConv = async () => {
     if (!active) return
     const cid = active.convId
     setConfirmDel(false)
-    convSeq.current++   // هر loadConvsِ در راه را باطل کن تا چت برنگردد
+    convSeq.current++   // هر loadConvs در راه را باطل کن تا چت برنگردد
     setConvs(cs => cs.filter(c => c.convId !== cid))
     setActive(null); activeRef.current = null; setMsgs([]); lastAtRef.current = 0
     await deleteConversation(cid, meKey)
@@ -246,9 +246,9 @@ function DirectInner() {
   if (!_hydrated || !user) return null
 
   return (
-    /* ستونِ ثابت که دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height=vp.height، translateY=offsetTop).
-       هدر بالا / محتوا وسط با اسکرولِ داخلی / نوارِ پاسخ پایین ⇒ همیشه بالای کیبورد،
-       پیام‌ها هرگز زیرِ هدر، و روی iOS با کیبورد جابجا/نصفه نمی‌شود. */
+    /* ستون ثابت که دقیقاً روی ناحیه‌ی دیدنی می‌نشیند (height=vp.height، translateY=offsetTop).
+       هدر بالا / محتوا وسط با اسکرول داخلی / نوار پاسخ پایین ⇒ همیشه بالای کیبورد،
+       پیام‌ها هرگز زیر هدر، و روی iOS با کیبورد جابجا/نصفه نمی‌شود. */
     <div dir="rtl" style={{
       position: 'fixed', top: 0, left: 0, right: 0,
       height: vp.height || '100dvh',
@@ -256,7 +256,7 @@ function DirectInner() {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
       background: '#F7F5F0', color: TEXT, fontFamily: 'Vazirmatn,Tahoma,sans-serif',
     }}>
-      {/* هدر — آیتمِ اولِ ستون (نه fixed) */}
+      {/* هدر — آیتم اول ستون (نه fixed) */}
       <header style={{ flexShrink: 0, background: '#fff', borderBottom: `1px solid ${LINE}`, paddingTop: 'env(safe-area-inset-top)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '13px clamp(14px,3vw,22px)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <button onClick={() => (active ? setActive(null) : router.back())} aria-label="بازگشت"
@@ -285,17 +285,17 @@ function DirectInner() {
         </div>
       </header>
 
-      {/* ── لیست گفتگوها — کانتینرِ اسکرولِ داخلی (ردیف هرگز زیرِ هدر نمی‌رود) ── */}
+      {/* ── لیست گفتگوها — کانتینر اسکرول داخلی (ردیف هرگز زیر هدر نمی‌رود) ── */}
       {!active && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
           <div style={{ maxWidth: 760, margin: '0 auto', padding: '14px clamp(14px,3vw,22px) calc(24px + env(safe-area-inset-bottom))' }}>
-            {/* بنرِ فعال‌سازیِ اعلانِ Web Push */}
+            {/* بنر فعال‌سازی اعلان Web Push */}
             {pushState === 'default' && (
               <button onClick={askPush}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'right', marginBottom: 12, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 12, padding: '11px 14px', cursor: 'pointer', fontFamily: 'inherit', color: GOLD_D }}>
                 <span style={{ display: 'inline-flex', width: 34, height: 34, borderRadius: 9, background: 'rgba(199,166,106,0.18)', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Bell size={17} /></span>
                 <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800, color: TEXT }}>اعلانِ پیام‌ها را روشن کنید</span>
+                  <span style={{ display: 'block', fontSize: 13.5, fontWeight: 800, color: TEXT }}>اعلان پیام‌ها را روشن کنید</span>
                   <span style={{ display: 'block', fontSize: 11.5, color: MUT, marginTop: 1 }}>تا وقتی اپ بسته است هم از پیام‌های جدید باخبر شوید</span>
                 </span>
               </button>
@@ -307,7 +307,7 @@ function DirectInner() {
                 </span>
                 <p style={{ fontSize: 15.5, fontWeight: 800, margin: '0 0 6px' }}>هنوز گفتگویی ندارید</p>
                 <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: 0 }}>
-                  وقتی کسی به استوریِ شما پاسخ بدهد، گفتگو اینجا ساخته می‌شود و می‌توانید جواب بدهید.
+                  وقتی کسی به استوری شما پاسخ بدهد، گفتگو اینجا ساخته می‌شود و می‌توانید جواب بدهید.
                 </p>
               </div>
             ) : (
@@ -376,7 +376,7 @@ function DirectInner() {
               })}
             </div>
           </div>
-          {/* نوارِ پاسخ — آیتمِ آخرِ ستون؛ چون ستون هم‌اندازه‌ی ناحیه‌ی دیدنی است، همیشه بالای کیبورد دیده می‌شود */}
+          {/* نوار پاسخ — آیتم آخر ستون؛ چون ستون هم‌اندازه‌ی ناحیه‌ی دیدنی است، همیشه بالای کیبورد دیده می‌شود */}
           <div style={{ flexShrink: 0, borderTop: `1px solid ${LINE}`, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             <div style={{ maxWidth: 760, margin: '0 auto', padding: vp.kb > 0 ? '10px clamp(14px,3vw,22px)' : '10px clamp(14px,3vw,22px) calc(12px + env(safe-area-inset-bottom))', display: 'flex', gap: 8, alignItems: 'center' }}>
               <input value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
@@ -396,7 +396,7 @@ function DirectInner() {
         </>
       )}
 
-      {/* دیالوگِ تأییدِ حذف — مدرن، وسطِ صفحه */}
+      {/* دیالوگ تأیید حذف — مدرن، وسط صفحه */}
       {confirmDel && (
         <div onClick={() => setConfirmDel(false)}
           style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 22 }}>
@@ -405,9 +405,9 @@ function DirectInner() {
             <span style={{ display: 'inline-flex', width: 54, height: 54, borderRadius: 16, background: 'rgba(239,68,68,0.1)', color: '#ef4444', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
               <Trash2 size={24} />
             </span>
-            <h3 style={{ fontSize: 16.5, fontWeight: 900, margin: '0 0 7px', color: TEXT }}>حذفِ گفتگو</h3>
+            <h3 style={{ fontSize: 16.5, fontWeight: 900, margin: '0 0 7px', color: TEXT }}>حذف گفتگو</h3>
             <p style={{ fontSize: 13, color: MUT, lineHeight: 2, margin: '0 0 20px' }}>
-              این گفتگو فقط برای شما پاک می‌شود؛ برای طرفِ مقابل باقی می‌ماند.
+              این گفتگو فقط برای شما پاک می‌شود؛ برای طرف مقابل باقی می‌ماند.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setConfirmDel(false)}

@@ -4,13 +4,13 @@ import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
 import { quote, createOrder, eligibleFor } from '@/lib/ads/booking';
 
-/* خریدِ جایگاهِ تبلیغاتی → درگاه.
+/* خرید جایگاه تبلیغاتی → درگاه.
 
    قیمت هرگز از بدنه‌ی درخواست خوانده نمی‌شود: کلاینت فقط می‌گوید کدام
-   جایگاه و کدام پلن، و مبلغ از ردیفِ همان پلن در دیتابیس درمی‌آید. */
+   جایگاه و کدام پلن، و مبلغ از ردیف همان پلن در دیتابیس درمی‌آید. */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor) return NextResponse.json({ message: 'برای خریدِ تبلیغ ابتدا وارد شوید' }, { status: 401 });
+  if (!actor) return NextResponse.json({ message: 'برای خرید تبلیغ ابتدا وارد شوید' }, { status: 401 });
 
   const b = await req.json().catch(() => ({}));
   const placementKey = String(b?.placementKey ?? '').trim();
@@ -19,17 +19,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'جایگاه و پلن را انتخاب کنید' }, { status: 400 });
   }
 
-  /* ── واجدِ شرایط بودن ── */
+  /* ── واجد شرایط بودن ── */
   const elig = await eligibleFor(actor.id);
   if (elig.identityRequired) {
     return NextResponse.json({
-      message: 'برای خریدِ تبلیغ ابتدا هویتِ خود (کد ملی) را تأیید کنید',
+      message: 'برای خرید تبلیغ ابتدا هویت خود (کد ملی) را تأیید کنید',
       identityRequired: true,
     }, { status: 403 });
   }
   if (!elig.placements.some(p => p.key === placementKey)) {
     return NextResponse.json({
-      message: 'نقشِ تأییدشده‌ی شما اجازه‌ی خریدِ این جایگاه را نمی‌دهد',
+      message: 'نقش تأییدشده‌ی شما اجازه‌ی خرید این جایگاه را نمی‌دهد',
     }, { status: 403 });
   }
 

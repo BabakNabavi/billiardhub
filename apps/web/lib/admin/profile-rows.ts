@@ -1,16 +1,16 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   منبعِ دادهٔ صفحه‌های نقشِ پنلِ ادمین — از دیتابیس، نه localStorage.
+   منبع دادهٔ صفحه‌های نقش پنل ادمین — از دیتابیس، نه localStorage.
 
    شش صفحه‌ی «مربیان / داوران / بازیکنان / خدمات فنی / فروشندگان /
    تولیدکنندگان» تا امروز از `lib/*-store.ts` می‌خواندند که همه روی
    localStorage بودند. یعنی:
-     • هر ادمین روی مرورگرِ خودش فهرستِ متفاوتی می‌دید
+     • هر ادمین روی مرورگر خودش فهرست متفاوتی می‌دید
      • هیچ‌کدام از تأییدها روی سرور ثبت نمی‌شد
      • پروفایل‌هایی که کاربران واقعاً ساخته بودند اصلاً دیده نمی‌شدند
 
-   دادهٔ واقعی از قبل در جدولِ `profiles` بود و `/api/admin/profiles`
+   دادهٔ واقعی از قبل در جدول `profiles` بود و `/api/admin/profiles`
    هم تأیید/رد را پیاده کرده بود؛ فقط این صفحه‌ها به آن وصل نبودند.
    ───────────────────────────────────────────────────────────── */
 
@@ -29,7 +29,7 @@ interface ApiProfile {
   data?: Record<string, unknown> | null
 }
 
-/* مسیرِ صفحه‌ی عمومیِ هر نقش */
+/* مسیر صفحه‌ی عمومی هر نقش */
 const HREF: Record<ProfileKind, (slug: string) => string> = {
   coach:        s => `/coaches/${s}`,
   referee:      s => `/referees/${s}`,
@@ -41,7 +41,7 @@ const HREF: Record<ProfileKind, (slug: string) => string> = {
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 
-/** خطِ دومِ هر ردیف — از فیلدهای آزادِ `data` ساخته می‌شود */
+/** خط دوم هر ردیف — از فیلدهای آزاد `data` ساخته می‌شود */
 function subtitleOf(p: ApiProfile): string {
   const d = p.data ?? {}
   const parts = [
@@ -53,13 +53,13 @@ function subtitleOf(p: ApiProfile): string {
   return p.status === 'pending' ? `${base} · در انتظار بررسی` : base
 }
 
-/** نامِ نمایشی */
+/** نام نمایشی */
 function titleOf(p: ApiProfile): string {
   const d = p.data ?? {}
   return str(d.name) || str(d.title) || str(d.brand) || str(d.fullName) || p.slug || 'بدون نام'
 }
 
-/** خواندنِ فهرستِ یک نقش برای ProfileAdmin */
+/** خواندن فهرست یک نقش برای ProfileAdmin */
 export async function loadProfileRows(kind: ProfileKind): Promise<AdminRow[]> {
   const r = await apiFetch(`/api/admin/profiles?kind=${kind}`, { cache: 'no-store' })
   if (!r.ok) return []
@@ -85,22 +85,22 @@ export async function toggleProfile(id: string, current: 'approved' | 'rejected'
   })
 }
 
-/* ── برای صفحه‌های ادمینی که ظاهرِ اختصاصیِ خودشان را دارند ──
-   (مربیان و داوران) و به‌جای AdminRow، خودِ شیءِ پروفایل را می‌خواهند. */
+/* ── برای صفحه‌های ادمینی که ظاهر اختصاصی خودشان را دارند ──
+   (مربیان و داوران) و به‌جای AdminRow، خود شیء پروفایل را می‌خواهند. */
 
-/** فهرستِ خامِ پروفایل‌های یک نقش، با شکلِ همان نقش */
+/** فهرست خام پروفایل‌های یک نقش، با شکل همان نقش */
 export async function fetchAdminProfiles<T>(kind: ProfileKind): Promise<T[]> {
   try {
     const r = await apiFetch(`/api/admin/profiles?kind=${kind}`, { cache: 'no-store' })
     if (!r.ok) return []
     const j = await r.json().catch(() => null) as { profiles?: Record<string, ApiProfile[]> } | null
     const list = j?.profiles?.[kind] ?? []
-    /* `slug` و `status` از ستون‌های خودِ ردیف می‌آیند، نه از data */
+    /* `slug` و `status` از ستون‌های خود ردیف می‌آیند، نه از data */
     return list.map(p => ({ ...(p.data ?? {}), slug: p.slug, status: p.status, id: p.id })) as T[]
   } catch { return [] }
 }
 
-/** تغییرِ وضعیت/تأییدِ یک پروفایل با نامک */
+/** تغییر وضعیت/تأیید یک پروفایل با نامک */
 export async function patchAdminProfile(slug: string, patch: Record<string, unknown>): Promise<void> {
   try {
     /* PATCH با شناسه کار می‌کند، پس اول شناسه‌ی همین نامک را پیدا می‌کنیم */
@@ -121,12 +121,12 @@ export async function patchAdminProfile(slug: string, patch: Record<string, unkn
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
-  } catch { /* بی‌صدا — کشِ محلی هم‌چنان به‌روز می‌شود */ }
+  } catch { /* بی‌صدا — کش محلی هم‌چنان به‌روز می‌شود */ }
 }
 
-/* ساختنِ سه تابعِ موردِ نیازِ ProfileAdmin برای یک نقش.
+/* ساختن سه تابع مورد نیاز ProfileAdmin برای یک نقش.
 
-   نکته: ProfileAdmin در `toggle` فقط slug را می‌دهد و وضعیتِ فعلی را
+   نکته: ProfileAdmin در `toggle` فقط slug را می‌دهد و وضعیت فعلی را
    نمی‌فرستد، پس وضعیت را از همان فهرستی که تازه خوانده‌ایم برمی‌داریم. */
 export function profileAdminSource(kind: ProfileKind) {
   let cache: AdminRow[] = []
@@ -136,8 +136,8 @@ export function profileAdminSource(kind: ProfileKind) {
       const row = cache.find(r => r.slug === id)
       await toggleProfile(id, row?.status ?? 'rejected')
     },
-    /* حذفِ پروفایل از پنل عمداً پیاده نشده: پاک‌کردنِ کارِ کاربر
-       برگشت‌ناپذیر است و «تعلیق» همان اثرِ نمایشی را دارد. */
+    /* حذف پروفایل از پنل عمداً پیاده نشده: پاک‌کردن کار کاربر
+       برگشت‌ناپذیر است و «تعلیق» همان اثر نمایشی را دارد. */
     remove: async (id: string) => {
       const row = cache.find(r => r.slug === id)
       if (row?.status === 'approved') await toggleProfile(id, 'approved')

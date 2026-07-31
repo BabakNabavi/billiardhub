@@ -4,7 +4,7 @@ import { actorFromRequest } from '@/lib/finance/db';
 import { getQuotaState } from '@/lib/ads/quota';
 import { listMyOrders } from '@/lib/ads/plans';
 
-/* وضعیتِ بسته و سهمیه‌ی خودِ کاربر — همانی که در پنلش نشان داده می‌شود:
+/* وضعیت بسته و سهمیه‌ی خود کاربر — همانی که در پنلش نشان داده می‌شود:
    چه بسته‌ای، تا کی، چند آگهی مانده، و تاریخچه‌ی خریدها. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);

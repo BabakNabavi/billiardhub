@@ -2,8 +2,8 @@
 
 /* ─────────────────────────────────────────────────────────────
    جزئیات خبر — هم‌خانواده‌ی صفحه‌ی لیست (/news): تم روشن، RTL،
-   تصویرِ هیرو، لیدِ خلاصه، متن، برچسب‌ها، اشتراک‌گذاری و اخبارِ
-   مرتبط (سایدبارِ چسبان در دسکتاپ). داده از lib/news-data.
+   تصویر هیرو، لید خلاصه، متن، برچسب‌ها، اشتراک‌گذاری و اخبار
+   مرتبط (سایدبار چسبان در دسکتاپ). داده از lib/news-data.
    ───────────────────────────────────────────────────────────── */
 
 import { useMemo, useState } from 'react'
@@ -44,7 +44,7 @@ export default function NewsDetailPage() {
   }
 
   const cat = categoryOf(article.category)
-  /* URL کانونیکالِ ثابت — هم برای SSR هم کلاینت یکی است (بدون hydration mismatch) */
+  /* URL کانونیکال ثابت — هم برای SSR هم کلاینت یکی است (بدون hydration mismatch) */
   const pageUrl = `https://mybilliardhb1.vercel.app/news/${article.id}`
   const shareText = encodeURIComponent(article.title)
 

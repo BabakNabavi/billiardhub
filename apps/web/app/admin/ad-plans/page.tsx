@@ -4,10 +4,10 @@
    قیمت)، و همان‌ها در صفحه‌ی /plans به کاربر نشان داده می‌شوند.
 
    سهمیه‌ی رایگان به‌ازای هر نقش جداست: فروشگاه‌دار طبیعتاً بیشتر از
-   کاربرِ عادی آگهی می‌گذارد. کاربری که چند نقش دارد، سخاوتمندانه‌ترین
+   کاربر عادی آگهی می‌گذارد. کاربری که چند نقش دارد، سخاوتمندانه‌ترین
    سهمیه را می‌گیرد.
 
-   کلیدِ «اعمالِ محدودیت» جداست: تا وقتی خاموش است هیچ کاربری محدود
+   کلید «اعمال محدودیت» جداست: تا وقتی خاموش است هیچ کاربری محدود
    نمی‌شود، ولی پلن‌ها ساخته و حتی فروخته می‌شوند. */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -96,7 +96,7 @@ export default function AdminAdPlans() {
       const s = sj?.settings ?? {}
       setQuotaOn(!!s.ads_quota_enabled)
 
-      /* شکلِ ذخیره‌شده ممکن است قدیمی باشد ({quota,period} برای همه) */
+      /* شکل ذخیره‌شده ممکن است قدیمی باشد ({quota,period} برای همه) */
       const raw = s.ads_free_quota ?? {}
       const legacy = typeof raw.quota === 'number' ? { quota: raw.quota, period: raw.period ?? 'week' } : null
       const def = raw.default ?? legacy ?? { quota: 3, period: 'week' }
@@ -116,8 +116,8 @@ export default function AdminAdPlans() {
   useEffect(() => { void load() }, [load])
 
   const create = async () => {
-    if (!draft.name.trim()) { flash('نامِ بسته لازم است'); return }
-    if (!draft.price.trim()) { flash('قیمتِ بسته لازم است'); return }
+    if (!draft.name.trim()) { flash('نام بسته لازم است'); return }
+    if (!draft.price.trim()) { flash('قیمت بسته لازم است'); return }
     setCreating(true)
     try {
       const r = await apiFetch('/api/admin/ad-plans', {
@@ -131,7 +131,7 @@ export default function AdminAdPlans() {
         }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { flash(j?.message || 'ساختِ بسته انجام نشد'); return }
+      if (!r.ok) { flash(j?.message || 'ساخت بسته انجام نشد'); return }
       setDraft(emptyDraft()); await load(); flash('بسته ساخته شد')
     } finally { setCreating(false) }
   }
@@ -179,7 +179,7 @@ export default function AdminAdPlans() {
         <Package size={21} style={{ color: GOLD_D }} />
         <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>بسته‌های آگهی</h1>
         <Link href="/plans" style={{ ...BTN, marginInlineStart: 'auto', textDecoration: 'none' }}>
-          <ArrowLeft size={14} /> دیدنِ صفحه‌ی کاربران
+          <ArrowLeft size={14} /> دیدن صفحه‌ی کاربران
         </Link>
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.95 }}>
@@ -194,14 +194,14 @@ export default function AdminAdPlans() {
         </div>
       )}
 
-      {/* ── کلیدِ اصلی + سهمیه‌ی هر نقش ── */}
+      {/* ── کلید اصلی + سهمیه‌ی هر نقش ── */}
       <section style={CARD}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ minWidth: 250, flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: INK, marginBottom: 5 }}>اعمالِ محدودیتِ تعداد آگهی</div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: INK, marginBottom: 5 }}>اعمال محدودیت تعداد آگهی</div>
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.95 }}>
               تا وقتی خاموش است، هیچ کاربری محدود نمی‌شود و همه آزادانه آگهی می‌گذارند.
-              با روشن‌کردنش، هرکس سهمیه‌ی رایگانِ نقشش تمام شود باید بسته بخرد.
+              با روشن‌کردنش، هرکس سهمیه‌ی رایگان نقشش تمام شود باید بسته بخرد.
             </p>
           </div>
           <button
@@ -220,11 +220,11 @@ export default function AdminAdPlans() {
         <div style={{ borderTop: `1px dashed ${LINE}`, marginTop: 20, paddingTop: 18 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
             <Users size={16} style={{ color: GOLD_D }} />
-            <h2 style={{ fontSize: 14, fontWeight: 900, color: INK, margin: 0 }}>سهمیه‌ی رایگان، به تفکیکِ نقش</h2>
+            <h2 style={{ fontSize: 14, fontWeight: 900, color: INK, margin: 0 }}>سهمیه‌ی رایگان، به تفکیک نقش</h2>
           </div>
           <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 1.95 }}>
-            عددِ صفر یعنی نامحدود. کاربری که چند نقش دارد، سخاوتمندانه‌ترین سهمیه را می‌گیرد —
-            گرفتنِ نقشِ تازه نباید کسی را محدودتر کند.
+            عدد صفر یعنی نامحدود. کاربری که چند نقش دارد، سخاوتمندانه‌ترین سهمیه را می‌گیرد —
+            گرفتن نقش تازه نباید کسی را محدودتر کند.
           </p>
 
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(258px,1fr))' }}>
@@ -251,7 +251,7 @@ export default function AdminAdPlans() {
                   </div>
                   <div style={{ fontSize: 11.5, color: MUT, marginTop: 9, lineHeight: 1.8 }}>
                     {Number(v.quota) === 0
-                      ? 'آگهیِ نامحدود'
+                      ? 'آگهی نامحدود'
                       : `${fa(Number(v.quota))} آگهی در هر ${PERIOD_FA[v.period]}`}
                   </div>
                 </div>
@@ -265,17 +265,17 @@ export default function AdminAdPlans() {
         </div>
       </section>
 
-      {/* ── حسابِ واریز ── */}
+      {/* ── حساب واریز ── */}
       <section style={CARD}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
           <Wallet size={17} style={{ color: GOLD_D }} />
-          <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>حسابِ واریزِ فروشِ بسته‌ها</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>حساب واریز فروش بسته‌ها</h2>
         </div>
         <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 1.95 }}>
-          پولِ خریدِ بسته‌ها به این حساب می‌نشیند. تا پر نشود، در صورتحسابِ ادمین «تعیین‌نشده» نمایش داده می‌شود.
+          پول خرید بسته‌ها به این حساب می‌نشیند. تا پر نشود، در صورتحساب ادمین «تعیین‌نشده» نمایش داده می‌شود.
         </p>
         <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
-          <div><label style={LABEL}>نامِ صاحبِ حساب</label>
+          <div><label style={LABEL}>نام صاحب حساب</label>
             <input style={INPUT} value={bank.ownerName} onChange={e => setBank(b => ({ ...b, ownerName: e.target.value }))} /></div>
           <div><label style={LABEL}>بانک</label>
             <input style={INPUT} value={bank.bankName} onChange={e => setBank(b => ({ ...b, bankName: e.target.value }))} /></div>
@@ -289,24 +289,24 @@ export default function AdminAdPlans() {
               onChange={e => setBank(b => ({ ...b, iban: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 26) }))}
               placeholder="IR…" /></div>
         </div>
-        <button onClick={() => saveSettings({ platform_bank: bank }, 'حسابِ واریز ذخیره شد')}
+        <button onClick={() => saveSettings({ platform_bank: bank }, 'حساب واریز ذخیره شد')}
           disabled={busy === 'settings'} style={{ ...BTN, marginTop: 16 }}>
           <Save size={14} /> ذخیره‌ی حساب
         </button>
       </section>
 
-      {/* ── ساختِ بسته‌ی تازه ── */}
+      {/* ── ساخت بسته‌ی تازه ── */}
       <section style={CARD}>
-        <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: '0 0 16px' }}>ساختِ بسته‌ی تازه</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: '0 0 16px' }}>ساخت بسته‌ی تازه</h2>
         <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))' }}>
-          <div><label style={LABEL}>نامِ بسته *</label>
+          <div><label style={LABEL}>نام بسته *</label>
             <input style={INPUT} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="مثال: بسته‌ی برنزی" /></div>
           <div><label style={LABEL}>تعداد آگهی <span style={{ fontWeight: 500, color: MUT }}>(۰ = نامحدود)</span></label>
             <input style={INPUT} inputMode="numeric" value={fa(draft.quota)} onChange={e => setDraft(d => ({ ...d, quota: digits(e.target.value) }))} /></div>
           <div><label style={LABEL}>در هر</label>
             <Select<Period> value={draft.period} options={PERIOD_OPTS} ariaLabel="بازه"
               onChange={p => setDraft(d => ({ ...d, period: p }))} /></div>
-          <div><label style={LABEL}>مدتِ اعتبار (روز)</label>
+          <div><label style={LABEL}>مدت اعتبار (روز)</label>
             <input style={INPUT} inputMode="numeric" value={fa(draft.durationDays)} onChange={e => setDraft(d => ({ ...d, durationDays: digits(e.target.value) }))} /></div>
           <div><label style={LABEL}>قیمت (تومان) *</label>
             <input style={INPUT} inputMode="numeric" value={money(draft.price)}
@@ -314,10 +314,10 @@ export default function AdminAdPlans() {
           <div><label style={LABEL}>برچسب <span style={{ fontWeight: 500, color: MUT }}>(اختیاری)</span></label>
             <input style={INPUT} value={draft.badge} onChange={e => setDraft(d => ({ ...d, badge: e.target.value }))} placeholder="پیشنهاد ما" /></div>
           <div style={{ gridColumn: '1 / -1' }}><label style={LABEL}>توضیح</label>
-            <input style={INPUT} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="مناسبِ فروشگاه‌های کوچک" /></div>
+            <input style={INPUT} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="مناسب فروشگاه‌های کوچک" /></div>
         </div>
         <button onClick={create} disabled={creating} style={{ ...BTN, marginTop: 16 }}>
-          {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساختِ بسته
+          {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساخت بسته
         </button>
       </section>
 
@@ -328,7 +328,7 @@ export default function AdminAdPlans() {
         </div>
       ) : plans.length === 0 ? (
         <div style={{ ...CARD, textAlign: 'center', color: MUT, fontSize: 13, padding: 34 }}>
-          هنوز بسته‌ای نساخته‌اید. اولین بسته را از فرمِ بالا بسازید.
+          هنوز بسته‌ای نساخته‌اید. اولین بسته را از فرم بالا بسازید.
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 14 }}>
@@ -374,7 +374,7 @@ function PlanRow({ p, busy, onPatch }: {
           )}
         </div>
         <div style={{ fontSize: 12, color: MUT, marginTop: 6, lineHeight: 1.95 }}>
-          {p.quota === 0 ? 'آگهیِ نامحدود' : `${fa(p.quota)} آگهی در هر ${PERIOD_FA[p.period]}`}
+          {p.quota === 0 ? 'آگهی نامحدود' : `${fa(p.quota)} آگهی در هر ${PERIOD_FA[p.period]}`}
           {' · '}اعتبار {fa(p.durationDays)} روز
           {p.description ? ` · ${p.description}` : ''}
         </div>

@@ -6,7 +6,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import { Newspaper, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
 import { listContent, createContent, updateContent, deleteContent } from '../../../lib/admin/content-client';
 
-/* شکلِ ردیفِ دیتابیس (snake_case) — جدولِ `news` در مهاجرتِ ۰۲۵ */
+/* شکل ردیف دیتابیس (snake_case) — جدول `news` در مهاجرت ۰۲۵ */
 interface DbNews {
   id: string;
   title?: string; excerpt?: string; body?: string; category?: string;
@@ -39,7 +39,7 @@ const emptyForm = { title: '', summary: '', content: '', category: 'general', ta
 export default function AdminNewsPage() {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
-  /* خالی شروع می‌شود و از دیتابیس پر می‌شود. پیش‌تر دو خبرِ ساختگی
+  /* خالی شروع می‌شود و از دیتابیس پر می‌شود. پیش‌تر دو خبر ساختگی
      («قهرمانی اسنوکر ۱۴۰۳» و «رنکینگ جدید») نشان داده می‌شد که
      هیچ‌وقت واقعی نبودند. */
   const [news, setNews] = useState<NewsItem[]>([]);

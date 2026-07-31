@@ -74,30 +74,30 @@ const mobileLinks = [
 export default function Navbar() {
   const { user, logout } = useAuthStore();
 
-  /* خروجِ واقعی: نشست روی سرور هم باطل می‌شود و کوکی‌ها پاک می‌شوند.
+  /* خروج واقعی: نشست روی سرور هم باطل می‌شود و کوکی‌ها پاک می‌شوند.
      پیش‌تر فقط localStorage خالی می‌شد و توکن تا ۷ روز معتبر می‌ماند. */
   const doLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    } catch { /* حتی اگر شبکه قطع بود، سمتِ کلاینت خارج می‌شویم */ }
+    } catch { /* حتی اگر شبکه قطع بود، سمت کلاینت خارج می‌شویم */ }
     try { localStorage.removeItem('bh_session_migrated'); } catch { /* ignore */ }
     logout();
     router.push('/');
   };
-  /* نوتیف و دایرکتِ سمت‌سرور — فقط برای نقش‌های واجدِ استوری */
+  /* نوتیف و دایرکت سمت‌سرور — فقط برای نقش‌های واجد استوری */
   const interactionsOn = useSocialInteractions();
   const [dmUnread, setDmUnread] = useState(0);
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  /* دایرکت/اعلان برای همه‌ی کاربرانِ لاگین — کاربرِ عادی هم با ریپلایِ استوری گفتگو دارد
-     (قبلاً به نقش‌های استوری‌دار محدود بود و آیکونِ پیام برای بقیه اصلاً دیده نمی‌شد) */
+  /* دایرکت/اعلان برای همه‌ی کاربران لاگین — کاربر عادی هم با ریپلای استوری گفتگو دارد
+     (قبلاً به نقش‌های استوری‌دار محدود بود و آیکون پیام برای بقیه اصلاً دیده نمی‌شد) */
   const notifUnread = notifs.filter(n => !n.read).length;
   useEffect(() => {
     if (!user) { setDmUnread(0); setNotifs([]); return; }
-    /* پرچمِ خاموش ⇒ نه پولِ ۱۵ ثانیه‌ای، نه اتصالِ Realtime، نه دو
-       درخواستِ اولیه. مخفی‌کردنِ آیکون به‌تنهایی این ترافیک را حذف
-       نمی‌کرد و برای هر کاربرِ لاگین تا ابد ادامه داشت. */
+    /* پرچم خاموش ⇒ نه پول ۱۵ ثانیه‌ای، نه اتصال Realtime، نه دو
+       درخواست اولیه. مخفی‌کردن آیکون به‌تنهایی این ترافیک را حذف
+       نمی‌کرد و برای هر کاربر لاگین تا ابد ادامه داشت. */
     if (!interactionsOn) { setDmUnread(0); setNotifs([]); return; }
     const key = user.phone || user.id || (user.firstName ?? 'user');
     const tick = async () => {
@@ -106,8 +106,8 @@ export default function Navbar() {
       setNotifs(ns);
     };
     tick();
-    /* Realtime: با هر پیامِ ورودی، نشان‌ها فوری تازه شوند؛ برقراری/بازیابیِ اتصال و
-       برگشت به اپ هم فوری sync می‌کنند (برادکستِ حین اتصال گم می‌شد ⇒ بجِ دیرهنگام) */
+    /* Realtime: با هر پیام ورودی، نشان‌ها فوری تازه شوند؛ برقراری/بازیابی اتصال و
+       برگشت به اپ هم فوری sync می‌کنند (برادکست حین اتصال گم می‌شد ⇒ بج دیرهنگام) */
     const stop = subscribeDM(key, {
       onMsg: () => tick(),
       onStatus: (s) => { if (s === 'SUBSCRIBED') tick(); },
@@ -135,9 +135,9 @@ export default function Navbar() {
     }
   };
   const notifText = (n: Notif) =>
-    n.type === 'like' ? 'استوریِ شما را لایک کرد'
+    n.type === 'like' ? 'استوری شما را لایک کرد'
     : n.type === 'reaction' ? `با استیکر ${n.text} واکنش داد`
-    : `به استوریِ شما پاسخ داد: ${n.text}`;
+    : `به استوری شما پاسخ داد: ${n.text}`;
   const router = useRouter();
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -264,9 +264,9 @@ export default function Navbar() {
         .desk { display:flex !important; }
         .mob  { display:none  !important; }
         @media(max-width:900px) { .desk{display:none!important;} .mob{display:flex!important;} }
-        /* تبلت (iPad Pro / Surface): منوی «بیشتر» از چپ بیرون می‌زد ⇒ وسطِ ویوپورت فیکس می‌شود */
+        /* تبلت (iPad Pro / Surface): منوی «بیشتر» از چپ بیرون می‌زد ⇒ وسط ویوپورت فیکس می‌شود */
         @media(min-width:901px) and (max-width:1240px){
-          /* بدون transform — انیمیشنِ fadeDown خودش transform را پر می‌کند و وسط‌چینی را می‌شکست */
+          /* بدون transform — انیمیشن fadeDown خودش transform را پر می‌کند و وسط‌چینی را می‌شکست */
           .nav-explore-panel { position:fixed !important; right:auto !important;
             left:calc((100% - min(700px, 94vw)) / 2) !important;
             top:calc(84px + env(safe-area-inset-top)) !important;
@@ -274,7 +274,7 @@ export default function Navbar() {
         }
         @media(max-width:480px) { .srch-wrap{display:none!important;} }
         /* عرض‌های باریک (iPhone SE 375 / 12 Pro 390): نوبار نباید از کادر بزند بیرون.
-           ردیفِ کاربرِ لاگین‌شده (جستجو + پیام + پروفایل + منو) از لوگو پهن‌تر است،
+           ردیف کاربر لاگین‌شده (جستجو + پیام + پروفایل + منو) از لوگو پهن‌تر است،
            پس هرچه صفحه باریک‌تر می‌شود، همین ردیف پله‌پله جمع‌تر می‌شود. */
         @media(max-width:430px) {
           .nav-inner { padding:0 10px !important; gap:6px !important; }
@@ -283,7 +283,7 @@ export default function Navbar() {
           .nav-actions { gap:5px !important; }
           .nav-ico { width:40px !important; height:40px !important; }
           .nav-profile { padding:6px 9px !important; height:40px !important; gap:5px !important; }
-          /* فلشِ رو به پایین در موبایل هم می‌ماند: بدونِ آن معلوم نبود
+          /* فلش رو به پایین در موبایل هم می‌ماند: بدون آن معلوم نبود
              این دکمه منو باز می‌کند و کاربر فکر می‌کرد فقط یک نشان است. */
           .nav-chev { display:block !important; }
         }
@@ -294,7 +294,7 @@ export default function Navbar() {
           .nav-profile { padding:5px 7px !important; height:36px !important; }
           .nav-login-btn { padding:7px 9px !important; font-size:12px !important; }
         }
-        /* باریک‌ترین حالت (گلکسی فولد و…): فقط نشانِ لوگو می‌ماند */
+        /* باریک‌ترین حالت (گلکسی فولد و…): فقط نشان لوگو می‌ماند */
         @media(max-width:330px) { .nav-brand { display:none !important; } }
 
         .mob-link-item { transition: background 0.15s, color 0.15s; }
@@ -316,7 +316,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" onClick={e => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            {/* سایه‌ی خیلی نرم + بِوِلِ ظریف (هایلایت بالا، تیرگی پایین) */}
+            {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
                 <img src="/images/Logo/logo-256x256.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -445,9 +445,9 @@ export default function Navbar() {
               <Search size={20} />
             </button>
 
-            {/* Bell — notifications (همه‌ی کاربرانِ لاگین، سمت‌سرور)
-                این اعلان‌ها فقط لایک/ری‌اکشن/پاسخ‌اند (نوعِ Notif همین سه‌تاست)،
-                پس با خاموش‌بودنِ تعاملات هیچ محتوایی ندارند. */}
+            {/* Bell — notifications (همه‌ی کاربران لاگین، سمت‌سرور)
+                این اعلان‌ها فقط لایک/ری‌اکشن/پاسخ‌اند (نوع Notif همین سه‌تاست)،
+                پس با خاموش‌بودن تعاملات هیچ محتوایی ندارند. */}
             {user && interactionsOn && (
               <div ref={notifRef} className="desk" style={{ position: 'relative', flexShrink: 0 }}>
                 <button onClick={openNotifs} aria-label="اعلان‌ها"
@@ -483,7 +483,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* دایرکتِ استوری — همه‌ی کاربرانِ لاگین، با بجِ نخوانده */}
+            {/* دایرکت استوری — همه‌ی کاربران لاگین، با بج نخوانده */}
             {user && interactionsOn && (
               <Link href="/direct" aria-label="دایرکت" className="nav-ico"
                 style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '12px', color: TEXT_MUT, flexShrink: 0, transition: 'color 0.2s' }}
@@ -509,7 +509,7 @@ export default function Navbar() {
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
                 <button className="nav-profile" onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
-                  {/* عکسِ پروفایل، وگرنه آدمک — نه حرفِ اولِ نام */}
+                  {/* عکس پروفایل، وگرنه آدمک — نه حرف اول نام */}
                   <Avatar src={user.avatar} size={30} alt=""
                     background={`linear-gradient(135deg,${GOLD},#8C6A22)`} iconColor="rgba(255,255,255,0.95)" />
                   <span className="desk" style={{ alignItems: 'center', color: TEXT }}>{user.firstName}</span>
@@ -580,7 +580,7 @@ export default function Navbar() {
           padding: '8px clamp(16px,3vw,32px) 0',
           animation: 'fadeDown 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>
-          {/* کارتِ روشنِ شیشه‌ای — متنِ سفیدِ قبلی روی صفحاتِ روشن دیده نمی‌شد */}
+          {/* کارت روشن شیشه‌ای — متن سفید قبلی روی صفحات روشن دیده نمی‌شد */}
           <div style={{
             maxWidth: '560px', margin: '0 auto',
             display: 'flex', alignItems: 'center', gap: '10px',
@@ -615,8 +615,8 @@ export default function Navbar() {
           background: '#F7F5F0',
           overflowY: 'auto',
           display: 'flex', flexDirection: 'column',
-          /* بدونِ این، منو از خطِ صفر باز می‌شد و دکمه‌ی بستن زیرِ نوارِ
-             وضعیت (ساعت و نشانِ شارژ) می‌رفت و قابلِ زدن نبود. */
+          /* بدون این، منو از خط صفر باز می‌شد و دکمه‌ی بستن زیر نوار
+             وضعیت (ساعت و نشان شارژ) می‌رفت و قابل زدن نبود. */
           paddingTop: 'env(safe-area-inset-top)',
           animation: 'slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both',
         }}>

@@ -38,9 +38,9 @@ export default function AdminRefereesPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
 
-  /* منبع: جدولِ `profiles` روی سرور — نه localStorage. تا امروز این
-     فهرست از مرورگرِ خودِ ادمین خوانده می‌شد، پس پروفایلی که داور روی
-     دستگاهِ خودش ساخته بود اصلاً این‌جا دیده نمی‌شد. */
+  /* منبع: جدول `profiles` روی سرور — نه localStorage. تا امروز این
+     فهرست از مرورگر خود ادمین خوانده می‌شد، پس پروفایلی که داور روی
+     دستگاه خودش ساخته بود اصلاً این‌جا دیده نمی‌شد. */
   useEffect(() => {
     void (async () => {
       const rows = await fetchAdminProfiles<RefereeProfile>('referee')
@@ -51,7 +51,7 @@ export default function AdminRefereesPage() {
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
   const act = async (slug: string, patch: Partial<RefereeProfile>) => {
     await patchAdminProfile(slug, patch as Record<string, unknown>)
-    updateRefereeProfile(slug, patch)   // کشِ محلی هم هم‌گام بماند
+    updateRefereeProfile(slug, patch)   // کش محلی هم هم‌گام بماند
     setTick(t => t + 1)
   }
 

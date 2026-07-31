@@ -1,9 +1,9 @@
 'use client'
 
-/* پنلِ تبلیغات (فاز ۲) — شش جایگاهِ مستقل، کمپین‌ها، پلن‌های قیمت،
+/* پنل تبلیغات (فاز ۲) — شش جایگاه مستقل، کمپین‌ها، پلن‌های قیمت،
    و درخواست‌های تبلیغ.
 
-   عمداً هیچ کلیدِ سراسری‌ای وجود ندارد: هر جایگاه Active/Inactive و
+   عمداً هیچ کلید سراسری‌ای وجود ندارد: هر جایگاه Active/Inactive و
    Mode (رایگان/دستی/پولی) خودش را دارد — طبق تصمیم D1. */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -54,7 +54,7 @@ const ROTATION_FA: Record<Rotation, string> = {
   fair: 'عادلانه', weighted: 'وزنی', random: 'تصادفی', fixed: 'ثابت',
 }
 const ROTATION_HINT: Record<Rotation, string> = {
-  fair: 'کم‌نمایش‌ترین اول', weighted: 'به‌نسبتِ وزن', random: 'بُرخورده', fixed: 'ترتیبِ ثابت',
+  fair: 'کم‌نمایش‌ترین اول', weighted: 'به‌نسبت وزن', random: 'بُرخورده', fixed: 'ترتیب ثابت',
 }
 const ROTATION_OPTS = (['fair', 'weighted', 'random', 'fixed'] as Rotation[])
   .map(r => ({ value: r, label: ROTATION_FA[r], hint: ROTATION_HINT[r] }))
@@ -140,13 +140,13 @@ export default function AdminAdvertising() {
         <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>سیستم تبلیغات</h1>
         {openRequests.length > 0 && (
           <span style={{ fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 20, padding: '4px 11px' }}>
-            {toFaDigits(openRequests.length)} درخواستِ باز
+            {toFaDigits(openRequests.length)} درخواست باز
           </span>
         )}
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.95 }}>
-        شش جایگاهِ مستقل. هر جایگاه فعال/غیرفعال و حالتِ خودش (رایگان، دستی، پولی) را جدا دارد —
-        هیچ کلیدِ سراسری‌ای وجود ندارد.
+        شش جایگاه مستقل. هر جایگاه فعال/غیرفعال و حالت خودش (رایگان، دستی، پولی) را جدا دارد —
+        هیچ کلید سراسری‌ای وجود ندارد.
       </p>
 
       {err && (
@@ -216,7 +216,7 @@ export default function AdminAdvertising() {
                 {r.status !== 'CLOSED' && (
                   <button onClick={async () => { setBusy(r.id); try { if (await call('DELETE', undefined, `?request=${r.id}`)) await load() } finally { setBusy('') } }}
                     disabled={busy === r.id} style={{ ...BTN, marginTop: 10, padding: '7px 13px', fontSize: 12 }}>
-                    بستنِ درخواست
+                    بستن درخواست
                   </button>
                 )}
               </div>
@@ -235,7 +235,7 @@ export default function AdminAdvertising() {
   )
 }
 
-/* ── آمارِ تبلیغات ───────────────────────────────────────────── */
+/* ── آمار تبلیغات ───────────────────────────────────────────── */
 function StatsSection({ s }: { s: Stats }) {
   const KPI = ({ icon, label, value, hint, color }: {
     icon: React.ReactNode; label: string; value: string; hint?: string; color?: string
@@ -268,8 +268,8 @@ function StatsSection({ s }: { s: Stats }) {
           hint={`نرخ کلیک ${toFaDigits(s.ctr.toFixed(2))}٪`} />
         <KPI icon={<Wallet size={14} />} label="درآمد (تومان)" value={fa(s.revenue.total)} color={GOLD_D}
           hint={s.revenue.orders > 0
-            ? `${fa(s.revenue.orders)} سفارشِ پرداخت‌شده`
-            : 'فروشِ آنلاینِ جایگاه در فاز بعد فعال می‌شود'} />
+            ? `${fa(s.revenue.orders)} سفارش پرداخت‌شده`
+            : 'فروش آنلاین جایگاه در فاز بعد فعال می‌شود'} />
       </div>
 
       {s.byPlacement.some(b => b.impressions > 0 || b.active > 0) && (
@@ -300,7 +300,7 @@ function StatsSection({ s }: { s: Stats }) {
   )
 }
 
-/* ── ردیفِ جایگاه — Active و Mode مستقل ─────────────────────── */
+/* ── ردیف جایگاه — Active و Mode مستقل ─────────────────────── */
 function PlacementRow({ p, busy, campaignCount, onPatch }: {
   p: Placement; busy: boolean; campaignCount: number
   onPatch: (key: string, body: Record<string, unknown>) => Promise<void>
@@ -334,7 +334,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
           {p.description && <div style={{ fontSize: 11.5, color: MUT, marginTop: 4, lineHeight: 1.85 }}>{p.description}</div>}
         </div>
 
-        {/* دو کنترلِ مستقل: وضعیت و حالت */}
+        {/* دو کنترل مستقل: وضعیت و حالت */}
         <button onClick={() => onPatch(p.key, { isActive: !p.isActive })} disabled={busy} style={{
           ...BTN,
           background: p.isActive ? 'rgba(14,122,56,0.10)' : 'rgba(0,0,0,0.04)',
@@ -344,7 +344,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
           <Power size={14} /> {p.isActive ? 'فعال' : 'غیرفعال'}
         </button>
         <div style={{ width: 118 }}>
-          <Select<Mode> compact value={p.mode} options={MODE_OPTS} ariaLabel={`حالتِ ${p.title}`}
+          <Select<Mode> compact value={p.mode} options={MODE_OPTS} ariaLabel={`حالت ${p.title}`}
             onChange={m => void onPatch(p.key, { mode: m })} />
         </div>
       </div>
@@ -356,12 +356,12 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
             onChange={e => setCap(digits(e.target.value))} />
           {Number(cap) === 0 && (
             <div style={{ fontSize: 10.5, color: RED, marginTop: 4, lineHeight: 1.6 }}>
-              با ظرفیتِ صفر چیزی نمایش داده نمی‌شود.
+              با ظرفیت صفر چیزی نمایش داده نمی‌شود.
             </div>
           )}
         </div>
         <div style={{ width: 100 }}>
-          <label style={LABEL}>تعدادِ نمایش</label>
+          <label style={LABEL}>تعداد نمایش</label>
           <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(shown)}
             onChange={e => setShown(digits(e.target.value))} title="۰ = به‌اندازه‌ی ظرفیت" />
           {Number(shown) > Number(cap) && Number(cap) >= 0 && (
@@ -372,7 +372,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
         </div>
         <div style={{ width: 138 }}>
           <label style={LABEL}>چرخش</label>
-          <Select<Rotation> compact value={p.rotationMode} options={ROTATION_OPTS} ariaLabel={`چرخشِ ${p.title}`}
+          <Select<Rotation> compact value={p.rotationMode} options={ROTATION_OPTS} ariaLabel={`چرخش ${p.title}`}
             onChange={r => void onPatch(p.key, { rotationMode: r })} />
         </div>
         <div style={{ width: 88 }}>
@@ -403,7 +403,7 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
 
       {p.mode === 'paid' && (
         <div style={{ marginTop: 10, fontSize: 11.5, color: FELT, background: 'rgba(14,122,56,0.07)', borderRadius: 9, padding: '7px 11px', lineHeight: 1.8 }}>
-          این جایگاه در صفحه‌ی «درخواست تبلیغات» قابلِ خرید است. پله‌های قیمتش را در بخشِ پلن‌ها تنظیم کنید.
+          این جایگاه در صفحه‌ی «درخواست تبلیغات» قابل خرید است. پله‌های قیمتش را در بخش پلن‌ها تنظیم کنید.
         </div>
       )}
     </div>
@@ -492,12 +492,12 @@ function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
           <div><label style={LABEL}>مدت (روز)</label>
             <input style={INPUT} inputMode="numeric" value={fa(draft.durationDays)}
               onChange={e => setDraft(d => ({ ...d, durationDays: digits(e.target.value) }))} /></div>
-          <div><label style={LABEL}>وضعیتِ شروع</label>
+          <div><label style={LABEL}>وضعیت شروع</label>
             <Select value={draft.status} options={STATUS_OPTS} ariaLabel="وضعیت"
               onChange={v => setDraft(d => ({ ...d, status: v }))} /></div>
         </div>
         <button onClick={create} disabled={busy === 'new'} style={{ ...BTN, marginTop: 14 }}>
-          {busy === 'new' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساختِ کمپین
+          {busy === 'new' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساخت کمپین
         </button>
       </div>
 
@@ -557,7 +557,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
   })
 
   const create = async () => {
-    if (!draft.name.trim()) { flash('نامِ پلن لازم است'); return }
+    if (!draft.name.trim()) { flash('نام پلن لازم است'); return }
     setBusy('new')
     try {
       const ok = await call('POST', {
@@ -574,14 +574,14 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
     } finally { setBusy('') }
   }
 
-  /* گروه‌بندی بر اساسِ جایگاه تا پله‌های مدتِ هر جایگاه کنار هم باشند */
+  /* گروه‌بندی بر اساس جایگاه تا پله‌های مدت هر جایگاه کنار هم باشند */
   const groups: { key: string; title: string; items: Plan[] }[] = []
   for (const p of placements) {
     const items = plans.filter(x => x.placementKey === p.key)
     if (items.length) groups.push({ key: p.key, title: p.title, items })
   }
   const general = plans.filter(x => !x.placementKey || !placements.some(p => p.key === x.placementKey))
-  if (general.length) groups.push({ key: '', title: 'پلن‌های عمومیِ آگهی (بدونِ جایگاه)', items: general })
+  if (general.length) groups.push({ key: '', title: 'پلن‌های عمومی آگهی (بدون جایگاه)', items: general })
 
   return (
     <section style={CARD}>
@@ -589,26 +589,26 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
         <Package size={17} style={{ color: GOLD_D }} />
         <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: 0 }}>پلن‌های قیمت‌گذاری</h2>
         <button onClick={() => setOpen(o => !o)} style={{ ...BTN, marginInlineStart: 'auto', padding: '7px 13px', fontSize: 12 }}>
-          <Plus size={13} /> پلنِ تازه
+          <Plus size={13} /> پلن تازه
         </button>
       </div>
       <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 14px', lineHeight: 1.95 }}>
         قیمت‌ها از دیتابیس خوانده می‌شوند، نه از کد. هر جایگاه می‌تواند چند پله‌ی مدت داشته باشد
-        (مثلاً ۷ روزه، ۳۰ روزه، ۳ ماهه). پلنی که سفارشِ ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد.
+        (مثلاً ۷ روزه، ۳۰ روزه، ۳ ماهه). پلنی که سفارش ثبت‌شده دارد حذف نمی‌شود و فقط غیرفعال می‌گردد.
       </p>
 
       {open && (
         <div style={{ border: `1px dashed ${LINE}`, borderRadius: 14, padding: 15, marginBottom: 16 }}>
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))' }}>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={LABEL}>نامِ پلن *</label>
+              <label style={LABEL}>نام پلن *</label>
               <input style={INPUT} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
                 placeholder="مثلاً بنر کناری راست — ۳۰ روزه" />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={LABEL}>جایگاه</label>
-              <Select value={draft.placementKey} ariaLabel="جایگاهِ پلن"
-                options={[{ value: '', label: 'بدونِ جایگاه (پلنِ عمومیِ آگهی)' },
+              <Select value={draft.placementKey} ariaLabel="جایگاه پلن"
+                options={[{ value: '', label: 'بدون جایگاه (پلن عمومی آگهی)' },
                   ...placements.map(p => ({ value: p.key, label: p.title, hint: MODE_FA[p.mode] }))]}
                 onChange={v => setDraft(d => ({ ...d, placementKey: v }))} />
             </div>
@@ -619,7 +619,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
             <div><label style={LABEL}>مدت (روز)</label>
               <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(draft.durationDays)}
                 onChange={e => setDraft(d => ({ ...d, durationDays: digits(e.target.value) }))} /></div>
-            <div><label style={LABEL}>تعدادِ آگهی</label>
+            <div><label style={LABEL}>تعداد آگهی</label>
               <input style={{ ...INPUT, textAlign: 'center' }} inputMode="numeric" value={fa(draft.adQuantity)}
                 onChange={e => setDraft(d => ({ ...d, adQuantity: digits(e.target.value) }))} /></div>
             <div><label style={LABEL}>اعتبار</label>
@@ -632,7 +632,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
               <input style={INPUT} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} /></div>
           </div>
           <button onClick={create} disabled={busy === 'new'} style={{ ...BTN, marginTop: 14 }}>
-            {busy === 'new' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساختِ پلن
+            {busy === 'new' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} ساخت پلن
           </button>
         </div>
       )}
@@ -653,7 +653,7 @@ function PlansSection({ plans, placements, onChanged, flash, call }: {
   )
 }
 
-/* ── ردیفِ پلنِ قیمت ─────────────────────────────────────────── */
+/* ── ردیف پلن قیمت ─────────────────────────────────────────── */
 function PlanRow({ p, placements, onChanged, flash, call }: {
   p: Plan; placements: Placement[]
   onChanged: () => Promise<void>; flash: (m: string) => void
@@ -679,7 +679,7 @@ function PlanRow({ p, placements, onChanged, flash, call }: {
   }
 
   const remove = async () => {
-    if (!confirm(`پلنِ «${p.name}» حذف شود؟ اگر سفارشی داشته باشد فقط غیرفعال می‌شود.`)) return
+    if (!confirm(`پلن «${p.name}» حذف شود؟ اگر سفارشی داشته باشد فقط غیرفعال می‌شود.`)) return
     setBusy(true)
     try {
       const r = await call('DELETE', undefined, `?plan=${p.id}`)
@@ -701,8 +701,8 @@ function PlanRow({ p, placements, onChanged, flash, call }: {
           {p.description ? ` · ${p.description}` : ''}
         </div>
         <div style={{ marginTop: 7, maxWidth: 260 }}>
-          <Select compact value={p.placementKey ?? ''} ariaLabel={`جایگاهِ ${p.name}`}
-            options={[{ value: '', label: 'بدونِ جایگاه (عمومی)' },
+          <Select compact value={p.placementKey ?? ''} ariaLabel={`جایگاه ${p.name}`}
+            options={[{ value: '', label: 'بدون جایگاه (عمومی)' },
               ...placements.map(x => ({ value: x.key, label: x.title }))]}
             onChange={v => void save({ placementKey: v })} />
         </div>

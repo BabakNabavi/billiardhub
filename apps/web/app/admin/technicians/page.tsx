@@ -1,8 +1,8 @@
 'use client';
 
 /* پنل ادمین — متخصصان فنی.
-   منبع: جدولِ `profiles` از راهِ `/api/admin/profiles`.
-   (پیش‌تر localStorage بود و هر ادمین فهرستِ متفاوتی می‌دید.) */
+   منبع: جدول `profiles` از راه `/api/admin/profiles`.
+   (پیش‌تر localStorage بود و هر ادمین فهرست متفاوتی می‌دید.) */
 
 import ProfileAdmin from '../ProfileAdmin';
 import { profileAdminSource } from '../../../lib/admin/profile-rows';

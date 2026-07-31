@@ -1,11 +1,11 @@
 /* ─────────────────────────────────────────────────────────────
-   محتوای رایگانِ جایگاه‌های موجودیتی (فاز ۵).
+   محتوای رایگان جایگاه‌های موجودیتی (فاز ۵).
 
-   جایگاهی که ادمین روی حالتِ «رایگان» گذاشته، کمپین ندارد؛ محتوایش
-   مستقیم از داده‌ی واقعیِ سایت می‌آید: تازه‌ترین محصولات، باشگاه‌ها و
-   فروشگاه‌ها. خروجی دقیقاً همان شکلِ EntitySnapshot است که مسیرِ
-   کمپینی می‌سازد، پس کلاینت فرقی بینِ «رایگان» و «پولی» نمی‌بیند و
-   تغییرِ حالت از پنلِ ادمین هیچ تغییری در ظاهر نمی‌دهد.
+   جایگاهی که ادمین روی حالت «رایگان» گذاشته، کمپین ندارد؛ محتوایش
+   مستقیم از داده‌ی واقعی سایت می‌آید: تازه‌ترین محصولات، باشگاه‌ها و
+   فروشگاه‌ها. خروجی دقیقاً همان شکل EntitySnapshot است که مسیر
+   کمپینی می‌سازد، پس کلاینت فرقی بین «رایگان» و «پولی» نمی‌بیند و
+   تغییر حالت از پنل ادمین هیچ تغییری در ظاهر نمی‌دهد.
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from '../finance/db'
@@ -15,14 +15,14 @@ import type { EntitySnapshot } from './resolve'
 const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d)
 const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d }
 
-/** تازه‌ترین محصولاتِ فعالِ بازار */
+/** تازه‌ترین محصولات فعال بازار */
 async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
   const { data, error } = await sb().from('products')
     .select('id,title,price,"discountPercent",images,brand,city,status,"createdAt"')
     .eq('status', 'active')
     .order('createdAt', { ascending: false })
-    /* شکستِ تساوی: داده‌ی seed همه یک زمانِ ثبت دارند و بدونِ این کلید،
-       ترتیبِ خروجی بینِ درخواست‌ها می‌توانست عوض شود و کارت‌ها بپرند */
+    /* شکست تساوی: داده‌ی seed همه یک زمان ثبت دارند و بدون این کلید،
+       ترتیب خروجی بین درخواست‌ها می‌توانست عوض شود و کارت‌ها بپرند */
     .order('id', { ascending: true })
     .limit(limit)
   if (error || !data) return []
@@ -38,7 +38,7 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
-      /* تخفیفِ ۱۰۰٪ تقسیم بر صفر می‌شد و قیمتِ خط‌خورده Infinity می‌داد */
+      /* تخفیف ۱۰۰٪ تقسیم بر صفر می‌شد و قیمت خط‌خورده Infinity می‌داد */
       oldPrice: disc > 0 && disc < 100 ? Math.round(price / (1 - disc / 100)) : price,
       discountPercent: disc,
       city: s(r.city),
@@ -50,8 +50,8 @@ async function freeProducts(limit: number): Promise<EntitySnapshot[]> {
  * تازه‌ترین باشگاه‌های فعال — تأییدشده‌ها اول.
  *
  * «تأییدشده اول» به‌جای «فقط تأییدشده» عمدی است: باشگاهی که ثبت‌نام
- * کرده ولی هنوز جوازش استعلام نشده، باشگاهِ واقعیِ سایت است و پنهان
- * کردنش سکشن را بی‌دلیل خالی می‌کند. نشانِ «تأیید» روی کارت تفاوت را
+ * کرده ولی هنوز جوازش استعلام نشده، باشگاه واقعی سایت است و پنهان
+ * کردنش سکشن را بی‌دلیل خالی می‌کند. نشان «تأیید» روی کارت تفاوت را
  * نشان می‌دهد.
  */
 async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
@@ -60,20 +60,20 @@ async function freeClubs(limit: number): Promise<EntitySnapshot[]> {
       '"snookerTables","pocketTables","highballTables","vipSnookerTables","vipPocketTables"')
     .eq('isActive', true)
     .order('createdAt', { ascending: false })
-    .order('id', { ascending: true })          // ترتیبِ پایدار در تساویِ زمان
+    .order('id', { ascending: true })          // ترتیب پایدار در تساوی زمان
     .limit(Math.max(limit * 3, limit))
   if (error || !data) return []
 
   const rows = data as unknown as Record<string, unknown>[]
   const rank = (r: Record<string, unknown>) => (s(r.verificationStatus) === 'verified' ? 0 : 1)
-  /* مرتب‌سازیِ پایدارِ جاوااسکریپت ترتیبِ قبلی را داخلِ هر رتبه حفظ می‌کند */
+  /* مرتب‌سازی پایدار جاوااسکریپت ترتیب قبلی را داخل هر رتبه حفظ می‌کند */
   rows.sort((a, b) => rank(a) - rank(b))
 
   return rows.slice(0, limit).map(r => {
     const imgs = Array.isArray(r.images) ? r.images as string[] : []
-    /* تفکیکِ واقعیِ میزها (میزِ VIP هم از جنسِ همان نوع است).
-       ایرهاکی عمداً بیرون است: میزِ بیلیارد نیست و کارت هم فقط سه
-       نوعِ اسنوکر/پاکت/هی‌بال را نشان می‌دهد. */
+    /* تفکیک واقعی میزها (میز VIP هم از جنس همان نوع است).
+       ایرهاکی عمداً بیرون است: میز بیلیارد نیست و کارت هم فقط سه
+       نوع اسنوکر/پاکت/هی‌بال را نشان می‌دهد. */
     const snooker = n(r.snookerTables) + n(r.vipSnookerTables)
     const pocket = n(r.pocketTables) + n(r.vipPocketTables)
     const highball = n(r.highballTables)
@@ -98,7 +98,7 @@ async function freeSellers(limit: number): Promise<EntitySnapshot[]> {
     .eq('kind', 'seller')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
-    .order('slug', { ascending: true })        // ترتیبِ پایدار در تساویِ زمان
+    .order('slug', { ascending: true })        // ترتیب پایدار در تساوی زمان
     .limit(limit)
   if (error || !data) return []
 
@@ -116,7 +116,7 @@ async function freeSellers(limit: number): Promise<EntitySnapshot[]> {
   })
 }
 
-/** محتوای پیش‌فرضِ یک جایگاهِ رایگان */
+/** محتوای پیش‌فرض یک جایگاه رایگان */
 export async function freeContent(entityType: EntityType, limit: number): Promise<EntitySnapshot[]> {
   const take = Math.max(0, Math.min(60, Math.round(limit) || 0))
   if (take === 0) return []
@@ -125,8 +125,8 @@ export async function freeContent(entityType: EntityType, limit: number): Promis
     if (entityType === 'club') return await freeClubs(take)
     return await freeSellers(take)
   } catch (e) {
-    /* خطا را بی‌صدا رد نکن: بدونِ لاگ، یک کوئریِ خرابِ دائمی از بیرون
-       دقیقاً شبیهِ «محتوایی نداریم» دیده می‌شود */
+    /* خطا را بی‌صدا رد نکن: بدون لاگ، یک کوئری خراب دائمی از بیرون
+       دقیقاً شبیه «محتوایی نداریم» دیده می‌شود */
     console.error('freeContent failed', entityType, e)
     return []
   }

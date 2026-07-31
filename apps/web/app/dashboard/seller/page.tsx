@@ -2,7 +2,7 @@
 /* ─────────────────────────────────────────────────────────────
    پنل صاحب فروشگاه — /dashboard/seller
    دسترسی: هرکس نقش «فروشنده» (seller) را گرفته باشد.
-   هر فیلد اینجا مستقیماً به یک چیزِ دیدنی در /sellers/<slug> وصل است.
+   هر فیلد اینجا مستقیماً به یک چیز دیدنی در /sellers/<slug> وصل است.
    ───────────────────────────────────────────────────────────── */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
@@ -19,7 +19,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 
 const toFa = (v: string | number) => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
-/* برای جواز کسبِ PDF (تصویر با canvas فشرده می‌شود، PDF مستقیم base64) */
+/* برای جواز کسب PDF (تصویر با canvas فشرده می‌شود، PDF مستقیم base64) */
 const readAsDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const r = new FileReader()
@@ -45,7 +45,7 @@ const Icon = {
   check:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
 }
 
-/* اسلاگ فروشگاه = همان id در آدرس. فعلاً تک‌فروشگاهیِ نمونه؛ بعداً از سرور می‌آید. */
+/* اسلاگ فروشگاه = همان id در آدرس. فعلاً تک‌فروشگاهی نمونه؛ بعداً از سرور می‌آید. */
 const DEFAULT_SLUG = '1'
 
 export default function SellerDashboard() {
@@ -57,7 +57,7 @@ export default function SellerDashboard() {
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState('')
   const [busy, setBusy]     = useState(false)
-  const [warn, setWarn]     = useState(false)   // هشدارِ «بدون جواز کسب»
+  const [warn, setWarn]     = useState(false)   // هشدار «بدون جواز کسب»
   const [warnAck, setWarnAck] = useState(false) // کاربر یادآوری را دید و ادامه داد
   const [brandInput, setBrandInput] = useState('')
 
@@ -73,19 +73,19 @@ export default function SellerDashboard() {
     return [user.primaryRole, ...(user.secondaryRoles ?? [])].includes('seller')
   }, [user])
 
-  /* بعد از هیدریت: فروشگاهِ خودِ همین کاربر را بارگذاری کن — بر اساسِ user.id (که همیشه
+  /* بعد از هیدریت: فروشگاه خود همین کاربر را بارگذاری کن — بر اساس user.id (که همیشه
      موجود است). شماره‌ی موبایل اختیاری است و نباید مبنای مالکیت باشد، وگرنه فروشگاه با
-     مالکِ خالی ذخیره می‌شد و دیگر پیدا نمی‌شد (فرم خالی می‌ماند).
-       • اگر فروشگاهِ خودش را دارد → همان.
-       • وگرنه اگر رکوردِ قدیمیِ بی‌صاحبی هست → همین کاربر تصاحبش می‌کند (بازیابیِ فروشگاهی
-         که پیش‌تر بدونِ شناسه‌ی مالک ذخیره شده بود).
-       • وگرنه فرمِ خالی با اسلاگِ *یکتای تازه* (نه «۱») تا روی فروشگاهِ دیگری ننویسد. */
+     مالک خالی ذخیره می‌شد و دیگر پیدا نمی‌شد (فرم خالی می‌ماند).
+       • اگر فروشگاه خودش را دارد → همان.
+       • وگرنه اگر رکورد قدیمی بی‌صاحبی هست → همین کاربر تصاحبش می‌کند (بازیابی فروشگاهی
+         که پیش‌تر بدون شناسه‌ی مالک ذخیره شده بود).
+       • وگرنه فرم خالی با اسلاگ *یکتای تازه* (نه «۱») تا روی فروشگاه دیگری ننویسد. */
   useEffect(() => {
     if (!_hydrated) return
     if (!user) { setLoaded(true); return }
 
     /* اول همان چیزی که در مرورگر هست تا فرم فوراً پر شود، بعد نسخه‌ی
-       سرور که منبعِ حقیقت است جایش را می‌گیرد. */
+       سرور که منبع حقیقت است جایش را می‌گیرد. */
     let mine = findSellerByOwner(user)
     if (!mine) {
       const orphan = findUnclaimedSeller()
@@ -101,7 +101,7 @@ export default function SellerDashboard() {
     void (async () => {
       const remote = await fetchMyProfile<SellerProfile>('seller')
       if (!remote) {
-        /* هنوز روی سرور نیست — پروفایلِ موجودِ مرورگر یک‌بار منتقل می‌شود */
+        /* هنوز روی سرور نیست — پروفایل موجود مرورگر یک‌بار منتقل می‌شود */
         if (mine) await saveProfileRemote('seller', mine.slug, mine as unknown as Record<string, unknown>,
           { number: mine.licenseNumber, url: mine.certificate?.url ?? '' })
         return
@@ -114,7 +114,7 @@ export default function SellerDashboard() {
         verified: remote.verified,
       }
       setForm(merged)
-      try { saveSellerProfile(merged) } catch { /* کشِ مرورگر پر است — مهم نیست */ }
+      try { saveSellerProfile(merged) } catch { /* کش مرورگر پر است — مهم نیست */ }
     })()
   }, [_hydrated, user?.id])
 
@@ -150,7 +150,7 @@ export default function SellerDashboard() {
     finally { setBusy(false); e.target.value = '' }
   }
 
-  /* گالریِ فروشگاه — تا ۱۲ عکس؛ همان گالری‌ای که در صفحه‌ی عمومی نمایش داده می‌شود */
+  /* گالری فروشگاه — تا ۱۲ عکس؛ همان گالری‌ای که در صفحه‌ی عمومی نمایش داده می‌شود */
   const addGalleryShots = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
@@ -183,18 +183,18 @@ export default function SellerDashboard() {
     const next: SellerProfile = {
       ...form,
       ownerName,
-      ownerId: user?.id || form.ownerId,           // مالکیت به کاربرِ فعلی گره می‌خورد تا همیشه پیدا شود
+      ownerId: user?.id || form.ownerId,           // مالکیت به کاربر فعلی گره می‌خورد تا همیشه پیدا شود
       ownerPhone: user?.phone || form.ownerPhone,
       status: 'approved',
       submittedAt: form.submittedAt || new Date().toISOString(),
     }
 
-    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند */
+    /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
     const res = await saveProfileRemote('seller', next.slug, next as unknown as Record<string, unknown>,
       { number: next.licenseNumber, url: next.certificate?.url ?? '' })
     if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); return }
 
-    /* عکس‌ها روی سرور به نشانیِ Storage تبدیل شده‌اند — همان را کش کن */
+    /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند — همان را کش کن */
     const saved = (res.profile?.data as SellerProfile | undefined) ?? next
     try { saveSellerProfile({ ...next, ...saved, slug: res.profile?.slug ?? next.slug }) } catch { /* کش پر است */ }
     setForm(f => ({ ...f, ...saved }))
@@ -205,7 +205,7 @@ export default function SellerDashboard() {
     e.preventDefault()
     if (!form.title.trim()) { setErr('نام فروشگاه لازم است.'); return }
     /* جواز کسب اجباری نیست (فقط داور مدرکش الزامی است) — یک‌بار یادآوری
-       می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدونِ تیکِ تأیید ثبت می‌شود. */
+       می‌شود و اگر کاربر ادامه بدهد، فروشگاه بدون تیک تأیید ثبت می‌شود. */
     if (!form.certificate && !warnAck) { setWarn(true); return }
     setBusy(true)
     void persist()
@@ -250,7 +250,7 @@ export default function SellerDashboard() {
 
         <form onSubmit={submit} className="space-y-5">
 
-          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
 
@@ -489,7 +489,7 @@ export default function SellerDashboard() {
                 <p className="mt-1 text-[12px] text-[#8A8474]">
                   {form.aboutImages.length > 0
                     ? `${toFa(form.aboutImages.length)} از ۳ عکس`
-                    : 'حداکثر ۳ عکس (اسلایدی) — کنار متنِ «درباره ما» پایین صفحه نمایش داده می‌شوند'}
+                    : 'حداکثر ۳ عکس (اسلایدی) — کنار متن «درباره ما» پایین صفحه نمایش داده می‌شوند'}
                 </p>
               </div>
               <button type="button" onClick={() => aboutRef.current?.click()}
@@ -529,7 +529,7 @@ export default function SellerDashboard() {
                 <p className="mt-1 text-[12px] text-[#8A8474]">
                   {form.gallery.length > 0
                     ? `${toFa(form.gallery.length)} از ۱۲ عکس`
-                    : 'حداکثر ۱۲ عکس — در بخشِ گالریِ صفحه‌ی فروشگاه نمایش داده می‌شوند'}
+                    : 'حداکثر ۱۲ عکس — در بخش گالری صفحه‌ی فروشگاه نمایش داده می‌شوند'}
                 </p>
               </div>
               <button type="button" onClick={() => galleryRef.current?.click()}
@@ -570,14 +570,14 @@ export default function SellerDashboard() {
             <Link href="/dashboard/shop" className={`${LQ_BTN} mt-3`}>{Icon.back} مدیریت محصولات</Link>
           </section>
 
-          {/* ═══ جواز کسب (اختیاری — برای تیکِ تأیید) ═══ */}
+          {/* ═══ جواز کسب (اختیاری — برای تیک تأیید) ═══ */}
           <section className={CARD}>
             <h2 className="text-[14.5px] font-bold">جواز کسب</h2>
             <div className="mb-4 mt-2">
               <VerificationPrompt role="seller" done={!!form.certificate} compact />
             </div>
 
-            {/* شماره‌ی جواز — بدونِ آن ادمین راهی برای استعلام ندارد */}
+            {/* شماره‌ی جواز — بدون آن ادمین راهی برای استعلام ندارد */}
             <div className="mb-4">
               <label className={LABEL}>شماره‌ی جواز کسب</label>
               <input
@@ -587,7 +587,7 @@ export default function SellerDashboard() {
                 placeholder="مثال: 1234567890"
               />
               <p className="mt-1.5 text-[11.5px] text-[#8A8474]">
-                برای گرفتنِ تیکِ تأیید، شماره باید با فایلِ آپلودشده یکی باشد.
+                برای گرفتن تیک تأیید، شماره باید با فایل آپلودشده یکی باشد.
               </p>
             </div>
 
@@ -632,7 +632,7 @@ export default function SellerDashboard() {
           </div>
         </form>
 
-        {/* هشدارِ بدونِ جواز کسب */}
+        {/* هشدار بدون جواز کسب */}
         {warn && (
           <div onClick={() => setWarn(false)} role="presentation"
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm">

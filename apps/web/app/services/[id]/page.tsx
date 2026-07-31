@@ -3,7 +3,7 @@
 /* ─────────────────────────────────────────────────────────────
    پروفایل متخصص خدمات فنی — ادیتوریال، لوکس و شخصی.
    هیروی معرفی → درباره من → خدمات من → پروژه‌ها (پرتفولیو) →
-   گالریِ آلبوم‌دار با لایت‌باکسِ فول‌اسکرین → محل فعالیت → CTA.
+   گالری آلبوم‌دار با لایت‌باکس فول‌اسکرین → محل فعالیت → CTA.
    بدون آمار/امتیاز. داده از lib/technicians-data.
    ───────────────────────────────────────────────────────────── */
 
@@ -27,7 +27,7 @@ const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
 const BG     = '#F7F7F5'
 
-/* آیکون واتساپ (هم‌خانواده‌ی فوترِ فروشگاه) */
+/* آیکون واتساپ (هم‌خانواده‌ی فوتر فروشگاه) */
 const WaIcon = (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.77.46 3.45 1.28 4.9L2 22l5.32-1.39a9.9 9.9 0 004.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2z"/></svg>
 )
@@ -60,7 +60,7 @@ export default function TechnicianProfilePage() {
 
   const tech = staticTech ?? stored
 
-  /* گالری: آلبومِ فعال + لایت‌باکس */
+  /* گالری: آلبوم فعال + لایت‌باکس */
   const [albumIdx, setAlbumIdx] = useState(0)
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [zoomed, setZoomed]     = useState(false)
@@ -334,7 +334,7 @@ export default function TechnicianProfilePage() {
             />
           </div>
 
-          {/* ناوبری — در RTL فلشِ راست = تصویر قبلی */}
+          {/* ناوبری — در RTL فلش راست = تصویر قبلی */}
           {photos.length > 1 && (
             <>
               <button className="tp-lb-nav" style={{ insetInlineStart: 14 }} onClick={e => { e.stopPropagation(); stepLb(1) }} aria-label="بعدی">

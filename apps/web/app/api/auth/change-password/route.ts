@@ -6,14 +6,14 @@ import { revokeAllSessions, clearSessionCookies } from '@/lib/auth/store';
 import { checkPassword } from '@/lib/auth/password';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 
-/* تغییرِ رمز از پنلِ کاربر.
+/* تغییر رمز از پنل کاربر.
 
    دو حالت پشتیبانی می‌شود:
-     • کاربری که رمز دارد ⇒ باید رمزِ فعلی را درست بدهد
-     • کاربری که رمز ندارد (حسابِ ساخته‌شده با OTP) ⇒ «تعیینِ رمز» بدونِ
-       رمزِ فعلی، چون چیزی برای تأیید وجود ندارد
+     • کاربری که رمز دارد ⇒ باید رمز فعلی را درست بدهد
+     • کاربری که رمز ندارد (حساب ساخته‌شده با OTP) ⇒ «تعیین رمز» بدون
+       رمز فعلی، چون چیزی برای تأیید وجود ندارد
 
-   حالتِ دوم امن است چون خودِ درخواست پشتِ نشستِ معتبر است؛ یعنی کاربر
+   حالت دوم امن است چون خود درخواست پشت نشست معتبر است؛ یعنی کاربر
    از قبل احراز هویت شده. */
 
 export async function GET(req: NextRequest) {
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   const { data } = await sb().from('users').select('password').eq('id', actor.id).maybeSingle();
   const has = !!((data as { password?: string } | null)?.password ?? '');
-  /* فقط «آیا رمز دارد یا نه» — خودِ هش هرگز برنمی‌گردد */
+  /* فقط «آیا رمز دارد یا نه» — خود هش هرگز برنمی‌گردد */
   return NextResponse.json({ hasPassword: has });
 }
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const confirm = String(b?.confirmPassword ?? '');
 
   if (next !== confirm) {
-    return NextResponse.json({ message: 'رمزِ تازه و تکرارش یکی نیستند' }, { status: 400 });
+    return NextResponse.json({ message: 'رمز تازه و تکرارش یکی نیستند' }, { status: 400 });
   }
 
   const check = checkPassword(next);
@@ -49,22 +49,22 @@ export async function POST(req: NextRequest) {
   const currentHash = (row as { password?: string } | null)?.password ?? '';
 
   if (currentHash) {
-    if (!current) return NextResponse.json({ message: 'رمزِ فعلی را وارد کنید' }, { status: 400 });
+    if (!current) return NextResponse.json({ message: 'رمز فعلی را وارد کنید' }, { status: 400 });
     if (!(await bcrypt.compare(current, currentHash))) {
-      return NextResponse.json({ message: 'رمزِ فعلی درست نیست' }, { status: 400 });
+      return NextResponse.json({ message: 'رمز فعلی درست نیست' }, { status: 400 });
     }
     if (await bcrypt.compare(next, currentHash)) {
-      return NextResponse.json({ message: 'رمزِ تازه نباید همان رمزِ فعلی باشد' }, { status: 400 });
+      return NextResponse.json({ message: 'رمز تازه نباید همان رمز فعلی باشد' }, { status: 400 });
     }
   }
 
   const hashed = await bcrypt.hash(next, 10);
   const { error } = await sb().from('users').update({ password: hashed }).eq('id', actor.id);
-  if (error) return NextResponse.json({ message: 'تغییرِ رمز انجام نشد' }, { status: 500 });
+  if (error) return NextResponse.json({ message: 'تغییر رمز انجام نشد' }, { status: 500 });
 
   /* همه‌ی نشست‌های دیگر باطل می‌شوند تا اگر کسی دسترسی داشته بیرون برود.
-     نشستِ خودِ کاربر هم باطل می‌شود و باید دوباره وارد شود — رفتارِ
-     محافظه‌کارانه‌تر و قابلِ‌فهم برای کاربر. */
+     نشست خود کاربر هم باطل می‌شود و باید دوباره وارد شود — رفتار
+     محافظه‌کارانه‌تر و قابل‌فهم برای کاربر. */
   await revokeAllSessions(actor.id, 'password_change');
 
   void audit({
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     entityType: 'user', entityId: actor.id, ip: clientIp(req) ?? undefined,
   });
 
-  /* کوکی‌های همین مرورگر هم پاک می‌شوند تا نشستِ مرده پشتِ سر نماند */
+  /* کوکی‌های همین مرورگر هم پاک می‌شوند تا نشست مرده پشت سر نماند */
   return clearSessionCookies(
     NextResponse.json({ ok: true, message: 'رمز عبور تغییر کرد؛ دوباره وارد شوید.' }),
   );

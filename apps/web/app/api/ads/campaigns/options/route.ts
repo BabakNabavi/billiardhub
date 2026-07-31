@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest } from '@/lib/finance/db';
 import { eligibleFor, PLACEMENT_ROLES } from '@/lib/ads/booking';
 
-/* جایگاه‌هایی که کاربرِ واردشده مجاز به خریدشان است.
-   کاربر هرگز جایگاهِ نامرتبط را نمی‌بیند — مبنا نقش‌های تأییدشده‌ی
-   فاز ۳ است، نه نقشِ خوداظهاری که خودِ کاربر می‌تواند عوضش کند. */
+/* جایگاه‌هایی که کاربر واردشده مجاز به خریدشان است.
+   کاربر هرگز جایگاه نامرتبط را نمی‌بیند — مبنا نقش‌های تأییدشده‌ی
+   فاز ۳ است، نه نقش خوداظهاری که خود کاربر می‌تواند عوضش کند. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });

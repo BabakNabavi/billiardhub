@@ -1,9 +1,9 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   ثبت‌نام — بازطراحی پریمیوم (۱۴۰۵). منطقِ دو مرحله‌ای
+   ثبت‌نام — بازطراحی پریمیوم (۱۴۰۵). منطق دو مرحله‌ای
    (شماره → اطلاعات) و api عیناً حفظ شده؛ پوسته هم‌خانواده‌ی
-   صفحه‌ی ورود: اسپلیتِ سینمایی + استپرِ سگمنتی + فیلدهای لوکس.
+   صفحه‌ی ورود: اسپلیت سینمایی + استپر سگمنتی + فیلدهای لوکس.
    بهبود UX: بازگشت به مرحله‌ی قبل.
    ───────────────────────────────────────────────────────────── */
 
@@ -29,12 +29,12 @@ interface FormData {
   confirmPassword: string;
 }
 
-/* نمایشِ فارسیِ ارقام. مقدارِ داخلِ فرم همیشه لاتین می‌ماند — استعلامِ
-   ثبت‌احوال و شاهکار ارقامِ فارسی را نمی‌پذیرند. */
+/* نمایش فارسی ارقام. مقدار داخل فرم همیشه لاتین می‌ماند — استعلام
+   ثبت‌احوال و شاهکار ارقام فارسی را نمی‌پذیرند. */
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
 
-/* قواعدِ رمز عبور — همان‌ها که هنگام ثبت هم بررسی می‌شوند.
-   حین تایپ نشان داده می‌شوند تا کاربر بعد از زدنِ دکمه غافلگیر نشود. */
+/* قواعد رمز عبور — همان‌ها که هنگام ثبت هم بررسی می‌شوند.
+   حین تایپ نشان داده می‌شوند تا کاربر بعد از زدن دکمه غافلگیر نشود. */
 const PW_RULES: { label: string; test: (v: string) => boolean }[] = [
   { label: 'حداقل ۸ کاراکتر',            test: v => v.length >= 8 },
   { label: 'حرف بزرگ انگلیسی (A-Z)',     test: v => /[A-Z]/.test(v) },
@@ -44,7 +44,7 @@ const PW_RULES: { label: string; test: (v: string) => boolean }[] = [
 ];
 const pwOk = (v: string) => PW_RULES.every(r => r.test(v));
 
-/* لینک‌های حقوقی درونِ متنِ پذیرش */
+/* لینک‌های حقوقی درون متن پذیرش */
 const legalLink: React.CSSProperties = {
   background: 'none', border: 'none', padding: 0, cursor: 'pointer',
   fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 800,
@@ -78,17 +78,17 @@ export default function RegisterPage() {
   const [showPw, setShowPw]   = useState(false);
   const [showPw2, setShowPw2] = useState(false);
   const [pwWarn, setPwWarn]   = useState(false);
-  /* چه کاری در حالِ انجام است — استعلام چند ثانیه طول می‌کشد */
+  /* چه کاری در حال انجام است — استعلام چند ثانیه طول می‌کشد */
   const [busyStep, setBusyStep] = useState('');
-  /* مرحله‌ی OTP (بینِ شماره و اطلاعاتِ حساب) */
+  /* مرحله‌ی OTP (بین شماره و اطلاعات حساب) */
   const [otpOpen, setOtpOpen] = useState(false);
   const [otp, setOtp]         = useState('');
   const [otpMsg, setOtpMsg]   = useState('');
   const [otpBusy, setOtpBusy] = useState(false);
   const [resendIn, setResendIn] = useState(0);
-  /* پذیرشِ قوانین — پیش‌شرطِ ساختِ حساب */
+  /* پذیرش قوانین — پیش‌شرط ساخت حساب */
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  /* شماره از قبل حساب دارد ⇒ به‌جای پیامک، راهنماییِ ورود */
+  /* شماره از قبل حساب دارد ⇒ به‌جای پیامک، راهنمایی ورود */
   const [phoneTaken, setPhoneTaken] = useState(false);
 
   const [form, setForm] = useState<FormData>({
@@ -101,7 +101,7 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
 
-  /* رفتن به صفحه‌ی قوانین و برگشت: اطلاعاتِ پرشده گم نشود.
+  /* رفتن به صفحه‌ی قوانین و برگشت: اطلاعات پرشده گم نشود.
      رمز عبور عمداً ذخیره نمی‌شود و کاربر دوباره واردش می‌کند. */
   useEffect(() => {
     try {
@@ -116,7 +116,7 @@ export default function RegisterPage() {
     } catch { /* ignore */ }
   }, []);
 
-  /* رفتن به صفحه‌ی حقوقی و برگشت، بدونِ گم‌شدنِ اطلاعاتِ پرشده */
+  /* رفتن به صفحه‌ی حقوقی و برگشت، بدون گم‌شدن اطلاعات پرشده */
   const goToLegal = (path: '/terms' | '/privacy') => {
     try {
       const { password: _p, confirmPassword: _c, ...rest } = form;
@@ -125,20 +125,20 @@ export default function RegisterPage() {
     router.push(`${path}?from=register`);
   };
 
-  /* سانیتایزِ ورودی‌ها: نام‌ها فقط حروف فارسی (بدون عدد و حروف انگلیسی)؛ کد ملی فقط ۱۰ رقم؛
+  /* سانیتایز ورودی‌ها: نام‌ها فقط حروف فارسی (بدون عدد و حروف انگلیسی)؛ کد ملی فقط ۱۰ رقم؛
      موبایل فقط عدد، ۱۱ رقم و حتماً با ۰۹ (اگر با ۹ شروع شد، ۰ اضافه می‌شود) */
   const sanitize = (key: keyof FormData, v: string): string => {
     const latin = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
     if (key === 'firstName' || key === 'lastName') return v.replace(/[0-9۰-۹A-Za-z]/g, '');
     if (key === 'nationalId') return latin.replace(/[^0-9]/g, '').slice(0, 10);
-    /* تاریخ تولدِ شمسی. اگر کاربر خودش «/» بزند، همان را مرزِ ماه و روز
+    /* تاریخ تولد شمسی. اگر کاربر خودش «/» بزند، همان را مرز ماه و روز
        می‌گیریم تا «۱۳۶۳/۶/۲» هم درست وارد شود؛ اگر فقط عدد بزند یا پیست
        کند، «/» خودکار گذاشته می‌شود ⇒ 1363/06/02 */
     if (key === 'birthDate') {
       /* «-» و «.» هم جداکننده‌ی رایج‌اند */
       const seg = latin.replace(/[-.]/g, '/').replace(/[^0-9/]/g, '').split('/');
       let y = seg[0] ?? '', m = seg[1] ?? '', d = seg.slice(2).join('');
-      /* سرریزِ هر بخش به بخشِ بعدی: تایپِ پیوسته‌ی ۱۳۶۳۰۶۰۲ هم درست جا می‌افتد */
+      /* سرریز هر بخش به بخش بعدی: تایپ پیوسته‌ی ۱۳۶۳۰۶۰۲ هم درست جا می‌افتد */
       if (y.length > 4) { m = y.slice(4) + m; y = y.slice(0, 4); }
       if (m.length > 2) { d = m.slice(2) + d; m = m.slice(0, 2); }
       d = d.slice(0, 2);
@@ -175,24 +175,24 @@ export default function RegisterPage() {
     setError('');
   };
 
-  /* شمارشِ معکوسِ ارسالِ مجدد */
+  /* شمارش معکوس ارسال مجدد */
   useEffect(() => {
     if (resendIn <= 0) return;
     const t = setTimeout(() => setResendIn(s => s - 1), 1000);
     return () => clearTimeout(t);
   }, [resendIn]);
 
-  // ── Step 1: validate phone → ارسالِ کدِ پیامکی ────────────────────
+  // ── Step 1: validate phone → ارسال کد پیامکی ────────────────────
   const handleContinue = async () => {
     if (!/^09[0-9]{9}$/.test(form.phone)) { setError('شماره موبایل معتبر نیست'); return; }
     setLoading(true); setError(''); setPhoneTaken(false);
-    /* سرور اول تکراری بودنِ شماره را چک می‌کند؛ اگر حساب داشته باشد
+    /* سرور اول تکراری بودن شماره را چک می‌کند؛ اگر حساب داشته باشد
        اصلاً پیامکی فرستاده نمی‌شود تا هزینه‌ی اضافه ایجاد نشود. */
     const r = await apiSendOtp(form.phone, 'register');
     setLoading(false);
     if (r.ok) { setOtpOpen(true); setOtp(''); setOtpMsg(''); setResendIn(60); return; }
     if (r.exists) { setPhoneTaken(true); setError(r.message || 'این شماره قبلاً ثبت‌نام کرده است'); return; }
-    setError(r.message || 'ارسالِ کدِ پیامکی ناموفق بود');
+    setError(r.message || 'ارسال کد پیامکی ناموفق بود');
   };
 
   const handleResend = async () => {
@@ -200,8 +200,8 @@ export default function RegisterPage() {
     setOtpBusy(true); setOtpMsg('');
     const r = await apiSendOtp(form.phone);
     setOtpBusy(false);
-    if (r.ok) { setResendIn(60); setOtpMsg('کدِ جدید ارسال شد'); }
-    else { setOtpMsg(r.message || 'ارسالِ مجدد ناموفق بود'); if (r.wait) setResendIn(r.wait); }
+    if (r.ok) { setResendIn(60); setOtpMsg('کد جدید ارسال شد'); }
+    else { setOtpMsg(r.message || 'ارسال مجدد ناموفق بود'); if (r.wait) setResendIn(r.wait); }
   };
 
   const handleVerify = async () => {
@@ -225,7 +225,7 @@ export default function RegisterPage() {
       return;
     }
     if (!/^1[23]\d{2}\/\d{1,2}\/\d{1,2}$/.test(form.birthDate.trim())) {
-      setError('تاریخ تولد را کامل و به‌صورتِ ۱۳۷۰/۰۵/۱۲ وارد کنید');
+      setError('تاریخ تولد را کامل و به‌صورت ۱۳۷۰/۰۵/۱۲ وارد کنید');
       return;
     }
     if (!pwOk(form.password)) {
@@ -242,16 +242,16 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    /* استعلام از شاهکار و ثبت‌احوال چند ثانیه طول می‌کشد و بیرون از دستِ
-       ماست. به‌جای اسپینرِ خاموش، بگو الان کجای کار است. */
+    /* استعلام از شاهکار و ثبت‌احوال چند ثانیه طول می‌کشد و بیرون از دست
+       ماست. به‌جای اسپینر خاموش، بگو الان کجای کار است. */
     setBusyStep('در حال بررسی…');
     try {
-      /* احراز هویت: شاهکار (کد ملی ↔ موبایلِ تأییدشده) + تطبیقِ نام با ثبت‌احوال */
+      /* احراز هویت: شاهکار (کد ملی ↔ موبایل تأییدشده) + تطبیق نام با ثبت‌احوال */
       const idv = await apiVerifyIdentity(form.phone, form.nationalId.trim(), {
         birthDate: form.birthDate.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(),
       });
-      if (!idv.ok) { setLoading(false); setBusyStep(''); setError(idv.message || 'استعلامِ احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
-      if (!idv.match) { setLoading(false); setBusyStep(''); setError(idv.message || 'اطلاعاتِ هویتی با کد ملی مطابقت ندارد'); return; }
+      if (!idv.ok) { setLoading(false); setBusyStep(''); setError(idv.message || 'استعلام احراز هویت ناموفق بود؛ دوباره تلاش کنید'); return; }
+      if (!idv.match) { setLoading(false); setBusyStep(''); setError(idv.message || 'اطلاعات هویتی با کد ملی مطابقت ندارد'); return; }
 
       setBusyStep('ساخت حساب…');
       const { data } = await api.post('/auth/register', {
@@ -276,11 +276,11 @@ export default function RegisterPage() {
     }
   };
 
-  /* فیلدِ استاندارد — تابعِ رندر (نه کامپوننت) تا با هر تایپ remount نشود و فوکِس نپرد */
+  /* فیلد استاندارد — تابع رندر (نه کامپوننت) تا با هر تایپ remount نشود و فوکس نپرد */
   const field = (
     k: keyof FormData, label: string, icon: React.ReactNode,
     opts: { type?: string; placeholder: string; inputMode?: 'numeric'; maxLength?: number; ltr?: boolean;
-      /* ارقام را فارسی نشان بده — مقدارِ ذخیره‌شده همچنان لاتین می‌ماند */
+      /* ارقام را فارسی نشان بده — مقدار ذخیره‌شده همچنان لاتین می‌ماند */
       faDigits?: boolean;
       reveal?: { shown: boolean; toggle: () => void } },
   ) => (
@@ -351,7 +351,7 @@ export default function RegisterPage() {
         .au-btn:not(:disabled):active { transform: scale(0.985); }
         .au-btn:disabled { opacity: .65; cursor: not-allowed; }
 
-        /* استپرِ سگمنتی */
+        /* استپر سگمنتی */
         .au-steps { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
         .au-step { flex: 1; }
         .au-step .t { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 800; margin-bottom: 7px; }
@@ -362,12 +362,12 @@ export default function RegisterPage() {
           transition: width .45s cubic-bezier(.22,1,.36,1); }
 
         .au-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        /* آیتم‌های گرید باید بتوانند از عرضِ ذاتیِ input کوچک‌تر شوند */
+        /* آیتم‌های گرید باید بتوانند از عرض ذاتی input کوچک‌تر شوند */
         .au-row2 > div { min-width: 0; }
         .au-wrap { min-width: 0; }
         @media (max-width: 420px) { .au-row2 { grid-template-columns: 1fr; } }
 
-        /* ── خطای مرکزی: وسطِ صفحه، جلوی چشمِ کاربر ── */
+        /* ── خطای مرکزی: وسط صفحه، جلوی چشم کاربر ── */
         @keyframes auFade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes auPop  { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
         .au-erlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
@@ -388,7 +388,7 @@ export default function RegisterPage() {
         .au-erbox button:hover { background: rgba(178,59,46,0.11); }
       `}</style>
 
-      {/* خطا — وسطِ صفحه */}
+      {/* خطا — وسط صفحه */}
       {error && (
         <div className="au-erlay" onClick={() => setError('')} role="alert">
           <div className="au-erbox" onClick={e => e.stopPropagation()}>
@@ -429,7 +429,7 @@ export default function RegisterPage() {
           </h1>
           <div style={{ width: 46, height: 3, borderRadius: 2, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'auX .5s .2s ease both', marginBottom: 10 }} />
           <p style={{ fontSize: 13, color: MUT, margin: '0 0 22px', lineHeight: 1.8 }}>
-            {otpOpen ? `کدِ ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
+            {otpOpen ? `کد ۵ رقمی به شماره ${toFa(form.phone)} پیامک شد` : step === 1 ? 'ابتدا شماره موبایل خود را وارد کنید' : `کاربر گرامی ${toFa(form.phone)} اکنون اطلاعات حساب را کامل کنید`}
           </p>
 
           {/* ── مرحله ۱: شماره ── */}
@@ -438,9 +438,9 @@ export default function RegisterPage() {
               {field('phone', 'شماره موبایل', <Phone size={16} />, { type: 'tel', placeholder: 'مثال: ۰۹۱۲۱۲۳۴۵۶۷', inputMode: 'numeric', maxLength: 11, ltr: true, faDigits: true })}
               <p style={{ fontSize: 11.5, color: MUT, margin: '2px 0 18px', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0 }} />
-                یک کدِ تأیید با پیامک به این شماره فرستاده می‌شود
+                یک کد تأیید با پیامک به این شماره فرستاده می‌شود
               </p>
-              {/* شماره از قبل حساب دارد ⇒ به‌جای ارسالِ پیامک، مسیرِ ورود */}
+              {/* شماره از قبل حساب دارد ⇒ به‌جای ارسال پیامک، مسیر ورود */}
               {phoneTaken && (
                 <div style={{ background: 'rgba(199,166,106,0.09)', border: '1px solid rgba(199,166,106,0.34)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
                   <div style={{ fontSize: 13, fontWeight: 800, color: TEXT, marginBottom: 6 }}>این شماره قبلاً ثبت‌نام کرده است</div>
@@ -460,7 +460,7 @@ export default function RegisterPage() {
               )}
 
               <button className="au-btn" onClick={handleContinue} disabled={loading || phoneTaken}>
-                {loading ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> در حال ارسالِ کد…</>) : (<>ادامه <ArrowLeft size={15} /></>)}
+                {loading ? (<><span style={{ width: 17, height: 17, border: '2px solid rgba(36,27,8,0.25)', borderTop: '2px solid #241B08', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> در حال ارسال کد…</>) : (<>ادامه <ArrowLeft size={15} /></>)}
               </button>
             </div>
           )}
@@ -485,11 +485,11 @@ export default function RegisterPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
                 <button onClick={handleResend} disabled={resendIn > 0 || otpBusy}
                   style={{ background: 'none', border: 'none', cursor: resendIn > 0 ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, color: resendIn > 0 ? MUT : GOLD_D, padding: 0 }}>
-                  {resendIn > 0 ? `ارسالِ مجدد تا ${resendIn.toLocaleString('fa-IR')} ثانیه` : 'ارسالِ مجددِ کد'}
+                  {resendIn > 0 ? `ارسال مجدد تا ${resendIn.toLocaleString('fa-IR')} ثانیه` : 'ارسال مجدد کد'}
                 </button>
                 <button onClick={() => { setOtpOpen(false); setError(''); }} disabled={otpBusy}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, color: SEC, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <ArrowRight size={13} /> ویرایشِ شماره
+                  <ArrowRight size={13} /> ویرایش شماره
                 </button>
               </div>
             </div>
@@ -504,8 +504,8 @@ export default function RegisterPage() {
               </div>
               <div className="au-row2">
                 {field('nationalId', 'کد ملی', <Fingerprint size={16} />, { type: 'tel', placeholder: 'کد ملی (۱۰ رقمی)', inputMode: 'numeric', maxLength: 10, ltr: true, faDigits: true })}
-                {/* تاریخ تولد فقط از تقویم انتخاب می‌شود — تایپِ دستی منبعِ
-                    اشتباه بود (ماه و روزِ جابه‌جا، سالِ غلط) و استعلامِ
+                {/* تاریخ تولد فقط از تقویم انتخاب می‌شود — تایپ دستی منبع
+                    اشتباه بود (ماه و روز جابه‌جا، سال غلط) و استعلام
                     ثبت‌احوال را بی‌دلیل رد می‌کرد. */}
                 <div style={{ marginBottom: 14 }}>
                   <JalaliDatePicker
@@ -528,7 +528,7 @@ export default function RegisterPage() {
                   کیبورد شما فارسی است — لطفاً زبان کیبورد را انگلیسی کنید.
                 </p>
               )}
-              {/* شرط‌های رمز — حین تایپ سبز می‌شوند تا کاربر بعد از زدنِ دکمه غافلگیر نشود */}
+              {/* شرط‌های رمز — حین تایپ سبز می‌شوند تا کاربر بعد از زدن دکمه غافلگیر نشود */}
               <div style={{
                 display: 'grid', gap: 7, margin: '-6px 0 14px',
                 gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))',
@@ -571,7 +571,7 @@ export default function RegisterPage() {
                 </p>
               )}
 
-              {/* پذیرش قوانین — بدون تیکِ آن، ثبت‌نام انجام نمی‌شود */}
+              {/* پذیرش قوانین — بدون تیک آن، ثبت‌نام انجام نمی‌شود */}
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, cursor: 'pointer', margin: '2px 0 14px' }}>
                 <input type="checkbox" checked={acceptedTerms}
                   onChange={e => {

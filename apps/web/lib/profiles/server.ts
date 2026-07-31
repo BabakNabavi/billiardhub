@@ -1,11 +1,11 @@
 /* ─────────────────────────────────────────────────────────────
-   پروفایل‌های نقش‌ها روی سرور (جدولِ profiles).
+   پروفایل‌های نقش‌ها روی سرور (جدول profiles).
 
-   بدنه‌ی پروفایل jsonb است تا فرم‌های موجود همان شکلِ داده‌ی خودشان
-   را بفرستند. تنها کارِ اضافه‌ی این لایه، بیرون‌کشیدنِ عکس‌هاست:
+   بدنه‌ی پروفایل jsonb است تا فرم‌های موجود همان شکل داده‌ی خودشان
+   را بفرستند. تنها کار اضافه‌ی این لایه، بیرون‌کشیدن عکس‌هاست:
    فرم‌ها عکس را به‌صورت data:URL می‌سازند و اگر همان را در jsonb
    بگذاریم، هر پروفایل چند مگابایت می‌شود. این‌جا هر data:URL یک‌بار
-   به Storage آپلود و با نشانیِ عمومی‌اش جایگزین می‌شود.
+   به Storage آپلود و با نشانی عمومی‌اش جایگزین می‌شود.
    ───────────────────────────────────────────────────────────── */
 
 import { getSupabaseServer } from '../supabase-server'
@@ -53,7 +53,7 @@ export function toProfile(r: DbRow): ProfileRow {
   }
 }
 
-/* ── آپلودِ عکس‌های data:URL ─────────────────────────────────── */
+/* ── آپلود عکس‌های data:URL ─────────────────────────────────── */
 
 const DATA_URL = /^data:(image\/[a-z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/i
 const EXT: Record<string, string> = {
@@ -63,15 +63,15 @@ const EXT: Record<string, string> = {
 
 let uploadSeq = 0
 
-/* امضای بایتیِ قالب‌های مجاز. اعلامِ نوع در خودِ data:URL حرفِ کاربر است
-   و قابلِ جعل؛ این‌جا خودِ بایت‌ها سنجیده می‌شوند. */
+/* امضای بایتی قالب‌های مجاز. اعلام نوع در خود data:URL حرف کاربر است
+   و قابل جعل؛ این‌جا خود بایت‌ها سنجیده می‌شوند. */
 function sniff(b: Buffer): string | null {
   if (b.length < 12) return null
   if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg'
   if (b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png'
   if (b.subarray(0, 3).toString('latin1') === 'GIF') return 'image/gif'
   if (b.subarray(0, 4).toString('latin1') === 'RIFF' && b.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp'
-  /* AVIF/HEIF: جعبه‌ی ftyp با برندِ avif */
+  /* AVIF/HEIF: جعبه‌ی ftyp با برند avif */
   if (b.subarray(4, 8).toString('latin1') === 'ftyp' && b.subarray(8, 12).toString('latin1').startsWith('avi')) return 'image/avif'
   return null
 }
@@ -80,12 +80,12 @@ async function uploadDataUrl(value: string, prefix: string): Promise<string> {
   const m = DATA_URL.exec(value)
   if (!m) return value
   const bytes = Buffer.from(m[2]!, 'base64')
-  if (bytes.byteLength > MAX_IMAGE_BYTES) return ''   // عکسِ بیش‌ازحد بزرگ کنار گذاشته می‌شود
+  if (bytes.byteLength > MAX_IMAGE_BYTES) return ''   // عکس بیش‌ازحد بزرگ کنار گذاشته می‌شود
 
-  /* نوعِ واقعی از روی بایت‌ها، نه از روی برچسبِ data:URL.
+  /* نوع واقعی از روی بایت‌ها، نه از روی برچسب data:URL.
      الگوی قبلی هر image/* را می‌پذیرفت — از جمله image/svg+xml — و آن را
-     با همان contentType در باکتِ عمومی می‌گذاشت؛ یعنی هر کسی می‌توانست
-     یک SVGِ حاوی اسکریپت را به‌عنوانِ «عکسِ پروفایل» بالا بدهد. */
+     با همان contentType در باکت عمومی می‌گذاشت؛ یعنی هر کسی می‌توانست
+     یک SVG حاوی اسکریپت را به‌عنوان «عکس پروفایل» بالا بدهد. */
   const mime = sniff(bytes)
   if (!mime || !EXT[mime]) return ''
 
@@ -99,7 +99,7 @@ async function uploadDataUrl(value: string, prefix: string): Promise<string> {
   return data.publicUrl
 }
 
-/** هر data:URL درونِ داده را (در هر عمقی) به Storage منتقل می‌کند */
+/** هر data:URL درون داده را (در هر عمقی) به Storage منتقل می‌کند */
 export async function offloadImages(value: unknown, prefix: string): Promise<unknown> {
   if (typeof value === 'string') {
     return value.startsWith('data:image/') ? await uploadDataUrl(value, prefix) : value
@@ -108,7 +108,7 @@ export async function offloadImages(value: unknown, prefix: string): Promise<unk
     const out: unknown[] = []
     for (const item of value) {
       const v = await offloadImages(item, prefix)
-      /* آپلودِ ناموفق ⇒ رشته‌ی خالی؛ در آرایه‌ی عکس‌ها جایی ندارد */
+      /* آپلود ناموفق ⇒ رشته‌ی خالی؛ در آرایه‌ی عکس‌ها جایی ندارد */
       if (v !== '') out.push(v)
     }
     return out
@@ -163,14 +163,14 @@ export interface SaveInput {
   data: Record<string, unknown>
   licenseNumber?: string | null
   licenseUrl?: string | null
-  /** ادمین می‌تواند وضعیت را عوض کند؛ صاحبِ پروفایل نه */
+  /** ادمین می‌تواند وضعیت را عوض کند؛ صاحب پروفایل نه */
   status?: ProfileRow['status']
 }
 
 export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   const existing = await getProfileByOwner(input.kind, input.ownerId)
 
-  /* نامک تغییر نمی‌کند — نشانیِ عمومی که یک‌بار منتشر شد باید بماند */
+  /* نامک تغییر نمی‌کند — نشانی عمومی که یک‌بار منتشر شد باید بماند */
   const slug = existing?.slug ?? input.slug
 
   const clean = await offloadImages(input.data, `profiles/${input.kind}/${input.ownerId}`) as Record<string, unknown>
@@ -197,7 +197,7 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
   return toProfile(data as DbRow)
 }
 
-/** تصمیمِ ادمین — تأیید، رد، تیکِ آبی و تأییدِ جواز */
+/** تصمیم ادمین — تأیید، رد، تیک آبی و تأیید جواز */
 export async function reviewProfile(id: string, patch: {
   status?: ProfileRow['status']
   verified?: boolean

@@ -1,6 +1,6 @@
 'use client'
 
-/* آپلودِ ویدیو + ساختِ خودکارِ کانال (مثل یوتیوب) — فقط کاربرِ لاگین‌کرده.
+/* آپلود ویدیو + ساخت خودکار کانال (مثل یوتیوب) — فقط کاربر لاگین‌کرده.
    مدت ویدیو و تامبنیل خودکار از فریم گرفته می‌شوند؛ آپلود روی Supabase Storage. */
 
 import { useEffect, useRef, useState } from 'react'
@@ -68,7 +68,7 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     setErr(''); setChLoaded(false)
     fetchMyChannel(ownerKey).then(c => {
       setChannel(c); setChLoaded(true)
-      /* نام از پروفایل پیشنهاد می‌شود؛ هندل را خودِ کاربر انتخاب می‌کند */
+      /* نام از پروفایل پیشنهاد می‌شود؛ هندل را خود کاربر انتخاب می‌کند */
       if (!c) { setChName(`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()); setChHandle('') }
     })
   }, [open, ownerKey, user])

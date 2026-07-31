@@ -1,4 +1,4 @@
-/* اعتبارسنجی کد ملی ایران (چک‌سام استاندارد) — منبعِ واحد */
+/* اعتبارسنجی کد ملی ایران (چک‌سام استاندارد) — منبع واحد */
 export function isValidNationalId(v: string): boolean {
   if (!/^\d{10}$/.test(v)) return false
   if (/^(\d)\1{9}$/.test(v)) return false

@@ -3,10 +3,10 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
-/* شناسه‌ی محصول در دیتابیس uuid است. اگر چیزِ دیگری بیاید، PostgREST
-   خطای 22P02 می‌دهد و قبلاً همان متنِ خام («invalid input syntax for
-   type uuid…») با کدِ ۵۰۰ به کاربر برمی‌گشت — هم نشتِ اطلاعاتِ داخلی
-   بود، هم از نظرِ معنایی غلط: شناسه‌ی بی‌شکل یعنی «پیدا نشد»، نه
+/* شناسه‌ی محصول در دیتابیس uuid است. اگر چیز دیگری بیاید، PostgREST
+   خطای 22P02 می‌دهد و قبلاً همان متن خام («invalid input syntax for
+   type uuid…») با کد ۵۰۰ به کاربر برمی‌گشت — هم نشت اطلاعات داخلی
+   بود، هم از نظر معنایی غلط: شناسه‌ی بی‌شکل یعنی «پیدا نشد»، نه
    «خطای سرور». حالا پیش از رفتن به دیتابیس بررسی می‌شود. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -27,7 +27,7 @@ export async function GET(
       .select('*')
       .eq('id', id)
 
-    /* پیامِ خطای دیتابیس هرگز به کاربر نمی‌رسد؛ فقط در لاگِ سرور می‌ماند */
+    /* پیام خطای دیتابیس هرگز به کاربر نمی‌رسد؛ فقط در لاگ سرور می‌ماند */
     if (error) {
       console.error('[products/:id] db error:', error.message)
       return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Select from '../../../components/ui/Select'
 
-/* ارقامِ فارسی — همه‌ی عددهای این پنل فارسی دیده می‌شوند */
+/* ارقام فارسی — همه‌ی عددهای این پنل فارسی دیده می‌شوند */
 const faNum = (v: string | number) => String(v).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
@@ -123,8 +123,8 @@ export default function CoachDashboardPage() {
   const storyInput = useRef<HTMLInputElement>(null)
 
   /* prefill from the logged-in user; load existing submission if any.
-     مالکیت بر اساسِ user.id است، نه شماره‌ی موبایلِ اختیاری — وگرنه پروفایلی که با
-     شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد و فرم خالی باز می‌شد. رکوردِ قدیمیِ
+     مالکیت بر اساس user.id است، نه شماره‌ی موبایل اختیاری — وگرنه پروفایلی که با
+     شماره‌ی خالی ذخیره شده بود دیگر پیدا نمی‌شد و فرم خالی باز می‌شد. رکورد قدیمی
      بی‌صاحب را همین کاربر تصاحب می‌کند تا داده‌اش برگردد. */
   useEffect(() => {
     if (!_hydrated) return
@@ -146,7 +146,7 @@ export default function CoachDashboardPage() {
       setForm(f => ({ ...f, firstNameFa: user.firstName || '', lastNameFa: user.lastName || '', city: user.city || '', phone: user.phone || '' }))
     }
 
-    /* نسخه‌ی سرور مقدم است. اگر کاربر پروفایلِ محلیِ قدیمی داشت و روی
+    /* نسخه‌ی سرور مقدم است. اگر کاربر پروفایل محلی قدیمی داشت و روی
        سرور نبود، همان‌جا بالا فرستاده می‌شود تا داده‌ی موجود از دست نرود. */
     void (async () => {
       const remote = await fetchMyProfile<Record<string, unknown>>('coach')
@@ -295,9 +295,9 @@ export default function CoachDashboardPage() {
       ownerId: user?.id || '',
       ownerPhone: user?.phone || '',
     }
-    /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند.
+    /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند.
        تا پیش از این فقط localStorage نوشته می‌شد، یعنی پروفایل هیچ‌وقت
-       به دیتابیس نمی‌رسید و پنلِ ادمین آن را نمی‌دید. */
+       به دیتابیس نمی‌رسید و پنل ادمین آن را نمی‌دید. */
     const res = await saveProfileRemote('coach', profile.slug, profile as unknown as Record<string, unknown>,
       { number: '', url: profile.certificate?.url ?? '' })
     if (!res.ok) {
@@ -306,12 +306,12 @@ export default function CoachDashboardPage() {
       return
     }
 
-    /* عکس‌ها روی سرور به نشانیِ Storage تبدیل شده‌اند */
+    /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
     const saved = (res.profile?.data as typeof profile | undefined) ?? profile
     try {
       saveCoachProfile({ ...profile, ...saved })
     } catch {
-      /* کشِ مرورگر پر است — مهم نیست، داده روی سرور ذخیره شده */
+      /* کش مرورگر پر است — مهم نیست، داده روی سرور ذخیره شده */
     }
     setSubmitted(true)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -374,7 +374,7 @@ export default function CoachDashboardPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
           {/* Stories — publishes to the home stories bar immediately, independent of the profile form */}

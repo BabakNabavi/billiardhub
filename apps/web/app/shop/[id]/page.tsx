@@ -56,10 +56,10 @@ function Stars({ r, size = 15 }: { r: number; size?: number }) {
   )
 }
 
-/* آگهیِ کاربر روی سرور uuid دارد، محصولاتِ کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد */
+/* آگهی کاربر روی سرور uuid دارد، محصولات کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد */
 type Detail = Omit<ShopProduct, 'id'> & { id: number | string }
 
-/* رکوردِ جدولِ products → شکلِ ShopProduct تا همین صفحه بتواند نمایشش دهد */
+/* رکورد جدول products → شکل ShopProduct تا همین صفحه بتواند نمایشش دهد */
 function normalizeUserProduct(up: Record<string, unknown>): Detail {
   const num = (v: unknown, d = 0) => {
     const n = Number(v)
@@ -98,9 +98,9 @@ export default function ProductDetailPage() {
     [id]
   )
 
-  /* اگر در کاتالوگِ نمونه نبود، آگهی را از سرور بخوان (و برای آگهی‌های
+  /* اگر در کاتالوگ نمونه نبود، آگهی را از سرور بخوان (و برای آگهی‌های
      قدیمی که هنوز در همین مرورگر مانده‌اند، از localStorage).
-     تا آمدنِ پاسخ «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
+     تا آمدن پاسخ «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
   const [userProduct, setUserProduct] = useState<Detail | null>(null)
   const [checked, setChecked] = useState(false)
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function ProductDetailPage() {
           const j = await r.json()
           if (j?.ad && alive) { setUserProduct(normalizeUserProduct(j.ad)); setChecked(true); return }
         }
-      } catch { /* به مسیرِ محلی برمی‌گردیم */ }
+      } catch { /* به مسیر محلی برمی‌گردیم */ }
       if (!alive) return
       try {
         const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[]
@@ -127,9 +127,9 @@ export default function ProductDetailPage() {
 
   const product: Detail | undefined = staticProduct ?? userProduct ?? undefined
 
-  /* آیا این محصول به یک فروشگاهِ ثبت‌شده تعلق دارد؟
-     محصولاتِ کاتالوگ همیشه فروشگاه دارند؛ آگهیِ کاربرِ عادی فقط وقتی
-     که خودش فروشگاه داشته باشد sellerId می‌گیرد. بدونِ آن، دکمه‌ی
+  /* آیا این محصول به یک فروشگاه ثبت‌شده تعلق دارد؟
+     محصولات کاتالوگ همیشه فروشگاه دارند؛ آگهی کاربر عادی فقط وقتی
+     که خودش فروشگاه داشته باشد sellerId می‌گیرد. بدون آن، دکمه‌ی
      «رفتن به فروشگاه» به صفحه‌ی خالی می‌رسید. */
   const hasStore = !!staticProduct || !!(userProduct && String(userProduct.sellerId ?? '').trim())
 
@@ -279,8 +279,8 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* آگهیِ کاربرِ عادی فروشگاهی ندارد ⇒ فقط راه‌های تماس.
-                  نشانِ «فروشگاه» هم نباید روی آگهیِ شخصی دیده شود. */}
+              {/* آگهی کاربر عادی فروشگاهی ندارد ⇒ فقط راه‌های تماس.
+                  نشان «فروشگاه» هم نباید روی آگهی شخصی دیده شود. */}
               {!hasStore && (
                 <p style={{ fontSize: 11.5, color: TMUT, lineHeight: 1.95, margin: '0 0 12px' }}>
                   این یک آگهی شخصی در بیلیارد بازار است. بیلیارد هاب طرف معامله نیست؛

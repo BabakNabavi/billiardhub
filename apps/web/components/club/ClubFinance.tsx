@@ -1,7 +1,7 @@
 'use client'
 
-/* بخشِ مالیِ داشبوردِ باشگاه — درآمد، موجودی، حسابِ بانکی و تسویه‌ها.
-   داده‌ها فقط از /api/clubs/:id/finance می‌آیند (RBAC سمتِ سرور). */
+/* بخش مالی داشبورد باشگاه — درآمد، موجودی، حساب بانکی و تسویه‌ها.
+   داده‌ها فقط از /api/clubs/:id/finance می‌آیند (RBAC سمت سرور). */
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
@@ -32,7 +32,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
     if (!clubId) return
     try {
       const r = await apiFetch(`/api/clubs/${clubId}/finance`, { credentials: 'include', headers: { }, cache: 'no-store' })
-      if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دریافتِ اطلاعاتِ مالی ممکن نشد'); setLoading(false); return }
+      if (!r.ok) { setErr((await r.json().catch(() => ({})))?.message || 'دریافت اطلاعات مالی ممکن نشد'); setLoading(false); return }
       setD(await r.json()); setErr(''); setLoading(false)
     } catch { setErr('خطا در ارتباط با سرور'); setLoading(false) }
   }, [clubId])
@@ -40,7 +40,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
   useEffect(() => { load() }, [load])
 
   if (loading) return <div style={{ padding: 60, textAlign: 'center', color: MUT }}><Loader2 size={26} style={{ animation: 'cfspin 1s linear infinite' }} /><style>{`@keyframes cfspin{to{transform:rotate(360deg)}}`}</style></div>
-  if (err) return <Empty icon={<AlertCircle size={26} />} title="اطلاعاتِ مالی در دسترس نیست" desc={err} />
+  if (err) return <Empty icon={<AlertCircle size={26} />} title="اطلاعات مالی در دسترس نیست" desc={err} />
   if (!d) return null
 
   const bank = d.bankAccount
@@ -49,66 +49,66 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* ── درآمد ──
-          هر عدد یک زیرنویس دارد. بدونِ آن، «امروز / این هفته / این ماه»
-          معلوم نبود مجموعِ چه چیزی است و از کجا می‌آید. */}
+          هر عدد یک زیرنویس دارد. بدون آن، «امروز / این هفته / این ماه»
+          معلوم نبود مجموع چه چیزی است و از کجا می‌آید. */}
       <section>
         <Head icon={<TrendingUp size={17} style={{ color: FELT }} />} title="درآمد"
-          desc="مجموعِ مبلغِ رزروهای پرداخت‌شده‌ی این باشگاه، پیش از کسرِ کمیسیون." />
+          desc="مجموع مبلغ رزروهای پرداخت‌شده‌ی این باشگاه، پیش از کسر کمیسیون." />
         <div className="cf-grid">
           <Stat label="امروز" value={d.revenue.today} tone="felt" hint="رزروهای پرداخت‌شده‌ی امروز" />
           <Stat label="این هفته" value={d.revenue.week} hint="از شنبه تا امروز" />
-          <Stat label="این ماه" value={d.revenue.month} hint="از اولِ ماهِ جاری" />
-          <Stat label="کلِ درآمد" value={d.revenue.total} strong hint="از آغازِ فعالیتِ باشگاه" />
+          <Stat label="این ماه" value={d.revenue.month} hint="از اول ماه جاری" />
+          <Stat label="کل درآمد" value={d.revenue.total} strong hint="از آغاز فعالیت باشگاه" />
         </div>
       </section>
 
       {/* ── موجودی ── */}
       <section>
-        <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="گردشِ مالی"
-          desc="سهمِ شما از هر رزرو، و سهمِ پلتفرم که به‌صورتِ کمیسیون کسر می‌شود." />
+        <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="گردش مالی"
+          desc="سهم شما از هر رزرو، و سهم پلتفرم که به‌صورت کمیسیون کسر می‌شود." />
         <div className="cf-grid">
-          <Stat label="سهمِ شما — آماده" value={d.balance.available} tone="gold" strong hint="رزروهای انجام‌شده، پس از کسرِ کمیسیون" />
-          <Stat label="سهمِ شما — در جریان" value={d.balance.pending} hint="رزروهایی که هنوز برگزار نشده‌اند" />
+          <Stat label="سهم شما — آماده" value={d.balance.available} tone="gold" strong hint="رزروهای انجام‌شده، پس از کسر کمیسیون" />
+          <Stat label="سهم شما — در جریان" value={d.balance.pending} hint="رزروهایی که هنوز برگزار نشده‌اند" />
           <Stat label="پرداخت‌شده به شما" value={d.balance.totalSettled} hint="آنچه تا امروز به حسابتان رسیده" />
-          <Stat label="کمیسیونِ پلتفرم" value={d.balance.totalCommission} muted hint="سهمِ بیلیارد هاب از رزروها" />
+          <Stat label="کمیسیون پلتفرم" value={d.balance.totalCommission} muted hint="سهم بیلیارد هاب از رزروها" />
         </div>
       </section>
 
       {/* ── رزروها ── */}
       <section>
         <Head icon={<Clock3 size={17} style={{ color: SEC }} />} title="رزروها"
-          desc="تعدادِ رزرو — نه مبلغ." />
+          desc="تعداد رزرو — نه مبلغ." />
         <div className="cf-grid">
           <Stat label="امروز" value={d.bookings.today} count unit="رزرو" />
-          <Stat label="پیشِ‌رو" value={d.bookings.upcoming} count unit="رزرو" />
+          <Stat label="پیش‌رو" value={d.bookings.upcoming} count unit="رزرو" />
           <Stat label="انجام‌شده" value={d.bookings.completed} count unit="رزرو" />
           <Stat label="کنسل‌شده" value={d.bookings.cancelled} count muted unit="رزرو" />
         </div>
       </section>
 
-      {/* ── حسابِ بانکی ──
-          این بخش فقط نمایش است. ثبت و تغییرِ شبا تنها یک‌جا انجام می‌شود —
-          تبِ «اطلاعات» — چون آن‌جا شبا با استعلامِ بانکی و کد ملیِ مالک
-          تطبیق داده می‌شود. فرمِ دومی که این‌جا بود همان شبا را بدونِ هیچ
+      {/* ── حساب بانکی ──
+          این بخش فقط نمایش است. ثبت و تغییر شبا تنها یک‌جا انجام می‌شود —
+          تب «اطلاعات» — چون آن‌جا شبا با استعلام بانکی و کد ملی مالک
+          تطبیق داده می‌شود. فرم دومی که این‌جا بود همان شبا را بدون هیچ
           استعلامی می‌گرفت و کاربر دو جای متفاوت برای یک کار می‌دید. */}
       <section>
-        <Head icon={<Landmark size={17} style={{ color: GOLD_D }} />} title="حسابِ بانکیِ تسویه"
-          action={onEditBank ? <button onClick={onEditBank} style={btnGhost}>{bank ? 'تغییرِ حساب' : 'ثبتِ حساب'}</button> : undefined} />
+        <Head icon={<Landmark size={17} style={{ color: GOLD_D }} />} title="حساب بانکی تسویه"
+          action={onEditBank ? <button onClick={onEditBank} style={btnGhost}>{bank ? 'تغییر حساب' : 'ثبت حساب'}</button> : undefined} />
         <div style={card}>
           {!bank ? (
             <p style={{ fontSize: 13, color: MUT, margin: 0, lineHeight: 2 }}>
-              برای دریافتِ تسویه، شماره شبای خود را در تبِ <b style={{ color: GOLD_D }}>اطلاعات</b> ثبت
-              و با استعلامِ بانکی تأیید کنید. حساب باید به نامِ خودِ صاحبِ باشگاه باشد.
+              برای دریافت تسویه، شماره شبای خود را در تب <b style={{ color: GOLD_D }}>اطلاعات</b> ثبت
+              و با استعلام بانکی تأیید کنید. حساب باید به نام خود صاحب باشگاه باشد.
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Row label="صاحبِ حساب" value={bank.account_holder_name || '—'} />
+              <Row label="صاحب حساب" value={bank.account_holder_name || '—'} />
               <Row label="بانک" value={bank.bank_name || '—'} />
               <Row label="شماره شبا" value={bank.iban || '—'} mono />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: `1px solid ${LINE}` }}>
                 <span style={{ fontSize: 12, color: MUT }}>وضعیت</span>
                 <span style={{ marginInlineStart: 'auto', ...badge(vs) }}>
-                  {vs === 'VERIFIED' ? <><ShieldCheck size={12} /> تأییدشده</> : vs === 'REJECTED' ? <><X size={12} /> رد شده</> : <><Clock3 size={12} /> در انتظارِ تأیید</>}
+                  {vs === 'VERIFIED' ? <><ShieldCheck size={12} /> تأییدشده</> : vs === 'REJECTED' ? <><X size={12} /> رد شده</> : <><Clock3 size={12} /> در انتظار تأیید</>}
                 </span>
               </div>
               {vs === 'REJECTED' && bank.rejection_reason && (
@@ -123,7 +123,7 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       <section>
         <Head icon={<ArrowDownToLine size={17} style={{ color: FELT }} />} title="تسویه‌ها" />
         {d.settlements.length === 0 ? (
-          <Empty icon={<Receipt size={24} />} title="هنوز تسویه‌ای انجام نشده" desc="پس از تأییدِ حسابِ بانکی، تسویه‌ها اینجا نمایش داده می‌شوند." />
+          <Empty icon={<Receipt size={24} />} title="هنوز تسویه‌ای انجام نشده" desc="پس از تأیید حساب بانکی، تسویه‌ها اینجا نمایش داده می‌شوند." />
         ) : (
           <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
             {d.settlements.map((s, i) => (
@@ -205,9 +205,9 @@ const settleBadge = (s: string): React.CSSProperties => ({
   color: s === 'COMPLETED' ? FELT : s === 'FAILED' ? '#B23B2E' : GOLD_D,
   background: s === 'COMPLETED' ? 'rgba(14,122,56,0.1)' : s === 'FAILED' ? 'rgba(178,59,46,0.09)' : 'rgba(199,166,106,0.13)',
 })
-const settleLabel = (s: string) => s === 'COMPLETED' ? 'واریز شد' : s === 'PROCESSING' ? 'در حالِ انجام' : s === 'FAILED' ? 'ناموفق' : 'در انتظار'
+const settleLabel = (s: string) => s === 'COMPLETED' ? 'واریز شد' : s === 'PROCESSING' ? 'در حال انجام' : s === 'FAILED' ? 'ناموفق' : 'در انتظار'
 const faDate = (iso: string) => { try { return new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'long' }).format(new Date(iso)) } catch { return '—' } }
 
-/* `BankModal` و `Field` حذف شدند: ثبتِ شبا تنها از تبِ «اطلاعات» انجام
-   می‌شود، جایی که با استعلامِ بانکی و کد ملیِ مالک تطبیق داده می‌شود.
-   نگه‌داشتنِ فرمِ دوم یعنی مسیری برای ثبتِ شبای تأییدنشده. */
+/* `BankModal` و `Field` حذف شدند: ثبت شبا تنها از تب «اطلاعات» انجام
+   می‌شود، جایی که با استعلام بانکی و کد ملی مالک تطبیق داده می‌شود.
+   نگه‌داشتن فرم دوم یعنی مسیری برای ثبت شبای تأییدنشده. */

@@ -1,5 +1,5 @@
-/* تستِ رندرِ واقعیِ شیتِ «افزودن به صفحه‌ی اصلی» در مرورگرِ واقعی، با
-   UA و ابعادِ دستگاه‌های iOS. سرورِ بیلدشده باید روی BASE بالا باشد.
+/* تست رندر واقعی شیت «افزودن به صفحه‌ی اصلی» در مرورگر واقعی، با
+   UA و ابعاد دستگاه‌های iOS. سرور بیلدشده باید روی BASE بالا باشد.
        node scripts/test-a2hs-ui.mjs [BASE] */
 
 import puppeteer from 'puppeteer-core'
@@ -32,23 +32,23 @@ const browser = await puppeteer.launch({
   args: ['--no-sandbox', '--disable-dev-shm-usage'],
 })
 
-/* رفتارِ گیت روی دستگاه‌های غیرِ iOS */
-console.log('\n■ گیت — دستگاه‌های غیرِ iOS (نباید چیزی نشان دهد)')
+/* رفتار گیت روی دستگاه‌های غیر iOS */
+console.log('\n■ گیت — دستگاه‌های غیر iOS (نباید چیزی نشان دهد)')
 for (const [label, ua, w, h] of [
   ['اندروید کروم', 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36', 412, 915],
   ['دسکتاپ کروم', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', 1440, 900],
-  ['کرومِ iOS',   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0 Mobile/15E148 Safari/604.1', 390, 844],
+  ['کروم iOS',   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0 Mobile/15E148 Safari/604.1', 390, 844],
 ]) {
   const p = await browser.newPage()
   await p.setUserAgent(ua)
   await p.setViewport({ width: w, height: h })
   await p.goto(BASE + '/', { waitUntil: 'networkidle2', timeout: 60000 })
-  await new Promise(r => setTimeout(r, 3200))          // بیش از تأخیرِ ۱۶۰۰ms
+  await new Promise(r => setTimeout(r, 3200))          // بیش از تأخیر ۱۶۰۰ms
   t(label, (await p.$$('.bh-a2hs-sheet')).length === 0, 'شیت ظاهر شد!')
   await p.close()
 }
 
-/* چیدمانِ شیت روی دستگاه‌های iOS */
+/* چیدمان شیت روی دستگاه‌های iOS */
 for (const d of DEVICES) {
   console.log(`\n■ ${d.name}  (${d.w}×${d.h})`)
   const p = await browser.newPage()
@@ -90,9 +90,9 @@ for (const d of DEVICES) {
   if (!r.found) { t('شیت رندر شد', false, 'پیدا نشد'); await p.close(); continue }
 
   t('شیت رندر شد', true)
-  t('بدونِ اسکرولِ افقی', r.docScrollW <= r.docClientW && r.bodyScrollW <= r.docClientW,
+  t('بدون اسکرول افقی', r.docScrollW <= r.docClientW && r.bodyScrollW <= r.docClientW,
      `scrollW=${r.docScrollW} clientW=${r.docClientW} body=${r.bodyScrollW}`)
-  t('داخلِ عرضِ صفحه', r.left >= 0 && r.right <= r.vw + 1, `left=${r.left} right=${r.right} vw=${r.vw}`)
+  t('داخل عرض صفحه', r.left >= 0 && r.right <= r.vw + 1, `left=${r.left} right=${r.right} vw=${r.vw}`)
   t('بالای شیت از کادر بیرون نزده', r.top >= -1, `top=${r.top}`)
   t('ارتفاع در viewport جا می‌شود', r.height <= r.vh, `h=${r.height} vh=${r.vh}${r.sheetScrolls ? ' (خودش اسکرول دارد)' : ''}`)
   t('هر ۳ مرحله نمایش داده شد', r.steps === 3, `steps=${r.steps}`)
@@ -105,18 +105,18 @@ for (const d of DEVICES) {
 }
 
 /* چرخه‌ی رد کردن: «بعداً» ⇒ رفرش ⇒ نباید برگردد */
-console.log('\n■ چرخه‌ی رد کردن روی مرورگرِ واقعی')
+console.log('\n■ چرخه‌ی رد کردن روی مرورگر واقعی')
 {
   const p = await browser.newPage()
   await p.setUserAgent(IOS_UA)
   await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true })
   /* عمداً `evaluateOnNewDocument` نیست: آن روی *هر* بارگذاری اجرا می‌شود و
-     رفرشِ همین تست را هم پاک می‌کرد — یعنی تست هرگز چیزی را نمی‌سنجید. */
+     رفرش همین تست را هم پاک می‌کرد — یعنی تست هرگز چیزی را نمی‌سنجید. */
   await p.goto(BASE + '/', { waitUntil: 'networkidle2', timeout: 60000 })
   await p.evaluate(() => { try { localStorage.clear() } catch {} })
   await p.reload({ waitUntil: 'networkidle2' })
   await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 })
-  t('بارِ اول ظاهر شد', true)
+  t('بار اول ظاهر شد', true)
 
   await p.evaluate(() => [...document.querySelectorAll('.bh-a2hs-ghost')][0].click())
   await new Promise(r => setTimeout(r, 300))
@@ -129,7 +129,7 @@ console.log('\n■ چرخه‌ی رد کردن روی مرورگرِ واقعی'
   await new Promise(r => setTimeout(r, 3200))
   t('بعد از رفرش دوباره ظاهر نشد', (await p.$$('.bh-a2hs-sheet')).length === 0)
 
-  /* «متوجه شدم» ⇒ سکوتِ بلند */
+  /* «متوجه شدم» ⇒ سکوت بلند */
   await p.evaluate(() => localStorage.removeItem('bh_a2hs_ios'))
   await p.reload({ waitUntil: 'networkidle2' })
   await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 })
@@ -141,7 +141,7 @@ console.log('\n■ چرخه‌ی رد کردن روی مرورگرِ واقعی'
 }
 
 /* standalone ⇒ هرگز */
-console.log('\n■ حالتِ نصب‌شده (standalone)')
+console.log('\n■ حالت نصب‌شده (standalone)')
 for (const [label, script] of [
   ['navigator.standalone = true', () => Object.defineProperty(navigator, 'standalone', { get: () => true, configurable: true })],
   ['display-mode: standalone', () => {
@@ -188,10 +188,10 @@ for (const route of ['/login', '/register']) {
   t('Escape می‌بندد', (await p.$$('.bh-a2hs-sheet')).length === 0)
 
   const hydration = errs.filter(e => /hydrat|did not match|Text content does not/i.test(e))
-  t('بدونِ خطای hydration', hydration.length === 0, hydration.join(' | '))
-  t('بدونِ خطای کنسولِ مربوط به این قابلیت',
+  t('بدون خطای hydration', hydration.length === 0, hydration.join(' | '))
+  t('بدون خطای کنسول مربوط به این قابلیت',
      errs.filter(e => /a2hs|AddToHome/i.test(e)).length === 0, errs.join(' | '))
-  if (errs.length) console.log('      (خطاهای نامرتبطِ صفحه: ' + errs.length + ')')
+  if (errs.length) console.log('      (خطاهای نامرتبط صفحه: ' + errs.length + ')')
   await p.close()
 }
 

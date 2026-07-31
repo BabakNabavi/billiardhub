@@ -1,11 +1,11 @@
 /* ─────────────────────────────────────────────────────────────
-   تعریفِ چهار نوعِ محتوا در یک جا — اخبار، رویدادها، رنکینگ و رسانه.
+   تعریف چهار نوع محتوا در یک جا — اخبار، رویدادها، رنکینگ و رسانه.
 
    هر چهار صفحه‌ی ادمین یک الگو دارند (فهرست، ساخت، ویرایش، حذف)، پس
-   به‌جای چهار مسیرِ تکراری، یک مسیرِ عمومی با همین نقشه کار می‌کند.
+   به‌جای چهار مسیر تکراری، یک مسیر عمومی با همین نقشه کار می‌کند.
 
-   نکته‌ی امنیتی: فهرستِ ستون‌ها این‌جا بسته است و هرچه در بدنه‌ی
-   درخواست بیاید ولی در این فهرست نباشد دور ریخته می‌شود. بدونِ آن،
+   نکته‌ی امنیتی: فهرست ستون‌ها این‌جا بسته است و هرچه در بدنه‌ی
+   درخواست بیاید ولی در این فهرست نباشد دور ریخته می‌شود. بدون آن،
    یک PATCH می‌توانست `views` یا `created_at` را هم دست‌کاری کند.
    ───────────────────────────────────────────────────────────── */
 
@@ -15,7 +15,7 @@ interface ContentSpec {
   table: string
   /* ستون‌هایی که ادمین می‌تواند بنویسد */
   writable: string[]
-  /* ستونِ مرتب‌سازیِ پیش‌فرض و جهتش */
+  /* ستون مرتب‌سازی پیش‌فرض و جهتش */
   orderBy: string
   ascending: boolean
   /* ستون‌های عددی — رشته‌ی ورودی باید عدد شود */
@@ -62,7 +62,7 @@ export const CONTENT: Record<ContentKind, ContentSpec> = {
 export const isContentKind = (v: string): v is ContentKind =>
   Object.prototype.hasOwnProperty.call(CONTENT, v)
 
-/** فقط ستون‌های مجاز، با نوعِ درست — ورودیِ ناشناخته دور ریخته می‌شود */
+/** فقط ستون‌های مجاز، با نوع درست — ورودی ناشناخته دور ریخته می‌شود */
 export function sanitize(kind: ContentKind, body: Record<string, unknown>): Record<string, unknown> {
   const spec = CONTENT[kind]
   const out: Record<string, unknown> = {}
@@ -82,7 +82,7 @@ export function sanitize(kind: ContentKind, body: Record<string, unknown>): Reco
     }
     if (typeof v === 'boolean' || v === null) { out[col] = v; continue }
 
-    /* رشته‌ی خالی روی ستونِ تاریخ باعثِ خطای Postgres می‌شود */
+    /* رشته‌ی خالی روی ستون تاریخ باعث خطای Postgres می‌شود */
     const s = String(v ?? '').trim()
     out[col] = s === '' ? null : s.slice(0, 20_000)
   }

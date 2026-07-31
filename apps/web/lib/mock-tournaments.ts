@@ -99,7 +99,7 @@ export function formatFee(fee: number): string {
 // SAMPLE_PLAYERS / SAMPLE_TOURNAMENTS / SAMPLE_REGISTRATIONS /
 // SAMPLE_LIVE_BRACKET / BRACKET_TEMPLATES پاک شدند.
 //
-// این آرایه‌ها فقط «داده‌ی آزمایشی» نبودند: صفحه‌های واقعیِ سایت از
+// این آرایه‌ها فقط «داده‌ی آزمایشی» نبودند: صفحه‌های واقعی سایت از
 // آن‌ها می‌خواندند، پس کاربر باشگاه و مسابقه و بازیکنی می‌دید که وجود
 // نداشتند. هر مصرف‌کننده حالا از API می‌خواند:
 //   مسابقات → lib/tournaments/client.ts

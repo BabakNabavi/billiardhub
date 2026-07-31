@@ -1,19 +1,19 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   ثبتِ کارتِ بانکیِ باشگاه — با استعلامِ واقعی.
+   ثبت کارت بانکی باشگاه — با استعلام واقعی.
 
-   پیش از این، شماره کارت و «نام صاحب حساب» دو فیلدِ متنیِ آزاد بودند و
-   هرچه تایپ می‌شد بی‌هیچ بررسی ذخیره می‌شد؛ یعنی می‌شد کارتِ شخصِ
-   دیگری را جای کارتِ خود ثبت کرد.
+   پیش از این، شماره کارت و «نام صاحب حساب» دو فیلد متنی آزاد بودند و
+   هرچه تایپ می‌شد بی‌هیچ بررسی ذخیره می‌شد؛ یعنی می‌شد کارت شخص
+   دیگری را جای کارت خود ثبت کرد.
 
    حالا زنجیره‌ی اثبات که از قبل در `/api/bank/card-to-iban` وجود داشت
    ولی هیچ‌جا صدا زده نمی‌شد، این‌جا اجرا می‌شود:
-     Luhn محلی → CardMatch (کارت مالِ همین کد ملی؟) → CardToIban (شبا و
-     نامِ دارنده) → IbanMatch (مقصدِ واقعیِ پول هم مالِ همین کد ملی؟)
+     Luhn محلی → CardMatch (کارت مال همین کد ملی؟) → CardToIban (شبا و
+     نام دارنده) → IbanMatch (مقصد واقعی پول هم مال همین کد ملی؟)
 
-   نام و شبا از خودِ سرویس می‌آیند و ورودیِ کاربر نیستند — پس قابلِ
-   دست‌کاری هم نیستند. در پایان یک تأییدِ صریح از صاحبِ حساب گرفته
+   نام و شبا از خود سرویس می‌آیند و ورودی کاربر نیستند — پس قابل
+   دست‌کاری هم نیستند. در پایان یک تأیید صریح از صاحب حساب گرفته
    می‌شود، چون پول به همین شبا می‌رود.
    ───────────────────────────────────────────────────────────── */
 
@@ -57,7 +57,7 @@ export default function BankCardVerify({ clubId, value, onChange }: {
       })
       const j = await r.json().catch(() => ({} as Record<string, unknown>))
       if (!r.ok || j.match === false || !j.iban) {
-        setErr(String(j.message ?? 'استعلامِ کارت ناموفق بود'))
+        setErr(String(j.message ?? 'استعلام کارت ناموفق بود'))
         onChange(null)
         return
       }
@@ -69,7 +69,7 @@ export default function BankCardVerify({ clubId, value, onChange }: {
         confirmed: false,
       })
     } catch {
-      setErr('خطا در ارتباط با سرویسِ استعلام')
+      setErr('خطا در ارتباط با سرویس استعلام')
       onChange(null)
     } finally { setBusy(false) }
   }
@@ -129,10 +129,10 @@ export default function BankCardVerify({ clubId, value, onChange }: {
           border: '1px solid rgba(14,122,56,0.25)', borderRadius: 12, padding: '12px 14px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, color: FELT, fontSize: 12.5, fontWeight: 800 }}>
-            <ShieldCheck size={14} /> کارت تأیید شد و به نامِ شماست
+            <ShieldCheck size={14} /> کارت تأیید شد و به نام شماست
           </div>
 
-          {/* هر سه از سرویس آمده‌اند — قابلِ ویرایش نیستند */}
+          {/* هر سه از سرویس آمده‌اند — قابل ویرایش نیستند */}
           <div style={box}>
             <span style={{ fontSize: 12.5, color: MUT }}>نام صاحب حساب</span>
             <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{value.ownerName || '—'}</span>
@@ -158,7 +158,7 @@ export default function BankCardVerify({ clubId, value, onChange }: {
               onChange={e => onChange({ ...value, confirmed: e.target.checked })}
               style={{ width: 16, height: 16, accentColor: '#C7A66A', flexShrink: 0, marginTop: 1 }} />
             <span style={{ fontSize: 12.5, color: INK, lineHeight: 1.9 }}>
-              اطلاعات بانکیِ بالا را بررسی کردم و درست است. تسویه‌ی درآمدِ رزروها به همین شبا انجام شود.
+              اطلاعات بانکی بالا را بررسی کردم و درست است. تسویه‌ی درآمد رزروها به همین شبا انجام شود.
             </span>
           </label>
         </div>
@@ -166,8 +166,8 @@ export default function BankCardVerify({ clubId, value, onChange }: {
 
       {!verified && !err && (
         <p style={{ fontSize: 11.5, color: MUT, marginTop: 8, lineHeight: 1.9 }}>
-          کارت باید به نامِ خودتان باشد. پس از استعلام، نام صاحب حساب و شبا خودکار
-          پر می‌شوند و قابلِ تغییر نیستند.
+          کارت باید به نام خودتان باشد. پس از استعلام، نام صاحب حساب و شبا خودکار
+          پر می‌شوند و قابل تغییر نیستند.
         </p>
       )}
     </div>

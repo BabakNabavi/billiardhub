@@ -1,6 +1,6 @@
 'use client'
 
-/* پخش زنده از گوشیِ باشگاه‌دار — دوربین گوشی روی صفحه «پخش زنده» سایت. */
+/* پخش زنده از گوشی باشگاه‌دار — دوربین گوشی روی صفحه «پخش زنده» سایت. */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'

@@ -6,8 +6,8 @@ import {
 } from '@/lib/stories/plans';
 import type { Period } from '@/lib/ads/quota';
 
-/* ساخت و ویرایشِ بسته‌های استوری — فقط ادمین.
-   بسته هرگز حذفِ فیزیکی نمی‌شود؛ سفارش‌های قبلی به آن ارجاع دارند. */
+/* ساخت و ویرایش بسته‌های استوری — فقط ادمین.
+   بسته هرگز حذف فیزیکی نمی‌شود؛ سفارش‌های قبلی به آن ارجاع دارند. */
 
 const PERIODS: Period[] = ['day', 'week', 'month'];
 
@@ -39,7 +39,7 @@ function parse(b: Record<string, unknown>, partial: boolean): Partial<StoryPlanI
 
   if (b.name !== undefined || !partial) {
     const name = str(b.name, 80);
-    if (!name) return { error: 'نامِ بسته لازم است' };
+    if (!name) return { error: 'نام بسته لازم است' };
     out.name = name;
   }
   if (b.description !== undefined) out.description = str(b.description, 400);
@@ -51,7 +51,7 @@ function parse(b: Record<string, unknown>, partial: boolean): Partial<StoryPlanI
   }
   if (b.durationDays !== undefined || !partial) {
     const d = Math.round(num(b.durationDays, 30));
-    if (d < 1) return { error: 'مدتِ اعتبار باید حداقل یک روز باشد' };
+    if (d < 1) return { error: 'مدت اعتبار باید حداقل یک روز باشد' };
     out.durationDays = d;
   }
   if (b.price !== undefined || !partial) {
@@ -81,9 +81,9 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     const m = e instanceof Error ? e.message : '';
     if (/does not exist|schema cache/i.test(m)) {
-      return NextResponse.json({ message: 'جدولِ بسته‌های استوری هنوز ساخته نشده (مایگریشن ۰۱۳ اجرا نشده)' }, { status: 503 });
+      return NextResponse.json({ message: 'جدول بسته‌های استوری هنوز ساخته نشده (مایگریشن ۰۱۳ اجرا نشده)' }, { status: 503 });
     }
-    return NextResponse.json({ message: 'ساختِ بسته انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'ساخت بسته انجام نشد' }, { status: 500 });
   }
 }
 
@@ -99,7 +99,7 @@ export async function PATCH(req: NextRequest) {
   if ('error' in p) return NextResponse.json({ message: p.error }, { status: 400 });
 
   const plan = await updateStoryPlan(id, p);
-  if (!plan) return NextResponse.json({ message: 'ویرایشِ بسته انجام نشد' }, { status: 500 });
+  if (!plan) return NextResponse.json({ message: 'ویرایش بسته انجام نشد' }, { status: 500 });
 
   void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'STORY_PLAN_UPDATED', entityType: 'story_plan', entityId: id, newValue: p });
   return NextResponse.json({ plan });

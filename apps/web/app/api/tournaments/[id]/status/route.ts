@@ -4,12 +4,12 @@ import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/owners
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { getTournament } from '@/lib/tournaments/server';
 
-/* تغییرِ وضعیتِ مسابقه توسطِ برگزارکننده.
+/* تغییر وضعیت مسابقه توسط برگزارکننده.
 
-   عمداً یک مسیرِ جدا از PATCHِ عمومی است: وضعیت تنها چیزی است که
-   بعد از ساخت مرتب عوض می‌شود (باز/بستنِ ثبت‌نام، شروع، پایان، لغو)
-   و گذارهایش قاعده دارد. یک PATCHِ باز روی کلِ ردیف یعنی مالک
-   می‌توانست `entry_fee` را بعد از ساختِ سفارش‌ها هم عوض کند. */
+   عمداً یک مسیر جدا از PATCH عمومی است: وضعیت تنها چیزی است که
+   بعد از ساخت مرتب عوض می‌شود (باز/بستن ثبت‌نام، شروع، پایان، لغو)
+   و گذارهایش قاعده دارد. یک PATCH باز روی کل ردیف یعنی مالک
+   می‌توانست `entry_fee` را بعد از ساخت سفارش‌ها هم عوض کند. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({
       message: t.status === next
         ? 'مسابقه هم‌اکنون در همین وضعیت است'
-        : 'این تغییرِ وضعیت مجاز نیست',
+        : 'این تغییر وضعیت مجاز نیست',
       from: t.status, allowed,
     }, { status: 409 });
   }
@@ -53,7 +53,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   if (error) {
     console.error('[tournaments/status]', error.message);
-    return NextResponse.json({ message: 'تغییرِ وضعیت انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'تغییر وضعیت انجام نشد' }, { status: 500 });
   }
 
   void audit({

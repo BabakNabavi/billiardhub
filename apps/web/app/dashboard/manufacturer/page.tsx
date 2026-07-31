@@ -1,7 +1,7 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پنل تولیدکننده — تکمیلِ پروفایلِ کارخانه/برند.
+   پنل تولیدکننده — تکمیل پروفایل کارخانه/برند.
    هرچه این‌جا ذخیره شود، همان در /manufacturers (دایرکتوری) و
    /manufacturers/<slug> (صفحه‌ی تولیدکننده) نمایش داده می‌شود.
    مالکیت با user.id — همان الگوی بقیه‌ی پنل‌ها.
@@ -68,7 +68,7 @@ export default function ManufacturerDashboard() {
         licenseNumber: remote.licenseNumber ?? '',
       }
       setForm(merged)
-      try { saveManufacturerProfile(merged) } catch { /* کشِ مرورگر پر است */ }
+      try { saveManufacturerProfile(merged) } catch { /* کش مرورگر پر است */ }
     })()
   }, [_hydrated, user?.id])
 
@@ -141,11 +141,11 @@ export default function ManufacturerDashboard() {
     }
     setBusy(true)
     void (async () => {
-      /* منبعِ حقیقت سرور است؛ localStorage فقط کشِ همین مرورگر می‌ماند */
+      /* منبع حقیقت سرور است؛ localStorage فقط کش همین مرورگر می‌ماند */
       const res = await saveProfileRemote('manufacturer', next.slug, next as unknown as Record<string, unknown>,
         { number: next.licenseNumber, url: next.licenseFile?.url ?? '' })
       if (!res.ok) { setErr(res.message ?? 'ذخیره روی سرور انجام نشد'); setBusy(false); return }
-      /* عکس‌ها روی سرور به نشانیِ Storage تبدیل شده‌اند */
+      /* عکس‌ها روی سرور به نشانی Storage تبدیل شده‌اند */
       const saved = (res.profile?.data as ManufacturerProfile | undefined) ?? next
       try { saveManufacturerProfile({ ...next, ...saved }) } catch { /* کش پر است */ }
       setForm(f => ({ ...f, ...saved }))
@@ -184,7 +184,7 @@ export default function ManufacturerDashboard() {
 
         <form onSubmit={submit} className="space-y-5">
 
-          {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+          {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
           <VerificationBadges />
 
 
@@ -310,7 +310,7 @@ export default function ManufacturerDashboard() {
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">پروانه‌ی تولید / جواز کسب</h2>
             <p className="mb-4 text-[12px] text-[#8A8474]">
-              برای گرفتنِ تیکِ تأیید لازم است. ادمین شماره را با فایلِ آپلودشده تطبیق می‌دهد.
+              برای گرفتن تیک تأیید لازم است. ادمین شماره را با فایل آپلودشده تطبیق می‌دهد.
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -371,7 +371,7 @@ export default function ManufacturerDashboard() {
           {/* ═══ محصولات ═══ */}
           <section className={CARD}>
             <h2 className="mb-1 text-[14.5px] font-bold">محصولات</h2>
-            <p className="mb-4 text-[12px] text-[#8A8474]">در صفحه‌ی تولیدکننده به‌صورت گالریِ محصولات نمایش داده می‌شود.</p>
+            <p className="mb-4 text-[12px] text-[#8A8474]">در صفحه‌ی تولیدکننده به‌صورت گالری محصولات نمایش داده می‌شود.</p>
 
             {form.products.length > 0 && (
               <div className="mb-4 space-y-2">

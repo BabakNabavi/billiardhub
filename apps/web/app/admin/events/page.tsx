@@ -7,7 +7,7 @@ import { Trophy, Plus, X, Save, Edit, Trash2 } from 'lucide-react';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
 import { listContent, createContent, updateContent, deleteContent } from '../../../lib/admin/content-client';
 
-/* شکلِ ردیفِ دیتابیس (snake_case) — جدولِ `events` در مهاجرتِ ۰۲۵ */
+/* شکل ردیف دیتابیس (snake_case) — جدول `events` در مهاجرت ۰۲۵ */
 interface DbEvent {
   id: string;
   title?: string; description?: string; category?: string; sport?: string;
@@ -120,7 +120,7 @@ export default function AdminEventsPage() {
     if (!form.startDate)    { setErr('تاریخ شروع الزامی است'); return; }
     setErr('');
 
-    /* نامِ ستون‌های دیتابیس snake_case است؛ فرم camelCase */
+    /* نام ستون‌های دیتابیس snake_case است؛ فرم camelCase */
     const payload = {
       title: form.title, description: form.description,
       category: form.category, sport: form.sport,

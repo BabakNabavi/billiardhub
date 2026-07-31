@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   Manufacturer profile store — پروتوتایپِ کلاینتی (localStorage).
+   Manufacturer profile store — پروتوتایپ کلاینتی (localStorage).
    مشترک بین /dashboard/manufacturer (پنل) و /manufacturers
    (دایرکتوری + صفحه‌ی تولیدکننده). مالکیت با user.id — همان
    الگوی seller/coach/referee/technician/player. ذخیره = انتشار.
@@ -25,7 +25,7 @@ export interface ManufacturerProfile {
   totalProduced: string
   employees: string
   certificates: { title: string; issuer: string; year: string }[]
-  /* پروانه‌ی تولید / جوازِ کسب — شماره و فایل */
+  /* پروانه‌ی تولید / جواز کسب — شماره و فایل */
   licenseNumber: string
   licenseFile: { name: string; url: string } | null
   phone: string
@@ -110,7 +110,7 @@ export function newManufacturerSlug(): string {
   return `m-${Date.now().toString(36)}`
 }
 
-/* پروفایلِ ذخیره‌شده → شکلِ MockManufacturer تا صفحات /manufacturers مستقیم رندرش کنند */
+/* پروفایل ذخیره‌شده → شکل MockManufacturer تا صفحات /manufacturers مستقیم رندرش کنند */
 export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer {
   const yearNum = parseInt(p.sinceYear.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))), 10)
   return {

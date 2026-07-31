@@ -7,8 +7,8 @@ import {
 } from '@/lib/profiles/server';
 
 /* پروفایل‌های نقش‌ها — فروشگاه، تولیدکننده و بقیه.
-   GET  ?slug=  یک پروفایل | ?mine=1 پروفایلِ خودم | بدونِ هیچ‌کدام: فهرست
-   POST ذخیره‌ی پروفایلِ خودم (ساخت یا به‌روزرسانی) */
+   GET  ?slug=  یک پروفایل | ?mine=1 پروفایل خودم | بدون هیچ‌کدام: فهرست
+   POST ذخیره‌ی پروفایل خودم (ساخت یا به‌روزرسانی) */
 
 const kindOf = (v: string): ProfileKind | null =>
   (PROFILE_KINDS as string[]).includes(v) ? (v as ProfileKind) : null;
@@ -17,7 +17,7 @@ const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: string }> }) {
   const kind = kindOf((await ctx.params).kind);
-  if (!kind) return NextResponse.json({ message: 'نوعِ پروفایل نامعتبر است' }, { status: 400 });
+  if (!kind) return NextResponse.json({ message: 'نوع پروفایل نامعتبر است' }, { status: 400 });
 
   const { searchParams } = new URL(req.url);
   const slug = searchParams.get('slug');
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
   if (slug) {
     const p = await getProfileBySlug(kind, slug);
     if (!p) return NextResponse.json({ message: 'پیدا نشد' }, { status: 404 });
-    /* پروفایلِ تأییدنشده را فقط صاحبش و ادمین می‌بینند */
+    /* پروفایل تأییدنشده را فقط صاحبش و ادمین می‌بینند */
     if (p.status !== 'approved') {
       const actor = actorFromRequest(req);
       const allowed = !!actor && (actor.id === p.ownerId || (await isAdmin(actor.id)));
@@ -46,13 +46,13 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ kind: strin
     const all = await listProfiles(kind, { status: 'approved' });
     return NextResponse.json({ profiles: all }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
-    return NextResponse.json({ message: 'خطا در دریافتِ پروفایل‌ها' }, { status: 500 });
+    return NextResponse.json({ message: 'خطا در دریافت پروفایل‌ها' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: string }> }) {
   const kind = kindOf((await ctx.params).kind);
-  if (!kind) return NextResponse.json({ message: 'نوعِ پروفایل نامعتبر است' }, { status: 400 });
+  if (!kind) return NextResponse.json({ message: 'نوع پروفایل نامعتبر است' }, { status: 400 });
 
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -62,9 +62,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   if (!data) return NextResponse.json({ message: 'بدنه‌ی پروفایل خالی است' }, { status: 400 });
 
   const slug = str(b?.slug, 80);
-  if (!slug) return NextResponse.json({ message: 'نامکِ پروفایل لازم است' }, { status: 400 });
+  if (!slug) return NextResponse.json({ message: 'نامک پروفایل لازم است' }, { status: 400 });
 
-  /* جوازِ کسب — عوض‌شدنش تأییدِ قبلی را باطل می‌کند (در PATCH ادمین دوباره بررسی می‌شود) */
+  /* جواز کسب — عوض‌شدنش تأیید قبلی را باطل می‌کند (در PATCH ادمین دوباره بررسی می‌شود) */
   const licenseNumber = b?.licenseNumber !== undefined ? str(b.licenseNumber, 60) : undefined;
   const licenseUrl = b?.licenseUrl !== undefined ? str(b.licenseUrl, 600) : undefined;
 
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ kind: stri
   } catch (e) {
     const msg = e instanceof Error ? e.message : '';
     if (/does not exist|schema cache/i.test(msg)) {
-      return NextResponse.json({ message: 'جدولِ پروفایل‌ها هنوز ساخته نشده (مایگریشن ۰۰۸ اجرا نشده)' }, { status: 503 });
+      return NextResponse.json({ message: 'جدول پروفایل‌ها هنوز ساخته نشده (مایگریشن ۰۰۸ اجرا نشده)' }, { status: 503 });
     }
     if (/duplicate key/i.test(msg)) {
       return NextResponse.json({ message: 'این نامک قبلاً استفاده شده است' }, { status: 409 });

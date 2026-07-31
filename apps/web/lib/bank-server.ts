@@ -1,10 +1,10 @@
 /* ─────────────────────────────────────────────────────────────
-   استعلام‌های بانکی — سمتِ سرور (s.api.ir).
+   استعلام‌های بانکی — سمت سرور (s.api.ir).
    کلید هیچ‌وقت به مرورگر نمی‌رود.
 
-   نکته‌ی مهم درباره‌ی این سرویس: پاسخِ «پیدا نشد» هم HTTP 200 با
+   نکته‌ی مهم درباره‌ی این سرویس: پاسخ «پیدا نشد» هم HTTP 200 با
    success=true برمی‌گرداند و فقط فیلدهای data را خالی می‌گذارد. پس
-   «نبودِ نتیجه» باید یک پاسخِ منفیِ واقعی حساب شود، نه «سرویس در
+   «نبود نتیجه» باید یک پاسخ منفی واقعی حساب شود، نه «سرویس در
    دسترس نیست» — همان اشتباهی که در PersonInfo رخ داده بود.
    ───────────────────────────────────────────────────────────── */
 
@@ -15,13 +15,13 @@ const CARD_MATCH_URL   = 'https://s.api.ir/api/sw1/CardMatch'
 const IBAN_MATCH_URL   = 'https://s.api.ir/api/sw1/IbanMatch'
 
 export interface CardToIbanResult {
-  ok: boolean            // پاسخِ معتبری از سرویس گرفتیم
+  ok: boolean            // پاسخ معتبری از سرویس گرفتیم
   found?: boolean        // کارت در سامانه‌ی بانکی پیدا شد
   iban?: string
   ownerName?: string
   bankName?: string
   message?: string
-  unavailable?: boolean  // مشکلِ دسترسی/اعتبار/شبکه — تصمیم با فراخوان است
+  unavailable?: boolean  // مشکل دسترسی/اعتبار/شبکه — تصمیم با فراخوان است
 }
 
 interface ApiEnvelope {
@@ -31,15 +31,15 @@ interface ApiEnvelope {
   data?: { name?: string | null; iban?: string | null; bankName?: string | null } | null
 }
 
-/** شماره کارت ⇒ شبا و نامِ دارنده */
+/** شماره کارت ⇒ شبا و نام دارنده */
 export async function cardToIban(card: string): Promise<CardToIbanResult> {
   const cardNumber = digitsOnly(card)
-  /* اعتبارسنجیِ محلی پیش از مصرفِ اعتبارِ سرویس */
+  /* اعتبارسنجی محلی پیش از مصرف اعتبار سرویس */
   if (cardNumber.length !== 16) return { ok: false, message: 'شماره کارت باید ۱۶ رقم باشد' }
   if (!isValidCard(cardNumber)) return { ok: false, message: 'شماره کارت معتبر نیست' }
 
   const key = process.env.SMS_API_KEY
-  if (!key) return { ok: false, unavailable: true, message: 'سرویسِ استعلامِ بانکی پیکربندی نشده است' }
+  if (!key) return { ok: false, unavailable: true, message: 'سرویس استعلام بانکی پیکربندی نشده است' }
 
   let r: Response
   try {
@@ -49,7 +49,7 @@ export async function cardToIban(card: string): Promise<CardToIbanResult> {
       body: JSON.stringify({ cardNumber }),
     })
   } catch {
-    return { ok: false, unavailable: true, message: 'خطا در اتصال به سرویسِ استعلامِ بانکی' }
+    return { ok: false, unavailable: true, message: 'خطا در اتصال به سرویس استعلام بانکی' }
   }
 
   const j = await r.json().catch(() => null) as ApiEnvelope | null
@@ -59,19 +59,19 @@ export async function cardToIban(card: string): Promise<CardToIbanResult> {
     || /trust level|سطح دسترسی|اعتبار|credit|unauthorized/i.test(j?.message || '')
   if (denied) {
     console.error('CardToIban unavailable:', j?.message || r.status)
-    return { ok: false, unavailable: true, message: 'سرویسِ استعلامِ بانکی در دسترس نیست' }
+    return { ok: false, unavailable: true, message: 'سرویس استعلام بانکی در دسترس نیست' }
   }
-  if (!j) return { ok: false, unavailable: true, message: 'پاسخِ سرویسِ استعلامِ بانکی خوانده نشد' }
+  if (!j) return { ok: false, unavailable: true, message: 'پاسخ سرویس استعلام بانکی خوانده نشد' }
 
-  /* ورودیِ نامعتبر از نگاهِ خودِ سرویس */
+  /* ورودی نامعتبر از نگاه خود سرویس */
   if (j.success === false) {
     if (j.code === 400) return { ok: false, message: 'شماره کارت معتبر نیست' }
     console.error('CardToIban failed:', j.message || j.code)
-    return { ok: false, unavailable: true, message: 'استعلامِ شبا ناموفق بود' }
+    return { ok: false, unavailable: true, message: 'استعلام شبا ناموفق بود' }
   }
 
   const iban = formatIban(String(j.data?.iban ?? ''))
-  /* success=true ولی بدونِ شبا ⇒ کارت پیدا نشد (پاسخِ منفیِ واقعی) */
+  /* success=true ولی بدون شبا ⇒ کارت پیدا نشد (پاسخ منفی واقعی) */
   if (!iban) {
     return { ok: true, found: false, message: 'برای این شماره کارت، شبایی یافت نشد. شماره را بررسی کنید.' }
   }
@@ -87,12 +87,12 @@ export async function cardToIban(card: string): Promise<CardToIbanResult> {
   }
 }
 
-/* ── تطبیقِ هویت با حسابِ بانکی ─────────────────────────────────────
+/* ── تطبیق هویت با حساب بانکی ─────────────────────────────────────
    CardMatch و IbanMatch هر دو یک قرارداد دارند:
      success=false            ⇒ ورودی نامعتبر یا خطای سرویس
-     success=true, data=false ⇒ پاسخِ منفیِ واقعی (مطابقت ندارد)
+     success=true, data=false ⇒ پاسخ منفی واقعی (مطابقت ندارد)
      success=true, data=true  ⇒ مطابقت دارد
-   برخلافِ CardToIban این‌جا data بولین است، پس false یعنی «نه»، نه «نبود». */
+   برخلاف CardToIban این‌جا data بولین است، پس false یعنی «نه»، نه «نبود». */
 
 export interface MatchResult {
   ok: boolean
@@ -105,7 +105,7 @@ interface MatchEnvelope { success?: boolean; code?: number; message?: string | n
 
 async function callMatch(url: string, body: Record<string, string>, what: string): Promise<MatchResult> {
   const key = process.env.SMS_API_KEY
-  if (!key) return { ok: false, unavailable: true, message: 'سرویسِ استعلامِ بانکی پیکربندی نشده است' }
+  if (!key) return { ok: false, unavailable: true, message: 'سرویس استعلام بانکی پیکربندی نشده است' }
 
   let r: Response
   try {
@@ -115,7 +115,7 @@ async function callMatch(url: string, body: Record<string, string>, what: string
       body: JSON.stringify(body),
     })
   } catch {
-    return { ok: false, unavailable: true, message: 'خطا در اتصال به سرویسِ استعلامِ بانکی' }
+    return { ok: false, unavailable: true, message: 'خطا در اتصال به سرویس استعلام بانکی' }
   }
 
   const j = await r.json().catch(() => null) as MatchEnvelope | null
@@ -124,12 +124,12 @@ async function callMatch(url: string, body: Record<string, string>, what: string
     || /trust level|سطح دسترسی|اعتبار|credit|unauthorized/i.test(j?.message || '')
   if (denied) {
     console.error(`${what} unavailable:`, j?.message || r.status)
-    return { ok: false, unavailable: true, message: 'سرویسِ استعلامِ بانکی در دسترس نیست' }
+    return { ok: false, unavailable: true, message: 'سرویس استعلام بانکی در دسترس نیست' }
   }
-  if (!j) return { ok: false, unavailable: true, message: 'پاسخِ سرویسِ استعلامِ بانکی خوانده نشد' }
+  if (!j) return { ok: false, unavailable: true, message: 'پاسخ سرویس استعلام بانکی خوانده نشد' }
 
   if (j.success === false) {
-    if (j.code === 400) return { ok: false, message: 'اطلاعاتِ واردشده معتبر نیست' }
+    if (j.code === 400) return { ok: false, message: 'اطلاعات واردشده معتبر نیست' }
     console.error(`${what} failed:`, j.message || j.code)
     return { ok: false, unavailable: true, message: 'استعلام ناموفق بود' }
   }
@@ -153,19 +153,19 @@ export async function matchIban(nationalCode: string, birthDate: string, rawIban
 }
 
 /* ─────────────────────────────────────────────────────────────
-   همگام‌سازیِ شبای تأییدشده با جدولِ تسویه.
+   همگام‌سازی شبای تأییدشده با جدول تسویه.
 
    دو جدول همزمان شبا نگه می‌دارند و هرکدام مصرف‌کننده‌ی خودش را دارد:
-     • `clubs.iban`          → نمایش در تبِ «اطلاعات» و صفحه‌ی عمومی
-     • `club_bank_accounts`  → مبنای واقعیِ تسویه و تبِ «مالی»
+     • `clubs.iban`          → نمایش در تب «اطلاعات» و صفحه‌ی عمومی
+     • `club_bank_accounts`  → مبنای واقعی تسویه و تب «مالی»
 
    پیش‌تر فقط اولی نوشته می‌شد، پس باشگاه‌دار شبایش را با استعلام تأیید
-   می‌کرد ولی تبِ مالی همچنان می‌گفت «حسابی ثبت نشده» و فرمِ دومی برای
-   وارد کردنِ همان شبا نشان می‌داد. این تابع همان دوگانگی را می‌بندد.
+   می‌کرد ولی تب مالی همچنان می‌گفت «حسابی ثبت نشده» و فرم دومی برای
+   وارد کردن همان شبا نشان می‌داد. این تابع همان دوگانگی را می‌بندد.
 
-   وضعیت مستقیم VERIFIED است، چون هر دو مسیرِ فراخوان پیش از رسیدن به
-   این‌جا با IbanMatch اثبات کرده‌اند حساب به نامِ کد ملیِ تأییدشده‌ی
-   همین کاربر است — سنجه‌ای قوی‌تر از بازبینیِ چشمیِ ادمین.
+   وضعیت مستقیم VERIFIED است، چون هر دو مسیر فراخوان پیش از رسیدن به
+   این‌جا با IbanMatch اثبات کرده‌اند حساب به نام کد ملی تأییدشده‌ی
+   همین کاربر است — سنجه‌ای قوی‌تر از بازبینی چشمی ادمین.
    ───────────────────────────────────────────────────────────── */
 export async function syncClubSettlementAccount(opts: {
   sb: () => any
@@ -189,7 +189,7 @@ export async function syncClubSettlementAccount(opts: {
 
   const p = prev as { id: string; iban?: string; verification_status?: string } | null
 
-  /* همان شبا و همان وضعیت ⇒ کاری لازم نیست؛ رکوردِ تکراری نساز */
+  /* همان شبا و همان وضعیت ⇒ کاری لازم نیست؛ رکورد تکراری نساز */
   if (p && p.iban === iban && p.verification_status === 'VERIFIED') return
 
   if (p) {
@@ -199,7 +199,7 @@ export async function syncClubSettlementAccount(opts: {
 
   await sb().from('club_bank_accounts').insert({
     club_id: clubId,
-    account_holder_name: holder || 'صاحبِ باشگاه',
+    account_holder_name: holder || 'صاحب باشگاه',
     bank_name: opts.bankName ?? null,
     iban,
     card_number_last4: opts.cardLast4 ?? null,

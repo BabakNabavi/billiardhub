@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────────
-   براکتِ مسابقه — خواندنِ سمتِ سرور.
+   براکت مسابقه — خواندن سمت سرور.
 
-   شکلِ براکت از خودِ ردیف‌ها استنتاج می‌شود (round / match_index)،
-   نه از یک ستونِ جداگانه؛ پس هیچ‌وقت با واقعیتِ جدول ناسازگار نمی‌شود.
+   شکل براکت از خود ردیف‌ها استنتاج می‌شود (round / match_index)،
+   نه از یک ستون جداگانه؛ پس هیچ‌وقت با واقعیت جدول ناسازگار نمی‌شود.
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from '@/lib/finance/db'
@@ -33,7 +33,7 @@ export async function listMatches(tournamentId: string): Promise<MatchRow[]> {
   return (data ?? []) as MatchRow[]
 }
 
-/* نامِ دورها از آخر شمرده می‌شود: آخرین دور همیشه «فینال» است، هر
+/* نام دورها از آخر شمرده می‌شود: آخرین دور همیشه «فینال» است، هر
    اندازه‌ای که براکت داشته باشد. */
 export function roundLabel(round: number, totalRounds: number): string {
   const fromEnd = totalRounds - round
@@ -41,7 +41,7 @@ export function roundLabel(round: number, totalRounds: number): string {
   if (fromEnd === 1) return 'نیمه‌نهایی'
   if (fromEnd === 2) return 'یک‌چهارم نهایی'
   if (fromEnd === 3) return 'یک‌هشتم نهایی'
-  return `دورِ ${round}`
+  return `دور ${round}`
 }
 
 export interface BracketView {
@@ -49,7 +49,7 @@ export interface BracketView {
   totalRounds: number
   champion: { name: string; registrationId: string | null } | null
   runnerUp: { name: string } | null
-  /* نفرِ سوم در حذفیِ یک‌طرفه وجود ندارد مگر بازیِ رده‌بندی برگزار شود؛
+  /* نفر سوم در حذفی یک‌طرفه وجود ندارد مگر بازی رده‌بندی برگزار شود؛
      عمداً حدس زده نمی‌شود. */
 }
 

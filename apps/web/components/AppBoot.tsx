@@ -4,8 +4,8 @@ import { useAuthStore } from '../store/auth.store'
 import { enablePush, pushPermission } from '../lib/push-client'
 import { useSocialInteractions } from './features/FeatureFlags'
 
-/* راه‌اندازیِ سراسری: ثبتِ Service Worker، نگه‌داریِ اشتراکِ پوش، و آپدیتِ خودکارِ
-   نسخه‌ی کهنه‌ی PWA (روی iOS اپِ گرم بعد از دیپلوی کدِ قدیمی را نگه می‌دارد). */
+/* راه‌اندازی سراسری: ثبت Service Worker، نگه‌داری اشتراک پوش، و آپدیت خودکار
+   نسخه‌ی کهنه‌ی PWA (روی iOS اپ گرم بعد از دیپلوی کد قدیمی را نگه می‌دارد). */
 export default function AppBoot() {
   const { user } = useAuthStore()
   const interactionsOn = useSocialInteractions()
@@ -17,12 +17,12 @@ export default function AppBoot() {
     }
   }, [])
 
-  /* اگر کاربر لاگین است و مجوز داده، اشتراکِ پوش را زنده نگه دار (از هر صفحه‌ای).
+  /* اگر کاربر لاگین است و مجوز داده، اشتراک پوش را زنده نگه دار (از هر صفحه‌ای).
 
-     با خاموش‌بودنِ تعاملاتِ اجتماعی این کار بی‌مورد است: امروز تنها
-     فرستنده‌ی پوش، پیامِ دایرکت است و آن مسیر بسته است. اشتراک‌های
-     ذخیره‌شده حذف نمی‌شوند — فقط تازه نمی‌شوند — پس با روشن‌شدنِ دوباره‌ی
-     پرچم همه‌چیز سرِ جایش است. */
+     با خاموش‌بودن تعاملات اجتماعی این کار بی‌مورد است: امروز تنها
+     فرستنده‌ی پوش، پیام دایرکت است و آن مسیر بسته است. اشتراک‌های
+     ذخیره‌شده حذف نمی‌شوند — فقط تازه نمی‌شوند — پس با روشن‌شدن دوباره‌ی
+     پرچم همه‌چیز سر جایش است. */
   useEffect(() => {
     if (!user || !interactionsOn) return
     if (pushPermission() === 'granted') {
@@ -31,7 +31,7 @@ export default function AppBoot() {
     }
   }, [user, interactionsOn])
 
-  // آپدیتِ خودکار: هر بار اپ visible/focus شد، نسخه‌ی سرور را چک کن؛ اگر فرق داشت reload
+  // آپدیت خودکار: هر بار اپ visible/focus شد، نسخه‌ی سرور را چک کن؛ اگر فرق داشت reload
   useEffect(() => {
     const check = async () => {
       if (typeof document === 'undefined' || document.visibilityState !== 'visible') return

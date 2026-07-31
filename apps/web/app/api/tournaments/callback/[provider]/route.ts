@@ -5,27 +5,27 @@ import { notifyTournamentRegistered } from '@/lib/notify';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
 import { confirmRegistrationPayment } from '@/lib/tournaments/server';
 
-/* بازگشت از درگاه برای ثبت‌نامِ مسابقه.
+/* بازگشت از درگاه برای ثبت‌نام مسابقه.
 
    چهار حفاظ که این مسیر را امن می‌کنند:
 
      ۱) **هیچ چیزی از کلاینت باور نمی‌شود.** نه مبلغ، نه وضعیت، نه
-        «پرداخت شد». تنها ورودیِ معتبر، شناسه‌ی سفارش و authority است
-        و صحتِ پرداخت را خودِ سرور از درگاه می‌پرسد.
+        «پرداخت شد». تنها ورودی معتبر، شناسه‌ی سفارش و authority است
+        و صحت پرداخت را خود سرور از درگاه می‌پرسد.
 
-     ۲) **مبلغ از سفارش خوانده می‌شود، نه از پاسخِ درگاه.** آنچه درگاه
-        می‌گوید پرداخت شده، با Snapshotِ سفارش مقایسه می‌شود؛ اختلاف
+     ۲) **مبلغ از سفارش خوانده می‌شود، نه از پاسخ درگاه.** آنچه درگاه
+        می‌گوید پرداخت شده، با Snapshot سفارش مقایسه می‌شود؛ اختلاف
         یعنی رد.
 
-     ۳) **Idempotent.** تابعِ دیتابیس اگر ثبت‌نام از قبل CONFIRMED باشد
-        دوباره کاری نمی‌کند. رفرشِ چندباره‌ی صفحه یا Callbackِ تکراری
+     ۳) **Idempotent.** تابع دیتابیس اگر ثبت‌نام از قبل CONFIRMED باشد
+        دوباره کاری نمی‌کند. رفرش چندباره‌ی صفحه یا Callback تکراری
         بی‌خطر است.
 
-     ۴) **ضدِ Replay.** ایندکسِ یکتا روی provider_ref_id اجازه نمی‌دهد
+     ۴) **ضد Replay.** ایندکس یکتا روی provider_ref_id اجازه نمی‌دهد
         یک شماره‌ی پیگیری دو ثبت‌نام را تأیید کند.
 
-   این مسیر در proxy.ts از CSRF معاف است (درگاه کوکیِ ما را ندارد)؛
-   امنیت از راهِ verifyِ سرورساید می‌آید، نه از توکن. */
+   این مسیر در proxy.ts از CSRF معاف است (درگاه کوکی ما را ندارد)؛
+   امنیت از راه verify سرورساید می‌آید، نه از توکن. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -33,7 +33,7 @@ async function handle(req: NextRequest, providerName: string) {
   const url = new URL(req.url);
   const q = url.searchParams;
 
-  /* شناسه‌ی سفارش را خودمان هنگامِ ساختِ پرداخت داده‌ایم */
+  /* شناسه‌ی سفارش را خودمان هنگام ساخت پرداخت داده‌ایم */
   const registrationId = q.get('paymentId') || q.get('registrationId') || '';
   const authority = q.get('Authority') || q.get('authority') || q.get('token') || '';
   const result = (q.get('Status') || q.get('status') || '').toLowerCase();
@@ -54,13 +54,13 @@ async function handle(req: NextRequest, providerName: string) {
 
   if (!reg) return back('invalid');
 
-  /* از قبل قطعی شده ⇒ همان نتیجه (رفرشِ صفحه‌ی بازگشت) */
+  /* از قبل قطعی شده ⇒ همان نتیجه (رفرش صفحه‌ی بازگشت) */
   if (reg.status === 'CONFIRMED' && reg.payment_status === 'PAID') {
     return back('ok', `&r=${reg.id}`);
   }
 
   /* authority باید همانی باشد که خودمان ذخیره کرده‌ایم — وگرنه کسی
-     می‌تواند با authorityِ پرداختِ دیگری این سفارش را تأیید کند. */
+     می‌تواند با authority پرداخت دیگری این سفارش را تأیید کند. */
   if (reg.provider_authority && authority && reg.provider_authority !== authority) {
     void audit({
       action: 'TOURNAMENT_PAYMENT_AUTHORITY_MISMATCH', entityType: 'tournament_registration',
@@ -81,7 +81,7 @@ async function handle(req: NextRequest, providerName: string) {
   const v = await provider.verifyPayment({
     paymentId: reg.id,
     authority: authority || reg.provider_authority || '',
-    amount: reg.amount,          // مبلغِ موردِ انتظار از سفارش، نه از درخواست
+    amount: reg.amount,          // مبلغ مورد انتظار از سفارش، نه از درخواست
   });
 
   if (!v.ok || !v.paid) {
@@ -109,7 +109,7 @@ async function handle(req: NextRequest, providerName: string) {
       entityId: reg.id, newValue: { reason: out.reason }, ip: clientIp(req) ?? undefined,
     });
     /* پول گرفته شده ولی نتوانستیم قطعی کنیم (مثلاً ظرفیت پر شد یا
-       مبلغ نخواند) — نیازمندِ بازپرداخت است و باید دیده شود. */
+       مبلغ نخواند) — نیازمند بازپرداخت است و باید دیده شود. */
     return back(out.reason === 'full_after_payment' ? 'full' : 'mismatch', `&r=${reg.id}`);
   }
 
@@ -119,8 +119,8 @@ async function handle(req: NextRequest, providerName: string) {
     ip: clientIp(req) ?? undefined,
   });
 
-  /* ثبت‌نام قطعی شد ⇒ رسیدِ پیامکی. بی‌صدا، چون شکستِ پیامک نباید
-     پرداختِ موفق را به صفحه‌ی خطا ببرد. */
+  /* ثبت‌نام قطعی شد ⇒ رسید پیامکی. بی‌صدا، چون شکست پیامک نباید
+     پرداخت موفق را به صفحه‌ی خطا ببرد. */
   void notifyTournamentRegistered(reg.id).catch(() => { /* بی‌صدا */ });
 
   return back('ok', `&r=${reg.id}`);
@@ -131,7 +131,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ provider: s
   return handle(req, provider);
 }
 
-/* بعضی درگاه‌ها با POSTِ مرورگری برمی‌گردند */
+/* بعضی درگاه‌ها با POST مرورگری برمی‌گردند */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ provider: string }> }) {
   const { provider } = await ctx.params;
   return handle(req, provider);

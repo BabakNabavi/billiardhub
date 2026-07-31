@@ -1,6 +1,6 @@
 'use client'
 
-/* نتیجه‌ی بازگشت از درگاهِ خریدِ تبلیغ.
+/* نتیجه‌ی بازگشت از درگاه خرید تبلیغ.
    این صفحه هیچ تصمیمی نمی‌گیرد — فقط نتیجه‌ای را که سرور پس از
    verify گرفته نشان می‌دهد. */
 
@@ -31,8 +31,8 @@ function Result() {
 
       <p style={{ fontSize: 13.5, color: SEC, lineHeight: 2.1, margin: '0 0 22px' }}>
         {ok
-          ? 'تبلیغِ شما ثبت شد و برای بررسی به تیمِ ما رفت. پس از تأیید، مدتی که خریده‌اید از همان لحظه شروع می‌شود و کمپین روی سایت نمایش داده خواهد شد.'
-          : (reason || 'اگر مبلغی از حسابِ شما کم شده باشد، طیِ چند روزِ کاری به‌صورت خودکار برمی‌گردد.')}
+          ? 'تبلیغ شما ثبت شد و برای بررسی به تیم ما رفت. پس از تأیید، مدتی که خریده‌اید از همان لحظه شروع می‌شود و کمپین روی سایت نمایش داده خواهد شد.'
+          : (reason || 'اگر مبلغی از حساب شما کم شده باشد، طی چند روز کاری به‌صورت خودکار برمی‌گردد.')}
       </p>
 
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -41,7 +41,7 @@ function Result() {
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
           color: GOLD_D, borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 800,
         }}>
-          تبلیغاتِ من <ArrowLeft size={14} />
+          تبلیغات من <ArrowLeft size={14} />
         </Link>
         <Link href="/advertise" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
@@ -52,7 +52,7 @@ function Result() {
       </div>
 
       <p style={{ fontSize: 11.5, color: MUT, marginTop: 20 }}>
-        در صورتِ هر ابهامی در پرداخت، با پشتیبانی تماس بگیرید.
+        در صورت هر ابهامی در پرداخت، با پشتیبانی تماس بگیرید.
       </p>
     </div>
   )

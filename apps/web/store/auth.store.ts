@@ -9,7 +9,7 @@ interface User {
   primaryRole: string;
   secondaryRoles: string[];
   isProfileComplete: boolean;
-  verified?: boolean;          // شماره‌ی موبایل با کدِ پیامکی تأیید شده
+  verified?: boolean;          // شماره‌ی موبایل با کد پیامکی تأیید شده
   phone?: string;
   bio?: string;
   city?: string;
@@ -44,9 +44,9 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      /* توکن دیگر ذخیره نمی‌شود. نشست روی کوکیِ httpOnly است و
-         جاوااسکریپت نباید اصلاً به آن دسترسی داشته باشد. فقط اطلاعاتِ
-         نمایشیِ کاربر (نام، نقش، آواتار) در localStorage می‌ماند. */
+      /* توکن دیگر ذخیره نمی‌شود. نشست روی کوکی httpOnly است و
+         جاوااسکریپت نباید اصلاً به آن دسترسی داشته باشد. فقط اطلاعات
+         نمایشی کاربر (نام، نقش، آواتار) در localStorage می‌ماند. */
       partialize: (state) => ({ user: state.user }) as unknown as AuthStore,
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();

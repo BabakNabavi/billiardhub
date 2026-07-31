@@ -5,13 +5,13 @@ import { sessionFromRequest } from '@/lib/auth/session'
 import { verifyIdentity, verifyPerson } from '@/lib/shahkar-server'
 import { ensurePersonForUser } from '@/lib/identity'
 
-/* احرازِ هویتِ کاربرِ فعلی — برای حساب‌هایی که پیش از راه‌اندازیِ استعلام
+/* احراز هویت کاربر فعلی — برای حساب‌هایی که پیش از راه‌اندازی استعلام
    ساخته شده‌اند و کد ملی‌شان ثبت نشده است.
 
-   نسخه‌ی قبلی به سرویسِ api.api.ir وصل بود که هیچ‌وقت کلیدی برایش تنظیم
-   نشده بود، و در نبودِ کلید به «حالتِ mock» می‌افتاد که فقط نامِ ارسالیِ
-   کلاینت را با نامِ داخلِ دیتابیس مقایسه می‌کرد — یعنی هر کاربری می‌توانست
-   هر کد ملی‌ای را به حسابِ خودش بچسباند. حالا همان سرویسِ واقعیِ s.api.ir
+   نسخه‌ی قبلی به سرویس api.api.ir وصل بود که هیچ‌وقت کلیدی برایش تنظیم
+   نشده بود، و در نبود کلید به «حالت mock» می‌افتاد که فقط نام ارسالی
+   کلاینت را با نام داخل دیتابیس مقایسه می‌کرد — یعنی هر کاربری می‌توانست
+   هر کد ملی‌ای را به حساب خودش بچسباند. حالا همان سرویس واقعی s.api.ir
    استفاده می‌شود که در ثبت‌نام هم کار می‌کند. */
 
 const CORS_HEADERS = {
@@ -57,9 +57,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'ابتدا شماره موبایل خود را ثبت کنید' }, { status: 400, headers: CORS_HEADERS })
   }
 
-  /* گامِ ۱ — شاهکار: این کد ملی به همین شماره تعلق دارد؟
-     کاربر با رمزِ خودش وارد شده و شماره‌اش در حسابش ثبت است، پس نیازی به
-     کدِ پیامکیِ دوباره نیست. */
+  /* گام ۱ — شاهکار: این کد ملی به همین شماره تعلق دارد؟
+     کاربر با رمز خودش وارد شده و شماره‌اش در حسابش ثبت است، پس نیازی به
+     کد پیامکی دوباره نیست. */
   const shahkar = await verifyIdentity(user.phone, nationalId, { requireOtp: false })
   if (!shahkar.ok) {
     return NextResponse.json({ message: shahkar.message ?? 'استعلام ناموفق بود' }, { status: 503, headers: CORS_HEADERS })
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  /* گامِ ۲ — ثبت‌احوال: نام و تاریخ تولد هم بخوانند (اگر تاریخ داده شده) */
+  /* گام ۲ — ثبت‌احوال: نام و تاریخ تولد هم بخوانند (اگر تاریخ داده شده) */
   let nameChecked = false
   if (birthDate) {
     const person = await verifyPerson(

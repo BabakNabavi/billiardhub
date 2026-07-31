@@ -48,7 +48,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function authHeader(): Record<string, string> {
-  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
   const t = csrfToken()
   return t ? { 'x-csrf-token': t } : {}
 }
@@ -371,11 +371,11 @@ export default function RolePage() {
   const [step, setStep]         = useState<'select' | 'upload'>('select')
   const [toast, setToast]       = useState<string | null>(null)
   const [loading, setLoading]   = useState(true)
-  /* مشخصاتِ بازیکن — همان لحظه‌ی انتخابِ نقش گرفته می‌شود */
+  /* مشخصات بازیکن — همان لحظه‌ی انتخاب نقش گرفته می‌شود */
   const [playerInfo, setPlayerInfo] = useState<PlayerDisciplinesValue>({ gender: 'm', entries: [] })
   const [playerErr, setPlayerErr]   = useState('')
 
-  /* اگر قبلاً پروفایلِ بازیکن ساخته، همان مقادیر پیش‌فرض شوند */
+  /* اگر قبلاً پروفایل بازیکن ساخته، همان مقادیر پیش‌فرض شوند */
   useEffect(() => {
     if (!user) return
     const mine = findPlayerByOwner(user)
@@ -434,7 +434,7 @@ export default function RolePage() {
   }
 
   const handleSubmitRoles = async () => {
-    /* بازیکن بدونِ رشته معنا ندارد — همان‌جا در جدولِ رنکینگ جایی نمی‌گیرد */
+    /* بازیکن بدون رشته معنا ندارد — همان‌جا در جدول رنکینگ جایی نمی‌گیرد */
     if (queued.has('player') && playerInfo.entries.length === 0) {
       setPlayerErr('برای نقش بازیکن، حداقل یک رشته را انتخاب کنید')
       return
@@ -456,7 +456,7 @@ export default function RolePage() {
     handleDone()
   }
 
-  /* رشته/دسته‌ها همان‌جا در پروفایلِ بازیکن می‌نشیند تا پنلِ بازیکن
+  /* رشته/دسته‌ها همان‌جا در پروفایل بازیکن می‌نشیند تا پنل بازیکن
      دوباره از صفر نپرسد. */
   const savePlayerBasics = () => {
     if (!user) return
@@ -472,7 +472,7 @@ export default function RolePage() {
         disciplines: playerInfo.entries,
         discipline: (playerInfo.entries.find(e => e.discipline !== 'highball')?.discipline ?? base.discipline) as typeof base.discipline,
       })
-    } catch { /* حافظه‌ی مرورگر پر است — نباید جلوی گرفتنِ نقش را بگیرد */ }
+    } catch { /* حافظه‌ی مرورگر پر است — نباید جلوی گرفتن نقش را بگیرد */ }
   }
 
   const showToast = (msg: string) => {
@@ -519,7 +519,7 @@ export default function RolePage() {
                 </p>
               </div>
 
-              {/* نقش‌های فعال — با امکانِ حذفِ نقشِ اشتباه */}
+              {/* نقش‌های فعال — با امکان حذف نقش اشتباه */}
               {(user?.secondaryRoles ?? []).length > 0 && (
                 <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: 'rgba(0,0,0,0.55)', marginBottom: 10 }}>نقش‌های فعال شما</div>
@@ -606,7 +606,7 @@ export default function RolePage() {
                 </div>
               )}
 
-              {/* مشخصاتِ بازیکن — همان دسته‌بندیِ بخشِ رنکینگ */}
+              {/* مشخصات بازیکن — همان دسته‌بندی بخش رنکینگ */}
               {queued.has('player') && (
                 <div style={{
                   background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
@@ -618,7 +618,7 @@ export default function RolePage() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>مشخصات بازیکن</span>
                   </div>
                   <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, marginBottom: 14 }}>
-                    این‌ها تعیین می‌کنند در کدام جدولِ رنکینگ قرار بگیرید.
+                    این‌ها تعیین می‌کنند در کدام جدول رنکینگ قرار بگیرید.
                   </p>
                   <PlayerDisciplines
                     value={playerInfo}

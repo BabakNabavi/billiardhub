@@ -2,13 +2,13 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 
-/* شمارشِ واقعیِ ردیف‌ها برای کارت‌های صفحه‌ی اول پنل.
+/* شمارش واقعی ردیف‌ها برای کارت‌های صفحه‌ی اول پنل.
 
-   تا امروز این اعداد در خودِ کامپوننت هاردکد بودند (۱۲۴ کاربر، ۴۳
-   باشگاه و…) و هیچ ربطی به دیتابیس نداشتند — یعنی پنلِ مدیریت عددی
+   تا امروز این اعداد در خود کامپوننت هاردکد بودند (۱۲۴ کاربر، ۴۳
+   باشگاه و…) و هیچ ربطی به دیتابیس نداشتند — یعنی پنل مدیریت عددی
    نشان می‌داد که هیچ‌وقت درست نبود. */
 
-/** شمارشِ سبک: هیچ ردیفی برنمی‌گردد، فقط عدد از هدرِ Content-Range */
+/** شمارش سبک: هیچ ردیفی برنمی‌گردد، فقط عدد از هدر Content-Range */
 async function countOf(table: string, filter = ''): Promise<number> {
   try {
     const q = sb().from(table).select('id', { count: 'exact', head: true });

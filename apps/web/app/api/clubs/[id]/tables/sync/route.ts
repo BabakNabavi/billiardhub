@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
 
-/* هم‌گام‌سازیِ میزهای باشگاه با دیتابیس.
-   تا امروز میزها فقط در localStorageِ مرورگرِ باشگاه‌دار بودند و همین باعث
-   می‌شد میزی که در باشگاه ثبت نشده هم قابلِ رزرو باشد. حالا منبعِ حقیقت
-   جدولِ tables است و این مسیر لیستِ باشگاه‌دار را روی آن می‌نشاند.
+/* هم‌گام‌سازی میزهای باشگاه با دیتابیس.
+   تا امروز میزها فقط در localStorage مرورگر باشگاه‌دار بودند و همین باعث
+   می‌شد میزی که در باشگاه ثبت نشده هم قابل رزرو باشد. حالا منبع حقیقت
+   جدول tables است و این مسیر لیست باشگاه‌دار را روی آن می‌نشاند.
 
-   ــ میزِ حذف‌شده پاک نمی‌شود، غیرفعال می‌شود تا رزروهای گذشته و قفلِ
+   ــ میز حذف‌شده پاک نمی‌شود، غیرفعال می‌شود تا رزروهای گذشته و قفل
      ساعت‌ها دست‌نخورده بمانند. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -54,8 +54,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     morningDiscount: Math.max(0, Math.min(100, Math.round(Number(t.morningDiscount) || 0))),
     discountRules: Array.isArray(t.discountRules) && t.discountRules.length > 0 ? t.discountRules : null,
     photoDataUrl: typeof t.photoDataUrl === 'string' ? t.photoDataUrl.slice(0, 400_000) : null,
-    /* هزینه‌ی بازیکنِ اضافه در سطحِ میز. NULL معنادار است: یعنی «تنظیمِ
-       باشگاه اعمال شود»، پس نبودِ مقدار نباید صفر ذخیره شود. */
+    /* هزینه‌ی بازیکن اضافه در سطح میز. NULL معنادار است: یعنی «تنظیم
+       باشگاه اعمال شود»، پس نبود مقدار نباید صفر ذخیره شود. */
     playerSurchargeEnabled: t.playerSurchargeEnabled === undefined ? null : !!t.playerSurchargeEnabled,
     playerSurchargePercent: Number.isFinite(Number(t.playerSurchargePercent))
       ? Math.max(0, Math.min(100, Math.round(Number(t.playerSurchargePercent)))) : null,
@@ -64,14 +64,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     isActive: true,
   });
 
-  /* اگر مایگریشنِ ۰۰۳ هنوز اجرا نشده باشد، پیامِ روشن بده نه خطای خام */
-  /* متنِ خامِ خطای دیتابیس فقط در لاگِ سرور می‌ماند؛ به کاربر پیامِ
+  /* اگر مایگریشن ۰۰۳ هنوز اجرا نشده باشد، پیام روشن بده نه خطای خام */
+  /* متن خام خطای دیتابیس فقط در لاگ سرور می‌ماند؛ به کاربر پیام
      قابل‌فهم می‌رسد. تنها استثنا خطای «مایگریشن اجرا نشده» است که
-     پیامش راهنمای خودِ ماست، نه نشتِ داده. */
+     پیامش راهنمای خود ماست، نه نشت داده. */
   const msg = (what: string, raw: string) => {
     console.error(`[clubs/:id/tables/sync] ${what}:`, raw);
     return /does not exist|schema cache|column/i.test(raw)
-      ? 'ساختارِ جدولِ میزها هنوز به‌روز نشده است (مایگریشن ۰۰۳ اجرا نشده)'
+      ? 'ساختار جدول میزها هنوز به‌روز نشده است (مایگریشن ۰۰۳ اجرا نشده)'
       : `خطا در ${what} میز`;
   };
 

@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { phone: rawPhone, password } = body;
 
-    /* شماره پیش از هر کاری به قالبِ واحد می‌آید. تا امروز خامْ جستجو
-       می‌شد، پس +98 یا ارقامِ فارسی «کاربر پیدا نشد» می‌گرفت و کاربر
-       پیامِ «رمز اشتباه» می‌دید. */
+    /* شماره پیش از هر کاری به قالب واحد می‌آید. تا امروز خامْ جستجو
+       می‌شد، پس +98 یا ارقام فارسی «کاربر پیدا نشد» می‌گرفت و کاربر
+       پیام «رمز اشتباه» می‌دید. */
     const phone = normalizePhone(rawPhone);
 
     if (!phone || !password) {
@@ -35,11 +35,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    /* محدودیتِ نرخ پس از اعتبارسنجیِ شکل، تا درخواستِ ناقص سهمیه نسوزاند */
+    /* محدودیت نرخ پس از اعتبارسنجی شکل، تا درخواست ناقص سهمیه نسوزاند */
     const rl = await hitRateLimit(req, RULES.login, String(phone));
     if (!rl.ok) return tooMany(rl.retryAfterSec);
 
-    /* قفلِ تدریجیِ حساب/IP — لایه‌ی دوم در برابرِ حدسِ رمز */
+    /* قفل تدریجی حساب/IP — لایه‌ی دوم در برابر حدس رمز */
     const guard = await loginGuard(req, String(phone));
     if (guard.locked) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       .eq('phone', phone)
       .single();
 
-    /* پیامِ یکسان برای «شماره وجود ندارد» و «رمز غلط» — وگرنه مهاجم با
+    /* پیام یکسان برای «شماره وجود ندارد» و «رمز غلط» — وگرنه مهاجم با
        همین تفاوت می‌فهمد کدام شماره‌ها در سایت حساب دارند. */
     if (error || !user) {
       await loginFailed(req, String(phone));
@@ -73,11 +73,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    /* ورودِ موفق ⇒ شمارنده‌ی همین حساب پاک می‌شود */
+    /* ورود موفق ⇒ شمارنده‌ی همین حساب پاک می‌شود */
     await loginSucceeded(String(phone));
 
-    /* توکنِ قدیمی هنوز در body برمی‌گردد تا کلاینت‌های فعلی نشکنند؛
-       در مرحله‌ی «د» حذف می‌شود. منبعِ اصلی از حالا کوکیِ httpOnly است. */
+    /* توکن قدیمی هنوز در body برمی‌گردد تا کلاینت‌های فعلی نشکنند؛
+       در مرحله‌ی «د» حذف می‌شود. منبع اصلی از حالا کوکی httpOnly است. */
     const token = jwt.sign(
       { sub: user.id, phone: user.phone, role: user.primaryRole },
       process.env.JWT_SECRET!,

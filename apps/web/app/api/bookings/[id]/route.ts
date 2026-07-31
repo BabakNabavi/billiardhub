@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb } from '@/lib/finance/db';
 import { actorOf, ownsClub } from '@/lib/auth/ownership';
 
-/* وضعیتِ یک رزرو.
+/* وضعیت یک رزرو.
 
    تا امروز این مسیر هیچ احراز هویتی نداشت: هر کسی که شناسه‌ی رزرو را
    می‌داشت شماره‌ی پیگیری، مبلغ، تاریخ و ساعت‌ها را می‌دید. UUID
@@ -11,15 +11,15 @@ import { actorOf, ownsClub } from '@/lib/auth/ownership';
    لاگ‌ها و تاریخچه‌ی مرورگر می‌ماند.
 
    حالا سه گروه اجازه دارند:
-     • خودِ رزروکننده
-     • مالکِ باشگاهی که رزرو در آن است
+     • خود رزروکننده
+     • مالک باشگاهی که رزرو در آن است
      • ادمین
 
    یک استثنای عمدی: بازگشت از درگاه. کاربر ممکن است هنگام برگشت هنوز
-   نشستِ فعال نداشته باشد (کوکیِ SameSite در ناوبریِ بین‌دامنه‌ای گاهی
+   نشست فعال نداشته باشد (کوکی SameSite در ناوبری بین‌دامنه‌ای گاهی
    نمی‌آید). برای همین با `?ref=` می‌شود رزرو را دید — ولی فقط با
-   دانستنِ **شماره‌ی پیگیری**، که خودش یک راز است و در پاسخ هم فقط
-   فیلدهای لازمِ صفحه‌ی نتیجه برمی‌گردد. */
+   دانستن **شماره‌ی پیگیری**، که خودش یک راز است و در پاسخ هم فقط
+   فیلدهای لازم صفحه‌ی نتیجه برمی‌گردد. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const row = data as Record<string, unknown>;
   const { userId, ...safe } = row;   // شناسه‌ی کاربر هرگز بیرون نمی‌رود
 
-  /* راهِ بازگشت از درگاه — نیازمندِ دانستنِ شماره‌ی پیگیری */
+  /* راه بازگشت از درگاه — نیازمند دانستن شماره‌ی پیگیری */
   const ref = req.nextUrl.searchParams.get('ref');
   if (ref && ref === String(row.booking_reference ?? '')) {
     return NextResponse.json(safe, { headers: { 'Cache-Control': 'no-store' } });

@@ -35,13 +35,13 @@ export default function AdminCoachesPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tick, setTick]         = useState(0)
 
-  /* منبع: جدولِ `profiles` روی سرور — نه localStorage. تا امروز این
-     فهرست از مرورگرِ خودِ ادمین خوانده می‌شد، پس پروفایلی که مربی روی
-     دستگاهِ خودش ساخته بود اصلاً این‌جا دیده نمی‌شد. */
+  /* منبع: جدول `profiles` روی سرور — نه localStorage. تا امروز این
+     فهرست از مرورگر خود ادمین خوانده می‌شد، پس پروفایلی که مربی روی
+     دستگاه خودش ساخته بود اصلاً این‌جا دیده نمی‌شد. */
   useEffect(() => {
     void (async () => {
       const rows = await fetchAdminProfiles<CoachProfile>('coach')
-      /* اگر سرور در دسترس نبود، کشِ محلی بهتر از فهرستِ خالی است */
+      /* اگر سرور در دسترس نبود، کش محلی بهتر از فهرست خالی است */
       setList(rows.length ? rows : listCoachProfiles())
     })()
   }, [tick])
@@ -49,7 +49,7 @@ export default function AdminCoachesPage() {
   const isAdmin = !!user && (user.phone === ADMIN_PHONE || user.primaryRole === 'admin')
   const act = async (slug: string, patch: Partial<CoachProfile>) => {
     await patchAdminProfile(slug, patch as Record<string, unknown>)
-    updateCoachProfile(slug, patch)   // کشِ محلی هم هم‌گام بماند
+    updateCoachProfile(slug, patch)   // کش محلی هم هم‌گام بماند
     setTick(t => t + 1)
   }
 

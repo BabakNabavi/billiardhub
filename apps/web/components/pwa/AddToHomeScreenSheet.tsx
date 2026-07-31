@@ -3,16 +3,16 @@ import { useCallback, useEffect, useRef } from 'react'
 import { persistDismissal, type A2hsAction } from '../../lib/pwa/a2hs'
 
 /* ─────────────────────────────────────────────────────────────
-   شیتِ راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari.
+   شیت راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari.
 
    این کامپوننت هیچ تصمیمی درباره‌ی «نشان بدهم یا نه» نمی‌گیرد؛ آن کار
    در `AddToHomeScreenGate` انجام شده و این‌جا فقط نمایش است. به همین
    دلیل هم با `dynamic(..., { ssr:false })` بارگذاری می‌شود و کدش اصلاً
-   به دستِ کاربرِ اندروید/دسکتاپ نمی‌رسد.
+   به دست کاربر اندروید/دسکتاپ نمی‌رسد.
 
    چرا CSS در <style> و نه inline: به media query (آیپد/لنداسکیپ)،
    `env(safe-area-inset-*)`، `:focus-visible` و `prefers-reduced-motion`
-   نیاز داریم و هیچ‌کدام با استایلِ inline ممکن نیست.
+   نیاز داریم و هیچ‌کدام با استایل inline ممکن نیست.
    ───────────────────────────────────────────────────────────── */
 
 const TEXT = {
@@ -29,7 +29,7 @@ const TEXT = {
   dialogLabel: 'راهنمای افزودن بیلیارد هاب به صفحه اصلی',
 } as const
 
-/* آیکونِ رسمیِ Share در iOS: مربعِ باز با فلشِ رو به بالا. */
+/* آیکون رسمی Share در iOS: مربع باز با فلش رو به بالا. */
 function ShareIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -41,7 +41,7 @@ function ShareIcon({ size = 20 }: { size?: number }) {
   )
 }
 
-/* آیکونِ «Add to Home Screen» در منوی Share: مربعِ گِرد با علامتِ + */
+/* آیکون «Add to Home Screen» در منوی Share: مربع گرد با علامت + */
 function AddSquareIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -61,7 +61,7 @@ function CheckIcon({ size = 20 }: { size?: number }) {
   )
 }
 
-/* شماره + متن + آیکون کنارِ هم، تا ترتیبشان نتواند از هم بیفتد */
+/* شماره + متن + آیکون کنار هم، تا ترتیبشان نتواند از هم بیفتد */
 const STEPS = [
   { n: '۱', text: TEXT.steps[0], Icon: ShareIcon },
   { n: '۲', text: TEXT.steps[1], Icon: AddSquareIcon },
@@ -70,7 +70,7 @@ const STEPS = [
 
 export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void }) {
   const sheetRef = useRef<HTMLDivElement>(null)
-  /* فوکوس باید بعد از بسته‌شدن به همان‌جایی برگردد که بود — وگرنه کاربرِ
+  /* فوکوس باید بعد از بسته‌شدن به همان‌جایی برگردد که بود — وگرنه کاربر
      صفحه‌خوان/کیبورد به ابتدای صفحه پرت می‌شود. */
   const restoreTo = useRef<HTMLElement | null>(null)
 
@@ -81,7 +81,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
 
   useEffect(() => {
     restoreTo.current = document.activeElement as HTMLElement | null
-    /* فوکوس روی خودِ دیالوگ، نه روی دکمه — تا صفحه‌خوان اول عنوان و
+    /* فوکوس روی خود دیالوگ، نه روی دکمه — تا صفحه‌خوان اول عنوان و
        توضیح را بخواند و کاربر ندانسته «متوجه شدم» را نزند. */
     sheetRef.current?.focus()
 
@@ -89,7 +89,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
       if (e.key === 'Escape') { e.preventDefault(); dismiss('dismiss'); return }
       if (e.key !== 'Tab') return
 
-      /* حلقه‌ی فوکوس: تا وقتی دیالوگ باز است، Tab نباید به پشتِ آن برود. */
+      /* حلقه‌ی فوکوس: تا وقتی دیالوگ باز است، Tab نباید به پشت آن برود. */
       const nodes = Array.from(sheetRef.current?.querySelectorAll<HTMLElement>('button:not([disabled])') ?? [])
       const first = nodes.at(0)
       const last = nodes.at(-1)
@@ -101,8 +101,8 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
     /* عمداً `document.body.style.overflow` را قفل نمی‌کنیم: این یک راهنمای
-       اختیاری است، نه یک مودالِ مسدودکننده. ضمناً قفلِ بدنه با قفلِ منوی
-       موبایلِ Navbar تداخل پیدا می‌کرد و اسکرول را برای همیشه می‌بست. */
+       اختیاری است، نه یک مودال مسدودکننده. ضمناً قفل بدنه با قفل منوی
+       موبایل Navbar تداخل پیدا می‌کرد و اسکرول را برای همیشه می‌بست. */
   }, [dismiss])
 
   useEffect(() => () => { restoreTo.current?.focus?.() }, [])
@@ -111,7 +111,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
     <>
       <style>{CSS}</style>
       {/* پس‌زمینه، × و Escape ⇒ فقط بستن؛ راهنما دفعه‌ی بعد دوباره می‌آید.
-          فقط «بعداً» و «متوجه شدم» — که انتخابِ آگاهانه‌اند — سکوتِ
+          فقط «بعداً» و «متوجه شدم» — که انتخاب آگاهانه‌اند — سکوت
           چندروزه/چندماهه می‌سازند. */}
       <div className="bh-a2hs-scrim" onClick={() => dismiss('dismiss')} aria-hidden="true" />
 
@@ -135,7 +135,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
 
           <div className="bh-a2hs-head">
             <div className="bh-a2hs-badge">
-              {/* آیکونِ برند — همان فایلی که iOS برای Home Screen استفاده می‌کند */}
+              {/* آیکون برند — همان فایلی که iOS برای Home Screen استفاده می‌کند */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/Logo/apple-touch-icon.png" alt="" width={52} height={52} decoding="async" />
             </div>
@@ -172,14 +172,14 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
 /* ─────────────────────────────────────────────────────────────
    z-index ۹۹۹۰ عمدی است:
      • بالاتر از همه‌ی محتوای صفحات (بیشینه‌ی موجود ۴۰۰۰)
-     • پایین‌تر از منوی موبایلِ Navbar و Toast (۹۹۹۹) و
+     • پایین‌تر از منوی موبایل Navbar و Toast (۹۹۹۹) و
        ClubStoryModal (۹۹۹۹۸) — چیزی که کاربر *فعالانه* باز می‌کند باید
        روی یک راهنمای *منفعل* بنشیند، نه برعکس.
 
    کنتراست‌ها محاسبه شده‌اند (WCAG AA):
      #111 روی #FFF = ۱۸٫۹ : ۱ | #5B5B5B روی #FFF = ۶٫۸ : ۱
      #FFF روی #141413 = ۱۷٫۹ : ۱ | #8A6430 روی #F6F1E8 = ۴٫۷ : ۱
-   (طلاییِ برند #C7A66A با متنِ سفید فقط ۲٫۳ : ۱ می‌داد و رد شد.)
+   (طلایی برند #C7A66A با متن سفید فقط ۲٫۳ : ۱ می‌داد و رد شد.)
    ───────────────────────────────────────────────────────────── */
 const CSS = `
 .bh-a2hs-scrim{
@@ -206,7 +206,7 @@ const CSS = `
   border-radius:24px 24px 0 0;
   box-shadow:0 -8px 24px rgba(0,0,0,.08), 0 -32px 64px rgba(0,0,0,.10);
   padding:10px 20px calc(18px + env(safe-area-inset-bottom)) 20px;
-  /* در لنداسکیپِ آیفون ارتفاع بسیار کم است — شیت خودش اسکرول می‌شود */
+  /* در لنداسکیپ آیفون ارتفاع بسیار کم است — شیت خودش اسکرول می‌شود */
   max-height:min(88vh, 88dvh);
   overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
   animation:bhA2hsUp .38s cubic-bezier(.32,.72,0,1) both;
@@ -218,7 +218,7 @@ const CSS = `
 }
 .bh-a2hs-x{
   position:absolute; top:6px; left:6px;
-  width:44px; height:44px;          /* هدفِ لمسیِ ۴۴px طبقِ HIG و WCAG */
+  width:44px; height:44px;          /* هدف لمسی ۴۴px طبق HIG و WCAG */
   display:flex; align-items:center; justify-content:center;
   border:0; background:transparent; cursor:pointer;
   color:#767676; border-radius:50%;
@@ -233,7 +233,7 @@ const CSS = `
   box-shadow:0 2px 8px rgba(160,120,64,.10); overflow:hidden;
 }
 .bh-a2hs-badge img{ width:52px; height:52px; border-radius:11px; display:block; }
-.bh-a2hs-titles{ min-width:0; }      /* بدونِ این، متنِ بلند فلکس را پهن می‌کند */
+.bh-a2hs-titles{ min-width:0; }      /* بدون این، متن بلند فلکس را پهن می‌کند */
 .bh-a2hs-title{
   margin:2px 0 6px; font-size:16.5px; font-weight:800; line-height:1.55;
   color:#111111; letter-spacing:-.2px; text-wrap:balance;
@@ -253,7 +253,7 @@ const CSS = `
 .bh-a2hs-glyph{
   flex-shrink:0; width:34px; height:34px; border-radius:10px;
   display:flex; align-items:center; justify-content:center;
-  background:#FFFFFF; border:1px solid rgba(0,0,0,.07); color:#0A72E8;   /* آبیِ کنترل‌های iOS */
+  background:#FFFFFF; border:1px solid rgba(0,0,0,.07); color:#0A72E8;   /* آبی کنترل‌های iOS */
   box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
 .bh-a2hs-actions{ display:flex; flex-direction:column; gap:8px; }
@@ -271,7 +271,7 @@ const CSS = `
 .bh-a2hs-ghost:active{ transform:scale(.985); }
 .bh-a2hs-sheet :focus-visible{ outline:2px solid #8A6430; outline-offset:2px; }
 
-/* آیپد و صفحه‌های بزرگ‌تر: کارتِ شناور به‌جای شیتِ چسبیده به لبه */
+/* آیپد و صفحه‌های بزرگ‌تر: کارت شناور به‌جای شیت چسبیده به لبه */
 @media (min-width:640px){
   .bh-a2hs-wrap{ padding-bottom:max(24px, env(safe-area-inset-bottom)); }
   .bh-a2hs-sheet{
@@ -280,7 +280,7 @@ const CSS = `
     box-shadow:0 12px 32px rgba(0,0,0,.10), 0 40px 80px rgba(0,0,0,.12);
   }
 }
-/* لنداسکیپِ آیفون: ارتفاع بحرانی است — فشرده‌تر می‌شود */
+/* لنداسکیپ آیفون: ارتفاع بحرانی است — فشرده‌تر می‌شود */
 @media (max-height:460px){
   .bh-a2hs-sheet{ max-height:94vh; padding-top:6px; }
   .bh-a2hs-head{ margin-bottom:12px; }
@@ -288,8 +288,8 @@ const CSS = `
   .bh-a2hs-badge img{ width:40px; height:40px; }
   .bh-a2hs-steps{ margin-bottom:12px; padding-top:10px; }
   .bh-a2hs-step{ padding-bottom:9px; }
-  /* row و نه row-reverse: در RTL محورِ اصلی از راست شروع می‌شود، پس
-     اولین فرزند (دکمه‌ی اصلی) خودش سمتِ راست می‌نشیند. row-reverse
+  /* row و نه row-reverse: در RTL محور اصلی از راست شروع می‌شود، پس
+     اولین فرزند (دکمه‌ی اصلی) خودش سمت راست می‌نشیند. row-reverse
      برعکسش می‌کرد و «بعداً» جای «متوجه شدم» را می‌گرفت. */
   .bh-a2hs-actions{ flex-direction:row; }
   .bh-a2hs-primary,.bh-a2hs-ghost{ flex:1 1 0; }

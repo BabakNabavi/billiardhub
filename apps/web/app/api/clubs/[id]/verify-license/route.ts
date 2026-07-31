@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 import { lookupLicense } from '@/lib/license-server';
 
-/* استعلامِ جوازِ کسبِ باشگاه و صدورِ تیکِ تأیید.
+/* استعلام جواز کسب باشگاه و صدور تیک تأیید.
 
-   جواز باید به نامِ خودِ صاحب باشگاه باشد: کد ملیِ داخلِ جواز با کد ملیِ
-   احرازشده‌ی مالک مقایسه می‌شود. همان منطقِ حسابِ بانکی — تطبیقِ کد ملی،
-   نه مقایسه‌ی رشته‌ایِ نام. */
+   جواز باید به نام خود صاحب باشگاه باشد: کد ملی داخل جواز با کد ملی
+   احرازشده‌ی مالک مقایسه می‌شود. همان منطق حساب بانکی — تطبیق کد ملی،
+   نه مقایسه‌ی رشته‌ای نام. */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id: clubId } = await ctx.params;
 
@@ -43,12 +43,12 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (holder && holder !== u.national_id) {
     return NextResponse.json({
       ok: true, match: false,
-      message: 'این جواز کسب به نام شما نیست. جواز باید متعلق به خودِ صاحب باشگاه باشد.',
+      message: 'این جواز کسب به نام شما نیست. جواز باید متعلق به خود صاحب باشگاه باشد.',
     }, { status: 422 });
   }
 
   if (r.expired) {
-    /* ثبت می‌شود ولی تیکِ تأیید نمی‌گیرد */
+    /* ثبت می‌شود ولی تیک تأیید نمی‌گیرد */
     await sb().from('clubs').update({
       licenseNumber: trackingCode,
       licenseVerified: false,

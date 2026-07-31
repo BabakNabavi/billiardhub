@@ -172,8 +172,8 @@ export const API_BASE =
     ? (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
     : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
 
-/* نشست روی کوکیِ httpOnly است و خودکار ارسال می‌شود؛ این توابع فقط
-   توکنِ CSRF را می‌گذارند. پیش‌تر از localStorage['token'] می‌خواندند
+/* نشست روی کوکی httpOnly است و خودکار ارسال می‌شود؛ این توابع فقط
+   توکن CSRF را می‌گذارند. پیش‌تر از localStorage['token'] می‌خواندند
    که هیچ‌جای پروژه نوشته نمی‌شد — یعنی این مسیرها همیشه بی‌توکن بودند. */
 function csrfHeader(): Record<string, string> {
   if (typeof document === 'undefined') return {}

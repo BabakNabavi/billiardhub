@@ -1,12 +1,12 @@
 /* ─────────────────────────────────────────────────────────────
-   ساختِ payloadِ زنده‌ی جایگاه‌ها — یک پیاده‌سازی، دو مصرف‌کننده.
+   ساخت payload زنده‌ی جایگاه‌ها — یک پیاده‌سازی، دو مصرف‌کننده.
 
-   تا امروز این منطق فقط داخلِ مسیرِ /api/ads/placements بود، پس تنها
-   راهِ رسیدن به آن یک درخواستِ HTTP از مرورگر بود. نتیجه‌اش این بود که
-   سه سکشنِ اصلیِ صفحه‌ی اول در HTMLِ اولیه خالی می‌ماندند.
+   تا امروز این منطق فقط داخل مسیر /api/ads/placements بود، پس تنها
+   راه رسیدن به آن یک درخواست HTTP از مرورگر بود. نتیجه‌اش این بود که
+   سه سکشن اصلی صفحه‌ی اول در HTML اولیه خالی می‌ماندند.
 
    حالا همین‌جا نشسته تا صفحه‌ی سرور هم بتواند مستقیم صدایش بزند و
-   محتوا در همان رندرِ اول بیاید — بدونِ آنکه دو نسخه‌ی جداگانه از
+   محتوا در همان رندر اول بیاید — بدون آنکه دو نسخه‌ی جداگانه از
    منطق داشته باشیم که با هم واگرا شوند.
    ───────────────────────────────────────────────────────────── */
 
@@ -31,10 +31,10 @@ export interface LivePlacementOut {
   campaigns: LiveCampaignOut[]
 }
 
-/** جایگاه‌های زنده، آماده‌ی مصرف در سرور یا پاسخِ API */
+/** جایگاه‌های زنده، آماده‌ی مصرف در سرور یا پاسخ API */
 export async function buildLivePlacements(key?: string): Promise<Record<string, LivePlacementOut>> {
-  /* انقضای lazy: کمپینِ تمام‌شده حتی اگر cron عقب باشد نمایش داده
-     نمی‌شود. await عمدی است — روی سرورلس، کارِ رهاشده ممکن است هرگز
+  /* انقضای lazy: کمپین تمام‌شده حتی اگر cron عقب باشد نمایش داده
+     نمی‌شود. await عمدی است — روی سرورلس، کار رهاشده ممکن است هرگز
      اجرا نشود. */
   await expireCampaigns()
 
@@ -50,8 +50,8 @@ export async function buildLivePlacements(key?: string): Promise<Record<string, 
       campaigns: [],
     }
 
-    /* حالتِ رایگان: محتوا از داده‌ی واقعیِ سایت، نه کمپین. فقط برای
-       جایگاهِ موجودیتی معنا دارد؛ بنرِ فروخته‌شده نباید بی‌صدا خالی شود. */
+    /* حالت رایگان: محتوا از داده‌ی واقعی سایت، نه کمپین. فقط برای
+       جایگاه موجودیتی معنا دارد؛ بنر فروخته‌شده نباید بی‌صدا خالی شود. */
     if (v.placement.mode === 'free' && v.placement.contentKind === 'entity') {
       const snaps = await freeContent(
         (v.placement.entityType ?? 'product') as EntityType,
@@ -83,7 +83,7 @@ export async function buildLivePlacements(key?: string): Promise<Record<string, 
       const byRef = new Map(snaps.map(s => [s.ref, s]))
       for (const c of v.campaigns) {
         const snap = byRef.get(String((c.content as Record<string, unknown>).ref ?? ''))
-        if (!snap) continue   // موجودیتِ حذف‌شده — کمپینِ یتیم نمایش داده نمی‌شود
+        if (!snap) continue   // موجودیت حذف‌شده — کمپین یتیم نمایش داده نمی‌شود
         item.campaigns.push({
           id: c.id, title: c.title, advertiser: c.advertiser, weight: c.weight, entity: snap,
         })

@@ -6,8 +6,8 @@ import { livePlacements, listPlacements, trackCampaign, LEGACY_KEY_MAP } from '@
 
    سیستم جایگاه‌ها در فاز ۲ به /api/ads/placements منتقل شد (جدول‌های
    placements/campaigns). این مسیر فقط برای کلاینت‌های کش‌شده‌ای مانده
-   که هنوز باندلِ قدیمی را دارند و با کلیدهای market_1/market_2/footer
-   صدا می‌زنند؛ خروجی از سیستمِ جدید ساخته و به شکلِ قدیمی برگردانده
+   که هنوز باندل قدیمی را دارند و با کلیدهای market_1/market_2/footer
+   صدا می‌زنند؛ خروجی از سیستم جدید ساخته و به شکل قدیمی برگردانده
    می‌شود. پس از چند دیپلوی می‌توان حذفش کرد. */
 
 const NEW_TO_LEGACY: Record<string, string> = Object.fromEntries(
@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
 
   if (sp.get('catalog') === '1') {
     try {
-      /* همان گیتِ فاز ۴ که در مسیرِ جدید هست: فقط جایگاهِ «پولی» قابلِ
-         خرید است. بدونِ این شرط، کلاینتِ قدیمی راهِ دورزدنِ گیت می‌شد. */
+      /* همان گیت فاز ۴ که در مسیر جدید هست: فقط جایگاه «پولی» قابل
+         خرید است. بدون این شرط، کلاینت قدیمی راه دورزدن گیت می‌شد. */
       const all = (await listPlacements()).filter(p => p.contentKind === 'banner' && p.mode === 'paid');
       return NextResponse.json({
         slots: all.map(p => ({
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   const id = String(b?.id ?? '').trim();
   const kind = b?.kind === 'click' ? 'click' : 'impression';
-  /* await عمدی — Promiseِ رهاشده روی سرورلس ممکن است هرگز اجرا نشود */
+  /* await عمدی — Promise رهاشده روی سرورلس ممکن است هرگز اجرا نشود */
   if (/^[0-9a-f-]{36}$/i.test(id)) await trackCampaign(id, kind);
   return NextResponse.json({ ok: true });
 }

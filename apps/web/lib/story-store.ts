@@ -42,8 +42,8 @@ export function pickStoryRole(roles: string[]): { key: string; label: string; co
   return { key, label: meta.label, color: meta.color }
 }
 
-/* ── سقفِ روزانه‌ی استوری بر اساس نقش ──
-   کاربرِ عادی (نقشِ user یا بدونِ نقشِ واجد شرایط) اصلاً نمی‌تواند استوری بگذارد. */
+/* ── سقف روزانه‌ی استوری بر اساس نقش ──
+   کاربر عادی (نقش user یا بدون نقش واجد شرایط) اصلاً نمی‌تواند استوری بگذارد. */
 export const STORY_DAILY_LIMIT: Record<string, number> = {
   player: 2,        // بازیکن رنکینگی
   coach: 2,
@@ -54,18 +54,18 @@ export const STORY_DAILY_LIMIT: Record<string, number> = {
   club_owner: 3,
 }
 
-/* بالاترین نقشِ واجدِ استوری که کاربر دارد؛ null یعنی کاربرِ عادی. */
+/* بالاترین نقش واجد استوری که کاربر دارد؛ null یعنی کاربر عادی. */
 export function storyRoleOf(roles: string[]): string | null {
   return ROLE_PRIORITY.find(r => roles.includes(r) && r in STORY_DAILY_LIMIT) ?? null
 }
 
-/* سقفِ روزانه‌ی استوری برای این کاربر (۰ = مجاز نیست). */
+/* سقف روزانه‌ی استوری برای این کاربر (۰ = مجاز نیست). */
 export function storyLimitFor(roles: string[]): number {
   const r = storyRoleOf(roles)
   return r ? (STORY_DAILY_LIMIT[r] ?? 0) : 0
 }
 
-/* تعداد استوری‌های امروزِ این مالک (روزِ تقویمیِ محلی). */
+/* تعداد استوری‌های امروز این مالک (روز تقویمی محلی). */
 export function countTodayStories(ownerKey: string): number {
   const today = new Date().toDateString()
   return getStoredStories().filter(s => s.ownerKey === ownerKey && new Date(s.createdAt).toDateString() === today).length

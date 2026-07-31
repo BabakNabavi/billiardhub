@@ -4,13 +4,13 @@ import type {
   VerifyPaymentInput, VerifyPaymentResult, RefundInput, RefundResult,
 } from './provider'
 
-/* درگاهِ شبیه‌سازی‌شده — کلِ چرخه‌ی پرداخت را بدونِ درگاهِ واقعی اجرا می‌کند.
+/* درگاه شبیه‌سازی‌شده — کل چرخه‌ی پرداخت را بدون درگاه واقعی اجرا می‌کند.
    کاربر به صفحه‌ی /payment/mock می‌رود و «پرداخت موفق/ناموفق» را می‌زند.
    authority با HMAC امضا می‌شود تا از جعل جلوگیری شود. */
 export class MockPaymentProvider implements PaymentProvider {
   readonly name = 'mock'
-  /* بدونِ fallbackِ هاردکد: امضای authority باید به کلیدِ محیط گره بخورد،
-     وگرنه با رشته‌ی ثابتِ داخلِ مخزن قابلِ جعل می‌شد. */
+  /* بدون fallback هاردکد: امضای authority باید به کلید محیط گره بخورد،
+     وگرنه با رشته‌ی ثابت داخل مخزن قابل جعل می‌شد. */
   private get secret() {
     const s = process.env.JWT_SECRET
     if (!s) throw new Error('JWT_SECRET is not set — mock payment signing unavailable')
@@ -40,6 +40,6 @@ export class MockPaymentProvider implements PaymentProvider {
   }
 
   async refundPayment(input: RefundInput): Promise<RefundResult> {
-    return { ok: true, providerRef: `MOCKRFND-${Date.now().toString(36).toUpperCase()}`, message: 'بازپرداختِ شبیه‌سازی‌شده' }
+    return { ok: true, providerRef: `MOCKRFND-${Date.now().toString(36).toUpperCase()}`, message: 'بازپرداخت شبیه‌سازی‌شده' }
   }
 }

@@ -2,13 +2,13 @@ import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD    = '#C7A66A';
-/* همان طلایی ولی خوانا برای متن روی پس‌زمینه‌ی روشنِ فوتر (۵٫۰۲:۱) */
+/* همان طلایی ولی خوانا برای متن روی پس‌زمینه‌ی روشن فوتر (۵٫۰۲:۱) */
 const GOLD_TXT = '#8A6020';
 const TEXT    = '#1A1917';
 /* آلفا از ۰٫۵۲ به ۰٫۶۲: روی پس‌زمینه‌ی فوتر ۳٫۴۷:۱ می‌داد (محاسبه‌شده) */
 const DIM     = 'rgba(26,25,23,0.62)';
 /* آلفا از ۰٫۳۴ به ۰٫۶۲ رفت: روی پس‌زمینه‌ی فوتر ۲٫۱۲:۱ می‌داد که
-   زیرِ حدِ ۴٫۵:۱ است؛ حالا ۴٫۷۴:۱ (محاسبه‌شده، نه تخمینی) */
+   زیر حد ۴٫۵:۱ است؛ حالا ۴٫۷۴:۱ (محاسبه‌شده، نه تخمینی) */
 const DIM2    = 'rgba(26,25,23,0.62)';
 const BORDER  = 'rgba(26,25,23,0.10)';
 
@@ -103,7 +103,7 @@ export default function Footer() {
           display: flex;
           align-items: center;
           gap: 5px;
-          /* هدفِ لمسی حداقل ۲۴px — استانداردِ WCAG 2.2.
+          /* هدف لمسی حداقل ۲۴px — استاندارد WCAG 2.2.
              پیش‌تر ~۱۹px بود و روی گوشی به‌سختی زده می‌شد. */
           min-height: 24px;
           padding: 4px 0;
@@ -111,8 +111,8 @@ export default function Footer() {
           line-height: 1.45;
         }
         .ft-link:hover { color: ${GOLD_TXT}; }
-        /* هاورِ لینک‌های حقوقی — پیش‌تر با رویدادِ JS بود و همین دو خط
-           کلِ فوتر را کلاینتی می‌کرد */
+        /* هاور لینک‌های حقوقی — پیش‌تر با رویداد JS بود و همین دو خط
+           کل فوتر را کلاینتی می‌کرد */
         .ft-legal { font-size:13px; color:${DIM2}; text-decoration:none; transition:color .22s ease; min-height:24px; display:inline-flex; align-items:center; }
         .ft-legal:hover { color:${GOLD_TXT}; }
         .ft-link svg { opacity: 0; transition: opacity 0.22s ease; flex-shrink: 0; }
@@ -144,11 +144,11 @@ export default function Footer() {
           .ft-brand { grid-column: 1 / -1 !important; }
           .ft-tagline { margin-bottom: 10px !important; }
           .ft-inner { padding: 26px 18px 12px !important; }
-          /* نوار آدرس/تلفن: gap ۲۴ برای چیدمانِ یک‌سطریِ دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
-             همان عدد به فاصله‌ی عمودیِ بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
+          /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
+             همان عدد به فاصله‌ی عمودی بین سطرها تبدیل می‌شد — سطری ۲۴px. حالا عمودی ۴، افقی ۱۶. */
           .ft-contact { gap: 4px 16px !important; padding: 9px 0 !important; margin-bottom: 8px !important; }
           /* سه خط آخر (کپی‌رایت / لینک‌ها / اعتبار). gap صفر است و فاصله فقط از line-height
-             می‌آید — که خودش برای متنِ ۱۳px حدود ۶px فضای نامرئی می‌سازد، پس مهارش می‌کنیم. */
+             می‌آید — که خودش برای متن ۱۳px حدود ۶px فضای نامرئی می‌سازد، پس مهارش می‌کنیم. */
           .ft-bottom { flex-direction: column !important; gap: 0 !important; text-align: center; margin-top: 0 !important; line-height: 1.5; }
           .ft-bottom > div { padding: 1px 0; }
           .ft-bottom-links { justify-content: center !important; gap: 16px !important; }
@@ -205,7 +205,7 @@ export default function Footer() {
           {/* Nav columns */}
           {nav.map(col => (
             <div key={col.heading}>
-              {/* letter-spacing فقط برای تیترهای لاتین؛ روی فارسی حروفِ چسبان را باز می‌کند */}
+              {/* letter-spacing فقط برای تیترهای لاتین؛ روی فارسی حروف چسبان را باز می‌کند */}
               <div className="ft-heading" style={{ fontSize: /[A-Z]/.test(col.heading) ? '11px' : '12px', color: col.color, letterSpacing: /[A-Z]/.test(col.heading) ? '0.18em' : 0, fontWeight: 700, marginBottom: '13px' }}>{col.heading}</div>
               {col.links.map(item => (
                 <Link key={item.href} href={item.href} className="ft-link">
@@ -230,8 +230,8 @@ export default function Footer() {
           ))}
           {/* اعتبار توسعه‌دهنده — دسکتاپ: سمت چپ روبروی ایمیل */}
           <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center' }}>
-            {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متنِ تمام‌بزرگ تنظیم شده بود
-                و روی متنِ حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
+            {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متن تمام‌بزرگ تنظیم شده بود
+                و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
               <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
               <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
@@ -261,8 +261,8 @@ export default function Footer() {
           </div>
           {/* اعتبار توسعه‌دهنده — موبایل: زیر لینک‌ها */}
           <div className="ft-dev-mob">
-            {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متنِ تمام‌بزرگ تنظیم شده بود
-                و روی متنِ حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
+            {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متن تمام‌بزرگ تنظیم شده بود
+                و روی متن حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
             <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
               <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
               <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>

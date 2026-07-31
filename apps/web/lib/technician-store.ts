@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   Technician profile store — پروتوتایپِ کلاینتی (localStorage).
+   Technician profile store — پروتوتایپ کلاینتی (localStorage).
    مشترک بین: /dashboard/technician (پنل) و /services (دایرکتوری+پروفایل).
    مالکیت با user.id کلید می‌خورد (نه phoneی اختیاری) — همان الگوی
    seller/coach/referee. ذخیره = انتشار (approved).
@@ -66,7 +66,7 @@ export function listApprovedTechnicians(): TechnicianProfile[] {
   return Object.values(getTechnicianProfiles()).filter(p => p.status === 'approved')
 }
 
-/* «پروفایلِ من» — مبنا user.id؛ شماره fallbackِ رکوردهای قدیمی */
+/* «پروفایل من» — مبنا user.id؛ شماره fallback رکوردهای قدیمی */
 export function findTechnicianByOwner(
   owner: string | { id?: string; phone?: string } | null | undefined,
 ): TechnicianProfile | null {
@@ -97,7 +97,7 @@ export function newTechnicianSlug(): string {
   return `t-${Date.now().toString(36)}`
 }
 
-/* پروفایلِ ذخیره‌شده → شکلِ Technician تا صفحات /services بدونِ تغییرِ ساختار رندرش کنند */
+/* پروفایل ذخیره‌شده → شکل Technician تا صفحات /services بدون تغییر ساختار رندرش کنند */
 export function profileToTechnician(p: TechnicianProfile): Technician {
   return {
     id: p.slug,

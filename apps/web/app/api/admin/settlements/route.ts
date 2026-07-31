@@ -4,10 +4,10 @@ import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
 import { getSettlementProvider } from '@/lib/settlement';
 import { notifySettlementPaid } from '@/lib/notify';
 
-/* تسویه — فقط ادمین. عملیاتِ مالی داخلِ توابعِ اتمیکِ دیتابیس انجام می‌شود. */
+/* تسویه — فقط ادمین. عملیات مالی داخل توابع اتمیک دیتابیس انجام می‌شود. */
 
-/* POST { action:'create', clubId }             → ایجادِ تسویه از موجودیِ در انتظار
-   POST { action:'process', id }                → علامتِ «در حالِ انجام»
+/* POST { action:'create', clubId }             → ایجاد تسویه از موجودی در انتظار
+   POST { action:'process', id }                → علامت «در حال انجام»
    POST { action:'complete', id, reference }    → نهایی‌سازی با شماره‌ی پیگیری */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     audit({ actorId: actor.id, actorRole: 'admin', action: 'SETTLEMENT_COMPLETED',
             entityType: 'settlement', entityId: String(b.id), newValue: { reference: b.reference }, ip });
 
-    /* خبرِ واریز به باشگاه‌دار — بی‌صدا */
+    /* خبر واریز به باشگاه‌دار — بی‌صدا */
     const st = r.settlement as { club_id?: string; amount?: number } | undefined;
     if (st?.club_id) void notifySettlementPaid(String(st.club_id), Number(st.amount) || 0).catch(() => { /* بی‌صدا */ });
 

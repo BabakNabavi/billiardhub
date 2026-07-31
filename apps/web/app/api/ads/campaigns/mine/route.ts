@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actorFromRequest } from '@/lib/finance/db';
 import { myCampaigns } from '@/lib/ads/booking';
 
-/* کمپین‌های خودِ کاربر — دادهٔ داشبوردِ تبلیغ‌دهنده.
+/* کمپین‌های خود کاربر — دادهٔ داشبورد تبلیغ‌دهنده.
    فقط کمپین‌هایی که user_id آن‌ها همین کاربر است. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);

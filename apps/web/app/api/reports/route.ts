@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, clientIp } from '@/lib/finance/db';
 
-/* ثبتِ گزارشِ تخلف — مثلِ دیوار: هر کاربر می‌تواند یک آگهی/محتوا را
-   با دلیلِ مشخص گزارش کند و ادمین در پنلِ خودش بررسی می‌کند. */
+/* ثبت گزارش تخلف — مثل دیوار: هر کاربر می‌تواند یک آگهی/محتوا را
+   با دلیل مشخص گزارش کند و ادمین در پنل خودش بررسی می‌کند. */
 
 export const REPORT_REASONS: { code: string; label: string }[] = [
   { code: 'fake',      label: 'آگهی جعلی یا گمراه‌کننده' },

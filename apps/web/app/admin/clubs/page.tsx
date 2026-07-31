@@ -62,13 +62,13 @@ export default function AdminClubsPage() {
   const [err, setErr] = useState('');
 
   const setStatus = async (id: string, status: string) => {
-    /* رد کردن بدونِ علت پذیرفته نمی‌شود — مالک باید بداند چه را اصلاح کند.
+    /* رد کردن بدون علت پذیرفته نمی‌شود — مالک باید بداند چه را اصلاح کند.
        سرور هم همین را اجبار می‌کند؛ این‌جا فقط زودتر پرسیده می‌شود. */
     let reason: string | undefined;
     if (status === 'rejected') {
-      const r = window.prompt('علتِ رد را بنویسید (برای مالکِ باشگاه پیامک می‌شود):');
+      const r = window.prompt('علت رد را بنویسید (برای مالک باشگاه پیامک می‌شود):');
       if (r === null) return;                 // انصراف
-      if (!r.trim()) { setErr('علتِ رد نمی‌تواند خالی باشد'); return; }
+      if (!r.trim()) { setErr('علت رد نمی‌تواند خالی باشد'); return; }
       reason = r.trim();
     }
 

@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
 
-/* ایجادِ پرداخت برای یک رزروِ در انتظار.
-   مبلغ همیشه از رکوردِ رزرو (سروری) خوانده می‌شود، نه از کلاینت. */
+/* ایجاد پرداخت برای یک رزرو در انتظار.
+   مبلغ همیشه از رکورد رزرو (سروری) خوانده می‌شود، نه از کلاینت. */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
@@ -24,17 +24,17 @@ export async function POST(req: NextRequest) {
 
   if (b.userId !== actor.id) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   if (b.payment_status === 'PAID') return NextResponse.json({ message: 'این رزرو قبلاً پرداخت شده است' }, { status: 409 });
-  if (b.booking_status !== 'PENDING_PAYMENT') return NextResponse.json({ message: 'این رزرو قابلِ پرداخت نیست' }, { status: 409 });
+  if (b.booking_status !== 'PENDING_PAYMENT') return NextResponse.json({ message: 'این رزرو قابل پرداخت نیست' }, { status: 409 });
   if (b.expires_at && new Date(b.expires_at).getTime() < Date.now()) {
-    return NextResponse.json({ message: 'مهلتِ پرداخت به پایان رسیده؛ لطفاً دوباره رزرو کنید' }, { status: 410 });
+    return NextResponse.json({ message: 'مهلت پرداخت به پایان رسیده؛ لطفاً دوباره رزرو کنید' }, { status: 410 });
   }
   if (!b.final_amount || b.final_amount <= 0) {
-    return NextResponse.json({ message: 'مبلغِ رزرو معتبر نیست' }, { status: 400 });
+    return NextResponse.json({ message: 'مبلغ رزرو معتبر نیست' }, { status: 400 });
   }
 
   const provider = getPaymentProvider();
 
-  /* اگر پرداختِ بازِ قبلی برای همین رزرو هست، همان ادامه یابد (ضدِ پرداختِ تکراری) */
+  /* اگر پرداخت باز قبلی برای همین رزرو هست، همان ادامه یابد (ضد پرداخت تکراری) */
   const { data: openRow } = await sb().from('payments')
     .select('id,provider,provider_authority,amount,status')
     .eq('booking_id', b.id).in('status', ['INITIATED', 'PENDING']).maybeSingle();
@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
     }).select('id').single();
     if (pErr || !created) {
       if (/does not exist|schema cache/i.test(pErr?.message || '')) {
-        return NextResponse.json({ message: 'سیستمِ پرداخت هنوز راه‌اندازی نشده است (مایگریشنِ دیتابیس اجرا نشده)' }, { status: 503 });
+        return NextResponse.json({ message: 'سیستم پرداخت هنوز راه‌اندازی نشده است (مایگریشن دیتابیس اجرا نشده)' }, { status: 503 });
       }
-      return NextResponse.json({ message: 'خطا در ایجادِ پرداخت' }, { status: 500 });
+      return NextResponse.json({ message: 'خطا در ایجاد پرداخت' }, { status: 500 });
     }
     paymentId = (created as { id: string }).id;
   }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
   if (!res.ok || !res.redirectUrl) {
     await sb().from('payments').update({ status: 'FAILED', raw_response: res.raw ?? { message: res.message }, updated_at: new Date().toISOString() }).eq('id', paymentId);
-    return NextResponse.json({ message: res.message || 'ایجادِ پرداخت ناموفق بود' }, { status: 502 });
+    return NextResponse.json({ message: res.message || 'ایجاد پرداخت ناموفق بود' }, { status: 502 });
   }
 
   await sb().from('payments').update({

@@ -5,11 +5,11 @@ import { sb } from '@/lib/finance/db';
 import { listMatches, buildBracket } from '@/lib/tournaments/matches';
 import { getTournament } from '@/lib/tournaments/server';
 
-/* براکتِ یک مسابقه.
+/* براکت یک مسابقه.
 
    GET  عمومی است — براکت، لایو و نتایج همه برای تماشاگر هستند.
-   POST قرعه‌کشی می‌کند و فقط از مالکِ باشگاه پذیرفته می‌شود.
-   DELETE براکت را برای قرعه‌کشیِ دوباره پاک می‌کند. */
+   POST قرعه‌کشی می‌کند و فقط از مالک باشگاه پذیرفته می‌شود.
+   DELETE براکت را برای قرعه‌کشی دوباره پاک می‌کند. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const b = await req.json().catch(() => ({}));
   const shuffle = b?.shuffle !== false;
 
-  /* کلِ براکت در یک تراکنش ساخته می‌شود — براکتِ نصفه از نبودش بدتر است */
+  /* کل براکت در یک تراکنش ساخته می‌شود — براکت نصفه از نبودش بدتر است */
   const { data, error } = await sb().rpc('bh_tournament_draw', {
     p_tournament_id: id, p_shuffle: shuffle,
   });
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   return NextResponse.json(res, { status: 201 });
 }
 
-/* DELETE — پاک‌کردنِ براکت برای قرعه‌کشیِ دوباره */
+/* DELETE — پاک‌کردن براکت برای قرعه‌کشی دوباره */
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
@@ -73,7 +73,7 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   if (g.err) return g.err;
 
   const { data, error } = await sb().rpc('bh_tournament_reset_bracket', { p_tournament_id: id });
-  if (error) return NextResponse.json({ message: 'حذفِ براکت انجام نشد' }, { status: 500 });
+  if (error) return NextResponse.json({ message: 'حذف براکت انجام نشد' }, { status: 500 });
 
   return NextResponse.json(data);
 }

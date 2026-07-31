@@ -2,9 +2,9 @@
 
 /* ─────────────────────────────────────────────────────────────
    بازیکنان — «ستارگان بیلیارد ایران» (بازطراحی ۱۴۰۵)
-   یک سطح بالاتر از دایرکتوری‌های سایت: هیروی سینماییِ تیره،
-   کاورِ مجله‌ایِ Featured، و کارت‌های پرتره‌ی تایپوگرافیک با
-   شماره‌ی رنکینگِ مونومنتال — نه کارتِ مستطیلیِ معمولی.
+   یک سطح بالاتر از دایرکتوری‌های سایت: هیروی سینمایی تیره،
+   کاور مجله‌ای Featured، و کارت‌های پرتره‌ی تایپوگرافیک با
+   شماره‌ی رنکینگ مونومنتال — نه کارت مستطیلی معمولی.
    داده از lib/players-data.
    ───────────────────────────────────────────────────────────── */
 
@@ -42,14 +42,14 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
   const d = DISCIPLINE_LABEL[p.discipline]
   return (
     <Link href={`/players/${p.id}`} className={`pl-card pl-${size}`} style={{ animationDelay: `${Math.min(i, 8) * 65}ms` }}>
-      {/* دوتون: صحنه‌ی محو زیرِ گرادیانِ تُن */}
+      {/* دوتون: صحنه‌ی محو زیر گرادیان تُن */}
       <div className="pl-scene" style={{ backgroundImage: `url(${p.scene})` }} />
       <div className="pl-tone" style={{ background: `linear-gradient(165deg, ${t.from}E8 12%, ${t.to}F2 58%, ${t.from}FA 100%)` }} />
       <div className="pl-glow" style={{ background: `radial-gradient(circle at 82% 14%, ${t.glow}, transparent 58%)` }} />
-      {/* قابِ داخلیِ مویی */}
+      {/* قاب داخلی مویی */}
       <div className="pl-frame" />
 
-      {/* رنکینگ — عنصرِ گرافیکیِ بزرگ */}
+      {/* رنکینگ — عنصر گرافیکی بزرگ */}
       {p.ranking != null && (
         <div className="pl-rank" aria-hidden>
           <span className="pl-rank-hash">#</span>{faDigits(String(p.ranking).padStart(2, '0'))}
@@ -72,7 +72,7 @@ function PlayerCard({ p, i, size = 'std' }: { p: Player; i: number; size?: 'std'
           <span className="pl-dot" />
           <span>{d.fa}</span>
         </div>
-        {/* ریویلِ hover */}
+        {/* ریویل hover */}
         <div className="pl-reveal">
           <p className="pl-intro">{p.intro}</p>
           <span className="pl-cta">مشاهده پروفایل <ArrowLeft size={13} /></span>
@@ -86,7 +86,7 @@ export default function PlayersPage() {
   const [seg, setSeg]     = useState<Seg>('all')
   const [query, setQuery] = useState('')
 
-  /* بازیکنانِ ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اولِ لیست می‌نشینند */
+  /* بازیکنان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Player[]>([])
   useEffect(() => { setRegistered(listApprovedPlayers().map(profileToPlayer)) }, [])
 
@@ -230,7 +230,7 @@ export default function PlayersPage() {
           </h1>
           <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'plScaleX .55s .3s ease both' }} />
           <p style={{ margin: '14px 0 0', fontSize: 'clamp(12.5px,1.5vw,14.5px)', color: 'rgba(255,255,255,0.62)', maxWidth: 520, lineHeight: 2, animation: 'plFadeUp .5s .35s ease both' }}>
-            چهره‌های شاخص، ملی‌پوشان و بازیکنان رنکینگِ اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
+            چهره‌های شاخص، ملی‌پوشان و بازیکنان رنکینگ اسنوکر و پاکت بیلیارد — حرفه‌ای‌های میز را این‌جا بشناسید.
           </p>
         </div>
       </header>

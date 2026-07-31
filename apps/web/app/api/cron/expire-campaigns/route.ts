@@ -6,9 +6,9 @@ import { backfillPersons } from '@/lib/identity';
 /* انقضای خودکار کمپین‌های تبلیغاتی (فاز ۲):
    SCHEDULED ای که زمانش رسیده ⇒ ACTIVE، و ACTIVE ای که تمام شده ⇒ EXPIRED.
 
-   نمایشِ عمومی هرگز به این cron وابسته نیست — مسیرِ خواندن، پنجره‌ی
+   نمایش عمومی هرگز به این cron وابسته نیست — مسیر خواندن، پنجره‌ی
    زمانی را همیشه فیلتر می‌کند و خودش هم lazy همین تابع را صدا می‌زند؛
-   این cron فقط تضمین می‌کند وضعیتِ رکوردها (و پنل ادمین) حتی بدونِ
+   این cron فقط تضمین می‌کند وضعیت رکوردها (و پنل ادمین) حتی بدون
    ترافیک هم با واقعیت همگام بماند.
 
    امنیت: اگر CRON_SECRET تنظیم شده باشد، فقط با همان هدر اجرا می‌شود
@@ -35,8 +35,8 @@ export async function GET(req: NextRequest) {
     audit({ actorRole: 'system', action: 'CAMPAIGNS_EXPIRED', newValue: r });
   }
 
-  /* فاز ۳ — بک‌فیلِ اشخاص: عمداً این‌جا (روی سرورِ پروداکشن) اجرا می‌شود
-     تا هشِ کد ملی با secret همین محیط ساخته شود، نه ماشینِ توسعه. */
+  /* فاز ۳ — بک‌فیل اشخاص: عمداً این‌جا (روی سرور پروداکشن) اجرا می‌شود
+     تا هش کد ملی با secret همین محیط ساخته شود، نه ماشین توسعه. */
   const persons = await backfillPersons();
   if (persons.linked > 0) {
     audit({ actorRole: 'system', action: 'PERSONS_BACKFILLED', newValue: persons });

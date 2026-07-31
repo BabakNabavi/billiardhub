@@ -83,7 +83,7 @@ interface Slot { hour: number; isBooked: boolean; }
 interface Club {
   id: string; name: string; city?: string; managerName?: string; phone?: string;
   bankCard?: string; bankCardOwner?: string; bankName?: string;
-  /* تنظیمِ هزینه‌ی بازیکنِ اضافه — از پنلِ باشگاه‌دار */
+  /* تنظیم هزینه‌ی بازیکن اضافه — از پنل باشگاه‌دار */
   playerSurchargeEnabled?: boolean; playerSurchargePercent?: number; playerSurchargeFrom?: number;
 }
 
@@ -103,7 +103,7 @@ function applyPastHours(slots: Slot[], isoDate: string): Slot[] {
   const ch = now.getHours();
   return slots.map(s => ({ ...s, isBooked: s.isBooked || s.hour <= ch }));
 }
-/* ساعت‌های کاریِ پیش‌فرض وقتی سرور فهرست را برنگرداند — همه آزاد فرض
+/* ساعت‌های کاری پیش‌فرض وقتی سرور فهرست را برنگرداند — همه آزاد فرض
    نمی‌شوند تا هیچ ساعتی الکی «رزروشده» یا «آزاد» نمایش داده نشود. */
 function openSlots(isoDate: string): Slot[] {
   return applyPastHours(Array.from({length:16},(_,i)=>({hour:i+8,isBooked:false})), isoDate);
@@ -241,19 +241,19 @@ function BookingContent() {
   const isoDate = jDay ? toISO(jYear,jMonth,jDay) : '';
 
   const [loading, setLoading]       = useState(true);
-  const [reserveClosed, setReserveClosed] = useState(false);   // صاحبِ باشگاه رزروِ آنلاین را بسته
+  const [reserveClosed, setReserveClosed] = useState(false);   // صاحب باشگاه رزرو آنلاین را بسته
   const [slotsLoad, setSlotsLoad]   = useState(false);
   const [booking, setBooking]       = useState(false);
   const [error, setError]           = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);   /* پذیرش قوانین رزرو */
-  /* انتقال به درگاه — تنها حالتِ میانی؛ رسیدِ نهایی را /booking/result
-     پس از تأییدِ سروریِ پرداخت نشان می‌دهد. */
+  /* انتقال به درگاه — تنها حالت میانی؛ رسید نهایی را /booking/result
+     پس از تأیید سروری پرداخت نشان می‌دهد. */
   const [redirecting, setRedirecting] = useState(false);
 
   const slotsRef = useRef<HTMLDivElement>(null);
 
   useEffect(()=>{
-    // صاحبِ باشگاه رزروِ آنلاین را بسته است؟ (از داشبورد باشگاه، همان کلید)
+    // صاحب باشگاه رزرو آنلاین را بسته است؟ (از داشبورد باشگاه، همان کلید)
     try {
       const rc = localStorage.getItem(`club-reserveClosedUntil-${clubId}`) ?? '';
       setReserveClosed(rc === 'always' || (rc !== '' && Number(rc) > Date.now()));
@@ -262,7 +262,7 @@ function BookingContent() {
     api.get(`/clubs/${clubId}`).catch(()=>({data:{id:clubId,name:'باشگاه',managerName:''}}))
       .then(c=>{ setClub(c.data); });
 
-    /* فقط میزهایی که باشگاه در سیستم ثبت کرده — هیچ میزِ ساختگی‌ای ساخته نمی‌شود */
+    /* فقط میزهایی که باشگاه در سیستم ثبت کرده — هیچ میز ساختگی‌ای ساخته نمی‌شود */
     api.get(`/clubs/${clubId}/tables`).catch(()=>({data:[]}))
       .then(t=>{ setTables(Array.isArray(t.data)?t.data:[]); setLoading(false); });
   },[clubId]);
@@ -282,10 +282,10 @@ function BookingContent() {
   const handleSlotClick = useCallback((hour:number, isBooked:boolean)=>{
     if(isBooked) return;
     setRangeError('');
-    /* کلیکِ سوم روی همان ساعتِ نهایی‌شده ⇒ لغوِ انتخاب */
+    /* کلیک سوم روی همان ساعت نهایی‌شده ⇒ لغو انتخاب */
     if(rangeStart===null && selectedSlots.length===1 && selectedSlots[0]===hour){ setSelectedSlots([]); return; }
     if(rangeStart===null){ setRangeStart(hour); setSelectedSlots([hour]); return; }
-    /* کلیکِ دوم روی همان ساعت ⇒ یعنی فقط همین یک ساعت رزرو شود */
+    /* کلیک دوم روی همان ساعت ⇒ یعنی فقط همین یک ساعت رزرو شود */
     if(hour===rangeStart){ setRangeStart(null); setSelectedSlots([hour]); return; }
     if(hour<rangeStart){ setRangeStart(hour); setSelectedSlots([hour]); setRangeError('ابتدا ساعت شروع، سپس ساعت پایان را انتخاب کنید'); return; }
     const {range,blocked} = buildRange(slots,rangeStart,hour);
@@ -308,23 +308,23 @@ function BookingContent() {
     const endTime   = new Date(`${isoDate}T${String(endH).padStart(2,'0')}:00:00Z`);
     setBooking(true); setError('');
     try {
-      /* مبلغ روی سرور بازمحاسبه می‌شود؛ pricePerHour فقط پشتیبانِ میزهای محلی است */
+      /* مبلغ روی سرور بازمحاسبه می‌شود؛ pricePerHour فقط پشتیبان میزهای محلی است */
       const res = await api.post('/bookings',{
         clubId, tableType:selectedTable.type, tableId:selectedTable.id,
         startTime:startTime.toISOString(), endTime:endTime.toISOString(),
         pricePerHour:selectedTable.pricePerHour, playerCount, currency:'IRT',
       });
       const bookingId = res.data?.id ?? '';
-      /* ایجادِ پرداخت و هدایتِ مستقیم به درگاه — هیچ صفحه‌ی میانیِ دیگری نیست */
+      /* ایجاد پرداخت و هدایت مستقیم به درگاه — هیچ صفحه‌ی میانی دیگری نیست */
       let paymentUrl: string | null = null;
       try {
         const pay = await api.post('/payments/create', { bookingId });
         paymentUrl = pay.data?.redirectUrl ?? null;
       } catch (pe: any) {
-        setError(pe?.response?.data?.message || 'اتصال به درگاهِ پرداخت ممکن نشد');
+        setError(pe?.response?.data?.message || 'اتصال به درگاه پرداخت ممکن نشد');
       }
       if(!paymentUrl){
-        setError(prev=>prev||'اتصال به درگاهِ پرداخت ممکن نشد؛ رزروِ شما تا ۱۰ دقیقه نگه داشته می‌شود.');
+        setError(prev=>prev||'اتصال به درگاه پرداخت ممکن نشد؛ رزرو شما تا ۱۰ دقیقه نگه داشته می‌شود.');
         return;
       }
       /* #16: immediately mark booked slots as reserved in local state */
@@ -343,12 +343,12 @@ function BookingContent() {
   const totalHours   = sorted.length;
   /* #22: per-slot pricing with time-based discount rules */
   const baseTotal    = selectedTable ? selectedSlots.reduce((s,h)=>s+slotPrice(h,selectedTable),0) : 0;
-  /* هزینه‌ی بازیکنِ اضافه — تنظیمِ خودِ میز، و اگر نداشت از باشگاه.
-     همان فرمولِ سمتِ سرور، تا عددِ روی صفحه با مبلغِ پرداختی یکی باشد. */
+  /* هزینه‌ی بازیکن اضافه — تنظیم خود میز، و اگر نداشت از باشگاه.
+     همان فرمول سمت سرور، تا عدد روی صفحه با مبلغ پرداختی یکی باشد. */
   const surcharge    = surchargeOf(selectedTable as unknown as Record<string,unknown>, club as unknown as Record<string,unknown>);
   const extraPlayerN = extraPlayers(playerCount, surcharge);
 
-  /* میزها بر اساسِ نوع، با ترتیبِ ثابتِ TYPE_LABEL */
+  /* میزها بر اساس نوع، با ترتیب ثابت TYPE_LABEL */
   const groupedTables = (() => {
     const order = Object.keys(TYPE_LABEL);
     const by = new Map<string, typeof tables>();
@@ -375,7 +375,7 @@ function BookingContent() {
     </div>
   );
 
-  /* ── انتقال به درگاهِ پرداخت ── */
+  /* ── انتقال به درگاه پرداخت ── */
   if(redirecting) return (
     <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'var(--font-base)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
       <div style={{textAlign:'center'}}>
@@ -388,16 +388,16 @@ function BookingContent() {
   );
 
 
-  /* ── رزروِ آنلاین بسته است ── */
+  /* ── رزرو آنلاین بسته است ── */
   if (reserveClosed) return (
     <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
       <div style={{maxWidth:420,textAlign:'center',background:'#fff',borderRadius:22,border:'1px solid rgba(0,0,0,0.07)',boxShadow:'0 12px 40px rgba(0,0,0,0.06)',padding:'36px 28px'}}>
         <div style={{width:66,height:66,borderRadius:'50%',background:'rgba(220,38,38,0.10)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزروِ آنلاین موقتاً بسته است</h1>
+        <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزرو آنلاین موقتاً بسته است</h1>
         <p style={{fontSize:14,color:'rgba(0,0,0,0.55)',lineHeight:1.8,margin:'0 0 22px'}}>
-          {club?.name ?? 'این باشگاه'} فعلاً رزروِ اینترنتی را غیرفعال کرده است. لطفاً بعداً دوباره تلاش کنید یا مستقیم با باشگاه تماس بگیرید.
+          {club?.name ?? 'این باشگاه'} فعلاً رزرو اینترنتی را غیرفعال کرده است. لطفاً بعداً دوباره تلاش کنید یا مستقیم با باشگاه تماس بگیرید.
         </p>
         <Link href={`/clubs/${clubId}`} style={{display:'inline-flex',alignItems:'center',gap:6,color:'#9A6E38',fontSize:14,fontWeight:800,textDecoration:'none',background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.34)',borderRadius:12,padding:'11px 20px'}}>
           بازگشت به صفحه‌ی باشگاه
@@ -474,9 +474,9 @@ function BookingContent() {
                 )}
               </div>
             )}
-            {/* میزها بر اساسِ نوع دسته می‌شوند — اسنوکرها زیرِ هم، پاکت‌ها
-                زیرِ هم و… . قبلاً به همان ترتیبی که از دیتابیس می‌آمدند
-                پشتِ سر هم می‌نشستند و انتخابشان گیج‌کننده بود. */}
+            {/* میزها بر اساس نوع دسته می‌شوند — اسنوکرها زیر هم، پاکت‌ها
+                زیر هم و… . قبلاً به همان ترتیبی که از دیتابیس می‌آمدند
+                پشت سر هم می‌نشستند و انتخابشان گیج‌کننده بود. */}
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
               {groupedTables.map(([type, group])=>(
                 <div key={type} style={{display:'flex',flexDirection:'column',gap:'8px'}}>
@@ -647,8 +647,8 @@ function BookingContent() {
                       <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
                         <span style={{fontSize: '14px',color:'rgba(0,0,0,0.45)',background:'rgba(0,0,0,0.05)',padding:'4px 12px',borderRadius:'20px',fontWeight:600}}>{toFa(totalHours)} ساعت</span>
                         {/* درصد از همان محاسبه‌ای می‌آید که مبلغ را می‌سازد.
-                            قبلاً این‌جا «>۲» و «۱۵٪» هاردکد بود و با نرخِ
-                            واقعیِ باشگاه نمی‌خواند: کاربر نفرِ دوم را اضافه
+                            قبلاً این‌جا «>۲» و «۱۵٪» هاردکد بود و با نرخ
+                            واقعی باشگاه نمی‌خواند: کاربر نفر دوم را اضافه
                             می‌کرد، برچسبی نمی‌دید ولی مبلغ بالا می‌رفت. */}
                         {extraPlayerN>0&&<span style={{fontSize: '14px',color:'#f59e0b',background:'rgba(245,158,11,0.08)',padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>{toFa(playerCount)} نفر +{toFa(extraPlayerN*surcharge.percent)}٪</span>}
                         {hasAnyDisc&&<span style={{fontSize: '14px',color:SEL_COLOR,background:`rgba(${SEL_RGB},0.08)`,border:`1px solid rgba(${SEL_RGB},0.25)`,padding:'4px 12px',borderRadius:'20px',fontWeight:700}}>تخفیف اعمال شد ✓</span>}
@@ -693,7 +693,7 @@ function BookingContent() {
                 </div>
               </div>
 
-              {/* #14: قوانینِ کاملِ لغو — پیش از پرداخت، نه بعد از آن */}
+              {/* #14: قوانین کامل لغو — پیش از پرداخت، نه بعد از آن */}
               <div style={{margin:'0 22px 18px'}}>
                 <CancellationPolicy />
               </div>
@@ -711,10 +711,9 @@ function BookingContent() {
                     {' '}را مطالعه و می‌پذیرم.
                   </span>
                 </label>
-                <Link href="/terms#booking" target="_blank"
-                  style={{display:'inline-flex',alignItems:'center',gap:5,marginTop:8,fontSize:12,fontWeight:700,color:'#9A6E38',textDecoration:'none'}}>
-                  مشاهده قوانین رزرو و لغو رزرو
-                </Link>
+                {/* لینک دوم «مشاهده قوانین رزرو و لغو رزرو» حذف شد —
+                    درست بالایش خود قوانین کامل نوشته شده و متن چک‌باکس
+                    هم لینک همان صفحه را دارد. */}
               </div>
 
               {/* #17: LQ-styled confirm button, new text */}

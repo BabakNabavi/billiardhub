@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
   const full = !!t && t.registeredCount >= t.maxPlayers;
 
-  /* ── لیستِ انتظار ──
+  /* ── لیست انتظار ──
      فقط وقتی ظرفیت پر است معنی دارد، پس تا آن موقع درخواستی هم
      فرستاده نمی‌شود. */
   const [wlPosition, setWlPosition] = useState<number | null>(null);
@@ -86,7 +86,7 @@ export default function RegisterPage() {
         body: JSON.stringify({ playerName: userName, phone: user?.phone ?? '' }),
       });
       const j = await r.json().catch(() => ({})) as { ok?: boolean; position?: number; message?: string };
-      if (!r.ok || !j.ok) { setWlErr(j.message ?? 'ثبت در لیستِ انتظار انجام نشد'); return; }
+      if (!r.ok || !j.ok) { setWlErr(j.message ?? 'ثبت در لیست انتظار انجام نشد'); return; }
       setWlPosition(j.position ?? null);
     } catch { setWlErr('خطا در ارتباط با سرور'); } finally { setWlBusy(false); }
   };
@@ -102,7 +102,7 @@ export default function RegisterPage() {
   const [step, setStep]           = useState<Step>('confirm');
   const [showAlert, setAlert]     = useState(false);
   const [alreadyReg, setAlreadyReg] = useState(false);
-  /* پیامِ سرور وقتی پرداخت ممکن نیست — به‌جای رسیدِ ساختگی */
+  /* پیام سرور وقتی پرداخت ممکن نیست — به‌جای رسید ساختگی */
   const [payUnavailable, setPayUnavailable] = useState('');
   const [busy, setBusy] = useState(false);
   const [receiptDate]             = useState(nowShamsi);
@@ -143,14 +143,14 @@ export default function RegisterPage() {
     } catch {}
   }, [step, id, userName, trackingCode, receiptDate, user?.phone]);
 
-  /* ثبت‌نام از راهِ سرور.
+  /* ثبت‌نام از راه سرور.
 
      نسخه‌ی قبلی «در حال اتصال به درگاه…» نشان می‌داد، ۲.۴ ثانیه صبر
-     می‌کرد و بعد رسیدِ ساختگی می‌ساخت. حالا سفارشِ واقعی در دیتابیس
-     ساخته می‌شود، مبلغ **سمتِ سرور** از خودِ مسابقه خوانده می‌شود، و
-     تنها اگر درگاهِ واقعی پیکربندی شده باشد به آن منتقل می‌شویم.
+     می‌کرد و بعد رسید ساختگی می‌ساخت. حالا سفارش واقعی در دیتابیس
+     ساخته می‌شود، مبلغ **سمت سرور** از خود مسابقه خوانده می‌شود، و
+     تنها اگر درگاه واقعی پیکربندی شده باشد به آن منتقل می‌شویم.
 
-     تا فعال‌شدنِ درگاه، سرور ۵۰۳ می‌دهد و ما همان را صادقانه نشان
+     تا فعال‌شدن درگاه، سرور ۵۰۳ می‌دهد و ما همان را صادقانه نشان
      می‌دهیم — نه رسید. */
   const handlePay = async () => {
     if (!isLoggedIn) { setAlert(true); return; }
@@ -560,7 +560,7 @@ export default function RegisterPage() {
       <Header />
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '24px clamp(16px,4vw,32px)' }}>
 
-        {/* پرداختِ آنلاین هنوز فعال نیست */}
+        {/* پرداخت آنلاین هنوز فعال نیست */}
         {payUnavailable && (
           <div style={{
             background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.28)',
@@ -679,12 +679,12 @@ export default function RegisterPage() {
               <div style={{ fontSize: 15, fontWeight: 800, color: '#111', marginBottom: 8, lineHeight: 1.7 }}>
                 {userName ? `${userName} گرامی` : 'کاربر گرامی'} متاسفانه لیست {toFa(t.maxPlayers)} نفر بازیکنان تکمیل شد
               </div>
-              {/* لیستِ انتظار — پیش‌تر ظرفیتِ تکمیل یعنی بن‌بست و کاربر
+              {/* لیست انتظار — پیش‌تر ظرفیت تکمیل یعنی بن‌بست و کاربر
                   باید دستی سر می‌زد ببیند جا باز شده یا نه. */}
               {wlPosition !== null ? (
                 <>
                   <div style={{ fontSize: 14, color: '#0E7A38', fontWeight: 800, marginBottom: 8, lineHeight: 1.8 }}>
-                    شما در لیستِ انتظار هستید — نفرِ {toFa(wlPosition)}
+                    شما در لیست انتظار هستید — نفر {toFa(wlPosition)}
                   </div>
                   <div style={{ fontSize: 13, color: '#777', marginBottom: 16, lineHeight: 1.8 }}>
                     اگر جا باز شود، پیامک می‌شود و صندلی برایتان نگه داشته می‌شود.
@@ -695,13 +695,13 @@ export default function RegisterPage() {
                     border: '1px solid rgba(178,59,46,0.28)',
                     fontSize: 14, fontWeight: 800, cursor: wlBusy ? 'wait' : 'pointer', fontFamily: 'inherit',
                   }}>
-                    خروج از لیستِ انتظار
+                    خروج از لیست انتظار
                   </button>
                 </>
               ) : (
                 <>
                   <div style={{ fontSize: 14, color: '#777', marginBottom: 18, lineHeight: 1.8 }}>
-                    می‌توانید در لیستِ انتظار بنشینید — اگر کسی انصراف دهد، نوبت به شما می‌رسد.
+                    می‌توانید در لیست انتظار بنشینید — اگر کسی انصراف دهد، نوبت به شما می‌رسد.
                   </div>
                   {wlErr && (
                     <div style={{ fontSize: 13, color: '#B23B2E', fontWeight: 700, marginBottom: 12 }}>{wlErr}</div>
@@ -712,7 +712,7 @@ export default function RegisterPage() {
                     border: '1px solid rgba(199,166,106,0.42)',
                     fontSize: 15, fontWeight: 800, cursor: wlBusy ? 'wait' : 'pointer', fontFamily: 'inherit',
                   }}>
-                    {wlBusy ? 'در حال ثبت…' : 'ثبت در لیستِ انتظار'}
+                    {wlBusy ? 'در حال ثبت…' : 'ثبت در لیست انتظار'}
                   </button>
                 </>
               )}

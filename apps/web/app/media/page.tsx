@@ -23,7 +23,7 @@ import { useAuthStore } from '../../store/auth.store'
 import { fetchUserVideos } from '../../lib/media-user'
 import MediaUpload from '../../components/MediaUpload'
 
-/* ── پالتِ روشن ── */
+/* ── پالت روشن ── */
 const INK   = '#1C1B17'
 const SEC   = '#5B564B'
 const MUT   = '#8A8474'
@@ -38,7 +38,7 @@ type SortKey = 'newest' | 'likes' | 'views'
 const SORTS: [SortKey, string][] = [['newest', 'جدیدترین'], ['likes', 'محبوب‌ترین'], ['views', 'پربازدیدترین']]
 const RECENT_KEY = 'bh-media-recent'
 
-/* ── نمایانگرِ اسکرول: هر سکشن با ورودِ نرم و آشکار بالا می‌آید ── */
+/* ── نمایانگر اسکرول: هر سکشن با ورود نرم و آشکار بالا می‌آید ── */
 function Reveal({ children, style, className }: { children: ReactNode; style?: React.CSSProperties; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [on, setOn] = useState(false)
@@ -54,7 +54,7 @@ function Reveal({ children, style, className }: { children: ReactNode; style?: R
   )
 }
 
-/* ── درگ‌اسکرولِ افقی (دسکتاپ) بدونِ شکستنِ سوایپِ موبایل ── */
+/* ── درگ‌اسکرول افقی (دسکتاپ) بدون شکستن سوایپ موبایل ── */
 function useDragScroll() {
   const ref = useRef<HTMLDivElement>(null)
   const st = useRef({ down: false, x: 0, left: 0, moved: false })
@@ -66,7 +66,7 @@ function useDragScroll() {
   return { ref, handlers: { onMouseDown, onMouseMove, onMouseUp: stop, onMouseLeave: stop, onClickCapture, onDragStart } }
 }
 
-/* ── کارتِ ویدیو با پیش‌نمایشِ ویدیوی هاور ── */
+/* ── کارت ویدیو با پیش‌نمایش ویدیوی هاور ── */
 function VideoCard({ v, i = 0, wide = false }: { v: MediaVideo; i?: number; wide?: boolean }) {
   const [hover, setHover] = useState(false)
   const vref = useRef<HTMLVideoElement>(null)
@@ -104,7 +104,7 @@ function VideoCard({ v, i = 0, wide = false }: { v: MediaVideo; i?: number; wide
   )
 }
 
-/* ── کارتِ شورتِ عمودی ── */
+/* ── کارت شورت عمودی ── */
 function ShortCard({ v }: { v: MediaVideo }) {
   const [hover, setHover] = useState(false)
   const vref = useRef<HTMLVideoElement>(null)
@@ -147,14 +147,14 @@ export default function MediaPage() {
 
   const { user } = useAuthStore()
   const [uploadOpen, setUploadOpen] = useState(false)
-  /* هر کاربرِ ثبت‌نام‌کرده در همان ثبت‌نام احراز هویت شده (OTP + شاهکار)؛
+  /* هر کاربر ثبت‌نام‌کرده در همان ثبت‌نام احراز هویت شده (OTP + شاهکار)؛
      پس مهمان → صفحه‌ی ورود (که خودش گزینه‌ی ساخت حساب دارد)، لاگین → آپلود */
   const onUploadClick = () => {
     if (!user) { window.location.href = '/login'; return }
     setUploadOpen(true)
   }
 
-  /* کنترل‌های ادمین + ویدیوهای آپلودیِ کاربران (سمت‌سرور) */
+  /* کنترل‌های ادمین + ویدیوهای آپلودی کاربران (سمت‌سرور) */
   const [basePool, setBasePool] = useState<MediaVideo[]>(MEDIA_VIDEOS)
   const [userVids, setUserVids] = useState<MediaVideo[]>([])
   const [featOverride, setFeatOverride] = useState<string | null>(null)
@@ -200,7 +200,7 @@ export default function MediaPage() {
 
   const trendDrag = useDragScroll()
 
-  /* ویدیوی محیطیِ هیرو فقط وقتی دیده می‌شود پخش شود (کمترین بارِ CPU ⇒ اسکرولِ نرم) */
+  /* ویدیوی محیطی هیرو فقط وقتی دیده می‌شود پخش شود (کمترین بار CPU ⇒ اسکرول نرم) */
   const heroVidRef = useRef<HTMLVideoElement>(null)
   useEffect(() => {
     const el = heroVidRef.current; if (!el) return
@@ -215,7 +215,7 @@ export default function MediaPage() {
     if (t) { const next = [t, ...recent.filter(r => r !== t)].slice(0, 6); setRecent(next); try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)) } catch { /* */ } }
   }
 
-  /* سرچِ ترند = پرتکرارترین برچسب‌ها */
+  /* سرچ ترند = پرتکرارترین برچسب‌ها */
   const trendingTags = useMemo(() => {
     const m = new Map<string, number>()
     for (const v of pool) for (const t of v.tags) m.set(t, (m.get(t) || 0) + 1)
@@ -232,10 +232,10 @@ export default function MediaPage() {
         @keyframes bmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .bm-wrap { max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,3.4vw,36px); }
 
-        /* ── نمایانگرِ اسکرول ── */
+        /* ── نمایانگر اسکرول ── */
         .bm-reveal { opacity:0; transform: translateY(34px); transition: opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
         .bm-reveal.on { opacity:1; transform:none; }
-        /* استاگرِ کارت‌ها هنگامِ ظاهرشدنِ سکشن (هر بار که اسکرول می‌رسی، واقعاً دیده می‌شود) */
+        /* استاگر کارت‌ها هنگام ظاهرشدن سکشن (هر بار که اسکرول می‌رسی، واقعاً دیده می‌شود) */
         .bm-reveal .bm-rail > *, .bm-reveal .bm-grid > *, .bm-reveal .bm-mosaic > * { opacity:0; }
         .bm-reveal.on .bm-rail > *, .bm-reveal.on .bm-grid > *, .bm-reveal.on .bm-mosaic > * { animation: bmUp .6s cubic-bezier(.22,1,.36,1) both; }
         .bm-reveal.on .bm-rail > *:nth-child(2), .bm-reveal.on .bm-grid > *:nth-child(2), .bm-reveal.on .bm-mosaic > *:nth-child(2) { animation-delay:.06s; }
@@ -246,7 +246,7 @@ export default function MediaPage() {
 
         /* ── کارت ── */
         .bm-card { display:block; text-decoration:none; color:inherit; }
-        /* عکس/لینک داخلِ ریل درگِ نیتیو نگیرد (علامتِ ممنوع) */
+        /* عکس/لینک داخل ریل درگ نیتیو نگیرد (علامت ممنوع) */
         .bm-rail a, .bm-rail img, .bm-rail video, .bm-mosaic img, .bm-grid img, .bm-featframe img, .bm-featframe video { -webkit-user-drag:none; user-select:none; }
         .bm-thumb { position:relative; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#EDE9E1;
           box-shadow: 0 1px 2px rgba(28,27,23,0.05); transition: transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s; }
@@ -278,7 +278,7 @@ export default function MediaPage() {
         .bm-dotsep { width:3px; height:3px; border-radius:50%; background:${MUT}; opacity:.6; }
         .bm-card-wide .bm-title { font-size:15px; }
 
-        /* ── سرتیترِ سکشن ── */
+        /* ── سرتیتر سکشن ── */
         .bm-sechead { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; }
         .bm-eyebrow { display:block; font-size:10px; font-weight:800; letter-spacing:.26em; color:${MUT}; margin-bottom:6px; }
         .bm-h2 { display:flex; align-items:center; gap:9px; font-size:clamp(18px,2.4vw,23px); font-weight:900; margin:0; color:${INK}; letter-spacing:-0.02em; }
@@ -286,7 +286,7 @@ export default function MediaPage() {
           font-size:12px; font-weight:800; background:#fff; border:1px solid ${LINE}; color:${GOLD_D}; cursor:pointer; font-family:inherit; transition: all .22s; }
         .bm-more:hover { border-color: rgba(199,166,106,0.6); background: rgba(199,166,106,0.08); gap:8px; }
 
-        /* ── ریلِ افقی ── */
+        /* ── ریل افقی ── */
         .bm-rail { display:flex; gap:16px; overflow-x:auto; scrollbar-width:none; padding:4px 2px 12px; scroll-snap-type:x proximity; }
         .bm-rail::-webkit-scrollbar { display:none; }
         .bm-rail > * { flex:0 0 clamp(230px,26vw,268px); scroll-snap-align:start; }
@@ -315,8 +315,8 @@ export default function MediaPage() {
           display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition: color .2s; }
         .bm-trendmini:hover p { color:${GOLD_D}; }
 
-        /* ── نویگیشنِ چسبان ── */
-        /* پس‌زمینه‌ی تقریباً تو‌پُر (به‌جای blurِ سنگین) ⇒ اسکرول کاملاً نرم، بدونِ جانک */
+        /* ── نویگیشن چسبان ── */
+        /* پس‌زمینه‌ی تقریباً تو‌پُر (به‌جای blur سنگین) ⇒ اسکرول کاملاً نرم، بدون جانک */
         .bm-nav { position:sticky; top:60px; z-index:40; background: rgba(250,248,243,0.97); border-top:1px solid ${LINE}; border-bottom:1px solid ${LINE}; }
         .bm-navrow { display:flex; align-items:center; gap:12px; padding-block:10px; }
         .bm-chips { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; flex:1; min-width:0; padding:2px; }
@@ -334,12 +334,12 @@ export default function MediaPage() {
         .bm-uploadbtn:hover { background:#E8CE96; transform: translateY(-1px); }
         @media (max-width: 620px) { .bm-up-txt { display:none; } .bm-uploadbtn { padding:0 12px; } }
 
-        /* ── گریدِ نامتقارن «جدید» ── */
+        /* ── گرید نامتقارن «جدید» ── */
         .bm-mosaic { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; }
         .bm-mosaic > .bm-lead { grid-column: span 2; grid-row: span 2; }
         .bm-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; }
 
-        /* ── اسپاتلایتِ سازنده ── */
+        /* ── اسپاتلایت سازنده ── */
         .bm-spot { position:relative; overflow:hidden; border-radius:24px; background: linear-gradient(135deg, #14322A 0%, #0B231D 62%, #0E1C18 100%);
           color:#EAF2EE; padding: clamp(24px,3.4vw,44px); display:grid; grid-template-columns: 1fr 1.05fr; gap: clamp(20px,3vw,40px); align-items:center; }
         .bm-spot::before { content:''; position:absolute; top:-30%; inset-inline-end:-10%; width:60%; height:160%;
@@ -354,7 +354,7 @@ export default function MediaPage() {
         .bm-follow:hover { background:#E8CE96; transform: translateY(-1px); }
         .bm-follow.on { background: transparent; color:#EAF2EE; border:1px solid rgba(255,255,255,0.4); }
 
-        /* ── بندِ مسابقات ── */
+        /* ── بند مسابقات ── */
         .bm-tour { background: linear-gradient(180deg, rgba(14,122,56,0.055), rgba(14,122,56,0.02)); border:1px solid rgba(14,122,56,0.14);
           border-radius:24px; padding: clamp(22px,3vw,38px); }
         .bm-tour-grid { display:grid; grid-template-columns: 1.5fr 1fr; gap: clamp(16px,2.4vw,26px); align-items:stretch; }
@@ -392,7 +392,7 @@ export default function MediaPage() {
         /* ── اسکلت ── */
         .bm-sk { background: linear-gradient(100deg, #EEEAE2 40%, #F6F3EC 50%, #EEEAE2 60%); background-size: 200% 100%; animation: bmShimmer 1.2s linear infinite; }
 
-        /* ── سرچِ تمام‌صفحه ── */
+        /* ── سرچ تمام‌صفحه ── */
         .bm-search-ov { position:fixed; inset:0; z-index:2000; background: rgba(250,248,243,0.86); backdrop-filter: blur(22px) saturate(1.2); animation: bmUp .22s ease both; overflow-y:auto; }
         .bm-search-inner { max-width: 760px; margin: 0 auto; padding: clamp(60px,10vh,120px) clamp(18px,4vw,28px) 60px; }
         .bm-search-box { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid ${LINE}; border-radius:18px; padding:6px 8px 6px 18px; box-shadow: 0 20px 50px rgba(28,27,23,0.12); }
@@ -674,7 +674,7 @@ export default function MediaPage() {
             })}
           </>
         ) : (
-          /* ═══ حالتِ فیلتر/جستجو ═══ */
+          /* ═══ حالت فیلتر/جستجو ═══ */
           <section>
             <SecHead title={cat !== 'all' ? mediaCategoryOf(cat as MediaCategoryKey).label : `نتایج «${query}»`}
               action={<span style={{ fontSize: 12.5, color: MUT, fontWeight: 700 }}>{faDigits(filtered.length)} ویدیو</span>} />

@@ -27,11 +27,11 @@ import MyBookings from '../../components/booking/MyBookings';
 /* ══ types ══ */
 interface MyReg { id: string; tournamentId: string; tournamentName: string; status: 'pending' | 'approved' | 'rejected'; registeredAt: string; }
 
-/* اعلان‌های نمونه حذف شدند: چهار اعلانِ ساختگی («رزرو شما در باشگاه
+/* اعلان‌های نمونه حذف شدند: چهار اعلان ساختگی («رزرو شما در باشگاه
    سنچوری تأیید شد»، «مدال ۵۰ مسابقه را دریافت کردید») به هر کاربری
-   نشان داده می‌شد، حتی کاربرِ تازه‌ای که هیچ رزروی نداشت. */
+   نشان داده می‌شد، حتی کاربر تازه‌ای که هیچ رزروی نداشت. */
 
-/* «۲ دقیقه پیش» از زمانِ واقعی */
+/* «۲ دقیقه پیش» از زمان واقعی */
 function timeAgo(at: number): string {
   const s = Math.max(0, Math.floor((Date.now() - at) / 1000));
   if (s < 60) return 'همین حالا';
@@ -83,7 +83,7 @@ export default function DashboardPage() {
   const [hasRefereeProfile, setHasRefereeProfile] = useState(false);
   const rafRef = useRef<number>(0);
 
-  /* اعلان‌های واقعیِ کاربر */
+  /* اعلان‌های واقعی کاربر */
   const [notifications, setNotifications] = useState<SocialNotif[]>([]);
   const unread = notifications.filter(n => !n.read).length;
 
@@ -93,7 +93,7 @@ export default function DashboardPage() {
     void (async () => setNotifications(await fetchNotifs(key)))();
   }, [user?.id, user?.phone]);
 
-  /* بازکردنِ پنل یعنی خوانده شدند */
+  /* بازکردن پنل یعنی خوانده شدند */
   useEffect(() => {
     const key = user?.id ?? user?.phone;
     if (!notifOpen || !key || unread === 0) return;
@@ -101,7 +101,7 @@ export default function DashboardPage() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   }, [notifOpen]);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* مسابقه‌ی پیشِ‌رو از سرور می‌آید. پیش‌تر از آرایه‌ی نمونه خوانده
+  /* مسابقه‌ی پیش‌رو از سرور می‌آید. پیش‌تر از آرایه‌ی نمونه خوانده
      می‌شد و `?? SAMPLE_TOURNAMENTS[0]` تضمین می‌کرد همیشه یک مسابقه‌ی
      ساختگی نمایش داده شود — حتی وقتی هیچ مسابقه‌ای وجود نداشت.
      حالا اگر چیزی نباشد، کارت اصلاً نمایش داده نمی‌شود. */
@@ -125,8 +125,8 @@ export default function DashboardPage() {
   /* ثبت‌نام‌های من از سرور خوانده می‌شود، نه از localStorage.
 
      نسخه‌ی قبلی همه‌ی کلیدهای `tournament-regs-*` مرورگر را می‌خواند و
-     با شماره‌ی تلفن فیلتر می‌کرد. یعنی روی دستگاهِ دیگر هیچ ثبت‌نامی
-     دیده نمی‌شد، و وضعیتِ پرداخت هم هرچه آخرین‌بار محلی ذخیره شده بود
+     با شماره‌ی تلفن فیلتر می‌کرد. یعنی روی دستگاه دیگر هیچ ثبت‌نامی
+     دیده نمی‌شد، و وضعیت پرداخت هم هرچه آخرین‌بار محلی ذخیره شده بود
      می‌ماند — نه آنچه واقعاً روی سرور است. */
   useEffect(() => {
     if (!user) return;
@@ -142,7 +142,7 @@ export default function DashboardPage() {
           id: x.id,
           tournamentId: x.tournamentId,
           tournamentName: x.tournamentTitle,
-          /* واژگانِ سرور به همانی که این صفحه می‌شناسد */
+          /* واژگان سرور به همانی که این صفحه می‌شناسد */
           status: x.status === 'CONFIRMED' ? 'approved'
             : x.status === 'PENDING_PAYMENT' ? 'pending'
             : 'rejected',
@@ -302,13 +302,13 @@ export default function DashboardPage() {
 
         @media(max-width:900px) {
           .dash-grid    { grid-template-columns: 1fr !important; }
-          /* ستونِ 1fr کوچک‌تر از min-content بچه‌ها نمی‌شود و همین باعث
+          /* ستون 1fr کوچک‌تر از min-content بچه‌ها نمی‌شود و همین باعث
              می‌شد کارت‌ها در صفحه‌های باریک از کادر بزنند بیرون */
           .dash-grid > * { min-width: 0 !important; }
           .stats-row    { grid-template-columns: repeat(2,1fr) !important; }
           .actions-row  { grid-template-columns: repeat(3,1fr) !important; }
         }
-        /* موبایل — حسِ اپ: دسترسی سریع مثل تب‌بار، ۴تایی و فشرده */
+        /* موبایل — حس اپ: دسترسی سریع مثل تب‌بار، ۴تایی و فشرده */
         @media(max-width:640px) {
           .actions-row { grid-template-columns: repeat(4,1fr) !important; gap: 7px !important; }
           .quick-action { padding: 10px 2px !important; gap: 6px !important; border-radius: 13px !important; }
@@ -695,11 +695,11 @@ export default function DashboardPage() {
             {/* ── RIGHT COLUMN ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '130px' }}>
 
-              {/* «بسته‌ی آگهیِ من» و «بسته‌ی استوریِ من» برداشته شدند.
-                  آن‌ها رابطِ سیستمِ قدیمیِ سهمیه‌ای بودند که در فازهای ۲ تا ۶
-                  جایش را به معماریِ Placement/Campaign داد؛ سهمیه هم اکنون
+              {/* «بسته‌ی آگهی من» و «بسته‌ی استوری من» برداشته شدند.
+                  آن‌ها رابط سیستم قدیمی سهمیه‌ای بودند که در فازهای ۲ تا ۶
+                  جایش را به معماری Placement/Campaign داد؛ سهمیه هم اکنون
                   خاموش است (ads_quota_enabled=false). نگه‌داشتنشان یعنی نشان
-                  دادنِ بسته‌ای که کاربر نه خریده و نه می‌تواند بخرد. */}
+                  دادن بسته‌ای که کاربر نه خریده و نه می‌تواند بخرد. */}
               <ScrollReveal>
                 <div className="dash-card">
                   <div className="card-label">
@@ -707,7 +707,7 @@ export default function DashboardPage() {
                     تبلیغات
                   </div>
                   <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 2, margin: '0 0 14px' }}>
-                    جایگاه‌های تبلیغاتیِ سایت، کمپین‌های فعال و گزارشِ نمایش و کلیک.
+                    جایگاه‌های تبلیغاتی سایت، کمپین‌های فعال و گزارش نمایش و کلیک.
                   </p>
                   <Link href="/advertise/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.28)', borderRadius: '12px', color: '#A07840', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>
                     پنل تبلیغات من
@@ -715,7 +715,7 @@ export default function DashboardPage() {
                 </div>
               </ScrollReveal>
 
-              {/* مسابقه‌ی پیشِ‌رو — فقط وقتی واقعاً مسابقه‌ای هست */}
+              {/* مسابقه‌ی پیش‌رو — فقط وقتی واقعاً مسابقه‌ای هست */}
               {upcomingTournament && (
               <ScrollReveal>
                 <div className="dash-card" style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.15)' }}>

@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
-   قراردادِ تسویه — نسخه‌ی فعلی «دستی» است (ادمین واریز می‌کند و
+   قرارداد تسویه — نسخه‌ی فعلی «دستی» است (ادمین واریز می‌کند و
    شماره‌ی پیگیری ثبت می‌شود). در آینده می‌توان Split Payment یا
-   تسویه‌ی خودکار را بدونِ تغییر در Booking/Ledger اضافه کرد.
+   تسویه‌ی خودکار را بدون تغییر در Booking/Ledger اضافه کرد.
    ───────────────────────────────────────────────────────────── */
 import { rpc, sb } from '../finance/db'
 
@@ -14,11 +14,11 @@ export interface SettlementRecord {
 
 export interface SettlementProvider {
   readonly name: string
-  /** ایجادِ درخواستِ تسویه از موجودیِ در انتظارِ باشگاه */
+  /** ایجاد درخواست تسویه از موجودی در انتظار باشگاه */
   createSettlement(clubId: string, adminId: string): Promise<{ ok: boolean; settlement?: SettlementRecord; message?: string }>
-  /** شروعِ پردازش (برای دستی: علامت‌گذاری «در حالِ انجام») */
+  /** شروع پردازش (برای دستی: علامت‌گذاری «در حال انجام») */
   processSettlement(id: string): Promise<{ ok: boolean; message?: string }>
-  /** نهایی‌سازی با شماره‌ی پیگیریِ واریز */
+  /** نهایی‌سازی با شماره‌ی پیگیری واریز */
   completeSettlement(id: string, reference: string): Promise<{ ok: boolean; settlement?: SettlementRecord; message?: string }>
   getSettlementStatus(id: string): Promise<SettlementRecord | null>
 }
@@ -53,9 +53,9 @@ class ManualSettlementProvider implements SettlementProvider {
 
 function translate(e: { message?: string }): string {
   const m = e?.message || ''
-  if (m.includes('nothing_to_settle')) return 'موجودیِ قابلِ تسویه‌ای وجود ندارد'
-  if (m.includes('bank_account_not_verified')) return 'حسابِ بانکیِ باشگاه تأیید نشده است'
-  if (m.includes('account_not_found')) return 'حسابِ مالیِ باشگاه یافت نشد'
+  if (m.includes('nothing_to_settle')) return 'موجودی قابل تسویه‌ای وجود ندارد'
+  if (m.includes('bank_account_not_verified')) return 'حساب بانکی باشگاه تأیید نشده است'
+  if (m.includes('account_not_found')) return 'حساب مالی باشگاه یافت نشد'
   if (m.includes('settlement_not_found')) return 'تسویه یافت نشد'
   return m || 'خطای نامشخص'
 }

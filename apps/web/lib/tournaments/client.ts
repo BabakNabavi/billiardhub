@@ -1,15 +1,15 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   پلِ مسابقات به سرور — برای صفحه‌های عمومی.
+   پل مسابقات به سرور — برای صفحه‌های عمومی.
 
    شش صفحه‌ی مسابقات از `SAMPLE_TOURNAMENTS` (آرایه‌ی هاردکد) می‌خواندند،
-   یعنی کاربر مسابقه‌های ساختگی می‌دید و هیچ‌کدام قابلِ ثبت‌نامِ واقعی
+   یعنی کاربر مسابقه‌های ساختگی می‌دید و هیچ‌کدام قابل ثبت‌نام واقعی
    نبودند.
 
    این‌جا داده‌ی واقعی خوانده و به **همان شکلی** نگاشت می‌شود که صفحه‌ها
-   از قبل انتظار دارند (`Tournament`). این‌طور شش صفحه بدونِ بازنویسی
-   وصل می‌شوند و ریسکِ شکستنِ چیدمان صفر است.
+   از قبل انتظار دارند (`Tournament`). این‌طور شش صفحه بدون بازنویسی
+   وصل می‌شوند و ریسک شکستن چیدمان صفر است.
    ───────────────────────────────────────────────────────────── */
 
 import type { Tournament, GameType, TournamentStatus } from '../mock-tournaments'
@@ -33,7 +33,7 @@ export interface DbTournament {
   seatsLeft?: number
 }
 
-/* وضعیتِ سرور ← وضعیتی که صفحه‌ها می‌شناسند */
+/* وضعیت سرور ← وضعیتی که صفحه‌ها می‌شناسند */
 const STATUS: Record<string, TournamentStatus> = {
   draft: 'upcoming',
   published: 'upcoming',
@@ -44,11 +44,11 @@ const STATUS: Record<string, TournamentStatus> = {
   cancelled: 'finished',
 }
 
-/* رشته‌ی دیتابیس ← نوعِ بازیِ صفحه‌ها.
+/* رشته‌ی دیتابیس ← نوع بازی صفحه‌ها.
 
-   واژگانِ دو طرف یکی نیست: دیتابیس با اصطلاحِ ایرانی کار می‌کند
-   (pocket / highball) و این صفحه‌ها با اصطلاحِ بین‌المللی (8ball /
-   9ball). هرچیزِ ناشناخته به `other` می‌افتد تا رنگ و برچسب نشکند. */
+   واژگان دو طرف یکی نیست: دیتابیس با اصطلاح ایرانی کار می‌کند
+   (pocket / highball) و این صفحه‌ها با اصطلاح بین‌المللی (8ball /
+   9ball). هرچیز ناشناخته به `other` می‌افتد تا رنگ و برچسب نشکند. */
 const GAME: Record<string, GameType> = {
   snooker: 'snooker',
   pocket: '8ball',
@@ -57,7 +57,7 @@ const GAME: Record<string, GameType> = {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** تاریخِ شمسی از ISO — همان شکلی که صفحه‌ها نمایش می‌دهند */
+/** تاریخ شمسی از ISO — همان شکلی که صفحه‌ها نمایش می‌دهند */
 function faDate(iso: string): string {
   try {
     return new Intl.DateTimeFormat('fa-IR', {
@@ -91,12 +91,12 @@ export function toTournament(r: DbTournament): Tournament {
     paymentMethod: 'online',
     status: STATUS[r.status] ?? 'upcoming',
     registeredCount: taken,
-    /* آمارِ نتایج هنوز از سرور نمی‌آید — این‌ها بعد از پیاده‌سازیِ
-       جدولِ نتایج پر می‌شوند و تا آن روز خالی می‌مانند، نه ساختگی. */
+    /* آمار نتایج هنوز از سرور نمی‌آید — این‌ها بعد از پیاده‌سازی
+       جدول نتایج پر می‌شوند و تا آن روز خالی می‌مانند، نه ساختگی. */
   } as Tournament
 }
 
-/** همه‌ی مسابقاتِ عمومی */
+/** همه‌ی مسابقات عمومی */
 export async function fetchTournaments(clubId?: string): Promise<Tournament[]> {
   try {
     const q = clubId ? `?clubId=${encodeURIComponent(clubId)}` : ''
@@ -113,7 +113,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   return all.find(t => t.id === id) ?? null
 }
 
-/** ظرفیت و وضعیتِ لحظه‌ای — برای صفحه‌ی ثبت‌نام */
+/** ظرفیت و وضعیت لحظه‌ای — برای صفحه‌ی ثبت‌نام */
 export async function fetchSeats(id: string): Promise<{
   seatsLeft: number; maxPlayers: number; entryFee: number; status: string
 } | null> {

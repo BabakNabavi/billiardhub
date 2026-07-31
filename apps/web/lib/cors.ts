@@ -1,14 +1,14 @@
 /* ─────────────────────────────────────────────────────────────
-   هدرهای CORS — یک منبعِ واحد.
+   هدرهای CORS — یک منبع واحد.
 
    چرا «*» حذف شد: مرورگر هرگز پاسخی با
-   `Access-Control-Allow-Origin: *` را همراهِ کوکی نمی‌پذیرد. چون
-   احرازِ هویت دارد کوکی‌محور می‌شود، «*» باید جای خودش را به
-   originِ مشخص بدهد وگرنه در مرحله‌ی ب همه‌چیز می‌شکند.
+   `Access-Control-Allow-Origin: *` را همراه کوکی نمی‌پذیرد. چون
+   احراز هویت دارد کوکی‌محور می‌شود، «*» باید جای خودش را به
+   origin مشخص بدهد وگرنه در مرحله‌ی ب همه‌چیز می‌شکند.
 
    اپ same-origin است (مرورگر /api/… را روی همان دامنه صدا می‌زند)
-   و برای درخواستِ same-origin اصلاً CORS لازم نیست؛ این هدرها فقط
-   برای سازگاری با فراخوان‌های احتمالیِ بیرونی می‌مانند.
+   و برای درخواست same-origin اصلاً CORS لازم نیست؛ این هدرها فقط
+   برای سازگاری با فراخوان‌های احتمالی بیرونی می‌مانند.
    ───────────────────────────────────────────────────────────── */
 
 const ALLOWED = [
@@ -19,7 +19,7 @@ const ALLOWED = [
   'http://localhost:3001',
 ]
 
-/** آیا این origin مجاز است؟ دامنه‌های پیش‌نمایشِ ورسل هم پذیرفته‌اند. */
+/** آیا این origin مجاز است؟ دامنه‌های پیش‌نمایش ورسل هم پذیرفته‌اند. */
 function isAllowed(origin: string): boolean {
   if (ALLOWED.includes(origin)) return true
   try {
@@ -28,7 +28,7 @@ function isAllowed(origin: string): boolean {
   } catch { return false }
 }
 
-/** هدرهای CORS برای یک درخواستِ مشخص */
+/** هدرهای CORS برای یک درخواست مشخص */
 export function corsHeaders(req?: { headers: Headers }): Record<string, string> {
   const origin = req?.headers.get('origin') ?? ''
   const base: Record<string, string> = {
@@ -43,7 +43,7 @@ export function corsHeaders(req?: { headers: Headers }): Record<string, string> 
   return base
 }
 
-/* سازگاری با کدِ فعلی که CORS را به‌صورتِ آبجکتِ ثابت import می‌کند.
-   بدونِ origin، هدرِ Allow-Origin صادر نمی‌شود — که برای same-origin
+/* سازگاری با کد فعلی که CORS را به‌صورت آبجکت ثابت import می‌کند.
+   بدون origin، هدر Allow-Origin صادر نمی‌شود — که برای same-origin
    کاملاً بی‌اثر است و برای cross-origin یعنی «مجاز نیست». */
 export const CORS: Record<string, string> = corsHeaders()

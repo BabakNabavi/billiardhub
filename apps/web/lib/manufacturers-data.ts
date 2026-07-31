@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   تولیدکنندگان — منبعِ واحد (مثل lib/sellers-data برای فروشگاه‌ها).
+   تولیدکنندگان — منبع واحد (مثل lib/sellers-data برای فروشگاه‌ها).
    هم صفحه‌ی لیست (/manufacturers) و هم صفحه‌ی تولیدکننده (/manufacturers/[id])
    از همین می‌خوانند تا کلیک روی هر کارت همان تولیدکننده را باز کند.
    ───────────────────────────────────────────────────────────── */
@@ -7,7 +7,7 @@
 export interface MfrProduct {
   id: string
   name: string
-  category: string          // برچسبِ آزادِ دسته (میز اسنوکر، چوب، پارچه، …)
+  category: string          // برچسب آزاد دسته (میز اسنوکر، چوب، پارچه، …)
   description: string
   specs: string[]
   image: string
@@ -19,15 +19,15 @@ export interface MockManufacturer {
   name: string
   city: string
   verified: boolean
-  elite: boolean            // «تولیدکننده‌ی رسمی» (نشانِ طلایی روی کارت)
+  elite: boolean            // «تولیدکننده‌ی رسمی» (نشان طلایی روی کارت)
   since: string
   sinceYear: number
   productCount: number
-  specialties: string[]     // روی کارت زیرِ لوکیشن با برچسبِ «تخصص:»
+  specialties: string[]     // روی کارت زیر لوکیشن با برچسب «تخصص:»
   responseTime: string
   phone: string
   bannerImage: string
-  description: string        // کوتاه — کارت + باکسِ «درباره ما»
+  description: string        // کوتاه — کارت + باکس «درباره ما»
 
   /* ── فقط صفحه‌ی تولیدکننده ── */
   tagline: string
@@ -59,7 +59,7 @@ export const MANUFACTURERS: MockManufacturer[] = [
     responseTime: '۲ ساعت',
     phone: '02166345678',
     bannerImage: '/images/shop/snooker-table.webp',
-    description: 'بزرگ‌ترین تولیدکننده‌ی میزهای حرفه‌ای بیلیارد در خاورمیانه — با استانداردِ WPBSA و بیش از ۲۵ سال تجربه.',
+    description: 'بزرگ‌ترین تولیدکننده‌ی میزهای حرفه‌ای بیلیارد در خاورمیانه — با استاندارد WPBSA و بیش از ۲۵ سال تجربه.',
     tagline: 'تولیدکننده‌ی رسمی میزهای حرفه‌ای بیلیارد — استاندارد WPBSA',
     about: 'کارخانه بیلیارد سازان ایران با بیش از ۲۵ سال تجربه، پیشرو در تولید تجهیزات حرفه‌ای بیلیارد در خاورمیانه است. محصولات این کارخانه در بیش از ۶ کشور عرضه می‌شود و در مسابقات رسمی ایران استفاده می‌گردد.',
     employees: '۸۵',
@@ -97,8 +97,8 @@ export const MANUFACTURERS: MockManufacturer[] = [
     responseTime: '۴ ساعت',
     phone: '03136543210',
     bannerImage: '/images/shop/cue_billiard_2.webp',
-    description: 'سازنده‌ی چوب‌های سفارشیِ حرفه‌ای با چوب‌های نادرِ جهان — تأییدشده‌ی فدراسیون بیلیارد.',
-    tagline: 'سازنده‌ی چوب‌های سفارشیِ حرفه‌ای',
+    description: 'سازنده‌ی چوب‌های سفارشی حرفه‌ای با چوب‌های نادر جهان — تأییدشده‌ی فدراسیون بیلیارد.',
+    tagline: 'سازنده‌ی چوب‌های سفارشی حرفه‌ای',
     about: 'پارسه متخصص ساخت چوب‌های سفارشی بیلیارد با چوب‌های نادر جهان است و چوب تیم ملی را تأمین می‌کند.',
     employees: '۳۰',
     exportCountries: '۲',
@@ -110,8 +110,8 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا چهارشنبه، ۹ تا ۱۸',
     website: 'www.parsecue.ir',
     products: [
-      { id: 'p1', name: 'چوب سفارشی Parsé Master', category: 'چوب', description: 'ساخته‌شده با چوب افرا کانادایی و نوکِ چرمِ آبگینه', specs: ['وزن: ۵۴۰ گرم', 'طول: ۱۴۷ سانتی‌متر', 'نوک: چرم آبگینه'], image: '/images/shop/cue_billiard_2.webp', badge: 'انحصاری' },
-      { id: 'p2', name: 'چوب حرفه‌ای Parsé Sport', category: 'چوب', description: 'چوب دو تکه‌ی مناسبِ بازیکنانِ باشگاهی', specs: ['وزن: ۵۲۰ گرم', 'اتصال: پین فولادی', 'روکش: لاکِ مات'], image: '/images/shop/cue_billiard_2.webp' },
+      { id: 'p1', name: 'چوب سفارشی Parsé Master', category: 'چوب', description: 'ساخته‌شده با چوب افرا کانادایی و نوک چرم آبگینه', specs: ['وزن: ۵۴۰ گرم', 'طول: ۱۴۷ سانتی‌متر', 'نوک: چرم آبگینه'], image: '/images/shop/cue_billiard_2.webp', badge: 'انحصاری' },
+      { id: 'p2', name: 'چوب حرفه‌ای Parsé Sport', category: 'چوب', description: 'چوب دو تکه‌ی مناسب بازیکنان باشگاهی', specs: ['وزن: ۵۲۰ گرم', 'اتصال: پین فولادی', 'روکش: لاک مات'], image: '/images/shop/cue_billiard_2.webp' },
     ],
     certificates: [
       { title: 'تأیید فدراسیون', issuer: 'فدراسیون بیلیارد و اسنوکر', year: '۱۳۹۵' },
@@ -130,9 +130,9 @@ export const MANUFACTURERS: MockManufacturer[] = [
     responseTime: '۸ ساعت',
     phone: '03538245678',
     bannerImage: '/images/shop/Home_table.webp',
-    description: 'تنها تولیدکننده‌ی تخصصیِ پارچه‌ی میزِ بیلیارد در ایران، با استانداردِ ملی.',
-    tagline: 'تولیدِ پارچه‌ی تخصصیِ میزهای بیلیارد',
-    about: 'رویال تنها تولیدکننده‌ی تخصصیِ پارچه‌ی میزِ بیلیارد در ایران است و پارچه‌ی بسیاری از باشگاه‌های کشور را تأمین می‌کند.',
+    description: 'تنها تولیدکننده‌ی تخصصی پارچه‌ی میز بیلیارد در ایران، با استاندارد ملی.',
+    tagline: 'تولید پارچه‌ی تخصصی میزهای بیلیارد',
+    about: 'رویال تنها تولیدکننده‌ی تخصصی پارچه‌ی میز بیلیارد در ایران است و پارچه‌ی بسیاری از باشگاه‌های کشور را تأمین می‌کند.',
     employees: '۱۸',
     exportCountries: '۱',
     totalProduced: '۸٬۵۰۰',
@@ -143,8 +143,8 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا پنج‌شنبه، ۸ تا ۱۶',
     website: '',
     products: [
-      { id: 'p1', name: 'پارچه‌ی Premium Green', category: 'پارچه', description: 'پارچه‌ی سبزِ استانداردِ مسابقات', specs: ['ترکیب: ۸۰٪ پشم', 'ضخامت: ۳٫۵mm', 'عرض: ۱۹۰ سانتی‌متر'], image: '/images/shop/Home_table.webp' },
-      { id: 'p2', name: 'پارچه‌ی Royal Blue', category: 'پارچه', description: 'پارچه‌ی آبیِ ویژه‌ی میزهای آمریکایی', specs: ['ترکیب: ۷۵٪ پشم', 'ضخامت: ۳٫۸mm'], image: '/images/shop/Home_table.webp', badge: 'جدید' },
+      { id: 'p1', name: 'پارچه‌ی Premium Green', category: 'پارچه', description: 'پارچه‌ی سبز استاندارد مسابقات', specs: ['ترکیب: ۸۰٪ پشم', 'ضخامت: ۳٫۵mm', 'عرض: ۱۹۰ سانتی‌متر'], image: '/images/shop/Home_table.webp' },
+      { id: 'p2', name: 'پارچه‌ی Royal Blue', category: 'پارچه', description: 'پارچه‌ی آبی ویژه‌ی میزهای آمریکایی', specs: ['ترکیب: ۷۵٪ پشم', 'ضخامت: ۳٫۸mm'], image: '/images/shop/Home_table.webp', badge: 'جدید' },
     ],
     certificates: [
       { title: 'استاندارد ملی', issuer: 'سازمان استاندارد ایران', year: '۱۳۹۸' },
@@ -163,9 +163,9 @@ export const MANUFACTURERS: MockManufacturer[] = [
     responseTime: '۱ ساعت',
     phone: '05135678901',
     bannerImage: '/images/shop/Pro_table.webp',
-    description: 'نخستین تولیدکننده‌ی سیستم‌های دیجیتال و هوشمندِ تجهیزات بیلیارد در ایران.',
-    tagline: 'تولیدِ تجهیزاتِ هوشمندِ بیلیارد',
-    about: 'شرکت نوین اولین تولیدکننده‌ی سیستم‌های دیجیتال و هوشمندِ تجهیزات بیلیارد در ایران است و روی نورپردازی و امتیازشماریِ خودکار تمرکز دارد.',
+    description: 'نخستین تولیدکننده‌ی سیستم‌های دیجیتال و هوشمند تجهیزات بیلیارد در ایران.',
+    tagline: 'تولید تجهیزات هوشمند بیلیارد',
+    about: 'شرکت نوین اولین تولیدکننده‌ی سیستم‌های دیجیتال و هوشمند تجهیزات بیلیارد در ایران است و روی نورپردازی و امتیازشماری خودکار تمرکز دارد.',
     employees: '۲۵',
     exportCountries: '۳',
     totalProduced: '۲٬۱۰۰',
@@ -176,8 +176,8 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا چهارشنبه، ۹ تا ۱۷',
     website: 'www.novintechbilliard.ir',
     products: [
-      { id: 'p1', name: 'میز اسنوکر LED Pro', category: 'میز هوشمند', description: 'میز اسنوکر با نورپردازیِ LED هوشمند و تایمر دیجیتال', specs: ['LED Edge Lighting', 'تایمر دیجیتال', 'کنترل از موبایل'], image: '/images/shop/Pro_table.webp', badge: 'نوآورانه' },
-      { id: 'p2', name: 'نمایشگر امتیاز دیجیتال', category: 'نمایشگر دیجیتال', description: 'اسکوربوردِ لمسیِ حرفه‌ای برای باشگاه‌ها', specs: ['نمایشگر ۲۱ اینچ', 'اتصال بی‌سیم', 'اپلیکیشن اختصاصی'], image: '/images/shop/pool_chalk_1.jpg' },
+      { id: 'p1', name: 'میز اسنوکر LED Pro', category: 'میز هوشمند', description: 'میز اسنوکر با نورپردازی LED هوشمند و تایمر دیجیتال', specs: ['LED Edge Lighting', 'تایمر دیجیتال', 'کنترل از موبایل'], image: '/images/shop/Pro_table.webp', badge: 'نوآورانه' },
+      { id: 'p2', name: 'نمایشگر امتیاز دیجیتال', category: 'نمایشگر دیجیتال', description: 'اسکوربورد لمسی حرفه‌ای برای باشگاه‌ها', specs: ['نمایشگر ۲۱ اینچ', 'اتصال بی‌سیم', 'اپلیکیشن اختصاصی'], image: '/images/shop/pool_chalk_1.jpg' },
     ],
     certificates: [
       { title: 'ایزو ۹۰۰۱', issuer: 'سازمان استاندارد ایران', year: '۱۴۰۲' },

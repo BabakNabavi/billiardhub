@@ -45,7 +45,7 @@ interface Product {
 const DEFAULT_SLUG = '1'
 
 /* پیش‌فرض‌ها — تا وقتی صاحب فروشگاه در /dashboard/seller چیزی ذخیره نکرده،
-   صفحه با همین‌ها نمایش داده می‌شود. هر فیلدِ ذخیره‌شده جای همتای خودش را می‌گیرد. */
+   صفحه با همین‌ها نمایش داده می‌شود. هر فیلد ذخیره‌شده جای همتای خودش را می‌گیرد. */
 const STORE = {
   id: DEFAULT_SLUG, brand: 'پروکیو', title: 'فروشگاه تجهیزات بیلیارد بابی', logoText: 'پک',
   province: 'تهران', city: 'تهران',
@@ -65,7 +65,7 @@ const STORE = {
   storyText: 'جدیدترین کالکشن چوب‌های کربنی Predator رسید — همین حالا ببینید!',
 }
 
-/* محصولاتِ یک فروشنده (به شکلِ کارت) — بر اساس id همان فروشگاه */
+/* محصولات یک فروشنده (به شکل کارت) — بر اساس id همان فروشگاه */
 function productsForSeller(sellerId: string): Product[] {
   return productsBySeller(sellerId).map(sp => ({
     id: String(sp.id),
@@ -83,7 +83,7 @@ function productsForSeller(sellerId: string): Product[] {
   }))
 }
 
-/* ─── اسلایدر عکسِ آپلودشده (بنر هدر + باکس درباره ما) ─── */
+/* ─── اسلایدر عکس آپلودشده (بنر هدر + باکس درباره ما) ─── */
 function ImageSlider({ images }: { images: string[] }) {
   const [i, setI] = useState(0)
   const shots = images
@@ -115,18 +115,18 @@ function ImageSlider({ images }: { images: string[] }) {
   )
 }
 
-/* ════════ پوسترهای پیش‌فرض — به‌سبکِ هدرِ صفحه‌ی مربیان (کامپوننتِ لایه‌ای، نه عکس) ════════
-   هر پوستر: گرادیانِ تیره + بافتِ نقطه‌ای + گلوی طلایی + خطوطِ اریبِ چوب + موتیفِ ظریفِ خطیِ طلایی. */
+/* ════════ پوسترهای پیش‌فرض — به‌سبک هدر صفحه‌ی مربیان (کامپوننت لایه‌ای، نه عکس) ════════
+   هر پوستر: گرادیان تیره + بافت نقطه‌ای + گلوی طلایی + خطوط اریب چوب + موتیف ظریف خطی طلایی. */
 const STORE_POSTERS = [
   { bg: 'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)', sub: 'PROFESSIONAL BILLIARD SHOP' },  // سرمه‌ای (مثل کاور مربی)
-  { bg: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', sub: 'CUES · BALLS · TABLES'        },  // نمدِ سبز
+  { bg: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', sub: 'CUES · BALLS · TABLES'        },  // نمد سبز
   { bg: 'linear-gradient(120deg,#141414 0%,#26221d 55%,#17140f 100%)', sub: 'PRO EQUIPMENT · لوازم حرفه‌ای' },  // زغالی-طلایی
   { bg: 'linear-gradient(120deg,#101c2b 0%,#14324a 55%,#0d2334 100%)', sub: 'ABOUT US · درباره ما'         },  // پوستر «درباره ما»
 ]
 
-/* پوستر پیش‌فرض — عیناً به سبکِ کاورِ صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
-   گلوی طلایی + خط اریب + وردمارکِ «بیلیارد هاب» + نامِ فروشگاه (خودکار) + زیرنویس.
-   about=true ⇒ ترکیبِ وسط‌چینِ باکسِ «درباره ما»؛ وگرنه حالتِ راست‌چینِ هدر. */
+/* پوستر پیش‌فرض — عیناً به سبک کاور صفحه‌ی مربی: زمینه‌ی تیره + بافت نقطه‌ای +
+   گلوی طلایی + خط اریب + وردمارک «بیلیارد هاب» + نام فروشگاه (خودکار) + زیرنویس.
+   about=true ⇒ ترکیب وسط‌چین باکس «درباره ما»؛ وگرنه حالت راست‌چین هدر. */
 function StorePoster({ variant, title, about = false }: { variant: number; title?: string; about?: boolean }) {
   const p = STORE_POSTERS[variant % STORE_POSTERS.length]!
   const layers = (
@@ -160,7 +160,7 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
       {layers}
-      {/* وردمارک BILLIARD HUB + نامِ فروشگاه + زیرنویس (راست‌چین) */}
+      {/* وردمارک BILLIARD HUB + نام فروشگاه + زیرنویس (راست‌چین) */}
       <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 9, maxWidth: 'min(62%,520px)' }}>
         <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
         {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
@@ -170,7 +170,7 @@ function StorePoster({ variant, title, about = false }: { variant: number; title
   )
 }
 
-/* اسلایدرِ پوسترهای پیش‌فرض — کراس‌فِیدِ نرم بین چند پوستر (نامِ فروشگاه خودکار روی همه) */
+/* اسلایدر پوسترهای پیش‌فرض — کراس‌فید نرم بین چند پوستر (نام فروشگاه خودکار روی همه) */
 function PosterSlider({ variants, title }: { variants: number[]; title?: string }) {
   const [active, setActive] = useState(0)
   useEffect(() => {
@@ -268,34 +268,34 @@ function CategoryDropdown({
 
 /* ═══ صفحه ═══ */
 export default function FlatShop() {
-  /* شناسه‌ی فروشگاه از آدرس (/sellers/[id]) — هر کارت فروشگاهِ خودش را باز می‌کند،
+  /* شناسه‌ی فروشگاه از آدرس (/sellers/[id]) — هر کارت فروشگاه خودش را باز می‌کند،
      نه همیشه فروشگاه شماره‌ی ۱. */
   const params = useParams()
   const sellerId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_SLUG
 
-  /* پروفایلِ ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
+  /* پروفایل ذخیره‌شده‌ی همین فروشگاه (از /dashboard/seller).
      بعد از mount خوانده می‌شود تا SSR و کلاینت یکی باشند. */
   const [profile, setProfile] = useState<SellerProfile | null>(null)
   useEffect(() => {
     setProfile(getSellerProfile(sellerId))
-    /* منبعِ حقیقت سرور است — فروشگاهِ کاربرانِ دیگر فقط از این‌جا می‌آید */
+    /* منبع حقیقت سرور است — فروشگاه کاربران دیگر فقط از این‌جا می‌آید */
     void fetchProfile<SellerProfile>('seller', sellerId).then(p => {
       if (p) setProfile({ ...p.data, slug: p.slug, verified: p.verified } as SellerProfile)
     })
   }, [sellerId])
 
-  /* محصولاتِ همین فروشگاه؛ فروشگاهِ نمونه که محصولِ اختصاصی ندارد، کاتالوگِ دمو را نشان می‌دهد
+  /* محصولات همین فروشگاه؛ فروشگاه نمونه که محصول اختصاصی ندارد، کاتالوگ دمو را نشان می‌دهد
      تا storefront خالی نماند. */
   const PRODUCTS = useMemo(() => {
     const own = productsForSeller(sellerId)
     return own.length ? own : productsForSeller('1')
   }, [sellerId])
 
-  /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلدِ خالی نباید صفحه را خالی کند */
+  /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلد خالی نباید صفحه را خالی کند */
   const store = useMemo(() => {
     if (!profile) {
-      /* پروفایلِ واقعی نیست ⇒ اگر این id یکی از فروشگاه‌های نمونه است، اطلاعاتِ همان را نشان بده
-         (نه پیش‌فرضِ «بابی»). این باعث می‌شود هر کارت، فروشگاهِ خودش را باز کند. */
+      /* پروفایل واقعی نیست ⇒ اگر این id یکی از فروشگاه‌های نمونه است، اطلاعات همان را نشان بده
+         (نه پیش‌فرض «بابی»). این باعث می‌شود هر کارت، فروشگاه خودش را باز کند. */
       const m = getMockSeller(sellerId)
       if (m) return {
         ...STORE, id: sellerId,
@@ -337,7 +337,7 @@ export default function FlatShop() {
   const phoneText = withCode ? `${areaCode}-${phoneDig}` : store.contactPhone
   const phoneHref = withCode ? `${areaCode}${phoneDig}` : phoneDig
 
-  /* دسته‌بندیِ انتخاب‌شده در دراپ‌داون + جستجو + صفحه */
+  /* دسته‌بندی انتخاب‌شده در دراپ‌داون + جستجو + صفحه */
   const [cat, setCat]     = useState<'all' | CatKey>('all')
   const [page, setPage]   = useState(1)
   const [query, setQuery] = useState('')
@@ -363,7 +363,7 @@ export default function FlatShop() {
   }, [PRODUCTS, cat, query])
 
   /* صفحه‌بندی: در حالت «همه محصولات» دو ردیف ۵تایی (۱۰ در هر صفحه).
-     تا ۱۰ محصول هیچ دکمه‌ای نیست؛ از ۱۱ به بعد عددِ ۲ و … پایین صفحه می‌آید. */
+     تا ۱۰ محصول هیچ دکمه‌ای نیست؛ از ۱۱ به بعد عدد ۲ و … پایین صفحه می‌آید. */
   const PER_PAGE  = 10
   const pageCount = Math.max(1, Math.ceil(visible.length / PER_PAGE))
   const safePage  = Math.min(page, pageCount)
@@ -372,8 +372,8 @@ export default function FlatShop() {
   /* با تغییر دسته/جستجو برگرد به صفحه‌ی ۱ */
   useEffect(() => { setPage(1) }, [cat, query])
 
-  /* تغییر صفحه: نرم به بالای گریدِ محصولات اسکرول کن تا صفحه نپرد
-     (وقتی صفحه‌ی بعدی محصولِ کمتری دارد، ارتفاع گرید کم می‌شود و بدونِ این، صفحه می‌پرد). */
+  /* تغییر صفحه: نرم به بالای گرید محصولات اسکرول کن تا صفحه نپرد
+     (وقتی صفحه‌ی بعدی محصول کمتری دارد، ارتفاع گرید کم می‌شود و بدون این، صفحه می‌پرد). */
   const gridRef = useRef<HTMLDivElement>(null)
   const goToPage = (n: number) => {
     setPage(n)
@@ -384,7 +384,7 @@ export default function FlatShop() {
     <div dir="rtl" className="min-h-screen bg-[#F7F5F0] font-[Vazirmatn,Tahoma,sans-serif] text-[#1C1B17]">
 
       <style>{`
-        /* کارت محصول — هم‌فرمِ کارت sec1 در صفحه‌ی بیلیارد بازار.
+        /* کارت محصول — هم‌فرم کارت sec1 در صفحه‌ی بیلیارد بازار.
            عرض را گرید تعیین می‌کند (برخلاف sec1 که کاروسل با عرض ثابت است)، ولی نسبت،
            سهم عکس، گردی، بوردر و فونت‌ها عیناً همان‌اند. */
         .prod-card-sec1 {
@@ -424,7 +424,7 @@ export default function FlatShop() {
       {/* ═══ هدر: بنر اسلایدی + کارت فروشگاه ═══ */}
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6">
         <div className="overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white">
-          {/* بنر — اسلایدرِ عکسِ آپلودشده؛ اگر چیزی نگذاشته، اسلایدرِ ۳ پوسترِ پیش‌فرض */}
+          {/* بنر — اسلایدر عکس آپلودشده؛ اگر چیزی نگذاشته، اسلایدر ۳ پوستر پیش‌فرض */}
           <div className="relative" style={{ height: 'clamp(150px,24vw,250px)', background: '#0a2f22' }}>
             {store.banners.length
               ? <ImageSlider images={store.banners} />
@@ -432,7 +432,7 @@ export default function FlatShop() {
             <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.32) 100%)' }} />
           </div>
 
-          {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیرِ هم */}
+          {/* کارت فروشگاه — لوگو نیمی روی بنر، بقیه زیر هم */}
           <div className="relative px-4 pb-5 sm:px-6 sm:pb-6">
             {/* لوگو با حلقه‌ی استوری — نیمی روی عکس */}
             <button
@@ -447,7 +447,7 @@ export default function FlatShop() {
               </span>
             </button>
 
-            {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیرِ هم */}
+            {/* نام، شهر (با دکمه‌ی تلفن روبه‌رویش سمت چپ)، توضیحات — زیر هم */}
             <h2 className="mt-3 text-[17px] font-bold sm:text-[19px]">{store.title}</h2>
             <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-[12.5px] text-[#8A8474]">
@@ -500,12 +500,12 @@ export default function FlatShop() {
           <CategoryDropdown value={cat} onChange={setCat} counts={catCounts} />
         </div>
 
-        {/* گرید — ۵ ستون در دسکتاپ (۲ ردیفِ ۵تایی = ۱۰ در هر صفحه) */}
+        {/* گرید — ۵ ستون در دسکتاپ (۲ ردیف ۵تایی = ۱۰ در هر صفحه) */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 min-[640px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1120px]:grid-cols-5">
             {paged.map(p => {
               const isWished = wish.has(p.id)
               return (
-                /* کارت هم‌فرمِ sec1 (صفحه‌ی بیلیارد بازار). کلاس‌های bz-scroll-card/pc-body آنجا داخل
+                /* کارت هم‌فرم sec1 (صفحه‌ی بیلیارد بازار). کلاس‌های bz-scroll-card/pc-body آنجا داخل
                    <style> همان صفحه‌اند و اینجا وجود ندارند، پس مقادیرشان اینجا بازتولید شده:
                    نسبت ۱:۱.۹۴۴ (موبایل ۱:۱.۸۴۷)، عکس ۶۰٪، radius ۱۰، بوردر ۱.۵px، فونت‌ها و ردیف قیمت. */
                 <article
@@ -591,7 +591,7 @@ export default function FlatShop() {
       {/* ═══ درباره ما — ۱/۳ اسلایدر سمت راست، متن سمت چپ ═══ */}
       <div className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6">
         <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E7E2D6] bg-white min-[760px]:grid-cols-[1fr_2fr]">
-          {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم)؛ اگر خالی، پوسترِ پیش‌فرضِ «درباره ما» */}
+          {/* اسلایدر ۳ عکسی (سمت راست، یک‌سوم)؛ اگر خالی، پوستر پیش‌فرض «درباره ما» */}
           <div className="relative min-h-[147px] bg-[#0a2a28] min-[760px]:min-h-[270px]">
             {store.aboutImages.length
               ? <ImageSlider images={store.aboutImages} />

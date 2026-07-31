@@ -1,8 +1,8 @@
 'use client'
 
-/* بسته‌های آگهیِ بیلیارد بازار — انتخاب و خرید.
+/* بسته‌های آگهی بیلیارد بازار — انتخاب و خرید.
 
-   صفحه همیشه در دسترس است، حتی وقتی محدودیتِ آگهی خاموش است؛ آن‌وقت
+   صفحه همیشه در دسترس است، حتی وقتی محدودیت آگهی خاموش است؛ آن‌وقت
    بالای صفحه صریح گفته می‌شود که خرید فعلاً لازم نیست، تا کسی بی‌دلیل
    پول ندهد. */
 
@@ -89,12 +89,12 @@ export default function PlansPage() {
             بیشتر آگهی بگذارید، بیشتر دیده شوید
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
-            هر بسته یک سهمیه‌ی مشخص برای ثبتِ آگهی در بیلیارد بازار می‌دهد.
+            هر بسته یک سهمیه‌ی مشخص برای ثبت آگهی در بیلیارد بازار می‌دهد.
             بسته را انتخاب کنید، از درگاه پرداخت کنید، و بلافاصله فعال می‌شود.
           </p>
         </div>
 
-        {/* وضعیتِ فعلیِ خودِ کاربر */}
+        {/* وضعیت فعلی خود کاربر */}
         {mine && (
           <div style={{
             background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: '15px 18px',
@@ -103,17 +103,17 @@ export default function PlansPage() {
             <Sparkles size={18} style={{ color: GOLD_D }} />
             <div style={{ flex: 1, minWidth: 220 }}>
               <div style={{ fontSize: 13.5, fontWeight: 800 }}>
-                {mine.planName ? `بسته‌ی فعالِ شما: ${mine.planName}` : 'شما بسته‌ی فعالی ندارید'}
+                {mine.planName ? `بسته‌ی فعال شما: ${mine.planName}` : 'شما بسته‌ی فعالی ندارید'}
               </div>
               <div style={{ fontSize: 12.5, color: MUT, marginTop: 4, lineHeight: 1.9 }}>
                 {mine.limit === 0
-                  ? 'آگهیِ نامحدود'
-                  : `${fa(mine.used)} از ${fa(mine.limit)} آگهیِ این ${PERIOD_FA[mine.period]} استفاده شده — ${fa(Math.max(0, mine.limit - mine.used))} تا مانده`}
+                  ? 'آگهی نامحدود'
+                  : `${fa(mine.used)} از ${fa(mine.limit)} آگهی این ${PERIOD_FA[mine.period]} استفاده شده — ${fa(Math.max(0, mine.limit - mine.used))} تا مانده`}
                 {mine.planExpiresAt ? ` · اعتبار تا ${faDate(mine.planExpiresAt)}` : ''}
               </div>
             </div>
             <Link href="/dashboard" style={{ fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none' }}>
-              پنلِ من ←
+              پنل من ←
             </Link>
           </div>
         )}
@@ -124,7 +124,7 @@ export default function PlansPage() {
             padding: '13px 17px', marginBottom: 20, fontSize: 13, color: '#14532D', lineHeight: 2,
           }}>
             در حال حاضر محدودیتی برای تعداد آگهی اعمال نمی‌شود و همه می‌توانند آزادانه آگهی ثبت کنند.
-            خریدِ بسته فعلاً لازم نیست — این صفحه برای وقتی است که محدودیت فعال شود.
+            خرید بسته فعلاً لازم نیست — این صفحه برای وقتی است که محدودیت فعال شود.
           </div>
         )}
 
@@ -134,8 +134,8 @@ export default function PlansPage() {
             padding: '13px 17px', marginBottom: 20, fontSize: 13, color: GOLD_D, lineHeight: 2,
           }}>
             {mine
-              ? `سهمیه‌ی رایگانِ شما ${fa(mine.limit)} آگهی در هر ${PERIOD_FA[mine.period]} است.`
-              : 'سهمیه‌ی رایگانِ هر کاربر بسته به نقشش متفاوت است.'}
+              ? `سهمیه‌ی رایگان شما ${fa(mine.limit)} آگهی در هر ${PERIOD_FA[mine.period]} است.`
+              : 'سهمیه‌ی رایگان هر کاربر بسته به نقشش متفاوت است.'}
             {' '}برای بیشتر از آن، یکی از بسته‌های زیر را تهیه کنید.
           </div>
         )}
@@ -157,14 +157,14 @@ export default function PlansPage() {
             <Package size={28} style={{ color: MUT, opacity: 0.6, marginBottom: 10 }} />
             <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 8px' }}>هنوز بسته‌ای برای فروش تعریف نشده است</p>
             <p style={{ fontSize: 13, color: MUT, margin: 0, lineHeight: 2 }}>
-              تا آن موقع، ثبتِ آگهی در بیلیارد بازار برای شما آزاد است.
+              تا آن موقع، ثبت آگهی در بیلیارد بازار برای شما آزاد است.
             </p>
             <Link href="/shop/new" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16, textDecoration: 'none',
               background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
               borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 800,
             }}>
-              ثبتِ آگهی <ArrowLeft size={14} />
+              ثبت آگهی <ArrowLeft size={14} />
             </Link>
           </div>
         ) : (
@@ -196,7 +196,7 @@ export default function PlansPage() {
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 18px', display: 'grid', gap: 9 }}>
                   {[
-                    p.quota === 0 ? 'ثبتِ آگهیِ نامحدود' : `${fa(p.quota)} آگهی در هر ${PERIOD_FA[p.period]}`,
+                    p.quota === 0 ? 'ثبت آگهی نامحدود' : `${fa(p.quota)} آگهی در هر ${PERIOD_FA[p.period]}`,
                     `${fa(p.durationDays)} روز اعتبار`,
                     'نمایش در بیلیارد بازار برای همه‌ی کاربران',
                   ].map(t => (
@@ -214,14 +214,14 @@ export default function PlansPage() {
                     cursor: buying ? 'not-allowed' : 'pointer', opacity: buying && buying !== p.id ? 0.55 : 1,
                     transition: 'transform .2s',
                   }}>
-                  {buying === p.id ? <><Loader2 size={15} className="animate-spin" /> در حال انتقال به درگاه…</> : 'خریدِ بسته'}
+                  {buying === p.id ? <><Loader2 size={15} className="animate-spin" /> در حال انتقال به درگاه…</> : 'خرید بسته'}
                 </button>
               </article>
             ))}
           </div>
         )}
 
-        {/* درخواستِ تبلیغ — همان‌جا که کاربر دنبال دیده‌شدن است */}
+        {/* درخواست تبلیغ — همان‌جا که کاربر دنبال دیده‌شدن است */}
         <div style={{
           marginTop: 28, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18, padding: '20px 22px',
           display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
@@ -230,7 +230,7 @@ export default function PlansPage() {
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ fontSize: 14.5, fontWeight: 900, marginBottom: 5 }}>تبلیغ در بیلیارد هاب</div>
             <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
-              اگر به‌جای آگهی، دنبالِ بنرِ تبلیغاتی در صفحه‌ی اصلی یا بیلیارد بازار هستید،
+              اگر به‌جای آگهی، دنبال بنر تبلیغاتی در صفحه‌ی اصلی یا بیلیارد بازار هستید،
               درخواستتان را ثبت کنید تا با شما تماس بگیریم.
             </p>
           </div>
@@ -239,7 +239,7 @@ export default function PlansPage() {
             background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
             borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 800,
           }}>
-            درخواستِ تبلیغ <ArrowLeft size={14} />
+            درخواست تبلیغ <ArrowLeft size={14} />
           </Link>
         </div>
       </div>

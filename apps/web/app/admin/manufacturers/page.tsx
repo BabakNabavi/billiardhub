@@ -1,7 +1,7 @@
 'use client';
 
 /* پنل ادمین — تولیدکنندگان.
-   منبع: جدولِ `profiles` از راهِ `/api/admin/profiles` (پیش‌تر localStorage بود). */
+   منبع: جدول `profiles` از راه `/api/admin/profiles` (پیش‌تر localStorage بود). */
 
 import ProfileAdmin from '../ProfileAdmin';
 import { profileAdminSource } from '../../../lib/admin/profile-rows';

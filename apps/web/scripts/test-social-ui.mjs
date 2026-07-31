@@ -1,8 +1,8 @@
-/* تستِ رابطِ کاربری: مشاهده‌ی استوری توسطِ مهمان + مخفی‌بودنِ تعاملات.
+/* تست رابط کاربری: مشاهده‌ی استوری توسط مهمان + مخفی‌بودن تعاملات.
        node scripts/test-social-ui.mjs [BASE]
 
-   برای اینکه «مهمان استوری می‌بیند» واقعاً سنجیده شود نه فرض، یک استوریِ
-   آزمایشی موقتاً ساخته می‌شود و در پایان فایلِ استوری‌ها دقیقاً به همان
+   برای اینکه «مهمان استوری می‌بیند» واقعاً سنجیده شود نه فرض، یک استوری
+   آزمایشی موقتاً ساخته می‌شود و در پایان فایل استوری‌ها دقیقاً به همان
    محتوای قبلی برگردانده می‌شود (اسنپ‌شات → تزریق → تست → بازگردانی). */
 
 import { createRequire } from 'node:module'
@@ -15,7 +15,7 @@ const puppeteer = require('puppeteer-core')
 const BASE = process.argv[2] || 'http://localhost:3120'
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 const FLAG = 'social_interactions_enabled'
-const STORIES_PATH = 'social/stories/index.json'   // همان مسیرِ P.stories در lib/social-server
+const STORIES_PATH = 'social/stories/index.json'   // همان مسیر P.stories در lib/social-server
 const BUCKET = 'club-media'
 
 let pass = 0, fail = 0
@@ -39,19 +39,19 @@ const sign = u => jwt.sign(
 const CSRF = 'test-csrf-token'
 const adminHeaders = { cookie: `bh_at=${sign(ADMIN)}; bh_csrf=${CSRF}`, 'x-csrf-token': CSRF, 'Content-Type': 'application/json' }
 async function seedSession(page) {
-  /* کوکی برای سرور، localStorage برای کلاینت. زوستند وضعیتِ کاربر را
-     از کلیدِ auth-storage می‌خواند و بدونِ آن، Navbar کاربر را مهمان
+  /* کوکی برای سرور، localStorage برای کلاینت. زوستند وضعیت کاربر را
+     از کلید auth-storage می‌خواند و بدون آن، Navbar کاربر را مهمان
      می‌بیند و آیکون‌ها را اصلاً رندر نمی‌کند. */
   /* دو نکته که بدونشان کاربر بلافاصله بیرون انداخته می‌شود:
 
-     • `bh_session_migrated` ⇒ SessionBridge سراغِ /api/auth/adopt نمی‌رود
-     • `token` در state ⇒ وقتی /api/auth/refresh با ۴۰۱ برمی‌گردد (نشستِ
-       واقعی در دیتابیس نداریم)، SessionBridge می‌بیند توکنِ قدیمی هست و
-       عمداً logout نمی‌کند — همان مسیرِ گذارِ خودِ پروژه.
+     • `bh_session_migrated` ⇒ SessionBridge سراغ /api/auth/adopt نمی‌رود
+     • `token` در state ⇒ وقتی /api/auth/refresh با ۴۰۱ برمی‌گردد (نشست
+       واقعی در دیتابیس نداریم)، SessionBridge می‌بیند توکن قدیمی هست و
+       عمداً logout نمی‌کند — همان مسیر گذار خود پروژه.
 
      `zustand` هنگام rehydrate توکن را از localStorage پاک می‌کند
-     (partialize فقط user را نگه می‌دارد)، پس تنها راهِ پایدار این است که
-     خودِ درخواستِ refresh پاسخِ ۵۰۳ بگیرد: «سرویس موقتاً نیست، کاری نکن».
+     (partialize فقط user را نگه می‌دارد)، پس تنها راه پایدار این است که
+     خود درخواست refresh پاسخ ۵۰۳ بگیرد: «سرویس موقتاً نیست، کاری نکن».
 
      continue/respond حتماً در try می‌آید — یک استثنای مدیریت‌نشده در این
      هندلر باعث می‌شد بقیه‌ی درخواست‌ها (از جمله /api/features) معلق
@@ -76,7 +76,7 @@ async function seedSession(page) {
 
 const setFlag = on => fetch(BASE + '/api/admin/settings', { method: 'PATCH', headers: adminHeaders, body: JSON.stringify({ [FLAG]: on }) })
 
-/* ── اسنپ‌شاتِ فایلِ استوری‌ها ────────────────────────────────── */
+/* ── اسنپ‌شات فایل استوری‌ها ────────────────────────────────── */
 async function readStories() {
   const { data, error } = await sb.storage.from(BUCKET).download(STORIES_PATH)
   if (error || !data) return null
@@ -87,7 +87,7 @@ async function writeStories(arr) {
 }
 
 const SNAPSHOT = await readStories()
-console.log(`  اسنپ‌شاتِ استوری‌ها: ${SNAPSHOT === null ? 'فایل وجود ندارد' : SNAPSHOT.length + ' استوری'}`)
+console.log(`  اسنپ‌شات استوری‌ها: ${SNAPSHOT === null ? 'فایل وجود ندارد' : SNAPSHOT.length + ' استوری'}`)
 
 const TEST_STORIES = [
   {
@@ -105,11 +105,11 @@ const TEST_STORIES = [
 let browser
 try {
   await writeStories([...TEST_STORIES, ...(SNAPSHOT ?? [])])
-  console.log('  دو استوریِ آزمایشی تزریق شد')
+  console.log('  دو استوری آزمایشی تزریق شد')
 
   browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 
-  /* دسترسی به نوارِ استوری در صفحه‌ی اصلی */
+  /* دسترسی به نوار استوری در صفحه‌ی اصلی */
   const openStrip = async (page) => {
     await page.goto(BASE + '/', { waitUntil: 'networkidle2', timeout: 90000 })
     await page.waitForSelector('[data-story-avatar], .story-ring, img[alt]', { timeout: 15000 }).catch(() => {})
@@ -119,20 +119,20 @@ try {
   await setFlag(false)
   await new Promise(r => setTimeout(r, 400))
 
-  head('بخش ۱۳ — مهمان: باز کردن، ناوبری و بستنِ استوری (پرچم خاموش)')
+  head('بخش ۱۳ — مهمان: باز کردن، ناوبری و بستن استوری (پرچم خاموش)')
   {
     const p = await browser.newPage(); await p.setViewport({ width: 1280, height: 900 })
     const calls = []
     p.on('request', r => { const u = r.url(); if (u.includes('/api/social/')) calls.push(u.replace(BASE, '')) })
     await openStrip(p)
 
-    /* کارتِ استوریِ آزمایشی را با نامش پیدا کن */
+    /* کارت استوری آزمایشی را با نامش پیدا کن */
     const opened = await p.evaluate(() => {
       const btn = [...document.querySelectorAll('.st-item')].find(b => b.textContent?.includes('کاربر آزمایشی'))
       if (!btn) return false
       btn.click(); return true
     })
-    t('نوارِ استوری برای مهمان دیده می‌شود و باز شد', opened)
+    t('نوار استوری برای مهمان دیده می‌شود و باز شد', opened)
 
     await new Promise(r => setTimeout(r, 900))
     const view = await p.evaluate(() => {
@@ -145,15 +145,15 @@ try {
         text: cap.slice(0, 0),
       }
     })
-    t('نمایشگرِ استوری باز شد و محتوا دیده می‌شود', view.openedViewer)
-    t('اینپوتِ پاسخ وجود ندارد', !view.hasReplyInput)
-    t('نوارِ استیکر وجود ندارد', !view.hasStickerBar)
+    t('نمایشگر استوری باز شد و محتوا دیده می‌شود', view.openedViewer)
+    t('اینپوت پاسخ وجود ندارد', !view.hasReplyInput)
+    t('نوار استیکر وجود ندارد', !view.hasStickerBar)
     t('CTAی «برای پاسخ وارد شوید» هم نیست', !view.hasLoginToReply)
 
-    /* ناوبری: استوریِ بعدی با کلیک روی نیمه‌ی چپ */
+    /* ناوبری: استوری بعدی با کلیک روی نیمه‌ی چپ */
     const before = await p.evaluate(() => document.body.innerText.includes('استوری آزمایشی دو'))
     await p.evaluate(() => {
-      /* دو دکمه‌ی نامرئیِ ناوبری: راست = بعدی، چپ = قبلی */
+      /* دو دکمه‌ی نامرئی ناوبری: راست = بعدی، چپ = قبلی */
       const zones = [...document.querySelectorAll('button')].filter(b => {
         const st = getComputedStyle(b)
         return st.position === 'absolute' && parseFloat(st.width) > 60 && b.textContent === ''
@@ -166,7 +166,7 @@ try {
 
     /* بستن */
     await p.evaluate(() => {
-      /* دکمه‌ی × در هدرِ نمایشگر: ۳۲×۳۲ و در بالای صفحه */
+      /* دکمه‌ی × در هدر نمایشگر: ۳۲×۳۲ و در بالای صفحه */
       const x = [...document.querySelectorAll('button')].find(b => {
         const r = b.getBoundingClientRect()
         return Math.round(r.width) === 32 && Math.round(r.height) === 32 && r.top < 140 && b.querySelector('svg')
@@ -183,7 +183,7 @@ try {
     await p.close()
   }
 
-  head('کاربرِ لاگین با پرچمِ خاموش')
+  head('کاربر لاگین با پرچم خاموش')
   {
     const p = await browser.newPage(); await p.setViewport({ width: 1280, height: 900 })
     const calls = []
@@ -200,22 +200,22 @@ try {
       bell: !!document.querySelector('button[aria-label="اعلان‌ها"]'),
       direct: !!document.querySelector('a[aria-label="دایرکت"]'),
     }))
-    t('آیکونِ اعلان‌ها مخفی است', !nav.bell)
-    t('آیکونِ دایرکت مخفی است', !nav.direct)
+    t('آیکون اعلان‌ها مخفی است', !nav.bell)
+    t('آیکون دایرکت مخفی است', !nav.direct)
 
     const social = calls.filter(u => u.includes('/dm') || u.includes('/notifications'))
-    t('پولِ ۱۵ ثانیه‌ای اجرا نشد', social.length === 0, social.join(', '))
+    t('پول ۱۵ ثانیه‌ای اجرا نشد', social.length === 0, social.join(', '))
 
     await p.goto(BASE + '/direct', { waitUntil: 'networkidle2', timeout: 60000 })
     await new Promise(r => setTimeout(r, 700))
     const direct = await p.evaluate(() => document.body.innerText)
-    t('/direct پیامِ «غیرفعال» نشان می‌دهد', direct.includes('موقتاً غیرفعال'), direct.slice(0, 90))
+    t('/direct پیام «غیرفعال» نشان می‌دهد', direct.includes('موقتاً غیرفعال'), direct.slice(0, 90))
     t('/direct صفحه‌ی خالی/شکسته نیست', direct.includes('بازگشت به صفحه'))
     await p.close()
   }
 
   /* ═══ پرچم روشن ═══ */
-  head('بخش ۱۵ — همان صفحات با پرچمِ روشن')
+  head('بخش ۱۵ — همان صفحات با پرچم روشن')
   await setFlag(true)
   await new Promise(r => setTimeout(r, 400))
   {
@@ -232,8 +232,8 @@ try {
       bell: !!document.querySelector('button[aria-label="اعلان‌ها"]'),
       direct: !!document.querySelector('a[aria-label="دایرکت"]'),
     }))
-    t('آیکونِ اعلان‌ها برگشت', nav.bell)
-    t('آیکونِ دایرکت برگشت', nav.direct)
+    t('آیکون اعلان‌ها برگشت', nav.bell)
+    t('آیکون دایرکت برگشت', nav.direct)
 
     const opened = await p.evaluate(() => {
       const btn = [...document.querySelectorAll('.st-item')].find(b => b.textContent?.includes('کاربر آزمایشی'))
@@ -248,7 +248,7 @@ try {
       sticker: !!document.querySelector('button[aria-label="استیکر"]'),
       send: !!document.querySelector('button[aria-label="ارسال"]'),
     }))
-    t('اینپوتِ پاسخ برگشت', ui.reply)
+    t('اینپوت پاسخ برگشت', ui.reply)
     t('دکمه‌ی لایک برگشت', ui.like)
     t('دکمه‌ی استیکر برگشت', ui.sticker)
     t('دکمه‌ی ارسال برگشت', ui.send)
@@ -262,11 +262,11 @@ try {
     await d.goto(BASE + '/direct', { waitUntil: 'networkidle2', timeout: 60000 })
     await new Promise(r => setTimeout(r, 900))
     const txt = await d.evaluate(() => document.body.innerText)
-    t('/direct دوباره صفحه‌ی واقعیِ دایرکت است', !txt.includes('موقتاً غیرفعال'), txt.slice(0, 90))
+    t('/direct دوباره صفحه‌ی واقعی دایرکت است', !txt.includes('موقتاً غیرفعال'), txt.slice(0, 90))
     await d.close()
   }
 
-  head('مهمان با پرچمِ روشن — همچنان نباید تعامل کند')
+  head('مهمان با پرچم روشن — همچنان نباید تعامل کند')
   {
     const p = await browser.newPage(); await p.setViewport({ width: 1280, height: 900 })
     await openStrip(p)
@@ -282,14 +282,14 @@ try {
       viewer: document.body.innerText.includes('استوری آزمایشی'),
     }))
     t('مهمان استوری را می‌بیند', ui.viewer)
-    t('مهمان اینپوتِ پاسخ ندارد', !ui.reply)
+    t('مهمان اینپوت پاسخ ندارد', !ui.reply)
     t('مهمان دکمه‌ی لایک ندارد', !ui.like)
-    t('به‌جایش CTAی ورود می‌بیند (رفتارِ قبلیِ پروژه)', ui.loginCta)
+    t('به‌جایش CTAی ورود می‌بیند (رفتار قبلی پروژه)', ui.loginCta)
     await p.close()
   }
 
 } finally {
-  /* وضعیتِ نهایی: پرچم خاموش، استوری‌ها دقیقاً مثلِ قبل */
+  /* وضعیت نهایی: پرچم خاموش، استوری‌ها دقیقاً مثل قبل */
   await setFlag(false).catch(() => {})
   if (browser) await browser.close().catch(() => {})
   if (SNAPSHOT === null) {
@@ -300,7 +300,7 @@ try {
   const restored = await readStories()
   const same = SNAPSHOT === null ? restored === null || (Array.isArray(restored) && restored.length === 0)
     : JSON.stringify(restored) === JSON.stringify(SNAPSHOT)
-  t('استوری‌ها دقیقاً به وضعیتِ قبل برگشتند', same,
+  t('استوری‌ها دقیقاً به وضعیت قبل برگشتند', same,
     `قبل=${SNAPSHOT === null ? 'null' : SNAPSHOT.length} بعد=${restored === null ? 'null' : restored.length}`)
 }
 

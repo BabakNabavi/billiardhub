@@ -1,7 +1,7 @@
 'use client'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-/* کلاینتِ سمت‌مرورگر با anon key — فقط برای Realtime (اشتراکِ کانالِ دایرکت). */
+/* کلاینت سمت‌مرورگر با anon key — فقط برای Realtime (اشتراک کانال دایرکت). */
 let _c: SupabaseClient | null = null
 export function getSupabaseBrowser(): SupabaseClient | null {
   if (_c) return _c

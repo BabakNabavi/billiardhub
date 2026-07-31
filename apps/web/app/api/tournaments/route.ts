@@ -5,9 +5,9 @@ import { sb, audit, clientIp } from '@/lib/finance/db';
 import { listPublicTournaments, listClubTournaments, seatsLeft } from '@/lib/tournaments/server';
 import { notifyTournamentCreated } from '@/lib/notify';
 
-/* فهرستِ مسابقات + ساختِ مسابقه توسطِ باشگاه.
+/* فهرست مسابقات + ساخت مسابقه توسط باشگاه.
 
-   ساخت فقط با اثباتِ مالکیتِ باشگاه از دیتابیس انجام می‌شود؛ `clubId`
+   ساخت فقط با اثبات مالکیت باشگاه از دیتابیس انجام می‌شود؛ `clubId`
    که کلاینت می‌فرستد تنها یک ادعاست و با `ownsClub` سنجیده می‌شود. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -17,9 +17,9 @@ const STATUSES = new Set([
   'ongoing', 'completed', 'cancelled',
 ]);
 
-/* فرمتِ مسابقه از فهرستِ بسته می‌آید، نه متنِ آزاد — پیش‌تر هرچه کاربر
+/* فرمت مسابقه از فهرست بسته می‌آید، نه متن آزاد — پیش‌تر هرچه کاربر
    تایپ می‌کرد ذخیره می‌شد و «bo5» و «Best of 5» و «حذفی» کنار هم
-   می‌نشستند و قابلِ گروه‌بندی نبودند. */
+   می‌نشستند و قابل گروه‌بندی نبودند. */
 const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
 
 /* تاریخ باید واقعاً تاریخ باشد. رشته‌ی بی‌معنی به‌جای خطای Postgres،
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   const clubId = req.nextUrl.searchParams.get('clubId') ?? undefined;
   const mine = req.nextUrl.searchParams.get('mine') === '1';
 
-  /* پنلِ باشگاه — شاملِ پیش‌نویس‌ها، فقط برای مالک */
+  /* پنل باشگاه — شامل پیش‌نویس‌ها، فقط برای مالک */
   if (mine && clubId && UUID.test(clubId)) {
     const actor = await actorOf(req);
     if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
@@ -91,15 +91,15 @@ export async function POST(req: NextRequest) {
     status,
   };
 
-  /* مهلتِ ثبت‌نام نباید بعد از خودِ مسابقه باشد */
+  /* مهلت ثبت‌نام نباید بعد از خود مسابقه باشد */
   if (row.starts_at && row.registration_ends_at && row.registration_ends_at > row.starts_at) {
-    return NextResponse.json({ message: 'مهلتِ ثبت‌نام نمی‌تواند بعد از تاریخِ برگزاری باشد' }, { status: 400 });
+    return NextResponse.json({ message: 'مهلت ثبت‌نام نمی‌تواند بعد از تاریخ برگزاری باشد' }, { status: 400 });
   }
 
   const { data, error } = await sb().from('tournaments').insert(row).select().single();
   if (error) {
     console.error('[tournaments] insert:', error.message);
-    return NextResponse.json({ message: 'ثبتِ مسابقه انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'ثبت مسابقه انجام نشد' }, { status: 500 });
   }
 
   void audit({

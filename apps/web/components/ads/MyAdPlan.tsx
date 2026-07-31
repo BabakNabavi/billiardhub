@@ -1,6 +1,6 @@
 'use client'
 
-/* آمارِ بسته‌ی آگهیِ کاربر — در پنلِ هر نقشی نشان داده می‌شود:
+/* آمار بسته‌ی آگهی کاربر — در پنل هر نقشی نشان داده می‌شود:
    چه بسته‌ای دارد، تا کی اعتبار دارد، چند آگهی مانده و چه خریده.
 
    وقتی محدودیت خاموش است هم نمایش داده می‌شود ولی صریح می‌گوید که
@@ -64,7 +64,7 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
     <section dir="rtl" style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 18, fontFamily: 'inherit' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <Package size={17} style={{ color: GOLD_D }} />
-        <h2 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>بسته‌ی آگهیِ من</h2>
+        <h2 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>بسته‌ی آگهی من</h2>
         <Link href="/plans" style={{ marginInlineStart: 'auto', fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none' }}>
           بسته‌ها ←
         </Link>
@@ -75,8 +75,8 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
       </div>
       <div style={{ fontSize: 12.5, color: MUT, lineHeight: 1.9, marginBottom: 12 }}>
         {unlimited
-          ? 'ثبتِ آگهیِ نامحدود'
-          : `${fa(quota.used)} از ${fa(quota.limit)} آگهیِ این ${PERIOD_FA[quota.period]} استفاده شده`}
+          ? 'ثبت آگهی نامحدود'
+          : `${fa(quota.used)} از ${fa(quota.limit)} آگهی این ${PERIOD_FA[quota.period]} استفاده شده`}
         {quota.planExpiresAt ? ` · اعتبار تا ${faDate(quota.planExpiresAt)}` : ''}
       </div>
 
@@ -97,15 +97,15 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
 
       {!quota.enabled && (
         <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '0 0 12px' }}>
-          در حال حاضر محدودیتی اعمال نمی‌شود؛ این عدد فقط برای اطلاعِ شماست.
+          در حال حاضر محدودیتی اعمال نمی‌شود؛ این عدد فقط برای اطلاع شماست.
         </p>
       )}
 
       {quota.enabled && quota.identityRequired && (
         <p style={{ fontSize: 12, color: '#B23B2E', fontWeight: 700, lineHeight: 1.9, margin: '0 0 12px' }}>
-          سهمیه‌ی رایگان به هویتِ تأییدشده تعلق می‌گیرد؛ برای فعال‌شدنش،
-          کد ملیِ خود را از{' '}
-          <Link href="/profile/verify" style={{ color: GOLD_D, textDecoration: 'underline' }}>بخشِ احرازِ هویت</Link>
+          سهمیه‌ی رایگان به هویت تأییدشده تعلق می‌گیرد؛ برای فعال‌شدنش،
+          کد ملی خود را از{' '}
+          <Link href="/profile/verify" style={{ color: GOLD_D, textDecoration: 'underline' }}>بخش احراز هویت</Link>
           {' '}تأیید کنید.
         </p>
       )}
@@ -116,7 +116,7 @@ export default function MyAdPlan({ compact = false }: { compact?: boolean }) {
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
           borderRadius: 10, padding: '9px 16px', fontSize: 13, fontWeight: 800, marginBottom: 4,
         }}>
-          خریدِ بسته <ArrowLeft size={14} />
+          خرید بسته <ArrowLeft size={14} />
         </Link>
       )}
 

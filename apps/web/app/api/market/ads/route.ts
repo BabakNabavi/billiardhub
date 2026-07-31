@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 
-/* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگرِ کاربر.
+/* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
 
-   پیش‌تر فرمِ ثبتِ آگهی نتیجه را در localStorage می‌نوشت؛ آگهی را کسی
-   جز خودِ آگهی‌دهنده نمی‌دید و سرور هم نمی‌دانست چند آگهی ثبت شده،
-   پس هیچ سهمیه‌ای قابلِ اعمال نبود. */
+   پیش‌تر فرم ثبت آگهی نتیجه را در localStorage می‌نوشت؛ آگهی را کسی
+   جز خود آگهی‌دهنده نمی‌دید و سرور هم نمی‌دانست چند آگهی ثبت شده،
+   پس هیچ سهمیه‌ای قابل اعمال نبود. */
 
 const num = (v: unknown, d = 0) => {
   const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
@@ -15,7 +15,7 @@ const num = (v: unknown, d = 0) => {
 };
 const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
 
-/* ── فهرستِ آگهی‌ها ─────────────────────────────────────────────── */
+/* ── فهرست آگهی‌ها ─────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const mine = searchParams.get('mine') === '1';
@@ -34,12 +34,12 @@ export async function GET(req: NextRequest) {
   const { data, error } = await q;
   if (error) {
     if (/does not exist|schema cache/i.test(error.message)) return NextResponse.json({ ads: [] });
-    return NextResponse.json({ message: 'خطا در دریافتِ آگهی‌ها' }, { status: 500 });
+    return NextResponse.json({ message: 'خطا در دریافت آگهی‌ها' }, { status: 500 });
   }
   return NextResponse.json({ ads: data ?? [] }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* ── ثبتِ آگهیِ تازه ────────────────────────────────────────────── */
+/* ── ثبت آگهی تازه ────────────────────────────────────────────── */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'برای ثبت آگهی ابتدا وارد شوید' }, { status: 401 });
@@ -53,9 +53,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'نام، قیمت و دسته‌بندی الزامی است' }, { status: 400 });
   }
 
-  /* سهمیه — فاز ۳: بررسی و مصرف در یک قدمِ اتمیک، پیش از درجِ آگهی.
-     سهمیه‌ی رایگان به «شخص» (کد ملی) گره خورده و بینِ همه‌ی حساب‌هایش
-     مشترک است؛ مصرف در دفتر ثبت می‌شود و با حذفِ آگهی برنمی‌گردد. */
+  /* سهمیه — فاز ۳: بررسی و مصرف در یک قدم اتمیک، پیش از درج آگهی.
+     سهمیه‌ی رایگان به «شخص» (کد ملی) گره خورده و بین همه‌ی حساب‌هایش
+     مشترک است؛ مصرف در دفتر ثبت می‌شود و با حذف آگهی برنمی‌گردد. */
   const gate = await consumeAdQuota(actor.id);
   if (!gate.ok) {
     return NextResponse.json(gate.body, { status: gate.status });
@@ -100,10 +100,10 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error('create ad failed:', error.message);
-    /* آگهی درج نشد ⇒ مصرفِ همین درخواست آزاد می‌شود (خطای فنی است، نه «حذفِ آگهی») */
+    /* آگهی درج نشد ⇒ مصرف همین درخواست آزاد می‌شود (خطای فنی است، نه «حذف آگهی») */
     if (gate.consumptionId) await releaseConsumption(gate.consumptionId);
     if (/does not exist|schema cache|column/i.test(error.message)) {
-      return NextResponse.json({ message: 'ساختارِ جدولِ آگهی‌ها به‌روز نیست (مایگریشن ۰۰۶ اجرا نشده)' }, { status: 503 });
+      return NextResponse.json({ message: 'ساختار جدول آگهی‌ها به‌روز نیست (مایگریشن ۰۰۶ اجرا نشده)' }, { status: 503 });
     }
     return NextResponse.json({ message: 'ثبت آگهی انجام نشد' }, { status: 500 });
   }

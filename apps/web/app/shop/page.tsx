@@ -5,15 +5,15 @@
    ─────────────────────────────────────────────────────────────
    ● کاملاً ایزوله: صفحه‌ی فعلی /shop دست‌نخورده است و این مسیر
      را می‌توان بدون هیچ اثری حذف کرد.
-   ● معماری الهام‌گرفته از تجربه‌ی مارکت‌پلیسِ دیوار (سایدبار
+   ● معماری الهام‌گرفته از تجربه‌ی مارکت‌پلیس دیوار (سایدبار
      دسته‌ها/فیلترها، قیمت از-تا، زمان انتشار) ولی با هویت بصری
-     بیلیارد هاب و کارت‌های «عمودی» همان فرمتِ فعلی بازار.
-   ● دیتا از منابعِ موجود:
+     بیلیارد هاب و کارت‌های «عمودی» همان فرمت فعلی بازار.
+   ● دیتا از منابع موجود:
      - محصولات: SHOP_PRODUCTS از app/shop/products.ts (منبع واحد)
        + آگهی‌های کاربر از localStorage «userProducts»
      - شهر فروشنده‌های نمونه: MOCK_SELLERS از lib/sellers-data
      - شهرها: lib/iran-geo (getProvinceNames/getCities) — طبق قانون پروژه
-   ● CATS_M آینه‌ی دقیقِ CATS صفحه‌ی /shop است (آن‌جا local است و
+   ● CATS_M آینه‌ی دقیق CATS صفحه‌ی /shop است (آن‌جا local است و
      export نشده؛ برای دست‌نزدن به صفحه‌ی فعلی این‌جا تکرار شده —
      بعد از تأیید نهایی در یک فایل مشترک ادغام شود).
    ═════════════════════════════════════════════════════════════ */
@@ -57,7 +57,7 @@ const CATS_M = [
   { id: 'ball-bag',  label: 'کیف توپ',  img: '/images/icon/kif/ballcase-icon-256.png' },
   { id: 'rest',      label: 'رست',      img: '/images/icon/rest/rest.png' },
   { id: 'cloth',     label: 'پارچه',    img: '/images/icon/parche/parche.png' },
-  /* تصویرِ روغن در فایلش چپ‌نشین است — کمی به راست هل داده می‌شود */
+  /* تصویر روغن در فایلش چپ‌نشین است — کمی به راست هل داده می‌شود */
   { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil.png', imgStyle: { transform: 'translateX(9%)' } as React.CSSProperties },
   { id: 'towel',     label: 'حوله',     img: '/images/icon/hole/hole.png' },
   { id: 'clothing',  label: 'پوشاک',    img: '/images/icon/pooshak/pooshak.png' },
@@ -65,7 +65,7 @@ const CATS_M = [
   { id: 'other',     label: 'سایر',     img: '/images/icon/other/other.png' },
 ]
 const CAT_IDS = new Set(CATS_M.map(c => c.id))
-/* محصولاتِ نمونه cat=case-bag دارند که در CATS با id=cue-case آمده */
+/* محصولات نمونه cat=case-bag دارند که در CATS با id=cue-case آمده */
 const normCat = (c?: string) => (c === 'case-bag' ? 'cue-case' : c && CAT_IDS.has(c) ? c : 'other')
 const catLabel = (id: string) => CATS_M.find(c => c.id === id)?.label ?? id
 
@@ -88,12 +88,12 @@ interface Listing {
   source: 'shop' | 'user'
 }
 
-/* شهرِ فروشنده‌های نمونه از lib/sellers-data (id → city) */
+/* شهر فروشنده‌های نمونه از lib/sellers-data (id → city) */
 const sellerCity = (sellerId: string) => MOCK_SELLERS.find(s => s.id === sellerId)?.city ?? ''
 
 /* ── آگهی‌های واقعی از سرور ────────────────────────────────────────
-   تا پیش از این، آگهی‌ها فقط در localStorageِ مرورگرِ خودِ آگهی‌دهنده
-   بودند و هیچ‌کسِ دیگری نمی‌دیدشان. */
+   تا پیش از این، آگهی‌ها فقط در localStorage مرورگر خود آگهی‌دهنده
+   بودند و هیچ‌کس دیگری نمی‌دیدشان. */
 function serverAdToListing(a: Record<string, any>): Listing {
   const imgs = Array.isArray(a.images) ? a.images : []
   const price = Number(a.price) || 0
@@ -122,7 +122,7 @@ async function fetchServerAds(): Promise<Listing[] | null> {
 }
 
 /* آگهی‌هایی که از قبل در مرورگر مانده‌اند یک‌بار به سرور منتقل می‌شوند
-   تا با وصل‌شدنِ بازار به سرور چیزی گم نشود. */
+   تا با وصل‌شدن بازار به سرور چیزی گم نشود. */
 async function migrateLocalAds(): Promise<void> {
   try {
     const raw = localStorage.getItem('userProducts')
@@ -130,9 +130,9 @@ async function migrateLocalAds(): Promise<void> {
     const list = JSON.parse(raw) as Record<string, any>[]
     if (!Array.isArray(list) || list.length === 0) { localStorage.removeItem('userProducts'); return }
 
-    /* هر آگهی یک سهمیه مصرف می‌کند و سهمیه برنمی‌گردد؛ پس آگهیِ
+    /* هر آگهی یک سهمیه مصرف می‌کند و سهمیه برنمی‌گردد؛ پس آگهی
        منتقل‌نشده نباید بی‌صدا پاک شود. هرچه ناموفق ماند در مرورگر
-       می‌ماند تا کاربر خودش تصمیم بگیرد (و با تمام‌شدنِ سهمیه، حلقه
+       می‌ماند تا کاربر خودش تصمیم بگیرد (و با تمام‌شدن سهمیه، حلقه
        همان‌جا می‌ایستد). */
     const leftover: Record<string, any>[] = []
     let stop = false
@@ -193,7 +193,7 @@ function loadListings(): Listing[] {
   return [...user, ...base]
 }
 
-/* ── کارت محصول — همان فرمتِ عمودیِ کارت‌های فعلی بازار (ایزوله) ── */
+/* ── کارت محصول — همان فرمت عمودی کارت‌های فعلی بازار (ایزوله) ── */
 function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
   return (
     <Link href={`/shop/${l.id}`} className="mk-card" style={{ animationDelay: `${Math.min(i, 12) * 40}ms`, position: 'relative' }}>
@@ -219,7 +219,7 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
         <div className="mk-priceline">
           {l.disc > 0 && <span className="mk-pct" dir="ltr">٪{toFa(l.disc)}</span>}
           <div style={{ marginInlineStart: 'auto', textAlign: 'left' }}>
-            {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمتِ اصلی جا برای مبلغ + پیلِ ٪ داشته باشد */}
+            {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل ٪ داشته باشد */}
             {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))} <span style={{ fontStyle: 'normal' }}>تومان</span></div>}
             <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</div>
           </div>
@@ -229,14 +229,14 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
   )
 }
 
-/* ── ردیف افقی موبایل — به سبکِ دیوار با هویتِ بازار ── */
+/* ── ردیف افقی موبایل — به سبک دیوار با هویت بازار ── */
 function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
   return (
     <Link href={`/shop/${l.id}`} className="mk-row" style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}>
       <div className="info">
         <span className="ttl">{l.name}</span>
         <span className="cnd">{COND_LABEL[l.condition]}</span>
-        {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمت جا برای مبلغ + پیلِ ٪ داشته باشد */}
+        {/* «تومان» روی خط خط‌خورده تا خط قیمت جا برای مبلغ + پیل ٪ داشته باشد */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
           <span className="prc">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</span>
@@ -289,7 +289,7 @@ function CityPicker({ value, onToggle, onClear }: {
   }, [q, all])
   return (
     <div>
-      {/* شهرهای انتخاب‌شده — با امکان حذفِ تکی */}
+      {/* شهرهای انتخاب‌شده — با امکان حذف تکی */}
       {value.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {value.map(c => (
@@ -303,7 +303,7 @@ function CityPicker({ value, onToggle, onClear }: {
           ))}
         </div>
       )}
-      {/* ذره‌بین فقط نسبت به اینپوت وسط‌چین می‌شود، نه کلِ لیست */}
+      {/* ذره‌بین فقط نسبت به اینپوت وسط‌چین می‌شود، نه کل لیست */}
       <div style={{ position: 'relative' }}>
         <Search size={13} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: MUT, pointerEvents: 'none' }} />
         <input value={q} onChange={e => setQ(e.target.value)}
@@ -368,8 +368,8 @@ export default function MarketNewPage() {
   const mCityRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    /* کاتالوگِ نمونه فوراً نمایش داده می‌شود تا صفحه خالی نماند،
-       بعد آگهی‌های واقعیِ سرور جایگزینِ بخشِ کاربران می‌شوند. */
+    /* کاتالوگ نمونه فوراً نمایش داده می‌شود تا صفحه خالی نماند،
+       بعد آگهی‌های واقعی سرور جایگزین بخش کاربران می‌شوند. */
     setListings(loadListings())
     try { setSavedKeys(new Set(JSON.parse(localStorage.getItem('bh_market_saved') ?? '[]'))) } catch {}
     setReady(true)
@@ -391,7 +391,7 @@ export default function MarketNewPage() {
   }, [])
   const toggleCity = (c: string) =>
     setCities(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
-  /* برچسبِ دکمه‌ی لوکیشن: کل ایران / تهران / تهران +۲ */
+  /* برچسب دکمه‌ی لوکیشن: کل ایران / تهران / تهران +۲ */
   const cityBtnLabel = cities.length === 0 ? 'کل ایران'
     : cities.length === 1 ? cities[0]
     : `${cities[0]} +${toFa(cities.length - 1)}`
@@ -523,7 +523,7 @@ export default function MarketNewPage() {
       <style>{`
         @keyframes mkUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         @keyframes mkSheet { from { transform: translateY(100%); } to { transform: none; } }
-        /* «بازار» — رولِ عمودی: می‌رود بالا، از پایین برمی‌گردد */
+        /* «بازار» — رول عمودی: می‌رود بالا، از پایین برمی‌گردد */
         @keyframes mkWord {
           0%, 68%   { transform: translateY(0);      opacity: 1; }
           76%       { transform: translateY(-130%);  opacity: 0; }
@@ -537,7 +537,7 @@ export default function MarketNewPage() {
           animation: mkWord 3.8s cubic-bezier(.22,1,.36,1) infinite; }
         @media (prefers-reduced-motion: reduce) { .mk-roll { animation: none; } }
 
-        /* ── کارت — همان فرمتِ عمودی کارت‌های /shop ── */
+        /* ── کارت — همان فرمت عمودی کارت‌های /shop ── */
         .mk-card { display: flex; flex-direction: column; background: #fff; border: 1.5px solid rgba(28,28,26,0.18);
           border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit;
           transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s;
@@ -649,7 +649,7 @@ export default function MarketNewPage() {
           color: ${MUT}; padding: 4px; display: flex; z-index: 2; }
         .mk-bk.on { color: ${GOLD_D}; }
         .mk-bk.on svg { fill: ${GOLD_D}; }
-        /* گزارشِ تخلف — زیرِ آیکونِ نشان، با همان تراز */
+        /* گزارش تخلف — زیر آیکون نشان، با همان تراز */
         .mk-rp { position: absolute; top: 34px; left: 8px; z-index: 2;
           color: rgba(0,0,0,0.22) !important; transition: color .2s; }
         .mk-rp:hover { color: #B23B2E !important; }
@@ -688,31 +688,31 @@ export default function MarketNewPage() {
 
         /* ── لی‌آوت ── */
         .mk-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 22px; align-items: start; }
-        /* باکسِ فیلترها کاملاً fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
-           ستونِ گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
-           right با %‏ (نه vw) حساب می‌شود تا عرضِ اسکرول‌بار محاسبه را به‌هم نزند. */
+        /* باکس فیلترها کاملاً fixed است و با هیچ اسکرولی تکان نمی‌خورد؛
+           ستون گرید (.mk-sidebar) فقط جای ۲۷۲px را رزرو می‌کند.
+           right با %‏ (نه vw) حساب می‌شود تا عرض اسکرول‌بار محاسبه را به‌هم نزند. */
         .mk-sidebar { min-width: 0; }
         .mk-sidebar-inner { position: fixed; top: 106px; width: 272px;
           right: calc(max((100% - 1300px) / 2, 0px) + clamp(16px, 3vw, 32px));
           background: #fff; border: 1px solid ${LINE}; border-radius: 16px;
           padding: 6px 16px 10px; max-height: calc(100vh - 126px); overflow-y: auto;
           scrollbar-width: thin; overscroll-behavior: contain; box-sizing: border-box; }
-        /* دسکتاپ: لیستِ آگهی‌ها در ناحیه‌ی خودش اسکرول می‌شود (اپ‌شل) —
-           هر تعداد آگهی هم باشد، صفحه و فوتر روی باکسِ فیلترها نمی‌آیند */
+        /* دسکتاپ: لیست آگهی‌ها در ناحیه‌ی خودش اسکرول می‌شود (اپ‌شل) —
+           هر تعداد آگهی هم باشد، صفحه و فوتر روی باکس فیلترها نمی‌آیند */
         @media (min-width: 901px) {
           .mk-main { padding-bottom: 24px !important; }
           .mk-listcol { height: calc(100vh - 136px); overflow-y: auto;
             overscroll-behavior: contain; scrollbar-width: thin;
             padding-inline-end: 6px; padding-bottom: 30px; box-sizing: border-box; }
         }
-        /* minmax کوچک‌تر ⇒ یک کارتِ بیشتر در هر سطرِ دسکتاپ */
+        /* minmax کوچک‌تر ⇒ یک کارت بیشتر در هر سطر دسکتاپ */
         .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
         .mk-mobilebar { display: none; }
         .mk-drawer { display: none; }
         @media (max-width: 900px) {
           .mk-topbar { display: none; }
           .mk-msearch { display: block; }
-          /* «همه‌ی آگهی‌ها» — جداسازیِ حرفه‌ای: فاصله‌ی بیشتر + نیم‌خطِ طلاییِ محوشونده */
+          /* «همه‌ی آگهی‌ها» — جداسازی حرفه‌ای: فاصله‌ی بیشتر + نیم‌خط طلایی محوشونده */
           .mk-statusbar { margin: 26px 2px 18px !important; }
           .mk-stitle { font-size: 14.5px !important; font-weight: 900 !important; }
           .mk-hr { align-self: center; height: 1px;
@@ -790,7 +790,7 @@ export default function MarketNewPage() {
         </div>
       </div>
 
-      {/* ═══ سرچ‌بار موبایل — لوکیشن داخل خودِ باکس ═══ */}
+      {/* ═══ سرچ‌بار موبایل — لوکیشن داخل خود باکس ═══ */}
       <div className="mk-msearch" ref={mCityRef}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: '#FAFAF7', border: `1px solid ${LINE}`, borderRadius: 14, overflow: 'visible', position: 'relative' }}>
           <Search size={15} style={{ color: MUT, flexShrink: 0, margin: '0 12px 0 4px' }} />

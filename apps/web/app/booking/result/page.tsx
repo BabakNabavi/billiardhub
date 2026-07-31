@@ -1,6 +1,6 @@
 'use client'
 
-/* نتیجه‌ی پرداخت — وضعیت همیشه از سرور خوانده می‌شود، نه از پارامترِ URL. */
+/* نتیجه‌ی پرداخت — وضعیت همیشه از سرور خوانده می‌شود، نه از پارامتر URL. */
 
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -38,8 +38,8 @@ function BookingResult() {
   useEffect(() => {
     if (!bookingId) return
     let alive = true
-    /* با نشست — این مسیر دیگر عمومی نیست. بازگشتِ درگاه یک ناوبریِ
-       سطحِ‌بالا است، پس کوکیِ SameSite=Lax همراه می‌آید. */
+    /* با نشست — این مسیر دیگر عمومی نیست. بازگشت درگاه یک ناوبری
+       سطح‌بالا است، پس کوکی SameSite=Lax همراه می‌آید. */
     apiFetch(`/api/bookings/${bookingId}`, { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (alive) { setB(d); setLoading(false) } })
@@ -54,7 +54,7 @@ function BookingResult() {
       <div style={{ width: '100%', maxWidth: 440, background: '#fff', borderRadius: 22, border: `1px solid ${LINE}`, boxShadow: '0 24px 60px rgba(28,27,23,0.1)', padding: '30px 26px', textAlign: 'center' }}>
         {loading ? (
           <><Loader2 size={30} style={{ color: MUT, animation: 'rspin 1s linear infinite' }} />
-            <p style={{ fontSize: 13.5, color: MUT, marginTop: 12 }}>در حال بررسیِ وضعیتِ پرداخت…</p></>
+            <p style={{ fontSize: 13.5, color: MUT, marginTop: 12 }}>در حال بررسی وضعیت پرداخت…</p></>
         ) : paid ? (
           <>
             <span style={{ display: 'inline-flex', width: 68, height: 68, borderRadius: 22, background: 'rgba(14,122,56,0.1)', color: FELT, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}><CheckCircle2 size={34} /></span>
@@ -77,7 +77,7 @@ function BookingResult() {
             <span style={{ display: 'inline-flex', width: 68, height: 68, borderRadius: 22, background: 'rgba(178,59,46,0.09)', color: '#B23B2E', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}><XCircle size={34} /></span>
             <h1 style={{ fontSize: 20, fontWeight: 900, color: INK, margin: '0 0 8px' }}>پرداخت انجام نشد</h1>
             <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.9 }}>
-              {reason || 'پرداخت تأیید نشد. اگر مبلغی کسر شده، طیِ ۷۲ ساعت به‌صورتِ خودکار بازمی‌گردد.'}
+              {reason || 'پرداخت تأیید نشد. اگر مبلغی کسر شده، طی ۷۲ ساعت به‌صورت خودکار بازمی‌گردد.'}
             </p>
           </>
         )}

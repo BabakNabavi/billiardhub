@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb } from '@/lib/finance/db';
 import { actorOf, ownsClub, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership';
 
-/* تنظیماتِ عملیاتیِ باشگاه — چیزهایی که مالک روزمره عوض می‌کند و
-   نباید با فرمِ بلندِ «ویرایشِ اطلاعات» قاطی شوند.
+/* تنظیمات عملیاتی باشگاه — چیزهایی که مالک روزمره عوض می‌کند و
+   نباید با فرم بلند «ویرایش اطلاعات» قاطی شوند.
 
-   عمداً فقط همین چند کلید پذیرفته می‌شوند: یک PATCH بازِ روی جدولِ
+   عمداً فقط همین چند کلید پذیرفته می‌شوند: یک PATCH باز روی جدول
    clubs یعنی مالک می‌تواند `ibanVerified` یا `verificationStatus` خودش
    را هم دستکاری کند. */
 

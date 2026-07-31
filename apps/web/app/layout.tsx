@@ -13,7 +13,7 @@ import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
 
 
 export const metadata: Metadata = {
-  /* بدونِ metadataBase، نشانی‌های نسبیِ canonical و og:url ناقص می‌مانند */
+  /* بدون metadataBase، نشانی‌های نسبی canonical و og:url ناقص می‌مانند */
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL
     || (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
@@ -29,12 +29,17 @@ export const metadata: Metadata = {
     title: 'بیلیارد هاب | پلتفرم جامع و تخصصی بیلیارد',
     description: 'اتصال بی‌واسطه بازیکنان، باشگاه‌ها، مربیان، داوران و تولیدکنندگان تجهیزات بیلیارد.',
     url: '/', siteName: 'بیلیارد هاب', locale: 'fa_IR', type: 'website',
+    /* تصویرِ اشتراک‌گذاری — تا امروز نبود و شبکه‌های اجتماعی خودشان
+       چیزی از صفحه برمی‌داشتند. لوگوی تازه اندازه‌ی استانداردِ ۱۲۰۰×۶۳۰
+       را دارد. */
+    images: [{ url: '/images/Logo/og-image.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
   },
-  twitter: { card: 'summary_large_image' },
+  twitter: { card: 'summary_large_image', images: ['/images/Logo/og-image.png'] },
   manifest: '/manifest.json',
   icons: {
     icon: [
       { url: '/images/Logo/favicon.ico' },
+      { url: '/images/Logo/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
       { url: '/images/Logo/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
       { url: '/images/Logo/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
     ],
@@ -51,14 +56,14 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   /* `maximumScale: 1` برداشته شد.
-     بزرگ‌نماییِ دومرحله‌ای را برای همه می‌بست — کاربرِ کم‌بینا اصلاً
-     نمی‌توانست متن را بزرگ کند. تنها دلیلِ رایجِ گذاشتنش، زومِ خودکارِ
-     iOS هنگامِ فوکوسِ ورودی است که این‌جا از قبل با
-     `input,textarea,select { font-size:16px }` زیرِ ۹۰۰px حل شده. */
+     بزرگ‌نمایی دومرحله‌ای را برای همه می‌بست — کاربر کم‌بینا اصلاً
+     نمی‌توانست متن را بزرگ کند. تنها دلیل رایج گذاشتنش، زوم خودکار
+     iOS هنگام فوکوس ورودی است که این‌جا از قبل با
+     `input,textarea,select { font-size:16px }` زیر ۹۰۰px حل شده. */
   viewportFit: 'cover',
-  /* عمداً بدونِ interactive-widget: می‌خواهیم کیبورد فقط «روی» محتوا بیاید
-     (مثل اینستاگرام)، نه اینکه کلِ صفحه را جمع/بلرزاند. چیدمانِ استوری و دایرکت
-     خودشان با VisualViewport نوارِ پاسخ را بالای کیبورد نگه می‌دارند. */
+  /* عمداً بدون interactive-widget: می‌خواهیم کیبورد فقط «روی» محتوا بیاید
+     (مثل اینستاگرام)، نه اینکه کل صفحه را جمع/بلرزاند. چیدمان استوری و دایرکت
+     خودشان با VisualViewport نوار پاسخ را بالای کیبورد نگه می‌دارند. */
   themeColor: '#C7A66A',
 };
 
@@ -70,10 +75,10 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <head>
-        {/* `mobile-web-app-capable` را خودِ Next از `appleWebApp.capable`
+        {/* `mobile-web-app-capable` را خود Next از `appleWebApp.capable`
             می‌سازد؛ دستی هم که بود، دوبار در head می‌نشست.
             آنچه Next دیگر نمی‌سازد `apple-mobile-web-app-capable` است و
-            iOSِ پیش از ۱۵٫۴ فقط همان را می‌فهمد — بدونش آیکونِ صفحه‌ی
+            iOS پیش از ۱۵٫۴ فقط همان را می‌فهمد — بدونش آیکون صفحه‌ی
             اصلی به‌جای اپ، سافاری را باز می‌کند. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <style>{`
@@ -85,9 +90,9 @@ export default function RootLayout({
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-DemiBold.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; }
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
-          /* وزن ۹۰۰ همه‌جا استفاده می‌شود — بدون فایلِ واقعی، مرورگر faux-bold کدر می‌سازد */
+          /* وزن ۹۰۰ همه‌جا استفاده می‌شود — بدون فایل واقعی، مرورگر faux-bold کدر می‌سازد */
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Black.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
-          /* از ساختنِ وزن/ایتالیکِ مصنوعی جلوگیری کن — اگر وزنی فایل نداشت، نزدیک‌ترین فایل استفاده شود */
+          /* از ساختن وزن/ایتالیک مصنوعی جلوگیری کن — اگر وزنی فایل نداشت، نزدیک‌ترین فایل استفاده شود */
           * { font-synthesis-weight: none; font-synthesis-style: none; }
           * { font-family: var(--font-base) !important; box-sizing:border-box; }
           input, select, textarea, button { font-family: var(--font-base) !important; }
@@ -104,28 +109,28 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
         <ScrollToTop />
-        {/* همه‌ی ارقامِ رندرشده فارسی می‌شوند — ورودی‌ها و کد دست‌نخورده */}
+        {/* همه‌ی ارقام رندرشده فارسی می‌شوند — ورودی‌ها و کد دست‌نخورده */}
         <PersianDigits />
         <SessionBridge />
-        {/* پرچم‌های قابلیت — یک‌بار برای کلِ اپ خوانده می‌شود.
+        {/* پرچم‌های قابلیت — یک‌بار برای کل اپ خوانده می‌شود.
             `children` همچنان روی سرور رندر می‌شود؛ عبور از یک Provider
-            کلاینتی آن را به کامپوننتِ کلاینتی تبدیل نمی‌کند. */}
+            کلاینتی آن را به کامپوننت کلاینتی تبدیل نمی‌کند. */}
         <FeatureFlagsProvider>
-          {/* AppBoot داخلِ Provider است چون تازه‌سازیِ اشتراکِ پوش را به
-              پرچمِ تعاملات گره زده — پوش امروز فقط برای دایرکت است. */}
+          {/* AppBoot داخل Provider است چون تازه‌سازی اشتراک پوش را به
+              پرچم تعاملات گره زده — پوش امروز فقط برای دایرکت است. */}
           <AppBoot />
           <Navbar />
           <main>{children}</main>
         </FeatureFlagsProvider>
-        {/* جایگاهِ «بنرِ پایینِ صفحه‌ی اصلی» عمداً این‌جا نیست: در layout
-            روی همه‌ی مسیرها می‌نشست، در حالی که کلیدش و مشخصاتِ فاز ۵
-            می‌گویند فقط پایینِ صفحه‌ی اصلی. حالا در app/page.tsx است. */}
-        {/* گیتِ ده‌خطیِ کلاینتی تصمیم می‌گیرد فوتر دیده شود یا نه؛ خودِ
+        {/* جایگاه «بنر پایین صفحه‌ی اصلی» عمداً این‌جا نیست: در layout
+            روی همه‌ی مسیرها می‌نشست، در حالی که کلیدش و مشخصات فاز ۵
+            می‌گویند فقط پایین صفحه‌ی اصلی. حالا در app/page.tsx است. */}
+        {/* گیت ده‌خطی کلاینتی تصمیم می‌گیرد فوتر دیده شود یا نه؛ خود
             فوتر Server Component است و هیچ JSای همراهش نمی‌رود. */}
         <FooterGate><Footer /></FooterGate>
         <ToastProvider />
         {/* راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari و فقط وقتی
-            هنوز نصب نشده. گیت سبک است؛ خودِ شیت lazy بارگذاری می‌شود. */}
+            هنوز نصب نشده. گیت سبک است؛ خود شیت lazy بارگذاری می‌شود. */}
         <AddToHomeScreenGate />
       </body>
     </html>

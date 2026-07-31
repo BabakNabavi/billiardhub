@@ -5,14 +5,14 @@ import { sb } from '@/lib/finance/db';
 
 /* علاقه‌مندی‌های کاربر.
 
-   عمومی نیست: هرکس فقط فهرستِ خودش را می‌بیند و فقط برای خودش
+   عمومی نیست: هرکس فقط فهرست خودش را می‌بیند و فقط برای خودش
    اضافه/حذف می‌کند. `user_id` هرگز از بدنه‌ی درخواست خوانده نمی‌شود —
-   همیشه از توکن می‌آید، وگرنه می‌شد فهرستِ دیگری را دستکاری کرد. */
+   همیشه از توکن می‌آید، وگرنه می‌شد فهرست دیگری را دستکاری کرد. */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TYPES = new Set(['club', 'coach', 'referee', 'seller', 'product']);
 
-/* جدولِ مقصدِ هر نوع — برای غنی‌سازیِ فهرست و انداختنِ رکوردِ یتیم */
+/* جدول مقصد هر نوع — برای غنی‌سازی فهرست و انداختن رکورد یتیم */
 const SOURCE: Record<string, { table: string; cols: string }> = {
   club:    { table: 'clubs',    cols: 'id,name,city,images,logo,"ratingAvg","ratingCount"' },
   seller:  { table: 'users',    cols: 'id,"firstName","lastName",avatar' },
@@ -21,7 +21,7 @@ const SOURCE: Record<string, { table: string; cols: string }> = {
   product: { table: 'products', cols: 'id,title,price,"discountPrice",images' },
 };
 
-/* GET /api/favorites?type=club — فهرستِ من */
+/* GET /api/favorites?type=club — فهرست من */
 export async function GET(req: NextRequest) {
   const actor = await actorOf(req);
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401 });
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
   const rows = (data ?? []) as { id: string; entity_type: string; entity_id: string; created_at: string }[];
 
-  /* یک کوئری به‌ازای هر **نوع**، نه هر رکورد — وگرنه فهرستِ ۵۰تایی
+  /* یک کوئری به‌ازای هر **نوع**، نه هر رکورد — وگرنه فهرست ۵۰تایی
      یعنی ۵۰ رفت‌وبرگشت. */
   const byType = new Map<string, string[]>();
   for (const r of rows) byType.set(r.entity_type, [...(byType.get(r.entity_type) ?? []), r.entity_id]);
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     }
   }));
 
-  /* موجودیتِ حذف‌شده از فهرست می‌افتد (FK چندمقصدی ممکن نیست) */
+  /* موجودیت حذف‌شده از فهرست می‌افتد (FK چندمقصدی ممکن نیست) */
   const favorites = rows
     .map(r => ({ ...r, entity: entities.get(`${r.entity_type}:${r.entity_id}`) ?? null }))
     .filter(r => r.entity !== null);
@@ -70,13 +70,13 @@ export async function POST(req: NextRequest) {
   if (!TYPES.has(entityType)) return NextResponse.json({ message: 'نوع معتبر نیست' }, { status: 400 });
   if (!UUID.test(entityId)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
 
-  /* موجودیت باید واقعاً وجود داشته باشد — وگرنه فهرستِ علاقه‌مندی
+  /* موجودیت باید واقعاً وجود داشته باشد — وگرنه فهرست علاقه‌مندی
      پر می‌شود از شناسه‌های ساختگی. */
   const src = SOURCE[entityType]!;
   const { data: ent } = await sb().from(src.table).select('id').eq('id', entityId).maybeSingle();
   if (!ent) return NextResponse.json({ message: 'مورد یافت نشد' }, { status: 404 });
 
-  /* دوباره‌زدنِ قلب نباید خطا بدهد — همان وضعیت برمی‌گردد */
+  /* دوباره‌زدن قلب نباید خطا بدهد — همان وضعیت برمی‌گردد */
   const { error } = await sb().from('favorites')
     .upsert({ user_id: actor.id, entity_type: entityType, entity_id: entityId },
             { onConflict: 'user_id,entity_type,entity_id', ignoreDuplicates: true });

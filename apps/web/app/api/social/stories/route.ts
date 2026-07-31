@@ -5,9 +5,9 @@ import { actorFromRequest } from '@/lib/finance/db'
 import { getStoryQuotaState } from '@/lib/stories/quota'
 import { redactList } from '@/lib/privacy'
 
-/* سقفِ استوری دیگر هاردکد نیست — از تنظیماتِ ادمین (به تفکیکِ نقش) و
-   بسته‌ی خریداری‌شده می‌آید. اعدادِ قبلی به‌عنوانِ پیش‌فرض در مایگریشنِ
-   ۰۱۳ نشسته‌اند تا رفتارِ امروزِ سایت عوض نشود. */
+/* سقف استوری دیگر هاردکد نیست — از تنظیمات ادمین (به تفکیک نقش) و
+   بسته‌ی خریداری‌شده می‌آید. اعداد قبلی به‌عنوان پیش‌فرض در مایگریشن
+   ۰۱۳ نشسته‌اند تا رفتار امروز سایت عوض نشود. */
 const PERIOD_MS: Record<'day' | 'week' | 'month', number> = { day: DAY, week: 7 * DAY, month: 30 * DAY }
 
 interface SStory {
@@ -23,8 +23,8 @@ export async function GET() {
   const now = Date.now()
   const live = all.filter(s => now - s.createdAt < DAY)
   if (live.length !== all.length) writeJson(P.stories, live).catch(() => {})
-  /* ownerKey برای بیشترِ کاربران شماره‌ی موبایل است و این مسیر عمومی
-     است؛ پس هشِ پایدار برمی‌گردد نه خودِ کلید. */
+  /* ownerKey برای بیشتر کاربران شماره‌ی موبایل است و این مسیر عمومی
+     است؛ پس هش پایدار برمی‌گردد نه خود کلید. */
   return NextResponse.json(
     redactList(live as unknown as Record<string, unknown>[]),
     { headers: CORS },
@@ -32,9 +32,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  /* مالکِ استوری از نشست خوانده می‌شود، نه از بدنه‌ی درخواست.
-     پیش‌تر هرکس می‌توانست ownerKey شخصِ دیگری را بفرستد و هم استوری
-     به نامِ او منتشر کند، هم سهمیه‌اش را خرج کند. */
+  /* مالک استوری از نشست خوانده می‌شود، نه از بدنه‌ی درخواست.
+     پیش‌تر هرکس می‌توانست ownerKey شخص دیگری را بفرستد و هم استوری
+     به نام او منتشر کند، هم سهمیه‌اش را خرج کند. */
   const actor = actorFromRequest(req)
   if (!actor) return NextResponse.json({ message: 'برای انتشار استوری وارد شوید' }, { status: 401, headers: CORS })
 
@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
   const now = Date.now()
   const live = all.filter(x => now - x.createdAt < DAY)
 
-  /* سقف از تنظیماتِ ادمین و بسته‌ی خریداری‌شده می‌آید، نه از عددِ هاردکد.
-     کلیدِ قدیمیِ ارسالی هم شمرده می‌شود تا استوری‌های قبلیِ همین کاربر
+  /* سقف از تنظیمات ادمین و بسته‌ی خریداری‌شده می‌آید، نه از عدد هاردکد.
+     کلید قدیمی ارسالی هم شمرده می‌شود تا استوری‌های قبلی همین کاربر
      از قلم نیفتند و سهمیه دور زده نشود. */
   const keys = [ownerKey, ...(s.ownerKey && s.ownerKey !== ownerKey ? [s.ownerKey] : [])]
   const quota = await getStoryQuotaState(actor.id, async period => {
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   if (!quota.allowed) {
     return NextResponse.json(
-      { message: quota.message ?? 'سقفِ استوریِ شما پر شده است', quotaExceeded: true },
+      { message: quota.message ?? 'سقف استوری شما پر شده است', quotaExceeded: true },
       { status: quota.limit <= 0 ? 403 : 429, headers: CORS },
     )
   }

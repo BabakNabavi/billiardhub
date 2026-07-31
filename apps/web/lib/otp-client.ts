@@ -1,6 +1,6 @@
 'use client'
 
-/* رپرهای کلاینتِ OTP */
+/* رپرهای کلاینت OTP */
 export interface OtpResult { ok: boolean; message?: string; wait?: number; exists?: boolean }
 
 /* purpose='register' ⇒ اگر شماره از قبل حساب داشته باشد، سرور پیامکی
@@ -19,8 +19,8 @@ export async function verifyOtp(mobile: string, code: string): Promise<OtpResult
   } catch { return { ok: false, message: 'خطا در اتصال' } }
 }
 
-/* احراز هویت: شاهکار (کد ملی ↔ موبایل) و در صورتِ دادنِ تاریخ تولد و نام،
-   تطبیقِ نام و نام‌خانوادگی با ثبت‌احوال */
+/* احراز هویت: شاهکار (کد ملی ↔ موبایل) و در صورت دادن تاریخ تولد و نام،
+   تطبیق نام و نام‌خانوادگی با ثبت‌احوال */
 export async function verifyIdentity(
   mobile: string, nationalCode: string,
   extra?: { birthDate?: string; firstName?: string; lastName?: string },

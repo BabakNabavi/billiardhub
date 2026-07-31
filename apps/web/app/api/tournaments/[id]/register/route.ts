@@ -6,11 +6,11 @@ import { audit, clientIp, sb } from '@/lib/finance/db';
 import { getTournament, registerForTournament, seatsLeft } from '@/lib/tournaments/server';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
 
-/* ثبت‌نام در مسابقه + شروعِ پرداخت.
+/* ثبت‌نام در مسابقه + شروع پرداخت.
 
-   ترتیبِ کار عمداً همین است:
+   ترتیب کار عمداً همین است:
      ۱) هویت از نشست
-     ۲) سفارش در دیتابیس ساخته می‌شود و مبلغ **همان‌جا** از جدولِ
+     ۲) سفارش در دیتابیس ساخته می‌شود و مبلغ **همان‌جا** از جدول
         مسابقه خوانده و Snapshot می‌شود
      ۳) تازه بعد از آن به درگاه می‌رویم
 
@@ -20,10 +20,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const REASON_FA: Record<string, string> = {
   not_found: 'مسابقه پیدا نشد',
-  registration_closed: 'ثبت‌نامِ این مسابقه باز نیست',
-  deadline_passed: 'مهلتِ ثبت‌نام تمام شده است',
+  registration_closed: 'ثبت‌نام این مسابقه باز نیست',
+  deadline_passed: 'مهلت ثبت‌نام تمام شده است',
   already_registered: 'شما قبلاً در این مسابقه ثبت‌نام کرده‌اید',
-  full: 'ظرفیتِ مسابقه تکمیل است',
+  full: 'ظرفیت مسابقه تکمیل است',
   server_error: 'ثبت‌نام انجام نشد',
 };
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (!t) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
 
   const body = await req.json().catch(() => ({}));
-  /* نامِ نمایشی از پروفایل خوانده می‌شود؛ آنچه کلاینت می‌فرستد فقط
+  /* نام نمایشی از پروفایل خوانده می‌شود؛ آنچه کلاینت می‌فرستد فقط
      برای نمایش است و روی مبلغ یا مالکیت اثری ندارد. */
   const { data: me } = await sb().from('users')
     .select('"firstName","lastName",phone').eq('id', actor.id).maybeSingle();
@@ -69,22 +69,22 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (out.free) {
     return NextResponse.json({
       ok: true, free: true, registrationId: out.registrationId,
-      message: 'ثبت‌نامِ شما قطعی شد.',
+      message: 'ثبت‌نام شما قطعی شد.',
     });
   }
 
   /* ── پرداخت ──
      عمداً `hasRealGateway()` پرسیده می‌شود، نه `isConfigured()`:
-     رجیستریِ درگاه وقتی چیزی تنظیم نباشد به mock برمی‌گردد و mock
-     همیشه «پیکربندی‌شده» است. تکیه بر آن یعنی اعلامِ «پرداخت موفق»
-     بدونِ جابه‌جاییِ ریالی — همان اشتباهی که این ماژول قبلاً داشت. */
+     رجیستری درگاه وقتی چیزی تنظیم نباشد به mock برمی‌گردد و mock
+     همیشه «پیکربندی‌شده» است. تکیه بر آن یعنی اعلام «پرداخت موفق»
+     بدون جابه‌جایی ریالی — همان اشتباهی که این ماژول قبلاً داشت. */
   if (!hasRealGateway()) {
-    /* صادقانه: سفارش ساخته شد ولی درگاه فعال نیست. هیچ رسیدِ ساختگی
+    /* صادقانه: سفارش ساخته شد ولی درگاه فعال نیست. هیچ رسید ساختگی
        صادر نمی‌شود و ثبت‌نام در PENDING_PAYMENT می‌ماند. */
     return NextResponse.json({
       ok: false, pendingPayment: true, registrationId: out.registrationId,
       amount: out.amount,
-      message: 'پرداختِ آنلاین هنوز فعال نشده است. ثبت‌نامِ شما در انتظارِ پرداخت ثبت شد؛ برای هماهنگی با باشگاه تماس بگیرید.',
+      message: 'پرداخت آنلاین هنوز فعال نشده است. ثبت‌نام شما در انتظار پرداخت ثبت شد؛ برای هماهنگی با باشگاه تماس بگیرید.',
     }, { status: 503 });
   }
 
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   });
 }
 
-/* وضعیتِ ظرفیت — برای نمایش در صفحه */
+/* وضعیت ظرفیت — برای نمایش در صفحه */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });

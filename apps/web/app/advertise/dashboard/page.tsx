@@ -1,6 +1,6 @@
 'use client'
 
-/* داشبوردِ تبلیغ‌دهنده (فاز ۶) — کمپین‌های خودِ کاربر با وضعیت،
+/* داشبورد تبلیغ‌دهنده (فاز ۶) — کمپین‌های خود کاربر با وضعیت،
    پرداخت و آمارشان. هیچ عددی این‌جا محاسبه نمی‌شود؛ همه از سرور
    می‌آید تا با آنچه ادمین می‌بیند یکی باشد. */
 
@@ -58,7 +58,7 @@ export default function AdvertiserDashboard() {
     try {
       const r = await apiFetch('/api/ads/campaigns/mine', { cache: 'no-store' })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { setErr(j?.message || 'برای دیدنِ تبلیغاتتان وارد شوید'); setCampaigns([]); return }
+      if (!r.ok) { setErr(j?.message || 'برای دیدن تبلیغاتتان وارد شوید'); setCampaigns([]); return }
       setCampaigns(j.campaigns ?? [])
       setTotals(j.totals ?? null)
       setErr('')
@@ -83,17 +83,17 @@ export default function AdvertiserDashboard() {
     <div dir="rtl" style={{ fontFamily: 'var(--font-base)', padding: 'clamp(14px,2.5vw,28px)', maxWidth: 1100, margin: '0 auto', minHeight: '70vh' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
         <Megaphone size={21} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>تبلیغاتِ من</h1>
+        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>تبلیغات من</h1>
         <Link href="/advertise" style={{
           marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
           color: GOLD_D, borderRadius: 10, padding: '8px 14px', fontSize: 13, fontWeight: 800, textDecoration: 'none',
         }}>
-          <Plus size={14} /> تبلیغِ تازه
+          <Plus size={14} /> تبلیغ تازه
         </Link>
       </div>
       <p style={{ fontSize: 13, color: MUT, margin: '0 0 18px', lineHeight: 1.95 }}>
-        وضعیتِ هر کمپین، مدتِ نمایش و آمارِ واقعیِ آن — همان اعدادی که در پنلِ مدیریت ثبت شده است.
+        وضعیت هر کمپین، مدت نمایش و آمار واقعی آن — همان اعدادی که در پنل مدیریت ثبت شده است.
       </p>
 
       {err && (
@@ -109,11 +109,11 @@ export default function AdvertiserDashboard() {
         </div>
       ) : (
         <>
-          {/* ── آمارِ کلی ── */}
+          {/* ── آمار کلی ── */}
           {totals && totals.all > 0 && (
             <div style={{ display: 'grid', gap: 11, gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))', marginBottom: 16 }}>
               {[
-                { icon: <Megaphone size={14} />, label: 'کمپینِ فعال', value: fa(totals.active), color: FELT },
+                { icon: <Megaphone size={14} />, label: 'کمپین فعال', value: fa(totals.active), color: FELT },
                 { icon: <Eye size={14} />, label: 'نمایش', value: fa(totals.impressions) },
                 { icon: <MousePointerClick size={14} />, label: 'کلیک', value: fa(totals.clicks), hint: `نرخ کلیک ${toFaDigits(totals.ctr.toFixed(2))}٪` },
                 { icon: <Wallet size={14} />, label: 'هزینه‌ی پرداخت‌شده', value: `${fa(totals.spent)} تومان`, color: GOLD_D },
@@ -129,7 +129,7 @@ export default function AdvertiserDashboard() {
             </div>
           )}
 
-          {/* ── فیلترِ وضعیت ── */}
+          {/* ── فیلتر وضعیت ── */}
           {campaigns.length > 0 && (
             <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 14 }}>
               {TABS.map(t => (
@@ -150,14 +150,14 @@ export default function AdvertiserDashboard() {
           {campaigns.length === 0 ? (
             <div style={{ ...CARD, textAlign: 'center', padding: 34 }}>
               <p style={{ fontSize: 13.5, color: SEC, margin: '0 0 14px', lineHeight: 2 }}>
-                هنوز تبلیغی ثبت نکرده‌اید. جایگاه‌های قابلِ خرید و تعرفه‌هایشان را ببینید.
+                هنوز تبلیغی ثبت نکرده‌اید. جایگاه‌های قابل خرید و تعرفه‌هایشان را ببینید.
               </p>
               <Link href="/advertise" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
                 background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
                 color: GOLD_D, borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 800,
               }}>
-                شروعِ تبلیغ <ArrowLeft size={14} />
+                شروع تبلیغ <ArrowLeft size={14} />
               </Link>
             </div>
           ) : shown.length === 0 ? (

@@ -2,7 +2,7 @@
 
 /* ─────────────────────────────────────────────────────────────
    پنل ادمین — بیلیارد مدیا: انتخاب ویدیوی ویژه (NOW SHOWING)،
-   مخفی/نمایشِ ویدیوها و مرور کانال‌ها با آمار.
+   مخفی/نمایش ویدیوها و مرور کانال‌ها با آمار.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react';
@@ -28,8 +28,8 @@ export default function AdminMediaPage() {
   const [ready, setReady] = useState(false);
 
   /* منبع: `app_settings` روی سرور. تا امروز این دو تنظیم در
-     localStorage بود، پس انتخابِ ادمین فقط روی مرورگرِ خودش اثر
-     داشت و کاربران هیچ‌وقت آن را نمی‌دیدند. کشِ محلی به‌عنوان
+     localStorage بود، پس انتخاب ادمین فقط روی مرورگر خودش اثر
+     داشت و کاربران هیچ‌وقت آن را نمی‌دیدند. کش محلی به‌عنوان
      نسخه‌ی اولیه می‌ماند تا صفحه لحظه‌ی اول خالی نباشد. */
   useEffect(() => {
     setHidden(getHiddenVideoIds());
@@ -44,11 +44,11 @@ export default function AdminMediaPage() {
         const s = j?.settings ?? {};
         if (Array.isArray(s.media_hidden_ids)) setHidden(s.media_hidden_ids.map(String));
         if (typeof s.media_featured_id === 'string') setFeatured(s.media_featured_id);
-      } catch { /* کشِ محلی می‌ماند */ }
+      } catch { /* کش محلی می‌ماند */ }
     })();
   }, []);
 
-  /* نوشتنِ تنظیم روی سرور + هم‌گام نگه‌داشتنِ کشِ محلی */
+  /* نوشتن تنظیم روی سرور + هم‌گام نگه‌داشتن کش محلی */
   const persist = async (patch: Record<string, unknown>) => {
     try {
       await apiFetch('/api/admin/settings', {
@@ -76,7 +76,7 @@ export default function AdminMediaPage() {
           <div>
             <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.24em', color: MUT }}>BILLIARD MEDIA · SUPER ADMIN</span>
             <h1 style={{ fontSize: 'clamp(18px,2.4vw,22px)', fontWeight: 900, margin: '4px 0 0' }}>مدیریت بیلیارد مدیا</h1>
-            <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.8 }}>انتخاب ویدیوی ویژه، مخفی/نمایشِ ویدیوها و مرور کانال‌ها.</p>
+            <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.8 }}>انتخاب ویدیوی ویژه، مخفی/نمایش ویدیوها و مرور کانال‌ها.</p>
           </div>
           <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
             <ArrowLeft size={13} /> پنل ادمین
@@ -90,14 +90,14 @@ export default function AdminMediaPage() {
             <h2 style={{ fontSize: 14.5, fontWeight: 900, margin: 0 }}>ویدیوی ویژه (NOW SHOWING)</h2>
           </div>
           <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px', lineHeight: 1.9 }}>
-            در بیلبوردِ صفحه‌ی مدیا و باندِ مدیای صفحه‌ی اصلی نمایش داده می‌شود. پیش‌فرض: «{defaultFeatured.title}»
+            در بیلبورد صفحه‌ی مدیا و باند مدیای صفحه‌ی اصلی نمایش داده می‌شود. پیش‌فرض: «{defaultFeatured.title}»
           </p>
           <select
             value={featured}
             onChange={e => {
               const v = e.target.value;
               setFeatured(v);
-              setFeaturedOverride(v || null);          // کشِ محلی
+              setFeaturedOverride(v || null);          // کش محلی
               void persist({ media_featured_id: v || null });
             }}
             style={{ width: '100%', maxWidth: 460 }}>
@@ -132,7 +132,7 @@ export default function AdminMediaPage() {
                   </Link>
                   <button
                     onClick={() => {
-                      toggleHiddenVideo(v.id);                 // کشِ محلی
+                      toggleHiddenVideo(v.id);                 // کش محلی
                       const next = getHiddenVideoIds();
                       setHidden(next);
                       void persist({ media_hidden_ids: next });

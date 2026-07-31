@@ -1,16 +1,16 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   ساعاتِ کاریِ باشگاه.
+   ساعات کاری باشگاه.
 
-   نسخه‌ی قبلی یک ردیفِ لخت بود: چک‌باکسِ بی‌برچسب کنارِ دو `input
+   نسخه‌ی قبلی یک ردیف لخت بود: چک‌باکس بی‌برچسب کنار دو `input
    type=time` که در فارسی هم AM/PM لاتین نشان می‌دهند. این نسخه هر روز
-   را یک کارتِ مستقل می‌کند، وضعیتِ باز/تعطیل را با کلیدِ روشن‌وخاموشِ
+   را یک کارت مستقل می‌کند، وضعیت باز/تعطیل را با کلید روشن‌وخاموش
    واضح نشان می‌دهد، و ساعت را از دو `select` می‌گیرد تا همه‌ی ارقام
    فارسی بمانند.
 
-   «همه‌ی روزها مثلِ این روز» هم اضافه شده چون بیشترِ باشگاه‌ها هر هفت
-   روز یک ساعت کار می‌کنند و پر کردنِ هفت ردیف آزاردهنده بود.
+   «همه‌ی روزها مثل این روز» هم اضافه شده چون بیشتر باشگاه‌ها هر هفت
+   روز یک ساعت کار می‌کنند و پر کردن هفت ردیف آزاردهنده بود.
    ───────────────────────────────────────────────────────────── */
 
 import { Copy, Clock } from 'lucide-react'
@@ -38,7 +38,7 @@ const MINS = ['00', '15', '30', '45']
 /** «۰۹:۳۰» از «09:30» */
 const faTime = (t: string) => toFa(t.replace(/:(\d\d)$/, ':$1'))
 
-/** طولِ کار به ساعت — برای نمایشِ خلاصه؛ عبور از نیمه‌شب هم درست حساب می‌شود */
+/** طول کار به ساعت — برای نمایش خلاصه؛ عبور از نیمه‌شب هم درست حساب می‌شود */
 function span(o: string, c: string): number {
   const [oh = 0, om = 0] = o.split(':').map(Number)
   const [ch = 0, cm = 0] = c.split(':').map(Number)
@@ -59,7 +59,7 @@ function TimeSelect({ value, onChange, label }: {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <span style={{ fontSize: 11.5, color: MUT, marginInlineEnd: 2 }}>{label}</span>
-      <select aria-label={`ساعتِ ${label}`} value={h} onChange={e => onChange(`${e.target.value}:${m}`)} style={sel}>
+      <select aria-label={`ساعت ${label}`} value={h} onChange={e => onChange(`${e.target.value}:${m}`)} style={sel}>
         {HOURS.map(x => <option key={x} value={x}>{toFa(x)}</option>)}
       </select>
       <span style={{ color: MUT, fontWeight: 800 }}>:</span>
@@ -111,7 +111,7 @@ export default function WorkingHours({ value, onChange }: {
               borderRadius: 12, padding: '10px 12px',
               opacity: v.isOpen ? 1 : 0.72, transition: 'opacity .2s, background .2s',
             }}>
-              {/* نامِ روز + کلیدِ باز/تعطیل */}
+              {/* نام روز + کلید باز/تعطیل */}
               <button type="button" onClick={() => setDay(d.key, { isOpen: !v.isOpen })}
                 aria-pressed={v.isOpen}
                 style={{
@@ -146,7 +146,7 @@ export default function WorkingHours({ value, onChange }: {
                     {toFa(span(v.open, v.close))} ساعت
                   </span>
 
-                  <button type="button" onClick={() => copyToAll(d.key)} title="همه‌ی روزها مثلِ این روز"
+                  <button type="button" onClick={() => copyToAll(d.key)} title="همه‌ی روزها مثل این روز"
                     style={{
                       marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5,
                       background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)',

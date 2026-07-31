@@ -13,7 +13,7 @@ import { Package, Edit, Trash2, Eye, CheckCircle, Clock, XCircle, Plus, Shopping
 const LQ = 'bg-[rgba(199,166,106,0.12)] border border-[rgba(199,166,106,0.34)] text-[#9A6E38] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(199,166,106,0.18)]';
 const LQ_NEUTRAL = 'bg-[rgba(28,28,26,0.04)] border border-[rgba(28,28,26,0.1)] text-[#5B564B] rounded-[10px] transition-all duration-200 hover:-translate-y-0.5';
 
-/* محصولِ ثبت‌شده در localStorage → شکلِ Product این صفحه */
+/* محصول ثبت‌شده در localStorage → شکل Product این صفحه */
 function mapLocalProduct(up: Record<string, unknown>): Product {
   const num = (v: unknown, d = 0) => (typeof v === 'number' ? v : d);
   const str = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
@@ -41,7 +41,7 @@ function mapLocalProduct(up: Record<string, unknown>): Product {
   };
 }
 
-/* رکوردِ جدولِ products روی سرور → شکلِ Product این صفحه */
+/* رکورد جدول products روی سرور → شکل Product این صفحه */
 function mapServerAd(a: Record<string, unknown>): Product {
   const n = (v: unknown, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d; };
   const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
@@ -151,7 +151,7 @@ export default function MyShopPage() {
 
   useEffect(() => {
     if (!user) return;
-    /* آگهی‌های واقعی از سرور می‌آیند؛ آگهی‌های قدیمیِ باقی‌مانده در همین
+    /* آگهی‌های واقعی از سرور می‌آیند؛ آگهی‌های قدیمی باقی‌مانده در همین
        مرورگر هم نشان داده می‌شوند تا تا پیش از مهاجرت چیزی گم‌شده به‌نظر نرسد. */
     const local = loadLocalProducts({ id: user.id, phone: user.phone });
     fetch('/api/market/ads?mine=1', { cache: 'no-store' })
@@ -176,13 +176,13 @@ export default function MyShopPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('آیا مطمئنی؟')) return;
     setDeleting(id);
-    /* آگهیِ قدیمیِ باقی‌مانده در همین مرورگر را هم پاک کن */
+    /* آگهی قدیمی باقی‌مانده در همین مرورگر را هم پاک کن */
     try {
       const list = JSON.parse(localStorage.getItem('userProducts') ?? '[]') as Record<string, unknown>[];
       const next = list.filter(p => String(p.id) !== String(id));
       if (next.length !== list.length) localStorage.setItem('userProducts', JSON.stringify(next));
     } catch { /* ignore */ }
-    try { await apiFetch(`/api/market/ads/${id}`, { method: 'DELETE' }); } catch { /* آگهیِ فقط‌محلی روی سرور نیست */ }
+    try { await apiFetch(`/api/market/ads/${id}`, { method: 'DELETE' }); } catch { /* آگهی فقط‌محلی روی سرور نیست */ }
     setProducts(products.filter(p => p.id !== id));
     setDeleting(null);
   };

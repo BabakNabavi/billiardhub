@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   Rankings store — پلِ بینِ پنل ادمین (/admin/rankings) و
+   Rankings store — پل بین پنل ادمین (/admin/rankings) و
    صفحه‌ی رنکینگ سایت (/ranking). localStorage، ساختار:
    sport → gender → category → RankingPlayer[]
    ظرفیت‌ها: اسنوکر دسته برتر ۳۲، دسته یک ۱۲۸؛ پاکت ۳۲.
@@ -18,7 +18,7 @@ export type RankingsStructure = Record<string, Record<string, Record<string, Ran
 
 const KEY = 'bh_rankings'
 
-/* ظرفیتِ هر دسته */
+/* ظرفیت هر دسته */
 export const CATEGORY_SIZES: Record<string, Record<string, number>> = {
   snooker: { 'دسته برتر': 32, 'دسته یک': 128, 'زیر ۲۱ سال': 32, 'پیشکسوتان': 32 },
   pocket:  { 'دسته برتر': 32, 'دسته یک': 32,  'زیر ۲۱ سال': 32, 'پیشکسوتان': 32 },
@@ -55,7 +55,7 @@ export function buildEmptyRankings(): RankingsStructure {
   return out
 }
 
-/* ساختارِ ذخیره‌شده را روی ساختارِ خالی سوار می‌کند تا اندازه‌ها همیشه درست باشند */
+/* ساختار ذخیره‌شده را روی ساختار خالی سوار می‌کند تا اندازه‌ها همیشه درست باشند */
 export function mergeIntoEmpty(raw: RankingsStructure | null | undefined): RankingsStructure {
   const base = buildEmptyRankings()
   try {
@@ -81,8 +81,8 @@ export function mergeIntoEmpty(raw: RankingsStructure | null | undefined): Ranki
   } catch { return base }
 }
 
-/* کشِ محلی — فقط برای اینکه صفحه لحظه‌ی اول خالی نباشد.
-   منبعِ حقیقت `app_settings.rankings_board` روی سرور است. */
+/* کش محلی — فقط برای اینکه صفحه لحظه‌ی اول خالی نباشد.
+   منبع حقیقت `app_settings.rankings_board` روی سرور است. */
 export function getStoredRankings(): RankingsStructure {
   if (typeof window === 'undefined') return buildEmptyRankings()
   try {
@@ -95,7 +95,7 @@ export function saveRankings(data: RankingsStructure) {
   localStorage.setItem(KEY, JSON.stringify(data))
 }
 
-/* جدولِ رنکینگ از سرور. `null` یعنی هنوز چیزی ثبت نشده — با «خالی»
+/* جدول رنکینگ از سرور. `null` یعنی هنوز چیزی ثبت نشده — با «خالی»
    یکی نیست و صفحه باید فرقشان را بداند. */
 export async function fetchRankingsBoard(): Promise<RankingsStructure | null> {
   try {
@@ -106,7 +106,7 @@ export async function fetchRankingsBoard(): Promise<RankingsStructure | null> {
   } catch { return null }
 }
 
-/* بازیکنانِ واقعاً واردشده‌ی یک دسته (نامِ خالی حذف می‌شود) */
+/* بازیکنان واقعاً واردشده‌ی یک دسته (نام خالی حذف می‌شود) */
 export function categoryPlayersOf(
   all: RankingsStructure, sport: string, gender: string, category: string,
 ): RankingPlayer[] {

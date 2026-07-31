@@ -1,17 +1,17 @@
 /* ─────────────────────────────────────────────────────────────
-   تاریخِ شمسی — منبعِ واحدِ تبدیل و نمایش.
+   تاریخ شمسی — منبع واحد تبدیل و نمایش.
    هر جای سایت که تاریخ به کاربر نشان داده می‌شود باید از این فایل
-   استفاده کند تا هیچ‌جا تاریخِ میلادی یا رقمِ لاتین دیده نشود.
+   استفاده کند تا هیچ‌جا تاریخ میلادی یا رقم لاتین دیده نشود.
    ───────────────────────────────────────────────────────────── */
 
 export const J_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'] as const
 export const J_DAY_NAMES = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'] as const
 
-/** ارقامِ لاتین → فارسی */
+/** ارقام لاتین → فارسی */
 export const toFaDigits = (v: string | number): string =>
   String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 
-/** عدد با جداکننده‌ی هزارگان و ارقامِ فارسی */
+/** عدد با جداکننده‌ی هزارگان و ارقام فارسی */
 export const faNum = (n: unknown): string => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
 /** میلادی → شمسی */
@@ -52,7 +52,7 @@ export function jalaliToGregorian(jy: number, jm: number, jd: number): [number, 
   return [gy, gm, gd]
 }
 
-/** «۸ مرداد ۱۴۰۵» از یک تاریخِ ISO یا Date */
+/** «۸ مرداد ۱۴۰۵» از یک تاریخ ISO یا Date */
 export function faDate(input: string | Date | null | undefined): string {
   if (!input) return '—'
   const d = input instanceof Date ? input : new Date(/^\d{4}-\d{2}-\d{2}$/.test(input) ? `${input}T00:00:00` : input)
@@ -66,7 +66,7 @@ export function faDateLong(input: string | Date | null | undefined): string {
   if (!input) return '—'
   const d = input instanceof Date ? input : new Date(/^\d{4}-\d{2}-\d{2}$/.test(input) ? `${input}T00:00:00` : input)
   if (isNaN(d.getTime())) return '—'
-  /* شنبه = ۰ در تقویمِ ایرانی؛ getDay(): یک‌شنبه = ۰ */
+  /* شنبه = ۰ در تقویم ایرانی؛ getDay(): یک‌شنبه = ۰ */
   const wd = J_DAY_NAMES[(d.getDay() + 1) % 7]
   return `${wd}، ${faDate(d)}`
 }

@@ -1,14 +1,14 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   تغییرِ رمزِ عبورِ حساب — از داخلِ پروفایل.
+   تغییر رمز عبور حساب — از داخل پروفایل.
 
    دو حالت دارد و خودش تشخیص می‌دهد کدام است:
-     • حسابی که رمز دارد   ⇒ «تغییرِ رمز»، رمزِ فعلی هم پرسیده می‌شود
-     • حسابی که رمز ندارد  ⇒ «تعیینِ رمز» (حسابِ ساخته‌شده با کدِ پیامکی)
+     • حسابی که رمز دارد   ⇒ «تغییر رمز»، رمز فعلی هم پرسیده می‌شود
+     • حسابی که رمز ندارد  ⇒ «تعیین رمز» (حساب ساخته‌شده با کد پیامکی)
 
    پس از موفقیت همه‌ی نشست‌ها باطل می‌شوند — از جمله همین نشست — پس
-   کاربر باید دوباره وارد شود. این را از قبل به او می‌گوییم تا خروجِ
+   کاربر باید دوباره وارد شود. این را از قبل به او می‌گوییم تا خروج
    ناگهانی گیجش نکند.
    ───────────────────────────────────────────────────────────── */
 
@@ -81,13 +81,13 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ text: string; bad: boolean } | null>(null)
 
-  /* «رمز دارد یا نه» را از سرور می‌پرسیم — خودِ هش هرگز برنمی‌گردد */
+  /* «رمز دارد یا نه» را از سرور می‌پرسیم — خود هش هرگز برنمی‌گردد */
   useEffect(() => {
     let alive = true
     apiFetch('/api/auth/change-password', { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
       .then(j => { if (alive && j) setHasPassword(!!j.hasPassword) })
-      .catch(() => { /* اگر نشد، حالتِ محافظه‌کارانه: رمز دارد */ if (alive) setHasPassword(true) })
+      .catch(() => { /* اگر نشد، حالت محافظه‌کارانه: رمز دارد */ if (alive) setHasPassword(true) })
     return () => { alive = false }
   }, [])
 
@@ -96,9 +96,9 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
   }
 
   const submit = async () => {
-    if (hasPassword && !current.trim()) { setMsg({ text: 'رمزِ فعلی را وارد کنید', bad: true }); return }
-    if (!RULES.every(r => r.ok(next)))  { setMsg({ text: 'رمزِ تازه همه‌ی شرط‌های زیر را ندارد', bad: true }); return }
-    if (next !== confirm)               { setMsg({ text: 'رمزِ تازه و تکرارش یکی نیستند', bad: true }); return }
+    if (hasPassword && !current.trim()) { setMsg({ text: 'رمز فعلی را وارد کنید', bad: true }); return }
+    if (!RULES.every(r => r.ok(next)))  { setMsg({ text: 'رمز تازه همه‌ی شرط‌های زیر را ندارد', bad: true }); return }
+    if (next !== confirm)               { setMsg({ text: 'رمز تازه و تکرارش یکی نیستند', bad: true }); return }
 
     setBusy(true); setMsg(null)
     try {
@@ -108,7 +108,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
         body: JSON.stringify({ currentPassword: current, newPassword: next, confirmPassword: confirm }),
       })
       const j = await r.json().catch(() => ({} as Record<string, unknown>))
-      if (!r.ok) { setMsg({ text: String(j.message ?? 'تغییرِ رمز انجام نشد'), bad: true }); return }
+      if (!r.ok) { setMsg({ text: String(j.message ?? 'تغییر رمز انجام نشد'), bad: true }); return }
 
       setCurrent(''); setNext(''); setConfirm('')
       setMsg({ text: String(j.message ?? 'رمز عبور تغییر کرد؛ دوباره وارد شوید.'), bad: false })
@@ -118,12 +118,12 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
     } finally { setBusy(false) }
   }
 
-  const verb = hasPassword === false ? 'تعیینِ رمز' : 'تغییرِ رمز'
+  const verb = hasPassword === false ? 'تعیین رمز' : 'تغییر رمز'
 
   /* خروج از همه‌ی دستگاه‌ها — مسیرش از قبل بود (`{all:true}`) ولی هیچ
-     دکمه‌ای نداشت، پس کاربر راهی برای بستنِ نشستِ گوشیِ گم‌شده نداشت. */
+     دکمه‌ای نداشت، پس کاربر راهی برای بستن نشست گوشی گم‌شده نداشت. */
   const logoutAll = async () => {
-    /* `confirm` این‌جا نامِ فیلدِ «تکرارِ رمز» است و تابعِ مرورگر را
+    /* `confirm` این‌جا نام فیلد «تکرار رمز» است و تابع مرورگر را
        سایه می‌اندازد؛ پس صریح از window خوانده می‌شود. */
     if (!window.confirm('از همه‌ی دستگاه‌ها خارج می‌شوید و باید دوباره وارد شوید. ادامه می‌دهید؟')) return
     setBusy(true)
@@ -140,7 +140,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
     } finally { setBusy(false) }
   }
 
-  /* ── حالتِ جمع‌شده ── */
+  /* ── حالت جمع‌شده ── */
   if (!open) {
     return (
       <div style={{
@@ -159,7 +159,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
           {verb}
         </button>
         <button type="button" onClick={() => void logoutAll()} disabled={busy}
-          title="بستنِ نشستِ همه‌ی دستگاه‌ها"
+          title="بستن نشست همه‌ی دستگاه‌ها"
           style={{
             ...BTN, padding: '8px 14px', fontSize: 12.5,
             background: 'rgba(0,0,0,0.03)', borderColor: LINE, color: SEC,
@@ -175,11 +175,11 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
     )
   }
 
-  /* ── حالتِ باز ── */
+  /* ── حالت باز ── */
   return (
     <div style={{ border: `1px solid ${LINE}`, borderRadius: 13, padding: 14, background: '#FAFAF7' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 900, color: INK }}>{verb}ِ عبور</span>
+        <span style={{ fontSize: 13.5, fontWeight: 900, color: INK }}>{verb} عبور</span>
         <button type="button" onClick={reset} aria-label="بستن"
           style={{ marginInlineStart: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: MUT, display: 'flex' }}>
           <X size={15} />
@@ -187,19 +187,19 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
       </div>
       <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px', lineHeight: 1.95 }}>
         {hasPassword === false
-          ? 'حسابتان با کدِ پیامکی ساخته شده و هنوز رمزی ندارد. با تعیینِ رمز می‌توانید بدونِ پیامک هم وارد شوید.'
-          : 'پس از تغییرِ رمز، همه‌ی دستگاه‌ها — از جمله همین دستگاه — از حساب خارج می‌شوند و باید دوباره وارد شوید.'}
+          ? 'حسابتان با کد پیامکی ساخته شده و هنوز رمزی ندارد. با تعیین رمز می‌توانید بدون پیامک هم وارد شوید.'
+          : 'پس از تغییر رمز، همه‌ی دستگاه‌ها — از جمله همین دستگاه — از حساب خارج می‌شوند و باید دوباره وارد شوید.'}
       </p>
 
       <div style={{ display: 'grid', gap: 10 }}>
         {hasPassword !== false && (
           <Secret value={current} onChange={v => { setCurrent(v); setMsg(null) }}
-            placeholder="رمزِ فعلی" autoFocus />
+            placeholder="رمز فعلی" autoFocus />
         )}
         <Secret value={next} onChange={v => { setNext(v); setMsg(null) }}
-          placeholder="رمزِ تازه" autoFocus={hasPassword === false} />
+          placeholder="رمز تازه" autoFocus={hasPassword === false} />
         <Secret value={confirm} onChange={v => { setConfirm(v); setMsg(null) }}
-          placeholder="تکرارِ رمزِ تازه" onEnter={() => void submit()} />
+          placeholder="تکرار رمز تازه" onEnter={() => void submit()} />
 
         <ul style={{ listStyle: 'none', padding: 0, margin: '2px 0 0', display: 'grid', gap: 5 }}>
           {RULES.map(r => {
@@ -223,7 +223,7 @@ export default function ChangePassword({ onChanged }: { onChanged?: () => void }
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
           <button type="button" onClick={() => void submit()} disabled={busy}
             style={{ ...BTN, opacity: busy ? 0.6 : 1 }}>
-            {busy ? <Loader2 size={14} className="animate-spin" /> : null} ثبتِ رمزِ تازه
+            {busy ? <Loader2 size={14} className="animate-spin" /> : null} ثبت رمز تازه
           </button>
           <button type="button" onClick={reset} disabled={busy}
             style={{ ...BTN, background: 'rgba(0,0,0,0.03)', borderColor: LINE, color: SEC }}>

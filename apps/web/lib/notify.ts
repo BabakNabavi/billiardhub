@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   اطلاع‌رسانیِ رویدادهای رزرو — یک‌جا، تا مسیرهای مالی شلوغ نشوند.
+   اطلاع‌رسانی رویدادهای رزرو — یک‌جا، تا مسیرهای مالی شلوغ نشوند.
    همه‌ی توابع بی‌صدا هستند: خطای پیامک نباید پرداخت یا لغو را بشکند.
    ───────────────────────────────────────────────────────────── */
 
@@ -7,7 +7,7 @@ import { sb } from './finance/db'
 import { notify, SMS } from './sms-server'
 import { faDate, faTimeRange } from './jalali'
 
-/* نامِ فارسیِ نوعِ میز — برای متنِ پیامک */
+/* نام فارسی نوع میز — برای متن پیامک */
 const TABLE_LABEL: Record<string, string> = {
   snooker: 'میز اسنوکر', pocket: 'میز پاکت', highball: 'میز هی‌بال',
   vip_snooker: 'میز VIP اسنوکر', vip_pocket: 'میز VIP پاکت',
@@ -43,14 +43,14 @@ async function clubOf(clubId: string): Promise<{ name: string; ownerId: string |
   return { name: c.name ?? 'باشگاه', ownerId: c.ownerId ?? null, notifyPhone: c.notifyPhone || null }
 }
 
-/** نامِ نمایشیِ کاربر — برای پیامکِ باشگاه‌دار */
+/** نام نمایشی کاربر — برای پیامک باشگاه‌دار */
 async function nameOf(userId: string): Promise<string> {
   const { data } = await sb().from('users').select('"firstName","lastName"').eq('id', userId).maybeSingle()
   const u = (data ?? {}) as { firstName?: string; lastName?: string }
   return `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
 }
 
-/** رزرو قطعی شد — به کاربر، و خبرِ رزروِ جدید به باشگاه‌دار */
+/** رزرو قطعی شد — به کاربر، و خبر رزرو جدید به باشگاه‌دار */
 export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   const b = await loadBooking(bookingId)
   if (!b) return
@@ -63,8 +63,8 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
 
   /* باشگاه‌دار هم باید بداند میزش پر شده.
 
-     مقصد لزوماً شماره‌ی خودِ مالک نیست: بسیاری از باشگاه‌ها به نامِ یک
-     نفر ثبت‌اند ولی کسِ دیگری اداره‌شان می‌کند. اگر «شماره‌ی
+     مقصد لزوماً شماره‌ی خود مالک نیست: بسیاری از باشگاه‌ها به نام یک
+     نفر ثبت‌اند ولی کس دیگری اداره‌شان می‌کند. اگر «شماره‌ی
      اطلاع‌رسانی» تنظیم شده باشد، پیامک به همان می‌رود. */
   if (club && club.ownerId !== b.userId) {
     let tableName = ''
@@ -81,7 +81,7 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   }
 }
 
-/** رزرو لغو شد — با مبلغِ بازگشتی */
+/** رزرو لغو شد — با مبلغ بازگشتی */
 export async function notifyBookingCancelled(bookingId: string, refund: number): Promise<void> {
   const b = await loadBooking(bookingId)
   if (!b) return
@@ -89,7 +89,7 @@ export async function notifyBookingCancelled(bookingId: string, refund: number):
   notify(await phoneOf(b.userId), SMS.bookingCancelled(club?.name ?? 'باشگاه', faDate(b.bookingDate), refund))
 }
 
-/** تسویه به حسابِ باشگاه‌دار واریز شد */
+/** تسویه به حساب باشگاه‌دار واریز شد */
 export async function notifySettlementPaid(clubId: string, amount: number): Promise<void> {
   const club = await clubOf(clubId)
   if (!club?.ownerId) return
@@ -97,17 +97,17 @@ export async function notifySettlementPaid(clubId: string, amount: number): Prom
 }
 
 /* ─────────────────────────────────────────────────────────────
-   رویدادهای ماژولِ باشگاه — تأیید، رد، و مسابقات.
+   رویدادهای ماژول باشگاه — تأیید، رد، و مسابقات.
 
    تا امروز هیچ‌کدام اعلانی نداشتند: ادمین باشگاهی را رد می‌کرد و
    مالک هیچ‌وقت خبردار نمی‌شد؛ فقط اگر تصادفاً به داشبوردش سر می‌زد
-   وضعیت را می‌دید — آن‌هم بدونِ علت.
+   وضعیت را می‌دید — آن‌هم بدون علت.
    ───────────────────────────────────────────────────────────── */
 
 async function ownerPhoneOf(clubId: string): Promise<{ phone: string | null; name: string }> {
   const c = await clubOf(clubId)
   if (!c) return { phone: null, name: 'باشگاه' }
-  /* شماره‌ی اعلانِ باشگاه اگر ثبت شده، وگرنه موبایلِ مالک */
+  /* شماره‌ی اعلان باشگاه اگر ثبت شده، وگرنه موبایل مالک */
   if (c.notifyPhone) return { phone: c.notifyPhone, name: c.name }
   const phone = c.ownerId ? await phoneOf(c.ownerId) : null
   return { phone, name: c.name }
@@ -125,10 +125,10 @@ export async function notifyClubRejected(clubId: string, reason: string): Promis
   const { phone, name } = await ownerPhoneOf(clubId)
   if (!phone) return
   const why = reason?.trim() ? `\nعلت: ${reason.trim()}` : ''
-  notify(phone, `${SMS.brand}\nثبتِ باشگاه «${name}» تأیید نشد.${why}\nپس از اصلاح، از داشبورد دوباره ارسال کنید.`)
+  notify(phone, `${SMS.brand}\nثبت باشگاه «${name}» تأیید نشد.${why}\nپس از اصلاح، از داشبورد دوباره ارسال کنید.`)
 }
 
-/** مسابقه‌ی تازه‌ای در باشگاه ثبت شد — به مالک، به‌عنوانِ رسیدِ ثبت */
+/** مسابقه‌ی تازه‌ای در باشگاه ثبت شد — به مالک، به‌عنوان رسید ثبت */
 export async function notifyTournamentCreated(clubId: string, title: string): Promise<void> {
   const { phone, name } = await ownerPhoneOf(clubId)
   if (!phone) return
@@ -147,12 +147,12 @@ export async function notifyTournamentCancelled(tournamentId: string): Promise<v
     const phone = await phoneOf(r.user_id)
     if (!phone) continue
     const money = r.payment_status === 'PAID'
-      ? '\nمبلغِ پرداختی طیِ روزهای آینده بازگردانده می‌شود.' : ''
+      ? '\nمبلغ پرداختی طی روزهای آینده بازگردانده می‌شود.' : ''
     notify(phone, `${SMS.brand}\nمسابقه «${title}» لغو شد.${money}`)
   }
 }
 
-/** ثبت‌نامِ مسابقه قطعی شد */
+/** ثبت‌نام مسابقه قطعی شد */
 export async function notifyTournamentRegistered(registrationId: string): Promise<void> {
   const { data: r } = await sb().from('tournament_registrations')
     .select('user_id,tournament_id').eq('id', registrationId).maybeSingle()
@@ -166,10 +166,10 @@ export async function notifyTournamentRegistered(registrationId: string): Promis
   const phone = await phoneOf(reg.user_id)
   if (!phone) return
   const when = tt.starts_at ? `\nتاریخ: ${faDate(tt.starts_at)}` : ''
-  notify(phone, `${SMS.brand}\nثبت‌نامِ شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`)
+  notify(phone, `${SMS.brand}\nثبت‌نام شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`)
 }
 
-/** نوبتِ کسی که در لیستِ انتظار بود رسید */
+/** نوبت کسی که در لیست انتظار بود رسید */
 export async function notifyWaitlistPromoted(registrationId: string, needsPayment: boolean): Promise<void> {
   const { data: r } = await sb().from('tournament_registrations')
     .select('user_id,tournament_id,amount').eq('id', registrationId).maybeSingle()
@@ -183,7 +183,7 @@ export async function notifyWaitlistPromoted(registrationId: string, needsPaymen
   const phone = await phoneOf(reg.user_id)
   if (!phone) return
 
-  /* پیامِ پولی حتماً باید فوریت را برساند: صندلی نگه داشته شده ولی
+  /* پیام پولی حتماً باید فوریت را برساند: صندلی نگه داشته شده ولی
      تا پرداخت‌نشدن قطعی نیست. */
   const body = needsPayment
     ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید.`

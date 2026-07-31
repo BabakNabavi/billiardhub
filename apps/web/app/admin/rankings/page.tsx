@@ -22,7 +22,7 @@ export default function AdminRankingsPage() {
 
   /* منبع: `app_settings.rankings_board` روی سرور. تا امروز این جدول
      فقط در localStorage بود، پس رنکینگی که ادمین وارد می‌کرد روی
-     دستگاهِ دیگری — و برای کاربران — اصلاً وجود نداشت. کشِ محلی
+     دستگاه دیگری — و برای کاربران — اصلاً وجود نداشت. کش محلی
      به‌عنوان نسخه‌ی اولیه می‌ماند تا صفحه لحظه‌ی اول خالی نباشد. */
   useEffect(() => {
     setRankings(getStoredRankings());
@@ -33,7 +33,7 @@ export default function AdminRankingsPage() {
         const j = await r.json().catch(() => null) as { settings?: Record<string, unknown> } | null;
         const board = j?.settings?.rankings_board;
         if (board && typeof board === 'object') setRankings(board as RankingsStructure);
-      } catch { /* کشِ محلی می‌ماند */ }
+      } catch { /* کش محلی می‌ماند */ }
     })();
   }, []);
 
@@ -58,8 +58,8 @@ export default function AdminRankingsPage() {
 
   /* ذخیره‌ی واقعی — همین داده در /ranking سایت نمایش داده می‌شود.
 
-     کشِ محلی فقط **بعد از** موفقیتِ سرور نوشته می‌شود. پیش‌تر برعکس
-     بود و اگر سرور رد می‌کرد، ادمین همچنان تغییرش را روی مرورگرِ خودش
+     کش محلی فقط **بعد از** موفقیت سرور نوشته می‌شود. پیش‌تر برعکس
+     بود و اگر سرور رد می‌کرد، ادمین همچنان تغییرش را روی مرورگر خودش
      می‌دید و فکر می‌کرد ذخیره شده — در حالی که برای بقیه هیچ اتفاقی
      نیفتاده بود. */
   const handleSave = async () => {
@@ -76,7 +76,7 @@ export default function AdminRankingsPage() {
       }
     } catch { setErr('خطا در ارتباط با سرور'); return; }
 
-    saveRankings(rankings);            // کشِ محلی، حالا که سرور تأیید کرد
+    saveRankings(rankings);            // کش محلی، حالا که سرور تأیید کرد
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

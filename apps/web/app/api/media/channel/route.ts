@@ -4,7 +4,7 @@ import { CORS, readJson, writeJson, safeKey } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
 import { redactList } from '@/lib/privacy'
 
-/* کانال‌های کاربران — مثل یوتیوب، برای انتشارِ ویدیو داشتنِ کانال لازم است و
+/* کانال‌های کاربران — مثل یوتیوب، برای انتشار ویدیو داشتن کانال لازم است و
    کانال یک مرحله‌ی صریح است (نام + هندل)، نه چیزی که پنهانی ساخته شود. */
 const INDEX = 'social/media/channels.json'
 
@@ -22,8 +22,8 @@ const normHandle = (h: string) => String(h || '').trim().replace(/^@+/, '').repl
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
 /* GET            → همه‌ی کانال‌ها
-   GET ?owner=KEY → کانالِ همان کاربر (اگر ندارد null)
-   GET ?handle=x  → بررسیِ در دسترس بودنِ هندل */
+   GET ?owner=KEY → کانال همان کاربر (اگر ندارد null)
+   GET ?handle=x  → بررسی در دسترس بودن هندل */
 export async function GET(req: NextRequest) {
   const list = await readJson<UserChannel[]>(INDEX, [])
   const owner = req.nextUrl.searchParams.get('owner')
@@ -34,8 +34,8 @@ export async function GET(req: NextRequest) {
     const taken = list.some(c => c.handle === h && (!owner || c.ownerKey !== owner))
     return NextResponse.json({ handle: h, available: !taken && h.length >= 3 }, { headers: CORS })
   }
-  /* پرس‌وجو با owner فقط برای «کانالِ خودم» است؛ مالکیت از نشست
-     بررسی می‌شود تا کسی با شماره‌ی دیگری کانالِ او را نخواند. */
+  /* پرس‌وجو با owner فقط برای «کانال خودم» است؛ مالکیت از نشست
+     بررسی می‌شود تا کسی با شماره‌ی دیگری کانال او را نخواند. */
   if (owner) {
     const actor = await actorOf(req).catch(() => null)
     if (!actor || (actor.dmKey !== owner && actor.id !== owner && !actor.isAdmin)) {
@@ -44,18 +44,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(list.find(c => c.ownerKey === owner) ?? null, { headers: CORS })
   }
 
-  /* فهرستِ عمومیِ کانال‌ها — ownerKey (که غالباً شماره‌ی موبایل است)
-     هش می‌شود تا از مسیرِ عمومی جمع‌آوری نشود. */
+  /* فهرست عمومی کانال‌ها — ownerKey (که غالباً شماره‌ی موبایل است)
+     هش می‌شود تا از مسیر عمومی جمع‌آوری نشود. */
   return NextResponse.json(
     redactList(list as unknown as Record<string, unknown>[]),
     { headers: CORS },
   )
 }
 
-/* POST { ownerKey, name, handle, bio?, avatar? } → ساخت یا ویرایشِ کانال */
+/* POST { ownerKey, name, handle, bio?, avatar? } → ساخت یا ویرایش کانال */
 export async function POST(req: NextRequest) {
-  /* مالکِ کانال از نشست می‌آید: پیش‌تر ownerKey را کلاینت می‌گفت و
-     یعنی می‌شد کانالِ دیگری را ساخت، تصاحب یا بازنویسی کرد. */
+  /* مالک کانال از نشست می‌آید: پیش‌تر ownerKey را کلاینت می‌گفت و
+     یعنی می‌شد کانال دیگری را ساخت، تصاحب یا بازنویسی کرد. */
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   const handle = normHandle(b?.handle)
 
   if (!ownerKey) return NextResponse.json({ ok: false, message: 'کاربر نامشخص است' }, { status: 400, headers: CORS })
-  if (name.length < 2) return NextResponse.json({ ok: false, message: 'نامِ کانال را وارد کنید' }, { status: 400, headers: CORS })
+  if (name.length < 2) return NextResponse.json({ ok: false, message: 'نام کانال را وارد کنید' }, { status: 400, headers: CORS })
   if (handle.length < 3) return NextResponse.json({ ok: false, message: 'هندل حداقل ۳ نویسه (انگلیسی/عدد) باشد' }, { status: 400, headers: CORS })
 
   const list = await readJson<UserChannel[]>(INDEX, [])

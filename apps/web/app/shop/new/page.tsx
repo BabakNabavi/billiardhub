@@ -118,7 +118,7 @@ const CATEGORY_SPECS: Record<string, SpecFieldDef[]> = {
   ],
 }
 
-/* «نوع» برای هر دسته — دراپ‌داونِ بالای فرم (اجباری). دسته‌هایی که اینجا نیستند، «نوع» متنِ آزاد می‌گیرند.
+/* «نوع» برای هر دسته — دراپ‌داون بالای فرم (اجباری). دسته‌هایی که اینجا نیستند، «نوع» متن آزاد می‌گیرند.
    توجه: در «چوب» گزینه‌ی «سایر» حذف شده است. */
 const TYPE_OPTIONS: Record<string, string[]> = {
   cue:        ['پاکت بیلیارد', 'اسنوکر', 'هی‌بال', 'کارامبول'],
@@ -126,18 +126,18 @@ const TYPE_OPTIONS: Record<string, string[]> = {
   ball:       ['۱۵ تایی پاکت بیلیارد', '۲۲ تایی اسنوکر', '۳ تایی کارامبول'],
   tip:        ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
   'case-bag': ['کیس سخت', 'کیس نرم', 'کیف', 'کوله‌پشتی'],
-  /* گچ: نوع فقط برای دسته‌بندی؛ لیستِ برند مستقل از نوع است (هرکدام که انتخاب شود همان برندهای گچ می‌آید) */
+  /* گچ: نوع فقط برای دسته‌بندی؛ لیست برند مستقل از نوع است (هرکدام که انتخاب شود همان برندهای گچ می‌آید) */
   chalk:      ['اسنوکر', 'پاکت بیلیارد', 'هی‌بال'],
 }
 
-/* برندهای «چوب» بر اساسِ نوع (اسنوکر / پاکت بیلیارد). «سایر» ⇒ فیلدِ متنِ دستی باز می‌شود.
-   نوع‌های دیگر (هی‌بال/کارامبول) برندِ متنِ آزاد می‌گیرند. */
+/* برندهای «چوب» بر اساس نوع (اسنوکر / پاکت بیلیارد). «سایر» ⇒ فیلد متن دستی باز می‌شود.
+   نوع‌های دیگر (هی‌بال/کارامبول) برند متن آزاد می‌گیرند. */
 const CUE_BRANDS: Record<string, string[]> = {
   'اسنوکر': ['John Parris', 'Peradon', 'Cue Craft', "O'Min", 'Ton Praram', 'Phoenix', 'PowerGlide', 'Trevor White', 'Jason Owen', 'Mike Wooldridge', 'Woods Cues', 'BCE', 'Precision', 'Master Cue', 'Maximus', 'Paochan', 'سایر'],
   'پاکت بیلیارد': ['Predator', 'Mezz', 'McDermott', 'Meucci', 'Jacoby', 'Pechauer', 'Viking', 'Cuetec', 'Joss', 'Lucasi', 'Longoni', 'Becue', 'Tiger', 'Schon', 'Players', 'Action', 'Poison', 'OB', 'Falcon', 'Dufferin', 'سایر'],
 }
 
-/* مدل‌های «چوب» بر اساسِ برند. برندهایی که اینجا نیستند ⇒ مدلِ متنِ دستی. «سایر» ⇒ فیلدِ متن. */
+/* مدل‌های «چوب» بر اساس برند. برندهایی که اینجا نیستند ⇒ مدل متن دستی. «سایر» ⇒ فیلد متن. */
 const CUE_MODELS: Record<string, string[]> = {
   'Peradon':        ['Winchester', 'Newbury', 'Guildford', 'Harlow', 'Knight', 'Joe Davis 600', 'Chiltern', 'Royal', 'Edwardian', 'Salisbury', 'Cannon', 'Crown', 'Lazer', 'Warwick', 'Oxford', 'Trafalgar', 'Stamford', 'Liverpool', 'York', 'Sheffield', 'سایر'],
   'McDermott':      ['SN801', 'SN802', 'SN401', 'SN402', 'SN404', 'SN503', 'SN504', 'سایر'],
@@ -164,7 +164,7 @@ const CAT_BRANDS: Record<string, string[]> = {
   rest:       ['Peradon', 'Riley', 'Hamilton', 'PowerGlide', 'Master', 'Tweeten', 'Longoni', 'Predator'],
 }
 
-/* مدل‌های هر دسته بر اساسِ برند. برندهایی که اینجا نیستند ⇒ مدلِ متنِ دستی. «سایر» خودکار اضافه می‌شود. */
+/* مدل‌های هر دسته بر اساس برند. برندهایی که اینجا نیستند ⇒ مدل متن دستی. «سایر» خودکار اضافه می‌شود. */
 const CAT_MODELS: Record<string, Record<string, string[]>> = {
   ball: {
     'Aramith':       ['Tournament Champion', 'Tournament Black', 'Premium', 'Super Pro', 'Premier', 'Pro Cup', 'Pro Cup TV', 'Duramith', 'Stone Collection', 'Philosophy Collection'],
@@ -237,15 +237,15 @@ const CAT_MODELS: Record<string, Record<string, string[]>> = {
   },
 }
 
-/* برندهای «میز» بر اساسِ نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب، وابسته به نوع.
-   نوع‌های دیگر (کارامبول/خانگی) برندِ متنِ آزاد می‌گیرند. */
+/* برندهای «میز» بر اساس نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب، وابسته به نوع.
+   نوع‌های دیگر (کارامبول/خانگی) برند متن آزاد می‌گیرند. */
 const TABLE_BRANDS: Record<string, string[]> = {
   'اسنوکر':       ['Wiraka', 'JOY', 'Rasson', 'Xingpai (Star)', 'Riley', 'BCE', 'Hamilton', 'Thurston', 'Shender', 'DPT'],
   'پاکت بیلیارد': ['Diamond', 'Brunswick', 'Olhausen', 'Rasson', 'Riley', 'Dynamic', 'Buffalo', 'Valley', 'Connelly', 'Imperial', 'Toulet', 'SAM'],
   'هی‌بال':        ['JOY', 'Wiraka', 'Xingpai (Star)', 'Rasson', 'Shender', 'Xingjue', 'Super Power', 'Hans Delta'],
 }
 
-/* مدل‌های «میز» بر اساسِ نوع سپس برند (یک برند در نوع‌های مختلف مدل‌های متفاوت دارد). */
+/* مدل‌های «میز» بر اساس نوع سپس برند (یک برند در نوع‌های مختلف مدل‌های متفاوت دارد). */
 const TABLE_MODELS: Record<string, Record<string, string[]>> = {
   'اسنوکر': {
     'Wiraka':         ['M1 Tournament Steelblock', 'M1 Classic', 'M1 Classic Gold', 'M1 1980', 'Jewel', 'Armour Rocky', 'Berlin Commercial', 'Morris'],
@@ -285,14 +285,14 @@ const TABLE_MODELS: Record<string, Record<string, string[]>> = {
   },
 }
 
-/* برندهای «تیپ» بر اساسِ نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب/میز، وابسته به نوع. */
+/* برندهای «تیپ» بر اساس نوع (اسنوکر/پاکت/هی‌بال) — مثل چوب/میز، وابسته به نوع. */
 const TIP_BRANDS: Record<string, string[]> = {
   'اسنوکر':       ['Kamui', 'Century', 'Elk Master', 'Blue Diamond', 'ADR147', 'Talisman', 'Moori', 'Zan', 'G2', 'Navigator', 'HOW', 'Tiger', 'Taom', 'Le Professional', 'Triangle', 'Peradon', 'Riley', 'PowerGlide'],
   'پاکت بیلیارد': ['Kamui', 'Predator', 'Tiger', 'HOW', 'Zan', 'Moori', 'Navigator', 'G2', 'Taom', 'Le Professional', 'Triangle', 'Blue Diamond', 'Molinari', 'Longoni', 'Caiden', 'KO Brothers', 'Techno Dud'],
   'هی‌بال':        ['Kamui', 'Predator', 'HOW', 'Tiger', 'Zan', 'Navigator', 'G2', 'Taom', 'Molinari', 'Caiden', 'KO Brothers'],
 }
 
-/* مدل‌های «تیپ» بر اساسِ نوع سپس برند. */
+/* مدل‌های «تیپ» بر اساس نوع سپس برند. */
 const TIP_MODELS: Record<string, Record<string, string[]>> = {
   'اسنوکر': {
     'Kamui':          ['Black', 'Original', 'Clear Black', 'Clear Original', 'Athlete'],
@@ -348,7 +348,7 @@ const TIP_MODELS: Record<string, Record<string, string[]>> = {
   },
 }
 
-/* گچ — برند/مدل بر اساسِ نوع. اسنوکر و هی‌بال یک داده‌ی مشترک؛ پاکت داده‌ی جدا. */
+/* گچ — برند/مدل بر اساس نوع. اسنوکر و هی‌بال یک داده‌ی مشترک؛ پاکت داده‌ی جدا. */
 const SNOOKER_CHALK_BRANDS = ['Taom', 'Kamui', 'Master', 'Triangle', 'Blue Diamond', 'Silver Cup', 'Peradon', 'Riley', 'PowerGlide', 'Century', 'Pioneer']
 const SNOOKER_CHALK_MODELS: Record<string, string[]> = {
   'Taom':         ['V10', 'Snooker Chalk 2.0', 'Soft', 'Pyro'],
@@ -395,7 +395,7 @@ const CHALK_MODELS: Record<string, Record<string, string[]>> = {
   },
 }
 
-/* دسته‌های نوع‌محور. برند بر اساسِ نوع؛ مدل بر اساسِ (نوع، برند) — به‌جز چوب که مدلش فقط بر اساسِ برند است. */
+/* دسته‌های نوع‌محور. برند بر اساس نوع؛ مدل بر اساس (نوع، برند) — به‌جز چوب که مدلش فقط بر اساس برند است. */
 const TYPE_BRANDS: Record<string, Record<string, string[]>> = { cue: CUE_BRANDS, table: TABLE_BRANDS, tip: TIP_BRANDS, chalk: CHALK_BRANDS }
 const TYPE_MODELS: Record<string, Record<string, Record<string, string[]>>> = { table: TABLE_MODELS, tip: TIP_MODELS, chalk: CHALK_MODELS }
 
@@ -496,10 +496,10 @@ function inp(err?: string, locked?: boolean): React.CSSProperties {
 }
 
 // ── Modern select style ─────────────────────────────────────────
-/* (استایلِ <select> بومی حذف شد — همه‌ی دراپ‌داون‌ها حالا FancySelect هستند) */
+/* (استایل <select> بومی حذف شد — همه‌ی دراپ‌داون‌ها حالا FancySelect هستند) */
 
-/* ── دراپ‌داونِ حرفه‌ای — پنل با Portal روی document.body و position:fixed رندر می‌شود
-   تا از overflow:hidden و stacking-contextِ کارت‌ها فرار کند و زیرِ المانِ بعدی نرود. ── */
+/* ── دراپ‌داون حرفه‌ای — پنل با Portal روی document.body و position:fixed رندر می‌شود
+   تا از overflow:hidden و stacking-context کارت‌ها فرار کند و زیر المان بعدی نرود. ── */
 function FancySelect({ value, onChange, options, placeholder = 'انتخاب...', disabled, error }: {
   value: string
   onChange: (v: string) => void
@@ -596,7 +596,7 @@ function FancySelect({ value, onChange, options, placeholder = 'انتخاب...'
   )
 }
 
-/* optional دیگر برچسبِ «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کلِ فرم حذف شد */
+/* optional دیگر برچسب «(اختیاری)» نمی‌گذارد — کلمه‌ی «اختیاری» از کل فرم حذف شد */
 function Label({ children, required }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
   return (
     <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 7 }}>
@@ -635,7 +635,7 @@ export default function NewProductPage() {
     province: '', city: '', address: '',
   })
   const [storeSlug, setStoreSlug] = useState('')
-  const [showSection, setShowSection] = useState(false)   // مودالِ انتخابِ سکشن قبل از ثبت
+  const [showSection, setShowSection] = useState(false)   // مودال انتخاب سکشن قبل از ثبت
   const [geoLocked, setGeoLocked] = useState(false)       // استان/شهر/آدرس از فروشگاه ⇒ قفل
   const [images,   setImages]   = useState<ImgSlot[]>([])
   const [dragging, setDragging] = useState(false)
@@ -643,8 +643,8 @@ export default function NewProductPage() {
   const [success,  setSuccess]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [acceptRules, setAcceptRules] = useState(false)
-  const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرشِ قوانینِ بیلیارد بازار
-  const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطرِ نبودِ هویتِ تأییدشده
+  const [quotaMsg, setQuotaMsg] = useState('')   // سهمیه‌ی آگهی تمام شده   // پذیرش قوانین بیلیارد بازار
+  const [quotaNeedsIdentity, setQuotaNeedsIdentity] = useState(false)   // ۴۲۹ به‌خاطر نبود هویت تأییدشده
   const [specs,     setSpecs]     = useState<Record<string, string>>({})
   const [specOthers, setSpecOthers] = useState<Record<string, string>>({})
 
@@ -656,14 +656,14 @@ export default function NewProductPage() {
     if (!user) return
     const u = user as any
     const authName = [u.firstName || '', u.lastName || ''].filter(Boolean).join(' ') || u.name || ''
-    /* فروشگاهِ ثبت‌شده‌ی همین فروشنده — منبعِ نامِ فروشگاه/شهر/آدرس/تماس روی فرم محصول */
+    /* فروشگاه ثبت‌شده‌ی همین فروشنده — منبع نام فروشگاه/شهر/آدرس/تماس روی فرم محصول */
     const store = findSellerByOwner({ id: u.id, phone: u.phone })
 
-    // نام فروشگاه: از پروفایلِ فروشگاه، وگرنه از حساب. قفل — روی محصول قابل تغییر نیست.
+    // نام فروشگاه: از پروفایل فروشگاه، وگرنه از حساب. قفل — روی محصول قابل تغییر نیست.
     const autoName = store?.title || u.shopName || authName
     if (autoName) { setForm(f => ({ ...f, shopName: autoName })); setShopNameLocked(true) }
 
-    // نام مالک: همان نامِ احرازشده. قفل.
+    // نام مالک: همان نام احرازشده. قفل.
     const autoOwner = store?.ownerName || authName || u.ownerName || ''
     if (autoOwner) { setForm(f => ({ ...f, ownerName: autoOwner })); setOwnerNameLocked(true) }
 
@@ -687,17 +687,17 @@ export default function NewProductPage() {
     setErrors(e => { const n = { ...e }; delete n[k]; return n })
   }
 
-  /* برند/مدل — اگر لیست داشت دراپ‌داون، وگرنه متنِ دستی.
-     چوب: برند بر اساسِ نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برندِ ثابتِ همان دسته. مدل همیشه بر اساسِ برند. */
+  /* برند/مدل — اگر لیست داشت دراپ‌داون، وگرنه متن دستی.
+     چوب: برند بر اساس نوع (اسنوکر/پاکت). بقیه‌ی دسته‌ها: برند ثابت همان دسته. مدل همیشه بر اساس برند. */
   const brandOptions = TYPE_BRANDS[form.category]
     ? (TYPE_BRANDS[form.category]![form.type] ?? null)          // نوع‌محور (چوب/میز/تیپ/گچ)
-    : (CAT_BRANDS[form.category] ?? null)                        // برندِ ثابتِ همان دسته
+    : (CAT_BRANDS[form.category] ?? null)                        // برند ثابت همان دسته
   const modelOptions = form.category === 'cue'
-    ? (CUE_MODELS[form.brand] ?? null)                          // چوب: مدل فقط بر اساسِ برند
+    ? (CUE_MODELS[form.brand] ?? null)                          // چوب: مدل فقط بر اساس برند
     : TYPE_MODELS[form.category]
-      ? (TYPE_MODELS[form.category]![form.type]?.[form.brand] ?? null)  // میز/تیپ/گچ: مدل بر اساسِ (نوع، برند)
+      ? (TYPE_MODELS[form.category]![form.type]?.[form.brand] ?? null)  // میز/تیپ/گچ: مدل بر اساس (نوع، برند)
       : (CAT_MODELS[form.category]?.[form.brand] ?? null)
-  /* مقدارِ مؤثر: اگر «سایر» انتخاب شده، متنِ دستی جای آن می‌نشیند */
+  /* مقدار مؤثر: اگر «سایر» انتخاب شده، متن دستی جای آن می‌نشیند */
   const effBrand = form.brand === 'سایر' ? form.brandOther.trim() : form.brand.trim()
   const effModel = form.model === 'سایر' ? form.modelOther.trim() : form.model.trim()
 
@@ -713,7 +713,7 @@ export default function NewProductPage() {
     setForm(f => ({ ...f, type: v, ...(typeDrivenCat(f.category) ? { brand: '', brandOther: '', model: '', modelOther: '' } : {}) }))
     setErrors(e => { const n = { ...e }; delete n.type; if (typeDrivenCat(form.category)) { delete n.brand; delete n.model } return n })
   }
-  /* تغییر برند ⇒ ریستِ مدل */
+  /* تغییر برند ⇒ ریست مدل */
   const setBrand = (v: string) => {
     setForm(f => ({ ...f, brand: v, model: '', modelOther: '' }))
     setErrors(e => { const n = { ...e }; delete n.brand; delete n.model; return n })
@@ -763,7 +763,7 @@ export default function NewProductPage() {
     return e
   }
 
-  /* ثبت: اول اعتبارسنجی، بعد مودالِ انتخابِ سکشن؛ کاربر سکشن را می‌زند و finalize ذخیره می‌کند */
+  /* ثبت: اول اعتبارسنجی، بعد مودال انتخاب سکشن؛ کاربر سکشن را می‌زند و finalize ذخیره می‌کند */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
@@ -786,12 +786,12 @@ export default function NewProductPage() {
       else if (v) finalSpecs[k] = v
     })
 
-    /* نامِ محصول از دسته/نوع/برند/مدل ساخته می‌شود (فیلدِ «نام محصول» حذف شده) */
+    /* نام محصول از دسته/نوع/برند/مدل ساخته می‌شود (فیلد «نام محصول» حذف شده) */
     const composedName = [effBrand, effModel].filter(Boolean).join(' ')
       || [catLabel, form.type.trim()].filter(Boolean).join(' ') || 'محصول'
 
     /* آگهی روی سرور ثبت می‌شود تا بقیه هم ببینندش. پیش‌تر فقط در
-       localStorage می‌ماند و عملاً هیچ‌کس جز خودِ آگهی‌دهنده نمی‌دیدش. */
+       localStorage می‌ماند و عملاً هیچ‌کس جز خود آگهی‌دهنده نمی‌دیدش. */
     void (async () => {
       try {
         const r = await apiFetch('/api/market/ads', {
@@ -812,7 +812,7 @@ export default function NewProductPage() {
         const j = await r.json().catch(() => ({}))
 
         if (r.status === 429) {
-          /* دو حالتِ متفاوت: سهمیه تمام شده، یا هویت هنوز تأیید نشده */
+          /* دو حالت متفاوت: سهمیه تمام شده، یا هویت هنوز تأیید نشده */
           setQuotaNeedsIdentity(!!j?.identityRequired)
           setQuotaMsg(j?.message || 'سهمیه‌ی آگهی شما تمام شده است')
           setSubmitting(false); return
@@ -876,7 +876,7 @@ export default function NewProductPage() {
 
       <div style={{ minHeight: '100vh', background: '#F7F7F5', direction: 'rtl', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, overflowX: 'hidden' }}>
 
-        {/* ambient blobs — داخلِ لایه‌ی fixed با overflow:hidden تا آفستِ منفی‌شان سرریزِ افقی نسازد */}
+        {/* ambient blobs — داخل لایه‌ی fixed با overflow:hidden تا آفست منفی‌شان سرریز افقی نسازد */}
         <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
           <div style={{ position: 'absolute', top: -120, right: -80, width: 500, height: 500, background: 'radial-gradient(circle,rgba(199,166,106,0.08) 0%,transparent 65%)', filter: 'blur(70px)' }} />
           <div style={{ position: 'absolute', bottom: -100, left: -60, width: 400, height: 400, background: 'radial-gradient(circle,rgba(199,166,106,0.05) 0%,transparent 65%)', filter: 'blur(60px)' }} />
@@ -912,7 +912,7 @@ export default function NewProductPage() {
             </p>
           </div>
 
-          {/* ── Steps indicator ── (flex-wrap تا روی موبایل سرریزِ افقی نسازد) */}
+          {/* ── Steps indicator ── (flex-wrap تا روی موبایل سرریز افقی نسازد) */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap', animation: 'fadeUp 0.45s ease both' }}>
             {[{ n: '۱', t: 'اطلاعات محصول' }, { n: '۲', t: 'اطلاعات فروشنده' }, { n: '۳', t: 'ثبت نهایی' }].map((s, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 20, background: i < 2 ? `rgba(199,166,106,0.10)` : 'rgba(28,28,26,0.05)', border: `1px solid ${i < 2 ? 'rgba(199,166,106,0.28)' : 'rgba(28,28,26,0.08)'}` }}>
@@ -959,7 +959,7 @@ export default function NewProductPage() {
                       <ErrMsg msg={errors.type} />
                     </div>
 
-                    {/* برند — چوب: دراپ‌داونِ برند بر اساسِ نوع؛ «سایر» ⇒ فیلدِ متن. بقیه: متنِ آزاد */}
+                    {/* برند — چوب: دراپ‌داون برند بر اساس نوع؛ «سایر» ⇒ فیلد متن. بقیه: متن آزاد */}
                     <div>
                       <Label required>برند</Label>
                       {brandOptions ? (
@@ -979,7 +979,7 @@ export default function NewProductPage() {
                       <ErrMsg msg={errors.brand} />
                     </div>
 
-                    {/* مدل — چوب: دراپ‌داونِ مدل بر اساسِ برند؛ «سایر» ⇒ فیلدِ متن. بقیه: متنِ آزاد */}
+                    {/* مدل — چوب: دراپ‌داون مدل بر اساس برند؛ «سایر» ⇒ فیلد متن. بقیه: متن آزاد */}
                     <div>
                       <Label required>مدل</Label>
                       {modelOptions ? (
@@ -1062,7 +1062,7 @@ export default function NewProductPage() {
                         {/* divider */}
                         <div style={{ height: 1, background: 'rgba(28,28,26,0.08)', margin: '4px 0 18px' }} />
 
-                        {/* condition — دراپ‌داونِ حرفه‌ای */}
+                        {/* condition — دراپ‌داون حرفه‌ای */}
                         <div style={{ marginBottom: 16 }}>
                           <Label required>وضعیت کالا</Label>
                           <FancySelect value={form.condition} onChange={v => set('condition', v)}
@@ -1294,15 +1294,15 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            {/* سهمیه تمام شد ⇒ راهنماییِ خریدِ بسته (وقتی ادمین سهمیه را روشن کند) */}
+            {/* سهمیه تمام شد ⇒ راهنمایی خرید بسته (وقتی ادمین سهمیه را روشن کند) */}
             {quotaMsg && (
               <div style={{ background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.38)', borderRadius: 16, padding: '16px 18px', marginBottom: 14 }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: '#A07840', marginBottom: 7 }}>
-                  {quotaNeedsIdentity ? 'هویتِ شما هنوز تأیید نشده است' : 'سهمیه‌ی آگهی شما تمام شده است'}
+                  {quotaNeedsIdentity ? 'هویت شما هنوز تأیید نشده است' : 'سهمیه‌ی آگهی شما تمام شده است'}
                 </div>
                 <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.58)', margin: '0 0 12px', lineHeight: 2 }}>{quotaMsg}</p>
                 <Link href={quotaNeedsIdentity ? '/profile/verify' : '/plans'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: 'rgba(199,166,106,0.18)', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38' }}>
-                  {quotaNeedsIdentity ? 'تأییدِ هویت' : 'مشاهده بسته‌های آگهی'}
+                  {quotaNeedsIdentity ? 'تأیید هویت' : 'مشاهده بسته‌های آگهی'}
                 </Link>
               </div>
             )}
@@ -1359,18 +1359,18 @@ export default function NewProductPage() {
           </form>
         </div>
 
-        {/* ── مودالِ انتخابِ محلِ نمایشِ محصول (قبل از ثبت نهایی) ── */}
+        {/* ── مودال انتخاب محل نمایش محصول (قبل از ثبت نهایی) ── */}
         {showSection && (
           <div onClick={() => setShowSection(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(20,18,14,0.42)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18, animation: 'fadeIn 0.2s ease both' }}>
             <div onClick={e => e.stopPropagation()} style={{ width: 'min(460px,100%)', background: '#fff', borderRadius: 22, border: '1px solid rgba(28,28,26,0.08)', boxShadow: '0 24px 60px rgba(20,18,14,0.28)', padding: '24px', animation: 'popIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both' }}>
               <h3 style={{ fontSize: 17, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>محصول کجا نمایش داده شود؟</h3>
-              <p style={{ fontSize: 13, color: TEXT_SEC, margin: '0 0 18px', lineHeight: 1.6 }}>محلِ نمایشِ محصول در بیلیارد بازار را انتخاب کنید.</p>
+              <p style={{ fontSize: 13, color: TEXT_SEC, margin: '0 0 18px', lineHeight: 1.6 }}>محل نمایش محصول در بیلیارد بازار را انتخاب کنید.</p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {([
-                  ['weekly', 'هفته‌های بیلیاردی', 'در سکشنِ اولِ بیلیارد بازار (تخفیف‌های هفته)'],
-                  ['party',  'بیلیارد پارتی',      'در سکشنِ بیلیارد پارتی'],
-                  ['newest', 'جدیدترین‌ها',        'انتخابِ پیش‌فرض — در سکشنِ جدیدترین‌ها'],
+                  ['weekly', 'هفته‌های بیلیاردی', 'در سکشن اول بیلیارد بازار (تخفیف‌های هفته)'],
+                  ['party',  'بیلیارد پارتی',      'در سکشن بیلیارد پارتی'],
+                  ['newest', 'جدیدترین‌ها',        'انتخاب پیش‌فرض — در سکشن جدیدترین‌ها'],
                 ] as ['weekly'|'party'|'newest', string, string][]).map(([val, title, sub]) => (
                   <button key={val} type="button" onClick={() => finalize(val)}
                     style={{ textAlign: 'right', padding: '14px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'Vazirmatn,Tahoma,sans-serif',

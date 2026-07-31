@@ -1,13 +1,13 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   نتایجِ پایانیِ مسابقه.
+   نتایج پایانی مسابقه.
 
-   قهرمان و نایب‌قهرمان از خودِ فینال خوانده می‌شوند.
+   قهرمان و نایب‌قهرمان از خود فینال خوانده می‌شوند.
 
-   نفرِ سوم عمداً «حدس» زده نمی‌شود: در حذفیِ یک‌طرفه دو بازنده‌ی
-   نیمه‌نهایی هر دو در یک رده‌اند و تا وقتی بازیِ رده‌بندی برگزار نشود
-   هیچ‌کدام سومِ رسمی نیست. پس هر دو با عنوانِ «سومِ مشترک» می‌آیند —
+   نفر سوم عمداً «حدس» زده نمی‌شود: در حذفی یک‌طرفه دو بازنده‌ی
+   نیمه‌نهایی هر دو در یک رده‌اند و تا وقتی بازی رده‌بندی برگزار نشود
+   هیچ‌کدام سوم رسمی نیست. پس هر دو با عنوان «سوم مشترک» می‌آیند —
    نه اینکه یکی را دلبخواهی بالاتر بگذاریم.
    ───────────────────────────────────────────────────────────── */
 
@@ -40,7 +40,7 @@ export default function ResultsPage() {
   const played = b.matches.filter(m => m.winner !== null && m.p1_name && m.p2_name);
   const finished = !!b.champion;
 
-  /* بازنده‌های نیمه‌نهایی — رده‌ی سومِ مشترک */
+  /* بازنده‌های نیمه‌نهایی — رده‌ی سوم مشترک */
   const semiLosers = b.totalRounds >= 2
     ? b.matches
         .filter(m => m.round === b.totalRounds - 1 && m.winner !== null)
@@ -68,11 +68,11 @@ export default function ResultsPage() {
           </p>
           <p style={{ fontSize: 12.5, color: MUT, margin: '0 0 16px', lineHeight: 2 }}>
             {b.matches.length === 0
-              ? 'نتایج پس از برگزاریِ بازی‌ها اینجا اعلام می‌شود.'
+              ? 'نتایج پس از برگزاری بازی‌ها اینجا اعلام می‌شود.'
               : `${faDigits(played.length)} از ${faDigits(b.matches.length)} بازی انجام شده است.`}
           </p>
           {b.matches.length > 0 && (
-            <Link href={`/tournaments/${id}/bracket`} style={btnGhost}><GitBranch size={14} /> دیدنِ براکت</Link>
+            <Link href={`/tournaments/${id}/bracket`} style={btnGhost}><GitBranch size={14} /> دیدن براکت</Link>
           )}
         </div>
       ) : (
@@ -82,18 +82,18 @@ export default function ResultsPage() {
             <PodiumRow place={1} label="قهرمان" name={b.champion!.name} />
             {b.runnerUp && <PodiumRow place={2} label="نایب‌قهرمان" name={b.runnerUp.name} />}
             {semiLosers.map((n, i) => (
-              <PodiumRow key={n + i} place={3} label="سومِ مشترک" name={n} />
+              <PodiumRow key={n + i} place={3} label="سوم مشترک" name={n} />
             ))}
           </div>
 
           {semiLosers.length === 2 && (
             <p style={{ fontSize: 11.5, color: MUT, margin: '-10px 0 22px', lineHeight: 2 }}>
-              در جدولِ حذفیِ یک‌طرفه، هر دو بازنده‌ی نیمه‌نهایی هم‌رده‌اند. تعیینِ نفرِ سوم
-              نیازمندِ بازیِ رده‌بندی است که در این مسابقه برگزار نشده.
+              در جدول حذفی یک‌طرفه، هر دو بازنده‌ی نیمه‌نهایی هم‌رده‌اند. تعیین نفر سوم
+              نیازمند بازی رده‌بندی است که در این مسابقه برگزار نشده.
             </p>
           )}
 
-          {/* ── همه‌ی نتایج به تفکیکِ دور ── */}
+          {/* ── همه‌ی نتایج به تفکیک دور ── */}
           <h2 style={{ fontSize: 15, fontWeight: 900, color: INK, margin: '0 0 12px' }}>همه‌ی بازی‌ها</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[...b.rounds].reverse().map(r => {

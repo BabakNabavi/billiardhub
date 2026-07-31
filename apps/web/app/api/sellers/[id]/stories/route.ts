@@ -39,7 +39,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   return NextResponse.json(active, { headers: CORS });
 }
 
-/* همان مدلِ استوریِ باشگاه: خواندن عمومی، ولی نوشتن/حذف فقط مالکِ
+/* همان مدل استوری باشگاه: خواندن عمومی، ولی نوشتن/حذف فقط مالک
    همان فروشگاه یا ادمین. */
 async function guardOwner(req: NextRequest, sellerId: string) {
   const actor = await actorOf(req);

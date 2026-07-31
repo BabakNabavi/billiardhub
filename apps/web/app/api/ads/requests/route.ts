@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { isPlacementKey, LEGACY_KEY_MAP, getPlacement } from '@/lib/ads/core';
 
-/* درخواستِ تبلیغ — فرمِ «تبلیغ در بیلیارد هاب».
+/* درخواست تبلیغ — فرم «تبلیغ در بیلیارد هاب».
    ورود لازم نیست؛ اگر کاربر وارد باشد، درخواست به حسابش گره می‌خورد. */
 
 const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
   }
 
   const actor = actorFromRequest(req);
-  /* کلیدِ قدیمی (کلاینتِ کش‌شده) به معادلِ تازه ترجمه می‌شود */
+  /* کلید قدیمی (کلاینت کش‌شده) به معادل تازه ترجمه می‌شود */
   const raw = String(b?.slotKey ?? '');
   const mapped = LEGACY_KEY_MAP[raw] ?? raw;
   let slotKey = isPlacementKey(mapped) ? mapped : null;
 
-  /* گیتِ Paid سمتِ سرور هم اعمال می‌شود: درخواست برای جایگاهی که ادمین
-     پولی‌اش نکرده، بدونِ جایگاه ثبت می‌شود (نه ردِ کاملِ فرم) تا متقاضی
-     از دست نرود ولی جایگاهِ غیرقابلِ‌فروش هم به پنل نرود. */
+  /* گیت Paid سمت سرور هم اعمال می‌شود: درخواست برای جایگاهی که ادمین
+     پولی‌اش نکرده، بدون جایگاه ثبت می‌شود (نه رد کامل فرم) تا متقاضی
+     از دست نرود ولی جایگاه غیرقابل‌فروش هم به پنل نرود. */
   if (slotKey) {
     const placement = await getPlacement(slotKey);
     if (!placement || placement.mode !== 'paid') slotKey = null;
@@ -47,9 +47,9 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     if (/does not exist|schema cache/i.test(error.message)) {
-      return NextResponse.json({ message: 'ثبتِ درخواست هنوز راه‌اندازی نشده (مایگریشن ۰۰۹ اجرا نشده)' }, { status: 503 });
+      return NextResponse.json({ message: 'ثبت درخواست هنوز راه‌اندازی نشده (مایگریشن ۰۰۹ اجرا نشده)' }, { status: 503 });
     }
-    return NextResponse.json({ message: 'ثبتِ درخواست انجام نشد' }, { status: 500 });
+    return NextResponse.json({ message: 'ثبت درخواست انجام نشد' }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true }, { status: 201 });

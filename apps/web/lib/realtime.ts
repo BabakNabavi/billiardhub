@@ -12,11 +12,11 @@ export interface PollEvent { convId: string; at: number }
 export interface DMHandlers {
   onMsg?: (p: MsgEvent) => void
   onRead?: (p: ReadEvent) => void
-  onPoll?: (p: PollEvent) => void   // حضورِ طرفِ مقابل ⇒ تیکِ «رسیده»ی آنی
+  onPoll?: (p: PollEvent) => void   // حضور طرف مقابل ⇒ تیک «رسیده»ی آنی
   onStatus?: (s: string) => void
 }
 
-/* اشتراک به کانالِ دایرکتِ خودم؛ تابعِ لغو برمی‌گرداند. */
+/* اشتراک به کانال دایرکت خودم؛ تابع لغو برمی‌گرداند. */
 export function subscribeDM(meKey: string, h: DMHandlers): () => void {
   const sb = getSupabaseBrowser()
   if (!sb || !meKey) return () => {}

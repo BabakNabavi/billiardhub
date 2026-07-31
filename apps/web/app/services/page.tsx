@@ -1,9 +1,9 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   خدمات فنی — دایرکتوریِ متخصصان (بازطراحی ۱۴۰۵)
+   خدمات فنی — دایرکتوری متخصصان (بازطراحی ۱۴۰۵)
    لوکس، مینیمال، ادیتوریال؛ بدون آمار/امتیاز — تمرکز روی شخص،
-   تخصص و هویتِ حرفه‌ای. داده از lib/technicians-data.
+   تخصص و هویت حرفه‌ای. داده از lib/technicians-data.
    موبایل: فیلترها در Bottom Sheet.
    ───────────────────────────────────────────────────────────── */
 
@@ -24,11 +24,11 @@ const MUT    = '#8A8474'
 const LINE   = '#E7E2D6'
 const BG     = '#F7F7F5'
 
-/* ── کارت متخصص — هویتِ مونوگرامی، بدون آمار ── */
+/* ── کارت متخصص — هویت مونوگرامی، بدون آمار ── */
 function TechCard({ t, i }: { t: Technician; i: number }) {
   return (
     <Link href={`/services/${t.id}`} className="sv-card" style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}>
-      {/* هویت: مونوگرامِ طلایی روی بافتِ نرم؛ hover ⇒ پرده‌ی خدمات (دسکتاپ) */}
+      {/* هویت: مونوگرام طلایی روی بافت نرم؛ hover ⇒ پرده‌ی خدمات (دسکتاپ) */}
       <div className="sv-id">
         <div className="sv-id-tex" />
         {t.photo ? (
@@ -77,7 +77,7 @@ export default function ServicesPage() {
   const [cityOpen, setCityOpen] = useState(false)
   const [sheet, setSheet]     = useState(false)
 
-  /* متخصصانِ ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اولِ لیست می‌نشینند */
+  /* متخصصان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Technician[]>([])
   useEffect(() => { setRegistered(listApprovedTechnicians().map(profileToTechnician)) }, [])
 
@@ -88,7 +88,7 @@ export default function ServicesPage() {
 
   const cities = useMemo(() => [...new Set(ALL.map(t => t.city).filter(c => c && c !== '—'))], [ALL])
 
-  /* قفلِ اسکرول هنگامِ بازبودنِ Bottom Sheet */
+  /* قفل اسکرول هنگام بازبودن Bottom Sheet */
   useEffect(() => {
     document.body.style.overflow = sheet ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -114,7 +114,7 @@ export default function ServicesPage() {
         @keyframes svScaleX { from { opacity:0; transform: scaleX(0); } to { opacity:1; transform: scaleX(1); } }
         @keyframes svSweep  { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(240%) skewX(-18deg); } }
 
-        /* ═══ هیروی سینماییِ Craftsmanship ═══ */
+        /* ═══ هیروی سینمایی Craftsmanship ═══ */
         .sv-hero { position: relative; overflow: hidden; color: #fff; background: #0C0B09; }
         .sv-hero-img { position: absolute; inset: 0; background: url('/images/services/repaire.jfif') center 40%/cover;
           filter: grayscale(0.45) brightness(0.48) contrast(1.1) sepia(0.12); transform: scale(1.05); }
@@ -128,7 +128,7 @@ export default function ServicesPage() {
         .sv-hero-word { position: absolute; bottom: -8px; inset-inline-start: -5px; font-weight: 900;
           font-size: clamp(60px, 10.5vw, 136px); line-height: 1; letter-spacing: .04em;
           color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.08); user-select: none; pointer-events: none; direction: ltr; }
-        /* خط‌کشِ دقت — تیک‌های اندازه‌گیری در پایینِ هیرو */
+        /* خط‌کش دقت — تیک‌های اندازه‌گیری در پایین هیرو */
         .sv-ruler { position: absolute; bottom: 0; inset-inline: 0; height: 12px;
           background:
             repeating-linear-gradient(90deg, rgba(199,166,106,0.55) 0 1px, transparent 1px 12px),
@@ -217,9 +217,9 @@ export default function ServicesPage() {
           </h1>
           <div style={{ width: 66, height: 3, borderRadius: 2, marginTop: 13, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'svScaleX .55s .3s ease both' }} />
           <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.62)', maxWidth: 520, lineHeight: 2, animation: 'svFadeUp .5s .3s ease both' }}>
-            از نصب و رگلاژ تا پارچه‌کشی و بازسازی — متخصصانِ اکوسیستم بیلیارد هاب را بشناسید و مستقیم با آن‌ها در ارتباط باشید.
+            از نصب و رگلاژ تا پارچه‌کشی و بازسازی — متخصصان اکوسیستم بیلیارد هاب را بشناسید و مستقیم با آن‌ها در ارتباط باشید.
           </p>
-          {/* مهرِ کیفیتِ کار — دقت، مهارت، اعتماد */}
+          {/* مهر کیفیت کار — دقت، مهارت، اعتماد */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 18, animation: 'svFadeUp .5s .4s ease both' }}>
             <span className="sv-spec"><i /> رگلاژ میلی‌متری</span>
             <span className="sv-spec"><i /> پارچه‌ی مسابقه‌ای</span>

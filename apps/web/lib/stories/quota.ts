@@ -1,13 +1,13 @@
 /* ─────────────────────────────────────────────────────────────
    سهمیه‌ی استوری — آینه‌ی سهمیه‌ی آگهی، ولی برای استوری.
 
-   شمارش از همان جاییست که خودِ استوری‌ها ذخیره می‌شوند (فایلِ ایندکس
-   روی سرور)، نه از مرورگرِ کاربر.
+   شمارش از همان جاییست که خود استوری‌ها ذخیره می‌شوند (فایل ایندکس
+   روی سرور)، نه از مرورگر کاربر.
 
-   ترتیب — دقیقاً مثلِ آگهی:
-     ۱) کلیدِ stories_quota_enabled خاموش ⇒ هیچ محدودیتی نیست
+   ترتیب — دقیقاً مثل آگهی:
+     ۱) کلید stories_quota_enabled خاموش ⇒ هیچ محدودیتی نیست
      ۲) بسته‌ی فعال ⇒ سهمیه‌ی همان بسته
-     ۳) وگرنه ⇒ سهمیه‌ی رایگانِ نقش
+     ۳) وگرنه ⇒ سهمیه‌ی رایگان نقش
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from '../finance/db'
@@ -26,7 +26,7 @@ const PERIOD_MS: Record<Period, number> = {
 }
 const PERIOD_FA: Record<Period, string> = { day: 'روز', week: 'هفته', month: 'ماه' }
 
-/* پیش‌فرض = همان اعدادِ هاردکدِ قبلی، تا رفتارِ امروز عوض نشود */
+/* پیش‌فرض = همان اعداد هاردکد قبلی، تا رفتار امروز عوض نشود */
 export const DEFAULT_STORY_QUOTA: FreeQuotaSetting = {
   default: { quota: 2, period: 'day' },
   roles: {
@@ -42,7 +42,7 @@ export const DEFAULT_STORY_QUOTA: FreeQuotaSetting = {
 }
 
 export interface StoryQuotaState {
-  enabled: boolean          // فروشِ بسته فعال است؟
+  enabled: boolean          // فروش بسته فعال است؟
   allowed: boolean
   used: number
   limit: number             // ۰ = نامحدود
@@ -86,7 +86,7 @@ async function rolesOf(userId: string): Promise<string[]> {
 }
 
 /** سهمیه‌ی کاربر و اینکه چند تا از آن مصرف شده.
-    `usedCount` را فراخوان می‌دهد چون منبعِ استوری‌ها فایلِ ایندکس است. */
+    `usedCount` را فراخوان می‌دهد چون منبع استوری‌ها فایل ایندکس است. */
 export async function getStoryQuotaState(
   userId: string,
   countUsed: (period: Period) => Promise<number>,
@@ -105,8 +105,8 @@ export async function getStoryQuotaState(
   } else {
     const roles = roleHint ? [roleHint] : await rolesOf(userId)
     /* در استوری، صفر یعنی «این نقش سهمیه ندارد» — نه نامحدود؛ وگرنه
-       نقشِ صفرِ «کاربر عادی» سهمیه‌ی نقشِ واقعی را می‌بلعید و مثلاً
-       بازیکن هم بدونِ استوری می‌ماند. */
+       نقش صفر «کاربر عادی» سهمیه‌ی نقش واقعی را می‌بلعید و مثلاً
+       بازیکن هم بدون استوری می‌ماند. */
     const picked = pickRoleQuota(free, roles, { zeroMeansNone: true })
     period = picked.quota.period
     limit = picked.quota.quota
@@ -125,14 +125,14 @@ export async function getStoryQuotaState(
 
   /* خاموش ⇒ هیچ محدودیتی نیست */
   if (!enabled) return { ...base, allowed: true }
-  /* سهمیه‌ی صفرِ بسته یعنی نامحدود */
+  /* سهمیه‌ی صفر بسته یعنی نامحدود */
   if (limit <= 0 && plan) return { ...base, allowed: true }
 
-  /* نقشی که اصلاً حقِ استوری ندارد */
+  /* نقشی که اصلاً حق استوری ندارد */
   if (limit <= 0) {
     return {
       ...base, allowed: false,
-      message: 'نقشِ شما سهمیه‌ی رایگانِ استوری ندارد؛ برای انتشار استوری یکی از بسته‌ها را تهیه کنید.',
+      message: 'نقش شما سهمیه‌ی رایگان استوری ندارد؛ برای انتشار استوری یکی از بسته‌ها را تهیه کنید.',
     }
   }
 
@@ -140,8 +140,8 @@ export async function getStoryQuotaState(
     return {
       ...base, allowed: false,
       message: plan
-        ? `سهمیه‌ی استوریِ بسته‌ی «${plan.name}» شما در این ${PERIOD_FA[period]} تمام شده است.`
-        : `سقفِ استوریِ این ${PERIOD_FA[period]} شما پر شده است. برای بیشتر، یکی از بسته‌های استوری را تهیه کنید.`,
+        ? `سهمیه‌ی استوری بسته‌ی «${plan.name}» شما در این ${PERIOD_FA[period]} تمام شده است.`
+        : `سقف استوری این ${PERIOD_FA[period]} شما پر شده است. برای بیشتر، یکی از بسته‌های استوری را تهیه کنید.`,
     }
   }
 

@@ -1,7 +1,7 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   بازیابی رمز عبور — سه گام در یک صفحه، با همان ظاهرِ صفحه‌ی ورود.
+   بازیابی رمز عبور — سه گام در یک صفحه، با همان ظاهر صفحه‌ی ورود.
    ارقام فارسی نمایش داده می‌شوند ولی همیشه لاتین به سرور می‌روند.
    ───────────────────────────────────────────────────────────── */
 
@@ -49,14 +49,14 @@ export default function ForgotPasswordPage() {
   const [focus, setFocus]       = useState('');
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* شمارشِ معکوسِ ارسالِ دوباره */
+  /* شمارش معکوس ارسال دوباره */
   useEffect(() => {
     if (wait <= 0) return;
     tick.current = setInterval(() => setWait(w => Math.max(0, w - 1)), 1000);
     return () => { if (tick.current) clearInterval(tick.current); };
   }, [wait]);
 
-  /* پیامِ خطا خودش بسته نمی‌شود — کاربر باید بخواندش و تأیید کند */
+  /* پیام خطا خودش بسته نمی‌شود — کاربر باید بخواندش و تأیید کند */
 
   const call = async (body: Record<string, unknown>) => {
     const r = await apiFetch('/api/auth/forgot-password', {
@@ -75,8 +75,8 @@ export default function ForgotPasswordPage() {
       const j = await call({ step: 'send' });
       if (j.status === 429) { setError(j.message || 'تلاش بیش از حد؛ کمی بعد دوباره امتحان کنید'); return; }
       /* پیش‌تر هر پاسخی «ارسال شد» فرض می‌شد و کاربر به مرحله‌ی کد
-         می‌رفت — حتی وقتی سرویسِ پیامک شکست خورده بود و کدی نرفته بود. */
-      if (j.ok === false) { setError(j.message || 'ارسالِ پیامک انجام نشد'); return; }
+         می‌رفت — حتی وقتی سرویس پیامک شکست خورده بود و کدی نرفته بود. */
+      if (j.ok === false) { setError(j.message || 'ارسال پیامک انجام نشد'); return; }
       setNote(j.message || '');
       setWait(j.wait ?? 60);
       setStep('code');
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
   const title = step === 'done' ? 'رمز عبور عوض شد' : 'بازیابی رمز عبور';
   const lead =
     step === 'phone'    ? 'شماره موبایل حسابتان را وارد کنید تا کد تأیید بفرستیم' :
-    step === 'code'     ? (note || 'کد تأییدِ پیامک‌شده را وارد کنید') :
+    step === 'code'     ? (note || 'کد تأیید پیامک‌شده را وارد کنید') :
     step === 'password' ? 'رمز تازه‌ای برای حسابتان انتخاب کنید' :
                           'همه‌ی دستگاه‌های دیگر از حساب خارج شدند. با رمز تازه وارد شوید.';
 

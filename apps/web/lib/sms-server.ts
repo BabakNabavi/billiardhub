@@ -1,13 +1,13 @@
 /* ─────────────────────────────────────────────────────────────
-   پیامکِ خدماتی — اطلاع‌رسانیِ تراکنشِ خودِ کاربر (رزرو، لغو، تسویه).
+   پیامک خدماتی — اطلاع‌رسانی تراکنش خود کاربر (رزرو، لغو، تسویه).
 
-   ⚠ این فایل فقط برای پیامکِ «خدماتی» است. پیامکِ تبلیغاتی لاین و مجوزِ
-   جدا دارد و از نظرِ قانونی به رضایتِ صریحِ کاربر و راهِ لغوِ اشتراک نیاز
+   ⚠ این فایل فقط برای پیامک «خدماتی» است. پیامک تبلیغاتی لاین و مجوز
+   جدا دارد و از نظر قانونی به رضایت صریح کاربر و راه لغو اشتراک نیاز
    دارد؛ هرگز از این‌جا تبلیغات نفرستید.
 
-   کلیدِ خاموش/روشن: SMS_NOTIFICATIONS=on
-   پیش‌فرض خاموش است تا در دوره‌ی تست، هر رزروِ آزمایشی هزینه نسازد.
-   روشن‌کردنش فقط تغییرِ متغیرِ محیطی است، نه دیپلوی مجدد.
+   کلید خاموش/روشن: SMS_NOTIFICATIONS=on
+   پیش‌فرض خاموش است تا در دوره‌ی تست، هر رزرو آزمایشی هزینه نسازد.
+   روشن‌کردنش فقط تغییر متغیر محیطی است، نه دیپلوی مجدد.
    ───────────────────────────────────────────────────────────── */
 
 const SEND_URL = 'https://s.api.ir/api/sw1/SendSms'
@@ -27,23 +27,23 @@ export interface SmsResult {
 
 interface Envelope { success?: boolean; code?: number; message?: string | null; data?: number | string | null }
 
-/** آیا ارسالِ پیامکِ اطلاع‌رسانی روشن است؟ */
+/** آیا ارسال پیامک اطلاع‌رسانی روشن است؟ */
 export const smsEnabled = () => process.env.SMS_NOTIFICATIONS === 'on'
 
-/** ارسالِ پیامک به یک یا چند شماره. هیچ‌وقت throw نمی‌کند. */
+/** ارسال پیامک به یک یا چند شماره. هیچ‌وقت throw نمی‌کند. */
 export async function sendSms(mobiles: string[], message: string): Promise<SmsResult> {
   const list = [...new Set(mobiles.map(normMobile).filter(isMobile))]
   if (list.length === 0) return { ok: false, skipped: true, message: 'شماره‌ی معتبری نبود' }
-  if (!message.trim()) return { ok: false, skipped: true, message: 'متنِ پیامک خالی است' }
+  if (!message.trim()) return { ok: false, skipped: true, message: 'متن پیامک خالی است' }
 
   if (!smsEnabled()) {
-    /* در حالتِ خاموش فقط لاگ می‌شود تا بشود جریان را دنبال کرد */
+    /* در حالت خاموش فقط لاگ می‌شود تا بشود جریان را دنبال کرد */
     console.info('[sms:off]', list.join(','), '|', message.replace(/\s+/g, ' ').slice(0, 80))
-    return { ok: false, skipped: true, message: 'ارسالِ پیامک خاموش است' }
+    return { ok: false, skipped: true, message: 'ارسال پیامک خاموش است' }
   }
 
   const key = process.env.SMS_API_KEY
-  if (!key) return { ok: false, skipped: true, message: 'کلیدِ سرویسِ پیامک تنظیم نشده' }
+  if (!key) return { ok: false, skipped: true, message: 'کلید سرویس پیامک تنظیم نشده' }
 
   try {
     const r = await fetch(SEND_URL, {
@@ -55,16 +55,16 @@ export async function sendSms(mobiles: string[], message: string): Promise<SmsRe
 
     if (!j || j.success !== true) {
       console.error('SendSms failed:', j?.message || r.status)
-      return { ok: false, message: 'ارسالِ پیامک ناموفق بود' }
+      return { ok: false, message: 'ارسال پیامک ناموفق بود' }
     }
     return { ok: true }
   } catch {
     console.error('SendSms: network error')
-    return { ok: false, message: 'خطا در اتصال به سرویسِ پیامک' }
+    return { ok: false, message: 'خطا در اتصال به سرویس پیامک' }
   }
 }
 
-/* بی‌صدا و بدونِ انتظار — اطلاع‌رسانی هیچ‌وقت نباید جریانِ اصلی (پرداخت،
+/* بی‌صدا و بدون انتظار — اطلاع‌رسانی هیچ‌وقت نباید جریان اصلی (پرداخت،
    لغو، تسویه) را کند یا خراب کند. */
 export function notify(mobile: string | null | undefined, message: string): void {
   if (!mobile) return
@@ -76,7 +76,7 @@ export function notify(mobile: string | null | undefined, message: string): void
 const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
 export const SMS = {
-  /* سرصفحه‌ی همه‌ی پیامک‌ها — تا نامِ برند در یک جا بماند */
+  /* سرصفحه‌ی همه‌ی پیامک‌ها — تا نام برند در یک جا بماند */
   brand: 'بیلیارد هاب',
   bookingConfirmed: (club: string, date: string, time: string, ref: string) =>
     `بیلیارد هاب\nرزرو شما در ${club} برای ${date} ساعت ${time} قطعی شد.\nکد پیگیری: ${ref}`,
@@ -86,8 +86,8 @@ export const SMS = {
       ? `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.\nمبلغ ${fa(refund)} تومان تا ۷۲ ساعت آینده بازمی‌گردد.`
       : `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.`,
 
-  /* پیامِ باشگاه‌دار عمداً کامل است: مدیر باید بدونِ بازکردنِ سایت
-     بداند کدام میز، چه ساعتی، چه روزی و به نامِ چه کسی رزرو شده. */
+  /* پیام باشگاه‌دار عمداً کامل است: مدیر باید بدون بازکردن سایت
+     بداند کدام میز، چه ساعتی، چه روزی و به نام چه کسی رزرو شده. */
   newBookingForOwner: (club: string, date: string, time: string, table: string, by: string) =>
     `بیلیارد هاب\n`
     + `مدیریت محترم باشگاه ${club}\n`

@@ -13,7 +13,7 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
 }
 
-/* خروج. برخلافِ قبل که فقط localStorage پاک می‌شد و توکن تا ۷ روز
+/* خروج. برخلاف قبل که فقط localStorage پاک می‌شد و توکن تا ۷ روز
    معتبر می‌ماند، حالا نشست در دیتابیس هم باطل می‌شود.
    body: { all?: boolean } ⇒ خروج از همه‌ی دستگاه‌ها */
 export async function POST(req: NextRequest) {

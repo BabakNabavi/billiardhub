@@ -2,9 +2,9 @@
 
 /* ─────────────────────────────────────────────────────────────
    اخبار بیلیارد هاب — پلتفرم رسانه‌ای (بازطراحی ۱۴۰۵)
-   تم روشن، RTL، موبایل‌فرست. داده از منبعِ واحدِ lib/news-data.
-   سلسله‌مراتب: تیکرِ فوری → هدرِ ادیتوریال → خبرِ ویژه + ریلِ
-   «آخرین اخبار» → گریدِ همه‌ی اخبار با فیلتر/جستجو/مرتب‌سازی
+   تم روشن، RTL، موبایل‌فرست. داده از منبع واحد lib/news-data.
+   سلسله‌مراتب: تیکر فوری → هدر ادیتوریال → خبر ویژه + ریل
+   «آخرین اخبار» → گرید همه‌ی اخبار با فیلتر/جستجو/مرتب‌سازی
    و Load More با اسکلتون.
    ───────────────────────────────────────────────────────────── */
 
@@ -28,7 +28,7 @@ const PAGE_STEP = 6
 
 type SortKey = 'newest' | 'views'
 
-/* ── متادیتای کوچکِ کارت (زمان مطالعه / بازدید) ── */
+/* ── متادیتای کوچک کارت (زمان مطالعه / بازدید) ── */
 function Meta({ a, light = false }: { a: NewsArticle; light?: boolean }) {
   const c = light ? 'rgba(255,255,255,0.72)' : MUT
   return (
@@ -84,7 +84,7 @@ function NewsCard({ a, i }: { a: NewsArticle; i: number }) {
   )
 }
 
-/* ── اسکلتونِ کارت (هنگام Load More) ── */
+/* ── اسکلتون کارت (هنگام Load More) ── */
 function SkeletonCard() {
   return (
     <div className="nw-card" style={{ pointerEvents: 'none' }}>
@@ -108,7 +108,7 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
 
-  const isBrowsing = cat === 'all' && !query.trim()   // حالت پیش‌فرض ⇒ سکشنِ ویژه نمایش داده می‌شود
+  const isBrowsing = cat === 'all' && !query.trim()   // حالت پیش‌فرض ⇒ سکشن ویژه نمایش داده می‌شود
 
   const sorted = useMemo(() => {
     const list = [...NEWS_ARTICLES]
@@ -125,14 +125,14 @@ export default function NewsPage() {
     })
   }, [sorted, cat, query])
 
-  /* ── چیدمانِ تحریریه‌ای «صفحه‌ی اول» — فقط در حالتِ مرور ── */
+  /* ── چیدمان تحریریه‌ای «صفحه‌ی اول» — فقط در حالت مرور ── */
   const byTs = useMemo(() => [...NEWS_ARTICLES].sort((a, b) => b.ts - a.ts), [])
   const lead      = isBrowsing ? (byTs.find(a => a.featured) ?? byTs[0]) : undefined
   const headlines = isBrowsing ? byTs.filter(a => a.id !== lead?.id).slice(0, 6) : []
   const secondRow = isBrowsing
     ? byTs.filter(a => a.featured && a.id !== lead?.id).concat(byTs.filter(a => !a.featured && a.id !== lead?.id)).slice(0, 3)
     : []
-  /* دو بخشِ پرمطلب ⇒ باندهای بخش (به سبکِ سرویس‌های خبری) */
+  /* دو بخش پرمطلب ⇒ باندهای بخش (به سبک سرویس‌های خبری) */
   const bands = useMemo(() => {
     if (!isBrowsing || !lead) return []
     const used = new Set<string>([lead.id, ...secondRow.map(a => a.id)])
@@ -209,7 +209,7 @@ export default function NewsPage() {
         .nw-spectrum i { width: 16px; height: 4px; border-radius: 2px; opacity: .9; }
         .nw-mast-date { text-align: left; }
         @media (max-width: 720px) { .nw-mast-date { display: none; } }
-        /* نوار سه‌رنگِ پایین ماست‌هد */
+        /* نوار سه‌رنگ پایین ماست‌هد */
         .nw-mast-bar { position: absolute; bottom: 0; inset-inline: 0; height: 3px; display: flex; }
         .nw-mast-bar i:nth-child(1) { flex: 2.6; background: linear-gradient(90deg, #8A6020, ${GOLD}); }
         .nw-mast-bar i:nth-child(2) { flex: 1; background: #B23B2E; }
@@ -358,7 +358,7 @@ export default function NewsPage() {
         }
       `}</style>
 
-      {/* ═══ ماست‌هد خبری — بنر لوکسِ تحریریه ═══ */}
+      {/* ═══ ماست‌هد خبری — بنر لوکس تحریریه ═══ */}
       <header className="nw-mast">
         <div className="nw-mast-grid" />
         <div className="nw-mast-word">NEWS</div>
@@ -376,13 +376,13 @@ export default function NewsPage() {
             <p style={{ margin: '13px 0 0', fontSize: 'clamp(12px,1.4vw,13.5px)', color: 'rgba(255,255,255,0.58)', lineHeight: 1.9, maxWidth: 460 }}>
               مرجع رسمی اخبار اسنوکر و پاکت بیلیارد ایران و جهان
             </p>
-            {/* طیفِ سرویس‌های خبری */}
+            {/* طیف سرویس‌های خبری */}
             <div className="nw-spectrum" style={{ marginTop: 16 }}>
               {NEWS_CATEGORIES.map(c => <i key={c.key} style={{ background: c.dot }} title={c.label} />)}
             </div>
           </div>
 
-          {/* بلوکِ تاریخ و وضعیت */}
+          {/* بلوک تاریخ و وضعیت */}
           <div className="nw-mast-date" style={{ animation: 'nwFadeUp .5s .15s ease both' }}>
             <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.26em', color: 'rgba(199,166,106,0.8)', marginBottom: 8, textAlign: 'right' }}>امروز</div>
             <div style={{ fontSize: 15.5, fontWeight: 900, color: '#fff', textAlign: 'right' }}>{todayFa}</div>
@@ -472,7 +472,7 @@ export default function NewsPage() {
         {isBrowsing && lead && (
           <>
             <section className="nw-front" style={{ marginBottom: 'clamp(26px,3.6vw,40px)' }}>
-              {/* خبرِ سرخط — ادیتوریالِ متن‌زیرِ‌تصویر */}
+              {/* خبر سرخط — ادیتوریال متن‌زیر‌تصویر */}
               <Link href={`/news/${lead.id}`} className="nw-lead">
                 <div className="nw-lead-img">
                   <img loading="lazy" decoding="async" src={lead.image} alt={lead.title} />

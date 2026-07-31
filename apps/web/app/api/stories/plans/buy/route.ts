@@ -4,8 +4,8 @@ import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
 import { getStoryPlan, createStoryOrder } from '@/lib/stories/plans';
 
-/* خریدِ بسته‌ی استوری → درگاه.
-   مبلغ همیشه از رکوردِ بسته روی سرور خوانده می‌شود، نه از کلاینت. */
+/* خرید بسته‌ی استوری → درگاه.
+   مبلغ همیشه از رکورد بسته روی سرور خوانده می‌شود، نه از کلاینت. */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'برای خرید بسته ابتدا وارد شوید' }, { status: 401 });
@@ -15,11 +15,11 @@ export async function POST(req: NextRequest) {
 
   const plan = await getStoryPlan(String(planId));
   if (!plan) return NextResponse.json({ message: 'این بسته پیدا نشد' }, { status: 404 });
-  if (!plan.isActive) return NextResponse.json({ message: 'این بسته دیگر قابلِ خرید نیست' }, { status: 409 });
-  if (plan.price <= 0) return NextResponse.json({ message: 'قیمتِ این بسته تنظیم نشده است' }, { status: 409 });
+  if (!plan.isActive) return NextResponse.json({ message: 'این بسته دیگر قابل خرید نیست' }, { status: 409 });
+  if (plan.price <= 0) return NextResponse.json({ message: 'قیمت این بسته تنظیم نشده است' }, { status: 409 });
 
   const order = await createStoryOrder(actor.id, plan);
-  if (!order) return NextResponse.json({ message: 'ثبتِ سفارش انجام نشد' }, { status: 500 });
+  if (!order) return NextResponse.json({ message: 'ثبت سفارش انجام نشد' }, { status: 500 });
 
   const provider = getPaymentProvider();
   const callbackUrl = `${req.nextUrl.origin}/api/stories/plans/callback/${provider.name}?order=${order.id}`;

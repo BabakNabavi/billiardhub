@@ -69,7 +69,7 @@ interface Table {
   brand: string; model: string; pricePerHour: number; isActive: boolean;
   photoDataUrl?: string;
   discountRules?: DiscountRule[];
-  /* هزینه‌ی بازیکنِ اضافه در سطحِ میز — undefined یعنی از باشگاه ارث می‌برد */
+  /* هزینه‌ی بازیکن اضافه در سطح میز — undefined یعنی از باشگاه ارث می‌برد */
   playerSurchargeEnabled?: boolean;
   playerSurchargePercent?: number;
   playerSurchargeFrom?: number;
@@ -240,9 +240,9 @@ function InputField({ label, value, onChange, type = 'text', placeholder = '', l
     fontFamily: 'var(--font-base)',
   };
 
-  /* فیلدِ عددی با ورودیِ فارسی جایگزین می‌شود: کاربر فارسی می‌بیند و
+  /* فیلد عددی با ورودی فارسی جایگزین می‌شود: کاربر فارسی می‌بیند و
      فارسی هم می‌تواند تایپ کند، ولی آنچه بالا می‌رود همیشه لاتین است.
-     `type="number"`ِ بومی هیچ‌وقت ارقامِ فارسی نشان نمی‌داد. */
+     `type="number"` بومی هیچ‌وقت ارقام فارسی نشان نمی‌داد. */
   if (type === 'number') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
@@ -311,7 +311,7 @@ function SaveBtn({ onClick, loading, label = 'ذخیره تغییرات' }: {
 
 type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'finance' | 'live' | 'tournaments' | 'gallery' | 'coaches';
 
-/* ردیفِ مسابقه در دیتابیس (snake_case) — جدولِ tournaments، مهاجرتِ ۰۲۶ */
+/* ردیف مسابقه در دیتابیس (snake_case) — جدول tournaments، مهاجرت ۰۲۶ */
 interface DbTournament {
   id: string; club_id: string; title: string; description?: string | null;
   discipline?: string; max_players: number; entry_fee: number;
@@ -320,14 +320,14 @@ interface DbTournament {
   status: string; seatsLeft?: number; match_format?: string | null;
 }
 
-/* برچسبِ فرمتِ مسابقه — همان فهرستی که دراپ‌داونِ ساخت نشان می‌دهد،
-   تا کارتِ فهرست و فرم یک زبان داشته باشند. */
+/* برچسب فرمت مسابقه — همان فهرستی که دراپ‌داون ساخت نشان می‌دهد،
+   تا کارت فهرست و فرم یک زبان داشته باشند. */
 const FORMAT_LABELS: Record<string, string> = {
   bo3: 'Best Of ۳', bo5: 'Best Of ۵', bo7: 'Best Of ۷',
   bo9: 'Best Of ۹', bo11: 'Best Of ۱۱',
 };
 
-/* نگاشتِ وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
+/* نگاشت وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
 const T_STATUS: Record<string, Tournament['status']> = {
   draft: 'upcoming', published: 'upcoming',
   registration_open: 'registration_open',
@@ -337,11 +337,11 @@ const T_STATUS: Record<string, Tournament['status']> = {
 };
 
 /* `starts_at` یک timestamptz است. برای فرم باید دوباره به همان قالبی
-   برگردد که `JalaliDatePicker` می‌فهمد («۱۴۰۵/۵/۱۵»)، وگرنه ویرایشِ یک
+   برگردد که `JalaliDatePicker` می‌فهمد («۱۴۰۵/۵/۱۵»)، وگرنه ویرایش یک
    مسابقه‌ی موجود تاریخش را خالی نشان می‌دهد.
 
-   تفکیکِ اجزا در وقتِ تهران انجام می‌شود، نه UTC: مسابقه‌ی ساعتِ ۱ بامداد
-   با `toISOString()` روزِ قبل خوانده می‌شد. */
+   تفکیک اجزا در وقت تهران انجام می‌شود، نه UTC: مسابقه‌ی ساعت ۱ بامداد
+   با `toISOString()` روز قبل خوانده می‌شد. */
 function isoToTehranParts(iso: string): { jy: number; jm: number; jd: number; hh: string; mm: string } | null {
   try {
     const p = new Intl.DateTimeFormat('en-CA', {
@@ -372,7 +372,7 @@ function fromDbTournament(r: DbTournament): Tournament {
     paymentMethod: 'online',
     cardNumber: '', cardHolder: '', bankName: '',
     status: T_STATUS[r.status] ?? 'upcoming',
-    /* ظرفیتِ پرشده از سرور می‌آید — شمارشِ محلی قابلِ اتکا نیست */
+    /* ظرفیت پرشده از سرور می‌آید — شمارش محلی قابل اتکا نیست */
     registeredCount: Math.max(0, r.max_players - (r.seatsLeft ?? r.max_players)),
   } as Tournament;
 }
@@ -381,7 +381,7 @@ export default function ClubDashboardPage() {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
 
-  /* بدون این گارد، کاربرِ لاگین‌نشده برای همیشه در «در حال بارگذاری» می‌ماند */
+  /* بدون این گارد، کاربر لاگین‌نشده برای همیشه در «در حال بارگذاری» می‌ماند */
   useEffect(() => {
     if (_hydrated && !user) router.push('/login');
   }, [_hydrated, user, router]);
@@ -395,13 +395,13 @@ export default function ClubDashboardPage() {
   // Bookings
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingFilter, setBookingFilter] = useState('all');
-  /* بستنِ رزروِ آنلاین: '' = باز | 'always' = همیشه بسته | عدد = بسته تا آن timestamp */
+  /* بستن رزرو آنلاین: '' = باز | 'always' = همیشه بسته | عدد = بسته تا آن timestamp */
   const [reserveClosedUntil, setReserveClosedUntil] = useState<string>('');
-  /* «رزروِ امروز بسته» — برخلافِ بالایی روی سرور ذخیره می‌شود */
+  /* «رزرو امروز بسته» — برخلاف بالایی روی سرور ذخیره می‌شود */
   const [closeToday, setCloseToday] = useState(false);
   const [closeTodayBusy, setCloseTodayBusy] = useState(false);
   const [closeTodayMsg, setCloseTodayMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  /* شماره‌ی دریافتِ پیامک — می‌تواند با شماره‌ی مالک فرق کند */
+  /* شماره‌ی دریافت پیامک — می‌تواند با شماره‌ی مالک فرق کند */
   const [notifyPhone, setNotifyPhone] = useState('');
   const [notifyBusy, setNotifyBusy] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -415,16 +415,16 @@ export default function ClubDashboardPage() {
   const [tableFormError, setTableFormError] = useState('');
   const [tablesSaving, setTablesSaving] = useState(false);
   const [tablesError, setTablesError] = useState('');
-  /* هزینه‌ی بازیکنِ اضافه — تنظیمِ باشگاه */
+  /* هزینه‌ی بازیکن اضافه — تنظیم باشگاه */
   const [surcharge, setSurcharge] = useState({ enabled: true, percent: '15', from: '2' });
   const [surchargeSaving, setSurchargeSaving] = useState(false);
   const [surchargeSaved, setSurchargeSaved] = useState(false);
   const [surchargeError, setSurchargeError] = useState('');
-  /* استعلامِ شبا از شماره کارت */
+  /* استعلام شبا از شماره کارت */
   const [ibanBusy, setIbanBusy] = useState(false);
   const [ibanMsg, setIbanMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [needsIdentity, setNeedsIdentity] = useState(false);
-  /* استعلامِ جواز کسب */
+  /* استعلام جواز کسب */
   const [licBusy, setLicBusy] = useState(false);
   const [licMsg, setLicMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
@@ -521,7 +521,7 @@ export default function ClubDashboardPage() {
 
   /* میزها روی سرور ذخیره می‌شوند (نه فقط در مرورگر) تا صفحه‌ی رزرو
      دقیقاً همین‌ها را ببیند. state خوش‌بینانه به‌روز می‌شود و بعد با
-     ردیف‌های واقعیِ سرور (که شناسه‌ی دائمی دارند) جایگزین می‌گردد. */
+     ردیف‌های واقعی سرور (که شناسه‌ی دائمی دارند) جایگزین می‌گردد. */
   const saveTables = useCallback(async (next: Table[]) => {
     setTables(next);
     if (!selectedClub) return;
@@ -563,7 +563,7 @@ export default function ClubDashboardPage() {
         managerName: c.managerName ?? '',
         description: c.description ?? '',
         address: c.address ?? '',
-        province: c.province ?? provinceOfCity(c.city ?? ''),   // بک‌فیلِ استان از شهر برای باشگاه‌های قدیمی
+        province: c.province ?? provinceOfCity(c.city ?? ''),   // بک‌فیل استان از شهر برای باشگاه‌های قدیمی
         city: c.city ?? '',
         country: c.country ?? 'ایران',
         phone: c.phone ?? '',
@@ -628,8 +628,8 @@ export default function ClubDashboardPage() {
       .catch(() => setStoryList([]));
 
     /* میزها از دیتابیس می‌آیند — همان منبعی که صفحه‌ی رزرو می‌خواند.
-       میزهای قدیمیِ داخلِ مرورگر (id با local-) یک‌بار به سرور منتقل می‌شوند
-       تا میزی که کاربر می‌بیند دقیقاً همان چیزی باشد که قابلِ رزرو است. */
+       میزهای قدیمی داخل مرورگر (id با local-) یک‌بار به سرور منتقل می‌شوند
+       تا میزی که کاربر می‌بیند دقیقاً همان چیزی باشد که قابل رزرو است. */
     (async () => {
       let legacy: Table[] = [];
       try {
@@ -652,11 +652,11 @@ export default function ClubDashboardPage() {
       } catch { setTables(legacy); }
     })();
 
-    // وضعیتِ بستنِ رزروِ آنلاین
+    // وضعیت بستن رزرو آنلاین
     try { setReserveClosedUntil(localStorage.getItem(`club-reserveClosedUntil-${selectedClub.id}`) ?? ''); }
     catch { setReserveClosedUntil(''); }
 
-    // «رزروِ امروز بسته» از سرور می‌آید، نه از این مرورگر
+    // «رزرو امروز بسته» از سرور می‌آید، نه از این مرورگر
     void apiFetch(`/api/clubs/${selectedClub.id}/settings`, { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
       .then(j => {
@@ -666,7 +666,7 @@ export default function ClubDashboardPage() {
       })
       .catch(() => { /* بی‌صدا */ });
 
-    /* مسابقات از سرور می‌آیند. کشِ محلی به‌عنوان نمایشِ اولیه می‌ماند
+    /* مسابقات از سرور می‌آیند. کش محلی به‌عنوان نمایش اولیه می‌ماند
        تا صفحه لحظه‌ی اول خالی نباشد، ولی بلافاصله با دادهٔ سرور
        جایگزین می‌شود — پیش‌تر تنها منبع همین localStorage بود، یعنی
        مسابقه‌ای که روی یک دستگاه ساخته می‌شد جای دیگر وجود نداشت. */
@@ -794,8 +794,8 @@ export default function ClubDashboardPage() {
     finally { setInfoSaving(false); }
   };
 
-  /* شماره کارت ⇒ شبا. نامِ دارنده‌ی حساب سمتِ سرور با هویتِ احرازشده‌ی
-     صاحب باشگاه مقایسه می‌شود؛ فقط در صورتِ تطابق، شبا «تأییدشده» می‌شود. */
+  /* شماره کارت ⇒ شبا. نام دارنده‌ی حساب سمت سرور با هویت احرازشده‌ی
+     صاحب باشگاه مقایسه می‌شود؛ فقط در صورت تطابق، شبا «تأییدشده» می‌شود. */
   const fetchIban = async () => {
     if (!selectedClub || !isValidCard(clubInfo.bankCard)) return;
     setIbanBusy(true); setIbanMsg(null);
@@ -819,7 +819,7 @@ export default function ClubDashboardPage() {
     } finally { setIbanBusy(false); }
   };
 
-  /* ثبتِ مستقیمِ شبا — برای کسی که شماره کارت نمی‌دهد */
+  /* ثبت مستقیم شبا — برای کسی که شماره کارت نمی‌دهد */
   const verifyIban = async () => {
     if (!selectedClub || !isValidIban(clubInfo.iban)) return;
     setIbanBusy(true); setIbanMsg(null);
@@ -839,8 +839,8 @@ export default function ClubDashboardPage() {
     } finally { setIbanBusy(false); }
   };
 
-  /* استعلامِ جوازِ کسب. کد ملیِ داخلِ جواز باید با کد ملیِ احرازشده‌ی
-     مالک یکی باشد، وگرنه تیکِ تأیید صادر نمی‌شود. */
+  /* استعلام جواز کسب. کد ملی داخل جواز باید با کد ملی احرازشده‌ی
+     مالک یکی باشد، وگرنه تیک تأیید صادر نمی‌شود. */
   const verifyLicense = async () => {
     if (!selectedClub || !clubInfo.licenseNumber.trim()) return;
     setLicBusy(true); setLicMsg(null);
@@ -862,7 +862,7 @@ export default function ClubDashboardPage() {
     } finally { setLicBusy(false); }
   };
 
-  /* ذخیره‌ی تنظیمِ هزینه‌ی بازیکنِ اضافه — همین مقدار ملاکِ محاسبه‌ی سروری است */
+  /* ذخیره‌ی تنظیم هزینه‌ی بازیکن اضافه — همین مقدار ملاک محاسبه‌ی سروری است */
   const saveSurcharge = async () => {
     if (!selectedClub) return;
     setSurchargeSaving(true); setSurchargeSaved(false);
@@ -919,9 +919,9 @@ export default function ClubDashboardPage() {
     finally { setHoursSaving(false); }
   };
 
-  /* بارگذاریِ مسابقات از سرور — منبعِ حقیقت دیگر localStorage نیست.
-     مسابقه‌های محلیِ قدیمی (شناسه‌ی `t_…`) تا وقتی هستند نمایش داده
-     می‌شوند ولی چیزِ تازه‌ای آن‌جا نوشته نمی‌شود. */
+  /* بارگذاری مسابقات از سرور — منبع حقیقت دیگر localStorage نیست.
+     مسابقه‌های محلی قدیمی (شناسه‌ی `t_…`) تا وقتی هستند نمایش داده
+     می‌شوند ولی چیز تازه‌ای آن‌جا نوشته نمی‌شود. */
   const loadTournaments = useCallback(async (clubId: string) => {
     try {
       const r = await apiFetch(`/api/tournaments?mine=1&clubId=${clubId}`, { cache: 'no-store' });
@@ -929,12 +929,12 @@ export default function ClubDashboardPage() {
       const j = await r.json().catch(() => null) as { tournaments?: DbTournament[] } | null;
       const rows = j?.tournaments ?? [];
       setMyTournaments(rows.map(fromDbTournament));
-    } catch { /* کشِ محلی می‌ماند */ }
+    } catch { /* کش محلی می‌ماند */ }
   }, []);
 
   const deleteTournament = async (id: string) => {
     /* مسابقه‌ی سرور فقط لغو می‌شود، نه حذف — سابقه‌ی مالی و ثبت‌نام‌ها
-       باید بماند. رکوردِ محلیِ قدیمی همان‌جا پاک می‌شود. */
+       باید بماند. رکورد محلی قدیمی همان‌جا پاک می‌شود. */
     if (/^[0-9a-f-]{36}$/i.test(id)) {
       try {
         await apiFetch(`/api/tournaments/${id}/status`, {
@@ -952,9 +952,9 @@ export default function ClubDashboardPage() {
     });
   };
 
-  /* `JalaliDatePicker` مقدارش را «۱۴۰۵/۵/۱۵» می‌دهد، ولی ستونِ
-     `starts_at` در دیتابیس timestamptz است. بدونِ این تبدیل، همان رشته‌ی
-     شمسی مستقیم به Postgres می‌رفت و یا خطا می‌داد یا تاریخِ بی‌معنیِ
+  /* `JalaliDatePicker` مقدارش را «۱۴۰۵/۵/۱۵» می‌دهد، ولی ستون
+     `starts_at` در دیتابیس timestamptz است. بدون این تبدیل، همان رشته‌ی
+     شمسی مستقیم به Postgres می‌رفت و یا خطا می‌داد یا تاریخ بی‌معنی
      میلادی می‌ساخت. */
   const jalaliToIso = (jalali: string, time: string): string | null => {
     const m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(String(jalali || '').trim());
@@ -962,7 +962,7 @@ export default function ClubDashboardPage() {
     const [gy, gm, gd] = jalaliToGregorian(Number(m[1]), Number(m[2]), Number(m[3]));
     const [hh = '00', mm = '00'] = String(time || '00:00').split(':');
     const p = (n: number | string) => String(n).padStart(2, '0');
-    /* +03:30 ثابت است: ایران از ۱۴۰۱ ساعتِ تابستانی ندارد */
+    /* +03:30 ثابت است: ایران از ۱۴۰۱ ساعت تابستانی ندارد */
     return `${gy}-${p(gm)}-${p(gd)}T${p(hh)}:${p(mm)}:00+03:30`;
   };
 
@@ -973,11 +973,11 @@ export default function ClubDashboardPage() {
     if (!tForm.startTime) { alert('ساعت شروع الزامی است'); return; }
     setTLoading(true);
     try {
-      /* روی سرور ساخته می‌شود؛ مالکیتِ باشگاه آن‌جا از دیتابیس اثبات
+      /* روی سرور ساخته می‌شود؛ مالکیت باشگاه آن‌جا از دیتابیس اثبات
          می‌شود، نه از clubId که این‌جا می‌فرستیم.
 
-         شماره‌ی کارت عمداً فرستاده نمی‌شود: حسابِ تسویه از پروفایلِ
-         تأییدشده‌ی باشگاه می‌آید، نه از فرمِ هر مسابقه. */
+         شماره‌ی کارت عمداً فرستاده نمی‌شود: حساب تسویه از پروفایل
+         تأییدشده‌ی باشگاه می‌آید، نه از فرم هر مسابقه. */
       const r = await apiFetch('/api/tournaments', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -991,15 +991,15 @@ export default function ClubDashboardPage() {
           venue: selectedClub.name,
           city: (selectedClub as { city?: string }).city ?? '',
           startsAt: jalaliToIso(tForm.date, tForm.startTime || '00:00'),
-          /* مهلتِ ثبت‌نام پیش‌تر اصلاً فرستاده نمی‌شد و همیشه NULL می‌ماند */
+          /* مهلت ثبت‌نام پیش‌تر اصلاً فرستاده نمی‌شد و همیشه NULL می‌ماند */
           registrationEndsAt: jalaliToIso(tForm.registrationDeadline, '23:59'),
           matchFormat: tForm.matchFormat,
-          /* پیش‌نویس ساخته می‌شود؛ باز کردنِ ثبت‌نام یک اقدامِ جداست */
+          /* پیش‌نویس ساخته می‌شود؛ باز کردن ثبت‌نام یک اقدام جداست */
           status: 'draft',
         }),
       });
       const j = await r.json().catch(() => ({} as Record<string, unknown>));
-      if (!r.ok) { alert(String(j.message ?? 'ثبتِ مسابقه انجام نشد')); return; }
+      if (!r.ok) { alert(String(j.message ?? 'ثبت مسابقه انجام نشد')); return; }
 
       await loadTournaments(selectedClub.id);
       setTournamentTab('list');
@@ -1199,37 +1199,37 @@ export default function ClubDashboardPage() {
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const filteredBookings = bookingFilter === 'all' ? bookings : bookings.filter(b => b.status === bookingFilter);
 
-  /* رزروِ آنلاین بسته است؟ (همیشه یا تا زمانِ آینده) */
-  /* اعتبارسنجیِ محلیِ کارت و شبا — پیش از هر استعلامِ بیرونی */
+  /* رزرو آنلاین بسته است؟ (همیشه یا تا زمان آینده) */
+  /* اعتبارسنجی محلی کارت و شبا — پیش از هر استعلام بیرونی */
   const cardBad   = clubInfo.bankCard.replace(/\D/g, '').length === 16 && !isValidCard(clubInfo.bankCard);
   const cardBank  = isValidCard(clubInfo.bankCard) ? bankOfCard(clubInfo.bankCard) : null;
   const ibanBad   = clubInfo.iban.length > 2 && clubInfo.iban.length === 26 && !isValidIban(clubInfo.iban);
   const ibanBank  = isValidIban(clubInfo.iban) ? bankOfIban(clubInfo.iban) : null;
 
-  /* دو سازوکارِ بستنِ رزرو وجود دارد و باید یک وضعیتِ واحد نشان دهند،
-     وگرنه کاربر «رزروِ امروز بسته» را تیک می‌زند و همان بالا می‌خواند
-     «رزروِ آنلاین باز است» — که هر دو درست‌اند ولی با هم متناقض به‌نظر
+  /* دو سازوکار بستن رزرو وجود دارد و باید یک وضعیت واحد نشان دهند،
+     وگرنه کاربر «رزرو امروز بسته» را تیک می‌زند و همان بالا می‌خواند
+     «رزرو آنلاین باز است» — که هر دو درست‌اند ولی با هم متناقض به‌نظر
      می‌رسند:
 
-       • closeToday          → همیشه، فقط روزِ جاری
-       • reserveClosedUntil  → موقت، همه‌ی روزها تا یک زمانِ مشخص
+       • closeToday          → همیشه، فقط روز جاری
+       • reserveClosedUntil  → موقت، همه‌ی روزها تا یک زمان مشخص
 
      پس متن هر دو را با هم می‌گوید. */
   const tempClosed = reserveClosedUntil === 'always' || (reserveClosedUntil !== '' && Number(reserveClosedUntil) > Date.now());
   const isReserveClosed = tempClosed || closeToday;
 
   const reserveClosedLabel = (() => {
-    if (reserveClosedUntil === 'always') return 'رزروِ آنلاین همیشه بسته است';
+    if (reserveClosedUntil === 'always') return 'رزرو آنلاین همیشه بسته است';
     if (tempClosed) {
       const until = new Date(Number(reserveClosedUntil)).toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
       return closeToday
-        ? `رزروِ آنلاین تا ${until} بسته است — و امروز همیشه بسته می‌ماند`
-        : `رزروِ آنلاین تا ${until} بسته است`;
+        ? `رزرو آنلاین تا ${until} بسته است — و امروز همیشه بسته می‌ماند`
+        : `رزرو آنلاین تا ${until} بسته است`;
     }
-    if (closeToday) return 'رزروِ امروز بسته است — روزهای آینده باز';
-    return 'رزروِ آنلاین باز است';
+    if (closeToday) return 'رزرو امروز بسته است — روزهای آینده باز';
+    return 'رزرو آنلاین باز است';
   })();
-  /* ذخیره‌ی «بستنِ رزروِ امروز» روی سرور */
+  /* ذخیره‌ی «بستن رزرو امروز» روی سرور */
   const saveCloseToday = async (next: boolean) => {
     if (!selectedClub) return;
     const prev = closeToday;
@@ -1241,14 +1241,14 @@ export default function ClubDashboardPage() {
         body: JSON.stringify({ closeTodayReservations: next }),
       });
       if (!r.ok) throw new Error();
-      setCloseTodayMsg({ ok: true, text: next ? 'رزروِ امروز بسته شد' : 'رزروِ امروز باز شد' });
+      setCloseTodayMsg({ ok: true, text: next ? 'رزرو امروز بسته شد' : 'رزرو امروز باز شد' });
     } catch {
-      setCloseToday(prev);        // برگرداندن به حالتِ قبل
+      setCloseToday(prev);        // برگرداندن به حالت قبل
       setCloseTodayMsg({ ok: false, text: 'ذخیره‌ی تنظیمات انجام نشد' });
     } finally { setCloseTodayBusy(false); }
   };
 
-  /* ذخیره‌ی شماره‌ی دریافتِ پیامک */
+  /* ذخیره‌ی شماره‌ی دریافت پیامک */
   const saveNotifyPhone = async () => {
     if (!selectedClub) return;
     if (notifyPhone && !/^09\d{9}$/.test(notifyPhone)) {
@@ -1322,7 +1322,7 @@ export default function ClubDashboardPage() {
         </Link>
       </div>
 
-      {/* وضعیتِ تأیید — هویت، مدارک و ایمیل */}
+      {/* وضعیت تأیید — هویت، مدارک و ایمیل */}
       <div style={{ marginBottom: 16 }}><VerificationBadges /></div>
 
       {/* Club selector dropdown */}
@@ -1419,7 +1419,7 @@ export default function ClubDashboardPage() {
         </div>
       )}
 
-      {/* ── وضعیتِ بررسیِ باشگاه ──
+      {/* ── وضعیت بررسی باشگاه ──
           مالک باید بداند باشگاهش منتشر شده یا نه، و اگر رد شده چرا.
           پیش‌تر هیچ‌کدام نمایش داده نمی‌شد: باشگاه ثبت می‌شد، در سایت
           دیده نمی‌شد، و مالک دلیلش را نمی‌دانست. */}
@@ -1433,21 +1433,21 @@ export default function ClubDashboardPage() {
         }}>
           {selectedClub.verificationStatus === 'rejected' ? (
             <>
-              <b>ثبتِ این باشگاه تأیید نشد.</b>
+              <b>ثبت این باشگاه تأیید نشد.</b>
               {selectedClub.rejectionReason && (
                 <div style={{ marginTop: 4, color: '#1C1B17', fontWeight: 500 }}>
                   علت: {selectedClub.rejectionReason}
                 </div>
               )}
               <div style={{ marginTop: 6, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>
-                پس از اصلاح، همین‌جا ذخیره کنید — باشگاه خودکار دوباره به صفِ بررسی می‌رود.
+                پس از اصلاح، همین‌جا ذخیره کنید — باشگاه خودکار دوباره به صف بررسی می‌رود.
               </div>
             </>
           ) : (
             <>
-              <b>باشگاه در انتظارِ بررسیِ کارشناسان است.</b>
+              <b>باشگاه در انتظار بررسی کارشناسان است.</b>
               <div style={{ marginTop: 4, color: 'rgba(0,0,0,0.55)', fontWeight: 500 }}>
-                تا تأیید، در فهرستِ عمومیِ سایت نمایش داده نمی‌شود. اطلاعات و مدارک را کامل کنید تا بررسی سریع‌تر انجام شود.
+                تا تأیید، در فهرست عمومی سایت نمایش داده نمی‌شود. اطلاعات و مدارک را کامل کنید تا بررسی سریع‌تر انجام شود.
               </div>
             </>
           )}
@@ -1751,7 +1751,7 @@ export default function ClubDashboardPage() {
               <div style={{ marginBottom: 16, padding: '13px 15px', borderRadius: 13, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.34)' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#A07840', marginBottom: 6 }}>ابتدا هویت خود را تأیید کنید</div>
                 <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 11px', lineHeight: 1.95 }}>
-                  حساب بانکی باید به نام خودِ صاحب باشگاه باشد. برای این بررسی، کد ملی و تاریخ تولد تأییدشده لازم است.
+                  حساب بانکی باید به نام خود صاحب باشگاه باشد. برای این بررسی، کد ملی و تاریخ تولد تأییدشده لازم است.
                 </p>
                 <Link href="/profile/verify"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: 'rgba(199,166,106,0.16)', border: '1px solid rgba(199,166,106,0.45)', color: '#A07840' }}>
@@ -1776,7 +1776,7 @@ export default function ClubDashboardPage() {
                 {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید.</div>}
                 {cardBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {cardBank}</div>}
 
-                {/* استعلامِ شبا از شماره کارت */}
+                {/* استعلام شبا از شماره کارت */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
                   <button type="button" onClick={fetchIban}
                     disabled={ibanBusy || !isValidCard(clubInfo.bankCard) || !selectedClub}
@@ -2007,7 +2007,7 @@ export default function ClubDashboardPage() {
               <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 18 }}>
                 <SectionTitle>تخفیف‌های زمانی میزها</SectionTitle>
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
-                  تخفیف زمانی فقط روی قیمتِ همین میز اعمال می‌شود (مثلاً صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
+                  تخفیف زمانی فقط روی قیمت همین میز اعمال می‌شود (مثلاً صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 110px', minWidth: 100 }}>
@@ -2062,25 +2062,25 @@ export default function ClubDashboardPage() {
                 )}
               </div>
 
-              {/* ── هزینه‌ی بازیکنِ اضافه — برای همین میز ──
-                  پیش‌تر یک تنظیمِ واحد برای کلِ باشگاه بود، ولی میزِ VIP
+              {/* ── هزینه‌ی بازیکن اضافه — برای همین میز ──
+                  پیش‌تر یک تنظیم واحد برای کل باشگاه بود، ولی میز VIP
                   اسنوکر و ایرهاکی یک قاعده ندارند. خالی‌گذاشتن یعنی
-                  «از تنظیمِ باشگاه پیروی کن». */}
+                  «از تنظیم باشگاه پیروی کن». */}
               <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 18 }}>
                 <SectionTitle>هزینه‌ی بازیکن اضافه — برای این میز</SectionTitle>
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
-                  اگر خالی بماند، تنظیمِ عمومیِ باشگاه روی این میز اعمال می‌شود.
+                  اگر خالی بماند، تنظیم عمومی باشگاه روی این میز اعمال می‌شود.
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 120px', minWidth: 110 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از چند نفر به بالا</div>
-                    <input value={tableForm.surchargeFrom} inputMode="numeric" placeholder="پیش‌فرضِ باشگاه"
+                    <input value={tableForm.surchargeFrom} inputMode="numeric" placeholder="پیش‌فرض باشگاه"
                       onChange={e => setTableForm(p => ({ ...p, surchargeFrom: e.target.value.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).slice(0, 2) }))}
                       style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                   </div>
                   <div style={{ flex: '1 1 120px', minWidth: 110 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>درصد به ازای هر نفر</div>
-                    <input value={tableForm.surchargePercent} inputMode="numeric" placeholder="پیش‌فرضِ باشگاه"
+                    <input value={tableForm.surchargePercent} inputMode="numeric" placeholder="پیش‌فرض باشگاه"
                       onChange={e => setTableForm(p => ({ ...p, surchargePercent: e.target.value.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).slice(0, 3) }))}
                       style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                   </div>
@@ -2088,7 +2088,7 @@ export default function ClubDashboardPage() {
                 {(tableForm.surchargeFrom || tableForm.surchargePercent) && (
                   <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginTop: 10, marginBottom: 0 }}>
                     از <b style={{ color: DARK }}>{tableForm.surchargeFrom || '۲'}</b> نفر به بالا،
-                    هر نفر <b style={{ color: DARK }}>{tableForm.surchargePercent || '۰'}٪</b> به مبلغِ رزروِ همین میز اضافه می‌شود.
+                    هر نفر <b style={{ color: DARK }}>{tableForm.surchargePercent || '۰'}٪</b> به مبلغ رزرو همین میز اضافه می‌شود.
                   </p>
                 )}
               </div>
@@ -2329,12 +2329,12 @@ export default function ClubDashboardPage() {
       {/* ════ Tab: Bookings ════ */}
       {activeTab === 'bookings' && (
         <div>
-          {/* ── بستنِ رزروِ روزِ جاری ──
-              این با «بستنِ موقتِ» پایین فرق دارد: آن یک بازه‌ی ساعتی است،
+          {/* ── بستن رزرو روز جاری ──
+              این با «بستن موقت» پایین فرق دارد: آن یک بازه‌ی ساعتی است،
               این یک قاعده‌ی ماندگار که هر روز خودش را تکرار می‌کند و
-              سرِ نیمه‌شبِ تهران روزِ بعد آزاد می‌شود. در دیتابیس ذخیره
-              می‌شود و خودِ API جلوی رزرو را می‌گیرد — نسخه‌ی قبلی فقط
-              در localStorage بود، یعنی روی مرورگرِ مشتری اثری نداشت. */}
+              سر نیمه‌شب تهران روز بعد آزاد می‌شود. در دیتابیس ذخیره
+              می‌شود و خود API جلوی رزرو را می‌گیرد — نسخه‌ی قبلی فقط
+              در localStorage بود، یعنی روی مرورگر مشتری اثری نداشت. */}
           <Card style={{ marginBottom: 16, padding: 16 }}>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
               <input type="checkbox" checked={closeToday} disabled={closeTodayBusy}
@@ -2356,16 +2356,16 @@ export default function ClubDashboardPage() {
               </p>
             )}
 
-            {/* شماره‌ی اطلاع‌رسانی — بسیاری از باشگاه‌ها به نامِ یک نفرند
-                ولی کسِ دیگری اداره‌شان می‌کند؛ پیامکِ رزرو باید به دستِ
+            {/* شماره‌ی اطلاع‌رسانی — بسیاری از باشگاه‌ها به نام یک نفرند
+                ولی کس دیگری اداره‌شان می‌کند؛ پیامک رزرو باید به دست
                 همان کسی برسد که واقعاً میز را آماده می‌کند. */}
             <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 16, paddingTop: 16 }}>
               <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A', marginBottom: 4 }}>
                 شماره‌ی دریافت پیامک‌ها
               </div>
               <p style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.95, margin: '0 0 10px' }}>
-                پیامکِ رزروها و اطلاع‌رسانی‌ها به این شماره فرستاده می‌شود.
-                اگر خالی بماند، به شماره‌ی خودِ شما می‌رود.
+                پیامک رزروها و اطلاع‌رسانی‌ها به این شماره فرستاده می‌شود.
+                اگر خالی بماند، به شماره‌ی خود شما می‌رود.
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                 <input
@@ -2392,7 +2392,7 @@ export default function ClubDashboardPage() {
             </div>
           </Card>
 
-          {/* ── بستن/بازکردنِ موقتِ رزروِ آنلاین ── */}
+          {/* ── بستن/بازکردن موقت رزرو آنلاین ── */}
           <Card style={{ marginBottom: 16, padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
               <span style={{ width: 9, height: 9, borderRadius: '50%', background: isReserveClosed ? '#DC2626' : '#16A34A', flexShrink: 0 }} />
@@ -2414,7 +2414,7 @@ export default function ClubDashboardPage() {
                   padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
                   fontFamily: 'var(--font-base)',
                   border: '1px solid rgba(22,163,74,0.34)', background: 'rgba(22,163,74,0.12)', color: '#0E7A38',
-                }}>باز کردنِ رزرو</button>
+                }}>باز کردن رزرو</button>
               )}
             </div>
           </Card>
@@ -2551,8 +2551,8 @@ export default function ClubDashboardPage() {
                     {t.status === 'live' && (
                       <Link href={`/tournaments/${t.id}/live`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.28)', color: '#dc2626' }}>● لایو</Link>
                     )}
-                    {/* پنلِ برگزاری — قرعه‌کشی و ثبتِ نتیجه. بدونِ این لینک،
-                        هیچ راهی برای رسیدن به صفحه‌ی مدیریتِ مسابقه نبود.
+                    {/* پنل برگزاری — قرعه‌کشی و ثبت نتیجه. بدون این لینک،
+                        هیچ راهی برای رسیدن به صفحه‌ی مدیریت مسابقه نبود.
                         جای دکمه‌ی «ویرایش» را گرفت که هیچ‌وقت onClick نداشت. */}
                     <Link href={`/tournaments/${t.id}/admin`} style={{
                       display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -2582,9 +2582,9 @@ export default function ClubDashboardPage() {
                   options={[{ value:'snooker',label:'اسنوکر' },{ value:'8ball',label:'ایت بال' },{ value:'9ball',label:'ناین بال' },{ value:'other',label:'سایر' }]} />
                 <SelectField label="ظرفیت (نفر)" value={tForm.maxPlayers} onChange={v => setTForm(p => ({...p, maxPlayers: v}))}
                   options={['8','16','32','64'].map(v => ({ value: v, label: v + ' نفر' }))} />
-                {/* تاریخ‌ها با همان تقویمِ شمسیِ تاریخِ تولد انتخاب می‌شوند،
-                    نه تایپِ آزاد — تایپِ آزاد یعنی هر کسی هر قالبی بنویسد
-                    و بعد قابلِ مرتب‌سازی و مقایسه نباشد.
+                {/* تاریخ‌ها با همان تقویم شمسی تاریخ تولد انتخاب می‌شوند،
+                    نه تایپ آزاد — تایپ آزاد یعنی هر کسی هر قالبی بنویسد
+                    و بعد قابل مرتب‌سازی و مقایسه نباشد.
                     maxYear جلو گذاشته شده چون مسابقه در آینده است. */}
                 <JalaliDatePicker label="تاریخ برگزاری" value={tForm.date}
                   onChange={v => setTForm(p => ({ ...p, date: v }))}

@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
 
-/* بازگشت از درگاهِ خریدِ بسته‌ی استوری — همان قواعدِ مسیرِ آگهی:
-   verify سمتِ سرور، مقایسه‌ی مبلغ، و فعال‌سازیِ اتمیک که کالبکِ
+/* بازگشت از درگاه خرید بسته‌ی استوری — همان قواعد مسیر آگهی:
+   verify سمت سرور، مقایسه‌ی مبلغ، و فعال‌سازی اتمیک که کالبک
    تکراری دو بار بسته نمی‌دهد. */
 
 async function handle(req: NextRequest, providerName: string) {
@@ -50,13 +50,13 @@ async function handle(req: NextRequest, providerName: string) {
       action: 'STORY_PLAN_AMOUNT_MISMATCH', entityType: 'story_plan_order', entityId: o.id,
       newValue: { got: v.amount, want: o.amount }, ip: clientIp(req) ?? undefined,
     });
-    return fail('مبلغِ پرداخت با قیمتِ بسته مطابقت ندارد');
+    return fail('مبلغ پرداخت با قیمت بسته مطابقت ندارد');
   }
 
   const { error } = await rpc('bh_activate_story_plan', { p_order_id: o.id, p_ref: v.refId ?? '' });
   if (error) {
     void audit({ action: 'STORY_PLAN_ACTIVATE_FAILED', entityType: 'story_plan_order', entityId: o.id, newValue: { error: error.message } });
-    return fail('خطا در فعال‌سازیِ بسته — با پشتیبانی تماس بگیرید');
+    return fail('خطا در فعال‌سازی بسته — با پشتیبانی تماس بگیرید');
   }
 
   void audit({

@@ -1,15 +1,15 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   پنلِ برگزارکننده‌ی مسابقه.
+   پنل برگزارکننده‌ی مسابقه.
 
-   تا پیش از این روی داده‌ی ساختگیِ داخلِ کد کار می‌کرد. حالا از
+   تا پیش از این روی داده‌ی ساختگی داخل کد کار می‌کرد. حالا از
    /api/tournaments/:id/matches می‌خواند و می‌نویسد:
-     • فهرستِ ثبت‌نام‌های تأییدشده
+     • فهرست ثبت‌نام‌های تأییدشده
      • قرعه‌کشی (یک‌بار، اتمیک)
-     • ثبتِ نتیجه‌ی هر بازی و صعودِ خودکارِ برنده
+     • ثبت نتیجه‌ی هر بازی و صعود خودکار برنده
 
-   دسترسی سمتِ سرور با `ownsClub` سنجیده می‌شود؛ این صفحه فقط UI است.
+   دسترسی سمت سرور با `ownsClub` سنجیده می‌شود؛ این صفحه فقط UI است.
    ───────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -57,7 +57,7 @@ export default function TournamentAdminPage() {
     ]);
     setB(bracket);
     setRegs((regRes?.registrations ?? []) as Registration[]);
-    if (!bracket) setErr('اطلاعاتِ این مسابقه در دسترس نیست');
+    if (!bracket) setErr('اطلاعات این مسابقه در دسترس نیست');
     setLoading(false);
   }, [id]);
 
@@ -80,11 +80,11 @@ export default function TournamentAdminPage() {
   };
 
   const doReset = async () => {
-    if (!window.confirm('کلِ براکت و همه‌ی نتایجِ ثبت‌شده پاک می‌شود. مطمئنید؟')) return;
+    if (!window.confirm('کل براکت و همه‌ی نتایج ثبت‌شده پاک می‌شود. مطمئنید؟')) return;
     setBusy(true); setErr('');
     const { ok, body } = await resetBracket(id);
     setBusy(false);
-    if (!ok) { setErr(body.message ?? 'حذفِ براکت انجام نشد'); return; }
+    if (!ok) { setErr(body.message ?? 'حذف براکت انجام نشد'); return; }
     flash('براکت حذف شد');
     await load();
   };
@@ -137,14 +137,14 @@ export default function TournamentAdminPage() {
       {/* ══ خلاصه ══ */}
       {tab === 'overview' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 12 }}>
-          <Stat label="ثبت‌نامِ تأییدشده" value={confirmed.length} unit="نفر" tone="felt" />
-          <Stat label="در انتظارِ پرداخت" value={pending.length} unit="نفر" />
+          <Stat label="ثبت‌نام تأییدشده" value={confirmed.length} unit="نفر" tone="felt" />
+          <Stat label="در انتظار پرداخت" value={pending.length} unit="نفر" />
           <Stat label="ظرفیت" value={b?.tournament.max_players ?? 0} unit="نفر" />
           <Stat label="بازی‌های براکت" value={b?.matches.length ?? 0} unit="بازی" tone={hasBracket ? 'gold' : undefined} />
           {hasBracket && (
             <>
               <Stat label="انجام‌شده" value={b!.matches.filter(m => m.winner).length} unit="بازی" />
-              <Stat label="در حالِ اجرا" value={b!.matches.filter(m => m.status === 'in_progress').length} unit="بازی" tone="red" />
+              <Stat label="در حال اجرا" value={b!.matches.filter(m => m.status === 'in_progress').length} unit="بازی" tone="red" />
             </>
           )}
           {b?.champion && (
@@ -162,17 +162,17 @@ export default function TournamentAdminPage() {
         <div style={card}>
           {!hasBracket ? (
             <>
-              <h3 style={h3}>قرعه‌کشیِ براکت</h3>
+              <h3 style={h3}>قرعه‌کشی براکت</h3>
               <p style={pStyle}>
-                {faDigits(confirmed.length)} بازیکنِ تأییدشده وارد براکت می‌شوند.
+                {faDigits(confirmed.length)} بازیکن تأییدشده وارد براکت می‌شوند.
                 {confirmed.length >= 2 && (() => {
                   let size = 2; while (size < confirmed.length) size *= 2;
                   const byes = size - confirmed.length;
-                  return ` براکتِ ${faDigits(size)} تایی ساخته می‌شود${byes ? ` و ${faDigits(byes)} بازیکن در دورِ اول بای می‌گیرند` : ''}.`;
+                  return ` براکت ${faDigits(size)} تایی ساخته می‌شود${byes ? ` و ${faDigits(byes)} بازیکن در دور اول بای می‌گیرند` : ''}.`;
                 })()}
               </p>
               <p style={{ ...pStyle, color: RED }}>
-                قرعه‌کشی یک‌بار انجام می‌شود. برای تکرارش باید کلِ براکت و نتایج پاک شود.
+                قرعه‌کشی یک‌بار انجام می‌شود. برای تکرارش باید کل براکت و نتایج پاک شود.
               </p>
               {pending.length > 0 && (
                 <p style={{ ...pStyle, color: GOLD_D }}>
@@ -181,10 +181,10 @@ export default function TournamentAdminPage() {
               )}
               <button onClick={doDraw} disabled={busy || confirmed.length < 2} style={btnGold(busy || confirmed.length < 2)}>
                 {busy ? <Loader2 size={15} style={{ animation: 'taspin 1s linear infinite' }} /> : <Shuffle size={15} />}
-                قرعه‌کشی و ساختِ براکت
+                قرعه‌کشی و ساخت براکت
               </button>
               {confirmed.length < 2 && (
-                <p style={{ ...pStyle, marginTop: 10 }}>حداقل دو ثبت‌نامِ تأییدشده لازم است.</p>
+                <p style={{ ...pStyle, marginTop: 10 }}>حداقل دو ثبت‌نام تأییدشده لازم است.</p>
               )}
             </>
           ) : (
@@ -192,14 +192,14 @@ export default function TournamentAdminPage() {
               <h3 style={h3}>براکت ساخته شده است</h3>
               <p style={pStyle}>
                 {faDigits(b!.totalRounds)} دور، {faDigits(b!.matches.length)} بازی.
-                نتایج را از تبِ «بازی‌ها» ثبت کنید.
+                نتایج را از تب «بازی‌ها» ثبت کنید.
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
                 <Link href={`/tournaments/${id}/bracket`} style={btnGhostLink}>
-                  <GitBranch size={14} /> دیدنِ براکت
+                  <GitBranch size={14} /> دیدن براکت
                 </Link>
                 <button onClick={doReset} disabled={busy} style={btnDanger(busy)}>
-                  <RotateCcw size={14} /> حذفِ براکت و قرعه‌کشیِ دوباره
+                  <RotateCcw size={14} /> حذف براکت و قرعه‌کشی دوباره
                 </button>
               </div>
             </>
@@ -213,7 +213,7 @@ export default function TournamentAdminPage() {
           <div style={{ ...card, textAlign: 'center', padding: '50px 20px' }}>
             <GitBranch size={30} style={{ color: MUT, opacity: 0.4, marginBottom: 10 }} />
             <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 6px', color: INK }}>هنوز براکتی ساخته نشده</p>
-            <p style={{ ...pStyle, margin: 0 }}>از تبِ «قرعه‌کشی» شروع کنید.</p>
+            <p style={{ ...pStyle, margin: 0 }}>از تب «قرعه‌کشی» شروع کنید.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -244,8 +244,8 @@ export default function TournamentAdminPage() {
   );
 }
 
-/* ── ویرایشگرِ یک بازی ──
-   بای و بازیِ نامشخص ورودیِ امتیاز نمی‌گیرند: اولی حریف ندارد و دومی
+/* ── ویرایشگر یک بازی ──
+   بای و بازی نامشخص ورودی امتیاز نمی‌گیرند: اولی حریف ندارد و دومی
    هنوز بازیکنش معلوم نیست. */
 function MatchEditor({
   tournamentId, match, onDone, onError,
@@ -269,7 +269,7 @@ function MatchEditor({
     setBusy(true); onError('');
     const { ok, body } = await reportResult(tournamentId, match.id, a, c);
     setBusy(false);
-    if (!ok) { onError(body.message ?? 'ثبتِ نتیجه انجام نشد'); return; }
+    if (!ok) { onError(body.message ?? 'ثبت نتیجه انجام نشد'); return; }
     await onDone('نتیجه ثبت شد');
   };
 
@@ -280,7 +280,7 @@ function MatchEditor({
       status: wasLive ? 'waiting' : 'in_progress',
     });
     setBusy(false);
-    if (!ok) { onError(body.message ?? 'تغییرِ وضعیت انجام نشد'); return; }
+    if (!ok) { onError(body.message ?? 'تغییر وضعیت انجام نشد'); return; }
     await onDone(wasLive ? 'بازی متوقف شد' : 'بازی روی آنتن رفت');
   };
 
@@ -301,15 +301,15 @@ function MatchEditor({
 
         {bye ? (
           <span style={{ fontSize: 11.5, fontWeight: 800, color: GOLD_D, background: 'rgba(199,166,106,0.13)', borderRadius: 999, padding: '4px 11px' }}>
-            بای — صعودِ خودکار
+            بای — صعود خودکار
           </span>
         ) : !ready ? (
-          <span style={{ fontSize: 11.5, color: MUT }}>در انتظارِ دورِ قبل</span>
+          <span style={{ fontSize: 11.5, color: MUT }}>در انتظار دور قبل</span>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <ScoreBox value={s1} onChange={setS1} label="امتیازِ بازیکنِ اول" />
+            <ScoreBox value={s1} onChange={setS1} label="امتیاز بازیکن اول" />
             <span style={{ color: MUT, fontWeight: 800 }}>–</span>
-            <ScoreBox value={s2} onChange={setS2} label="امتیازِ بازیکنِ دوم" />
+            <ScoreBox value={s2} onChange={setS2} label="امتیاز بازیکن دوم" />
             <button onClick={save} disabled={busy} style={btnSmall(busy, GOLD_D)}>
               {busy ? <Loader2 size={12} style={{ animation: 'taspin 1s linear infinite' }} /> : <Save size={12} />}
               {match.winner ? 'اصلاح' : 'ثبت'}
@@ -317,7 +317,7 @@ function MatchEditor({
             {!match.winner && (
               <button onClick={toggleLive} disabled={busy}
                 style={btnSmall(busy, match.status === 'in_progress' ? RED : MUT)}>
-                <Radio size={12} /> {match.status === 'in_progress' ? 'پایانِ پخش' : 'شروعِ زنده'}
+                <Radio size={12} /> {match.status === 'in_progress' ? 'پایان پخش' : 'شروع زنده'}
               </button>
             )}
           </div>
@@ -346,7 +346,7 @@ function PlayerLine({ name, win, dim }: { name: string; win: boolean; dim: boole
   );
 }
 
-/* ورودیِ امتیاز: نمایشِ فارسی، مقدارِ لاتین */
+/* ورودی امتیاز: نمایش فارسی، مقدار لاتین */
 function ScoreBox({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
   const FA = '۰۱۲۳۴۵۶۷۸۹';
   const fa = (v: string) => v.replace(/[0-9]/g, d => FA[+d]!);

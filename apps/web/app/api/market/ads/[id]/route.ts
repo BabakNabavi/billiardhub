@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 
-/* یک آگهیِ بیلیارد بازار — خواندن، ویرایش و حذف.
-   ویرایش و حذف فقط برای صاحبِ آگهی یا ادمین. */
+/* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
+   ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
 
 const num = (v: unknown, d = 0) => {
   const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
@@ -21,13 +21,13 @@ async function load(id: string) {
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  /* شناسه‌های عددی متعلق به کاتالوگِ نمونه‌اند و اصلاً در دیتابیس نیستند */
+  /* شناسه‌های عددی متعلق به کاتالوگ نمونه‌اند و اصلاً در دیتابیس نیستند */
   if (!UUID.test(id)) return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
 
   const ad = await load(id);
   if (!ad || ad.status === 'deleted') return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
 
-  /* شمارنده‌ی بازدید — شکستِ آن نباید صفحه را خراب کند */
+  /* شمارنده‌ی بازدید — شکست آن نباید صفحه را خراب کند */
   void sb().from('products').update({ views: num(ad.views) + 1 }).eq('id', id).then(() => {}, () => {});
 
   return NextResponse.json({ ad }, { headers: { 'Cache-Control': 'no-store' } });

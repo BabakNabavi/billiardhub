@@ -11,7 +11,7 @@ import { getManufacturer, MANUFACTURERS, type MfrProduct } from '../../../lib/ma
 
 const DEFAULT_ID = '1'
 
-/* آیکونِ کارخانه (لوگوی پیش‌فرض) */
+/* آیکون کارخانه (لوگوی پیش‌فرض) */
 const FactoryIcon = (
   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
@@ -19,7 +19,7 @@ const FactoryIcon = (
   </svg>
 )
 
-/* ─── اسلایدر عکسِ بنر ─── */
+/* ─── اسلایدر عکس بنر ─── */
 function ImageSlider({ images }: { images: string[] }) {
   const [i, setI] = useState(0)
   const shots = images
@@ -49,7 +49,7 @@ function ImageSlider({ images }: { images: string[] }) {
   )
 }
 
-/* ════════ پوسترهای پیش‌فرض — به‌سبکِ هدرِ صفحه‌ی فروشگاه (وردمارکِ «بیلیارد هاب») ════════ */
+/* ════════ پوسترهای پیش‌فرض — به‌سبک هدر صفحه‌ی فروشگاه (وردمارک «بیلیارد هاب») ════════ */
 const MFR_POSTERS = [
   { bg: 'linear-gradient(115deg,#0c1424 0%,#17253f 55%,#1e2f4d 100%)', sub: 'PROFESSIONAL MANUFACTURER' },
   { bg: 'linear-gradient(120deg,#07231a 0%,#0e3a2a 55%,#0a2f22 100%)', sub: 'TABLES · CUES · CLOTH'      },
@@ -117,7 +117,7 @@ function PosterSlider({ variants, title }: { variants: number[]; title?: string 
   )
 }
 
-/* ─── دراپ‌داون دسته‌بندیِ محصولات (از خودِ محصولاتِ همین تولیدکننده) ─── */
+/* ─── دراپ‌داون دسته‌بندی محصولات (از خود محصولات همین تولیدکننده) ─── */
 function CategoryDropdown({
   value, onChange, cats,
 }: {
@@ -182,13 +182,13 @@ function CategoryDropdown({
 export default function ManufacturerPage() {
   const params = useParams()
   const mfrId = (Array.isArray(params?.id) ? params.id[0] : params?.id) || DEFAULT_ID
-  /* اول داده‌ی ایستا؛ اگر نبود، پروفایلِ ثبت‌نامی (پنل ⇒ localStorage) */
+  /* اول داده‌ی ایستا؛ اگر نبود، پروفایل ثبت‌نامی (پنل ⇒ localStorage) */
   const [storedMfr, setStoredMfr] = useState<ReturnType<typeof profileToManufacturer> | null>(null)
   useEffect(() => {
     if (getManufacturer(mfrId)) return
     const p = getManufacturerProfile(mfrId)
     setStoredMfr(p ? profileToManufacturer(p) : null)
-    /* تولیدکننده‌ی ثبت‌نامیِ کاربرانِ دیگر فقط روی سرور است */
+    /* تولیدکننده‌ی ثبت‌نامی کاربران دیگر فقط روی سرور است */
     void fetchProfile<ManufacturerProfile>('manufacturer', mfrId).then(r => {
       if (r) setStoredMfr(profileToManufacturer({ ...r.data, slug: r.slug } as ManufacturerProfile))
     })
@@ -197,7 +197,7 @@ export default function ManufacturerPage() {
 
   const province = provinceOfCity(mfr.city)
 
-  /* شماره‌ی تماس (شماره‌ها خودشان کدِ شهر دارند) */
+  /* شماره‌ی تماس (شماره‌ها خودشان کد شهر دارند) */
   const areaCode  = telPrefix(province)
   const phoneDig  = mfr.phone.replace(/\D/g, '')
   const withCode  = !!areaCode && !!phoneDig && !phoneDig.startsWith('0')
@@ -210,7 +210,7 @@ export default function ManufacturerPage() {
   const [page, setPage]   = useState(1)
   const [query, setQuery] = useState('')
 
-  /* دسته‌بندی‌ها از خودِ محصولات */
+  /* دسته‌بندی‌ها از خود محصولات */
   const cats = useMemo(() => {
     const counts = new Map<string, number>()
     PRODUCTS.forEach(p => counts.set(p.category, (counts.get(p.category) ?? 0) + 1))

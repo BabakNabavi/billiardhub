@@ -32,18 +32,18 @@ interface StoryGroup {
   roleLabel: string;
   allSeen: boolean;
   stories: StoryItem[];
-  ownerKey?: string;   // برای هدف‌گذاریِ ریپلای/دایرکت (استوریِ سمت‌سرور)
-  /* عکسِ *زنده*ی صاحبِ استوری.  عکسِ لحظه‌ی انتشار است و با
-     عوض‌شدنِ عکسِ پروفایل به‌روز نمی‌شود؛ این یکی می‌شود. */
+  ownerKey?: string;   // برای هدف‌گذاری ریپلای/دایرکت (استوری سمت‌سرور)
+  /* عکس *زنده*ی صاحب استوری.  عکس لحظه‌ی انتشار است و با
+     عوض‌شدن عکس پروفایل به‌روز نمی‌شود؛ این یکی می‌شود. */
   avatarSrc?: string;
 }
 
-/* استوری‌های نمونه حذف شدند — نوزده کاربرِ ساختگی (مربی، داور،
-   فروشگاه) که روی صفحه‌ی اصلی کنارِ استوری‌های واقعی نشان داده
+/* استوری‌های نمونه حذف شدند — نوزده کاربر ساختگی (مربی، داور،
+   فروشگاه) که روی صفحه‌ی اصلی کنار استوری‌های واقعی نشان داده
    می‌شدند و هیچ‌کدام وجود خارجی نداشتند. */
 
 const emojis = ['❤️','🔥','👏','😮','😂','🎱','💪','🏆'];
-/* استیکرهای سریعِ پاسخِ استوری — ست مدرن و به‌روز */
+/* استیکرهای سریع پاسخ استوری — ست مدرن و به‌روز */
 const STICKERS = ['❤️','😍','😂','😮','🔥','👏','💯','🎯'];
 const bgGradients: Record<string,string> = {
   club:    'linear-gradient(160deg,#011a0f 0%,#022c22 50%,#065f46 100%)',
@@ -106,7 +106,7 @@ function buildLocalGroups(stories: StoredStory[]): StoryGroup[] {
   });
 }
 
-/* استوریِ سمت‌سرور (Supabase) — بین همه‌ی دستگاه‌ها و کاربران دیده می‌شود. */
+/* استوری سمت‌سرور (Supabase) — بین همه‌ی دستگاه‌ها و کاربران دیده می‌شود. */
 function buildServerGroups(stories: SStory[]): StoryGroup[] {
   const byOwner = new Map<string, SStory[]>();
   for (const s of stories) {
@@ -126,8 +126,8 @@ function buildServerGroups(stories: SStory[]): StoryGroup[] {
   });
 }
 
-/* استوریِ فروشگاه‌ها — مستقیم از پروفایلِ فروشگاه (لوکال) خوانده می‌شود؛
-   هر فروشگاهِ تاییدشده که عکسِ استوری دارد، خودکار در نوار می‌آید (بدون نیاز به ذخیره‌ی مجدد). */
+/* استوری فروشگاه‌ها — مستقیم از پروفایل فروشگاه (لوکال) خوانده می‌شود؛
+   هر فروشگاه تاییدشده که عکس استوری دارد، خودکار در نوار می‌آید (بدون نیاز به ذخیره‌ی مجدد). */
 function buildSellerStoreGroups(): StoryGroup[] {
   const meta = STORY_ROLES.seller ?? { label: 'فروشگاه', color: '#f59e0b' };
   return listSellerProfiles()
@@ -178,7 +178,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
 
-  /* استوری تمام‌صفحه و کاملاً ثابت می‌ماند (هیچ تغییری نمی‌کند)؛ فقط کیبورد + فیلدِ
+  /* استوری تمام‌صفحه و کاملاً ثابت می‌ماند (هیچ تغییری نمی‌کند)؛ فقط کیبورد + فیلد
      پاسخ رویش می‌آید. لایه‌ی پاسخ دقیقاً روی ناحیه‌ی دیدنی می‌نشیند و استوری با
      translateY(offsetTop) در جایش پین می‌شود تا روی iOS جابجا/نصفه نشود. */
   const vp = useVisualViewport();
@@ -187,9 +187,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
     const prevH = html.style.overflow, prevB = body.style.overflow;
     const sy = window.scrollY;
     html.style.overflow = 'hidden'; body.style.overflow = 'hidden';
-    /* iOS هنگام فوکوسِ اینپوت، سند را برنامه‌ای اسکرول می‌کند و overflow:hidden جلویش
-       را نمی‌گیرد ⇒ استوری بالا می‌رفت و سایتِ زیر پیدا می‌شد. body را فیکس می‌کنیم تا
-       سند اصلاً اسکرول‌پذیر نباشد؛ خودِ استوری inset:0 کامل و دست‌نخورده می‌ماند. */
+    /* iOS هنگام فوکوس اینپوت، سند را برنامه‌ای اسکرول می‌کند و overflow:hidden جلویش
+       را نمی‌گیرد ⇒ استوری بالا می‌رفت و سایت زیر پیدا می‌شد. body را فیکس می‌کنیم تا
+       سند اصلاً اسکرول‌پذیر نباشد؛ خود استوری inset:0 کامل و دست‌نخورده می‌ماند. */
     body.style.position = 'fixed'; body.style.top = `-${sy}px`;
     body.style.left = '0'; body.style.right = '0'; body.style.width = '100%';
     const block = (e: TouchEvent) => {
@@ -198,7 +198,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
       e.preventDefault();
     };
     document.addEventListener('touchmove', block, { passive: false });
-    /* هر تلاشِ اسکرولِ باقی‌مانده را همان لحظه خنثی کن */
+    /* هر تلاش اسکرول باقی‌مانده را همان لحظه خنثی کن */
     const keepTop = () => { if (window.scrollY !== 0) window.scrollTo(0, 0); };
     window.addEventListener('scroll', keepTop);
     return () => {
@@ -227,24 +227,24 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           100%{opacity:0;transform:translateX(-50%) translateY(-130px) scale(1);}
         }
         .story-reaction-pop { position:absolute;bottom:28px;left:50%;font-size:52px;pointer-events:none;z-index:60;animation:reactionFloat 2.2s ease forwards; }
-        /* پیلِ پاسخ — خط‌دار و شفاف روی نوارِ مشکی (مثل دایرکتِ اینستاگرام) */
+        /* پیل پاسخ — خط‌دار و شفاف روی نوار مشکی (مثل دایرکت اینستاگرام) */
         .story-msg-input { flex:1;min-width:0;background:transparent;border:1.5px solid rgba(255,255,255,0.55);border-radius:100px;padding:13px 20px;color:#fff;font-size:14px;font-weight:500;outline:none;font-family:inherit; }
         .story-msg-input::placeholder { color:rgba(255,255,255,0.7); }
         .story-msg-input:focus { border-color:rgba(255,255,255,0.9); }
-        /* آیکون‌های خطیِ سفید، بدونِ پس‌زمینه */
+        /* آیکون‌های خطی سفید، بدون پس‌زمینه */
         .story-ic { width:40px;height:40px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s ease;color:#fff; }
         .story-ic:hover { transform:scale(1.14); }
         .story-ic.on { color:#ef4444; }
-        /* ردیفِ استیکرِ سریع — بارِ شیشه‌ای افقی */
+        /* ردیف استیکر سریع — بار شیشه‌ای افقی */
         .story-stk { display:flex;justify-content:space-around;gap:4px;background:rgba(30,28,34,0.7);border:1px solid rgba(255,255,255,0.14);border-radius:100px;padding:9px 12px;margin-bottom:12px;backdrop-filter:blur(24px);animation:stkIn .22s cubic-bezier(.22,1,.36,1) both; }
         .story-stk button { background:none;border:none;cursor:pointer;font-size:28px;line-height:1;padding:2px;transition:transform .18s cubic-bezier(.22,1,.36,1); }
         .story-stk button:hover { transform:scale(1.35) translateY(-2px); }
       `}</style>
-      {/* رَپِرِ تمام‌صفحه و کاملاً ثابت — بدونِ transform (transform روی iOS فیکس‌بودن را
-          می‌شکند و استوری با اسکرول حرکت می‌کند و سایتِ زیر پیدا می‌شود) */}
+      {/* رَپر تمام‌صفحه و کاملاً ثابت — بدون transform (transform روی iOS فیکس‌بودن را
+          می‌شکند و استوری با اسکرول حرکت می‌کند و سایت زیر پیدا می‌شود) */}
       <div onClick={onClose} style={{ position:'fixed',inset:0,zIndex:99999,background:'rgba(0,0,0,0.96)',backdropFilter:'blur(8px)',animation:'overlayFadeIn .2s ease' }}>
 
-        {/* ── کارتِ استوری: تمام‌ارتفاع و ثابت ── */}
+        {/* ── کارت استوری: تمام‌ارتفاع و ثابت ── */}
         <div onClick={e => e.stopPropagation()} style={{ position:'absolute',top:0,bottom:0,left:'50%',transform:'translateX(-50%)',width:'min(440px,100vw)',overflow:'hidden',animation:'storyModalIn .3s cubic-bezier(.22,1,.36,1)',boxShadow:'0 0 80px rgba(0,0,0,0.6)' }}>
 
           {hasMedia ? (
@@ -288,7 +288,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
             <button onClick={onClose} style={{ width:'32px',height:'32px',borderRadius:'50%',background:'none',border:'none',cursor:'pointer',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><X size={22} /></button>
           </div>
 
-          {/* نواحیِ لمسِ قبلی/بعدی */}
+          {/* نواحی لمس قبلی/بعدی */}
           <button onClick={onNext} style={{ position:'absolute',right:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
           <button onClick={onPrev} style={{ position:'absolute',left:0,top:'80px',bottom:'70px',width:'38%',background:'transparent',border:'none',cursor:'pointer',zIndex:10 }} />
 
@@ -303,16 +303,16 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           {sentReaction && <div className="story-reaction-pop">{sentReaction}</div>}
         </div>
 
-      </div>{/* پایانِ رَپِرِ استوری — استوری اینجا کامل و دست‌نخورده می‌ماند */}
+      </div>{/* پایان رَپر استوری — استوری اینجا کامل و دست‌نخورده می‌ماند */}
 
       {/* ── لایه‌ی پاسخ: دقیقاً روی ناحیه‌ی دیدنی (بالای کیبورد)؛ pointerEvents:none تا
-          لمس‌ها به استوریِ پشت برسند، فقط خودِ نوارِ پاسخ کلیک‌پذیر است ──
+          لمس‌ها به استوری پشت برسند، فقط خود نوار پاسخ کلیک‌پذیر است ──
 
-          کلِ این لایه پشتِ پرچمِ «تعاملاتِ اجتماعی» است. وقتی خاموش باشد
-          هیچ‌چیزِ آن رندر نمی‌شود — نه اینپوتِ پاسخ، نه لایک، نه استیکر،
+          کل این لایه پشت پرچم «تعاملات اجتماعی» است. وقتی خاموش باشد
+          هیچ‌چیز آن رندر نمی‌شود — نه اینپوت پاسخ، نه لایک، نه استیکر،
           نه دکمه‌ی ارسال، و نه حتی CTAی «برای پاسخ وارد شوید» که برای
-          مهمان نمایش داده می‌شد. چون لایه‌ی جداست، خودِ استوری (تصویر،
-          نوارِ پیشرفت، ناوبریِ قبلی/بعدی، بستن) اصلاً دست نمی‌خورد. */}
+          مهمان نمایش داده می‌شد. چون لایه‌ی جداست، خود استوری (تصویر،
+          نوار پیشرفت، ناوبری قبلی/بعدی، بستن) اصلاً دست نمی‌خورد. */}
       {interactionsOn && (
       <div style={{ position:'fixed',left:0,right:0,top:0,height:vp.height||'100dvh',transform: vp.offsetTop ? `translateY(${vp.offsetTop}px)` : undefined,zIndex:100000,pointerEvents:'none',display:'flex',flexDirection:'column',justifyContent:'flex-end',alignItems:'center' }}>
         <div onClick={e => e.stopPropagation()} style={{ pointerEvents:'auto',width:'min(440px,96vw)',padding: vp.kb>0 ? '0 0 8px' : '0 0 calc(env(safe-area-inset-bottom) + 10px)' }}>
@@ -358,7 +358,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 /* ── Stories strip ── */
 export default function Stories() {
   const { user } = useAuthStore();
-  /* پرچمِ تعاملات. دیدنِ استوری هرگز به این وابسته نیست — فقط
+  /* پرچم تعاملات. دیدن استوری هرگز به این وابسته نیست — فقط
      لایک/ری‌اکشن/پاسخ. */
   const interactionsOn = useSocialInteractions();
   const [apiGroups, setApiGroups]     = useState<StoryGroup[]>([]);
@@ -366,7 +366,7 @@ export default function Stories() {
   const [serverGroups, setServerGroups] = useState<StoryGroup[]>([]);
   const [storeGroups, setStoreGroups] = useState<StoryGroup[]>([]);
   const [seenGroups, setSeenGroups] = useState<Set<string>>(new Set());
-  const [seenIds, setSeenIds] = useState<Set<string>>(new Set());   // storyId‌هایِ دیده‌شده (سروری، per-viewer)
+  const [seenIds, setSeenIds] = useState<Set<string>>(new Set());   // storyId‌های دیده‌شده (سروری، per-viewer)
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
   const [activeStory, setActiveStory] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -378,32 +378,32 @@ export default function Stories() {
   const [storyImg, setStoryImg] = useState('');
   const [storyCaption, setStoryCaption] = useState('');
 
-  // استوریِ سمت‌سرور (بین دستگاه‌ها) اولویت دارد؛ اگر سرور خالی/آفلاین بود، لوکال فالبک
+  // استوری سمت‌سرور (بین دستگاه‌ها) اولویت دارد؛ اگر سرور خالی/آفلاین بود، لوکال فالبک
   const userStoryGroups = serverGroups.length > 0 ? serverGroups : localGroups;
   const groups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
-  const localLimit = storyLimitFor(myRoles);   // ۰ = کاربرِ عادی، مجاز نیست
+  const localLimit = storyLimitFor(myRoles);   // ۰ = کاربر عادی، مجاز نیست
 
-  /* عکسِ آواتارِ یک گروه.
+  /* عکس آواتار یک گروه.
 
-     `logoUrl` عکسی است که *لحظه‌ی انتشارِ استوری* ذخیره شده. اگر کاربر
-     بعداً عکسِ پروفایلش را عوض کند، آن اسنپ‌شات قدیمی می‌ماند — و اگر
-     موقعِ انتشار عکسی نداشته، تا ابد خالی می‌ماند. برای استوریِ *خودِ
-     کاربر* عکسِ زنده‌ی نشست را ترجیح می‌دهیم؛ برای بقیه همان اسنپ‌شات
-     تنها چیزی است که در دست داریم (کلیدِ مالک در پاسخِ عمومی هش شده و
-     قابلِ تطبیق نیست). */
+     `logoUrl` عکسی است که *لحظه‌ی انتشار استوری* ذخیره شده. اگر کاربر
+     بعداً عکس پروفایلش را عوض کند، آن اسنپ‌شات قدیمی می‌ماند — و اگر
+     موقع انتشار عکسی نداشته، تا ابد خالی می‌ماند. برای استوری *خود
+     کاربر* عکس زنده‌ی نشست را ترجیح می‌دهیم؛ برای بقیه همان اسنپ‌شات
+     تنها چیزی است که در دست داریم (کلید مالک در پاسخ عمومی هش شده و
+     قابل تطبیق نیست). */
   const isMine = (g: StoryGroup) =>
     !!user && (g.ownerKey === user.id || g.ownerKey === ownerKey || g.userId === `local-${ownerKey}`);
   const avatarOf = (g: StoryGroup): string | undefined =>
     (isMine(g) ? (user?.avatar || g.avatarSrc || g.logoUrl) : (g.avatarSrc || g.logoUrl)) || undefined;
 
   /* سهمیه‌ی واقعی از سرور.
-     تا امروز این کادر عددِ localStorage را نشان می‌داد؛ یعنی روی هر
-     دستگاهِ تازه از صفر شروع می‌شد و با پاک‌کردنِ حافظه‌ی مرورگر ریست
-     می‌شد — کاربر «۰ از ۲» می‌دید در حالی که سرور چیزِ دیگری می‌دانست.
-     منبعِ حقیقت همان چیزی است که موقعِ انتشار سنجیده می‌شود. */
+     تا امروز این کادر عدد localStorage را نشان می‌داد؛ یعنی روی هر
+     دستگاه تازه از صفر شروع می‌شد و با پاک‌کردن حافظه‌ی مرورگر ریست
+     می‌شد — کاربر «۰ از ۲» می‌دید در حالی که سرور چیز دیگری می‌دانست.
+     منبع حقیقت همان چیزی است که موقع انتشار سنجیده می‌شود. */
   const [quota, setQuota] = useState<{ used: number; limit: number; allowed: boolean; enabled: boolean } | null>(null);
   const dailyLimit = quota ? quota.limit : localLimit;
   const usedToday = quota ? quota.used : countTodayStories(ownerKey);
@@ -412,8 +412,8 @@ export default function Stories() {
   const [publishing, setPublishing] = useState(false);
   const [replyFocus, setReplyFocus] = useState(false);
   const [replySent, setReplySent] = useState(false);
-  /* سهمیه را هر بار که کادرِ انتشار باز می‌شود تازه می‌گیریم — و بعد از
-     هر انتشارِ موفق هم، تا شمارنده بلافاصله درست شود. */
+  /* سهمیه را هر بار که کادر انتشار باز می‌شود تازه می‌گیریم — و بعد از
+     هر انتشار موفق هم، تا شمارنده بلافاصله درست شود. */
   const refreshQuota = async () => {
     if (!user) return;
     try {
@@ -421,7 +421,7 @@ export default function Stories() {
       if (!r.ok) return;
       const j = await r.json() as { quota?: { used: number; limit: number; allowed: boolean; enabled: boolean } };
       if (j?.quota) setQuota(j.quota);
-    } catch { /* آفلاین ⇒ همان عددِ محلی نشان داده می‌شود */ }
+    } catch { /* آفلاین ⇒ همان عدد محلی نشان داده می‌شود */ }
   };
   useEffect(() => { if (posting) void refreshQuota(); }, [posting]);   // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -436,12 +436,12 @@ export default function Stories() {
 
   useEffect(() => {
     setMounted(true); reloadLocal(); reloadServer();
-    /* تازه‌سازیِ دوره‌ای تا استوریِ دستگاه‌های دیگر هم بیاید */
+    /* تازه‌سازی دوره‌ای تا استوری دستگاه‌های دیگر هم بیاید */
     const iv = setInterval(reloadServer, 25000);
     return () => clearInterval(iv);
   }, []);
 
-  /* «دیده‌شدنِ» ماندگار را از سرور بخوان (وقتی کاربر لاگین شد/کلید آماده شد) */
+  /* «دیده‌شدن» ماندگار را از سرور بخوان (وقتی کاربر لاگین شد/کلید آماده شد) */
   useEffect(() => {
     if (!ownerKey) return;
     fetchSeen(ownerKey).then(ids => { if (Array.isArray(ids) && ids.length) setSeenIds(new Set(ids)); });
@@ -479,7 +479,7 @@ export default function Stories() {
       const id = `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
       const file = dataUrlToFile(storyImg, `${id}.jpg`);
       const mediaUrl = file ? (await uploadFile('club-media', file, `social/stories/img/${id}.jpg`)) || '' : '';
-      if (!mediaUrl) throw new Error('upload');   // ⇒ فالبکِ آفلاین
+      if (!mediaUrl) throw new Error('upload');   // ⇒ فالبک آفلاین
       const res = await postStory({
         ownerKey, userName: meName(),
         roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
@@ -487,7 +487,7 @@ export default function Stories() {
         logoUrl: user.avatar || undefined, mediaUrl, caption: storyCaption.trim(),
       });
       if (!res.ok) {
-        /* خطای واقعیِ سرور (سقف/عدم‌مجوز) — فالبکِ لوکال نکن */
+        /* خطای واقعی سرور (سقف/عدم‌مجوز) — فالبک لوکال نکن */
         if (res.status >= 400 && res.status < 500) { setPostErr(res.message || 'انتشار ممکن نشد'); setPublishing(false); return; }
         throw new Error('server');   // ۵xx/شبکه ⇒ فالبک
       }
@@ -496,7 +496,7 @@ export default function Stories() {
       setPosting(false); setStoryImg(''); setStoryCaption('');
     } catch {
       /* آفلاین ⇒ ذخیره‌ی محلی (تک‌دستگاهی) */
-      if (countTodayStories(ownerKey) >= dailyLimit) { setPostErr(`سقف استوریِ امروزِ شما (${dailyLimit.toLocaleString('fa-IR')}) پر شده است`); setPublishing(false); return; }
+      if (countTodayStories(ownerKey) >= dailyLimit) { setPostErr(`سقف استوری امروز شما (${dailyLimit.toLocaleString('fa-IR')}) پر شده است`); setPublishing(false); return; }
       addStoredStory({
         id: `st-${Date.now()}-${Math.floor(Math.random() * 1e4)}`, ownerKey,
         userName: meName(), roleKey: roleInfo.key, roleLabel: roleInfo.label, roleColor: roleInfo.color,
@@ -619,7 +619,7 @@ export default function Stories() {
     markGroupSeen(groups[index]);
   };
 
-  /* استوری هنگام نوشتنِ ریپلای، تمرکز روی فیلد یا بازبودنِ استیکرها متوقف می‌شود */
+  /* استوری هنگام نوشتن ریپلای، تمرکز روی فیلد یا بازبودن استیکرها متوقف می‌شود */
   const storyPaused = showEmojis || replyFocus || comment.trim().length > 0;
   useEffect(() => {
     if (activeGroup === null || storyPaused) return;
@@ -627,11 +627,11 @@ export default function Stories() {
     return () => clearTimeout(timer);
   }, [activeGroup, activeStory, storyPaused]);
 
-  /* ریپلای/استیکر → دایرکتِ صاحبِ استوری (سمت‌سرور؛ آفلاین ⇒ فالبکِ لوکال) */
+  /* ریپلای/استیکر → دایرکت صاحب استوری (سمت‌سرور؛ آفلاین ⇒ فالبک لوکال) */
   const sendReply = async (text: string, kind: 'text' | 'reaction') => {
-    /* لایه‌ی دوم، نه فقط مخفی‌کردنِ دکمه. مهم است چون پایین‌تر یک فالبکِ
+    /* لایه‌ی دوم، نه فقط مخفی‌کردن دکمه. مهم است چون پایین‌تر یک فالبک
        محلی هست: اگر سرور «نه» بگوید، پاسخ در localStorage می‌نشیند و به
-       کاربر «ارسال شد» نشان داده می‌شود. با پرچمِ خاموش، ۴۰۳ی سرور دقیقاً
+       کاربر «ارسال شد» نشان داده می‌شود. با پرچم خاموش، ۴۰۳ی سرور دقیقاً
        همان مسیر را فعال می‌کرد. */
     if (!interactionsOn) return;
     if (activeGroup === null || !text.trim() || !user) return;   // مهمان نمی‌تواند پاسخ بدهد
@@ -646,7 +646,7 @@ export default function Stories() {
       text: text.trim(), kind: dmKind, storyRef: st.id,
     });
     if (!(res as { ok?: boolean }).ok) {
-      /* آفلاین ⇒ اینباکسِ لوکال */
+      /* آفلاین ⇒ اینباکس لوکال */
       addStoryReply({ ownerKey: owner, storyId: st.id, fromName: meName(), fromRole: roleInfo.label, kind: kind === 'reaction' ? 'reaction' : 'text', text: text.trim(), caption: st.caption || undefined });
     }
     setReplySent(true);
@@ -665,7 +665,7 @@ export default function Stories() {
     setComment('');
   };
 
-  /* نه استوری‌ای هست و نه کاربر اجازه‌ی ساختن دارد ⇒ نوارِ خالی نشان
+  /* نه استوری‌ای هست و نه کاربر اجازه‌ی ساختن دارد ⇒ نوار خالی نشان
      نده. پیش‌تر این حالت پیش نمی‌آمد چون همیشه استوری‌های نمونه بودند. */
   if (groups.length === 0 && !(user && canPost)) return null;
 
@@ -704,7 +704,7 @@ export default function Stories() {
       `}</style>
 
       <div className="st-strip">
-        {/* Add story button — فقط نقش‌های واجدِ استوری (کاربر عادی نمی‌بیند) */}
+        {/* Add story button — فقط نقش‌های واجد استوری (کاربر عادی نمی‌بیند) */}
         {user && canPost && (
           <div className="st-item" onClick={() => { setPostErr(''); setPosting(true); }} role="button">
             <div className="st-ring" style={{ background: 'rgba(199,166,106,0.16)', border: '1.5px dashed rgba(199,166,106,0.45)' }}>
@@ -727,13 +727,13 @@ export default function Stories() {
                   : 'linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)',
                 boxShadow: isSeen ? 'none' : '0 0 14px rgba(214,41,118,0.45)',
               }}>
-                {/* عکسِ پروفایل؛ اگر نبود آدمکِ استاندارد — نه حرفِ اولِ نام.
-                    این نوار روی صفحه‌ی اول است و یک حرفِ فارسی روی دایره‌ی
-                    رنگی، هم ناخوانا بود هم ظاهرِ صفحه را می‌شکست.
+                {/* عکس پروفایل؛ اگر نبود آدمک استاندارد — نه حرف اول نام.
+                    این نوار روی صفحه‌ی اول است و یک حرف فارسی روی دایره‌ی
+                    رنگی، هم ناخوانا بود هم ظاهر صفحه را می‌شکست.
 
-                    `avatarOf` عکسِ زنده‌ی خودِ کاربر را بر `logoUrl`ِ
-                    ذخیره‌شده در استوری ترجیح می‌دهد: آن یکی عکسِ لحظه‌ی
-                    انتشار است و با عوض‌کردنِ عکسِ پروفایل به‌روز نمی‌شد. */}
+                    `avatarOf` عکس زنده‌ی خود کاربر را بر `logoUrl`
+                    ذخیره‌شده در استوری ترجیح می‌دهد: آن یکی عکس لحظه‌ی
+                    انتشار است و با عوض‌کردن عکس پروفایل به‌روز نمی‌شد. */}
                 <div className="st-inner" style={{ background: `linear-gradient(135deg,${g.roleColor}28,${g.roleColor}0E)`, padding: 0 }}>
                   <Avatar
                     src={avatarOf(g)}
@@ -766,8 +766,8 @@ export default function Stories() {
       )}
 
       {/* Story composer — any logged-in role can post; appears in the strip instantly.
-         با portal به body رندر می‌شود: کانتینرِ نوارِ استوری opacity وابسته به اسکرول دارد
-         و stacking-context می‌سازد؛ بدون portal، با بازشدنِ کیبورد مودال محو و پشتِ هرو می‌افتاد. */}
+         با portal به body رندر می‌شود: کانتینر نوار استوری opacity وابسته به اسکرول دارد
+         و stacking-context می‌سازد؛ بدون portal، با بازشدن کیبورد مودال محو و پشت هرو می‌افتاد. */}
       {mounted && posting && createPortal(
         <div onClick={() => setPosting(false)} style={{ position:'fixed', inset:0, zIndex:99999, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:16, direction:'rtl' }}>
           <div onClick={e => e.stopPropagation()} style={{ background:'#fff', borderRadius:20, width:'min(420px,94vw)', padding:22, boxShadow:'0 30px 80px rgba(0,0,0,0.4)', fontFamily:"'Vazirmatn',Tahoma,sans-serif" }}>
@@ -776,7 +776,7 @@ export default function Stories() {
               <button onClick={() => setPosting(false)} aria-label="بستن" style={{ background:'none', border:'none', cursor:'pointer', color:'#888', display:'flex' }}><X size={18} /></button>
             </div>
             <div style={{ fontSize:12.5, color:'#777', marginBottom:12 }}>به‌عنوان <span style={{ color:roleInfo.color, fontWeight:800 }}>{roleInfo.label}</span> منتشر می‌شود و ۲۴ ساعت در نوار استوری صفحه‌ی اول نمایش داده می‌شود.</div>
-            {/* شمارنده‌ی سقفِ روزانه */}
+            {/* شمارنده‌ی سقف روزانه */}
             <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'rgba(199,166,106,0.08)', border:'1px solid rgba(199,166,106,0.22)' }}>
               <span style={{ fontSize:11.5, fontWeight:700, color:'#9A6E38' }}>سقف امروز:</span>
               <span style={{ fontSize:12, fontWeight:800, color:'#1C1B17' }}>{usedToday.toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>

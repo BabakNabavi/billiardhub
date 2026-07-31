@@ -4,8 +4,8 @@ import { CORS, readJson, writeJson } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 import { redactList } from '@/lib/privacy'
 
-/* ویدیوهای آپلودیِ کاربران — مثل یوتیوب، سمت‌سرور روی Supabase Storage.
-   هر کاربرِ لاگین‌کرده می‌تواند کانال بسازد و ویدیو بگذارد. */
+/* ویدیوهای آپلودی کاربران — مثل یوتیوب، سمت‌سرور روی Supabase Storage.
+   هر کاربر لاگین‌کرده می‌تواند کانال بسازد و ویدیو بگذارد. */
 const INDEX = 'social/media/index.json'
 
 export interface UserVideo {
@@ -30,10 +30,10 @@ export function OPTIONS() { return new NextResponse(null, { status: 204, headers
 
 /* GET → همه‌ی ویدیوهای کاربران (تازه‌ترین اول).
 
-   عمداً عمومی است (فهرستِ ویدیوها مثلِ صفحه‌ی اولِ یوتیوب)، ولی
-   `ownerKey` از `phone || id` ساخته می‌شود و برای بیشترِ کاربران
-   همان شماره‌ی موبایل است؛ پیش‌تر عیناً برمی‌گشت و هر کسی بدونِ ورود
-   می‌توانست شماره‌ها را جمع کند. حالا هشِ پایدار برمی‌گردد. */
+   عمداً عمومی است (فهرست ویدیوها مثل صفحه‌ی اول یوتیوب)، ولی
+   `ownerKey` از `phone || id` ساخته می‌شود و برای بیشتر کاربران
+   همان شماره‌ی موبایل است؛ پیش‌تر عیناً برمی‌گشت و هر کسی بدون ورود
+   می‌توانست شماره‌ها را جمع کند. حالا هش پایدار برمی‌گردد. */
 export async function GET(req: NextRequest) {
   const list = await readJson<UserVideo[]>(INDEX, [])
   const actor = await actorOf(req).catch(() => null)
@@ -44,10 +44,10 @@ export async function GET(req: NextRequest) {
   )
 }
 
-/* POST { video } → افزودنِ ویدیوی جدید (بعد از آپلودِ فایل‌ها در Storage) */
+/* POST { video } → افزودن ویدیوی جدید (بعد از آپلود فایل‌ها در Storage) */
 export async function POST(req: NextRequest) {
   /* مالکیت از نشست می‌آید، نه از بدنه. پیش‌تر ownerKey را کلاینت
-     می‌گفت و یعنی هر کسی می‌توانست ویدیو را به نامِ دیگری ثبت کند. */
+     می‌گفت و یعنی هر کسی می‌توانست ویدیو را به نام دیگری ثبت کند. */
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })
 
@@ -80,9 +80,9 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, video: item }, { status: 201, headers: CORS })
 }
 
-/* DELETE ?id=..&user=KEY → حذفِ ویدیوی خودِ کاربر */
+/* DELETE ?id=..&user=KEY → حذف ویدیوی خود کاربر */
 export async function DELETE(req: NextRequest) {
-  /* پیش‌تر `user` از کوئری خوانده می‌شد، یعنی با گذاشتنِ کلیدِ قربانی
+  /* پیش‌تر `user` از کوئری خوانده می‌شد، یعنی با گذاشتن کلید قربانی
      می‌شد ویدیوی او را پاک کرد. حالا مالک از نشست می‌آید. */
   const actor = await actorOf(req)
   if (!actor) return NextResponse.json(UNAUTHENTICATED, { status: 401, headers: CORS })

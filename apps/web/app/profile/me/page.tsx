@@ -62,7 +62,7 @@ function hexToRgba(hex: string, a: number) {
 }
 
 function authHeader(): Record<string,string> {
-  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
   const t = csrfToken()
   return t ? { 'x-csrf-token': t } : {}
 }
@@ -119,7 +119,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 // ─── Club Search ──────────────────────────────────────────────
-/* فقط باشگاه‌های ثبت‌شده (همان لیستِ صفحه‌ی /clubs) — ورودی دستی مجاز نیست */
+/* فقط باشگاه‌های ثبت‌شده (همان لیست صفحه‌ی /clubs) — ورودی دستی مجاز نیست */
 function ClubSearch({ onSelect }: { onSelect: (clubId: string, name: string) => void }) {
   const [q, setQ]         = useState('')
   const [clubs, setClubs] = useState<ClubOption[]>([])
@@ -198,7 +198,7 @@ export default function ProfileMePage() {
 
   const fileRef = useRef<HTMLInputElement>(null)
 
-  /* اگر API در دسترس نبود، از حسابِ محلی (store) پر می‌کنیم —
+  /* اگر API در دسترس نبود، از حساب محلی (store) پر می‌کنیم —
      قبلاً به /login می‌فرستاد که خودش به /dashboard برمی‌گشت و
      «ویرایش پروفایل» عملاً بی‌اثر می‌شد */
   const buildLocalProfile = (): UserProfile | null => {
@@ -241,7 +241,7 @@ export default function ProfileMePage() {
       .then(j => { if (j) applyProfile(j); else fallback() })
       .catch(fallback)
       .finally(() => setLoading(false))
-    /* باشگاهِ انتخاب‌شده‌ی قبلی (ذخیره‌ی محلی) */
+    /* باشگاه انتخاب‌شده‌ی قبلی (ذخیره‌ی محلی) */
     try {
       const saved = JSON.parse(localStorage.getItem('bh_my_club') ?? 'null')
       if (saved?.name) setClubName(saved.name)
@@ -256,7 +256,7 @@ export default function ProfileMePage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      /* فقط فیلدهای قابلِ ویرایش؛ نام، کد ملی و تاریخ تولد اصلاً فرستاده
+      /* فقط فیلدهای قابل ویرایش؛ نام، کد ملی و تاریخ تولد اصلاً فرستاده
          نمی‌شوند — سرور هم اگر بیایند نادیده‌شان می‌گیرد. */
       const res = await apiFetch('/api/users/profile', {
         method: 'PATCH',
@@ -266,13 +266,13 @@ export default function ProfileMePage() {
       if (!res.ok) throw new Error()
       showToast('پروفایل ذخیره شد')
     } catch {
-      /* API در دسترس نیست ⇒ ذخیره‌ی محلی در حسابِ کاربر (persist می‌شود) */
+      /* API در دسترس نیست ⇒ ذخیره‌ی محلی در حساب کاربر (persist می‌شود) */
       useAuthStore.getState().updateUser({ bio, city })
       showToast('پروفایل به‌صورت محلی ذخیره شد')
     } finally { setSaving(false) }
   }
 
-  /* برش مربعی + فشرده‌سازی سمتِ کلاینت. خروجی یک File است تا مستقیم
+  /* برش مربعی + فشرده‌سازی سمت کلاینت. خروجی یک File است تا مستقیم
      آپلود شود؛ dataURL دیگر ذخیره نمی‌شود (پایین‌تر توضیح داده شده). */
   const compressAvatar = (file: File): Promise<File> =>
     new Promise((resolve, reject) => {
@@ -297,25 +297,25 @@ export default function ProfileMePage() {
     })
 
   /* ─────────────────────────────────────────────────────────────
-     عکسِ پروفایل — چرا این تابع کاملاً بازنویسی شد.
+     عکس پروفایل — چرا این تابع کاملاً بازنویسی شد.
 
-     نسخه‌ی قبلی به `${API}/user/profile/avatar` می‌زد، یعنی بک‌اندِ
+     نسخه‌ی قبلی به `${API}/user/profile/avatar` می‌زد، یعنی بک‌اند
      NestJS روی `localhost:3001` که در پروداکشن اصلاً وجود ندارد. آن
-     درخواست همیشه شکست می‌خورد و مسیرِ fallback اجرا می‌شد: عکس به شکلِ
+     درخواست همیشه شکست می‌خورد و مسیر fallback اجرا می‌شد: عکس به شکل
      dataURL فقط در localStorage می‌نشست.
 
      نتیجه دقیقاً همان چیزی بود که کاربر گزارش کرد — عکس عوض می‌شد،
-     ولی با خروج و ورودِ دوباره ناپدید می‌شد. چون هرگز به دیتابیس
-     نرفته بود: `logout()` استورِ محلی را پاک می‌کرد و ورودِ بعدی
+     ولی با خروج و ورود دوباره ناپدید می‌شد. چون هرگز به دیتابیس
+     نرفته بود: `logout()` استور محلی را پاک می‌کرد و ورود بعدی
      کاربر را از دیتابیس می‌خواند، جایی که `avatar` خالی بود.
 
      حالا از همان زیرساختی استفاده می‌شود که استوری‌ها استفاده می‌کنند:
        ۱) آپلود روی Supabase Storage با `/api/upload`
-       ۲) ذخیره‌ی نشانی در ستونِ `users.avatar` با PATCHِ پروفایل
-          (`avatar` از قبل در فهرستِ سفیدِ آن مسیر بود)
+       ۲) ذخیره‌ی نشانی در ستون `users.avatar` با PATCH پروفایل
+          (`avatar` از قبل در فهرست سفید آن مسیر بود)
 
      dataURL دیگر در localStorage ذخیره نمی‌شود: هم سهمیه‌ی مرورگر را
-     می‌بلعید و هم توهمِ ذخیره‌شدن می‌ساخت. اگر آپلود شکست بخورد، صادقانه
+     می‌بلعید و هم توهم ذخیره‌شدن می‌ساخت. اگر آپلود شکست بخورد، صادقانه
      خطا نشان داده می‌شود.
      ───────────────────────────────────────────────────────────── */
   const [avatarBusy, setAvatarBusy] = useState(false)
@@ -329,8 +329,8 @@ export default function ProfileMePage() {
     setAvatarBusy(true)
     try {
       const squared = await compressAvatar(file)
-      /* `profiles/` — یکی از پیشوندهای مجازِ /api/upload.
-         مهر زمانی در نام هست تا کشِ CDN عکسِ قبلی را برنگرداند. */
+      /* `profiles/` — یکی از پیشوندهای مجاز /api/upload.
+         مهر زمانی در نام هست تا کش CDN عکس قبلی را برنگرداند. */
       const key = `profiles/${profile?.id ?? 'me'}-${Date.now()}.jpg`
       const url = await uploadFile('club-media', squared, key)
       if (!url) throw new Error('upload')
@@ -364,8 +364,8 @@ export default function ProfileMePage() {
     else showToast('خطا در ثبت کارت', 'error')
   }
 
-  /* انتخابِ باشگاه = عضویت در آن. شمارشِ اعضا از روی همین ردیف‌هاست،
-     پس انتخابِ دوباره‌ی همان باشگاه عدد را بالا نمی‌برد و جابه‌جایی
+  /* انتخاب باشگاه = عضویت در آن. شمارش اعضا از روی همین ردیف‌هاست،
+     پس انتخاب دوباره‌ی همان باشگاه عدد را بالا نمی‌برد و جابه‌جایی
      بین دو باشگاه هم خودبه‌خود درست حساب می‌شود. */
   const handleClub = async (clubId: string, name: string) => {
     setClubName(name)
@@ -377,7 +377,7 @@ export default function ProfileMePage() {
         body: JSON.stringify({ clubId }),
       })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { showToast(j?.message || 'ثبتِ عضویت انجام نشد', 'error'); return }
+      if (!r.ok) { showToast(j?.message || 'ثبت عضویت انجام نشد', 'error'); return }
       setClubMembers(typeof j.members === 'number' ? j.members : null)
       showToast(`عضو باشگاه ${name} شدید`)
     } catch {
@@ -416,8 +416,8 @@ export default function ProfileMePage() {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '0 0 100px' }}>
 
           {/* ── سربرگ ──
-              نوارِ کاورِ ۱۴۰ پیکسلی حذف شد. این صفحه فقط برای خودِ کاربر
-              است و هیچ‌کس دیگری آن را نمی‌بیند، پس یک بنرِ تزئینی فقط
+              نوار کاور ۱۴۰ پیکسلی حذف شد. این صفحه فقط برای خود کاربر
+              است و هیچ‌کس دیگری آن را نمی‌بیند، پس یک بنر تزئینی فقط
               محتوا را پایین می‌برد. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 4px' }}>
             <button onClick={() => router.push('/dashboard')} aria-label="بازگشت"
@@ -430,9 +430,9 @@ export default function ProfileMePage() {
           <div style={{ padding: '0 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, marginBottom: 20 }}>
               {/* ── آواتار ──
-                  کلِ دایره دکمه است، نه فقط نشانِ گوشه — کاربر معمولاً
-                  روی خودِ عکس می‌زند. نشانِ دوربین هم بزرگ‌تر و واضح‌تر
-                  شد و دیگر از فونتِ CDN نمی‌آید (که در ایران اغلب
+                  کل دایره دکمه است، نه فقط نشان گوشه — کاربر معمولاً
+                  روی خود عکس می‌زند. نشان دوربین هم بزرگ‌تر و واضح‌تر
+                  شد و دیگر از فونت CDN نمی‌آید (که در ایران اغلب
                   بارگذاری نمی‌شد و آیکون نامرئی می‌ماند). */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 <button
@@ -457,7 +457,7 @@ export default function ProfileMePage() {
                   )}
                 </button>
 
-                {/* نشانِ دوربین — تزئینیِ محض، چون خودِ دایره دکمه است */}
+                {/* نشان دوربین — تزئینی محض، چون خود دایره دکمه است */}
                 <span aria-hidden="true" style={{
                   position: 'absolute', bottom: 0, left: 0,
                   width: 28, height: 28, borderRadius: '50%',
@@ -483,16 +483,16 @@ export default function ProfileMePage() {
               </div>
             </div>
 
-            {/* ── وضعیتِ تأیید ── */}
+            {/* ── وضعیت تأیید ── */}
             <div style={{ marginBottom: 16 }}><VerificationBadges /></div>
 
             {/* ── اطلاعات هویتی — استعلام‌شده، قفل ──
                 این‌ها هنگام ثبت‌نام از ثبت‌احوال و شاهکار گرفته شده‌اند.
-                تغییرشان یعنی هویتِ تأییدشده دیگر معنایی ندارد، پس نه این‌جا
-                و نه از راهِ API نوشته نمی‌شوند. */}
+                تغییرشان یعنی هویت تأییدشده دیگر معنایی ندارد، پس نه این‌جا
+                و نه از راه API نوشته نمی‌شوند. */}
             <Section title="اطلاعات هویتی" icon={<ShieldCheck size={18} />} color="#0E7A38">
               <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', margin: '0 0 14px', lineHeight: 1.95 }}>
-                این اطلاعات هنگام ثبت‌نام از ثبت‌احوال استعلام شده و قابلِ ویرایش نیست.
+                این اطلاعات هنگام ثبت‌نام از ثبت‌احوال استعلام شده و قابل ویرایش نیست.
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
                 <Field label="نام">
@@ -523,7 +523,7 @@ export default function ProfileMePage() {
               </Field>
 
               <Field label="رمز عبور">
-                {/* سرور همه‌ی نشست‌ها را باطل می‌کند؛ پس این‌جا هم حسابِ محلی
+                {/* سرور همه‌ی نشست‌ها را باطل می‌کند؛ پس این‌جا هم حساب محلی
                     را پاک می‌کنیم و کاربر را به صفحه‌ی ورود می‌فرستیم. */}
                 <ChangePassword
                   onChanged={() => {
@@ -543,7 +543,7 @@ export default function ProfileMePage() {
                 <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="چند جمله درباره خودت..." style={{ ...inputStyle, resize: 'vertical', minHeight: 70 }} />
               </Field>
               <Field label="جنسیت">
-                {/* استایلِ حرفه‌ای select از globals.css می‌آید — اینلاین override نکن */}
+                {/* استایل حرفه‌ای select از globals.css می‌آید — اینلاین override نکن */}
                 <select value={gender} onChange={e => setGender(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }}>
                   <option value="">انتخاب کنید</option>
                   <option value="male">مرد</option>
@@ -627,7 +627,7 @@ export default function ProfileMePage() {
               </button>
             </Section>
 
-            {/* ── دسترسی‌ها — همه با ثبتِ کد ملی هنگام ثبت‌نام فعال‌اند ── */}
+            {/* ── دسترسی‌ها — همه با ثبت کد ملی هنگام ثبت‌نام فعال‌اند ── */}
             <Section title="دسترسی‌ها" icon={<LockOpen size={18} />} color="#C7A66A">
               {[
                 { label: 'رزرو میز', icon: <Grid2x2 size={17} /> },

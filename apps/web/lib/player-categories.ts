@@ -1,14 +1,14 @@
 /* ─────────────────────────────────────────────────────────────
-   رشته و دسته‌بندیِ بازیکن — منبعِ واحد.
+   رشته و دسته‌بندی بازیکن — منبع واحد.
 
-   دسته‌بندی‌ها عمداً همان‌هایی هستند که در بخشِ رنکینگ سایت
+   دسته‌بندی‌ها عمداً همان‌هایی هستند که در بخش رنکینگ سایت
    (lib/rankings-store) استفاده می‌شوند، تا بازیکن دقیقاً در همان
    جدولی قرار بگیرد که در /ranking دیده می‌شود.
 
-   محورِ رنکینگ، «دسته» و «رده‌ی سنی» را در یک لیست ادغام کرده
+   محور رنکینگ، «دسته» و «رده‌ی سنی» را در یک لیست ادغام کرده
    (دسته برتر / دسته یک / زیر ۲۱ سال / پیشکسوتان). این‌جا از کاربر
-   دو چیزِ جدا می‌پرسیم — رده‌ی سنی و دسته — و خودمان به همان
-   برچسبِ رنکینگ ترجمه می‌کنیم؛ وگرنه «بزرگسالان» جایی برای انتخاب
+   دو چیز جدا می‌پرسیم — رده‌ی سنی و دسته — و خودمان به همان
+   برچسب رنکینگ ترجمه می‌کنیم؛ وگرنه «بزرگسالان» جایی برای انتخاب
    نداشت.
    ───────────────────────────────────────────────────────────── */
 
@@ -20,7 +20,7 @@ export type Gender = 'm' | 'f'
 export const DISCIPLINES: { key: Discipline; fa: string; en: string; ranked: boolean }[] = [
   { key: 'snooker',  fa: 'اسنوکر',        en: 'SNOOKER',  ranked: true  },
   { key: 'pool',     fa: 'پاکت بیلیارد',  en: 'POOL',     ranked: true  },
-  /* های‌بال هنوز جدولِ رنکینگ ندارد؛ انتخابش آزاد است ولی به رنکینگ وصل نمی‌شود */
+  /* های‌بال هنوز جدول رنکینگ ندارد؛ انتخابش آزاد است ولی به رنکینگ وصل نمی‌شود */
   { key: 'highball', fa: 'های‌بال',       en: 'HIGHBALL', ranked: false },
 ]
 
@@ -54,19 +54,19 @@ export const divisionFa = (d: Division | string): string =>
 export const isRanked = (d: Discipline | string): boolean =>
   !!DISCIPLINES.find(x => x.key === d)?.ranked
 
-/** بانوان در جدولِ رنکینگ «دسته یک» ندارند */
+/** بانوان در جدول رنکینگ «دسته یک» ندارند */
 export function divisionsFor(gender: Gender): typeof DIVISIONS {
   return gender === 'f' ? DIVISIONS.filter(d => d.key === 'premier') : DIVISIONS
 }
 
-/** کلیدِ رشته در lib/rankings-store (آن‌جا پاکت `pocket` نام دارد) */
+/** کلید رشته در lib/rankings-store (آن‌جا پاکت `pocket` نام دارد) */
 export function rankingSport(d: Discipline | string): 'snooker' | 'pocket' | null {
   if (d === 'snooker') return 'snooker'
   if (d === 'pool') return 'pocket'
   return null
 }
 
-/** برچسبِ دقیقِ دسته در جدولِ رنکینگ — null یعنی این رشته جدول ندارد */
+/** برچسب دقیق دسته در جدول رنکینگ — null یعنی این رشته جدول ندارد */
 export function rankingCategory(e: DisciplineEntry, gender: Gender): string | null {
   if (!isRanked(e.discipline)) return null
   if (e.ageGroup !== 'adult') return ageGroupFa(e.ageGroup)
@@ -85,7 +85,7 @@ export function entryLabel(e: DisciplineEntry, gender: Gender): string {
 export const emptyEntry = (discipline: Discipline): DisciplineEntry =>
   ({ discipline, ageGroup: 'adult', division: 'premier' })
 
-/** ورودیِ ناهمگون (پروفایل‌های قدیمی) → لیستِ استاندارد */
+/** ورودی ناهمگون (پروفایل‌های قدیمی) → لیست استاندارد */
 export function normalizeEntries(raw: unknown, legacy?: string): DisciplineEntry[] {
   const ok = (d: unknown): d is Discipline => DISCIPLINES.some(x => x.key === d)
   if (Array.isArray(raw)) {

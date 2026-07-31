@@ -1,10 +1,10 @@
 /* ─────────────────────────────────────────────────────────────
-   اطلاعاتِ بانکی — اعتبارسنجیِ محلی (بدونِ نیاز به وب‌سرویس).
-   استعلامِ مالکِ کارت/شبا جداگانه و از سرویسِ بیرونی انجام می‌شود؛
-   این‌جا فقط چیزهایی است که همین‌جا و آفلاین قابلِ تشخیص‌اند.
+   اطلاعات بانکی — اعتبارسنجی محلی (بدون نیاز به وب‌سرویس).
+   استعلام مالک کارت/شبا جداگانه و از سرویس بیرونی انجام می‌شود؛
+   این‌جا فقط چیزهایی است که همین‌جا و آفلاین قابل تشخیص‌اند.
    ───────────────────────────────────────────────────────────── */
 
-/** ارقامِ فارسی/عربی → لاتین و حذفِ هر چیزِ غیرعدد */
+/** ارقام فارسی/عربی → لاتین و حذف هر چیز غیرعدد */
 export function digitsOnly(v: string): string {
   return String(v || '')
     .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
@@ -19,7 +19,7 @@ export function formatCard(v: string): string {
   return digitsOnly(v).slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
 }
 
-/** الگوریتمِ Luhn — کارتِ تایپیِ اشتباه همین‌جا رد می‌شود */
+/** الگوریتم Luhn — کارت تایپی اشتباه همین‌جا رد می‌شود */
 export function isValidCard(v: string): boolean {
   const d = digitsOnly(v)
   if (d.length !== 16) return false
@@ -32,7 +32,7 @@ export function isValidCard(v: string): boolean {
   return sum % 10 === 0
 }
 
-/* شش‌رقمِ اولِ کارت ⇒ نامِ بانک. فهرست از BINهای رسمیِ شاپرک. */
+/* شش‌رقم اول کارت ⇒ نام بانک. فهرست از BINهای رسمی شاپرک. */
 const BINS: Record<string, string> = {
   '636214': 'آینده', '627412': 'اقتصاد نوین', '627381': 'انصار', '505785': 'ایران زمین',
   '622106': 'پارسیان', '639194': 'پارسیان', '627884': 'پارسیان',
@@ -51,7 +51,7 @@ const BINS: Record<string, string> = {
   '636797': 'مسکن', '639599': 'قوامین', '504971': 'ملل',
 }
 
-/** نامِ بانک از روی شماره کارت (اگر شناخته‌شده باشد) */
+/** نام بانک از روی شماره کارت (اگر شناخته‌شده باشد) */
 export function bankOfCard(v: string): string | null {
   const d = digitsOnly(v)
   return d.length >= 6 ? (BINS[d.slice(0, 6)] ?? null) : null
@@ -65,7 +65,7 @@ export function formatIban(v: string): string {
   return d ? `IR${d}` : ''
 }
 
-/** اعتبارسنجیِ شبا با mod-97 (استانداردِ ISO 13616) */
+/** اعتبارسنجی شبا با mod-97 (استاندارد ISO 13616) */
 export function isValidIban(v: string): boolean {
   const raw = String(v || '').replace(/\s/g, '').toUpperCase()
   const m = /^IR(\d{24})$/.exec(raw)
@@ -77,13 +77,13 @@ export function isValidIban(v: string): boolean {
   return rem === 1
 }
 
-/** نمایشِ خوانا: IR12 3456 7890 … */
+/** نمایش خوانا: IR12 3456 7890 … */
 export function prettyIban(v: string): string {
   const raw = formatIban(v)
   return raw ? raw.replace(/(.{4})/g, '$1 ').trim() : ''
 }
 
-/** کدِ بانک داخلِ شبا (رقم‌های ۵ تا ۷) ⇒ نامِ بانک */
+/** کد بانک داخل شبا (رقم‌های ۵ تا ۷) ⇒ نام بانک */
 const IBAN_BANKS: Record<string, string> = {
   '010': 'مرکزی', '011': 'صنعت و معدن', '012': 'ملت', '013': 'رفاه کارگران', '014': 'مسکن',
   '015': 'سپه', '016': 'کشاورزی', '017': 'ملی', '018': 'تجارت', '019': 'صادرات',
@@ -101,7 +101,7 @@ export function bankOfIban(v: string): string | null {
 
 /* ── شماره جواز کسب ─────────────────────────────────────────── */
 
-/** جوازِ کسبِ اصناف معمولاً عددی و بینِ ۶ تا ۱۵ رقم است */
+/** جواز کسب اصناف معمولاً عددی و بین ۶ تا ۱۵ رقم است */
 export function isValidLicenseNumber(v: string): boolean {
   const d = digitsOnly(v)
   return d.length >= 6 && d.length <= 15

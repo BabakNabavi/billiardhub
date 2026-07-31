@@ -6,7 +6,7 @@ import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/
 
 export const dynamic = 'force-dynamic'
 
-/* کوکیِ نشست یا هدرِ Authorization — از منبعِ واحد */
+/* کوکی نشست یا هدر Authorization — از منبع واحد */
 function getUserFromRequest(req: NextRequest) {
   const s = sessionFromRequest(req)
   return s ? { id: s.id, role: s.role } : null
@@ -25,12 +25,12 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12')
     const offset = (page - 1) * limit
 
-    /* `?mine=true` ⇒ محصولاتِ خودِ کاربر، با هر وضعیتی.
+    /* `?mine=true` ⇒ محصولات خود کاربر، با هر وضعیتی.
 
-       داشبوردِ فروشنده باید آگهیِ غیرفعال، منقضی و در انتظارِ تأیید را
-       هم ببیند — چیزی که فهرستِ عمومی عمداً نشان نمی‌دهد. مالکیت از
-       نشست خوانده می‌شود، نه از پارامتر، پس کسی نمی‌تواند فهرستِ
-       محصولاتِ دیگری را بخواهد. */
+       داشبورد فروشنده باید آگهی غیرفعال، منقضی و در انتظار تأیید را
+       هم ببیند — چیزی که فهرست عمومی عمداً نشان نمی‌دهد. مالکیت از
+       نشست خوانده می‌شود، نه از پارامتر، پس کسی نمی‌تواند فهرست
+       محصولات دیگری را بخواهد. */
     const mine = searchParams.get('mine') === 'true'
     let ownerId: string | null = null
     if (mine) {
@@ -121,8 +121,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    /* سهمیه (فاز ۳) — این مسیر هم مثل /api/market/ads ردیفِ products
-       می‌سازد؛ بدونِ این دروازه، سقفِ شخص‌محور کاملاً دور زده می‌شد. */
+    /* سهمیه (فاز ۳) — این مسیر هم مثل /api/market/ads ردیف products
+       می‌سازد؛ بدون این دروازه، سقف شخص‌محور کاملاً دور زده می‌شد. */
     const gate = await consumeAdQuota(user.id)
     if (!gate.ok) {
       return NextResponse.json(
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
       .from('products')
       .insert({
         title,
-        /* ستونِ description در دیتابیس NOT NULL است؛ نبودنش ۵۰۰ می‌داد */
+        /* ستون description در دیتابیس NOT NULL است؛ نبودنش ۵۰۰ می‌داد */
         description: description ?? '',
         price: Number(price),
         discountPrice: discountPrice ? Number(discountPrice) : null,
@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) {
-      /* درج نشد ⇒ مصرفِ همین درخواست آزاد می‌شود (خطای فنی، نه حذفِ آگهی) */
+      /* درج نشد ⇒ مصرف همین درخواست آزاد می‌شود (خطای فنی، نه حذف آگهی) */
       if (gate.consumptionId) await releaseConsumption(gate.consumptionId)
       throw error
     }

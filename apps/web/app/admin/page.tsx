@@ -1,10 +1,10 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   پنل سوپرادمین — هابِ مدیریتِ کلِ پلتفرم (بازسازی ۱۴۰۵).
-   گروه‌بندی بر اساسِ دامنه‌های واقعیِ سایت، بدونِ آیتم‌های
-   تکراری (پنلِ باشگاه‌دار حذف شد — آن پنلِ مالک است نه ادمین)
-   و با جای‌گذاریِ بخش‌های آینده به‌صورت «به‌زودی».
+   پنل سوپرادمین — هاب مدیریت کل پلتفرم (بازسازی ۱۴۰۵).
+   گروه‌بندی بر اساس دامنه‌های واقعی سایت، بدون آیتم‌های
+   تکراری (پنل باشگاه‌دار حذف شد — آن پنل مالک است نه ادمین)
+   و با جای‌گذاری بخش‌های آینده به‌صورت «به‌زودی».
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react';
@@ -30,7 +30,7 @@ interface AdminItem {
   title: string;
   desc: string;
   icon: React.ReactNode;
-  link?: string;          // بدونِ لینک ⇒ به‌زودی
+  link?: string;          // بدون لینک ⇒ به‌زودی
 }
 
 interface AdminSection {
@@ -81,9 +81,9 @@ const SECTIONS: AdminSection[] = [
     items: [
       { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار بیلیارد', icon: <Newspaper size={20} />, link: '/admin/news' },
       { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
-      { title: 'سیستم تبلیغات', desc: 'شش جایگاهِ مستقل، کمپین‌ها، پلن‌های قیمت و درخواست‌ها', icon: <Megaphone size={20} />, link: '/admin/advertising' },
-      { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروشِ آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
-      { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوریِ هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
+      { title: 'سیستم تبلیغات', desc: 'شش جایگاه مستقل، کمپین‌ها، پلن‌های قیمت و درخواست‌ها', icon: <Megaphone size={20} />, link: '/admin/advertising' },
+      { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروش آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
+      { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوری هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
       { title: 'قابلیت‌های پلتفرم', desc: 'روشن/خاموش کردن تعاملات اجتماعی — لایک، ری‌اکشن، پاسخ استوری و پیام خصوصی', icon: <ShieldCheck size={20} />, link: '/admin/features' },
@@ -91,7 +91,7 @@ const SECTIONS: AdminSection[] = [
   },
 ];
 
-/* اعداد از `/api/admin/stats` می‌آیند. پیش‌تر این‌جا شش عددِ ثابت بود
+/* اعداد از `/api/admin/stats` می‌آیند. پیش‌تر این‌جا شش عدد ثابت بود
    (۱۲۴، ۸۷، ۴۳، …) که هیچ‌وقت با دیتابیس نمی‌خواند. */
 const STAT_CARDS: { key: string; label: string; link: string }[] = [
   { key: 'users',        label: 'کاربران',        link: '/admin/users' },
@@ -113,7 +113,7 @@ export default function AdminPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  /* شمارشِ واقعیِ ردیف‌ها؛ تا رسیدنش «—» نشان داده می‌شود */
+  /* شمارش واقعی ردیف‌ها؛ تا رسیدنش «—» نشان داده می‌شود */
   useEffect(() => {
     void apiFetch('/api/admin/stats', { cache: 'no-store' })
       .then(r => (r.ok ? r.json() : null))
@@ -223,7 +223,7 @@ export default function AdminPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 16px' }}>
           <CheckCircle size={15} style={{ color: '#0E7A38', flexShrink: 0 }} />
           <span style={{ fontSize: 12, color: SEC }}>
-            مدیریتِ روزانه‌ی هر باشگاه (میزها، رزروها) در پنلِ خودِ باشگاه‌دار انجام می‌شود؛ این پنل مخصوص نظارت و تأییدهای سراسری است.
+            مدیریت روزانه‌ی هر باشگاه (میزها، رزروها) در پنل خود باشگاه‌دار انجام می‌شود؛ این پنل مخصوص نظارت و تأییدهای سراسری است.
           </span>
         </div>
       </div>

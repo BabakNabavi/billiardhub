@@ -1,4 +1,4 @@
-/* Service Worker — فقط برای Web Push (اعلانِ دایرکت وقتی اپ بسته/پس‌زمینه است). */
+/* Service Worker — فقط برای Web Push (اعلان دایرکت وقتی اپ بسته/پس‌زمینه است). */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 

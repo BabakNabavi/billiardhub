@@ -2,25 +2,25 @@
    سهمیه‌ی آگهی — فاز ۳: شخص‌محور (Person-based).
 
    اصول:
-     • سهمیه‌ی رایگان متعلق به «شخص» است (persons — با هشِ کد ملی
-       یکتا می‌شود)، نه حساب و نه نقش. چند حسابِ یک نفر از یک
+     • سهمیه‌ی رایگان متعلق به «شخص» است (persons — با هش کد ملی
+       یکتا می‌شود)، نه حساب و نه نقش. چند حساب یک نفر از یک
        سهمیه‌ی مشترک مصرف می‌کنند.
-     • فقط نقش‌های «تأییدشده» سهمیه می‌سازند (پروفایلِ approved یا
-       باشگاهِ verified) — primaryRole/secondaryRoles خوداظهاری‌اند
+     • فقط نقش‌های «تأییدشده» سهمیه می‌سازند (پروفایل approved یا
+       باشگاه verified) — primaryRole/secondaryRoles خوداظهاری‌اند
        و هیچ اثری بر سهمیه ندارند.
-     • Free Quota = بیشینه‌ی سهمیه بینِ نقش‌های تأییدشده (جمع نمی‌شوند).
-     • دوره‌ی ۳۰ روزه؛ مصرف در دفترِ quota_consumptions ثبت می‌شود و
+     • Free Quota = بیشینه‌ی سهمیه بین نقش‌های تأییدشده (جمع نمی‌شوند).
+     • دوره‌ی ۳۰ روزه؛ مصرف در دفتر quota_consumptions ثبت می‌شود و
        حذف/انقضای آگهی آن را پاک نمی‌کند ⇒ سهمیه برنمی‌گردد.
-     • مصرف اتمیک است (bh_consume_quota با قفلِ ردیفِ شخص) — دو
-       درخواستِ هم‌زمان، حتی از دو حسابِ یک شخص، از سقف رد نمی‌شوند.
+     • مصرف اتمیک است (bh_consume_quota با قفل ردیف شخص) — دو
+       درخواست هم‌زمان، حتی از دو حساب یک شخص، از سقف رد نمی‌شوند.
 
-   ترتیبِ سهمیه (مثل قبل):
-     ۱) کلیدِ ads_quota_enabled خاموش ⇒ محدودیتی اعمال نمی‌شود
-        (ولی مصرفِ free همچنان در دفتر ثبت می‌شود تا با روشن‌شدنش
+   ترتیب سهمیه (مثل قبل):
+     ۱) کلید ads_quota_enabled خاموش ⇒ محدودیتی اعمال نمی‌شود
+        (ولی مصرف free همچنان در دفتر ثبت می‌شود تا با روشن‌شدنش
         تاریخچه واقعی باشد)
-     ۲) پلنِ فعالِ خریداری‌شده ⇒ سهمیه‌ی همان پلن (رفتارِ موجود؛
+     ۲) پلن فعال خریداری‌شده ⇒ سهمیه‌ی همان پلن (رفتار موجود؛
         اعتبارها در فاز ۵ به ad_credits منتقل می‌شوند)
-     ۳) وگرنه ⇒ سهمیه‌ی رایگانِ شخص از ads_free_quota
+     ۳) وگرنه ⇒ سهمیه‌ی رایگان شخص از ads_free_quota
    ───────────────────────────────────────────────────────────── */
 
 import { sb, rpc } from '../finance/db'
@@ -35,11 +35,11 @@ export interface QuotaState {
   limit: number             // ۰ = نامحدود
   period: Period
   resetAt: string | null    // کی یک جای خالی باز می‌شود
-  planName: string | null   // پلنِ فعال، اگر دارد
+  planName: string | null   // پلن فعال، اگر دارد
   planExpiresAt: string | null
   role?: string             // نقشی که سهمیه از آن آمده
   verifiedRoles?: string[]  // نقش‌های تأییدشده‌ی شخص
-  identityRequired?: boolean // کد ملیِ تأییدشده ندارد ⇒ سهمیه‌ی رایگان ندارد
+  identityRequired?: boolean // کد ملی تأییدشده ندارد ⇒ سهمیه‌ی رایگان ندارد
   message?: string
 }
 
@@ -53,7 +53,7 @@ const PERIOD_DAYS: Record<Period, number> = { day: 1, week: 7, month: 30 }
 
 const PERIOD_FA: Record<Period, string> = { day: 'روز', week: 'هفته', month: 'دوره‌ی ۳۰ روزه' }
 
-/* ── سهمیه‌ی رایگان، به تفکیکِ نقش ───────────────────────────── */
+/* ── سهمیه‌ی رایگان، به تفکیک نقش ───────────────────────────── */
 
 export const QUOTA_ROLES = [
   'user', 'player', 'coach', 'referee', 'technician', 'seller', 'manufacturer', 'club_owner',
@@ -72,7 +72,7 @@ export interface FreeQuotaSetting {
   roles: Partial<Record<QuotaRole, RoleQuota>>
 }
 
-/* اعدادِ مصوبِ فاز ۳ — دوره‌ی ۳۰ روزه (month) */
+/* اعداد مصوب فاز ۳ — دوره‌ی ۳۰ روزه (month) */
 export const DEFAULT_FREE_QUOTA: FreeQuotaSetting = {
   default: { quota: 1, period: 'month' },
   roles: {
@@ -89,12 +89,12 @@ export const DEFAULT_FREE_QUOTA: FreeQuotaSetting = {
 
 const isPeriod = (v: unknown): v is Period => v === 'day' || v === 'week' || v === 'month'
 
-/** ورودیِ ذخیره‌شده (که ممکن است شکلِ قدیمیِ {quota,period} باشد) → شکلِ استاندارد */
+/** ورودی ذخیره‌شده (که ممکن است شکل قدیمی {quota,period} باشد) → شکل استاندارد */
 export function normalizeFreeQuota(raw: unknown): FreeQuotaSetting {
   if (!raw || typeof raw !== 'object') return DEFAULT_FREE_QUOTA
   const o = raw as Record<string, unknown>
 
-  /* شکلِ قدیمی: یک سهمیه برای همه */
+  /* شکل قدیمی: یک سهمیه برای همه */
   if (typeof o.quota === 'number' && !o.roles && !o.default) {
     const one: RoleQuota = { quota: Math.max(0, o.quota), period: isPeriod(o.period) ? o.period : 'week' }
     return { default: one, roles: Object.fromEntries(QUOTA_ROLES.map(r => [r, one])) }
@@ -119,12 +119,12 @@ export function normalizeFreeQuota(raw: unknown): FreeQuotaSetting {
 }
 
 /**
- * سخاوتمندانه‌ترین سهمیه بینِ نقش‌ها (MAX، نه جمع) — بر مبنای «تعداد در روز».
+ * سخاوتمندانه‌ترین سهمیه بین نقش‌ها (MAX، نه جمع) — بر مبنای «تعداد در روز».
  *
- * صفر در موتورِ آگهی یعنی «نامحدود» (پس سخاوتمندترین)، ولی در موتورِ
+ * صفر در موتور آگهی یعنی «نامحدود» (پس سخاوتمندترین)، ولی در موتور
  * استوری یعنی «این نقش اصلاً سهمیه ندارد». با zeroMeansNone، صفر
- * به‌جای بی‌نهایت، کمترین ارزش را می‌گیرد تا نقشِ صفرِ «کاربر عادی»
- * سهمیه‌ی نقشِ واقعیِ کاربر را از بین نبرد.
+ * به‌جای بی‌نهایت، کمترین ارزش را می‌گیرد تا نقش صفر «کاربر عادی»
+ * سهمیه‌ی نقش واقعی کاربر را از بین نبرد.
  */
 export function pickRoleQuota(
   setting: FreeQuotaSetting,
@@ -145,7 +145,7 @@ export function pickRoleQuota(
   return best ?? { quota: setting.default, role: 'user' }
 }
 
-/** خواندنِ یک تنظیم؛ نبودِ جدول یا کلید نباید چیزی را بشکند */
+/** خواندن یک تنظیم؛ نبود جدول یا کلید نباید چیزی را بشکند */
 export async function getSetting<T>(key: string, fallback: T): Promise<T> {
   try {
     const { data, error } = await sb().from('app_settings').select('value').eq('key', key).maybeSingle()
@@ -155,12 +155,12 @@ export async function getSetting<T>(key: string, fallback: T): Promise<T> {
   } catch { return fallback }
 }
 
-/** شروعِ بازه‌ی جاری (پنجره‌ی لغزان) */
+/** شروع بازه‌ی جاری (پنجره‌ی لغزان) */
 function windowStart(period: Period): Date {
   return new Date(Date.now() - PERIOD_MS[period])
 }
 
-/** پلنِ فعالِ کاربر، اگر دارد */
+/** پلن فعال کاربر، اگر دارد */
 export async function activePlan(userId: string): Promise<{
   name: string; quota: number; period: Period; expiresAt: string
 } | null> {
@@ -182,7 +182,7 @@ export async function activePlan(userId: string): Promise<{
   } catch { return null }
 }
 
-/** شمارشِ آگهی‌های ثبت‌شده در بازه — فقط برای مسیرِ «پلنِ خریداری‌شده» (رفتارِ موجود) */
+/** شمارش آگهی‌های ثبت‌شده در بازه — فقط برای مسیر «پلن خریداری‌شده» (رفتار موجود) */
 async function usedInWindow(userId: string, period: Period): Promise<number> {
   try {
     const { count, error } = await sb()
@@ -195,15 +195,15 @@ async function usedInWindow(userId: string, period: Period): Promise<number> {
   } catch { return 0 }
 }
 
-/* ── دفترِ مصرفِ شخص ─────────────────────────────────────────── */
+/* ── دفتر مصرف شخص ─────────────────────────────────────────── */
 
 /**
- * مصرفِ ثبت‌شده‌ی شخص در پنجره + زمانی که «یک جای خالی» باز می‌شود.
+ * مصرف ثبت‌شده‌ی شخص در پنجره + زمانی که «یک جای خالی» باز می‌شود.
  *
- * وقتی مصرف از سقف بیشتر شده (مثلاً سهمیه بعد از تنزلِ نقش کم شده، یا
- * در دوره‌ی خاموشیِ enforcement ثبت شده)، جای خالی با خروجِ قدیمی‌ترین
+ * وقتی مصرف از سقف بیشتر شده (مثلاً سهمیه بعد از تنزل نقش کم شده، یا
+ * در دوره‌ی خاموشی enforcement ثبت شده)، جای خالی با خروج قدیمی‌ترین
  * مصرف باز نمی‌شود؛ باید آن‌قدر مصرف از پنجره خارج شود که used به
- * limit-1 برسد. پس ردیفِ تعیین‌کننده، (used-limit+1)اُمین مصرفِ قدیمی
+ * limit-1 برسد. پس ردیف تعیین‌کننده، (used-limit+1)اُمین مصرف قدیمی
  * است — نه اولی.
  */
 async function ledgerUsed(personId: string, period: Period, limit: number)
@@ -238,10 +238,10 @@ async function ledgerUsed(personId: string, period: Period, limit: number)
   } catch { return { used: 0, freeSlotAt: null } }
 }
 
-const IDENTITY_MSG = 'برای استفاده از سهمیه‌ی رایگانِ آگهی، ابتدا هویتِ خود (کد ملی) را از بخشِ پروفایل تأیید کنید.'
-const SYSTEM_MSG = 'سیستمِ سهمیه موقتاً در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید'
+const IDENTITY_MSG = 'برای استفاده از سهمیه‌ی رایگان آگهی، ابتدا هویت خود (کد ملی) را از بخش پروفایل تأیید کنید.'
+const SYSTEM_MSG = 'سیستم سهمیه موقتاً در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید'
 
-/** وضعیتِ کاملِ سهمیه — هم برای اجازه‌دادن، هم برای نمایش در پنل */
+/** وضعیت کامل سهمیه — هم برای اجازه‌دادن، هم برای نمایش در پنل */
 export async function getQuotaState(userId: string): Promise<QuotaState> {
   const enabled = await getSetting<boolean>('ads_quota_enabled', false)
 
@@ -249,7 +249,7 @@ export async function getQuotaState(userId: string): Promise<QuotaState> {
   const freeRaw = await getSetting<unknown>('ads_free_quota', DEFAULT_FREE_QUOTA)
   const free = normalizeFreeQuota(freeRaw)
 
-  /* ── مسیرِ پلنِ خریداری‌شده — دست‌نخورده از قبل ───────────── */
+  /* ── مسیر پلن خریداری‌شده — دست‌نخورده از قبل ───────────── */
   if (plan) {
     const used = await usedInWindow(userId, plan.period)
     const base = {
@@ -265,17 +265,17 @@ export async function getQuotaState(userId: string): Promise<QuotaState> {
     return {
       ...base,
       allowed: false,
-      message: `سهمیه‌ی آگهیِ پلنِ «${plan.name}» شما در این ${PERIOD_FA[plan.period]} تمام شده است. برای ثبت آگهی بیشتر، پلن خود را ارتقا دهید.`,
+      message: `سهمیه‌ی آگهی پلن «${plan.name}» شما در این ${PERIOD_FA[plan.period]} تمام شده است. برای ثبت آگهی بیشتر، پلن خود را ارتقا دهید.`,
     }
   }
 
-  /* ── مسیرِ سهمیه‌ی رایگانِ شخص‌محور ──────────────────────── */
+  /* ── مسیر سهمیه‌ی رایگان شخص‌محور ──────────────────────── */
   const lookup = await lookupPersonForUser(userId)
   const personId = lookup.personId
 
   if (!personId) {
     /* شخص ندارد: یا هویتش تأیید نشده (identityRequired) یا دیتابیس
-       خطا داده (personError) — پیام و رفتارِ این دو یکی نیست */
+       خطا داده (personError) — پیام و رفتار این دو یکی نیست */
     const identityRequired = lookup.reason === 'no_identity'
     const picked = pickRoleQuota(free, ['user'])
     return {
@@ -305,7 +305,7 @@ export async function getQuotaState(userId: string): Promise<QuotaState> {
     used,
     limit,
     period,
-    /* زمانِ بازشدنِ اولین جای خالی (با در نظر گرفتنِ مصرفِ مازاد) */
+    /* زمان بازشدن اولین جای خالی (با در نظر گرفتن مصرف مازاد) */
     resetAt: freeSlotAt,
     planName: null,
     planExpiresAt: null,
@@ -314,33 +314,33 @@ export async function getQuotaState(userId: string): Promise<QuotaState> {
   }
 
   if (!enabled) return { ...base, allowed: true }
-  /* سهمیه‌ی صفر یعنی نامحدود (قراردادِ موجودِ پنلِ ادمین) */
+  /* سهمیه‌ی صفر یعنی نامحدود (قرارداد موجود پنل ادمین) */
   if (limit <= 0) return { ...base, allowed: true }
 
   if (used >= limit) {
     return {
       ...base,
       allowed: false,
-      message: `سهمیه‌ی رایگانِ شما در این ${PERIOD_FA[period]} تمام شده است. حذفِ آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید.`,
+      message: `سهمیه‌ی رایگان شما در این ${PERIOD_FA[period]} تمام شده است. حذف آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید.`,
     }
   }
   return { ...base, allowed: true }
 }
 
-/* ── مصرفِ اتمیکِ سهمیه (دروازه‌ی ثبتِ آگهی) ─────────────────── */
+/* ── مصرف اتمیک سهمیه (دروازه‌ی ثبت آگهی) ─────────────────── */
 
 export type ConsumeResult =
   | { ok: true; consumptionId: string | null; used: number; limit: number }
   | { ok: false; status: number; body: Record<string, unknown> }
 
 /**
- * دروازه‌ی ثبتِ آگهی: بررسی و مصرفِ سهمیه در یک قدم.
- *   • مسیرِ پلن: مثل قبل (شمارشِ products؛ اعتبارِ فاز ۵ بعداً)
- *   • مسیرِ رایگان: مصرفِ اتمیک با bh_consume_quota — حتی وقتی
- *     enforcement خاموش است ثبت می‌شود (با سقفِ ۰ = فقط ثبت) تا
- *     تاریخچه برای روزِ روشن‌شدن واقعی باشد.
- * اگر ثبتِ آگهی بعداً شکست خورد، releaseConsumption را با
- * consumptionId صدا بزنید (جبرانِ خطای فنی — «حذفِ آگهی» نیست).
+ * دروازه‌ی ثبت آگهی: بررسی و مصرف سهمیه در یک قدم.
+ *   • مسیر پلن: مثل قبل (شمارش products؛ اعتبار فاز ۵ بعداً)
+ *   • مسیر رایگان: مصرف اتمیک با bh_consume_quota — حتی وقتی
+ *     enforcement خاموش است ثبت می‌شود (با سقف ۰ = فقط ثبت) تا
+ *     تاریخچه برای روز روشن‌شدن واقعی باشد.
+ * اگر ثبت آگهی بعداً شکست خورد، releaseConsumption را با
+ * consumptionId صدا بزنید (جبران خطای فنی — «حذف آگهی» نیست).
  */
 export async function consumeAdQuota(userId: string, refId?: string | null): Promise<ConsumeResult> {
   const state = await getQuotaState(userId)
@@ -356,13 +356,13 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
     },
   })
 
-  /* مسیرِ پلنِ خریداری‌شده — بدونِ دفترِ شخص (رفتارِ موجود) */
+  /* مسیر پلن خریداری‌شده — بدون دفتر شخص (رفتار موجود) */
   if (state.planName) {
     if (!state.allowed) return reject(429)
     return { ok: true, consumptionId: null, used: state.used + 1, limit: state.limit }
   }
 
-  /* مسیرِ رایگان — شخص لازم است */
+  /* مسیر رایگان — شخص لازم است */
   const lookup = await lookupPersonForUser(userId)
   const personId = lookup.personId
   if (!personId) {
@@ -370,7 +370,7 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
       /* enforcement خاموش و شخصی نیست که برایش ثبت کنیم */
       return { ok: true, consumptionId: null, used: state.used, limit: state.limit }
     }
-    /* هویت تأیید نشده ⇒ پیامِ راهنما؛ خطای زیرساخت ⇒ fail-closed موقت */
+    /* هویت تأیید نشده ⇒ پیام راهنما؛ خطای زیرساخت ⇒ fail-closed موقت */
     if (lookup.reason === 'no_identity') {
       return { ok: false, status: 429, body: { message: IDENTITY_MSG, quotaExceeded: true, identityRequired: true } }
     }
@@ -382,7 +382,7 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
     {
       p_person_id: personId,
       p_user_id: userId,
-      /* خاموش ⇒ سقفِ ۰ (فقط ثبتِ مصرف)؛ روشن ⇒ سقفِ واقعی */
+      /* خاموش ⇒ سقف ۰ (فقط ثبت مصرف)؛ روشن ⇒ سقف واقعی */
       p_limit: state.enabled ? state.limit : 0,
       p_window_days: PERIOD_DAYS[state.period],
       p_ref: refId ?? null,
@@ -391,20 +391,20 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
 
   if (error || !data) {
     if (!state.enabled) {
-      /* ثبتِ best-effort شکست خورد؛ جلوی کاربر را نمی‌گیریم */
+      /* ثبت best-effort شکست خورد؛ جلوی کاربر را نمی‌گیریم */
       return { ok: true, consumptionId: null, used: state.used, limit: state.limit }
     }
     /* enforcement روشن است: خطای دیتابیس نباید سهمیه را دورزدنی کند (fail-closed) */
     return {
       ok: false,
       status: 503,
-      body: { message: 'سیستمِ سهمیه موقتاً در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید' },
+      body: { message: 'سیستم سهمیه موقتاً در دسترس نیست؛ چند لحظه بعد دوباره تلاش کنید' },
     }
   }
 
   if (!data.ok) {
-    /* باختنِ رقابتِ هم‌زمان: شمارشِ لحظه‌ی چکِ اولیه کهنه است و تابع
-       دیتابیس عددِ واقعی را برگردانده — همان را به کاربر می‌دهیم تا
+    /* باختن رقابت هم‌زمان: شمارش لحظه‌ی چک اولیه کهنه است و تابع
+       دیتابیس عدد واقعی را برگردانده — همان را به کاربر می‌دهیم تا
        پیام و اعداد با هم نخوانند نشود. */
     const used = typeof data.used === 'number' ? data.used : state.used
     const limit = typeof data.limit === 'number' && data.limit > 0 ? data.limit : state.limit
@@ -413,7 +413,7 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
       status: 429,
       body: {
         message: state.message
-          ?? `سهمیه‌ی رایگانِ شما در این ${PERIOD_FA[state.period]} تمام شده است. حذفِ آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید.`,
+          ?? `سهمیه‌ی رایگان شما در این ${PERIOD_FA[state.period]} تمام شده است. حذف آگهی سهمیه را برنمی‌گرداند؛ برای ثبت آگهی بیشتر، یکی از بسته‌های آگهی را تهیه کنید.`,
         quotaExceeded: true,
         quota: { used, limit, period: state.period, resetAt: state.resetAt },
       },
@@ -428,14 +428,14 @@ export async function consumeAdQuota(userId: string, refId?: string | null): Pro
   }
 }
 
-/** جبرانِ خطای فنی: اگر درجِ آگهی پس از مصرف شکست، همان یک ردیف آزاد می‌شود */
+/** جبران خطای فنی: اگر درج آگهی پس از مصرف شکست، همان یک ردیف آزاد می‌شود */
 export async function releaseConsumption(consumptionId: string): Promise<void> {
   try {
     await sb().from('quota_consumptions').delete().eq('id', consumptionId)
-  } catch { /* در بدترین حالت یک مصرفِ اضافه ثبت مانده — به نفعِ سخت‌گیری */ }
+  } catch { /* در بدترین حالت یک مصرف اضافه ثبت مانده — به نفع سخت‌گیری */ }
 }
 
-/** پس از درجِ موفقِ آگهی، شناسه‌اش روی ردیفِ مصرف ثبت می‌شود (اطلاعاتی) */
+/** پس از درج موفق آگهی، شناسه‌اش روی ردیف مصرف ثبت می‌شود (اطلاعاتی) */
 export async function attachConsumptionRef(consumptionId: string, refId: string): Promise<void> {
   try {
     await sb().from('quota_consumptions').update({ ref_id: refId }).eq('id', consumptionId)

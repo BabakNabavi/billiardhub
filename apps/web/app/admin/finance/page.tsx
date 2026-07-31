@@ -1,7 +1,7 @@
 'use client'
 
-/* پنلِ مالیِ پلتفرم — نمای کلی، پرداخت‌ها، موجودیِ باشگاه‌ها، تسویه‌ها و بازپرداخت‌ها.
-   همه‌ی داده‌ها از /api/admin/finance می‌آید (RBAC سمتِ سرور: فقط ادمین). */
+/* پنل مالی پلتفرم — نمای کلی، پرداخت‌ها، موجودی باشگاه‌ها، تسویه‌ها و بازپرداخت‌ها.
+   همه‌ی داده‌ها از /api/admin/finance می‌آید (RBAC سمت سرور: فقط ادمین). */
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../lib/http'
@@ -59,7 +59,7 @@ export default function AdminFinance() {
   const o = d.overview
   const TABS: [TabKey, string, number][] = [
     ['overview', 'نمای کلی', 0], ['payments', 'پرداخت‌ها', d.payments.length],
-    ['balances', 'موجودیِ باشگاه‌ها', d.clubBalances.length], ['settlements', 'تسویه‌ها', d.settlements.length],
+    ['balances', 'موجودی باشگاه‌ها', d.clubBalances.length], ['settlements', 'تسویه‌ها', d.settlements.length],
     ['refunds', 'بازپرداخت‌ها', d.refunds.length],
   ]
 
@@ -68,7 +68,7 @@ export default function AdminFinance() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
         <Wallet size={22} style={{ color: GOLD_D }} />
         <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>مالی</h1>
-        <span style={{ fontSize: 12, color: MUT }}>ارقام از دفترِ مالی محاسبه می‌شوند</span>
+        <span style={{ fontSize: 12, color: MUT }}>ارقام از دفتر مالی محاسبه می‌شوند</span>
       </div>
 
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 18 }}>
@@ -83,10 +83,10 @@ export default function AdminFinance() {
 
       {tab === 'overview' && (
         <div className="af-grid">
-          <Stat label="درآمدِ کلِ رزروها" value={o.bookingRevenue} icon={<TrendingUp size={15} />} strong />
-          <Stat label="کمیسیونِ پلتفرم" value={o.platformCommission} icon={<Wallet size={15} />} tone="gold" strong />
-          <Stat label="سهمِ باشگاه‌ها" value={o.clubEarnings} icon={<Landmark size={15} />} />
-          <Stat label="در انتظارِ تسویه" value={o.pendingSettlement} icon={<ArrowDownToLine size={15} />} tone="felt" />
+          <Stat label="درآمد کل رزروها" value={o.bookingRevenue} icon={<TrendingUp size={15} />} strong />
+          <Stat label="کمیسیون پلتفرم" value={o.platformCommission} icon={<Wallet size={15} />} tone="gold" strong />
+          <Stat label="سهم باشگاه‌ها" value={o.clubEarnings} icon={<Landmark size={15} />} />
+          <Stat label="در انتظار تسویه" value={o.pendingSettlement} icon={<ArrowDownToLine size={15} />} tone="felt" />
           <Stat label="تسویه‌شده" value={o.completedSettlement} icon={<CheckCircle2 size={15} />} />
           <Stat label="بازپرداخت‌ها" value={o.refunds} icon={<RotateCcw size={15} />} muted />
         </div>
@@ -101,13 +101,13 @@ export default function AdminFinance() {
       )}
 
       {tab === 'balances' && (
-        <Table head={['باشگاه', 'قابلِ تسویه', 'در انتظار', 'کلِ درآمد', 'تسویه‌شده', '']}
+        <Table head={['باشگاه', 'قابل تسویه', 'در انتظار', 'کل درآمد', 'تسویه‌شده', '']}
           rows={d.clubBalances.map(b => [
             String(b.clubName ?? '—'), <b key="a" style={{ color: GOLD_D }}>{fa(b.available_balance)}</b>,
             fa(b.pending_balance), fa(b.total_earnings), fa(b.total_settled),
             Number(b.pending_balance) > 0
               ? <button key="btn" onClick={() => act({ action: 'create', clubId: b.club_id }, String(b.club_id))} disabled={busy === b.club_id}
-                  style={btnPrimary}>{busy === b.club_id ? '…' : 'ایجادِ تسویه'}</button>
+                  style={btnPrimary}>{busy === b.club_id ? '…' : 'ایجاد تسویه'}</button>
               : <span key="btn" style={{ fontSize: 11.5, color: MUT }}>—</span>,
           ])} empty="هنوز باشگاهی درآمدی نداشته است" />
       )}
@@ -124,7 +124,7 @@ export default function AdminFinance() {
                 {String(s.status) === 'PENDING' && (
                   <button onClick={() => act({ action: 'process', id: s.id }, String(s.id))} disabled={busy === s.id} style={btnGhost}>شروع</button>
                 )}
-                <button onClick={() => setModal({ id: String(s.id), amount: Number(s.amount) })} style={btnPrimary}>ثبتِ واریز</button>
+                <button onClick={() => setModal({ id: String(s.id), amount: Number(s.amount) })} style={btnPrimary}>ثبت واریز</button>
               </span>
             ),
           ])} empty="هنوز تسویه‌ای ایجاد نشده است" />
@@ -217,7 +217,7 @@ const PayBadge = ({ s }: { s: string }) => {
 const SettleBadge = ({ s }: { s: string }) => {
   const map: Record<string, [string, string, string]> = {
     COMPLETED: ['انجام‌شده', FELT, 'rgba(14,122,56,0.1)'],
-    PROCESSING: ['در حالِ انجام', GOLD_D, 'rgba(199,166,106,0.13)'],
+    PROCESSING: ['در حال انجام', GOLD_D, 'rgba(199,166,106,0.13)'],
     PENDING: ['در انتظار', GOLD_D, 'rgba(199,166,106,0.13)'],
     REQUESTED: ['درخواست‌شده', GOLD_D, 'rgba(199,166,106,0.13)'],
     FAILED: ['ناموفق', '#B23B2E', 'rgba(178,59,46,0.09)'],
@@ -233,11 +233,11 @@ function RefModal({ amount, onClose, onSubmit }: { amount: number; onClose: () =
       <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
           <CreditCard size={18} style={{ color: GOLD_D }} />
-          <span style={{ fontSize: 15, fontWeight: 900, color: INK, flex: 1 }}>ثبتِ واریز</span>
+          <span style={{ fontSize: 15, fontWeight: 900, color: INK, flex: 1 }}>ثبت واریز</span>
           <button onClick={onClose} style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 9, padding: 6, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
         </div>
         <p style={{ fontSize: 13, color: SEC, margin: '0 0 14px', lineHeight: 1.9 }}>
-          مبلغِ <b style={{ color: INK }}>{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیریِ بانکی را وارد کنید.
+          مبلغ <b style={{ color: INK }}>{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیری بانکی را وارد کنید.
         </p>
         <input value={ref} onChange={e => setRef(e.target.value)} placeholder="شماره‌ی پیگیری"
           style={{ width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: GROUND, fontSize: 13.5, fontFamily: 'inherit', color: INK, outline: 'none', direction: 'ltr', textAlign: 'left' }} />

@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, ownsClub } from '@/lib/finance/db';
 
-/* داشبوردِ مالیِ باشگاه — فقط مالکِ همان باشگاه یا ادمین (RBAC).
+/* داشبورد مالی باشگاه — فقط مالک همان باشگاه یا ادمین (RBAC).
    موجودی از club_accounts (کَش) و صحتش از ledger بازبینی می‌شود. */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id: clubId } = await ctx.params;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const rows = (bookings.data ?? []) as Record<string, unknown>[];
   const todayISO = now.toISOString().slice(0, 10);
 
-  /* شماره‌ی شبا فقط به‌صورتِ ماسک‌شده برمی‌گردد */
+  /* شماره‌ی شبا فقط به‌صورت ماسک‌شده برمی‌گردد */
   const bk = bank.data as { iban?: string } | null;
   const maskedIban = bk?.iban ? `${bk.iban.slice(0, 6)}${'•'.repeat(Math.max(0, bk.iban.length - 10))}${bk.iban.slice(-4)}` : null;
 

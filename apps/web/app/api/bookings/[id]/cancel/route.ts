@@ -5,8 +5,8 @@ import { computeRefund, bookingStartsAt, canCancelAt } from '@/lib/finance/cance
 import { getPaymentProvider } from '@/lib/payments';
 import { notifyBookingCancelled } from '@/lib/notify';
 
-/* کنسلیِ رزرو — کاربرِ صاحبِ رزرو، مالکِ باشگاه یا ادمین.
-   مبلغِ بازپرداخت طبقِ سیاستِ متمرکز محاسبه و کلِ اثرِ مالی اتمیک ثبت می‌شود. */
+/* کنسلی رزرو — کاربر صاحب رزرو، مالک باشگاه یا ادمین.
+   مبلغ بازپرداخت طبق سیاست متمرکز محاسبه و کل اثر مالی اتمیک ثبت می‌شود. */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const actor = actorFromRequest(req);
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
   if (b.booking_status === 'CANCELLED') return NextResponse.json({ message: 'این رزرو قبلاً کنسل شده است' }, { status: 409 });
-  if (b.booking_status === 'COMPLETED') return NextResponse.json({ message: 'رزروِ انجام‌شده قابلِ کنسل نیست' }, { status: 409 });
+  if (b.booking_status === 'COMPLETED') return NextResponse.json({ message: 'رزرو انجام‌شده قابل کنسل نیست' }, { status: 409 });
 
   /* طبق قوانین: لغو فقط تا ۲ ساعت پیش از شروع. مالک باشگاه و ادمین مستثنا هستند
      (لغو از سوی باشگاه، طبق همان بند، با بازگشت وجه انجام می‌شود). */
@@ -40,14 +40,14 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const body = await req.json().catch(() => ({}));
   const reason = String(body?.reason || '').slice(0, 300) || 'کنسل توسط کاربر';
 
-  /* بازپرداخت فقط برای رزروِ پرداخت‌شده؛ ادمین می‌تواند مبلغ را override کند */
+  /* بازپرداخت فقط برای رزرو پرداخت‌شده؛ ادمین می‌تواند مبلغ را override کند */
   let refund = 0, policyLabel = 'رزرو پرداخت نشده بود';
   if (b.payment_status === 'PAID') {
     const decision = computeRefund(b.final_amount, bookingStartsAt(b.bookingDate, b.timeSlots));
     refund = decision.refundAmount; policyLabel = decision.label;
     if (admin && typeof body?.refundAmount === 'number') {
       refund = Math.max(0, Math.min(Math.round(body.refundAmount), b.final_amount));
-      policyLabel = 'مبلغِ دستیِ ادمین';
+      policyLabel = 'مبلغ دستی ادمین';
     }
   }
 
@@ -56,13 +56,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   });
   if (error) {
     if (/does not exist|schema cache|function/i.test(error.message || '')) {
-      return NextResponse.json({ message: 'سیستمِ مالی هنوز راه‌اندازی نشده است' }, { status: 503 });
+      return NextResponse.json({ message: 'سیستم مالی هنوز راه‌اندازی نشده است' }, { status: 503 });
     }
     console.error('[bookings/:id/cancel] db error:', error.message);
-    return NextResponse.json({ message: 'خطا در کنسلِ رزرو' }, { status: 500 });
+    return NextResponse.json({ message: 'خطا در کنسل رزرو' }, { status: 500 });
   }
 
-  /* ثبتِ درخواستِ بازپرداخت + تلاش برای بازگشتِ خودکار از طریقِ درگاه */
+  /* ثبت درخواست بازپرداخت + تلاش برای بازگشت خودکار از طریق درگاه */
   if (refund > 0) {
     const { data: payRow } = await sb().from('payments')
       .select('id,provider,provider_authority,provider_ref_id')
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         await sb().from('refunds').update({ status: 'COMPLETED', provider_ref: r.providerRef ?? null, completed_at: new Date().toISOString() }).eq('id', (refRow as { id: string }).id);
         await sb().from('bookings').update({ refund_status: 'COMPLETED' }).eq('id', b.id);
       }
-      /* اگر درگاه بازگشتِ خودکار ندارد، رکورد در وضعیتِ REQUESTED می‌ماند
+      /* اگر درگاه بازگشت خودکار ندارد، رکورد در وضعیت REQUESTED می‌ماند
          تا ادمین دستی انجام دهد — هیچ چیزی گم نمی‌شود. */
     }
   }
@@ -90,13 +90,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
           action: 'BOOKING_CANCELLED', entityType: 'booking', entityId: b.id,
           newValue: { refund, policy: policyLabel, reason }, ip: clientIp(req) ?? undefined });
 
-  /* اطلاع‌رسانیِ لغو — بی‌صدا */
+  /* اطلاع‌رسانی لغو — بی‌صدا */
   void notifyBookingCancelled(b.id, refund).catch(() => { /* بی‌صدا */ });
 
   return NextResponse.json({ ...(data ?? {}), refundAmount: refund, policy: policyLabel });
 }
 
-/* پیش‌نمایشِ سیاستِ کنسلی بدونِ اجرای آن */
+/* پیش‌نمایش سیاست کنسلی بدون اجرای آن */
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const { data } = await sb().from('bookings')

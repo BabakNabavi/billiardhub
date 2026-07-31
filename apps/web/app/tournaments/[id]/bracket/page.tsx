@@ -1,15 +1,15 @@
 'use client';
 
 /* ─────────────────────────────────────────────────────────────
-   براکتِ مسابقه — نمایشِ عمومی.
+   براکت مسابقه — نمایش عمومی.
 
    پیش‌تر این صفحه براکت را خودش در حافظه‌ی مرورگر می‌ساخت و با
-   بازیکنانِ نمونه پر می‌کرد؛ چیزی ذخیره نمی‌شد و هر بار عوض می‌شد.
+   بازیکنان نمونه پر می‌کرد؛ چیزی ذخیره نمی‌شد و هر بار عوض می‌شد.
    حالا فقط همان براکتی را نشان می‌دهد که برگزارکننده در
    /tournaments/:id/admin قرعه‌کشی کرده است.
 
-   چیدمان: هر دور یک ستون. ستون‌ها اسکرولِ افقیِ خودشان را دارند تا
-   براکتِ ۳۲ نفره عرضِ صفحه را نشکند.
+   چیدمان: هر دور یک ستون. ستون‌ها اسکرول افقی خودشان را دارند تا
+   براکت ۳۲ نفره عرض صفحه را نشکند.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useState, useCallback } from 'react';
@@ -40,8 +40,8 @@ export default function BracketPage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  /* وقتی بازیِ زنده‌ای در جریان است براکت خودش تازه می‌شود — تماشاگر
-     نباید برای دیدنِ نتیجه‌ی دورِ بعد صفحه را رفرش کند. */
+  /* وقتی بازی زنده‌ای در جریان است براکت خودش تازه می‌شود — تماشاگر
+     نباید برای دیدن نتیجه‌ی دور بعد صفحه را رفرش کند. */
   const hasLive = !!b?.matches.some(m => m.status === 'in_progress');
   useEffect(() => {
     if (!hasLive) return;
@@ -65,7 +65,7 @@ export default function BracketPage() {
         <h1 style={{ fontSize: 17, fontWeight: 900, color: INK, margin: 0 }}>براکت</h1>
         {hasLive && (
           <span style={liveDot}>
-            <Radio size={11} /> در حالِ پخش
+            <Radio size={11} /> در حال پخش
             {refreshing && <RefreshCw size={10} style={{ animation: 'bkspin 1s linear infinite' }} />}
           </span>
         )}
@@ -77,7 +77,7 @@ export default function BracketPage() {
           <GitBranch size={34} style={{ color: MUT, opacity: 0.4, marginBottom: 12 }} />
           <p style={{ fontSize: 15, fontWeight: 800, color: INK, margin: '0 0 6px' }}>هنوز قرعه‌کشی نشده</p>
           <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 2 }}>
-            براکت پس از بسته‌شدنِ ثبت‌نام و قرعه‌کشیِ برگزارکننده اینجا نمایش داده می‌شود.
+            براکت پس از بسته‌شدن ثبت‌نام و قرعه‌کشی برگزارکننده اینجا نمایش داده می‌شود.
           </p>
         </div>
       ) : (
@@ -110,8 +110,8 @@ export default function BracketPage() {
                     <span style={{ width: 3, height: 15, borderRadius: 2, background: GOLD }} />
                     <h2 style={{ fontSize: 13.5, fontWeight: 900, color: INK, margin: 0 }}>{r.label}</h2>
                   </div>
-                  {/* بازی‌های دورهای بعد بینِ دو بازیِ قبلی پخش می‌شوند تا
-                      شکلِ درختیِ براکت خوانده شود */}
+                  {/* بازی‌های دورهای بعد بین دو بازی قبلی پخش می‌شوند تا
+                      شکل درختی براکت خوانده شود */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'space-around', flex: 1 }}>
                     {r.matches.map(m => <MatchCard key={m.id} m={m} />)}
                   </div>

@@ -187,8 +187,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
   const img     = (apiImg && apiImg.trim() !== '' && !apiImg.includes('billiadr-club-1') && !apiImg.includes('default')) ? apiImg : poolImg;
   const activeTables = TABLE_TYPES.filter(t => (club as any)[t.key] > 0);
 
-  /* نشانِ مسابقه از مسابقاتِ واقعیِ همین باشگاه می‌آید — نه از آرایه‌ی
-     نمونه که با نامِ باشگاه تطبیق داده می‌شد. */
+  /* نشان مسابقه از مسابقات واقعی همین باشگاه می‌آید — نه از آرایه‌ی
+     نمونه که با نام باشگاه تطبیق داده می‌شد. */
   const activeTournament = tournaments.find(
     t => t.status === 'registration_open' || t.status === 'live' || t.status === 'upcoming'
   );
@@ -309,7 +309,7 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
               </div>
             )}
           </div>
-          {/* علاقه‌مندی — سمتِ چپ تا با تیکِ تأیید تداخل نکند.
+          {/* علاقه‌مندی — سمت چپ تا با تیک تأیید تداخل نکند.
               خودش کلیک را متوقف می‌کند وگرنه کارت باز می‌شود. */}
           <div style={{ position: 'absolute', top: 10, left: 10 }}>
             <FavoriteButton type="club" id={club.id} size={15} />
@@ -531,12 +531,12 @@ export default function ClubsPage() {
 
   /* فقط باشگاه‌های واقعی.
 
-     پیش‌تر شش باشگاهِ نمونه همیشه اولِ فهرست بودند و باشگاه‌های واقعیِ
-     هم‌نام با آن‌ها **حذف** می‌شدند. یعنی صاحبِ «باشگاه المپیک مشهد»
+     پیش‌تر شش باشگاه نمونه همیشه اول فهرست بودند و باشگاه‌های واقعی
+     هم‌نام با آن‌ها **حذف** می‌شدند. یعنی صاحب «باشگاه المپیک مشهد»
      که واقعاً ثبت‌نام کرده بود، نسخه‌ی ساختگی به‌جای باشگاهش نمایش
      داده می‌شد و صفحه‌ی خودش اصلاً دیده نمی‌شد. */
-  /* فیلترها به سرور می‌روند، نه اینکه کلِ جدول دانلود و در مرورگر فیلتر
-     شود. جستجو با تأخیرِ کوتاه فرستاده می‌شود تا هر حرفِ تایپ‌شده یک
+  /* فیلترها به سرور می‌روند، نه اینکه کل جدول دانلود و در مرورگر فیلتر
+     شود. جستجو با تأخیر کوتاه فرستاده می‌شود تا هر حرف تایپ‌شده یک
      درخواست نسازد. */
   useEffect(() => {
     const p = new URLSearchParams();
@@ -553,8 +553,8 @@ export default function ClubsPage() {
     return () => clearTimeout(t);
   }, [city, search, selectedTypes, selectedAmens]);
 
-  /* مسابقاتِ عمومی، یک‌بار برای کلِ فهرست — تا هر کارت جداگانه
-     درخواست نفرستد. کلید `club_id` است، نه نامِ باشگاه. */
+  /* مسابقات عمومی، یک‌بار برای کل فهرست — تا هر کارت جداگانه
+     درخواست نفرستد. کلید `club_id` است، نه نام باشگاه. */
   const [tournByClub, setTournByClub] = useState<Map<string, Tournament[]>>(new Map());
   useEffect(() => {
     void (async () => {
@@ -785,7 +785,7 @@ export default function ClubsPage() {
             </div>
           ) : filtered.length === 0 ? (
             /* «هیچ باشگاهی ثبت نشده» با «فیلتر چیزی پیدا نکرد» فرق دارد؛
-               پیشنهادِ «فیلترها را پاک کنید» وقتی فیلتری فعال نیست بی‌معنی است. */
+               پیشنهاد «فیلترها را پاک کنید» وقتی فیلتری فعال نیست بی‌معنی است. */
             <div style={{ textAlign: 'center', padding: '80px 24px' }}>
               <div style={{ fontSize: 44, opacity: 0.15, marginBottom: 14 }}>🎱</div>
               {clubs.length === 0 ? (

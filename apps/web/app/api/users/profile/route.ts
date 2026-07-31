@@ -2,15 +2,15 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 
-/* پروفایلِ کاربرِ واردشده — خواندن و ویرایش.
+/* پروفایل کاربر واردشده — خواندن و ویرایش.
 
-   فیلدهایی که موقعِ ثبت‌نام از ثبت‌احوال و شاهکار استعلام شده‌اند
+   فیلدهایی که موقع ثبت‌نام از ثبت‌احوال و شاهکار استعلام شده‌اند
    (نام، نام خانوادگی، کد ملی، تاریخ تولد) این‌جا هرگز نوشته نمی‌شوند:
-   استعلام یک‌بار انجام شده و تغییرِ بعدیِ آن‌ها یعنی هویتِ تأییدشده
-   دیگر معنایی ندارد. لیستِ سفیدِ زیر تنها چیزی است که تغییر می‌کند —
-   نه اینکه فقط در UI قفل باشد و از راهِ API باز.
+   استعلام یک‌بار انجام شده و تغییر بعدی آن‌ها یعنی هویت تأییدشده
+   دیگر معنایی ندارد. لیست سفید زیر تنها چیزی است که تغییر می‌کند —
+   نه اینکه فقط در UI قفل باشد و از راه API باز.
 
-   شماره‌ی موبایل هم این‌جا عوض نمی‌شود؛ مسیرِ خودش را دارد
+   شماره‌ی موبایل هم این‌جا عوض نمی‌شود؛ مسیر خودش را دارد
    (/api/auth/change-phone) که کد پیامکی و شاهکار می‌خواهد. */
 
 const EDITABLE = [
@@ -20,7 +20,7 @@ const EDITABLE = [
 
 const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
 
-/* ستون‌هایی که ممکن است در نسخه‌های قدیمیِ دیتابیس نباشند */
+/* ستون‌هایی که ممکن است در نسخه‌های قدیمی دیتابیس نباشند */
 const OPTIONAL_COLS = new Set(['address', 'work_phone']);
 
 function shape(u: Record<string, unknown>) {
@@ -41,7 +41,7 @@ function shape(u: Record<string, unknown>) {
     address: u.address ?? '',
     workPhone: u.work_phone ?? '',
     clubNameManual: u.club_name_manual ?? '',
-    /* هویتِ استعلام‌شده — فقط برای نمایش */
+    /* هویت استعلام‌شده — فقط برای نمایش */
     nationalId: u.national_id ?? '',
     birthDate: u.birth_date ?? u.birthDate ?? '',
     nationalIdVerified: !!u.national_id_verified,
@@ -70,7 +70,7 @@ export async function PATCH(req: NextRequest) {
 
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;
 
-  /* نامِ ورودیِ کلاینت camelCase است، ستونِ دیتابیس snake_case */
+  /* نام ورودی کلاینت camelCase است، ستون دیتابیس snake_case */
   const incoming: Record<string, unknown> = { ...b };
   if (b.clubNameManual !== undefined) incoming.club_name_manual = b.clubNameManual;
   if (b.workPhone !== undefined) incoming.work_phone = b.workPhone;
@@ -87,7 +87,7 @@ export async function PATCH(req: NextRequest) {
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({
       message: blocked.length
-        ? 'این اطلاعات هنگام ثبت‌نام استعلام شده‌اند و قابلِ ویرایش نیستند'
+        ? 'این اطلاعات هنگام ثبت‌نام استعلام شده‌اند و قابل ویرایش نیستند'
         : 'تغییری برای ذخیره فرستاده نشد',
     }, { status: 400 });
   }
@@ -96,8 +96,8 @@ export async function PATCH(req: NextRequest) {
 
   let { data, error } = await sb().from('users').update(patch).eq('id', actor.id).select().single();
 
-  /* ستونِ اختیاری هنوز ساخته نشده ⇒ بدونِ آن دوباره تلاش کن، نه اینکه
-     کلِ ذخیره‌ی پروفایل شکست بخورد */
+  /* ستون اختیاری هنوز ساخته نشده ⇒ بدون آن دوباره تلاش کن، نه اینکه
+     کل ذخیره‌ی پروفایل شکست بخورد */
   if (error && /column .* does not exist|schema cache/i.test(error.message)) {
     for (const c of OPTIONAL_COLS) delete patch[c];
     if (Object.keys(patch).length <= 1) {

@@ -1,13 +1,13 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────
-   جایگاهِ تبلیغاتی v2 — روی سیستمِ Placement/Campaign (فاز ۲).
+   جایگاه تبلیغاتی v2 — روی سیستم Placement/Campaign (فاز ۲).
 
-   ● نمایشِ هر جایگاه فقط به is_active خودش وابسته است؛ هیچ کلیدِ
+   ● نمایش هر جایگاه فقط به is_active خودش وابسته است؛ هیچ کلید
      سراسری‌ای وجود ندارد.
-   ● جایگاهِ بنری با بیش از یک کمپین «اسلایدری» می‌چرخد (تصمیم D1)؛
-     وزنِ کمپین در ترتیبِ چرخش لحاظ می‌شود.
-   ● جایگاهِ خالی/غیرفعال هیچ‌چیزی رندر نمی‌کند — نه قاب، نه فاصله.
+   ● جایگاه بنری با بیش از یک کمپین «اسلایدری» می‌چرخد (تصمیم D1)؛
+     وزن کمپین در ترتیب چرخش لحاظ می‌شود.
+   ● جایگاه خالی/غیرفعال هیچ‌چیزی رندر نمی‌کند — نه قاب، نه فاصله.
    ───────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState } from 'react'
@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from 'react'
 /* تایپ‌ها و `toPlacementState` به `lib/ads/placement-state` منتقل شدند.
 
    دلیل: این فایل `'use client'` است، پس هرچه از آن export شود یک
-   «ارجاعِ کلاینت» می‌شود و Server Component نمی‌تواند صدایش بزند.
+   «ارجاع کلاینت» می‌شود و Server Component نمی‌تواند صدایش بزند.
    `app/page.tsx` دقیقاً همین کار را می‌کرد و صفحه‌ی اصلی ۵۰۰ داد:
 
      Attempted to call toPlacementState() from the server but
@@ -33,12 +33,12 @@ import type {
 } from '../../lib/ads/placement-state'
 import { toPlacementState as toState } from '../../lib/ads/placement-state'
 
-/* یک fetch برای کلِ صفحه، صرف‌نظر از تعدادِ جایگاه‌ها.
+/* یک fetch برای کل صفحه، صرف‌نظر از تعداد جایگاه‌ها.
    شکست کش نمی‌شود — وگرنه یک خطای گذرای شبکه، تبلیغات را تا reload
-   بعدی برای کلِ نشستِ SPA خاموش می‌کرد.
-   کش عمرِ کوتاه دارد: چرخشِ عادلانه سمتِ سرور تصمیم‌گیری می‌شود، پس
-   کشِ همیشگی یعنی کاربری که ساعت‌ها در SPA می‌ماند تا آخر همان یک
-   ترتیب را می‌بیند و عدالتِ چرخش برایش اتفاق نمی‌افتد. */
+   بعدی برای کل نشست SPA خاموش می‌کرد.
+   کش عمر کوتاه دارد: چرخش عادلانه سمت سرور تصمیم‌گیری می‌شود، پس
+   کش همیشگی یعنی کاربری که ساعت‌ها در SPA می‌ماند تا آخر همان یک
+   ترتیب را می‌بیند و عدالت چرخش برایش اتفاق نمی‌افتد. */
 const CACHE_TTL = 90_000
 let cache: Promise<Record<string, PlacementPayload>> | null = null
 let cachedAt = 0
@@ -54,7 +54,7 @@ function loadPlacements(): Promise<Record<string, PlacementPayload>> {
   return cache
 }
 
-/* فقط http(s) یا مسیرِ داخلی — لایه‌ی دومِ دفاع در برابر javascript: */
+/* فقط http(s) یا مسیر داخلی — لایه‌ی دوم دفاع در برابر javascript: */
 const safeHref = (v: string) => (/^(https?:\/\/|\/)/i.test(v) ? v : '')
 
 const ping = (id: string, kind: 'impression' | 'click') => {
@@ -70,12 +70,12 @@ export function usePlacement(key: PlacementKey): LiveCampaign[] | null {
 
 /* `initial` از سرور می‌آید.
 
-   بدونِ آن، سه سکشنِ اصلیِ صفحه (محصولاتِ ویژه، باشگاه‌های پیشنهادی،
-   فروشگاه‌های تجهیزات) در HTMLِ اولیه خالی بودند و فقط بعد از اجرای
+   بدون آن، سه سکشن اصلی صفحه (محصولات ویژه، باشگاه‌های پیشنهادی،
+   فروشگاه‌های تجهیزات) در HTML اولیه خالی بودند و فقط بعد از اجرای
    جاوااسکریپت پر می‌شدند — یعنی خزنده‌ها محتوایی نمی‌دیدند و کاربر هم
-   یک پرشِ چیدمان تجربه می‌کرد.
+   یک پرش چیدمان تجربه می‌کرد.
 
-   با مقدارِ اولیه، همان داده در رندرِ سرور هست و کلاینت فقط در صورتِ
+   با مقدار اولیه، همان داده در رندر سرور هست و کلاینت فقط در صورت
    تازه‌شدن به‌روزش می‌کند. */
 export function usePlacementState(key: PlacementKey, initial?: PlacementState): PlacementState {
   const [state, setState] = useState<PlacementState>(
@@ -92,7 +92,7 @@ export function usePlacementState(key: PlacementKey, initial?: PlacementState): 
   return state
 }
 
-/** جایگاهِ بنری — با چرخشِ اسلایدری وقتی بیش از یک کمپین دارد */
+/** جایگاه بنری — با چرخش اسلایدری وقتی بیش از یک کمپین دارد */
 export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
   slot: PlacementKey
   className?: string
@@ -109,16 +109,16 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
       if (!alive) return
       const payload = all[slot]
       const list = (payload?.campaigns ?? []).filter(c => c.banner?.imageUrl)
-      /* از فاز ۴، هر چهار حالتِ چرخش سمتِ سرور تصمیم‌گیری می‌شود و
-         ترتیبِ همین آرایه نتیجه‌ی آن است؛ کلاینت فقط در همان ترتیب
-         می‌چرخد. (تکرارِ وزنیِ قبلی حذف شد: هم کارِ سرور را دوباره
-         می‌کرد، هم اسلایدهای تکراریِ پشتِ‌هم می‌ساخت.) */
+      /* از فاز ۴، هر چهار حالت چرخش سمت سرور تصمیم‌گیری می‌شود و
+         ترتیب همین آرایه نتیجه‌ی آن است؛ کلاینت فقط در همان ترتیب
+         می‌چرخد. (تکرار وزنی قبلی حذف شد: هم کار سرور را دوباره
+         می‌کرد، هم اسلایدهای تکراری پشت‌هم می‌ساخت.) */
       setBanners(list)
     })
     return () => { alive = false }
   }, [slot])
 
-  /* چرخشِ خودکار */
+  /* چرخش خودکار */
   useEffect(() => {
     if (!banners || banners.length <= 1) return
     const t = setInterval(() => setActive(a => (a + 1) % banners.length), intervalMs)
@@ -168,7 +168,7 @@ export default function AdSlot({ slot, className, style, intervalMs = 5000 }: {
           تبلیغ{current.advertiser ? ` · ${current.advertiser}` : ''}
         </figcaption>
 
-        {/* نقطه‌های اسلایدر — فقط با بیش از یک کمپینِ متمایز */}
+        {/* نقطه‌های اسلایدر — فقط با بیش از یک کمپین متمایز */}
         {distinct.length > 1 && (
           <div style={{ position: 'absolute', bottom: 8, insetInline: 0, display: 'flex', justifyContent: 'center', gap: 5, pointerEvents: 'none' }}>
             {distinct.map(id => (

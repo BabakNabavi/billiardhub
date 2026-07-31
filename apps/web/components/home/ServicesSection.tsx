@@ -1,18 +1,18 @@
 /* ─────────────────────────────────────────────────────────────
-   سکشنِ خدمات — Server Component.
+   سکشن خدمات — Server Component.
 
    عمداً `'use client'` ندارد: هیچ حالت و هیچ رویدادی لازم ندارد، پس
    نباید حتی یک بایت جاوااسکریپت به مرورگر بفرستد. از `page.tsx` به
-   `HomeClient` **به‌عنوانِ prop** پاس داده می‌شود؛ این الگویی است که
-   اجازه می‌دهد یک Server Component داخلِ درختِ یک Client Component
-   بنشیند بدونِ اینکه کلاینتی شود.
+   `HomeClient` **به‌عنوان prop** پاس داده می‌شود؛ این الگویی است که
+   اجازه می‌دهد یک Server Component داخل درخت یک Client Component
+   بنشیند بدون اینکه کلاینتی شود.
 
-   نسخه‌ی قبلی داخلِ HomeClient بود و دو چیز آن را کلاینتی می‌کرد:
-     • `onMouseEnter/onMouseLeave` برای افکتِ هاور ⇒ حالا CSS خالص
-     • `<SR>` (ScrollReveal) ⇒ حالا انیمیشنِ CSS با `animation-timeline`
-       نیست، بلکه فقط یک fade-inِ ساده که به JS نیاز ندارد
+   نسخه‌ی قبلی داخل HomeClient بود و دو چیز آن را کلاینتی می‌کرد:
+     • `onMouseEnter/onMouseLeave` برای افکت هاور ⇒ حالا CSS خالص
+     • `<SR>` (ScrollReveal) ⇒ حالا انیمیشن CSS با `animation-timeline`
+       نیست، بلکه فقط یک fade-in ساده که به JS نیاز ندارد
 
-   نتیجه: ~۶۰ خط JSX از بارِ Hydration خارج شد.
+   نتیجه: ~۶۰ خط JSX از بار Hydration خارج شد.
    ───────────────────────────────────────────────────────────── */
 
 import Link from 'next/link'
@@ -34,8 +34,8 @@ export default function ServicesSection() {
       background: 'radial-gradient(circle at 82% 0%, rgba(199,166,106,0.14), transparent 46%), linear-gradient(145deg, #0B0A08 0%, #171208 55%, #0B0A08 100%)',
       padding: 'clamp(52px,5vw,80px) clamp(16px,5%,80px) clamp(44px,4.2vw,68px)',
     }}>
-      {/* هاور با CSS، نه با رویدادِ JS — همان افکت، بدونِ هیچ جاوااسکریپتی.
-          هر کارت رنگِ خودش را از متغیرِ --c می‌گیرد. */}
+      {/* هاور با CSS، نه با رویداد JS — همان افکت، بدون هیچ جاوااسکریپتی.
+          هر کارت رنگ خودش را از متغیر --c می‌گیرد. */}
       <style>{`
         .svc-card {
           position: relative; overflow: hidden;
@@ -78,7 +78,7 @@ export default function ServicesSection() {
             <span className="sec-label" style={{ color: '#C7A66A' }}>SERVICES</span>
             <h2 className="sec-title" style={{ color: '#fff', fontSize: 'clamp(20px,2.84vw,37px)' }}>خدمات تخصصی</h2>
             <p style={{ color: 'rgba(255,255,255,0.46)', fontSize: 'clamp(12px,1vw,14px)', margin: 0 }}>
-              نصب، تعمیر و نگهداریِ تجهیزات بیلیارد توسطِ متخصصان
+              نصب، تعمیر و نگهداری تجهیزات بیلیارد توسط متخصصان
             </p>
           </div>
           <Link href="/services" className="see-all-lq on-dark">
@@ -89,7 +89,7 @@ export default function ServicesSection() {
         <div className="services-grid" style={{ alignItems: 'stretch' }}>
           {SERVICES.map((s, i) => (
             /* کارت حالا لینک است، نه div با cursor:pointer — پیش‌تر
-               ظاهرِ کلیک‌شدنی داشت ولی با کیبورد قابلِ رسیدن نبود. */
+               ظاهر کلیک‌شدنی داشت ولی با کیبورد قابل رسیدن نبود. */
             <Link key={s.id} href="/services" className="svc-card" style={{ ['--c' as never]: s.color }}>
               <span className="svc-num">{String(i + 1).padStart(2, '0')}</span>
               <span style={{

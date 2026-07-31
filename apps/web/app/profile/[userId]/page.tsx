@@ -48,7 +48,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function authHeader(): Record<string, string> {
-  /* نشست روی کوکیِ httpOnly است؛ فقط توکنِ CSRF لازم است */
+  /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
   const t = csrfToken()
   return t ? { 'x-csrf-token': t } : {}
 }

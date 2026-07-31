@@ -1,7 +1,7 @@
 'use client'
 
-/* نتیجه‌ی بازگشت از درگاهِ خریدِ بسته.
-   وضعیتِ واقعی از سرور خوانده می‌شود، نه از پارامترِ آدرس — چون
+/* نتیجه‌ی بازگشت از درگاه خرید بسته.
+   وضعیت واقعی از سرور خوانده می‌شود، نه از پارامتر آدرس — چون
    پارامتر را می‌شود دستکاری کرد. */
 
 import { Suspense, useEffect, useState } from 'react'
@@ -62,14 +62,14 @@ function Result() {
 
         <p style={{ fontSize: 13.5, color: SEC, lineHeight: 2, margin: '0 0 20px' }}>
           {ok
-            ? 'از این لحظه می‌توانید طبقِ سهمیه‌ی بسته استوری منتشر کنید.'
-            : (reason || 'پرداخت تکمیل نشد. اگر مبلغی کسر شده باشد، طیِ ۷۲ ساعت به حسابتان برمی‌گردد.')}
+            ? 'از این لحظه می‌توانید طبق سهمیه‌ی بسته استوری منتشر کنید.'
+            : (reason || 'پرداخت تکمیل نشد. اگر مبلغی کسر شده باشد، طی ۷۲ ساعت به حسابتان برمی‌گردد.')}
         </p>
 
         {ok && (
           loading ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: MUT, marginBottom: 18 }}>
-              <Loader2 size={15} className="animate-spin" /><span style={{ fontSize: 12.5 }}>در حال دریافتِ وضعیتِ بسته…</span>
+              <Loader2 size={15} className="animate-spin" /><span style={{ fontSize: 12.5 }}>در حال دریافت وضعیت بسته…</span>
             </div>
           ) : quota && (
             <div style={{
@@ -81,7 +81,7 @@ function Result() {
               )}
               <div style={{ fontSize: 12.5, color: MUT, lineHeight: 2 }}>
                 {quota.limit === 0
-                  ? 'استوریِ نامحدود'
+                  ? 'استوری نامحدود'
                   : `${fa(Math.max(0, quota.limit - quota.used))} استوری از ${fa(quota.limit)} تای این ${PERIOD_FA[quota.period]} مانده`}
                 {quota.planExpiresAt ? <><br />اعتبار تا {faDate(quota.planExpiresAt)}</> : null}
               </div>
@@ -91,7 +91,7 @@ function Result() {
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href={ok ? '/dashboard' : '/story-plans'} style={BTN}>
-            {ok ? 'پنلِ من' : 'انتخابِ دوباره‌ی بسته'} <ArrowLeft size={14} />
+            {ok ? 'پنل من' : 'انتخاب دوباره‌ی بسته'} <ArrowLeft size={14} />
           </Link>
           <Link href="/story-plans" style={{ ...BTN, background: 'rgba(0,0,0,0.04)', borderColor: LINE, color: SEC }}>
             بسته‌ها

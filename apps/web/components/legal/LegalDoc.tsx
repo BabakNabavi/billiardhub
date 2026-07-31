@@ -17,7 +17,7 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
   const [active, setActive] = useState<string>('')
   const [tocOpen, setTocOpen] = useState(false)
   const [showTop, setShowTop] = useState(false)
-  /* وقتی کاربر از فرمِ ثبت‌نام به این‌جا آمده، نوارِ تأیید پایین صفحه می‌آید.
+  /* وقتی کاربر از فرم ثبت‌نام به این‌جا آمده، نوار تأیید پایین صفحه می‌آید.
      از window خوانده می‌شود (نه useSearchParams) تا صفحه استاتیک بماند. */
   const [fromRegister, setFromRegister] = useState(false)
   const [accepted, setAccepted] = useState(false)
@@ -49,8 +49,8 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
     return () => window.removeEventListener('scroll', onScroll)
   }, [doc])
 
-  /* لنگرِ آدرس (/terms#market) — چون محتوا سمتِ کلاینت رندر می‌شود، مرورگر
-     در لحظه‌ی لودِ اول عنصر را پیدا نمی‌کند و اسکرول نمی‌کند؛ پس خودمان انجام می‌دهیم.
+  /* لنگر آدرس (/terms#market) — چون محتوا سمت کلاینت رندر می‌شود، مرورگر
+     در لحظه‌ی لود اول عنصر را پیدا نمی‌کند و اسکرول نمی‌کند؛ پس خودمان انجام می‌دهیم.
      دو تلاش (rAF و ۳۰۰ms) تا فونت/تصاویر ارتفاع را جابه‌جا نکنند. */
   useEffect(() => {
     const go = (behavior: ScrollBehavior) => {
@@ -211,7 +211,7 @@ export default function LegalDoc({ doc, icon = 'terms' }: { doc: LegalDocument; 
         </button>
       )}
 
-      {/* نوارِ تأیید — فقط وقتی از فرمِ ثبت‌نام آمده باشد */}
+      {/* نوار تأیید — فقط وقتی از فرم ثبت‌نام آمده باشد */}
       {fromRegister && (
         <div style={{
           position: 'fixed', insetInline: 0, bottom: 0, zIndex: 60,

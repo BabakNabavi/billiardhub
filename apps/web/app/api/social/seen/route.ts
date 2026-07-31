@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CORS, safeKey, readJson, writeJson } from '@/lib/social-server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 
-/* «دیده‌شدنِ» استوری، per-viewer و ماندگار روی سرور ⇒ حتی با لاگ‌اوت/لاگین یا
-   دستگاهِ دیگر، رینگِ استوریِ دیده‌شده دیگر رنگی نمی‌شود (مثل اینستاگرام) */
+/* «دیده‌شدن» استوری، per-viewer و ماندگار روی سرور ⇒ حتی با لاگ‌اوت/لاگین یا
+   دستگاه دیگر، رینگ استوری دیده‌شده دیگر رنگی نمی‌شود (مثل اینستاگرام) */
 const seenPath = (user: string) => `social/seen/${safeKey(user)}.json`;
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }); }
 
-/* فهرستِ «دیده‌شده» داده‌ی شخصیِ کاربر است؛ صاحبش از نشست می‌آید نه از
+/* فهرست «دیده‌شده» داده‌ی شخصی کاربر است؛ صاحبش از نشست می‌آید نه از
    کوئری، وگرنه هر کسی می‌توانست الگوی تماشای دیگری را بخواند یا آن را
    دستکاری کند. */
 export async function GET(req: NextRequest) {
@@ -30,6 +30,6 @@ export async function POST(req: NextRequest) {
   if (!user || !ids.length) return NextResponse.json({ ok: true }, { headers: CORS });
   const cur = await readJson<string[]>(seenPath(user), []);
   const set = new Set(cur); ids.forEach(i => set.add(i));
-  await writeJson(seenPath(user), [...set].slice(-3000));   // سقفِ نگه‌داری
+  await writeJson(seenPath(user), [...set].slice(-3000));   // سقف نگه‌داری
   return NextResponse.json({ ok: true }, { headers: CORS });
 }

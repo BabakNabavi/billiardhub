@@ -1,6 +1,6 @@
 'use client'
 
-/* آمارِ بسته‌ی استوریِ کاربر — در پنلِ هر نقشی نشان داده می‌شود:
+/* آمار بسته‌ی استوری کاربر — در پنل هر نقشی نشان داده می‌شود:
    چه بسته‌ای دارد، تا کی اعتبار دارد، چند استوری مانده و چه خریده.
 
    وقتی محدودیت خاموش است هم نمایش داده می‌شود ولی صریح می‌گوید که
@@ -61,7 +61,7 @@ export default function MyStoryPlan({ compact = false }: { compact?: boolean }) 
     <section dir="rtl" style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, padding: 18, fontFamily: 'inherit' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <Clapperboard size={17} style={{ color: GOLD_D }} />
-        <h2 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>بسته‌ی استوریِ من</h2>
+        <h2 style={{ fontSize: 14.5, fontWeight: 900, color: INK, margin: 0 }}>بسته‌ی استوری من</h2>
         <Link href="/story-plans" style={{ marginInlineStart: 'auto', fontSize: 12.5, fontWeight: 800, color: GOLD_D, textDecoration: 'none' }}>
           بسته‌ها ←
         </Link>
@@ -72,8 +72,8 @@ export default function MyStoryPlan({ compact = false }: { compact?: boolean }) 
       </div>
       <div style={{ fontSize: 12.5, color: MUT, lineHeight: 1.9, marginBottom: 12 }}>
         {unlimited
-          ? 'ثبتِ استوریِ نامحدود'
-          : `${fa(quota.used)} از ${fa(quota.limit)} استوریِ این ${PERIOD_FA[quota.period]} استفاده شده`}
+          ? 'ثبت استوری نامحدود'
+          : `${fa(quota.used)} از ${fa(quota.limit)} استوری این ${PERIOD_FA[quota.period]} استفاده شده`}
         {quota.planExpiresAt ? ` · اعتبار تا ${faDate(quota.planExpiresAt)}` : ''}
       </div>
 
@@ -94,7 +94,7 @@ export default function MyStoryPlan({ compact = false }: { compact?: boolean }) 
 
       {!quota.enabled && (
         <p style={{ fontSize: 12, color: MUT, lineHeight: 1.9, margin: '0 0 12px' }}>
-          فروشِ بسته‌ی استوری هنوز فعال نشده؛ سهمیه‌ی رایگانِ نقشتان برقرار است.
+          فروش بسته‌ی استوری هنوز فعال نشده؛ سهمیه‌ی رایگان نقشتان برقرار است.
         </p>
       )}
 
@@ -104,7 +104,7 @@ export default function MyStoryPlan({ compact = false }: { compact?: boolean }) 
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D,
           borderRadius: 10, padding: '9px 16px', fontSize: 13, fontWeight: 800, marginBottom: 4,
         }}>
-          خریدِ بسته <ArrowLeft size={14} />
+          خرید بسته <ArrowLeft size={14} />
         </Link>
       )}
 

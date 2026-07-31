@@ -1,12 +1,12 @@
 /* ─────────────────────────────────────────────────────────────
-   رزروِ تبلیغ (فاز ۶) — از انتخابِ جایگاه تا سفارشِ آماده‌ی پرداخت.
+   رزرو تبلیغ (فاز ۶) — از انتخاب جایگاه تا سفارش آماده‌ی پرداخت.
 
-   سه اصلِ امنیتی که در کلِ این فایل رعایت شده‌اند:
-     ۱) قیمت همیشه از ردیفِ پلن در دیتابیس خوانده می‌شود؛ هیچ عددی از
+   سه اصل امنیتی که در کل این فایل رعایت شده‌اند:
+     ۱) قیمت همیشه از ردیف پلن در دیتابیس خوانده می‌شود؛ هیچ عددی از
         کلاینت پذیرفته نمی‌شود.
      ۲) پلن باید واقعاً به همان جایگاه تعلق داشته باشد — وگرنه کاربر
-        می‌توانست پلنِ ارزانِ یک جایگاه را به جایگاهِ گران‌تر بچسباند.
-     ۳) کاربر فقط جایگاه‌هایی را می‌بیند که نقشِ تأییدشده‌اش اجازه می‌دهد.
+        می‌توانست پلن ارزان یک جایگاه را به جایگاه گران‌تر بچسباند.
+     ۳) کاربر فقط جایگاه‌هایی را می‌بیند که نقش تأییدشده‌اش اجازه می‌دهد.
    ───────────────────────────────────────────────────────────── */
 
 import { sb } from '../finance/db'
@@ -16,10 +16,10 @@ import {
   type Placement, type PricingPlan, type PlacementKey,
 } from './core'
 
-/* ── واجدِ شرایط بودن ─────────────────────────────────────────
-   هر جایگاه به نقش‌هایی گره خورده که منطقاً صاحبِ آن محتوا هستند:
+/* ── واجد شرایط بودن ─────────────────────────────────────────
+   هر جایگاه به نقش‌هایی گره خورده که منطقاً صاحب آن محتوا هستند:
    باشگاه‌دار باشگاهش را برجسته می‌کند، فروشنده فروشگاهش را، تولیدکننده
-   محصولش را. بنرهای عمومی برای هر کسب‌وکارِ تأییدشده باز است. */
+   محصولش را. بنرهای عمومی برای هر کسب‌وکار تأییدشده باز است. */
 export const PLACEMENT_ROLES: Record<PlacementKey, string[]> = {
   market_featured_products_homepage: ['manufacturer', 'seller'],
   featured_clubs_homepage: ['club_owner'],
@@ -39,8 +39,8 @@ export interface Eligibility {
 /**
  * جایگاه‌هایی که این کاربر می‌تواند بخرد.
  *
- * فقط جایگاه‌های `paid` (گیتِ فاز ۴) و فقط آن‌هایی که نقشِ تأییدشده‌ی
- * کاربر اجازه می‌دهد. نقشِ خوداظهارِ `users.primaryRole` عمداً نادیده
+ * فقط جایگاه‌های `paid` (گیت فاز ۴) و فقط آن‌هایی که نقش تأییدشده‌ی
+ * کاربر اجازه می‌دهد. نقش خوداظهار `users.primaryRole` عمداً نادیده
  * گرفته می‌شود چون کاربر خودش می‌تواند تغییرش دهد — مبنا همان
  * نقش‌های تأییدشده‌ی فاز ۳ است.
  */
@@ -63,7 +63,7 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
     plans: await plansForPlacement(p.key),
   })))
 
-  /* جایگاهی که هیچ پله‌ی قیمتی ندارد قابلِ خرید نیست */
+  /* جایگاهی که هیچ پله‌ی قیمتی ندارد قابل خرید نیست */
   return { roles, identityRequired: false, placements: withPlans.filter(p => p.plans.length > 0) }
 }
 
@@ -78,25 +78,25 @@ export interface Quote {
 }
 export type QuoteResult = Quote | { ok: false; status: number; message: string }
 
-/** قیمتِ نهایی — فقط از دیتابیس. هیچ ورودیِ عددی از کلاینت پذیرفته نمی‌شود. */
+/** قیمت نهایی — فقط از دیتابیس. هیچ ورودی عددی از کلاینت پذیرفته نمی‌شود. */
 export async function quote(placementKey: string, planId: string): Promise<QuoteResult> {
   const placement = await getPlacement(placementKey)
   if (!placement) return { ok: false, status: 404, message: 'جایگاه پیدا نشد' }
-  if (placement.mode !== 'paid') return { ok: false, status: 409, message: 'این جایگاه فعلاً قابلِ خرید نیست' }
+  if (placement.mode !== 'paid') return { ok: false, status: 409, message: 'این جایگاه فعلاً قابل خرید نیست' }
 
   const { data, error } = await sb().from('ad_pricing_plans').select('*').eq('id', planId).maybeSingle()
   if (error || !data) return { ok: false, status: 404, message: 'پلن پیدا نشد' }
   const row = data as Record<string, unknown>
 
-  /* پلن باید مالِ همین جایگاه باشد — جلوی چسباندنِ پلنِ ارزانِ جایگاهِ
-     دیگر به جایگاهِ گران را می‌گیرد */
+  /* پلن باید مال همین جایگاه باشد — جلوی چسباندن پلن ارزان جایگاه
+     دیگر به جایگاه گران را می‌گیرد */
   if (String(row.placement_key ?? '') !== placement.key) {
     return { ok: false, status: 409, message: 'این پلن به این جایگاه تعلق ندارد' }
   }
   if (row.is_active !== true) return { ok: false, status: 409, message: 'این پلن دیگر فعال نیست' }
 
   const amount = Number(row.price) || 0
-  if (amount <= 0) return { ok: false, status: 409, message: 'قیمتِ این پلن تنظیم نشده است' }
+  if (amount <= 0) return { ok: false, status: 409, message: 'قیمت این پلن تنظیم نشده است' }
 
   const plan: PricingPlan = {
     id: String(row.id), name: String(row.name), description: (row.description as string) ?? null,
@@ -110,7 +110,7 @@ export async function quote(placementKey: string, planId: string): Promise<Quote
   return { ok: true, placement, plan, amount, durationDays: plan.durationDays }
 }
 
-/* ── ساختِ سفارش ──────────────────────────────────────────────── */
+/* ── ساخت سفارش ──────────────────────────────────────────────── */
 
 export interface OrderDraft {
   orderId: string
@@ -120,11 +120,11 @@ export interface OrderDraft {
 }
 
 /**
- * کمپینِ پیش‌نویس + سفارشِ در انتظارِ پرداخت.
+ * کمپین پیش‌نویس + سفارش در انتظار پرداخت.
  *
- * کمپین با وضعیتِ PENDING_PAYMENT ساخته می‌شود تا تا پیش از پرداخت
- * هیچ‌جا نمایش داده نشود (فقط ACTIVE داخلِ پنجره سرو می‌شود). پنجره‌ی
- * زمانیِ واقعی هنگامِ تأییدِ ادمین از نو حساب می‌شود.
+ * کمپین با وضعیت PENDING_PAYMENT ساخته می‌شود تا تا پیش از پرداخت
+ * هیچ‌جا نمایش داده نشود (فقط ACTIVE داخل پنجره سرو می‌شود). پنجره‌ی
+ * زمانی واقعی هنگام تأیید ادمین از نو حساب می‌شود.
  */
 export async function createOrder(
   userId: string,
@@ -150,7 +150,7 @@ export async function createOrder(
     sort_order: 0,
   }).select('id').single()
 
-  if (campErr || !camp) return { error: 'ساختِ کمپین انجام نشد' }
+  if (campErr || !camp) return { error: 'ساخت کمپین انجام نشد' }
   const campaignId = String((camp as { id: string }).id)
 
   const { data: order, error: orderErr } = await sb().from('campaign_orders').insert({
@@ -163,7 +163,7 @@ export async function createOrder(
     duration_days: q.durationDays,
     status: 'PENDING',
     provider: 'pending',
-    /* اسنپ‌شات: قیمت و مشخصاتِ لحظه‌ی خرید بماند حتی اگر پلن بعداً عوض شود */
+    /* اسنپ‌شات: قیمت و مشخصات لحظه‌ی خرید بماند حتی اگر پلن بعداً عوض شود */
     snapshot: {
       placementTitle: q.placement.title,
       planName: q.plan.name,
@@ -174,7 +174,7 @@ export async function createOrder(
 
   if (orderErr || !order) {
     await sb().from('campaigns').delete().eq('id', campaignId)
-    return { error: 'ثبتِ سفارش انجام نشد' }
+    return { error: 'ثبت سفارش انجام نشد' }
   }
 
   return {
@@ -183,7 +183,7 @@ export async function createOrder(
   }
 }
 
-/* ── داشبوردِ تبلیغ‌دهنده ─────────────────────────────────────── */
+/* ── داشبورد تبلیغ‌دهنده ─────────────────────────────────────── */
 
 export interface MyCampaign {
   id: string
@@ -203,7 +203,7 @@ export interface MyCampaign {
   createdAt: string
 }
 
-/** کمپین‌های خودِ کاربر با وضعیتِ پرداخت و آمارشان */
+/** کمپین‌های خود کاربر با وضعیت پرداخت و آمارشان */
 export async function myCampaigns(userId: string): Promise<MyCampaign[]> {
   const { data: camps, error } = await sb().from('campaigns').select('*')
     .eq('user_id', userId).order('created_at', { ascending: false }).limit(200)

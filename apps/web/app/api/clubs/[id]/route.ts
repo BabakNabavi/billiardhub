@@ -55,26 +55,26 @@ export async function PUT(
 
   const body = await req.json();
 
-  /* فیلدهای «اعتماد» فقط سرورساید نوشته می‌شوند: تأییدِ جواز از مسیرِ
-     استعلامِ اماکن (verify-license) و تأییدِ شبا از استعلامِ بانکی.
-     پیش‌تر بدنه‌ی خام مستقیم UPDATE می‌شد و مالکِ باشگاه می‌توانست
+  /* فیلدهای «اعتماد» فقط سرورساید نوشته می‌شوند: تأیید جواز از مسیر
+     استعلام اماکن (verify-license) و تأیید شبا از استعلام بانکی.
+     پیش‌تر بدنه‌ی خام مستقیم UPDATE می‌شد و مالک باشگاه می‌توانست
      verificationStatus خودش را 'verified' کند — که از فاز ۳ به بعد
-     یعنی گرفتنِ نقشِ تأییدشده‌ی باشگاه‌دار و سهمیه‌ی ۴تاییِ آگهی.
+     یعنی گرفتن نقش تأییدشده‌ی باشگاه‌دار و سهمیه‌ی ۴تایی آگهی.
      ادمین همچنان می‌تواند این فیلدها را تغییر دهد. */
   if (!isAdmin) {
     for (const k of [
       'verificationStatus', 'licenseVerified', 'licenseCheckedAt', 'licenseNumber',
       'ibanVerified', 'ibanOwnerName', 'ownerId', 'id', 'createdAt',
-      /* انتشار هم دستِ ادمین است؛ وگرنه مالک می‌توانست خودش باشگاهِ
-         تأییدنشده را در فهرستِ عمومی بنشاند. */
+      /* انتشار هم دست ادمین است؛ وگرنه مالک می‌توانست خودش باشگاه
+         تأییدنشده را در فهرست عمومی بنشاند. */
       'isActive',
     ]) {
       if (Object.prototype.hasOwnProperty.call(body, k)) delete (body as Record<string, unknown>)[k];
     }
   }
 
-  /* تأییدِ ادمین = انتشار. رد کردن = برداشتن از فهرستِ عمومی.
-     این دو تا امروز از هم جدا بودند و «تأیید شده» هیچ اثری روی دیده‌شدنِ
+  /* تأیید ادمین = انتشار. رد کردن = برداشتن از فهرست عمومی.
+     این دو تا امروز از هم جدا بودند و «تأیید شده» هیچ اثری روی دیده‌شدن
      باشگاه نداشت. */
   const decision = isAdmin && typeof body.verificationStatus === 'string'
     ? String(body.verificationStatus) : null;
@@ -82,10 +82,10 @@ export async function PUT(
   if (decision) {
     if (decision === 'verified') {
       body.isActive = true;
-      body.rejectionReason = null;      // ردِ قبلی دیگر معتبر نیست
+      body.rejectionReason = null;      // رد قبلی دیگر معتبر نیست
     } else if (decision === 'rejected') {
       body.isActive = false;
-      /* علتِ رد اجباری است: بدونِ آن مالک فقط می‌بیند «رد شد» و
+      /* علت رد اجباری است: بدون آن مالک فقط می‌بیند «رد شد» و
          نمی‌داند چه چیزی را باید اصلاح کند. */
       const reason = String(body.rejectionReason ?? '').trim();
       if (!reason) {
@@ -98,8 +98,8 @@ export async function PUT(
     body.reviewedBy = userId;
   }
 
-  /* ارسالِ دوباره پس از اصلاح: مالک که باشگاهِ ردشده را ویرایش می‌کند،
-     دوباره به صفِ بررسی می‌رود. بدونِ این، باشگاهِ ردشده تا ابد ردشده
+  /* ارسال دوباره پس از اصلاح: مالک که باشگاه ردشده را ویرایش می‌کند،
+     دوباره به صف بررسی می‌رود. بدون این، باشگاه ردشده تا ابد ردشده
      می‌ماند و راهی برای بازبینی وجود ندارد. */
   let resubmitted = false;
   if (!isAdmin) {
@@ -114,8 +114,8 @@ export async function PUT(
     }
   }
 
-  /* شبا فقط از راهِ استعلامِ کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
-     دست‌کاری کند، تأیید باطل می‌گردد تا تسویه به حسابِ تأییدنشده نرود. */
+  /* شبا فقط از راه استعلام کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
+     دست‌کاری کند، تأیید باطل می‌گردد تا تسویه به حساب تأییدنشده نرود. */
   if (Object.prototype.hasOwnProperty.call(body, 'iban')) {
     const { data: cur } = await getSupabaseServer().from('clubs').select('iban').eq('id', id).maybeSingle();
     const before = String((cur as { iban?: string } | null)?.iban ?? '').replace(/\s/g, '');
@@ -132,10 +132,10 @@ export async function PUT(
 
   if (error) {
     console.error('[clubs/:id] update error:', error.message);
-    return NextResponse.json({ message: 'به‌روزرسانیِ باشگاه انجام نشد' }, { status: 500, headers: CORS });
+    return NextResponse.json({ message: 'به‌روزرسانی باشگاه انجام نشد' }, { status: 500, headers: CORS });
   }
 
-  /* اعلان و ردِ ممیزی — بی‌صدا، چون شکستِ پیامک نباید تصمیمِ ادمین را
+  /* اعلان و رد ممیزی — بی‌صدا، چون شکست پیامک نباید تصمیم ادمین را
      برگرداند. تا امروز هیچ‌کدام از این دو وجود نداشت. */
   if (decision === 'verified') {
     void notifyClubApproved(id).catch(() => { /* بی‌صدا */ });
@@ -184,7 +184,7 @@ export async function DELETE(
   const { error } = await getSupabaseServer().from('clubs').delete().eq('id', id);
   if (error) {
     console.error('[clubs/:id] delete error:', error.message);
-    return NextResponse.json({ message: 'حذفِ باشگاه انجام نشد' }, { status: 500, headers: CORS });
+    return NextResponse.json({ message: 'حذف باشگاه انجام نشد' }, { status: 500, headers: CORS });
   }
 
   return NextResponse.json({ success: true }, { headers: CORS });
