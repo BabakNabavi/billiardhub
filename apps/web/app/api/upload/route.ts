@@ -98,7 +98,15 @@ export async function POST(req: NextRequest) {
 
   const { error } = await getSupabaseServer().storage
     .from('club-media')
-    .upload(path, bytes, { contentType: kind.mime, upsert: true });
+    .upload(path, bytes, {
+      contentType: kind.mime,
+      upsert: true,
+      /* پیش‌فرضِ Supabase روی no-cache است، یعنی هر بازدیدکننده هر بار
+         عکسِ باشگاه/محصول را دوباره دانلود می‌کند. نامِ فایل شاملِ
+         زمان و شناسه است و هرگز با همان نام عوض نمی‌شود، پس کشِ
+         یک‌ساله امن است. */
+      cacheControl: '31536000',
+    });
 
   if (error) {
     console.error('[upload] storage error:', error.message);

@@ -62,11 +62,27 @@ export default async function HomePage() {
   }
 
   return (
-    <HomeClient
-      initialPlacements={initialPlacements}
-      initialFeatured={featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED}
-      servicesSlot={<ServicesSection />}
-      exploreSlot={<ExploreStrip />}
-    />
+    <>
+      {/* تصویرِ هیرو LCPِ صفحه است ولی داخلِ کامپوننتِ کلاینتی قرار دارد،
+          پس مرورگر تا پارس‌شدنِ آن عمق پیدایش نمی‌کند — همان چیزی که
+          PageSpeed «LCP request discovery» می‌نامد.
+
+          این preload در <head> می‌نشیند و دانلود همان اولین لحظه شروع
+          می‌شود. `fetchPriority=high` هم می‌گوید از بقیه‌ی منابع جلو
+          بیفتد. عکس همان است که پوسترِ ویدیو و اسلاید اولِ هیروست. */}
+      <link
+        rel="preload"
+        as="image"
+        href="/images/hero/1.webp"
+        type="image/webp"
+        fetchPriority="high"
+      />
+      <HomeClient
+        initialPlacements={initialPlacements}
+        initialFeatured={featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED}
+        servicesSlot={<ServicesSection />}
+        exploreSlot={<ExploreStrip />}
+      />
+    </>
   )
 }

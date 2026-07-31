@@ -92,7 +92,7 @@ async function uploadDataUrl(value: string, prefix: string): Promise<string> {
   const path = `${prefix}/${Date.now()}-${uploadSeq++}.${EXT[mime]}`
   const { error } = await getSupabaseServer().storage
     .from(BUCKET)
-    .upload(path, bytes, { contentType: mime, upsert: false })
+    .upload(path, bytes, { contentType: mime, upsert: false, cacheControl: '31536000' })
   if (error) return ''
 
   const { data } = getSupabaseServer().storage.from(BUCKET).getPublicUrl(path)

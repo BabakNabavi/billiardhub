@@ -542,7 +542,7 @@ function SellerCard({ s }: { s: RealStore }) {
             <span style={{ fontSize: '10px', color: TEXT_M }}>({s.reviews})</span>
           </div>
         )}
-        <div style={{ marginTop: '12px', padding: '8px 0', borderRadius: '10px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, color: GOLD, fontSize: '12px', fontWeight: 700 }}>
+        <div style={{ marginTop: '12px', padding: '8px 0', borderRadius: '10px', background: 'rgba(199,166,106,0.08)', border: `1px solid ${GOLD_BOR}`, color: CTA_INK, fontSize: '12px', fontWeight: 700 }}>
           مشاهده فروشگاه
         </div>
       </div>
@@ -573,7 +573,7 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
           <div style={{ fontSize: '9px', color: accent, fontWeight: 700, letterSpacing: '0.24em', marginBottom: '5px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{label}</div>
           <div style={{ fontSize: 'clamp(13px,1.3vw,18px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '10px', textShadow: '0 2px 10px rgba(0,0,0,0.85)' }} dangerouslySetInnerHTML={{ __html: body }} />
           <div style={lqCta
-            ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#F6F1E8', border: '1px solid rgba(199,166,106,0.45)', color: '#9A6E38', padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
+            ? { display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#F6F1E8', border: '1px solid rgba(199,166,106,0.45)', color: CTA_INK, padding: '5px 13px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }
             : { display: 'inline-flex', alignItems: 'center', gap: '5px', background: accent, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, color: isDark ? '#1a1a1a' : '#fff' }
           }>{cta} <ArrowLeft size={9} /></div>
         </div>

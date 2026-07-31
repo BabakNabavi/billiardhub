@@ -2,9 +2,14 @@ import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
 
 const GOLD    = '#C7A66A';
+/* همان طلایی ولی خوانا برای متن روی پس‌زمینه‌ی روشنِ فوتر (۵٫۰۲:۱) */
+const GOLD_TXT = '#8A6020';
 const TEXT    = '#1A1917';
-const DIM     = 'rgba(26,25,23,0.52)';
-const DIM2    = 'rgba(26,25,23,0.34)';
+/* آلفا از ۰٫۵۲ به ۰٫۶۲: روی پس‌زمینه‌ی فوتر ۳٫۴۷:۱ می‌داد (محاسبه‌شده) */
+const DIM     = 'rgba(26,25,23,0.62)';
+/* آلفا از ۰٫۳۴ به ۰٫۶۲ رفت: روی پس‌زمینه‌ی فوتر ۲٫۱۲:۱ می‌داد که
+   زیرِ حدِ ۴٫۵:۱ است؛ حالا ۴٫۷۴:۱ (محاسبه‌شده، نه تخمینی) */
+const DIM2    = 'rgba(26,25,23,0.62)';
 const BORDER  = 'rgba(26,25,23,0.10)';
 
 const SOCIALS = [
@@ -44,7 +49,7 @@ const SOCIALS = [
 const nav = [
   {
     heading: 'PLATFORM',
-    color: GOLD,
+    color: GOLD_TXT,
     links: [
       { href: '/clubs',    label: 'باشگاه‌ها'     },
       { href: '/sellers',  label: 'فروشگاه‌ها'    },
@@ -53,7 +58,7 @@ const nav = [
   },
   {
     heading: 'EXPLORE',
-    color: '#4A8FC8',
+    color: '#1D6FA8',
     links: [
       { href: '/players',  label: 'بازیکنان' },
       { href: '/coaches',  label: 'مربیان'   },
@@ -62,7 +67,7 @@ const nav = [
   },
   {
     heading: 'ACCOUNT',
-    color: '#8B6AC8',
+    color: '#6D4BAE',
     links: [
       { href: '/register',  label: 'ثبت‌نام' },
       { href: '/login',     label: 'ورود'    },
@@ -105,11 +110,11 @@ export default function Footer() {
           transition: color 0.22s ease;
           line-height: 1.45;
         }
-        .ft-link:hover { color: ${GOLD}; }
+        .ft-link:hover { color: ${GOLD_TXT}; }
         /* هاورِ لینک‌های حقوقی — پیش‌تر با رویدادِ JS بود و همین دو خط
            کلِ فوتر را کلاینتی می‌کرد */
         .ft-legal { font-size:13px; color:${DIM2}; text-decoration:none; transition:color .22s ease; min-height:24px; display:inline-flex; align-items:center; }
-        .ft-legal:hover { color:${GOLD}; }
+        .ft-legal:hover { color:${GOLD_TXT}; }
         .ft-link svg { opacity: 0; transition: opacity 0.22s ease; flex-shrink: 0; }
         .ft-link:hover svg { opacity: 1; }
         .ft-social {
@@ -173,11 +178,11 @@ export default function Footer() {
               <div>
                 <div style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                   <span style={{ color: TEXT }}>بیلیارد </span>
-                  <span style={{ color: GOLD }}>هاب</span>
+                  <span style={{ color: GOLD_TXT }}>هاب</span>
                 </div>
                 <div style={{ fontSize: '10px', letterSpacing: '0.16em', marginTop: '8px', fontWeight: 600 }}>
                   <span style={{ color: DIM2 }}>BILLIARD </span>
-                  <span style={{ color: GOLD }}>HUB</span>
+                  <span style={{ color: GOLD_TXT }}>HUB</span>
                   <span style={{ color: DIM2 }}> | IRAN</span>
                 </div>
               </div>
@@ -227,8 +232,8 @@ export default function Footer() {
           <div className="ft-dev-desk" style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center' }}>
             {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متنِ تمام‌بزرگ تنظیم شده بود
                 و روی متنِ حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
-            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.30)' }}>
-              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD }}>Babak Nabavi</span></a>
+            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
+              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
               <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
@@ -258,8 +263,8 @@ export default function Footer() {
           <div className="ft-dev-mob">
             {/* letterSpacing از ۰.۱۴ به ۰.۰۴ کم شد: آن مقدار برای متنِ تمام‌بزرگ تنظیم شده بود
                 و روی متنِ حروف‌کوچک، فاصله‌ی حروف بیش از حد باز می‌افتاد */}
-            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.30)' }}>
-              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD }}>Babak Nabavi</span></a>
+            <span style={{ direction: 'ltr', display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1, fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.04em', color: 'rgba(26,25,23,0.62)' }}>
+              <a href="https://www.babaknabavi.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>Designed &amp; Developed by <span style={{ color: GOLD_TXT }}>Babak Nabavi</span></a>
               <a href="#" aria-label="اینستاگرام" style={{ display: 'inline-flex', color: GOLD, alignSelf: 'center', transform: 'translateY(-2px)' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
