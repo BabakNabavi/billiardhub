@@ -58,7 +58,16 @@ export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: 
   await writeJson(otpPath(m), { hash: hashCode(code), at: now, tries: 0 })
 
   const key = process.env.SMS_API_KEY
-  if (!key) return { ok: true, message: 'حالت آزمایشی: کلیدِ پیامک تنظیم نشده' }   // ذخیره شد ولی ارسال نشد
+  if (!key) {
+    /* پیش‌تر این‌جا `ok: true` برمی‌گشت — یعنی کلید تنظیم نبود، هیچ
+       پیامکی نمی‌رفت، ولی همه‌ی لایه‌های بالاتر «ارسال شد» می‌دیدند و
+       کاربر منتظرِ کدی می‌ماند که ساخته شده بود ولی هرگز فرستاده نشد.
+
+       حالت آزمایشیِ محلی همچنان کار می‌کند (کد در لاگِ سرور می‌آید تا
+       بشود بدونِ پیامک تست کرد)، ولی وضعیت صادقانه گزارش می‌شود. */
+    console.warn('[otp] SMS_API_KEY تنظیم نشده — کد ساخته شد ولی ارسال نشد. کدِ آزمایشی:', code)
+    return { ok: false, message: 'سرویسِ پیامک پیکربندی نشده است' }
+  }
 
   try {
     const r = await fetch(SMS_URL, {
@@ -68,9 +77,19 @@ export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: 
     })
     /* سرویس همیشه ۲۰۰ می‌دهد؛ نتیجه‌ی واقعی در success/message است. */
     if (r.status === 401 || r.status === 403) return { ok: false, message: 'کلیدِ سرویسِ پیامک پذیرفته نشد' }
-    const j = await r.json().catch(() => null) as { success?: boolean; data?: boolean; message?: string } | null
+    const j = await r.json().catch(() => null) as { success?: boolean; data?: boolean; message?: string; code?: number } | null
+
+    /* پاسخِ سرویس همیشه لاگ می‌شود — موفق یا ناموفق.
+
+       تا امروز فقط شکست لاگ می‌شد، پس وقتی سرویس «موفق» می‌گفت ولی
+       پیامک به دستِ کاربر نمی‌رسید (اعتبارِ تمام‌شده، قالبِ تأییدنشده،
+       فیلترِ اپراتور) هیچ ردی نمی‌ماند تا بشود دنبالش را گرفت. */
+    console.info('[otp] SmsOTP →', JSON.stringify({
+      mobile: m.slice(0, 4) + '***' + m.slice(-4),   // شماره‌ی کامل در لاگ نمی‌نشیند
+      http: r.status, success: j?.success, code: j?.code, message: j?.message,
+    }))
+
     if (j && (j.success === true || j.data === true)) return { ok: true }
-    console.error('SmsOTP failed:', j?.message || r.status)   // پیامِ خامِ سرویس فقط در لاگِ سرور
     return { ok: false, message: 'ارسالِ کدِ پیامکی ناموفق بود؛ چند لحظه بعد دوباره تلاش کنید' }
   } catch {
     return { ok: false, message: 'خطا در اتصال به سرویسِ پیامک' }
