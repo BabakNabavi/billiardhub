@@ -439,30 +439,61 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
    یک کارت برای دسکتاپ و موبایل (کارت سفید، حاشیه‌ی نازک،
    پیلِ ٪ بنفش، قیمتِ خط‌خورده).
 ═══════════════════════════════════════════════════════════════ */
+/* استایل‌های ثابتِ این کارت به کلاس رفتند، نه `style` اینلاین.
+
+   چرا: این کارت ۲۴ بار روی صفحه رندر می‌شود (محصولات × دو کپیِ مارکی).
+   هر بار همان رشته‌ی استایل عیناً در HTML تکرار می‌شد. اندازه‌گیری روی
+   HTMLِ واقعیِ سایت: ۸۴۰ ویژگیِ style اینلاین، ۱۰۱KB، که ۶۲KBاش
+   صرفاً تکرار بود — همین کارت بزرگ‌ترین سهم را داشت.
+
+   کلاس یک‌بار در CSS می‌آید و بی‌نهایت بار استفاده می‌شود؛ مرورگر هم
+   می‌تواند کشش کند. فقط چیزی که واقعاً از داده می‌آید اینلاین ماند. */
+const BAZAAR_CSS = `
+  .bz-card { text-decoration:none; background:#fff; border-radius:10px;
+    border:1.5px solid rgba(28,28,26,0.18); overflow:hidden;
+    display:flex; flex-direction:column; flex-shrink:0; }
+  .bz-img { width:100%; flex:0 0 60%; position:relative; background:#F4F3F1;
+    overflow:hidden; border-bottom:1.5px solid rgba(28,28,26,0.18); }
+  .bz-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .bz-body { padding:9px 8px 8px; flex:1; display:flex; flex-direction:column;
+    gap:4px; overflow:hidden; }
+  .bz-name { font-size:12.5px; color:#1C1B17; line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .bz-row { margin-top:auto; display:flex; align-items:center; gap:5px; }
+  .bz-pct { background:#b400ae; color:#fff; font-size:12px; font-weight:800;
+    border-radius:999px; padding:3px 8px 1px; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .bz-prices { margin-inline-start:auto; text-align:right; }
+  .bz-old { font-size:10px; color:#6E695C; text-decoration:line-through;
+    line-height:1.1; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bz-new { font-size:12.5px; font-weight:700; color:#1C1B17;
+    font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bz-unit { font-size:9px; font-weight:500; }
+`;
+
 function BazaarCard({ p, className, style }: { p: RealProduct; className?: string; style?: React.CSSProperties }) {
   return (
-    <Link href={`/shop/${p.id}`} className={`prod-hover${className ? ` ${className}` : ''}`}
-      style={{ textDecoration: 'none', background: '#fff', borderRadius: 10, border: '1.5px solid rgba(28,28,26,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0, ...style }}>
-      <div style={{ width: '100%', flex: '0 0 60%', position: 'relative', background: '#F4F3F1', overflow: 'hidden', borderBottom: '1.5px solid rgba(28,28,26,0.18)' }}>
-        <img loading="lazy" decoding="async" src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+    <Link href={`/shop/${p.id}`} className={`prod-hover bz-card${className ? ` ${className}` : ''}`} style={style}>
+      <div className="bz-img">
+        <img loading="lazy" decoding="async" src={p.img} alt={p.name}
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       </div>
-      <div style={{ padding: '9px 8px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden' }}>
-        <span style={{ fontSize: '12.5px', color: '#1C1B17', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name} — {p.sub}</span>
-        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
+      <div className="bz-body">
+        <span className="bz-name">{p.name} — {p.sub}</span>
+        <div className="bz-row">
           {p.pct > 0 && (
-            <span dir="ltr" style={{ background: '#b400ae', color: '#fff', fontSize: '12px', fontWeight: 800, borderRadius: 999, padding: '3px 8px 1px', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              ٪{p.pct.toLocaleString('fa-IR')}
-            </span>
+            <span dir="ltr" className="bz-pct">٪{p.pct.toLocaleString('fa-IR')}</span>
           )}
-          <div style={{ marginInlineStart: 'auto', textAlign: 'right' }}>
+          <div className="bz-prices">
             {/* «تومان» روی خطِ خط‌خورده تا خطِ قیمتِ اصلی جا برای مبلغ + پیلِ تخفیف داشته باشد */}
             {p.pct > 0 && (
-              <div style={{ fontSize: '10px', color: '#6E695C', textDecoration: 'line-through', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                {p.price.toLocaleString('fa-IR')} <span style={{ fontSize: '9px', fontWeight: 500 }}>تومان</span>
+              <div className="bz-old">
+                {p.price.toLocaleString('fa-IR')} <span className="bz-unit">تومان</span>
               </div>
             )}
-            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1C1B17', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-              {p.sale.toLocaleString('fa-IR')}{p.pct === 0 && <span style={{ fontSize: '9px', fontWeight: 500, color: '#8A8474' }}> تومان</span>}
+            <div className="bz-new">
+              {p.sale.toLocaleString('fa-IR')}
+              {p.pct === 0 && <span className="bz-unit" style={{ color: '#8A8474' }}> تومان</span>}
             </div>
           </div>
         </div>
@@ -1483,6 +1514,7 @@ useEffect(() => {
           }
         }
 
+        ${BAZAAR_CSS}
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارکِ outline پس‌زمینه‌ی هر سکشن — امضای هویتِ جدید */
