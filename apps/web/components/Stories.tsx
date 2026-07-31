@@ -8,6 +8,7 @@ import api from '../lib/api';
 import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
 import { addStoryReply } from '../lib/story-inbox';
 import { useSocialInteractions } from './features/FeatureFlags';
+import Avatar from './ui/Avatar';
 import { uploadFile } from '../lib/supabase';
 import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
 import { listSellerProfiles } from '../lib/seller-store';
@@ -32,6 +33,9 @@ interface StoryGroup {
   allSeen: boolean;
   stories: StoryItem[];
   ownerKey?: string;   // برای هدف‌گذاریِ ریپلای/دایرکت (استوریِ سمت‌سرور)
+  /* عکسِ *زنده*ی صاحبِ استوری.  عکسِ لحظه‌ی انتشار است و با
+     عوض‌شدنِ عکسِ پروفایل به‌روز نمی‌شود؛ این یکی می‌شود. */
+  avatarSrc?: string;
 }
 
 /* استوری‌های نمونه حذف شدند — نوزده کاربرِ ساختگی (مربی، داور،
@@ -272,10 +276,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 
           {/* Header */}
           <div style={{ position:'absolute',top:'calc(env(safe-area-inset-top) + 26px)',left:'12px',right:'12px',display:'flex',alignItems:'center',gap:'10px',zIndex:50 }}>
-            <div style={{ width:'40px',height:'40px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}90`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'#fff',fontSize:'17px',overflow:'hidden' }}>
-              {currentGroup.logoUrl
-                ? <img loading="lazy" decoding="async" src={currentGroup.logoUrl} alt={currentGroup.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
-                : currentGroup.userAvatar}
+            <div style={{ width:'40px',height:'40px',borderRadius:'50%',flexShrink:0,background:`${currentGroup.roleColor}25`,border:`2px solid ${currentGroup.roleColor}90`,display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden' }}>
+              <Avatar src={currentGroup.avatarSrc ?? currentGroup.logoUrl} alt={currentGroup.userName}
+                size={36} background="transparent" iconColor="rgba(255,255,255,0.9)" />
             </div>
             <div style={{ flex:1,minWidth:0 }}>
               <div style={{ color:'#fff',fontWeight:700,fontSize:'15px',textShadow:'0 1px 4px rgba(0,0,0,0.5)' }}>{currentGroup.userName}</div>
@@ -382,6 +385,19 @@ export default function Stories() {
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
   const localLimit = storyLimitFor(myRoles);   // ۰ = کاربرِ عادی، مجاز نیست
+
+  /* عکسِ آواتارِ یک گروه.
+
+     `logoUrl` عکسی است که *لحظه‌ی انتشارِ استوری* ذخیره شده. اگر کاربر
+     بعداً عکسِ پروفایلش را عوض کند، آن اسنپ‌شات قدیمی می‌ماند — و اگر
+     موقعِ انتشار عکسی نداشته، تا ابد خالی می‌ماند. برای استوریِ *خودِ
+     کاربر* عکسِ زنده‌ی نشست را ترجیح می‌دهیم؛ برای بقیه همان اسنپ‌شات
+     تنها چیزی است که در دست داریم (کلیدِ مالک در پاسخِ عمومی هش شده و
+     قابلِ تطبیق نیست). */
+  const isMine = (g: StoryGroup) =>
+    !!user && (g.ownerKey === user.id || g.ownerKey === ownerKey || g.userId === `local-${ownerKey}`);
+  const avatarOf = (g: StoryGroup): string | undefined =>
+    (isMine(g) ? (user?.avatar || g.avatarSrc || g.logoUrl) : (g.avatarSrc || g.logoUrl)) || undefined;
 
   /* سهمیه‌ی واقعی از سرور.
      تا امروز این کادر عددِ localStorage را نشان می‌داد؛ یعنی روی هر
@@ -711,10 +727,21 @@ export default function Stories() {
                   : 'linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)',
                 boxShadow: isSeen ? 'none' : '0 0 14px rgba(214,41,118,0.45)',
               }}>
-                <div className="st-inner" style={{ background: `linear-gradient(135deg,${g.roleColor}28,${g.roleColor}0E)` }}>
-                  {g.logoUrl
-                    ? <img loading="lazy" decoding="async" src={g.logoUrl} alt={g.userName} style={{ width:'100%',height:'100%',objectFit:'cover' }} />
-                    : g.userAvatar}
+                {/* عکسِ پروفایل؛ اگر نبود آدمکِ استاندارد — نه حرفِ اولِ نام.
+                    این نوار روی صفحه‌ی اول است و یک حرفِ فارسی روی دایره‌ی
+                    رنگی، هم ناخوانا بود هم ظاهرِ صفحه را می‌شکست.
+
+                    `avatarOf` عکسِ زنده‌ی خودِ کاربر را بر `logoUrl`ِ
+                    ذخیره‌شده در استوری ترجیح می‌دهد: آن یکی عکسِ لحظه‌ی
+                    انتشار است و با عوض‌کردنِ عکسِ پروفایل به‌روز نمی‌شد. */}
+                <div className="st-inner" style={{ background: `linear-gradient(135deg,${g.roleColor}28,${g.roleColor}0E)`, padding: 0 }}>
+                  <Avatar
+                    src={avatarOf(g)}
+                    alt={g.userName}
+                    size={54}
+                    background="transparent"
+                    iconColor={isSeen ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.88)'}
+                  />
                 </div>
               </div>
               <span className="st-name" style={{ color: isSeen ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.65)' }}>
@@ -727,7 +754,7 @@ export default function Stories() {
 
       {mounted && activeGroup !== null && (
         <StoryViewer
-          groups={groups} activeGroup={activeGroup} activeStory={activeStory}
+          groups={groups.map(g => ({ ...g, avatarSrc: avatarOf(g) }))} activeGroup={activeGroup} activeStory={activeStory}
           liked={liked} showEmojis={showEmojis} comment={comment} sentReaction={sentReaction}
           paused={storyPaused} replySent={replySent} canReply={!!user} interactionsOn={interactionsOn}
           onClose={() => { closeStory(); setReplyFocus(false); }} onNext={nextStory} onPrev={prevStory}

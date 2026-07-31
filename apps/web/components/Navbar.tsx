@@ -14,6 +14,7 @@ import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../
 import { useSocialInteractions } from './features/FeatureFlags';
 import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
+import Avatar from './ui/Avatar';
 
 const GOLD = '#B8933A';
 const GOLD_LIGHT = 'rgba(184,147,58,0.1)';
@@ -281,8 +282,10 @@ export default function Navbar() {
           .nav-login-btn { padding:8px 10px !important; font-size:12.5px !important; gap:4px !important; }
           .nav-actions { gap:5px !important; }
           .nav-ico { width:40px !important; height:40px !important; }
-          .nav-profile { padding:6px 9px !important; height:40px !important; gap:6px !important; }
-          .nav-chev { display:none !important; }
+          .nav-profile { padding:6px 9px !important; height:40px !important; gap:5px !important; }
+          /* فلشِ رو به پایین در موبایل هم می‌ماند: بدونِ آن معلوم نبود
+             این دکمه منو باز می‌کند و کاربر فکر می‌کرد فقط یک نشان است. */
+          .nav-chev { display:block !important; }
         }
         @media(max-width:365px) {
           .nav-brand { font-size:15px !important; }
@@ -506,9 +509,9 @@ export default function Navbar() {
             ) : (
               <div ref={profileRef} style={{ position: 'relative' }}>
                 <button className="nav-profile" onClick={() => setProfileOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: SURF, border: `1px solid ${BORDER_C}`, borderRadius: '12px', padding: '6px 12px', color: TEXT_MUT, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.3s', backdropFilter: 'blur(12px)', height: '44px' }}>
-                  <div style={{ width: '30px', height: '30px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '15px', flexShrink: 0 }}>
-                    {user.firstName?.[0]}
-                  </div>
+                  {/* عکسِ پروفایل، وگرنه آدمک — نه حرفِ اولِ نام */}
+                  <Avatar src={user.avatar} size={30} alt=""
+                    background={`linear-gradient(135deg,${GOLD},#8C6A22)`} iconColor="rgba(255,255,255,0.95)" />
                   <span className="desk" style={{ alignItems: 'center', color: TEXT }}>{user.firstName}</span>
                   <ChevronDown className="nav-chev" size={13} style={{ transition: 'transform 0.3s', transform: profileOpen ? 'rotate(180deg)' : 'rotate(0)', color: TEXT_MUT, flexShrink: 0 }} />
                 </button>
@@ -642,9 +645,9 @@ export default function Navbar() {
               </Link>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: 'rgba(255,255,255,0.7)', borderRadius: '16px', border: '1px solid rgba(28,28,26,0.08)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 12px rgba(28,28,26,0.05)' }}>
-                <div style={{ width: '40px', height: '40px', background: `linear-gradient(135deg,${GOLD},#8C6A22)`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '19px', flexShrink: 0 }}>
-                  {user.firstName?.[0]}
-                </div>
+                <Avatar src={user.avatar} size={40} alt=""
+                  background={`linear-gradient(135deg,${GOLD},#8C6A22)`} iconColor="rgba(255,255,255,0.95)" />
+
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ color: '#1C1B17', fontWeight: 700, fontSize: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.firstName} {user.lastName}</div>
                   <div style={{ color: 'rgba(28,28,26,0.42)', fontSize: '13px', marginTop: '2px' }}>{user.primaryRole}</div>

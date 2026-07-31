@@ -10,6 +10,12 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import ChangePhone from '../../../components/auth/ChangePhone'
 import ChangePassword from '../../../components/auth/ChangePassword'
 import Select from '../../../components/ui/Select'
+import Avatar from '../../../components/ui/Avatar'
+import { uploadFile } from '../../../lib/supabase'
+import {
+  ArrowRight, Camera, Loader2, Search, ShieldCheck, Check, CreditCard, Save,
+  User, Contact, MapPin, Store, LockOpen, Grid2x2, ShoppingBag, Eye, Plus,
+} from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────
 interface UserProfile {
@@ -70,13 +76,13 @@ const GOLD_DARK = '#A07840'
 
 // ─── Section wrapper ──────────────────────────────────────────
 function Section({ title, icon, color = '#C7A66A', children }: {
-  title: string; icon: string; color?: string; children: React.ReactNode
+  title: string; icon: React.ReactNode; color?: string; children: React.ReactNode
 }) {
   return (
     <div style={{ background: '#FFFFFF', border: `1px solid ${hexToRgba(color, 0.15)}`, borderRadius: 18, padding: '20px', marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
         <span style={{ width: 34, height: 34, borderRadius: 10, background: hexToRgba(color, 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <i className={`ti ${icon}`} style={{ fontSize: 19, color }} />
+          <span style={{ color, display: 'flex' }}>{icon}</span>
         </span>
         <span style={{ fontSize: 16, fontWeight: 700, color: '#111111' }}>{title}</span>
       </div>
@@ -134,7 +140,7 @@ function ClubSearch({ onSelect }: { onSelect: (clubId: string, name: string) => 
   return (
     <div ref={wrapRef} style={{ position: 'relative' }}>
       <div style={{ position: 'relative' }}>
-        <i className="ti ti-search" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 18, color: 'rgba(0,0,0,0.38)' }} />
+        <Search size={17} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.38)' }} />
         <input
           value={q}
           onChange={e => { setQ(e.target.value); setOpen(true) }}
@@ -266,45 +272,83 @@ export default function ProfileMePage() {
     } finally { setSaving(false) }
   }
 
-  /* فشرده‌سازی سمتِ کلاینت — خروجی dataURL برای ذخیره‌ی محلی */
-  const compressAvatar = (file: File): Promise<string> =>
+  /* برش مربعی + فشرده‌سازی سمتِ کلاینت. خروجی یک File است تا مستقیم
+     آپلود شود؛ dataURL دیگر ذخیره نمی‌شود (پایین‌تر توضیح داده شده). */
+  const compressAvatar = (file: File): Promise<File> =>
     new Promise((resolve, reject) => {
       const img = new Image()
+      const url = URL.createObjectURL(file)
       img.onload = () => {
+        URL.revokeObjectURL(url)
         const size = 420
         const c = document.createElement('canvas')
         const s = Math.min(img.width, img.height)
         c.width = size; c.height = size
-        const ctx = c.getContext('2d')!
+        const ctx = c.getContext('2d')
+        if (!ctx) { reject(new Error('canvas')); return }
         ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size)
-        resolve(c.toDataURL('image/jpeg', 0.82))
+        c.toBlob(
+          b => b ? resolve(new File([b], 'avatar.jpg', { type: 'image/jpeg' })) : reject(new Error('blob')),
+          'image/jpeg', 0.82,
+        )
       }
-      img.onerror = reject
-      img.src = URL.createObjectURL(file)
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image')) }
+      img.src = url
     })
+
+  /* ─────────────────────────────────────────────────────────────
+     عکسِ پروفایل — چرا این تابع کاملاً بازنویسی شد.
+
+     نسخه‌ی قبلی به `${API}/user/profile/avatar` می‌زد، یعنی بک‌اندِ
+     NestJS روی `localhost:3001` که در پروداکشن اصلاً وجود ندارد. آن
+     درخواست همیشه شکست می‌خورد و مسیرِ fallback اجرا می‌شد: عکس به شکلِ
+     dataURL فقط در localStorage می‌نشست.
+
+     نتیجه دقیقاً همان چیزی بود که کاربر گزارش کرد — عکس عوض می‌شد،
+     ولی با خروج و ورودِ دوباره ناپدید می‌شد. چون هرگز به دیتابیس
+     نرفته بود: `logout()` استورِ محلی را پاک می‌کرد و ورودِ بعدی
+     کاربر را از دیتابیس می‌خواند، جایی که `avatar` خالی بود.
+
+     حالا از همان زیرساختی استفاده می‌شود که استوری‌ها استفاده می‌کنند:
+       ۱) آپلود روی Supabase Storage با `/api/upload`
+       ۲) ذخیره‌ی نشانی در ستونِ `users.avatar` با PATCHِ پروفایل
+          (`avatar` از قبل در فهرستِ سفیدِ آن مسیر بود)
+
+     dataURL دیگر در localStorage ذخیره نمی‌شود: هم سهمیه‌ی مرورگر را
+     می‌بلعید و هم توهمِ ذخیره‌شدن می‌ساخت. اگر آپلود شکست بخورد، صادقانه
+     خطا نشان داده می‌شود.
+     ───────────────────────────────────────────────────────────── */
+  const [avatarBusy, setAvatarBusy] = useState(false)
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    e.target.value = ''
     if (!file) return
+    if (!file.type.startsWith('image/')) { showToast('فقط فایل تصویری مجاز است', 'error'); return }
+
+    setAvatarBusy(true)
     try {
-      const form = new FormData()
-      form.append('file', file)
-      const res = await apiFetch(`${API}/user/profile/avatar`, { method: 'POST', headers: authHeader(), body: form })
-      if (!res.ok) throw new Error()
-      const j = await res.json()
-      setProfile(p => p ? { ...p, avatar: j.url } : p)
-      useAuthStore.getState().updateUser({ avatar: j.url })
-      showToast('عکس پروفایل بروز شد')
+      const squared = await compressAvatar(file)
+      /* `profiles/` — یکی از پیشوندهای مجازِ /api/upload.
+         مهر زمانی در نام هست تا کشِ CDN عکسِ قبلی را برنگرداند. */
+      const key = `profiles/${profile?.id ?? 'me'}-${Date.now()}.jpg`
+      const url = await uploadFile('club-media', squared, key)
+      if (!url) throw new Error('upload')
+
+      const res = await apiFetch('/api/users/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: url }),
+      })
+      if (!res.ok) throw new Error('save')
+
+      setProfile(p => p ? { ...p, avatar: url } : p)
+      useAuthStore.getState().updateUser({ avatar: url })
+      showToast('عکس پروفایل ذخیره شد')
     } catch {
-      /* API در دسترس نیست ⇒ ذخیره‌ی محلی (در حسابِ کاربر persist می‌شود و در نوبار هم می‌آید) */
-      try {
-        const dataUrl = await compressAvatar(file)
-        setProfile(p => p ? { ...p, avatar: dataUrl } : p)
-        useAuthStore.getState().updateUser({ avatar: dataUrl })
-        showToast('عکس پروفایل ذخیره شد')
-      } catch { showToast('خواندن عکس ممکن نشد', 'error') }
+      showToast('ذخیره‌ی عکس انجام نشد؛ دوباره تلاش کنید', 'error')
     } finally {
-      e.target.value = ''
+      setAvatarBusy(false)
     }
   }
 
@@ -352,7 +396,7 @@ export default function ProfileMePage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
-      <i className="ti ti-loader-2" style={{ fontSize: 35, color: '#C7A66A' }} />
+      <Loader2 size={34} className="bh-spin" style={{ color: '#C7A66A' }} />
     </div>
   )
 
@@ -364,8 +408,6 @@ export default function ProfileMePage() {
 
   return (
     <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-
       <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl', position: 'relative' }}>
 
         {/* orbs */}
@@ -373,26 +415,60 @@ export default function ProfileMePage() {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '0 0 100px' }}>
 
-          {/* ── Cover & avatar ── */}
-          <div style={{ height: 140, background: 'linear-gradient(160deg,rgba(199,166,106,0.25) 0%,rgba(199,166,106,0.05) 100%)', position: 'relative' }}>
-            <button onClick={() => router.push('/dashboard')} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.50)' }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 20 }} />
+          {/* ── سربرگ ──
+              نوارِ کاورِ ۱۴۰ پیکسلی حذف شد. این صفحه فقط برای خودِ کاربر
+              است و هیچ‌کس دیگری آن را نمی‌بیند، پس یک بنرِ تزئینی فقط
+              محتوا را پایین می‌برد. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 4px' }}>
+            <button onClick={() => router.push('/dashboard')} aria-label="بازگشت"
+              style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 11, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.55)', flexShrink: 0 }}>
+              <ArrowRight size={19} />
             </button>
+            <span style={{ fontSize: 15, fontWeight: 800, color: '#111' }}>پروفایل من</span>
           </div>
 
           <div style={{ padding: '0 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: -40, marginBottom: 20 }}>
-              {/* avatar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, marginBottom: 20 }}>
+              {/* ── آواتار ──
+                  کلِ دایره دکمه است، نه فقط نشانِ گوشه — کاربر معمولاً
+                  روی خودِ عکس می‌زند. نشانِ دوربین هم بزرگ‌تر و واضح‌تر
+                  شد و دیگر از فونتِ CDN نمی‌آید (که در ایران اغلب
+                  بارگذاری نمی‌شد و آیکون نامرئی می‌ماند). */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
-                <div style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid #FFFFFF', overflow: 'hidden', background: 'linear-gradient(135deg,#C7A66A,#A07840)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 31, fontWeight: 700, color: '#FFFFFF' }}>
-                  {profile.avatar
-                    ? <img loading="lazy" decoding="async" src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : fullName.trim()[0]
-                  }
-                </div>
-                <button onClick={() => fileRef.current?.click()} style={{ position: 'absolute', bottom: 2, left: 2, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                  <i className="ti ti-camera" style={{ fontSize: 13, color: '#FFFFFF' }} />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={avatarBusy}
+                  aria-label="تغییر عکس پروفایل"
+                  title="تغییر عکس پروفایل"
+                  style={{
+                    padding: 0, border: '3px solid #FFFFFF', borderRadius: '50%',
+                    background: 'none', cursor: avatarBusy ? 'wait' : 'pointer',
+                    display: 'block', boxShadow: '0 2px 10px rgba(0,0,0,0.10)', position: 'relative',
+                  }}>
+                  <Avatar src={profile.avatar} size={84} alt="" />
+                  {avatarBusy && (
+                    <span style={{
+                      position: 'absolute', inset: 0, borderRadius: '50%', display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.45)', color: '#fff',
+                    }}>
+                      <Loader2 size={22} className="bh-spin" />
+                    </span>
+                  )}
                 </button>
+
+                {/* نشانِ دوربین — تزئینیِ محض، چون خودِ دایره دکمه است */}
+                <span aria-hidden="true" style={{
+                  position: 'absolute', bottom: 0, left: 0,
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: '#141413', border: '2.5px solid #FFFFFF',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', pointerEvents: 'none',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                }}>
+                  <Camera size={14} />
+                </span>
+
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
               </div>
 
@@ -401,7 +477,7 @@ export default function ProfileMePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{profile.phone}</span>
                   <span style={{ fontSize: 10, color: '#C7A66A', background: 'rgba(199,166,106,0.1)', border: '1px solid rgba(199,166,106,0.25)', borderRadius: 20, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <i className="ti ti-shield-check" style={{ fontSize: 12 }} />کد ملی ثبت شده
+                    <ShieldCheck size={12} />کد ملی ثبت شده
                   </span>
                 </div>
               </div>
@@ -414,7 +490,7 @@ export default function ProfileMePage() {
                 این‌ها هنگام ثبت‌نام از ثبت‌احوال و شاهکار گرفته شده‌اند.
                 تغییرشان یعنی هویتِ تأییدشده دیگر معنایی ندارد، پس نه این‌جا
                 و نه از راهِ API نوشته نمی‌شوند. */}
-            <Section title="اطلاعات هویتی" icon="ti-shield-check" color="#0E7A38">
+            <Section title="اطلاعات هویتی" icon={<ShieldCheck size={18} />} color="#0E7A38">
               <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', margin: '0 0 14px', lineHeight: 1.95 }}>
                 این اطلاعات هنگام ثبت‌نام از ثبت‌احوال استعلام شده و قابلِ ویرایش نیست.
               </p>
@@ -462,7 +538,7 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── اطلاعات پایه ── */}
-            <Section title="اطلاعات شخصی" icon="ti-user">
+            <Section title="اطلاعات شخصی" icon={<User size={18} />}>
               <Field label="بیوگرافی">
                 <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="چند جمله درباره خودت..." style={{ ...inputStyle, resize: 'vertical', minHeight: 70 }} />
               </Field>
@@ -480,7 +556,7 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── اطلاعات تماس — هر وقت خواستید عوضشان کنید ── */}
-            <Section title="اطلاعات تماس" icon="ti-address-book" color="#3D63E6">
+            <Section title="اطلاعات تماس" icon={<Contact size={18} />} color="#3D63E6">
               <Field label="نشانی">
                 <textarea value={address} onChange={e => setAddress(e.target.value)} rows={2}
                   placeholder="استان، شهر، خیابان، پلاک…" style={{ ...inputStyle, resize: 'vertical', minHeight: 58 }} />
@@ -493,7 +569,7 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── موقعیت ── */}
-            <Section title="موقعیت" icon="ti-map-pin" color="#06b6d4">
+            <Section title="موقعیت" icon={<MapPin size={18} />} color="#06b6d4">
               <ProvinceCitySelect
                 value={{ province, city }}
                 onChange={v => { setProvince(v.province); setCity(v.city) }}
@@ -501,13 +577,13 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── باشگاه ── */}
-            <Section title="باشگاه" icon="ti-building-store" color="#a78bfa">
+            <Section title="باشگاه" icon={<Store size={18} />} color="#a78bfa">
               <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 باشگاهی که در آن بازی می‌کنید را از میان باشگاه‌های ثبت‌شده انتخاب کنید
               </p>
               {clubName && (
                 <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <i className="ti ti-check" style={{ fontSize: 16, color: '#a78bfa' }} />
+                  <Check size={15} style={{ color: '#a78bfa' }} />
                   <span style={{ fontSize: 15, color: '#a78bfa', fontWeight: 700 }}>{clubName}</span>
                   {clubMembers !== null && (
                     <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
@@ -524,13 +600,13 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── کارت بانکی ── */}
-            <Section title="کارت بانکی" icon="ti-credit-card" color="#f59e0b">
+            <Section title="کارت بانکی" icon={<CreditCard size={18} />} color="#f59e0b">
               <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 برای لغو رزرو و تسویه حساب — کارت باید به نام خودتان باشد
               </p>
               {profile.bankCard && (
                 <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: '8px 14px', marginBottom: 12, fontSize: 15, color: '#fbbf24', fontFamily: 'monospace', letterSpacing: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="ti ti-credit-card" style={{ fontSize: 18 }} />
+                  <CreditCard size={17} />
                   {toFa(profile.bankCard)}
                 </div>
               )}
@@ -552,18 +628,18 @@ export default function ProfileMePage() {
             </Section>
 
             {/* ── دسترسی‌ها — همه با ثبتِ کد ملی هنگام ثبت‌نام فعال‌اند ── */}
-            <Section title="دسترسی‌ها" icon="ti-lock-open" color="#C7A66A">
+            <Section title="دسترسی‌ها" icon={<LockOpen size={18} />} color="#C7A66A">
               {[
-                { label: 'رزرو میز', icon: 'ti-table' },
-                { label: 'خرید و فروش', icon: 'ti-shopping-bag' },
-                { label: 'مشاهده استوری', icon: 'ti-eye' },
-                { label: 'ثبت آگهی', icon: 'ti-plus' },
-                { label: 'پروفایل عمومی', icon: 'ti-user' },
+                { label: 'رزرو میز', icon: <Grid2x2 size={17} /> },
+                { label: 'خرید و فروش', icon: <ShoppingBag size={17} /> },
+                { label: 'مشاهده استوری', icon: <Eye size={17} /> },
+                { label: 'ثبت آگهی', icon: <Plus size={17} /> },
+                { label: 'پروفایل عمومی', icon: <User size={17} /> },
               ].map(f => (
                 <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <i className={`ti ${f.icon}`} style={{ fontSize: 18, color: '#C7A66A', flexShrink: 0 }} />
+                  <span style={{ color: '#C7A66A', flexShrink: 0, display: 'flex' }}>{f.icon}</span>
                   <span style={{ fontSize: 15, color: '#111111', flex: 1 }}>{f.label}</span>
-                  <i className="ti ti-check" style={{ fontSize: 16, color: '#C7A66A' }} />
+                  <Check size={15} style={{ color: '#C7A66A' }} />
                 </div>
               ))}
             </Section>
@@ -574,8 +650,8 @@ export default function ProfileMePage() {
               disabled={saving}
               style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: saving ? 'rgba(199,166,106,0.10)' : 'linear-gradient(135deg,#C7A66A,#A07840)', color: saving ? 'rgba(0,0,0,0.35)' : '#FFFFFF', fontSize: 16, fontWeight: 700, fontFamily: 'inherit', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: saving ? 'none' : '0 4px 16px rgba(199,166,106,0.3)' }}>
               {saving
-                ? <><i className="ti ti-loader-2" style={{ fontSize: 18 }} />در حال ذخیره...</>
-                : <><i className="ti ti-device-floppy" style={{ fontSize: 18 }} />ذخیره پروفایل</>
+                ? <><Loader2 size={17} className="bh-spin" />در حال ذخیره...</>
+                : <><Save size={17} />ذخیره پروفایل</>
               }
             </button>
           </div>

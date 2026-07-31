@@ -12,7 +12,8 @@
     "test:a2hs": "node scripts/test-a2hs.mjs",
     "test:a2hs:ui": "node scripts/test-a2hs-ui.mjs",
     "test:phone": "node scripts/test-phone.mjs",
-    "test:social": "node scripts/test-social-flag.mjs"
+    "test:social": "node scripts/test-social-flag.mjs",
+    "test:avatar": "node scripts/test-avatar.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
