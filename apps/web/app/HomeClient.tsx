@@ -1848,7 +1848,7 @@ useEffect(() => {
             fontSize: 'clamp(29px, 4.6vw, 66px)', fontWeight: 900, lineHeight: 1.08,
             margin: '0 0 22px', letterSpacing: '-0.03em', textAlign: 'center', whiteSpace: 'nowrap',
           }}>
-            <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>پلتفرم جامع و هوشمند </span>
+            <span style={{ color: '#ffffff', textShadow: '0 2px 28px rgba(0,0,0,0.55)' }}>پلتفرم جامع و تخصصی </span>
             <span style={{ color: '#D4A843', textShadow: '0 2px 10px rgba(212,168,67,0.40), 0 2px 28px rgba(0,0,0,0.55)' }}>بیلیارد</span>
           </h1>
 

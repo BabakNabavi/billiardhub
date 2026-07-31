@@ -29,7 +29,7 @@ import { toPlacementState, type PlacementKey, type PlacementState, type Placemen
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'بیلیارد هاب | پلتفرم جامع و هوشمند بیلیارد',
+  title: 'بیلیارد هاب | پلتفرم جامع و تخصصی بیلیارد',
   description:
     'باشگاه‌های بیلیارد، رزرو آنلاین میز، مربیان و داوران رسمی، فروشگاه تجهیزات و مسابقات — همه در بیلیارد هاب.',
   alternates: { canonical: '/' },
