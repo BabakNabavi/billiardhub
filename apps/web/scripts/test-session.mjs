@@ -45,23 +45,21 @@ const ck = j => Object.entries(j).map(([k, v]) => `${k}=${v}`).join('; ')
    با دو-سه اجرای پیاپی پر می‌شود. آن‌وقت *همه* چیز ۴۲۹ می‌گیرد و تست
    قرمز می‌شود بی‌آنکه چیزی خراب باشد — پس تشخیصش می‌دهیم و صادقانه
    می‌گوییم به‌جای اینکه شکست جعلی گزارش کنیم. */
-let rateLimited = false
+const bail = () => {
+  console.log('\n⚠ سقف نرخ ورود پر است (اجراهای پیاپی همین تست).')
+  console.log('  این یعنی محافظت کار می‌کند؛ ~۱۰ دقیقه بعد دوباره اجرا کنید.\n')
+  process.exit(0)
+}
+
 const login = async () => {
   const r = await fetch(BASE + '/api/auth/login', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ phone: PHONE, password: PW }),
   })
-  if (r.status === 429) rateLimited = true
+  /* سقف در *هر* مرحله‌ای ممکن است پر شود، نه فقط اولی. اگر ادامه دهیم،
+     ورودهای بعدی جار خالی می‌دهند و ده‌ها شکست جعلی گزارش می‌شود. */
+  if (r.status === 429) bail()
   return { ok: r.ok, jar: jarOf(r) }
-}
-
-{
-  const probe = await login()
-  if (!probe.ok && rateLimited) {
-    console.log('\n⚠ سقف نرخ ورود پر است (اجراهای پیاپی همین تست).')
-    console.log('  این یعنی محافظت کار می‌کند؛ چند دقیقه بعد دوباره اجرا کنید.\n')
-    process.exit(0)
-  }
 }
 
 head('۱) ورود و صدور کوکی‌ها')
@@ -73,6 +71,9 @@ t('bh_rt صادر شد', !!first.jar.bh_rt)
 head('۲) بازگشت پس از مدتی — فقط bh_rt در دست است')
 {
   const noAt = { ...first.jar }; delete noAt.bh_at
+  /* بدون این مکث، ورود و تمدید در یک ثانیه می‌افتند و JWT رشته‌ی
+     یکسان می‌دهد — آن‌وقت «چرخید؟» بی‌معنا می‌شود. */
+  await tick()
   const r = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck(noAt) } })
   const j = jarOf(r)
   t('تمدید موفق', r.status === 200, `status=${r.status}`)

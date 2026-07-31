@@ -286,6 +286,35 @@ export default function ForgotPasswordPage() {
             <button type="button" className="au-ghost" onClick={sendCode} disabled={loading || wait > 0}>
               {wait > 0 ? `ارسال دوباره تا ${toFa(String(wait))} ثانیه` : 'ارسال دوباره‌ی کد'}
             </button>
+
+            {/* ── راه خروج وقتی کد نمی‌رسد ──
+
+                سرویس پیامک برای هر شماره‌ای «موفق» گزارش می‌دهد — حتی
+                شماره‌ای که وجود ندارد — و هیچ گزارش تحویلی نمی‌دهد. پس
+                نرسیدن پیامک از سمت ما اصلاً قابل تشخیص نیست و کاربر
+                بی‌آنکه بداند منتظر می‌ماند.
+
+                این کادر تنها کاری است که از دست ما برمی‌آید: گفتن اینکه
+                چه چیزی ممکن است اشتباه باشد و راه تماس. */}
+            <div style={{
+              marginTop: 14, padding: '11px 13px', borderRadius: 12,
+              background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.22)',
+            }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: '#6B5225', marginBottom: 6 }}>
+                کد به دستتان نرسید؟
+              </div>
+              <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: '#6B5225' }}>
+                <li>چند دقیقه صبر کنید و «ارسال دوباره» را بزنید.</li>
+                <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
+                <li>اگر باز هم نرسید، ممکن است اپراتور آن شماره پیامک ما را تحویل ندهد.</li>
+              </ul>
+              <Link href="/contact" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,
+                fontSize: 12.5, fontWeight: 700, color: '#9A6E38', textDecoration: 'none',
+              }}>
+                تماس با پشتیبانی ←
+              </Link>
+            </div>
           </div>
         )}
 

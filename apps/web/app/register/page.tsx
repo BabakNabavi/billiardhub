@@ -492,6 +492,18 @@ export default function RegisterPage() {
                   <ArrowRight size={13} /> ویرایش شماره
                 </button>
               </div>
+
+              {/* سرویس پیامک برای هر شماره‌ای «موفق» می‌گوید و گزارش تحویل
+                  نمی‌دهد، پس نرسیدن کد از سمت ما قابل تشخیص نیست. تنها
+                  کاری که می‌شود کرد این است که کاربر بی‌خبر نماند. */}
+              <div style={{ marginTop: 14, padding: '11px 13px', borderRadius: 12, background: 'rgba(199,166,106,0.07)', border: '1px solid rgba(199,166,106,0.22)' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: '#6B5225', marginBottom: 6 }}>کد به دستتان نرسید؟</div>
+                <ul style={{ margin: 0, paddingInlineStart: 16, fontSize: 12, lineHeight: 2, color: '#6B5225' }}>
+                  <li>چند دقیقه صبر کنید و «ارسال مجدد» را بزنید.</li>
+                  <li>پوشه‌ی پیام‌های مسدودشده یا فیلترشده‌ی گوشی را ببینید.</li>
+                  <li>اگر باز هم نرسید، شماره‌ی دیگری امتحان کنید یا با پشتیبانی تماس بگیرید.</li>
+                </ul>
+              </div>
             </div>
           )}
 
