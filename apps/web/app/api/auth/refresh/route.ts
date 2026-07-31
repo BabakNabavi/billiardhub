@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { REFRESH_COOKIE, ACCESS_COOKIE, ACCESS_TTL_SEC, verifyToken, signAccessToken, signRefreshToken } from '@/lib/auth/session';
-import { checkRefresh, setSessionRefresh, setSessionCookies, clearSessionCookies } from '@/lib/auth/store';
+import { checkRefresh, setSessionRefresh, setSessionCookies, clearSessionCookies, shouldRotate } from '@/lib/auth/store';
 
 const CORS_HEADERS = {
   'Vary': 'Origin',
@@ -15,9 +15,13 @@ export async function OPTIONS() {
 }
 
 /* تازه‌سازی توکن دسترسی.
-   رفرش‌توکن با هر بار استفاده «می‌چرخد»: توکن تازه صادر و هش نشست
-   به‌روز می‌شود. اگر توکن چرخیده‌ی قدیمی دوباره ارائه شود، یعنی یک
-   نسخه‌اش جای دیگری هم هست ⇒ کل نشست باطل می‌شود. */
+
+   رفرش‌توکن هر ۱۲ ساعت یک‌بار می‌چرخد، نه با هر تمدید. بین دو چرخش،
+   این مسیر فقط توکن دسترسی تازه می‌دهد و کوکی رفرش را دست نمی‌زند.
+
+   اگر توکنِ *چرخیده‌ی قدیمی* ارائه شود، یعنی نسخه‌ای از آن جای دیگری
+   مانده ⇒ نشست باطل می‌شود. استثنا: تا ۶۰ ثانیه پس از چرخش، این یک
+   مسابقه فرض می‌شود نه سرقت. */
 export async function POST(req: NextRequest) {
   const raw = req.cookies.get(REFRESH_COOKIE)?.value;
   if (!raw) {
@@ -54,13 +58,26 @@ export async function POST(req: NextRequest) {
 
   const access = signAccessToken({ id: u.id, role: u.primaryRole ?? 'user', phone: u.phone, sid: claims.sid });
 
-  /* مسابقه (دو تب، رفرش وسط چرخش) ⇒ فقط توکن دسترسی تازه می‌شود.
+  /* ── چه وقت رفرش‌توکن *نباید* بچرخد ─────────────────────────────
 
-     اگر این‌جا هم می‌چرخاندیم، توکنی که تب اول همین حالا گرفته بی‌اعتبار
-     می‌شد و دفعه‌ی بعد *آن* «سرقت» تشخیص داده می‌شد — یعنی مسابقه به
-     یک حلقه‌ی بی‌پایانِ خروج از حساب تبدیل می‌شد. */
-  if (check.raced) {
-    const res = NextResponse.json({ ok: true, raced: true }, { headers: CORS_HEADERS });
+     دو حالت:
+
+     ۱) `raced` — توکن قدیمی بود ولی داخل پنجره‌ی مهلت. اگر این‌جا هم
+        می‌چرخاندیم، توکنی که بافت دیگر همین حالا گرفته بی‌اعتبار می‌شد و
+        دفعه‌ی بعد *آن* «سرقت» تشخیص داده می‌شد — مسابقه به حلقه‌ی
+        بی‌پایان خروج از حساب تبدیل می‌شد.
+
+     ۲) هنوز فاصله‌ی چرخش (۱۲ ساعت) نگذشته. چرخش با هر تمدید یعنی روزی
+        بیش از صد نسخه‌ی باطل‌شده در گردش، و هر کدام یک فرصت برای بیرون
+        انداختن ناخواسته‌ی کاربر.
+
+     در هر دو حالت فقط توکن دسترسی تازه می‌شود؛ کوکی رفرش دست نمی‌خورد
+     و همان که هست معتبر می‌ماند. */
+  if (check.raced || !shouldRotate(check.row)) {
+    const res = NextResponse.json(
+      { ok: true, ...(check.raced ? { raced: true } : {}) },
+      { headers: CORS_HEADERS },
+    );
     res.cookies.set(ACCESS_COOKIE, access, {
       httpOnly: true, secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', path: '/', maxAge: ACCESS_TTL_SEC,
@@ -71,6 +88,6 @@ export async function POST(req: NextRequest) {
   const refresh = signRefreshToken({ id: u.id, sid: claims.sid });
   await setSessionRefresh(claims.sid, refresh);
 
-  const res = NextResponse.json({ ok: true }, { headers: CORS_HEADERS });
+  const res = NextResponse.json({ ok: true, rotated: true }, { headers: CORS_HEADERS });
   return setSessionCookies(res, { access, refresh });
 }

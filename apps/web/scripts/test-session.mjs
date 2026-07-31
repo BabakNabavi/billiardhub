@@ -1,9 +1,16 @@
 /* تست ماندگاری نشست — نگهبان باگی که کاربر را از حساب خودش بیرون می‌انداخت.
        node scripts/test-session.mjs [BASE]
 
-   رفرش‌توکن با هر استفاده می‌چرخد. اگر دو درخواست هم‌زمان برسند (دو تب،
-   رفرش صفحه وسط چرخش)، درخواست دوم توکن قدیمی را می‌فرستد و سرور آن را
-   «سرقت» می‌دید و کل نشست را باطل می‌کرد. */
+   دو مکانیزم این‌جا سنجیده می‌شود:
+
+     ۱) رفرش‌توکن هر ۱۲ ساعت یک‌بار می‌چرخد، نه با هر تمدید. تا امروز با
+        هر تمدید می‌چرخید و روزی بیش از صد نسخه‌ی باطل‌شده در گردش بود؛
+        هر کدام یک فرصت برای بیرون انداختن ناخواسته‌ی کاربر.
+
+     ۲) پنجره‌ی مهلت ۶۰ ثانیه‌ای برای لحظه‌ی خودِ چرخش (دو تب، رفرش وسط
+        کار) تا مسابقه با سرقت اشتباه نشود.
+
+   و در کنارش: سرقت واقعی باید همچنان گرفته شود. */
 
 import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
@@ -11,7 +18,7 @@ require('dotenv').config({ path: '.env.local' })
 const bcrypt = require('bcrypt')
 const { createClient } = require('@supabase/supabase-js')
 
-const BASE = process.argv[2] || 'http://localhost:3250'
+const BASE = process.argv[2] || 'http://localhost:3300'
 const PHONE = '09008887766'
 const PW = 'TestPass@2026'
 
@@ -24,7 +31,6 @@ const head = s => console.log(`\n■ ${s}`)
 
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
 
-/* حساب آزمایشی خودمان با رمز مشخص — هیچ حساب واقعی لمس نمی‌شود */
 const { data: u } = await sb.from('users').select('id').eq('phone', PHONE).maybeSingle()
 if (!u) { console.error('حساب آزمایشی نیست'); process.exit(1) }
 await sb.from('users').update({ password: await bcrypt.hash(PW, 10) }).eq('id', u.id)
@@ -35,16 +41,10 @@ const jarOf = res => {
   for (const c of list.filter(Boolean)) { const [kv] = c.split(';'); const i = kv.indexOf('='); j[kv.slice(0, i).trim()] = kv.slice(i + 1) }
   return j
 }
-/* JWT مهر زمانی ثانیه‌ای دارد: دو امضا در یک ثانیه رشته‌ی یکسان
-   می‌دهند و اصلاً چرخشی رخ نمی‌دهد. برای اینکه تست *واقعاً* چرخش را
-   بسنجد، بین مراحل یک ثانیه صبر می‌کنیم. */
+/* JWT مهر زمانی ثانیه‌ای دارد: دو امضا در یک ثانیه رشته‌ی یکسان می‌دهند. */
 const tick = () => new Promise(r => setTimeout(r, 1100))
 const ck = j => Object.entries(j).map(([k, v]) => `${k}=${v}`).join('; ')
 
-/* هر اجرای این تست چند بار وارد می‌شود و سقف نرخ ورود (۱۰ در ۱۰ دقیقه)
-   با دو-سه اجرای پیاپی پر می‌شود. آن‌وقت *همه* چیز ۴۲۹ می‌گیرد و تست
-   قرمز می‌شود بی‌آنکه چیزی خراب باشد — پس تشخیصش می‌دهیم و صادقانه
-   می‌گوییم به‌جای اینکه شکست جعلی گزارش کنیم. */
 const bail = () => {
   console.log('\n⚠ سقف نرخ ورود پر است (اجراهای پیاپی همین تست).')
   console.log('  این یعنی محافظت کار می‌کند؛ ~۱۰ دقیقه بعد دوباره اجرا کنید.\n')
@@ -56,11 +56,21 @@ const login = async () => {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ phone: PHONE, password: PW }),
   })
-  /* سقف در *هر* مرحله‌ای ممکن است پر شود، نه فقط اولی. اگر ادامه دهیم،
-     ورودهای بعدی جار خالی می‌دهند و ده‌ها شکست جعلی گزارش می‌شود. */
   if (r.status === 429) bail()
   return { ok: r.ok, jar: jarOf(r) }
 }
+const refresh = jar => fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck(jar) } })
+
+/** آخرین نشست فعال همین کاربر — برای دست‌کاری زمان چرخش */
+const latestSid = async () => {
+  const { data } = await sb.from('sessions').select('id').eq('user_id', u.id)
+    .is('revoked_at', null).order('created_at', { ascending: false }).limit(1)
+  return data?.[0]?.id
+}
+const setRotatedAgo = (sid, ms) =>
+  sb.from('sessions').update({ last_used_at: new Date(Date.now() - ms).toISOString() }).eq('id', sid)
+
+const HOUR = 3600e3
 
 head('۱) ورود و صدور کوکی‌ها')
 const first = await login()
@@ -68,65 +78,72 @@ t('ورود موفق', first.ok)
 t('bh_at صادر شد', !!first.jar.bh_at)
 t('bh_rt صادر شد', !!first.jar.bh_rt)
 
-head('۲) بازگشت پس از مدتی — فقط bh_rt در دست است')
+head('۲) تمدید عادی — نباید رفرش‌توکن را بچرخاند')
 {
   const noAt = { ...first.jar }; delete noAt.bh_at
-  /* بدون این مکث، ورود و تمدید در یک ثانیه می‌افتند و JWT رشته‌ی
-     یکسان می‌دهد — آن‌وقت «چرخید؟» بی‌معنا می‌شود. */
   await tick()
-  const r = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck(noAt) } })
+  const r = await refresh(noAt)
   const j = jarOf(r)
+  const body = await r.json().catch(() => ({}))
   t('تمدید موفق', r.status === 200, `status=${r.status}`)
-  t('bh_at تازه گرفت', !!j.bh_at)
-  t('bh_rt چرخید', !!j.bh_rt && j.bh_rt !== first.jar.bh_rt)
-  first.jar.bh_at = j.bh_at; first.jar.bh_rt = j.bh_rt
+  t('توکن دسترسی تازه داده شد', !!j.bh_at)
+  t('رفرش‌توکن دست نخورد', !j.bh_rt, `bh_rt=${j.bh_rt ? 'عوض شد' : '—'}`)
+  t('پاسخ نمی‌گوید چرخیده', body?.rotated !== true, JSON.stringify(body))
 }
 
-head('۳) مسابقه — همان باگی که کاربر را بیرون می‌انداخت')
+head('۳) همان توکن بارها کار می‌کند — کاربر بیرون نمی‌افتد')
 {
-  /* توکن *قدیمی* را دوباره می‌فرستیم؛ دقیقاً کاری که تب دوم می‌کند */
-  const s2 = await login()
-  const oldRt = s2.jar.bh_rt
-  await tick()
-  // یک‌بار مصرفش کن تا واقعاً بچرخد
-  const rot = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck(s2.jar) } })
-  t('چرخش انجام شد', jarOf(rot).bh_rt !== oldRt, 'توکن عوض نشد')
-  // حالا همان توکن قدیمی را دوباره بفرست (مسابقه)
-  const race = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck({ ...s2.jar, bh_rt: oldRt }) } })
-  const body = await race.json().catch(() => ({}))
-  t('توکن قدیمی در پنجره‌ی مهلت پذیرفته می‌شود', race.status === 200, `status=${race.status} ${JSON.stringify(body).slice(0, 90)}`)
-  t('پاسخ می‌گوید مسابقه بوده', body?.raced === true, JSON.stringify(body))
-  t('توکن دسترسی تازه داده شد', !!jarOf(race).bh_at)
-  t('رفرش‌توکن دوباره نچرخید (وگرنه حلقه‌ی بی‌پایان)', !jarOf(race).bh_rt)
-
-  /* و مهم‌تر: نشست باطل نشده باشد */
-  const after = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck(s2.jar) } })
-  t('نشست هنوز زنده است', after.status === 200, `status=${after.status}`)
+  for (let i = 1; i <= 4; i++) {
+    const r = await refresh(first.jar)
+    if (r.status !== 200) { t(`تمدید ${i}`, false, `status=${r.status}`); break }
+    if (i === 4) t('چهار تمدید پیاپی با همان توکن ⇒ همه موفق', true)
+  }
+  const { data: s } = await sb.from('sessions').select('revoked_at').eq('id', await latestSid()).maybeSingle()
+  t('نشست باطل نشد', !s?.revoked_at)
 }
 
-head('۴) سرقت واقعی هنوز گرفته می‌شود')
+head('۴) بعد از ۱۲ ساعت واقعاً می‌چرخد')
 {
   const s = await login()
-  const oldRt = s.jar.bh_rt
+  const sid = await latestSid()
+  await setRotatedAgo(sid, 13 * HOUR)
   await tick()
-  await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck(s.jar) } })
-  /* پنجره‌ی مهلت یک دقیقه است؛ با دست‌کاری last_used_at به گذشته،
-     همان توکن قدیمی باید «سرقت» تشخیص داده شود. */
-  const { data: rows } = await sb.from('sessions').select('id').eq('user_id', u.id)
-    .is('revoked_at', null).order('created_at', { ascending: false }).limit(1)
-  const sid = rows?.[0]?.id
-  await sb.from('sessions').update({ last_used_at: new Date(Date.now() - 5 * 60_000).toISOString() }).eq('id', sid)
-
-  const theft = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: ck({ ...s.jar, bh_rt: oldRt }) } })
-  const jb = await theft.json().catch(() => ({}))
-  t('توکن کهنه بیرون از پنجره ⇒ ۴۰۱', theft.status === 401, `status=${theft.status}`)
-  t('دلیلش «reused» است', jb?.reason === 'reused', JSON.stringify(jb).slice(0, 90))
-
-  const { data: rev } = await sb.from('sessions').select('revoked_reason').eq('id', sid).maybeSingle()
-  t('نشست باطل شد', !!rev?.revoked_reason, String(rev?.revoked_reason))
+  const r = await refresh(s.jar)
+  const j = jarOf(r)
+  const body = await r.json().catch(() => ({}))
+  t('تمدید موفق', r.status === 200, `status=${r.status}`)
+  t('این‌بار رفرش‌توکن چرخید', !!j.bh_rt && j.bh_rt !== s.jar.bh_rt)
+  t('پاسخ می‌گوید چرخیده', body?.rotated === true, JSON.stringify(body))
+  s.rotated = j.bh_rt; s.sid = sid
+  globalThis.__rot = s
 }
 
-head('۵) توکن جعلی/بی‌ربط')
+head('۵) مسابقه در لحظه‌ی چرخش — نشست نباید باطل شود')
+{
+  const s = globalThis.__rot
+  const race = await refresh({ ...s.jar })       // همان توکن قبل از چرخش
+  const body = await race.json().catch(() => ({}))
+  t('توکن قدیمی در پنجره‌ی مهلت پذیرفته شد', race.status === 200, `status=${race.status}`)
+  t('پاسخ می‌گوید مسابقه بوده', body?.raced === true, JSON.stringify(body))
+  t('رفرش‌توکن دوباره نچرخید', !jarOf(race).bh_rt)
+  const { data: row } = await sb.from('sessions').select('revoked_at').eq('id', s.sid).maybeSingle()
+  t('نشست زنده ماند', !row?.revoked_at)
+}
+
+head('۶) سرقت واقعی همچنان گرفته می‌شود')
+{
+  const s = globalThis.__rot
+  /* توکن قبل از چرخش، ولی بیرون از پنجره‌ی مهلت */
+  await setRotatedAgo(s.sid, 5 * 60e3)
+  const theft = await refresh({ ...s.jar })
+  const body = await theft.json().catch(() => ({}))
+  t('توکن کهنه بیرون از پنجره ⇒ ۴۰۱', theft.status === 401, `status=${theft.status}`)
+  t('دلیلش «reused» است', body?.reason === 'reused', JSON.stringify(body).slice(0, 80))
+  const { data: row } = await sb.from('sessions').select('revoked_reason').eq('id', s.sid).maybeSingle()
+  t('نشست باطل شد', !!row?.revoked_reason, String(row?.revoked_reason))
+}
+
+head('۷) توکن جعلی/بی‌ربط')
 {
   const r = await fetch(BASE + '/api/auth/refresh', { method: 'POST', headers: { cookie: 'bh_rt=not-a-token' } })
   t('توکن نامعتبر ⇒ ۴۰۱', r.status === 401, `status=${r.status}`)

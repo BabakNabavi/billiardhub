@@ -402,8 +402,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
                چهار gap × ۳px همان ۱۲px را آزاد می‌کند. */
             overflow: 'hidden', gap: '6px',
           }}>
-            {/* ۱۳px → ۱۴٫۳ (۱۰٪) → ۱۵ (۵٪ دیگر) */}
-            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a',
+            {/* ۱۳ → ۱۴٫۳ → ۱۵ → ۱۶٫۵ (۱۰٪ دیگر) */}
+            <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#1a1a1a',
               letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
               {club.name.replace(/^باشگاه\s+/, '')}
             </div>
@@ -415,7 +415,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
                 { label: 'پاکت',   n: pocketTables,  clr: '#1D4ED8' },
                 { label: 'هی‌بال', n: hiballTables,  clr: '#6D28D9' },
               ].map(t => (
-                <span key={t.label} style={{ fontSize: '9px', fontWeight: 700, color: t.clr,
+                <span key={t.label} style={{ fontSize: '10px', fontWeight: 700, color: t.clr,
                   background: `${t.clr}12`, border: `1px solid ${t.clr}26`,
                   borderRadius: '20px', padding: '1px 6px', whiteSpace: 'nowrap' }}>
                   {t.label} {t.n.toLocaleString('fa-IR')}
@@ -423,8 +423,8 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               ))}
             </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '10px' }}>
-              <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'rgba(0,0,0,0.40)', fontSize: '11px' }}>
+              <MapPin size={9} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
             <div className="cta-lq cta-lq-sm" style={{ borderRadius: rad }}>
@@ -1535,7 +1535,7 @@ useEffect(() => {
           transition:box-shadow .3s ease, background .3s ease, transform .3s ease;
           box-shadow:0 0 0 rgba(199,166,106,0);
         }
-        .cta-lq-sm { padding:6px 0; font-size:11px; }
+        .cta-lq-sm { padding:6px 0; font-size:12px; }
         @media (hover:hover) {
           .club-card-x:hover .cta-lq {
             background:rgba(199,166,106,0.20);
