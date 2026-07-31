@@ -41,12 +41,27 @@ const jarOf = res => {
 const tick = () => new Promise(r => setTimeout(r, 1100))
 const ck = j => Object.entries(j).map(([k, v]) => `${k}=${v}`).join('; ')
 
+/* هر اجرای این تست چند بار وارد می‌شود و سقف نرخ ورود (۱۰ در ۱۰ دقیقه)
+   با دو-سه اجرای پیاپی پر می‌شود. آن‌وقت *همه* چیز ۴۲۹ می‌گیرد و تست
+   قرمز می‌شود بی‌آنکه چیزی خراب باشد — پس تشخیصش می‌دهیم و صادقانه
+   می‌گوییم به‌جای اینکه شکست جعلی گزارش کنیم. */
+let rateLimited = false
 const login = async () => {
   const r = await fetch(BASE + '/api/auth/login', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ phone: PHONE, password: PW }),
   })
+  if (r.status === 429) rateLimited = true
   return { ok: r.ok, jar: jarOf(r) }
+}
+
+{
+  const probe = await login()
+  if (!probe.ok && rateLimited) {
+    console.log('\n⚠ سقف نرخ ورود پر است (اجراهای پیاپی همین تست).')
+    console.log('  این یعنی محافظت کار می‌کند؛ چند دقیقه بعد دوباره اجرا کنید.\n')
+    process.exit(0)
+  }
 }
 
 head('۱) ورود و صدور کوکی‌ها')

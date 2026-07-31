@@ -32,18 +32,18 @@ export const metadata: Metadata = {
     /* تصویرِ اشتراک‌گذاری — تا امروز نبود و شبکه‌های اجتماعی خودشان
        چیزی از صفحه برمی‌داشتند. لوگوی تازه اندازه‌ی استانداردِ ۱۲۰۰×۶۳۰
        را دارد. */
-    images: [{ url: '/images/Logo/og-image.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
+    images: [{ url: '/images/Logo/bh-og-v2.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
   },
-  twitter: { card: 'summary_large_image', images: ['/images/Logo/og-image.png'] },
+  twitter: { card: 'summary_large_image', images: ['/images/Logo/bh-og-v2.png'] },
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/images/Logo/favicon.ico' },
-      { url: '/images/Logo/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/images/Logo/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/images/Logo/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-v2.ico' },
+      { url: '/images/Logo/bh-favicon-96-v2.png', sizes: '96x96', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-32-v2.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-16-v2.png', sizes: '16x16', type: 'image/png' },
     ],
-    apple: '/images/Logo/apple-touch-icon.png',
+    apple: '/images/Logo/bh-apple-180-v2.png',
   },
   appleWebApp: {
     capable: true,

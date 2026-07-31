@@ -45,43 +45,38 @@ const SOCIALS = [
   },
 ];
 
-/* سه لینک در هر ستون — قبلاً ۵تا بود و در موبایل فوتر را شلوغ می‌کرد */
+/* ستون «اطلاعات و قوانین» حذف شد (هم موبایل هم دسکتاپ).
+   لینک‌هایش — قوانین، حریم خصوصی، تماس، درباره ما — از نوار پایینی
+   فوتر و منوی اصلی هم در دسترس‌اند و تکرارشان فقط فوتر را بلند می‌کرد.
+
+   `mobile: false` یعنی آن لینک در موبایل نشان داده نمی‌شود. در موبایل
+   هر ستون فقط دو لینک اصلی دارد تا فوتر کوتاه بماند. */
 const nav = [
   {
     heading: 'PLATFORM',
     color: GOLD_TXT,
     links: [
-      { href: '/clubs',    label: 'باشگاه‌ها'     },
-      { href: '/sellers',  label: 'فروشگاه‌ها'    },
-      { href: '/shop',     label: 'بیلیارد بازار' },
+      { href: '/clubs',    label: 'باشگاه‌ها'                   },
+      { href: '/shop',     label: 'بیلیارد بازار'               },
+      { href: '/sellers',  label: 'فروشگاه‌ها', mobile: false   },
     ],
   },
   {
     heading: 'EXPLORE',
     color: '#1D6FA8',
     links: [
-      { href: '/players',  label: 'بازیکنان' },
-      { href: '/coaches',  label: 'مربیان'   },
-      { href: '/referees', label: 'داوران'   },
+      { href: '/players',  label: 'بازیکنان'              },
+      { href: '/coaches',  label: 'مربیان'                },
+      { href: '/referees', label: 'داوران', mobile: false },
     ],
   },
   {
     heading: 'ACCOUNT',
     color: '#6D4BAE',
     links: [
-      { href: '/register',  label: 'ثبت‌نام' },
-      { href: '/login',     label: 'ورود'    },
-      { href: '/dashboard', label: 'داشبورد' },
-    ],
-  },
-  {
-    heading: 'اطلاعات و قوانین',
-    color: '#0E7A38',
-    links: [
-      { href: '/terms',   label: 'قوانین و مقررات' },
-      { href: '/privacy', label: 'حریم خصوصی'      },
-      { href: '/contact', label: 'تماس با ما'      },
-      { href: '/about',   label: 'درباره ما'       },
+      { href: '/register',  label: 'ثبت‌نام'               },
+      { href: '/login',     label: 'ورود'                  },
+      { href: '/dashboard', label: 'داشبورد', mobile: false },
     ],
   },
 ];
@@ -138,6 +133,8 @@ export default function Footer() {
         @media (max-width: 900px) {
           .ft-grid { grid-template-columns: 1fr 1fr !important; gap: 20px 28px !important; margin-bottom: 30px !important; }
           .ft-brand { grid-column: 1 / -1; }
+          /* لینک‌های درجه‌دو در موبایل حذف می‌شوند تا فوتر کوتاه بماند */
+          .ft-only-desk { display: none !important; }
         }
         @media (max-width: 520px) {
           .ft-grid { grid-template-columns: repeat(2,1fr) !important; gap: 16px 14px !important; margin-bottom: 16px !important; }
@@ -164,14 +161,15 @@ export default function Footer() {
 
         {/* ── Main grid ─────────────────────────────── */}
         {/* ۴ ستون لینک (با افزودن «اطلاعات و قوانین») + ستون برند */}
-        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1.15fr', gap: '30px', marginBottom: '32px' }}>
+        {/* سه ستون لینک + ستون برند (ستون «اطلاعات و قوانین» حذف شد) */}
+        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '30px', marginBottom: '32px' }}>
 
           {/* Brand column */}
           <div className="ft-brand">
             {/* Logo + wordmark */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
               <img
-                src="/images/Logo/logo-256x256.webp"
+                src="/images/Logo/bh-mark-256-v2.webp"
                 alt="بیلیارد هاب"
                 style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
               />
@@ -208,7 +206,11 @@ export default function Footer() {
               {/* letter-spacing فقط برای تیترهای لاتین؛ روی فارسی حروف چسبان را باز می‌کند */}
               <div className="ft-heading" style={{ fontSize: /[A-Z]/.test(col.heading) ? '11px' : '12px', color: col.color, letterSpacing: /[A-Z]/.test(col.heading) ? '0.18em' : 0, fontWeight: 700, marginBottom: '13px' }}>{col.heading}</div>
               {col.links.map(item => (
-                <Link key={item.href} href={item.href} className="ft-link">
+                /* `ft-only-desk` در موبایل مخفی می‌شود — با CSS و نه با
+                   شرط جاوااسکریپتی، تا فوتر Server Component بماند و
+                   هیچ JSای همراهش نرود. */
+                <Link key={item.href} href={item.href}
+                  className={`ft-link${(item as { mobile?: boolean }).mobile === false ? ' ft-only-desk' : ''}`}>
                   <ChevronLeft size={10} />
                   {item.label}
                 </Link>

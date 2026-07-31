@@ -319,7 +319,7 @@ export default function Navbar() {
             {/* سایه‌ی خیلی نرم + بول ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
-                <img src="/images/Logo/logo-256x256.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/images/Logo/bh-mark-256-v2.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>
@@ -625,12 +625,14 @@ export default function Navbar() {
               نوشته‌ی فارسی «بیلیارد هاب» حذف شد: خود لوگو همان را
               نوشته دارد و تکرارش فقط ارتفاع می‌گرفت. با چیدمان ردیفی،
               لوگو و ضربدر هر دو بالا آمدند و هم‌تراز شدند. */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 20px 12px' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 20px' }}>
+            {/* لوگو دقیقاً وسط ردیف می‌نشیند؛ دکمه‌ی بستن با position
+                مطلق کنار می‌ایستد تا عرضش مرکز را جابه‌جا نکند. */}
+            <img src="/images/Logo/bh-header-v2.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto' }} />
             <button onClick={() => setMobileOpen(false)} aria-label="بستن منو"
-              style={{ background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex', flexShrink: 0 }}>
+              style={{ position: 'absolute', insetInlineStart: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(28,28,26,0.05)', border: '1px solid rgba(28,28,26,0.1)', borderRadius: '12px', cursor: 'pointer', color: 'rgba(28,28,26,0.5)', padding: '8px', display: 'flex' }}>
               <X size={20} />
             </button>
-            <img src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: '38px', width: 'auto', flexShrink: 0 }} />
           </div>
 
           {/* Gold separator */}

@@ -79,7 +79,7 @@ function MfrPoster({ variant, title, about = false }: { variant: number; title?:
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
         {layers}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(7px,1.2vw,12px)', padding: 'clamp(12px,2vw,22px) 16px', textAlign: 'center' }}>
-          <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
+          <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v2.png" alt="بیلیارد هاب" style={{ height: 'clamp(19px,3.2vw,34px)', width: 'auto' }}/>
           {title && <div style={{ fontSize: 'clamp(14px,2.5vw,23px)', fontWeight: 800, color: '#fff', lineHeight: 1.28, maxWidth: '94%', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
           {subtitleRow(true)}
         </div>
@@ -91,7 +91,7 @@ function MfrPoster({ variant, title, about = false }: { variant: number; title?:
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: p.bg }}>
       {layers}
       <div style={{ position: 'absolute', top: '50%', insetInlineEnd: 'clamp(22px,5vw,54px)', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 9, maxWidth: 'min(62%,520px)' }}>
-        <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
+        <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v2.png" alt="بیلیارد هاب" style={{ height: 'clamp(22px,3.3vw,36px)', width: 'auto' }}/>
         {title && <div style={{ fontSize: 'clamp(15px,2.3vw,24px)', fontWeight: 800, color: '#fff', lineHeight: 1.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
         {subtitleRow(false)}
       </div>

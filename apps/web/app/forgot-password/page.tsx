@@ -158,7 +158,11 @@ export default function ForgotPasswordPage() {
         .au-inp { flex: 1; min-width: 0; background: transparent; border: none; outline: none;
           padding: 14px 14px; font-size: 14.5px; color: ${TEXT}; font-family: inherit; direction: ltr; text-align: right; }
         .au-inp::placeholder { color: #B7B0A0; direction: rtl; font-size: 12.5px; letter-spacing: normal; }
-        .au-inp.otp { text-align: center; letter-spacing: 8px; font-size: 19px; font-weight: 800; padding-inline: 8px; }
+        /* text-indent برابر با letter-spacing است و عمدی.
+           CSS بعد از *هر* نویسه — از جمله آخری — فاصله می‌گذارد، پس متن
+           وسط‌چین همیشه به اندازه‌ی نصف آن فاصله کج می‌افتد. این تورفتگی
+           دقیقاً همان را جبران می‌کند و خط‌تیره‌ها واقعاً وسط می‌نشینند. */
+        .au-inp.otp { text-align: center; letter-spacing: 8px; text-indent: 8px; font-size: 19px; font-weight: 800; padding-inline: 8px; }
 
         .au-btn { width: 100%; padding: 15px; border: none; border-radius: 13px; cursor: pointer;
           font-family: inherit; font-size: 15px; font-weight: 800; color: #241B08;

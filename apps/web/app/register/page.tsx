@@ -476,7 +476,7 @@ export default function RegisterPage() {
                 onChange={e => { setOtp(e.target.value.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 6)); setOtpMsg(''); }}
                 onKeyDown={e => { if (e.key === 'Enter') handleVerify(); }}
                 placeholder="- - - - -"
-                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', fontSize: 26, fontWeight: 800, direction: 'ltr', padding: '14px', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', color: TEXT, outline: 'none', fontFamily: 'inherit' }}
+                style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.5em', textIndent: '0.5em', fontSize: 26, fontWeight: 800, direction: 'ltr', padding: '14px', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', color: TEXT, outline: 'none', fontFamily: 'inherit' }}
               />
               {otpMsg && <p style={{ fontSize: 12, fontWeight: 700, color: otpMsg.includes('ارسال شد') ? '#0E7A38' : '#B23B2E', margin: '10px 0 0', textAlign: 'center' }}>{otpMsg}</p>}
               <button className="au-btn" onClick={handleVerify} disabled={otpBusy} style={{ marginTop: 16 }}>

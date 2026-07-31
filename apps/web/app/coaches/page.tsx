@@ -266,7 +266,7 @@ function CoachCard({ coach, view, idx, onStory }: { coach: Coach; view: 'grid' |
         <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize:'14px 14px' }}/>
         <div style={{ position:'absolute', left:'-12%', top:'-40%', width:'52%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.20) 0%, transparent 64%)', filter:'blur(14px)', pointerEvents:'none' }}/>
         <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'56%', width:'1px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.5),transparent)', transform:'rotate(-12deg)', pointerEvents:'none' }}/>
-        <img loading="lazy" decoding="async" src="/images/Logo/BH.png" alt="" style={{ position:'absolute', top:'9px', insetInlineEnd:'10px', height:'22%', width:'auto', opacity:0.9 }}/>
+        <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v2.png" alt="" style={{ position:'absolute', top:'9px', insetInlineEnd:'10px', height:'22%', width:'auto', opacity:0.9 }}/>
         <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'2px', background:`linear-gradient(90deg,transparent,${GOLD},transparent)`, opacity:0.55 }}/>
       </div>
       {/* avatar */}
