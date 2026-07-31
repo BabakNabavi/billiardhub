@@ -12,6 +12,7 @@ import Link from 'next/link';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/auth.store';
 import { Eye, EyeOff, Phone, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
+import { toAuthError } from '../../lib/auth/error-message';
 
 /* نمایشِ فارسیِ ارقام — مقدارِ ارسالی به سرور همچنان لاتین می‌ماند */
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d);
@@ -32,6 +33,8 @@ export default function LoginPage() {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
   const [phoneFocus, setPhoneFocus] = useState(false);
+  /* آیا خطا مربوط به ورودیِ کاربر بود؟ خطای شبکه نباید فیلدها را قرمز کند */
+  const [errIsCred, setErrIsCred] = useState(true);
   const [passFocus,  setPassFocus]  = useState(false);
 
   /* مقصدِ بازگشت. وقتی middleware کاربرِ بدونِ نشست را از یک صفحه‌ی
@@ -49,26 +52,29 @@ export default function LoginPage() {
     if (_hydrated && user) router.replace(nextPath);
   }, [_hydrated, user, router, nextPath]);
 
-  /* خطا بعد از چند ثانیه خودش بسته می‌شود */
-  useEffect(() => {
-    if (!error) return;
-    const t = setTimeout(() => setError(''), 6500);
-    return () => clearTimeout(t);
-  }, [error]);
+  /* پیامِ خطا دیگر خودش بسته نمی‌شود.
+
+     پیش‌تر بعد از ۶٫۵ ثانیه ناپدید می‌شد؛ کاربری که سرش را بالا می‌آورد
+     یا متن را کامل نخوانده بود، پیام را از دست می‌داد و نمی‌فهمید چه
+     شده. حالا تا زدنِ «متوجه شدم» یا تغییرِ ورودی می‌ماند. */
 
   const handleLogin = async () => {
     if (!phone.trim())    { setError('لطفاً شماره موبایل را وارد کنید'); return; }
     if (!password.trim()) { setError('لطفاً رمز عبور را وارد کنید'); return; }
 
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setErrIsCred(true);
     try {
       const res = await api.post('/auth/login', { phone: phone.trim(), password });
       setAuth(res.data.user, res.data.token);
       /* نشستِ کوکی‌محور تازه ساخته شد ⇒ نشانه‌ی مهاجرت هم دیگر لازم نیست */
       try { localStorage.setItem('bh_session_migrated', String(Date.now())); } catch { /* ignore */ }
       router.replace(nextPath);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'شماره یا رمز عبور اشتباه است');
+    } catch (err) {
+      /* پیشتر هر خطایی «رمز اشتباه» گزارش می‌شد — حتی وقتی درخواست
+         اصلاً به سرور نرسیده بود. حالا از هم جدا می‌شوند. */
+      const e = toAuthError(err, 'شماره یا رمز عبور اشتباه است');
+      setError(e.message);
+      setErrIsCred(e.isCredentialError);
     } finally {
       setLoading(false);
     }
@@ -163,7 +169,7 @@ export default function LoginPage() {
 
         <div style={{ marginBottom: 14 }}>
           <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: SEC, marginBottom: 8 }}>شماره موبایل</label>
-          <div className={`au-wrap${phoneFocus ? ' on' : ''}${error && !phone ? ' err' : ''}`}>
+          <div className={`au-wrap${phoneFocus ? ' on' : ''}${error && errIsCred && !phone ? ' err' : ''}`}>
             <span className="au-ic"><Phone size={16} /></span>
             <input
               type="tel"

@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
 import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp, verifyIdentity as apiVerifyIdentity } from '@/lib/otp-client';
 import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck, CalendarDays } from 'lucide-react';
+import { toAuthError } from '../../lib/auth/error-message';
 
 type Step = 1 | 2;
 
@@ -266,7 +267,9 @@ export default function RegisterPage() {
       setAuth({ ...data.user, verified: true }, data.token);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'خطا در ثبت‌نام، دوباره تلاش کنید');
+      /* خطای شبکه دیگر «خطا در ثبت‌نام» گزارش نمی‌شود؛ کاربر می‌فهمد
+         مشکل از اتصال بوده نه از اطلاعاتی که وارد کرده. */
+      setError(toAuthError(err, 'خطا در ثبت‌نام، دوباره تلاش کنید').message);
     } finally {
       setLoading(false);
       setBusyStep('');

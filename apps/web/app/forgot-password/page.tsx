@@ -56,11 +56,7 @@ export default function ForgotPasswordPage() {
     return () => { if (tick.current) clearInterval(tick.current); };
   }, [wait]);
 
-  useEffect(() => {
-    if (!error) return;
-    const t = setTimeout(() => setError(''), 6500);
-    return () => clearTimeout(t);
-  }, [error]);
+  /* پیامِ خطا خودش بسته نمی‌شود — کاربر باید بخواندش و تأیید کند */
 
   const call = async (body: Record<string, unknown>) => {
     const r = await apiFetch('/api/auth/forgot-password', {
@@ -78,11 +74,14 @@ export default function ForgotPasswordPage() {
     try {
       const j = await call({ step: 'send' });
       if (j.status === 429) { setError(j.message || 'تلاش بیش از حد؛ کمی بعد دوباره امتحان کنید'); return; }
+      /* پیش‌تر هر پاسخی «ارسال شد» فرض می‌شد و کاربر به مرحله‌ی کد
+         می‌رفت — حتی وقتی سرویسِ پیامک شکست خورده بود و کدی نرفته بود. */
+      if (j.ok === false) { setError(j.message || 'ارسالِ پیامک انجام نشد'); return; }
       setNote(j.message || '');
       setWait(j.wait ?? 60);
       setStep('code');
     } catch {
-      setError('ارتباط با سرور برقرار نشد');
+      setError('ارتباط با سرور برقرار نشد. اتصالتان را بررسی کنید و دوباره تلاش کنید.');
     } finally { setLoading(false); }
   };
 
@@ -94,7 +93,7 @@ export default function ForgotPasswordPage() {
       if (!j.ok) { setError(j.message || 'کد وارد‌شده درست نیست'); return; }
       setStep('password');
     } catch {
-      setError('ارتباط با سرور برقرار نشد');
+      setError('ارتباط با سرور برقرار نشد. اتصالتان را بررسی کنید و دوباره تلاش کنید.');
     } finally { setLoading(false); }
   };
 
@@ -107,7 +106,7 @@ export default function ForgotPasswordPage() {
       if (!j.ok) { setError(j.message || 'تغییر رمز انجام نشد'); return; }
       setStep('done');
     } catch {
-      setError('ارتباط با سرور برقرار نشد');
+      setError('ارتباط با سرور برقرار نشد. اتصالتان را بررسی کنید و دوباره تلاش کنید.');
     } finally { setLoading(false); }
   };
 

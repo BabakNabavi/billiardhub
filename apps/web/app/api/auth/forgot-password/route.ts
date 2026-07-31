@@ -6,6 +6,7 @@ import { sendOtp, verifyOtp, wasOtpVerified } from '@/lib/otp-server';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { revokeAllSessions } from '@/lib/auth/store';
 import { checkPassword } from '@/lib/auth/password';
+import { normalizePhone } from '@/lib/auth/phone';
 
 /* بازیابیِ رمز عبور — روی همان زیرساختِ OTPِ موجود، بدونِ ساختنِ سیستمِ
    موازی. سه گام:
@@ -24,7 +25,9 @@ import { checkPassword } from '@/lib/auth/password';
       برمی‌گردد و نه لاگ می‌شود. */
 
 const GENERIC = 'اگر این شماره در سیستم ثبت شده باشد، کدِ بازیابی برای آن ارسال می‌شود.';
-const isPhone = (p: string) => /^09\d{9}$/.test(p);
+/* `isPhone` حذف شد: شرطِ سخت‌گیرانه‌ی `^09\d{9}$` روی ورودیِ خام هر
+   شکلِ دیگری را رد می‌کرد و کاربر پیامِ «کد ارسال شد» می‌گرفت بدونِ
+   اینکه پیامکی فرستاده شود. حالا `normalizePhone` جایش را گرفته. */
 
 async function userIdOf(phone: string): Promise<string | null> {
   const { data } = await sb().from('users').select('id').eq('phone', phone).maybeSingle();
@@ -34,9 +37,9 @@ async function userIdOf(phone: string): Promise<string | null> {
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   const step = String(b?.step ?? '');
-  const phone = String(b?.phone ?? '').trim();
+  const phone = normalizePhone(b?.phone);
 
-  if (!isPhone(phone)) {
+  if (!phone) {
     /* شکلِ نامعتبر ⇒ همان پیامِ عمومی، تا شمارشِ کاربر از این راه هم نشود */
     return NextResponse.json({ ok: true, message: GENERIC });
   }
@@ -50,8 +53,31 @@ export async function POST(req: NextRequest) {
     /* شماره‌ی ناموجود: نه پیامکی، نه تفاوتی در پاسخ */
     if (uid) {
       const r = await sendOtp(phone);
+
       if (!r.ok && r.wait) {
         return NextResponse.json({ ok: true, message: GENERIC, wait: r.wait });
+      }
+
+      /* ── شکستِ واقعیِ ارسال ──
+         پیش‌تر این حالت بی‌صدا رد می‌شد و همان پیامِ «کد ارسال شد»
+         برمی‌گشت. یعنی وقتی سرویسِ پیامک قطع بود، اعتبارِ کلید تمام
+         شده بود، یا شماره را نمی‌پذیرفت، کاربر منتظرِ پیامکی می‌ماند
+         که هرگز نمی‌آمد — و ما هم هیچ‌جا خبردار نمی‌شدیم.
+
+         حالا هم در لاگِ ممیزی ثبت می‌شود و هم به کاربر گفته می‌شود که
+         ارسال انجام نشد. این نشتِ اطلاعات نیست: به این‌جا فقط وقتی
+         می‌رسیم که شماره از قبل در سیستم باشد، و پیام درباره‌ی خرابیِ
+         سرویس است نه وجود یا نبودِ حساب. */
+      if (!r.ok) {
+        console.error('[forgot-password] SMS failed:', r.message);
+        void audit({
+          action: 'PASSWORD_RESET_SMS_FAILED', entityType: 'user', entityId: uid,
+          newValue: { reason: r.message ?? 'unknown' }, ip: clientIp(req) ?? undefined,
+        });
+        return NextResponse.json({
+          ok: false,
+          message: 'ارسالِ پیامک انجام نشد. چند لحظه بعد دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.',
+        }, { status: 502 });
       }
     }
     return NextResponse.json({ ok: true, message: GENERIC });

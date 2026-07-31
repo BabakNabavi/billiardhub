@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
+import { normalizePhone } from '@/lib/auth/phone';
 import { wasIdentityVerified } from '@/lib/otp-server';
 import { ensurePersonForUser } from '@/lib/identity';
 
@@ -21,7 +22,10 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, phone, password, nationalId, birthDate } = body;
+    const { firstName, lastName, phone: rawPhone, password, nationalId, birthDate } = body;
+    /* همان قالبِ واحدِ ورود — وگرنه کاربری که با +98 ثبت‌نام کند
+       دیگر هرگز نمی‌تواند با 09 وارد شود. */
+    const phone = normalizePhone(rawPhone);
 
     if (!firstName || !lastName || !phone || !password) {
       return NextResponse.json(

@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
+import { normalizePhone } from '@/lib/auth/phone';
 import { loginGuard, loginFailed, loginSucceeded, lockMessage, GENERIC_LOGIN_ERROR } from '@/lib/auth/login-guard';
 
 const CORS_HEADERS = {
@@ -20,7 +21,12 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { phone, password } = body;
+    const { phone: rawPhone, password } = body;
+
+    /* شماره پیش از هر کاری به قالبِ واحد می‌آید. تا امروز خامْ جستجو
+       می‌شد، پس +98 یا ارقامِ فارسی «کاربر پیدا نشد» می‌گرفت و کاربر
+       پیامِ «رمز اشتباه» می‌دید. */
+    const phone = normalizePhone(rawPhone);
 
     if (!phone || !password) {
       return NextResponse.json(
