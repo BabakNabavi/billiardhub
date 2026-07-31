@@ -37,13 +37,24 @@ const post = (path, data) => req(path, {
    ثبت‌نامِ دارندگانِ این شماره‌ها را گرفت. حالا برعکس سنجیده می‌شود. */
 head('ثبت‌نام — شماره‌ی ۰۹۰۰ (ایرانسل) نباید رد شود')
 {
-  const r = await post('/api/auth/register', {
-    firstName: 'تست', lastName: 'تست', phone: '09008887766', password: 'Test@12345',
-  })
-  t('۰۹۰۰… به‌خاطرِ پیشوند رد نمی‌شود',
-    !(r.status === 400 && /معتبر نیست/.test(r.body?.message ?? '')),
-    `status=${r.status} msg=${r.body?.message}`)
-  console.log(`      (پاسخ: ${r.status} — ${String(r.body?.message ?? '').slice(0, 60)})`)
+  /* عمداً از شماره‌ای استفاده می‌شود که *از قبل* در سیستم هست: اگر گیتِ
+     پیشوند باز باشد، پاسخ «قبلاً ثبت شده» است و همین ثابت می‌کند از
+     بررسیِ پیشوند رد شده — بدونِ اینکه تست حسابِ تازه‌ای بسازد.
+
+     نسخه‌ی اولِ این تست شماره‌ی نو می‌فرستاد و یک کاربرِ آزمایشی در
+     دیتابیسِ واقعی جا می‌گذاشت. تست نباید داده بسازد. */
+  const { data } = await sb.from('users').select('phone').ilike('phone', '0900%').limit(1)
+  const existing = data?.[0]?.phone
+  if (!existing) { console.log('      (هیچ حسابِ ۰۹۰۰ای نیست — این تست رد شد)') }
+  else {
+    const r = await post('/api/auth/register', {
+      firstName: 'تست', lastName: 'تست', phone: existing, password: 'Test@12345',
+    })
+    t('۰۹۰۰… به‌خاطرِ پیشوند رد نمی‌شود',
+      !/معتبر نیست/.test(r.body?.message ?? ''), `status=${r.status} msg=${r.body?.message}`)
+    t('به مرحله‌ی بعد رسیده (پاسخ «قبلاً ثبت شده»)',
+      r.status === 409 || /قبلاً ثبت/.test(r.body?.message ?? ''), `status=${r.status} msg=${r.body?.message}`)
+  }
 }
 
 head('ثبت‌نام — شکلِ واقعاً نامعتبر همچنان رد می‌شود')
