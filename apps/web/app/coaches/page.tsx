@@ -22,9 +22,9 @@ const SPECS: Record<string, { label: string; color: string; glow: string }> = {
 }
 
 const IMGS: string[] = [
-  '/images/shop/snooker-table.jpg',
-  '/images/shop/cue_billiard_2.jpg',
-  '/images/shop/Ball-1.jpg',
+  '/images/shop/snooker-table.webp',
+  '/images/shop/cue_billiard_2.webp',
+  '/images/shop/Ball-1.webp',
   '/images/shop/pool_chalk_1.jpg',
 ]
 const img = (i: number) => IMGS[i % IMGS.length] ?? IMGS[0]!

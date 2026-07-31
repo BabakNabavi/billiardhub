@@ -125,7 +125,7 @@ export function profileToManufacturer(p: ManufacturerProfile): MockManufacturer 
     specialties: p.specialties,
     responseTime: 'چند ساعت',
     phone: p.phone,
-    bannerImage: p.bannerImage || '/images/shop/Pro_table.jpg',
+    bannerImage: p.bannerImage || '/images/shop/Pro_table.webp',
     description: p.description,
     tagline: p.tagline || p.description,
     about: p.about || p.description,

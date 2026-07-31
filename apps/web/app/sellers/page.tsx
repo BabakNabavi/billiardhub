@@ -146,7 +146,7 @@ function profileToSeller(p: SellerProfile): typeof SELLERS[0] {
     specialties: [] as string[],
     responseTime: '—',
     phone: p.contactPhone || phones[0] || '',
-    bannerImage: p.gallery[0]?.url || p.storyImage || '/images/shop/Pro_table.jpg',
+    bannerImage: p.gallery[0]?.url || p.storyImage || '/images/shop/Pro_table.webp',
     description: p.desc || '',
   }
 }

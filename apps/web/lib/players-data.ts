@@ -69,7 +69,7 @@ export const PLAYERS: Player[] = [
     featured: true,
     club: { name: 'باشگاه پلاتینیوم', href: '/clubs' },
     tone: 'felt',
-    scene: '/images/shop/snooker-table.jpg',
+    scene: '/images/shop/snooker-table.webp',
     intro: 'مردِ شماره‌ی یکِ اسنوکر ایران؛ سه فصلِ پیاپی صدرنشینِ رنکینگ ملی.',
     bio: [
       'آرمان توکلی بازی را از چهارده‌سالگی در سالنِ کوچکی در جنوب تهران شروع کرد؛ جایی که به گفته‌ی خودش «فقط یک میزِ سالم داشت و همان کافی بود.» ده سال بعد، او پرافتخارترین بازیکنِ نسلِ خودش است.',
@@ -89,8 +89,8 @@ export const PLAYERS: Player[] = [
       { name: 'قهرمانی آسیا (تیمی)', year: '۱۴۰۳', result: 'نایب‌قهرمان' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/snooker-table.jpg', '/images/HS/1.jfif', '/images/shop/snooker-table-2.jpg', '/images/HS/4.jfif'] },
-      { id: 'a2', title: 'آلبوم تیم ملی', photos: ['/images/HS/5.jfif', '/images/shop/Pro_table.jpg', '/images/hero/hero-lounge.jpg'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/snooker-table.webp', '/images/HS/1.jfif', '/images/shop/snooker-table-2.webp', '/images/HS/4.jfif'] },
+      { id: 'a2', title: 'آلبوم تیم ملی', photos: ['/images/HS/5.jfif', '/images/shop/Pro_table.webp', '/images/hero/hero-lounge.jpg'] },
     ],
     tags: ['تیم ملی', 'اسنوکر', 'قهرمانی آسیا'],
   },
@@ -125,7 +125,7 @@ export const PLAYERS: Player[] = [
       { name: 'قهرمانی کشور بانوان', year: '۱۴۰۴', result: 'قهرمان' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/HS/2.jfif', '/images/shop/Ball-1.jpg', '/images/HS/6.jfif'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/HS/2.jfif', '/images/shop/Ball-1.webp', '/images/HS/6.webp'] },
     ],
     tags: ['لیگ بانوان', 'اسنوکر', 'برک'],
   },
@@ -160,8 +160,8 @@ export const PLAYERS: Player[] = [
       { name: 'مسترز پایان فصل', year: '۱۴۰۴', result: 'قهرمان' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/Ball.jpg', '/images/shop/Home_table.jpg', '/images/shop/pool_chalk_1.jpg'] },
-      { id: 'a2', title: 'آلبوم تمرینات', photos: ['/images/shop/cue_billiard_2.jpg', '/images/shop/Pro_table.jpg'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/Ball.jpg', '/images/shop/Home_table.webp', '/images/shop/pool_chalk_1.jpg'] },
+      { id: 'a2', title: 'آلبوم تمرینات', photos: ['/images/shop/cue_billiard_2.webp', '/images/shop/Pro_table.webp'] },
     ],
     tags: ['ناین‌بال', 'پاکت بیلیارد', 'تور ملی'],
   },
@@ -178,7 +178,7 @@ export const PLAYERS: Player[] = [
     youth: false,
     club: { name: 'باشگاه زاینده‌رود' },
     tone: 'felt',
-    scene: '/images/shop/snooker-table-2.jpg',
+    scene: '/images/shop/snooker-table-2.webp',
     intro: 'تاکتیکی‌ترین بازیکنِ رنکینگ؛ استادِ فریم‌های طولانی و جنگ‌های سِیفتی.',
     bio: [
       'سینا رستمی را «شطرنج‌بازِ میز» صدا می‌زنند؛ بازیکنی که با صبر و سِیفتی‌های چندلایه حریف را وادار به اشتباه می‌کند و در سه فصل گذشته همیشه بین سه نفرِ اول رنکینگ بوده است.',
@@ -193,7 +193,7 @@ export const PLAYERS: Player[] = [
       { name: 'تهران مسترز', year: '۱۴۰۴', result: 'نیمه‌نهایی' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/snooker-table-2.jpg', '/images/HS/1.jfif'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/snooker-table-2.webp', '/images/HS/1.jfif'] },
     ],
     tags: ['اسنوکر', 'رنکینگ'],
   },
@@ -210,7 +210,7 @@ export const PLAYERS: Player[] = [
     youth: false,
     club: { name: 'باشگاه پرستیژ' },
     tone: 'night',
-    scene: '/images/shop/Ball-1.jpg',
+    scene: '/images/shop/Ball-1.webp',
     intro: 'چهره‌ی اولِ پاکت بیلیاردِ بانوان و نماینده‌ی ایران در رقابت‌های غرب آسیا.',
     bio: [
       'شیرین کمالی با بردِ تاریخی‌اش برابر قهرمانِ سابقِ غرب آسیا، پاکت بیلیاردِ بانوان ایران را به نقشه‌ی منطقه برگرداند. ضربه‌ی برکِ او یکی از قدرتمندترین‌های لیگ است — فارغ از جنسیت.',
@@ -224,7 +224,7 @@ export const PLAYERS: Player[] = [
       { name: 'لیگ بانوان', year: '۱۴۰۵', result: 'قهرمان' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/Ball-1.jpg', '/images/HS/2.jfif'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/Ball-1.webp', '/images/HS/2.jfif'] },
     ],
     tags: ['پاکت بیلیارد', 'لیگ بانوان'],
   },
@@ -241,7 +241,7 @@ export const PLAYERS: Player[] = [
     youth: true,
     club: { name: 'آکادمی بیلیارد هاب' },
     tone: 'bronze',
-    scene: '/images/HS/6.jfif',
+    scene: '/images/HS/6.webp',
     intro: 'پدیده‌ی هفده‌ساله‌ی اسنوکر؛ جوان‌ترین بازیکنِ تاریخِ جمعِ ده نفرِ اول رنکینگ.',
     bio: [
       'امیرعلی نجات در شانزده‌سالگی واردِ جدولِ اصلی قهرمانی کشور شد و یک سال بعد، با ورود به جمعِ ده نفر اول رنکینگ، رکوردِ کم‌سن‌ترین بازیکنِ تاریخِ این جمع را شکست.',
@@ -256,7 +256,7 @@ export const PLAYERS: Player[] = [
       { name: 'قهرمانی جوانان کشور', year: '۱۴۰۴', result: 'قهرمان' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/HS/6.jfif', '/images/shop/snooker-table.jpg'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/HS/6.webp', '/images/shop/snooker-table.webp'] },
     ],
     tags: ['جوانان', 'اسنوکر', 'استعدادیابی'],
   },
@@ -272,7 +272,7 @@ export const PLAYERS: Player[] = [
     gender: 'm',
     youth: false,
     tone: 'felt',
-    scene: '/images/shop/Home_table.jpg',
+    scene: '/images/shop/Home_table.webp',
     intro: 'متخصصِ برک‌های سنگین؛ صاحبِ رکوردِ بیشترین بردِ متوالی در لیگ شهری.',
     bio: [
       'بهراد محسنی با چهارده بردِ متوالی در لیگ شهری مشهد، رکوردی ثبت کرد که هنوز پابرجاست. بازیکنی که بهترین بازی‌اش را در شب‌های حذفی نشان می‌دهد.',
@@ -285,7 +285,7 @@ export const PLAYERS: Player[] = [
       { name: 'لیگ شهری مشهد', year: '۱۴۰۴', result: 'قهرمان' },
     ],
     albums: [
-      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/Home_table.jpg'] },
+      { id: 'a1', title: 'آلبوم مسابقات', photos: ['/images/shop/Home_table.webp'] },
     ],
     tags: ['پاکت بیلیارد'],
   },

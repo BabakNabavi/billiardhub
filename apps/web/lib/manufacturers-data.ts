@@ -58,7 +58,7 @@ export const MANUFACTURERS: MockManufacturer[] = [
     specialties: ['میز اسنوکر', 'میز آمریکایی', 'میز کارامبول', 'پارچه میز'],
     responseTime: '۲ ساعت',
     phone: '02166345678',
-    bannerImage: '/images/shop/snooker-table.jpg',
+    bannerImage: '/images/shop/snooker-table.webp',
     description: 'بزرگ‌ترین تولیدکننده‌ی میزهای حرفه‌ای بیلیارد در خاورمیانه — با استانداردِ WPBSA و بیش از ۲۵ سال تجربه.',
     tagline: 'تولیدکننده‌ی رسمی میزهای حرفه‌ای بیلیارد — استاندارد WPBSA',
     about: 'کارخانه بیلیارد سازان ایران با بیش از ۲۵ سال تجربه، پیشرو در تولید تجهیزات حرفه‌ای بیلیارد در خاورمیانه است. محصولات این کارخانه در بیش از ۶ کشور عرضه می‌شود و در مسابقات رسمی ایران استفاده می‌گردد.',
@@ -72,10 +72,10 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا پنج‌شنبه، ۸ تا ۱۷',
     website: 'www.billiardiran.ir',
     products: [
-      { id: 'p1', name: 'میز اسنوکر حرفه‌ای BS-Tournament', category: 'میز اسنوکر', description: 'میز ۱۲ فوتی با تخته اسلیت ۴۵ میلی‌متری ایتالیایی و پارچه Strachan 6811', specs: ['ابعاد: ۳۶۵×۱۸۳ سانتی‌متر', 'تخته: اسلیت ۴۵mm ایتالیا', 'پارچه: Strachan 6811', 'کوسن: Super Pro', 'وزن: ۹۵۰ کیلوگرم'], image: '/images/shop/snooker-table.jpg', badge: 'پرفروش' },
-      { id: 'p2', name: 'میز آمریکایی BS-Pro 9ft', category: 'میز آمریکایی', description: 'میز ۹ فوتی مناسب باشگاه‌ها، با چوب بلوط جامد', specs: ['ابعاد: ۲۵۴×۱۲۷ سانتی‌متر', 'تخته: اسلیت ۲۵mm', 'پارچه: Simonis 860', 'کوسن: K-66 Profile'], image: '/images/shop/Pro_table.jpg' },
-      { id: 'p3', name: 'میز اسنوکر خانگی BS-Home 10ft', category: 'میز اسنوکر', description: 'نسخه‌ی خانگی میز اسنوکر با کیفیت بالا و قیمت مناسب', specs: ['ابعاد: ۳۰۵×۱۵۳ سانتی‌متر', 'تخته: MDF بالاکیفیت', 'پارچه: Hainsworth Elite Pro'], image: '/images/shop/Home_table.jpg', badge: 'جدید' },
-      { id: 'p4', name: 'پارچه‌ی میز اسنوکر Sovereign', category: 'پارچه میز', description: 'پارچه‌ی استاندارد مسابقاتی تولید داخل با کیفیت بین‌المللی', specs: ['جنس: ۷۰٪ پشم ۳۰٪ نایلون', 'رنگ: سبز / آبی', 'عرض: ۱۹۵ سانتی‌متر'], image: '/images/shop/Ball-1.jpg' },
+      { id: 'p1', name: 'میز اسنوکر حرفه‌ای BS-Tournament', category: 'میز اسنوکر', description: 'میز ۱۲ فوتی با تخته اسلیت ۴۵ میلی‌متری ایتالیایی و پارچه Strachan 6811', specs: ['ابعاد: ۳۶۵×۱۸۳ سانتی‌متر', 'تخته: اسلیت ۴۵mm ایتالیا', 'پارچه: Strachan 6811', 'کوسن: Super Pro', 'وزن: ۹۵۰ کیلوگرم'], image: '/images/shop/snooker-table.webp', badge: 'پرفروش' },
+      { id: 'p2', name: 'میز آمریکایی BS-Pro 9ft', category: 'میز آمریکایی', description: 'میز ۹ فوتی مناسب باشگاه‌ها، با چوب بلوط جامد', specs: ['ابعاد: ۲۵۴×۱۲۷ سانتی‌متر', 'تخته: اسلیت ۲۵mm', 'پارچه: Simonis 860', 'کوسن: K-66 Profile'], image: '/images/shop/Pro_table.webp' },
+      { id: 'p3', name: 'میز اسنوکر خانگی BS-Home 10ft', category: 'میز اسنوکر', description: 'نسخه‌ی خانگی میز اسنوکر با کیفیت بالا و قیمت مناسب', specs: ['ابعاد: ۳۰۵×۱۵۳ سانتی‌متر', 'تخته: MDF بالاکیفیت', 'پارچه: Hainsworth Elite Pro'], image: '/images/shop/Home_table.webp', badge: 'جدید' },
+      { id: 'p4', name: 'پارچه‌ی میز اسنوکر Sovereign', category: 'پارچه میز', description: 'پارچه‌ی استاندارد مسابقاتی تولید داخل با کیفیت بین‌المللی', specs: ['جنس: ۷۰٪ پشم ۳۰٪ نایلون', 'رنگ: سبز / آبی', 'عرض: ۱۹۵ سانتی‌متر'], image: '/images/shop/Ball-1.webp' },
     ],
     certificates: [
       { title: 'استاندارد WPBSA', issuer: 'World Professional Billiards & Snooker Association', year: '۱۳۹۵' },
@@ -96,7 +96,7 @@ export const MANUFACTURERS: MockManufacturer[] = [
     specialties: ['چوب سفارشی', 'تعمیر چوب', 'گریپ چوب'],
     responseTime: '۴ ساعت',
     phone: '03136543210',
-    bannerImage: '/images/shop/cue_billiard_2.jpg',
+    bannerImage: '/images/shop/cue_billiard_2.webp',
     description: 'سازنده‌ی چوب‌های سفارشیِ حرفه‌ای با چوب‌های نادرِ جهان — تأییدشده‌ی فدراسیون بیلیارد.',
     tagline: 'سازنده‌ی چوب‌های سفارشیِ حرفه‌ای',
     about: 'پارسه متخصص ساخت چوب‌های سفارشی بیلیارد با چوب‌های نادر جهان است و چوب تیم ملی را تأمین می‌کند.',
@@ -110,8 +110,8 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا چهارشنبه، ۹ تا ۱۸',
     website: 'www.parsecue.ir',
     products: [
-      { id: 'p1', name: 'چوب سفارشی Parsé Master', category: 'چوب', description: 'ساخته‌شده با چوب افرا کانادایی و نوکِ چرمِ آبگینه', specs: ['وزن: ۵۴۰ گرم', 'طول: ۱۴۷ سانتی‌متر', 'نوک: چرم آبگینه'], image: '/images/shop/cue_billiard_2.jpg', badge: 'انحصاری' },
-      { id: 'p2', name: 'چوب حرفه‌ای Parsé Sport', category: 'چوب', description: 'چوب دو تکه‌ی مناسبِ بازیکنانِ باشگاهی', specs: ['وزن: ۵۲۰ گرم', 'اتصال: پین فولادی', 'روکش: لاکِ مات'], image: '/images/shop/cue_billiard_2.jpg' },
+      { id: 'p1', name: 'چوب سفارشی Parsé Master', category: 'چوب', description: 'ساخته‌شده با چوب افرا کانادایی و نوکِ چرمِ آبگینه', specs: ['وزن: ۵۴۰ گرم', 'طول: ۱۴۷ سانتی‌متر', 'نوک: چرم آبگینه'], image: '/images/shop/cue_billiard_2.webp', badge: 'انحصاری' },
+      { id: 'p2', name: 'چوب حرفه‌ای Parsé Sport', category: 'چوب', description: 'چوب دو تکه‌ی مناسبِ بازیکنانِ باشگاهی', specs: ['وزن: ۵۲۰ گرم', 'اتصال: پین فولادی', 'روکش: لاکِ مات'], image: '/images/shop/cue_billiard_2.webp' },
     ],
     certificates: [
       { title: 'تأیید فدراسیون', issuer: 'فدراسیون بیلیارد و اسنوکر', year: '۱۳۹۵' },
@@ -129,7 +129,7 @@ export const MANUFACTURERS: MockManufacturer[] = [
     specialties: ['پارچه اسنوکر', 'پارچه آمریکایی', 'پارچه کارامبول'],
     responseTime: '۸ ساعت',
     phone: '03538245678',
-    bannerImage: '/images/shop/Home_table.jpg',
+    bannerImage: '/images/shop/Home_table.webp',
     description: 'تنها تولیدکننده‌ی تخصصیِ پارچه‌ی میزِ بیلیارد در ایران، با استانداردِ ملی.',
     tagline: 'تولیدِ پارچه‌ی تخصصیِ میزهای بیلیارد',
     about: 'رویال تنها تولیدکننده‌ی تخصصیِ پارچه‌ی میزِ بیلیارد در ایران است و پارچه‌ی بسیاری از باشگاه‌های کشور را تأمین می‌کند.',
@@ -143,8 +143,8 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا پنج‌شنبه، ۸ تا ۱۶',
     website: '',
     products: [
-      { id: 'p1', name: 'پارچه‌ی Premium Green', category: 'پارچه', description: 'پارچه‌ی سبزِ استانداردِ مسابقات', specs: ['ترکیب: ۸۰٪ پشم', 'ضخامت: ۳٫۵mm', 'عرض: ۱۹۰ سانتی‌متر'], image: '/images/shop/Home_table.jpg' },
-      { id: 'p2', name: 'پارچه‌ی Royal Blue', category: 'پارچه', description: 'پارچه‌ی آبیِ ویژه‌ی میزهای آمریکایی', specs: ['ترکیب: ۷۵٪ پشم', 'ضخامت: ۳٫۸mm'], image: '/images/shop/Home_table.jpg', badge: 'جدید' },
+      { id: 'p1', name: 'پارچه‌ی Premium Green', category: 'پارچه', description: 'پارچه‌ی سبزِ استانداردِ مسابقات', specs: ['ترکیب: ۸۰٪ پشم', 'ضخامت: ۳٫۵mm', 'عرض: ۱۹۰ سانتی‌متر'], image: '/images/shop/Home_table.webp' },
+      { id: 'p2', name: 'پارچه‌ی Royal Blue', category: 'پارچه', description: 'پارچه‌ی آبیِ ویژه‌ی میزهای آمریکایی', specs: ['ترکیب: ۷۵٪ پشم', 'ضخامت: ۳٫۸mm'], image: '/images/shop/Home_table.webp', badge: 'جدید' },
     ],
     certificates: [
       { title: 'استاندارد ملی', issuer: 'سازمان استاندارد ایران', year: '۱۳۹۸' },
@@ -162,7 +162,7 @@ export const MANUFACTURERS: MockManufacturer[] = [
     specialties: ['میز هوشمند', 'نمایشگر دیجیتال', 'میز با LED'],
     responseTime: '۱ ساعت',
     phone: '05135678901',
-    bannerImage: '/images/shop/Pro_table.jpg',
+    bannerImage: '/images/shop/Pro_table.webp',
     description: 'نخستین تولیدکننده‌ی سیستم‌های دیجیتال و هوشمندِ تجهیزات بیلیارد در ایران.',
     tagline: 'تولیدِ تجهیزاتِ هوشمندِ بیلیارد',
     about: 'شرکت نوین اولین تولیدکننده‌ی سیستم‌های دیجیتال و هوشمندِ تجهیزات بیلیارد در ایران است و روی نورپردازی و امتیازشماریِ خودکار تمرکز دارد.',
@@ -176,7 +176,7 @@ export const MANUFACTURERS: MockManufacturer[] = [
     hours: 'شنبه تا چهارشنبه، ۹ تا ۱۷',
     website: 'www.novintechbilliard.ir',
     products: [
-      { id: 'p1', name: 'میز اسنوکر LED Pro', category: 'میز هوشمند', description: 'میز اسنوکر با نورپردازیِ LED هوشمند و تایمر دیجیتال', specs: ['LED Edge Lighting', 'تایمر دیجیتال', 'کنترل از موبایل'], image: '/images/shop/Pro_table.jpg', badge: 'نوآورانه' },
+      { id: 'p1', name: 'میز اسنوکر LED Pro', category: 'میز هوشمند', description: 'میز اسنوکر با نورپردازیِ LED هوشمند و تایمر دیجیتال', specs: ['LED Edge Lighting', 'تایمر دیجیتال', 'کنترل از موبایل'], image: '/images/shop/Pro_table.webp', badge: 'نوآورانه' },
       { id: 'p2', name: 'نمایشگر امتیاز دیجیتال', category: 'نمایشگر دیجیتال', description: 'اسکوربوردِ لمسیِ حرفه‌ای برای باشگاه‌ها', specs: ['نمایشگر ۲۱ اینچ', 'اتصال بی‌سیم', 'اپلیکیشن اختصاصی'], image: '/images/shop/pool_chalk_1.jpg' },
     ],
     certificates: [

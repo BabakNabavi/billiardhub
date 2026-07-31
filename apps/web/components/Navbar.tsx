@@ -310,7 +310,7 @@ export default function Navbar() {
             {/* سایه‌ی خیلی نرم + بِوِلِ ظریف (هایلایت بالا، تیرگی پایین) */}
             <div style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
               boxShadow: '0 1px 2px rgba(28,27,23,0.12), 0 4px 9px rgba(184,147,58,0.13)' }}>
-                <img src="/images/Logo/logo-256x256.png" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/images/Logo/logo-256x256.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: '12px', pointerEvents: 'none',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.26), inset 0 -1px 2px rgba(60,40,10,0.18)' }} />
               </div>

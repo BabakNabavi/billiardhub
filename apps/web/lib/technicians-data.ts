@@ -75,7 +75,7 @@ export const TECHNICIANS: Technician[] = [
     services: ['تعویض پارچه', 'رگلاژ و تراز میز', 'نصب میز', 'تعمیر میز'],
     projects: [
       { id: 'p1', title: 'پارچه‌کشی میز فینال', desc: 'تعویض پارچه‌ی مسابقه‌ای و رگلاژ کامل پیش از فینال فصل.', city: 'تهران', club: 'باشگاه پلاتینیوم', service: 'تعویض پارچه', image: '/images/services/IMG_0961.png' },
-      { id: 'p2', title: 'نصب و تراز دو میز اسنوکر', desc: 'نصب از صفر، تراز اسلیت سه‌تکه و تست غلتش.', city: 'کرج', club: 'باشگاه المپیک', service: 'نصب میز', image: '/images/shop/snooker-table.jpg' },
+      { id: 'p2', title: 'نصب و تراز دو میز اسنوکر', desc: 'نصب از صفر، تراز اسلیت سه‌تکه و تست غلتش.', city: 'کرج', club: 'باشگاه المپیک', service: 'نصب میز', image: '/images/shop/snooker-table.webp' },
       { id: 'p3', title: 'بازسازی میز کلاسیک', desc: 'تعویض لاستیک باند، پارچه و احیای چوبِ بدنه.', city: 'تهران', service: 'بازسازی میز', image: '/images/services/repaire.jfif' },
     ],
     albums: [
@@ -83,13 +83,13 @@ export const TECHNICIANS: Technician[] = [
         id: 'a1',
         title: 'پروژه‌های تهران',
         desc: 'منتخبِ نصب‌ها و پارچه‌کشی‌های یک سالِ اخیر در تهران.',
-        photos: ['/images/services/IMG_0961.png', '/images/shop/snooker-table.jpg', '/images/shop/snooker-table-2.jpg', '/images/hero/hero-lounge.jpg', '/images/services/IMG_0962.png'],
+        photos: ['/images/services/IMG_0961.png', '/images/shop/snooker-table.webp', '/images/shop/snooker-table-2.webp', '/images/hero/hero-lounge.jpg', '/images/services/IMG_0962.png'],
       },
       {
         id: 'a2',
         title: 'مراحل بازسازی',
         desc: 'از بازکردنِ باند تا نتیجه‌ی نهایی — مستندِ یک بازسازیِ کامل.',
-        photos: ['/images/services/repaire.jfif', '/images/services/IMG_0963.png', '/images/shop/Pro_table.jpg', '/images/clubs/club2.jpg'],
+        photos: ['/images/services/repaire.jfif', '/images/services/IMG_0963.png', '/images/shop/Pro_table.webp', '/images/clubs/club2.jpg'],
       },
     ],
     phone: '09121112233',
@@ -110,14 +110,14 @@ export const TECHNICIANS: Technician[] = [
     services: ['بازسازی میز', 'تعمیر میز', 'تعویض لاستیک باند', 'ساخت و تعمیر قطعات'],
     projects: [
       { id: 'p1', title: 'بازسازی کامل میز ۱۲ فوت', desc: 'تعویض باند، اسلیت‌بندی مجدد و رویه‌ی نو.', city: 'مشهد', club: 'مجموعه آفتاب', service: 'بازسازی میز', image: '/images/services/IMG_0963.png' },
-      { id: 'p2', title: 'ساخت جیب و قطعات برنجی', desc: 'ساختِ سفارشیِ قطعاتِ ازرده‌خارج برای میز کلاسیک.', city: 'نیشابور', service: 'ساخت و تعمیر قطعات', image: '/images/shop/rest-pool-2.jpg' },
+      { id: 'p2', title: 'ساخت جیب و قطعات برنجی', desc: 'ساختِ سفارشیِ قطعاتِ ازرده‌خارج برای میز کلاسیک.', city: 'نیشابور', service: 'ساخت و تعمیر قطعات', image: '/images/shop/rest-pool-2.webp' },
     ],
     albums: [
       {
         id: 'a1',
         title: 'بازسازی میزهای مجموعه آفتاب',
         desc: 'مستندِ نوسازیِ چهار میزِ سالنِ اصلی.',
-        photos: ['/images/services/IMG_0963.png', '/images/shop/Home_table.jpg', '/images/clubs/club3.jpg', '/images/shop/Pro_table.jpg'],
+        photos: ['/images/services/IMG_0963.png', '/images/shop/Home_table.webp', '/images/clubs/club3.jpg', '/images/shop/Pro_table.webp'],
       },
     ],
     phone: '09152223344',
@@ -137,14 +137,14 @@ export const TECHNICIANS: Technician[] = [
     services: ['نصب میز', 'جابه‌جایی میز', 'رگلاژ و تراز میز'],
     projects: [
       { id: 'p1', title: 'انتقال سه میز باشگاهی', desc: 'دمونتاژ، حمل و نصب مجدد با تراز کامل در محل جدید.', city: 'اصفهان', club: 'باشگاه زاینده‌رود', service: 'جابه‌جایی میز', image: '/images/services/IMG_0962.png' },
-      { id: 'p2', title: 'نصب میز خانگی ۸ فوت', desc: 'نصب در منزل با محدودیتِ فضای ورود.', city: 'اصفهان', service: 'نصب میز', image: '/images/shop/Home_table.jpg' },
+      { id: 'p2', title: 'نصب میز خانگی ۸ فوت', desc: 'نصب در منزل با محدودیتِ فضای ورود.', city: 'اصفهان', service: 'نصب میز', image: '/images/shop/Home_table.webp' },
     ],
     albums: [
       {
         id: 'a1',
         title: 'نصب‌های اصفهان',
         desc: 'گزیده‌ی نصب‌ها و انتقال‌های امسال.',
-        photos: ['/images/services/IMG_0962.png', '/images/shop/Home_table.jpg', '/images/clubs/club5.jpg'],
+        photos: ['/images/services/IMG_0962.png', '/images/shop/Home_table.webp', '/images/clubs/club5.jpg'],
       },
     ],
     phone: '09133334455',
@@ -164,14 +164,14 @@ export const TECHNICIANS: Technician[] = [
     ],
     services: ['تعویض پارچه', 'تعویض لاستیک باند', 'تعمیر میز', 'رگلاژ و تراز میز'],
     projects: [
-      { id: 'p1', title: 'تعویض پارچه و رگلاژ ۶ میز', desc: 'سرویسِ کاملِ سالن پیش از لیگ شهری.', city: 'شیراز', club: 'باشگاه پرستیژ', service: 'تعویض پارچه', image: '/images/shop/Pro_table.jpg' },
+      { id: 'p1', title: 'تعویض پارچه و رگلاژ ۶ میز', desc: 'سرویسِ کاملِ سالن پیش از لیگ شهری.', city: 'شیراز', club: 'باشگاه پرستیژ', service: 'تعویض پارچه', image: '/images/shop/Pro_table.webp' },
     ],
     albums: [
       {
         id: 'a1',
         title: 'سرویس‌های باشگاه پرستیژ',
         desc: 'پارچه‌کشی و رگلاژِ فصلِ جاری.',
-        photos: ['/images/shop/Pro_table.jpg', '/images/shop/pool_chalk_1.jpg', '/images/clubs/club6.jpeg'],
+        photos: ['/images/shop/Pro_table.webp', '/images/shop/pool_chalk_1.jpg', '/images/clubs/club6.jpeg'],
       },
     ],
     phone: '09174445566',
@@ -190,14 +190,14 @@ export const TECHNICIANS: Technician[] = [
     ],
     services: ['خدمات چوب و تجهیزات', 'ساخت و تعمیر قطعات'],
     projects: [
-      { id: 'p1', title: 'سرویس چوب‌های تیم استانی', desc: 'تعویض تیپ و بالانسِ دوازده چوب پیش از مسابقات.', city: 'تبریز', service: 'خدمات چوب و تجهیزات', image: '/images/shop/cue_billiard_2.jpg' },
+      { id: 'p1', title: 'سرویس چوب‌های تیم استانی', desc: 'تعویض تیپ و بالانسِ دوازده چوب پیش از مسابقات.', city: 'تبریز', service: 'خدمات چوب و تجهیزات', image: '/images/shop/cue_billiard_2.webp' },
     ],
     albums: [
       {
         id: 'a1',
         title: 'کارگاه چوب',
         desc: 'نمونه‌کارهای سرویس و تعمیرِ چوب.',
-        photos: ['/images/shop/cue_billiard_2.jpg', '/images/shop/cue_billiard.jpg', '/images/shop/accessori.png'],
+        photos: ['/images/shop/cue_billiard_2.webp', '/images/shop/cue_billiard.webp', '/images/shop/accessori.png'],
       },
     ],
     phone: '09144556677',
@@ -216,15 +216,15 @@ export const TECHNICIANS: Technician[] = [
     ],
     services: ['نصب میز', 'رگلاژ و تراز میز', 'جابه‌جایی میز', 'تعمیر میز'],
     projects: [
-      { id: 'p1', title: 'بازسازی میز اسنوکر', desc: 'تعویض پارچه و باند به‌همراه ترازِ کامل.', city: 'کرمان', club: 'باشگاه ماهان', service: 'بازسازی میز', image: '/images/shop/snooker-table-2.jpg' },
-      { id: 'p2', title: 'نصب دو میز مسابقه‌ای', desc: 'نصب و تراز برای میزبانیِ تورِ استانی.', city: 'رفسنجان', service: 'نصب میز', image: '/images/shop/snooker-table.jpg' },
+      { id: 'p1', title: 'بازسازی میز اسنوکر', desc: 'تعویض پارچه و باند به‌همراه ترازِ کامل.', city: 'کرمان', club: 'باشگاه ماهان', service: 'بازسازی میز', image: '/images/shop/snooker-table-2.webp' },
+      { id: 'p2', title: 'نصب دو میز مسابقه‌ای', desc: 'نصب و تراز برای میزبانیِ تورِ استانی.', city: 'رفسنجان', service: 'نصب میز', image: '/images/shop/snooker-table.webp' },
     ],
     albums: [
       {
         id: 'a1',
         title: 'پروژه‌های کرمان',
         desc: 'نصب‌ها و سرویس‌های استانِ کرمان.',
-        photos: ['/images/shop/snooker-table-2.jpg', '/images/shop/snooker-table.jpg', '/images/HS/4.jfif', '/images/clubs/club7.jpeg'],
+        photos: ['/images/shop/snooker-table-2.webp', '/images/shop/snooker-table.webp', '/images/HS/4.jfif', '/images/clubs/club7.jpeg'],
       },
     ],
     phone: '09131234567',

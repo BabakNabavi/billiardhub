@@ -56,6 +56,21 @@ const GOLD_D   = '#A07840';
 const CTA_INK  = '#8A6020';
 const GOLD_DIM = 'rgba(199,166,106,0.60)';
 const GOLD_BOR = 'rgba(199,166,106,0.22)';
+
+/* لرزشِ کوتاه هنگام تعویضِ کارت.
+
+   مرورگر `navigator.vibrate` را پیش از اولین لمسِ کاربر مسدود می‌کند و
+   هر بار یک خطا در کنسول می‌گذارد — همان چیزی که نمره‌ی Best Practices
+   را پایین نگه داشته بود. این کمکی تا وقتی کاربر واقعاً چیزی لمس نکرده
+   اصلاً صدایش نمی‌زند. */
+let userTapped = false;
+if (typeof window !== 'undefined') {
+  window.addEventListener('pointerdown', () => { userTapped = true; }, { once: true, passive: true });
+}
+function vibrate(ms = 8) {
+  if (!userTapped) return;
+  try { navigator.vibrate?.(ms); } catch { /* دستگاهی که پشتیبانی نمی‌کند */ }
+}
 const TEXT     = '#1A1917';
 const TEXT_M   = 'rgba(26,25,23,0.28)';
 const BORDER   = 'rgba(26,25,23,0.07)';
@@ -73,9 +88,9 @@ const IMG = {
   wall2: '/images/clubs/wallpaper2.jpeg',
   wall3: '/images/clubs/wallpaper3.webp',
   wall4:  '/images/clubs/wallpaper4.webp',
-  wall5:  '/images/clubs/wallpaper5.jfif',
-  wall12: '/images/clubs/wallpaper12.jpg',
-  wall6: '/images/clubs/wallpaper12.jpg',
+  wall5:  '/images/clubs/wallpaper5.webp',
+  wall12: '/images/clubs/wallpaper12.webp',
+  wall6: '/images/clubs/wallpaper12.webp',
   wall7: '/images/clubs/wallpaper21.jpg',
 
   // Real club photos — filenames match current /public/images/clubs/
@@ -90,15 +105,15 @@ const IMG = {
   clubC: '/images/clubs/billiadr-club-3.jpg',
 
   // Equipment / shop
-  table:    '/images/shop/Home_table.jpg',
-  proTable: '/images/shop/Pro_table.jpg',
-  snooker:  '/images/shop/snooker-table.jpg',
-  snooker2: '/images/shop/snooker-table-2.jpg',
-  cue:      '/images/shop/cue_billiard.jpg',
-  cue2:     '/images/shop/cue_billiard_2.jpg',
-  ball:     '/images/shop/Ball-1.jpg',
+  table:    '/images/shop/Home_table.webp',
+  proTable: '/images/shop/Pro_table.webp',
+  snooker:  '/images/shop/snooker-table.webp',
+  snooker2: '/images/shop/snooker-table-2.webp',
+  cue:      '/images/shop/cue_billiard.webp',
+  cue2:     '/images/shop/cue_billiard_2.webp',
+  ball:     '/images/shop/Ball-1.webp',
   chalk:    '/images/shop/pool_chalk_1.jpg',
-  rest:     '/images/shop/rest-pool-2.jpg',
+  rest:     '/images/shop/rest-pool-2.webp',
 
   // Education / learn
   learn1: '/images/learn/learn1.webp',
@@ -1323,7 +1338,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       if (newActive !== activeClubRef.current) {
         activeClubRef.current = newActive;
         setActiveClub(newActive);
-        try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8); } catch(_) {}
+        vibrate();
       }
     });
   }, []);
@@ -1359,7 +1374,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       if (newActive !== activeMktRef.current) {
         activeMktRef.current = newActive;
         setActiveMkt(newActive);
-        try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8); } catch(_) {}
+        vibrate();
       }
     });
   }, []);
@@ -1394,9 +1409,15 @@ useEffect(() => {
 
   return (
     <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&display=swap" rel="stylesheet" />
+      {/* فونتِ Cormorant Garamond و دو preconnectش حذف شدند.
+
+          سه دلیل، هر سه با اندازه‌گیری:
+            • CSPِ خودِ ما بارگذاری‌اش را مسدود می‌کرد ⇒ هیچ‌وقت لود
+              نمی‌شد و فقط یک خطای امنیتی در کنسول می‌ساخت (که نمره‌ی
+              Best Practices را پایین می‌آورد)
+            • هیچ‌جای پروژه به این فونت ارجاع نمی‌داد
+            • دو `preconnect` به دامنه‌ای که هرگز استفاده نمی‌شد، فقط
+              اتصالِ بی‌مصرف باز می‌کرد */}
       <style>{`
         :root { --hero-bottom-gap: 5px; }
         @keyframes fadeUp      { from{opacity:0;transform:translateY(30px) scale(0.97);filter:blur(5px);}to{opacity:1;transform:none;filter:blur(0);} }

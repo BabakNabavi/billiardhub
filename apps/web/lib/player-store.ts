@@ -131,7 +131,7 @@ export function profileToPlayer(p: PlayerProfile): Player {
     youth: p.youth,
     club: p.clubName ? { name: p.clubName } : undefined,
     tone: p.tone,
-    scene: p.scene || '/images/shop/snooker-table.jpg',
+    scene: p.scene || '/images/shop/snooker-table.webp',
     intro: p.intro,
     bio: p.bio.length ? p.bio : [p.intro].filter(Boolean),
     careerStart: p.careerStart || '—',

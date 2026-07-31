@@ -40,7 +40,7 @@ export const MOCK_SELLERS: MockSeller[] = [
     specialties: ['چوب حرفه‌ای', 'میز', 'لوازم جانبی'],
     responseTime: '۲ ساعت',
     phone: '02188001234',
-    bannerImage: '/images/shop/snooker-table.jpg',
+    bannerImage: '/images/shop/snooker-table.webp',
     description: 'بزرگ‌ترین مجموعه تجهیزات بیلیارد در ایران با بیش از ۳۰۰ محصول اصل از برترین برندهای جهانی',
   },
   {
@@ -58,7 +58,7 @@ export const MOCK_SELLERS: MockSeller[] = [
     specialties: ['چوب', 'توپ'],
     responseTime: '۴ ساعت',
     phone: '02155009876',
-    bannerImage: '/images/shop/cue_billiard_2.jpg',
+    bannerImage: '/images/shop/cue_billiard_2.webp',
     description: 'فروش تخصصی چوب و توپ بیلیارد با ضمانت اصالت کالا و خدمات پس از فروش',
   },
   {
@@ -76,7 +76,7 @@ export const MOCK_SELLERS: MockSeller[] = [
     specialties: ['چوب', 'لوازم جانبی'],
     responseTime: '۸ ساعت',
     phone: '03136001234',
-    bannerImage: '/images/shop/Ball-1.jpg',
+    bannerImage: '/images/shop/Ball-1.webp',
     description: 'فروشگاه تخصصی بیلیارد در اصفهان با قیمت‌های رقابتی و تنوع بالا',
   },
   {
@@ -94,7 +94,7 @@ export const MOCK_SELLERS: MockSeller[] = [
     specialties: ['چوب', 'کیف چوب'],
     responseTime: '۱ ساعت',
     phone: '05138001234',
-    bannerImage: '/images/shop/Home_table.jpg',
+    bannerImage: '/images/shop/Home_table.webp',
     description: 'ارسال سراسری — تخصصی در فروش آنلاین چوب و لوازم بیلیارد با بهترین قیمت',
   },
   {
@@ -112,7 +112,7 @@ export const MOCK_SELLERS: MockSeller[] = [
     specialties: ['میز اسنوکر', 'چوب', 'پارچه میز'],
     responseTime: '۳ ساعت',
     phone: '07132001234',
-    bannerImage: '/images/shop/Pro_table.jpg',
+    bannerImage: '/images/shop/Pro_table.webp',
     description: 'نماینده رسمی برند Predator در جنوب کشور — تخصصی در میزهای اسنوکر حرفه‌ای',
   },
   {

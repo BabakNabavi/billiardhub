@@ -49,7 +49,7 @@ async function resolveProducts(rawRefs: string[]): Promise<Map<string, EntitySna
     out.set(s(r.id), {
       entityType: 'product', ref: s(r.id),
       title: s(r.title, 'محصول'),
-      image: imgs[0] || '/images/shop/cue_billiard_2.jpg',
+      image: imgs[0] || '/images/shop/cue_billiard_2.webp',
       subtitle: s(r.brand),
       href: `/shop/${s(r.id)}`,
       price,
@@ -76,7 +76,7 @@ async function resolveClubs(rawRefs: string[]): Promise<Map<string, EntitySnapsh
       entityType: 'club', ref: s(r.id),
       title: s(r.name, 'باشگاه'),
       /* «??» بعد از s() مرده بود — s هرگز null برنمی‌گرداند */
-      image: imgs[0] || s(r.logo) || '/images/shop/snooker-table.jpg',
+      image: imgs[0] || s(r.logo) || '/images/shop/snooker-table.webp',
       subtitle: s(r.city),
       href: `/clubs/${s(r.id)}`,
       city: s(r.city),

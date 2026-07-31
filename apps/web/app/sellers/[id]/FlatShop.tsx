@@ -61,7 +61,7 @@ const STORE = {
   address: 'تهران، خیابان ولیعصر، بالاتر از پارک ملت، پلاک ۴۵',
   hours: 'شنبه تا پنج‌شنبه، ۹ تا ۲۰',
   shipping: 'تحویل حضوری هم در فروشگاه امکان‌پذیر است',
-  storyImage: '/images/shop/Pro_table.jpg',
+  storyImage: '/images/shop/Pro_table.webp',
   storyText: 'جدیدترین کالکشن چوب‌های کربنی Predator رسید — همین حالا ببینید!',
 }
 

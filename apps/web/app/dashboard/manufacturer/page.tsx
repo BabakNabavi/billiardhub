@@ -120,7 +120,7 @@ export default function ManufacturerDashboard() {
     const p: MfrProduct = {
       id: rid(), name: prod.name.trim(), category: prod.category.trim(),
       description: prod.description.trim(), specs: [],
-      image: prod.image || '/images/shop/Pro_table.jpg',
+      image: prod.image || '/images/shop/Pro_table.webp',
     }
     set('products', [...form.products, p])
     setProd({ name: '', category: '', description: '', image: '' })

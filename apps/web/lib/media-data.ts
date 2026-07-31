@@ -68,7 +68,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۱۸:۲۴',
     views: 48200, likes: 2210,
     date: '۳۰ تیر ۱۴۰۵', ts: 1000,
-    thumb: '/images/shop/snooker-table.jpg',
+    thumb: '/images/shop/snooker-table.webp',
     src: DEMO_SRC,
     description: [
       'در این مسترکلاس، مسیر رسیدن از برک‌های ۳۰تایی به برک‌های بالای ۷۰ را قدم‌به‌قدم می‌سازیم: انتخاب توپِ درست، زاویه‌ی ورود به رنگی‌ها، مدیریت کوشن و برنامه‌ریزی سه‌ضربه‌ای.',
@@ -85,7 +85,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۱۲:۰۷',
     views: 61800, likes: 3140,
     date: '۲۹ تیر ۱۴۰۵', ts: 990,
-    thumb: '/images/shop/Pro_table.jpg',
+    thumb: '/images/shop/Pro_table.webp',
     src: DEMO_SRC,
     description: [
       'خلاصه‌ی کاملِ فینال تهران مسترز با گزارشِ اختصاصی؛ از سیفتی‌های نفس‌گیرِ فریم ششم تا کلیرنسِ تاریخیِ فریم آخر.',
@@ -101,7 +101,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۰۹:۴۵',
     views: 35400, likes: 1780,
     date: '۲۸ تیر ۱۴۰۵', ts: 980,
-    thumb: '/images/shop/Ball-1.jpg',
+    thumb: '/images/shop/Ball-1.webp',
     src: DEMO_SRC,
     description: [
       'استاپ‌شات، فالو و درا — سه ضربه‌ای که پایه‌ی هر پوزیشن‌پلی هستند. با سه تمرینِ ساده که فقط به یک توپ نیاز دارند.',
@@ -117,7 +117,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۲۴:۱۶',
     views: 52900, likes: 2860,
     date: '۲۷ تیر ۱۴۰۵', ts: 970,
-    thumb: '/images/shop/snooker-table-2.jpg',
+    thumb: '/images/shop/snooker-table-2.webp',
     src: DEMO_SRC,
     description: [
       'قهرمان تازه‌ی جهان از شبِ فینال می‌گوید؛ از استرسِ فریمِ آخر تا لحظه‌ای که تصمیم گرفت به‌جای سیفتی، سراغِ قرمزِ آخر برود.',
@@ -132,7 +132,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۱۵:۳۲',
     views: 28700, likes: 1490,
     date: '۲۵ تیر ۱۴۰۵', ts: 950,
-    thumb: '/images/shop/cue_billiard_2.jpg',
+    thumb: '/images/shop/cue_billiard_2.webp',
     src: DEMO_SRC,
     description: [
       'با ریگِ تستِ ثابت، دیفلکشنِ سه شفتِ کربنی و دو شفتِ افرا را اندازه گرفتیم؛ اعداد، جدول مقایسه و جمع‌بندیِ خرید.',
@@ -222,7 +222,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۰۷:۱۲',
     views: 40100, likes: 2050,
     date: '۱۳ تیر ۱۴۰۵', ts: 830,
-    thumb: '/images/HS/6.jfif',
+    thumb: '/images/HS/6.webp',
     src: DEMO_SRC,
     description: [
       'بیشترِ خطاهای ضربه از استنسِ غلط شروع می‌شود. چک‌لیستِ هفت‌مرحله‌ای برای قرارگیریِ درست پشت میز.',
@@ -237,7 +237,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۱۳:۴۸',
     views: 20400, likes: 1030,
     date: '۱۱ تیر ۱۴۰۵', ts: 810,
-    thumb: '/images/shop/Home_table.jpg',
+    thumb: '/images/shop/Home_table.webp',
     src: DEMO_SRC,
     description: [
       'قبل از ضربه‌ی اول، مسیرِ ۱ تا ۹ را در ذهن بچینید. سه الگوی تمرینی برای تقویتِ نگاهِ کلی به میز.',
@@ -297,7 +297,7 @@ export const MEDIA_VIDEOS: MediaVideo[] = [
     duration: '۰۶:۵۴',
     views: 9800, likes: 430,
     date: '۳ تیر ۱۴۰۵', ts: 730,
-    thumb: '/images/shop/rest-pool-2.jpg',
+    thumb: '/images/shop/rest-pool-2.webp',
     src: DEMO_SRC,
     description: [
       'مراسمِ سالانه‌ی معرفیِ برترین باشگاه‌های شبکه‌ی بیلیارد هاب؛ برندگان، لحظه‌ها و حاشیه‌های شبِ باشگاه‌ها.',

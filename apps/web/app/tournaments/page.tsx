@@ -159,7 +159,7 @@ export default function TournamentsPage() {
 
         /* ═══ پوستر قهرمانی (هیرو) ═══ */
         .tn-hero { position: relative; overflow: hidden; color: #fff; background: #0B0A08; }
-        .tn-hero-img { position: absolute; inset: 0; background: url('/images/shop/Pro_table.jpg') center 62%/cover;
+        .tn-hero-img { position: absolute; inset: 0; background: url('/images/shop/Pro_table.webp') center 62%/cover;
           filter: grayscale(0.35) brightness(0.5) contrast(1.1) saturate(1.15); transform: scale(1.04); }
         .tn-hero-grade { position: absolute; inset: 0; background:
           radial-gradient(ellipse 60% 90% at 74% 8%, rgba(255,238,204,0.20), transparent 55%),
