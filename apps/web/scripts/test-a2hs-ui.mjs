@@ -104,7 +104,7 @@ for (const d of DEVICES) {
   await p.close()
 }
 
-/* چرخه‌ی رد کردن: «بعداً» ⇒ رفرش ⇒ نباید برگردد */
+/* یک دکمه، دو رفتار: × فقط می‌بندد، «متوجه شدم» دو روز ساکت می‌کند */
 console.log('\n■ چرخه‌ی رد کردن روی مرورگر واقعی')
 {
   const p = await browser.newPage()
@@ -118,25 +118,38 @@ console.log('\n■ چرخه‌ی رد کردن روی مرورگر واقعی')
   await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 })
   t('بار اول ظاهر شد', true)
 
-  await p.evaluate(() => [...document.querySelectorAll('.bh-a2hs-ghost')][0].click())
-  await new Promise(r => setTimeout(r, 300))
-  t('بعد از «بعداً» بسته شد', (await p.$$('.bh-a2hs-sheet')).length === 0)
+  t('فقط یک دکمه دارد («بعداً» حذف شده)',
+    await p.evaluate(() => document.querySelectorAll('.bh-a2hs-actions button').length) === 1)
+  t('دکمه‌ی «بعداً» دیگر وجود ندارد',
+    await p.evaluate(() => !document.querySelector('.bh-a2hs-ghost') && !document.body.innerText.includes('بعداً')))
 
-  const stored = await p.evaluate(() => localStorage.getItem('bh_a2hs_ios_v2'))
-  t('در localStorage ثبت شد', !!stored && JSON.parse(stored).s === 'later', String(stored))
+  /* ── × فقط می‌بندد ── */
+  await p.evaluate(() => document.querySelector('.bh-a2hs-x').click())
+  await new Promise(r => setTimeout(r, 300))
+  t('با × بسته شد', (await p.$$('.bh-a2hs-sheet')).length === 0)
+  await p.reload({ waitUntil: 'networkidle2' })
+  await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 }).catch(() => {})
+  t('بعد از رفرش دوباره آمد (× سکوت نمی‌سازد)', (await p.$$('.bh-a2hs-sheet')).length === 1)
+
+  /* ── «متوجه شدم» ⇒ دو روز ── */
+  await p.evaluate(() => document.querySelector('.bh-a2hs-primary').click())
+  await new Promise(r => setTimeout(r, 300))
+  const st = await p.evaluate(() => localStorage.getItem('bh_a2hs_ios_v2'))
+  t('«متوجه شدم» ثبت شد', !!st && JSON.parse(st).s === 'ok', String(st))
 
   await p.reload({ waitUntil: 'networkidle2' })
   await new Promise(r => setTimeout(r, 3200))
-  t('بعد از رفرش دوباره ظاهر نشد', (await p.$$('.bh-a2hs-sheet')).length === 0)
+  t('بعد از رفرش دیگر نیامد', (await p.$$('.bh-a2hs-sheet')).length === 0)
 
-  /* «متوجه شدم» ⇒ سکوت بلند */
-  await p.evaluate(() => localStorage.removeItem('bh_a2hs_ios_v2'))
+  /* ساعت را دو روز جلو می‌بریم (با دست‌کاری مهر زمانی ذخیره‌شده) */
+  await p.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem('bh_a2hs_ios_v2'))
+    s.t = Date.now() - 3 * 24 * 3600e3
+    localStorage.setItem('bh_a2hs_ios_v2', JSON.stringify(s))
+  })
   await p.reload({ waitUntil: 'networkidle2' })
-  await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 })
-  await p.evaluate(() => document.querySelector('.bh-a2hs-primary').click())
-  await new Promise(r => setTimeout(r, 300))
-  const ok = await p.evaluate(() => JSON.parse(localStorage.getItem('bh_a2hs_ios_v2') || '{}').s)
-  t('«متوجه شدم» ثبت شد', ok === 'ok', String(ok))
+  await p.waitForSelector('.bh-a2hs-sheet', { timeout: 15000 }).catch(() => {})
+  t('سه روز بعد دوباره برمی‌گردد', (await p.$$('.bh-a2hs-sheet')).length === 1)
   await p.close()
 }
 

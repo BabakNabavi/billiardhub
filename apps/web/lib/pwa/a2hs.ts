@@ -25,27 +25,23 @@ const DAY = 24 * 60 * 60 * 1000
 export const A2HS_CONFIG = {
   /** تأخیر پس از ورود به صفحه — کاربر اول باید صفحه را ببیند، نه پاپ‌آپ را */
   showDelayMs: 1600,
-  /** «بعداً» ⇒ دو روز سکوت.
+  /** «متوجه شدم» ⇒ دو روز سکوت.
    *
-   *  اول یک هفته بود و عملاً یعنی راهنما یک‌بار دیده می‌شد و تمام. برای
-   *  چیزی که کاربر باید خودش دستی انجام دهد، یک یادآوری دوروزه منطقی
-   *  است؛ سقف `maxShows` جلوی اصرار بی‌پایان را می‌گیرد. */
-  laterCooldownMs: 2 * DAY,
-  /** «متوجه شدم» ⇒ دو ماه سکوت.
-   *
-   *  شش ماه بود؛ برای کاربری که «متوجه شدم» زد ولی هرگز نصب نکرد، عملاً
-   *  یعنی دیگر هیچ‌وقت. دو ماه هم محترمانه است هم یک یادآوری می‌دهد. */
-  gotItCooldownMs: 60 * DAY,
+   *  تنها دکمه‌ی تصمیم‌گیرنده همین است. «بعداً» حذف شد چون دو دکمه با دو
+   *  مدت سکوت متفاوت، هم انتخاب را سخت می‌کرد هم رفتار را غیرقابل‌پیش‌بینی.
+   *  حالا یک دکمه و یک عدد: هر دو روز یک یادآوری، تا وقتی کاربر نصب کند. */
+  gotItCooldownMs: 2 * DAY,
   /** بستن با × یا کلیک روی پس‌زمینه ⇒ فقط تا پایان همین بازدید.
    *
-   *  این مهم‌ترین اصلاح است: پس‌زمینه کل صفحه را می‌پوشاند، پس یک لمس
-   *  اتفاقی برای بستن، پیش‌تر همان cooldown بلند «بعداً» را می‌نوشت و
-   *  راهنما برای روزها ناپدید می‌شد — بدون اینکه کاربر چنین چیزی
-   *  خواسته باشد. حالا فقط تا رفرش بعدی ساکت می‌ماند و شمارنده هم
-   *  بالا نمی‌رود. */
+   *  پس‌زمینه کل صفحه را می‌پوشاند، پس یک لمس اتفاقی نباید به‌اندازه‌ی یک
+   *  تصمیم آگاهانه وزن داشته باشد. */
   dismissCooldownMs: 0,
-  /** بعد از این تعداد نمایش، دیگر اصرار نمی‌کنیم (سکوت بلند) */
-  maxShows: 3,
+  /* سقف تعداد نمایش عمداً حذف شد: با سکوت دوروزه، «سقف» هم دقیقاً همان
+     دو روز می‌شد و هیچ اثر جداگانه‌ای نداشت.
+
+     نتیجه‌اش این است که راهنما هر دو روز یک‌بار برمی‌گردد و تا نصب‌شدن
+     اپ متوقف نمی‌شود — همان چیزی که خواسته شده. تنها چیزی که برای همیشه
+     خاموشش می‌کند، خودِ نصب است (تشخیص standalone). */
   /** مسیرهایی که کاربر وسط کار حساس است و نباید مزاحمش شد */
   mutedRoutes: ['/login', '/register', '/forgot-password', '/direct', '/admin'] as const,
 } as const
@@ -94,20 +90,26 @@ export function safariConfidence(ua: string, standaloneFlag: unknown): SafariCon
 
 /* ── وضعیت ذخیره‌شده ────────────────────────────────────────── */
 
-export type A2hsAction = 'later' | 'ok' | 'dismiss'
+/* `later` دیگر تولید نمی‌شود (دکمه‌اش حذف شد) ولی در نوع می‌ماند: هر
+   مرورگری که با نسخه‌ی قبلی این مقدار را ذخیره کرده باید همچنان خوانده
+   شود، نه اینکه رکوردش خراب حساب شود. */
+export type A2hsAction = 'ok' | 'dismiss'
+type StoredAction = A2hsAction | 'later'
 
 export interface A2hsState {
   /** آخرین اقدام کاربر */
-  s: A2hsAction
+  s: StoredAction
   /** زمان آن اقدام */
   t: number
-  /** چند بار تا حالا نشانش داده‌ایم */
+  /** چند بار تا حالا نشانش داده‌ایم (فقط برای سابقه؛ دیگر سقفی نیست) */
   n: number
 }
 
-const COOLDOWN: Record<A2hsAction, number> = {
+const COOLDOWN: Record<StoredAction, number> = {
   ok: A2HS_CONFIG.gotItCooldownMs,
-  later: A2HS_CONFIG.laterCooldownMs,
+  /* رکوردهای قدیمی «بعداً» با همان قاعده‌ی امروز سنجیده می‌شوند، پس
+     کسی که دیروز آن دکمه را زده در سکوت قدیمی گیر نمی‌ماند. */
+  later: A2HS_CONFIG.gotItCooldownMs,
   dismiss: A2HS_CONFIG.dismissCooldownMs,
 }
 
@@ -125,8 +127,7 @@ export function parseState(raw: string | null): A2hsState | null {
 /** آیا هنوز در دوره‌ی سکوت هستیم؟ */
 export function isMuted(state: A2hsState | null, now: number): boolean {
   if (!state) return false
-  if (state.n >= A2HS_CONFIG.maxShows) return now - state.t < A2HS_CONFIG.gotItCooldownMs
-  return now - state.t < (COOLDOWN[state.s] ?? A2HS_CONFIG.laterCooldownMs)
+  return now - state.t < (COOLDOWN[state.s] ?? A2HS_CONFIG.gotItCooldownMs)
 }
 
 /** بستن ساده (× یا پس‌زمینه) شمارنده را بالا نمی‌برد — انتخاب آگاهانه نبوده */

@@ -48,41 +48,41 @@ const verdict = e => { const d = decide(e); return d.show ? `show:${d.device}` :
 console.log('\nA — آیفون + سافاری + اولین ورود')
 t('نمایش داده می‌شود', verdict(env()), 'show:iphone')
 
-console.log('\nB — «متوجه شدم» ⇒ رفرش')
+console.log('\nB — «متوجه شدم» ⇒ دقیقاً دو روز سکوت')
 {
   const s = JSON.stringify(nextState(null, 'ok', NOW))
   t('بلافاصله بعد از رفرش پنهان', verdict(env({ stored: s })), 'hide:muted')
-  t('یک ماه بعد هنوز پنهان', verdict(env({ stored: s, now: NOW + 30 * DAY })), 'hide:muted')
-  t('۶۱ روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 61 * DAY })), 'show:iphone')
-}
-
-console.log('\nC — «بعداً» ⇒ رفرش (cooldown دوروزه)')
-{
-  const s = JSON.stringify(nextState(null, 'later', NOW))
-  t('بلافاصله پنهان', verdict(env({ stored: s })), 'hide:muted')
   t('یک روز بعد هنوز پنهان', verdict(env({ stored: s, now: NOW + 1 * DAY })), 'hide:muted')
+  t('۴۷ ساعت بعد هنوز پنهان', verdict(env({ stored: s, now: NOW + 47 * 3600e3 })), 'hide:muted')
   t('سه روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 3 * DAY })), 'show:iphone')
 }
 
 console.log('\nبستن ساده (× / پس‌زمینه / Escape) ⇒ فقط همین بازدید')
 {
   const s = nextState(null, 'dismiss', NOW)
-  t('شمارنده بالا نمی‌رود', s.n, 0)
   t('رفرش بعدی دوباره نشان می‌دهد', verdict(env({ stored: JSON.stringify(s), now: NOW + 1000 })), 'show:iphone')
-  /* سه بار بستن اتفاقی نباید به سکوت شش‌ماهه برسد */
   let acc = null
   for (let i = 0; i < 5; i++) acc = nextState(acc, 'dismiss', NOW)
-  t('پنج بار بستن هم سقف را پر نمی‌کند', acc.n, 0)
-  t('و هنوز نمایش داده می‌شود', verdict(env({ stored: JSON.stringify(acc), now: NOW + 1000 })), 'show:iphone')
+  t('پنج بار بستن هم چیزی را قفل نمی‌کند', verdict(env({ stored: JSON.stringify(acc), now: NOW + 1000 })), 'show:iphone')
 }
 
-console.log('\nسقف نمایش — بعد از ۳ بار «بعداً» دیگر اصرار نمی‌کند')
+console.log('\nدیگر سقف نمایش وجود ندارد — تا نصب‌نشدن هر دو روز برمی‌گردد')
 {
   let s = null
-  for (let i = 0; i < 3; i++) s = nextState(s, 'later', NOW)
-  t('شمارنده = ۳', s.n, 3)
-  t('چهار روز بعد هم پنهان (سقف)', verdict(env({ stored: JSON.stringify(s), now: NOW + 4 * DAY })), 'hide:muted')
-  t('۶۱ روز بعد آزاد', verdict(env({ stored: JSON.stringify(s), now: NOW + 61 * DAY })), 'show:iphone')
+  for (let i = 0; i < 5; i++) s = nextState(s, 'ok', NOW)
+  t('پنج بار «متوجه شدم» هم فقط دو روز سکوت می‌دهد',
+    verdict(env({ stored: JSON.stringify(s), now: NOW + 3 * DAY })), 'show:iphone')
+}
+
+console.log('\nسازگاری با رکوردهای قدیمی «بعداً»')
+{
+  /* دکمه‌اش حذف شده ولی مرورگرهایی که با نسخه‌ی قبلی ذخیره کرده‌اند
+     نباید در سکوت قدیمی گیر بمانند */
+  const legacy = JSON.stringify({ s: 'later', t: NOW, n: 1 })
+  t('رکورد قدیمی خوانده می‌شود', parseState(legacy)?.s, 'later')
+  t('و با همان قاعده‌ی دوروزه سنجیده می‌شود',
+    verdict(env({ stored: legacy, now: NOW + 3 * DAY })), 'show:iphone')
+  t('پیش از دو روز هنوز پنهان', verdict(env({ stored: legacy, now: NOW + 1 * DAY })), 'hide:muted')
 }
 
 console.log('\nD — نصب‌شده / standalone')

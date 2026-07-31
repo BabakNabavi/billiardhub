@@ -24,7 +24,6 @@ const TEXT = {
     'روی Add / افزودن بزنید.',
   ],
   gotIt: 'متوجه شدم',
-  later: 'بعداً',
   close: 'بستن راهنما',
   dialogLabel: 'راهنمای افزودن بیلیارد هاب به صفحه اصلی',
 } as const
@@ -111,8 +110,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
     <>
       <style>{CSS}</style>
       {/* پس‌زمینه، × و Escape ⇒ فقط بستن؛ راهنما دفعه‌ی بعد دوباره می‌آید.
-          فقط «بعداً» و «متوجه شدم» — که انتخاب آگاهانه‌اند — سکوت
-          چندروزه/چندماهه می‌سازند. */}
+          تنها «متوجه شدم» — که انتخاب آگاهانه است — دو روز سکوت می‌سازد. */}
       <div className="bh-a2hs-scrim" onClick={() => dismiss('dismiss')} aria-hidden="true" />
 
       <div className="bh-a2hs-wrap" role="presentation">
@@ -155,12 +153,14 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
             ))}
           </ol>
 
+          {/* یک دکمه، یک تصمیم.
+
+              «بعداً» حذف شد: دو دکمه با دو مدت سکوت متفاوت هم انتخاب را
+              سخت می‌کرد هم رفتار را غیرقابل‌پیش‌بینی. کسی که الان وقت
+              ندارد، همان × بالا را می‌زند و راهنما دفعه‌ی بعد برمی‌گردد. */}
           <div className="bh-a2hs-actions">
             <button type="button" className="bh-a2hs-primary" onClick={() => dismiss('ok')}>
               {TEXT.gotIt}
-            </button>
-            <button type="button" className="bh-a2hs-ghost" onClick={() => dismiss('later')}>
-              {TEXT.later}
             </button>
           </div>
         </div>
@@ -256,19 +256,16 @@ const CSS = `
   background:#FFFFFF; border:1px solid rgba(0,0,0,.07); color:#0A72E8;   /* آبی کنترل‌های iOS */
   box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
-.bh-a2hs-actions{ display:flex; flex-direction:column; gap:8px; }
-.bh-a2hs-primary,.bh-a2hs-ghost{
+.bh-a2hs-actions{ display:flex; }
+.bh-a2hs-primary{
   width:100%; min-height:48px; border-radius:13px; cursor:pointer;
   font-size:14.5px; font-weight:700; font-family:inherit;
-  transition:transform .16s ease, background .16s ease, border-color .16s ease;
+  background:#141413; color:#FFFFFF; border:1px solid #141413;
+  transition:background .16s ease, transform .16s ease;
   -webkit-tap-highlight-color:transparent;
 }
-.bh-a2hs-primary{ background:#141413; color:#FFFFFF; border:1px solid #141413; }
 .bh-a2hs-primary:hover{ background:#000000; }
 .bh-a2hs-primary:active{ transform:scale(.985); }
-.bh-a2hs-ghost{ background:transparent; color:#5B5B5B; border:1px solid rgba(0,0,0,.10); }
-.bh-a2hs-ghost:hover{ background:rgba(0,0,0,.03); color:#141413; }
-.bh-a2hs-ghost:active{ transform:scale(.985); }
 .bh-a2hs-sheet :focus-visible{ outline:2px solid #8A6430; outline-offset:2px; }
 
 /* آیپد و صفحه‌های بزرگ‌تر: کارت شناور به‌جای شیت چسبیده به لبه */
@@ -288,11 +285,6 @@ const CSS = `
   .bh-a2hs-badge img{ width:40px; height:40px; }
   .bh-a2hs-steps{ margin-bottom:12px; padding-top:10px; }
   .bh-a2hs-step{ padding-bottom:9px; }
-  /* row و نه row-reverse: در RTL محور اصلی از راست شروع می‌شود، پس
-     اولین فرزند (دکمه‌ی اصلی) خودش سمت راست می‌نشیند. row-reverse
-     برعکسش می‌کرد و «بعداً» جای «متوجه شدم» را می‌گرفت. */
-  .bh-a2hs-actions{ flex-direction:row; }
-  .bh-a2hs-primary,.bh-a2hs-ghost{ flex:1 1 0; }
 }
 
 @keyframes bhA2hsFade{ from{opacity:0} to{opacity:1} }
@@ -300,7 +292,7 @@ const CSS = `
 
 @media (prefers-reduced-motion:reduce){
   .bh-a2hs-scrim,.bh-a2hs-sheet{ animation:bhA2hsFade .01ms both; }
-  .bh-a2hs-primary,.bh-a2hs-ghost{ transition:none; }
-  .bh-a2hs-primary:active,.bh-a2hs-ghost:active{ transform:none; }
+  .bh-a2hs-primary{ transition:none; }
+  .bh-a2hs-primary:active{ transform:none; }
 }
 `
