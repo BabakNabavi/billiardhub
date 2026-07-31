@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef } from 'react'
-import { persistDismissal } from '../../lib/pwa/a2hs'
+import { persistDismissal, type A2hsAction } from '../../lib/pwa/a2hs'
 
 /* ─────────────────────────────────────────────────────────────
    شیتِ راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari.
@@ -74,7 +74,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
      صفحه‌خوان/کیبورد به ابتدای صفحه پرت می‌شود. */
   const restoreTo = useRef<HTMLElement | null>(null)
 
-  const dismiss = useCallback((action: 'later' | 'ok') => {
+  const dismiss = useCallback((action: A2hsAction) => {
     persistDismissal(action)
     onClose()
   }, [onClose])
@@ -86,7 +86,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
     sheetRef.current?.focus()
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); dismiss('later'); return }
+      if (e.key === 'Escape') { e.preventDefault(); dismiss('dismiss'); return }
       if (e.key !== 'Tab') return
 
       /* حلقه‌ی فوکوس: تا وقتی دیالوگ باز است، Tab نباید به پشتِ آن برود. */
@@ -110,8 +110,10 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
   return (
     <>
       <style>{CSS}</style>
-      {/* پس‌زمینه: کلیک روی آن = «بعداً» (نه رد کردنِ دائمی) */}
-      <div className="bh-a2hs-scrim" onClick={() => dismiss('later')} aria-hidden="true" />
+      {/* پس‌زمینه، × و Escape ⇒ فقط بستن؛ راهنما دفعه‌ی بعد دوباره می‌آید.
+          فقط «بعداً» و «متوجه شدم» — که انتخابِ آگاهانه‌اند — سکوتِ
+          چندروزه/چندماهه می‌سازند. */}
+      <div className="bh-a2hs-scrim" onClick={() => dismiss('dismiss')} aria-hidden="true" />
 
       <div className="bh-a2hs-wrap" role="presentation">
         <div
@@ -124,7 +126,7 @@ export default function AddToHomeScreenSheet({ onClose }: { onClose: () => void 
         >
           <div className="bh-a2hs-grip" aria-hidden="true" />
 
-          <button type="button" className="bh-a2hs-x" onClick={() => dismiss('later')} aria-label={TEXT.close}>
+          <button type="button" className="bh-a2hs-x" onClick={() => dismiss('dismiss')} aria-label={TEXT.close}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  strokeWidth={2.1} strokeLinecap="round" aria-hidden="true" focusable="false">
               <path d="M6 6l12 12M18 6L6 18" />

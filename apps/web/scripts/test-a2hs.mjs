@@ -56,12 +56,24 @@ console.log('\nB — «متوجه شدم» ⇒ رفرش')
   t('۱۸۱ روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 181 * DAY })), 'show:iphone')
 }
 
-console.log('\nC — «بعداً» ⇒ رفرش (cooldown هفت‌روزه)')
+console.log('\nC — «بعداً» ⇒ رفرش (cooldown دوروزه)')
 {
   const s = JSON.stringify(nextState(null, 'later', NOW))
   t('بلافاصله پنهان', verdict(env({ stored: s })), 'hide:muted')
-  t('۶ روز بعد هنوز پنهان', verdict(env({ stored: s, now: NOW + 6 * DAY })), 'hide:muted')
-  t('۸ روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 8 * DAY })), 'show:iphone')
+  t('یک روز بعد هنوز پنهان', verdict(env({ stored: s, now: NOW + 1 * DAY })), 'hide:muted')
+  t('سه روز بعد دوباره ظاهر', verdict(env({ stored: s, now: NOW + 3 * DAY })), 'show:iphone')
+}
+
+console.log('\nبستنِ ساده (× / پس‌زمینه / Escape) ⇒ فقط همین بازدید')
+{
+  const s = nextState(null, 'dismiss', NOW)
+  t('شمارنده بالا نمی‌رود', s.n, 0)
+  t('رفرشِ بعدی دوباره نشان می‌دهد', verdict(env({ stored: JSON.stringify(s), now: NOW + 1000 })), 'show:iphone')
+  /* سه بار بستنِ اتفاقی نباید به سکوتِ شش‌ماهه برسد */
+  let acc = null
+  for (let i = 0; i < 5; i++) acc = nextState(acc, 'dismiss', NOW)
+  t('پنج بار بستن هم سقف را پر نمی‌کند', acc.n, 0)
+  t('و هنوز نمایش داده می‌شود', verdict(env({ stored: JSON.stringify(acc), now: NOW + 1000 })), 'show:iphone')
 }
 
 console.log('\nسقفِ نمایش — بعد از ۳ بار «بعداً» دیگر اصرار نمی‌کند')
@@ -69,7 +81,7 @@ console.log('\nسقفِ نمایش — بعد از ۳ بار «بعداً» دی
   let s = null
   for (let i = 0; i < 3; i++) s = nextState(s, 'later', NOW)
   t('شمارنده = ۳', s.n, 3)
-  t('۸ روز بعد هم پنهان (سقف)', verdict(env({ stored: JSON.stringify(s), now: NOW + 8 * DAY })), 'hide:muted')
+  t('چهار روز بعد هم پنهان (سقف)', verdict(env({ stored: JSON.stringify(s), now: NOW + 4 * DAY })), 'hide:muted')
   t('۱۸۱ روز بعد آزاد', verdict(env({ stored: JSON.stringify(s), now: NOW + 181 * DAY })), 'show:iphone')
 }
 

@@ -10,7 +10,9 @@
     "lint": "eslint --max-warnings 0",
     "check-types": "next typegen && tsc --noEmit",
     "test:a2hs": "node scripts/test-a2hs.mjs",
-    "test:a2hs:ui": "node scripts/test-a2hs-ui.mjs"
+    "test:a2hs:ui": "node scripts/test-a2hs-ui.mjs",
+    "test:phone": "node scripts/test-phone.mjs",
+    "test:social": "node scripts/test-social-flag.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

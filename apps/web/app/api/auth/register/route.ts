@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { issueSession } from '@/lib/auth/store';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
-import { normalizePhone } from '@/lib/auth/phone';
+import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib/auth/phone';
 import { wasIdentityVerified } from '@/lib/otp-server';
 import { ensurePersonForUser } from '@/lib/identity';
 
@@ -30,6 +30,17 @@ export async function POST(req: NextRequest) {
     if (!firstName || !lastName || !phone || !password) {
       return NextResponse.json(
         { message: 'همه فیلدها الزامی هستند' },
+        { status: 400, headers: CORS_HEADERS },
+      );
+    }
+
+    /* پیشوند باید به اپراتورِ واقعی تعلق داشته باشد.
+       بدونِ این شرط، حسابی با شماره‌ی ناموجود (مثلاً ۰۹۰۰…) ساخته
+       می‌شد و بعد هیچ‌وقت کدِ تأیید یا بازیابیِ رمز به دستش نمی‌رسید،
+       چون سرویسِ پیامک چنین شماره‌ای را می‌پذیرد ولی جایی نمی‌رساند. */
+    if (!hasAssignedPrefix(phone)) {
+      return NextResponse.json(
+        { message: INVALID_MOBILE_MESSAGE },
         { status: 400, headers: CORS_HEADERS },
       );
     }

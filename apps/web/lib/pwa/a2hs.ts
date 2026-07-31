@@ -18,10 +18,22 @@ const DAY = 24 * 60 * 60 * 1000
 export const A2HS_CONFIG = {
   /** تأخیر پس از ورود به صفحه — کاربر اول باید صفحه را ببیند، نه پاپ‌آپ را */
   showDelayMs: 1600,
-  /** «بعداً» ⇒ یک هفته سکوت */
-  laterCooldownMs: 7 * DAY,
+  /** «بعداً» ⇒ دو روز سکوت.
+   *
+   *  اول یک هفته بود و عملاً یعنی راهنما یک‌بار دیده می‌شد و تمام. برای
+   *  چیزی که کاربر باید خودش دستی انجام دهد، یک یادآوریِ دوروزه منطقی
+   *  است؛ سقفِ `maxShows` جلوی اصرارِ بی‌پایان را می‌گیرد. */
+  laterCooldownMs: 2 * DAY,
   /** «متوجه شدم» ⇒ شش ماه سکوت */
   gotItCooldownMs: 180 * DAY,
+  /** بستن با × یا کلیک روی پس‌زمینه ⇒ فقط تا پایانِ همین بازدید.
+   *
+   *  این مهم‌ترین اصلاح است: پس‌زمینه کلِ صفحه را می‌پوشاند، پس یک لمسِ
+   *  اتفاقی برای بستن، پیش‌تر همان cooldownِ بلندِ «بعداً» را می‌نوشت و
+   *  راهنما برای روزها ناپدید می‌شد — بدونِ اینکه کاربر چنین چیزی
+   *  خواسته باشد. حالا فقط تا رفرشِ بعدی ساکت می‌ماند و شمارنده هم
+   *  بالا نمی‌رود. */
+  dismissCooldownMs: 0,
   /** بعد از این تعداد نمایش، دیگر اصرار نمی‌کنیم (سکوتِ بلند) */
   maxShows: 3,
   /** مسیرهایی که کاربر وسطِ کارِ حساس است و نباید مزاحمش شد */
@@ -72,20 +84,28 @@ export function safariConfidence(ua: string, standaloneFlag: unknown): SafariCon
 
 /* ── وضعیتِ ذخیره‌شده ────────────────────────────────────────── */
 
+export type A2hsAction = 'later' | 'ok' | 'dismiss'
+
 export interface A2hsState {
   /** آخرین اقدامِ کاربر */
-  s: 'later' | 'ok'
+  s: A2hsAction
   /** زمانِ آن اقدام */
   t: number
   /** چند بار تا حالا نشانش داده‌ایم */
   n: number
 }
 
+const COOLDOWN: Record<A2hsAction, number> = {
+  ok: A2HS_CONFIG.gotItCooldownMs,
+  later: A2HS_CONFIG.laterCooldownMs,
+  dismiss: A2HS_CONFIG.dismissCooldownMs,
+}
+
 export function parseState(raw: string | null): A2hsState | null {
   if (!raw) return null
   try {
     const o = JSON.parse(raw) as Partial<A2hsState>
-    if (o?.s !== 'later' && o?.s !== 'ok') return null
+    if (o?.s !== 'later' && o?.s !== 'ok' && o?.s !== 'dismiss') return null
     return { s: o.s, t: Number(o.t) || 0, n: Number(o.n) || 0 }
   } catch {
     return null   // مقدارِ خراب = انگار چیزی ذخیره نشده
@@ -96,12 +116,12 @@ export function parseState(raw: string | null): A2hsState | null {
 export function isMuted(state: A2hsState | null, now: number): boolean {
   if (!state) return false
   if (state.n >= A2HS_CONFIG.maxShows) return now - state.t < A2HS_CONFIG.gotItCooldownMs
-  const cooldown = state.s === 'ok' ? A2HS_CONFIG.gotItCooldownMs : A2HS_CONFIG.laterCooldownMs
-  return now - state.t < cooldown
+  return now - state.t < (COOLDOWN[state.s] ?? A2HS_CONFIG.laterCooldownMs)
 }
 
-export function nextState(prev: A2hsState | null, action: 'later' | 'ok', now: number): A2hsState {
-  return { s: action, t: now, n: (prev?.n ?? 0) + 1 }
+/** بستنِ ساده (× یا پس‌زمینه) شمارنده را بالا نمی‌برد — انتخابِ آگاهانه نبوده */
+export function nextState(prev: A2hsState | null, action: A2hsAction, now: number): A2hsState {
+  return { s: action, t: now, n: (prev?.n ?? 0) + (action === 'dismiss' ? 0 : 1) }
 }
 
 /* ── تصمیمِ نهایی ────────────────────────────────────────────── */
@@ -167,7 +187,7 @@ export function readEnv(): A2hsEnv {
 /** ثبتِ اقدامِ کاربر. شکستِ نوشتن بی‌صدا رد می‌شود — نبودِ حافظه نباید
  *  به خطای زمانِ اجرا تبدیل شود؛ بدترین حالتش این است که دفعه‌ی بعد
  *  دوباره نشان داده می‌شود. */
-export function persistDismissal(action: 'later' | 'ok'): void {
+export function persistDismissal(action: A2hsAction): void {
   try {
     const prev = parseState(localStorage.getItem(A2HS_STORAGE_KEY))
     localStorage.setItem(A2HS_STORAGE_KEY, JSON.stringify(nextState(prev, action, Date.now())))

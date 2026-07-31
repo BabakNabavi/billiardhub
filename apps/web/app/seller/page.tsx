@@ -16,11 +16,10 @@ import {
 
 /* ══ types ══ */
 type OrderStatus = 'pending'|'processing'|'shipped'|'delivered'|'cancelled';
-type Tab = 'overview'|'products'|'orders'|'analytics'|'messages';
+type Tab = 'overview'|'products'|'orders'|'analytics';
 
 interface Order   { id:string; buyer:string; product:string; qty:number; total:number; status:OrderStatus; date:string; city:string; }
 interface Product { id:string; title:string; category:string; price:number; stock:number; sold:number; rating:number; views:number; active:boolean; img:string; }
-interface Msg     { id:string; buyer:string; product:string; text:string; time:string; unread:boolean; }
 
 /* ══ data ══ */
 const ORDERS: Order[] = [
@@ -36,12 +35,6 @@ const PRODUCTS: Product[] = [
   { id:'p2', title:'ست توپ Aramith Tournament', category:'ball',      price:3800000, stock:8,  sold:83,  rating:4.8, views:890,  active:true,  img:'/images/billiadr-club-3.jpg' },
   { id:'p3', title:'گچ Master Blue Diamond',    category:'accessory', price:680000,  stock:50, sold:124, rating:4.6, views:2100, active:true,  img:'/images/billiadr-club-1.jpg' },
   { id:'p4', title:'پایه چوب چرمی دستدوز',     category:'accessory', price:1900000, stock:0,  sold:19,  rating:4.3, views:430,  active:false, img:'/images/billiadr-club-3.jpg' },
-];
-
-const MSGS: Msg[] = [
-  { id:'msg1', buyer:'رضا کریمی',   product:'چوب Predator',       text:'آیا این چوب برای مبتدی‌ها مناسبه؟',   time:'۱۰ دقیقه پیش', unread:true  },
-  { id:'msg2', buyer:'نازنین م.',    product:'گچ Master',          text:'امکان تخفیف هست؟',                      time:'۱ ساعت پیش',   unread:true  },
-  { id:'msg3', buyer:'امیر ر.',      product:'ست توپ Aramith',     text:'ممنون از ارسال سریع. کیفیت عالیه!',    time:'دیروز',        unread:false },
 ];
 
 const MONTHLY = [40,65,48,72,58,89,76,92,84,110,98,124];
@@ -79,10 +72,6 @@ function SellerContent() {
   const [orderFilter, setOF]     = useState<'all'|OrderStatus>('all');
   const [editProduct, setEdit]   = useState<string|null>(null);
   const [notifOpen,   setNotif]  = useState(false);
-  /* تبِ «پیام‌ها» و شمارنده‌اش پشتِ پرچمِ تعاملاتِ اجتماعی‌اند. با
-     خاموش‌بودن، نه تب می‌ماند نه بجِ «n پیام جدید» — نه فضای خالی. */
-  const interactionsOn = useSocialInteractions();
-  const unreadMsgs = interactionsOn ? MSGS.filter(m=>m.unread).length : 0;
   const pendingOrders = ORDERS.filter(o=>o.status==='pending').length;
 
   const filteredProds = PRODUCTS.filter(p => {
@@ -149,10 +138,11 @@ function SellerContent() {
             {/* Actions */}
             <div style={{ display:'flex', gap:'8px', flexShrink:0, alignItems:'center' }}>
               {/* Alerts */}
-              {(pendingOrders > 0 || unreadMsgs > 0) && (
+              {/* نشانِ «n پیام جدید» حذف شد — پشتِ آن آرایه‌ی ثابتِ MSGS بود
+                  با سه خریدارِ ساختگی، نه پیامِ واقعی. */}
+              {pendingOrders > 0 && (
                 <div style={{ display:'flex', gap:'6px' }}>
-                  {pendingOrders > 0 && <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', fontSize: '13px', color:'#f59e0b', fontWeight:700 }}><AlertCircle size={11}/>{toFa(pendingOrders)} سفارش جدید</div>}
-                  {unreadMsgs > 0 && <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', fontSize: '13px', color:'#C7A66A', fontWeight:700 }}><MessageCircle size={11}/>{toFa(unreadMsgs)} پیام جدید</div>}
+                  <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 10px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'20px', fontSize: '13px', color:'#f59e0b', fontWeight:700 }}><AlertCircle size={11}/>{toFa(pendingOrders)} سفارش جدید</div>
                 </div>
               )}
 
@@ -171,7 +161,6 @@ function SellerContent() {
               { k:'products',  l:'محصولات',      icon:<Package size={14}/>,  badge: PRODUCTS.filter(p=>p.stock<=3&&p.stock>0).length },
               { k:'orders',    l:'سفارش‌ها',     icon:<ShoppingBag size={14}/>, badge: pendingOrders },
               { k:'analytics', l:'آمار فروش',    icon:<TrendingUp size={14}/> },
-              ...(interactionsOn ? [{ k:'messages',  l:'پیام‌ها',      icon:<MessageCircle size={14}/>, badge: unreadMsgs }] : []),
             ].map(t => (
               <button key={t.k} className={`s-tab ${tab===t.k?'active':''}`} onClick={()=>setTab(t.k as Tab)}>
                 {t.icon}{t.l}
@@ -314,28 +303,6 @@ function SellerContent() {
                     ))}
                   </div>
 
-                  {/* Messages preview */}
-                  {MSGS.filter(m=>m.unread).length > 0 && (
-                    <div className="s-card" style={{ border:'1px solid rgba(199,166,106,0.15)' }}>
-                      <div style={{ fontSize: '15px', fontWeight:700, color: '#111111', marginBottom:'12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                          <span style={{ width:'3px', height:'13px', background:'linear-gradient(180deg,#C7A66A,transparent)', borderRadius:'2px', display:'inline-block' }} />
-                          پیام‌های جدید
-                        </div>
-                        <span style={{ fontSize: '12px', color:'#C7A66A', background:'rgba(199,166,106,0.1)', border:'1px solid rgba(199,166,106,0.2)', borderRadius:'20px', padding:'2px 8px', fontWeight:700 }}>{toFa(unreadMsgs)}</span>
-                      </div>
-                      {MSGS.filter(m=>m.unread).map(m => (
-                        <div key={m.id} style={{ marginBottom:'8px', padding:'10px', background:'rgba(199,166,106,0.04)', border:'1px solid rgba(199,166,106,0.1)', borderRadius:'12px', cursor:'pointer' }} onClick={()=>setTab('messages')}>
-                          <div style={{ fontSize: '14px', fontWeight:700, color: '#111111', marginBottom:'3px' }}>{m.buyer}</div>
-                          <div style={{ fontSize: '13px', color:'rgba(0,0,0,0.45)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{m.text}</div>
-                          <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.30)', marginTop:'3px' }}>{m.time}</div>
-                        </div>
-                      ))}
-                      <button onClick={()=>setTab('messages')} style={{ width:'100%', padding:'8px', marginTop:'4px', background:'rgba(199,166,106,0.06)', border:'1px solid rgba(199,166,106,0.15)', borderRadius:'10px', color:'#C7A66A', fontSize: '13px', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
-                        مشاهده همه پیام‌ها →
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -469,30 +436,6 @@ function SellerContent() {
             </div>
           )}
 
-          {/* ════ MESSAGES ════ */}
-          {tab==='messages' && (
-            <div style={{ animation:'fadeUp 0.4s ease both', display:'flex', flexDirection:'column', gap:'10px' }}>
-              {MSGS.map(m => (
-                <div key={m.id} style={{ display:'flex', alignItems:'flex-start', gap:'14px', padding:'16px 18px', background: m.unread?'rgba(199,166,106,0.04)':'#FFFFFF', border:`1px solid ${m.unread?'rgba(199,166,106,0.15)':'rgba(0,0,0,0.05)'}`, borderRadius:'16px', cursor:'pointer', transition:'all 0.2s' }}>
-                  <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'linear-gradient(135deg,#C7A66A,#A07840)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '18px', fontWeight:900, color:'#fff', flexShrink:0 }}>
-                    {m.buyer[0]}
-                  </div>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', flexWrap:'wrap' }}>
-                      <span style={{ fontSize: '16px', fontWeight: m.unread?800:600, color: '#111111' }}>{m.buyer}</span>
-                      <span style={{ fontSize: '13px', color:'rgba(0,0,0,0.40)' }}>درباره: {m.product}</span>
-                      {m.unread && <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#C7A66A', display:'inline-block', boxShadow:'0 0 6px #C7A66A' }} />}
-                    </div>
-                    <div style={{ fontSize: '15px', color:'rgba(0,0,0,0.50)', lineHeight:1.5 }}>{m.text}</div>
-                    <div style={{ fontSize: '12px', color:'rgba(0,0,0,0.30)', marginTop:'5px' }}>{m.time}</div>
-                  </div>
-                  <button style={{ padding:'8px 16px', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.06)', borderRadius:'10px', color:'rgba(0,0,0,0.45)', fontSize: '14px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
-                    پاسخ
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </>

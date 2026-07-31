@@ -145,7 +145,6 @@ export const config = {
     '/admin/:path*',
     '/dashboard/:path*',
     '/profile/:path*',
-    '/messages/:path*',
     '/direct/:path*',
     '/referees/dashboard/:path*',
   ],

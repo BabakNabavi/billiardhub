@@ -9,7 +9,6 @@ const PRIVATE = [
   '/admin/',
   '/dashboard/',
   '/profile/',
-  '/messages/',
   '/direct/',
   '/cart/',
   '/checkout/',

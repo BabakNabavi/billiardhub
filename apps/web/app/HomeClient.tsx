@@ -388,12 +388,19 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
           <div className="club-mob-panel" style={{
             flex: '0 0 40%', background: '#fff',
             borderRadius: `0 0 ${rad} ${rad}`,
-            /* پدینگِ پایین: ۲۴ → ۱۶ → ۱۰، تا دکمه‌ی «مشاهده و رزرو»
-               بالاتر بنشیند. spacerِ `flex:1` دکمه را به کف می‌چسباند،
-               پس تنها راهِ بالا آوردنش کم‌کردنِ همین پدینگ است. */
-            padding: '17px 7px 10px',
+            /* پدینگِ پایین ۲۰px.
+               کامنتِ قبلی اینجا وارونه بود: چون spacerِ `flex:1` دکمه را
+               به کفِ پنل می‌چسباند، *کم‌کردن* پدینگ دکمه را پایین‌تر
+               می‌برد نه بالاتر. پدینگ ۲۴→۱۶→۱۰ کم شده بود و دکمه هر بار
+               به کف نزدیک‌تر می‌شد. حالا زیادش می‌کنیم تا واقعاً بالا
+               بیاید و کفِ کارت نفس بکشد. */
+            padding: '17px 7px 20px',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-            overflow: 'hidden', gap: '9px',
+            /* gap ۹ → ۶: اندازه‌گیری نشان داد مجموعِ محتوا دقیقاً ۱۲px از
+               پنل بلندتر بود، پس spacerِ `flex:1` صفر می‌شد و پدینگِ
+               پایین بلعیده می‌شد — دکمه فقط ۴px از کف فاصله داشت.
+               چهار gap × ۳px همان ۱۲px را آزاد می‌کند. */
+            overflow: 'hidden', gap: '6px',
           }}>
             {/* ۱۳px → ۱۴٫۳ (۱۰٪) → ۱۵ (۵٪ دیگر) */}
             <div style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a',
@@ -1699,9 +1706,14 @@ useEffect(() => {
         @media(max-width:600px){
           .club-desk-panel { display:none !important; }
           .club-mob-panel  { display:flex !important; }
-          /* پنل جا کم داشت و دکمه به کف می‌چسبید ⇒ عکس ۵۶٪، پنل ۴۴٪ */
-          .club-img-x      { flex:0 0 56% !important; }
-          .club-mob-panel  { flex:0 0 44% !important; }
+          /* پنل جا کم داشت و دکمه به کف می‌چسبید ⇒ عکس ۵۲٪، پنل ۴۸٪.
+             اندازه‌گیری شد: با ۴۴٪ ارتفاعِ پنل ۱۲۹px بود و مجموعِ محتوا
+             (تیتر + چیپ‌های میز + شهر + دکمه) با پدینگِ کافی در آن جا
+             نمی‌شد؛ دکمه ۸px از کفِ پنل بیرون می‌زد و overflow:hidden
+             پایینش را می‌برید. حالا پنل بلندتر است تا پدینگِ ۲۰px واقعاً
+             دکمه را بالا بیاورد، نه اینکه از کادر بیرونش کند. */
+          .club-img-x      { flex:0 0 52% !important; }
+          .club-mob-panel  { flex:0 0 48% !important; }
           .club-open-btn   { display:flex !important; }
           .clubs-desk      { display:none !important; }
           .clubs-nav       { display:none !important; }

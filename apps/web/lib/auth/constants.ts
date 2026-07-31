@@ -18,7 +18,6 @@ export const PROTECTED_PREFIXES = [
   '/admin',
   '/dashboard',
   '/profile',
-  '/messages',
   '/direct',
   '/referees/dashboard',
 ]

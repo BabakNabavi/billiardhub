@@ -381,12 +381,34 @@ export default function Stories() {
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
-  const dailyLimit = storyLimitFor(myRoles);   // ۰ = کاربرِ عادی، مجاز نیست
-  const canPost = dailyLimit > 0;
+  const localLimit = storyLimitFor(myRoles);   // ۰ = کاربرِ عادی، مجاز نیست
+
+  /* سهمیه‌ی واقعی از سرور.
+     تا امروز این کادر عددِ localStorage را نشان می‌داد؛ یعنی روی هر
+     دستگاهِ تازه از صفر شروع می‌شد و با پاک‌کردنِ حافظه‌ی مرورگر ریست
+     می‌شد — کاربر «۰ از ۲» می‌دید در حالی که سرور چیزِ دیگری می‌دانست.
+     منبعِ حقیقت همان چیزی است که موقعِ انتشار سنجیده می‌شود. */
+  const [quota, setQuota] = useState<{ used: number; limit: number; allowed: boolean; enabled: boolean } | null>(null);
+  const dailyLimit = quota ? quota.limit : localLimit;
+  const usedToday = quota ? quota.used : countTodayStories(ownerKey);
+  const canPost = quota ? (quota.limit > 0 || !quota.enabled) : localLimit > 0;
   const [postErr, setPostErr] = useState('');
   const [publishing, setPublishing] = useState(false);
   const [replyFocus, setReplyFocus] = useState(false);
   const [replySent, setReplySent] = useState(false);
+  /* سهمیه را هر بار که کادرِ انتشار باز می‌شود تازه می‌گیریم — و بعد از
+     هر انتشارِ موفق هم، تا شمارنده بلافاصله درست شود. */
+  const refreshQuota = async () => {
+    if (!user) return;
+    try {
+      const r = await fetch('/api/stories/quota', { cache: 'no-store', credentials: 'include' });
+      if (!r.ok) return;
+      const j = await r.json() as { quota?: { used: number; limit: number; allowed: boolean; enabled: boolean } };
+      if (j?.quota) setQuota(j.quota);
+    } catch { /* آفلاین ⇒ همان عددِ محلی نشان داده می‌شود */ }
+  };
+  useEffect(() => { if (posting) void refreshQuota(); }, [posting]);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const reloadLocal = () => {
     setLocalGroups(buildLocalGroups(getStoredStories()));
     setStoreGroups(buildSellerStoreGroups());
@@ -454,6 +476,7 @@ export default function Stories() {
         throw new Error('server');   // ۵xx/شبکه ⇒ فالبک
       }
       await reloadServer();
+      void refreshQuota();
       setPosting(false); setStoryImg(''); setStoryCaption('');
     } catch {
       /* آفلاین ⇒ ذخیره‌ی محلی (تک‌دستگاهی) */
@@ -729,10 +752,10 @@ export default function Stories() {
             {/* شمارنده‌ی سقفِ روزانه */}
             <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, padding:'8px 12px', borderRadius:10, background:'rgba(199,166,106,0.08)', border:'1px solid rgba(199,166,106,0.22)' }}>
               <span style={{ fontSize:11.5, fontWeight:700, color:'#9A6E38' }}>سقف امروز:</span>
-              <span style={{ fontSize:12, fontWeight:800, color:'#1C1B17' }}>{countTodayStories(ownerKey).toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>
+              <span style={{ fontSize:12, fontWeight:800, color:'#1C1B17' }}>{usedToday.toLocaleString('fa-IR')} از {dailyLimit.toLocaleString('fa-IR')}</span>
               <span style={{ marginInlineStart:'auto', display:'flex', gap:4 }}>
                 {Array.from({ length: dailyLimit }).map((_, i) => (
-                  <span key={i} style={{ width:8, height:8, borderRadius:'50%', background: i < countTodayStories(ownerKey) ? '#C7A66A' : 'rgba(199,166,106,0.25)' }} />
+                  <span key={i} style={{ width:8, height:8, borderRadius:'50%', background: i < usedToday ? '#C7A66A' : 'rgba(199,166,106,0.25)' }} />
                 ))}
               </span>
             </div>

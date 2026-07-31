@@ -6,7 +6,7 @@ import { sendOtp, verifyOtp, wasOtpVerified } from '@/lib/otp-server';
 import { hitRateLimit, tooMany, RULES } from '@/lib/auth/rate-limit';
 import { revokeAllSessions } from '@/lib/auth/store';
 import { checkPassword } from '@/lib/auth/password';
-import { normalizePhone } from '@/lib/auth/phone';
+import { normalizePhone, hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from '@/lib/auth/phone';
 
 /* بازیابیِ رمز عبور — روی همان زیرساختِ OTPِ موجود، بدونِ ساختنِ سیستمِ
    موازی. سه گام:
@@ -68,6 +68,16 @@ export async function POST(req: NextRequest) {
          ارسال انجام نشد. این نشتِ اطلاعات نیست: به این‌جا فقط وقتی
          می‌رسیم که شماره از قبل در سیستم باشد، و پیام درباره‌ی خرابیِ
          سرویس است نه وجود یا نبودِ حساب. */
+      /* پیشوندِ ناموجود ⇒ همان‌جا و با پیامِ روشن.
+         این حالت نشتِ اطلاعات نیست: درباره‌ی *شکلِ* شماره است، نه وجودِ
+         حساب — همان چیزی که کاربر با نگاه‌کردن به شماره‌اش هم می‌فهمد.
+         بدونِ این، دارنده‌ی چنین حسابی «کد ارسال شد» می‌دید و تا ابد
+         منتظر می‌ماند، چون سرویسِ پیامک چنین شماره‌ای را می‌پذیرد ولی
+         به جایی نمی‌رساند. */
+      if (!r.ok && !hasAssignedPrefix(phone)) {
+        return NextResponse.json({ ok: false, message: INVALID_MOBILE_MESSAGE }, { status: 400 });
+      }
+
       if (!r.ok) {
         console.error('[forgot-password] SMS failed:', r.message);
         void audit({
