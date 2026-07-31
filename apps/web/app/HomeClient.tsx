@@ -357,19 +357,10 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
             <div style={{ flex: 1 }} />
             <div style={{ height: '1px', background: 'linear-gradient(to left, transparent, rgba(199,166,106,0.35), transparent)', margin: '6px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div style={{
-                width: '90%', textAlign: 'center',
-                background: hov ? 'rgba(199,166,106,0.20)' : 'rgba(199,166,106,0.12)',
-                border: `1px solid ${GOLD_BOR}`,
-                borderRadius: rad,
-                padding: '9px 0',
-                color: CTA_INK,
-                fontSize: '13px', fontWeight: 700,
-                fontFamily: 'var(--font-base)',
-                transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
-                transform: hov ? 'translateY(-1px)' : 'none',
-                boxShadow: hov ? '0 8px 20px rgba(199,166,106,0.34)' : '0 0 0 rgba(199,166,106,0)',
-              }}>
+              {/* هاور با CSS انجام می‌شود، نه با stateِ `hov`.
+                  دو سود: استایلِ تکراری از HTML بیرون می‌رود، و هر
+                  ورود/خروجِ ماوس دیگر یک رندرِ React راه نمی‌اندازد. */}
+              <div className="cta-lq" style={{ borderRadius: rad }}>
                 مشاهده و رزرو
               </div>
             </div>
@@ -411,20 +402,7 @@ function ClubCard({ club, h = '360px', featured = false }: { club: RealClub; h?:
               <MapPin size={8} style={{ color: GOLD, flexShrink: 0 }} />{club.city}
             </div>
             <div style={{ flex: 1 }} />
-            <div style={{
-              width: '90%', textAlign: 'center',
-              background: hov ? 'rgba(199,166,106,0.20)' : 'rgba(199,166,106,0.12)',
-              border: `1px solid ${GOLD_BOR}`,
-              borderRadius: rad,
-              padding: '6px 0',
-              color: CTA_INK,
-              /* متنِ دکمه ۱۰٪ بزرگ‌تر: ۱۰ → ۱۱px */
-              fontSize: '11px', fontWeight: 700,
-              fontFamily: 'var(--font-base)',
-              transition: 'box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease',
-              transform: hov ? 'translateY(-1px)' : 'none',
-              boxShadow: hov ? '0 6px 16px rgba(199,166,106,0.32)' : '0 0 0 rgba(199,166,106,0)',
-            }}>
+            <div className="cta-lq cta-lq-sm" style={{ borderRadius: rad }}>
               مشاهده و رزرو
             </div>
           </div>
@@ -1515,6 +1493,26 @@ useEffect(() => {
         }
 
         ${BAZAAR_CSS}
+        /* دکمه‌ی «مشاهده و رزرو» — هشت بار روی صفحه تکرار می‌شد و هر بار
+           رشته‌ی کاملِ استایل در HTML می‌آمد. هاورش از کارتِ والد می‌آید. */
+        .cta-lq {
+          width:90%; text-align:center; padding:9px 0;
+          background:rgba(199,166,106,0.12);
+          border:1px solid ${GOLD_BOR};
+          color:${CTA_INK}; font-size:13px; font-weight:700;
+          font-family:var(--font-base);
+          transition:box-shadow .3s ease, background .3s ease, transform .3s ease;
+          box-shadow:0 0 0 rgba(199,166,106,0);
+        }
+        .cta-lq-sm { padding:6px 0; font-size:11px; }
+        @media (hover:hover) {
+          .club-card-x:hover .cta-lq {
+            background:rgba(199,166,106,0.20);
+            transform:translateY(-1px);
+            box-shadow:0 8px 20px rgba(199,166,106,0.34);
+          }
+          .club-card-x:hover .cta-lq-sm { box-shadow:0 6px 16px rgba(199,166,106,0.32); }
+        }
         .sec-title{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-0.048em;line-height:0.96;margin:0 0 6px;}
         .sec-rule {height:3px;width:64px;border-radius:2px;margin-top:14px;background:linear-gradient(90deg,currentColor,transparent);}
         /* وردمارکِ outline پس‌زمینه‌ی هر سکشن — امضای هویتِ جدید */
