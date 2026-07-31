@@ -86,6 +86,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوریِ هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
       { title: 'بیلیارد مدیا', desc: 'مدیریت ویدیوها و کانال‌ها', icon: <Clapperboard size={20} />, link: '/admin/media' },
       { title: 'گزارش‌های تخلف', desc: 'بررسی گزارش کاربران درباره آگهی‌ها و محتوا', icon: <Flag size={20} />, link: '/admin/reports' },
+      { title: 'قابلیت‌های پلتفرم', desc: 'روشن/خاموش کردن تعاملات اجتماعی — لایک، ری‌اکشن، پاسخ استوری و پیام خصوصی', icon: <ShieldCheck size={20} />, link: '/admin/features' },
     ],
   },
 ];

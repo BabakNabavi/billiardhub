@@ -9,8 +9,21 @@ import {
 } from '@/lib/social-server'
 import { sendPush } from '@/lib/push-server'
 import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
+import { guardSocialInteractions } from '@/lib/features'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
+
+/* ── پرچمِ «تعاملاتِ اجتماعی» ──────────────────────────────────
+   وقتی خاموش است، این مسیر کاملاً بسته می‌شود — نه فقط رابطِ کاربری.
+   مخفی‌کردنِ دکمه جلوی درخواستِ مستقیم را نمی‌گیرد.
+
+   POST هر چهار قابلیت را می‌سازد (پیام، پاسخ به استوری، لایک و
+   ری‌اکشن همه با همین مسیر و فقط با `kind` متفاوت می‌آیند)، پس
+   بستنِ آن یعنی هیچ تعاملِ جدیدی ساخته نمی‌شود.
+
+   GET و DELETE هم بسته می‌شوند چون خودِ «پیام خصوصی» خاموش است.
+   داده‌ها دست‌نخورده می‌مانند و با روشن‌شدنِ دوباره‌ی پرچم، همان
+   گفتگوهای قبلی سرِ جایشان‌اند. */
 
 /* هویتِ فرستنده/خواننده همیشه از نشست می‌آید، نه از کوئری یا بدنه.
    پیش‌تر `user` و `from.key` را کلاینت می‌گفت و همین یعنی هر کسی
@@ -24,6 +37,7 @@ const isParticipant = (cid: string, key: string) =>
 /* GET                              → لیست گفتگوهای خودِ کاربر
    GET ?conv=ID&since=TS            → { messages, otherKey, otherPoll, otherRead } */
 export async function GET(req: NextRequest) {
+  const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
   if (!actor) return deny(401, UNAUTHENTICATED)
 
@@ -71,6 +85,7 @@ export async function GET(req: NextRequest) {
 
 /* POST { from:{key,name,role}, to:{key,name,role}, text, kind, storyRef? } */
 export async function POST(req: NextRequest) {
+  const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
   if (!actor) return deny(401, UNAUTHENTICATED)
 
@@ -122,6 +137,7 @@ export async function POST(req: NextRequest) {
 
 /* DELETE ?conv=ID&user=KEY → پاک‌کردنِ گفتگو فقط از سمتِ همین کاربر */
 export async function DELETE(req: NextRequest) {
+  const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
   if (!actor) return deny(401, UNAUTHENTICATED)
 

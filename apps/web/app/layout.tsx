@@ -9,6 +9,7 @@ import ScrollToTop from '../components/ScrollToTop';
 import AppBoot from '../components/AppBoot';
 import PersianDigits from '../components/PersianDigits';
 import AddToHomeScreenGate from '../components/pwa/AddToHomeScreenGate';
+import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
 
 
 export const metadata: Metadata = {
@@ -103,12 +104,19 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: '#F7F7F5', margin: 0, padding: 0 }}>
         <ScrollToTop />
-        <AppBoot />
         {/* همه‌ی ارقامِ رندرشده فارسی می‌شوند — ورودی‌ها و کد دست‌نخورده */}
         <PersianDigits />
         <SessionBridge />
-        <Navbar />
-        <main>{children}</main>
+        {/* پرچم‌های قابلیت — یک‌بار برای کلِ اپ خوانده می‌شود.
+            `children` همچنان روی سرور رندر می‌شود؛ عبور از یک Provider
+            کلاینتی آن را به کامپوننتِ کلاینتی تبدیل نمی‌کند. */}
+        <FeatureFlagsProvider>
+          {/* AppBoot داخلِ Provider است چون تازه‌سازیِ اشتراکِ پوش را به
+              پرچمِ تعاملات گره زده — پوش امروز فقط برای دایرکت است. */}
+          <AppBoot />
+          <Navbar />
+          <main>{children}</main>
+        </FeatureFlagsProvider>
         {/* جایگاهِ «بنرِ پایینِ صفحه‌ی اصلی» عمداً این‌جا نیست: در layout
             روی همه‌ی مسیرها می‌نشست، در حالی که کلیدش و مشخصاتِ فاز ۵
             می‌گویند فقط پایینِ صفحه‌ی اصلی. حالا در app/page.tsx است. */}

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { fetchConversations, fetchNotifs, markNotifsRead, type Notif } from '../lib/social';
+import { useSocialInteractions } from './features/FeatureFlags';
 import { subscribeDM } from '../lib/realtime';
 import Stories from './Stories';
 
@@ -83,6 +84,7 @@ export default function Navbar() {
     router.push('/');
   };
   /* نوتیف و دایرکتِ سمت‌سرور — فقط برای نقش‌های واجدِ استوری */
+  const interactionsOn = useSocialInteractions();
   const [dmUnread, setDmUnread] = useState(0);
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -92,6 +94,10 @@ export default function Navbar() {
   const notifUnread = notifs.filter(n => !n.read).length;
   useEffect(() => {
     if (!user) { setDmUnread(0); setNotifs([]); return; }
+    /* پرچمِ خاموش ⇒ نه پولِ ۱۵ ثانیه‌ای، نه اتصالِ Realtime، نه دو
+       درخواستِ اولیه. مخفی‌کردنِ آیکون به‌تنهایی این ترافیک را حذف
+       نمی‌کرد و برای هر کاربرِ لاگین تا ابد ادامه داشت. */
+    if (!interactionsOn) { setDmUnread(0); setNotifs([]); return; }
     const key = user.phone || user.id || (user.firstName ?? 'user');
     const tick = async () => {
       const [convs, ns] = await Promise.all([fetchConversations(key), fetchNotifs(key)]);
@@ -114,7 +120,7 @@ export default function Navbar() {
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('focus', onVisible);
     };
-  }, [user]);
+  }, [user, interactionsOn]);
   useEffect(() => {
     const fn = (e: MouseEvent) => { if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false); };
     document.addEventListener('mousedown', fn);
@@ -436,8 +442,10 @@ export default function Navbar() {
               <Search size={20} />
             </button>
 
-            {/* Bell — notifications (همه‌ی کاربرانِ لاگین، سمت‌سرور) */}
-            {user && (
+            {/* Bell — notifications (همه‌ی کاربرانِ لاگین، سمت‌سرور)
+                این اعلان‌ها فقط لایک/ری‌اکشن/پاسخ‌اند (نوعِ Notif همین سه‌تاست)،
+                پس با خاموش‌بودنِ تعاملات هیچ محتوایی ندارند. */}
+            {user && interactionsOn && (
               <div ref={notifRef} className="desk" style={{ position: 'relative', flexShrink: 0 }}>
                 <button onClick={openNotifs} aria-label="اعلان‌ها"
                   style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: notifOpen ? GOLD_LIGHT : 'none', border: 'none', cursor: 'pointer', borderRadius: '12px', color: notifOpen ? GOLD : TEXT_MUT, transition: 'color 0.2s' }}>
@@ -473,7 +481,7 @@ export default function Navbar() {
             )}
 
             {/* دایرکتِ استوری — همه‌ی کاربرانِ لاگین، با بجِ نخوانده */}
-            {user && (
+            {user && interactionsOn && (
               <Link href="/direct" aria-label="دایرکت" className="nav-ico"
                 style={{ position: 'relative', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '12px', color: TEXT_MUT, flexShrink: 0, transition: 'color 0.2s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD }}

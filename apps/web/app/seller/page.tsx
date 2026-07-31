@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
 import AuthGuard from '../../components/AuthGuard';
+import { useSocialInteractions } from '../../components/features/FeatureFlags';
 import {
   Package, TrendingUp, ShoppingBag, Star,
   Bell, Settings, ChevronRight, Eye, Edit,
@@ -78,7 +79,10 @@ function SellerContent() {
   const [orderFilter, setOF]     = useState<'all'|OrderStatus>('all');
   const [editProduct, setEdit]   = useState<string|null>(null);
   const [notifOpen,   setNotif]  = useState(false);
-  const unreadMsgs = MSGS.filter(m=>m.unread).length;
+  /* تبِ «پیام‌ها» و شمارنده‌اش پشتِ پرچمِ تعاملاتِ اجتماعی‌اند. با
+     خاموش‌بودن، نه تب می‌ماند نه بجِ «n پیام جدید» — نه فضای خالی. */
+  const interactionsOn = useSocialInteractions();
+  const unreadMsgs = interactionsOn ? MSGS.filter(m=>m.unread).length : 0;
   const pendingOrders = ORDERS.filter(o=>o.status==='pending').length;
 
   const filteredProds = PRODUCTS.filter(p => {
@@ -167,7 +171,7 @@ function SellerContent() {
               { k:'products',  l:'محصولات',      icon:<Package size={14}/>,  badge: PRODUCTS.filter(p=>p.stock<=3&&p.stock>0).length },
               { k:'orders',    l:'سفارش‌ها',     icon:<ShoppingBag size={14}/>, badge: pendingOrders },
               { k:'analytics', l:'آمار فروش',    icon:<TrendingUp size={14}/> },
-              { k:'messages',  l:'پیام‌ها',      icon:<MessageCircle size={14}/>, badge: unreadMsgs },
+              ...(interactionsOn ? [{ k:'messages',  l:'پیام‌ها',      icon:<MessageCircle size={14}/>, badge: unreadMsgs }] : []),
             ].map(t => (
               <button key={t.k} className={`s-tab ${tab===t.k?'active':''}`} onClick={()=>setTab(t.k as Tab)}>
                 {t.icon}{t.l}

@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/auth.store';
 import AuthGuard from '../../components/AuthGuard';
+import { useSocialInteractions } from '../../components/features/FeatureFlags';
+import FeatureDisabled from '../../components/features/FeatureDisabled';
 import {
   Search, Send, Paperclip, Image, Smile, MoreVertical,
   ChevronRight, Check, CheckCheck, Circle, X, Phone,
@@ -610,6 +612,13 @@ function MessagesContent() {
 }
 
 export default function MessagesPage() {
+  /* همان گیتِ /direct — این صفحه هم ورودیِ پیام است. */
+  const on = useSocialInteractions();
+  if (!on) return <FeatureDisabled title="پیام خصوصی موقتاً غیرفعال است" />;
+  return <MessagesPageInner />;
+}
+
+function MessagesPageInner() {
   return (
     <AuthGuard>
       <MessagesContent />

@@ -14,15 +14,15 @@ export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
-  const ownerKey = new URL(req.url).searchParams.get('ownerKey') ?? '';
+  /* پارامترِ `ownerKey` از کوئری حذف شد.
 
+     هیچ فراخوانی‌ای در پروژه آن را نمی‌فرستاد (هر سه مصرف‌کننده بدونِ
+     پارامتر صدا می‌زنند)، ولی چون در شمارش شرکت می‌کرد، هر کسی
+     می‌توانست کلیدِ شخصِ دیگری را بفرستد و از عددِ برگشتی تعدادِ
+     استوریِ او را استنتاج کند. مجوز هیچ‌وقت به آن وابسته نبود، پس
+     حذفش هیچ رفتاری را عوض نمی‌کند و یک ورودیِ کلاینت‌محور کم می‌شود. */
   const [quota, orders] = await Promise.all([
-    getStoryQuotaState(actor.id, async period => {
-      const counts = await Promise.all(
-        [actor.id, ownerKey].filter(Boolean).map(k => countStories(k, period)),
-      );
-      return Math.max(0, ...counts);
-    }),
+    getStoryQuotaState(actor.id, period => countStories(actor.id, period)),
     listMyStoryOrders(actor.id),
   ]);
 

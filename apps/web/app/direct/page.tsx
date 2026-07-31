@@ -14,6 +14,8 @@ import { useVisualViewport } from '../../lib/useVisualViewport'
 import { enablePush, pushPermission } from '../../lib/push-client'
 import { toast } from '../../components/ui/Toast'
 import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell, Trash2 } from 'lucide-react'
+import { useSocialInteractions } from '../../components/features/FeatureFlags'
+import FeatureDisabled from '../../components/features/FeatureDisabled'
 
 const GOLD = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -32,7 +34,17 @@ function timeAgo(ts: number): string {
 const preview = (kind: string, text: string) =>
   kind === 'reaction' ? `استیکر ${text}` : kind === 'like' ? '❤️ لایک استوری' : text
 
+/* پرچمِ تعاملات خاموش ⇒ کلِ صفحه‌ی دایرکت اصلاً mount نمی‌شود.
+   مهم است که گیت *بیرونِ* کامپوننت باشد، نه یک return زودهنگام داخلش:
+   با return زودهنگام، همه‌ی useEffectها (خواندنِ گفتگوها، Realtime،
+   ثبتِ اشتراکِ پوش) باز هم اجرا می‌شدند. */
 export default function DirectPage() {
+  return useSocialInteractions()
+    ? <DirectInner />
+    : <FeatureDisabled title="پیام خصوصی موقتاً غیرفعال است" note="گفتگوهای شما محفوظ‌اند و با فعال‌شدنِ دوباره‌ی این بخش در دسترس خواهند بود." />
+}
+
+function DirectInner() {
   const router = useRouter()
   const { user, _hydrated } = useAuthStore()
   const [convs, setConvs] = useState<ConvIndexItem[]>([])

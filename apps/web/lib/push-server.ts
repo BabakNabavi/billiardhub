@@ -37,6 +37,15 @@ export async function sendPush(
   payload: { title: string; body: string; url?: string; tag?: string },
 ): Promise<void> {
   if (!ensure() || !user) return
+  /* لایه‌ی دوم برای پرچمِ «تعاملاتِ اجتماعی».
+
+     امروز تنها صداکننده‌ی این تابع POSTِ دایرکت است که خودش گیت شده، پس
+     این خط عملاً تکراری است. عمداً هست: اگر فردا مسیرِ دیگری از پوش
+     استفاده کند و یادمان برود گیتش کند، پوشِ تعاملات بی‌صدا برنمی‌گردد.
+     اگر روزی پوشِ غیرِتعاملی (رزرو، پرداخت) اضافه شد، باید همان‌جا از
+     این تابع جدا شود — نه اینکه این شرط برداشته شود. */
+  const { socialInteractionsEnabled } = await import('./features')
+  if (!(await socialInteractionsEnabled())) return
   const list = await readJson<Sub[]>(subPath(user), [])
   if (!list.length) return
   const data = JSON.stringify(payload)

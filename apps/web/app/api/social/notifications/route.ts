@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { CORS, P, readJson, writeJson, type Notif } from '@/lib/social-server'
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership'
+import { guardSocialInteractions } from '@/lib/features'
 
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }) }
 
@@ -12,6 +13,10 @@ const deny = (s: number, body: unknown) => NextResponse.json(body, { status: s, 
 
 /* GET → لیستِ نوتیف‌های خودِ کاربر (تازه‌ترین اول) */
 export async function GET(req: NextRequest) {
+  /* نوعِ Notif فقط reply|reaction|like است — یعنی این مسیر
+     صددرصد مالِ تعاملاتِ اجتماعی است و هیچ اعلانِ دیگری (تأییدِ باشگاه،
+     رزرو، پرداخت، تبلیغات) از این‌جا نمی‌گذرد. */
+  const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
   if (!actor) return deny(401, UNAUTHENTICATED)
 
@@ -22,6 +27,10 @@ export async function GET(req: NextRequest) {
 
 /* POST { action:'read' } → همه‌ی اعلان‌های خودِ کاربر خوانده‌شده */
 export async function POST(req: NextRequest) {
+  /* نوعِ Notif فقط reply|reaction|like است — یعنی این مسیر
+     صددرصد مالِ تعاملاتِ اجتماعی است و هیچ اعلانِ دیگری (تأییدِ باشگاه،
+     رزرو، پرداخت، تبلیغات) از این‌جا نمی‌گذرد. */
+  const off = await guardSocialInteractions(CORS); if (off) return off
   const actor = await actorOf(req)
   if (!actor) return deny(401, UNAUTHENTICATED)
 

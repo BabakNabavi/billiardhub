@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
 import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
 import { addStoryReply } from '../lib/story-inbox';
+import { useSocialInteractions } from './features/FeatureFlags';
 import { uploadFile } from '../lib/supabase';
 import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
 import { listSellerProfiles } from '../lib/seller-store';
@@ -169,7 +170,7 @@ function compressStory(file: File): Promise<string> {
 }
 
 /* ── Story viewer ── */
-function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, canReply, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
+function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comment, sentReaction, paused, replySent, canReply, interactionsOn, onClose, onNext, onPrev, onLike, onReaction, onToggleEmojis, onComment, onSendComment, onReplyFocus, onReplyBlur }: any) {
   const currentGroup = groups[activeGroup];
   const currentStory = currentGroup?.stories[activeStory];
 
@@ -302,7 +303,14 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
       </div>{/* پایانِ رَپِرِ استوری — استوری اینجا کامل و دست‌نخورده می‌ماند */}
 
       {/* ── لایه‌ی پاسخ: دقیقاً روی ناحیه‌ی دیدنی (بالای کیبورد)؛ pointerEvents:none تا
-          لمس‌ها به استوریِ پشت برسند، فقط خودِ نوارِ پاسخ کلیک‌پذیر است ── */}
+          لمس‌ها به استوریِ پشت برسند، فقط خودِ نوارِ پاسخ کلیک‌پذیر است ──
+
+          کلِ این لایه پشتِ پرچمِ «تعاملاتِ اجتماعی» است. وقتی خاموش باشد
+          هیچ‌چیزِ آن رندر نمی‌شود — نه اینپوتِ پاسخ، نه لایک، نه استیکر،
+          نه دکمه‌ی ارسال، و نه حتی CTAی «برای پاسخ وارد شوید» که برای
+          مهمان نمایش داده می‌شد. چون لایه‌ی جداست، خودِ استوری (تصویر،
+          نوارِ پیشرفت، ناوبریِ قبلی/بعدی، بستن) اصلاً دست نمی‌خورد. */}
+      {interactionsOn && (
       <div style={{ position:'fixed',left:0,right:0,top:0,height:vp.height||'100dvh',transform: vp.offsetTop ? `translateY(${vp.offsetTop}px)` : undefined,zIndex:100000,pointerEvents:'none',display:'flex',flexDirection:'column',justifyContent:'flex-end',alignItems:'center' }}>
         <div onClick={e => e.stopPropagation()} style={{ pointerEvents:'auto',width:'min(440px,96vw)',padding: vp.kb>0 ? '0 0 8px' : '0 0 calc(env(safe-area-inset-bottom) + 10px)' }}>
           {replySent && (
@@ -338,6 +346,7 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
           )}
         </div>
       </div>
+      )}
     </>,
     document.body
   );
@@ -346,6 +355,9 @@ function StoryViewer({ groups, activeGroup, activeStory, liked, showEmojis, comm
 /* ── Stories strip ── */
 export default function Stories() {
   const { user } = useAuthStore();
+  /* پرچمِ تعاملات. دیدنِ استوری هرگز به این وابسته نیست — فقط
+     لایک/ری‌اکشن/پاسخ. */
+  const interactionsOn = useSocialInteractions();
   const [apiGroups, setApiGroups]     = useState<StoryGroup[]>([]);
   const [localGroups, setLocalGroups] = useState<StoryGroup[]>([]);
   const [serverGroups, setServerGroups] = useState<StoryGroup[]>([]);
@@ -578,6 +590,11 @@ export default function Stories() {
 
   /* ریپلای/استیکر → دایرکتِ صاحبِ استوری (سمت‌سرور؛ آفلاین ⇒ فالبکِ لوکال) */
   const sendReply = async (text: string, kind: 'text' | 'reaction') => {
+    /* لایه‌ی دوم، نه فقط مخفی‌کردنِ دکمه. مهم است چون پایین‌تر یک فالبکِ
+       محلی هست: اگر سرور «نه» بگوید، پاسخ در localStorage می‌نشیند و به
+       کاربر «ارسال شد» نشان داده می‌شود. با پرچمِ خاموش، ۴۰۳ی سرور دقیقاً
+       همان مسیر را فعال می‌کرد. */
+    if (!interactionsOn) return;
     if (activeGroup === null || !text.trim() || !user) return;   // مهمان نمی‌تواند پاسخ بدهد
     const g = groups[activeGroup];
     const st = g?.stories[activeStory];
@@ -689,7 +706,7 @@ export default function Stories() {
         <StoryViewer
           groups={groups} activeGroup={activeGroup} activeStory={activeStory}
           liked={liked} showEmojis={showEmojis} comment={comment} sentReaction={sentReaction}
-          paused={storyPaused} replySent={replySent} canReply={!!user}
+          paused={storyPaused} replySent={replySent} canReply={!!user} interactionsOn={interactionsOn}
           onClose={() => { closeStory(); setReplyFocus(false); }} onNext={nextStory} onPrev={prevStory}
           onLike={() => { setLiked(p => !p); if (!liked) handleReaction('❤️'); }}
           onReaction={handleReaction} onToggleEmojis={() => setShowEmojis(p => !p)}

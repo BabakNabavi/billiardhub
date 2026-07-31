@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { invalidateFeatureCache } from '@/lib/features';
 
 /* تنظیماتِ پلتفرم — کلیدهایی که خودِ شما روشن/خاموش می‌کنید.
 
@@ -29,6 +30,14 @@ const WRITABLE: Record<string, 'bool' | 'json'> = {
      جدولِ نرمالِ `rankings` (مهاجرتِ ۰۲۵) برای مدلِ ردیف‌به‌ردیفِ آینده
      آماده است ولی این صفحه هنوز از آن استفاده نمی‌کند. */
   rankings_board: 'json',
+
+  /* تعاملاتِ اجتماعی — لایک، ری‌اکشن، پاسخ به استوری و پیام خصوصی.
+     نبودِ ردیف یعنی «خاموش» (fail-closed در lib/features.ts)، پس این
+     کلید تا اولین‌بار که ادمین روشنش کند اصلاً در دیتابیس نیست.
+
+     ⚠️ دیدنِ استوری عمداً زیرِ این پرچم نیست و با خاموش‌بودنِ آن هم
+     برای همه — از جمله مهمان — کار می‌کند. */
+  social_interactions_enabled: 'bool',
 };
 
 const READABLE = Object.keys(WRITABLE);
@@ -74,6 +83,10 @@ export async function PATCH(req: NextRequest) {
   if (Object.keys(applied).length === 0) {
     return NextResponse.json({ message: 'تنظیمِ قابلِ ذخیره‌ای فرستاده نشد' }, { status: 400 });
   }
+
+  /* کشِ پرچم‌ها را همین‌جا بینداز دور تا ادمین نتیجه‌ی تغییرِ خودش را
+     بلافاصله ببیند، نه بعد از انقضای TTL. */
+  invalidateFeatureCache();
 
   void audit({
     actorId: g.actor!.id, actorRole: g.actor!.role, action: 'SETTINGS_UPDATED',
