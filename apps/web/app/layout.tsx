@@ -8,6 +8,7 @@ import { ToastProvider } from '../components/ui/Toast';
 import ScrollToTop from '../components/ScrollToTop';
 import AppBoot from '../components/AppBoot';
 import PersianDigits from '../components/PersianDigits';
+import AddToHomeScreenGate from '../components/pwa/AddToHomeScreenGate';
 
 
 export const metadata: Metadata = {
@@ -68,7 +69,12 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <head>
-        <meta name="mobile-web-app-capable" content="yes" />
+        {/* `mobile-web-app-capable` را خودِ Next از `appleWebApp.capable`
+            می‌سازد؛ دستی هم که بود، دوبار در head می‌نشست.
+            آنچه Next دیگر نمی‌سازد `apple-mobile-web-app-capable` است و
+            iOSِ پیش از ۱۵٫۴ فقط همان را می‌فهمد — بدونش آیکونِ صفحه‌ی
+            اصلی به‌جای اپ، سافاری را باز می‌کند. */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <style>{`
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-Thin.woff2') format('woff2'); font-weight:100; font-style:normal; font-display:swap; }
           @font-face { font-family:'IRANSansX'; src:url('/fonts/IranSans/IRANSansX-UltraLight.woff2') format('woff2'); font-weight:200; font-style:normal; font-display:swap; }
@@ -110,6 +116,9 @@ export default function RootLayout({
             فوتر Server Component است و هیچ JSای همراهش نمی‌رود. */}
         <FooterGate><Footer /></FooterGate>
         <ToastProvider />
+        {/* راهنمای «افزودن به صفحه‌ی اصلی» — فقط iOS/Safari و فقط وقتی
+            هنوز نصب نشده. گیت سبک است؛ خودِ شیت lazy بارگذاری می‌شود. */}
+        <AddToHomeScreenGate />
       </body>
     </html>
   );
