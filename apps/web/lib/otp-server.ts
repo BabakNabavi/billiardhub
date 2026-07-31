@@ -49,11 +49,6 @@ export async function sendOtp(mobile: string): Promise<{ ok: boolean; message?: 
   const m = normMobile(mobile)
   if (!/^09\d{9}$/.test(m)) return { ok: false, message: 'شماره‌ی موبایل معتبر نیست' }
 
-  /* پیشوند هم باید واقعاً تخصیص یافته باشد.
-     سرویسِ پیامک شماره‌ای مثل `0900…` را می‌پذیرد و «موفق» می‌گوید، ولی
-     چون هیچ سیم‌کارتی با آن وجود ندارد پیامک به جایی نمی‌رسد. بدونِ این
-     شرط، شکست کاملاً بی‌صدا بود: نه خطایی، نه لاگی، فقط کاربری که تا
-     ابد منتظرِ کد می‌ماند. */
   if (!hasAssignedPrefix(m)) return { ok: false, message: INVALID_MOBILE_MESSAGE }
 
   const prev = await readOtp(m)

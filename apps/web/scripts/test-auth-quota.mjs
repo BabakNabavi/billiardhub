@@ -30,38 +30,39 @@ const post = (path, data) => req(path, {
   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
 })
 
-/* ════════ ۱) اعتبارسنجیِ شماره در مسیرهای واقعی ════════ */
-head('ثبت‌نام — شماره‌ی با پیشوندِ ناموجود رد می‌شود')
+/* ════════ ۱) اعتبارسنجیِ شماره در مسیرهای واقعی ════════
+
+   نسخه‌ی قبلیِ این تست انتظار داشت `0900` رد شود. آن فرض غلط بود —
+   ۰۹۰۰ بازه‌ی واقعیِ ایرانسل است — و همان فرض روی سایتِ زنده جلوی
+   ثبت‌نامِ دارندگانِ این شماره‌ها را گرفت. حالا برعکس سنجیده می‌شود. */
+head('ثبت‌نام — شماره‌ی ۰۹۰۰ (ایرانسل) نباید رد شود')
 {
   const r = await post('/api/auth/register', {
-    firstName: 'تست', lastName: 'تست', phone: '09001234567', password: 'Test@12345',
+    firstName: 'تست', lastName: 'تست', phone: '09008887766', password: 'Test@12345',
   })
-  t('۰۹۰۰… ⇒ ۴۰۰ با پیامِ روشن', r.status === 400 && /معتبر نیست/.test(r.body?.message ?? ''),
+  t('۰۹۰۰… به‌خاطرِ پیشوند رد نمی‌شود',
+    !(r.status === 400 && /معتبر نیست/.test(r.body?.message ?? '')),
     `status=${r.status} msg=${r.body?.message}`)
-  t('پیام نمی‌گوید حساب هست یا نیست', !/ثبت شده|وجود دارد/.test(r.body?.message ?? ''), r.body?.message)
+  console.log(`      (پاسخ: ${r.status} — ${String(r.body?.message ?? '').slice(0, 60)})`)
 }
 
-head('بازیابیِ رمز — شماره‌ی با پیشوندِ ناموجود')
+head('ثبت‌نام — شکلِ واقعاً نامعتبر همچنان رد می‌شود')
 {
-  /* هم شماره‌ی دارای حساب و هم بدونِ حساب باید *همان* پیام را بگیرند —
-     یعنی این بررسی چیزی درباره‌ی وجودِ حساب لو نمی‌دهد. */
+  const r = await post('/api/auth/register', {
+    firstName: 'تست', lastName: 'تست', phone: '0812345678', password: 'Test@12345',
+  })
+  t('شماره‌ی بی‌شکل ⇒ ۴۰۰', r.status === 400, `status=${r.status} msg=${r.body?.message}`)
+}
+
+head('بازیابیِ رمز — ۰۹۰۰ مثلِ بقیه رفتار می‌کند')
+{
   const { data } = await sb.from('users').select('phone').ilike('phone', '0900%').limit(1)
   const withAccount = data?.[0]?.phone
-  const noAccount = '09008887766'
-
-  const b = await post('/api/auth/forgot-password', { step: 'send', phone: noAccount })
-  t('بدونِ حساب ⇒ پیامِ روشن (نه «کد ارسال شد»)', b.status === 400 && /معتبر نیست/.test(b.body?.message ?? ''),
-    `status=${b.status} msg=${b.body?.message}`)
-
+  const b = await post('/api/auth/forgot-password', { step: 'send', phone: '09008887766' })
+  t('۰۹۰۰ِ بدونِ حساب ⇒ پاسخِ عمومی (نه «معتبر نیست»)',
+    b.status === 200 && b.body?.ok === true, `status=${b.status} msg=${b.body?.message}`)
   if (!withAccount) console.log('      (حسابِ ۰۹۰۰… در دیتابیس نیست)')
-  else {
-    const a = await post('/api/auth/forgot-password', { step: 'send', phone: withAccount })
-    t('با حساب ⇒ همان پیام', a.status === 400 && /معتبر نیست/.test(a.body?.message ?? ''),
-      `status=${a.status} msg=${a.body?.message}`)
-    t('پاسخِ هر دو یکسان است (بدونِ افشای وجودِ حساب)',
-      a.status === b.status && a.body?.message === b.body?.message)
-    t('کاربر دیگر بی‌خبر منتظر نمی‌ماند', a.body?.ok === false)
-  }
+  else console.log(`      (حسابِ ۰۹۰۰ موجود است؛ ارسالِ واقعی در این تست انجام نمی‌شود)`)
 }
 
 head('بازیابیِ رمز — شماره‌ی ناموجود در سیستم (ضدِ شمارشِ کاربر)')

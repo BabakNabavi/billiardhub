@@ -25,10 +25,26 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12')
     const offset = (page - 1) * limit
 
+    /* `?mine=true` ⇒ محصولاتِ خودِ کاربر، با هر وضعیتی.
+
+       داشبوردِ فروشنده باید آگهیِ غیرفعال، منقضی و در انتظارِ تأیید را
+       هم ببیند — چیزی که فهرستِ عمومی عمداً نشان نمی‌دهد. مالکیت از
+       نشست خوانده می‌شود، نه از پارامتر، پس کسی نمی‌تواند فهرستِ
+       محصولاتِ دیگری را بخواهد. */
+    const mine = searchParams.get('mine') === 'true'
+    let ownerId: string | null = null
+    if (mine) {
+      const user = getUserFromRequest(req)
+      if (!user) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 })
+      ownerId = user.id
+    }
+
     let query = supabase
       .from('products')
       .select('*', { count: 'exact' })
-      .eq('status', 'active')
+
+    if (ownerId) query = query.eq('sellerId', ownerId)
+    else query = query.eq('status', 'active')
 
     if (category && category !== 'all') {
       query = query.eq('category', category)
