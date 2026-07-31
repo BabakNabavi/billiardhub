@@ -49,6 +49,18 @@ export async function POST(req: NextRequest) {
     const rl = await hitRateLimit(req, RULES.otpSend, phone);
     if (!rl.ok) return tooMany(rl.retryAfterSec);
 
+    /* پیشوندِ تخصیص‌نیافته ⇒ پیشِ هر کاری، با پیامِ روشن.
+
+       عمداً *قبل* از جستجوی حساب: این یک بررسیِ صرفاً شکلی است و
+       پاسخش برای شماره‌ی دارای حساب و بدونِ حساب یکسان است، پس چیزی
+       درباره‌ی وجودِ حساب لو نمی‌دهد. اگر بعد از جستجو می‌آمد، کاربری
+       که شماره را اشتباه تایپ کرده همان «کد ارسال شد» را می‌گرفت و
+       دوباره بی‌خبر منتظر می‌ماند — یعنی همان باگی که قرار بود حل شود
+       فقط برای یک دسته حل شده بود. */
+    if (!hasAssignedPrefix(phone)) {
+      return NextResponse.json({ ok: false, message: INVALID_MOBILE_MESSAGE }, { status: 400 });
+    }
+
     const uid = await userIdOf(phone);
     /* شماره‌ی ناموجود: نه پیامکی، نه تفاوتی در پاسخ */
     if (uid) {
@@ -68,16 +80,6 @@ export async function POST(req: NextRequest) {
          ارسال انجام نشد. این نشتِ اطلاعات نیست: به این‌جا فقط وقتی
          می‌رسیم که شماره از قبل در سیستم باشد، و پیام درباره‌ی خرابیِ
          سرویس است نه وجود یا نبودِ حساب. */
-      /* پیشوندِ ناموجود ⇒ همان‌جا و با پیامِ روشن.
-         این حالت نشتِ اطلاعات نیست: درباره‌ی *شکلِ* شماره است، نه وجودِ
-         حساب — همان چیزی که کاربر با نگاه‌کردن به شماره‌اش هم می‌فهمد.
-         بدونِ این، دارنده‌ی چنین حسابی «کد ارسال شد» می‌دید و تا ابد
-         منتظر می‌ماند، چون سرویسِ پیامک چنین شماره‌ای را می‌پذیرد ولی
-         به جایی نمی‌رساند. */
-      if (!r.ok && !hasAssignedPrefix(phone)) {
-        return NextResponse.json({ ok: false, message: INVALID_MOBILE_MESSAGE }, { status: 400 });
-      }
-
       if (!r.ok) {
         console.error('[forgot-password] SMS failed:', r.message);
         void audit({

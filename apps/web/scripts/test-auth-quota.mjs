@@ -43,15 +43,24 @@ head('ثبت‌نام — شماره‌ی با پیشوندِ ناموجود ر�
 
 head('بازیابیِ رمز — شماره‌ی با پیشوندِ ناموجود')
 {
-  /* این شماره در سیستم هست (حسابِ واقعی) ولی پیشوندش تخصیص نیافته */
+  /* هم شماره‌ی دارای حساب و هم بدونِ حساب باید *همان* پیام را بگیرند —
+     یعنی این بررسی چیزی درباره‌ی وجودِ حساب لو نمی‌دهد. */
   const { data } = await sb.from('users').select('phone').ilike('phone', '0900%').limit(1)
-  const bad = data?.[0]?.phone
-  if (!bad) { console.log('      (حسابِ ۰۹۰۰… در دیتابیس نیست — این تست رد شد)') }
+  const withAccount = data?.[0]?.phone
+  const noAccount = '09008887766'
+
+  const b = await post('/api/auth/forgot-password', { step: 'send', phone: noAccount })
+  t('بدونِ حساب ⇒ پیامِ روشن (نه «کد ارسال شد»)', b.status === 400 && /معتبر نیست/.test(b.body?.message ?? ''),
+    `status=${b.status} msg=${b.body?.message}`)
+
+  if (!withAccount) console.log('      (حسابِ ۰۹۰۰… در دیتابیس نیست)')
   else {
-    const r = await post('/api/auth/forgot-password', { step: 'send', phone: bad })
-    t('پیامِ روشن به‌جای «کد ارسال شد»', r.status === 400 && /معتبر نیست/.test(r.body?.message ?? ''),
-      `status=${r.status} msg=${r.body?.message}`)
-    t('کاربر دیگر بی‌خبر منتظر نمی‌ماند', r.body?.ok === false)
+    const a = await post('/api/auth/forgot-password', { step: 'send', phone: withAccount })
+    t('با حساب ⇒ همان پیام', a.status === 400 && /معتبر نیست/.test(a.body?.message ?? ''),
+      `status=${a.status} msg=${a.body?.message}`)
+    t('پاسخِ هر دو یکسان است (بدونِ افشای وجودِ حساب)',
+      a.status === b.status && a.body?.message === b.body?.message)
+    t('کاربر دیگر بی‌خبر منتظر نمی‌ماند', a.body?.ok === false)
   }
 }
 
