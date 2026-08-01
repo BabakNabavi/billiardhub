@@ -492,7 +492,7 @@ export default function NewClubPage() {
                 { key: 'hasCafe',              label: 'کافه'         },
                 { key: 'hasParking',           label: 'پارکینگ'      },
                 { key: 'hasWifi',              label: 'اینترنت بی‌سیم' },
-                { key: 'hasProfessionalCoach', label: 'مربی حرفه‌ای' },
+                { key: 'hasProfessionalCoach', label: 'مربی' },
               ].map(item => (
                 <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input type="checkbox" name={item.key}

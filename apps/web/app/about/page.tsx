@@ -301,7 +301,7 @@ export default function AboutPage() {
           <div aria-hidden style={{ position: 'absolute', top: 0, insetInline: 0, height: 3, background: `linear-gradient(90deg,#8A6020,${GOLD},#8A6020)` }} />
           {/* دو لوگو — چپ: آرتا تجارت، راست: بیلیارد هاب، هم‌تراز و هم‌اندازه */}
           <img loading="lazy" decoding="async" className="ab-clogo l" src="/images/Logo/Arta.svg" alt="شرکت بازرگانی آرتا تجارت بین‌الملل آپادانا" />
-          <img loading="lazy" decoding="async" className="ab-clogo r" src="/images/Logo/bh-mark-256-v2.webp" alt="بیلیارد هاب" />
+          <img loading="lazy" decoding="async" className="ab-clogo r" src="/images/Logo/bh-mark-256-v3.webp" alt="بیلیارد هاب" />
           <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.3em', color: MUT }}>COMPANY &amp; BRAND</span>
 
           {/* مُهر برند ثبت‌شده — متن چرخان آهسته */}

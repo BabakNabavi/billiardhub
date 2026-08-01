@@ -73,6 +73,26 @@ export async function PUT(
     }
   }
 
+  /* ── نام مدیر: نوشتنی نیست، مشتق است ─────────────────────────────
+     «نام مدیر» باید همان نام و نام خانوادگیِ احرازشده‌ی موقع ثبت‌نام
+     باشد. تا امروز یک فیلد آزادِ متنی در داشبورد بود، یعنی باشگاه
+     می‌توانست زیر نام هر کسی معرفی شود در حالی که استعلام‌ها به نام
+     شخص دیگری گرفته شده. قفلِ UI به‌تنهایی کافی نیست — هر درخواستِ
+     دستی هم باید رد شود، پس مقدار را از رکورد کاربرِ مالک بازمی‌نویسیم
+     و هرچه از مرورگر آمده دور می‌ریزیم. */
+  if (Object.prototype.hasOwnProperty.call(body, 'managerName')) {
+    delete (body as Record<string, unknown>).managerName;
+  }
+  {
+    const { data: owner } = await getSupabaseServer()
+      .from('users').select('"firstName","lastName"').eq('id', club.ownerId).maybeSingle();
+    const o = owner as { firstName?: string; lastName?: string } | null;
+    const verified = `${o?.firstName ?? ''} ${o?.lastName ?? ''}`.trim();
+    /* اگر کاربر هنوز نام ثبت نکرده، مقدار قبلی دست‌نخورده می‌ماند —
+       بازنویسی با رشته‌ی خالی یعنی پاک کردنِ داده‌ی درست. */
+    if (verified) (body as Record<string, unknown>).managerName = verified;
+  }
+
   /* تأیید ادمین = انتشار. رد کردن = برداشتن از فهرست عمومی.
      این دو تا امروز از هم جدا بودند و «تأیید شده» هیچ اثری روی دیده‌شدن
      باشگاه نداشت. */

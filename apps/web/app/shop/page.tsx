@@ -738,7 +738,7 @@ export default function MarketNewPage() {
           {/* برند */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
             <span style={{ width: 36, height: 36, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 10px rgba(199,166,106,0.26)' }}>
-              <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-256-v2.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src="/images/Logo/bh-mark-256-v3.webp" alt="بیلیارد هاب" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </span>
             <span style={{ fontWeight: 900, fontSize: 17.5, letterSpacing: '-0.02em', color: TEXT, whiteSpace: 'nowrap' }}>
               بیلیارد <span style={{ color: GOLD }}>هاب</span>

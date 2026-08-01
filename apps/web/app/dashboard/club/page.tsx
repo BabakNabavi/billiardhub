@@ -228,10 +228,15 @@ function SectionTitle({ children, style }: { children: React.ReactNode; style?: 
   );
 }
 
-function InputField({ label, value, onChange, type = 'text', placeholder = '', ltr = false, grouped = false }: {
+function InputField({ label, value, onChange, type = 'text', placeholder = '', ltr = false, grouped = false,
+  readOnly = false, hint }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; ltr?: boolean;
   /** جداکننده‌ی سه‌رقمی — برای مبلغ */
   grouped?: boolean;
+  /** فیلدِ مشتق که کاربر حق تغییرش را ندارد (مثل نام مدیر) */
+  readOnly?: boolean;
+  /** توضیح کوتاه زیر فیلد — برای گفتنِ «چرا نمی‌توانم این را عوض کنم» */
+  hint?: string;
 }) {
   const box: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box',
@@ -261,15 +266,21 @@ function InputField({ label, value, onChange, type = 'text', placeholder = '', l
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
       <input type={type} value={value} placeholder={placeholder}
         dir={ltr ? 'ltr' : undefined} lang={ltr ? 'en' : undefined}
-        onChange={e => onChange(e.target.value)}
+        readOnly={readOnly} aria-readonly={readOnly || undefined} tabIndex={readOnly ? -1 : undefined}
+        onChange={e => { if (!readOnly) onChange(e.target.value); }}
         style={{
           width: '100%', boxSizing: 'border-box',
           border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px',
-          fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none',
+          fontSize: 14, color: readOnly ? '#6B7280' : DARK, outline: 'none',
+          /* `readOnly` به‌جای `disabled`: مقدار همچنان خوانا و قابل کپی
+             است و برخلاف disabled در فرم هم شرکت می‌کند؛ فقط قفل است. */
+          background: readOnly ? '#F3F4F6' : '#FAFAFA',
+          cursor: readOnly ? 'default' : undefined,
           fontFamily: ltr ? '"Courier New", Courier, monospace' : 'var(--font-base)',
           textAlign: ltr ? 'left' : undefined,
         }}
       />
+      {hint && <span style={{ fontSize: 11, color: '#9CA3AF', lineHeight: 1.6 }}>{hint}</span>}
     </div>
   );
 }
@@ -380,6 +391,13 @@ function fromDbTournament(r: DbTournament): Tournament {
 export default function ClubDashboardPage() {
   const router = useRouter();
   const { user, _hydrated } = useAuthStore();
+
+  /* نام مدیرِ باشگاه = نام و نام خانوادگیِ همان شخصی که موقع ثبت‌نام
+     احراز هویت شده. این فیلد ویرایش‌پذیر نیست؛ اگر باشد، باشگاه می‌تواند
+     زیر نام کسی معرفی شود که استعلام‌ها به نامش گرفته نشده. سرور هم
+     مستقلاً همین مقدار را می‌نویسد (app/api/clubs/[id]/route.ts)، پس
+     این‌جا فقط بازتابِ همان است، نه تنها خط دفاع. */
+  const verifiedManagerName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
 
   /* بدون این گارد، کاربر لاگین‌نشده برای همیشه در «در حال بارگذاری» می‌ماند */
   useEffect(() => {
@@ -560,7 +578,10 @@ export default function ClubDashboardPage() {
       const c = r.data;
       setClubInfo({
         name: c.name ?? '',
-        managerName: c.managerName ?? '',
+        /* نامِ احرازشده بر مقدار ذخیره‌شده اولویت دارد تا state با آنچه
+           نشان می‌دهیم و آنچه سرور می‌نویسد یکی بماند — وگرنه رکوردهای
+           قدیمی که نامِ دستی داشتند تا اولین ذخیره ناهمخوان می‌مانند. */
+        managerName: verifiedManagerName || (c.managerName ?? ''),
         description: c.description ?? '',
         address: c.address ?? '',
         province: c.province ?? provinceOfCity(c.city ?? ''),   // بک‌فیل استان از شهر برای باشگاه‌های قدیمی
@@ -679,7 +700,7 @@ export default function ClubDashboardPage() {
     api.get(`/bookings/club/${selectedClub.id}`)
       .then(r => setBookings(r.data))
       .catch(() => {});
-  }, [selectedClub]);
+  }, [selectedClub, verifiedManagerName]);
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
@@ -1633,7 +1654,10 @@ export default function ClubDashboardPage() {
             <SectionTitle>اطلاعات پایه</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <InputField label="نام باشگاه"   value={clubInfo.name}        onChange={v => setClubInfo(p => ({...p, name: v}))} />
-              <InputField label="نام مدیر"     value={clubInfo.managerName} onChange={v => setClubInfo(p => ({...p, managerName: v}))} />
+              <InputField label="نام مدیر" readOnly
+                hint="از اطلاعات احراز هویت شما — قابل تغییر نیست"
+                value={verifiedManagerName || clubInfo.managerName}
+                onChange={() => { /* قفل */ }} />
               <div style={{ gridColumn: '1 / -1' }}>
                 <ProvinceCitySelect
                   value={{ province: clubInfo.province, city: clubInfo.city }}
@@ -1702,7 +1726,7 @@ export default function ClubDashboardPage() {
                 { key: 'hasCafe',              label: 'کافه'          },
                 { key: 'hasParking',           label: 'پارکینگ'       },
                 { key: 'hasWifi',              label: 'WiFi'           },
-                { key: 'hasProfessionalCoach', label: 'مربی حرفه‌ای' },
+                { key: 'hasProfessionalCoach', label: 'مربی' },
               ].map(f => {
                 const checked = (clubInfo as unknown as Record<string, boolean>)[f.key];
                 return (
