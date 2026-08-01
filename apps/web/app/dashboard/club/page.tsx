@@ -494,6 +494,14 @@ export default function ClubDashboardPage() {
   const [postalBusy, setPostalBusy] = useState(false);
   const [postalMsg, setPostalMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  /* موقعیت مکانی — مبنای «نزدیک‌ترین باشگاه» در فهرست باشگاه‌ها.
+     تا امروز فقط در فرمِ ثبتِ اولیه قابل تعیین بود؛ باشگاهی که آن‌جا
+     رد می‌کرد، برای همیشه مختصاتِ ۰٬۰ می‌ماند و در مرتب‌سازی بر اساس
+     فاصله اصلاً دیده نمی‌شد. */
+  const [geo, setGeo] = useState<{ lat: number; lon: number } | null>(null);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoMsg, setGeoMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
   /* آپلود مدرک جواز کسب */
   const [licUploading, setLicUploading] = useState(false);
   const [licDocName, setLicDocName] = useState('');
@@ -519,7 +527,7 @@ export default function ClubDashboardPage() {
     name: '', managerName: '', description: '', address: '', province: '', city: '',
     /* «کشور» از فرم برداشته شد — همه ایران‌اند. جایش کد پستی آمد که
        آدرس و مختصات را از استعلام می‌آورد. */
-    postalCode: '', phone: '', website: '', timezone: 'Asia/Tehran',
+    postalCode: '', addressNote: '', phone: '', website: '', timezone: 'Asia/Tehran',
     snookerTables: '0', pocketTables: '0', highballTables: '0',
     vipSnookerTables: '0', vipPocketTables: '0', airHockeyTables: '0',
     dartBoards: '0', playstations: '0',
@@ -656,6 +664,7 @@ export default function ClubDashboardPage() {
         province: c.province ?? provinceOfCity(c.city ?? ''),   // بک‌فیل استان از شهر برای باشگاه‌های قدیمی
         city: c.city ?? '',
         postalCode: c.postalCode ?? '',
+        addressNote: c.addressNote ?? '',
         phone: c.phone ?? '',
         website: c.website ?? '',
         timezone: c.timezone ?? 'Asia/Tehran',
@@ -679,6 +688,9 @@ export default function ClubDashboardPage() {
         licenseNumber: c.licenseNumber ?? '',
       });
       setIbanVerified(!!c.ibanVerified);
+      /* مختصات؛ صفر یعنی ثبت‌نشده، نه «جزیره‌ی صفر درجه» */
+      setGeo(Number(c.latitude) && Number(c.longitude) ? { lat: Number(c.latitude), lon: Number(c.longitude) } : null);
+      setGeoMsg(null);
       setBankEditing(false);
       setLicDocName(c.licenseDocumentUrl ? 'مدرک بارگذاری‌شده' : '');
       setLicDocMsg(null);
@@ -909,7 +921,16 @@ export default function ClubDashboardPage() {
   const saveInfo = async () => {
     if (!selectedClub) return;
     setInfoSaving(true);
-    try { await api.put(`/clubs/${selectedClub.id}`, clubInfo); } catch {}
+    try {
+      /* نام بانک مشتق است و در state نمی‌نشیند؛ موقع ذخیره از روی شبا
+         حساب و فرستاده می‌شود تا صفحه‌ی عمومی هم آن را داشته باشد.
+         آدرس عمداً فرستاده نمی‌شود وقتی از استعلام آمده — سرور خودش
+         آن را نوشته و بازفرستادنش فقط راه را برای دست‌کاری باز می‌کند. */
+      await api.put(`/clubs/${selectedClub.id}`, {
+        ...clubInfo,
+        bankName: derivedBankName || clubInfo.bankName,
+      });
+    } catch { /* پیام در UI با وضعیت دکمه دیده می‌شود */ }
     finally { setInfoSaving(false); }
   };
 
@@ -1000,6 +1021,43 @@ export default function ClubDashboardPage() {
     } catch {
       setPostalMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
     } finally { setPostalBusy(false); }
+  };
+
+  /* ثبتِ موقعیتِ مکانی از دستگاهِ خودِ باشگاه‌دار.
+
+     دو راه برای پرکردنِ مختصات هست و هر دو لازم‌اند: استعلامِ کد پستی
+     (دقیق ولی به مرکزِ پلاکِ پستی) و همین دکمه (وقتی باشگاه‌دار داخلِ
+     باشگاه ایستاده). بدونِ مختصات، باشگاه در مرتب‌سازی «نزدیک‌ترین»
+     اصلاً دیده نمی‌شود. */
+  const saveLocation = async () => {
+    if (!selectedClub) return;
+    if (!navigator.geolocation) {
+      setGeoMsg({ ok: false, text: 'مرورگر شما موقعیت مکانی را پشتیبانی نمی‌کند' });
+      return;
+    }
+    setGeoBusy(true); setGeoMsg(null);
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        try {
+          await api.put(`/clubs/${selectedClub.id}`, { latitude: lat, longitude: lon });
+          setGeo({ lat, lon });
+          setGeoMsg({ ok: true, text: 'موقعیت باشگاه ثبت شد — حالا در «نزدیک‌ترین باشگاه‌ها» دیده می‌شوید' });
+        } catch {
+          setGeoMsg({ ok: false, text: 'ذخیره‌ی موقعیت انجام نشد' });
+        } finally { setGeoBusy(false); }
+      },
+      err => {
+        setGeoBusy(false);
+        setGeoMsg({
+          ok: false,
+          text: err.code === err.PERMISSION_DENIED
+            ? 'دسترسی به موقعیت مکانی رد شد — از تنظیمات مرورگر اجازه بدهید'
+            : 'دریافت موقعیت ممکن نشد؛ دوباره تلاش کنید',
+        });
+      },
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
   };
 
   /* آپلود مدرک جواز کسب. مدرک به باکتِ خصوصی می‌رود و مسیرش — نه یک
@@ -1404,6 +1462,11 @@ export default function ClubDashboardPage() {
   const cardBank  = isValidCard(clubInfo.bankCard) ? bankOfCard(clubInfo.bankCard) : null;
   const ibanBad   = clubInfo.iban.length > 2 && clubInfo.iban.length === 26 && !isValidIban(clubInfo.iban);
   const ibanBank  = isValidIban(clubInfo.iban) ? bankOfIban(clubInfo.iban) : null;
+  /* نام بانک از خودِ شبا/کارت درمی‌آید — شبا مقدم است چون مقصدِ واقعیِ
+     پول همان است. سرویسِ استعلام گاهی نامِ بانک را برنمی‌گرداند و
+     آن‌وقت این فیلد خالی می‌ماند؛ پیشوندِ شبا همیشه هست. */
+  const derivedBankName = ibanBank || cardBank || '';
+  const hasGeo = geo !== null;
 
   /* دو سازوکار بستن رزرو وجود دارد و باید یک وضعیت واحد نشان دهند،
      وگرنه کاربر «رزرو امروز بسته» را تیک می‌زند و همان بالا می‌خواند
@@ -1865,16 +1928,20 @@ export default function ClubDashboardPage() {
                   خودش می‌آورد. */}
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>کد پستی</label>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap', marginTop: 4 }}>
+                {/* در موبایل هر دو تمام‌عرض و هم‌ارتفاع می‌شوند؛ پیش‌تر با
+                    flex-wrap دکمه به اندازه‌ی متنش کوچک می‌ماند و زیرِ
+                    فیلدِ تمام‌عرض ناهم‌تراز می‌نشست. */}
+                <div className="bh-postal-row">
                   <FaNumberInput
                     value={clubInfo.postalCode} ariaLabel="کد پستی" placeholder="۱۰ رقم"
                     onChange={v => { setClubInfo(p => ({ ...p, postalCode: v.slice(0, 10) })); setPostalMsg(null); }}
-                    style={{ ...inputStyle, flex: '1 1 160px', minWidth: 150, width: 'auto', textAlign: 'center', letterSpacing: '0.08em' }}
+                    style={{ ...inputStyle, width: '100%', height: 40, boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.08em' }}
                   />
                   <button type="button" onClick={fetchAddress}
                     disabled={postalBusy || !/^\d{10}$/.test(clubInfo.postalCode) || !selectedClub}
                     style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                      height: 40, padding: '0 16px', borderRadius: 10, boxSizing: 'border-box',
                       fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap',
                       cursor: (postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 'not-allowed' : 'pointer',
                       background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
@@ -1893,8 +1960,90 @@ export default function ClubDashboardPage() {
                   با استعلام کد پستی، آدرس و موقعیت باشگاه خودکار پر می‌شود.
                 </div>
               </div>
+              {/* ── آدرس ──
+                  خروجیِ استعلامِ کد پستی است، پس ورودیِ کاربر نیست. با
+                  `<input>` تک‌خطی هم در موبایل فقط اولش دیده می‌شد و
+                  بقیه‌اش بیرونِ کادر می‌ماند؛ حالا چندخطی است و کاملاً
+                  خوانده می‌شود. */}
               <div style={{ gridColumn: '1 / -1' }}>
-                <InputField label="آدرس"         value={clubInfo.address}     onChange={v => setClubInfo(p => ({...p, address: v}))} placeholder="آدرس کامل" />
+                <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>آدرس</label>
+                {/* بلوکِ خودرشد به‌جای textarea: هر ارتفاعِ ثابتی در عرضِ
+                    باریک آدرس را می‌برید، و `rows` هم چون به عرض بستگی
+                    ندارد جواب نمی‌داد. این‌جا ارتفاع از خودِ متن می‌آید،
+                    پس در هیچ عرضی چیزی پنهان نمی‌ماند. */}
+                <div data-field="address" style={{
+                  ...inputStyle, marginTop: 4, lineHeight: 1.95, minHeight: 42,
+                  height: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  background: '#F3F4F6', color: clubInfo.address ? '#4B5563' : '#9CA3AF', cursor: 'default',
+                }}>
+                  {clubInfo.address || 'با استعلام کد پستی پر می‌شود'}
+                </div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, lineHeight: 1.9 }}>
+                  از استعلام کد پستی — قابل تغییر نیست. توضیح‌های تکمیلی را در فیلد زیر بنویسید.
+                </div>
+              </div>
+
+              {/* جای «طبقه‌ی سوم»، «ورودی از کوچه‌ی پشتی» و مانند این —
+                  تا آدرسِ رسمی دست‌نخورده بماند. */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>توضیحات آدرس</label>
+                <textarea value={clubInfo.addressNote} rows={2}
+                  onChange={e => setClubInfo(p => ({ ...p, addressNote: e.target.value.slice(0, 300) }))}
+                  placeholder="مثلاً: طبقه‌ی دوم، واحد ۵ — ورودی از کوچه‌ی روبه‌رو"
+                  style={{ ...inputStyle, marginTop: 4, resize: 'vertical', lineHeight: 1.95, minHeight: 58 }} />
+              </div>
+
+              {/* ── موقعیت مکانی ──
+                  کاربران می‌توانند باشگاه‌ها را بر اساس فاصله مرتب کنند؛
+                  باشگاهی که مختصات ندارد در آن فهرست اصلاً نمی‌آید. تا
+                  امروز فقط موقع ثبتِ اولیه قابل تعیین بود. */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>موقعیت مکانی</label>
+                <div style={{
+                  marginTop: 5, padding: '12px 14px', borderRadius: 12,
+                  background: hasGeo ? 'rgba(48,197,90,0.06)' : 'rgba(245,158,11,0.07)',
+                  border: `1px solid ${hasGeo ? 'rgba(48,197,90,0.24)' : 'rgba(245,158,11,0.28)'}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 9 }}>
+                    <MapPin size={14} style={{ color: hasGeo ? '#166534' : '#B45309', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12.5, fontWeight: 800, color: hasGeo ? '#166534' : '#92600A' }}>
+                      {hasGeo ? 'موقعیت ثبت شده است' : 'موقعیت هنوز ثبت نشده'}
+                    </span>
+                    {hasGeo && (
+                      <span style={{ fontSize: 11, color: '#6B7280', direction: 'ltr', fontFamily: 'monospace' }}>
+                        {geo!.lat.toFixed(5)}, {geo!.lon.toFixed(5)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
+                    <button type="button" onClick={saveLocation} disabled={geoBusy || !selectedClub}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                        height: 38, padding: '0 15px', borderRadius: 10, boxSizing: 'border-box',
+                        fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700,
+                        cursor: geoBusy ? 'not-allowed' : 'pointer', opacity: geoBusy ? 0.5 : 1,
+                        background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
+                      }}>
+                      {geoBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={14} />}
+                      {geoBusy ? 'در حال دریافت…' : hasGeo ? 'به‌روزرسانی موقعیت' : 'ثبت موقعیت فعلی'}
+                    </button>
+                    {hasGeo && (
+                      <a href={`https://maps.google.com/?q=${geo!.lat},${geo!.lon}`} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 12, fontWeight: 700, color: '#9A6E38', textDecoration: 'none' }}>
+                        دیدن روی نقشه ↗
+                      </a>
+                    )}
+                  </div>
+                  {geoMsg && (
+                    <div style={{ fontSize: 11.5, fontWeight: 700, marginTop: 8, lineHeight: 1.9, color: geoMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                      {geoMsg.text}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 7, lineHeight: 1.95 }}>
+                    کاربران می‌توانند باشگاه‌ها را بر اساس نزدیکی مرتب کنند؛ بدون موقعیت، باشگاه شما در آن فهرست نمی‌آید.
+                    استعلام کد پستی هم موقعیت را ثبت می‌کند، ولی اگر داخل باشگاه هستید این دکمه دقیق‌تر است.
+                  </div>
+                </div>
               </div>
               <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))} placeholder="021-..." />
               <InputField label="وبسایت"       value={clubInfo.website}     onChange={v => setClubInfo(p => ({...p, website: v}))} placeholder="https://..." />
@@ -2161,9 +2310,14 @@ export default function ClubDashboardPage() {
               <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner} readOnly={bankLocked}
                 hint={bankLocked ? 'از استعلام بانکی — قابل تغییر نیست' : undefined}
                 onChange={v => setClubInfo(p => ({ ...p, bankCardOwner: v }))} placeholder="نام و نام خانوادگی" />
-              <InputField label="نام بانک" value={clubInfo.bankName} readOnly={bankLocked}
-                hint={bankLocked ? 'از استعلام بانکی — قابل تغییر نیست' : undefined}
-                onChange={v => setClubInfo(p => ({ ...p, bankName: v }))} placeholder="مثلاً ملی، صادرات..." />
+              {/* نام بانک هیچ‌وقت ورودی نبوده و نباید باشد: از پیشوندِ خودِ
+                  شبا/کارت مشتق می‌شود و همیشه درست است. تا امروز فیلدی
+                  آزاد بود که اگر استعلام نامِ بانک را برنمی‌گرداند خالی
+                  می‌ماند — دقیقاً همان حالتی که فقط راهنما دیده می‌شد. */}
+              <InputField label="نام بانک" readOnly
+                value={derivedBankName || clubInfo.bankName}
+                hint={derivedBankName ? 'از شماره شبا — قابل تغییر نیست' : 'پس از ثبت شبا یا کارت پر می‌شود'}
+                onChange={() => { /* مشتق است */ }} placeholder="—" />
             </div>
             {clubInfo.bankCard && (
               <div style={{ marginBottom: 16, background: 'linear-gradient(135deg,#1e3a5f,#0f2340)', borderRadius: 14, padding: '16px 20px', position: 'relative', overflow: 'hidden' }}>

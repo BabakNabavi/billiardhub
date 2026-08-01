@@ -1069,3 +1069,20 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .bh-disc-label { grid-column: 2 / -1; }
   .bh-disc-add { grid-column: 1 / -1; width: 100%; }
 }
+
+/* ── ردیفِ کد پستی + دکمه‌ی استعلام ─────────────────────────────
+   با flex-wrap، دکمه به اندازه‌ی متنش می‌ماند و در موبایل زیرِ فیلدِ
+   تمام‌عرض ناهم‌تراز می‌نشست. شبکه هر دو حالت را قطعی می‌کند. */
+.bh-postal-row {
+  display: grid;
+  /* max-content — با auto، دکمه کلِ فضای باقی‌مانده را می‌گرفت و در
+     دسکتاپ ۶۰۰ پیکسل پهن می‌شد. */
+  grid-template-columns: minmax(140px, 200px) max-content;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+@media (max-width: 560px) {
+  /* هر دو تمام‌عرض و هم‌ارتفاع، زیرِ هم */
+  .bh-postal-row { grid-template-columns: 1fr; gap: 8px; }
+}

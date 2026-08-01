@@ -73,6 +73,15 @@ export async function PUT(
     }
   }
 
+  /* ── آدرس: خروجیِ استعلام است، نه ورودیِ کاربر ────────────────────
+     مسیرِ /api/address/postal-code خودش آن را می‌نویسد. اگر از این‌جا
+     هم نوشتنی بماند، همان آدرسِ رسمی با یک درخواستِ دستی قابلِ تغییر
+     است و دیگر معلوم نیست چه چیزی استعلام شده و چه چیزی تایپ.
+     توضیحاتِ تکمیلی جای خودش را دارد (addressNote). */
+  if (!isAdmin && Object.prototype.hasOwnProperty.call(body, 'address')) {
+    delete (body as Record<string, unknown>).address;
+  }
+
   /* ── نام مدیر: نوشتنی نیست، مشتق است ─────────────────────────────
      «نام مدیر» باید همان نام و نام خانوادگیِ احرازشده‌ی موقع ثبت‌نام
      باشد. تا امروز یک فیلد آزادِ متنی در داشبورد بود، یعنی باشگاه
@@ -179,7 +188,7 @@ export async function PUT(
 
      فقط فیلدهای واقعاً اختیاری این‌طور کنار گذاشته می‌شوند؛ هر ستونِ
      ناشناخته‌ی دیگری همان خطای قبلی را می‌دهد تا بی‌صدا گم نشود. */
-  const OPTIONAL_COLUMNS = ['postalCode'];
+  const OPTIONAL_COLUMNS = ['postalCode', 'addressNote'];
   if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)) {
     const dropped = OPTIONAL_COLUMNS.filter(
       k => Object.prototype.hasOwnProperty.call(body, k) && error!.message.includes(k));
