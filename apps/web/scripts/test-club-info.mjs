@@ -142,6 +142,20 @@ if (process.env.SMS_API_KEY) {
   const { lookupPostalCode } = await load('lib/address-server.ts')
   head('۷) استعلام واقعیِ کد پستی')
   const good = await lookupPostalCode('1416753955')
+
+  /* سرویسِ بالادستیِ ارائه‌دهنده گاهی پاسخ نمی‌دهد. قرمز کردنِ تست در
+     آن حالت دروغ است — کدِ ما درست کار کرده. */
+  if (good.unavailable) {
+    console.log(`  ⏭  سرویسِ ارائه‌دهنده در دسترس نیست — بخشِ استعلام رد شد.`)
+    console.log(`     «${good.providerMessage ?? good.message}» (code ${good.providerCode ?? '—'})`)
+    t('شکستِ سرویس با «کد پستی اشتباه» اشتباه گرفته نمی‌شود',
+      /موقتاً پاسخ نمی‌دهد|در دسترس نیست/.test(good.message ?? ''), true)
+    t('کد کوتاه هنوز بدونِ تماس با سرویس رد می‌شود',
+      (await lookupPostalCode('123')).unavailable !== true, true)
+    console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
+    process.exit(fail ? 1 : 0)
+  }
+
   t('کد معتبر ⇒ ok', good.ok)
   t('کد معتبر ⇒ found', good.found)
   t('استان برگشت', typeof good.data?.province === 'string' && good.data.province.length > 0)

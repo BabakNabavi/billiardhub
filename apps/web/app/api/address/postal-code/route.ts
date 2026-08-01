@@ -52,7 +52,16 @@ export async function POST(req: NextRequest) {
   }
 
   const r = await lookupPostalCode(postalCode);
-  if (!r.ok) return NextResponse.json(r, { status: r.unavailable ? 503 : 400 });
+
+  if (!r.ok) {
+    /* پیامِ خامِ ارائه‌دهنده وضعیتِ حسابِ *ما* را می‌گوید (اعتبار، سطح
+       دسترسی، قطعیِ بالادست) و جای نشان‌دادنش به هر کاربری نیست.
+       `providerCode` می‌ماند چون یک عدد است و برای پشتیبانی کافی؛
+       متنِ کامل فقط برای ادمین و در لاگِ سرور. */
+    const forUser = { ...r };
+    if (!(await isAdmin(actor.id))) delete forUser.providerMessage;
+    return NextResponse.json(forUser, { status: r.unavailable ? 503 : 400 });
+  }
   if (!r.found) return NextResponse.json(r, { status: 404 });
 
   const a = r.data!;

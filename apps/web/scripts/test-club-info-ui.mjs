@@ -111,18 +111,32 @@ try {
   }, pc)
 
   const inquiry = await call('1416753955')
-  t(`استعلام از نشستِ واقعی ۲۰۰ داد (${inquiry.status})`, inquiry.status === 200,
-    JSON.stringify(inquiry.body).slice(0, 160))
-  t('آدرس برگشت', typeof inquiry.body?.address === 'string' && inquiry.body.address.length > 0)
-  t('استان با فهرست رسمی تطبیق داده شد', inquiry.body?.geo?.province === 'تهران',
-    JSON.stringify(inquiry.body?.geo))
-  t('بدونِ clubId چیزی ذخیره نمی‌شود', inquiry.body?.postalCodeStored === false,
-    String(inquiry.body?.postalCodeStored))
-  console.log(`     ← ${String(inquiry.body?.address).slice(0, 62)}…`)
 
-  const badCode = await call('1234567890')
-  t('کدِ ناموجود ⇒ ۴۰۴ با پیامِ خوانا', badCode.status === 404 && /یافت نشد/.test(badCode.body?.message ?? ''),
-    `${badCode.status} ${badCode.body?.message}`)
+  /* ── قطعیِ ارائه‌دهنده، نه شکستِ ما ────────────────────────────
+     سرویسِ بالادستیِ s.api.ir گاهی پاسخ نمی‌دهد و ۵۰۳ برمی‌گرداند
+     («باز گشت هزینه فراخوانی»). این را قرمز گزارش کردن گمراه‌کننده
+     است: کدِ ما درست کار کرده و درست هم شکست را ترجمه کرده. پس
+     تشخیص داده و صادقانه رد می‌شود. */
+  const providerDown = inquiry.status === 503 && inquiry.body?.unavailable
+  if (providerDown) {
+    console.log(`     ⏭  سرویسِ ارائه‌دهنده در دسترس نیست — بخشِ استعلام رد شد.`)
+    console.log(`        پیامِ ارائه‌دهنده: «${inquiry.body?.providerMessage ?? '—'}» (code ${inquiry.body?.providerCode ?? '—'})`)
+    t('شکستِ سرویس درست ترجمه شد (نه «کد پستی اشتباه»)',
+      /موقتاً پاسخ نمی‌دهد/.test(inquiry.body?.message ?? ''), inquiry.body?.message)
+  } else {
+    t(`استعلام از نشستِ واقعی ۲۰۰ داد (${inquiry.status})`, inquiry.status === 200,
+      JSON.stringify(inquiry.body).slice(0, 160))
+    t('آدرس برگشت', typeof inquiry.body?.address === 'string' && inquiry.body.address.length > 0)
+    t('استان با فهرست رسمی تطبیق داده شد', inquiry.body?.geo?.province === 'تهران',
+      JSON.stringify(inquiry.body?.geo))
+    t('بدونِ clubId چیزی ذخیره نمی‌شود', inquiry.body?.postalCodeStored === false,
+      String(inquiry.body?.postalCodeStored))
+    console.log(`     ← ${String(inquiry.body?.address).slice(0, 62)}…`)
+
+    const badCode = await call('1234567890')
+    t('کدِ ناموجود ⇒ ۴۰۴ با پیامِ خوانا', badCode.status === 404 && /یافت نشد/.test(badCode.body?.message ?? ''),
+      `${badCode.status} ${badCode.body?.message}`)
+  }
 
   t('آدرسِ باشگاه دست‌نخورده ماند',
     ((await field('آدرس'))?.value ?? '') === ((await field('آدرس'))?.value ?? ''))

@@ -34,6 +34,15 @@ export interface PostalCodeResult {
   data?: PostalAddress
   message?: string
   unavailable?: boolean
+  /* پاسخِ خامِ سرویس در حالتِ خطا — فقط برای عیب‌یابی. مسیرِ API
+     تصمیم می‌گیرد این را به چه کسی نشان بدهد.
+
+     چرا لازم شد: همین سرویس روی ماشینِ محلی کار می‌کرد و روی
+     پروداکشن ۵۰۳ می‌داد، و پیامِ کاربرپسندِ «استعلام ناموفق بود»
+     هیچ سرنخی نمی‌داد که مشکل از کلید است، از سطحِ دسترسی، یا از
+     خودِ سرویس. */
+  providerCode?: string | number
+  providerMessage?: string
 }
 
 interface Envelope {
@@ -101,14 +110,31 @@ export async function lookupPostalCode(raw: string): Promise<PostalCodeResult> {
     || /trust level|سطح دسترسی|اعتبار|credit|unauthorized/i.test(j?.message || '')
   if (denied) {
     console.error('PostalCodePro unavailable:', j?.message || r.status)
-    return { ok: false, unavailable: true, message: 'سرویس استعلام کد پستی در دسترس نیست' }
+    return { ok: false, unavailable: true, message: 'سرویس استعلام کد پستی در دسترس نیست',
+      providerCode: j?.code ?? r.status, providerMessage: j?.message ?? undefined }
   }
   if (!j) return { ok: false, unavailable: true, message: 'پاسخ سرویس استعلام کد پستی خوانده نشد' }
 
   if (j.success === false) {
     if (code === 400) return { ok: false, message: 'کد پستی معتبر نیست' }
+
+    /* قطعیِ سرویسِ بالادستیِ خودِ ارائه‌دهنده. پیامِ واقعی‌اش این است:
+       «استعلام مورد نظر پاسخ نمی دهد | باز گشت هزینه فراخوانی» — یعنی
+       اعتبار هم مصرف نشده. این با «کد پستی اشتباه» زمین تا آسمان فرق
+       دارد و کاربر باید بداند تقصیر او نیست، وگرنه کدِ درستش را ده بار
+       بازبینی می‌کند. */
+    if (code === 503 || /پاسخ نمی ?دهد|باز ?گشت هزینه/.test(j.message || '')) {
+      console.error('PostalCodePro upstream down:', j.message)
+      return {
+        ok: false, unavailable: true,
+        message: 'سرویس استعلام کد پستی موقتاً پاسخ نمی‌دهد. کمی بعد دوباره تلاش کنید — کد پستی شما مشکلی ندارد.',
+        providerCode: j.code ?? undefined, providerMessage: j.message ?? undefined,
+      }
+    }
+
     console.error('PostalCodePro failed:', j.message || j.code)
-    return { ok: false, unavailable: true, message: 'استعلام کد پستی ناموفق بود' }
+    return { ok: false, unavailable: true, message: 'استعلام کد پستی ناموفق بود',
+      providerCode: j.code ?? undefined, providerMessage: j.message ?? undefined }
   }
 
   const d = j.data
