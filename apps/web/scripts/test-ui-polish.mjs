@@ -151,5 +151,37 @@ head('۸) اصلاحاتِ این دور')
   t('منطقِ دستیِ قدیمی برداشته شد', !/Number\(reserveClosedUntil\) > Date\.now\(\)/.test(dash))
 }
 
+head('۹) صفحه‌ی ویرایش پروفایل')
+{
+  const prof = read('app/profile/me/page.tsx')
+  const route = read('app/api/users/bank-card/route.ts')
+
+  t('بخشِ جداگانه‌ی «موقعیت» حذف شد', !/title="موقعیت"/.test(prof))
+  t('استان/شهر داخلِ اطلاعات تماس آمد',
+    /title="اطلاعات تماس"[\s\S]{0,500}<ProvinceCitySelect/.test(prof))
+  t('ترتیب: استان/شهر ← نشانی ← تلفن',
+    prof.indexOf('<ProvinceCitySelect') < prof.indexOf('label="نشانی"')
+    && prof.indexOf('label="نشانی"') < prof.indexOf('label="تلفن محل کار"'))
+  t('بخشِ «دسترسی‌ها» حذف شد', !/title="دسترسی‌ها"/.test(prof))
+
+  t('چهار فیلدِ بانکی به ترتیب',
+    prof.indexOf('label="شماره کارت"') < prof.indexOf('label="شماره شبا"')
+    && prof.indexOf('label="شماره شبا"') < prof.indexOf('label="نام صاحب حساب"')
+    && prof.indexOf('label="نام صاحب حساب"') < prof.indexOf('label="نام بانک"'))
+  /* نشانِ کهربایی که شماره‌ی کارت را دوباره نشان می‌داد برداشته شد */
+  t('شماره کارت دیگر دو جا نیست', !/<CreditCard size=\{17\} \/>/.test(prof))
+  t('شبا فقط‌خواندنی است', /label="شماره شبا"[\s\S]{0,200}readOnly/.test(prof))
+  t('نام حساب فقط‌خواندنی', /label="نام صاحب حساب"[\s\S]{0,160}readOnly/.test(prof))
+  t('نام بانک فقط‌خواندنی', /label="نام بانک"[\s\S]{0,160}readOnly/.test(prof))
+  t('پس از استعلام قفل می‌شود', /setCardLocked\(true\)/.test(prof))
+  t('«تغییر کارت» بازش می‌کند', /setCardLocked\(false\)/.test(prof))
+  t('کارتِ ذخیره‌شده یعنی قفل', /setCardLocked\(!!j\.bankCard\)/.test(prof))
+
+  t('سرور شبا را هم می‌گیرد', /const ib = await cardToIban\(card\)/.test(route))
+  t('نام بانک از شبا مشتق می‌شود', /iban \? bankOfIban\(iban\) : bankOfCard\(card\)/.test(route))
+  t('نبودِ ستونِ شبا ثبت را نمی‌شکند', /مهاجرت ۰۳۸ اجرا نشده/.test(route))
+  t('شکستِ استعلامِ شبا به کاربر گفته می‌شود', /ibanMessage/.test(route))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)

@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
-import { digitsOnly, isValidCard, bankOfCard } from '@/lib/bank';
-import { matchCard } from '@/lib/bank-server';
+import { digitsOnly, isValidCard, bankOfCard, bankOfIban } from '@/lib/bank';
+import { matchCard, cardToIban } from '@/lib/bank-server';
 
 /* کارت بانکی کاربر — مقصد بازگشت وجه رزروِ لغوشده.
 
@@ -16,11 +16,12 @@ import { matchCard } from '@/lib/bank-server';
    چرا فقط ذخیره نمی‌کنیم: این کارت مقصدِ پول است. کارتی که به نام
    شخصِ دیگری باشد یا اشتباه تایپ شده باشد، یعنی پولِ بازگشتی به حساب
    غریبه. پس همان زنجیره‌ی باشگاه این‌جا هم اجرا می‌شود:
-     ۱) Luhn محلی — کارتِ اشتباه‌تایپ‌شده بدون مصرف اعتبار رد می‌شود
+     ۱) Luhn محلی  — کارتِ اشتباه‌تایپ‌شده بدون مصرف اعتبار رد می‌شود
      ۲) CardMatch  — این کارت واقعاً به همین کد ملی تعلق دارد؟
+     ۳) CardToIban — شبای همان کارت، که مقصدِ واقعیِ بازگشتِ وجه است
 
-   `IbanMatch` این‌جا لازم نیست چون برخلاف تسویه‌ی باشگاه، بازگشتِ وجه
-   به خودِ کارت انجام می‌شود نه به شبا. */
+   `IbanMatch` لازم نیست: شبا از خودِ کارتی می‌آید که در گامِ ۲ ثابت
+   شد به نامِ همین شخص است، پس تطبیقِ دوباره چیزی اضافه نمی‌کند. */
 
 export async function PUT(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -69,26 +70,52 @@ export async function PUT(req: NextRequest) {
     }, { status: 422 });
   }
 
+  /* شبا هم همین‌جا گرفته می‌شود.
+
+     برگشتِ وجه در نهایت به شبا انجام می‌شود نه به کارت، و همین لحظه
+     در دسترس است. اگر ذخیره‌اش نکنیم، موقعِ بازپرداخت باید دوباره
+     استعلام بگیریم — اعتبار مصرف کند و ممکن است سرویس بالا نباشد.
+
+     شکستِ این استعلام کلِ ثبت را باطل نمی‌کند: تطابقِ کارت با هویت
+     — که بخشِ امنیتیِ ماجراست — از قبل انجام شده. */
+  const ib = await cardToIban(card);
+  const iban = ib.ok && ib.found ? ib.iban ?? null : null;
+
   /* نام دارنده از هویتِ احرازشده نوشته می‌شود، نه از ورودیِ کاربر:
      کارت با همین کد ملی تطبیق داده شده، پس نامِ واقعی همین است. یک
      فیلدِ متنیِ آزاد فقط اجازه می‌داد کارتِ تأییدشده زیر نامِ دلخواه
      بنشیند — همان اشتباهی که در اطلاعات بانکی باشگاه بود. */
   const ownerName = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
 
-  const { error } = await sb().from('users')
-    .update({ bank_card: card, bank_card_owner: ownerName || null })
-    .eq('id', actor.id);
+  const patch: Record<string, unknown> = { bank_card: card, bank_card_owner: ownerName || null };
+  if (iban) patch.bank_iban = iban;
+
+  let { error } = await sb().from('users').update(patch).eq('id', actor.id);
+
+  /* ستون bank_iban با مهاجرت ۰۳۸ می‌آید. تا اجرا نشده، نبودنش نباید
+     ثبتِ خودِ کارت را بشکند. */
+  if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)
+      && error.message.includes('bank_iban')) {
+    console.error('[users/bank-card] ستون bank_iban نیست — مهاجرت ۰۳۸ اجرا نشده');
+    delete patch.bank_iban;
+    ({ error } = await sb().from('users').update(patch).eq('id', actor.id));
+  }
 
   if (error) {
     console.error('[users/bank-card] update error:', error.message);
     return NextResponse.json({ message: 'ثبت کارت انجام نشد' }, { status: 500 });
   }
 
+  /* نام بانک از شبا مشتق می‌شود و اگر شبا نیامد، از خودِ کارت —
+     هیچ‌کدام ورودیِ کاربر نیست. */
   return NextResponse.json({
     ok: true, match: true,
     bankCard: card,
+    bankIban: iban ?? '',
     bankCardOwner: ownerName,
-    bankName: bankOfCard(card) || undefined,
+    bankName: (iban ? bankOfIban(iban) : bankOfCard(card)) || undefined,
+    /* اگر استعلامِ شبا نگرفت، کاربر باید بداند چرا آن فیلد خالی است */
+    ibanMessage: iban ? undefined : (ib.message ?? 'شبای این کارت گرفته نشد'),
   });
 }
 
@@ -98,7 +125,7 @@ export async function DELETE(req: NextRequest) {
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
 
   const { error } = await sb().from('users')
-    .update({ bank_card: null, bank_card_owner: null }).eq('id', actor.id);
+    .update({ bank_card: null, bank_card_owner: null, bank_iban: null }).eq('id', actor.id);
   if (error) {
     console.error('[users/bank-card] delete error:', error.message);
     return NextResponse.json({ message: 'حذف کارت انجام نشد' }, { status: 500 });

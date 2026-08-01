@@ -12,9 +12,10 @@ import ChangePassword from '../../../components/auth/ChangePassword'
 import Select from '../../../components/ui/Select'
 import Avatar from '../../../components/ui/Avatar'
 import { uploadFile } from '../../../lib/supabase'
+import { bankOfIban, bankOfCard, prettyIban } from '../../../lib/bank'
 import {
   ArrowRight, Camera, Loader2, Search, ShieldCheck, Check, CreditCard, Save,
-  User, Contact, MapPin, Store, LockOpen, Grid2x2, ShoppingBag, Eye, Plus, Trash2,
+  User, Contact, Store, Trash2,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -44,6 +45,8 @@ interface UserProfile {
   clubNameManual?: string
   bankCard?: string
   bankCardOwner?: string
+  /* شبای همان کارت — از استعلام، نه ورودیِ کاربر */
+  bankIban?: string
   address?: string
   workPhone?: string
 }
@@ -192,6 +195,13 @@ export default function ProfileMePage() {
   const [bankCard, setBankCard] = useState('')
   const [bankOwner, setBankOwner] = useState('')
   const [bankBusy, setBankBusy] = useState(false)
+  /* شبا و نام بانک خروجیِ استعلام‌اند؛ نام بانک از پیشوندِ شبا مشتق
+     می‌شود و ستون جدا نمی‌خواهد. */
+  const [bankIban, setBankIban] = useState('')
+  const [bankName, setBankName] = useState('')
+  /* پس از استعلامِ موفق، فیلدِ کارت و دکمه قفل می‌شوند تا هر بار
+     اعتبارِ سرویس بی‌دلیل مصرف نشود. «تغییر کارت» بازش می‌کند. */
+  const [cardLocked, setCardLocked] = useState(false)
   const [clubName, setClubName] = useState('')
   const [address, setAddress]   = useState('')
   const [workPhone, setWorkPhone] = useState('')
@@ -226,6 +236,11 @@ export default function ProfileMePage() {
     setGender(j.gender ?? '')
     setInstagram(j.instagram ?? '')
     setBankOwner(j.bankCardOwner ?? '')
+    setBankCard(j.bankCard ? formatCard(j.bankCard) : '')
+    setBankIban(j.bankIban ?? '')
+    setBankName(j.bankIban ? (bankOfIban(j.bankIban) ?? '') : (j.bankCard ? (bankOfCard(j.bankCard) ?? '') : ''))
+    /* کارتی که ذخیره شده یعنی استعلامش قبلاً موفق بوده — پس قفل */
+    setCardLocked(!!j.bankCard)
     setClubName(j.clubNameManual ?? '')
     setAddress(j.address ?? '')
     setWorkPhone(j.workPhone ?? '')
@@ -396,8 +411,20 @@ export default function ProfileMePage() {
       const j = await res.json().catch(() => ({}))
       if (res.ok) {
         setProfile(p => p ? { ...p, bankCard: j.bankCard ?? clean, bankCardOwner: j.bankCardOwner ?? '' } : p)
+        setBankCard(formatCard(j.bankCard ?? clean))
         setBankOwner(j.bankCardOwner ?? '')
-        showToast(j.bankName ? `کارت بانک ${j.bankName} ثبت شد` : 'کارت بانکی ثبت شد')
+        setBankIban(j.bankIban ?? '')
+        setBankName(j.bankName ?? '')
+        /* از این لحظه فیلد و دکمه قفل‌اند */
+        setCardLocked(true)
+        showToast(
+          j.ibanMessage
+            /* کارت تأیید شد ولی شبا نیامد — نباید مثل موفقیتِ کامل
+               نشان داده شود، وگرنه کاربر فیلدِ خالیِ شبا را نمی‌فهمد. */
+            ? `کارت ثبت شد، ولی ${j.ibanMessage}`
+            : j.bankName ? `کارت بانک ${j.bankName} ثبت شد` : 'کارت بانکی ثبت شد',
+          j.ibanMessage ? 'error' : undefined,
+        )
       } else {
         /* پیامِ سرور دقیق است (هویت تأییدنشده، کارتِ شخصِ دیگر، قطعیِ
            سرویس) و باید همان به کاربر برسد، نه یک «خطا» کلی. */
@@ -622,25 +649,26 @@ export default function ProfileMePage() {
               </Field>
             </Section>
 
-            {/* ── اطلاعات تماس — هر وقت خواستید عوضشان کنید ── */}
+            {/* ── اطلاعات تماس ──
+                استان و شهر از بخشِ جداگانه‌ی «موقعیت» به این‌جا آمدند:
+                هر چهارتا یک چیز را می‌گویند — کجا می‌شود پیدایتان کرد —
+                و دو کارتِ جدا فقط صفحه را بلند می‌کرد. ترتیب هم از کلی
+                به جزئی است: استان، شهر، نشانی، تلفن. */}
             <Section title="اطلاعات تماس" icon={<Contact size={18} />} color="#3D63E6">
+              <ProvinceCitySelect
+                value={{ province, city }}
+                onChange={v => { setProvince(v.province); setCity(v.city) }}
+              />
+              <div style={{ height: 12 }} />
               <Field label="نشانی">
                 <textarea value={address} onChange={e => setAddress(e.target.value)} rows={2}
-                  placeholder="استان، شهر، خیابان، پلاک…" style={{ ...inputStyle, resize: 'vertical', minHeight: 58 }} />
+                  placeholder="خیابان، کوچه، پلاک…" style={{ ...inputStyle, resize: 'vertical', minHeight: 58 }} />
               </Field>
               <Field label="تلفن محل کار">
                 <input value={toFa(workPhone)} onChange={e => setWorkPhone(toEnDigits(e.target.value).slice(0, 15))}
                   placeholder="۰۲۱۲۲۸۵۹۵۵۱" inputMode="numeric"
                   style={{ ...inputStyle, direction: 'ltr', textAlign: 'right' }} />
               </Field>
-            </Section>
-
-            {/* ── موقعیت ── */}
-            <Section title="موقعیت" icon={<MapPin size={18} />} color="#06b6d4">
-              <ProvinceCitySelect
-                value={{ province, city }}
-                onChange={v => { setProvince(v.province); setCity(v.city) }}
-              />
             </Section>
 
             {/* ── باشگاه ── */}
@@ -671,54 +699,61 @@ export default function ProfileMePage() {
               <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
                 برای لغو رزرو و تسویه حساب — کارت باید به نام خودتان باشد
               </p>
-              {profile.bankCard && (
-                <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: '8px 14px', marginBottom: 12, fontSize: 15, color: '#fbbf24', fontFamily: 'monospace', letterSpacing: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <CreditCard size={17} />
-                  {toFa(profile.bankCard)}
-                </div>
-              )}
+              {/* شماره‌ی کارت پیش‌تر دو جا بود: یک‌بار در نشانِ کهربایی
+                  بالای بخش و یک‌بار در فیلد. حالا فقط فیلد، که همان
+                  مقدارِ ذخیره‌شده را نشان می‌دهد و قابل ویرایش است. */}
               <Field label="شماره کارت">
                 <input
                   value={toFa(bankCard)}
-                  onChange={e => setBankCard(formatCard(toEnDigits(e.target.value)))}
+                  readOnly={cardLocked}
+                  onChange={e => { if (!cardLocked) setBankCard(formatCard(toEnDigits(e.target.value))) }}
                   placeholder="---- ---- ---- ----"
                   inputMode="numeric"
-                  style={{ ...inputStyle, letterSpacing: 3, direction: 'ltr', textAlign: 'center' }}
+                  style={{
+                    ...inputStyle, letterSpacing: 3, direction: 'ltr', textAlign: 'center',
+                    ...(cardLocked ? { background: 'rgba(0,0,0,0.04)', color: 'rgba(0,0,0,0.55)', cursor: 'default' } : {}),
+                  }}
                 />
               </Field>
-              {/* نام دارنده ورودی نیست: کارت با کد ملیِ احرازشده تطبیق
-                  داده می‌شود، پس نامِ واقعی همان نامِ ثبت‌نام است. یک
-                  فیلدِ آزاد فقط اجازه می‌داد کارتِ تأییدشده زیر نامِ
-                  دلخواه بنشیند. */}
-              <Field label="نام صاحب کارت">
-                <input value={bankOwner || '—'} readOnly tabIndex={-1}
-                  style={{ ...inputStyle, background: 'rgba(0,0,0,0.04)', color: 'rgba(0,0,0,0.45)', cursor: 'default' }} />
+
+              {/* سه فیلدِ بعدی خروجیِ استعلام‌اند، نه ورودیِ کاربر. یک
+                  فیلدِ آزاد فقط اجازه می‌داد کارتِ تأییدشده زیر نام یا
+                  بانکِ دلخواه بنشیند. */}
+              <Field label="شماره شبا">
+                <input value={bankIban ? toFa(prettyIban(bankIban)) : '—'} readOnly tabIndex={-1}
+                  style={{ ...lockedStyle, direction: 'ltr', textAlign: 'center', fontFamily: 'monospace', fontSize: 13.5 }} />
               </Field>
-              <div style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.4)', margin: '-4px 0 12px', lineHeight: 1.8 }}>
-                از اطلاعات احراز هویت شما — کارت باید به نام خودتان باشد و استعلام می‌شود.
+              <Field label="نام صاحب حساب">
+                <input value={bankOwner || '—'} readOnly tabIndex={-1}
+                  style={lockedStyle} />
+              </Field>
+              <Field label="نام بانک">
+                <input value={bankName || '—'} readOnly tabIndex={-1}
+                  style={lockedStyle} />
+              </Field>
+
+              <div style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.4)', margin: '-4px 0 12px', lineHeight: 1.85 }}>
+                {cardLocked
+                  ? 'کارت ثبت و استعلام شده است. برای تغییر، روی «تغییر کارت» بزنید.'
+                  : 'شماره کارت را وارد کنید و «ثبت کارت» را بزنید؛ شبا، نام دارنده و نام بانک خودکار پر می‌شوند.'}
               </div>
-              <button onClick={handleBankCard} disabled={bankBusy}
-                style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: bankBusy ? 'not-allowed' : 'pointer', opacity: bankBusy ? 0.55 : 1 }}>
-                {bankBusy ? 'در حال استعلام…' : 'ثبت کارت'}
-              </button>
+
+              {cardLocked ? (
+                <button onClick={() => { setCardLocked(false); setBankCard('') }}
+                  style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', color: 'rgba(0,0,0,0.55)', fontSize: 14.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+                  تغییر کارت
+                </button>
+              ) : (
+                <button onClick={handleBankCard} disabled={bankBusy}
+                  style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: bankBusy ? 'not-allowed' : 'pointer', opacity: bankBusy ? 0.55 : 1 }}>
+                  {bankBusy ? 'در حال استعلام…' : 'ثبت کارت'}
+                </button>
+              )}
             </Section>
 
-            {/* ── دسترسی‌ها — همه با ثبت کد ملی هنگام ثبت‌نام فعال‌اند ── */}
-            <Section title="دسترسی‌ها" icon={<LockOpen size={18} />} color="#C7A66A">
-              {[
-                { label: 'رزرو میز', icon: <Grid2x2 size={17} /> },
-                { label: 'خرید و فروش', icon: <ShoppingBag size={17} /> },
-                { label: 'مشاهده استوری', icon: <Eye size={17} /> },
-                { label: 'ثبت آگهی', icon: <Plus size={17} /> },
-                { label: 'پروفایل عمومی', icon: <User size={17} /> },
-              ].map(f => (
-                <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <span style={{ color: '#C7A66A', flexShrink: 0, display: 'flex' }}>{f.icon}</span>
-                  <span style={{ fontSize: 15, color: '#111111', flex: 1 }}>{f.label}</span>
-                  <Check size={15} style={{ color: '#C7A66A' }} />
-                </div>
-              ))}
-            </Section>
+            {/* بخشِ «دسترسی‌ها» حذف شد: پنج ردیف بود که همیشه و برای همه
+                تیکِ سبز داشتند — هیچ‌کدام واقعاً وضعیتی را نشان نمی‌داد
+                و فقط صفحه را بلند می‌کرد. */}
 
             {/* ── Save button ── */}
             <button
