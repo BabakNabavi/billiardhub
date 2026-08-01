@@ -496,6 +496,8 @@ export default function ClubDashboardPage() {
   const [ibanVerified, setIbanVerified] = useState(false);
   /* راهِ خروج از قفل. بدون این، کسی که حسابش عوض شده گیر می‌افتاد. */
   const [bankEditing, setBankEditing] = useState(false);
+  /* پرسشِ تأیید پیش از بازکردنِ قفل — درون‌صفحه‌ای، نه window.confirm */
+  const [bankUnlockAsk, setBankUnlockAsk] = useState(false);
   const bankLocked = ibanVerified && !bankEditing;
 
   /* استعلام کد پستی */
@@ -1030,9 +1032,12 @@ export default function ClubDashboardPage() {
   /* بازکردنِ قفلِ حساب برای تغییر. تأیید همین‌جا هم برداشته می‌شود تا
      تیکِ سبز روی حسابی که دیگر همان حساب نیست نماند؛ سرور هم مستقل
      همین کار را موقع ذخیره انجام می‌دهد. */
+  /* `window.confirm` پنجره‌ی خودِ مرورگر را می‌آورد: انگلیسیِ چپ‌به‌راست،
+     با ظاهرِ سیستم‌عامل و بی‌ربط به بقیه‌ی سایت. همان الگوی تأییدِ
+     درون‌صفحه‌ای که «حذف باشگاه» دارد این‌جا هم به کار می‌رود. */
   const unlockBank = () => {
-    if (!window.confirm('برای تغییر حساب، تأیید فعلی باطل می‌شود و باید دوباره استعلام بگیرید. ادامه می‌دهید؟')) return;
     setBankEditing(true);
+    setBankUnlockAsk(false);
     setIbanMsg({ ok: false, text: 'تأیید باطل شد — پس از تغییر، دوباره استعلام بگیرید.' });
   };
 
@@ -1857,13 +1862,15 @@ export default function ClubDashboardPage() {
 
           <Card style={{ marginBottom: 16 }}>
             <SectionTitle>دسترسی سریع</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
+            {/* شش کارت در دو سطرِ سه‌تایی. با `minmax(120px,…)` در موبایل
+                دو ستون می‌شد و هفت کارت چهار سطر می‌گرفت. «گالری» هم
+                برداشته شد — تبِ خودش بالای همین صفحه هست. */}
+            <div className="bh-quick">
               {[
                 { label: 'ثبت مسابقه',    Icon: Trophy,       action: () => { setActiveTab('tournaments'); setTournamentTab('create'); } },
                 { label: 'افزودن میز',    Icon: Grid3X3,      action: () => { setActiveTab('tables'); setShowTableForm(true); } },
                 { label: 'رزروهای جدید',  Icon: CalendarDays, action: () => { setActiveTab('bookings'); setBookingFilter('pending'); } },
                 { label: 'ویرایش اطلاعات', Icon: FileText,    action: () => setActiveTab('info') },
-                { label: 'گالری',          Icon: ImageIcon,   action: () => setActiveTab('gallery') },
                 { label: 'مربیان',         Icon: GraduationCap, action: () => setActiveTab('coaches') },
                 { label: 'پروفایل باشگاه', Icon: Eye,         action: () => router.push(`/clubs/${selectedClub?.id}`) },
               ].map(({ label, Icon, action }) => (
@@ -2299,8 +2306,8 @@ export default function ClubDashboardPage() {
                   <CheckCircle size={15} />
                   {bankEditing ? 'در حال تغییر حساب — پس از ذخیره باید دوباره استعلام بگیرید' : 'حساب تأیید شده و قفل است'}
                 </div>
-                {!bankEditing && (
-                  <button type="button" onClick={unlockBank} style={{
+                {!bankEditing && !bankUnlockAsk && (
+                  <button type="button" onClick={() => setBankUnlockAsk(true)} style={{
                     padding: '7px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                     fontFamily: 'var(--font-base)', background: '#fff',
                     border: '1px solid rgba(0,0,0,0.14)', color: '#6B7280',
@@ -2308,8 +2315,44 @@ export default function ClubDashboardPage() {
                 )}
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
-              <div style={{ gridColumn: '1 / -1' }}>
+
+            {/* تأییدِ درون‌صفحه‌ای به‌جای پنجره‌ی خودِ مرورگر — همان الگویی
+                که «حذف باشگاه» پایین همین صفحه دارد. */}
+            {bankUnlockAsk && (
+              <div style={{
+                marginBottom: 16, padding: '13px 15px', borderRadius: 13,
+                background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.26)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 11 }}>
+                  <AlertTriangle size={15} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 12.5, color: '#991B1B', lineHeight: 1.95, fontWeight: 600 }}>
+                    با تغییر حساب، تأیید فعلی باطل می‌شود و تا استعلام دوباره، تسویه انجام نمی‌شود. ادامه می‌دهید؟
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button type="button" onClick={unlockBank} style={{
+                    padding: '8px 18px', borderRadius: 20, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                    fontFamily: 'var(--font-base)', background: 'rgba(239,68,68,0.12)',
+                    border: '1px solid rgba(239,68,68,0.35)', color: '#dc2626',
+                  }}>بله، تغییر می‌دهم</button>
+                  <button type="button" onClick={() => setBankUnlockAsk(false)} style={{
+                    padding: '8px 18px', borderRadius: 20, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+                    fontFamily: 'var(--font-base)', background: 'rgba(0,0,0,0.04)',
+                    border: '1px solid rgba(0,0,0,0.12)', color: '#6B7280',
+                  }}>انصراف</button>
+                </div>
+              </div>
+            )}
+            {/* ── چهار فیلد ──
+                فقط فیلدِ اول ورودی است. سه‌تای بعدی خروجیِ استعلام‌اند و
+                هیچ‌وقت نباید تایپ شوند: یک فیلدِ آزاد اجازه می‌داد حسابِ
+                تأییدشده زیر نام یا بانکِ دلخواه بنشیند.
+
+                پیش‌تر شماره کارت و شبا هرکدام یک سطرِ کامل می‌گرفتند و
+                دو دکمه‌ی استعلامِ جدا داشتند. حالا یک شبکه‌ی دوستونی و
+                یک دکمه‌ی واحد. */}
+            <div className="bh-bank-grid">
+              <div className="bh-bank-card">
                 <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>شماره کارت</label>
                 <input
                   type="text"
@@ -2320,92 +2363,54 @@ export default function ClubDashboardPage() {
                   readOnly={bankLocked}
                   onChange={e => { if (!bankLocked) setClubInfo(p => ({ ...p, bankCard: formatCard(e.target.value) })); }}
                   placeholder="6037 9911 1234 5678"
-                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em', fontSize: 16, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none',
+                  style={{ ...inputStyle, marginTop: 4, fontFamily: 'monospace', letterSpacing: '0.06em', fontSize: 14.5, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 10px', outline: 'none', textAlign: 'center',
                     background: bankLocked ? '#F3F4F6' : inputStyle.background,
                     color: bankLocked ? '#6B7280' : inputStyle.color,
                     border: cardBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
                 />
                 {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید.</div>}
-                {cardBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {cardBank}</div>}
-
-                {/* استعلام شبا از شماره کارت — پس از تأیید خاموش */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
-                  <button type="button" onClick={fetchIban}
-                    disabled={bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard) || !selectedClub}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
-                      fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700,
-                      cursor: (bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard)) ? 'not-allowed' : 'pointer',
-                      background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
-                      opacity: (bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard)) ? 0.5 : 1,
-                    }}>
-                    {ibanBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Wallet size={14} />}
-                    {ibanBusy ? 'در حال استعلام…' : 'دریافت شبا از شماره کارت'}
-                  </button>
-                  {ibanMsg && (
-                    <span style={{ fontSize: 11.5, fontWeight: 700, lineHeight: 1.9, color: ibanMsg.ok ? '#0E7A38' : '#B23B2E' }}>
-                      {ibanMsg.text}
-                    </span>
-                  )}
-                </div>
               </div>
 
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div>
                 <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>شماره شبا</label>
-                <input
-                  type="text"
-                  value={clubInfo.iban}
-                  maxLength={26}
-                  dir="ltr"
-                  readOnly={bankLocked}
-                  onChange={e => { if (!bankLocked) setClubInfo(p => ({ ...p, iban: formatIban(e.target.value) })); }}
-                  placeholder="IR820540102680020817909002"
-                  style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.06em', fontSize: 15, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none',
-                    background: bankLocked ? '#F3F4F6' : inputStyle.background,
-                    color: bankLocked ? '#6B7280' : inputStyle.color,
-                    border: ibanBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
+                <input type="text" readOnly dir="ltr"
+                  value={clubInfo.iban ? prettyIban(clubInfo.iban) : ''}
+                  placeholder="—"
+                  style={{ ...inputStyle, marginTop: 4, fontFamily: 'monospace', fontSize: 13, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 8px', outline: 'none', textAlign: 'center',
+                    background: '#F3F4F6', color: '#6B7280', cursor: 'default' }}
                 />
-                {ibanBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره شبا معتبر نیست — «IR» به‌همراه ۲۴ رقم.</div>}
-                {ibanBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {ibanBank} — {prettyIban(clubInfo.iban)}</div>}
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
-                  تسویه‌ی درآمد رزروها به همین شبا انجام می‌شود و باید به نام صاحب باشگاه باشد.
-                </div>
-                {isValidIban(clubInfo.iban) && !bankLocked && (
-                  <button type="button" onClick={verifyIban} disabled={ibanBusy || !selectedClub}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 9, padding: '8px 15px', borderRadius: 10,
-                      fontFamily: 'var(--font-base)', fontSize: 12, fontWeight: 700, cursor: ibanBusy ? 'not-allowed' : 'pointer',
-                      background: '#fff', border: '1px solid rgba(0,0,0,0.12)', color: '#6B7280', opacity: ibanBusy ? 0.5 : 1,
-                    }}>
-                    {ibanBusy ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={13} />}
-                    تأیید شبا بدون شماره کارت
-                  </button>
-                )}
               </div>
 
-              {/* نام دارنده و نام بانک خروجیِ استعلام‌اند، نه ورودیِ کاربر —
-                  پس از تأیید قفل می‌شوند تا تیکِ سبز روی نامی که دستی
-                  عوض شده ننشیند. */}
-              <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner} readOnly={bankLocked}
-                hint={bankLocked ? 'از استعلام بانکی — قابل تغییر نیست' : undefined}
-                onChange={v => setClubInfo(p => ({ ...p, bankCardOwner: v }))} placeholder="نام و نام خانوادگی" />
-              {/* نام بانک هیچ‌وقت ورودی نبوده و نباید باشد: از پیشوندِ خودِ
-                  شبا/کارت مشتق می‌شود و همیشه درست است. تا امروز فیلدی
-                  آزاد بود که اگر استعلام نامِ بانک را برنمی‌گرداند خالی
-                  می‌ماند — دقیقاً همان حالتی که فقط راهنما دیده می‌شد. */}
+              <InputField label="نام صاحب حساب" readOnly value={clubInfo.bankCardOwner}
+                onChange={() => { /* از استعلام */ }} placeholder="—" />
               <InputField label="نام بانک" readOnly
                 value={derivedBankName || clubInfo.bankName}
-                hint={derivedBankName ? 'از شماره شبا — قابل تغییر نیست' : 'پس از ثبت شبا یا کارت پر می‌شود'}
-                onChange={() => { /* مشتق است */ }} placeholder="—" />
+                onChange={() => { /* مشتق از شبا */ }} placeholder="—" />
             </div>
-            {clubInfo.bankCard && (
-              <div style={{ marginBottom: 16, background: 'linear-gradient(135deg,#1e3a5f,#0f2340)', borderRadius: 14, padding: '16px 20px', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.15em', marginBottom: 10 }}>پیش‌نمایش کارت</div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: '0.15em', fontFamily: 'monospace', direction: 'ltr', marginBottom: 10 }}>{clubInfo.bankCard}</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{clubInfo.bankCardOwner || '—'}{clubInfo.bankName ? ` — ${clubInfo.bankName}` : ''}</div>
-              </div>
-            )}
-            <SaveBtn onClick={saveInfo} loading={infoSaving} label="ذخیره اطلاعات بانکی" />
+
+            {/* یک دکمه به‌جای دو تا. «تأیید شبا بدون شماره کارت» برداشته
+                شد: راهِ دومی برای همان نتیجه بود و کاربر نمی‌دانست کدام
+                را بزند. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
+              <button type="button" onClick={fetchIban}
+                disabled={bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard) || !selectedClub}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                  width: '100%', padding: '11px 16px', borderRadius: 11,
+                  fontFamily: 'var(--font-base)', fontSize: 13.5, fontWeight: 800,
+                  cursor: (bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard)) ? 'not-allowed' : 'pointer',
+                  background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
+                  opacity: (bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard)) ? 0.5 : 1,
+                }}>
+                {ibanBusy ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Wallet size={15} />}
+                {ibanBusy ? 'در حال استعلام…' : 'ثبت کارت'}
+              </button>
+              {ibanMsg && (
+                <span style={{ fontSize: 11.5, fontWeight: 700, lineHeight: 1.9, color: ibanMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                  {ibanMsg.text}
+                </span>
+              )}
+            </div>
           </Card>
 
           {/* Stats card */}

@@ -1157,3 +1157,31 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .wh-lb { display: none; }
   .wh-cell { justify-content: center; }
 }
+
+/* ── دسترسی سریع (داشبورد باشگاه) ───────────────────────────────
+   شش کارت. با `minmax(120px,…)` در موبایل دو ستون می‌شد و چهار سطر
+   می‌گرفت؛ سه ستون هم جا می‌شود و دو سطر کافی است. */
+.bh-quick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 560px) {
+  .bh-quick { gap: 8px; }
+  .bh-quick button { padding: 12px 6px !important; }
+  .bh-quick button > div:last-child { font-size: 11px !important; line-height: 1.5; }
+}
+
+/* ── اطلاعات بانکی باشگاه ───────────────────────────────────────
+   چهار فیلد؛ پیش‌تر شماره کارت و شبا هرکدام یک سطرِ کامل می‌گرفتند
+   در حالی که محتوایشان کوتاه است. */
+.bh-bank-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+/* شبا بلندترین مقدار را دارد و در ستونِ نصف نمی‌شکند اگر تنها بماند */
+@media (max-width: 560px) {
+  .bh-bank-grid { grid-template-columns: 1fr; gap: 12px; }
+}
