@@ -75,8 +75,24 @@ export async function POST(req: NextRequest) {
     if (address) patch.address = address;
     if (geo.province) patch.province = geo.province;
     if (geo.city) patch.city = geo.city;
-    if (a.lat !== undefined) patch.latitude = a.lat;
-    if (a.long !== undefined) patch.longitude = a.long;
+
+    /* مختصات فقط وقتی از این‌جا نوشته می‌شود که باشگاه هنوز مختصاتی
+       نداشته باشد.
+
+       دلیلش «هرکدام دقیق‌تر است»: کد پستی مرکزِ پلاکِ پستی را می‌دهد،
+       ولی دکمه‌ی «ثبت موقعیت فعلی» اندازه‌گیریِ واقعیِ داخلِ باشگاه است
+       و فقط وقتی ذخیره می‌شود که دقتش زیر ۱۵۰ متر باشد. پس اگر
+       باشگاه‌دار آن را زده، این استعلام نباید مقدارِ بهترش را با
+       تخمینِ پستی خراب کند. */
+    const { data: cur } = await sb().from('clubs')
+      .select('latitude,longitude').eq('id', clubId).maybeSingle();
+    const c = (cur ?? {}) as { latitude?: number | null; longitude?: number | null };
+    const hasCoords = !!Number(c.latitude) && !!Number(c.longitude);
+
+    if (!hasCoords) {
+      if (a.lat !== undefined) patch.latitude = a.lat;
+      if (a.long !== undefined) patch.longitude = a.long;
+    }
 
     const { error } = await sb().from('clubs').update(patch).eq('id', clubId);
     if (error) {

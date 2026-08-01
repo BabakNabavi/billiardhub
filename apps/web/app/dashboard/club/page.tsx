@@ -24,7 +24,7 @@ import { apiFetch } from '../../../lib/http';
 import { sortTables } from '../../../lib/tables/order';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
-import { toJalali, jalaliToGregorian } from '../../../lib/jalali';
+import { toJalali, jalaliToGregorian, faDate, faTimeRange } from '../../../lib/jalali';
 import FaNumberInput, { toFa as faDigit, groupFa, amountInWords } from '../../../components/ui/FaNumberInput';
 import {
   GAME_TYPE_LABELS, STATUS_LABELS, STATUS_COLORS, formatFee,
@@ -57,10 +57,16 @@ interface ClubStory {
   expiresAt: string;
 }
 
+/* شکلِ واقعیِ رکوردِ رزرو. `startTime`/`endTime` هیچ‌وقت وجود نداشتند —
+   تاریخ در `bookingDate` و ساعت‌ها در `timeSlots` («۱۸,۱۹,۲۰») ذخیره
+   می‌شوند و مبلغ در `final_amount`. */
 interface Booking {
-  id: string; tableType: string; tableNumber: number;
-  startTime: string; endTime: string; status: string; totalPrice: number;
-  user: { firstName: string; lastName: string; phone: string; };
+  id: string; tableType: string; tableNumber: number | null;
+  tableTypeKey?: string | null;
+  bookingDate: string; timeSlots: string | null;
+  status: string; totalPrice: number; final_amount?: number;
+  booking_reference?: string | null;
+  user: { firstName: string; lastName: string; phone: string; } | null;
 }
 
 interface DiscountRule { id: string; startTime: string; endTime: string; percent: number; label: string; }
@@ -452,6 +458,7 @@ export default function ClubDashboardPage() {
 
   // Bookings
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookingsError, setBookingsError] = useState('');
   const [bookingFilter, setBookingFilter] = useState('all');
   /* بستن رزرو آنلاین: '' = باز | 'always' = همیشه بسته | عدد = بسته تا آن timestamp */
   const [reserveClosedUntil, setReserveClosedUntil] = useState<string>('');
@@ -795,9 +802,17 @@ export default function ClubDashboardPage() {
     } catch { setMyTournaments([]); }
     void loadTournaments(selectedClub.id);
 
+    /* `catch` خالی بود و همین باعث شد یک ۴۰۴ ماه‌ها پنهان بماند: مسیر
+       اصلاً وجود نداشت، تب همیشه خالی می‌ماند و هیچ نشانه‌ای از خطا
+       دیده نمی‌شد. حالا دست‌کم در کنسول ثبت می‌شود. */
+    setBookingsError('');
     api.get(`/bookings/club/${selectedClub.id}`)
-      .then(r => setBookings(r.data))
-      .catch(() => {});
+      .then(r => setBookings(Array.isArray(r.data) ? r.data : []))
+      .catch((e: unknown) => {
+        console.error('[dashboard/club] دریافت رزروها ناموفق:', e);
+        setBookings([]);
+        setBookingsError('دریافت رزروها انجام نشد؛ صفحه را تازه کنید.');
+      });
   }, [selectedClub, verifiedManagerName]);
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -1039,10 +1054,29 @@ export default function ClubDashboardPage() {
     navigator.geolocation.getCurrentPosition(
       async pos => {
         const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        const acc = Math.round(pos.coords.accuracy ?? 0);
+
+        /* «هرکدام دقیق‌تر بود» — و دقت را خودِ مرورگر گزارش می‌کند.
+           GPS داخلِ باشگاه چند ده متر خطا دارد و از مرکزِ بلوکِ پستی
+           بهتر است؛ ولی روی دسکتاپِ وای‌فای همان GPS می‌تواند چند
+           کیلومتر خطا داشته باشد و آن‌وقت *بدتر* از کد پستی است.
+           پس مقدارِ بی‌دقت اصلاً ذخیره نمی‌شود. */
+        if (acc > 150) {
+          setGeoBusy(false);
+          setGeoMsg({
+            ok: false,
+            text: `دقت موقعیت پایین است (±${faDigit(String(acc))} متر) و ذخیره نشد. از تلفن همراه و داخل باشگاه دوباره تلاش کنید — یا از استعلام کد پستی استفاده کنید.`,
+          });
+          return;
+        }
+
         try {
           await api.put(`/clubs/${selectedClub.id}`, { latitude: lat, longitude: lon });
           setGeo({ lat, lon });
-          setGeoMsg({ ok: true, text: 'موقعیت باشگاه ثبت شد — حالا در «نزدیک‌ترین باشگاه‌ها» دیده می‌شوید' });
+          setGeoMsg({
+            ok: true,
+            text: `موقعیت باشگاه با دقت ±${faDigit(String(acc))} متر ثبت شد — حالا در «نزدیک‌ترین باشگاه‌ها» دیده می‌شوید`,
+          });
         } catch {
           setGeoMsg({ ok: false, text: 'ذخیره‌ی موقعیت انجام نشد' });
         } finally { setGeoBusy(false); }
@@ -3022,6 +3056,12 @@ export default function ClubDashboardPage() {
               }}>{f.label}</button>
             ))}
           </div>
+          {bookingsError && (
+            <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700,
+              background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.22)', color: '#991B1B' }}>
+              {bookingsError}
+            </div>
+          )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {filteredBookings.length === 0 ? (
               <Card style={{ textAlign: 'center', padding: 40 }}>
@@ -3034,16 +3074,25 @@ export default function ClubDashboardPage() {
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: b.status === 'pending' ? 12 : 0 }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 15, color: DARK }}>{b.user?.firstName} {b.user?.lastName}</div>
+                      {/* همان قالبِ بقیه‌ی سایت: «میز ۱ | اسنوکر» */}
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>
-                        {TABLE_TYPE_LABELS[b.tableType] || b.tableType} — میز {b.tableNumber}
+                        {b.tableNumber ? `میز ${faDigit(String(b.tableNumber))} | ` : ''}
+                        {TABLE_TYPE_LABELS[String(b.tableTypeKey ?? b.tableType)] || b.tableType}
                       </div>
+                      {/* `startTime`/`endTime` روی رکوردِ رزرو وجود ندارند —
+                          تاریخ در `bookingDate` و ساعت‌ها در `timeSlots`
+                          ذخیره می‌شوند. به همین دلیل این‌جا فقط «تا» چاپ
+                          می‌شد، بدون هیچ زمانی. */}
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
-                        {toPersianDate(b.startTime)} تا {toPersianDate(b.endTime)}
+                        {faDate(b.bookingDate)}
+                        {b.timeSlots ? ` — ${faTimeRange(b.timeSlots)}` : ''}
                       </div>
                       {b.user?.phone && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}><Phone size={11} /> {b.user.phone}</div>}
-                      {b.totalPrice > 0 && (
+                      {/* `final_amount` مبلغِ واقعیِ فاز مالی است؛
+                          `totalPrice` ستونِ قدیمی و گاهی خالی است. */}
+                      {Number(b.final_amount ?? b.totalPrice) > 0 && (
                         <div style={{ fontSize: 13, color: '#059669', fontWeight: 700, marginTop: 4 }}>
-                          {b.totalPrice.toLocaleString('fa-IR')} تومان
+                          {Number(b.final_amount ?? b.totalPrice).toLocaleString('fa-IR')} تومان
                         </div>
                       )}
                     </div>

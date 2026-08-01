@@ -94,5 +94,36 @@ head('۴) موقعیت مکانی — از داشبورد')
   t('موقعیتِ کاربر گرفته می‌شود', /navigator\.geolocation\.getCurrentPosition/.test(clubs))
 }
 
+head('۵) کدام منبعِ موقعیت برنده است')
+{
+  t('GPSِ بی‌دقت ذخیره نمی‌شود', /if \(acc > 150\)/.test(dash))
+  t('دقت به کاربر گفته می‌شود', /دقت موقعیت پایین است/.test(dash))
+  t('دقتِ خوب با عددش ثبت می‌شود', /با دقت ±\$\{faDigit\(String\(acc\)\)\} متر ثبت شد/.test(dash))
+
+  const postal = read('app/api/address/postal-code/route.ts')
+  t('استعلام مختصاتِ موجود را بازنویسی نمی‌کند', /if \(!hasCoords\)/.test(postal))
+  t('«موجود» یعنی غیرصفر', /!!Number\(c\.latitude\) && !!Number\(c\.longitude\)/.test(postal))
+  t('آدرس و استان همچنان به‌روز می‌شوند', /if \(address\) patch\.address = address/.test(postal))
+}
+
+head('۶) رزروهای باشگاه — مسیرهای غایب')
+{
+  const club = read('app/api/bookings/club/[clubId]/route.ts')
+  t('مسیر ساخته شد', /export async function GET/.test(club))
+  t('فقط مالکِ باشگاه', /ownsClub\(actor, clubId\)/.test(club))
+  t('نام و شماره‌ی رزروکننده هم می‌آید', /firstName.*lastName.*phone/.test(club))
+  t('در یک کوئری، نه به‌ازای هر رزرو', /\.in\('id', userIds\)/.test(club))
+
+  const st = read('app/api/bookings/[id]/status/route.ts')
+  t('مسیر تغییر وضعیت ساخته شد', /export async function PUT/.test(st))
+  t('فقط مالکِ باشگاه', /ownsClub\(actor, String\(b\.clubId\)\)/.test(st))
+  t('لغو به مسیرِ خودش ارجاع می‌شود', /از دکمه‌ی لغو استفاده کنید/.test(st))
+  t('رزروِ لغوشده دوباره فعال نمی‌شود', /این رزرو لغو شده و قابل تغییر نیست/.test(st))
+  t('هر دو ستونِ وضعیت به‌روز می‌شوند', /status: next,\s*\n\s*booking_status: ALLOWED\[next\]/.test(st))
+
+  t('catch خالی دیگر خطا را نمی‌بلعد', /دریافت رزروها ناموفق/.test(dash))
+  t('خطا به کاربر نشان داده می‌شود', /bookingsError && \(/.test(dash))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)
