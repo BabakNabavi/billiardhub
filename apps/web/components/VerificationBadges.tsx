@@ -12,7 +12,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useState } from 'react'
-import { BadgeCheck, Check, Loader2, Mail, ShieldCheck, X } from 'lucide-react'
+import { BadgeCheck, Check, Clock, Loader2, Mail, ShieldCheck, X } from 'lucide-react'
 import { apiFetch } from '../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
@@ -20,16 +20,33 @@ const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/
 
+/* «مدرک» سه حالت دارد، نه دو تا: نداشتن با «لازم نبودن» فرق می‌کند و
+   «بارگذاری‌شده ولی هنوز بررسی‌نشده» هم حالتِ سومی است که پیش‌تر اصلاً
+   دیده نمی‌شد. */
+export type DocState = 'verified' | 'pending' | 'missing' | 'not_required'
+
 export interface VerificationState {
   identity: boolean       // کد ملی و مشخصات، استعلام‌شده
-  documents: boolean      // مدرک نقش، تأیید ادمین
+  documents: DocState     // مدرک نقش — از /api/users/document-status
+  documentsNote: string
   email: boolean
   emailAddress?: string
 }
 
-function Row({ icon, title, note, done, children }: {
-  icon: React.ReactNode; title: string; note: string; done: boolean; children?: React.ReactNode
+/* نشانِ کنارِ عنوان. «در انتظار بررسی» عمداً رنگِ کهربایی دارد نه سبز:
+   سبز یعنی کار تمام است، و مدرکی که هنوز بررسی نشده تمام نیست. */
+const CHIP = {
+  done: { label: 'تأیید شده', color: FELT, bg: 'rgba(14,122,56,0.09)', border: 'rgba(14,122,56,0.26)' },
+  pending: { label: 'در انتظار بررسی', color: '#92600A', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.32)' },
+} as const
+
+function Row({ icon, title, note, done, pending = false, children }: {
+  icon: React.ReactNode; title: string; note: string; done: boolean
+  /** بارگذاری شده ولی هنوز تأیید نشده */
+  pending?: boolean
+  children?: React.ReactNode
 }) {
+  const chip = done ? CHIP.done : pending ? CHIP.pending : null
   return (
     <div style={{
       display: 'flex', gap: 11, alignItems: 'flex-start',
@@ -45,14 +62,14 @@ function Row({ icon, title, note, done, children }: {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 13.5, fontWeight: 800, color: INK }}>{title}</span>
-          {done && (
+          {chip && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 4,
-              fontSize: 11, fontWeight: 800, color: FELT,
-              background: 'rgba(14,122,56,0.09)', border: '1px solid rgba(14,122,56,0.26)',
+              fontSize: 11, fontWeight: 800, color: chip.color,
+              background: chip.bg, border: `1px solid ${chip.border}`,
               borderRadius: 20, padding: '2px 9px',
             }}>
-              <Check size={11} /> تأیید شده
+              {done ? <Check size={11} /> : <Clock size={11} />} {chip.label}
             </span>
           )}
         </div>
@@ -75,9 +92,20 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
       const r = await apiFetch('/api/users/profile', { cache: 'no-store' })
       if (!r.ok) return
       const j = await r.json()
+
+      /* وضعیتِ مدرک از مسیرِ خودش می‌آید. پیش‌تر از
+         `j.verificationStatus` خوانده می‌شد، ولی آن ستون با تأییدِ
+         **کد ملی** روی 'verified' می‌رود — نتیجه‌اش این بود که ردیفِ
+         «تأیید مدارک» بلافاصله بعد از استعلامِ هویت سبز می‌شد، بدون
+         اینکه هیچ مدرکی آپلود یا بررسی شده باشد. */
+      const d = await apiFetch('/api/users/document-status', { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : null)
+        .catch(() => null)
+
       setState({
         identity: !!j.nationalIdVerified || !!j.nationalId,
-        documents: j.verificationStatus === 'verified' || j.verificationStatus === 'approved',
+        documents: (d?.state as DocState) ?? 'missing',
+        documentsNote: d?.message ?? 'وضعیت مدارک در دسترس نیست.',
         email: !!j.emailVerified,
         emailAddress: j.email || '',
       })
@@ -134,13 +162,14 @@ export default function VerificationBadges({ style }: { style?: React.CSSPropert
           : 'اطلاعات هویتی شما هنوز استعلام نشده است.'}
       />
 
+      {/* سبز فقط وقتی مدرک واقعاً آپلود و تأیید شده. متن هم از سرور
+          می‌آید تا با وضعیتِ واقعی یکی بماند. */}
       <Row
         icon={<BadgeCheck size={16} />}
         title="تأیید مدارک"
-        done={state.documents}
-        note={state.documents
-          ? 'مدارک شما بررسی و تأیید شده است.'
-          : 'مدرک مربوط به نقشتان را در پنل همان نقش آپلود کنید تا کارشناسان بررسی کنند.'}
+        done={state.documents === 'verified'}
+        pending={state.documents === 'pending'}
+        note={state.documentsNote}
       />
 
       <Row

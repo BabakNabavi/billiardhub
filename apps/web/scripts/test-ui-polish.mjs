@@ -102,5 +102,22 @@ head('۶) صفحه‌ی رزرو')
   t('ترتیبِ میزها همچنان از منبعِ واحد می‌آید', /tableTypeRank\(a\[0\]\)/.test(booking))
 }
 
+head('۷) نشانِ «تأیید مدارک»')
+{
+  const badge = read('components/VerificationBadges.tsx')
+  const route = read('app/api/users/document-status/route.ts')
+  t('دیگر از verificationStatusِ کاربر خوانده نمی‌شود',
+    !/documents: j\.verificationStatus/.test(badge))
+  t('از مسیرِ اختصاصیِ وضعیتِ مدرک می‌خواند', /\/api\/users\/document-status/.test(badge))
+  t('سبز فقط با state === verified', /done=\{state\.documents === 'verified'\}/.test(badge))
+  t('حالتِ «در انتظار بررسی» هم دارد', /pending=\{state\.documents === 'pending'\}/.test(badge))
+  t('نشانِ انتظار سبز نیست', /در انتظار بررسی/.test(badge) && /#92600A/.test(badge))
+  t('باشگاه‌دار از جوازِ باشگاه سنجیده می‌شود', /licenseVerified/.test(route))
+  t('آپلودِ بدونِ تأیید ⇒ pending', /uploaded \? 'pending' : 'missing'/.test(route))
+  t('نقشِ بدونِ مدرک ⇒ not_required', /'not_required'/.test(route))
+  t('فقط GET — نوشتنی نیست', !/export async function (POST|PUT|PATCH|DELETE)/.test(route))
+  t('پشتِ ورود است', /ابتدا وارد شوید/.test(route))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)
