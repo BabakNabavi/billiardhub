@@ -817,11 +817,34 @@ export default function ClubDashboardPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
+  /* «رد کردن» یک لغو است، نه فقط عوض‌کردنِ برچسب: باید بازپرداخت حساب
+     شود و ساعتِ قفل‌شده آزاد گردد تا کسِ دیگری بتواند رزروش کند. پس
+     مسیرِ لغو صدا زده می‌شود، نه مسیرِ وضعیت — مسیرِ وضعیت هم عمداً
+     `cancelled` را نمی‌پذیرد تا این اشتباه دوباره تکرار نشود.
+
+     `catch` خالیِ قبلی هم برداشته شد: مسیرِ وضعیت اصلاً وجود نداشت و
+     ۴۰۴ بی‌صدا بلعیده می‌شد، در حالی که UI خوش‌بینانه وضعیت را
+     عوض‌شده نشان می‌داد. */
   const updateBookingStatus = async (id: string, status: string) => {
+    setBookingsError('');
     try {
-      await api.put(`/bookings/${id}/status`, { status });
+      if (status === 'cancelled') {
+        const r = await apiFetch(`/api/bookings/${id}/cancel`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'رد توسط باشگاه' }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j?.message || 'لغو رزرو انجام نشد');
+      } else {
+        await api.put(`/bookings/${id}/status`, { status });
+      }
       setBookings(bs => bs.map(b => b.id === id ? { ...b, status } : b));
-    } catch {}
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { message?: string } }; message?: string })
+        ?.response?.data?.message ?? (e as { message?: string })?.message;
+      console.error('[dashboard/club] تغییر وضعیت رزرو ناموفق:', e);
+      setBookingsError(msg || 'تغییر وضعیت رزرو انجام نشد');
+    }
   };
 
   const addTable = () => {
