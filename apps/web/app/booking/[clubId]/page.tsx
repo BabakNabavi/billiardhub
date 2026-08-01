@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import AuthGuard from '../../../components/AuthGuard';
 import CancellationPolicy from '../../../components/booking/CancellationPolicy';
 import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
+import { sortTables, tableTypeRank } from '../../../lib/tables/order';
 import {
   ChevronRight, ChevronLeft, Check, Clock,
   CheckCircle, AlertCircle, X, Info, CreditCard,
@@ -348,19 +349,16 @@ function BookingContent() {
   const surcharge    = surchargeOf(selectedTable as unknown as Record<string,unknown>, club as unknown as Record<string,unknown>);
   const extraPlayerN = extraPlayers(playerCount, surcharge);
 
-  /* میزها بر اساس نوع، با ترتیب ثابت TYPE_LABEL */
+  /* میزها بر اساس نوع — ترتیب از lib/tables/order می‌آید تا داشبورد و
+     این صفحه یک چیدمان داشته باشند. درونِ هر گروه هم به ترتیبِ شماره. */
   const groupedTables = (() => {
-    const order = Object.keys(TYPE_LABEL);
     const by = new Map<string, typeof tables>();
-    for (const t of tables) {
+    for (const t of sortTables(tables)) {
       const k = t.type ?? 'other';
       if (!by.has(k)) by.set(k, [] as unknown as typeof tables);
       (by.get(k) as unknown as typeof tables[number][]).push(t);
     }
-    return [...by.entries()].sort((a, b) => {
-      const ia = order.indexOf(a[0]), ib = order.indexOf(b[0]);
-      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-    });
+    return [...by.entries()].sort((a, b) => tableTypeRank(a[0]) - tableTypeRank(b[0]));
   })();
   const totalPrice   = Math.round(baseTotal*playerMultiplier(playerCount,surcharge));
   const accentColor  = selectedTable?(TYPE_COLOR[selectedTable.type]??'#C7A66A'):'#C7A66A';

@@ -21,6 +21,7 @@ import { provinceOfCity } from '../../../lib/iran-geo';
 import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import { apiFetch } from '../../../lib/http';
+import { sortTables } from '../../../lib/tables/order';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
 import { toJalali, jalaliToGregorian } from '../../../lib/jalali';
@@ -229,7 +230,7 @@ function SectionTitle({ children, style }: { children: React.ReactNode; style?: 
 }
 
 function InputField({ label, value, onChange, type = 'text', placeholder = '', ltr = false, grouped = false,
-  readOnly = false, hint }: {
+  readOnly = false, hint, maxWidth }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; ltr?: boolean;
   /** جداکننده‌ی سه‌رقمی — برای مبلغ */
   grouped?: boolean;
@@ -237,6 +238,8 @@ function InputField({ label, value, onChange, type = 'text', placeholder = '', l
   readOnly?: boolean;
   /** توضیح کوتاه زیر فیلد — برای گفتنِ «چرا نمی‌توانم این را عوض کنم» */
   hint?: string;
+  /** سقفِ عرض؛ برای فیلدهای کوتاه مثل شماره‌ی میز که کلِ ستون را لازم ندارند */
+  maxWidth?: number;
 }) {
   const box: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box',
@@ -250,7 +253,7 @@ function InputField({ label, value, onChange, type = 'text', placeholder = '', l
      `type="number"` بومی هیچ‌وقت ارقام فارسی نشان نمی‌داد. */
   if (type === 'number') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, maxWidth }}>
         <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
         <FaNumberInput
           value={value} onChange={onChange} placeholder={placeholder}
@@ -262,7 +265,7 @@ function InputField({ label, value, onChange, type = 'text', placeholder = '', l
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, maxWidth }}>
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
       <input type={type} value={value} placeholder={placeholder}
         dir={ltr ? 'ltr' : undefined} lang={ltr ? 'en' : undefined}
@@ -447,7 +450,12 @@ export default function ClubDashboardPage() {
   const [licMsg, setLicMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [tablePhotoDataUrl, setTablePhotoDataUrl] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '' });
+  const [editForm, setEditForm] = useState({
+    number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', photoDataUrl: '',
+    /* هزینه‌ی بازیکن اضافه در فرمِ *افزودن* بود ولی در فرمِ *ویرایش* نبود،
+       یعنی باشگاه‌دار پس از ثبتِ میز راهی برای اصلاحش نداشت. */
+    surchargeFrom: '', surchargePercent: '',
+  });
   const [editDiscounts, setEditDiscounts] = useState<DiscountRule[]>([]);
   const [editDiscountForm, setEditDiscountForm] = useState({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
 
@@ -467,6 +475,10 @@ export default function ClubDashboardPage() {
   // Stats
   const [clubStats, setClubStats] = useState<ClubStats>(DEFAULT_STATS);
   const [statsSaving, setStatsSaving] = useState(false);
+  /* اعضا و مسابقات شمرده می‌شوند، نه تایپ — از /api/clubs/:id/stats.
+     `null` یعنی هنوز نیامده، که با صفر فرق دارد: نباید لحظه‌ای «۰ عضو»
+     نشان بدهیم و بعد عدد واقعی بپرد. */
+  const [liveStats, setLiveStats] = useState<{ members: number; tournaments: number } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -624,6 +636,14 @@ export default function ClubDashboardPage() {
       else setClubStats(DEFAULT_STATS);
     } catch { setClubStats(DEFAULT_STATS); }
 
+    /* آمار شمردنی از سرور. شکستش کارت را خالی نمی‌کند — `null` می‌ماند
+       و به‌جای عدد، خط تیره نشان داده می‌شود. */
+    setLiveStats(null);
+    void apiFetch(`/api/clubs/${selectedClub.id}/stats`, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j) setLiveStats({ members: Number(j.members) || 0, tournaments: Number(j.tournaments) || 0 }); })
+      .catch(() => { /* بی‌صدا */ });
+
     try {
       const a = localStorage.getItem(`club-albums-${selectedClub.id}`);
       if (a) setAlbums(JSON.parse(a));
@@ -772,6 +792,10 @@ export default function ClubDashboardPage() {
       model: t.model,
       pricePerHour: String(t.pricePerHour),
       photoDataUrl: t.photoDataUrl || '',
+      /* undefined یعنی «از تنظیم باشگاه پیروی کن» و باید خالی بماند،
+         نه اینکه به صفر تبدیل شود — صفر یعنی «رایگان برای همه». */
+      surchargeFrom: t.playerSurchargeFrom == null ? '' : String(t.playerSurchargeFrom),
+      surchargePercent: t.playerSurchargePercent == null ? '' : String(t.playerSurchargePercent),
     });
     setEditDiscounts(t.discountRules ? [...t.discountRules] : []);
     setEditDiscountForm({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
@@ -804,6 +828,11 @@ export default function ClubDashboardPage() {
       pricePerHour: parseFloat(editForm.pricePerHour.replace(/,/g, '')) || 0,
       photoDataUrl: editForm.photoDataUrl || undefined,
       discountRules: editDiscounts.length > 0 ? editDiscounts : undefined,
+      /* خالی ⇒ undefined، تا میز دوباره از تنظیم باشگاه ارث ببرد.
+         این‌طور باشگاه‌دار می‌تواند یک استثنا را هم پس بگیرد. */
+      playerSurchargeFrom: editForm.surchargeFrom ? parseInt(editForm.surchargeFrom, 10) : undefined,
+      playerSurchargePercent: editForm.surchargePercent ? parseInt(editForm.surchargePercent, 10) : undefined,
+      playerSurchargeEnabled: (editForm.surchargeFrom || editForm.surchargePercent) ? true : undefined,
     } : t));
     setEditingTableId(null);
   };
@@ -1871,11 +1900,21 @@ export default function ClubDashboardPage() {
           <Card>
             <SectionTitle>آمار باشگاه</SectionTitle>
             <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 16px' }}>
-              این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند.
+              این اعداد روی صفحه عمومی باشگاه نمایش داده می‌شوند. دو مورد اول
+              خودکار شمرده می‌شوند و قابل تغییر نیستند.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
-              <InputField label="اعضای فعال"   value={clubStats.members}       onChange={v => setClubStats(p => ({...p, members: v}))}       placeholder="مثال: ۱,۲۰۰+" />
-              <InputField label="مسابقات"       value={clubStats.tournaments}   onChange={v => setClubStats(p => ({...p, tournaments: v}))}   placeholder="مثال: ۴۸" />
+              {/* اعضا و مسابقات شمرده می‌شوند: هر کاربری که این باشگاه را
+                  به‌عنوان باشگاهِ خودش انتخاب کند یکی به اولی اضافه می‌شود،
+                  و هر مسابقه‌ای که ثبت شود یکی به دومی. از صفر شروع می‌کنند. */}
+              <InputField label="اعضای فعال" readOnly
+                hint="کاربرانی که این باشگاه را انتخاب کرده‌اند"
+                value={liveStats ? liveStats.members.toLocaleString('fa-IR') : '—'}
+                onChange={() => { /* شمرده می‌شود */ }} />
+              <InputField label="مسابقات" readOnly
+                hint="مسابقاتی که برای این باشگاه ثبت شده"
+                value={liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : '—'}
+                onChange={() => { /* شمرده می‌شود */ }} />
               <InputField label="سال‌ها سابقه"  value={clubStats.yearsActive}   onChange={v => setClubStats(p => ({...p, yearsActive: v}))}   placeholder="مثال: ۱۵" />
               <InputField label="ظرفیت روزانه"  value={clubStats.dailyCapacity} onChange={v => setClubStats(p => ({...p, dailyCapacity: v}))} placeholder="مثال: ۸۰ نفر" />
             </div>
@@ -1970,7 +2009,9 @@ export default function ClubDashboardPage() {
 
               {/* fields grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 16 }}>
-                <InputField label="شماره میز" type="number" value={tableForm.number}
+                {/* شماره‌ی میز یکی دو رقم بیشتر نیست — عرضِ کامل ستون
+                    فقط فاصله‌ی خالی می‌ساخت. */}
+                <InputField label="شماره میز" type="number" maxWidth={96} value={tableForm.number}
                   onChange={v => setTableForm(p => ({...p, number: v}))} placeholder="1" />
 
                 {/* price with thousands + words */}
@@ -2042,11 +2083,14 @@ export default function ClubDashboardPage() {
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>تا ساعت</div>
                     <FaTimeSelect value={discountForm.endTime} onChange={v => setDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
                   </div>
+                  {/* `type="number"` بومی هیچ‌وقت ارقام فارسی نشان نمی‌داد؛
+                      FaNumberInput فارسی نمایش می‌دهد و لاتین بیرون می‌دهد.
+                      عنوانِ ٪ هم وسطِ ستونِ خودش می‌نشیند، نه کنارِ لبه. */}
                   <div style={{ flex: '0 0 70px', minWidth: 60 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>٪</div>
-                    <input type="number" min="1" max="99" value={discountForm.percent}
-                      onChange={e => setDiscountForm(p => ({ ...p, percent: e.target.value }))}
-                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
+                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4, textAlign: 'center' }}>٪</div>
+                    <FaNumberInput value={discountForm.percent} ariaLabel="درصد تخفیف"
+                      onChange={v => setDiscountForm(p => ({ ...p, percent: v.slice(0, 2) }))}
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                   </div>
                   <div style={{ flex: '1 1 110px', minWidth: 100 }}>
                     <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>برچسب (اختیاری)</div>
@@ -2109,10 +2153,13 @@ export default function ClubDashboardPage() {
                       style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                   </div>
                 </div>
+                {/* «از X نفر به بالا» با منطق واقعی نمی‌خواند: خودِ عددِ
+                    واردشده رایگان است و افزایش از نفرِ بعدی شروع می‌شود
+                    (lib/finance/pricing.ts → extraPlayers). */}
                 {(tableForm.surchargeFrom || tableForm.surchargePercent) && (
                   <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginTop: 10, marginBottom: 0 }}>
-                    از <b style={{ color: DARK }}>{tableForm.surchargeFrom || '۲'}</b> نفر به بالا،
-                    هر نفر <b style={{ color: DARK }}>{tableForm.surchargePercent || '۰'}٪</b> به مبلغ رزرو همین میز اضافه می‌شود.
+                    تا <b style={{ color: DARK }}>{faDigit(tableForm.surchargeFrom || '2')}</b> نفر بدون افزایش؛
+                    از نفر بعد، هر نفر <b style={{ color: DARK }}>{faDigit(tableForm.surchargePercent || '0')}٪</b> به مبلغ رزرو همین میز اضافه می‌شود.
                   </p>
                 )}
               </div>
@@ -2145,7 +2192,7 @@ export default function ClubDashboardPage() {
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Grid3X3 size={40} color="#D1D5DB" strokeWidth={1.2} /></div>
                 <p style={{ color: '#6B7280', fontSize: 14 }}>هنوز میزی ثبت نشده</p>
               </Card>
-            ) : tables.map(t => {
+            ) : sortTables(tables).map(t => {
               const cs = TYPE_CHIP_STYLE[t.type] ?? { bg: 'rgba(0,0,0,0.04)', border: 'rgba(0,0,0,0.10)', color: '#374151' };
               return (
                 <Card key={t.id} style={{ padding: 16 }}>
@@ -2189,7 +2236,7 @@ export default function ClubDashboardPage() {
                   {editingTableId === t.id && (
                     <div style={{ marginTop: 16, borderTop: '1px solid #F0EDE8', paddingTop: 16 }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 14 }}>
-                        <InputField label="شماره میز" type="number" value={editForm.number}
+                        <InputField label="شماره میز" type="number" maxWidth={96} value={editForm.number}
                           onChange={v => setEditForm(p => ({...p, number: v}))} placeholder="1" />
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
@@ -2246,10 +2293,10 @@ export default function ClubDashboardPage() {
                             <FaTimeSelect value={editDiscountForm.endTime} onChange={v => setEditDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
                           </div>
                           <div style={{ flex: '0 0 60px', minWidth: 55 }}>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>٪</div>
-                            <input type="number" min="1" max="99" value={editDiscountForm.percent}
-                              onChange={e => setEditDiscountForm(p => ({ ...p, percent: e.target.value }))}
-                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3, textAlign: 'center' }}>٪</div>
+                            <FaNumberInput value={editDiscountForm.percent} ariaLabel="درصد تخفیف"
+                              onChange={v => setEditDiscountForm(p => ({ ...p, percent: v.slice(0, 2) }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                           </div>
                           <div style={{ flex: '1 1 100px', minWidth: 90 }}>
                             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>برچسب</div>
@@ -2284,6 +2331,38 @@ export default function ClubDashboardPage() {
                               </div>
                             ))}
                           </div>
+                        )}
+                      </div>
+
+                      {/* ── هزینه‌ی بازیکن اضافه ──
+                          همان بلوکِ فرمِ افزودن. نبودنش یعنی این تنظیم فقط
+                          یک‌بار موقع ثبتِ میز قابل تعیین بود و بعد قفل. */}
+                      <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 14, marginBottom: 14 }}>
+                        <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 700, marginBottom: 4 }}>هزینه‌ی بازیکن اضافه</div>
+                        <p style={{ fontSize: 11, color: '#9CA3AF', margin: '0 0 10px', lineHeight: 1.7 }}>
+                          خالی بماند یعنی تنظیم عمومی باشگاه روی این میز اعمال می‌شود.
+                        </p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
+                          <div style={{ flex: '1 1 120px', minWidth: 110 }}>
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>تا چند نفر رایگان</div>
+                            <FaNumberInput value={editForm.surchargeFrom} ariaLabel="تا چند نفر رایگان"
+                              placeholder="پیش‌فرض باشگاه"
+                              onChange={v => setEditForm(p => ({ ...p, surchargeFrom: v.slice(0, 2) }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
+                          </div>
+                          <div style={{ flex: '1 1 120px', minWidth: 110 }}>
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>درصد به ازای هر نفر</div>
+                            <FaNumberInput value={editForm.surchargePercent} ariaLabel="درصد به ازای هر نفر"
+                              placeholder="پیش‌فرض باشگاه"
+                              onChange={v => setEditForm(p => ({ ...p, surchargePercent: v.slice(0, 3) }))}
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
+                          </div>
+                        </div>
+                        {(editForm.surchargeFrom || editForm.surchargePercent) && (
+                          <p style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.9, marginTop: 8, marginBottom: 0 }}>
+                            تا <b style={{ color: DARK }}>{faDigit(editForm.surchargeFrom || '2')}</b> نفر بدون افزایش؛
+                            از نفر بعد، هر نفر <b style={{ color: DARK }}>{faDigit(editForm.surchargePercent || '0')}٪</b> به مبلغ رزرو همین میز اضافه می‌شود.
+                          </p>
                         )}
                       </div>
 

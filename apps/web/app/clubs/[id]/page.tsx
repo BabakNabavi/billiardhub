@@ -111,6 +111,9 @@ export default function ClubProfilePage() {
   const [coaches, setCoaches]         = useState<CoachEntry[]>([]);
   const [clubAlbums, setClubAlbums]   = useState<ClubAlbum[]>([]);
   const [clubStats, setClubStats]     = useState<ClubStats>(DEFAULT_STATS);
+  /* شمرده‌شده‌ها جدا از آمارِ دستی نگه داشته می‌شوند تا با مقدارِ
+     localStorage قاطی نشوند. `null` یعنی هنوز از سرور نیامده. */
+  const [liveStats, setLiveStats]     = useState<{ members: number; tournaments: number } | null>(null);
   const [storyViewer, setStoryViewer] = useState(false);
 
   const isAdmin = false;
@@ -153,6 +156,14 @@ export default function ClubProfilePage() {
     try { const c = localStorage.getItem(`club-coaches-${id}`); if (c) setCoaches(JSON.parse(c)); } catch {}
     try { const s = localStorage.getItem(`club-stats-${id}`);   if (s) setClubStats(JSON.parse(s)); } catch {}
     try { const a = localStorage.getItem(`club-albums-${id}`);  if (a) setClubAlbums(JSON.parse(a)); } catch {}
+
+    /* اعضا و مسابقات از سرور شمرده می‌آیند. تا امروز از localStorage
+       خوانده می‌شدند، یعنی فقط در مرورگرِ خودِ باشگاه‌دار عددی داشتند و
+       هر بازدیدکننده‌ی دیگری جای آن‌ها را خالی می‌دید. */
+    fetch(`/api/clubs/${id}/stats`, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j) setLiveStats({ members: Number(j.members) || 0, tournaments: Number(j.tournaments) || 0 }); })
+      .catch(() => { /* بی‌صدا — کارت آمار بدون این دو هم رندر می‌شود */ });
   }, [id]);
 
   const compressImage = (file: File): Promise<string> =>
@@ -228,9 +239,11 @@ export default function ClubProfilePage() {
   const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
 
+  /* صفر یک عددِ درست است، نه «خالی»: باشگاهِ تازه باید ۰ عضو نشان بدهد
+     نه جای خالی. پس برخلاف دو ردیفِ بعدی این‌جا `|| null` نداریم. */
   const statsRows = [
-    { label: 'اعضای فعال',  v: clubStats.members       || null, color: '#C7A66A' },
-    { label: 'مسابقات',      v: clubStats.tournaments   || null, color: '#f59e0b' },
+    { label: 'اعضای فعال',  v: liveStats ? liveStats.members.toLocaleString('fa-IR') : null,     color: '#C7A66A' },
+    { label: 'مسابقات',      v: liveStats ? liveStats.tournaments.toLocaleString('fa-IR') : null, color: '#f59e0b' },
     { label: 'سال‌ها سابقه', v: clubStats.yearsActive   || null, color: '#a78bfa' },
     { label: 'ظرفیت روزانه', v: clubStats.dailyCapacity || null, color: '#06b6d4' },
   ];

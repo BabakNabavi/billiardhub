@@ -17,7 +17,9 @@
     "test:session": "node scripts/test-session.mjs",
     "test:pricing": "node scripts/test-pricing.mjs",
     "test:manager-name": "node scripts/test-manager-name.mjs",
-    "build:logos": "node scripts/build-logos.mjs"
+    "build:logos": "node scripts/build-logos.mjs",
+    "test:club-stats": "node scripts/test-club-stats.mjs",
+    "test:club-stats:ui": "node scripts/test-club-stats-ui.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
