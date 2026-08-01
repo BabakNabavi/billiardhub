@@ -19,7 +19,8 @@
     "test:manager-name": "node scripts/test-manager-name.mjs",
     "build:logos": "node scripts/build-logos.mjs",
     "test:club-stats": "node scripts/test-club-stats.mjs",
-    "test:club-stats:ui": "node scripts/test-club-stats-ui.mjs"
+    "test:club-stats:ui": "node scripts/test-club-stats-ui.mjs",
+    "test:club-dashboard:ui": "node scripts/test-club-dashboard-ui.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
