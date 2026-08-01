@@ -20,7 +20,9 @@
     "build:logos": "node scripts/build-logos.mjs",
     "test:club-stats": "node scripts/test-club-stats.mjs",
     "test:club-stats:ui": "node scripts/test-club-stats-ui.mjs",
-    "test:club-dashboard:ui": "node scripts/test-club-dashboard-ui.mjs"
+    "test:club-dashboard:ui": "node scripts/test-club-dashboard-ui.mjs",
+    "test:club-info": "node scripts/test-club-info.mjs",
+    "test:club-info:ui": "node scripts/test-club-info-ui.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

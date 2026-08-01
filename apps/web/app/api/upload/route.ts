@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
+import { bucketFor } from '@/lib/social-server';
+import { isAdmin as isAdminUser } from '@/lib/finance/db';
 
 /* ─────────────────────────────────────────────────────────────
    آپلود فایل — سمت سرور.
@@ -26,6 +28,10 @@ const MAX_VIDEO = 200 * 1024 * 1024;   // ۲۰۰ مگابایت
    باکت خصوصی نوشته می‌شوند. */
 const ALLOWED_PREFIXES = [
   'clubs/', 'products/', 'social/stories/', 'social/media/', 'sellers/', 'profiles/',
+  /* مدارک — جواز کسب و مانند آن. برخلاف بقیه به باکت **خصوصی** می‌رود
+     و لینک عمومی ندارد: جواز کسب نام، کد ملی و نشانی صاحب باشگاه را
+     روی خود دارد و نباید با داشتنِ آدرس برای همه باز شود. */
+  'documents/',
 ];
 
 /* امضای بایتی قالب‌های مجاز — برچسب مرورگر قابل جعل است */
@@ -45,6 +51,9 @@ function sniff(b: Buffer): { mime: string; ext: string } | null {
   }
   /* WebM/Matroska */
   if (b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3) return { mime: 'video/webm', ext: 'webm' };
+  /* PDF — جواز کسب اغلب اسکنِ PDF است، نه عکس. تا امروز رد می‌شد و
+     کاربر مجبور بود از مدرکش عکس بگیرد. */
+  if (b.subarray(0, 5).toString('latin1') === '%PDF-') return { mime: 'application/pdf', ext: 'pdf' };
   return null;
 }
 
@@ -74,6 +83,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'مسیر آپلود مجاز نیست' }, { status: 400 });
   }
 
+  /* ── مالکیت ──
+     پیشوندِ مجاز بودن کافی نیست: هر کاربرِ واردشده می‌توانست روی
+     `clubs/<id>/…` یا `documents/clubs/<id>/…` باشگاهِ دیگری بنویسد و
+     چون upsert روشن است، فایلِ او را هم بازنویسی کند. حالا هرجا
+     شناسه‌ی باشگاه در مسیر باشد، مالکیت بررسی می‌شود. */
+  const clubInPath = cleaned.match(/(?:^|\/)clubs\/([0-9a-f_]{8}[0-9a-f_-]{20,})/i)?.[1];
+  if (clubInPath) {
+    /* safeSeg خط تیره‌های uuid را نگه می‌دارد؛ زیرخط‌ها اثرِ نویسه‌های
+       حذف‌شده‌اند و چنین شناسه‌ای در دیتابیس پیدا نمی‌شود. */
+    const { data: club } = await getSupabaseServer()
+      .from('clubs').select('"ownerId"').eq('id', clubInPath).maybeSingle();
+    const owner = (club as { ownerId?: string } | null)?.ownerId;
+    if (!club || (owner !== actor.id && !(await isAdminUser(actor.id)))) {
+      return NextResponse.json({ message: 'دسترسی به این باشگاه مجاز نیست' }, { status: 403 });
+    }
+  } else if (cleaned.startsWith('documents/')) {
+    /* مدرکِ بی‌صاحب پذیرفته نمی‌شود — وگرنه باکتِ خصوصی به یک انبارِ
+       آزادِ فایل تبدیل می‌شود. */
+    return NextResponse.json({ message: 'مسیر مدرک باید شامل شناسه‌ی باشگاه باشد' }, { status: 400 });
+  }
+
   /* ── محتوا ── */
   const bytes = Buffer.from(await file.arrayBuffer());
   const kind = sniff(bytes);
@@ -96,8 +126,11 @@ export async function POST(req: NextRequest) {
   const base = cleaned.replace(/\.[A-Za-z0-9]{1,5}$/, '');
   const path = `${base}.${kind.ext}`;
 
+  /* مدارک به باکت خصوصی، بقیه به باکت عمومی */
+  const bucket = bucketFor(path);
+
   const { error } = await getSupabaseServer().storage
-    .from('club-media')
+    .from(bucket)
     .upload(path, bytes, {
       contentType: kind.mime,
       upsert: true,
@@ -111,6 +144,12 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error('[upload] storage error:', error.message);
     return NextResponse.json({ message: 'آپلود انجام نشد' }, { status: 500 });
+  }
+
+  /* فایلِ خصوصی لینک عمومی ندارد. مسیرش برمی‌گردد و خواندنش از مسیرِ
+     مجوزدارِ خودش انجام می‌شود (مثلاً /api/clubs/:id/license-doc). */
+  if (bucket !== 'club-media') {
+    return NextResponse.json({ path, mime: kind.mime, private: true });
   }
 
   const { data } = getSupabaseServer().storage.from('club-media').getPublicUrl(path);

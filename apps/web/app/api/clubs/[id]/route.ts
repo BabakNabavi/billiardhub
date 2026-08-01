@@ -134,21 +134,62 @@ export async function PUT(
     }
   }
 
-  /* شبا فقط از راه استعلام کارت «تأییدشده» می‌شود. اگر کاربر خودش آن را
-     دست‌کاری کند، تأیید باطل می‌گردد تا تسویه به حساب تأییدنشده نرود. */
-  if (Object.prototype.hasOwnProperty.call(body, 'iban')) {
-    const { data: cur } = await getSupabaseServer().from('clubs').select('iban').eq('id', id).maybeSingle();
-    const before = String((cur as { iban?: string } | null)?.iban ?? '').replace(/\s/g, '');
-    const after = String(body.iban ?? '').replace(/\s/g, '');
-    if (before !== after) { body.ibanVerified = false; body.ibanOwnerName = null; }
+  /* ── حسابِ تأییدشده پس از تأیید قفل است ──────────────────────────
+     شبا و کارت و نام دارنده و نام بانک، خروجیِ استعلام‌اند نه ورودیِ
+     کاربر. تا امروز فقط تغییر شبا تأیید را باطل می‌کرد و بقیه آزاد
+     بودند: یعنی می‌شد شبای تأییدشده را نگه داشت و «نام صاحب حساب» را
+     به هر چیزی عوض کرد، و کارت را هم همین‌طور. نتیجه‌اش حسابی بود که
+     تیکِ «تأییدشده» داشت ولی نامش با آنچه استعلام گفته یکی نبود.
+
+     حالا هر تغییر در این چهار فیلد تأیید را باطل می‌کند، مگر تغییری
+     که خودِ مسیرِ استعلام انجام می‌دهد (آن مسیر مستقیم به دیتابیس
+     می‌نویسد و از این‌جا رد نمی‌شود). */
+  if (!isAdmin) {
+    const { data: cur } = await getSupabaseServer()
+      .from('clubs').select('iban,"bankCard","ibanOwnerName","bankName","ibanVerified"')
+      .eq('id', id).maybeSingle();
+    const before = (cur ?? {}) as Record<string, unknown>;
+
+    if (before.ibanVerified) {
+      const norm = (v: unknown) => String(v ?? '').replace(/[\s-]/g, '');
+      const changed = (['iban', 'bankCard', 'ibanOwnerName', 'bankName'] as const)
+        .filter(k => Object.prototype.hasOwnProperty.call(body, k) && norm(body[k]) !== norm(before[k]));
+
+      if (changed.length > 0) {
+        /* باطل‌کردن، نه رد کردن: کاربر حق دارد حسابش را عوض کند —
+           فقط باید دوباره استعلام بگیرد. */
+        body.ibanVerified = false;
+        body.ibanOwnerName = null;
+        body.bankCardVerified = false;
+        console.info('[clubs/:id] تأیید حساب باطل شد — تغییر در:', changed.join(','));
+      }
+    }
   }
 
-  const { data: updated, error } = await getSupabaseServer()
-    .from('clubs')
-    .update(body)
-    .eq('id', id)
-    .select()
-    .single();
+  const doUpdate = (payload: Record<string, unknown>) => getSupabaseServer()
+    .from('clubs').update(payload).eq('id', id).select().single();
+
+  let { data: updated, error } = await doUpdate(body);
+
+  /* ── ستونی که هنوز مهاجرتش اجرا نشده ─────────────────────────────
+     دیپلوی و مهاجرت هم‌زمان نیستند: کدِ تازه ممکن است پیش از اجرای SQL
+     روی سرور بنشیند. بدون این، *کلِ* ذخیره‌ی اطلاعات باشگاه با یک ستونِ
+     نبوده می‌شکست — یعنی یک فیلدِ نو، فرمی را که تا امروز کار می‌کرده
+     از کار می‌انداخت.
+
+     فقط فیلدهای واقعاً اختیاری این‌طور کنار گذاشته می‌شوند؛ هر ستونِ
+     ناشناخته‌ی دیگری همان خطای قبلی را می‌دهد تا بی‌صدا گم نشود. */
+  const OPTIONAL_COLUMNS = ['postalCode'];
+  if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)) {
+    const dropped = OPTIONAL_COLUMNS.filter(
+      k => Object.prototype.hasOwnProperty.call(body, k) && error!.message.includes(k));
+    if (dropped.length > 0) {
+      console.error('[clubs/:id] ستون‌های بدونِ مهاجرت کنار گذاشته شدند:', dropped.join(','));
+      const trimmed = { ...body } as Record<string, unknown>;
+      for (const k of dropped) delete trimmed[k];
+      ({ data: updated, error } = await doUpdate(trimmed));
+    }
+  }
 
   if (error) {
     console.error('[clubs/:id] update error:', error.message);

@@ -1,0 +1,89 @@
+export const dynamic = 'force-dynamic';
+import { NextRequest, NextResponse } from 'next/server';
+import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
+import { lookupPostalCode, composeAddress, normalizePostalCode } from '@/lib/address-server';
+import { getProvinceNames, getCities, provinceOfCity } from '@/lib/iran-geo';
+
+/* استان و شهر فقط اگر در فهرستِ رسمیِ پروژه باشند پذیرفته می‌شوند.
+   نامِ سرویس همیشه با نامِ ما یکی نیست («تهران» بله، ولی خیلی جاها
+   نگارشِ متفاوت دارند) و اگر خام ذخیره شود، ProvinceCitySelect آن را
+   پیدا نمی‌کند و فرم خالی می‌ماند — درست همان تله‌ای که قانونِ
+   «منبعِ واحدِ استان و شهر» برای جلوگیری از آن نوشته شده. */
+function normalizeGeo(province?: string, city?: string): { province?: string; city?: string } {
+  const provinces = getProvinceNames();
+  const p = province && provinces.includes(province) ? province : undefined;
+
+  if (city) {
+    /* شهر ملاکِ اصلی است: از روی آن استان هم درمی‌آید */
+    const owner = provinceOfCity(city);
+    if (owner) return { province: owner, city };
+    if (p && getCities(p).includes(city)) return { province: p, city };
+  }
+  return { province: p };
+}
+
+/* استعلام کد پستی ⇒ آدرس.
+
+   پشتِ ورود است و سقف نرخ دارد: هر فراخوان اعتبارِ سرویس بیرونی را
+   مصرف می‌کند، پس یک مسیرِ باز عملاً یک شیرِ باز روی حساب ماست.
+
+   اگر `clubId` بیاید، نتیجه روی همان باشگاه هم ذخیره می‌شود — تا
+   آدرس و مختصات همان چیزی بماند که سرویس گفته، نه چیزی که بعداً در
+   مرورگر دستکاری شده باشد. */
+export async function POST(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
+
+  const rl = await hitRateLimit(req, { action: 'postal-code', max: 20, windowSec: 600 }, actor.id);
+  if (!rl.ok) return tooMany(rl.retryAfterSec);
+
+  const body = await req.json().catch(() => ({}));
+  const postalCode = normalizePostalCode(String(body?.postalCode ?? ''));
+  const clubId = String(body?.clubId ?? '');
+
+  if (clubId) {
+    const admin = await isAdmin(actor.id);
+    const { data: club } = await sb().from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();
+    if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
+    if ((club as { ownerId?: string }).ownerId !== actor.id && !admin) {
+      return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+    }
+  }
+
+  const r = await lookupPostalCode(postalCode);
+  if (!r.ok) return NextResponse.json(r, { status: r.unavailable ? 503 : 400 });
+  if (!r.found) return NextResponse.json(r, { status: 404 });
+
+  const a = r.data!;
+  const address = a.address || composeAddress(a);
+  const geo = normalizeGeo(a.province, a.city);
+
+  if (clubId) {
+    /* فقط فیلدهایی نوشته می‌شوند که سرویس واقعاً برگردانده — وگرنه یک
+       استعلامِ ناقص، آدرسِ درستِ قبلی را با رشته‌ی خالی پاک می‌کرد. */
+    const patch: Record<string, unknown> = { postalCode };
+    if (address) patch.address = address;
+    if (geo.province) patch.province = geo.province;
+    if (geo.city) patch.city = geo.city;
+    if (a.lat !== undefined) patch.latitude = a.lat;
+    if (a.long !== undefined) patch.longitude = a.long;
+
+    const { error } = await sb().from('clubs').update(patch).eq('id', clubId);
+    if (error) {
+      /* ستون postalCode با مهاجرت ۰۳۵ اضافه می‌شود. تا وقتی اجرا نشده،
+         استعلام نباید بشکند: آدرس — که ارزش اصلی است — ذخیره می‌شود و
+         فقط خودِ کد پستی نگه داشته نمی‌شود. */
+      if (/postalCode/i.test(error.message)) {
+        console.error('[postal-code] ستون postalCode نیست — مهاجرت ۰۳۵ اجرا نشده');
+        delete patch.postalCode;
+        await sb().from('clubs').update(patch).eq('id', clubId);
+        return NextResponse.json({ ...r, address, geo, postalCodeStored: false });
+      }
+      console.error('[postal-code] update error:', error.message);
+      return NextResponse.json({ message: 'ذخیره‌ی آدرس انجام نشد' }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ ...r, address, geo, postalCodeStored: !!clubId });
+}

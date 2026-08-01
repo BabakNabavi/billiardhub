@@ -38,6 +38,23 @@ async function updateStatus(id: string, status: string, rejectionReason?: string
   }
 }
 
+/* مدرکِ جواز در باکتِ خصوصی است و لینکِ مستقیم ندارد؛ سرور پس از بررسی
+   دسترسی یک لینکِ امضاشده‌ی دو دقیقه‌ای می‌دهد. باز کردنِ پنجره پیش از
+   await انجام می‌شود، وگرنه مرورگر آن را pop-up ناخواسته می‌شمارد و
+   می‌بندد. */
+async function openLicenseDoc(id: string) {
+  const w = window.open('', '_blank', 'noopener,noreferrer');
+  try {
+    const r = await apiFetch(`/api/clubs/${id}/license-doc`);
+    const j = await r.json().catch(() => ({})) as { url?: string; message?: string };
+    if (!r.ok || !j.url) { w?.close(); alert(j.message ?? 'مدرک در دسترس نیست'); return; }
+    if (w) w.location.href = j.url; else window.open(j.url, '_blank', 'noopener,noreferrer');
+  } catch {
+    w?.close();
+    alert('خطا در ارتباط با سرور');
+  }
+}
+
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   pending:    { label: 'در انتظار بررسی', color: '#92600A', bg: '#FEF3C7', icon: <Clock size={13} /> },
   verified:   { label: 'تأیید شده',       color: '#166534', bg: '#DCFCE7', icon: <Check size={13} /> },
@@ -155,12 +172,15 @@ export default function AdminClubsPage() {
                     {st.icon} {st.label}
                   </div>
 
-                  {/* مدرک */}
+                  {/* مدرک — مدارکِ تازه در باکتِ خصوصی‌اند و لینکِ مستقیم
+                      ندارند، پس از مسیرِ مجوزدار یک لینکِ امضاشده گرفته
+                      می‌شود. رکوردهای قدیمی که URL کامل دارند هم از همان
+                      مسیر برمی‌گردند، پس این‌جا یک رفتار بیشتر نیست. */}
                   {club.licenseDocumentUrl ? (
-                    <a href={club.licenseDocumentUrl} target="_blank" rel="noopener noreferrer"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD, borderRadius: 10, padding: '6px 14px', fontSize: 12, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+                    <button type="button" onClick={() => void openLicenseDoc(club.id)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.30)', color: GOLD, borderRadius: 10, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-base)', flexShrink: 0 }}>
                       <ExternalLink size={12} /> مشاهده مدرک
-                    </a>
+                    </button>
                   ) : (
                     <span style={{ fontSize: 12, color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <FileText size={12} /> بدون مدرک

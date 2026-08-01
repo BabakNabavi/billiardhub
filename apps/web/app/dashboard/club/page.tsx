@@ -10,7 +10,7 @@ import {
   LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
   Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
   Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon, Settings,
-  Loader2, Wallet, Radio,
+  Loader2, Wallet, Radio, MapPin,
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
 import GoLive from '../../../components/club/GoLive';
@@ -444,6 +444,22 @@ export default function ClubDashboardPage() {
   /* استعلام شبا از شماره کارت */
   const [ibanBusy, setIbanBusy] = useState(false);
   const [ibanMsg, setIbanMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  /* حسابِ تأییدشده قفل است: دکمه‌های استعلام خاموش و فیلدها فقط‌خواندنی.
+     تا امروز دکمه بعد از استعلامِ موفق هم روشن می‌ماند و کاربر می‌توانست
+     بی‌نهایت بار استعلام بگیرد — هر بار یک واحد از اعتبارِ سرویس. */
+  const [ibanVerified, setIbanVerified] = useState(false);
+  /* راهِ خروج از قفل. بدون این، کسی که حسابش عوض شده گیر می‌افتاد. */
+  const [bankEditing, setBankEditing] = useState(false);
+  const bankLocked = ibanVerified && !bankEditing;
+
+  /* استعلام کد پستی */
+  const [postalBusy, setPostalBusy] = useState(false);
+  const [postalMsg, setPostalMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  /* آپلود مدرک جواز کسب */
+  const [licUploading, setLicUploading] = useState(false);
+  const [licDocName, setLicDocName] = useState('');
+  const [licDocMsg, setLicDocMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [needsIdentity, setNeedsIdentity] = useState(false);
   /* استعلام جواز کسب */
   const [licBusy, setLicBusy] = useState(false);
@@ -462,7 +478,9 @@ export default function ClubDashboardPage() {
   // Club info
   const [clubInfo, setClubInfo] = useState({
     name: '', managerName: '', description: '', address: '', province: '', city: '',
-    country: 'ایران', phone: '', website: '', timezone: 'Asia/Tehran',
+    /* «کشور» از فرم برداشته شد — همه ایران‌اند. جایش کد پستی آمد که
+       آدرس و مختصات را از استعلام می‌آورد. */
+    postalCode: '', phone: '', website: '', timezone: 'Asia/Tehran',
     snookerTables: '0', pocketTables: '0', highballTables: '0',
     vipSnookerTables: '0', vipPocketTables: '0', airHockeyTables: '0',
     dartBoards: '0', playstations: '0',
@@ -598,7 +616,7 @@ export default function ClubDashboardPage() {
         address: c.address ?? '',
         province: c.province ?? provinceOfCity(c.city ?? ''),   // بک‌فیل استان از شهر برای باشگاه‌های قدیمی
         city: c.city ?? '',
-        country: c.country ?? 'ایران',
+        postalCode: c.postalCode ?? '',
         phone: c.phone ?? '',
         website: c.website ?? '',
         timezone: c.timezone ?? 'Asia/Tehran',
@@ -621,6 +639,11 @@ export default function ClubDashboardPage() {
         iban: c.iban ?? '',
         licenseNumber: c.licenseNumber ?? '',
       });
+      setIbanVerified(!!c.ibanVerified);
+      setBankEditing(false);
+      setLicDocName(c.licenseDocumentUrl ? 'مدرک بارگذاری‌شده' : '');
+      setLicDocMsg(null);
+      setPostalMsg(null);
       if (c.workingHours) setHoursForm(c.workingHours);
       setSurcharge({
         enabled: c.playerSurchargeEnabled === undefined ? true : !!c.playerSurchargeEnabled,
@@ -864,6 +887,8 @@ export default function ClubDashboardPage() {
         bankCardOwner: j.ownerName || p.bankCardOwner,
       }));
       setIbanMsg({ ok: true, text: `تأیید شد — حساب به نام «${j.ownerName ?? '—'}» و متعلق به کد ملی شماست` });
+      /* از این لحظه فیلدها و دکمه‌ها قفل می‌شوند */
+      setIbanVerified(true); setBankEditing(false);
     } catch {
       setIbanMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
     } finally { setIbanBusy(false); }
@@ -884,9 +909,87 @@ export default function ClubDashboardPage() {
       if (!r.ok) { setIbanMsg({ ok: false, text: j?.message || 'استعلام انجام نشد' }); return; }
       if (j.bankName) setClubInfo(p => ({ ...p, bankName: j.bankName }));
       setIbanMsg({ ok: true, text: 'شبا تأیید شد و متعلق به کد ملی شماست' });
+      setIbanVerified(true); setBankEditing(false);
     } catch {
       setIbanMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
     } finally { setIbanBusy(false); }
+  };
+
+  /* بازکردنِ قفلِ حساب برای تغییر. تأیید همین‌جا هم برداشته می‌شود تا
+     تیکِ سبز روی حسابی که دیگر همان حساب نیست نماند؛ سرور هم مستقل
+     همین کار را موقع ذخیره انجام می‌دهد. */
+  const unlockBank = () => {
+    if (!window.confirm('برای تغییر حساب، تأیید فعلی باطل می‌شود و باید دوباره استعلام بگیرید. ادامه می‌دهید؟')) return;
+    setBankEditing(true);
+    setIbanMsg({ ok: false, text: 'تأیید باطل شد — پس از تغییر، دوباره استعلام بگیرید.' });
+  };
+
+  /* استعلام کد پستی ⇒ آدرس. آدرس و مختصات را خودِ سرور روی باشگاه
+     می‌نویسد؛ این‌جا فقط بازتابش می‌دهیم تا کاربر ببیند چه ثبت شد. */
+  const fetchAddress = async () => {
+    if (!selectedClub || !/^\d{10}$/.test(clubInfo.postalCode)) return;
+    setPostalBusy(true); setPostalMsg(null);
+    try {
+      const r = await apiFetch('/api/address/postal-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postalCode: clubInfo.postalCode, clubId: selectedClub.id }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { setPostalMsg({ ok: false, text: j?.message || 'استعلام انجام نشد' }); return; }
+      setClubInfo(p => ({
+        ...p,
+        address: j.address || p.address,
+        /* `geo` نسخه‌ی تطبیق‌داده‌شده با فهرست رسمی است، نه خروجی خام
+           سرویس — وگرنه ProvinceCitySelect نام را پیدا نمی‌کرد. */
+        province: j.geo?.province || p.province,
+        city: j.geo?.city || p.city,
+      }));
+      setPostalMsg({
+        ok: true,
+        text: j.postalCodeStored === false
+          ? 'آدرس یافت شد و ثبت شد (کد پستی پس از اجرای مهاجرت ذخیره می‌شود)'
+          : 'آدرس از کد پستی خوانده و ثبت شد',
+      });
+    } catch {
+      setPostalMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
+    } finally { setPostalBusy(false); }
+  };
+
+  /* آپلود مدرک جواز کسب. مدرک به باکتِ خصوصی می‌رود و مسیرش — نه یک
+     لینک عمومی — روی باشگاه ذخیره می‌شود. */
+  const uploadLicenseDoc = async (file: File) => {
+    if (!selectedClub) return;
+    setLicUploading(true); setLicDocMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('path', `documents/clubs/${selectedClub.id}/license-${Date.now()}`);
+      const r = await apiFetch('/api/upload', { method: 'POST', body: fd });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !(j?.path || j?.url)) {
+        setLicDocMsg({ ok: false, text: j?.message || 'آپلود انجام نشد' });
+        return;
+      }
+      await api.put(`/clubs/${selectedClub.id}`, { licenseDocumentUrl: j.path || j.url });
+      setLicDocName(file.name);
+      setLicDocMsg({ ok: true, text: 'مدرک بارگذاری شد و برای بررسی ادمین ثبت گردید' });
+    } catch {
+      setLicDocMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
+    } finally { setLicUploading(false); }
+  };
+
+  /* دیدنِ مدرکِ بارگذاری‌شده — لینکِ امضاشده‌ی کوتاه‌عمر از سرور */
+  const openLicenseDoc = async () => {
+    if (!selectedClub) return;
+    try {
+      const r = await apiFetch(`/api/clubs/${selectedClub.id}/license-doc`);
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j?.url) { setLicDocMsg({ ok: false, text: j?.message || 'مدرک در دسترس نیست' }); return; }
+      window.open(j.url, '_blank', 'noopener,noreferrer');
+    } catch {
+      setLicDocMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
+    }
   };
 
   /* استعلام جواز کسب. کد ملی داخل جواز باید با کد ملی احرازشده‌ی
@@ -1693,8 +1796,42 @@ export default function ClubDashboardPage() {
                   onChange={v => setClubInfo(p => ({ ...p, province: v.province, city: v.city }))}
                 />
               </div>
-              <InputField label="کشور"         value={clubInfo.country}     onChange={v => setClubInfo(p => ({...p, country: v}))} />
-              <InputField label="آدرس"         value={clubInfo.address}     onChange={v => setClubInfo(p => ({...p, address: v}))} placeholder="آدرس کامل" />
+              {/* «کشور» برداشته شد — همه‌ی باشگاه‌ها ایران‌اند و آن فیلد
+                  فقط داده‌ی ناهمگون می‌ساخت. جایش کد پستی، که آدرس را
+                  خودش می‌آورد. */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>کد پستی</label>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap', marginTop: 4 }}>
+                  <FaNumberInput
+                    value={clubInfo.postalCode} ariaLabel="کد پستی" placeholder="۱۰ رقم"
+                    onChange={v => { setClubInfo(p => ({ ...p, postalCode: v.slice(0, 10) })); setPostalMsg(null); }}
+                    style={{ ...inputStyle, flex: '1 1 160px', minWidth: 150, width: 'auto', textAlign: 'center', letterSpacing: '0.08em' }}
+                  />
+                  <button type="button" onClick={fetchAddress}
+                    disabled={postalBusy || !/^\d{10}$/.test(clubInfo.postalCode) || !selectedClub}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
+                      fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap',
+                      cursor: (postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 'not-allowed' : 'pointer',
+                      background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
+                      opacity: (postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 0.5 : 1,
+                    }}>
+                    {postalBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={14} />}
+                    {postalBusy ? 'در حال استعلام…' : 'استعلام آدرس'}
+                  </button>
+                </div>
+                {postalMsg && (
+                  <div style={{ fontSize: 11.5, fontWeight: 700, marginTop: 6, lineHeight: 1.9, color: postalMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                    {postalMsg.text}
+                  </div>
+                )}
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
+                  با استعلام کد پستی، آدرس و موقعیت باشگاه خودکار پر می‌شود.
+                </div>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <InputField label="آدرس"         value={clubInfo.address}     onChange={v => setClubInfo(p => ({...p, address: v}))} placeholder="آدرس کامل" />
+              </div>
               <InputField label="تلفن"         value={clubInfo.phone}       onChange={v => setClubInfo(p => ({...p, phone: v}))} placeholder="021-..." />
               <InputField label="وبسایت"       value={clubInfo.website}     onChange={v => setClubInfo(p => ({...p, website: v}))} placeholder="https://..." />
               <div style={{ gridColumn: '1 / -1' }}>
@@ -1719,6 +1856,50 @@ export default function ClubDashboardPage() {
                       {licMsg.text}
                     </span>
                   )}
+                </div>
+
+                {/* ── تصویر/فایل جواز کسب ──
+                    کدِ پیگیری فقط اعتبار را ثابت می‌کند؛ خودِ مدرک برای
+                    بررسیِ ادمین لازم است. تا امروز فقط در فرمِ ثبتِ اولیه
+                    قابل بارگذاری بود و بعد از آن هیچ راهی برای افزودن یا
+                    عوض‌کردنش نبود. */}
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed #EFEBE4' }}>
+                  <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 8 }}>
+                    تصویر یا فایل جواز کسب
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <label style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
+                      fontSize: 12.5, fontWeight: 700, cursor: licUploading ? 'not-allowed' : 'pointer',
+                      background: '#fff', border: '1px dashed rgba(0,0,0,0.18)', color: '#6B7280',
+                      opacity: licUploading ? 0.5 : 1,
+                    }}>
+                      <input type="file" accept="image/*,application/pdf" style={{ display: 'none' }}
+                        disabled={licUploading || !selectedClub}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) void uploadLicenseDoc(f); e.target.value = ''; }} />
+                      {licUploading
+                        ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        : <Upload size={14} />}
+                      {licUploading ? 'در حال بارگذاری…' : licDocName ? 'جایگزینی مدرک' : 'بارگذاری جواز کسب'}
+                    </label>
+                    {licDocName && (
+                      <button type="button" onClick={openLicenseDoc} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10,
+                        fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)',
+                        background: 'rgba(48,197,90,0.08)', border: '1px solid rgba(48,197,90,0.28)', color: '#166534',
+                      }}>
+                        <FileText size={13} /> مشاهده‌ی مدرک
+                      </button>
+                    )}
+                  </div>
+                  {licDocMsg && (
+                    <div style={{ fontSize: 11.5, fontWeight: 700, marginTop: 7, lineHeight: 1.9, color: licDocMsg.ok ? '#0E7A38' : '#B23B2E' }}>
+                      {licDocMsg.text}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, lineHeight: 1.9 }}>
+                    عکس یا PDF، تا ۸ مگابایت. این مدرک خصوصی است و فقط شما و بررسی‌کننده‌ی سایت می‌بینیدش.
+                  </div>
                 </div>
               </div>
               <SelectField label="منطقه زمانی" value={clubInfo.timezone}    onChange={v => setClubInfo(p => ({...p, timezone: v}))}
@@ -1812,6 +1993,29 @@ export default function ClubDashboardPage() {
                 </Link>
               </div>
             )}
+            {/* ── نوارِ «تأیید شده» ──
+                وقتی حساب تأیید است، همه‌ی فیلدها و هر دو دکمه‌ی استعلام
+                قفل‌اند. تنها راهِ بازکردن، دکمه‌ی زیر است که تأیید را هم
+                باطل می‌کند. */}
+            {ibanVerified && (
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+                marginBottom: 16, padding: '11px 15px', borderRadius: 12,
+                background: 'rgba(48,197,90,0.07)', border: '1px solid rgba(48,197,90,0.24)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, fontWeight: 800, color: '#166534' }}>
+                  <CheckCircle size={15} />
+                  {bankEditing ? 'در حال تغییر حساب — پس از ذخیره باید دوباره استعلام بگیرید' : 'حساب تأیید شده و قفل است'}
+                </div>
+                {!bankEditing && (
+                  <button type="button" onClick={unlockBank} style={{
+                    padding: '7px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    fontFamily: 'var(--font-base)', background: '#fff',
+                    border: '1px solid rgba(0,0,0,0.14)', color: '#6B7280',
+                  }}>تغییر حساب</button>
+                )}
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, marginBottom: 20 }}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>شماره کارت</label>
@@ -1821,24 +2025,27 @@ export default function ClubDashboardPage() {
                   maxLength={19}
                   dir="ltr"
                   inputMode="numeric"
-                  onChange={e => setClubInfo(p => ({ ...p, bankCard: formatCard(e.target.value) }))}
+                  readOnly={bankLocked}
+                  onChange={e => { if (!bankLocked) setClubInfo(p => ({ ...p, bankCard: formatCard(e.target.value) })); }}
                   placeholder="6037 9911 1234 5678"
                   style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em', fontSize: 16, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none',
+                    background: bankLocked ? '#F3F4F6' : inputStyle.background,
+                    color: bankLocked ? '#6B7280' : inputStyle.color,
                     border: cardBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
                 />
                 {cardBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره کارت معتبر نیست — ۱۶ رقم را دوباره بررسی کنید.</div>}
                 {cardBank && <div style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, marginTop: 5 }}>بانک {cardBank}</div>}
 
-                {/* استعلام شبا از شماره کارت */}
+                {/* استعلام شبا از شماره کارت — پس از تأیید خاموش */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
                   <button type="button" onClick={fetchIban}
-                    disabled={ibanBusy || !isValidCard(clubInfo.bankCard) || !selectedClub}
+                    disabled={bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard) || !selectedClub}
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
                       fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700,
-                      cursor: (ibanBusy || !isValidCard(clubInfo.bankCard)) ? 'not-allowed' : 'pointer',
+                      cursor: (bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard)) ? 'not-allowed' : 'pointer',
                       background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
-                      opacity: (ibanBusy || !isValidCard(clubInfo.bankCard)) ? 0.5 : 1,
+                      opacity: (bankLocked || ibanBusy || !isValidCard(clubInfo.bankCard)) ? 0.5 : 1,
                     }}>
                     {ibanBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Wallet size={14} />}
                     {ibanBusy ? 'در حال استعلام…' : 'دریافت شبا از شماره کارت'}
@@ -1858,9 +2065,12 @@ export default function ClubDashboardPage() {
                   value={clubInfo.iban}
                   maxLength={26}
                   dir="ltr"
-                  onChange={e => setClubInfo(p => ({ ...p, iban: formatIban(e.target.value) }))}
+                  readOnly={bankLocked}
+                  onChange={e => { if (!bankLocked) setClubInfo(p => ({ ...p, iban: formatIban(e.target.value) })); }}
                   placeholder="IR820540102680020817909002"
                   style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.06em', fontSize: 15, width: '100%', boxSizing: 'border-box', borderRadius: 8, padding: '9px 12px', outline: 'none',
+                    background: bankLocked ? '#F3F4F6' : inputStyle.background,
+                    color: bankLocked ? '#6B7280' : inputStyle.color,
                     border: ibanBad ? '1px solid rgba(178,59,46,0.5)' : inputStyle.border }}
                 />
                 {ibanBad && <div style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, marginTop: 5 }}>شماره شبا معتبر نیست — «IR» به‌همراه ۲۴ رقم.</div>}
@@ -1868,7 +2078,7 @@ export default function ClubDashboardPage() {
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
                   تسویه‌ی درآمد رزروها به همین شبا انجام می‌شود و باید به نام صاحب باشگاه باشد.
                 </div>
-                {isValidIban(clubInfo.iban) && (
+                {isValidIban(clubInfo.iban) && !bankLocked && (
                   <button type="button" onClick={verifyIban} disabled={ibanBusy || !selectedClub}
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 9, padding: '8px 15px', borderRadius: 10,
@@ -1881,9 +2091,14 @@ export default function ClubDashboardPage() {
                 )}
               </div>
 
-              <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner}
+              {/* نام دارنده و نام بانک خروجیِ استعلام‌اند، نه ورودیِ کاربر —
+                  پس از تأیید قفل می‌شوند تا تیکِ سبز روی نامی که دستی
+                  عوض شده ننشیند. */}
+              <InputField label="نام صاحب حساب" value={clubInfo.bankCardOwner} readOnly={bankLocked}
+                hint={bankLocked ? 'از استعلام بانکی — قابل تغییر نیست' : undefined}
                 onChange={v => setClubInfo(p => ({ ...p, bankCardOwner: v }))} placeholder="نام و نام خانوادگی" />
-              <InputField label="نام بانک" value={clubInfo.bankName}
+              <InputField label="نام بانک" value={clubInfo.bankName} readOnly={bankLocked}
+                hint={bankLocked ? 'از استعلام بانکی — قابل تغییر نیست' : undefined}
                 onChange={v => setClubInfo(p => ({ ...p, bankName: v }))} placeholder="مثلاً ملی، صادرات..." />
             </div>
             {clubInfo.bankCard && (
