@@ -2222,57 +2222,64 @@ export default function ClubDashboardPage() {
                 );
               })()}
 
-              {/* fields grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 16 }}>
-                {/* شماره‌ی میز یکی دو رقم بیشتر نیست — عرضِ کامل ستون
-                    فقط فاصله‌ی خالی می‌ساخت. */}
-                <InputField label="شماره میز" type="number" maxWidth={96} value={tableForm.number}
-                  onChange={v => setTableForm(p => ({...p, number: v}))} placeholder="1" />
+              {/* ── مشخصات میز ──
+                  چیدمانِ قبلی یک شبکه‌ی `auto-fit minmax(145px)` بود که
+                  هر چهار فیلد را هم‌عرض می‌کرد: شماره‌ی دو رقمی همان‌قدر
+                  جا می‌گرفت که قیمتِ شش رقمی، و در موبایل ستون‌ها توی هم
+                  می‌رفتند. حالا هر فیلد به اندازه‌ی محتوایش عرض دارد و
+                  عکس هم کنارشان می‌نشیند نه زیرشان. */}
+              <div className="bh-table-form" style={{ marginBottom: 16 }}>
+                <div className="bh-tf-fields">
+                  <div className="bh-tf-num">
+                    <InputField label="شماره میز" type="number" value={tableForm.number}
+                      onChange={v => setTableForm(p => ({...p, number: v}))} placeholder="1" />
+                  </div>
 
-                {/* price with thousands + words */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
-                  {/* `toLocaleString('en-US')` جداکننده می‌گذاشت ولی ارقام
-                      لاتین می‌ماندند — همان چیزی که در فرم دیده می‌شد. */}
-                  <FaNumberInput
-                    value={tableForm.pricePerHour}
-                    onChange={v => setTableForm(p => ({ ...p, pricePerHour: v }))}
-                    placeholder="۵۰٬۰۰۰" grouped ariaLabel="قیمت هر ساعت"
-                    style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)', width: '100%', boxSizing: 'border-box' }}
-                  />
-                  {tableForm.pricePerHour && parseInt(tableForm.pricePerHour) > 0 && (
-                    <div style={{ fontSize: 11, color: GOLD, marginTop: 1, paddingRight: 2 }}>
-                      {numberToFarsi(parseInt(tableForm.pricePerHour))} تومان
-                    </div>
-                  )}
+                  <div className="bh-tf-price" style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                    <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
+                    {/* `toLocaleString('en-US')` جداکننده می‌گذاشت ولی ارقام
+                        لاتین می‌ماندند — همان چیزی که در فرم دیده می‌شد. */}
+                    <FaNumberInput
+                      value={tableForm.pricePerHour}
+                      onChange={v => setTableForm(p => ({ ...p, pricePerHour: v }))}
+                      placeholder="۵۰٬۰۰۰" grouped ariaLabel="قیمت هر ساعت"
+                      style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 10px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)', width: '100%', boxSizing: 'border-box', textAlign: 'center' }}
+                    />
+                    {tableForm.pricePerHour && parseInt(tableForm.pricePerHour) > 0 && (
+                      <div style={{ fontSize: 11, color: GOLD, lineHeight: 1.7 }}>
+                        {numberToFarsi(parseInt(tableForm.pricePerHour))} تومان
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bh-tf-txt">
+                    <InputField label="برند" value={tableForm.brand} ltr
+                      onChange={v => setTableForm(p => ({...p, brand: v}))} placeholder="Viraka" />
+                  </div>
+                  <div className="bh-tf-txt">
+                    <InputField label="مدل" value={tableForm.model} ltr
+                      onChange={v => setTableForm(p => ({...p, model: v}))} placeholder="M1 Gold" />
+                  </div>
                 </div>
 
-                <InputField label="برند" value={tableForm.brand} ltr
-                  onChange={v => setTableForm(p => ({...p, brand: v}))} placeholder="Viraka" />
-                <InputField label="مدل" value={tableForm.model} ltr
-                  onChange={v => setTableForm(p => ({...p, model: v}))} placeholder="M1 Gold" />
-              </div>
-
-              {/* photo upload */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 8 }}>عکس میز (اختیاری)</div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                {/* عکس میز — کنارِ فیلدها، هم‌ارتفاعِ آن‌ها */}
+                <label className="bh-tf-photo" title="عکس میز (اختیاری)">
                   <input type="file" accept="image/*" style={{ display: 'none' }}
                     onChange={async e => {
                       const f = e.target.files?.[0]; if (!f) return;
                       const d = await compressImage(f); setTablePhotoDataUrl(d);
                     }} />
                   {tablePhotoDataUrl ? (
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <img loading="lazy" decoding="async" src={tablePhotoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
-                      <button onClick={e => { e.preventDefault(); setTablePhotoDataUrl(''); }}
-                        style={{ position: 'absolute', top: -6, left: -6, width: 20, height: 20, borderRadius: '50%', background: '#ef4444', border: 'none', color: '#fff', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
-                    </div>
+                    <>
+                      <img loading="lazy" decoding="async" src={tablePhotoDataUrl} alt="" />
+                      <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); setTablePhotoDataUrl(''); }}
+                        aria-label="حذف عکس" className="bh-tf-photo-x">✕</button>
+                    </>
                   ) : (
-                    <div style={{ width: 120, height: 80, borderRadius: 10, border: '1.5px dashed #D1D5DB', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'rgba(0,0,0,0.02)' }}>
-                      <Camera size={20} color="#9CA3AF" />
-                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>انتخاب عکس</span>
-                    </div>
+                    <span className="bh-tf-photo-empty">
+                      <Camera size={19} color="#9CA3AF" />
+                      <span>عکس میز</span>
+                    </span>
                   )}
                 </label>
               </div>
@@ -2289,35 +2296,37 @@ export default function ClubDashboardPage() {
                 <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14, lineHeight: 1.7 }}>
                   تخفیف زمانی فقط روی قیمت همین میز اعمال می‌شود (مثلاً صبح‌ها تا ساعت ۱۲، ۲۰٪ تخفیف).
                 </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14, alignItems: 'flex-end' }}>
-                  <div style={{ flex: '1 1 110px', minWidth: 100 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از ساعت</div>
+                {/* چیدمانِ قبلی flex-wrap با `flex: 1 1 110px` بود؛ کشوهای
+                    ساعت پهن‌ترند و در موبایل روی هم می‌افتادند. حالا شبکه‌ای
+                    است که در هر عرض ستون‌هایش مشخص است. */}
+                <div className="bh-disc-row" style={{ marginBottom: 14 }}>
+                  <div className="bh-disc-time">
+                    <div className="bh-disc-lb">از ساعت</div>
                     <FaTimeSelect value={discountForm.startTime} onChange={v => setDiscountForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع تخفیف" compact />
                   </div>
-                  <div style={{ flex: '1 1 110px', minWidth: 100 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>تا ساعت</div>
+                  <div className="bh-disc-time">
+                    <div className="bh-disc-lb">تا ساعت</div>
                     <FaTimeSelect value={discountForm.endTime} onChange={v => setDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
                   </div>
                   {/* `type="number"` بومی هیچ‌وقت ارقام فارسی نشان نمی‌داد؛
                       FaNumberInput فارسی نمایش می‌دهد و لاتین بیرون می‌دهد.
-                      عنوانِ ٪ هم وسطِ ستونِ خودش می‌نشیند، نه کنارِ لبه. */}
-                  <div style={{ flex: '0 0 70px', minWidth: 60 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4, textAlign: 'center' }}>٪</div>
+                      عرضش هم اندازه‌ی یک عددِ دو رقمی است، نه بیشتر. */}
+                  <div className="bh-disc-pct">
+                    <div className="bh-disc-lb" style={{ textAlign: 'center' }}>٪</div>
                     <FaNumberInput value={discountForm.percent} ariaLabel="درصد تخفیف"
                       onChange={v => setDiscountForm(p => ({ ...p, percent: v.slice(0, 2) }))}
-                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
+                      style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 4px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                   </div>
-                  <div style={{ flex: '1 1 110px', minWidth: 100 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>برچسب (اختیاری)</div>
+                  <div className="bh-disc-label">
+                    <div className="bh-disc-lb">برچسب (اختیاری)</div>
                     <input type="text" value={discountForm.label} placeholder="تخفیف صبحگاهی"
                       onChange={e => setDiscountForm(p => ({ ...p, label: e.target.value }))}
                       style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK }} />
                   </div>
-                  <button onClick={addDiscount} style={{
+                  <button onClick={addDiscount} className="bh-disc-add" style={{
                     padding: '9px 16px', borderRadius: 12, fontSize: 13, fontWeight: 700,
                     border: '1px solid rgba(48,197,90,0.35)', background: 'rgba(48,197,90,0.08)',
-                    backdropFilter: 'blur(20px)', color: '#166534',
-                    cursor: 'pointer', fontFamily: 'var(--font-base)', whiteSpace: 'nowrap',
+                    color: '#166534', cursor: 'pointer', fontFamily: 'var(--font-base)', whiteSpace: 'nowrap',
                     boxShadow: 'inset 0 1px 0 rgba(48,197,90,0.12)',
                   }}>+ افزودن</button>
                 </div>
@@ -2356,7 +2365,7 @@ export default function ClubDashboardPage() {
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 120px', minWidth: 110 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>تا چند نفر رایگان</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از این تعداد</div>
                     <input value={tableForm.surchargeFrom} inputMode="numeric" placeholder="پیش‌فرض باشگاه"
                       onChange={e => setTableForm(p => ({ ...p, surchargeFrom: e.target.value.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).slice(0, 2) }))}
                       style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
@@ -2421,7 +2430,7 @@ export default function ClubDashboardPage() {
                       {/* «میز ۳ — اسنوکر» و نه برعکس: شماره‌ی میز چیزی است
                           که باشگاه‌دار با آن میز را می‌شناسد، پس اول بیاید. */}
                       <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2 }}>
-                        {t.number ? `میز ${t.number} — ` : ''}
+                        {t.number ? `میز ${t.number} | ` : ''}
                         {TABLE_TYPE_LABELS[t.type] || t.type}
                       </div>
                       {(t.brand || t.model) && (
@@ -2450,31 +2459,37 @@ export default function ClubDashboardPage() {
 
                   {editingTableId === t.id && (
                     <div style={{ marginTop: 16, borderTop: '1px solid #F0EDE8', paddingTop: 16 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 14 }}>
-                        <InputField label="شماره میز" type="number" maxWidth={96} value={editForm.number}
-                          onChange={v => setEditForm(p => ({...p, number: v}))} placeholder="1" />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
-                          <FaNumberInput
-                            value={editForm.pricePerHour}
-                            onChange={v => setEditForm(p => ({ ...p, pricePerHour: v }))}
-                            placeholder="۵۰٬۰۰۰" grouped ariaLabel="قیمت هر ساعت"
-                            style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 12px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)', width: '100%', boxSizing: 'border-box' }}
-                          />
-                          {editForm.pricePerHour && parseInt(editForm.pricePerHour) > 0 && (
-                            <div style={{ fontSize: 11, color: GOLD, marginTop: 1, paddingRight: 2 }}>
-                              {numberToFarsi(parseInt(editForm.pricePerHour))} تومان
-                            </div>
-                          )}
+                      {/* همان چیدمانِ فرمِ افزودن — یک تجربه در هر دو */}
+                      <div className="bh-table-form" style={{ marginBottom: 14 }}>
+                        <div className="bh-tf-fields">
+                          <div className="bh-tf-num">
+                            <InputField label="شماره میز" type="number" value={editForm.number}
+                              onChange={v => setEditForm(p => ({...p, number: v}))} placeholder="1" />
+                          </div>
+                          <div className="bh-tf-price" style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                            <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>قیمت هر ساعت (تومان)</label>
+                            <FaNumberInput
+                              value={editForm.pricePerHour}
+                              onChange={v => setEditForm(p => ({ ...p, pricePerHour: v }))}
+                              placeholder="۵۰٬۰۰۰" grouped ariaLabel="قیمت هر ساعت"
+                              style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 10px', fontSize: 14, background: '#FAFAFA', color: DARK, outline: 'none', fontFamily: 'var(--font-base)', width: '100%', boxSizing: 'border-box', textAlign: 'center' }}
+                            />
+                            {editForm.pricePerHour && parseInt(editForm.pricePerHour) > 0 && (
+                              <div style={{ fontSize: 11, color: GOLD, lineHeight: 1.7 }}>
+                                {numberToFarsi(parseInt(editForm.pricePerHour))} تومان
+                              </div>
+                            )}
+                          </div>
+                          <div className="bh-tf-txt">
+                            <InputField label="برند" value={editForm.brand} ltr
+                              onChange={v => setEditForm(p => ({...p, brand: v}))} placeholder="Viraka" />
+                          </div>
+                          <div className="bh-tf-txt">
+                            <InputField label="مدل" value={editForm.model} ltr
+                              onChange={v => setEditForm(p => ({...p, model: v}))} placeholder="M1 Gold" />
+                          </div>
                         </div>
-                        <InputField label="برند" value={editForm.brand} ltr
-                          onChange={v => setEditForm(p => ({...p, brand: v}))} placeholder="Viraka" />
-                        <InputField label="مدل" value={editForm.model} ltr
-                          onChange={v => setEditForm(p => ({...p, model: v}))} placeholder="M1 Gold" />
-                      </div>
-                      <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginBottom: 8 }}>عکس میز</div>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                        <label className="bh-tf-photo" title="عکس میز">
                           <input type="file" accept="image/*" style={{ display: 'none' }}
                             onChange={async e => {
                               const f = e.target.files?.[0]; if (!f) return;
@@ -2482,45 +2497,45 @@ export default function ClubDashboardPage() {
                               setEditForm(p => ({...p, photoDataUrl: d}));
                             }} />
                           {editForm.photoDataUrl ? (
-                            <div style={{ position: 'relative', display: 'inline-block' }}>
-                              <img loading="lazy" decoding="async" src={editForm.photoDataUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${GOLD}55` }} />
-                              <button onClick={e => { e.preventDefault(); setEditForm(p => ({...p, photoDataUrl: ''})); }}
-                                style={{ position: 'absolute', top: -6, left: -6, width: 20, height: 20, borderRadius: '50%', background: '#ef4444', border: 'none', color: '#fff', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                            </div>
+                            <>
+                              <img loading="lazy" decoding="async" src={editForm.photoDataUrl} alt="" />
+                              <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); setEditForm(p => ({...p, photoDataUrl: ''})); }}
+                                aria-label="حذف عکس" className="bh-tf-photo-x">✕</button>
+                            </>
                           ) : (
-                            <div style={{ width: 120, height: 80, borderRadius: 10, border: '1.5px dashed #D1D5DB', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'rgba(0,0,0,0.02)' }}>
-                              <Camera size={20} color="#9CA3AF" />
-                              <span style={{ fontSize: 11, color: '#9CA3AF' }}>عوض کردن عکس</span>
-                            </div>
+                            <span className="bh-tf-photo-empty">
+                              <Camera size={19} color="#9CA3AF" />
+                              <span>عکس میز</span>
+                            </span>
                           )}
                         </label>
                       </div>
                       {/* Discount rules in edit form */}
                       <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 14, marginBottom: 14 }}>
                         <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 700, marginBottom: 10 }}>تخفیف‌های زمانی</div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10, alignItems: 'flex-end' }}>
-                          <div style={{ flex: '1 1 100px', minWidth: 90 }}>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>از ساعت</div>
+                        <div className="bh-disc-row" style={{ marginBottom: 10 }}>
+                          <div className="bh-disc-time">
+                            <div className="bh-disc-lb">از ساعت</div>
                             <FaTimeSelect value={editDiscountForm.startTime} onChange={v => setEditDiscountForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع تخفیف" compact />
                           </div>
-                          <div style={{ flex: '1 1 100px', minWidth: 90 }}>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>تا ساعت</div>
+                          <div className="bh-disc-time">
+                            <div className="bh-disc-lb">تا ساعت</div>
                             <FaTimeSelect value={editDiscountForm.endTime} onChange={v => setEditDiscountForm(p => ({ ...p, endTime: v }))} ariaLabel="پایان تخفیف" compact />
                           </div>
-                          <div style={{ flex: '0 0 60px', minWidth: 55 }}>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3, textAlign: 'center' }}>٪</div>
+                          <div className="bh-disc-pct">
+                            <div className="bh-disc-lb" style={{ textAlign: 'center' }}>٪</div>
                             <FaNumberInput value={editDiscountForm.percent} ariaLabel="درصد تخفیف"
                               onChange={v => setEditDiscountForm(p => ({ ...p, percent: v.slice(0, 2) }))}
-                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 4px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
                           </div>
-                          <div style={{ flex: '1 1 100px', minWidth: 90 }}>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>برچسب</div>
+                          <div className="bh-disc-label">
+                            <div className="bh-disc-lb">برچسب</div>
                             <input type="text" value={editDiscountForm.label} placeholder="تخفیف صبحگاهی"
                               onChange={e => setEditDiscountForm(p => ({ ...p, label: e.target.value }))}
-                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
+                              style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK }} />
                           </div>
-                          <button onClick={addEditDiscount} style={{
-                            padding: '7px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+                          <button onClick={addEditDiscount} className="bh-disc-add" style={{
+                            padding: '8px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700,
                             border: '1px solid rgba(48,197,90,0.35)', background: 'rgba(48,197,90,0.08)',
                             color: '#166534', cursor: 'pointer', fontFamily: 'var(--font-base)', whiteSpace: 'nowrap',
                           }}>+ افزودن</button>
@@ -2559,8 +2574,8 @@ export default function ClubDashboardPage() {
                         </p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
                           <div style={{ flex: '1 1 120px', minWidth: 110 }}>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>تا چند نفر رایگان</div>
-                            <FaNumberInput value={editForm.surchargeFrom} ariaLabel="تا چند نفر رایگان"
+                            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>از این تعداد</div>
+                            <FaNumberInput value={editForm.surchargeFrom} ariaLabel="از این تعداد"
                               placeholder="پیش‌فرض باشگاه"
                               onChange={v => setEditForm(p => ({ ...p, surchargeFrom: v.slice(0, 2) }))}
                               style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '7px 8px', fontSize: 13, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />

@@ -114,7 +114,8 @@ head('۷) میزها — ویرایشِ هزینه‌ی بازیکن اضافه'
   t('startEditTable مقدار قبلی را می‌خواند', /surchargeFrom: t\.playerSurchargeFrom == null/.test(dash), true)
   t('saveEditTable ذخیره‌اش می‌کند', /playerSurchargeFrom: editForm\.surchargeFrom/.test(dash), true)
   t('خالی ⇒ undefined (ارث از باشگاه)', /editForm\.surchargeFrom \? parseInt\(editForm\.surchargeFrom, 10\) : undefined/.test(dash), true)
-  t('در فرمِ ویرایش رندر می‌شود', /ariaLabel="تا چند نفر رایگان"/.test(dash), true)
+  /* برچسب از «تا چند نفر رایگان» به «از این تعداد» تغییر کرد */
+  t('در فرمِ ویرایش رندر می‌شود', /ariaLabel="از این تعداد"/.test(dash), true)
   t('فهرست میزها مرتب‌شده رندر می‌شود', /sortTables\(tables\)\.map/.test(dash), true)
 
   const booking = read('app/booking/[clubId]/page.tsx')
@@ -127,8 +128,10 @@ head('۸) درصد تخفیف و شماره‌ی میز')
   t('درصد تخفیف با ورودیِ فارسی', /FaNumberInput value=\{discountForm\.percent\}/.test(dash), true)
   t('درصد تخفیفِ فرمِ ویرایش هم فارسی', /FaNumberInput value=\{editDiscountForm\.percent\}/.test(dash), true)
   t('هیچ input عددیِ بومی برای درصد نمانده', !/type="number" min="1" max="99"/.test(dash), true)
-  t('علامت ٪ وسط‌چین', (dash.match(/marginBottom: [0-9]+, textAlign: 'center' \}\}>٪/g) ?? []).length, 2)
-  t('شماره‌ی میز باریک‌تر (هر دو فرم)', (dash.match(/label="شماره میز" type="number" maxWidth=\{96\}/g) ?? []).length, 2)
+  /* برچسبِ ٪ به کلاسِ مشترکِ bh-disc-lb منتقل شد؛ وسط‌چینی روی خودش مانده */
+  t('علامت ٪ وسط‌چین', (dash.match(/textAlign: 'center' \}\}>٪/g) ?? []).length, 2)
+  /* عرضِ شماره‌ی میز از prop به شبکه‌ی CSS رفت (bh-tf-num) */
+  t('شماره‌ی میز ستونِ باریکِ خودش را دارد', (dash.match(/className="bh-tf-num"/g) ?? []).length, 2)
 }
 
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)

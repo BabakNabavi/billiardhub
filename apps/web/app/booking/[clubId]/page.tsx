@@ -501,8 +501,14 @@ function BookingContent() {
                     }
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'3px',flexWrap:'wrap'}}>
-                        <span style={{fontSize: '16px',fontWeight:800,color:isSel?color:'#111'}}>{table.name}</span>
-                        <span style={{fontSize: '10px',color,background:`${color}12`,border:`1px solid ${color}22`,borderRadius:'20px',padding:'2px 9px',fontWeight:700}}>{TYPE_LABEL[table.type]??table.type}</span>
+                        {/* «میز ۱ | اسنوکر» — رشته داخلِ خودِ عنوان است، پس
+                            نشانِ دکمه‌مانندِ کنارش حذف شد: دو بار یک چیز را
+                            می‌گفتند و کارت را شلوغ می‌کرد. */}
+                        <span style={{fontSize: '16px',fontWeight:800,color:isSel?color:'#111'}}>
+                          {table.number ? `میز ${toFa(table.number)} ` : ''}
+                          <span style={{color:'rgba(0,0,0,0.25)',fontWeight:600,padding:'0 2px'}}>|</span>
+                          {` ${TYPE_LABEL[table.type]??table.type}`}
+                        </span>
                         {/* #22: morning discount badge */}
                         {disc>0&&<span style={{fontSize: '10px',color:SEL_COLOR,background:`rgba(${SEL_RGB},0.10)`,border:`1px solid rgba(${SEL_RGB},0.25)`,borderRadius:'20px',padding:'2px 9px',fontWeight:700}}>صبح −{disc}٪</span>}
                       </div>
@@ -527,7 +533,10 @@ function BookingContent() {
               <span style={{width:'3px',height:'13px',background:'linear-gradient(135deg,#06b6d4,#a78bfa)',borderRadius:'2px',display:'inline-block',flexShrink:0}}/>
               تعداد بازیکنان
             </div>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:14}}>
+            {/* شمارنده وسطِ باکس، و هر توضیح یا محاسبه‌ای زیرِ آن.
+                پیش‌تر شمارنده چپ‌چین بود و توضیح کنارش می‌نشست؛ در عرضِ
+                کم، آن دو از هم دور می‌افتادند و ربطشان گم می‌شد. */}
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
               <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
                 <button className="player-btn" disabled={playerCount<=1} onClick={()=>setPlayerCount(p=>Math.max(1,p-1))}><Minus size={14}/></button>
                 <div style={{textAlign:'center',minWidth:60}}>
@@ -537,12 +546,15 @@ function BookingContent() {
                 <button className="player-btn" disabled={playerCount>=8} onClick={()=>setPlayerCount(p=>Math.min(8,p+1))}><Plus size={14}/></button>
               </div>
               {extraPlayerN>0?(
-                <div style={{padding:'10px 16px',background:'rgba(48,197,90,0.07)',border:'1px solid rgba(48,197,90,0.20)',borderRadius:'14px',fontSize: '14px',color:'rgba(0,0,0,0.45)',lineHeight:1.7}}>
+                <div style={{padding:'10px 16px',background:'rgba(48,197,90,0.07)',border:'1px solid rgba(48,197,90,0.20)',borderRadius:'14px',fontSize: '14px',color:'rgba(0,0,0,0.45)',lineHeight:1.7,textAlign:'center'}}>
                   <span style={{color:SEL_COLOR,fontWeight:800}}>+{toFa(extraPlayerN*surcharge.percent)}٪</span> اضافه بابت {toFa(extraPlayerN)} نفر
                 </div>
               ):surcharge.enabled&&surcharge.percent>0?(
-                <div style={{fontSize: '14px',color:'rgba(0,0,0,0.35)',padding:'10px 16px',background:'rgba(0,0,0,0.03)',borderRadius:'14px'}}>
-                  تا {toFa(surcharge.from)} نفر رایگان؛ از نفر بعد، هر نفر {toFa(surcharge.percent)}٪ اضافه می‌شود
+                /* «رایگان» گمراه‌کننده بود — میز رایگان نیست، فقط افزایشی
+                   ندارد. متن هم با همان چیزی که در داشبورد نوشته می‌شود
+                   یکی شد. */
+                <div style={{fontSize: '13.5px',color:'rgba(0,0,0,0.38)',padding:'10px 16px',background:'rgba(0,0,0,0.03)',borderRadius:'14px',textAlign:'center',lineHeight:1.9}}>
+                  تا {toFa(surcharge.from)} نفر بدون افزایش، از نفر بعد، هر نفر {toFa(surcharge.percent)} درصد اضافه می‌شود
                 </div>
               ):null}
             </div>

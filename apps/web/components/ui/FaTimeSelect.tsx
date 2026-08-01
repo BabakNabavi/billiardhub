@@ -3,13 +3,15 @@
 /* ─────────────────────────────────────────────────────────────
    انتخاب ساعت با ارقام فارسی.
 
-   `<input type="time">` بومی همیشه ارقام لاتین و قالب AM/PM را
-   نشان می‌دهد و هیچ راهی برای فارسی‌کردنش نیست — ظاهرش را مرورگر
-   می‌سازد، نه ما. برای همین با دو `<select>` جایگزین می‌شود.
+   ورودیِ زمانِ بومیِ مرورگر همیشه ارقام لاتین و قالب AM/PM را نشان
+   می‌دهد و هیچ راهی برای فارسی‌کردنش نیست — ظاهرش را مرورگر می‌سازد،
+   نه ما. برای همین با دو کشوی خودِ پروژه جایگزین شده است.
 
    مقدار همان `HH:MM` ۲۴ساعتی لاتین می‌ماند، پس جای هر
    `<input type="time">` می‌نشیند بدون تغییر منطق اطراف.
    ───────────────────────────────────────────────────────────── */
+
+import Select from './Select'
 
 const FA = '۰۱۲۳۴۵۶۷۸۹'
 const toFa = (v: string | number) => String(v).replace(/[0-9]/g, d => FA[+d]!)
@@ -36,31 +38,29 @@ export default function FaTimeSelect({
      ذخیره‌شده‌ی قبلی بی‌صدا عوض نشود. */
   const minuteList = mins.includes(m) ? mins : [...mins, m].sort()
 
-  const sel: React.CSSProperties = {
-    border: '1px solid #E7E2D6', borderRadius: 9,
-    padding: compact ? '6px 7px' : '8px 9px',
-    fontSize: compact ? 13 : 14, fontWeight: 700, color: '#1C1B17',
-    background: '#fff', fontFamily: 'inherit', outline: 'none',
-    cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.55 : 1,
-  }
+  /* دو کشوی بومی جای خود را به کشوی مشترکِ پروژه دادند: کشوی سیستم در
+     هر سیستم‌عاملی شکل خودش را دارد و کنارِ بقیه‌ی فرم ناهماهنگ و
+     ابتدایی دیده می‌شد. */
+  const box: React.CSSProperties = { width: compact ? 62 : 72, flexShrink: 0 }
 
+  /* `direction: ltr` روی خودِ قاب، وگرنه در صفحه‌ی راست‌به‌چپ اولین
+     فرزند سمتِ راست می‌نشیند و «۰۹:۳۰» به شکلِ «۳۰:۰۹» دیده می‌شود —
+     ساعت و دقیقه جابه‌جا. مقدارِ ذخیره‌شده همان HH:MM می‌ماند. */
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-      <select
-        aria-label={ariaLabel ? `ساعت ${ariaLabel}` : 'ساعت'}
-        disabled={disabled} value={h} style={sel}
-        onChange={e => onChange(`${e.target.value}:${m}`)}
-      >
-        {HOURS.map(x => <option key={x} value={x}>{toFa(x)}</option>)}
-      </select>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, direction: 'ltr' }}>
+      <Select
+        value={h} compact={compact} disabled={disabled} style={box}
+        ariaLabel={ariaLabel ? `ساعت ${ariaLabel}` : 'ساعت'}
+        options={HOURS.map(x => ({ value: x, label: toFa(x) }))}
+        onChange={v => onChange(`${v}:${m}`)}
+      />
       <span style={{ color: '#8A8474', fontWeight: 800 }}>:</span>
-      <select
-        aria-label={ariaLabel ? `دقیقه‌ی ${ariaLabel}` : 'دقیقه'}
-        disabled={disabled} value={m} style={sel}
-        onChange={e => onChange(`${h}:${e.target.value}`)}
-      >
-        {minuteList.map(x => <option key={x} value={x}>{toFa(x)}</option>)}
-      </select>
+      <Select
+        value={m} compact={compact} disabled={disabled} style={box}
+        ariaLabel={ariaLabel ? `دقیقه‌ی ${ariaLabel}` : 'دقیقه'}
+        options={minuteList.map(x => ({ value: x, label: toFa(x) }))}
+        onChange={v => onChange(`${h}:${v}`)}
+      />
     </span>
   )
 }

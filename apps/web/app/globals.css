@@ -960,3 +960,112 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(199, 166, 106, 0.14);
 }
 select:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ─────────────────────────────────────────────────────────────
+   فرمِ میز — داشبورد باشگاه
+
+   چیدمانِ قبلی یک `repeat(auto-fit, minmax(145px, 1fr))` بود که هر
+   چهار فیلد را هم‌عرض می‌کرد: شماره‌ی دو رقمی همان‌قدر جا می‌گرفت که
+   قیمتِ شش رقمی. در موبایل هم ستون‌ها به ۱۴۵px نمی‌رسیدند و فیلدها
+   توی هم می‌رفتند.
+
+   حالا هر فیلد عرضِ متناسبِ محتوایش را دارد و عکس کنارشان می‌نشیند،
+   نه در بلوکِ جدا زیرشان.
+   ───────────────────────────────────────────────────────────── */
+.bh-table-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.bh-tf-fields {
+  flex: 1 1 340px;
+  min-width: 0;
+  display: grid;
+  /* شماره ← قیمت ← برند ← مدل */
+  grid-template-columns: 84px minmax(132px, 1.1fr) minmax(104px, 1fr) minmax(104px, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.bh-tf-num, .bh-tf-price, .bh-tf-txt { min-width: 0; }
+
+/* عکس: هم‌ارتفاعِ یک فیلدِ کامل (برچسب + ورودی) تا ردیف به هم نریزد */
+.bh-tf-photo {
+  flex: 0 0 104px;
+  height: 76px;
+  margin-top: 20px;              /* هم‌تراز با ورودی‌ها، زیرِ خطِ برچسب */
+  position: relative;
+  border-radius: 10px;
+  border: 1.5px dashed #D1D5DB;
+  background: rgba(0, 0, 0, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: visible;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.bh-tf-photo:hover { border-color: rgba(199, 166, 106, 0.6); background: rgba(199, 166, 106, 0.05); }
+.bh-tf-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover; border-radius: 9px;
+  display: block;
+}
+.bh-tf-photo-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 3;
+  font-size: 11px; color: #9CA3AF; text-align: center; line-height: 1.6;
+}
+.bh-tf-photo-x {
+  position: absolute; top: -7px; inset-inline-start: -7px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #ef4444; border: none; color: #fff;
+  font-size: 11px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* قیمت سقفِ عرض دارد: بدون آن، در عرض‌های میانی یک فیلدِ شش‌رقمی تا
+   ۵۰۰ پیکسل کش می‌آمد و کنارِ شماره‌ی ۸۴ پیکسلی مسخره می‌شد. */
+.bh-tf-price { max-width: 260px; }
+
+/* موبایل و تبلتِ باریک — دو ستون: شماره کنارِ قیمت، بعد برند کنارِ مدل */
+@media (max-width: 700px) {
+  .bh-table-form { gap: 10px; }
+  .bh-tf-fields { grid-template-columns: 78px minmax(0, 1fr); gap: 9px; }
+  .bh-tf-price { max-width: none; }
+  .bh-tf-photo { flex: 1 1 100%; height: 72px; margin-top: 2px; }
+}
+
+/* ── ردیفِ تخفیفِ زمانی ───────────────────────────────────────────
+   پیش‌تر flex-wrap با `flex: 1 1 110px` بود. کشوهای ساعت از آن پهن‌تر
+   درمی‌آیند، پس در موبایل روی هم می‌افتادند و برچسب‌ها توی فیلدِ بغلی
+   می‌رفتند. شبکه هر عرض را قطعی می‌کند.
+
+   ستونِ درصد فقط جای یک عددِ دو رقمی است — بیشتر از این لازم ندارد. */
+.bh-disc-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) 58px minmax(120px, 1.3fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+.bh-disc-lb {
+  font-size: 11.5px;
+  color: #9CA3AF;
+  margin-bottom: 4px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.bh-disc-time, .bh-disc-pct, .bh-disc-label { min-width: 0; }
+.bh-disc-add { align-self: end; height: 38px; }
+
+@media (max-width: 700px) {
+  /* چهار ستونِ کمکی: ساعت‌ها هرکدام نیمی از ردیف، و در ردیفِ بعد
+     درصد در ستونِ باریکِ اول و برچسب در بقیه. با «۱fr ۱fr» ساده،
+     درصد نصفِ عرضِ صفحه می‌شد در حالی که فقط دو رقم می‌گیرد. */
+  .bh-disc-row { grid-template-columns: 62px repeat(3, 1fr); gap: 9px; }
+  .bh-disc-time:nth-of-type(1) { grid-column: 1 / span 2; }
+  .bh-disc-time:nth-of-type(2) { grid-column: 3 / span 2; }
+  .bh-disc-pct { grid-column: 1; }
+  .bh-disc-label { grid-column: 2 / -1; }
+  .bh-disc-add { grid-column: 1 / -1; width: 100%; }
+}

@@ -41,6 +41,10 @@ function shape(u: Record<string, unknown>) {
     address: u.address ?? '',
     workPhone: u.work_phone ?? '',
     clubNameManual: u.club_name_manual ?? '',
+    /* کارت بانکی فقط خواندنی است؛ نوشتنش مسیر خودش را دارد
+       (/api/users/bank-card) که تطبیق با کد ملی را هم انجام می‌دهد. */
+    bankCard: u.bank_card ?? '',
+    bankCardOwner: u.bank_card_owner ?? '',
     /* هویت استعلام‌شده — فقط برای نمایش */
     nationalId: u.national_id ?? '',
     birthDate: u.birth_date ?? u.birthDate ?? '',

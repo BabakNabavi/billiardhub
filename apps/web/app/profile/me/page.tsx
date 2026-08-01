@@ -191,6 +191,7 @@ export default function ProfileMePage() {
   const [instagram, setInstagram] = useState('')
   const [bankCard, setBankCard] = useState('')
   const [bankOwner, setBankOwner] = useState('')
+  const [bankBusy, setBankBusy] = useState(false)
   const [clubName, setClubName] = useState('')
   const [address, setAddress]   = useState('')
   const [workPhone, setWorkPhone] = useState('')
@@ -376,16 +377,37 @@ export default function ProfileMePage() {
     }
   }
 
+  /* مسیرِ قبلی به بک‌اندِ NestJS اشاره می‌کرد که هیچ‌وقت روی Next ساخته
+     نشد؛ همیشه ۴۰۴ می‌گرفت و در UI به «خطا در ثبت کارت» ترجمه می‌شد —
+     پیامی که هیچ سرنخی از علت نمی‌داد.
+
+     نامِ دارنده دیگر فرستاده نمی‌شود: سرور آن را از هویتِ احرازشده
+     می‌نویسد، چون کارت با همان کد ملی تطبیق داده می‌شود. */
   const handleBankCard = async () => {
-    const clean = bankCard.replace(/-/g,'')
+    const clean = toEnDigits(bankCard).replace(/\D/g, '')
     if (clean.length !== 16) { showToast('شماره کارت باید ۱۶ رقم باشد', 'error'); return }
-    const res = await apiFetch(`${API}/user/profile/bank-card`, {
-      method: 'PUT',
-      headers: { ...authHeader(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bankCard: clean, bankCardOwner: bankOwner }),
-    })
-    if (res.ok) showToast('کارت بانکی ثبت شد')
-    else showToast('خطا در ثبت کارت', 'error')
+    setBankBusy(true)
+    try {
+      const res = await apiFetch('/api/users/bank-card', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bankCard: clean }),
+      })
+      const j = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setProfile(p => p ? { ...p, bankCard: j.bankCard ?? clean, bankCardOwner: j.bankCardOwner ?? '' } : p)
+        setBankOwner(j.bankCardOwner ?? '')
+        showToast(j.bankName ? `کارت بانک ${j.bankName} ثبت شد` : 'کارت بانکی ثبت شد')
+      } else {
+        /* پیامِ سرور دقیق است (هویت تأییدنشده، کارتِ شخصِ دیگر، قطعیِ
+           سرویس) و باید همان به کاربر برسد، نه یک «خطا» کلی. */
+        showToast(j?.message || 'ثبت کارت انجام نشد', 'error')
+      }
+    } catch {
+      showToast('خطا در ارتباط با سرور', 'error')
+    } finally {
+      setBankBusy(false)
+    }
   }
 
   /* انتخاب باشگاه = عضویت در آن. شمارش اعضا از روی همین ردیف‌هاست،
@@ -664,11 +686,20 @@ export default function ProfileMePage() {
                   style={{ ...inputStyle, letterSpacing: 3, direction: 'ltr', textAlign: 'center' }}
                 />
               </Field>
+              {/* نام دارنده ورودی نیست: کارت با کد ملیِ احرازشده تطبیق
+                  داده می‌شود، پس نامِ واقعی همان نامِ ثبت‌نام است. یک
+                  فیلدِ آزاد فقط اجازه می‌داد کارتِ تأییدشده زیر نامِ
+                  دلخواه بنشیند. */}
               <Field label="نام صاحب کارت">
-                <input value={bankOwner} onChange={e => setBankOwner(e.target.value)} placeholder="نام و نام خانوادگی" style={inputStyle} />
+                <input value={bankOwner || '—'} readOnly tabIndex={-1}
+                  style={{ ...inputStyle, background: 'rgba(0,0,0,0.04)', color: 'rgba(0,0,0,0.45)', cursor: 'default' }} />
               </Field>
-              <button onClick={handleBankCard} style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
-                ثبت کارت
+              <div style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.4)', margin: '-4px 0 12px', lineHeight: 1.8 }}>
+                از اطلاعات احراز هویت شما — کارت باید به نام خودتان باشد و استعلام می‌شود.
+              </div>
+              <button onClick={handleBankCard} disabled={bankBusy}
+                style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: bankBusy ? 'not-allowed' : 'pointer', opacity: bankBusy ? 0.55 : 1 }}>
+                {bankBusy ? 'در حال استعلام…' : 'ثبت کارت'}
               </button>
             </Section>
 
