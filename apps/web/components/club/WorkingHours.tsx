@@ -14,6 +14,7 @@
    ───────────────────────────────────────────────────────────── */
 
 import { Copy, Clock } from 'lucide-react'
+import FaTimeSelect from '../ui/FaTimeSelect'
 
 const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -47,25 +48,19 @@ function span(o: string, c: string): number {
   return Math.round((d / 60) * 10) / 10
 }
 
+/* کشوهای بومی جایشان را به `FaTimeSelect` دادند.
+
+   دلیلش فقط هماهنگیِ ظاهری نبود: استایلِ سراسریِ `select` برای جای
+   فلش ۳۶ پیکسل padding می‌گذارد، پس هر کشو دستِ‌کم ۷۰ پیکسل پهن
+   می‌شد. چهار کشو در یک ردیف — به‌علاوه‌ی نام روز و نشانِ مدت — در
+   موبایل از عرضِ صفحه بیرون می‌زد. */
 function TimeSelect({ value, onChange, label }: {
   value: string; onChange: (v: string) => void; label: string
 }) {
-  const [h = '09', m = '00'] = value.split(':')
-  const sel: React.CSSProperties = {
-    border: `1px solid ${LINE}`, borderRadius: 9, padding: '7px 8px',
-    fontSize: 14, fontWeight: 700, color: INK, background: '#fff',
-    fontFamily: 'inherit', outline: 'none', cursor: 'pointer',
-  }
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ fontSize: 11.5, color: MUT, marginInlineEnd: 2 }}>{label}</span>
-      <select aria-label={`ساعت ${label}`} value={h} onChange={e => onChange(`${e.target.value}:${m}`)} style={sel}>
-        {HOURS.map(x => <option key={x} value={x}>{toFa(x)}</option>)}
-      </select>
-      <span style={{ color: MUT, fontWeight: 800 }}>:</span>
-      <select aria-label={`دقیقه‌ی ${label}`} value={MINS.includes(m) ? m : '00'} onChange={e => onChange(`${h}:${e.target.value}`)} style={sel}>
-        {MINS.map(x => <option key={x} value={x}>{toFa(x)}</option>)}
-      </select>
+    <div className="wh-time" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+      <span className="wh-time-lb" style={{ fontSize: 11.5, color: MUT }}>{label}</span>
+      <FaTimeSelect value={value} onChange={onChange} ariaLabel={label} minuteStep={15} compact />
     </div>
   )
 }
@@ -104,7 +99,7 @@ export default function WorkingHours({ value, onChange }: {
         {DAYS.map(d => {
           const v = value[d.key] ?? { open: '09:00', close: '23:00', isOpen: true }
           return (
-            <div key={d.key} style={{
+            <div key={d.key} className="wh-row" style={{
               display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
               background: v.isOpen ? '#fff' : '#FAFAF7',
               border: `1px solid ${v.isOpen ? LINE : '#EFEBE1'}`,
@@ -128,7 +123,7 @@ export default function WorkingHours({ value, onChange }: {
                     transition: 'inset-inline-start .2s',
                   }} />
                 </span>
-                <span style={{ fontSize: 13.5, fontWeight: 800, color: INK, minWidth: 62, textAlign: 'start' }}>
+                <span className="wh-day" style={{ fontSize: 13.5, fontWeight: 800, color: INK, minWidth: 62, textAlign: 'start' }}>
                   {d.label}
                 </span>
               </button>
@@ -138,7 +133,7 @@ export default function WorkingHours({ value, onChange }: {
                   <TimeSelect label="از" value={v.open} onChange={x => setDay(d.key, { open: x })} />
                   <TimeSelect label="تا" value={v.close} onChange={x => setDay(d.key, { close: x })} />
 
-                  <span style={{
+                  <span className="wh-span" style={{
                     fontSize: 11.5, color: FELT, background: 'rgba(14,122,56,0.08)',
                     border: '1px solid rgba(14,122,56,0.2)', borderRadius: 20, padding: '3px 10px',
                     fontWeight: 700, whiteSpace: 'nowrap',
@@ -147,13 +142,14 @@ export default function WorkingHours({ value, onChange }: {
                   </span>
 
                   <button type="button" onClick={() => copyToAll(d.key)} title="همه‌ی روزها مثل این روز"
+                    className="wh-copy"
                     style={{
                       marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5,
                       background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)',
                       color: GOLD_D, borderRadius: 9, padding: '6px 10px', fontSize: 11.5,
                       fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                     }}>
-                    <Copy size={11} /> برای همه‌ی روزها
+                    <Copy size={11} /> <span className="wh-copy-txt">برای همه‌ی روزها</span>
                   </button>
                 </>
               ) : (

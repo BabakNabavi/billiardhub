@@ -65,7 +65,11 @@ head('۳) فرمِ میز — چیدمانِ تازه')
   t('عکسِ میز کنارِ فیلدهاست', (dash.match(/className="bh-tf-photo"/g) ?? []).length === 2)
   t('CSS شبکه تعریف شده', /\.bh-tf-fields\s*\{/.test(css))
   t('شماره‌ی میز باریک‌ترین ستون است', /grid-template-columns: 84px/.test(css))
-  t('موبایل دو ستونی می‌شود', /78px minmax\(0, 1fr\)/.test(css))
+  /* چیدمانِ موبایل از «۷۸px + ۱fr» به شبکه‌ی دوازده‌ستونی رفت تا برند و
+     مدل دقیقاً نصف‌نصف شوند. */
+  t('موبایل دو ردیف می‌شود: شماره+قیمت، بعد برند+مدل',
+    /\.bh-tf-num\s+\{ grid-column: span 4; \}/.test(css)
+    && /\.bh-tf-price \{ grid-column: span 8/.test(css))
   t('عکس در موبایل تمام‌عرض', /\.bh-tf-photo \{ flex: 1 1 100%/.test(css))
 }
 
@@ -117,6 +121,34 @@ head('۷) نشانِ «تأیید مدارک»')
   t('نقشِ بدونِ مدرک ⇒ not_required', /'not_required'/.test(route))
   t('فقط GET — نوشتنی نیست', !/export async function (POST|PUT|PATCH|DELETE)/.test(route))
   t('پشتِ ورود است', /ابتدا وارد شوید/.test(route))
+}
+
+head('۸) اصلاحاتِ این دور')
+{
+  t('برچسبِ تیکِ بستنِ میز', /قابلیت رزرو برای این میز غیرفعال می‌شود/.test(dash))
+  t('«منطقه زمانی» حذف شد', !/label="منطقه زمانی"/.test(dash))
+  t('تعداد میزها چهار ستونی است', /grid-template-columns: repeat\(4, 1fr\)/.test(css))
+  /* فقط داخلِ همان بلوک شمرده می‌شود: این کلیدها جاهای دیگرِ فایل هم
+     هستند (تعریفِ نوع، نگاشتِ ظرفیت) و `indexOf` روی کلِ فایل اولین
+     رخداد را می‌گرفت، نه ترتیبِ واقعیِ فهرست. */
+  {
+    const block = dash.split('className="bh-table-counts"')[1]?.split('].map(f =>')[0] ?? ''
+    const order = [...block.matchAll(/key: '(\w+)'/g)].map(m => m[1])
+    t('ترتیبِ تعداد میزها', order, [
+      'snookerTables', 'pocketTables', 'vipSnookerTables', 'vipPocketTables',
+      'highballTables', 'airHockeyTables', 'dartBoards', 'playstations',
+    ])
+  }
+  t('برند و مدل هرکدام نیمی از ردیف', /\.bh-tf-txt\s+\{ grid-column: span 6; \}/.test(css))
+  t('ردیفِ ساعاتِ کاری شبکه‌ای شد', /\.wh-day-row\s*\{/.test(css))
+  t('انتخابگرهای ساعت فشرده‌اند', /ariaLabel="شروع" compact/.test(dash))
+  t('دکمه‌ی استعلام پس از موفقیت قفل می‌شود', /const postalLocked = postalDone/.test(dash))
+  t('با تغییرِ کد پستی باز می‌شود', /postalDone === clubInfo\.postalCode/.test(dash))
+  /* باگی که دکمه‌های بستن را «بی‌اثر» نشان می‌داد: سرور ISO می‌داد و
+     این‌جا هنوز عددِ میلی‌ثانیه خوانده می‌شد. */
+  t('وضعیتِ بستن از منبعِ مشترک خوانده می‌شود',
+    /const closure = closureState\(\{ closeToday, closedUntil: reserveClosedUntil \}\)/.test(dash))
+  t('منطقِ دستیِ قدیمی برداشته شد', !/Number\(reserveClosedUntil\) > Date\.now\(\)/.test(dash))
 }
 
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)

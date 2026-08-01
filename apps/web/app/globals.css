@@ -1031,8 +1031,13 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 /* موبایل و تبلتِ باریک — دو ستون: شماره کنارِ قیمت، بعد برند کنارِ مدل */
 @media (max-width: 700px) {
   .bh-table-form { gap: 10px; }
-  .bh-tf-fields { grid-template-columns: 78px minmax(0, 1fr); gap: 9px; }
-  .bh-tf-price { max-width: none; }
+  /* شبکه‌ی دوازده‌ستونی: شماره و قیمت ردیفِ اول با نسبتِ ۴ به ۸،
+     برند و مدل ردیفِ دوم دقیقاً نصف‌نصف. با `78px + 1fr` برند در
+     ستونِ باریک می‌افتاد و نصفِ عرضِ مدل می‌شد. */
+  .bh-tf-fields { grid-template-columns: repeat(12, 1fr); gap: 9px; }
+  .bh-tf-num   { grid-column: span 4; }
+  .bh-tf-price { grid-column: span 8; max-width: none; }
+  .bh-tf-txt   { grid-column: span 6; }
   .bh-tf-photo { flex: 1 1 100%; height: 72px; margin-top: 2px; }
 }
 
@@ -1100,4 +1105,55 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   .bh-amenities { grid-template-columns: 1fr 1fr; gap: 8px; }
   /* در دو ستونِ باریک، حاشیه‌ی افقی کمتر تا متن نشکند */
   .bh-amenities > label { padding: 10px 11px !important; gap: 8px !important; }
+}
+
+/* ── تعداد میزها ────────────────────────────────────────────────
+   هشت عددِ تک‌رقمی. با `minmax(155px,…)` در موبایل دو ستون می‌شد و
+   چهار ردیف می‌گرفت — فضای زیادی برای اطلاعاتی که در دو ردیف جا
+   می‌شود. */
+.bh-table-counts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 700px) {
+  .bh-table-counts { gap: 8px 7px; }
+  /* برچسب‌ها بلندند («پلی‌استیشن») و در ستونِ ۷۰ پیکسلی می‌شکنند */
+  .bh-table-counts label { font-size: 10.5px !important; line-height: 1.5; }
+}
+
+/* ── ساعات کاری ─────────────────────────────────────────────────
+   ردیفِ هر روز شامل کلید، نام روز، دو انتخابگرِ ساعت، نشانِ مدت و
+   دکمه‌ی «برای همه‌ی روزها» است. در موبایل این‌همه در یک خط جا
+   نمی‌شد و از صفحه بیرون می‌زد. */
+@media (max-width: 620px) {
+  .wh-row { gap: 8px !important; padding: 9px 10px !important; }
+  .wh-day { min-width: 0 !important; font-size: 12.5px !important; }
+  /* دو انتخابگرِ ساعت کنارِ هم در یک سطرِ کامل */
+  .wh-time { flex: 1 1 0; min-width: 0; justify-content: flex-start; }
+  .wh-time-lb { flex-shrink: 0; }
+  /* نشانِ مدت در موبایل حذف — از روی خودِ دو ساعت خوانده می‌شود */
+  .wh-span { display: none !important; }
+  /* دکمه فقط آیکون، تا جای ساعت‌ها را نگیرد */
+  .wh-copy { margin-inline-start: 0 !important; padding: 6px 8px !important; }
+  .wh-copy-txt { display: none; }
+}
+
+/* ── ردیفِ ساعاتِ کاری (تبِ داشبورد) ────────────────────────────
+   نامِ روز + دو انتخابگرِ ساعت. با flex و انتخابگرهای غیرفشرده،
+   مجموعِ عرض از موبایل بیشتر می‌شد و ساعت‌ها بیرون می‌زدند. */
+.wh-day-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 118px) 1fr 1fr;
+  align-items: center;
+  gap: 10px;
+}
+.wh-cell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+
+@media (max-width: 560px) {
+  .wh-day-row { grid-template-columns: 74px 1fr 1fr; gap: 7px; padding: 10px 11px !important; }
+  .wh-day-name { font-size: 12.5px !important; }
+  /* «از» و «تا» حذف: جای دو ساعت را می‌گرفتند و ترتیبشان خودش گویاست */
+  .wh-lb { display: none; }
+  .wh-cell { justify-content: center; }
 }

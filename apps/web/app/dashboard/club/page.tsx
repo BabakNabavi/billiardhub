@@ -22,6 +22,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import { apiFetch } from '../../../lib/http';
 import { sortTables } from '../../../lib/tables/order';
+import { closureState, closureLabel } from '../../../lib/booking/closure';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
 import { toJalali, jalaliToGregorian, faDate, faTimeRange } from '../../../lib/jalali';
@@ -338,7 +339,7 @@ function ClosedToggle({ checked, onChange, compact = false }: {
         </span>
         <span style={{ display: 'block', fontSize: 11.5, color: '#9CA3AF', lineHeight: 1.85, marginTop: 2 }}>
           {checked
-            ? 'این میز در صفحه‌ی رزرو آنلاین نمایش داده نمی‌شود. رزروهای ثبت‌شده‌ی قبلی سر جای خود می‌مانند.'
+            ? 'قابلیت رزرو برای این میز غیرفعال می‌شود — در صفحه‌ی رزرو آنلاین دیده نمی‌شود. رزروهای ثبت‌شده‌ی قبلی سر جای خود می‌مانند.'
             : 'اگر میز در تعمیر است یا موقتاً حضوری واگذار شده، این را تیک بزنید.'}
         </span>
       </span>
@@ -500,6 +501,10 @@ export default function ClubDashboardPage() {
   /* استعلام کد پستی */
   const [postalBusy, setPostalBusy] = useState(false);
   const [postalMsg, setPostalMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  /* کد پستی‌ای که استعلامش موفق بوده. تا وقتی همان است، دکمه خاموش
+     می‌ماند: هر فراخوان اعتبارِ سرویس را می‌سوزاند و نتیجه‌اش هم
+     همان است. با تغییرِ کد پستی خودبه‌خود دوباره روشن می‌شود. */
+  const [postalDone, setPostalDone] = useState('');
 
   /* موقعیت مکانی — مبنای «نزدیک‌ترین باشگاه» در فهرست باشگاه‌ها.
      تا امروز فقط در فرمِ ثبتِ اولیه قابل تعیین بود؛ باشگاهی که آن‌جا
@@ -702,6 +707,8 @@ export default function ClubDashboardPage() {
       setLicDocName(c.licenseDocumentUrl ? 'مدرک بارگذاری‌شده' : '');
       setLicDocMsg(null);
       setPostalMsg(null);
+      /* قفلِ استعلام مالِ همین باشگاه بود؛ با عوض‌شدن باشگاه پاک شود */
+      setPostalDone('');
       if (c.workingHours) setHoursForm(c.workingHours);
       setSurcharge({
         enabled: c.playerSurchargeEnabled === undefined ? true : !!c.playerSurchargeEnabled,
@@ -1050,11 +1057,13 @@ export default function ClubDashboardPage() {
         province: j.geo?.province || p.province,
         city: j.geo?.city || p.city,
       }));
+      /* از این لحظه دکمه برای همین کد پستی خاموش می‌شود */
+      setPostalDone(clubInfo.postalCode);
       setPostalMsg({
         ok: true,
         text: j.postalCodeStored === false
           ? 'آدرس یافت شد و ثبت شد (کد پستی پس از اجرای مهاجرت ذخیره می‌شود)'
-          : 'آدرس از کد پستی خوانده و ثبت شد',
+          : 'آدرس از کد پستی خوانده و ثبت شد — برای استعلام دوباره، کد پستی را تغییر دهید',
       });
     } catch {
       setPostalMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
@@ -1524,6 +1533,10 @@ export default function ClubDashboardPage() {
      آن‌وقت این فیلد خالی می‌ماند؛ پیشوندِ شبا همیشه هست. */
   const derivedBankName = ibanBank || cardBank || '';
   const hasGeo = geo !== null;
+  /* قفلِ دکمه‌ی استعلام تا وقتی کد پستی همان است که استعلامش موفق بود.
+     هر فراخوان اعتبارِ سرویس را می‌سوزاند و نتیجه‌اش هم همان است؛ با
+     تغییرِ کد پستی خودبه‌خود باز می‌شود. */
+  const postalLocked = postalDone !== '' && postalDone === clubInfo.postalCode;
 
   /* دو سازوکار بستن رزرو وجود دارد و باید یک وضعیت واحد نشان دهند،
      وگرنه کاربر «رزرو امروز بسته» را تیک می‌زند و همان بالا می‌خواند
@@ -1534,20 +1547,19 @@ export default function ClubDashboardPage() {
        • reserveClosedUntil  → موقت، همه‌ی روزها تا یک زمان مشخص
 
      پس متن هر دو را با هم می‌گوید. */
-  const tempClosed = reserveClosedUntil === 'always' || (reserveClosedUntil !== '' && Number(reserveClosedUntil) > Date.now());
-  const isReserveClosed = tempClosed || closeToday;
+  /* از منبعِ مشترک خوانده می‌شود، نه با منطقِ دستیِ این‌جا.
 
-  const reserveClosedLabel = (() => {
-    if (reserveClosedUntil === 'always') return 'رزرو آنلاین همیشه بسته است';
-    if (tempClosed) {
-      const until = new Date(Number(reserveClosedUntil)).toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-      return closeToday
-        ? `رزرو آنلاین تا ${until} بسته است — و امروز همیشه بسته می‌ماند`
-        : `رزرو آنلاین تا ${until} بسته است`;
-    }
-    if (closeToday) return 'رزرو امروز بسته است — روزهای آینده باز';
-    return 'رزرو آنلاین باز است';
-  })();
+     باگی که این رفع می‌کند: از وقتی بستنِ موقت به سرور منتقل شد،
+     مقدارِ برگشتی یک رشته‌ی ISO است («2026-08-01T21:37:39Z») یا
+     'infinity'. ولی کدِ قبلی هنوز فرمتِ localStorage را می‌خواند —
+     عددِ میلی‌ثانیه و 'always'. `Number('2026-08-…')` می‌شود NaN و
+     مقایسه‌اش با Date.now() همیشه false. یعنی دکمه‌ها کارشان را
+     می‌کردند و سرور هم ذخیره می‌کرد، ولی UI هیچ‌وقت نشان نمی‌داد که
+     رزرو بسته شده — و از بیرون «کار نکردن دکمه» دیده می‌شد. */
+  const closure = closureState({ closeToday, closedUntil: reserveClosedUntil });
+  const tempClosed = closure.always || closure.untilMs !== null;
+  const isReserveClosed = tempClosed || closeToday;
+  const reserveClosedLabel = closureLabel(closure);
   /* ذخیره‌ی «بستن رزرو امروز» روی سرور */
   const saveCloseToday = async (next: boolean) => {
     if (!selectedClub) return;
@@ -1995,17 +2007,18 @@ export default function ClubDashboardPage() {
                     style={{ ...inputStyle, width: '100%', height: 40, boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.08em' }}
                   />
                   <button type="button" onClick={fetchAddress}
-                    disabled={postalBusy || !/^\d{10}$/.test(clubInfo.postalCode) || !selectedClub}
+                    disabled={postalLocked || postalBusy || !/^\d{10}$/.test(clubInfo.postalCode) || !selectedClub}
                     style={{
                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                       height: 40, padding: '0 16px', borderRadius: 10, boxSizing: 'border-box',
                       fontFamily: 'var(--font-base)', fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap',
-                      cursor: (postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 'not-allowed' : 'pointer',
+                      cursor: (postalLocked || postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 'not-allowed' : 'pointer',
                       background: 'rgba(199,166,106,0.14)', border: '1px solid rgba(199,166,106,0.42)', color: '#A07840',
-                      opacity: (postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 0.5 : 1,
+                      opacity: (postalLocked || postalBusy || !/^\d{10}$/.test(clubInfo.postalCode)) ? 0.5 : 1,
                     }}>
-                    {postalBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={14} />}
-                    {postalBusy ? 'در حال استعلام…' : 'استعلام آدرس'}
+                    {postalBusy ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                      : postalLocked ? <CheckCircle size={14} /> : <MapPin size={14} />}
+                    {postalBusy ? 'در حال استعلام…' : postalLocked ? 'استعلام انجام شد' : 'استعلام آدرس'}
                   </button>
                 </div>
                 {postalMsg && (
@@ -2172,8 +2185,9 @@ export default function ClubDashboardPage() {
                   </div>
                 </div>
               </div>
-              <SelectField label="منطقه زمانی" value={clubInfo.timezone}    onChange={v => setClubInfo(p => ({...p, timezone: v}))}
-                options={[{ value: 'Asia/Tehran', label: 'تهران (UTC+3:30)' }]} />
+              {/* «منطقه زمانی» برداشته شد: تنها گزینه‌اش تهران بود و یک
+                  کشوی تک‌گزینه‌ای فقط جا می‌گرفت. مقدارش در state روی
+                  'Asia/Tehran' می‌ماند و همان ذخیره می‌شود. */}
             </div>
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>توضیحات باشگاه</label>
@@ -2183,13 +2197,17 @@ export default function ClubDashboardPage() {
             </div>
 
             <SectionTitle>تعداد میزها</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 12, marginBottom: 20 }}>
+            {/* دو ردیفِ چهارتایی. با `minmax(155px,…)` در موبایل فقط دو
+                ستون جا می‌شد و هشت گزینه چهار ردیف می‌گرفتند — فضای
+                زیادی برای هشت عددِ تک‌رقمی. ترتیب هم گروه‌بندی‌شده است:
+                ردیفِ اول رشته‌های اصلی و VIPشان، ردیفِ دوم بقیه. */}
+            <div className="bh-table-counts" style={{ marginBottom: 20 }}>
               {[
                 { key: 'snookerTables',    label: 'اسنوکر'       },
                 { key: 'pocketTables',     label: 'پاکت بیلیارد' },
-                { key: 'highballTables',   label: 'هی‌بال'        },
                 { key: 'vipSnookerTables', label: 'VIP اسنوکر'   },
                 { key: 'vipPocketTables',  label: 'VIP پاکت'     },
+                { key: 'highballTables',   label: 'هی‌بال'        },
                 { key: 'airHockeyTables',  label: 'ایرهاکی'     },
                 { key: 'dartBoards',       label: 'دارت'          },
                 { key: 'playstations',     label: 'پلی‌استیشن'   },
@@ -2930,27 +2948,38 @@ export default function ClubDashboardPage() {
               const setDay = (patch: Partial<WorkingDay>) =>
                 setHoursForm(p => ({ ...p, [day.key]: { ...dh, ...patch } as WorkingDay }));
               return (
-                <div key={day.key} style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                /* ── ردیفِ هر روز ──
+                   پیش‌تر یک flex با `gap: 12` و انتخابگرهای غیرفشرده
+                   بود: نامِ روز ۹۰px، دو انتخابگرِ ۷۲پیکسلی با دو‌نقطه و
+                   برچسبِ «از»/«تا». مجموعش از عرضِ موبایل بیشتر می‌شد و
+                   ساعت‌ها از صفحه بیرون می‌زدند. حالا شبکه است: نامِ روز
+                   ستونِ اول، دو ساعت ستون‌های هم‌عرضِ بعدی — و در موبایل
+                   برچسب‌های «از/تا» حذف و انتخابگرها فشرده می‌شوند. */
+                <div key={day.key} className="wh-day-row" style={{
+                  padding: '12px 16px',
                   background: dh.isOpen ? '#FFFBF0' : '#F9FAFB',
                   border: `1px solid ${dh.isOpen ? '#FEF3C7' : '#E5E7EB'}`,
-                  borderRadius: 12, flexWrap: 'wrap',
+                  borderRadius: 12,
                 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 90, cursor: 'pointer' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', minWidth: 0 }}>
                     <input type="checkbox" checked={dh.isOpen}
                       onChange={e => setDay({ isOpen: e.target.checked })}
-                      style={{ width: 16, height: 16, accentColor: GOLD }} />
-                    <span style={{ fontWeight: 700, fontSize: 14, color: DARK }}>{day.label}</span>
+                      style={{ width: 16, height: 16, accentColor: GOLD, flexShrink: 0 }} />
+                    <span className="wh-day-name" style={{ fontWeight: 700, fontSize: 14, color: DARK }}>{day.label}</span>
                   </label>
                   {dh.isOpen ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 12, color: '#6B7280' }}>از</span>
-                      <FaTimeSelect value={dh.open} onChange={v => setDay({ open: v })} ariaLabel="شروع" />
-                      <span style={{ fontSize: 12, color: '#6B7280' }}>تا</span>
-                      <FaTimeSelect value={dh.close} onChange={v => setDay({ close: v })} ariaLabel="پایان" />
-                    </div>
+                    <>
+                      <div className="wh-cell">
+                        <span className="wh-lb" style={{ fontSize: 12, color: '#6B7280' }}>از</span>
+                        <FaTimeSelect value={dh.open} onChange={v => setDay({ open: v })} ariaLabel="شروع" compact />
+                      </div>
+                      <div className="wh-cell">
+                        <span className="wh-lb" style={{ fontSize: 12, color: '#6B7280' }}>تا</span>
+                        <FaTimeSelect value={dh.close} onChange={v => setDay({ close: v })} ariaLabel="پایان" compact />
+                      </div>
+                    </>
                   ) : (
-                    <span style={{ fontSize: 13, color: '#9CA3AF' }}>تعطیل</span>
+                    <span style={{ fontSize: 13, color: '#9CA3AF', gridColumn: '2 / -1' }}>تعطیل</span>
                   )}
                 </div>
               );
