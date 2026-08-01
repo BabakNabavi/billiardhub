@@ -177,6 +177,14 @@ head('۹) صفحه‌ی ویرایش پروفایل')
   t('«تغییر کارت» بازش می‌کند', /setCardLocked\(false\)/.test(prof))
   t('کارتِ ذخیره‌شده یعنی قفل', /setCardLocked\(!!j\.bankCard\)/.test(prof))
 
+  /* ذخیره‌شدن کافی نیست — باید در پاسخِ پروفایل هم برگردد، وگرنه صفحه
+     پس از رفرش «—» نشان می‌دهد در حالی که مقدار در دیتابیس هست. */
+  {
+    const profApi = read('app/api/users/profile/route.ts')
+    t('پروفایل شبا را برمی‌گرداند', /bankIban: u\.bank_iban/.test(profApi))
+    t('شبا در فهرستِ نوشتنی نیست',
+      !/bank_iban/.test(profApi.split('const EDITABLE')[1]?.split(']')[0] ?? ''))
+  }
   t('سرور شبا را هم می‌گیرد', /const ib = await cardToIban\(card\)/.test(route))
   t('نام بانک از شبا مشتق می‌شود', /iban \? bankOfIban\(iban\) : bankOfCard\(card\)/.test(route))
   t('نبودِ ستونِ شبا ثبت را نمی‌شکند', /مهاجرت ۰۳۸ اجرا نشده/.test(route))

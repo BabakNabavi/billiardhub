@@ -45,6 +45,10 @@ function shape(u: Record<string, unknown>) {
        (/api/users/bank-card) که تطبیق با کد ملی را هم انجام می‌دهد. */
     bankCard: u.bank_card ?? '',
     bankCardOwner: u.bank_card_owner ?? '',
+    /* شبای همان کارت — خروجیِ استعلام، نه ورودیِ کاربر. بدونِ این،
+       صفحه پس از هر رفرش شبا را «—» نشان می‌داد در حالی که در
+       دیتابیس ذخیره بود. */
+    bankIban: u.bank_iban ?? '',
     /* هویت استعلام‌شده — فقط برای نمایش */
     nationalId: u.national_id ?? '',
     birthDate: u.birth_date ?? u.birthDate ?? '',
