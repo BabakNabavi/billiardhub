@@ -544,7 +544,7 @@ function BookingContent() {
                 </div>
               ):surcharge.enabled&&surcharge.percent>0?(
                 <div style={{fontSize: '14px',color:'rgba(0,0,0,0.35)',padding:'10px 16px',background:'rgba(0,0,0,0.03)',borderRadius:'14px'}}>
-                  از {toFa(surcharge.from)} نفر به بالا، هر نفر {toFa(surcharge.percent)}٪ اضافه می‌شود
+                  تا {toFa(surcharge.from)} نفر رایگان؛ از نفر بعد، هر نفر {toFa(surcharge.percent)}٪ اضافه می‌شود
                 </div>
               ):null}
             </div>

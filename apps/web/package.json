@@ -14,7 +14,8 @@
     "test:phone": "node scripts/test-phone.mjs",
     "test:social": "node scripts/test-social-flag.mjs",
     "test:avatar": "node scripts/test-avatar.mjs",
-    "test:session": "node scripts/test-session.mjs"
+    "test:session": "node scripts/test-session.mjs",
+    "test:pricing": "node scripts/test-pricing.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

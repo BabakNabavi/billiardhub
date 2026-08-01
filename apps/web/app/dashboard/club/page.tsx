@@ -2073,7 +2073,7 @@ export default function ClubDashboardPage() {
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 120px', minWidth: 110 }}>
-                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>از چند نفر به بالا</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>تا چند نفر رایگان</div>
                     <input value={tableForm.surchargeFrom} inputMode="numeric" placeholder="پیش‌فرض باشگاه"
                       onChange={e => setTableForm(p => ({ ...p, surchargeFrom: e.target.value.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, ch => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(ch))).slice(0, 2) }))}
                       style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-base)', color: DARK, textAlign: 'center' }} />
@@ -2132,9 +2132,11 @@ export default function ClubDashboardPage() {
                       <div style={{ width: 52, height: 52, borderRadius: 12, background: cs.bg, border: `1.5px solid ${cs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Grid3X3 size={22} color={cs.color} strokeWidth={1.5} /></div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
+                      {/* «میز ۳ — اسنوکر» و نه برعکس: شماره‌ی میز چیزی است
+                          که باشگاه‌دار با آن میز را می‌شناسد، پس اول بیاید. */}
                       <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2 }}>
+                        {t.number ? `میز ${t.number} — ` : ''}
                         {TABLE_TYPE_LABELS[t.type] || t.type}
-                        {t.number ? ` — میز ${t.number}` : ''}
                       </div>
                       {(t.brand || t.model) && (
                         <div style={{ fontSize: 12, color: '#9CA3AF' }}>{t.brand} {t.model}</div>

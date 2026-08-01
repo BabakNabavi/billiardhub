@@ -100,7 +100,13 @@ export default function FaNumberInput({
       className={className}
       style={style}
       value={shown}
-      placeholder={placeholder}
+      /* راهنمای متن هم فارسی نشان داده می‌شود.
+
+          فقط گره‌های متنی را عوض می‌کند و به ویژگی‌ها
+         (attribute) دست نمی‌زند، پس placeholder لاتین می‌ماند — کاربر
+         مقدار را فارسی می‌دید ولی راهنما را «1». چون خودِ این کامپوننت
+         مسئول نمایش فارسی است، همین‌جا هم تبدیل می‌شود. */
+      placeholder={placeholder === undefined ? undefined : toFa(placeholder)}
       onChange={e => {
         /* هرچه تایپ شد — فارسی، عربی، لاتین یا با جداکننده — به لاتین
            خالص تبدیل و همان بالا فرستاده می‌شود. */

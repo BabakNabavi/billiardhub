@@ -42,9 +42,17 @@ export function slotPrice(hour: number, table: PricedTable): number {
   return disc > 0 ? Math.round(base * (1 - disc / 100)) : base
 }
 
-/* ── هزینه‌ی بازیکن اضافه — تنظیم هر باشگاه ─────────────────────────
-   from = «از این تعداد نفر به بالا، هر نفر percent درصد اضافه می‌شود».
-   با مقادیر پیش‌فرض (from=۲، percent=۱۵): دو نفر ⇒ +۱۵٪، سه نفر ⇒ +۳۰٪. */
+/* ── هزینه‌ی بازیکن اضافه — تنظیم هر میز ────────────────────────────
+
+   `from` = «تا این تعداد نفر رایگان است؛ از نفر بعدی هزینه اضافه
+   می‌شود». یعنی عددی که صاحب باشگاه وارد می‌کند، خودش هنوز شاملِ
+   افزایش نیست.
+
+   با پیش‌فرض (from=۲، percent=۱۵):
+     ۱ نفر ⇒ بدون افزایش
+     ۲ نفر ⇒ بدون افزایش   ← خودِ عددِ واردشده
+     ۳ نفر ⇒ +۱۵٪
+     ۴ نفر ⇒ +۳۰٪ */
 export interface PlayerSurcharge { enabled: boolean; percent: number; from: number }
 
 export const DEFAULT_SURCHARGE: PlayerSurcharge = { enabled: true, percent: 15, from: 2 }
@@ -80,10 +88,14 @@ export function surchargeOf(
   }
 }
 
-/** تعداد نفراتی که مشمول افزایش می‌شوند */
+/** تعداد نفراتی که مشمول افزایش می‌شوند
+ *
+ *  پیش‌تر `- (s.from - 1)` بود، یعنی خودِ عددی که صاحب باشگاه وارد
+ *  کرده هم هزینه می‌گرفت: با from=۲، دو نفر ۱۵٪ گران‌تر می‌شد. حالا
+ *  از نفرِ *بعد* از آن عدد شروع می‌شود. */
 export function extraPlayers(playerCount: number, s: PlayerSurcharge): number {
   if (!s.enabled || s.percent <= 0) return 0
-  return Math.max(0, Math.round(playerCount) - (s.from - 1))
+  return Math.max(0, Math.round(playerCount) - s.from)
 }
 
 /** ضریب نهایی قیمت بر اساس تعداد بازیکن */
