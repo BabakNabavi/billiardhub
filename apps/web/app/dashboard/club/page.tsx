@@ -24,6 +24,7 @@ import { apiFetch } from '../../../lib/http';
 import { sortTables } from '../../../lib/tables/order';
 import { closureState, closureLabel } from '../../../lib/booking/closure';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
+import ClubLogo from '../../../components/club/ClubLogo';
 import JalaliDatePicker from '../../../components/ui/JalaliDatePicker';
 import { toJalali, jalaliToGregorian, faDate, faTimeRange } from '../../../lib/jalali';
 import FaNumberInput, { toFa as faDigit, groupFa, amountInWords } from '../../../components/ui/FaNumberInput';
@@ -84,6 +85,11 @@ interface Table {
   /* رزروِ همین میز بسته است — میز می‌ماند، ولی در صفحه‌ی رزرو نیست */
   reservationClosed?: boolean;
 }
+
+/* عکسِ گالریِ باشگاه. نامِ `dataUrl` تاریخی است ولی حالا نشانیِ عمومیِ
+   Storage را نگه می‌دارد، نه base64 — ده عکسِ base64 داخل یک ستون هم
+   ردیف را چند مگابایتی می‌کرد و هم هر بار خواندنِ باشگاه را کند. */
+interface ClubPhoto { id: string; dataUrl: string; name: string }
 
 interface WorkingDay { isOpen: boolean; open: string; close: string; }
 type WorkingHours = Record<string, WorkingDay>;
@@ -582,7 +588,8 @@ export default function ClubDashboardPage() {
   const [newAlbumName, setNewAlbumName] = useState('');
   const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
   const [uploadingAlbum, setUploadingAlbum] = useState<string | null>(null);
-  const [singlePhotos, setSinglePhotos] = useState<{ id: string; dataUrl: string; name: string }[]>([]);
+  const [singlePhotos, setSinglePhotos] = useState<ClubPhoto[]>([]);
+  const [photoError, setPhotoError] = useState('');
   const [uploadingSingle, setUploadingSingle] = useState(false);
 
   // Time discounts
@@ -623,10 +630,25 @@ export default function ClubDashboardPage() {
     try { localStorage.setItem(lsKey('coaches'), JSON.stringify(next)); } catch {}
   }, [lsKey]);
 
-  const savePhotos = useCallback((next: { id: string; dataUrl: string; name: string }[]) => {
+  /* عکس‌های باشگاه روی سرور ذخیره می‌شوند (ستون `images`)، نه در
+     localStorage. نسخه‌ی قبلی فقط در مرورگرِ خودِ باشگاه‌دار می‌نشست —
+     یعنی هیچ بازدیدکننده‌ای این عکس‌ها را نمی‌دید، در حالی که کلِ هدفشان
+     همین است که در صفحه‌ی عمومیِ باشگاه دیده شوند.
+
+     همین عکس‌ها پس‌زمینه‌ی صفحه‌ی باشگاه را می‌سازند. */
+  const MAX_CLUB_PHOTOS = 10;
+
+  const savePhotos = useCallback(async (next: ClubPhoto[]) => {
+    if (!selectedClub) return;
     setSinglePhotos(next);
-    try { localStorage.setItem(lsKey('photos'), JSON.stringify(next)); } catch {}
-  }, [lsKey]);
+    setPhotoError('');
+    try {
+      await api.put(`/clubs/${selectedClub.id}`, { images: next.map(p => p.dataUrl) });
+      try { localStorage.removeItem(lsKey('photos')); } catch { /* ignore */ }
+    } catch {
+      setPhotoError('ذخیره‌ی عکس‌ها روی سرور انجام نشد؛ دوباره تلاش کنید.');
+    }
+  }, [lsKey, selectedClub]);
 
   /* میزها روی سرور ذخیره می‌شوند (نه فقط در مرورگر) تا صفحه‌ی رزرو
      دقیقاً همین‌ها را ببیند. state خوش‌بینانه به‌روز می‌شود و بعد با
@@ -701,6 +723,11 @@ export default function ClubDashboardPage() {
         iban: c.iban ?? '',
         licenseNumber: c.licenseNumber ?? '',
       });
+      /* عکس‌های گالری از سرور — منبعِ حقیقت همین است، نه localStorage */
+      setSinglePhotos(Array.isArray(c.images)
+        ? (c.images as string[]).filter(Boolean).slice(0, 10).map((u, i) => ({ id: `srv-${i}`, dataUrl: u, name: '' }))
+        : []);
+      setPhotoError('');
       setIbanVerified(!!c.ibanVerified);
       /* مختصات؛ صفر یعنی ثبت‌نشده، نه «جزیره‌ی صفر درجه» */
       setGeo(Number(c.latitude) && Number(c.longitude) ? { lat: Number(c.latitude), lon: Number(c.longitude) } : null);
@@ -747,6 +774,7 @@ export default function ClubDashboardPage() {
     } catch { setCoaches([]); }
 
     try {
+      /* مقدارِ قدیمیِ مرورگر فقط تا رسیدنِ پاسخِ سرور نشان داده می‌شود */
       const p = localStorage.getItem(`club-photos-${selectedClub.id}`);
       if (p) setSinglePhotos(JSON.parse(p));
       else setSinglePhotos([]);
@@ -1373,19 +1401,43 @@ export default function ClubDashboardPage() {
   };
 
   const uploadSinglePhotos = async (files: FileList) => {
-    setUploadingSingle(true);
-    const newPhotos: { id: string; dataUrl: string; name: string }[] = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) continue;
-      const dataUrl = await compressImage(file);
-      newPhotos.push({ id: uid(), dataUrl, name: file.name });
+    if (!selectedClub) return;
+    setPhotoError('');
+    const room = MAX_CLUB_PHOTOS - singlePhotos.length;
+    if (room <= 0) {
+      setPhotoError(`حداکثر ${MAX_CLUB_PHOTOS} عکس — برای افزودن عکس تازه، یکی را حذف کنید.`);
+      return;
     }
-    savePhotos([...newPhotos, ...singlePhotos]);
-    setUploadingSingle(false);
+
+    setUploadingSingle(true);
+    const picked = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, room);
+    const added: ClubPhoto[] = [];
+    try {
+      for (const file of picked) {
+        /* روی Storage آپلود می‌شود نه به‌صورت data-URL: ده عکسِ base64
+           داخل یک ستون، هم ردیف را چند مگابایتی می‌کند و هم هر بار
+           خواندنِ باشگاه را کند. */
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('path', `clubs/${selectedClub.id}/photos/${Date.now()}-${added.length}`);
+        const r = await apiFetch('/api/upload', { method: 'POST', body: fd });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j?.url) throw new Error(j?.message);
+        added.push({ id: uid(), dataUrl: j.url, name: file.name });
+      }
+      if (picked.length < Array.from(files).filter(f => f.type.startsWith('image/')).length) {
+        setPhotoError(`فقط ${picked.length} عکس اضافه شد — سقف ${MAX_CLUB_PHOTOS} عکس است.`);
+      }
+      await savePhotos([...singlePhotos, ...added]);
+    } catch {
+      setPhotoError('آپلود عکس انجام نشد؛ دوباره تلاش کنید.');
+    } finally {
+      setUploadingSingle(false);
+    }
   };
 
   const deleteSinglePhoto = (id: string) => {
-    savePhotos(singlePhotos.filter(p => p.id !== id));
+    void savePhotos(singlePhotos.filter(p => p.id !== id));
   };
 
   const addDiscount = () => {
@@ -3398,9 +3450,9 @@ export default function ClubDashboardPage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 32, fontWeight: 900, color: GOLD,
                 }}>
-                  {selectedClub?.logo
-                    ? <img loading="lazy" decoding="async" src={selectedClub.logo} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : (selectedClub?.name?.[0] ?? '🎱')}
+                  {/* همان نشانی که بازدیدکننده می‌بیند — تا صاحبِ باشگاه
+                      پیش‌نمایشِ واقعی داشته باشد، نه حرفِ اولِ نام. */}
+                  <ClubLogo src={selectedClub?.logo} name={selectedClub?.name} size={88} />
                 </div>
                 <label style={{
                   position: 'absolute', bottom: 0, left: 0,
@@ -3530,19 +3582,36 @@ export default function ClubDashboardPage() {
 
           {/* ── Single photos ── */}
           <Card style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <SectionTitle style={{ margin: 0 }}>عکس‌های باشگاه</SectionTitle>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+              <SectionTitle style={{ margin: 0 }}>
+                عکس‌های باشگاه
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#9CA3AF', marginInlineStart: 8 }}>
+                  {faDigit(String(singlePhotos.length))} از {faDigit(String(MAX_CLUB_PHOTOS))}
+                </span>
+              </SectionTitle>
               <label style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                cursor: (uploadingSingle || singlePhotos.length >= MAX_CLUB_PHOTOS) ? 'not-allowed' : 'pointer',
+                opacity: (uploadingSingle || singlePhotos.length >= MAX_CLUB_PHOTOS) ? 0.5 : 1,
                 padding: '8px 16px', borderRadius: 20,
                 background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.38)',
                 fontSize: 13, fontWeight: 700, color: '#A07840',
               }}>
-                {uploadingSingle ? <><Loader2 size={13} /> آپلود...</> : <><Camera size={13} /> آپلود عکس</>}
+                {uploadingSingle ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> آپلود...</> : <><Camera size={13} /> آپلود عکس</>}
                 <input type="file" accept="image/*" multiple style={{ display: 'none' }}
-                  onChange={e => { if (e.target.files?.length) uploadSinglePhotos(e.target.files); e.target.value = ''; }} />
+                  disabled={uploadingSingle || singlePhotos.length >= MAX_CLUB_PHOTOS}
+                  onChange={e => { if (e.target.files?.length) void uploadSinglePhotos(e.target.files); e.target.value = ''; }} />
               </label>
             </div>
+            <p style={{ fontSize: 11.5, color: '#9CA3AF', margin: '0 0 14px', lineHeight: 1.95 }}>
+              این عکس‌ها پس‌زمینه‌ی صفحه‌ی عمومی باشگاه شما می‌شوند. عکسِ اول بیشتر از بقیه دیده می‌شود.
+            </p>
+            {photoError && (
+              <div style={{ marginBottom: 12, padding: '9px 13px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+                background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.22)', color: '#991B1B' }}>
+                {photoError}
+              </div>
+            )}
             {singlePhotos.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '28px 0', color: '#9CA3AF', fontSize: 13 }}>
                 هنوز عکسی آپلود نشده — از دکمه بالا عکس اضافه کنید

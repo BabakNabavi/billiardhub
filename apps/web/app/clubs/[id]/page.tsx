@@ -16,6 +16,7 @@ import {
 import { fetchTournaments } from '../../../lib/tournaments/client';
 import ClubStoryModal from '../../../components/ClubStoryModal';
 import ClubReviews from '../../../components/club/ClubReviews';
+import ClubLogo from '../../../components/club/ClubLogo'
 import FavoriteButton from '../../../components/FavoriteButton';
 
 interface Club {
@@ -285,8 +286,16 @@ export default function ClubProfilePage() {
         .coach-card { padding:16px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;transition:all 0.3s;cursor:pointer }
         .coach-card:hover { background:rgba(199,166,106,0.03);border-color:rgba(199,166,106,0.28);transform:translateY(-3px) }
 
-        .info-grid { display:grid;grid-template-columns:1fr 300px;gap:28px;align-items:start }
-        @media(max-width:960px){ .info-grid{grid-template-columns:1fr} }
+        /* minmax(0,…) نه 1fr: کمینه‌ی «auto» یعنی ستون زیرِ عرضِ محتوا
+           نمی‌رود، پس یک رشته‌ی بلندِ nowrap کلِ صفحه را پهن می‌کند. */
+        .info-grid { display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start }
+        @media(max-width:960px){ .info-grid{grid-template-columns:minmax(0,1fr)} }
+        /* هیچ تصویری نباید از قابش بیرون بزند */
+        .info-grid img, .gallery-grid img, .album-scroll img { max-width:100% }
+
+        /* آمار میزها — دو ستون؛ «مجموع» تمام‌عرض در انتها */
+        .tbl-stats { display:grid;grid-template-columns:1fr 1fr;gap:6px }
+        .tbl-stats-total { grid-column:1 / -1 }
 
         .album-scroll { display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none }
         .album-scroll::-webkit-scrollbar { display:none }
@@ -368,7 +377,9 @@ export default function ClubProfilePage() {
                 {hasStory && <div style={{ position: 'absolute', inset: -4, borderRadius: '50%', zIndex: 0, background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)' }} />}
                 {hasStory && <div style={{ position: 'absolute', inset: -1, borderRadius: '50%', zIndex: 1, border: '3px solid rgba(10,8,6,0.92)' }} />}
                 <div onClick={() => { if (hasStory) setStoryViewer(true); }} style={{ position: 'relative', zIndex: 2, width: 62, height: 62, borderRadius: '50%', background: club.logo ? 'transparent' : 'rgba(199,166,106,0.18)', border: hasStory ? 'none' : '2px solid rgba(199,166,106,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 900, color: '#C7A66A', backdropFilter: 'blur(20px)', overflow: 'hidden', cursor: hasStory ? 'pointer' : 'default' }}>
-                  {club.logo ? <img loading="lazy" decoding="async" src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : club.name[0]}
+                  {/* لوگوی آپلودشده، وگرنه نشانِ پیش‌فرضِ باشگاه —
+                      پیش‌تر فقط حرفِ اولِ نام نوشته می‌شد. */}
+                  <ClubLogo src={club.logo} name={club.name} size={62} tone="dark" />
                 </div>
                 {isAdmin && <button style={{ position: 'absolute', bottom: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#C7A66A', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Camera size={10} color="#0A0806" /></button>}
                 {isAdmin && !hasStory && <button style={{ position: 'absolute', top: -2, left: -2, zIndex: 3, width: 22, height: 22, borderRadius: '50%', background: '#ef4444', border: '2px solid #0A0806', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}><Plus size={10} color="#fff" /></button>}
@@ -431,12 +442,6 @@ export default function ClubProfilePage() {
               {/* Main column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                {/* امتیاز و نظرها — پیش‌تر امتیاز فقط عدد ثابتی بود که
-                    هیچ‌کس نمی‌توانست ثبتش کند */}
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
-                  <ClubReviews clubId={id} />
-                </div>
-
                 {/* About */}
                 <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
                   <h2 style={{ fontSize: 17, fontWeight: 800, color: '#111111', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -496,15 +501,19 @@ export default function ClubProfilePage() {
                       if (active.length === 0) return (
                         <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.30)', textAlign: 'center', padding: '8px 0' }}>اطلاعات میز ثبت نشده</div>
                       );
+                      /* دو ستون به‌جای فهرستِ تک‌ستونی: هر ردیف فقط یک
+                         برچسبِ کوتاه و یک عدد دارد و نصفِ عرض برایش کافی
+                         است. «مجموع» تمام‌عرض می‌ماند تا از بقیه جدا
+                         دیده شود. */
                       return (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div className="tbl-stats">
                           {active.map(t => (
-                            <div key={t.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: `rgba(${t.rgb},0.06)`, border: `1px solid rgba(${t.rgb},0.14)`, borderRadius: 10 }}>
-                              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', fontWeight: 600 }}>{t.label}</span>
-                              <span style={{ fontSize: 17, fontWeight: 900, color: t.color }}>{toFa((club as any)[t.key])}</span>
+                            <div key={t.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, padding: '7px 11px', background: `rgba(${t.rgb},0.06)`, border: `1px solid rgba(${t.rgb},0.14)`, borderRadius: 10, minWidth: 0 }}>
+                              <span style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.label}</span>
+                              <span style={{ fontSize: 17, fontWeight: 900, color: t.color, flexShrink: 0 }}>{toFa((club as any)[t.key])}</span>
                             </div>
                           ))}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: 'rgba(0,0,0,0.03)', borderRadius: 10, marginTop: 2 }}>
+                          <div className="tbl-stats-total" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 11px', background: 'rgba(0,0,0,0.03)', borderRadius: 10, marginTop: 2 }}>
                             <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>مجموع</span>
                             <span style={{ fontSize: 18, fontWeight: 900, color: 'rgba(0,0,0,0.55)' }}>{toFa(total)}</span>
                           </div>
@@ -617,12 +626,25 @@ export default function ClubProfilePage() {
                   <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.42)', display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
                       <MapPin size={12} style={{ color: '#C7A66A', flexShrink: 0 }} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.address}، {club.city}</span>
+                      {/* `overflow`/`text-overflow` روی عنصرِ inline اثر
+                          ندارد — پس `nowrap` کلِ نشانیِ بلند را باز
+                          می‌کرد و کمینه‌ی عرضِ ستون را به ۵۴۸ پیکسل
+                          می‌رساند؛ نتیجه‌اش بیرون‌زدنِ کلِ صفحه در موبایل
+                          بود. با `display:block` سه‌نقطه واقعاً کار
+                          می‌کند و ستون آزادانه کوچک می‌شود. */}
+                      <span style={{ display: 'block', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{club.address}، {club.city}</span>
                     </div>
                     <a href={`https://www.google.com/maps?q=${club.latitude},${club.longitude}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.20)', borderRadius: 20, color: '#06b6d4', fontSize: 14, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
                       <Navigation size={12} /> مسیریابی
                     </a>
                   </div>
+                </div>
+
+                {/* امتیاز و نظرها — آخرین کارت، پس از موقعیت مکانی.
+                    پیش‌تر اولین چیزی بود که کاربر می‌دید، در حالی که
+                    اول باید بداند باشگاه چیست و کجاست و بعد نظرها. */}
+                <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 'clamp(16px,3vw,24px)' }}>
+                  <ClubReviews clubId={id} />
                 </div>
               </div>
 

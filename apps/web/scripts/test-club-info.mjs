@@ -67,13 +67,18 @@ head('۴) قفلِ حساب بانکی پس از تأیید')
   t('قفل = تأییدشده و در حالِ ویرایش نبودن', /const bankLocked = ibanVerified && !bankEditing/.test(dash))
   t('دکمه‌ی «دریافت شبا از کارت» پس از تأیید خاموش',
     /disabled=\{bankLocked \|\| ibanBusy \|\| !isValidCard/.test(dash))
-  t('دکمه‌ی «تأیید شبا بدون کارت» پس از تأیید پنهان',
-    /isValidIban\(clubInfo\.iban\) && !bankLocked/.test(dash))
+  /* دکمه‌ی دومِ استعلام کلاً حذف شد؛ حالا یک «ثبت کارت» هست و بس.
+     کامنت‌ها کنار گذاشته می‌شوند: نامِ دکمه در توضیحِ همان حذف مانده. */
+  const dashCode = dash.replace(/\{\/\*[\s\S]*?\*\/\}|\/\*[\s\S]*?\*\//g, '')
+  t('دکمه‌ی دومِ «تأیید شبا بدون کارت» وجود ندارد', !/تأیید شبا بدون شماره کارت/.test(dashCode))
   t('استعلامِ موفقِ کارت قفل می‌کند', /setIbanVerified\(true\); setBankEditing\(false\)/.test(dash))
   t('شماره کارت قفل می‌شود', /readOnly=\{bankLocked\}[\s\S]{0,200}formatCard/.test(dash))
-  t('شبا قفل می‌شود', /readOnly=\{bankLocked\}[\s\S]{0,200}formatIban/.test(dash))
-  t('نام صاحب حساب قفل می‌شود', /label="نام صاحب حساب"[^\n]*readOnly=\{bankLocked\}/.test(dash))
-  t('نام بانک قفل می‌شود', /label="نام بانک"[^\n]*readOnly=\{bankLocked\}/.test(dash))
+  /* این سه، خروجیِ استعلام‌اند نه ورودیِ کاربر — پس همیشه readOnly
+     هستند، نه فقط پس از تأیید. سنجشِ قبلی هنوز `readOnly={bankLocked}`
+     می‌خواست و با سخت‌ترشدنِ قفل قرمز مانده بود. */
+  t('شبا همیشه فقط‌خواندنی است', /<input type="text" readOnly dir="ltr"[\s\S]{0,120}prettyIban/.test(dash))
+  t('نام صاحب حساب همیشه فقط‌خواندنی است', /label="نام صاحب حساب" readOnly/.test(dash))
+  t('نام بانک همیشه فقط‌خواندنی است', /label="نام بانک" readOnly/.test(dash))
   t('راهِ خروج هست (تغییر حساب)', /const unlockBank/.test(dash) && dash.includes('تغییر حساب'))
 
   const api = read('app/api/clubs/[id]/route.ts')

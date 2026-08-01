@@ -5,6 +5,7 @@ import Link from 'next/link';
 import api from '../../lib/api';
 import ClubStoryModal from '../../components/ClubStoryModal';
 import FavoriteButton from '../../components/FavoriteButton';
+import ClubLogo from '../../components/club/ClubLogo';
 import {
   Search, MapPin, Star, Wifi, Car, Coffee, Trophy,
   X, SlidersHorizontal, Users, Check, Navigation,
@@ -230,7 +231,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 8, right: 8, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
               <div style={{ width: 47, height: 47, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 2.5, boxShadow: '0 0 12px rgba(188,24,136,0.5)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.7)', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  {club.logo ? <img loading="lazy" decoding="async" src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>{club.name[0]}</span>}
+                  {/* نشانِ پیش‌فرض به‌جای حرفِ اولِ نام */}
+                  <ClubLogo src={club.logo} name={club.name} size={40} tone="dark" />
                 </div>
               </div>
             </button>
@@ -348,7 +350,8 @@ function ClubCard({ club, view, idx = 0, tournaments = [] }: { club: Club; view:
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setStoryOpen(true); }} style={{ position: 'absolute', bottom: 44, right: 12, padding: 0, border: 'none', background: 'none', cursor: 'pointer', zIndex: 5 }}>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)', padding: 3, boxShadow: '0 0 18px rgba(188,24,136,0.6)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.75)', background: 'rgba(0,0,0,0.40)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxSizing: 'border-box' }}>
-                  {club.logo ? <img loading="lazy" decoding="async" src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>{club.name[0]}</span>}
+                  {/* نشانِ پیش‌فرض به‌جای حرفِ اولِ نام */}
+                  <ClubLogo src={club.logo} name={club.name} size={48} tone="dark" />
                 </div>
               </div>
             </button>

@@ -224,5 +224,50 @@ head('۱۰) پنل باشگاه — دسترسی سریع، دیالوگ، و ب
   t('دکمه‌ی جداگانه‌ی ذخیره‌ی بانکی حذف شد', !/ذخیره اطلاعات بانکی/.test(dash))
 }
 
+/* ── گالریِ باشگاه: ۱۰ عکس، روی سرور، پس‌زمینه‌ی صفحه‌ی عمومی ──
+   بخشِ رفتاریِ این‌ها پشتِ ورود است، پس این‌جا فقط چیزی سنجیده می‌شود
+   که در مرورگر قابلِ اثبات نبود: اینکه عکس‌ها دیگر در localStorage
+   نمی‌مانند (که هیچ بازدیدکننده‌ای نمی‌دیدشان) و سقف واقعاً اعمال است. */
+{
+  head('گالریِ باشگاه — تا ۱۰ عکس برای پس‌زمینه')
+  const dash = read('app/dashboard/club/page.tsx')
+  const club = read('app/clubs/[id]/page.tsx')
+
+  t('سقف ۱۰ عکس تعریف شده', /const MAX_CLUB_PHOTOS = 10/.test(dash))
+  t('سقف هنگام آپلود اعمال می‌شود', /MAX_CLUB_PHOTOS - singlePhotos\.length/.test(dash))
+  t('عکس‌ها روی سرور ذخیره می‌شوند',
+    /api\.put\(`\/clubs\/\$\{selectedClub\.id\}`, \{ images:/.test(dash))
+  /* base64 صفحه را سنگین می‌کرد و از سقفِ سطرِ دیتابیس هم رد می‌شد */
+  t('آپلود به Storage می‌رود نه data-URL', /\/api\/upload/.test(dash))
+  t('عکس‌ها موقعِ باز شدن از سرور خوانده می‌شوند', /c\.images\s*\)/.test(dash))
+  t('به کاربر گفته می‌شود پس‌زمینه می‌شوند', /پس‌زمینه‌ی صفحه‌ی عمومی/.test(dash))
+  t('همان images پس‌زمینه‌ی صفحه‌ی باشگاه است',
+    /const images\s+= club\.images\?\.length \? club\.images/.test(club))
+}
+
+/* ── نشانِ پیش‌فرضِ باشگاه ── */
+{
+  head('نشانِ باشگاه')
+  const logo = read('components/club/ClubLogo.tsx')
+  const club = read('app/clubs/[id]/page.tsx')
+  const list = read('app/clubs/page.tsx')
+  const dash = read('app/dashboard/club/page.tsx')
+
+  t('کامپوننتِ مشترک ساخته شد', /export default function ClubLogo/.test(logo))
+  t('لوگوی آپلودشده اولویت دارد', /if \(src\) \{/.test(logo))
+  /* idهای تکراری در فهرستِ باشگاه‌ها نامعتبرند.
+     کامنت‌ها کنار گذاشته می‌شوند وگرنه خودِ توضیحِ همین قاعده
+     باعثِ خطا می‌شد. */
+  const logoCode = logo.replace(/\/\*[\s\S]*?\*\/|\{\/\*[\s\S]*?\*\/\}/g, '')
+  t('بدونِ <defs> و idِ تکراری', !/<defs>/.test(logoCode) && !/\sid="/.test(logoCode))
+  t('نشان با SVG است نه فونت', /<svg /.test(logo) && !/fontSize/.test(logo))
+
+  t('صفحه‌ی باشگاه از آن استفاده می‌کند', /<ClubLogo src=\{club\.logo\}/.test(club))
+  t('فهرستِ باشگاه‌ها هم', (list.match(/<ClubLogo src=\{club\.logo\}/g) ?? []).length === 2)
+  t('پیش‌نمایشِ داشبورد هم', /<ClubLogo src=\{selectedClub\?\.logo\}/.test(dash))
+  t('حرفِ اولِ نام دیگر جای لوگو نیست',
+    !/club\.logo \? <img[\s\S]{0,220}club\.name\[0\]/.test(club + list))
+}
+
 console.log(`\n${'─'.repeat(52)}\n  نتیجه: ${pass} موفق، ${fail} ناموفق\n`)
 process.exit(fail ? 1 : 0)
