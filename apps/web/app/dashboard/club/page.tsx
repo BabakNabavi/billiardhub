@@ -2178,7 +2178,11 @@ export default function ClubDashboardPage() {
             </div>
 
             <SectionTitle>امکانات</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: 10, marginBottom: 20 }}>
+            {/* `minmax(175px,…)` در موبایل به دو ستون نمی‌رسید (عرضِ
+                داخلیِ کارت حدود ۳۱۶ پیکسل است) و هر چهار گزینه در چهار
+                سطر می‌افتادند. برچسب‌ها کوتاه‌اند و دو ستون راحت جا
+                می‌شود. */}
+            <div className="bh-amenities" style={{ marginBottom: 20 }}>
               {[
                 { key: 'hasCafe',              label: 'کافه'          },
                 { key: 'hasParking',           label: 'پارکینگ'       },

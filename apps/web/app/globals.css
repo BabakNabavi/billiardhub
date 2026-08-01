@@ -1086,3 +1086,18 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
   /* هر دو تمام‌عرض و هم‌ارتفاع، زیرِ هم */
   .bh-postal-row { grid-template-columns: 1fr; gap: 8px; }
 }
+
+/* ── امکانات باشگاه ─────────────────────────────────────────────
+   با `repeat(auto-fit, minmax(175px, 1fr))` در موبایل فقط یک ستون
+   جا می‌شد و هر چهار گزینه چهار سطر می‌گرفتند. برچسب‌ها کوتاه‌اند
+   («کافه»، «WiFi»)، پس دو ستون کافی است. */
+.bh-amenities {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 620px) {
+  .bh-amenities { grid-template-columns: 1fr 1fr; gap: 8px; }
+  /* در دو ستونِ باریک، حاشیه‌ی افقی کمتر تا متن نشکند */
+  .bh-amenities > label { padding: 10px 11px !important; gap: 8px !important; }
+}

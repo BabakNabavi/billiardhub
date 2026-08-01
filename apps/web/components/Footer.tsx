@@ -130,15 +130,22 @@ export default function Footer() {
           box-shadow: 0 4px 14px rgba(199,166,106,0.18);
         }
         .ft-dev-mob { display: none; }
+        /* سه ستونِ PLATFORM/EXPLORE/ACCOUNT در یک سطر می‌مانند. با دو
+           ستون، ستونِ سوم به سطرِ بعد می‌افتاد و فوتر بی‌دلیل بلند
+           می‌شد — در حالی که برچسب‌ها کوتاه‌اند و جا هست. */
         @media (max-width: 900px) {
-          .ft-grid { grid-template-columns: 1fr 1fr !important; gap: 20px 28px !important; margin-bottom: 30px !important; }
+          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 20px 20px !important; margin-bottom: 30px !important; }
           .ft-brand { grid-column: 1 / -1; }
           /* لینک‌های درجه‌دو در موبایل حذف می‌شوند تا فوتر کوتاه بماند */
           .ft-only-desk { display: none !important; }
         }
         @media (max-width: 520px) {
-          .ft-grid { grid-template-columns: repeat(2,1fr) !important; gap: 16px 14px !important; margin-bottom: 16px !important; }
+          .ft-grid { grid-template-columns: repeat(3,1fr) !important; gap: 14px 10px !important; margin-bottom: 16px !important; }
           .ft-brand { grid-column: 1 / -1 !important; }
+          /* «بیلیارد بازار» بلندترین برچسب است و در ستونِ ۱۱۰ پیکسلی
+             می‌شکند؛ کمی کوچک‌تر و بدونِ شکستنِ کلمه جا می‌شود. */
+          .ft-grid a { font-size: 13px !important; white-space: nowrap; }
+          .ft-heading { font-size: 10px !important; letter-spacing: 0.10em !important; }
           .ft-tagline { margin-bottom: 10px !important; }
           .ft-inner { padding: 26px 18px 12px !important; }
           /* نوار آدرس/تلفن: gap ۲۴ برای چیدمان یک‌سطری دسکتاپ بود. در موبایل آیتم‌ها می‌شکنند و
