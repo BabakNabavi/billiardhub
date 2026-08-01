@@ -9,6 +9,7 @@ import AuthGuard from '../../../components/AuthGuard';
 import CancellationPolicy from '../../../components/booking/CancellationPolicy';
 import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
 import { sortTables, tableTypeRank } from '../../../lib/tables/order';
+import { closureState, isDateClosed, closedHours, closureLabel, type ClosureState } from '../../../lib/booking/closure';
 import {
   ChevronRight, ChevronLeft, Check, Clock,
   CheckCircle, AlertCircle, X, Info, CreditCard,
@@ -141,11 +142,13 @@ function slotPrice(hour: number, table: Table): number {
 }
 
 /* ── Jalali calendar with 4-week limit ── */
-function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD, maxJY, maxJM, maxJD, onSelect, onPrev, onNext }: {
+function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD, maxJY, maxJM, maxJD, onSelect, onPrev, onNext, isClosedDay }: {
   jYear:number; jMonth:number; selectedDay:number|null;
   todayJY:number; todayJM:number; todayJD:number;
   maxJY:number; maxJM:number; maxJD:number;
   onSelect:(d:number)=>void; onPrev:()=>void; onNext:()=>void;
+  /** روزهایی که باشگاه رزروشان را بسته — غیرقابل انتخاب، با رنگِ خودشان */
+  isClosedDay?:(d:number)=>boolean;
 }) {
   const dim  = jDaysInMonth(jYear, jMonth);
   const off  = (jFirstWD(jYear, jMonth) + 1) % 7;
@@ -169,18 +172,22 @@ function JalaliCalendar({ jYear, jMonth, selectedDay, todayJY, todayJM, todayJD,
           if(!day) return <div key={i}/>;
           const isPast = jYear<todayJY||(jYear===todayJY&&jMonth<todayJM)||(jYear===todayJY&&jMonth===todayJM&&day<todayJD);
           const isFutureLocked = jYear>maxJY||(jYear===maxJY&&jMonth>maxJM)||(jYear===maxJY&&jMonth===maxJM&&day>maxJD);
-          const isDisabled = isPast||isFutureLocked;
+          /* روزِ بسته هم غیرقابل انتخاب است، ولی رنگش با «گذشته» فرق
+             می‌کند تا کاربر بفهمد بسته است نه تمام‌شده. */
+          const isClosed = !isPast && !isFutureLocked && !!isClosedDay?.(day);
+          const isDisabled = isPast||isFutureLocked||isClosed;
           const isSel   = day===selectedDay;
           const isToday = day===todayJD&&jMonth===todayJM&&jYear===todayJY;
           return (
-            <button key={i} disabled={isDisabled} onClick={()=>!isDisabled&&onSelect(day)} style={{
+            <button key={i} disabled={isDisabled} onClick={()=>!isDisabled&&onSelect(day)}
+              title={isClosed?'باشگاه رزرو این روز را بسته است':undefined} style={{
               height:'38px',borderRadius:'9px',border:'none',fontSize: '15px',
               fontWeight:isToday?800:500, cursor:isDisabled?'not-allowed':'pointer',
-              background:isSel?'linear-gradient(135deg,#C7A66A,#A07840)':isToday?'rgba(199,166,106,0.1)':isFutureLocked?'rgba(0,0,0,0.02)':'transparent',
-              color:isSel?'#fff':isDisabled?'rgba(0,0,0,0.12)':isToday?'#C7A66A':'rgba(0,0,0,0.55)',
+              background:isSel?'linear-gradient(135deg,#C7A66A,#A07840)':isClosed?'rgba(239,68,68,0.07)':isToday?'rgba(199,166,106,0.1)':isFutureLocked?'rgba(0,0,0,0.02)':'transparent',
+              color:isSel?'#fff':isClosed?'rgba(220,38,38,0.55)':isDisabled?'rgba(0,0,0,0.12)':isToday?'#C7A66A':'rgba(0,0,0,0.55)',
               boxShadow:isSel?'0 4px 12px rgba(199,166,106,0.35)':'none',
-              outline:isToday&&!isSel?'1px solid rgba(199,166,106,0.3)':'none',
-              opacity:isDisabled?(isFutureLocked?0.22:0.4):1,
+              outline:isClosed?'1px solid rgba(239,68,68,0.20)':isToday&&!isSel?'1px solid rgba(199,166,106,0.3)':'none',
+              opacity:isDisabled?(isClosed?0.85:isFutureLocked?0.22:0.4):1,
               textDecoration:isFutureLocked?'line-through':'none',
               transition:'all 0.18s',
             }}>{toFa(day)}</button>
@@ -242,7 +249,11 @@ function BookingContent() {
   const isoDate = jDay ? toISO(jYear,jMonth,jDay) : '';
 
   const [loading, setLoading]       = useState(true);
-  const [reserveClosed, setReserveClosed] = useState(false);   // صاحب باشگاه رزرو آنلاین را بسته
+  /* وضعیتِ بستنِ رزرو — از سرور، نه از localStorage.
+     پیش‌تر کلیدِ مرورگر خوانده می‌شد؛ آن کلید فقط در مرورگرِ خودِ
+     باشگاه‌دار وجود داشت، پس بازدیدکننده قفل را نمی‌دید و باشگاه‌دار
+     کلِ صفحه را بسته می‌دید — حتی برای روزهایی که باز بودند. */
+  const [closure, setClosure] = useState<ClosureState>({ always: false, untilMs: null, closeToday: false });
   const [slotsLoad, setSlotsLoad]   = useState(false);
   const [booking, setBooking]       = useState(false);
   const [error, setError]           = useState('');
@@ -254,11 +265,13 @@ function BookingContent() {
   const slotsRef = useRef<HTMLDivElement>(null);
 
   useEffect(()=>{
-    // صاحب باشگاه رزرو آنلاین را بسته است؟ (از داشبورد باشگاه، همان کلید)
-    try {
-      const rc = localStorage.getItem(`club-reserveClosedUntil-${clubId}`) ?? '';
-      setReserveClosed(rc === 'always' || (rc !== '' && Number(rc) > Date.now()));
-    } catch { /* ignore */ }
+    /* وضعیت بستن رزرو از سرور. شکستش صفحه را نمی‌بندد — بدترین حالت
+       این است که قفل در UI دیده نشود، و سرورِ ثبتِ رزرو همچنان جلوی
+       رزروِ نادرست را می‌گیرد. */
+    fetch(`/api/clubs/${clubId}/booking-status`, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j) setClosure(closureState({ closeToday: j.closeToday, closedUntil: j.always ? 'always' : j.closedUntil })); })
+      .catch(() => { /* بی‌صدا */ });
 
     api.get(`/clubs/${clubId}`).catch(()=>({data:{id:clubId,name:'باشگاه',managerName:''}}))
       .then(c=>{ setClub(c.data); });
@@ -360,6 +373,10 @@ function BookingContent() {
     }
     return [...by.entries()].sort((a, b) => tableTypeRank(a[0]) - tableTypeRank(b[0]));
   })();
+  /* ساعت‌های بسته‌ی همین تاریخ — هم برای رنگِ قرمزِ شبکه، هم برای
+     نگذاشتنِ کاربر در دامِ انتخابی که سرور بعداً رد می‌کند. */
+  const blockedHours = isoDate ? closedHours(isoDate, closure) : [];
+
   const totalPrice   = Math.round(baseTotal*playerMultiplier(playerCount,surcharge));
   const accentColor  = selectedTable?(TYPE_COLOR[selectedTable.type]??'#C7A66A'):'#C7A66A';
   const dateLabel    = jDay?`${toFa(jDay)} ${jMonths[jMonth-1]} ${toFa(jYear)}`:'';
@@ -386,8 +403,12 @@ function BookingContent() {
   );
 
 
-  /* ── رزرو آنلاین بسته است ── */
-  if (reserveClosed) return (
+  /* ── رزرو آنلاین *همیشه* بسته است ──
+     تنها حالتی که کلِ صفحه معنا ندارد. بستنِ امروز یا بستنِ چند ساعت
+     این‌جا نمی‌آید: آن‌ها فقط همان روز یا همان ساعت‌ها را می‌بندند و
+     کاربر باید بتواند تاریخِ دیگری انتخاب کند. تا امروز هر سه حالت
+     به همین صفحه می‌رسیدند و کاربر اصلاً نمی‌توانست رزرو کند. */
+  if (closure.always) return (
     <div style={{minHeight:'100vh',background:'#F7F7F5',direction:'rtl',fontFamily:'Vazirmatn,Tahoma,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
       <div style={{maxWidth:420,textAlign:'center',background:'#fff',borderRadius:22,border:'1px solid rgba(0,0,0,0.07)',boxShadow:'0 12px 40px rgba(0,0,0,0.06)',padding:'36px 28px'}}>
         <div style={{width:66,height:66,borderRadius:'50%',background:'rgba(220,38,38,0.10)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
@@ -449,6 +470,19 @@ function BookingContent() {
               <AlertCircle size={15} style={{color:'#ef4444',flexShrink:0}}/>
               <span style={{fontSize: '15px',color:'#fca5a5',flex:1}}>{error}</span>
               <button onClick={()=>setError('')} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(239,68,68,0.5)',padding:0,display:'flex'}}><X size={13}/></button>
+            </div>
+          )}
+
+          {/* ── قفلِ جزئی ──
+              رزرو باز است ولی بعضی روزها یا ساعت‌ها بسته‌اند. بدونِ این
+              نوار، کاربر فقط خانه‌های قرمز را می‌دید و علتش را نمی‌فهمید. */}
+          {(closure.closeToday || closure.untilMs !== null) && (
+            <div style={{display:'flex',alignItems:'flex-start',gap:10,padding:'12px 15px',marginBottom:'14px',
+              background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.28)',borderRadius:14}}>
+              <AlertCircle size={15} style={{color:'#B45309',flexShrink:0,marginTop:2}}/>
+              <span style={{fontSize:13.5,color:'#92600A',lineHeight:1.9}}>
+                {closureLabel(closure)} — روزها و ساعت‌های قرمز قابل انتخاب نیستند؛ بقیه باز است.
+              </span>
             </div>
           )}
 
@@ -570,6 +604,7 @@ function BookingContent() {
               jYear={jYear} jMonth={jMonth} selectedDay={jDay}
               todayJY={tJY} todayJM={tJM} todayJD={tJD}
               maxJY={mJY}   maxJM={mJM}   maxJD={mJD}
+              isClosedDay={d => isDateClosed(toISO(jYear, jMonth, d), closure)}
               onSelect={d=>{setJDay(d);setSelectedSlots([]);setRangeStart(null);}}
               onPrev={prevMonth} onNext={nextMonth}
             />
@@ -622,24 +657,31 @@ function BookingContent() {
               ):(
                 <div className="slot-grid" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'6px'}}>
                   {slots.map(slot=>{
+                    /* ساعتی که در بازه‌ی «بستن برای N ساعت» می‌افتد قرمز و
+                       غیرفعال می‌شود — جدا از «مشغول»، چون علتش فرق دارد
+                       و کاربر باید بفهمد باشگاه بسته، نه اینکه پر شده. */
+                    const isShut  = blockedHours.includes(slot.hour);
                     const isSel   = selectedSlots.includes(slot.hour);
                     const isStart = rangeStart===slot.hour;
-                    const cls     = slot.isBooked?'slot-btn slot-busy':isStart?'slot-btn slot-start':isSel?'slot-btn slot-range':'slot-btn slot-free';
+                    const off     = slot.isBooked || isShut;
+                    const cls     = off?'slot-btn slot-busy':isStart?'slot-btn slot-start':isSel?'slot-btn slot-range':'slot-btn slot-free';
                     const discPct = getSlotDiscountPct(slot.hour, selectedTable);
-                    const hasDisc = discPct > 0;
+                    const hasDisc = discPct > 0 && !off;
                     return (
-                      <button key={slot.hour} className={cls} disabled={slot.isBooked}
-                        onClick={()=>handleSlotClick(slot.hour,slot.isBooked)}
+                      <button key={slot.hour} className={cls} disabled={off}
+                        title={isShut?'باشگاه رزرو این ساعت را بسته است':undefined}
+                        onClick={()=>{ if(!isShut) handleSlotClick(slot.hour,slot.isBooked); }}
                         style={{
-                          borderColor:slot.isBooked?'rgba(239,68,68,0.14)':isStart?`rgba(${SEL_RGB},0.60)`:isSel?`rgba(${SEL_RGB},0.45)`:'rgba(0,0,0,0.07)',
-                          background:slot.isBooked?'rgba(239,68,68,0.04)':isStart?`rgba(${SEL_RGB},0.18)`:isSel?`rgba(${SEL_RGB},0.12)`:hasDisc?`rgba(${SEL_RGB},0.04)`:'rgba(0,0,0,0.03)',
-                          color:slot.isBooked?'rgba(239,68,68,0.3)':(isStart||isSel)?SEL_COLOR:'rgba(0,0,0,0.48)',
+                          borderColor:isShut?'rgba(220,38,38,0.30)':slot.isBooked?'rgba(239,68,68,0.14)':isStart?`rgba(${SEL_RGB},0.60)`:isSel?`rgba(${SEL_RGB},0.45)`:'rgba(0,0,0,0.07)',
+                          background:isShut?'rgba(220,38,38,0.09)':slot.isBooked?'rgba(239,68,68,0.04)':isStart?`rgba(${SEL_RGB},0.18)`:isSel?`rgba(${SEL_RGB},0.12)`:hasDisc?`rgba(${SEL_RGB},0.04)`:'rgba(0,0,0,0.03)',
+                          color:isShut?'rgba(185,28,28,0.85)':slot.isBooked?'rgba(239,68,68,0.3)':(isStart||isSel)?SEL_COLOR:'rgba(0,0,0,0.48)',
                           boxShadow:isStart?`0 0 16px rgba(${SEL_RGB},0.35)`:isSel?`0 0 10px rgba(${SEL_RGB},0.18)`:'none',
                         }}>
                         <span style={{fontSize: '15px'}}>{toFa(slot.hour)}:۰۰</span>
-                        {slot.isBooked&&<span style={{fontSize: '9px',opacity:0.6}}>مشغول</span>}
-                        {!slot.isBooked&&hasDisc&&<span style={{fontSize: '9px',color:SEL_COLOR,opacity:0.9}}>−{toFa(discPct)}٪</span>}
-                        {!slot.isBooked&&!hasDisc&&isStart&&<span style={{fontSize: '9px',opacity:0.8}}>شروع</span>}
+                        {isShut&&<span style={{fontSize: '9px',fontWeight:800,opacity:0.85}}>بسته</span>}
+                        {!isShut&&slot.isBooked&&<span style={{fontSize: '9px',opacity:0.6}}>مشغول</span>}
+                        {!off&&hasDisc&&<span style={{fontSize: '9px',color:SEL_COLOR,opacity:0.9}}>−{toFa(discPct)}٪</span>}
+                        {!off&&!hasDisc&&isStart&&<span style={{fontSize: '9px',opacity:0.8}}>شروع</span>}
                       </button>
                     );
                   })}

@@ -74,6 +74,8 @@ interface Table {
   playerSurchargeEnabled?: boolean;
   playerSurchargePercent?: number;
   playerSurchargeFrom?: number;
+  /* رزروِ همین میز بسته است — میز می‌ماند، ولی در صفحه‌ی رزرو نیست */
+  reservationClosed?: boolean;
 }
 
 interface WorkingDay { isOpen: boolean; open: string; close: string; }
@@ -303,6 +305,41 @@ function SelectField({ label, value, onChange, options }: {
   );
 }
 
+/* تیکِ «بستن رزرو این میز».
+
+   با `isActive` فرق دارد و همین تفاوت مهم است: `isActive=false` یعنی
+   میز اصلاً وجود ندارد و از همه‌جای سیستم — از جمله گزارش‌ها و تعدادِ
+   میزها — بیرون می‌رود. این‌جا میز سرِ جایش می‌ماند و فقط از صفحه‌ی
+   رزروِ آنلاین برداشته می‌شود؛ برای میزی که در تعمیر است یا موقتاً
+   حضوری اجاره داده شده. */
+function ClosedToggle({ checked, onChange, compact = false }: {
+  checked: boolean; onChange: (v: boolean) => void; compact?: boolean;
+}) {
+  return (
+    <label style={{
+      display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',
+      marginBottom: compact ? 14 : 16, padding: compact ? '10px 12px' : '12px 14px',
+      borderRadius: 12, userSelect: 'none',
+      background: checked ? 'rgba(220,38,38,0.06)' : 'rgba(0,0,0,0.02)',
+      border: `1px solid ${checked ? 'rgba(220,38,38,0.28)' : 'rgba(0,0,0,0.08)'}`,
+      transition: 'background .2s, border-color .2s',
+    }}>
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
+        style={{ width: 17, height: 17, accentColor: '#DC2626', cursor: 'pointer', flexShrink: 0, marginTop: 1 }} />
+      <span style={{ minWidth: 0 }}>
+        <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: checked ? '#B91C1C' : DARK }}>
+          بستن رزرو این میز
+        </span>
+        <span style={{ display: 'block', fontSize: 11.5, color: '#9CA3AF', lineHeight: 1.85, marginTop: 2 }}>
+          {checked
+            ? 'این میز در صفحه‌ی رزرو آنلاین نمایش داده نمی‌شود. رزروهای ثبت‌شده‌ی قبلی سر جای خود می‌مانند.'
+            : 'اگر میز در تعمیر است یا موقتاً حضوری واگذار شده، این را تیک بزنید.'}
+        </span>
+      </span>
+    </label>
+  );
+}
+
 function SaveBtn({ onClick, loading, label = 'ذخیره تغییرات' }: {
   onClick: () => void; loading: boolean; label?: string;
 }) {
@@ -418,6 +455,7 @@ export default function ClubDashboardPage() {
   const [bookingFilter, setBookingFilter] = useState('all');
   /* بستن رزرو آنلاین: '' = باز | 'always' = همیشه بسته | عدد = بسته تا آن timestamp */
   const [reserveClosedUntil, setReserveClosedUntil] = useState<string>('');
+  const [closureBusy, setClosureBusy] = useState(false);
   /* «رزرو امروز بسته» — برخلاف بالایی روی سرور ذخیره می‌شود */
   const [closeToday, setCloseToday] = useState(false);
   const [closeTodayBusy, setCloseTodayBusy] = useState(false);
@@ -431,7 +469,7 @@ export default function ClubDashboardPage() {
   const [tables, setTables] = useState<Table[]>([]);
   const [showTableForm, setShowTableForm] = useState(false);
   /* surchargeFrom/Percent خالی ⇒ «از باشگاه ارث ببر» */
-  const [tableForm, setTableForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', surchargeFrom: '', surchargePercent: '' });
+  const [tableForm, setTableForm] = useState({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', surchargeFrom: '', surchargePercent: '', reservationClosed: false });
   const [tableLoading, setTableLoading] = useState(false);
   const [tableFormError, setTableFormError] = useState('');
   const [tablesSaving, setTablesSaving] = useState(false);
@@ -471,6 +509,7 @@ export default function ClubDashboardPage() {
     /* هزینه‌ی بازیکن اضافه در فرمِ *افزودن* بود ولی در فرمِ *ویرایش* نبود،
        یعنی باشگاه‌دار پس از ثبتِ میز راهی برای اصلاحش نداشت. */
     surchargeFrom: '', surchargePercent: '',
+    reservationClosed: false,
   });
   const [editDiscounts, setEditDiscounts] = useState<DiscountRule[]>([]);
   const [editDiscountForm, setEditDiscountForm] = useState({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
@@ -702,7 +741,10 @@ export default function ClubDashboardPage() {
       } catch { /* ignore */ }
 
       try {
-        const r = await api.get(`/clubs/${selectedClub.id}/tables`);
+        /* `all=1` — داشبورد باید میزهای بسته را هم ببیند تا بتواند
+           بازشان کند؛ صفحه‌ی رزرو همان مسیر را بدونِ این پرچم می‌خواند
+           و فقط میزهای قابلِ رزرو می‌گیرد. */
+        const r = await api.get(`/clubs/${selectedClub.id}/tables?all=1`);
         const rows: Table[] = Array.isArray(r.data) ? r.data : [];
         if (rows.length > 0) { setTables(rows); localStorage.removeItem(`club-tables-${selectedClub.id}`); return; }
         if (legacy.length > 0) {
@@ -716,9 +758,10 @@ export default function ClubDashboardPage() {
       } catch { setTables(legacy); }
     })();
 
-    // وضعیت بستن رزرو آنلاین
-    try { setReserveClosedUntil(localStorage.getItem(`club-reserveClosedUntil-${selectedClub.id}`) ?? ''); }
-    catch { setReserveClosedUntil(''); }
+    /* وضعیت بستن رزرو آنلاین — منبعِ حقیقت سرور است (پایین‌تر، همراهِ
+       بقیه‌ی تنظیمات خوانده می‌شود). این‌جا فقط تا رسیدنِ پاسخ خالی
+       می‌شود تا مقدارِ باشگاهِ قبلی روی این یکی نماند. */
+    setReserveClosedUntil('');
 
     // «رزرو امروز بسته» از سرور می‌آید، نه از این مرورگر
     void apiFetch(`/api/clubs/${selectedClub.id}/settings`, { cache: 'no-store' })
@@ -792,6 +835,7 @@ export default function ClubDashboardPage() {
       playerSurchargeFrom: tableForm.surchargeFrom ? parseInt(tableForm.surchargeFrom, 10) : undefined,
       playerSurchargePercent: tableForm.surchargePercent ? parseInt(tableForm.surchargePercent, 10) : undefined,
       playerSurchargeEnabled: (tableForm.surchargeFrom || tableForm.surchargePercent) ? true : undefined,
+      reservationClosed: tableForm.reservationClosed,
     };
     saveTables([...tables, newTable]);
     setShowTableForm(false);
@@ -799,7 +843,7 @@ export default function ClubDashboardPage() {
     setTablePhotoDataUrl('');
     setDiscounts([]);
     setDiscountForm({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
-    setTableForm({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', surchargeFrom: '', surchargePercent: '' });
+    setTableForm({ number: '', type: 'snooker', brand: '', model: '', pricePerHour: '', surchargeFrom: '', surchargePercent: '', reservationClosed: false });
   };
 
   const deleteTable = (id: string) => {
@@ -819,6 +863,7 @@ export default function ClubDashboardPage() {
          نه اینکه به صفر تبدیل شود — صفر یعنی «رایگان برای همه». */
       surchargeFrom: t.playerSurchargeFrom == null ? '' : String(t.playerSurchargeFrom),
       surchargePercent: t.playerSurchargePercent == null ? '' : String(t.playerSurchargePercent),
+      reservationClosed: !!t.reservationClosed,
     });
     setEditDiscounts(t.discountRules ? [...t.discountRules] : []);
     setEditDiscountForm({ startTime: '08:00', endTime: '12:00', percent: '20', label: '' });
@@ -856,6 +901,7 @@ export default function ClubDashboardPage() {
       playerSurchargeFrom: editForm.surchargeFrom ? parseInt(editForm.surchargeFrom, 10) : undefined,
       playerSurchargePercent: editForm.surchargePercent ? parseInt(editForm.surchargePercent, 10) : undefined,
       playerSurchargeEnabled: (editForm.surchargeFrom || editForm.surchargePercent) ? true : undefined,
+      reservationClosed: editForm.reservationClosed,
     } : t));
     setEditingTableId(null);
   };
@@ -1421,14 +1467,32 @@ export default function ClubDashboardPage() {
     } finally { setNotifyBusy(false); }
   };
 
-  const setReservationClosure = (opt: number | 'always' | 'open') => {
+  /* بستنِ موقت روی سرور ذخیره می‌شود، نه در localStorage.
+
+     پیش‌تر فقط در مرورگرِ خودِ باشگاه‌دار می‌نشست، یعنی سرور هیچ‌وقت
+     رزرو را نمی‌بست و هر بازدیدکننده‌ی دیگری می‌توانست رزرو کند —
+     در حالی که خودِ باشگاه‌دار صفحه‌ی رزرو را کاملاً بسته می‌دید.
+     لحظه‌ی پایان را هم سرور حساب می‌کند تا ساعتِ اشتباهِ دستگاه قفل را
+     زودتر یا دیرتر باز نکند. */
+  const setReservationClosure = async (opt: number | 'always' | 'open') => {
     if (!selectedClub) return;
-    const val = opt === 'open' ? '' : opt === 'always' ? 'always' : String(Date.now() + opt * 3600_000);
-    setReserveClosedUntil(val);
+    setClosureBusy(true);
+    const prev = reserveClosedUntil;
     try {
-      const k = `club-reserveClosedUntil-${selectedClub.id}`;
-      if (val) localStorage.setItem(k, val); else localStorage.removeItem(k);
-    } catch { /* ignore */ }
+      const r = await apiFetch(`/api/clubs/${selectedClub.id}/settings`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ closeForHours: opt === 'open' ? null : opt }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j?.message);
+      setReserveClosedUntil(j.reserveClosedUntil ?? '');
+      /* کلیدِ قدیمی پاک می‌شود تا نسخه‌ی مرورگری دیگر روی سرور اثر
+         نگذارد و دو منبعِ حقیقت باقی نماند. */
+      try { localStorage.removeItem(`club-reserveClosedUntil-${selectedClub.id}`); } catch { /* ignore */ }
+    } catch {
+      setReserveClosedUntil(prev);
+      setCloseTodayMsg({ ok: false, text: 'ذخیره‌ی وضعیت رزرو انجام نشد' });
+    } finally { setClosureBusy(false); }
   };
 
   const TABS: { key: TabKey; label: string; Icon: React.ComponentType<{size?: number; strokeWidth?: number}>; badge?: number }[] = [
@@ -2263,7 +2327,7 @@ export default function ClubDashboardPage() {
                 </div>
 
                 {/* عکس میز — کنارِ فیلدها، هم‌ارتفاعِ آن‌ها */}
-                <label className="bh-tf-photo" title="عکس میز (اختیاری)">
+                <label className="bh-tf-photo" title="عکس میز (اختیاری)" data-photo="add">
                   <input type="file" accept="image/*" style={{ display: 'none' }}
                     onChange={async e => {
                       const f = e.target.files?.[0]; if (!f) return;
@@ -2283,6 +2347,10 @@ export default function ClubDashboardPage() {
                   )}
                 </label>
               </div>
+
+              <ClosedToggle
+                checked={tableForm.reservationClosed}
+                onChange={v => setTableForm(p => ({ ...p, reservationClosed: v }))} />
 
               {tableFormError && (
                 <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: 10, fontSize: 13, color: '#991B1B' }}>
@@ -2429,9 +2497,20 @@ export default function ClubDashboardPage() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       {/* «میز ۳ — اسنوکر» و نه برعکس: شماره‌ی میز چیزی است
                           که باشگاه‌دار با آن میز را می‌شناسد، پس اول بیاید. */}
-                      <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2 }}>
-                        {t.number ? `میز ${t.number} | ` : ''}
-                        {TABLE_TYPE_LABELS[t.type] || t.type}
+                      <div style={{ fontWeight: 700, fontSize: 15, color: DARK, marginBottom: 2, display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                        <span>
+                          {t.number ? `میز ${t.number} | ` : ''}
+                          {TABLE_TYPE_LABELS[t.type] || t.type}
+                        </span>
+                        {/* بدون این نشان، باشگاه‌دار از فهرست نمی‌فهمید کدام
+                            میز بسته است و باید تک‌تک ویرایش را باز می‌کرد. */}
+                        {t.reservationClosed && (
+                          <span style={{
+                            fontSize: 10.5, fontWeight: 800, color: '#B91C1C',
+                            background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.26)',
+                            borderRadius: 20, padding: '2px 9px',
+                          }}>رزرو بسته</span>
+                        )}
                       </div>
                       {(t.brand || t.model) && (
                         <div style={{ fontSize: 12, color: '#9CA3AF' }}>{t.brand} {t.model}</div>
@@ -2510,6 +2589,11 @@ export default function ClubDashboardPage() {
                           )}
                         </label>
                       </div>
+
+                      <ClosedToggle compact
+                        checked={editForm.reservationClosed}
+                        onChange={v => setEditForm(p => ({ ...p, reservationClosed: v }))} />
+
                       {/* Discount rules in edit form */}
                       <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 4, paddingTop: 14, marginBottom: 14 }}>
                         <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 700, marginBottom: 10 }}>تخفیف‌های زمانی</div>
@@ -2734,16 +2818,28 @@ export default function ClubDashboardPage() {
               <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A' }}>{reserveClosedLabel}</span>
               <span style={{ fontSize: 12, color: '#6B7280' }}>— وقتی بسته باشد، کسی نمی‌تواند از سایت رزرو کند.</span>
             </div>
+            {/* «یک روز» حذف شد چون همان کاری را می‌کرد که تیکِ «بستن رزرو
+                امروز» — دو راه برای یک نتیجه، با دو ذخیره‌گاهِ متفاوت.
+                ساعتی‌ها وقتی امروز بسته است خاموش می‌شوند: بستنِ چند
+                ساعت از روزی که تمامش بسته است بی‌معنی است. «همیشه»
+                همیشه فعال می‌ماند — تنها گزینه‌ای که ورای امروز می‌رود. */}
             <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
               {([
-                ['۳ ساعت', 3], ['۶ ساعت', 6], ['۱۲ ساعت', 12], ['یک روز', 24], ['همیشه', 'always'],
-              ] as [string, number | 'always'][]).map(([lbl, opt]) => (
-                <button key={lbl} onClick={() => setReservationClosure(opt)} style={{
-                  padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                  fontFamily: 'var(--font-base)',
-                  border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)', color: '#9A6E38',
-                }}>بستن برای {lbl}</button>
-              ))}
+                ['۳ ساعت', 3], ['۶ ساعت', 6], ['۱۲ ساعت', 12], ['همیشه', 'always'],
+              ] as [string, number | 'always'][]).map(([lbl, opt]) => {
+                const off = opt !== 'always' && closeToday;
+                return (
+                  <button key={lbl} disabled={off || closureBusy}
+                    title={off ? 'رزرو امروز از قبل بسته است' : undefined}
+                    onClick={() => setReservationClosure(opt)} style={{
+                    padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700,
+                    cursor: (off || closureBusy) ? 'not-allowed' : 'pointer',
+                    fontFamily: 'var(--font-base)',
+                    border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)', color: '#9A6E38',
+                    opacity: (off || closureBusy) ? 0.42 : 1,
+                  }}>بستن برای {lbl}</button>
+                );
+              })}
               {isReserveClosed && (
                 <button onClick={() => setReservationClosure('open')} style={{
                   padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',

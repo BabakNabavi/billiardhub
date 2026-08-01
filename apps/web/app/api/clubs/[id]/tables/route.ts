@@ -12,6 +12,11 @@ export async function GET(
 ) {
   const { id } = await params;
   const sb = getSupabaseServer();
+  /* داشبورد باید میزهای بسته را هم ببیند تا بتواند بازشان کند؛
+     صفحه‌ی رزرو نباید. پیش‌فرض «فقط قابلِ رزرو» است، چون مصرف‌کننده‌ی
+     اصلیِ این مسیر همان صفحه‌ی رزرو است و یک فراموشی آن‌جا یعنی
+     نمایشِ میزی که باشگاه‌دار بسته است. */
+  const includeClosed = new URL(_req.url).searchParams.get('all') === '1';
 
   const { data: rows, error } = await sb
     .from('tables')
@@ -21,7 +26,14 @@ export async function GET(
     .order('number', { ascending: true });
 
   if (error) return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } });
-  return NextResponse.json(rows ?? [], { headers: { 'Cache-Control': 'no-store' } });
+
+  /* فیلتر در جاوااسکریپت و نه در کوئری: تا وقتی مهاجرتِ ۰۳۶ اجرا نشده،
+     ستون وجود ندارد و یک `.eq('reservationClosed', false)` کلِ فهرست را
+     خطا می‌کرد — یعنی صفحه‌ی رزرو هیچ میزی نشان نمی‌داد. */
+  const list = (rows ?? []) as { reservationClosed?: boolean }[];
+  const out = includeClosed ? list : list.filter(t => t.reservationClosed !== true);
+
+  return NextResponse.json(out, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function POST(

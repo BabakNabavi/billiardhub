@@ -18,6 +18,7 @@ interface InTable {
   brand?: string | null; model?: string | null; pricePerHour?: number | string;
   morningDiscount?: number | null; discountRules?: unknown; photoDataUrl?: string | null;
   playerSurchargeEnabled?: boolean; playerSurchargePercent?: number | string; playerSurchargeFrom?: number | string;
+  reservationClosed?: boolean;
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -61,6 +62,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       ? Math.max(0, Math.min(100, Math.round(Number(t.playerSurchargePercent)))) : null,
     playerSurchargeFrom: Number.isFinite(Number(t.playerSurchargeFrom))
       ? Math.max(1, Math.min(12, Math.round(Number(t.playerSurchargeFrom)))) : null,
+    /* بستنِ رزروِ همین میز — میز ثبت‌شده می‌ماند ولی در صفحه‌ی رزرو
+       دیده نمی‌شود. با isActive فرق دارد: آن یعنی میز اصلاً نیست و از
+       گزارش‌ها هم بیرون می‌رود. */
+    reservationClosed: !!t.reservationClosed,
     isActive: true,
   });
 
@@ -78,15 +83,38 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const idMap: Record<string, string> = {};
   const keepIds: string[] = [];
 
+  /* ستونِ reservationClosed با مهاجرتِ ۰۳۶ می‌آید. تا وقتی اجرا نشده،
+     نبودنش نباید ذخیره‌ی *کلِ* میزها را بشکند — یعنی یک فیلدِ نو،
+     قابلیتی را که تا امروز کار می‌کرده از کار بیندازد. یک بار تشخیص
+     داده می‌شود و بقیه‌ی حلقه بدونِ آن ادامه می‌دهد. */
+  let hasClosedColumn = true;
+  const rowFor = (t: InTable, i: number) => {
+    const r = row(t, i) as Record<string, unknown>;
+    if (!hasClosedColumn) delete r.reservationClosed;
+    return r;
+  };
+  const isMissingClosed = (m: string) =>
+    /does not exist|schema cache|PGRST204/i.test(m) && /reservationClosed/i.test(m);
+
   for (let i = 0; i < incoming.length; i++) {
     const t = incoming[i]!;
     const existingId = t.id && UUID.test(String(t.id)) ? String(t.id) : null;
     if (existingId) {
-      const { error } = await sb.from('tables').update(row(t, i)).eq('id', existingId).eq('clubId', clubId);
+      let { error } = await sb.from('tables').update(rowFor(t, i)).eq('id', existingId).eq('clubId', clubId);
+      if (error && isMissingClosed(error.message)) {
+        hasClosedColumn = false;
+        console.error('[tables/sync] ستون reservationClosed نیست — مهاجرت ۰۳۶ اجرا نشده');
+        ({ error } = await sb.from('tables').update(rowFor(t, i)).eq('id', existingId).eq('clubId', clubId));
+      }
       if (error) return NextResponse.json({ message: msg('به‌روزرسانی', error.message) }, { status: 500 });
       keepIds.push(existingId);
     } else {
-      const { data, error } = await sb.from('tables').insert(row(t, i)).select('id').single();
+      let { data, error } = await sb.from('tables').insert(rowFor(t, i)).select('id').single();
+      if (error && isMissingClosed(error.message)) {
+        hasClosedColumn = false;
+        console.error('[tables/sync] ستون reservationClosed نیست — مهاجرت ۰۳۶ اجرا نشده');
+        ({ data, error } = await sb.from('tables').insert(rowFor(t, i)).select('id').single());
+      }
       if (error) return NextResponse.json({ message: msg('ثبت', error.message) }, { status: 500 });
       const newId = String((data as { id: string }).id);
       if (t.id) idMap[String(t.id)] = newId;
