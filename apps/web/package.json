@@ -50,7 +50,8 @@
     "test:content": "node scripts/test-content-flow.mjs",
     "test:ads": "node scripts/test-ads-admin.mjs",
     "test:dashboard": "node scripts/test-dashboard-stats.mjs",
-    "test:journey": "node scripts/test-user-journey.mjs"
+    "test:journey": "node scripts/test-user-journey.mjs",
+    "test:booking:deep": "node scripts/test-booking-payment.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
