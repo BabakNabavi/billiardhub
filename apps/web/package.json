@@ -29,7 +29,9 @@
     "test:club-page:ui": "node scripts/test-club-page-ui.mjs",
     "test:lock": "node scripts/test-verification-lock.mjs",
     "test:icons:ui": "node scripts/test-icons-ui.mjs",
-    "test:gallery:ui": "node scripts/test-gallery-ui.mjs"
+    "test:gallery:ui": "node scripts/test-gallery-ui.mjs",
+    "test:closure:ui": "node scripts/test-closure-ui.mjs",
+    "purge:bookings": "node scripts/purge-test-bookings.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

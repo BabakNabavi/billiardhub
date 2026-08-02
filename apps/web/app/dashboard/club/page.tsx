@@ -21,7 +21,8 @@ import { useAuthStore } from '../../../store/auth.store';
 import { formatCard, isValidCard, bankOfCard, formatIban, isValidIban, bankOfIban, prettyIban } from '../../../lib/bank';
 import { apiFetch } from '../../../lib/http';
 import { sortTables } from '../../../lib/tables/order';
-import { closureState, closureLabel } from '../../../lib/booking/closure';
+import { closureState, closureLabel, activeOption, isOptionDisabled } from '../../../lib/booking/closure';
+import type { ClosureOption } from '../../../lib/booking/closure';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import ClubLogo from '../../../components/club/ClubLogo';
 import { Card, SectionTitle, InputField, SelectField, ClosedToggle, SaveBtn } from '../../../components/dashboard/club/fields';
@@ -1260,6 +1261,18 @@ export default function ClubDashboardPage() {
   const tempClosed = closure.always || closure.untilMs !== null;
   const isReserveClosed = tempClosed || closeToday;
   const reserveClosedLabel = closureLabel(closure);
+
+  /* ── سلسله‌مراتبِ قفل‌ها ──
+     قوی‌تر ضعیف‌تر را خاموش می‌کند: همیشه ← امروز ← ۱۲ ← ۶ ← ۳.
+     منطقش در `lib/booking/closure` است تا سرور و این صفحه یک قاعده
+     داشته باشند، نه دو تفسیر از یک چیز. */
+  const activeClosureOpt = activeOption(closure);
+  /* تیکِ «امروز» فقط با «همیشه» خاموش می‌شود */
+  const todayLocked = isOptionDisabled('today', closure);
+  const disabledReason = (opt: ClosureOption) =>
+    closure.always ? 'رزرو «همیشه» بسته است — اول آن را باز کنید'
+      : closure.closeToday ? 'رزرو امروز از قبل بسته است'
+      : 'قفلِ بلندتری از این فعال است';
   /* ذخیره‌ی «بستن رزرو امروز» روی سرور */
   const saveCloseToday = async (next: boolean) => {
     if (!selectedClub) return;
@@ -2652,10 +2665,13 @@ export default function ClubDashboardPage() {
               می‌شود و خود API جلوی رزرو را می‌گیرد — نسخه‌ی قبلی فقط
               در localStorage بود، یعنی روی مرورگر مشتری اثری نداشت. */}
           <Card style={{ marginBottom: 16, padding: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
-              <input type="checkbox" checked={closeToday} disabled={closeTodayBusy}
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10,
+              cursor: todayLocked ? 'not-allowed' : 'pointer', opacity: todayLocked ? 0.5 : 1 }}
+              title={todayLocked ? 'رزرو «همیشه» بسته است — اول آن را باز کنید' : undefined}>
+              <input type="checkbox" checked={closeToday} disabled={closeTodayBusy || todayLocked}
                 onChange={e => void saveCloseToday(e.target.checked)}
-                style={{ width: 17, height: 17, accentColor: '#C7A66A', flexShrink: 0, marginTop: 2 }} />
+                style={{ width: 17, height: 17, accentColor: '#C7A66A', flexShrink: 0, marginTop: 2,
+                  cursor: todayLocked ? 'not-allowed' : 'pointer' }} />
               <span style={{ minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 14, fontWeight: 800, color: '#1C1C1A' }}>
                   بستن رزرو امروز
@@ -2671,11 +2687,59 @@ export default function ClubDashboardPage() {
                 {closeTodayMsg.text}
               </p>
             )}
+          </Card>
 
-            {/* شماره‌ی اطلاع‌رسانی — بسیاری از باشگاه‌ها به نام یک نفرند
-                ولی کس دیگری اداره‌شان می‌کند؛ پیامک رزرو باید به دست
-                همان کسی برسد که واقعاً میز را آماده می‌کند. */}
-            <div style={{ borderTop: '1px solid #F0EDE8', marginTop: 16, paddingTop: 16 }}>
+          {/* ── بستن/بازکردن موقت رزرو آنلاین ── */}
+          <Card style={{ marginBottom: 16, padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: isReserveClosed ? '#DC2626' : '#16A34A', flexShrink: 0 }} />
+              <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A' }}>{reserveClosedLabel}</span>
+              <span style={{ fontSize: 12, color: '#6B7280' }}>— وقتی بسته باشد، کسی نمی‌تواند از سایت رزرو کند.</span>
+            </div>
+            {/* «یک روز» حذف شد چون همان کاری را می‌کرد که تیکِ «بستن رزرو
+                امروز» — دو راه برای یک نتیجه، با دو ذخیره‌گاهِ متفاوت.
+                ساعتی‌ها وقتی امروز بسته است خاموش می‌شوند: بستنِ چند
+                ساعت از روزی که تمامش بسته است بی‌معنی است. «همیشه»
+                همیشه فعال می‌ماند — تنها گزینه‌ای که ورای امروز می‌رود. */}
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+              {([
+                ['۳ ساعت', 3], ['۶ ساعت', 6], ['۱۲ ساعت', 12], ['همیشه', 'always'],
+              ] as [string, ClosureOption][]).map(([lbl, opt]) => {
+                const on = activeClosureOpt === opt;
+                const off = isOptionDisabled(opt, closure) || closureBusy;
+                return (
+                  <button key={lbl} disabled={off}
+                    title={off ? disabledReason(opt) : undefined}
+                    onClick={() => setReservationClosure(opt)} style={{
+                    padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700,
+                    cursor: off ? 'not-allowed' : 'pointer',
+                    fontFamily: 'var(--font-base)',
+                    border: `1px solid ${on ? 'rgba(220,38,38,0.55)' : 'rgba(199,166,106,0.34)'}`,
+                    background: on ? 'rgba(220,38,38,0.14)' : 'rgba(199,166,106,0.12)',
+                    color: on ? '#B91C1C' : '#9A6E38',
+                    opacity: off ? 0.42 : 1,
+                  }}>{on ? '● ' : ''}بستن برای {lbl}</button>
+                );
+              })}
+              {isReserveClosed && (
+                <button onClick={() => setReservationClosure('open')} style={{
+                  padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                  fontFamily: 'var(--font-base)',
+                  border: '1px solid rgba(22,163,74,0.34)', background: 'rgba(22,163,74,0.12)', color: '#0E7A38',
+                }}>باز کردن رزرو</button>
+              )}
+            </div>
+          </Card>
+
+
+          {/* ── شماره‌ی اطلاع‌رسانی ──
+              بسیاری از باشگاه‌ها به نام یک نفرند ولی کس دیگری
+              اداره‌شان می‌کند؛ پیامک رزرو باید به دست همان کسی برسد که
+              واقعاً میز را آماده می‌کند. کارتِ جدا شد چون میانِ تیکِ
+              «امروز» و دکمه‌های ساعتی نشسته بود و ترتیبِ آن دو را
+              می‌شکست. */}
+          <Card style={{ marginBottom: 16, padding: 16 }}>
+            <div>
               <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A', marginBottom: 4 }}>
                 شماره‌ی دریافت پیامک‌ها
               </div>
@@ -2705,45 +2769,6 @@ export default function ClubDashboardPage() {
                   </span>
                 )}
               </div>
-            </div>
-          </Card>
-
-          {/* ── بستن/بازکردن موقت رزرو آنلاین ── */}
-          <Card style={{ marginBottom: 16, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ width: 9, height: 9, borderRadius: '50%', background: isReserveClosed ? '#DC2626' : '#16A34A', flexShrink: 0 }} />
-              <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1A' }}>{reserveClosedLabel}</span>
-              <span style={{ fontSize: 12, color: '#6B7280' }}>— وقتی بسته باشد، کسی نمی‌تواند از سایت رزرو کند.</span>
-            </div>
-            {/* «یک روز» حذف شد چون همان کاری را می‌کرد که تیکِ «بستن رزرو
-                امروز» — دو راه برای یک نتیجه، با دو ذخیره‌گاهِ متفاوت.
-                ساعتی‌ها وقتی امروز بسته است خاموش می‌شوند: بستنِ چند
-                ساعت از روزی که تمامش بسته است بی‌معنی است. «همیشه»
-                همیشه فعال می‌ماند — تنها گزینه‌ای که ورای امروز می‌رود. */}
-            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-              {([
-                ['۳ ساعت', 3], ['۶ ساعت', 6], ['۱۲ ساعت', 12], ['همیشه', 'always'],
-              ] as [string, number | 'always'][]).map(([lbl, opt]) => {
-                const off = opt !== 'always' && closeToday;
-                return (
-                  <button key={lbl} disabled={off || closureBusy}
-                    title={off ? 'رزرو امروز از قبل بسته است' : undefined}
-                    onClick={() => setReservationClosure(opt)} style={{
-                    padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700,
-                    cursor: (off || closureBusy) ? 'not-allowed' : 'pointer',
-                    fontFamily: 'var(--font-base)',
-                    border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)', color: '#9A6E38',
-                    opacity: (off || closureBusy) ? 0.42 : 1,
-                  }}>بستن برای {lbl}</button>
-                );
-              })}
-              {isReserveClosed && (
-                <button onClick={() => setReservationClosure('open')} style={{
-                  padding: '8px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                  fontFamily: 'var(--font-base)',
-                  border: '1px solid rgba(22,163,74,0.34)', background: 'rgba(22,163,74,0.12)', color: '#0E7A38',
-                }}>باز کردن رزرو</button>
-              )}
             </div>
           </Card>
 

@@ -414,9 +414,11 @@ function BookingContent() {
         <div style={{width:66,height:66,borderRadius:'50%',background:'rgba(220,38,38,0.10)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزرو آنلاین موقتاً بسته است</h1>
+        {/* «تا اطلاع بعدی» نه «موقتاً»: این حالت پایانِ مشخصی ندارد و
+            «موقتاً» به کاربر می‌گفت کمی بعد دوباره سر بزند. */}
+        <h1 style={{fontSize:19,fontWeight:900,color:'#111',margin:'0 0 10px'}}>رزروها تا اطلاع بعدی بسته است</h1>
         <p style={{fontSize:14,color:'rgba(0,0,0,0.55)',lineHeight:1.8,margin:'0 0 22px'}}>
-          {club?.name ?? 'این باشگاه'} فعلاً رزرو اینترنتی را غیرفعال کرده است. لطفاً بعداً دوباره تلاش کنید یا مستقیم با باشگاه تماس بگیرید.
+          {club?.name ?? 'این باشگاه'} رزرو اینترنتی را تا اطلاع بعدی غیرفعال کرده است. برای رزرو، مستقیم با باشگاه تماس بگیرید.
         </p>
         <Link href={`/clubs/${clubId}`} style={{display:'inline-flex',alignItems:'center',gap:6,color:'#9A6E38',fontSize:14,fontWeight:800,textDecoration:'none',background:'rgba(199,166,106,0.12)',border:'1px solid rgba(199,166,106,0.34)',borderRadius:12,padding:'11px 20px'}}>
           بازگشت به صفحه‌ی باشگاه

@@ -18,7 +18,8 @@ const load = async rel => import('data:text/javascript;base64,' + Buffer.from(
     compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext },
   }).outputText).toString('base64'))
 
-const { closureState, isDateClosed, closedHours, closureLabel, todayInTehran } =
+const { closureState, isDateClosed, closedHours, closureLabel, todayInTehran,
+        activeOption, isOptionDisabled, optionRank } =
   await load('lib/booking/closure.ts')
 
 let pass = 0, fail = 0
@@ -139,6 +140,68 @@ head('۸) هر دو قفل با هم')
   t('برچسب هر دو را می‌گوید', /امروز همیشه بسته/.test(closureLabel(s)), true)
 }
 
+head('۸ب) سلسله‌مراتبِ اولویت — همیشه ← امروز ← ۱۲ ← ۶ ← ۳')
+{
+  const at = h => new Date(NOW.getTime() + h * 3600_000).toISOString()
+  const open   = closureState({ now: NOW })
+  const h3     = closureState({ closedUntil: at(3),  now: NOW })
+  const h6     = closureState({ closedUntil: at(6),  now: NOW })
+  const h12    = closureState({ closedUntil: at(12), now: NOW })
+  const today  = closureState({ closeToday: true,    now: NOW })
+  const always = closureState({ closedUntil: 'infinity', now: NOW })
+
+  /* کدام دکمه «زده‌شده» دیده می‌شود */
+  t('هیچ‌کدام فعال نیست', activeOption(open, NOW), null)
+  t('۳ ساعت ⇒ دکمه‌ی ۳', activeOption(h3, NOW), 3)
+  t('۶ ساعت ⇒ دکمه‌ی ۶', activeOption(h6, NOW), 6)
+  t('۱۲ ساعت ⇒ دکمه‌ی ۱۲', activeOption(h12, NOW), 12)
+  t('همیشه ⇒ دکمه‌ی همیشه', activeOption(always, NOW), 'always')
+  /* دو ساعت بعد از زدنِ «۱۲ ساعت» هنوز همان دکمه فعال است */
+  const later = new Date(NOW.getTime() + 2 * 3600_000)
+  t('گذرِ زمان دکمه را عوض نمی‌کند', activeOption(h12, later), 12)
+
+  /* هیچ قفلی ⇒ همه‌چیز روشن */
+  t('باز: هیچ گزینه‌ای خاموش نیست',
+    [3, 6, 12, 'always', 'today'].map(o => isOptionDisabled(o, open, NOW)),
+    [false, false, false, false, false])
+
+  /* «۳ ساعت» ضعیف‌ترین است و چیزی را خاموش نمی‌کند */
+  t('۳ ساعت چیزی را خاموش نمی‌کند',
+    [6, 12, 'today', 'always'].map(o => isOptionDisabled(o, h3, NOW)),
+    [false, false, false, false])
+
+  /* «۶ ساعت» فقط «۳» را می‌بندد */
+  t('۶ ساعت فقط ۳ را خاموش می‌کند',
+    [3, 12, 'today', 'always'].map(o => isOptionDisabled(o, h6, NOW)),
+    [true, false, false, false])
+
+  /* «۱۲ ساعت» هر دوی ۶ و ۳ را می‌بندد */
+  t('۱۲ ساعت، ۶ و ۳ را خاموش می‌کند',
+    [3, 6, 12, 'today', 'always'].map(o => isOptionDisabled(o, h12, NOW)),
+    [true, true, false, false, false])
+
+  /* تیکِ «امروز» هر سه ساعتی را می‌بندد ولی «همیشه» را نه */
+  t('امروز، ۳ و ۶ و ۱۲ را خاموش می‌کند',
+    [3, 6, 12].map(o => isOptionDisabled(o, today, NOW)),
+    [true, true, true])
+  t('ولی «همیشه» همچنان روشن است', isOptionDisabled('always', today, NOW), false)
+
+  /* «همیشه» همه‌چیز را می‌بندد، از جمله تیکِ امروز */
+  t('همیشه، همه‌چیز را خاموش می‌کند',
+    [3, 6, 12, 'today'].map(o => isOptionDisabled(o, always, NOW)),
+    [true, true, true, true])
+  /* حتی خودش: با «همیشه» تنها راهِ باقی‌مانده «باز کردن رزرو» است */
+  t('خودِ «همیشه» هم خاموش می‌شود', isOptionDisabled('always', always, NOW), true)
+  /* ولی ۳/۶/۱۲ باید قابلِ تمدید بمانند */
+  t('۳ ساعتِ فعال قابلِ تمدید است', isOptionDisabled(3, h3, NOW), false)
+  t('۶ ساعتِ فعال قابلِ تمدید است', isOptionDisabled(6, h6, NOW), false)
+
+  /* ترتیبِ رتبه‌ها همان چیزی است که کاربر خواسته */
+  t('ترتیبِ رتبه‌ها',
+    [optionRank(3), optionRank(6), optionRank(12), optionRank('today'), optionRank('always')],
+    [0, 1, 2, 3, 4])
+}
+
 /* ── بازرسی کد ───────────────────────────────────────────────────── */
 head('۹) اعمال روی سرور')
 {
@@ -180,8 +243,33 @@ head('۱۰) رفتارِ صفحه‌ها')
   t('در هر دو فرم', (dash.match(/<ClosedToggle/g) ?? []).length, 2)
   t('«یک روز» حذف شد', !/\['یک روز', 24\]/.test(dash))
   t('«همیشه» مانده است', /\['همیشه', 'always'\]/.test(dash))
-  t('ساعتی‌ها با closeToday خاموش می‌شوند', /opt !== 'always' && closeToday/.test(dash))
+  /* قاعده از ماژولِ مشترک می‌آید نه از شرطِ دستیِ داخلِ صفحه */
+  t('خاموشی از سلسله‌مراتب می‌آید', dash.includes('isOptionDisabled(opt, closure)'))
+  t('دکمه‌ی فعال رنگ می‌گیرد', /const on = activeClosureOpt === opt/.test(dash))
+  t('تیکِ امروز با «همیشه» خاموش می‌شود',
+    dash.includes("todayLocked = isOptionDisabled('today', closure)"))
   t('بستنِ موقت روی سرور ذخیره می‌شود', /closeForHours: opt === 'open' \? null : opt/.test(dash))
+
+  /* ترتیبِ خواسته‌شده: اول تیکِ «امروز»، بعد وضعیت و دکمه‌های ساعتی */
+  /* جای *استفاده* در JSX سنجیده می‌شود نه جای تعریفِ متغیر — تعریف
+     صدها خط بالاتر است و هر مقایسه‌ای با آن بی‌معنی. */
+  t('«بستن رزرو امروز» بالاتر از نوارِ وضعیت است',
+    dash.indexOf('بستن رزرو امروز') < dash.indexOf('{reserveClosedLabel}'))
+  /* شماره‌ی پیامک پیش‌تر میانِ آن دو نشسته بود و ترتیب را می‌شکست */
+  t('شماره‌ی پیامک پایین‌ترین کارت است',
+    dash.indexOf('{reserveClosedLabel}') < dash.indexOf('شماره‌ی دریافت پیامک‌ها'))
+
+  /* «همیشه بسته» باید همان‌جا در صفحه‌ی باشگاه گفته شود، نه یک
+     صفحه جلوتر */
+  const clubPage = read('app/clubs/[id]/page.tsx')
+  t('صفحه‌ی باشگاه وضعیت را می‌خواند', /booking-status/.test(clubPage))
+  t('دکمه‌ی رزرو خاموش می‌شود', /disabled=\{bookingClosed\}/.test(clubPage))
+  t('پیامِ «تا اطلاع بعدی» نشان داده می‌شود',
+    /رزروهای این باشگاه تا اطلاع بعدی بسته است/.test(clubPage))
+  t('کلیک وقتی بسته است کاری نمی‌کند', /if \(bookingClosed\) return;/.test(clubPage))
+
+  const bookPage = read('app/booking/[clubId]/page.tsx')
+  t('صفحه‌ی رزرو هم همان را می‌گوید', /رزروها تا اطلاع بعدی بسته است/.test(bookPage))
   t('نشانِ «رزرو بسته» روی کارتِ میز', /رزرو بسته<\/span>/.test(dash))
   t('داشبورد میزهای بسته را هم می‌گیرد', /tables\?all=1/.test(dash))
 

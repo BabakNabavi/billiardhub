@@ -100,6 +100,61 @@ export function closedHours(date: string, s: ClosureState, now: Date = new Date(
   return out
 }
 
+/* ── اولویتِ سازوکارها ──────────────────────────────────────────
+   قفل‌ها هم‌عرض نیستند؛ یکی روی دیگری را می‌پوشاند. ترتیب از قوی به
+   ضعیف: همیشه ← امروز ← ۱۲ ساعت ← ۶ ساعت ← ۳ ساعت.
+
+   کاربردش این است که گزینه‌ی ضعیف‌تر وقتی قوی‌تری فعال است خاموش
+   شود. بدونِ این، باشگاه‌دار می‌توانست روی «همیشه بسته» دکمه‌ی «۳
+   ساعت» را بزند و نتیجه‌اش *بازشدنِ* رزرو بود — یعنی دکمه دقیقاً
+   برعکسِ نامش عمل می‌کرد. */
+
+export type ClosureOption = 3 | 6 | 12 | 'always'
+
+const RANK: Record<string, number> = { '3': 0, '6': 1, '12': 2, today: 3, always: 4 }
+
+/** رتبه‌ی یک گزینه — بالاتر یعنی قوی‌تر */
+export function optionRank(opt: ClosureOption | 'today'): number {
+  return RANK[String(opt)] ?? -1
+}
+
+/** کدام گزینه همین حالا فعال است؟ (برای نشان‌دادنِ حالتِ «زده‌شده»)
+ *
+ *  از زمانِ باقی‌مانده حساب می‌شود نه از چیزی که ذخیره شده باشد: اگر
+ *  «۱۲ ساعت» یک ساعت پیش زده شده، یازده ساعت مانده و همچنان همان
+ *  دکمه باید فعال دیده شود. پس به نزدیک‌ترین سطلِ بالاتر گرد می‌شود. */
+export function activeOption(s: ClosureState, now: Date = new Date()): ClosureOption | null {
+  if (s.always) return 'always'
+  if (s.untilMs === null) return null
+  const hoursLeft = (s.untilMs - now.getTime()) / 3_600_000
+  if (hoursLeft <= 3) return 3
+  if (hoursLeft <= 6) return 6
+  return 12
+}
+
+/** قوی‌ترین قفلِ فعال — مبنای خاموش‌کردنِ گزینه‌های ضعیف‌تر */
+export function activeRank(s: ClosureState, now: Date = new Date()): number {
+  if (s.always) return optionRank('always')
+  if (s.closeToday) return optionRank('today')
+  const a = activeOption(s, now)
+  return a === null ? -1 : optionRank(a)
+}
+
+/** آیا این گزینه باید خاموش باشد؟
+ *
+ *  قاعده یکی است و همه‌ی حالت‌های خواسته‌شده از آن درمی‌آید: هر گزینه
+ *  که رتبه‌اش *پایین‌تر* از قفلِ فعلی است خاموش می‌شود. پس «همیشه»
+ *  هیچ‌وقت خاموش نمی‌شود مگر خودش فعال باشد، و تیکِ «امروز» فقط با
+ *  «همیشه» خاموش می‌شود. */
+export function isOptionDisabled(opt: ClosureOption | 'today', s: ClosureState, now: Date = new Date()): boolean {
+  /* «همیشه» استثناست: وقتی فعال است هیچ راهی جز «باز کردن رزرو»
+     نباید بماند — حتی خودش. دوباره‌زدنش هم چیزی را عوض نمی‌کند.
+     برای ۳/۶/۱۲ برعکس است: دوباره‌زدن بازه را تمدید می‌کند و باید
+     ممکن بماند. */
+  if (s.always) return true
+  return activeRank(s, now) > optionRank(opt)
+}
+
 /** متنِ خوانا برای نشان‌دادن وضعیت */
 export function closureLabel(s: ClosureState): string {
   if (s.always) return 'رزرو آنلاین همیشه بسته است'

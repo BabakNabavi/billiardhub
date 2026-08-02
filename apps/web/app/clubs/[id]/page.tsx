@@ -105,6 +105,9 @@ export default function ClubProfilePage() {
   const [club, setClub]               = useState<Club>(sampleClub);
   const [notFound, setNotFound]       = useState(false);
   const [loading, setLoading]         = useState(true);
+  /* از /api/clubs/[id]/booking-status — همان منبعی که صفحه‌ی رزرو
+     می‌خواند، تا هر دو یک چیز بگویند */
+  const [bookingStatus, setBookingStatus] = useState<{ always?: boolean; label?: string } | null>(null);
   const [slide, setSlide]             = useState(0);
   const [distance, setDistance]       = useState<string | null>('۲.۳ کیلومتر');
   const [tab, setTab]                 = useState<'info' | 'tournaments' | 'gallery' | 'schedule'>('info');
@@ -213,6 +216,16 @@ export default function ClubProfilePage() {
   /* اگر باشگاه نیامد باید همان را بگوییم. پیش‌تر state با یک باشگاه
      ساختگی مقداردهی شده بود، پس شکست درخواست یا شناسه‌ی اشتباه به
      نمایش «باشگاه سنچوری تهران» با تلفن و نشانی جعلی ختم می‌شد. */
+  /* وضعیتِ بستنِ رزرو — همان مسیری که صفحه‌ی رزرو می‌خواند، تا هر دو
+     یک چیز بگویند. شکستش دکمه را نمی‌بندد: بدترین حالت این است که
+     کاربر یک صفحه جلوتر پیام را ببیند. */
+  useEffect(() => {
+    fetch(`/api/clubs/${id}/booking-status`, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j) setBookingStatus(j); })
+      .catch(() => { /* بی‌صدا */ });
+  }, [id]);
+
   useEffect(() => {
     api.get(`/clubs/${id}`)
       .then(r => { if (r.data?.id) setClub(r.data); else setNotFound(true); })
@@ -237,7 +250,14 @@ export default function ClubProfilePage() {
     return () => clearInterval(t);
   }, [images.length]);
 
-  const goBook = () => user ? router.push(`/booking/${club.id}`) : router.push('/login');
+  /* وقتی باشگاه رزرو را «همیشه» بسته کرده، بردنِ کاربر به صفحه‌ی رزرو
+     فقط یک کلیکِ اضافه است تا همان‌جا پیامِ بسته‌بودن را ببیند. پس
+     دکمه از همین‌جا خاموش می‌شود و دلیلش نوشته می‌شود. */
+  const bookingClosed = bookingStatus?.always === true;
+  const goBook = () => {
+    if (bookingClosed) return;
+    user ? router.push(`/booking/${club.id}`) : router.push('/login');
+  };
   const popupCoach = activeCoach !== null ? (coaches[activeCoach] ?? null) : null;
 
   /* صفر یک عددِ درست است، نه «خالی»: باشگاهِ تازه باید ۰ عضو نشان بدهد
@@ -684,8 +704,12 @@ export default function ClubProfilePage() {
                       </div>
                     );
                   })()}
-                  <button className="book-btn-desktop" onClick={goBook} style={{ width: '100%', padding: '13px', background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 18, color: '#C7A66A', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.25s' }}>
-                    <Calendar size={15} /> رزرو آنلاین
+                  <button className="book-btn-desktop" onClick={goBook} disabled={bookingClosed}
+                    title={bookingClosed ? 'این باشگاه رزروها را تا اطلاع بعدی بسته است' : undefined}
+                    style={{ width: '100%', padding: '13px', background: bookingClosed ? 'rgba(220,38,38,0.08)' : 'rgba(199,166,106,0.12)', border: `1px solid ${bookingClosed ? 'rgba(220,38,38,0.28)' : 'rgba(199,166,106,0.35)'}`, borderRadius: 18, color: bookingClosed ? '#B91C1C' : '#C7A66A', fontSize: bookingClosed ? 13.5 : 16, fontWeight: 800, cursor: bookingClosed ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'background 0.25s', lineHeight: 1.7 }}>
+                    {bookingClosed
+                      ? <>رزروهای این باشگاه تا اطلاع بعدی بسته است</>
+                      : <><Calendar size={15} /> رزرو آنلاین</>}
                   </button>
                 </div>
 
@@ -1055,8 +1079,12 @@ export default function ClubProfilePage() {
 
         {/* Sticky mobile reserve button */}
         <div className="book-fixed">
-          <button onClick={goBook} style={{ width: '100%', padding: '14px', border: '1px solid rgba(199,166,106,0.35)', borderRadius: 20, background: 'rgba(199,166,106,0.14)', color: '#C7A66A', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Calendar size={16} /> رزرو آنلاین میز
+          <button onClick={goBook} disabled={bookingClosed}
+            title={bookingClosed ? 'این باشگاه رزروها را تا اطلاع بعدی بسته است' : undefined}
+            style={{ width: '100%', padding: '14px', border: `1px solid ${bookingClosed ? 'rgba(220,38,38,0.28)' : 'rgba(199,166,106,0.35)'}`, borderRadius: 20, background: bookingClosed ? 'rgba(220,38,38,0.08)' : 'rgba(199,166,106,0.14)', color: bookingClosed ? '#B91C1C' : '#C7A66A', fontSize: bookingClosed ? 13.5 : 17, fontWeight: 800, cursor: bookingClosed ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, lineHeight: 1.7 }}>
+          {bookingClosed
+            ? <>رزروهای این باشگاه تا اطلاع بعدی بسته است</>
+            : <><Calendar size={16} /> رزرو آنلاین میز</>}
           </button>
         </div>
       </div>
