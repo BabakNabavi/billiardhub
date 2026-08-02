@@ -108,8 +108,18 @@ export async function PUT(
   const decision = isAdmin && typeof body.verificationStatus === 'string'
     ? String(body.verificationStatus) : null;
 
+  /* مقدارِ ناشناخته را همین‌جا رد می‌کنیم تا به‌جای خطای ۵۰۰ از سمتِ
+     قیدِ دیتابیس، پیامِ روشن برگردد. */
+  if (decision && !['pending', 'verified', 'approved', 'rejected', 'unverified'].includes(decision)) {
+    return NextResponse.json(
+      { message: 'وضعیت تأیید نامعتبر است' }, { status: 400, headers: CORS });
+  }
+
   if (decision) {
-    if (decision === 'verified') {
+    /* هر دو «تأیید» باشگاه را منتشر می‌کنند؛ تفاوتشان فقط تیکِ آبی است.
+       `approved` یعنی کارت در فهرست دیده شود ولی چون مدرکی بررسی
+       نشده، نشانِ تأیید نگیرد. */
+    if (decision === 'verified' || decision === 'approved') {
       body.isActive = true;
       body.rejectionReason = null;      // رد قبلی دیگر معتبر نیست
     } else if (decision === 'rejected') {

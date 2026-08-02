@@ -46,8 +46,14 @@ export async function GET(req: NextRequest) {
     if (!isAdminReq) {
       /* دیده‌شدن عمومی = هم منتشرشده، هم تأییدشده.
          `isActive` تنها کافی نیست: داده‌ی قدیمی با وضعیت pending هم
-         isActive=true داشت و در فهرست عمومی می‌نشست. */
-      q = q.eq('isActive', true).eq('verificationStatus', 'verified');
+         isActive=true داشت و در فهرست عمومی می‌نشست.
+
+         دو وضعیت دیده می‌شوند: `verified` (مدارک بررسی شده ⇒ تیک آبی)
+         و `approved` (ادمین کارت را منتشر کرده ولی مدرکی تأیید نشده ⇒
+         بدون تیک). این دو عمداً از هم جدا شده‌اند: پیش‌تر یک مقدار هم
+         «دیده شو» بود هم «تیک بگیر»، و باشگاهِ بی‌مدرک راهی جز یکی از
+         این دو انتها نداشت. */
+      q = q.eq('isActive', true).in('verificationStatus', ['verified', 'approved']);
 
       /* ── فیلترهای سمت سرور ──
          پیش‌تر همه‌ی فیلترها روی کلاینت بودند: کل جدول دانلود می‌شد و
@@ -83,7 +89,19 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(clubs ?? [], { status: 200, headers: CORS_HEADERS });
+    /* `isVerified` مشتق است، نه ستونِ دیتابیس.
+       کارت‌های فهرستِ /clubs همیشه `club.isVerified` را می‌خواندند ولی
+       چنین ستونی روی جدولِ clubs وجود ندارد — یعنی تیکِ آبی روی هیچ
+       کارتی رندر نمی‌شد و کسی متوجه نشده بود، چون تا امروز *همه‌ی*
+       باشگاه‌های عمومی `verified` بودند و نبودِ تیک به چشم نمی‌آمد.
+       حالا که «تأییدشده بدونِ تیک» هم داریم، این تمایز دیده می‌شود و
+       باید درست باشد. */
+    const withBadge = (clubs ?? []).map((c: Record<string, unknown>) => ({
+      ...c,
+      isVerified: c.verificationStatus === 'verified',
+    }));
+
+    return NextResponse.json(withBadge, { status: 200, headers: CORS_HEADERS });
   } catch {
     return NextResponse.json(
       { message: 'خطای سرور' },

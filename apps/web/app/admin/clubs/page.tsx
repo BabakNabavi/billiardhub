@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import { Check, X, ExternalLink, FileText, Clock } from 'lucide-react';
+import { Check, X, ExternalLink, FileText, Clock, Eye } from 'lucide-react';
 import { apiFetch } from '../../../lib/http';
 
 const GOLD = '#C7A66A';
@@ -57,7 +57,10 @@ async function openLicenseDoc(id: string) {
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   pending:    { label: 'در انتظار بررسی', color: '#92600A', bg: '#FEF3C7', icon: <Clock size={13} /> },
-  verified:   { label: 'تأیید شده',       color: '#166534', bg: '#DCFCE7', icon: <Check size={13} /> },
+  verified:   { label: 'تأیید + تیک آبی', color: '#166534', bg: '#DCFCE7', icon: <Check size={13} /> },
+  /* منتشرشده ولی بی‌تیک — عمداً رنگش با «تأیید + تیک» یکی نیست تا در
+     فهرست بی‌نگاه‌کردن به متن هم از هم جدا شوند. */
+  approved:   { label: 'منتشر بدون تیک',  color: '#1D4ED8', bg: '#DBEAFE', icon: <Eye size={13} /> },
   rejected:   { label: 'رد شده',          color: '#991B1B', bg: '#FEE2E2', icon: <X size={13} /> },
   unverified: { label: 'بدون مدرک',       color: '#4B5563', bg: '#F3F4F6', icon: <FileText size={13} /> },
 };
@@ -67,7 +70,7 @@ export default function AdminClubsPage() {
   const { user } = useAuthStore();
   const [clubs, setClubs] = useState<ClubRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'rejected' | 'unverified'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'approved' | 'rejected' | 'unverified'>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
@@ -112,7 +115,7 @@ export default function AdminClubsPage() {
         <div style={{ fontSize: 12, color: GOLD, fontWeight: 700, letterSpacing: '0.2em', marginBottom: 6 }}>ADMIN</div>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#111', margin: 0 }}>تأیید باشگاه‌ها</h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
-          بررسی مدارک و صدور تیک تأیید — تأیید یعنی انتشار در سایت، رد یعنی برداشتن از فهرست
+          هر دو «تأیید» باشگاه را در سایت منتشر می‌کنند؛ تفاوتشان فقط تیکِ آبی است. رد یعنی برداشتن از فهرست.
         </p>
       </div>
 
@@ -125,7 +128,7 @@ export default function AdminClubsPage() {
 
       {/* فیلتر */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {(['all', 'pending', 'verified', 'rejected', 'unverified'] as const).map(f => (
+        {(['all', 'pending', 'verified', 'approved', 'rejected', 'unverified'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)}
             style={{ padding: '6px 16px', borderRadius: 20, border: '1px solid', fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-base)', cursor: 'pointer',
               background: filter === f ? GOLD : '#fff',
@@ -190,13 +193,25 @@ export default function AdminClubsPage() {
 
                 {/* دکمه‌های اقدام */}
                 {club.verificationStatus !== 'verified' && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f3f4f6' }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f3f4f6', flexWrap: 'wrap' }}>
                     <button
                       disabled={!!actionLoading}
                       onClick={() => setStatus(club.id, 'verified')}
                       style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#16a34a', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)', opacity: actionLoading === club.id + 'verified' ? 0.6 : 1 }}>
                       <Check size={14} /> تأیید و اعطای تیک
                     </button>
+                    {/* انتشار بدونِ تیک — برای باشگاهی که مدرکی آپلود نکرده
+                        یا مدارکش هنوز بررسی نشده. کارتش در فهرست دیده
+                        می‌شود ولی نشانِ تأیید نمی‌گیرد. */}
+                    {club.verificationStatus !== 'approved' && (
+                      <button
+                        disabled={!!actionLoading}
+                        onClick={() => setStatus(club.id, 'approved')}
+                        title="باشگاه در فهرست منتشر می‌شود ولی تیک آبی نمی‌گیرد"
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1D4ED8', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-base)', opacity: actionLoading === club.id + 'approved' ? 0.6 : 1 }}>
+                        <Eye size={14} /> تأیید بدون تیک آبی
+                      </button>
+                    )}
                     {club.verificationStatus !== 'rejected' && (
                       <button
                         disabled={!!actionLoading}
@@ -208,12 +223,22 @@ export default function AdminClubsPage() {
                   </div>
                 )}
                 {club.verificationStatus === 'verified' && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f3f4f6' }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f3f4f6', flexWrap: 'wrap' }}>
+                    {/* برداشتنِ فقط تیک، بدونِ برداشتنِ باشگاه از سایت —
+                        وگرنه تنها راهِ پس‌گرفتنِ تیکِ اشتباه، «رد» بود که
+                        باشگاه را هم از فهرست حذف می‌کرد. */}
+                    <button
+                      disabled={!!actionLoading}
+                      onClick={() => setStatus(club.id, 'approved')}
+                      title="باشگاه در سایت می‌ماند، فقط تیک آبی برداشته می‌شود"
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(29,78,216,0.08)', color: '#1D4ED8', border: '1px solid rgba(29,78,216,0.2)', borderRadius: 10, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-base)' }}>
+                      <Eye size={12} /> برداشتن تیک آبی
+                    </button>
                     <button
                       disabled={!!actionLoading}
                       onClick={() => setStatus(club.id, 'rejected')}
                       style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(220,38,38,0.08)', color: '#dc2626', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 10, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-base)' }}>
-                      <X size={12} /> لغو تأیید
+                      <X size={12} /> لغو تأیید و حذف از فهرست
                     </button>
                   </div>
                 )}
