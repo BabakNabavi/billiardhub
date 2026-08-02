@@ -49,7 +49,8 @@
     "test:business": "node scripts/test-business-admin.mjs",
     "test:content": "node scripts/test-content-flow.mjs",
     "test:ads": "node scripts/test-ads-admin.mjs",
-    "test:dashboard": "node scripts/test-dashboard-stats.mjs"
+    "test:dashboard": "node scripts/test-dashboard-stats.mjs",
+    "test:journey": "node scripts/test-user-journey.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
