@@ -50,3 +50,108 @@ export async function GET(
     return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
   }
 }
+
+/* ── عملیاتِ ادمین روی محصول ──────────────────────────────────────
+   صفحه‌ی «تأیید محصولات» از روزِ اول `PUT /products/:id` و
+   `DELETE /products/:id` را صدا می‌زد و این فایل فقط `GET` داشت. هر
+   دو ۴۰۵ می‌گرفتند و صفحه خطا را در `.catch` می‌بلعید: دکمه‌ی «تأیید»
+   زده می‌شد، ردیف در رابط سبز می‌شد، و در دیتابیس هیچ اتفاقی
+   نمی‌افتاد — تا اولین رفرش.
+
+   `PATCH` هم پذیرفته می‌شود چون فعلِ درست‌تر برای تغییرِ جزئی است؛
+   `PUT` برای سازگاری با فراخوانیِ موجود می‌ماند. */
+
+import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db'
+
+/* فقط همین دو پرچم از بیرون قابلِ تغییرند. فهرستِ سفید عمدی است:
+   با بدنه‌ی خام، ادمین (یا هر باگی) می‌توانست `price` یا `sellerId`
+   را هم عوض کند. */
+const ADMIN_FIELDS = ['isVerified', 'isOfficialStore'] as const
+
+async function adminGuard(req: NextRequest) {
+  const actor = actorFromRequest(req)
+  if (!actor) return NextResponse.json({ error: 'ابتدا وارد شوید' }, { status: 401 })
+  if (!(await isAdmin(actor.id))) {
+    return NextResponse.json({ error: 'دسترسی مجاز نیست' }, { status: 403 })
+  }
+  return actor
+}
+
+async function applyPatch(req: NextRequest, id: string) {
+  if (!UUID.test(String(id ?? ''))) {
+    return NextResponse.json({ error: 'محصول پیدا نشد' }, { status: 404 })
+  }
+  const guard = await adminGuard(req)
+  if (guard instanceof NextResponse) return guard
+
+  const body = await req.json().catch(() => ({})) as Record<string, unknown>
+  const patch: Record<string, unknown> = {}
+  for (const k of ADMIN_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(body, k)) patch[k] = !!body[k]
+  }
+  if (Object.keys(patch).length === 0) {
+    return NextResponse.json({ error: 'تغییرِ مجازی فرستاده نشد' }, { status: 400 })
+  }
+  /* تأیید یعنی درخواستِ تأیید رسیدگی شده */
+  if (patch.isVerified === true) patch.requestedVerification = false
+  patch.updatedAt = new Date().toISOString()
+
+  const supabase = getSupabaseServer()
+  const { data: before } = await supabase.from('products')
+    .select('id,"isVerified","isOfficialStore"').eq('id', id).maybeSingle()
+  if (!before) return NextResponse.json({ error: 'محصول پیدا نشد' }, { status: 404 })
+
+  const { data, error } = await supabase.from('products')
+    .update(patch).eq('id', id).select().single()
+  if (error) {
+    console.error('[products/:id] update:', error.message)
+    return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
+  }
+
+  void audit({
+    actorId: (guard as { id: string }).id, actorRole: 'admin',
+    action: 'PRODUCT_UPDATED_BY_ADMIN', entityType: 'product', entityId: id,
+    oldValue: before as Record<string, unknown>, newValue: patch,
+    ip: clientIp(req) ?? undefined,
+  })
+
+  return NextResponse.json({ product: data })
+}
+
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  return applyPatch(req, (await context.params).id)
+}
+
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  return applyPatch(req, (await context.params).id)
+}
+
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params
+  if (!UUID.test(String(id ?? ''))) {
+    return NextResponse.json({ error: 'محصول پیدا نشد' }, { status: 404 })
+  }
+  const guard = await adminGuard(req)
+  if (guard instanceof NextResponse) return guard
+
+  const supabase = getSupabaseServer()
+  const { data: before } = await supabase.from('products')
+    .select('*').eq('id', id).maybeSingle()
+  if (!before) return NextResponse.json({ error: 'محصول پیدا نشد' }, { status: 404 })
+
+  const { error } = await supabase.from('products').delete().eq('id', id)
+  if (error) {
+    console.error('[products/:id] delete:', error.message)
+    return NextResponse.json({ error: 'خطای سرور' }, { status: 500 })
+  }
+
+  /* بدنه‌ی کامل در ممیزی می‌ماند: حذفِ محصول برگشت‌پذیر نیست و
+     دست‌کم باید بشود فهمید چه چیزی و به‌دستِ چه کسی رفته. */
+  void audit({
+    actorId: (guard as { id: string }).id, actorRole: 'admin',
+    action: 'PRODUCT_DELETED_BY_ADMIN', entityType: 'product', entityId: id,
+    oldValue: before as Record<string, unknown>, ip: clientIp(req) ?? undefined,
+  })
+
+  return NextResponse.json({ ok: true })
+}

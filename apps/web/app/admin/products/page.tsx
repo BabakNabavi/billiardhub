@@ -39,34 +39,44 @@ export default function AdminProductsPage() {
   const { user } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterVerification, setFilterVerification] = useState('all');
 
   useEffect(() => {
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
-    api.get('/products').then(res => {
-      setProducts(res.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    /* پاسخِ /api/products یک شیء است: { products, total, page, ... }
+       نه آرایه. پیش‌تر همان شیء در state می‌نشست و اولین `.filter`
+       صفحه را می‌شکست — یعنی «تأیید محصولات» هرگز چیزی نشان نمی‌داد. */
+    api.get('/products?limit=200').then(res => {
+      const list = Array.isArray(res.data) ? res.data : (res.data?.products ?? []);
+      setProducts(list);
+      setErr('');
+    }).catch(() => setErr('خواندن محصولات انجام نشد'))
+      .finally(() => setLoading(false));
   }, [user]);
 
   const handleVerify = async (productId: string, verified: boolean) => {
+    setErr('');
     try {
       await api.put(`/products/${productId}`, { isVerified: verified });
-      setProducts(products.map(p => p.id === productId ? { ...p, isVerified: verified } : p));
-    } catch (err) {
-      console.error(err);
+      setProducts(ps => ps.map(p => p.id === productId ? { ...p, isVerified: verified, requestedVerification: verified ? false : p.requestedVerification } : p));
+    } catch (e: any) {
+      /* پیش‌تر خطا فقط در کنسول می‌نشست و ردیف در رابط سبز می‌شد؛
+         ادمین باور می‌کرد تأیید انجام شده. */
+      setErr(e?.response?.data?.error ?? 'تغییر وضعیت محصول انجام نشد');
     }
   };
 
   const handleDelete = async (productId: string) => {
     if (!confirm('آیا مطمئنی؟')) return;
+    setErr('');
     try {
       await api.delete(`/products/${productId}`);
-      setProducts(products.filter(p => p.id !== productId));
-    } catch (err) {
-      console.error(err);
+      setProducts(ps => ps.filter(p => p.id !== productId));
+    } catch (e: any) {
+      setErr(e?.response?.data?.error ?? 'حذف محصول انجام نشد');
     }
   };
 
@@ -85,6 +95,12 @@ export default function AdminProductsPage() {
 
   return (
     <div className="max-w-6xl mx-auto pb-10">
+      {err && (
+        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+          style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+          {err}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           <ShoppingBag size={24} className="text-purple-600" />
