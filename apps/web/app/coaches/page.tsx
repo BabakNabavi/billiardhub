@@ -412,7 +412,16 @@ export default function CoachesPage() {
         @media(max-width:700px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         @media(max-width:480px) {.g5{grid-template-columns:repeat(2,1fr)!important;}}
         /* mobile: search + toggles drop to their own row under the pills */
-        @media(max-width:640px){.coach-search-group{flex-basis:100%;margin-inline-start:0!important;}}
+        /* flex-basis:100% روی یک آیتمِ فلکس، «۱۰۰٪» را نسبت به فضای
+           موجود حساب می‌کند و با فاصله‌ی ردیف از آن بیرون می‌زد: روی
+           صفحه‌ی ۳۲۰ این گروه ۳۳۲ پیکسل می‌شد و کلِ صفحه به پهلو کشیده
+           می‌شد. سقفِ صریح و اجازه‌ی شکستن، هر دو لازم است.
+           (این بلوک داخلِ یک template literal است — بک‌تیک ممنوع.) */
+        @media(max-width:640px){
+          .coach-search-group{flex-basis:100%;margin-inline-start:0!important;
+            max-width:100%;flex-wrap:wrap;min-width:0;}
+          .coach-search-group>*{min-width:0;}
+        }
         /* list view: 2 cards per row on desktop, 1 on mobile */
         .coach-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
         @media(max-width:700px){.coach-list-grid{grid-template-columns:1fr;}}

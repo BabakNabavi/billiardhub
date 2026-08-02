@@ -617,7 +617,11 @@ export default function MarketNewPage() {
         .mk-mcat { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
           cursor: pointer; font-family: inherit; padding: 0; }
         /* ۵٪+۵٪ بزرگ‌تر (۵۲ ⇒ ۵۸) */
-        .mk-mcat .ic { width: 58px; height: 58px; border-radius: 17px; background: #fff; border: 1px solid ${LINE};
+        /* عرضِ ثابتِ ۵۸ در پنج ستون روی صفحه‌ی ۳۲۰ جا نمی‌شد:
+           ۵×۵۸ + چهار فاصله‌ی ۶ + حاشیه = ۳۲۲ پیکسل، یعنی کلِ صفحه
+           به پهلو کشیده می‌شد. حالا آیکن ستونِ خودش را پر می‌کند و از
+           ۵۸ بزرگ‌تر نمی‌شود، پس روی صفحه‌های بزرگ‌تر همان قبلی است. */
+        .mk-mcat .ic { width: 100%; max-width: 58px; aspect-ratio: 1; border-radius: 17px; background: #fff; border: 1px solid ${LINE};
           display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .25s cubic-bezier(.22,1,.36,1); }
         .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
         .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
