@@ -9,9 +9,16 @@ import type { Period } from '@/lib/ads/quota';
 
 const PERIODS: Period[] = ['day', 'week', 'month'];
 
+/* علامتِ منفی عمداً نگه داشته می‌شود.
+   پیش‌تر `[^0-9.]` منفی را هم پاک می‌کرد، پس `-۵۰۰۰` بی‌صدا به `۵۰۰۰`
+   تبدیل می‌شد و بررسیِ `if (price < 0)` پایین‌تر هرگز اجرا نمی‌شد —
+   یک اعتبارسنجیِ مرده. حالا ورودیِ منفی واقعاً رد می‌شود. */
 const num = (v: unknown, d = 0) => {
-  const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
-  return Number.isFinite(n) ? n : d;
+  const raw = String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)));
+  const neg = /^\s*-/.test(raw);
+  const n = Number(raw.replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(n)) return d;
+  return neg ? -n : n;
 };
 const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
 

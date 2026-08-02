@@ -11,9 +11,15 @@ import type { Period } from '@/lib/ads/quota';
 
 const PERIODS: Period[] = ['day', 'week', 'month'];
 
+/* علامتِ منفی نگه داشته می‌شود — همان اشکالِ مسیرِ بسته‌های آگهی:
+   `[^0-9.]` منفی را پاک می‌کرد و بررسیِ «قیمت منفی» هرگز اجرا
+   نمی‌شد. */
 const num = (v: unknown, d = 0) => {
-  const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
-  return Number.isFinite(n) ? n : d;
+  const raw = String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)));
+  const neg = /^\s*-/.test(raw);
+  const n = Number(raw.replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(n)) return d;
+  return neg ? -n : n;
 };
 const str = (v: unknown, max = 200) => String(v ?? '').trim().slice(0, max);
 
