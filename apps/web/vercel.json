@@ -11,7 +11,7 @@
     },
     {
       "path": "/api/cron/complete-bookings",
-      "schedule": "0 * * * *"
+      "schedule": "0 4 * * *"
     }
   ]
 }
