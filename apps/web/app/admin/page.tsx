@@ -16,7 +16,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
-  CalendarDays, Flag, Package,
+  CalendarDays, Flag, Package, LifeBuoy,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -47,6 +47,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'مدیریت کاربران', desc: 'مشاهده، ویرایش و مسدودسازی کاربران', icon: <Users size={20} />, link: '/admin/users' },
       { title: 'مدیریت نقش‌ها', desc: 'اعطا و لغو نقش‌ها (مربی، داور، فروشنده…)', icon: <KeyRound size={20} />, link: '/admin/roles' },
       { title: 'احراز هویت', desc: 'بررسی درخواست‌های تأیید هویت کاربران', icon: <ShieldCheck size={20} />, link: '/admin/verifications' },
+      { title: 'تیکت‌های پشتیبانی', desc: 'پیام‌های تماس با ما و درخواست تغییر کد پستی و اطلاعات بانکی', icon: <LifeBuoy size={20} />, link: '/admin/support' },
     ],
   },
   {

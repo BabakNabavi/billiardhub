@@ -49,6 +49,10 @@ function shape(u: Record<string, unknown>) {
        صفحه پس از هر رفرش شبا را «—» نشان می‌داد در حالی که در
        دیتابیس ذخیره بود. */
     bankIban: u.bank_iban ?? '',
+    /* کارتِ استعلام‌شده قفل است و فقط ادمین بازش می‌کند. کلاینت
+       پیش‌تر از روی «کارت خالی نیست» حدس می‌زد؛ آن حدس پس از
+       بازکردنِ ادمین اشتباه می‌شد چون کارت سرِ جایش می‌ماند. */
+    bankCardVerified: !!u.bank_card_verified,
     /* هویت استعلام‌شده — فقط برای نمایش */
     nationalId: u.national_id ?? '',
     birthDate: u.birth_date ?? u.birthDate ?? '',

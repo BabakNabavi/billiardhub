@@ -4,6 +4,7 @@ import { sb, actorFromRequest } from '@/lib/finance/db';
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit';
 import { digitsOnly, isValidCard, bankOfCard, bankOfIban } from '@/lib/bank';
 import { matchCard, cardToIban } from '@/lib/bank-server';
+import { lockedResponse, isMissingColumn } from '@/lib/verification-lock';
 
 /* کارت بانکی کاربر — مقصد بازگشت وجه رزروِ لغوشده.
 
@@ -41,13 +42,25 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: 'شماره کارت معتبر نیست — رقم‌ها را دوباره بررسی کنید' }, { status: 400 });
   }
 
-  const { data: me } = await sb().from('users')
-    .select('national_id, national_id_verified, birth_date, "firstName", "lastName"')
-    .eq('id', actor.id).maybeSingle();
+  const COLS = 'national_id, national_id_verified, birth_date, "firstName", "lastName", bank_card_verified';
+  let { data: me, error: meErr } = await sb().from('users').select(COLS).eq('id', actor.id).maybeSingle();
+  /* ستونِ قفل با مهاجرت ۰۳۹ می‌آید؛ تا اجرا نشده ثبتِ کارت نباید بشکند */
+  if (meErr && isMissingColumn(meErr.message)) {
+    console.error('[bank-card] ستون bank_card_verified نیست — مهاجرت ۰۳۹ اجرا نشده');
+    ({ data: me } = await sb().from('users')
+      .select('national_id, national_id_verified, birth_date, "firstName", "lastName"')
+      .eq('id', actor.id).maybeSingle());
+  }
   const u = (me ?? {}) as {
     national_id?: string; national_id_verified?: boolean; birth_date?: string;
-    firstName?: string; lastName?: string;
+    firstName?: string; lastName?: string; bank_card_verified?: boolean;
   };
+
+  /* قفل — پیش از matchCard، وگرنه اعتبارِ سرویس مصرف شده و بعد جواب
+     دور ریخته می‌شود. تنها راهِ تغییر، تیکتِ پشتیبانی و بازکردنِ ادمین
+     است؛ پیش‌تر خودِ کاربر با دکمه‌ی «تغییر کارت» بی‌نهایت بار
+     می‌توانست استعلام بگیرد. */
+  if (u.bank_card_verified) return lockedResponse('bank');
 
   if (!u.national_id || !u.national_id_verified || !u.birth_date) {
     return NextResponse.json({
@@ -87,17 +100,24 @@ export async function PUT(req: NextRequest) {
      بنشیند — همان اشتباهی که در اطلاعات بانکی باشگاه بود. */
   const ownerName = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
 
-  const patch: Record<string, unknown> = { bank_card: card, bank_card_owner: ownerName || null };
+  const patch: Record<string, unknown> = {
+    bank_card: card,
+    bank_card_owner: ownerName || null,
+    /* استعلام موفق بود ⇒ از این پس قفل */
+    bank_card_verified: true,
+    bank_card_verified_at: new Date().toISOString(),
+  };
   if (iban) patch.bank_iban = iban;
 
   let { error } = await sb().from('users').update(patch).eq('id', actor.id);
 
-  /* ستون bank_iban با مهاجرت ۰۳۸ می‌آید. تا اجرا نشده، نبودنش نباید
-     ثبتِ خودِ کارت را بشکند. */
-  if (error && /does not exist|PGRST204/i.test(`${error.message} ${error.code ?? ''}`)
-      && error.message.includes('bank_iban')) {
-    console.error('[users/bank-card] ستون bank_iban نیست — مهاجرت ۰۳۸ اجرا نشده');
-    delete patch.bank_iban;
+  /* ستون‌های اختیاری: bank_iban با مهاجرت ۰۳۸ و فلگِ قفل با ۰۳۹.
+     تا اجرا نشده‌اند، نبودشان نباید ثبتِ خودِ کارت را بشکند. */
+  if (error && isMissingColumn(`${error.message} ${error.code ?? ''}`)) {
+    console.error('[users/bank-card] ستونِ اختیاری نیست — مهاجرت ۰۳۸/۰۳۹ اجرا نشده:', error.message);
+    if (error.message.includes('bank_iban')) delete patch.bank_iban;
+    delete patch.bank_card_verified;
+    delete patch.bank_card_verified_at;
     ({ error } = await sb().from('users').update(patch).eq('id', actor.id));
   }
 
@@ -119,10 +139,19 @@ export async function PUT(req: NextRequest) {
   });
 }
 
-/** حذف کارت ثبت‌شده */
+/** حذف کارت ثبت‌شده — فقط تا وقتی استعلامش تأیید نشده.
+ *
+ *  اگر این‌جا باز می‌ماند، قفلِ PUT بی‌معنی بود: حذف کن، دوباره ثبت
+ *  کن، و هر بار یک استعلامِ تازه. پس از تأیید، تغییر فقط با تیکت. */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
+
+  const { data: me } = await sb().from('users')
+    .select('bank_card_verified').eq('id', actor.id).maybeSingle();
+  if ((me as { bank_card_verified?: boolean } | null)?.bank_card_verified) {
+    return lockedResponse('bank');
+  }
 
   const { error } = await sb().from('users')
     .update({ bank_card: null, bank_card_owner: null, bank_iban: null }).eq('id', actor.id);

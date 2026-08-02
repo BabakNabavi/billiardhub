@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
 import { matchIban, syncClubSettlementAccount } from '@/lib/bank-server';
+import { lockedResponse } from '@/lib/verification-lock';
 import { formatIban, isValidIban, bankOfIban } from '@/lib/bank';
 
 /* ثبت شبا به‌صورت مستقیم — برای باشگاه‌داری که شبایش را دارد ولی
@@ -21,11 +22,17 @@ export async function POST(req: NextRequest) {
 
   if (clubId) {
     const admin = await isAdmin(actor.id);
-    const { data: club } = await sb().from('clubs').select('"ownerId"').eq('id', clubId).maybeSingle();
+    const { data: club } = await sb().from('clubs')
+      .select('"ownerId","ibanVerified"').eq('id', clubId).maybeSingle();
     if (!club) return NextResponse.json({ message: 'باشگاه یافت نشد' }, { status: 404 });
-    if ((club as { ownerId?: string }).ownerId !== actor.id && !admin) {
+    const c = club as { ownerId?: string; ibanVerified?: boolean };
+    if (c.ownerId !== actor.id && !admin) {
       return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
     }
+
+    /* قفل — همان قاعده‌ی card-to-iban؛ این مسیر راهِ دومِ رسیدن به
+       همان ستون است و اگر باز می‌ماند، قفلِ آن یکی دور زده می‌شد. */
+    if (c.ibanVerified && !admin) return lockedResponse('bank');
   }
 
   const { data: me } = await sb().from('users')

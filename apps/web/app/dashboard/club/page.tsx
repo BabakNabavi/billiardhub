@@ -500,10 +500,11 @@ export default function ClubDashboardPage() {
      تا امروز دکمه بعد از استعلامِ موفق هم روشن می‌ماند و کاربر می‌توانست
      بی‌نهایت بار استعلام بگیرد — هر بار یک واحد از اعتبارِ سرویس. */
   const [ibanVerified, setIbanVerified] = useState(false);
-  /* راهِ خروج از قفل. بدون این، کسی که حسابش عوض شده گیر می‌افتاد. */
+  /* پیش‌تر راهِ خروجی در همین صفحه بود («تغییر حساب») تا کسی که حسابش
+     عوض شده گیر نیفتد. ولی همان راه یعنی استعلامِ نامحدود و هزینه‌ی
+     نامحدود؛ حالا خروج از قفل تیکتِ پشتیبانی است. این حالت فقط برای
+     پنجره‌ی کوتاهِ پس از استعلامِ ناموفق نگه داشته شده. */
   const [bankEditing, setBankEditing] = useState(false);
-  /* پرسشِ تأیید پیش از بازکردنِ قفل — درون‌صفحه‌ای، نه window.confirm */
-  const [bankUnlockAsk, setBankUnlockAsk] = useState(false);
   const bankLocked = ibanVerified && !bankEditing;
 
   /* استعلام کد پستی */
@@ -513,6 +514,8 @@ export default function ClubDashboardPage() {
      می‌ماند: هر فراخوان اعتبارِ سرویس را می‌سوزاند و نتیجه‌اش هم
      همان است. با تغییرِ کد پستی خودبه‌خود دوباره روشن می‌شود. */
   const [postalDone, setPostalDone] = useState('');
+  /* قفلِ ماندگارِ کد پستی — از سرور می‌آید و رفرش بازش نمی‌کند */
+  const [postalVerified, setPostalVerified] = useState(false);
 
   /* موقعیت مکانی — مبنای «نزدیک‌ترین باشگاه» در فهرست باشگاه‌ها.
      تا امروز فقط در فرمِ ثبتِ اولیه قابل تعیین بود؛ باشگاهی که آن‌جا
@@ -738,6 +741,10 @@ export default function ClubDashboardPage() {
       setPostalMsg(null);
       /* قفلِ استعلام مالِ همین باشگاه بود؛ با عوض‌شدن باشگاه پاک شود */
       setPostalDone('');
+      /* ولی قفلِ ماندگار از خودِ باشگاه خوانده می‌شود. بک‌فیل با
+         `postalCode`: باشگاهی که کد پستیِ ثبت‌شده دارد، استعلامش
+         قبلاً موفق بوده — حتی اگر مهاجرت ۰۳۹ هنوز اجرا نشده باشد. */
+      setPostalVerified(c.postalCodeVerified ?? /^\d{10}$/.test(String(c.postalCode ?? '')));
       if (c.workingHours) setHoursForm(c.workingHours);
       setSurcharge({
         enabled: c.playerSurchargeEnabled === undefined ? true : !!c.playerSurchargeEnabled,
@@ -1057,17 +1064,10 @@ export default function ClubDashboardPage() {
     } finally { setIbanBusy(false); }
   };
 
-  /* بازکردنِ قفلِ حساب برای تغییر. تأیید همین‌جا هم برداشته می‌شود تا
-     تیکِ سبز روی حسابی که دیگر همان حساب نیست نماند؛ سرور هم مستقل
-     همین کار را موقع ذخیره انجام می‌دهد. */
-  /* `window.confirm` پنجره‌ی خودِ مرورگر را می‌آورد: انگلیسیِ چپ‌به‌راست،
-     با ظاهرِ سیستم‌عامل و بی‌ربط به بقیه‌ی سایت. همان الگوی تأییدِ
-     درون‌صفحه‌ای که «حذف باشگاه» دارد این‌جا هم به کار می‌رود. */
-  const unlockBank = () => {
-    setBankEditing(true);
-    setBankUnlockAsk(false);
-    setIbanMsg({ ok: false, text: 'تأیید باطل شد — پس از تغییر، دوباره استعلام بگیرید.' });
-  };
+  /* `unlockBank` حذف شد: بازکردنِ قفلِ حساب دیگر کارِ خودِ کاربر نیست.
+     هر بازکردن سه استعلامِ پولیِ تازه می‌طلبید و هیچ سقفی نداشت، پس
+     حالا فقط ادمین — پس از تیکتِ پشتیبانی — می‌تواند بازش کند.
+     سرور هم مستقل همین را اعمال می‌کند، نه فقط این صفحه. */
 
   /* استعلام کد پستی ⇒ آدرس. آدرس و مختصات را خودِ سرور روی باشگاه
      می‌نویسد؛ این‌جا فقط بازتابش می‌دهیم تا کاربر ببیند چه ثبت شد. */
@@ -1090,13 +1090,14 @@ export default function ClubDashboardPage() {
         province: j.geo?.province || p.province,
         city: j.geo?.city || p.city,
       }));
-      /* از این لحظه دکمه برای همین کد پستی خاموش می‌شود */
+      /* از این لحظه قفل است — و برخلافِ قبل، رفرش بازش نمی‌کند */
       setPostalDone(clubInfo.postalCode);
+      if (j.locked) setPostalVerified(true);
       setPostalMsg({
         ok: true,
         text: j.postalCodeStored === false
           ? 'آدرس یافت شد و ثبت شد (کد پستی پس از اجرای مهاجرت ذخیره می‌شود)'
-          : 'آدرس از کد پستی خوانده و ثبت شد — برای استعلام دوباره، کد پستی را تغییر دهید',
+          : 'آدرس از کد پستی خوانده و ثبت شد. کد پستی از این پس قفل است؛ برای تغییر آن به پشتیبانی تیکت بزنید.',
       });
     } catch {
       setPostalMsg({ ok: false, text: 'خطا در ارتباط با سرور' });
@@ -1590,10 +1591,16 @@ export default function ClubDashboardPage() {
      آن‌وقت این فیلد خالی می‌ماند؛ پیشوندِ شبا همیشه هست. */
   const derivedBankName = ibanBank || cardBank || '';
   const hasGeo = geo !== null;
-  /* قفلِ دکمه‌ی استعلام تا وقتی کد پستی همان است که استعلامش موفق بود.
-     هر فراخوان اعتبارِ سرویس را می‌سوزاند و نتیجه‌اش هم همان است؛ با
-     تغییرِ کد پستی خودبه‌خود باز می‌شود. */
-  const postalLocked = postalDone !== '' && postalDone === clubInfo.postalCode;
+  /* قفلِ کد پستی — یک استعلامِ موفق و تمام.
+
+     پیش‌تر این فقط حالتِ ری‌اکت بود: با عوض‌کردنِ کد پستی یا یک رفرش
+     باز می‌شد، و سمتِ سرور هم اصلاً چکی نبود. یعنی هرکس می‌توانست
+     بی‌شمار بار استعلام بگیرد و هر بار برای ما هزینه داشت.
+
+     حالا مقدارِ ماندگار از سرور می‌آید (`postalCodeVerified`) و
+     `postalDone` فقط قفل را در همان نشست بی‌درنگ اعمال می‌کند.
+     تغییرش تنها با تیکتِ پشتیبانی ممکن است. */
+  const postalLocked = postalVerified || (postalDone !== '' && postalDone === clubInfo.postalCode);
 
   /* دو سازوکار بستن رزرو وجود دارد و باید یک وضعیت واحد نشان دهند،
      وگرنه کاربر «رزرو امروز بسته» را تیک می‌زند و همان بالا می‌خواند
@@ -2060,10 +2067,21 @@ export default function ClubDashboardPage() {
                     flex-wrap دکمه به اندازه‌ی متنش کوچک می‌ماند و زیرِ
                     فیلدِ تمام‌عرض ناهم‌تراز می‌نشست. */}
                 <div className="bh-postal-row">
+                  {/* پس از استعلامِ موفق، خودِ فیلد هم قفل می‌شود نه فقط
+                      دکمه: تا دیروز کافی بود یک رقم عوض شود تا دکمه
+                      روشن شود و استعلامِ تازه‌ای هزینه بتراشد. */}
                   <FaNumberInput
                     value={clubInfo.postalCode} ariaLabel="کد پستی" placeholder="۱۰ رقم"
-                    onChange={v => { setClubInfo(p => ({ ...p, postalCode: v.slice(0, 10) })); setPostalMsg(null); }}
-                    style={{ ...inputStyle, width: '100%', height: 40, boxSizing: 'border-box', textAlign: 'center', letterSpacing: '0.08em' }}
+                    readOnly={postalLocked}
+                    onChange={v => {
+                      if (postalLocked) return;
+                      setClubInfo(p => ({ ...p, postalCode: v.slice(0, 10) })); setPostalMsg(null);
+                    }}
+                    style={{
+                      ...inputStyle, width: '100%', height: 40, boxSizing: 'border-box',
+                      textAlign: 'center', letterSpacing: '0.08em',
+                      ...(postalLocked ? { background: 'rgba(0,0,0,0.04)', color: 'rgba(0,0,0,0.55)', cursor: 'default' } : {}),
+                    }}
                   />
                   <button type="button" onClick={fetchAddress}
                     disabled={postalLocked || postalBusy || !/^\d{10}$/.test(clubInfo.postalCode) || !selectedClub}
@@ -2085,9 +2103,22 @@ export default function ClubDashboardPage() {
                     {postalMsg.text}
                   </div>
                 )}
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
-                  با استعلام کد پستی، آدرس و موقعیت باشگاه خودکار پر می‌شود.
-                </div>
+                {/* وقتی قفل است، کاربر باید بداند چرا و چه کند — وگرنه
+                    فیلدِ خاکستری فقط شبیهِ باگ به‌نظر می‌رسد. */}
+                {postalLocked ? (
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
+                    کد پستی استعلام و ثبت شده و قابل تغییر نیست. برای تغییر آن{' '}
+                    <a href={`/contact?subject=${encodeURIComponent('درخواست تغییر کد پستی')}${selectedClub ? `&clubId=${selectedClub.id}` : ''}`}
+                      style={{ color: '#A07840', fontWeight: 800, textDecoration: 'underline' }}>
+                      به پشتیبانی تیکت بزنید
+                    </a>.
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, lineHeight: 1.9 }}>
+                    با استعلام کد پستی، آدرس و موقعیت باشگاه خودکار پر می‌شود.
+                    استعلام فقط یک بار ممکن است، پس کد پستی را با دقت وارد کنید.
+                  </div>
+                )}
               </div>
               {/* ── آدرس ──
                   خروجیِ استعلامِ کد پستی است، پس ورودیِ کاربر نیست. با
@@ -2345,9 +2376,11 @@ export default function ClubDashboardPage() {
               </div>
             )}
             {/* ── نوارِ «تأیید شده» ──
-                وقتی حساب تأیید است، همه‌ی فیلدها و هر دو دکمه‌ی استعلام
-                قفل‌اند. تنها راهِ بازکردن، دکمه‌ی زیر است که تأیید را هم
-                باطل می‌کند. */}
+                حسابِ تأییدشده دیگر با یک دکمه در همین صفحه باز نمی‌شود.
+                دلیلش هزینه است: هر بازکردن یعنی سه استعلامِ پولیِ تازه
+                (CardMatch + CardToIban + IbanMatch)، و پیش‌تر هیچ سقفی
+                جز حوصله‌ی کاربر نداشت. حالا تغییر فقط با تیکتِ پشتیبانی
+                و بازکردنِ آگاهانه‌ی ادمین ممکن است. */}
             {ibanVerified && (
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
@@ -2356,43 +2389,15 @@ export default function ClubDashboardPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, fontWeight: 800, color: '#166534' }}>
                   <CheckCircle size={15} />
-                  {bankEditing ? 'در حال تغییر حساب — پس از ذخیره باید دوباره استعلام بگیرید' : 'حساب تأیید شده و قفل است'}
+                  حساب تأیید شده و قفل است
                 </div>
-                {!bankEditing && !bankUnlockAsk && (
-                  <button type="button" onClick={() => setBankUnlockAsk(true)} style={{
-                    padding: '7px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                    fontFamily: 'var(--font-base)', background: '#fff',
+                <a
+                  href={`/contact?subject=${encodeURIComponent('درخواست ویرایش اطلاعات بانکی')}${selectedClub ? `&clubId=${selectedClub.id}` : ''}`}
+                  style={{
+                    padding: '7px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700,
+                    fontFamily: 'var(--font-base)', background: '#fff', textDecoration: 'none',
                     border: '1px solid rgba(0,0,0,0.14)', color: '#6B7280',
-                  }}>تغییر حساب</button>
-                )}
-              </div>
-            )}
-
-            {/* تأییدِ درون‌صفحه‌ای به‌جای پنجره‌ی خودِ مرورگر — همان الگویی
-                که «حذف باشگاه» پایین همین صفحه دارد. */}
-            {bankUnlockAsk && (
-              <div style={{
-                marginBottom: 16, padding: '13px 15px', borderRadius: 13,
-                background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.26)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 11 }}>
-                  <AlertTriangle size={15} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <span style={{ fontSize: 12.5, color: '#991B1B', lineHeight: 1.95, fontWeight: 600 }}>
-                    با تغییر حساب، تأیید فعلی باطل می‌شود و تا استعلام دوباره، تسویه انجام نمی‌شود. ادامه می‌دهید؟
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button type="button" onClick={unlockBank} style={{
-                    padding: '8px 18px', borderRadius: 20, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                    fontFamily: 'var(--font-base)', background: 'rgba(239,68,68,0.12)',
-                    border: '1px solid rgba(239,68,68,0.35)', color: '#dc2626',
-                  }}>بله، تغییر می‌دهم</button>
-                  <button type="button" onClick={() => setBankUnlockAsk(false)} style={{
-                    padding: '8px 18px', borderRadius: 20, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-                    fontFamily: 'var(--font-base)', background: 'rgba(0,0,0,0.04)',
-                    border: '1px solid rgba(0,0,0,0.12)', color: '#6B7280',
-                  }}>انصراف</button>
-                </div>
+                  }}>درخواست تغییر حساب</a>
               </div>
             )}
             {/* ── چهار فیلد ──

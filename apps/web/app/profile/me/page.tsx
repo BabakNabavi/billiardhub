@@ -47,6 +47,8 @@ interface UserProfile {
   bankCardOwner?: string
   /* شبای همان کارت — از استعلام، نه ورودیِ کاربر */
   bankIban?: string
+  /* کارت استعلام‌شده و قفل است؛ بازکردنش فقط با ادمین */
+  bankCardVerified?: boolean
   address?: string
   workPhone?: string
 }
@@ -239,8 +241,10 @@ export default function ProfileMePage() {
     setBankCard(j.bankCard ? formatCard(j.bankCard) : '')
     setBankIban(j.bankIban ?? '')
     setBankName(j.bankIban ? (bankOfIban(j.bankIban) ?? '') : (j.bankCard ? (bankOfCard(j.bankCard) ?? '') : ''))
-    /* کارتی که ذخیره شده یعنی استعلامش قبلاً موفق بوده — پس قفل */
-    setCardLocked(!!j.bankCard)
+    /* فلگِ سرور ملاک است. بک‌فیل با «کارت خالی نیست» فقط برای پیش از
+       اجرای مهاجرت ۰۳۹ است؛ پس از آن، ادمین که قفل را باز می‌کند
+       کارت را پاک نمی‌کند، و حدسِ قدیمی همچنان قفل نشان می‌داد. */
+    setCardLocked(j.bankCardVerified ?? !!j.bankCard)
     setClubName(j.clubNameManual ?? '')
     setAddress(j.address ?? '')
     setWorkPhone(j.workPhone ?? '')
@@ -734,15 +738,20 @@ export default function ProfileMePage() {
 
               <div style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.4)', margin: '-4px 0 12px', lineHeight: 1.85 }}>
                 {cardLocked
-                  ? 'کارت ثبت و استعلام شده است. برای تغییر، روی «تغییر کارت» بزنید.'
-                  : 'شماره کارت را وارد کنید و «ثبت کارت» را بزنید؛ شبا، نام دارنده و نام بانک خودکار پر می‌شوند.'}
+                  ? 'کارت ثبت و استعلام شده و قابل تغییر نیست. برای تغییر آن به پشتیبانی تیکت بزنید.'
+                  : 'شماره کارت را وارد کنید و «ثبت کارت» را بزنید؛ شبا، نام دارنده و نام بانک خودکار پر می‌شوند. استعلام فقط یک بار ممکن است.'}
               </div>
 
+              {/* پیش‌تر این‌جا دکمه‌ی «تغییر کارت» بود که قفل را همان‌جا
+                  باز می‌کرد — یعنی هر کاربر می‌توانست بی‌شمار بار
+                  CardMatch و CardToIban بگیرد و هر بار برای ما هزینه
+                  داشت. حالا تغییر از راه تیکت است و ادمین قفل را
+                  یک‌بار باز می‌کند. */}
               {cardLocked ? (
-                <button onClick={() => { setCardLocked(false); setBankCard('') }}
-                  style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', color: 'rgba(0,0,0,0.55)', fontSize: 14.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
-                  تغییر کارت
-                </button>
+                <a href={`/contact?subject=${encodeURIComponent('درخواست ویرایش اطلاعات بانکی')}`}
+                  style={{ display: 'block', textAlign: 'center', width: '100%', padding: '10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)', background: '#fff', color: 'rgba(0,0,0,0.55)', fontSize: 14.5, fontWeight: 700, fontFamily: 'inherit', textDecoration: 'none', boxSizing: 'border-box' }}>
+                  درخواست تغییر کارت از پشتیبانی
+                </a>
               ) : (
                 <button onClick={handleBankCard} disabled={bankBusy}
                   style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: bankBusy ? 'not-allowed' : 'pointer', opacity: bankBusy ? 0.55 : 1 }}>

@@ -40,7 +40,15 @@ const CONTACT = {
 }
 
 /* «تبلیغات» این‌جا نیست — فرم خودش را در /advertise دارد */
-const SUBJECTS = ['پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد', 'سایر']
+/* دو موضوعِ آخر تنها راهِ تغییرِ کد پستی و اطلاعات بانکی‌اند: آن دو
+   پس از یک استعلامِ موفق قفل می‌شوند، چون هر استعلام برای ما هزینه
+   دارد. ترتیب عمدی است — این دو بالاتر از «سایر» می‌آیند تا کاربری
+   که از پیامِ قفل به این‌جا آمده، سریع پیدایشان کند. */
+const SUBJECTS = [
+  'پشتیبانی', 'همکاری', 'پیشنهاد و انتقاد',
+  'درخواست تغییر کد پستی', 'درخواست ویرایش اطلاعات بانکی',
+  'سایر',
+]
 
 function useReveal() {
   useEffect(() => {
@@ -150,6 +158,24 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false)
   const [copied, setCopied] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
+  /* باشگاهی که تیکت درباره‌ی آن است — از لینکِ پیامِ قفل می‌آید تا
+     ادمین بداند دقیقاً کدام قفل را باید باز کند. */
+  const [clubId, setClubId] = useState('')
+
+  /* پیامِ قفل کاربر را با ?subject=… به این‌جا می‌فرستد. بدونِ این،
+     کاربرِ قفل‌شده باید موضوع را از فهرست پیدا می‌کرد — و اگر اشتباه
+     انتخاب می‌کرد، تیکت در صفِ درستی نمی‌نشست. */
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search)
+    const s = q.get('subject') ?? ''
+    if (SUBJECTS.includes(s)) {
+      setForm(f => ({ ...f, subject: s }))
+      /* کمی صبر تا لِی‌اوت بنشیند، وگرنه اسکرول به جای اشتباه می‌رود */
+      setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350)
+    }
+    const c = q.get('clubId') ?? ''
+    if (c) setClubId(c)
+  }, [])
 
   const set = (k: keyof typeof form) => (v: string) => {
     if (k === 'phone') v = v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '').slice(0, 11)
@@ -187,23 +213,29 @@ export default function ContactPage() {
     ev.preventDefault()
     if (!validate()) return
     setLoading(true)
-    const payload = { ...form, at: new Date().toISOString() }
+    /* پیش‌تر این‌جا به بک‌اندِ مرده‌ی NestJS پست می‌شد و در شکست، پیام
+       در localStorageی خودِ کاربر می‌نشست و باز هم «ارسال شد» نشان
+       داده می‌شد — یعنی هیچ تیکتی هرگز به دستِ کسی نمی‌رسید. حالا که
+       تغییرِ کد پستی و اطلاعات بانکی فقط از همین راه ممکن است، آن
+       دروغ کاربر را به بن‌بست می‌برد. */
     try {
-      const res = await fetch(`${API}/contact`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ...form, clubId: clubId || undefined }),
       })
-      if (!res.ok) throw new Error()
+      const j = await res.json().catch(() => ({}))
+      setLoading(false)
+      if (!res.ok) {
+        setErrors({ submit: j?.message || 'ارسال پیام انجام نشد. دوباره تلاش کنید.' })
+        return
+      }
+      setSent(true)
     } catch {
-      /* API در دسترس نیست ⇒ ذخیره‌ی محلی؛ پیام‌ها بعداً قابل انتقال‌اند */
-      try {
-        const all = JSON.parse(localStorage.getItem('bh_contact_messages') ?? '[]')
-        localStorage.setItem('bh_contact_messages', JSON.stringify([{ id: Date.now(), ...payload }, ...all]))
-      } catch {}
+      setLoading(false)
+      setErrors({ submit: 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.' })
     }
-    /* مکث کوتاه برای حس واقعی لودینگ */
-    await new Promise(r => setTimeout(r, 700))
-    setLoading(false)
-    setSent(true)
   }
 
   return (
@@ -419,6 +451,14 @@ export default function ContactPage() {
                       </>
                     ) : (<>ارسال پیام <Send size={15} /></>)}
                   </button>
+
+                  {/* شکستِ ارسال باید دیده شود — پیش‌تر بی‌صدا رد می‌شد
+                      و کاربر «ارسال شد» می‌دید. */}
+                  {errors.submit && (
+                    <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, background: 'rgba(178,59,46,0.08)', border: '1px solid rgba(178,59,46,0.22)', fontSize: 12.5, fontWeight: 700, color: '#B23B2E', lineHeight: 1.7 }}>
+                      {errors.submit}
+                    </div>
+                  )}
                 </form>
               ) : (
                 /* ── انیمیشن موفقیت ── */

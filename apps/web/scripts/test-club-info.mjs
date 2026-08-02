@@ -79,7 +79,10 @@ head('۴) قفلِ حساب بانکی پس از تأیید')
   t('شبا همیشه فقط‌خواندنی است', /<input type="text" readOnly dir="ltr"[\s\S]{0,120}prettyIban/.test(dash))
   t('نام صاحب حساب همیشه فقط‌خواندنی است', /label="نام صاحب حساب" readOnly/.test(dash))
   t('نام بانک همیشه فقط‌خواندنی است', /label="نام بانک" readOnly/.test(dash))
-  t('راهِ خروج هست (تغییر حساب)', /const unlockBank/.test(dash) && dash.includes('تغییر حساب'))
+  /* راهِ خروجِ درون‌صفحه‌ای برداشته شد. هر بازکردن سه استعلامِ پولی
+     می‌طلبید و سقفی نداشت؛ حالا خروج فقط از راه تیکتِ پشتیبانی است. */
+  t('بازکردنِ خودخدمتیِ قفل حذف شد', !/const unlockBank/.test(dash))
+  t('راهِ خروج، تیکتِ پشتیبانی است', /درخواست تغییر حساب/.test(dash) && /\/contact\?subject=/.test(dash))
 
   const api = read('app/api/clubs/[id]/route.ts')
   t('سرور هم تغییرِ هر چهار فیلد را باطل‌کننده می‌داند',

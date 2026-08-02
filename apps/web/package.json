@@ -26,7 +26,8 @@
     "test:ui-polish": "node scripts/test-ui-polish.mjs",
     "test:closure": "node scripts/test-closure.mjs",
     "test:club-address": "node scripts/test-club-address.mjs",
-    "test:club-page:ui": "node scripts/test-club-page-ui.mjs"
+    "test:club-page:ui": "node scripts/test-club-page-ui.mjs",
+    "test:lock": "node scripts/test-verification-lock.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

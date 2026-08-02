@@ -70,7 +70,7 @@ export function amountInWords(latin: string): string {
 
 export default function FaNumberInput({
   value, onChange, placeholder, maxLength = 15, grouped = false,
-  style, className, disabled, ariaLabel, dir = 'rtl',
+  style, className, disabled, readOnly, ariaLabel, dir = 'rtl',
 }: {
   /** همیشه لاتین — همان چیزی که به سرور می‌رود */
   value: string | number
@@ -82,6 +82,10 @@ export default function FaNumberInput({
   style?: React.CSSProperties
   className?: string
   disabled?: boolean
+  /** فقط‌خواندنی — برخلافِ `disabled`، مقدار همچنان انتخاب و کپی
+   *  می‌شود و صفحه‌خوان هم آن را می‌خواند. برای فیلدی که استعلام شده
+   *  و قفل است، همین درست است نه خاموش‌کردنِ کامل. */
+  readOnly?: boolean
   ariaLabel?: string
   dir?: 'rtl' | 'ltr'
 }) {
@@ -97,6 +101,7 @@ export default function FaNumberInput({
       inputMode="numeric"
       dir={dir}
       disabled={disabled}
+      readOnly={readOnly}
       className={className}
       style={style}
       value={shown}
