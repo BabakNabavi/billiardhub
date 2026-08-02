@@ -40,19 +40,30 @@
 --      ADJUSTMENT             اصلاحِ دستی، هر دو علامت
 -- ───────────────────────────────────────────────────────────────────────────
 
-/* نوع‌های تازه به CHECK اضافه می‌شوند. چون CHECK موجود نامِ خودکار دارد،
-   با نامِ واقعی‌اش پیدا و جایگزین می‌شود. */
+/* نوع‌های تازه به CHECK اضافه می‌شوند. CHECK اصلی نامِ خودکار دارد،
+   پس با محتوایش پیدا می‌شود.
+
+   دو نکته که اجرای دوباره را می‌شکست:
+   · `ledger_sign_chk` (که ۰۴۱ می‌سازد) هم عبارتِ BOOKING_PAYMENT را
+     دارد. جست‌وجوی بدونِ استثنا گاهی آن را پیدا می‌کرد و در نتیجه
+     `ledger_type_chk` سرِ جایش می‌ماند و ADD با «already exists»
+     شکست می‌خورد.
+   · ممکن است بیش از یک قیدِ قدیمی باشد، پس روی همه حلقه می‌زنیم. */
+ALTER TABLE public.ledger_entries DROP CONSTRAINT IF EXISTS ledger_type_chk;
+
 DO $$
-DECLARE c_name text;
+DECLARE c record;
 BEGIN
-  SELECT con.conname INTO c_name
-    FROM pg_constraint con
-    JOIN pg_class rel ON rel.oid = con.conrelid
-   WHERE rel.relname = 'ledger_entries' AND con.contype = 'c'
-     AND pg_get_constraintdef(con.oid) ILIKE '%BOOKING_PAYMENT%';
-  IF c_name IS NOT NULL THEN
-    EXECUTE format('ALTER TABLE public.ledger_entries DROP CONSTRAINT %I', c_name);
-  END IF;
+  FOR c IN
+    SELECT con.conname
+      FROM pg_constraint con
+      JOIN pg_class rel ON rel.oid = con.conrelid
+     WHERE rel.relname = 'ledger_entries' AND con.contype = 'c'
+       AND con.conname NOT IN ('ledger_type_chk', 'ledger_sign_chk')
+       AND pg_get_constraintdef(con.oid) ILIKE '%BOOKING_PAYMENT%'
+  LOOP
+    EXECUTE format('ALTER TABLE public.ledger_entries DROP CONSTRAINT %I', c.conname);
+  END LOOP;
 END $$;
 
 ALTER TABLE public.ledger_entries
@@ -341,8 +352,14 @@ BEGIN
    WHERE club_id = p_club_id AND status='POSTED' AND type = 'CLUB_EARNING';
   SELECT COALESCE(SUM(-amount),0) INTO reversed FROM public.ledger_entries
    WHERE club_id = p_club_id AND status='POSTED' AND type = 'CLUB_EARNING_REVERSAL';
-  SELECT COALESCE(SUM(-amount),0) INTO settled  FROM public.ledger_entries
+  /* تسویه‌ی خالص: پرداخت‌شده منهای آنچه برگشت خورده.
+     بدونِ کسرِ برگشت‌ها، یک تسویه‌ی ناموفق برای همیشه از بدهیِ باشگاه
+     کم می‌ماند — یعنی پولی که هرگز به او نرسیده «پرداخت‌شده» حساب
+     می‌شود. تستِ سناریو همین را گرفت (اختلافِ ۱۰۰٬۰۰۰). */
+  SELECT COALESCE(SUM(-amount),0) INTO settled FROM public.ledger_entries
    WHERE club_id = p_club_id AND status='POSTED' AND type = 'SETTLEMENT';
+  SELECT settled - COALESCE(SUM(amount),0) INTO settled FROM public.ledger_entries
+   WHERE club_id = p_club_id AND status='POSTED' AND type = 'SETTLEMENT_REVERSAL';
   SELECT COALESCE(SUM(amount),0) INTO comm     FROM public.ledger_entries
    WHERE club_id = p_club_id AND status='POSTED' AND type = 'PLATFORM_COMMISSION';
 
@@ -358,12 +375,17 @@ BEGIN
     total_earnings   = earned - reversed,
     total_commission = comm,
     total_settled    = settled,
-    /* در انتظارِ تسویه (تأییدشده، پرداخت‌نشده) */
+    /* در انتظارِ تسویه (تأییدشده ولی هنوز پرداخت‌نشده) — فقط برای
+       نمایش. از `available` کم *نمی‌شود*، چون ردیفِ SETTLEMENT همان
+       لحظه‌ی تأیید در دفتر نوشته می‌شود و `settled` قبلاً حسابش کرده.
+       کم‌کردنِ دوباره یعنی هر تسویه دو بار از بدهی کسر شود — تستِ
+       سناریو دقیقاً همین را گرفت: با تسویه‌ی ۹۰۰٬۰۰۰ بدهی از
+       ۱٬۹۰۰٬۰۰۰ به ۱۰۰٬۰۰۰ می‌رسید به‌جای ۱٬۰۰۰٬۰۰۰. */
     pending_balance  = inflight,
     /* آنچه همین حالا به باشگاه بدهکاریم و قابلِ تسویه است.
        داشبوردِ ادمین و باشگاه همین ستون را «قابل تسویه» می‌خوانند،
        پس معنایش باید همان بماند. */
-    available_balance = (earned - reversed) - settled - inflight,
+    available_balance = (earned - reversed) - settled,
     updated_at = now()
    WHERE club_id = p_club_id
    RETURNING * INTO acc;

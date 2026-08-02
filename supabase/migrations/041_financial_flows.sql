@@ -48,13 +48,13 @@ BEGIN
     VALUES (b.id, pay.id, b."clubId", b."userId", 'BOOKING_PAYMENT', pay.amount,
             'booking:' || b.id || ':PAYMENT',
             jsonb_build_object('ref', p_provider_ref, 'late', true))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
 
     INSERT INTO refunds (booking_id, payment_id, club_id, user_id, amount, gross_amount,
                          cancellation_fee, reason, status, idempotency_key)
     VALUES (b.id, pay.id, b."clubId", b."userId", pay.amount, pay.amount, 0,
             'پرداخت پس از انقضای رزرو', 'REQUESTED', 'late:' || pay.id)
-    ON CONFLICT (idempotency_key) DO NOTHING;
+    ON CONFLICT (idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING;
 
     /* عمداً RAISE نمی‌کند: استثنا کلِ تراکنش را برمی‌گرداند و همین
        ردیف‌های بالا — که ثبتِ «پول رسید و باید پس داده شود» هستند —
@@ -73,7 +73,7 @@ BEGIN
   /* رزرو تأیید می‌شود، ولی سهمِ باشگاه هنوز «سررسید نشده» است */
   UPDATE bookings SET
     payment_status='PAID', booking_status='CONFIRMED', settlement_status='NOT_DUE',
-    status='confirmed', "paymentId"=pay.id::text, gateway=pay.provider, updated_at=now()
+    status='confirmed', "paymentId"=pay.id::text, gateway=pay.provider, "updatedAt"=now()
    WHERE id = b.id RETURNING * INTO b;
 
   /* تنها رویدادِ مالیِ این لحظه: پول وارد حسابِ مرکزی شد */
@@ -83,7 +83,7 @@ BEGIN
           jsonb_build_object('ref', p_provider_ref, 'source', 'reservation',
                              'commissionPlanned', b.platform_commission,
                              'clubSharePlanned', b.club_amount))
-  ON CONFLICT (source_key) DO NOTHING;
+  ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
 
   INSERT INTO club_accounts (club_id, owner_id) VALUES (b."clubId", b.club_owner_id)
     ON CONFLICT (club_id) DO NOTHING;
@@ -110,7 +110,7 @@ BEGIN
   END IF;
 
   UPDATE bookings SET booking_status='COMPLETED', status='completed',
-         settlement_status='PENDING', completed_at=now(), updated_at=now()
+         settlement_status='PENDING', completed_at=now(), "updatedAt"=now()
    WHERE id = b.id RETURNING * INTO b;
 
   /* درآمدِ پلتفرم — همیشه مثبت */
@@ -121,7 +121,7 @@ BEGIN
             jsonb_build_object('source','reservation','gross', b.final_amount,
                                'commissionType', b.commission_type,
                                'commissionValue', b.commission_value))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
   END IF;
 
   /* بدهیِ پلتفرم به باشگاه */
@@ -130,7 +130,7 @@ BEGIN
     VALUES (b.id, b."clubId", b."userId", 'CLUB_EARNING', b.club_amount,
             'booking:' || b.id || ':CLUB_EARNING',
             jsonb_build_object('source','reservation','gross', b.final_amount))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
   END IF;
 
   PERFORM public.bh_reconcile_club_account(b."clubId");
@@ -186,7 +186,7 @@ BEGIN
 
   IF b.payment_status <> 'PAID' THEN
     UPDATE bookings SET booking_status='CANCELLED', status='cancelled',
-           cancelled_at=now(), cancellation_reason=p_reason, updated_at=now()
+           cancelled_at=now(), cancellation_reason=p_reason, "updatedAt"=now()
      WHERE id = b.id RETURNING * INTO b;
     RETURN b;
   END IF;
@@ -205,13 +205,13 @@ BEGIN
     VALUES (b.id, b."clubId", b."userId", 'CLUB_EARNING_REVERSAL', -b.club_amount,
             'booking:' || b.id || ':CLUB_REVERSAL',
             jsonb_build_object('reason', p_reason))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
 
     INSERT INTO ledger_entries (booking_id, club_id, user_id, type, amount, source_key, meta)
     VALUES (b.id, b."clubId", b."userId", 'ADJUSTMENT', -b.platform_commission,
             'booking:' || b.id || ':COMMISSION_REVERSAL',
             jsonb_build_object('kind','commission_reversal','reason', p_reason))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
   END IF;
 
   IF refund > 0 THEN
@@ -219,7 +219,7 @@ BEGIN
     VALUES (b.id, pay.id, b."clubId", b."userId", 'REFUND', -refund,
             'booking:' || b.id || ':REFUND',
             jsonb_build_object('reason', p_reason, 'gross', b.final_amount))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
 
     /* بازپرداخت یک عملیاتِ مالیِ واقعی است، نه فقط عوض‌کردنِ وضعیت.
        پیش‌تر این ردیف هرگز ساخته نمی‌شد و جدولِ refunds خالی می‌ماند. */
@@ -227,7 +227,7 @@ BEGIN
                          cancellation_fee, reason, status, idempotency_key)
     VALUES (b.id, pay.id, b."clubId", b."userId", refund, b.final_amount, fee,
             p_reason, 'REQUESTED', 'booking:' || b.id)
-    ON CONFLICT (idempotency_key) DO NOTHING;
+    ON CONFLICT (idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING;
   END IF;
 
   /* جریمه‌ی لغو درآمدِ پلتفرم است و باید همان‌جا ثبت شود، وگرنه در
@@ -237,7 +237,7 @@ BEGIN
     VALUES (b.id, pay.id, b."clubId", b."userId", 'CANCELLATION_FEE', fee,
             'booking:' || b.id || ':CANCEL_FEE',
             jsonb_build_object('reason', p_reason, 'gross', b.final_amount))
-    ON CONFLICT (source_key) DO NOTHING;
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
   END IF;
 
   UPDATE bookings SET
@@ -248,7 +248,7 @@ BEGIN
                           WHEN refund > 0 THEN 'PARTIALLY_REFUNDED'
                           ELSE b.payment_status END,
     refund_status = CASE WHEN refund > 0 THEN 'REQUESTED' ELSE 'NONE' END,
-    updated_at=now()
+    "updatedAt"=now()
    WHERE id = b.id RETURNING * INTO b;
 
   PERFORM public.bh_reconcile_club_account(b."clubId");
@@ -270,7 +270,7 @@ BEGIN
    WHERE id = p_refund_id RETURNING * INTO r;
 
   IF r.booking_id IS NOT NULL THEN
-    UPDATE bookings SET refund_status='COMPLETED', updated_at=now() WHERE id = r.booking_id;
+    UPDATE bookings SET refund_status='COMPLETED', "updatedAt"=now() WHERE id = r.booking_id;
   END IF;
   IF r.payment_id IS NOT NULL THEN
     UPDATE payments SET refunded_amount = LEAST(amount, refunded_amount + r.amount),
@@ -297,10 +297,13 @@ BEGIN
   /* موجودی از دفتر بازسازی می‌شود، نه از کَشی که ممکن است منحرف باشد */
   acc := public.bh_reconcile_club_account(p_club_id);
 
-  amt := COALESCE(p_amount, acc.pending_balance);
+  /* «قابلِ تسویه» در ستونِ available_balance است، نه pending.
+     در ۰۴۰ معنا صریح شد: available = بدهیِ پرداختنیِ اکنون،
+     pending = تسویه‌ای که تأیید شده ولی هنوز پرداخت نشده. */
+  amt := COALESCE(p_amount, acc.available_balance);
   IF amt <= 0 THEN RAISE EXCEPTION 'nothing_to_settle'; END IF;
-  IF amt > acc.pending_balance THEN
-    RAISE EXCEPTION 'amount_exceeds_payable:% > %', amt, acc.pending_balance;
+  IF amt > acc.available_balance THEN
+    RAISE EXCEPTION 'amount_exceeds_payable:% > %', amt, acc.available_balance;
   END IF;
 
   SELECT * INTO ba FROM club_bank_accounts
@@ -363,7 +366,7 @@ BEGIN
   INSERT INTO ledger_entries (club_id, type, amount, source_key, meta)
   VALUES (s.club_id, 'SETTLEMENT_REVERSAL', s.amount, 'settlement:' || s.id || ':REVERSAL',
           jsonb_build_object('settlement_id', s.id, 'reason', p_reason))
-  ON CONFLICT (source_key) DO NOTHING;
+  ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
 
   UPDATE bookings SET settlement_status = 'PENDING'
    WHERE "clubId" = s.club_id AND settlement_status = 'SETTLED';
@@ -411,7 +414,7 @@ BEGIN
                              'tournamentId', t.id, 'tournamentTitle', t.title,
                              'provider', p_provider, 'refId', p_ref_id,
                              'commissionPlanned', comm, 'clubSharePlanned', net))
-  ON CONFLICT (source_key) DO NOTHING;
+  ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
 
   INSERT INTO club_accounts (club_id) VALUES (t.club_id) ON CONFLICT (club_id) DO NOTHING;
 
@@ -453,7 +456,7 @@ BEGIN
               jsonb_build_object('source','tournament','registrationId', r.id,
                                  'tournamentId', t.id, 'gross', r.amount,
                                  'commissionPercent', r.commission_percent))
-      ON CONFLICT (source_key) DO NOTHING;
+      ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
     END IF;
 
     IF r.net_amount > 0 THEN
@@ -462,7 +465,7 @@ BEGIN
               'treg:' || r.id || ':CLUB_EARNING',
               jsonb_build_object('source','tournament','registrationId', r.id,
                                  'tournamentId', t.id, 'gross', r.amount))
-      ON CONFLICT (source_key) DO NOTHING;
+      ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING;
     END IF;
     n := n + 1;
   END LOOP;
