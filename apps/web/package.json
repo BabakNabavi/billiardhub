@@ -48,7 +48,8 @@
     "test:finance:admin": "node scripts/test-finance-admin.mjs",
     "test:business": "node scripts/test-business-admin.mjs",
     "test:content": "node scripts/test-content-flow.mjs",
-    "test:ads": "node scripts/test-ads-admin.mjs"
+    "test:ads": "node scripts/test-ads-admin.mjs",
+    "test:dashboard": "node scripts/test-dashboard-stats.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

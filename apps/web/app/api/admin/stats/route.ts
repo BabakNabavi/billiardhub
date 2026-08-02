@@ -8,13 +8,17 @@ import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
    باشگاه و…) و هیچ ربطی به دیتابیس نداشتند — یعنی پنل مدیریت عددی
    نشان می‌داد که هیچ‌وقت درست نبود. */
 
-/** شمارش سبک: هیچ ردیفی برنمی‌گردد، فقط عدد از هدر Content-Range */
-async function countOf(table: string, filter = ''): Promise<number> {
+/** شمارش سبک: هیچ ردیفی برنمی‌گردد، فقط عدد از هدر Content-Range.
+ *  `where` یک برابریِ ساده است؛ پیش‌تر رشته‌ای مثل `'isActive=false'`
+ *  دستی split می‌شد و مقدار همیشه به بولین تبدیل می‌گشت، پس فیلترِ
+ *  متنی اصلاً ممکن نبود. */
+async function countOf(
+  table: string,
+  where?: { col: string; val: string | boolean },
+): Promise<number> {
   try {
     const q = sb().from(table).select('id', { count: 'exact', head: true });
-    const { count, error } = filter
-      ? await q.eq(filter.split('=')[0]!, filter.split('=')[1] === 'true')
-      : await q;
+    const { count, error } = where ? await q.eq(where.col, where.val) : await q;
     if (error) return 0;
     return count ?? 0;
   } catch { return 0; }
@@ -28,17 +32,37 @@ export async function GET(req: NextRequest) {
   }
 
   /* جدولی که هنوز ساخته نشده ⇒ صفر، نه خطا */
-  const [users, products, clubs, news, pendingClubs, bookings] = await Promise.all([
+  const [
+    users, products, clubs, news, bookings,
+    pendingClubs, pendingRoles, pendingProfiles, openReports,
+  ] = await Promise.all([
     countOf('users'),
     countOf('products'),
     countOf('clubs'),
     countOf('news'),
-    countOf('clubs', 'isActive=false'),
     countOf('bookings'),
+
+    /* «در انتظار تأیید» یعنی منتظرِ تصمیمِ ادمین.
+       پیش‌تر این عدد `isActive = false` را می‌شمرد، که باشگاهِ *ردشده*
+       را هم در بر می‌گرفت — یعنی نشانِ «۳ مورد در انتظار» می‌ماند و
+       ادمین به صفی می‌رفت که کاری در آن نبود. */
+    countOf('clubs', { col: 'verificationStatus', val: 'pending' }),
+
+    /* این دو صف تازه‌اند و تا امروز هیچ‌جای پنل دیده نمی‌شدند:
+       درخواستِ نقش و پروفایلِ حرفه‌ای می‌توانستند روزها بی‌پاسخ بمانند
+       بدونِ آنکه ادمین بداند چیزی منتظر است. */
+    countOf('role_requests', { col: 'status', val: 'pending' }),
+    countOf('profiles', { col: 'status', val: 'pending' }),
+    countOf('reports', { col: 'status', val: 'open' }),
   ]);
 
   return NextResponse.json(
-    { users, products, clubs, news, pendingClubs, bookings },
+    {
+      users, products, clubs, news, bookings,
+      pendingClubs, pendingRoles, pendingProfiles, openReports,
+      /* مجموعِ کارهای روی میز — برای نشانِ کلی */
+      pendingTotal: pendingClubs + pendingRoles + pendingProfiles + openReports,
+    },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

@@ -102,7 +102,10 @@ const STAT_CARDS: { key: string; label: string; link: string }[] = [
   { key: 'clubs',        label: 'باشگاه‌ها',       link: '/admin/clubs' },
   { key: 'bookings',     label: 'رزروها',         link: '/admin/bookings' },
   { key: 'news',         label: 'اخبار',          link: '/admin/news' },
-  { key: 'pendingClubs', label: 'در انتظار تأیید', link: '/admin/clubs' },
+  { key: 'pendingClubs',    label: 'باشگاه در انتظار', link: '/admin/clubs' },
+  /* این دو صف تا امروز هیچ‌جای پنل دیده نمی‌شدند */
+  { key: 'pendingRoles',    label: 'درخواست نقش',     link: '/admin/roles' },
+  { key: 'pendingProfiles', label: 'پروفایل در انتظار', link: '/admin/coaches' },
 ];
 
 export default function AdminPage() {
