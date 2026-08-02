@@ -174,7 +174,9 @@ head('۱۰) رفتارِ صفحه‌ها')
   t('نوارِ توضیح دارد', /closureLabel\(closure\)/.test(bp))
 
   const dash = read('app/dashboard/club/page.tsx')
-  t('تیکِ بستنِ میز هست', /function ClosedToggle/.test(dash))
+  /* خودِ کامپوننت به fields.tsx رفت؛ چیزی که این‌جا اهمیت دارد این
+     است که هنوز در هر دو فرمِ صفحه به کار می‌رود. */
+  t('تیکِ بستنِ میز هست', /export function ClosedToggle/.test(read('components/dashboard/club/fields.tsx')))
   t('در هر دو فرم', (dash.match(/<ClosedToggle/g) ?? []).length, 2)
   t('«یک روز» حذف شد', !/\['یک روز', 24\]/.test(dash))
   t('«همیشه» مانده است', /\['همیشه', 'always'\]/.test(dash))
