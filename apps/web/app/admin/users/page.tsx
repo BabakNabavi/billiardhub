@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import api from '../../../lib/api';
+import { apiFetch } from '../../../lib/http';
 import { Users, Search, CheckCircle, XCircle, Eye, Shield } from 'lucide-react';
 
 interface User {
@@ -54,21 +54,37 @@ export default function AdminUsersPage() {
   const [filterRole, setFilterRole] = useState('all');
   const [filterVerification, setFilterVerification] = useState('all');
 
+  const [err, setErr] = useState('');
+
+  /* منبع: `/api/admin/users`.
+     پیش‌تر `api.get('/user/all')` بود — مسیرِ بک‌اندِ NestJS که حذف
+     شده و در Next وجود ندارد. نتیجه‌اش ۴۰۴ بود که در `.catch` بلعیده
+     می‌شد و صفحه فهرستِ خالی نشان می‌داد، در حالی که کارتِ داشبورد
+     همان لحظه ۲۱ کاربر می‌شمرد. */
   useEffect(() => {
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
-    api.get('/user/all').then(res => {
-      setUsers(res.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [user]);
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/admin/users', { cache: 'no-store' });
+        const j = await r.json().catch(() => ({})) as { users?: User[]; message?: string };
+        if (!r.ok) { setErr(j.message ?? 'خواندن کاربران انجام نشد'); return; }
+        setUsers(j.users ?? []); setErr('');
+      } catch { setErr('خطا در ارتباط با سرور'); }
+      finally { setLoading(false); }
+    })();
+  }, [user, router]);
 
   const handleVerify = async (userId: string, status: string) => {
+    setErr('');
     try {
-      await api.put(`/user/${userId}/verify`, { status });
-      setUsers(users.map(u => u.id === userId ? { ...u, verificationStatus: status } : u));
-    } catch (err) {
-      console.error(err);
-    }
+      const r = await apiFetch('/api/admin/users', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, verificationStatus: status }),
+      });
+      const j = await r.json().catch(() => ({})) as { message?: string };
+      if (!r.ok) { setErr(j.message ?? 'تغییر وضعیت انجام نشد'); return; }
+      setUsers(us => us.map(u => u.id === userId ? { ...u, verificationStatus: status } : u));
+    } catch { setErr('خطا در ارتباط با سرور'); }
   };
 
   const filtered = users.filter(u => {
@@ -91,6 +107,15 @@ export default function AdminUsersPage() {
           {filtered.length.toLocaleString('fa-IR')} کاربر
         </span>
       </div>
+
+      {/* خطا هرگز نباید بی‌صدا بماند — همین بی‌صدایی بود که ۴۰۴ را
+          ماه‌ها پنهان کرد و صفحه فقط «کاربری پیدا نشد» نشان می‌داد. */}
+      {err && (
+        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
+          style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+          {err}
+        </div>
+      )}
 
       {/* فیلترها */}
       <div className="bg-white rounded-2xl shadow-sm p-5 mb-6">

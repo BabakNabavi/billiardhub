@@ -14,6 +14,10 @@ const STATUSES = new Set([
   'ongoing', 'completed', 'cancelled',
 ]);
 
+/* همان مجموعه‌ای که مسیرِ باشگاه می‌پذیرد — دو مسیر نباید فرمت‌های
+   متفاوتی قبول کنند. */
+const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
+
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor || !(await isAdmin(actor.id))) {
@@ -101,14 +105,38 @@ export async function POST(req: NextRequest) {
     return Number.isFinite(t) ? new Date(t).toISOString() : null;
   })();
 
-  const c = club as { name?: string; city?: string };
+  const registrationEndsAt = (() => {
+    const s = String(b.registrationEndsAt ?? '').trim();
+    if (!s) return null;
+    const t = Date.parse(s);
+    return Number.isFinite(t) ? new Date(t).toISOString() : null;
+  })();
+
+  /* همان قاعده‌ی مسیرِ باشگاه — مهلتِ ثبت‌نام بعد از خودِ مسابقه بی‌معنی
+     است. تا امروز این مسیر اصلاً مهلت را نمی‌پذیرفت، پس بررسی هم نداشت. */
+  if (startsAt && registrationEndsAt && registrationEndsAt > startsAt) {
+    return NextResponse.json(
+      { message: 'مهلت ثبت‌نام نمی‌تواند بعد از تاریخ برگزاری باشد' }, { status: 400 });
+  }
+
+  /* فیلدها عمداً با مسیرِ باشگاه یکی است. پیش‌تر این‌جا فقط عنوان و
+     مبلغ و ظرفیت و تاریخ پذیرفته می‌شد؛ یعنی مسابقه‌ای که ادمین
+     می‌ساخت رشته و فرمت و جایزه و مهلتِ ثبت‌نام نداشت و با مسابقه‌ی
+     ساخته‌ی باشگاه یکسان نبود. */
+  const c = club as { name?: string; city?: string; province?: string };
   const { data, error } = await sb().from('tournaments').insert({
-    club_id: clubId, created_by: actor.id, title,
+    club_id: clubId, created_by: actor.id, title: title.slice(0, 200),
     description: String(b.description ?? '').slice(0, 5000) || null,
-    discipline: String(b.discipline ?? 'snooker'),
+    discipline: String(b.discipline ?? 'snooker').slice(0, 40),
     max_players: maxPlayers, entry_fee: entryFee,
-    venue: c.name ?? null, city: c.city ?? null,
-    starts_at: startsAt, status,
+    prize: String(b.prize ?? '').slice(0, 200) || null,
+    venue: String(b.venue ?? '').slice(0, 200) || c.name || null,
+    province: String(b.province ?? '').slice(0, 80) || c.province || null,
+    city: String(b.city ?? '').slice(0, 80) || c.city || null,
+    starts_at: startsAt,
+    registration_ends_at: registrationEndsAt,
+    match_format: FORMATS.has(String(b.matchFormat)) ? String(b.matchFormat) : null,
+    status,
   }).select().single();
 
   if (error) {

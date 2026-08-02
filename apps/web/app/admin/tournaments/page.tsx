@@ -47,7 +47,12 @@ export default function AdminTournaments() {
   const [busy, setBusy] = useState('')
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([])
   const [showNew, setShowNew] = useState(false)
-  const [nf, setNf] = useState({ clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '' })
+  /* فیلدها عمداً همان‌هایی است که پنلِ باشگاه دارد — دو فرم برای یک
+     موجودیت نباید امکاناتِ متفاوت بدهند. */
+  const [nf, setNf] = useState({
+    clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '',
+    discipline: 'snooker', matchFormat: '', registrationEndsAt: '', prize: '', description: '',
+  })
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -84,11 +89,16 @@ export default function AdminTournaments() {
           clubId: nf.clubId, title: nf.title,
           entryFee: Number(nf.entryFee) || 0, maxPlayers: Number(nf.maxPlayers) || 16,
           startsAt: nf.startsAt || undefined,
+          discipline: nf.discipline, matchFormat: nf.matchFormat || undefined,
+          registrationEndsAt: nf.registrationEndsAt || undefined,
+          prize: nf.prize || undefined, description: nf.description || undefined,
         }),
       })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message ?? 'ثبت مسابقه انجام نشد'); return }
-      setShowNew(false); setNf({ clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '' })
+      setShowNew(false)
+      setNf({ clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '',
+             discipline: 'snooker', matchFormat: '', registrationEndsAt: '', prize: '', description: '' })
       await load()
     } catch { setErr('خطا در ارتباط با سرور') }
     finally { setBusy('') }
@@ -175,10 +185,43 @@ export default function AdminTournaments() {
             <input value={nf.maxPlayers} inputMode="numeric" style={inp}
               onChange={e => setNf(p => ({ ...p, maxPlayers: e.target.value.replace(/\D/g, '') }))} />
           </Field>
+          <Field label="رشته">
+            <select value={nf.discipline} onChange={e => setNf(p => ({ ...p, discipline: e.target.value }))} style={inp}>
+              <option value="snooker">اسنوکر</option>
+              <option value="pool">پول ۸ و ۹</option>
+              <option value="carom">کاروم</option>
+              <option value="billiard">بیلیارد</option>
+            </select>
+          </Field>
+          <Field label="فرمت مسابقه">
+            <select value={nf.matchFormat} onChange={e => setNf(p => ({ ...p, matchFormat: e.target.value }))} style={inp}>
+              <option value="">نامشخص</option>
+              <option value="bo3">Best of ۳</option>
+              <option value="bo5">Best of ۵</option>
+              <option value="bo7">Best of ۷</option>
+              <option value="bo9">Best of ۹</option>
+              <option value="bo11">Best of ۱۱</option>
+            </select>
+          </Field>
           <Field label="تاریخ برگزاری (اختیاری)">
             <input type="datetime-local" value={nf.startsAt} style={inp}
               onChange={e => setNf(p => ({ ...p, startsAt: e.target.value }))} />
           </Field>
+          <Field label="مهلت ثبت‌نام (اختیاری)">
+            <input type="datetime-local" value={nf.registrationEndsAt} style={inp}
+              onChange={e => setNf(p => ({ ...p, registrationEndsAt: e.target.value }))} />
+          </Field>
+          <Field label="جایزه (اختیاری)">
+            <input value={nf.prize} style={inp} placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰ تومان"
+              onChange={e => setNf(p => ({ ...p, prize: e.target.value }))} />
+          </Field>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Field label="توضیحات (اختیاری)">
+              <textarea value={nf.description} rows={3}
+                style={{ ...inp, resize: 'vertical', lineHeight: 1.9 }}
+                onChange={e => setNf(p => ({ ...p, description: e.target.value }))} />
+            </Field>
+          </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
             <Act on={!!nf.clubId && !!nf.title.trim() && busy !== 'new'} tone="go" onClick={() => void create()}>
               ثبت و انتشار

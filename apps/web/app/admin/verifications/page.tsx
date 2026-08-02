@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import api from '../../../lib/api';
+import { apiFetch } from '../../../lib/http';
 import { CheckCircle, XCircle, Eye, Star, Clock } from 'lucide-react';
 
 interface VerificationRequest {
@@ -34,23 +34,37 @@ export default function AdminVerificationsPage() {
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending');
+  const [err, setErr] = useState('');
 
   useEffect(() => {
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
-    api.get('/user/all').then(res => {
-      const pending = res.data.filter((u: any) => u.verificationStatus === 'pending' || u.verificationStatus === 'verified' || u.verificationStatus === 'rejected');
-      setRequests(pending);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    /* منبع: `/api/admin/users`. پیش‌تر `/user/all` بود — مسیرِ
+       بک‌اندِ حذف‌شده‌ی NestJS که ۴۰۴ می‌داد و `.catch` بی‌صدا
+       می‌بلعیدش، پس صفِ احراز هویت همیشه خالی به نظر می‌رسید. */
+    void (async () => {
+      try {
+        const r = await apiFetch('/api/admin/users', { cache: 'no-store' });
+        const j = await r.json().catch(() => ({})) as { users?: VerificationRequest[]; message?: string };
+        if (!r.ok) { setErr(j.message ?? 'خواندن کاربران انجام نشد'); return; }
+        setRequests((j.users ?? []).filter(u =>
+          ['pending', 'verified', 'rejected'].includes(u.verificationStatus)));
+        setErr('');
+      } catch { setErr('خطا در ارتباط با سرور'); }
+      finally { setLoading(false); }
+    })();
   }, [user]);
 
   const handleVerify = async (userId: string, status: string) => {
+    setErr('');
     try {
-      await api.put(`/user/${userId}/verify`, { status });
-      setRequests(requests.map(r => r.id === userId ? { ...r, verificationStatus: status } : r));
-    } catch (err) {
-      console.error(err);
-    }
+      const r = await apiFetch('/api/admin/users', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, verificationStatus: status }),
+      });
+      const j = await r.json().catch(() => ({})) as { message?: string };
+      if (!r.ok) { setErr(j.message ?? 'تغییر وضعیت انجام نشد'); return; }
+      setRequests(rs => rs.map(x => x.id === userId ? { ...x, verificationStatus: status } : x));
+    } catch { setErr('خطا در ارتباط با سرور'); }
   };
 
   const filtered = requests.filter(r => r.verificationStatus === activeTab);

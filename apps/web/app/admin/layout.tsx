@@ -16,6 +16,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="admin-scope">
       <style>{`
+        /* ── حاشیه‌ی افقیِ مشترک ──
+           تا امروز این لایه هیچ padding افقی نداشت و هر صفحه خودش باید
+           فکرش را می‌کرد. صفحه‌هایی مثل «مسابقات باشگاه‌ها» فقط
+           \`maxWidth\` داشتند، پس روی موبایل کارت‌ها کاملاً به لبه‌ی چپ و
+           راست می‌چسبیدند. یک‌بار این‌جا حل می‌شود تا صفحه‌های آینده هم
+           خودبه‌خود درست باشند.
+
+           \`box-sizing\` لازم است وگرنه صفحه‌هایی که \`width:100%\` دارند
+           با اضافه‌شدنِ padding از عرضِ صفحه بیرون می‌زنند. */
+        .admin-scope { padding-inline: clamp(14px, 4vw, 28px); box-sizing: border-box; }
+        .admin-scope * { box-sizing: border-box; }
+        /* صفحه‌های ادمین خودشان \`margin: 0 auto\` دارند؛ این فقط فضای
+           تنفس کنارِ آن است و وسط‌چینی را خراب نمی‌کند. */
+        @media (max-width: 480px) {
+          .admin-scope { padding-inline: 14px; }
+          /* جدول‌ها و نوارهای عریض داخلِ خودشان اسکرول شوند، نه کلِ صفحه */
+          .admin-scope table { display: block; overflow-x: auto; max-width: 100%; }
+        }
+
         .admin-back-btn:hover { border-color: rgba(199,166,106,0.55) !important; color: #9A6E38 !important; }
 
         .admin-scope select {
