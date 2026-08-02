@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../lib/http'
+import CommissionPanel from '../../../components/admin/CommissionPanel'
 import {
   Wallet, TrendingUp, CreditCard, Landmark, RotateCcw, Loader2,
   ArrowDownToLine, CheckCircle2, AlertCircle, X,
@@ -32,7 +33,7 @@ interface Data {
   }
   payments: Row[]; clubBalances: Row[]; settlements: Row[]; refunds: Row[]
 }
-type TabKey = 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds'
+type TabKey = 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds' | 'commission'
 
 export default function AdminFinance() {
   const [d, setD] = useState<Data | null>(null)
@@ -72,7 +73,7 @@ export default function AdminFinance() {
   const TABS: [TabKey, string, number][] = [
     ['overview', 'نمای کلی', 0], ['payments', 'پرداخت‌ها', d.payments.length],
     ['balances', 'موجودی باشگاه‌ها', d.clubBalances.length], ['settlements', 'تسویه‌ها', d.settlements.length],
-    ['refunds', 'بازپرداخت‌ها', d.refunds.length],
+    ['refunds', 'بازپرداخت‌ها', d.refunds.length], ['commission', 'کمیسیون', 0],
   ]
 
   return (
@@ -137,6 +138,8 @@ export default function AdminFinance() {
           )}
         </>
       )}
+
+      {tab === 'commission' && <CommissionPanel />}
 
       {tab === 'payments' && (
         <Table head={['شناسه', 'باشگاه', 'مبلغ', 'وضعیت', 'درگاه', 'تاریخ']}
