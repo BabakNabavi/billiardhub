@@ -192,6 +192,20 @@ export async function saveProfile(input: SaveInput): Promise<ProfileRow> {
     return toProfile(data as DbRow)
   }
 
+  /* ── پروفایلِ تازه در انتظارِ بررسی است، نه منتشرشده ──
+     ستونِ `status` در مهاجرت ۰۰۸ پیش‌فرضِ `'approved'` دارد، پس هر
+     پروفایلِ تازه بی‌درنگ روی سایتِ عمومی می‌نشست. یعنی هر کسی که
+     ثبت‌نام می‌کرد می‌توانست خودش را «مربی» یا «فروشنده» اعلام کند و
+     همان لحظه منتشر شود؛ صفِ تأییدِ ادمین عملاً تشریفاتی بود.
+
+     این‌جا صریحاً `pending` گذاشته می‌شود تا پیش‌فرضِ دیتابیس بی‌اثر
+     شود — بدونِ نیاز به مهاجرت. اگر ادمین خودش وضعیتی داده باشد
+     (`input.status`) همان محترم است.
+
+     ⚠️ فقط در *ساخت*. در ویرایش دست نمی‌خورد، وگرنه هر بار که مربیِ
+     تأییدشده متنش را عوض می‌کرد از سایت غیب می‌شد. */
+  if (row.status === undefined) row.status = 'pending'
+
   const { data, error } = await sb().from('profiles').insert(row).select().single()
   if (error) throw new Error(error.message)
   return toProfile(data as DbRow)
