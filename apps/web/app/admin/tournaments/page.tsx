@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { apiFetch } from '../../../lib/http'
-import { Trophy, Loader2, AlertCircle, Users, Wallet, ExternalLink } from 'lucide-react'
+import { Trophy, Loader2, AlertCircle, Users, Wallet, ExternalLink, Plus, Trash2 } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38'
@@ -45,6 +45,9 @@ export default function AdminTournaments() {
   const [err, setErr] = useState('')
   const [filter, setFilter] = useState('')
   const [busy, setBusy] = useState('')
+  const [clubs, setClubs] = useState<{ id: string; name: string }[]>([])
+  const [showNew, setShowNew] = useState(false)
+  const [nf, setNf] = useState({ clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '' })
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -52,7 +55,7 @@ export default function AdminTournaments() {
       const r = await apiFetch(`/api/admin/tournaments${filter ? `?status=${filter}` : ''}`, { cache: 'no-store' })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message ?? 'دسترسی مجاز نیست'); return }
-      setRows(j.tournaments ?? []); setCounts(j.counts ?? {}); setErr('')
+      setRows(j.tournaments ?? []); setCounts(j.counts ?? {}); setClubs(j.clubs ?? []); setErr('')
     } catch { setErr('خطا در ارتباط با سرور') }
     finally { setLoading(false) }
   }, [filter])
@@ -72,8 +75,42 @@ export default function AdminTournaments() {
     finally { setBusy('') }
   }
 
+  const create = async () => {
+    setBusy('new'); setErr('')
+    try {
+      const r = await apiFetch('/api/admin/tournaments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clubId: nf.clubId, title: nf.title,
+          entryFee: Number(nf.entryFee) || 0, maxPlayers: Number(nf.maxPlayers) || 16,
+          startsAt: nf.startsAt || undefined,
+        }),
+      })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { setErr(j?.message ?? 'ثبت مسابقه انجام نشد'); return }
+      setShowNew(false); setNf({ clubId: '', title: '', entryFee: '', maxPlayers: '16', startsAt: '' })
+      await load()
+    } catch { setErr('خطا در ارتباط با سرور') }
+    finally { setBusy('') }
+  }
+
+  const remove = async (id: string) => {
+    setBusy(id); setErr('')
+    try {
+      const r = await apiFetch(`/api/admin/tournaments?id=${id}`, { method: 'DELETE' })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { setErr(j?.message ?? 'حذف انجام نشد'); return }
+      await load()
+    } catch { setErr('خطا در ارتباط با سرور') }
+    finally { setBusy('') }
+  }
+
   const card: React.CSSProperties = {
     background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 16, marginBottom: 12,
+  }
+  const inp: React.CSSProperties = {
+    width: '100%', padding: '9px 11px', borderRadius: 9, border: `1px solid ${LINE}`,
+    background: '#FAFAFA', fontSize: 13.5, fontFamily: 'inherit', boxSizing: 'border-box',
   }
   const chip = (on: boolean): React.CSSProperties => ({
     flexShrink: 0, padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
@@ -94,6 +131,12 @@ export default function AdminTournaments() {
       </p>
 
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 16 }}>
+        <button onClick={() => setShowNew(v => !v)} style={{
+          flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
+          padding: '8px 14px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit',
+          fontSize: 12.5, fontWeight: 800,
+          border: '1px solid rgba(48,197,90,0.34)', background: 'rgba(48,197,90,0.12)', color: FELT,
+        }}><Plus size={13} /> مسابقه‌ی جدید</button>
         <button onClick={() => setFilter('')} style={chip(filter === '')}>همه</button>
         {Object.entries(STATUS).map(([k, v]) => (
           <button key={k} onClick={() => setFilter(k)} style={chip(filter === k)}>
@@ -108,6 +151,41 @@ export default function AdminTournaments() {
           background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.26)',
           color: '#991B1B', fontSize: 12.5, fontWeight: 700, lineHeight: 1.9,
         }}><AlertCircle size={15} style={{ flexShrink: 0, marginTop: 2 }} />{err}</div>
+      )}
+
+      {/* ── ساختِ مسابقه توسطِ ادمین ──
+          باشگاه اجباری است: مسابقه بدونِ باشگاه، بدونِ حسابِ تسویه و
+          بدونِ صاحب می‌ماند. */}
+      {showNew && (
+        <div style={{ ...card, display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))' }}>
+          <Field label="باشگاه">
+            <select value={nf.clubId} onChange={e => setNf(p => ({ ...p, clubId: e.target.value }))} style={inp}>
+              <option value="">انتخاب کنید…</option>
+              {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </Field>
+          <Field label="عنوان مسابقه">
+            <input value={nf.title} onChange={e => setNf(p => ({ ...p, title: e.target.value }))} style={inp} />
+          </Field>
+          <Field label="ورودی (تومان)">
+            <input value={nf.entryFee} inputMode="numeric" style={inp}
+              onChange={e => setNf(p => ({ ...p, entryFee: e.target.value.replace(/\D/g, '') }))} />
+          </Field>
+          <Field label="ظرفیت">
+            <input value={nf.maxPlayers} inputMode="numeric" style={inp}
+              onChange={e => setNf(p => ({ ...p, maxPlayers: e.target.value.replace(/\D/g, '') }))} />
+          </Field>
+          <Field label="تاریخ برگزاری (اختیاری)">
+            <input type="datetime-local" value={nf.startsAt} style={inp}
+              onChange={e => setNf(p => ({ ...p, startsAt: e.target.value }))} />
+          </Field>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+            <Act on={!!nf.clubId && !!nf.title.trim() && busy !== 'new'} tone="go" onClick={() => void create()}>
+              ثبت و انتشار
+            </Act>
+            <Act on={busy !== 'new'} onClick={() => setShowNew(false)}>انصراف</Act>
+          </div>
+        </div>
       )}
 
       {loading ? (
@@ -176,10 +254,26 @@ export default function AdminTournaments() {
                 لغو مسابقه
               </Act>
             )}
+            {/* حذفِ فیزیکی فقط وقتی پولی جابه‌جا نشده؛ سرور هم مستقل
+                همین را بررسی می‌کند و در غیرِ این صورت ۴۰۹ می‌دهد. */}
+            {t.paidRegistrations === 0 && (
+              <Act on={busy !== t.id} tone="stop" onClick={() => void remove(t.id)}>
+                <Trash2 size={12} /> حذف
+              </Act>
+            )}
           </div>
         </div>
       ))}
     </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
+      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#5B564B' }}>{label}</span>
+      {children}
+    </label>
   )
 }
 

@@ -48,6 +48,7 @@ const SECTIONS: AdminSection[] = [
       { title: 'مدیریت نقش‌ها', desc: 'اعطا و لغو نقش‌ها (مربی، داور، فروشنده…)', icon: <KeyRound size={20} />, link: '/admin/roles' },
       { title: 'احراز هویت', desc: 'بررسی درخواست‌های تأیید هویت کاربران', icon: <ShieldCheck size={20} />, link: '/admin/verifications' },
       { title: 'تیکت‌های پشتیبانی', desc: 'پیام‌های تماس با ما و درخواست تغییر کد پستی و اطلاعات بانکی', icon: <LifeBuoy size={20} />, link: '/admin/support' },
+      { title: 'دسترسی ادمین', desc: 'دادن یا برداشتن دسترسی ادمین به کاربران', icon: <Crown size={20} />, link: '/admin/access' },
     ],
   },
   {

@@ -73,6 +73,99 @@ export async function GET(req: NextRequest) {
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
+/* ساختِ مسابقه توسطِ ادمین — برای باشگاهی که خودش انتخاب می‌کند.
+   بدنه: { clubId, title, entryFee, maxPlayers, startsAt?, discipline?, status? } */
+export async function POST(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor || !(await isAdmin(actor.id))) {
+    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  }
+
+  const b = await req.json().catch(() => ({})) as Record<string, unknown>;
+  const clubId = String(b.clubId ?? '');
+  const title = String(b.title ?? '').trim();
+  if (!clubId) return NextResponse.json({ message: 'باشگاه را انتخاب کنید' }, { status: 400 });
+  if (!title) return NextResponse.json({ message: 'عنوان مسابقه الزامی است' }, { status: 400 });
+
+  const { data: club } = await sb().from('clubs').select('id,name,city').eq('id', clubId).maybeSingle();
+  if (!club) return NextResponse.json({ message: 'باشگاه پیدا نشد' }, { status: 404 });
+
+  const status = STATUSES.has(String(b.status)) ? String(b.status) : 'registration_open';
+  const entryFee = Math.max(0, Math.min(500_000_000, Math.round(Number(b.entryFee) || 0)));
+  const maxPlayers = Math.max(2, Math.min(512, Math.round(Number(b.maxPlayers) || 16)));
+
+  const startsAt = (() => {
+    const s = String(b.startsAt ?? '').trim();
+    if (!s) return null;
+    const t = Date.parse(s);
+    return Number.isFinite(t) ? new Date(t).toISOString() : null;
+  })();
+
+  const c = club as { name?: string; city?: string };
+  const { data, error } = await sb().from('tournaments').insert({
+    club_id: clubId, created_by: actor.id, title,
+    description: String(b.description ?? '').slice(0, 5000) || null,
+    discipline: String(b.discipline ?? 'snooker'),
+    max_players: maxPlayers, entry_fee: entryFee,
+    venue: c.name ?? null, city: c.city ?? null,
+    starts_at: startsAt, status,
+  }).select().single();
+
+  if (error) {
+    console.error('[admin/tournaments] create', error.message);
+    return NextResponse.json({ message: 'ثبت مسابقه انجام نشد' }, { status: 500 });
+  }
+
+  void audit({
+    actorId: actor.id, actorRole: 'admin', action: 'TOURNAMENT_CREATED_BY_ADMIN',
+    entityType: 'tournament', entityId: String((data as { id: string }).id),
+    newValue: { clubId, title, entryFee, status }, ip: clientIp(req) ?? undefined,
+  });
+
+  return NextResponse.json({ ok: true, tournament: data }, { status: 201 });
+}
+
+/* حذفِ فیزیکیِ مسابقه.
+   فقط وقتی هیچ ثبت‌نامِ پرداخت‌شده‌ای ندارد: حذفِ مسابقه‌ای که پول
+   جابه‌جا کرده، ردیف‌های دفتر را یتیم می‌کند و ردِ پول گم می‌شود.
+   در آن حالت راهِ درست «لغو» است که سابقه را نگه می‌دارد. */
+export async function DELETE(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor || !(await isAdmin(actor.id))) {
+    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  }
+
+  const id = req.nextUrl.searchParams.get('id') ?? '';
+  if (!id) return NextResponse.json({ message: 'شناسه لازم است' }, { status: 400 });
+
+  const { data: t } = await sb().from('tournaments').select('*').eq('id', id).maybeSingle();
+  if (!t) return NextResponse.json({ message: 'مسابقه پیدا نشد' }, { status: 404 });
+
+  const { count: paid } = await sb().from('tournament_registrations')
+    .select('id', { count: 'exact', head: true })
+    .eq('tournament_id', id).eq('payment_status', 'PAID');
+  if ((paid ?? 0) > 0) {
+    return NextResponse.json({
+      message: `این مسابقه ${paid} ثبت‌نامِ پرداخت‌شده دارد و حذف نمی‌شود — سابقه‌ی مالی باید بماند. به‌جایش لغوش کنید.`,
+    }, { status: 409 });
+  }
+
+  /* ثبت‌نام‌های پرداخت‌نشده مانعی ندارند و با خودِ مسابقه می‌روند */
+  await sb().from('tournament_registrations').delete().eq('tournament_id', id);
+  const { error } = await sb().from('tournaments').delete().eq('id', id);
+  if (error) {
+    console.error('[admin/tournaments] delete', error.message);
+    return NextResponse.json({ message: 'حذف انجام نشد' }, { status: 500 });
+  }
+
+  void audit({
+    actorId: actor.id, actorRole: 'admin', action: 'TOURNAMENT_DELETED_BY_ADMIN',
+    entityType: 'tournament', entityId: id, oldValue: t, ip: clientIp(req) ?? undefined,
+  });
+
+  return NextResponse.json({ ok: true });
+}
+
 /* ادمین می‌تواند وضعیتِ مسابقه را عوض کند — مثلاً مسابقه‌ای که باشگاه
    رهایش کرده یا محتوایش نامناسب است. برخلافِ مسیرِ باشگاه، این‌جا
    محدودیتِ گذر نداریم چون ادمین باید بتواند هر وضعیتِ گیرکرده‌ای را
