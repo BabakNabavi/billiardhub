@@ -24,6 +24,10 @@ export default function AdminRankingsPage() {
      فقط در localStorage بود، پس رنکینگی که ادمین وارد می‌کرد روی
      دستگاه دیگری — و برای کاربران — اصلاً وجود نداشت. کش محلی
      به‌عنوان نسخه‌ی اولیه می‌ماند تا صفحه لحظه‌ی اول خالی نباشد. */
+  /* «روی سرور هست یا نه» — برای هشدارِ پایین.
+     null = هنوز نمی‌دانیم. */
+  const [onServer, setOnServer] = useState<boolean | null>(null);
+
   useEffect(() => {
     setRankings(getStoredRankings());
     void (async () => {
@@ -32,7 +36,8 @@ export default function AdminRankingsPage() {
         if (!r.ok) return;
         const j = await r.json().catch(() => null) as { settings?: Record<string, unknown> } | null;
         const board = j?.settings?.rankings_board;
-        if (board && typeof board === 'object') setRankings(board as RankingsStructure);
+        if (board && typeof board === 'object') { setRankings(board as RankingsStructure); setOnServer(true); }
+        else setOnServer(false);
       } catch { /* کش محلی می‌ماند */ }
     })();
   }, []);
@@ -77,6 +82,7 @@ export default function AdminRankingsPage() {
     } catch { setErr('خطا در ارتباط با سرور'); return; }
 
     saveRankings(rankings);            // کش محلی، حالا که سرور تأیید کرد
+    setOnServer(true);                 // هشدارِ «فقط محلی» دیگر لازم نیست
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -101,6 +107,21 @@ export default function AdminRankingsPage() {
         <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
           style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
           {err}
+        </div>
+      )}
+
+      {/* ── هشدارِ «هنوز روی سرور نیست» ──
+          این جدول زمانی فقط در localStorage بود. ادمینی که پیش از آن
+          بازیکن وارد کرده، همچنان داده‌اش را این‌جا می‌بیند — چون از
+          مرورگرِ خودش خوانده می‌شود — ولی سایت چیزی نشان نمی‌دهد.
+          بدونِ این هشدار، تنها نشانه‌ی مشکل «صفحه‌ی رنکینگِ خالی» بود
+          که هیچ ربطی به این صفحه به نظر نمی‌رسید. */}
+      {onServer === false && (
+        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
+          style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+          این جدول هنوز روی سرور ذخیره نشده و فقط روی همین مرورگر است —
+          پس در صفحه‌ی رنکینگِ سایت چیزی دیده نمی‌شود.
+          برای انتشار، یک‌بار دکمه‌ی «ذخیره» را بزنید.
         </div>
       )}
 

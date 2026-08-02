@@ -67,6 +67,12 @@ export async function loadFeatures(opts?: { fresh?: boolean }): Promise<Features
   return value
 }
 
+/* ⚠️ تا ۱۰ ثانیه (TTL) پس از تغییرِ پرچم، این تابع ممکن است مقدارِ
+   قبلی را بدهد — در هر دو جهت، و روی Production در هر نمونه‌ی سرورلس
+   جداگانه. یک‌بار امتحان شد که مسیرِ «رد» تازه‌خوانی کند تا روشن‌کردن
+   فوری شود؛ ولی نتیجه‌اش این بود که *خاموش‌کردن* تا ۱۰ ثانیه طول
+   می‌کشید — و برای یک کلیدِ ایمنی، کندیِ خاموش‌کردن بدتر از کندیِ
+   روشن‌کردن است. پس تقارن عمداً حفظ شده. */
 export async function socialInteractionsEnabled(): Promise<boolean> {
   return (await loadFeatures()).socialInteractions
 }

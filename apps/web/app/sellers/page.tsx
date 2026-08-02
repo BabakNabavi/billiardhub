@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
 import { fetchProfiles } from '../../lib/profiles/client'
-import { MOCK_SELLERS } from '../../lib/sellers-data'
+import type { MockSeller } from '../../lib/sellers-data'
 import { productsBySeller } from '../shop/products'
 
 const GOLD     = '#C7A66A'
@@ -123,9 +123,17 @@ function SellerPosterBg() {
   )
 }
 
-// ── Mock Data ─────────────────────────────────────────────────
-/* فروشگاه‌های نمونه از منبع واحد؛ FlatShop هم از همین می‌خواند */
-const SELLERS = MOCK_SELLERS
+/* ── فقط فروشگاه‌های واقعی ────────────────────────────────────────
+   تا امروز پایه‌ی این فهرست `MOCK_SELLERS` بود: پنج فروشگاهِ ساختگی با
+   نام و شهر و تلفن، که همیشه — حتی روی Production — به کاربر نشان داده
+   می‌شدند. جدولِ `profiles` صفر ردیف دارد، یعنی هرچه بازدیدکننده در
+   این صفحه می‌دید ساختگی بود.
+
+   بدتر اینکه صفحه‌ی اول صادق بود و همین فهرست را خالی نشان می‌داد؛ پس
+   کاربر در Home هیچ فروشگاهی نمی‌دید و در /sellers پنج‌تا. همان کاری
+   که قبلاً با `SAMPLE_CLUBS` شد این‌جا هم انجام می‌شود: پایه خالی است و
+   فهرست فقط از فروشگاه‌های تأییدشده‌ی واقعی پر می‌شود. */
+const SELLERS: MockSeller[] = []
 
 /* یک فروشگاه ذخیره‌شده (از /dashboard/seller، تاییدشده) را به شکل کارت همین لیست در می‌آورد.
    فیلدهایی که فروشنده وارد نکرده با پیش‌فرض خنثی پر می‌شوند تا کارت نشکند. */

@@ -55,11 +55,31 @@ async function guard(req: NextRequest, id: string) {
   return { actor, t };
 }
 
-export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+/* وضعیت‌هایی که هر کسی حق دیدنشان را دارد. `draft` عمداً بیرون است:
+   پیش‌نویس یعنی باشگاه هنوز منتشرش نکرده. */
+const PUBLIC_STATUSES = new Set([
+  'published', 'registration_open', 'registration_closed',
+  'ongoing', 'completed', 'cancelled',
+]);
+
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!UUID.test(id)) return NextResponse.json({ message: 'شناسه معتبر نیست' }, { status: 400 });
   const t = await getTournament(id);
   if (!t) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
+
+  /* فهرستِ عمومی پیش‌نویس‌ها را فیلتر می‌کرد، ولی این مسیر نمی‌کرد:
+     با داشتنِ شناسه، عنوان و مبلغ و تاریخِ مسابقه‌ی منتشرنشده برای هر
+     کسی خوانده می‌شد. مالکِ باشگاه و ادمین همچنان می‌بینند؛ بقیه نه.
+
+     پاسخ عمداً ۴۰۴ است نه ۴۰۳: ۴۰۳ خودش تأیید می‌کند که چنین مسابقه‌ای
+     وجود دارد. */
+  if (!PUBLIC_STATUSES.has(t.status)) {
+    const actor = await actorOf(req);
+    const allowed = !!actor && (actor.role === 'admin' || await ownsClub(actor, t.club_id));
+    if (!allowed) return NextResponse.json({ message: 'مسابقه یافت نشد' }, { status: 404 });
+  }
+
   return NextResponse.json({ tournament: t }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
