@@ -130,7 +130,13 @@ t('قوانین هم فارسی شد', /قانون ۱ و ۲/.test(rules), rules)
 
 console.log('\n■ خطای درون‌صفحه‌ای')
 /* بدونِ نام، ثبت باید خطای درون‌صفحه بدهد نه پنجره‌ی مرورگر */
-await page.evaluate(() => [...document.querySelectorAll('button')].find(x => /^ثبت مسابقه$/.test(x.innerText.trim()))?.click())
+/* دکمه‌ی ثبت حالا «ثبت و انتشار» است (کنارش «ذخیره‌ی پیش‌نویس») */
+const clicked = await page.evaluate(() => {
+  const b = [...document.querySelectorAll('button')].find(x => /^ثبت و انتشار$/.test(x.innerText.trim()))
+  if (!b) return false
+  b.click(); return true
+})
+t('دکمه‌ی ثبت پیدا شد', clicked)
 await sleep(1200)
 t('پنجره‌ی خودِ مرورگر باز نشد', nativeDialogs === 0, `${nativeDialogs} پنجره`)
 t('خطا داخلِ صفحه دیده می‌شود',

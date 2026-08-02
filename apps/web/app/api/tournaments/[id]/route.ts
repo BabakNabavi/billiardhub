@@ -22,6 +22,22 @@ const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
    حال اجرا یا تمام‌شده نباید تاریخ و مبلغش عوض شود. */
 const FROZEN = new Set(['ongoing', 'completed', 'cancelled']);
 
+/* ── گذرهای مجازِ وضعیت ──────────────────────────────────────────
+   تا امروز هیچ راهی برای عوض‌کردنِ وضعیت نبود: مسابقه با `draft`
+   ساخته می‌شد، فهرست‌های عمومی پیش‌نویس را نشان نمی‌دهند، و دکمه‌ی
+   انتشاری هم وجود نداشت — یعنی یک بن‌بست.
+
+   هر گذری هم مجاز نیست. نقشه‌ی زیر فقط چیزهایی را می‌پذیرد که
+   معنا دارند؛ «شروع مسابقه» و «پایان» کارِ این مسیر نیست و جای
+   خودش را دارد. */
+const TRANSITIONS: Record<string, string[]> = {
+  draft: ['registration_open'],
+  registration_open: ['registration_closed', 'draft'],
+  registration_closed: ['registration_open'],
+  /* published بازمانده‌ی داده‌ی قدیمی است؛ راهِ خروج داشته باشد */
+  published: ['registration_open', 'draft'],
+};
+
 const isoOrNull = (v: unknown): string | null => {
   const s = String(v ?? '').trim();
   if (!s) return null;
@@ -61,6 +77,34 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   const b = await req.json().catch(() => ({}));
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+  /* ── تغییر وضعیت (انتشار / بستن ثبت‌نام / بازگشت به پیش‌نویس) ── */
+  if (b.status !== undefined) {
+    const next = String(b.status);
+    const allowed = TRANSITIONS[t.status] ?? [];
+    if (!allowed.includes(next)) {
+      return NextResponse.json({
+        message: `تغییر وضعیت از «${t.status}» به «${next}» مجاز نیست`,
+      }, { status: 409 });
+    }
+
+    /* برگرداندن به پیش‌نویس یعنی مسابقه از دیدِ عموم ناپدید می‌شود.
+       اگر کسی ثبت‌نام کرده باشد، این یعنی رویدادی که رویش حساب کرده
+       بی‌خبر غیب شود — پس بسته است. راهِ درستش «لغو» است که به
+       ثبت‌نام‌کننده‌ها خبر می‌دهد. */
+    if (next === 'draft') {
+      const { count } = await sb().from('tournament_registrations')
+        .select('id', { count: 'exact', head: true })
+        .eq('tournament_id', id).neq('status', 'CANCELLED');
+      if ((count ?? 0) > 0) {
+        return NextResponse.json({
+          message: `این مسابقه ${count} ثبت‌نام دارد و به پیش‌نویس برنمی‌گردد. برای توقف، آن را لغو کنید.`,
+        }, { status: 409 });
+      }
+    }
+
+    patch.status = next;
+  }
 
   if (typeof b.title === 'string') {
     const title = b.title.trim();

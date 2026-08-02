@@ -276,9 +276,15 @@ function fromDbTournament(r: DbTournament): Tournament {
     paymentMethod: 'online',
     cardNumber: '', cardHolder: '', bankName: '',
     status: T_STATUS[r.status] ?? 'upcoming',
+    /* وضعیتِ خامِ دیتابیس هم نگه داشته می‌شود.
+       `T_STATUS` چند وضعیت را روی یکی می‌نگارد (مثلاً `draft` و
+       `published` هر دو «upcoming» می‌شوند)، پس از روی مقدارِ نگاشته
+       نمی‌شود فهمید مسابقه منتشر شده یا نه — و دکمه‌ی انتشار دقیقاً
+       همین را لازم دارد. */
+    rawStatus: r.status,
     /* ظرفیت پرشده از سرور می‌آید — شمارش محلی قابل اتکا نیست */
     registeredCount: Math.max(0, r.max_players - (r.seatsLeft ?? r.max_players)),
-  } as Tournament;
+  } as Tournament & { rawStatus: string };
 }
 
 export default function ClubDashboardPage() {
@@ -427,6 +433,8 @@ export default function ClubDashboardPage() {
   const [tLoading, setTLoading] = useState(false);
   /* خطای فرمِ مسابقه — درون صفحه، نه پنجره‌ی خودِ مرورگر */
   const [tError, setTError] = useState('');
+  /* شناسه‌ی مسابقه‌ای که وضعیتش در حالِ تغییر است */
+  const [tStatusBusy, setTStatusBusy] = useState('');
 
   /* state گالری (آلبوم، عکس، استوری، لوگو) در خودِ GalleryTab است
      — هیچ‌جای دیگرِ این صفحه به آن‌ها کار ندارد. */
@@ -1105,7 +1113,29 @@ export default function ClubDashboardPage() {
     return `${gy}-${p(gm)}-${p(gd)}T${p(hh)}:${p(mm)}:00+03:30`;
   };
 
-  const createTournament = async () => {
+  /* انتشار / بستنِ ثبت‌نام / بازگشت به پیش‌نویس.
+     گذرهای مجاز را سرور تعیین می‌کند؛ این‌جا فقط دکمه‌ی مناسب نشان
+     داده می‌شود و پاسخِ خطا همان‌جا خوانده می‌شود. */
+  const setTournamentStatus = async (id: string, status: string) => {
+    setTStatusBusy(id);
+    setTError('');
+    try {
+      const r = await apiFetch(`/api/tournaments/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      const j = await r.json().catch(() => ({} as Record<string, unknown>));
+      if (!r.ok) { setTError(String(j.message ?? 'تغییر وضعیت انجام نشد')); return; }
+      if (selectedClub) await loadTournaments(selectedClub.id);
+    } catch {
+      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
+    } finally { setTStatusBusy(''); }
+  };
+
+  /* `publish=false` یعنی پیش‌نویس بماند. پیش‌فرض انتشار است چون
+     ثبتِ مسابقه معمولاً یعنی می‌خواهی دیده شود — و حالتِ قبلی (همیشه
+     پیش‌نویس، بدونِ دکمه‌ی انتشار) یک بن‌بست بود. */
+  const createTournament = async (publish = true) => {
     if (!selectedClub) return;
     /* `alert` پنجره‌ی خودِ مرورگر را می‌آورد: انگلیسیِ چپ‌به‌راست، با
        ظاهرِ سیستم‌عامل و بی‌ربط به بقیه‌ی سایت — همان چیزی که در
@@ -1138,13 +1168,7 @@ export default function ClubDashboardPage() {
              حالا ساعتش هم از خودِ فرم می‌آید، نه ۲۳:۵۹ ثابت. */
           registrationEndsAt: jalaliToIso(tForm.registrationDeadline, tForm.registrationDeadlineTime || '23:59'),
           matchFormat: tForm.matchFormat,
-          /* ── چرا `registration_open` و نه `draft` ──
-             مسابقه‌ای که باشگاه‌دار ثبت می‌کند باید دیده شود. پیش‌تر
-             `draft` ساخته می‌شد و فهرست‌های عمومی پیش‌نویس را نشان
-             نمی‌دهند — ولی هیچ دکمه‌ای برای انتشار هم ساخته نشده بود.
-             نتیجه: هر مسابقه‌ای که ساخته می‌شد برای همیشه نامرئی
-             می‌ماند، بدونِ هیچ پیام یا نشانه‌ای. */
-          status: 'registration_open',
+          status: publish ? 'registration_open' : 'draft',
         }),
       });
       const j = await r.json().catch(() => ({} as Record<string, unknown>));
@@ -2907,6 +2931,18 @@ export default function ClubDashboardPage() {
 
           {tournamentTab === 'list' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* خطای تغییرِ وضعیت باید همین‌جا دیده شود؛ باکسِ خطای
+                  فرمِ ساخت در تبِ دیگری است و کاربر نمی‌بیندش. */}
+              {tError && (
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 8,
+                  padding: '11px 14px', borderRadius: 12,
+                  background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.24)',
+                }}>
+                  <AlertTriangle size={15} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9 }}>{tError}</span>
+                </div>
+              )}
               {myTournaments.length === 0 ? (
                 <Card style={{ textAlign: 'center', padding: 40 }}>
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Trophy size={40} color="#D1D5DB" strokeWidth={1.2} /></div>
@@ -2939,12 +2975,58 @@ export default function ClubDashboardPage() {
                         </div>
                       )}
                     </div>
-                    <span style={{
-                      fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
-                      background: `${STATUS_COLORS[t.status]}22`, color: STATUS_COLORS[t.status],
-                    }}>{STATUS_LABELS[t.status]}</span>
+                    {/* نشانِ «دیده می‌شود / دیده نمی‌شود» مهم‌تر از نامِ
+                        فنیِ وضعیت است: باشگاه‌دار می‌خواهد بداند مسابقه‌اش
+                        عمومی هست یا نه. */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
+                      <span style={{
+                        fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
+                        background: `${STATUS_COLORS[t.status]}22`, color: STATUS_COLORS[t.status],
+                      }}>{STATUS_LABELS[t.status]}</span>
+                      {(() => {
+                        const raw = (t as Tournament & { rawStatus?: string }).rawStatus ?? '';
+                        const publicNow = raw !== 'draft' && raw !== 'cancelled';
+                        return (
+                          <span style={{
+                            fontSize: 10.5, padding: '3px 9px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap',
+                            background: publicNow ? 'rgba(48,197,90,0.12)' : 'rgba(0,0,0,0.05)',
+                            color: publicNow ? '#166534' : '#6B7280',
+                          }}>{publicNow ? 'در سایت دیده می‌شود' : 'پیش‌نویس — دیده نمی‌شود'}</span>
+                        );
+                      })()}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                    {/* ── انتشار و ثبت‌نام ──
+                        پیش‌تر مسابقه با `draft` ساخته می‌شد و هیچ راهی
+                        برای انتشارش نبود؛ برای همیشه نامرئی می‌ماند. */}
+                    {(() => {
+                      const raw = (t as Tournament & { rawStatus?: string }).rawStatus ?? '';
+                      const busy = tStatusBusy === t.id;
+                      const btn = (label: string, next: string, tone: 'go' | 'stop') => (
+                        <button key={next} type="button" disabled={busy}
+                          onClick={() => void setTournamentStatus(t.id, next)}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                            padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                            fontFamily: 'var(--font-base)', cursor: busy ? 'not-allowed' : 'pointer',
+                            opacity: busy ? 0.55 : 1,
+                            border: `1px solid ${tone === 'go' ? 'rgba(48,197,90,0.34)' : 'rgba(0,0,0,0.14)'}`,
+                            background: tone === 'go' ? 'rgba(48,197,90,0.12)' : 'rgba(0,0,0,0.04)',
+                            color: tone === 'go' ? '#166534' : '#6B7280',
+                          }}>{busy ? 'در حال ذخیره…' : label}</button>
+                      );
+                      if (raw === 'draft' || raw === 'published') {
+                        return btn('انتشار و باز کردن ثبت‌نام', 'registration_open', 'go');
+                      }
+                      if (raw === 'registration_open') {
+                        return <>{btn('بستن ثبت‌نام', 'registration_closed', 'stop')}{btn('بازگشت به پیش‌نویس', 'draft', 'stop')}</>;
+                      }
+                      if (raw === 'registration_closed') {
+                        return btn('باز کردن دوباره‌ی ثبت‌نام', 'registration_open', 'go');
+                      }
+                      return null;
+                    })()}
                     <Link href={`/tournaments/${t.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.11)', color: '#374151' }}><Eye size={12} /> مشاهده</Link>
                     <Link href={`/tournaments/${t.id}/bracket`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 13px', borderRadius: 20, fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.28)', color: '#A07840' }}>براکت</Link>
                     {t.status === 'live' && (
@@ -3097,8 +3179,17 @@ export default function ClubDashboardPage() {
                   <span style={{ fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9 }}>{tError}</span>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 10 }}>
-                <SaveBtn onClick={createTournament} loading={tLoading} label="ثبت مسابقه" />
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <SaveBtn onClick={() => void createTournament(true)} loading={tLoading} label="ثبت و انتشار" />
+                {/* پیش‌نویس برای وقتی است که جزئیات هنوز قطعی نیست.
+                    برخلافِ قبل، از فهرست می‌شود منتشرش کرد. */}
+                <button type="button" disabled={tLoading} onClick={() => void createTournament(false)} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '10px 20px', borderRadius: 20, fontSize: 13, fontWeight: 700,
+                  fontFamily: 'var(--font-base)', cursor: tLoading ? 'not-allowed' : 'pointer',
+                  border: '1px solid rgba(0,0,0,0.14)', background: 'rgba(0,0,0,0.04)', color: '#6B7280',
+                  opacity: tLoading ? 0.6 : 1,
+                }}>ذخیره‌ی پیش‌نویس</button>
                 <button onClick={() => setTournamentTab('list')} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '10px 20px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.12)',
