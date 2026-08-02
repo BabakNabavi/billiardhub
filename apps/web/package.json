@@ -44,7 +44,8 @@
     "audit:e2e": "node scripts/audit-e2e.mjs",
     "test:roles": "node scripts/test-role-flow.mjs",
     "test:profiles": "node scripts/test-profiles-flow.mjs",
-    "test:legacy-api": "node scripts/test-legacy-api.mjs"
+    "test:legacy-api": "node scripts/test-legacy-api.mjs",
+    "test:finance:admin": "node scripts/test-finance-admin.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
