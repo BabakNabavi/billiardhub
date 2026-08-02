@@ -244,17 +244,23 @@ head('۱۰) پنل باشگاه — دسترسی سریع، دیالوگ، و ب
    نمی‌مانند (که هیچ بازدیدکننده‌ای نمی‌دیدشان) و سقف واقعاً اعمال است. */
 {
   head('گالریِ باشگاه — تا ۱۰ عکس برای پس‌زمینه')
-  const dash = read('app/dashboard/club/page.tsx')
+  /* کلِ گالری — state، هندلرها و JSX — به کامپوننتِ خودش منتقل شد.
+     صفحه‌ی داشبورد دیگر هیچ‌کدامشان را نمی‌بیند. */
+  const dash = read('components/dashboard/club/GalleryTab.tsx')
+  const page = read('app/dashboard/club/page.tsx')
   const club = read('app/clubs/[id]/page.tsx')
 
   t('سقف ۱۰ عکس تعریف شده', /const MAX_CLUB_PHOTOS = 10/.test(dash))
   t('سقف هنگام آپلود اعمال می‌شود', /MAX_CLUB_PHOTOS - singlePhotos\.length/.test(dash))
   t('عکس‌ها روی سرور ذخیره می‌شوند',
-    /api\.put\(`\/clubs\/\$\{selectedClub\.id\}`, \{ images:/.test(dash))
+    /api\.put\(`\/clubs\/\$\{club\.id\}`, \{ images:/.test(dash))
   /* base64 صفحه را سنگین می‌کرد و از سقفِ سطرِ دیتابیس هم رد می‌شد */
   t('آپلود به Storage می‌رود نه data-URL', /\/api\/upload/.test(dash))
-  t('عکس‌ها موقعِ باز شدن از سرور خوانده می‌شوند', /c\.images\s*\)/.test(dash))
+  t('عکس‌ها موقعِ باز شدن از سرور خوانده می‌شوند', /club\.images\s*\)/.test(dash))
   t('به کاربر گفته می‌شود پس‌زمینه می‌شوند', /پس‌زمینه‌ی صفحه‌ی عمومی/.test(dash))
+  /* صفحه‌ی مادر فقط باشگاه و راهِ خبردادنِ لوگو را می‌دهد — نه بیست prop */
+  t('صفحه فقط دو prop می‌دهد', /<GalleryTab club=\{selectedClub\}/.test(page))
+  t('state گالری از صفحه رفته', !/const \[singlePhotos, setSinglePhotos\]/.test(page))
   t('همان images پس‌زمینه‌ی صفحه‌ی باشگاه است',
     /const images\s+= club\.images\?\.length \? club\.images/.test(club))
 }
@@ -278,7 +284,9 @@ head('۱۰) پنل باشگاه — دسترسی سریع، دیالوگ، و ب
 
   t('صفحه‌ی باشگاه از آن استفاده می‌کند', /<ClubLogo src=\{club\.logo\}/.test(club))
   t('فهرستِ باشگاه‌ها هم', (list.match(/<ClubLogo src=\{club\.logo\}/g) ?? []).length === 2)
-  t('پیش‌نمایشِ داشبورد هم', /<ClubLogo src=\{selectedClub\?\.logo\}/.test(dash))
+  /* پیش‌نمایشِ لوگو داخلِ تبِ گالری است، که کامپوننتِ خودش شد */
+  t('پیش‌نمایشِ داشبورد هم',
+    /<ClubLogo src=\{club\?\.logo\}/.test(read('components/dashboard/club/GalleryTab.tsx')))
   t('حرفِ اولِ نام دیگر جای لوگو نیست',
     !/club\.logo \? <img[\s\S]{0,220}club\.name\[0\]/.test(club + list))
 }
