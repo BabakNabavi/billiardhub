@@ -183,10 +183,13 @@ export default function MediaPage() {
     })
   }, [sorted, cat, query])
 
+  /* پیش‌تر آخرین تکیه‌گاه `MEDIA_VIDEOS[0]!` بود؛ حالا که فهرستِ محتوای
+     دستی خالی است، آن ادعا `undefined` می‌دهد و اولین `featuredV.id`
+     صفحه را می‌شکند. نبودِ ویدیو یک حالتِ معتبر است، نه خطا. */
   const featuredV = (featOverride ? pool.find(v => v.id === featOverride) : undefined)
-    ?? pool.find(v => v.featured) ?? pool[0] ?? MEDIA_VIDEOS[0]!
-  const trending  = [...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== featuredV.id)
-  const newest    = [...pool].sort((a, b) => b.ts - a.ts).filter(v => v.id !== featuredV.id)
+    ?? pool.find(v => v.featured) ?? pool[0] ?? null
+  const trending  = [...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== featuredV?.id)
+  const newest    = [...pool].sort((a, b) => b.ts - a.ts).filter(v => v.id !== featuredV?.id)
   const popular   = [...pool].sort((a, b) => b.likes - a.likes)
   const tourneys  = pool.filter(v => v.category === 'highlights')
   const shorts    = [...pool].sort((a, b) => b.likes - a.likes).slice(0, 10)
@@ -221,6 +224,23 @@ export default function MediaPage() {
     for (const v of pool) for (const t of v.tags) m.set(t, (m.get(t) || 0) + 1)
     return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e[0])
   }, [pool])
+
+  /* هیچ ویدیویی نیست — نه آپلودیِ کاربران، نه محتوای دستی. صفحه‌ی
+     خالیِ صادق بهتر از چیدمانِ سینماییِ بی‌محتواست. گارد عمداً *بعد از*
+     همه‌ی هوک‌هاست تا ترتیبِ هوک‌ها بین رندرها عوض نشود. */
+  if (!featuredV) {
+    return (
+      <div dir="rtl" style={{ minHeight: '70vh', background: GROUND, color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif', display: 'grid', placeItems: 'center', padding: '80px 24px', textAlign: 'center' }}>
+        <div>
+          <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 10 }}>بیلیارد مدیا</div>
+          <p style={{ fontSize: 14, opacity: 0.7, lineHeight: 2.1, maxWidth: 430, margin: '0 auto' }}>
+            هنوز ویدیویی منتشر نشده. هر کاربرِ واردشده می‌تواند کانال بسازد و
+            ویدیوی خودش را بگذارد.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: GROUND, color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif', position: 'relative', overflowX: 'clip' }}>

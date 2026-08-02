@@ -741,8 +741,13 @@ function DiscoveryPanel() {
    فروشندگان. بریک تیره بین دو سکشن روشن، به هویت «سالن نمایش»
    (/media): شارکُل-برنزی، پرفراژ فیلم، پلی طلایی، دیوار پوستر.
 ═══════════════════════════════════════════════════════════════ */
-const MEDIA_FEAT  = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0]!;
-const MEDIA_MINIS = [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== MEDIA_FEAT.id).slice(0, 3);
+/* فهرستِ محتوای دستی می‌تواند خالی باشد (و امروز هست). پیش‌تر این‌جا
+   `MEDIA_VIDEOS[0]!` نوشته شده بود که با فهرستِ خالی `undefined`
+   می‌شود و اولین `feat.id` کلِ صفحه‌ی اول را می‌شکند. */
+const MEDIA_FEAT  = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0] ?? null;
+const MEDIA_MINIS = MEDIA_FEAT
+  ? [...MEDIA_VIDEOS].sort((a, b) => b.views - a.views).filter(v => v.id !== MEDIA_FEAT.id).slice(0, 3)
+  : [];
 
 function HomeMediaBand() {
   /* کنترل‌های ادمین (ویژه/مخفی) بعد از mount اعمال می‌شوند */
@@ -757,6 +762,10 @@ function HomeMediaBand() {
     setFeat(f);
     setMinis([...pool].sort((a, b) => b.views - a.views).filter(v => v.id !== f.id).slice(0, 3));
   }, []);
+
+  /* بدونِ محتوا، نوارِ مدیا اصلاً رندر نمی‌شود — یک سکشنِ سینماییِ خالی
+     بدتر از نبودنش است. */
+  if (!feat) return null;
 
   return (
     <section dir="rtl" className="hm-band">

@@ -65,7 +65,9 @@ export default function AdminMediaPage() {
   if (!_hydrated || !ready) return null;
   if (!user || user.primaryRole !== 'admin') return null;
 
-  const defaultFeatured = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0]!;
+  /* فهرستِ محتوای دستی حالا خالی است؛ `[0]!` یعنی undefined و
+     `defaultFeatured.title` صفحه‌ی ادمین را می‌شکند. */
+  const defaultFeatured = MEDIA_VIDEOS.find(v => v.featured) ?? MEDIA_VIDEOS[0] ?? null;
 
   return (
     <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, paddingBottom: 64 }}>
@@ -90,7 +92,8 @@ export default function AdminMediaPage() {
             <h2 style={{ fontSize: 14.5, fontWeight: 900, margin: 0 }}>ویدیوی ویژه (NOW SHOWING)</h2>
           </div>
           <p style={{ fontSize: 12, color: MUT, margin: '0 0 12px', lineHeight: 1.9 }}>
-            در بیلبورد صفحه‌ی مدیا و باند مدیای صفحه‌ی اصلی نمایش داده می‌شود. پیش‌فرض: «{defaultFeatured.title}»
+            در بیلبورد صفحه‌ی مدیا و باند مدیای صفحه‌ی اصلی نمایش داده می‌شود.
+            {defaultFeatured ? ` پیش‌فرض: «${defaultFeatured.title}»` : ' فعلاً محتوای دستی‌ای وجود ندارد.'}
           </p>
           <select
             value={featured}
@@ -101,7 +104,7 @@ export default function AdminMediaPage() {
               void persist({ media_featured_id: v || null });
             }}
             style={{ width: '100%', maxWidth: 460 }}>
-            <option value="">پیش‌فرض ({defaultFeatured.title})</option>
+            <option value="">{defaultFeatured ? `پیش‌فرض (${defaultFeatured.title})` : 'پیش‌فرض'}</option>
             {MEDIA_VIDEOS.map(v => (
               <option key={v.id} value={v.id}>{v.title}</option>
             ))}
