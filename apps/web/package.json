@@ -52,7 +52,8 @@
     "test:dashboard": "node scripts/test-dashboard-stats.mjs",
     "test:journey": "node scripts/test-user-journey.mjs",
     "test:booking:deep": "node scripts/test-booking-payment.mjs",
-    "test:responsive": "node scripts/test-responsive.mjs"
+    "test:responsive": "node scripts/test-responsive.mjs",
+    "test:social:audit": "node scripts/test-social.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",
