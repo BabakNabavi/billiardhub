@@ -149,10 +149,17 @@ export interface JalaliDatePickerProps {
   maxYear?: number
   error?: string
   id?: string
+  /** کدام سمتِ امروز قابلِ انتخاب است؟
+   *
+   *  این کامپوننت برای تاریخ تولد نوشته شده بود و آینده را می‌بست.
+   *  برای تاریخِ برگزاریِ مسابقه دقیقاً برعکس لازم است: گذشته باید
+   *  بسته باشد. با `'future'` امروز و بعدش باز می‌ماند. */
+  direction?: 'past' | 'future'
 }
 
 export default function JalaliDatePicker({
   value, onChange, label, placeholder = 'انتخاب تاریخ', minYear, maxYear, error, id,
+  direction = 'past',
 }: JalaliDatePickerProps) {
   const today = useMemo(() => {
     const n = new Date()
@@ -160,14 +167,18 @@ export default function JalaliDatePicker({
     return { y, m, d }
   }, [])
 
-  const loYear = minYear ?? today.y - 100
-  const hiYear = maxYear ?? today.y            // تاریخ تولد آینده بی‌معناست
+  const future = direction === 'future'
+  /* برای رویداد، سالِ گذشته بی‌معناست و صد سالِ بعد هم. پیش‌فرضِ دو
+     سال — امسال و سالِ بعد — همان چیزی است که یک باشگاه لازم دارد. */
+  const loYear = minYear ?? (future ? today.y : today.y - 100)
+  const hiYear = maxYear ?? (future ? today.y + 1 : today.y)   // تاریخ تولد آینده بی‌معناست
 
   const sel = parse(value)
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [viewY, setViewY] = useState(sel?.y ?? today.y - 25)
-  const [viewM, setViewM] = useState(sel?.m ?? 1)
+  /* نمای آغازین: برای رویداد همین ماه، برای تاریخ تولد ۲۵ سال پیش */
+  const [viewY, setViewY] = useState(sel?.y ?? (direction === 'future' ? today.y : today.y - 25))
+  const [viewM, setViewM] = useState(sel?.m ?? (direction === 'future' ? today.m : 1))
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
 
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -245,10 +256,17 @@ export default function JalaliDatePicker({
     return [...Array(pad).fill(null), ...Array.from({ length: n }, (_, i) => i + 1)] as (number | null)[]
   }, [viewY, viewM])
 
-  const isFuture = (d: number) =>
+  /* دو سمتِ امروز جدا حساب می‌شوند و بسته به `direction` یکی بسته
+     می‌شود. خودِ امروز در هر دو حالت باز است. */
+  const isAfterToday = (d: number) =>
     viewY > today.y
     || (viewY === today.y && viewM > today.m)
     || (viewY === today.y && viewM === today.m && d > today.d)
+  const isBeforeToday = (d: number) =>
+    viewY < today.y
+    || (viewY === today.y && viewM < today.m)
+    || (viewY === today.y && viewM === today.m && d < today.d)
+  const isBlocked = (d: number) => future ? isBeforeToday(d) : isAfterToday(d)
 
   const pick = (d: number) => {
     onChange(`${viewY}/${viewM}/${d}`)
@@ -295,7 +313,7 @@ export default function JalaliDatePicker({
           if (d === null) return <div key={`e${i}`} />
           const isSel = !!sel && sel.y === viewY && sel.m === viewM && sel.d === d
           const isToday = today.y === viewY && today.m === viewM && today.d === d
-          const disabled = isFuture(d)
+          const disabled = isBlocked(d)
           return (
             <button key={d} type="button" disabled={disabled} onClick={() => pick(d)}
               style={{

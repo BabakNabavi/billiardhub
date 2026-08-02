@@ -22,6 +22,7 @@ export interface SelectOption<T extends string | number = string> {
 
 export default function Select<T extends string | number = string>({
   value, options, onChange, placeholder = 'انتخاب کنید…', disabled, ariaLabel, style, compact,
+  latin,
 }: {
   value: T | ''
   options: SelectOption<T>[]
@@ -31,6 +32,14 @@ export default function Select<T extends string | number = string>({
   ariaLabel?: string
   style?: React.CSSProperties
   compact?: boolean
+  /** ارقامِ برچسب‌ها لاتین بمانند.
+   *
+   *  `PersianDigits` هر متنِ رندرشده‌ای را فارسی می‌کند — که برای
+   *  تقریباً همه‌جای سایت درست است، ولی نه برای «Best of 5» که یک
+   *  اصطلاحِ لاتین است و «Best of ۵» نه فارسی است نه انگلیسی.
+   *  کلاسِ `bh-latin` همان راهِ کنارگذاشتنی است که خودِ آن کامپوننت
+   *  تعریف کرده. */
+  latin?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [up, setUp] = useState(false)
@@ -71,6 +80,7 @@ export default function Select<T extends string | number = string>({
         ref={btnRef} type="button" disabled={disabled}
         onClick={() => setOpen(o => !o)}
         aria-label={ariaLabel} aria-expanded={open} aria-haspopup="listbox"
+        className={latin ? 'bh-latin' : undefined}
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
           padding: pad, borderRadius: 11, fontFamily: 'inherit',
@@ -94,7 +104,7 @@ export default function Select<T extends string | number = string>({
       </button>
 
       {open && !disabled && (
-        <div ref={listRef} role="listbox" style={{
+        <div ref={listRef} role="listbox" className={latin ? 'bh-latin' : undefined} style={{
           position: 'absolute', insetInline: 0, zIndex: 60,
           ...(up ? { bottom: 'calc(100% + 6px)' } : { top: 'calc(100% + 6px)' }),
           maxHeight: LIST_H, overflowY: 'auto', overscrollBehavior: 'contain',

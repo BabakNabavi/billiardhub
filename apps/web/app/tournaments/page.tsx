@@ -279,7 +279,7 @@ export default function TournamentsPage() {
             </h1>
             <div style={{ width: 70, height: 3, borderRadius: 2, marginTop: 14, background: `linear-gradient(90deg,${GOLD},#8A6020)`, transformOrigin: 'right', animation: 'tnScaleX .55s .3s ease both' }} />
             <p style={{ margin: '14px 0 0', fontSize: 'clamp(12px,1.4vw,14px)', color: 'rgba(255,255,255,0.6)', maxWidth: 470, lineHeight: 2, animation: 'tnFadeUp .5s .35s ease both' }}>
-              از لیگ‌های باشگاهی تا جام‌های قهرمانی — رویدادهای رسمی اکوسیستم بیلیارد هاب را دنبال کنید.
+              از لیگ‌های باشگاهی تا جام‌های قهرمانی ، رویدادهای رسمی را در پلتفرم بیلیارد هاب را دنبال کنید.
             </p>
           </div>
 

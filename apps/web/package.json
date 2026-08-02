@@ -31,7 +31,8 @@
     "test:icons:ui": "node scripts/test-icons-ui.mjs",
     "test:gallery:ui": "node scripts/test-gallery-ui.mjs",
     "test:closure:ui": "node scripts/test-closure-ui.mjs",
-    "purge:bookings": "node scripts/purge-test-bookings.mjs"
+    "purge:bookings": "node scripts/purge-test-bookings.mjs",
+    "test:tournament:ui": "node scripts/test-tournament-ui.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

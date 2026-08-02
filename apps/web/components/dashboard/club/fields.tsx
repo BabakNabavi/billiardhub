@@ -96,15 +96,17 @@ export function InputField({ label, value, onChange, type = 'text', placeholder 
   );
 }
 
-export function SelectField({ label, value, onChange, options }: {
+export function SelectField({ label, value, onChange, options, latin }: {
   label: string; value: string; onChange: (v: string) => void;
   options: { value: string; label: string; disabled?: boolean }[];
+  /** ارقامِ گزینه‌ها لاتین بمانند — مثلِ «Best of 5» */
+  latin?: boolean;
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{label}</label>
       <Select
-        value={value} ariaLabel={label}
+        value={value} ariaLabel={label} latin={latin}
         options={options.filter(o => !o.disabled).map(o => ({ value: o.value, label: o.label }))}
         onChange={onChange} />
     </div>

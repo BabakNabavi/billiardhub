@@ -177,6 +177,20 @@ function toPersianDate(s: string): string {
 }
 
 
+/* عددهای داخلِ یک متنِ آزاد را فارسی می‌کند — و در صورت نیاز
+   سه‌رقم‌جدا. فقط رشته‌های رقمی دست می‌خورند، پس بقیه‌ی متن (و حتی
+   ایموجی و علائم) دست‌نخورده می‌ماند.
+
+   `group` برای جوایز است: مبلغِ بی‌جداکننده خوانده نمی‌شود. برای
+   قوانین خاموش است چون «قانون ۳» نباید «۳» بماند ولی «۱٬۲۳۴» هم
+   نمی‌خواهیم وقتی شماره‌ی بند است. */
+function faDigitsInText(s: string, group = false): string {
+  return s.replace(/\d+/g, m => {
+    const t = group && m.length > 3 ? Number(m).toLocaleString('en-US').replace(/,/g, '٬') : m
+    return t.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
+  })
+}
+
 function compressImage(file: File): Promise<string> {
   return new Promise(resolve => {
     const img = new Image();
@@ -213,8 +227,8 @@ interface DbTournament {
 /* برچسب فرمت مسابقه — همان فهرستی که دراپ‌داون ساخت نشان می‌دهد،
    تا کارت فهرست و فرم یک زبان داشته باشند. */
 const FORMAT_LABELS: Record<string, string> = {
-  bo3: 'Best Of ۳', bo5: 'Best Of ۵', bo7: 'Best Of ۷',
-  bo9: 'Best Of ۹', bo11: 'Best Of ۱۱',
+  bo3: 'Best of 3', bo5: 'Best of 5', bo7: 'Best of 7',
+  bo9: 'Best of 9', bo11: 'Best of 11',
 };
 
 /* نگاشت وضعیت‌های سرور به همان چیزی که این صفحه از قبل می‌شناسد */
@@ -405,12 +419,14 @@ export default function ClubDashboardPage() {
   const [tournamentTab, setTournamentTab] = useState<'list' | 'create'>('list');
   const [tForm, setTForm] = useState({
     name: '', description: '', gameType: 'snooker' as GameType,
-    date: '', startTime: '', registrationDeadline: '',
+    date: '', startTime: '', registrationDeadline: '', registrationDeadlineTime: '23:59',
     maxPlayers: '16', entryFee: '', prizeInfo: '', rules: '', matchFormat: 'bo5',
     paymentMethod: 'card_transfer' as 'online' | 'card_transfer',
     cardNumber: '', cardHolder: '', bankName: '',
   });
   const [tLoading, setTLoading] = useState(false);
+  /* خطای فرمِ مسابقه — درون صفحه، نه پنجره‌ی خودِ مرورگر */
+  const [tError, setTError] = useState('');
 
   /* state گالری (آلبوم، عکس، استوری، لوگو) در خودِ GalleryTab است
      — هیچ‌جای دیگرِ این صفحه به آن‌ها کار ندارد. */
@@ -1091,9 +1107,13 @@ export default function ClubDashboardPage() {
 
   const createTournament = async () => {
     if (!selectedClub) return;
-    if (!tForm.name.trim()) { alert('نام مسابقه الزامی است'); return; }
-    if (!tForm.date) { alert('تاریخ مسابقه الزامی است'); return; }
-    if (!tForm.startTime) { alert('ساعت شروع الزامی است'); return; }
+    /* `alert` پنجره‌ی خودِ مرورگر را می‌آورد: انگلیسیِ چپ‌به‌راست، با
+       ظاهرِ سیستم‌عامل و بی‌ربط به بقیه‌ی سایت — همان چیزی که در
+       «تغییر حساب» هم برداشته شد. */
+    setTError('');
+    if (!tForm.name.trim()) { setTError('نام مسابقه الزامی است'); return; }
+    if (!tForm.date) { setTError('تاریخ برگزاری را انتخاب کنید'); return; }
+    if (!tForm.startTime) { setTError('ساعت شروع را انتخاب کنید'); return; }
     setTLoading(true);
     try {
       /* روی سرور ساخته می‌شود؛ مالکیت باشگاه آن‌جا از دیتابیس اثبات
@@ -1114,25 +1134,34 @@ export default function ClubDashboardPage() {
           venue: selectedClub.name,
           city: (selectedClub as { city?: string }).city ?? '',
           startsAt: jalaliToIso(tForm.date, tForm.startTime || '00:00'),
-          /* مهلت ثبت‌نام پیش‌تر اصلاً فرستاده نمی‌شد و همیشه NULL می‌ماند */
-          registrationEndsAt: jalaliToIso(tForm.registrationDeadline, '23:59'),
+          /* مهلت ثبت‌نام پیش‌تر اصلاً فرستاده نمی‌شد و همیشه NULL می‌ماند.
+             حالا ساعتش هم از خودِ فرم می‌آید، نه ۲۳:۵۹ ثابت. */
+          registrationEndsAt: jalaliToIso(tForm.registrationDeadline, tForm.registrationDeadlineTime || '23:59'),
           matchFormat: tForm.matchFormat,
-          /* پیش‌نویس ساخته می‌شود؛ باز کردن ثبت‌نام یک اقدام جداست */
-          status: 'draft',
+          /* ── چرا `registration_open` و نه `draft` ──
+             مسابقه‌ای که باشگاه‌دار ثبت می‌کند باید دیده شود. پیش‌تر
+             `draft` ساخته می‌شد و فهرست‌های عمومی پیش‌نویس را نشان
+             نمی‌دهند — ولی هیچ دکمه‌ای برای انتشار هم ساخته نشده بود.
+             نتیجه: هر مسابقه‌ای که ساخته می‌شد برای همیشه نامرئی
+             می‌ماند، بدونِ هیچ پیام یا نشانه‌ای. */
+          status: 'registration_open',
         }),
       });
       const j = await r.json().catch(() => ({} as Record<string, unknown>));
-      if (!r.ok) { alert(String(j.message ?? 'ثبت مسابقه انجام نشد')); return; }
+      if (!r.ok) { setTError(String(j.message ?? 'ثبت مسابقه انجام نشد')); return; }
 
       await loadTournaments(selectedClub.id);
       setTournamentTab('list');
       setTForm({
         name: '', description: '', gameType: 'snooker', date: '', startTime: '',
-        registrationDeadline: '', maxPlayers: '16', entryFee: '', prizeInfo: '',
-        rules: '', matchFormat: '', paymentMethod: 'card_transfer',
+        registrationDeadline: '', registrationDeadlineTime: '23:59',
+        maxPlayers: '16', entryFee: '', prizeInfo: '',
+        rules: '', matchFormat: 'bo5', paymentMethod: 'card_transfer',
         cardNumber: '', cardHolder: '', bankName: '',
       });
-    } catch {} finally { setTLoading(false); }
+    } catch {
+      setTError('ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.');
+    } finally { setTLoading(false); }
   };
 
   // Gallery actions
@@ -2900,7 +2929,9 @@ export default function ClubDashboardPage() {
                       </div>
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
                         {t.registeredCount}/{t.maxPlayers} بازیکن | {formatFee(t.entryFee)}
-                        {t.matchFormat && ` | ${FORMAT_LABELS[t.matchFormat] ?? t.matchFormat}`}
+                        {/* `bh-latin` وگرنه PersianDigits همین‌جا هم
+                            «Best of 5» را «Best of ۵» می‌کند */}
+                        {t.matchFormat && <span className="bh-latin"> | {FORMAT_LABELS[t.matchFormat] ?? t.matchFormat}</span>}
                       </div>
                       {t.registrationDeadline && (
                         <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 2 }}>
@@ -2950,13 +2981,17 @@ export default function ClubDashboardPage() {
                   options={[{ value:'snooker',label:'اسنوکر' },{ value:'8ball',label:'ایت بال' },{ value:'9ball',label:'ناین بال' },{ value:'other',label:'سایر' }]} />
                 <SelectField label="ظرفیت (نفر)" value={tForm.maxPlayers} onChange={v => setTForm(p => ({...p, maxPlayers: v}))}
                   options={['8','16','32','64'].map(v => ({ value: v, label: v + ' نفر' }))} />
-                {/* تاریخ‌ها با همان تقویم شمسی تاریخ تولد انتخاب می‌شوند،
-                    نه تایپ آزاد — تایپ آزاد یعنی هر کسی هر قالبی بنویسد
-                    و بعد قابل مرتب‌سازی و مقایسه نباشد.
-                    maxYear جلو گذاشته شده چون مسابقه در آینده است. */}
+                {/* تاریخ‌ها با تقویم شمسی انتخاب می‌شوند نه تایپ آزاد —
+                    تایپ آزاد یعنی هر کسی هر قالبی بنویسد و بعد قابل
+                    مرتب‌سازی و مقایسه نباشد.
+
+                    `direction="future"`: مسابقه در گذشته برگزار نمی‌شود.
+                    پیش‌تر تقویم همان تنظیمِ تاریخ تولد را داشت و روزهای
+                    گذشته باز بودند؛ سال هم تا ۱۴۱۰ باز بود که هیچ باشگاهی
+                    لازم ندارد. حالا فقط امسال و سالِ بعد. */}
                 <JalaliDatePicker label="تاریخ برگزاری" value={tForm.date}
                   onChange={v => setTForm(p => ({ ...p, date: v }))}
-                  minYear={1404} maxYear={1410} />
+                  direction="future" />
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
                   <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>ساعت شروع</label>
@@ -2964,10 +2999,18 @@ export default function ClubDashboardPage() {
                     onChange={v => setTForm(p => ({ ...p, startTime: v }))} ariaLabel="شروع مسابقه" />
                 </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <JalaliDatePicker label="مهلت ثبت‌نام" value={tForm.registrationDeadline}
-                    onChange={v => setTForm(p => ({ ...p, registrationDeadline: v }))}
-                    minYear={1404} maxYear={1410} />
+                {/* مهلت ثبت‌نام هم ساعت دارد: پیش‌تر همیشه ۲۳:۵۹ فرض
+                    می‌شد، پس باشگاهی که می‌خواست ثبت‌نام ظهر بسته شود
+                    راهی نداشت. */}
+                <JalaliDatePicker label="مهلت ثبت‌نام" value={tForm.registrationDeadline}
+                  onChange={v => setTForm(p => ({ ...p, registrationDeadline: v }))}
+                  direction="future" />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                  <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>ساعت پایان ثبت‌نام</label>
+                  <FaTimeSelect value={tForm.registrationDeadlineTime || '23:59'}
+                    onChange={v => setTForm(p => ({ ...p, registrationDeadlineTime: v }))}
+                    ariaLabel="پایان ثبت‌نام" />
                 </div>
 
                 {/* مبلغ: سه‌رقم‌جدا، فارسی، و به حروف زیرش */}
@@ -2984,26 +3027,36 @@ export default function ClubDashboardPage() {
                   )}
                 </div>
 
-                <SelectField label="فرمت مسابقه" value={tForm.matchFormat}
+                {/* عدد انگلیسی می‌ماند: «Best of» یک اصطلاحِ لاتین است و
+                    «Best Of ۱۱» نه فارسی است نه انگلیسی. بقیه‌ی سایت
+                    (صفحه‌ی مسابقه و فرمِ عمومی) هم از قبل همین شکل را
+                    داشتند؛ فقط همین یک جا فرق می‌کرد. */}
+                <SelectField label="فرمت مسابقه" value={tForm.matchFormat} latin
                   onChange={v => setTForm(p => ({ ...p, matchFormat: v }))}
                   options={[
-                    { value: 'bo3',  label: 'Best Of ۳'  },
-                    { value: 'bo5',  label: 'Best Of ۵'  },
-                    { value: 'bo7',  label: 'Best Of ۷'  },
-                    { value: 'bo9',  label: 'Best Of ۹'  },
-                    { value: 'bo11', label: 'Best Of ۱۱' },
+                    { value: 'bo3',  label: 'Best of 3'  },
+                    { value: 'bo5',  label: 'Best of 5'  },
+                    { value: 'bo7',  label: 'Best of 7'  },
+                    { value: 'bo9',  label: 'Best of 9'  },
+                    { value: 'bo11', label: 'Best of 11' },
                   ]} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
+                {/* اعداد همان‌جا که تایپ می‌شوند فارسی می‌شوند.
+                    در «جوایز» مبلغ هم سه‌رقم‌جدا می‌شود: «۱۰۰۰۰۰۰۰» را
+                    هیچ‌کس نمی‌خواند، «۱۰٬۰۰۰٬۰۰۰» را بله. */}
                 {[
-                  { label: 'توضیحات', key: 'description', rows: 3, ph: '' },
-                  { label: 'جوایز', key: 'prizeInfo', rows: 2, ph: '🏆 اول: ... | 🥈 دوم: ...' },
-                  { label: 'قوانین', key: 'rules', rows: 4, ph: '• قانون اول\n• قانون دوم' },
+                  { label: 'توضیحات', key: 'description', rows: 3, ph: '', fa: false, group: false },
+                  { label: 'جوایز', key: 'prizeInfo', rows: 2, ph: '🏆 اول: ۱۰٬۰۰۰٬۰۰۰ تومان', fa: true, group: true },
+                  { label: 'قوانین', key: 'rules', rows: 4, ph: '• قانون اول\n• قانون دوم', fa: true, group: false },
                 ].map(f => (
                   <div key={f.key}>
                     <label style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>{f.label}</label>
                     <textarea value={(tForm as Record<string,string>)[f.key]} rows={f.rows} placeholder={f.ph}
-                      onChange={e => setTForm(p => ({...p, [f.key]: e.target.value}))}
+                      onChange={e => setTForm(p => ({
+                        ...p,
+                        [f.key]: f.fa ? faDigitsInText(e.target.value, f.group) : e.target.value,
+                      }))}
                       style={inputStyle} />
                   </div>
                 ))}
@@ -3030,6 +3083,18 @@ export default function ClubDashboardPage() {
                   <InputField label="شماره کارت" value={tForm.cardNumber} onChange={v => setTForm(p => ({...p, cardNumber: v}))} placeholder="6037-XXXX-XXXX-XXXX" />
                   <InputField label="نام صاحب کارت" value={tForm.cardHolder} onChange={v => setTForm(p => ({...p, cardHolder: v}))} />
                   <InputField label="نام بانک" value={tForm.bankName} onChange={v => setTForm(p => ({...p, bankName: v}))} placeholder="ملت" />
+                </div>
+              )}
+              {/* خطا کنارِ خودِ دکمه دیده می‌شود، نه در پنجره‌ای که
+                  کاربر باید ببندد تا دوباره فرم را ببیند. */}
+              {tError && (
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 8,
+                  marginBottom: 12, padding: '11px 14px', borderRadius: 12,
+                  background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.24)',
+                }}>
+                  <AlertTriangle size={15} color="#dc2626" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9 }}>{tError}</span>
                 </div>
               )}
               <div style={{ display: 'flex', gap: 10 }}>
