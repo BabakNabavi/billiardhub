@@ -120,6 +120,26 @@ try {
     await visit(p, l)
   }
 
+  head('بازسازیِ نشست — فقط کوکی، بدونِ localStorage')
+  /* حالتِ لبه‌ی واقعی: کوکیِ معتبر هست ولی استورِ zustand خالی است
+     (پاک‌کردنِ حافظه، تغییرِ نسخه‌ی استور، خرابیِ ذخیره‌سازی). پیش‌تر
+     کاربر «خارج‌شده» دیده می‌شد و داشبوردِ باشگاه او را به /login
+     می‌فرستاد. */
+  {
+    const bare = await browser.newPage()
+    await bare.setViewport({ width: 1440, height: 900 })
+    await bare.evaluateOnNewDocument(() => { try { localStorage.clear() } catch { /* */ } })
+    await bare.goto(B + '/dashboard/club', { waitUntil: 'domcontentloaded', timeout: 90_000 })
+    await new Promise(z => setTimeout(z, 5000))
+    const where = new URL(bare.url()).pathname
+    t('با کوکیِ تنها به /login پرت نمی‌شود'.padEnd(42), where !== '/login', 'رفت به ' + where)
+    const restored = await bare.evaluate(() => {
+      try { return !!JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.user?.id } catch { return false }
+    })
+    t('نشست از روی کوکی بازسازی شد'.padEnd(42), restored, 'استور خالی ماند')
+    await bare.close()
+  }
+
   head('ساختِ پروفایل از راهِ API — همان کاری که داشبورد می‌کند')
   for (const kind of ['coach', 'referee', 'seller', 'manufacturer', 'technician', 'player']) {
     const r = await page.evaluate(async (k, c) => {

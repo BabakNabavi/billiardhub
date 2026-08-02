@@ -1,6 +1,6 @@
 'use client'
 
-/* پل نشست — دو کار می‌کند:
+/* پل نشست — سه کار می‌کند:
 
    ۱) مهاجرت بی‌صدا: کاربرانی که توکنشان در localStorage است، بدون
       اینکه چیزی ببینند به نشست کوکی‌محور منتقل می‌شوند.
@@ -9,6 +9,13 @@
       باید پیش از انقضا تمدید شود؛ وگرنه کاربری که نیم‌ساعت روی سایت
       بماند ناگهان ۴۰۱ می‌گیرد. چون بیشتر فراخوان‌ها fetch ساده‌اند و
       اینترسپتور ندارند، تمدید را «پیش‌دستانه» انجام می‌دهیم نه واکنشی.
+
+   ۳) بازسازیِ نشست از روی کوکی: منبعِ حقیقتِ نشست کوکیِ httpOnly است،
+      ولی رابط کاربر را از استورِ zustand می‌خواند که در localStorage
+      می‌ماند. اگر آن پاک شود و کوکی بماند — پاک‌کردنِ دستیِ حافظه،
+      تغییرِ نسخه‌ی استور، یا خرابیِ ذخیره‌سازی — کاربر با نشستِ کاملاً
+      معتبر «خارج‌شده» دیده می‌شد و /dashboard/club او را به /login
+      می‌فرستاد. حالا یک‌بار از سرور پرسیده می‌شود.
 
    این کامپوننت پس از پایان دوره‌ی گذار ساده‌تر می‌شود (بخش adopt حذف). */
 
@@ -30,6 +37,25 @@ export default function SessionBridge() {
   const user = useAuthStore(s => s.user)
   const hydrated = useAuthStore(s => s._hydrated)
   const logout = useAuthStore(s => s.logout)
+  const login = useAuthStore(s => s.login)
+
+  /* ── بازسازیِ نشست از کوکی ──
+     فقط وقتی استور خالی است. اگر کوکی هم نباشد سرور ۴۰۱ می‌دهد و
+     هیچ اتفاقی نمی‌افتد — یعنی برای مهمان بی‌هزینه است (یک درخواست
+     در هر بار بارگذاری، و فقط وقتی کاربری در استور نیست). */
+  useEffect(() => {
+    if (!hydrated || user) return
+    let stopped = false
+    void (async () => {
+      try {
+        const r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
+        if (stopped || !r.ok) return
+        const me = await r.json().catch(() => null)
+        if (!stopped && me?.id) login(me, '')
+      } catch { /* شبکه قطع بود؛ کاربر مهمان می‌ماند */ }
+    })()
+    return () => { stopped = true }
+  }, [hydrated, user, login])
 
   useEffect(() => {
     if (!hydrated) return
