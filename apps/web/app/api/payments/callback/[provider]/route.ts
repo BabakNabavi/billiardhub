@@ -36,8 +36,19 @@ async function handle(req: NextRequest, providerName: string) {
   }
 
   const provider = getPaymentProvider(pay.provider || providerName);
-  const auth = authority || pay.provider_authority || '';
+
+  /* ── شناسه‌ی درگاه از دیتابیس می‌آید، نه از نوارِ نشانی ──
+     پیش‌تر `authority || pay.provider_authority` بود، یعنی مقدارِ
+     کوئری‌استرینگ اولویت داشت. با آن، کسی می‌توانست شناسه‌ی یک پرداختِ
+     واقعاً موفقِ *دیگر* را روی این پرداخت سوار کند و درگاه آن را تأیید
+     می‌کرد. حالا فقط همان شناسه‌ای معتبر است که موقعِ ساختِ پرداخت
+     ذخیره شده؛ اگر درگاه شناسه‌ی دیگری برگرداند، ناسازگاری است. */
+  const auth = pay.provider_authority || '';
   if (!auth) return fail('شناسه‌ی پرداخت نامعتبر است');
+  if (authority && pay.provider_authority && authority !== pay.provider_authority) {
+    console.error('[payments/callback] authority mismatch', { paymentId: pay.id });
+    return fail('شناسه‌ی پرداخت با درخواست اولیه هم‌خوانی ندارد');
+  }
 
   const v = await provider.verifyPayment({ paymentId: pay.id, authority: auth, amount: pay.amount });
   if (!v.ok || !v.paid) {

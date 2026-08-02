@@ -33,7 +33,8 @@
     "test:closure:ui": "node scripts/test-closure-ui.mjs",
     "purge:bookings": "node scripts/purge-test-bookings.mjs",
     "test:tournament:ui": "node scripts/test-tournament-ui.mjs",
-    "test:tournament:publish": "node scripts/test-tournament-publish.mjs"
+    "test:tournament:publish": "node scripts/test-tournament-publish.mjs",
+    "test:finance": "node scripts/test-financial-invariants.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

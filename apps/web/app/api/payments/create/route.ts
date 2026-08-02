@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
-import { getPaymentProvider } from '@/lib/payments';
+import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
 
 /* ایجاد پرداخت برای یک رزرو در انتظار.
    مبلغ همیشه از رکورد رزرو (سروری) خوانده می‌شود، نه از کلاینت. */
@@ -30,6 +30,21 @@ export async function POST(req: NextRequest) {
   }
   if (!b.final_amount || b.final_amount <= 0) {
     return NextResponse.json({ message: 'مبلغ رزرو معتبر نیست' }, { status: 400 });
+  }
+
+  /* ── دروازه‌ی واقعی الزامی است ──
+     `getPaymentProvider()` وقتی درگاهی تنظیم نشده باشد بی‌صدا به mock
+     می‌افتد. برای مسابقات از قبل جلویش گرفته شده بود، ولی رزرو این
+     بررسی را نداشت: یعنی رزرو می‌توانست «پرداخت‌شده» شود بدونِ آنکه
+     ریالی جابه‌جا شده باشد — و بعد بدهیِ واقعی به باشگاه بسازد.
+
+     `BH_ALLOW_MOCK_PAYMENTS=1` تنها راهِ آگاهانه‌ی آزمایش است و به‌طور
+     پیش‌فرض خاموش. */
+  if (!hasRealGateway() && process.env.BH_ALLOW_MOCK_PAYMENTS !== '1') {
+    return NextResponse.json({
+      message: 'پرداخت آنلاین هنوز فعال نیست. لطفاً بعداً تلاش کنید یا با باشگاه تماس بگیرید.',
+      gatewayDisabled: true,
+    }, { status: 503 });
   }
 
   const provider = getPaymentProvider();
