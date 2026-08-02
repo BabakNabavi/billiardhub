@@ -8,11 +8,11 @@
    و Load More با اسکلتون.
    ───────────────────────────────────────────────────────────── */
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, Clock3, Eye, ArrowLeft, Zap } from 'lucide-react'
 import {
-  NEWS_ARTICLES, NEWS_CATEGORIES, categoryOf, faNum,
+  NEWS_ARTICLES, NEWS_CATEGORIES, categoryOf, faNum, fetchNewsArticles,
   type NewsArticle, type NewsCategoryKey,
 } from '../../lib/news-data'
 
@@ -106,15 +106,24 @@ export default function NewsPage() {
   const [sortOpen, setSortOpen] = useState(false)
   const [shown, setShown]   = useState(PAGE_STEP)
   const [loading, setLoading] = useState(false)
+  /* اخبار از سرور می‌آید. NEWS_ARTICLES حالا خالی است و فقط برای
+     همسانیِ رندرِ اول نگه داشته شده. */
+  const [articles, setArticles] = useState(NEWS_ARTICLES)
+  const [loaded, setLoaded] = useState(false)
+  useEffect(() => {
+    let alive = true
+    void fetchNewsArticles().then(rows => { if (alive) { setArticles(rows); setLoaded(true) } })
+    return () => { alive = false }
+  }, [])
   const sortRef = useRef<HTMLDivElement>(null)
 
   const isBrowsing = cat === 'all' && !query.trim()   // حالت پیش‌فرض ⇒ سکشن ویژه نمایش داده می‌شود
 
   const sorted = useMemo(() => {
-    const list = [...NEWS_ARTICLES]
+    const list = [...articles]
     list.sort((a, b) => (sort === 'views' ? b.views - a.views : b.ts - a.ts))
     return list
-  }, [sort])
+  }, [sort, articles])
 
   const filtered = useMemo(() => {
     const q = query.trim()
@@ -126,7 +135,7 @@ export default function NewsPage() {
   }, [sorted, cat, query])
 
   /* ── چیدمان تحریریه‌ای «صفحه‌ی اول» — فقط در حالت مرور ── */
-  const byTs = useMemo(() => [...NEWS_ARTICLES].sort((a, b) => b.ts - a.ts), [])
+  const byTs = useMemo(() => [...articles].sort((a, b) => b.ts - a.ts), [articles])
   const lead      = isBrowsing ? (byTs.find(a => a.featured) ?? byTs[0]) : undefined
   const headlines = isBrowsing ? byTs.filter(a => a.id !== lead?.id).slice(0, 6) : []
   const secondRow = isBrowsing
@@ -137,7 +146,7 @@ export default function NewsPage() {
     if (!isBrowsing || !lead) return []
     const used = new Set<string>([lead.id, ...secondRow.map(a => a.id)])
     const counts = new Map<NewsCategoryKey, number>()
-    for (const a of NEWS_ARTICLES) counts.set(a.category, (counts.get(a.category) ?? 0) + 1)
+    for (const a of articles) counts.set(a.category, (counts.get(a.category) ?? 0) + 1)
     const topCats = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0])
     return topCats.map(k => {
       const items = byTs.filter(a => a.category === k && !used.has(a.id))
@@ -160,7 +169,7 @@ export default function NewsPage() {
   const gridBase  = isBrowsing ? filtered.filter(a => !frontIds.has(a.id)) : filtered
   const gridItems = gridBase.slice(0, shown)
   const hasMore   = gridBase.length > shown
-  const breaking  = NEWS_ARTICLES.filter(a => a.breaking)
+  const breaking  = articles.filter(a => a.breaking)
 
   const loadMore = () => {
     if (loading) return

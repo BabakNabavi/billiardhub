@@ -6,12 +6,12 @@
    مرتبط (سایدبار چسبان در دسکتاپ). داده از lib/news-data.
    ───────────────────────────────────────────────────────────── */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Clock3, Eye, ChevronLeft, Link2, Check, Zap, ArrowLeft } from 'lucide-react'
 import {
-  getArticle, relatedArticles, categoryOf, faNum, NEWS_CATEGORIES,
+  getArticle, categoryOf, faNum, NEWS_CATEGORIES, fetchNewsArticles, type NewsArticle,
 } from '../../../lib/news-data'
 
 const GOLD   = '#C7A66A'
@@ -25,9 +25,36 @@ const BG     = '#F7F7F5'
 export default function NewsDetailPage() {
   const params = useParams()
   const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
-  const article = useMemo(() => getArticle(id), [id])
-  const related = useMemo(() => (article ? relatedArticles(article, 4) : []), [article])
+  /* خبر از سرور می‌آید. `getArticle` روی فهرستِ محلی کار می‌کند که
+     حالا خالی است، پس تنها به آن تکیه نمی‌کنیم — وگرنه هر خبرِ واقعیِ
+     منتشرشده «پیدا نشد» می‌شد. */
+  const [article, setArticle] = useState(() => getArticle(id))
+  const [all, setAll] = useState<NewsArticle[]>([])
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    let alive = true
+    void fetchNewsArticles().then(rows => {
+      if (!alive) return
+      setAll(rows)
+      setArticle(rows.find(a => a.id === id) ?? getArticle(id))
+      setLoading(false)
+    })
+    return () => { alive = false }
+  }, [id])
+  const related = useMemo(() => {
+    if (!article) return []
+    const same = all.filter(x => x.id !== article.id && x.category === article.category)
+    const rest = all.filter(x => x.id !== article.id && x.category !== article.category)
+    return [...same, ...rest].slice(0, 4)
+  }, [article, all])
   const [copied, setCopied] = useState(false)
+
+  /* تا وقتی پاسخ نیامده «پیدا نشد» نگو */
+  if (loading && !article) {
+    return (
+      <div dir="rtl" style={{ minHeight: '70vh', background: BG }} />
+    )
+  }
 
   if (!article) {
     return (
