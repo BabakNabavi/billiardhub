@@ -81,7 +81,8 @@ const SECTIONS: AdminSection[] = [
     title: 'محتوا و رویدادها', en: 'CONTENT & EVENTS', dot: '#B23B2E',
     items: [
       { title: 'اخبار', desc: 'نوشتن و مدیریت اخبار بیلیارد', icon: <Newspaper size={20} />, link: '/admin/news' },
-      { title: 'مسابقات و رویدادها', desc: 'ایجاد و مدیریت رویدادهای رسمی', icon: <Trophy size={20} />, link: '/admin/events' },
+      { title: 'مسابقات باشگاه‌ها', desc: 'مسابقاتی که باشگاه‌ها ساخته‌اند — ثبت‌نام، درآمد و وضعیت', icon: <Trophy size={20} />, link: '/admin/tournaments' },
+      { title: 'رویدادهای رسمی', desc: 'رویدادهای محتوایی که خودتان ایجاد می‌کنید', icon: <CalendarDays size={20} />, link: '/admin/events' },
       { title: 'سیستم تبلیغات', desc: 'شش جایگاه مستقل، کمپین‌ها، پلن‌های قیمت و درخواست‌ها', icon: <Megaphone size={20} />, link: '/admin/advertising' },
       { title: 'بسته‌های آگهی', desc: 'ساخت و قیمت‌گذاری بسته‌های فروش آگهی', icon: <Package size={20} />, link: '/admin/ad-plans' },
       { title: 'بسته‌های استوری', desc: 'سهمیهٔ استوری هر نقش و بسته‌های فروش', icon: <Clapperboard size={20} />, link: '/admin/story-plans' },
