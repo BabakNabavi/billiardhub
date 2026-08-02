@@ -72,12 +72,33 @@ t('هر دو زمینه‌ی کمیسیون تعریف شده', ctxs.includes('R
 
 /* ── ۲) توابع ─────────────────────────────────────────────────────── */
 head('۲) توابعِ مالی')
-for (const fn of ['bh_reconcile_club_account', 'bh_complete_booking', 'bh_complete_due_bookings',
-                  'bh_fail_settlement', 'bh_complete_refund', 'bh_tournament_complete']) {
-  /* فراخوانِ بی‌آرگومان ⇒ ۴۰۴ یعنی تابع نیست، هر چیزِ دیگر یعنی هست */
-  const r = await rpc(fn, {})
-  t(`${fn} وجود دارد`, r.s !== 404, `HTTP ${r.s}`)
+/* PostgREST تابع را با *نام و امضا* پیدا می‌کند؛ فراخوانِ بی‌آرگومان
+   برای تابعی که پارامتر دارد همیشه ۴۰۴ می‌دهد و چیزی درباره‌ی وجودش
+   نمی‌گوید. پس با آرگومانِ درست ولی شناسه‌ی ناموجود صدا زده می‌شود:
+   ۴۰۴ ⇒ تابع نیست، ۴۰۰ (استثنای «یافت نشد») ⇒ تابع هست. */
+const NIL = '00000000-0000-0000-0000-000000000000'
+const PROBES = [
+  ['bh_complete_booking',       { p_booking_id: NIL }],
+  ['bh_complete_due_bookings',  {}],
+  ['bh_fail_settlement',        { p_id: NIL, p_reason: 'probe' }],
+  ['bh_complete_refund',        { p_refund_id: NIL, p_reference: 'probe', p_admin: NIL }],
+  ['bh_tournament_complete',    { p_tournament_id: NIL }],
+  ['bh_tournament_confirm',     { p_registration_id: NIL, p_provider: 'probe', p_ref_id: 'probe', p_amount: 0 }],
+  ['bh_create_settlement',      { p_club_id: NIL, p_admin: NIL, p_amount: null, p_idem: null }],
+  ['bh_commission_for_ctx',     { p_club_id: NIL, p_amount: 1000, p_context: 'RESERVATION' }],
+]
+for (const [fn, args] of PROBES) {
+  const r = await rpc(fn, args)
+  t(`${fn} وجود دارد`, r.s !== 404, `HTTP ${r.s} ${JSON.stringify(r.b).slice(0, 90)}`)
 }
+
+/* آشتی جداگانه سنجیده می‌شود چون واقعاً می‌نویسد — با باشگاهِ واقعی
+   صدا زده می‌شود و نتیجه‌اش باید همان چیزی باشد که دفتر می‌گوید. */
+const anyClub = (await get('club_accounts?select=club_id&limit=1')).b?.[0]?.club_id
+if (anyClub) {
+  const rec = await rpc('bh_reconcile_club_account', { p_club_id: anyClub })
+  t('bh_reconcile_club_account کار می‌کند', rec.s < 300, `HTTP ${rec.s} ${JSON.stringify(rec.b).slice(0, 90)}`)
+} else { skip++; console.log('  ⏭  باشگاهی برای آشتی نیست') }
 
 /* ── ۳) سازگاریِ موجودی با دفتر ────────────────────────────────────── */
 head('۳) موجودیِ باشگاه = دفتر')
@@ -132,15 +153,6 @@ if (!WRITE) {
     const dl = await del(`ledger_entries?id=eq.${id}`)
     t('حذفِ ردیفِ دفتر رد می‌شود', dl >= 400, `HTTP ${dl}`)
 
-    /* پاک‌سازی: تریگر حذف را نمی‌پذیرد، پس با تابعِ سرویس پاک می‌شود.
-       اگر نشد، ردیف با source_key نشان‌دار می‌ماند و گزارش داده می‌شود. */
-    const still = await get(`ledger_entries?select=id&id=eq.${id}`)
-    if (Array.isArray(still.b) && still.b.length) {
-      console.log(`  ⚠  ردیفِ آزمایشی ${id} به‌خاطر append-only پاک نشد — با SQL دستی حذفش کنید:`)
-      console.log(`      ALTER TABLE ledger_entries DISABLE TRIGGER ledger_append_only;`)
-      console.log(`      DELETE FROM ledger_entries WHERE id = '${id}';`)
-      console.log(`      ALTER TABLE ledger_entries ENABLE TRIGGER ledger_append_only;`)
-    }
   }
 
   head('۷) کلیدِ یکتای رویداد')
@@ -148,6 +160,24 @@ if (!WRITE) {
   const a = await post('ledger_entries', { type: 'ADJUSTMENT', amount: 1, source_key: key, meta: { zzTest: true } })
   const b2 = await post('ledger_entries', { type: 'ADJUSTMENT', amount: 1, source_key: key, meta: { zzTest: true } })
   t('ردیفِ تکراری با همان source_key رد می‌شود', a.s < 300 && b2.s >= 400, `${a.s}/${b2.s}`)
+
+  /* ── پاک‌سازیِ fixture ──
+     دفتر عمداً append-only است و هیچ مسیرِ حذفی هم برایش ساخته نشده
+     (تصمیمِ آگاهانه: نداشتنِ درِ پشتی مهم‌تر از خودکار بودنِ پاک‌سازی
+     است). پس این حالت ردیف جا می‌گذارد و خودش دستورِ پاک‌کردن را
+     می‌دهد — بی‌صدا رهایش نمی‌کند. */
+  head('۸) پاک‌سازیِ داده‌ی آزمایشی')
+  const left = await get('ledger_entries?select=id,source_key&source_key=like.zz-*')
+  const n = Array.isArray(left.b) ? left.b.length : 0
+  if (n === 0) {
+    t('چیزی برای پاک‌کردن نماند', true)
+  } else {
+    console.log(`  ⚠  ${n} ردیفِ آزمایشی در دفتر ماند. برای پاک‌کردن، در SQL Editor بزنید:\n`)
+    console.log(`      ALTER TABLE ledger_entries DISABLE TRIGGER ledger_append_only;`)
+    console.log(`      DELETE FROM ledger_entries WHERE source_key LIKE 'zz-%';`)
+    console.log(`      ALTER TABLE ledger_entries ENABLE TRIGGER ledger_append_only;\n`)
+    skip++
+  }
 }
 
 console.log(`\n${'─'.repeat(52)}`)

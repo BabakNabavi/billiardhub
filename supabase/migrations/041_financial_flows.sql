@@ -473,7 +473,37 @@ BEGIN
 END $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
--- ۶) دسترسی — هیچ‌کدام از این توابع از کلاینت صدا زده نمی‌شوند
+-- ۶) حالا که همه‌ی توابع علامتِ درست می‌نویسند، قید اعمال می‌شود
+--
+--    این قید عمداً در ۰۴۰ نبود: توابعِ نسخه‌ی ۰۰۱ کمیسیون را منفی
+--    می‌نوشتند و اگر قید زودتر می‌آمد، در فاصله‌ی میان دو مهاجرت هر
+--    تأییدِ پرداختی خطا می‌داد.
+-- ───────────────────────────────────────────────────────────────────────────
+UPDATE public.ledger_entries SET amount = ABS(amount)
+ WHERE type IN ('BOOKING_PAYMENT','TOURNAMENT_PAYMENT','PLATFORM_COMMISSION',
+                'CLUB_EARNING','CANCELLATION_FEE','SETTLEMENT_REVERSAL')
+   AND amount < 0;
+UPDATE public.ledger_entries SET amount = -ABS(amount)
+ WHERE type IN ('REFUND','SETTLEMENT','CLUB_EARNING_REVERSAL')
+   AND amount > 0;
+
+ALTER TABLE public.ledger_entries DROP CONSTRAINT IF EXISTS ledger_sign_chk;
+ALTER TABLE public.ledger_entries
+  ADD CONSTRAINT ledger_sign_chk CHECK (
+    CASE
+      WHEN type IN ('BOOKING_PAYMENT','TOURNAMENT_PAYMENT','PLATFORM_COMMISSION',
+                    'CLUB_EARNING','CANCELLATION_FEE','SETTLEMENT_REVERSAL')
+        THEN amount >= 0
+      WHEN type IN ('REFUND','SETTLEMENT','CLUB_EARNING_REVERSAL')
+        THEN amount <= 0
+      ELSE true            -- ADJUSTMENT هر دو علامت را می‌پذیرد
+    END);
+
+/* موجودی‌ها پس از نرمال‌سازیِ علامت دوباره از دفتر ساخته می‌شوند */
+SELECT public.bh_reconcile_all_clubs();
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- ۷) دسترسی — هیچ‌کدام از این توابع از کلاینت صدا زده نمی‌شوند
 -- ───────────────────────────────────────────────────────────────────────────
 REVOKE ALL ON FUNCTION public.bh_complete_booking(uuid)              FROM anon, authenticated;
 REVOKE ALL ON FUNCTION public.bh_complete_due_bookings()             FROM anon, authenticated;

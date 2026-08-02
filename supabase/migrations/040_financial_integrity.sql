@@ -72,17 +72,10 @@ UPDATE public.ledger_entries SET amount = -ABS(amount)
  WHERE type IN ('REFUND','SETTLEMENT','CLUB_EARNING_REVERSAL')
    AND amount > 0;
 
-ALTER TABLE public.ledger_entries DROP CONSTRAINT IF EXISTS ledger_sign_chk;
-ALTER TABLE public.ledger_entries
-  ADD CONSTRAINT ledger_sign_chk CHECK (
-    CASE
-      WHEN type IN ('BOOKING_PAYMENT','TOURNAMENT_PAYMENT','PLATFORM_COMMISSION',
-                    'CLUB_EARNING','CANCELLATION_FEE','SETTLEMENT_REVERSAL')
-        THEN amount >= 0
-      WHEN type IN ('REFUND','SETTLEMENT','CLUB_EARNING_REVERSAL')
-        THEN amount <= 0
-      ELSE true            -- ADJUSTMENT هر دو علامت را می‌پذیرد
-    END);
+/* ⚠️ قیدِ علامت عمداً این‌جا اعمال *نمی‌شود*.
+   توابعِ نسخه‌ی ۰۰۱ هنوز کمیسیون را منفی می‌نویسند؛ اگر قید همین‌جا
+   بیاید، در فاصله‌ی میان اجرای ۰۴۰ و ۰۴۱ هر تأییدِ پرداختی خطا می‌دهد.
+   قید در پایانِ ۰۴۱ — پس از جای‌گزینیِ توابع — گذاشته می‌شود. */
 
 COMMENT ON COLUMN public.ledger_entries.amount IS
   'علامت از دیدِ خزانه‌ی پلتفرم. مثبت = ورود/درآمد/بدهیِ تازه به باشگاه، منفی = خروج/تسویه.';
@@ -258,7 +251,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS commission_club_ctx_uidx
 INSERT INTO public.commission_rules (scope, context, type, value, is_active)
 SELECT 'GLOBAL', 'TOURNAMENT', 'PERCENTAGE',
        COALESCE((SELECT (value #>> '{}')::numeric FROM public.app_settings
-                  WHERE key = 'tournament_commission_percent'), 5)
+                  WHERE key = 'tournament_commission_percent'), 5),
+       true
 WHERE NOT EXISTS (
   SELECT 1 FROM public.commission_rules
    WHERE scope = 'GLOBAL' AND context = 'TOURNAMENT' AND is_active);
@@ -340,7 +334,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS refunds_treg_active_uidx
 -- ───────────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.bh_reconcile_club_account(p_club_id uuid)
 RETURNS club_accounts LANGUAGE plpgsql AS $$
-DECLARE acc club_accounts; earned bigint; reversed bigint; settled bigint; comm bigint;
+DECLARE acc club_accounts; earned bigint; reversed bigint; settled bigint;
+        comm bigint; inflight bigint;
 BEGIN
   SELECT COALESCE(SUM(amount),0) INTO earned   FROM public.ledger_entries
    WHERE club_id = p_club_id AND status='POSTED' AND type = 'CLUB_EARNING';
@@ -354,13 +349,21 @@ BEGIN
   INSERT INTO public.club_accounts (club_id) VALUES (p_club_id)
     ON CONFLICT (club_id) DO NOTHING;
 
+  /* «در حالِ تسویه» = تسویه‌ای که تأیید شده ولی هنوز پرداخت نشده.
+     این مبلغ نه قابلِ تسویه‌ی دوباره است و نه هنوز پرداخت‌شده. */
+  SELECT COALESCE(SUM(amount),0) INTO inflight FROM public.settlements
+   WHERE club_id = p_club_id AND status IN ('PENDING','APPROVED','PROCESSING');
+
   UPDATE public.club_accounts SET
     total_earnings   = earned - reversed,
     total_commission = comm,
     total_settled    = settled,
-    /* بدهیِ باقی‌مانده‌ی پلتفرم به این باشگاه */
-    pending_balance  = (earned - reversed) - settled,
-    available_balance = 0,
+    /* در انتظارِ تسویه (تأییدشده، پرداخت‌نشده) */
+    pending_balance  = inflight,
+    /* آنچه همین حالا به باشگاه بدهکاریم و قابلِ تسویه است.
+       داشبوردِ ادمین و باشگاه همین ستون را «قابل تسویه» می‌خوانند،
+       پس معنایش باید همان بماند. */
+    available_balance = (earned - reversed) - settled - inflight,
     updated_at = now()
    WHERE club_id = p_club_id
    RETURNING * INTO acc;
