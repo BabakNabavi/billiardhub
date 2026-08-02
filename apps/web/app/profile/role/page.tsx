@@ -81,7 +81,12 @@ const ROLES: RoleMeta[] = [
 const ROLE_MAP = Object.fromEntries(ROLES.map(r => [r.value, r])) as Record<RoleValue, RoleMeta>
 
 // آدرس API بک‌اند NestJS
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+/* پیش‌تر این‌جا `http://localhost:3001` بود — بک‌اندِ NestJS که حذف
+   شده. یعنی روی Production همه‌ی این فراخوانی‌ها به یک میزبانِ ناموجود
+   می‌رفتند و بی‌صدا شکست می‌خوردند: کاربر نقشش را انتخاب می‌کرد،
+   صفحه «ثبت شد» می‌گفت و هیچ درخواستی ساخته نمی‌شد. مسیرها حالا
+   نسبی‌اند و به route handlerهای خودِ Next می‌روند. */
+const API = ''
 
 // ─── RoleCard ─────────────────────────────────────────────────
 function RoleCard({
@@ -195,6 +200,9 @@ function DocUploadStep({
   onBack: () => void
   onDone: () => void
 }) {
+  /* مسیرِ مدرک باید زیرِ شناسه‌ی خودِ کاربر باشد؛ /api/upload جز این
+     را رد می‌کند تا کسی مدرکِ دیگری را بازنویسی نکند. */
+  const { user: me } = useAuthStore()
   const [files, setFiles]     = useState<Record<string, File | null>>({})
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress]   = useState<Record<string, 'idle' | 'uploading' | 'done' | 'error'>>({})
@@ -214,17 +222,19 @@ function DocUploadStep({
         setProgress(p => ({ ...p, [roleVal]: 'uploading' }))
         const formData = new FormData()
         formData.append('file', files[roleVal]!)
-        formData.append('role', roleVal)
+        /* باکتِ مدارک خصوصی است و لینکِ عمومی ندارد؛ مسیر برمی‌گردد. */
+        formData.append('path', `documents/roles/${me?.id ?? ''}/${roleVal}-${Date.now()}`)
 
         try {
-          const upRes = await apiFetch(`${API}/roles/upload-doc`, {
+          const upRes = await apiFetch('/api/upload', {
             method: 'POST',
             headers: authHeader(),
             body: formData,
           })
           if (upRes.ok) {
             const j = await upRes.json()
-            docUrl = j.url
+            /* فایلِ خصوصی `url` ندارد — `path` همان ارجاعِ ماندگار است */
+            docUrl = j.path ?? j.url
             setProgress(p => ({ ...p, [roleVal]: 'done' }))
           } else {
             setProgress(p => ({ ...p, [roleVal]: 'error' }))
@@ -237,7 +247,7 @@ function DocUploadStep({
       }
 
       // ثبت درخواست نقش
-      await apiFetch(`${API}/roles/request`, {
+      await apiFetch('/api/roles/request', {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: roleVal, docUrl }),
@@ -385,7 +395,7 @@ export default function RolePage() {
 
   // بارگذاری درخواست‌های قبلی از NestJS
   useEffect(() => {
-    apiFetch(`${API}/roles/my`, { headers: authHeader() })
+    apiFetch('/api/roles/my', { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch(() => {})
@@ -427,7 +437,7 @@ export default function RolePage() {
     }
     setQueued(new Set())
     setStep('select')
-    apiFetch(`${API}/roles/my`, { headers: authHeader() })
+    apiFetch('/api/roles/my', { headers: authHeader() })
       .then(r => r.ok ? r.json() : [])
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch(() => {})
@@ -445,7 +455,7 @@ export default function RolePage() {
     if (queued.has('player')) savePlayerBasics()
 
     for (const roleVal of queuedArr) {
-      await apiFetch(`${API}/roles/request`, {
+      await apiFetch('/api/roles/request', {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({

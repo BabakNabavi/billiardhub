@@ -41,7 +41,8 @@
     "test:carousel": "node scripts/test-carousel-drag.mjs",
     "test:admin:manage": "node scripts/test-admin-manage.mjs",
     "test:admin:positive": "node scripts/test-admin-positive.mjs",
-    "audit:e2e": "node scripts/audit-e2e.mjs"
+    "audit:e2e": "node scripts/audit-e2e.mjs",
+    "test:roles": "node scripts/test-role-flow.mjs"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.2.8",

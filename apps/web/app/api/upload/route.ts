@@ -98,6 +98,15 @@ export async function POST(req: NextRequest) {
     if (!club || (owner !== actor.id && !(await isAdminUser(actor.id)))) {
       return NextResponse.json({ message: 'دسترسی به این باشگاه مجاز نیست' }, { status: 403 });
     }
+  } else if (cleaned.startsWith('documents/roles/')) {
+    /* مدرکِ درخواستِ نقش (کارت مربیگری، کارت داوری، جواز کسب…).
+       مسیر باید `documents/roles/<شناسه‌ی خودِ کاربر>/…` باشد؛ نوشتن
+       زیرِ شناسه‌ی کسِ دیگر مجاز نیست چون `upsert` روشن است و یعنی
+       می‌شد مدرکِ دیگری را بازنویسی کرد. */
+    const owner = cleaned.split('/')[2] ?? '';
+    if (owner !== actor.id.replace(/[^A-Za-z0-9_-]/g, '_')) {
+      return NextResponse.json({ message: 'مسیر مدرک باید زیر شناسه‌ی خودتان باشد' }, { status: 403 });
+    }
   } else if (cleaned.startsWith('documents/')) {
     /* مدرکِ بی‌صاحب پذیرفته نمی‌شود — وگرنه باکتِ خصوصی به یک انبارِ
        آزادِ فایل تبدیل می‌شود. */
