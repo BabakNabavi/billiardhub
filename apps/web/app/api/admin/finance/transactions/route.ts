@@ -49,6 +49,41 @@ export async function GET(req: NextRequest) {
   const rows = (data ?? []) as Record<string, number | string | null>[];
   const agg = (k: string) => rows.reduce((s, r) => s + Number(r[k] || 0), 0);
 
+  /* ── خروجیِ CSV برای حسابدار و اداره‌ی مالیات ──
+     هر ردیف شناسه‌های مرجع را هم دارد تا بشود به پرداخت، رزرو و
+     باشگاه وصلش کرد — بدونِ آن‌ها گزارش فقط یک ستون عدد است.
+
+     BOM لازم است: بدونش اکسل فارسی را به‌هم‌ریخته نشان می‌دهد. */
+  if (q.get('format') === 'csv') {
+    const cols = [
+      ['created_at', 'تاریخ'], ['type', 'نوع'], ['source', 'منبع'],
+      ['club_name', 'باشگاه'], ['club_id', 'شناسه باشگاه'], ['user_id', 'شناسه کاربر'],
+      ['booking_id', 'شناسه رزرو'], ['payment_id', 'شناسه پرداخت'],
+      ['gross_in', 'ورودی ناخالص'], ['platform_revenue', 'درآمد پلتفرم'],
+      ['club_share', 'سهم باشگاه'], ['refunded_out', 'بازپرداخت'],
+      ['amount', 'مبلغ'], ['currency', 'واحد'], ['source_key', 'کلید رویداد'],
+    ] as const;
+
+    const esc = (v: unknown) => {
+      const s = String(v ?? '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [
+      cols.map(c => esc(c[1])).join(','),
+      ...rows.map(r => cols.map(c => esc(r[c[0]])).join(',')),
+    ];
+    const csv = '﻿' + lines.join('\r\n');
+    const stamp = new Date().toISOString().slice(0, 10);
+
+    return new NextResponse(csv, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="billiardhub-financial-${stamp}.csv"`,
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+
   return NextResponse.json({
     transactions: rows,
     total: count ?? rows.length,
