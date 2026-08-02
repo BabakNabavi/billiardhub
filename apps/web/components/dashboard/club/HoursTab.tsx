@@ -27,15 +27,23 @@ const DAYS = [
   { key: 'friday',    label: 'جمعه' },
 ] as const;
 
-export default function HoursTab({ hoursForm, setHoursForm, saveHours, hoursSaving }: {
+export default function HoursTab({ hoursForm, setHoursForm, saveHours, hoursSaving, hoursError }: {
   hoursForm: WorkingHours;
   setHoursForm: React.Dispatch<React.SetStateAction<WorkingHours>>;
   saveHours: () => void;
   hoursSaving: boolean;
+  /* خطای ذخیره باید دیده شود؛ پیش‌تر بی‌صدا بلعیده می‌شد */
+  hoursError?: string;
 }) {
   return (
       <Card>
         <SectionTitle>ساعات کاری باشگاه</SectionTitle>
+        {hoursError && (
+          <div style={{ marginBottom: 14, padding: '10px 13px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+            background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+            {hoursError}
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
           {DAYS.map(day => {
             const dh: WorkingDay = hoursForm[day.key] ?? { isOpen: true, open: '09:00', close: '23:00' };

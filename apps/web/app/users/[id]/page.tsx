@@ -62,11 +62,14 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /* پیش‌تر `/user/public/:id` صدا زده می‌شد — مسیرِ بک‌اندِ NestJS که
+     حذف شده و ۴۰۴ می‌داد. این صفحه از دکمه‌ی چشمِ فهرستِ کاربرانِ
+     ادمین باز می‌شود، پس آن دکمه همیشه «کاربر پیدا نشد» می‌داد. */
   useEffect(() => {
-    api.get(`/user/public/${id}`).then((res) => {
+    api.get(`/users/${id}`).then((res) => {
       setProfile(res.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => setProfile(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <div className="text-center py-20">در حال بارگذاری...</div>;

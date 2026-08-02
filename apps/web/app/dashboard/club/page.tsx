@@ -419,6 +419,7 @@ export default function ClubDashboardPage() {
   // Working hours
   const [hoursForm, setHoursForm] = useState<WorkingHours>(DEFAULT_HOURS);
   const [hoursSaving, setHoursSaving] = useState(false);
+  const [hoursError, setHoursError] = useState('');
 
   // Tournaments
   const [myTournaments, setMyTournaments] = useState<Tournament[]>([]);
@@ -1059,11 +1060,21 @@ export default function ClubDashboardPage() {
     }
   };
 
+  /* ساعتِ کاری روی ستونِ `workingHours` همین باشگاه می‌نشیند.
+
+     پیش‌تر این‌جا `PUT /clubs/:id/hours` صدا زده می‌شد — مسیری که
+     هرگز در Next ساخته نشد و ۴۰۴ می‌داد. `catch {}` خالی هم خطا را
+     می‌بلعید، پس دکمه سبز می‌شد، اسپینر تمام می‌شد، و باشگاه‌دار باور
+     می‌کرد ساعتِ کاری‌اش ذخیره شده. هیچ‌وقت نشده بود. */
   const saveHours = async () => {
     if (!selectedClub) return;
     setHoursSaving(true);
-    try { await api.put(`/clubs/${selectedClub.id}/hours`, hoursForm); } catch {}
-    finally { setHoursSaving(false); }
+    try {
+      const res = await api.put(`/clubs/${selectedClub.id}`, { workingHours: hoursForm });
+      if (res?.data) setHoursError('');
+    } catch (err: any) {
+      setHoursError(err?.response?.data?.message ?? 'ذخیره‌ی ساعت کاری انجام نشد');
+    } finally { setHoursSaving(false); }
   };
 
   /* بارگذاری مسابقات از سرور — منبع حقیقت دیگر localStorage نیست.
@@ -2705,7 +2716,7 @@ export default function ClubDashboardPage() {
       {/* ════ Tab: Hours ════ */}
       {activeTab === 'hours' && (
         <HoursTab hoursForm={hoursForm} setHoursForm={setHoursForm}
-          saveHours={saveHours} hoursSaving={hoursSaving} />
+          saveHours={saveHours} hoursSaving={hoursSaving} hoursError={hoursError} />
       )}
 
       {/* ════ Tab: Bookings ════ */}

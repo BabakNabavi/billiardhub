@@ -2,7 +2,16 @@ import axios from 'axios';
 import { CSRF_COOKIE, CSRF_HEADER } from './auth/constants';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api',
+  /* ── چرا پیش‌فرض `/api` است ──
+     تا امروز این مقدار `http://localhost:4000/api` بود: نشانیِ بک‌اندِ
+     NestJS که از پروژه حذف شده. یعنی اگر `NEXT_PUBLIC_API_URL` یک‌بار
+     روی Vercel تنظیم نمی‌شد یا پاک می‌شد، هر فراخوانیِ این کلاینت —
+     ورود، ثبت‌نام، رزرو، باشگاه‌ها — روی مرورگرِ کاربر به localhost
+     می‌رفت و شکست می‌خورد، بدونِ هیچ نشانه‌ای جز صفحه‌های خالی.
+
+     مسیرهای API حالا در خودِ Next‌اند، پس `/api` هم درست است و هم
+     ذاتاً امن: بدترین حالتش این است که به همان دامنه برود. */
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   /* نشست روی کوکی httpOnly است و باید با هر درخواست برود */
   withCredentials: true,
   /* بدون تایم‌اوت، درخواستی که به سرور نمی‌رسد تا مهلت پیش‌فرض مرورگر
