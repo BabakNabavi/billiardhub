@@ -21,16 +21,28 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     sb().from('club_accounts').select('*').eq('club_id', clubId).maybeSingle(),
     sb().from('club_bank_accounts').select('id,account_holder_name,bank_name,iban,verification_status,rejection_reason,verified_at')
         .eq('club_id', clubId).eq('is_active', true).maybeSingle(),
-    sb().from('ledger_entries').select('type,amount,created_at').eq('club_id', clubId).eq('type', 'CLUB_EARNING'),
+    /* `status='POSTED'` لازم است وگرنه ردیفِ باطل‌شده هم درآمد حساب
+       می‌شود. و برگشتِ سهم (`CLUB_EARNING_REVERSAL`) هم باید بیاید،
+       وگرنه پس از یک لغو، درآمد بیشتر از واقع نشان داده می‌شود. */
+    sb().from('ledger_entries').select('type,amount,created_at,meta')
+        .eq('club_id', clubId).eq('status', 'POSTED')
+        .in('type', ['CLUB_EARNING', 'CLUB_EARNING_REVERSAL', 'PLATFORM_COMMISSION',
+                     'BOOKING_PAYMENT', 'TOURNAMENT_PAYMENT']),
     sb().from('bookings').select('id,booking_reference,"bookingDate","timeSlots",final_amount,club_amount,booking_status,payment_status,settlement_status,"createdAt"')
         .eq('clubId', clubId).order('createdAt', { ascending: false }).limit(50),
     sb().from('settlements').select('id,amount,status,reference_number,requested_at,completed_at')
         .eq('club_id', clubId).order('requested_at', { ascending: false }).limit(20),
   ]);
 
-  const earnings = (ledger.data ?? []) as { amount: number; created_at: string }[];
+  type Led = { type: string; amount: number; created_at: string; meta?: { source?: string } | null };
+  const led = (ledger.data ?? []) as Led[];
+  /* «درآمد» برای باشگاه یعنی سهمِ خودش: تعلق‌گرفته منهای برگشت‌خورده */
+  const earnings = led.filter(e => e.type === 'CLUB_EARNING' || e.type === 'CLUB_EARNING_REVERSAL');
   const sum = (from?: string) => earnings
     .filter(e => !from || e.created_at >= from)
+    .reduce((s, e) => s + Number(e.amount || 0), 0);
+  const sumType = (t: string, src?: string) => led
+    .filter(e => e.type === t && (!src || e.meta?.source === src))
     .reduce((s, e) => s + Number(e.amount || 0), 0);
 
   const a = (acc.data ?? {}) as Record<string, number>;
@@ -43,13 +55,25 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   return NextResponse.json({
     balance: {
+      /* «قابل تسویه» — آنچه پلتفرم همین حالا به این باشگاه بدهکار است */
       available: a.available_balance ?? 0,
+      /* «در انتظار تسویه» — تأییدشده ولی هنوز پرداخت‌نشده */
       pending: a.pending_balance ?? 0,
       totalEarnings: a.total_earnings ?? 0,
       totalCommission: a.total_commission ?? 0,
       totalSettled: a.total_settled ?? 0,
     },
     revenue: { today: sum(startOfDay), week: sum(weekAgo), month: sum(monthAgo), total: sum() },
+    /* تفکیکی که باشگاه‌دار برای فهمیدنِ «چرا این عدد» لازم دارد:
+       فروشِ ناخالص، کمیسیونِ ما، و سهمِ خودش — به‌تفکیکِ رزرو و مسابقه */
+    breakdown: {
+      grossSales: sumType('BOOKING_PAYMENT') + sumType('TOURNAMENT_PAYMENT'),
+      fromReservations: sumType('BOOKING_PAYMENT'),
+      fromTournaments: sumType('TOURNAMENT_PAYMENT'),
+      platformCommission: sumType('PLATFORM_COMMISSION'),
+      clubShare: sum(),
+      reversed: -sumType('CLUB_EARNING_REVERSAL'),
+    },
     bankAccount: bank.data ? { ...(bank.data as object), iban: maskedIban } : null,
     bookings: {
       today: rows.filter(r => r.bookingDate === todayISO).length,

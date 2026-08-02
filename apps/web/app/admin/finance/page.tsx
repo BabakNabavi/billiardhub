@@ -17,7 +17,19 @@ const faDate = (iso?: unknown) => { try { return new Intl.DateTimeFormat('fa-IR'
 
 type Row = Record<string, unknown>
 interface Data {
-  overview: { bookingRevenue: number; platformCommission: number; clubEarnings: number; refunds: number; pendingSettlement: number; completedSettlement: number }
+  overview: {
+    /* پولی که وارد حسابِ مرکزی شده — این «درآمد» نیست */
+    grossIn: number; bookingRevenue: number; tournamentRevenue: number
+    /* درآمدِ واقعیِ پلتفرم */
+    platformCommission: number; cancellationFee: number; netPlatformRevenue: number
+    commissionFromReservations: number; commissionFromTournaments: number
+    /* بدهی به باشگاه‌ها */
+    clubEarnings: number; payableNow: number; inFlightSettlement: number
+    completedSettlement: number; settledOut: number
+    refunds: number; pendingRefunds: number; failedPayments: number
+    /* اگر ناصفر باشد یعنی دفتر ناقص است */
+    balanceCheck: number
+  }
   payments: Row[]; clubBalances: Row[]; settlements: Row[]; refunds: Row[]
 }
 type TabKey = 'overview' | 'payments' | 'balances' | 'settlements' | 'refunds'
@@ -82,14 +94,48 @@ export default function AdminFinance() {
       </div>
 
       {tab === 'overview' && (
-        <div className="af-grid">
-          <Stat label="درآمد کل رزروها" value={o.bookingRevenue} icon={<TrendingUp size={15} />} strong />
-          <Stat label="کمیسیون پلتفرم" value={o.platformCommission} icon={<Wallet size={15} />} tone="gold" strong />
-          <Stat label="سهم باشگاه‌ها" value={o.clubEarnings} icon={<Landmark size={15} />} />
-          <Stat label="در انتظار تسویه" value={o.pendingSettlement} icon={<ArrowDownToLine size={15} />} tone="felt" />
-          <Stat label="تسویه‌شده" value={o.completedSettlement} icon={<CheckCircle2 size={15} />} />
-          <Stat label="بازپرداخت‌ها" value={o.refunds} icon={<RotateCcw size={15} />} muted />
-        </div>
+        <>
+          {/* ── تفکیکِ حیاتی ──
+              «پولِ دریافتی» درآمدِ ما نیست. کاربر دو میلیون می‌دهد ولی
+              درآمدِ پلتفرم فقط کمیسیون و جریمه است؛ بقیه بدهیِ ما به
+              باشگاه است. نمایشِ ناخالص به‌عنوان درآمد، هم گزارشِ
+              مالیاتی را غلط می‌کند هم تصمیم‌های کسب‌وکار را. */}
+          <div style={{ fontSize: 12, color: SEC, marginBottom: 10, lineHeight: 1.9 }}>
+            «وجوه دریافتی» پولی است که به حساب مرکزی آمده — درآمد پلتفرم نیست.
+            درآمد واقعی ما کمیسیون و جریمه‌ی لغو است.
+          </div>
+
+          <div className="af-grid">
+            <Stat label="وجوه دریافتی (ناخالص)" value={o.grossIn} icon={<TrendingUp size={15} />} strong />
+            <Stat label="درآمد خالص پلتفرم" value={o.netPlatformRevenue} icon={<Wallet size={15} />} tone="gold" strong />
+            <Stat label="بدهی به باشگاه‌ها (قابل تسویه)" value={o.payableNow} icon={<Landmark size={15} />} tone="felt" strong />
+          </div>
+
+          <div className="af-grid" style={{ marginTop: 12 }}>
+            <Stat label="از رزرو" value={o.bookingRevenue} icon={<TrendingUp size={15} />} muted />
+            <Stat label="از مسابقات" value={o.tournamentRevenue} icon={<TrendingUp size={15} />} muted />
+            <Stat label="کمیسیون" value={o.platformCommission} icon={<Wallet size={15} />} />
+            <Stat label="جریمه لغو" value={o.cancellationFee} icon={<Wallet size={15} />} />
+            <Stat label="در انتظار تسویه" value={o.inFlightSettlement} icon={<ArrowDownToLine size={15} />} />
+            <Stat label="تسویه‌شده" value={o.completedSettlement} icon={<CheckCircle2 size={15} />} />
+            <Stat label="بازپرداخت‌ها" value={o.refunds} icon={<RotateCcw size={15} />} muted />
+            <Stat label="بازپرداخت در انتظار" value={o.pendingRefunds} icon={<RotateCcw size={15} />} muted />
+          </div>
+
+          {/* ناوردا: اگر ناصفر شود یعنی جایی از دفتر ناقص است.
+              بی‌صدا نگه‌داشتنش یعنی ماه‌ها بعد در حسابرسی معلوم شود. */}
+          {o.balanceCheck !== 0 && (
+            <div style={{
+              marginTop: 14, padding: '12px 15px', borderRadius: 12,
+              background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.28)',
+              fontSize: 12.5, fontWeight: 700, color: '#991B1B', lineHeight: 1.9,
+            }}>
+              ⚠ ناترازی دفتر: {fa(o.balanceCheck)} تومان.
+              وجوه دریافتی باید برابر «کمیسیون + جریمه + سهم باشگاه‌ها + بازپرداخت» باشد.
+              این اختلاف یعنی رویدادی در دفتر ثبت نشده — پیش از هر تسویه‌ای بررسی شود.
+            </div>
+          )}
+        </>
       )}
 
       {tab === 'payments' && (

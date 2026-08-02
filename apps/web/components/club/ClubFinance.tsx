@@ -16,6 +16,11 @@ const fa = (n: number) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
 interface Finance {
   balance: { available: number; pending: number; totalEarnings: number; totalCommission: number; totalSettled: number }
+  /* تفکیکِ فروشِ ناخالص — از `/api/clubs/[id]/finance` */
+  breakdown?: {
+    grossSales: number; fromReservations: number; fromTournaments: number
+    platformCommission: number; clubShare: number; reversed: number
+  }
   revenue: { today: number; week: number; month: number; total: number }
   bankAccount: { account_holder_name?: string; bank_name?: string; iban?: string; verification_status?: string; rejection_reason?: string } | null
   bookings: { today: number; upcoming: number; completed: number; cancelled: number; recent: Record<string, unknown>[] }
@@ -66,12 +71,33 @@ export default function ClubFinance({ clubId, onEditBank }: { clubId: string; on
       <section>
         <Head icon={<Wallet size={17} style={{ color: GOLD_D }} />} title="گردش مالی"
           desc="سهم شما از هر رزرو، و سهم پلتفرم که به‌صورت کمیسیون کسر می‌شود." />
+        {/* برچسبِ «در جریان» پیش‌تر یعنی «رزروهای هنوز برگزارنشده» بود.
+            با مدلِ تازه، سهمِ باشگاه اصلاً پیش از برگزاری ساخته نمی‌شود؛
+            پس آن ستون حالا معنای دیگری دارد: تسویه‌ای که تأیید شده و
+            هنوز به حساب ننشسته. برچسبِ قدیمی گمراه‌کننده می‌شد. */}
         <div className="cf-grid">
-          <Stat label="سهم شما — آماده" value={d.balance.available} tone="gold" strong hint="رزروهای انجام‌شده، پس از کسر کمیسیون" />
-          <Stat label="سهم شما — در جریان" value={d.balance.pending} hint="رزروهایی که هنوز برگزار نشده‌اند" />
+          <Stat label="قابل تسویه" value={d.balance.available} tone="gold" strong
+            hint="سهم شما از رزروها و مسابقاتِ برگزارشده، پس از کسر کمیسیون" />
+          <Stat label="در انتظار تسویه" value={d.balance.pending}
+            hint="تسویه‌ای که تأیید شده و در حال انتقال به حساب شماست" />
           <Stat label="پرداخت‌شده به شما" value={d.balance.totalSettled} hint="آنچه تا امروز به حسابتان رسیده" />
-          <Stat label="کمیسیون پلتفرم" value={d.balance.totalCommission} muted hint="سهم بیلیارد هاب از رزروها" />
+          <Stat label="کمیسیون پلتفرم" value={d.balance.totalCommission} muted hint="سهم بیلیارد هاب" />
         </div>
+
+        {/* تفکیکِ «چرا این عدد» — بدونِ آن، باشگاه‌دار فقط یک رقم
+            می‌بیند و راهی برای راستی‌آزمایی‌اش ندارد. */}
+        {d.breakdown && (
+          <div className="cf-grid" style={{ marginTop: 10 }}>
+            <Stat label="فروش ناخالص" value={d.breakdown.grossSales} muted
+              hint="کل مبلغی که مشتریان پرداخت کرده‌اند" />
+            <Stat label="از رزرو" value={d.breakdown.fromReservations} muted />
+            <Stat label="از مسابقات" value={d.breakdown.fromTournaments} muted />
+            {d.breakdown.reversed > 0 && (
+              <Stat label="برگشت‌خورده" value={d.breakdown.reversed} muted
+                hint="سهمی که به‌خاطر لغو پس از برگزاری برگشت خورد" />
+            )}
+          </div>
+        )}
       </section>
 
       {/* ── رزروها ── */}
