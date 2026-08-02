@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { csrfToken, apiFetch } from '../../../lib/http'
+import Ti from '../../../components/ui/Ti'
 
 // ─── Types ────────────────────────────────────────────────────
 type RoleValue =
@@ -291,10 +292,10 @@ function RoleForm({ role, onSaved }: { role: RoleMeta; onSaved: () => void }) {
         }}
       >
         {saved
-          ? <><i className="ti ti-check" style={{ fontSize: 18 }} aria-hidden="true" />ذخیره شد</>
+          ? <><Ti name="check" size={18} />ذخیره شد</>
           : saving
-          ? <><i className="ti ti-loader-2" style={{ fontSize: 18 }} aria-hidden="true" />در حال ذخیره...</>
-          : <><i className="ti ti-device-floppy" style={{ fontSize: 18 }} aria-hidden="true" />ذخیره پروفایل</>
+          ? <><Ti name="loader-2" size={18} />در حال ذخیره...</>
+          : <><Ti name="device-floppy" size={18} />ذخیره پروفایل</>
         }
       </button>
     </div>
@@ -337,7 +338,7 @@ function ProfileSetupInner() {
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
       <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.45)', fontSize: 15 }}>
-        <i className="ti ti-loader-2" style={{ fontSize: 31, color: '#C7A66A', display: 'block', marginBottom: 12 }} />
+        <Ti name="loader-2" size={31} color={'#C7A66A'} style={{ display: 'block', marginBottom: 12 }} />
         در حال بارگذاری...
       </div>
     </div>
@@ -346,7 +347,7 @@ function ProfileSetupInner() {
   if (userRoles.length === 0) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl' }}>
       <div style={{ textAlign: 'center', padding: 32 }}>
-        <i className="ti ti-lock" style={{ fontSize: 44, color: 'rgba(0,0,0,0.35)', display: 'block', marginBottom: 16 }} />
+        <Ti name="lock" size={44} color={'rgba(0,0,0,0.35)'} style={{ display: 'block', marginBottom: 16 }} />
         <div style={{ color: '#111111', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>هنوز نقشی تأیید نشده</div>
         <div style={{ color: 'rgba(0,0,0,0.45)', fontSize: 15, marginBottom: 24, lineHeight: 1.7 }}>ابتدا نقش درخواست بدید و منتظر تأیید ادمین بمانید.</div>
         <button onClick={() => router.push('/profile/role')} style={{ background: '#C7A66A', color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
@@ -359,9 +360,7 @@ function ProfileSetupInner() {
   const activeMeta = activeTab ? ROLE_MAP[activeTab] : null
 
   return (
-    <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl', position: 'relative', overflow: 'hidden' }}>
+    <>      <div style={{ minHeight: '100vh', background: '#F7F7F5', fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'fixed', width: 300, height: 300, background: 'radial-gradient(circle, rgba(199,166,106,0.15) 0%, transparent 70%)', top: -80, right: -60, pointerEvents: 'none', filter: 'blur(50px)', zIndex: 0 }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 480, margin: '0 auto', padding: '28px 16px 100px' }}>
@@ -369,7 +368,7 @@ function ProfileSetupInner() {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
             <button onClick={() => router.push('/profile/role')} style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.50)' }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 20 }} aria-hidden="true" />
+              <Ti name="arrow-right" size={20} />
             </button>
             <div>
               <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>پروفایل کاری</div>
@@ -385,7 +384,7 @@ function ProfileSetupInner() {
               const isActive = activeTab === ur.role
               return (
                 <button key={ur.role} onClick={() => setActiveTab(ur.role)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, flexShrink: 0, border: `1px solid ${isActive ? hexToRgba(m.color, 0.5) : 'rgba(0,0,0,0.07)'}`, background: isActive ? hexToRgba(m.color, 0.12) : 'rgba(0,0,0,0.04)', color: isActive ? m.color : '#64748b', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', transition: 'all 0.2s' }}>
-                  <i className={`ti ${m.icon}`} style={{ fontSize: 17 }} aria-hidden="true" />
+                  <Ti name={m.icon} size={17} />
                   {m.label}
                 </button>
               )
@@ -397,14 +396,14 @@ function ProfileSetupInner() {
             <div style={{ background: '#F7F7F5', border: `1px solid ${hexToRgba(activeMeta.color, 0.2)}`, borderRadius: 16, padding: '20px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <span style={{ width: 36, height: 36, borderRadius: 10, background: hexToRgba(activeMeta.color, 0.12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className={`ti ${activeMeta.icon}`} style={{ fontSize: 20, color: activeMeta.color }} aria-hidden="true" />
+                  <Ti name={activeMeta.icon} size={20} color={activeMeta.color} />
                 </span>
                 <div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: '#111111' }}>{activeMeta.label}</div>
                   <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{activeMeta.description}</div>
                 </div>
                 <button onClick={() => router.push(`/profile/${activeTab}`)} style={{ marginRight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: activeMeta.color, background: hexToRgba(activeMeta.color, 0.1), border: `1px solid ${hexToRgba(activeMeta.color, 0.3)}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  <i className="ti ti-eye" style={{ fontSize: 14 }} aria-hidden="true" />
+                  <Ti name="eye" size={14} />
                   مشاهده صفحه
                 </button>
               </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR, STATUS_LABEL } from '@/lib/roles'
 import { csrfToken, apiFetch } from '../../../lib/http'
+import Ti from '../../../components/ui/Ti'
 
 function authHeader(): Record<string,string> {
   /* نشست روی کوکی httpOnly است؛ فقط توکن CSRF لازم است */
@@ -63,7 +64,7 @@ function RequestCard({
           background: hexToRgba(meta.color, 0.12),
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <i className={`ti ${meta.icon}`} style={{ fontSize: 22, color: meta.color }} aria-hidden="true" />
+          <Ti name={meta.icon} size={22} color={meta.color} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 2 }}>
@@ -84,7 +85,7 @@ function RequestCard({
       {/* Time + doc */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>
-          <i className="ti ti-clock" style={{ fontSize: 13, marginLeft: 3 }} aria-hidden="true" />
+          <Ti name="clock" size={13} style={{ marginLeft: 3 }} />
           {timeAgo(req.requested_at)}
         </span>
         {req.doc_url && (
@@ -97,13 +98,13 @@ function RequestCard({
               display: 'inline-flex', alignItems: 'center', gap: 4,
             }}
           >
-            <i className="ti ti-file" style={{ fontSize: 13 }} aria-hidden="true" />
+            <Ti name="file" size={13} />
             مشاهده مدرک
           </a>
         )}
         {meta.requiresDoc && !req.doc_url && (
           <span style={{ fontSize: 12, color: '#f59e0b' }}>
-            <i className="ti ti-alert-triangle" style={{ fontSize: 13, marginLeft: 3 }} aria-hidden="true" />
+            <Ti name="alert-triangle" size={13} style={{ marginLeft: 3 }} />
             مدرک آپلود نشده
           </span>
         )}
@@ -125,7 +126,7 @@ function RequestCard({
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >
-                <i className="ti ti-check" style={{ fontSize: 16 }} aria-hidden="true" />
+                <Ti name="check" size={16} />
                 تأیید
               </button>
               <button
@@ -137,7 +138,7 @@ function RequestCard({
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >
-                <i className="ti ti-x" style={{ fontSize: 16 }} aria-hidden="true" />
+                <Ti name="x" size={16} />
                 رد کردن
               </button>
             </div>
@@ -245,9 +246,7 @@ export default function AdminRolesPage() {
   ]
 
   return (
-    <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-      <div style={{
+    <>      <div style={{
         minHeight: '100vh', background: '#F7F7F5',
         fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
         position: 'relative',
@@ -263,7 +262,7 @@ export default function AdminRolesPage() {
               borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', color: 'rgba(0,0,0,0.50)',
             }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 20 }} aria-hidden="true" />
+              <Ti name="arrow-right" size={20} />
             </button>
             <div>
               <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>مدیریت درخواست نقش</div>
@@ -304,7 +303,7 @@ export default function AdminRolesPage() {
             </div>
           ) : requests.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <i className="ti ti-inbox" style={{ fontSize: 40, color: '#1e293b', display: 'block', marginBottom: 12 }} />
+              <Ti name="inbox" size={40} color={'#1e293b'} style={{ display: 'block', marginBottom: 12 }} />
               <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.38)' }}>درخواستی وجود ندارد</span>
             </div>
           ) : (

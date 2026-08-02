@@ -7,6 +7,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import PlayerDisciplines, { type PlayerDisciplinesValue } from '../../../components/player/PlayerDisciplines'
 import { emptyPlayerProfile, findPlayerByOwner, newPlayerSlug, savePlayerProfile } from '../../../lib/player-store'
+import Ti from '../../../components/ui/Ti'
 
 // ─── Types (inline — نیاز به import از lib نیست) ──────────────
 type RoleValue =
@@ -258,7 +259,7 @@ function DocUploadStep({
           marginBottom: 24, padding: 0,
         }}
       >
-        <i className="ti ti-arrow-right" style={{ fontSize: 18 }} aria-hidden="true" />
+        <Ti name="arrow-right" size={18} />
         بازگشت
       </button>
 
@@ -268,7 +269,7 @@ function DocUploadStep({
           background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)',
           borderRadius: 20, padding: '4px 14px', fontSize: 13, color: '#C7A66A', marginBottom: 14,
         }}>
-          <i className="ti ti-upload" style={{ fontSize: 15 }} aria-hidden="true" />
+          <Ti name="upload" size={15} />
           آپلود مدرک تأیید هویت
         </div>
         <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7 }}>
@@ -297,7 +298,7 @@ function DocUploadStep({
                   background: hexToRgba(meta.color, 0.12),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <i className={`ti ${meta.icon}`} style={{ fontSize: 19, color: meta.color }} aria-hidden="true" />
+                  <Ti name={meta.icon} size={19} color={meta.color} />
                 </span>
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: '#111111' }}>{meta.label}</div>
@@ -310,12 +311,12 @@ function DocUploadStep({
                 background: '#F7F7F5', border: '1px dashed rgba(0,0,0,0.08)',
                 borderRadius: 10, padding: '10px 14px', cursor: 'pointer',
               }}>
-                <i className="ti ti-file-upload" style={{ fontSize: 20, color: file ? meta.color : '#475569' }} aria-hidden="true" />
+                <Ti name="file-upload" size={20} color={file ? meta.color : '#475569'} />
                 <span style={{ fontSize: 13, color: file ? meta.color : '#475569', flex: 1 }}>
                   {file ? file.name : 'انتخاب فایل (JPG / PNG / PDF)'}
                 </span>
-                {st === 'done'  && <i className="ti ti-check" style={{ fontSize: 16, color: '#C7A66A' }} aria-hidden="true" />}
-                {st === 'error' && <i className="ti ti-x"     style={{ fontSize: 16, color: '#ef4444' }} aria-hidden="true" />}
+                {st === 'done'  && <Ti name="check" size={16} color={'#C7A66A'} />}
+                {st === 'error' && <Ti name="x" size={16} color={'#ef4444'} />}
                 <input
                   type="file"
                   accept=".jpg,.jpeg,.png,.pdf"
@@ -333,7 +334,7 @@ function DocUploadStep({
             borderRadius: 12, padding: '12px 16px',
             display: 'flex', alignItems: 'center', gap: 10,
           }}>
-            <i className="ti ti-info-circle" style={{ fontSize: 20, color: '#C7A66A' }} aria-hidden="true" />
+            <Ti name="info-circle" size={20} color={'#C7A66A'} />
             <span style={{ fontSize: 14, color: 'rgba(0,0,0,0.50)' }}>
               {rolesNoDoc.map(r => ROLE_MAP[r].label).join('، ')} نیازی به مدرک ندارند و سریع‌تر تأیید می‌شوند.
             </span>
@@ -354,8 +355,8 @@ function DocUploadStep({
         }}
       >
         {uploading
-          ? <><i className="ti ti-loader-2" style={{ fontSize: 18 }} aria-hidden="true" />در حال ارسال...</>
-          : <><i className="ti ti-send"     style={{ fontSize: 18 }} aria-hidden="true" />ارسال درخواست تأیید</>
+          ? <><Ti name="loader-2" size={18} />در حال ارسال...</>
+          : <><Ti name="send" size={18} />ارسال درخواست تأیید</>
         }
       </button>
     </div>
@@ -485,9 +486,7 @@ export default function RolePage() {
   const queuedArr     = Array.from(queued) as RoleValue[]
 
   return (
-    <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-
+    <>
       <div style={{
         minHeight: '100vh', background: '#F7F7F5',
         fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
@@ -508,7 +507,7 @@ export default function RolePage() {
                   background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.28)',
                   borderRadius: 20, padding: '4px 14px', fontSize: 13, color: '#C7A66A', marginBottom: 14,
                 }}>
-                  <i className="ti ti-shield-check" style={{ fontSize: 15 }} aria-hidden="true" />
+                  <Ti name="shield-check" size={15} />
                   هویت حرفه‌ای شما
                 </div>
                 <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111111', marginBottom: 8, lineHeight: 1.5 }}>
@@ -598,7 +597,7 @@ export default function RolePage() {
                         }}>
                           <span style={{ width: 6, height: 6, borderRadius: '50%', background: r.color }} />
                           {r.label}
-                          <i className="ti ti-x" style={{ fontSize: 12, marginRight: 2 }} aria-hidden="true" />
+                          <Ti name="x" size={12} style={{ marginRight: 2 }} />
                         </button>
                       )
                     })}
@@ -614,7 +613,7 @@ export default function RolePage() {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
-                    <i className="ti ti-chart-bar" style={{ fontSize: 17, color: '#C7A66A' }} aria-hidden="true" />
+                    <Ti name="chart-bar" size={17} color={'#C7A66A'} />
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>مشخصات بازیکن</span>
                   </div>
                   <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, marginBottom: 14 }}>
@@ -648,9 +647,9 @@ export default function RolePage() {
                           background: hexToRgba(m.color, 0.1), color: m.color,
                           fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
                         }}>
-                          <i className={`ti ${m.icon}`} style={{ fontSize: 15 }} aria-hidden="true" />
+                          <Ti name={m.icon} size={15} />
                           {m.label}
-                          <i className="ti ti-arrow-left" style={{ fontSize: 13 }} aria-hidden="true" />
+                          <Ti name="arrow-left" size={13} />
                         </button>
                       )
                     })}
@@ -676,7 +675,7 @@ export default function RolePage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transform: 'translateY(0)',
                   }}
                 >
-                  <i className="ti ti-check" style={{ fontSize: 18 }} aria-hidden="true" />
+                  <Ti name="check" size={18} />
                   {queued.size === 0
                     ? 'نقش جدیدی انتخاب کنید'
                     : `تأیید — فعال‌سازی ${toFarsiDigits(queued.size)} نقش`}

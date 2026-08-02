@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '../../store/cart.store'
+import Ti from '../../components/ui/Ti'
 
 function toFa(v: string | number) {
   return String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
@@ -40,9 +41,7 @@ export default function CartPage() {
   }
 
   return (
-    <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-      <style>{`
+    <>      <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
         @keyframes fadeOut { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(0.95)} }
         .cart-item { animation: fadeUp 0.35s ease both; transition: opacity 0.3s, transform 0.3s; }
@@ -63,12 +62,12 @@ export default function CartPage() {
             <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(0,0,0,0.45)', textDecoration: 'none', marginBottom: 16, transition: 'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C7A66A' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.45)' }}>
-              <i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
+              <Ti name="arrow-right" size={16} />
               بازگشت به فروشگاه
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="ti ti-shopping-cart" style={{ fontSize: 24, color: '#A07840' }} />
+                <Ti name="shopping-cart" size={24} color={'#A07840'} />
               </div>
               <div>
                 <h1 style={{ fontSize: 26, fontWeight: 900, color: '#111111', margin: '0 0 4px' }}>سبد خرید</h1>
@@ -83,12 +82,12 @@ export default function CartPage() {
             /* Empty state */
             <div style={{ textAlign: 'center', padding: '80px 20px', animation: 'fadeUp 0.5s ease both' }}>
               <div style={{ width: 100, height: 100, borderRadius: 24, background: '#F3F2EF', border: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-                <i className="ti ti-shopping-cart-off" style={{ fontSize: 48, color: 'rgba(0,0,0,0.30)' }} />
+                <Ti name="shopping-cart-off" size={48} color={'rgba(0,0,0,0.30)'} />
               </div>
               <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 10px' }}>سبد خرید خالی است</h2>
               <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.45)', margin: '0 0 32px', lineHeight: 1.7 }}>هنوز محصولی به سبد اضافه نکرده‌اید.<br/>به فروشگاه بروید و بهترین تجهیزات را انتخاب کنید.</p>
               <Link href="/shop" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '14px 28px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 17, boxShadow: '0 8px 28px rgba(199,166,106,0.35)' }}>
-                <i className="ti ti-shopping-bag" style={{ fontSize: 20 }} />
+                <Ti name="shopping-bag" size={20} />
                 رفتن به فروشگاه
               </Link>
             </div>
@@ -102,7 +101,7 @@ export default function CartPage() {
                   <button onClick={clear} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(0,0,0,0.38)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8, transition: 'all 0.2s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444'; (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.06)' }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#475569'; (e.currentTarget as HTMLElement).style.background = 'none' }}>
-                    <i className="ti ti-trash" style={{ fontSize: 15 }} />
+                    <Ti name="trash" size={15} />
                     حذف همه
                   </button>
                 </div>
@@ -137,11 +136,11 @@ export default function CartPage() {
                           </Link>
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                              <i className="ti ti-tag" style={{ fontSize: 13, color: '#A07840' }} />
+                              <Ti name="tag" size={13} color={'#A07840'} />
                               {item.category}
                             </span>
                             <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                              <i className="ti ti-map-pin" style={{ fontSize: 13, color: '#A07840' }} />
+                              <Ti name="map-pin" size={13} color={'#A07840'} />
                               {item.city}
                             </span>
                           </div>
@@ -187,7 +186,7 @@ export default function CartPage() {
                             onClick={() => handleRemove(item.id)}
                             style={{ padding: '6px 10px', borderRadius: 8, background: '#F3F2EF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.38)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontFamily: 'inherit', transition: 'all 0.2s' }}
                           >
-                            <i className="ti ti-trash" style={{ fontSize: 15 }} />
+                            <Ti name="trash" size={15} />
                             حذف
                           </button>
                         </div>
@@ -272,7 +271,7 @@ export default function CartPage() {
                     <Link href="/checkout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(135deg,#C7A66A,#A07840)', color: '#fff', padding: '15px', borderRadius: 14, textDecoration: 'none', fontWeight: 800, fontSize: 17, boxShadow: '0 8px 28px rgba(199,166,106,0.35)', transition: 'all 0.3s' }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 36px rgba(199,166,106,0.50)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 28px rgba(199,166,106,0.35)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}>
-                      <i className="ti ti-lock" style={{ fontSize: 18 }} />
+                      <Ti name="lock" size={18} />
                       پرداخت امن
                     </Link>
 
@@ -284,7 +283,7 @@ export default function CartPage() {
                         { icon: 'ti-rotate', label: 'مرجوعی رایگان' },
                       ].map(b => (
                         <div key={b.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                          <i className={`ti ${b.icon}`} style={{ fontSize: 18, color: '#A07840', opacity: 0.7 }} />
+                          <Ti name={b.icon} size={18} color={'#A07840'} style={{ opacity: 0.7 }} />
                           <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.38)', textAlign: 'center' }}>{b.label}</span>
                         </div>
                       ))}
@@ -296,7 +295,7 @@ export default function CartPage() {
                 <Link href="/shop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, padding: '12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', color: 'rgba(0,0,0,0.45)', textDecoration: 'none', fontSize: 15, transition: 'all 0.2s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#111111'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.09)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(0,0,0,0.45)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.05)' }}>
-                  <i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
+                  <Ti name="arrow-right" size={16} />
                   ادامه خرید
                 </Link>
               </div>
