@@ -6,6 +6,7 @@
    مرتبط (سایدبار چسبان در دسکتاپ). داده از lib/news-data.
    ───────────────────────────────────────────────────────────── */
 
+import { absoluteUrl } from '../../../lib/site-url'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -72,7 +73,7 @@ export default function NewsDetailPage() {
 
   const cat = categoryOf(article.category)
   /* URL کانونیکال ثابت — هم برای SSR هم کلاینت یکی است (بدون hydration mismatch) */
-  const pageUrl = `https://mybilliardhb1.vercel.app/news/${article.id}`
+  const pageUrl = absoluteUrl(`/news/${article.id}`)
   const shareText = encodeURIComponent(article.title)
 
   const copyLink = async () => {

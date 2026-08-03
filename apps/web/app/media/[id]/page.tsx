@@ -6,6 +6,7 @@
    کانونیکال، توضیحات بازشونده و «ادامهٔ تماشا».
    ───────────────────────────────────────────────────────────── */
 
+import { absoluteUrl } from '../../../lib/site-url'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -65,7 +66,7 @@ export default function MediaVideoPage() {
   }
 
   const cat = mediaCategoryOf(video.category)
-  const pageUrl = `https://mybilliardhb1.vercel.app/media/${video.id}`
+  const pageUrl = absoluteUrl(`/media/${video.id}`)
   const shareText = encodeURIComponent(video.title)
   const copyLink = async () => { try { await navigator.clipboard.writeText(pageUrl); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { /* */ } }
 

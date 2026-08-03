@@ -32,6 +32,6 @@ export function base(): string {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`) ||
-    'https://billiardhub.vercel.app'
+    'https://www.billiardhub.net'
   return raw.replace(/\/+$/, '')
 }

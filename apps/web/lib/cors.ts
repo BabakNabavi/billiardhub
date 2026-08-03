@@ -14,6 +14,9 @@
 const ALLOWED = [
   'https://www.billiardhub.net',
   'https://billiardhub.net',
+  'https://www.billiardhub.net',
+  'https://billiardhub.net',
+  /* دامنه‌ی Vercel هم می‌ماند: پیش‌نمایش‌ها و دوره‌ی گذارِ دامنه */
   'https://billiardhub.vercel.app',
   'http://localhost:3000',
   'http://localhost:3001',
