@@ -259,7 +259,9 @@ export default function Footer() {
             جای متعارفش همین‌جاست: پایینِ صفحه، پیش از نوارِ حقوقی.
             در فوترِ عمومی است تا شرطِ اینماد — دیده‌شدن بدونِ ورود به
             حساب — برقرار بماند. */}
-        <div style={{ display: 'flex', justifyContent: 'flex-start', paddingBottom: '16px' }}>
+        {/* `flex-end` در چیدمانِ راست‌به‌چپ یعنی سمتِ چپ — همان‌جایی که
+            نشان‌های اعتماد در سایت‌های فارسی می‌نشینند. */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '16px' }}>
           <EnamadSeal />
         </div>
 
