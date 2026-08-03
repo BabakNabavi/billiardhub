@@ -9,8 +9,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'بیلیارد هاب';
   const options = {
     body: data.body || '',
-    icon: data.icon || '/images/Logo/bh-icon-512-v3.png',
-    badge: data.badge || '/images/Logo/bh-icon-512-v3.png',
+    icon: data.icon || '/images/Logo/bh-icon-512-v4.png',
+    badge: data.badge || '/images/Logo/bh-icon-512-v4.png',
     dir: 'rtl',
     lang: 'fa',
     tag: data.tag || 'bh-dm',

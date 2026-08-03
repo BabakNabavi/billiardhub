@@ -394,7 +394,7 @@ export default function CoachProfilePage() {
                 <div style={{ position:'absolute', left:'-6%', top:'-40%', width:'46%', height:'180%', background:'radial-gradient(ellipse, rgba(199,166,106,0.18) 0%, transparent 66%)', filter:'blur(18px)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'-20%', bottom:'-20%', left:'54%', width:'1.5px', background:'linear-gradient(180deg,transparent,rgba(199,166,106,0.45),transparent)', transform:'rotate(-10deg)', pointerEvents:'none' }}/>
                 <div style={{ position:'absolute', top:'50%', insetInlineEnd:'clamp(20px,4vw,40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'10px' }}>
-                  <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v3.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
+                  <img loading="lazy" decoding="async" src="/images/Logo/bh-header-v4.png" alt="بیلیارد هاب" style={{ height:'clamp(26px,4vw,40px)', width:'auto' }}/>
                   <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                     <span style={{ width:'22px', height:'1.5px', background:'linear-gradient(90deg,#C7A66A,transparent)', display:'inline-block' }}/>
                     <span style={{ fontSize:'clamp(9px,1.4vw,12px)', fontWeight:800, letterSpacing:'0.3em', color:'rgba(199,166,106,0.9)' }}>PROFESSIONAL COACH</span>

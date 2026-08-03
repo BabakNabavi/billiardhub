@@ -47,18 +47,21 @@ export const metadata: Metadata = {
     /* تصویرِ اشتراک‌گذاری — تا امروز نبود و شبکه‌های اجتماعی خودشان
        چیزی از صفحه برمی‌داشتند. لوگوی تازه اندازه‌ی استانداردِ ۱۲۰۰×۶۳۰
        را دارد. */
-    images: [{ url: '/images/Logo/bh-og-v3.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
+    images: [{ url: '/images/Logo/bh-og-v4.png', width: 1200, height: 630, alt: 'بیلیارد هاب' }],
   },
-  twitter: { card: 'summary_large_image', images: ['/images/Logo/bh-og-v3.png'] },
+  twitter: { card: 'summary_large_image', images: ['/images/Logo/bh-og-v4.png'] },
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/images/Logo/bh-favicon-v3.ico' },
-      { url: '/images/Logo/bh-favicon-96-v3.png', sizes: '96x96', type: 'image/png' },
-      { url: '/images/Logo/bh-favicon-32-v3.png', sizes: '32x32', type: 'image/png' },
-      { url: '/images/Logo/bh-favicon-16-v3.png', sizes: '16x16', type: 'image/png' },
+      /* `.ico` این‌جا فهرست نمی‌شود: Next خودش `app/favicon.ico` را روی
+         `/favicon.ico` سرو می‌کند و لینکش را با هشِ نسخه در head
+         می‌گذارد. سطرِ دستی فقط یک نسخه‌ی دوم می‌ساخت — و وقتی فایلش
+         گم شد، همان سطر یک ۴۰۴ در هر صفحه بود. */
+      { url: '/images/Logo/bh-favicon-96-v4.png', sizes: '96x96', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-32-v4.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/Logo/bh-favicon-16-v4.png', sizes: '16x16', type: 'image/png' },
     ],
-    apple: '/images/Logo/bh-apple-180-v3.png',
+    apple: '/images/Logo/bh-apple-180-v4.png',
   },
   appleWebApp: {
     capable: true,

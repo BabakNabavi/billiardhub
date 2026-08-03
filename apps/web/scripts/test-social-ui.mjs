@@ -93,12 +93,12 @@ const TEST_STORIES = [
   {
     id: 'st-uitest-1', ownerKey: USER.id, userName: 'کاربر آزمایشی',
     roleKey: 'player', roleLabel: 'بازیکن', roleColor: '#06b6d4', avatar: 'ک',
-    mediaUrl: `${BASE}/images/Logo/bh-icon-512-v3.png`, caption: 'استوری آزمایشی یک', createdAt: Date.now(),
+    mediaUrl: `${BASE}/images/Logo/bh-icon-512-v4.png`, caption: 'استوری آزمایشی یک', createdAt: Date.now(),
   },
   {
     id: 'st-uitest-2', ownerKey: USER.id, userName: 'کاربر آزمایشی',
     roleKey: 'player', roleLabel: 'بازیکن', roleColor: '#06b6d4', avatar: 'ک',
-    mediaUrl: `${BASE}/images/Logo/bh-icon-512-v3.png`, caption: 'استوری آزمایشی دو', createdAt: Date.now(),
+    mediaUrl: `${BASE}/images/Logo/bh-icon-512-v4.png`, caption: 'استوری آزمایشی دو', createdAt: Date.now(),
   },
 ]
 
