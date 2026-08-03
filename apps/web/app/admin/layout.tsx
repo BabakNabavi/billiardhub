@@ -61,6 +61,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           /* جدولِ عریض داخلِ خودش بلغزد، نه کلِ صفحه */
           .admin-scope table { display: block; overflow-x: auto; max-width: 100%; }
+
+          /* ══ جدول‌های ۱۲ستونیِ Tailwind ══
+             صفحه‌های قدیمی‌تر (کاربران، محصولات) هر ردیف را با
+             grid-cols-12 و px-5 می‌چینند. روی ۳۹۰ پیکسل، مجموعِ
+             ستون‌ها و حاشیه‌ها سه پیکسل از صفحه بیرون می‌زد و ردیف‌ها
+             هم بدونِ هیچ فاصله‌ای روی هم می‌نشستند.
+
+             به‌جای بازنویسیِ چیدمان — که پرریسک است — ردیف روی موبایل
+             به دو ستون می‌شکند و فاصله می‌گیرد. */
+          .admin-scope .grid-cols-12 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            row-gap: 8px;
+            column-gap: 10px;
+            padding-inline: 14px;
+          }
+          /* ستون‌های ۱۲تایی دیگر معنا ندارند وقتی شبکه دوستونی است */
+          .admin-scope .grid-cols-12 > [class*="col-span-"] { grid-column: auto; }
+          /* عنوانِ ستون‌های جدول روی موبایل بی‌فایده است */
+          .admin-scope .grid-cols-12.bg-gray-50 { display: none; }
+
+          /* ردیف‌های پشتِ‌هم باید از هم جدا دیده شوند */
+          .admin-scope .divide-y > * + * { border-top-width: 1px; padding-top: 10px; }
         }
 
         /* حاشیه‌ی امن روی همه‌ی اندازه‌ها — کمینه‌ی مطلق ۱۴ پیکسل */

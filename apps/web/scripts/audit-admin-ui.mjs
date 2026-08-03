@@ -54,6 +54,8 @@ const MIN_TAP = 36       // کمترین بعدِ هدفِ لمس روی موب�
 
 const measure = page => page.evaluate((MIN_GAP, MIN_TAP) => {
   const de = document.documentElement, vw = de.clientWidth
+  /* دامنه‌ی سنجش: فقط محتوای پنل. فوتر/سربرگِ سایت بیرون‌اند. */
+  const scope = document.querySelector('.admin-scope') || document.body
   const isMobile = vw < 700
   const vis = el => {
     const s = getComputedStyle(el)
@@ -70,8 +72,9 @@ const measure = page => page.evaluate((MIN_GAP, MIN_TAP) => {
   const overflow = Math.max(document.body.scrollWidth, de.scrollWidth) - vw
 
   let edge = Infinity, edgeEl = null
-  for (const el of document.querySelectorAll('h1,h2,h3,p,label,input,select,textarea,button,td,th')) {
+  for (const el of scope.querySelectorAll('h1,h2,h3,p,label,input,select,textarea,button,td,th')) {
     if (!vis(el) || inScroller(el) || el.closest('header,nav,footer,[aria-live],next-route-announcer')) continue
+    if (el.closest('[class*="ft-"]')) continue
     const r = el.getBoundingClientRect()
     if (!r.width || !r.height || r.width >= vw - 2 || r.top > 4000 || r.bottom < 0) continue
     const pad = Math.min(r.left, vw - r.right)
@@ -79,10 +82,13 @@ const measure = page => page.evaluate((MIN_GAP, MIN_TAP) => {
   }
 
   let gap = Infinity, gapEl = null
-  for (const parent of document.querySelectorAll('div,section,main,ul')) {
+  for (const parent of scope.querySelectorAll('div,section,main,ul')) {
     if (!vis(parent)) continue
     const ps = getComputedStyle(parent)
     if (ps.display === 'flex' && ps.flexDirection.startsWith('row')) continue
+    /* فهرستی که ردیف‌هایش با خطِ جداکننده از هم جدا می‌شوند، فاصله‌ی
+       صفر دارد و درست است — جداییِ بصری از خط می‌آید نه از فاصله. */
+    if (parent.className && /divide-y/.test(String(parent.className))) continue
     const kids = [...parent.children].filter(c => {
       if (!vis(c)) return false
       const r = c.getBoundingClientRect()
@@ -99,7 +105,7 @@ const measure = page => page.evaluate((MIN_GAP, MIN_TAP) => {
 
   const small = []
   if (isMobile) {
-    for (const el of document.querySelectorAll('button,a[href],select')) {
+    for (const el of scope.querySelectorAll('button,a[href],select')) {
       if (!vis(el)) continue
       const r = el.getBoundingClientRect()
       if (!r.width || !r.height || r.top > 4000) continue
