@@ -14,6 +14,7 @@ import { useHorizontalScroll, scrollSign, getPos, setPos } from '../lib/useHoriz
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
 import { sharedJson } from '../lib/shared-fetch';
+import { useDeferredStart } from '../lib/useDeferredStart';
 
 /* ═══════════════════════════════════════════════════════════════
    SCROLL REVEAL
@@ -614,10 +615,13 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
   slides: string[]; label: string; body: string; cta: string; accent: string; href: string; initialIdx?: number; lqCta?: boolean;
 }) {
   const [idx, setIdx] = useState(initialIdx);
+  /* شروع پس از آرام‌شدنِ مرورگر — نه وسطِ hydration */
+  const ready = useDeferredStart();
   useEffect(() => {
+    if (!ready) return;
     const t = setInterval(() => setIdx(p => (p + 1) % slides.length), 3200);
     return () => clearInterval(t);
-  }, [slides.length]);
+  }, [ready, slides.length]);
   const isDark = accent === GOLD;
   return (
     <Link href={href} style={{ textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '14px', overflow: 'hidden', height: 'clamp(120px,11vw,160px)', cursor: 'pointer' }}>
@@ -1019,6 +1023,17 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const [scrollY, setScrollY] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  /* ── چرخش‌های خودکار ──
+     هیرو، بنرها و دو نوارِ کشویی همگی در لحظه‌ی mount شروع می‌شدند —
+     یعنی دقیقاً وسطِ hydration. هر تیک یک رندرِ کاملِ React است و
+     جمعشان در بدترین لحظه روی رشته‌ی اصلی می‌نشست.
+
+     این پرچم تا آرام‌شدنِ مرورگر `false` است. اسلایدِ اولِ هر بخش از
+     همان ابتدا دیده می‌شود؛ فقط *رفتن به بعدی* عقب می‌افتد، که چشم
+     نمی‌بیند. بالای همه‌ی افکت‌ها اعلام می‌شود چون چند تای آن‌ها
+     پیش از این نقطه در بدنه‌ی کامپوننت‌اند. */
+  const spin = useDeferredStart();
   const rafRef   = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -1233,6 +1248,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   }, []);
 
   useEffect(() => {
+    if (!spin) return;
     const el = mktDeskRef.current;
     if (!el) return;
     const SPEED = 50;
@@ -1253,7 +1269,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     };
     mktTickerRef.current = requestAnimationFrame(tick);
     return () => { if (mktTickerRef.current) cancelAnimationFrame(mktTickerRef.current); };
-  }, []);
+  }, [spin]);
 
 
   // ── Sellers auto-scroll ──
@@ -1263,6 +1279,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const sellersTickerR  = useRef<number | null>(null);
 
   useEffect(() => {
+    if (!spin) return;
     const el = sellersRef.current;
     if (!el) return;
     const SPEED = 45;
@@ -1283,7 +1300,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
     };
     sellersTickerR.current = requestAnimationFrame(tick);
     return () => { if (sellersTickerR.current) cancelAnimationFrame(sellersTickerR.current); };
-  }, []);
+  }, [spin]);
 
 
   // ── Banner slider ──
@@ -1297,6 +1314,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   /* تایمر در تب پنهان می‌ایستد. چرخاندن اسلایدی که کسی نمی‌بیند فقط
      باتری و نخ اصلی می‌خورد، و هر تیک یک رندر کامل React است. */
   useEffect(() => {
+    if (!spin) return;
     startBannerTimer();
     const onVis = () => {
       if (document.hidden) { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); bannerTimerRef.current = null; }
@@ -1307,7 +1325,7 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
       document.removeEventListener('visibilitychange', onVis);
       if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
     };
-  }, []);
+  }, [spin]);
 
 
   /* تشخیص کارت وسط با rAF (به‌جای رویداد اسکرول) — چون در دسکتاپ ترک با
@@ -1462,11 +1480,14 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   }, []);
 
 
+/* چرخشِ هیرو هم منتظرِ آرام‌شدنِ مرورگر می‌ماند. اسلایدِ اول همان
+   لحظه دیده می‌شود؛ فقط *رفتن به بعدی* عقب می‌افتد. */
 useEffect(() => {
+    if (!spin) return;
     if (!playing) { if (timerRef.current) clearInterval(timerRef.current); return; }
     timerRef.current = setInterval(next, 7000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [playing, next]);
+  }, [spin, playing, next]);
 
   const heroO = Math.max(0, 1 - scrollY / 700);
   const heroS = 1 + scrollY * 0.00013;
