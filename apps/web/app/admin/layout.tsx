@@ -35,6 +35,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           .admin-scope table { display: block; overflow-x: auto; max-width: 100%; }
         }
 
+        /* ══ هدفِ لمس روی موبایل ══
+           اندازه‌گیری نشان داد در هر صفحه ده‌ها دکمه‌ی زیرِ ۳۶ پیکسل
+           هست و کوچک‌ترینشان ۱۱ پیکسل — یعنی آیکن‌های عملیاتِ جدول‌ها.
+           راهنمای دسترس‌پذیری ۴۴ می‌گوید؛ ۴۰ سازشِ معقولی است که
+           چیدمانِ فعلی را هم به‌هم نمی‌ریزد.
+
+           عمداً از has() استفاده نمی‌شود تا روی مرورگرهای قدیمی‌تر هم
+           کار کند؛ min-height و min-width ذاتاً امن‌اند.
+           (این بلوک داخلِ template literal است — بک‌تیک ممنوع.) */
+        @media (max-width: 700px) {
+          .admin-scope button,
+          .admin-scope a[role="button"] {
+            min-height: 40px;
+            min-width: 40px;
+          }
+          /* دکمه‌ی آیکنیِ داخلِ ردیف‌ها معمولاً padding کمی دارد */
+          .admin-scope button > svg:only-child { display: block; margin: auto; }
+
+          /* ══ ریتمِ عمودی ══
+             کارت‌ها و ردیف‌ها بدونِ فاصله روی هم می‌نشستند. این قاعده
+             فقط به فرزندانِ *مستقیمِ* ریشه‌ی صفحه فاصله می‌دهد، نه به
+             هر عنصری — پس چیدمان‌های داخلی دست‌نخورده می‌مانند. */
+          .admin-scope > div > * + * { margin-top: 12px; }
+
+          /* جدولِ عریض داخلِ خودش بلغزد، نه کلِ صفحه */
+          .admin-scope table { display: block; overflow-x: auto; max-width: 100%; }
+        }
+
+        /* حاشیه‌ی امن روی همه‌ی اندازه‌ها — کمینه‌ی مطلق ۱۴ پیکسل */
+        .admin-scope select,
+        .admin-scope input,
+        .admin-scope textarea { max-width: 100%; }
+
         .admin-back-btn:hover { border-color: rgba(199,166,106,0.55) !important; color: #9A6E38 !important; }
 
         .admin-scope select {
