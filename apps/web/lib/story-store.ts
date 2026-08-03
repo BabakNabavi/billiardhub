@@ -42,6 +42,12 @@ export const STORY_ROLES: Record<string, { label: string; color: string }> = {
   player:       { label: 'بازیکن',      color: '#06b6d4' },
 }
 
+/* نامی که حسابِ رسمی روی استوری نشان می‌دهد.
+   نامِ واقعیِ شخص در پنل و مدارک دست‌نخورده می‌ماند؛ این فقط
+   چهره‌ی عمومیِ پلتفرم است. سرور و کلاینت هر دو از همین یک جا
+   می‌خوانند تا دو طرف با هم اختلاف پیدا نکنند. */
+export const OFFICIAL_DISPLAY_NAME = 'Billiard Hub'
+
 /* Order of preference when a user holds several roles. */
 /* `admin` اولِ فهرست است: حسابِ رسمی معمولاً نقش‌های دیگری هم دارد
    (باشگاه‌دار، مربی…) و بدونِ این، استوریِ رسمی با برچسبِ آن نقش‌ها

@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Plus, Heart, Send, Check, Smile } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
-import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
+import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, OFFICIAL_DISPLAY_NAME, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
 import { addStoryReply } from '../lib/story-inbox';
 import { useSocialInteractions } from './features/FeatureFlags';
 import Avatar from './ui/Avatar';
@@ -400,7 +400,7 @@ export default function Stories() {
 
   // استوری سمت‌سرور (بین دستگاه‌ها) اولویت دارد؛ اگر سرور خالی/آفلاین بود، لوکال فالبک
   const userStoryGroups = serverGroups.length > 0 ? serverGroups : localGroups;
-  const groups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups];
+  const rawGroups: StoryGroup[] = [...userStoryGroups, ...storeGroups, ...apiGroups];
   const roleInfo = pickStoryRole(user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : []);
   const myRoles = user ? [user.primaryRole, ...(user.secondaryRoles ?? [])] : [];
   const ownerKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : '';
@@ -493,12 +493,27 @@ export default function Stories() {
      نامِ واقعیِ مالک در پنل و مدارک لازم است، ولی چیزی که بازدیدکننده
      روی استوری می‌بیند باید نامِ برند باشد، نه نامِ شخص. این تنها جای
      تفاوت است؛ همه‌جای دیگر همان نامِ واقعی می‌ماند. */
-  const BRAND_NAME = 'Billiard Hub';
   const isOfficial = user?.primaryRole === 'admin'
     || (user?.secondaryRoles ?? []).includes('admin');
   const meName = () => (isOfficial
-    ? BRAND_NAME
+    ? OFFICIAL_DISPLAY_NAME
     : `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کاربر');
+
+  /* هویتِ استوریِ خودِ کاربر از نشستِ زنده می‌آید، نه از رکوردِ ذخیره‌شده.
+
+     هر استوری نام و نقش را *لحظه‌ی انتشار* در خودش کپی می‌کند. تا وقتی
+     چیزی عوض نشود این بی‌ضرر است، ولی به‌محض تغییرِ نام یا نقش، همه‌ی
+     استوری‌های موجود روی مقدارِ قدیمی می‌مانند تا منقضی شوند.
+
+     سرور همین کار را برای همه انجام می‌دهد؛ این‌جا فقط مسیرِ فالبکِ
+     محلی پوشش داده می‌شود، که اصلاً از سرور رد نمی‌شود. */
+  const groups: StoryGroup[] = rawGroups.map(g => (isMine(g) ? {
+    ...g,
+    userName: meName(),
+    userRole: roleInfo.key,
+    roleLabel: roleInfo.label,
+    roleColor: roleInfo.color,
+  } : g));
 
   const publishStory = async () => {
     if (!user || !storyImg || publishing) return;
@@ -761,13 +776,21 @@ export default function Stories() {
         {groups.map((g, i) => {
           const isSeen = seenGroups.has(g.userId) || g.allSeen || (g.stories.length > 0 && g.stories.every(s => seenIds.has(s.id)));
           const firstStory = g.stories[0];
+          /* حسابِ رسمی حلقه‌ی سبز می‌گیرد، بقیه همان گرادیانِ رنگی.
+             تفکیک باید در *خودِ حلقه* باشد؛ رنگِ نقش تا امروز فقط به
+             پس‌زمینه‌ی محوِ زیرِ عکس می‌رفت که عملاً دیده نمی‌شد. */
+          const official = g.userRole === 'admin';
           return (
             <button key={g.userId} className="st-item" onClick={() => openStory(i)}>
               <div className="st-ring" style={{
                 background: isSeen
                   ? 'rgba(255,255,255,0.08)'
-                  : 'linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)',
-                boxShadow: isSeen ? 'none' : '0 0 14px rgba(214,41,118,0.45)',
+                  : official
+                    ? 'linear-gradient(45deg, #0E7A38, #34D058, #0E7A38)'
+                    : 'linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)',
+                boxShadow: isSeen
+                  ? 'none'
+                  : official ? '0 0 14px rgba(52,208,88,0.50)' : '0 0 14px rgba(214,41,118,0.45)',
               }}>
                 {/* عکس پروفایل؛ اگر نبود آدمک استاندارد — نه حرف اول نام.
                     این نوار روی صفحه‌ی اول است و یک حرف فارسی روی دایره‌ی
