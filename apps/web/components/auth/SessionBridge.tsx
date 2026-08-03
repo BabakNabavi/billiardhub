@@ -39,23 +39,52 @@ export default function SessionBridge() {
   const logout = useAuthStore(s => s.logout)
   const login = useAuthStore(s => s.login)
 
-  /* ── بازسازیِ نشست از کوکی ──
-     فقط وقتی استور خالی است. اگر کوکی هم نباشد سرور ۴۰۱ می‌دهد و
-     هیچ اتفاقی نمی‌افتد — یعنی برای مهمان بی‌هزینه است (یک درخواست
-     در هر بار بارگذاری، و فقط وقتی کاربری در استور نیست). */
+  /* ── همگام‌سازیِ کاربر با سرور، در هر بار بارگذاری ──
+
+     دو کار با هم:
+
+     ۱) بازسازیِ نشست وقتی استور خالی است. منبعِ حقیقتِ نشست کوکیِ
+        httpOnly است، ولی رابط از استورِ zustand می‌خواند. اگر آن پاک
+        شود و کوکی بماند، کاربر با نشستِ معتبر «خارج‌شده» دیده می‌شد.
+
+     ۲) تازه‌کردنِ اطلاعاتِ کاربرِ موجود. این بخش تازه است و یک ایرادِ
+        واقعی را می‌بندد: شیءِ کاربر در localStorage می‌ماند و تا امروز
+        فقط لحظه‌ی *ورود* نوشته می‌شد. یعنی هر تغییری در نام، نقش یا
+        عکسِ پروفایل — چه از پنلِ ادمین، چه از خودِ پروفایل، چه از
+        دستگاهی دیگر — روی این دستگاه دیده نمی‌شد تا کاربر دستی خارج و
+        دوباره وارد شود.
+
+        نشانه‌اش دقیقاً همین بود: نامِ حساب روی موبایل درست و روی
+        دسکتاپ قدیمی می‌ماند، فقط چون آن یکی دستگاه بعد از تغییر
+        دوباره وارد شده بود.
+
+     برای مهمان یک درخواست است که ۴۰۱ می‌گیرد و تمام. */
   useEffect(() => {
-    if (!hydrated || user) return
+    if (!hydrated) return
     let stopped = false
     void (async () => {
       try {
         const r = await fetch('/api/users/profile', { credentials: 'include', cache: 'no-store' })
         if (stopped || !r.ok) return
         const me = await r.json().catch(() => null)
-        if (!stopped && me?.id) login(me, '')
-      } catch { /* شبکه قطع بود؛ کاربر مهمان می‌ماند */ }
+        if (stopped || !me?.id) return
+        /* اگر چیزی عوض نشده، دست به استور نزن — وگرنه هر بارگذاری یک
+           رندرِ بی‌دلیل به کلِ درخت می‌دهد. */
+        const same = user
+          && user.id === me.id
+          && user.firstName === me.firstName
+          && user.lastName === me.lastName
+          && user.primaryRole === me.primaryRole
+          && (user.avatar ?? '') === (me.avatar ?? '')
+          && JSON.stringify(user.secondaryRoles ?? []) === JSON.stringify(me.secondaryRoles ?? [])
+        if (!same) login(me, '')
+      } catch { /* شبکه قطع بود؛ همان چیزی که هست می‌ماند */ }
     })()
     return () => { stopped = true }
-  }, [hydrated, user, login])
+    /* عمداً فقط به `hydrated` وابسته است: افزودنِ `user` این افکت را
+       بعد از هر به‌روزرسانی دوباره اجرا می‌کرد و حلقه می‌ساخت. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated])
 
   useEffect(() => {
     if (!hydrated) return

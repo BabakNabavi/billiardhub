@@ -462,18 +462,54 @@ export default function Stories() {
     return () => clearInterval(iv);
   }, []);
 
-  /* «دیده‌شدن» ماندگار را از سرور بخوان (وقتی کاربر لاگین شد/کلید آماده شد) */
+  /* ── «دیده‌شدن» در سه لایه ──
+
+     سرور منبعِ اصلی است (بین دستگاه‌ها مشترک)، ولی تنها لایه نیست.
+     نسخه‌ی محلی هم نگه داشته می‌شود، چون فراخوانِ سرور می‌تواند شکست
+     بخورد: نشست چند لحظه پیش از تازه‌شدنِ توکن منقضی شده باشد، شبکه
+     قطع باشد، یا کاربر پیش از رسیدنِ پاسخ صفحه را ببندد. در همه‌ی
+     این حالت‌ها بدونِ لایه‌ی محلی، رینگِ استوریِ دیده‌شده دوباره
+     رنگی برمی‌گشت — همان چیزی که دیده شد.
+
+     دو لایه با هم *ادغام* می‌شوند، نه اینکه یکی دیگری را پاک کند. */
+  const SEEN_KEY = 'bh_seen_stories';
+  const readLocalSeen = (): string[] => {
+    try { const v = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); return Array.isArray(v) ? v : [] }
+    catch { return [] }
+  };
+  const writeLocalSeen = (ids: string[]) => {
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(ids.slice(-3000))) } catch { /* سهمیه پر */ }
+  };
+
+  /* نسخه‌ی محلی بلافاصله خوانده می‌شود — پیش از هر رفت‌وبرگشتِ شبکه،
+     پس رینگ حتی یک لحظه هم اشتباه نشان داده نمی‌شود. */
+  useEffect(() => {
+    const local = readLocalSeen();
+    if (local.length) setSeenIds(prev => new Set([...prev, ...local]));
+  }, []);
+
   useEffect(() => {
     if (!ownerKey) return;
-    fetchSeen(ownerKey).then(ids => { if (Array.isArray(ids) && ids.length) setSeenIds(new Set(ids)); });
+    fetchSeen(ownerKey).then(ids => {
+      if (!Array.isArray(ids) || !ids.length) return;
+      setSeenIds(prev => {
+        const n = new Set([...prev, ...ids]);
+        writeLocalSeen([...n]);
+        return n;
+      });
+    });
   }, [ownerKey]);
 
-  /* یک گروه را دیده‌شده علامت بزن: هم لوکال (فوری) هم سرور (ماندگار) */
+  /* یک گروه را دیده‌شده علامت بزن: حافظه، localStorage، سرور */
   const markGroupSeen = (g?: StoryGroup) => {
     if (!g) return;
     const ids = g.stories.map(s => s.id).filter(Boolean);
     if (!ids.length) return;
-    setSeenIds(prev => { const n = new Set(prev); ids.forEach(i => n.add(i)); return n; });
+    setSeenIds(prev => {
+      const n = new Set(prev); ids.forEach(i => n.add(i));
+      writeLocalSeen([...n]);
+      return n;
+    });
     if (ownerKey) markSeen(ownerKey, ids);
   };
 

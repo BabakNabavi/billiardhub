@@ -24,6 +24,8 @@ export const PLACEMENT_ROLES: Record<PlacementKey, string[]> = {
   market_featured_products_homepage: ['manufacturer', 'seller'],
   featured_clubs_homepage: ['club_owner'],
   featured_equipment_stores_homepage: ['seller'],
+  market_ads_right: ['club_owner', 'seller', 'manufacturer'],
+  market_ads_left: ['club_owner', 'seller', 'manufacturer'],
   equipment_ads_right: ['club_owner', 'seller', 'manufacturer'],
   equipment_ads_left: ['club_owner', 'seller', 'manufacturer'],
   homepage_bottom_banner: ['club_owner', 'seller', 'manufacturer'],

@@ -21,6 +21,8 @@ export type PlacementKey =
   | 'market_featured_products_homepage'
   | 'featured_clubs_homepage'
   | 'featured_equipment_stores_homepage'
+  | 'market_ads_right'
+  | 'market_ads_left'
   | 'equipment_ads_right'
   | 'equipment_ads_left'
   | 'homepage_bottom_banner'

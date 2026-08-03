@@ -176,7 +176,7 @@ export default function AdvertisePage() {
               <input style={INPUT} value={form.company} onChange={e => set('company', e.target.value)} /></div>
 
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={LABEL}>جایگاه مورد نظر</label>
+              <label style={LABEL}>جایگاه مورد نظر (صفحه اصلی)</label>
               {slots.length === 0 ? (
                 /* هیچ جایگاهی روی حالت «پولی» نیست ⇒ کشوی خالی بن‌بست است؛
                    به‌جایش توضیح می‌دهیم که درخواست همچنان ثبت می‌شود. */
