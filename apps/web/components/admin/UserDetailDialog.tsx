@@ -169,8 +169,6 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
     if (!u) return
     const f: Record<string, string> = {}
     for (const x of EDIT_FIELDS) f[x.key] = String(u[x.key] ?? '')
-    /* تاریخ ممکن است از قدیم در ستونِ camelCase مانده باشد */
-    if (!f.birth_date) f.birth_date = String(u.birthDate ?? '')
     setForm(f); setSaveErr(''); setEditing(true)
   }
 
@@ -183,7 +181,7 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
       const fields: Record<string, string> = {}
       for (const x of EDIT_FIELDS) {
         const now = form[x.key] ?? ''
-        const was = String(u?.[x.key] ?? (x.key === 'birth_date' ? (u?.birthDate ?? '') : ''))
+        const was = String(u?.[x.key] ?? '')
         if (now.trim() !== was.trim()) fields[x.key] = now.trim()
       }
       if (!Object.keys(fields).length) { setEditing(false); setSaving(false); return }
@@ -322,7 +320,7 @@ export default function UserDetailDialog({ userId, onClose }: { userId: string; 
                 <Field label="تأیید ایمیل" value={g('email') ? (g('email_verified') ? 'تأییدشده' : 'تأییدنشده') : null} />
                 <Field label="وضعیت احراز" value={STATUS_FA[status] ?? status} />
                 <Field label="جنسیت" value={GENDER_FA[String(g('gender') ?? '')] ?? g('gender')} />
-                <Field label="تاریخ تولد" value={birthFa(g('birth_date') ?? g('birthDate'))} />
+                <Field label="تاریخ تولد" value={birthFa(g('birth_date'))} />
               </Section>
 
               <Section title="نشانی">

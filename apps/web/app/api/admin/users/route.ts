@@ -34,7 +34,10 @@ const COLUMNS =
    دیدنِ کدِ ملی نمی‌شود مدرک را با شخص تطبیق داد. */
 const DETAIL_COLUMNS = COLUMNS + ',' + [
   'email', '"isActive"', 'avatar', 'bio', 'province', 'address', 'gender',
-  '"birthDate"', 'birth_date', 'instagram', 'telegram', '"updatedAt"',
+  /* `birthDate` (کمل‌کیس) این‌جا نیست: ستونی از نسلِ قبل بود که هیچ
+     مسیری در آن نمی‌نوشت و صفر از ۲۱ کاربر مقداری داشت. تاریخِ تولد
+     در `birth_date` است — همان جایی که ثبت‌نام می‌نویسد. */
+  'birth_date', 'instagram', 'telegram', '"updatedAt"',
   'national_id', 'national_id_verified', 'phone_verified', 'email_verified',
   'work_phone', 'club_id', 'club_name_manual', 'documents',
   'bank_card', 'bank_card_owner', 'bank_iban', 'bank_card_verified',

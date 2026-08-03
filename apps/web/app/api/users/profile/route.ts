@@ -55,7 +55,10 @@ function shape(u: Record<string, unknown>) {
     bankCardVerified: !!u.bank_card_verified,
     /* هویت استعلام‌شده — فقط برای نمایش */
     nationalId: u.national_id ?? '',
-    birthDate: u.birth_date ?? u.birthDate ?? '',
+    /* نامِ فیلد در پاسخ کمل‌کیس می‌ماند (کلاینت همین را می‌خواند)؛
+       منبعش تنها ستونِ واقعی است. ستونِ همنامِ کمل‌کیس در دیتابیس
+       بازمانده‌ی نسلِ قبل بود و هیچ‌وقت پر نشد. */
+    birthDate: u.birth_date ?? '',
     nationalIdVerified: !!u.national_id_verified,
     phoneVerified: !!u.phone_verified,
     emailVerified: !!u.email_verified,
