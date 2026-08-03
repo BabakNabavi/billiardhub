@@ -9,9 +9,13 @@
    کلِ مجموعه‌ی قبلی گم شده بود و هر یازده آدرس روی سایتِ زنده ۴۰۴
    می‌داد — سربرگ، فوتر، فاوآیکون، آیکونِ اپ، همه.)
 
-   ── دو منبع ──
-   · Newlogo/Fin.jpg     نشانه + نامِ «BILLIARD HUB» — لوگوی کامل
-   · Newlogo/Favicon.jpg فقط نشانه — برای فاوآیکون و آیکون‌ها
+   ── یک منبع ──
+   · Newlogo/Fin.jpg — نشانه + نامِ «BILLIARD HUB»
+
+   همه‌ی یازده فایل از همین یک تصویر ساخته می‌شوند: نشانِ نوارِ بالا،
+   فوتر، فاوآیکون، آیکونِ اپ، لوگوی سربرگ و تصویرِ اشتراک‌گذاری. اگر
+   روزی نسخه‌ی «فقط نشانه» هم لازم شد، باید فایلِ جداگانه‌اش کنارِ همین
+   بیاید و این‌جا صریح استفاده شود — نه اینکه از لوگوی کامل بریده شود.
 
    ── پس‌زمینه‌ی شفاف ──
    هر دو منبع «طلایی روی سفید»اند، ولی `bh-header` روی کارت‌های تیره‌ی
@@ -32,8 +36,7 @@ import path from 'node:path'
 import sharp from 'sharp'
 
 const DIR = 'public/images/Logo'
-const SRC_FULL = path.join(DIR, 'Newlogo/Fin.jpg')
-const SRC_MARK = path.join(DIR, 'Newlogo/Favicon.jpg')
+const SRC = path.join(DIR, 'Newlogo/Fin.jpg')
 
 const WHITE = '#FFFFFF'
 /* آستانه‌ی پایین: هرچه از سفید کمتر فاصله دارد کاملاً شفاف است.
@@ -131,26 +134,26 @@ const put = (rel, buf) => {
   written.push([rel.replace(/\\/g, '/'), Math.round(buf.length / 1024)])
 }
 
-const full = await trimmed(SRC_FULL)
-const mark = await trimmed(SRC_MARK)
+const full = await trimmed(SRC)
 
 /* ── نشانِ مربع — نوارِ بالا، فوتر، صفحه‌ی درباره ──
    کاشیِ سفید، چون در قابِ گردِ سایه‌دارِ نوارِ بالا می‌نشیند. */
-const m256 = await square(mark, 256, 0.10, WHITE)
+const m256 = await square(full, 256, 0.08, WHITE)
 put(`${DIR}/bh-mark-256-v4.png`, await sharp(m256).png({ quality: 92 }).toBuffer())
 put(`${DIR}/bh-mark-256-v4.webp`, await sharp(m256).webp({ quality: 92 }).toBuffer())
 
-/* ── فاوآیکون ── حاشیه‌ی کم تا در ۱۶ پیکسل هم خوانا بماند */
+/* ── فاوآیکون ── حاشیه‌ی کم تا در کوچک‌ترین اندازه هم بیشترین
+   فضای ممکن به لوگو برسد */
 for (const s of [16, 32, 96]) {
-  put(`${DIR}/bh-favicon-${s}-v4.png`, await sharp(await square(mark, s, 0.05, WHITE)).png().toBuffer())
+  put(`${DIR}/bh-favicon-${s}-v4.png`, await sharp(await square(full, s, 0.03, WHITE)).png().toBuffer())
 }
 
 /* ── آیکونِ اپ ── اپل و اندروید شفاف را سیاه پر می‌کنند، پس سفید */
-put(`${DIR}/bh-apple-180-v4.png`, await sharp(await square(mark, 180, 0.10, WHITE)).png().toBuffer())
-put(`${DIR}/bh-icon-192-v4.png`, await sharp(await square(mark, 192, 0.10, WHITE)).png().toBuffer())
+put(`${DIR}/bh-apple-180-v4.png`, await sharp(await square(full, 180, 0.08, WHITE)).png().toBuffer())
+put(`${DIR}/bh-icon-192-v4.png`, await sharp(await square(full, 192, 0.08, WHITE)).png().toBuffer())
 /* ۵۱۲ هم به‌عنوان maskable استفاده می‌شود: اندروید تا ۲۰٪ از هر طرف
-   را می‌برد، پس حاشیه‌ی بیشتری لازم دارد وگرنه نشانه بریده می‌شود. */
-put(`${DIR}/bh-icon-512-v4.png`, await sharp(await square(mark, 512, 0.20, WHITE)).png().toBuffer())
+   را می‌برد، پس حاشیه‌ی بیشتری لازم دارد وگرنه لوگو بریده می‌شود. */
+put(`${DIR}/bh-icon-512-v4.png`, await sharp(await square(full, 512, 0.18, WHITE)).png().toBuffer())
 
 /* ── لوگوی سربرگ ── تنها فایلِ شفاف: روی کارتِ سرمه‌ای می‌نشیند */
 put(`${DIR}/bh-header-v4.png`, await sharp(full).resize({ height: 200, fit: 'inside' }).png().toBuffer())
@@ -173,7 +176,7 @@ put(`${DIR}/bh-og-v4.png`, await sharp({
    مات است — فقط کانالِ چهارم پر از ۲۵۵ اضافه می‌شود. */
 const ico = []
 for (const s of [16, 32, 48, 64, 128, 256]) {
-  ico.push({ size: s, buf: await sharp(await square(mark, s, 0.05, WHITE)).ensureAlpha().png().toBuffer() })
+  ico.push({ size: s, buf: await sharp(await square(full, s, 0.03, WHITE)).ensureAlpha().png().toBuffer() })
 }
 put('app/favicon.ico', buildIco(ico))
 
