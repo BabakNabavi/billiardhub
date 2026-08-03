@@ -23,6 +23,25 @@ const COLUMNS =
   'id,phone,"firstName","lastName","primaryRole","secondaryRoles",' +
   '"isProfileComplete","verificationStatus","createdAt",city';
 
+/* ── ستون‌های صفحه‌ی جزئیات (`?id=`) ──
+   دکمه‌ی چشم در فهرست فقط به پروفایلِ عمومی می‌رفت و آن‌جا جز نام
+   چیزی نبود — یعنی ادمین برای دیدنِ مشخصاتِ یک نفر هیچ راهی نداشت.
+
+   این فهرست بلندتر است ولی همچنان بسته: `password`, `otp_code` و
+   `otp_expires_at` عمداً نیستند و از این مسیر بیرون نمی‌روند.
+
+   `national_id` هست، چون کارِ اصلیِ همین پنل احرازِ هویت است و بدونِ
+   دیدنِ کدِ ملی نمی‌شود مدرک را با شخص تطبیق داد. */
+const DETAIL_COLUMNS = COLUMNS + ',' + [
+  'email', '"isActive"', 'avatar', 'bio', 'province', 'address', 'gender',
+  '"birthDate"', 'birth_date', 'instagram', 'telegram', '"updatedAt"',
+  'national_id', 'national_id_verified', 'phone_verified', 'email_verified',
+  'work_phone', 'club_id', 'club_name_manual', 'documents',
+  'bank_card', 'bank_card_owner', 'bank_iban', 'bank_card_verified',
+  '"playerProfile"', '"coachProfile"', '"refereeProfile"',
+  '"manufacturerProfile"', '"installerProfile"', '"sellerProfile"',
+].join(',');
+
 const VERIFICATION = new Set(['unverified', 'pending', 'verified', 'rejected']);
 
 export async function GET(req: NextRequest) {
@@ -30,6 +49,22 @@ export async function GET(req: NextRequest) {
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
   if (!(await can(actor.id, 'users'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  }
+
+  /* ?id=… → مشخصاتِ کاملِ یک کاربر برای پنجره‌ی جزئیات */
+  const one = (req.nextUrl.searchParams.get('id') ?? '').trim();
+  if (one) {
+    const { data, error } = await sb().from('users').select(DETAIL_COLUMNS).eq('id', one).maybeSingle();
+    if (error) {
+      console.error('[admin/users:detail]', error.message);
+      return NextResponse.json({ message: 'خواندن کاربر انجام نشد' }, { status: 500 });
+    }
+    if (!data) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
+    audit({
+      actorId: actor.id, actorRole: 'admin', action: 'USER_DETAIL_VIEWED',
+      entityType: 'user', entityId: one, ip: clientIp(req) ?? undefined,
+    });
+    return NextResponse.json({ user: data });
   }
 
   const sp = req.nextUrl.searchParams;

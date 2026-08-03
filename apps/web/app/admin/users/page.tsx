@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import { apiFetch } from '../../../lib/http';
 import { Users, Search, CheckCircle, XCircle, Eye, Shield } from 'lucide-react';
+import UserDetailDialog from '../../../components/admin/UserDetailDialog';
 
 interface User {
   id: string;
@@ -53,6 +54,7 @@ export default function AdminUsersPage() {
   const { user, _hydrated } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [detail, setDetail] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterVerification, setFilterVerification] = useState('all');
@@ -196,8 +198,11 @@ export default function AdminUsersPage() {
                   )}
                 </div>
                 <div className="col-span-2 flex items-center justify-center gap-1">
-                  <button onClick={() => router.push(`/users/${u.id}`)}
-                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="مشاهده">
+                  {/* پیش‌تر این دکمه به پروفایلِ عمومی می‌رفت و آن‌جا
+                      جز نام چیزی نبود — ادمین هیچ راهی برای دیدنِ
+                      مشخصاتِ یک نفر نداشت. */}
+                  <button onClick={() => setDetail(u.id)}
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="مشاهده مشخصات">
                     <Eye size={15} />
                   </button>
                   {u.verificationStatus !== 'verified' && (
@@ -228,6 +233,8 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {detail && <UserDetailDialog userId={detail} onClose={() => setDetail(null)} />}
     </div>
   );
 }
