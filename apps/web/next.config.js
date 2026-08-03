@@ -88,7 +88,13 @@ const nextConfig = {
               "form-action 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://*.supabase.co",
+              /* `trustseal.enamad.ir` — نشانِ اعتمادِ الکترونیکی در فوتر.
+                 تصویرِ نشان مستقیم از سرورِ اینماد می‌آید و بدونِ این
+                 اجازه، CSP آن را می‌بندد و به‌جای نشان یک قابِ شکسته
+                 دیده می‌شود — یعنی نشان باطل می‌شود، چون اینماد دوره‌ای
+                 وجودش را بررسی می‌کند. میزبانیِ محلیِ تصویر هم مجاز
+                 نیست؛ باید از دامنه‌ی خودشان بیاید. */
+              "img-src 'self' data: blob: https://*.supabase.co https://trustseal.enamad.ir",
               "media-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co",

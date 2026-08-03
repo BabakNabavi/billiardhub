@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronLeft } from 'lucide-react';
+import EnamadSeal from './EnamadSeal';
 
 const GOLD    = '#C7A66A';
 /* همان طلایی ولی خوانا برای متن روی پس‌زمینه‌ی روشن فوتر (۵٫۰۲:۱) */
@@ -252,6 +253,14 @@ export default function Footer() {
               </a>
             </span>
           </div>
+        </div>
+
+        {/* ── نشانِ اعتمادِ الکترونیکی ────────────────
+            جای متعارفش همین‌جاست: پایینِ صفحه، پیش از نوارِ حقوقی.
+            در فوترِ عمومی است تا شرطِ اینماد — دیده‌شدن بدونِ ورود به
+            حساب — برقرار بماند. */}
+        <div style={{ display: 'flex', justifyContent: 'flex-start', paddingBottom: '16px' }}>
+          <EnamadSeal />
         </div>
 
         {/* ── Bottom bar ────────────────────────────── */}
