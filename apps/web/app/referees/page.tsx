@@ -35,16 +35,16 @@ interface Referee {
   verified?: boolean
 }
 
-const REFEREES: Referee[] = [
-  { id:'1',  name:'کاوه طالبی',    specialty:'snooker',  city:'تهران',  experience:20, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور بین‌المللی WPBSA با ۲۰ سال سابقه — قضاوت ۴۵ مسابقه بین‌المللی اسنوکر',   photo:'' },
-  { id:'2',  name:'نیلوفر حسینی', specialty:'pocket',   city:'مشهد',   experience:12, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(1), bio:'داور ملی پاکت بیلیارد — پیشگام داوری بانوان با ۹۵ مسابقه ملی',               photo:'' },
-  { id:'3',  name:'رامین فرهادی', specialty:'highball', city:'اصفهان', experience:8,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'متخصص هی‌بال — عضو کمیته داوران فدراسیون بیلیارد و اسنوکر ایران',             photo:'' },
-  { id:'4',  name:'سحر محمدی',    specialty:'pocket',   city:'تهران',  experience:5,  grade:'داور درجه A',     gradeColor:'#C2410C', hasStory:true,  storyImage:img(3), bio:'داور جوان پاکت بیلیارد — قضاوت ۳۰+ مسابقه استانی و کشوری',                  photo:'' },
-  { id:'5',  name:'حامد موسوی',   specialty:'snooker',  city:'تبریز',  experience:15, grade:'داور بین‌المللی', gradeColor:'#7C3AED', hasStory:true,  storyImage:img(0), bio:'داور ارشد IBSF — نماینده ایران در قهرمانی آسیا ۱۴۰۲ و لیگ برتر',             photo:'' },
-  { id:'6',  name:'علی رضایی',    specialty:'highball', city:'شیراز',  experience:7,  grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:false, storyImage:'',     bio:'داور هی‌بال — قضاوت لیگ برتر هی‌بال و مسابقات جوانان فدراسیون',               photo:'' },
-  { id:'7',  name:'مینا صالحی',   specialty:'pocket',   city:'کرج',    experience:3,  grade:'داور درجه B',     gradeColor:'#16A34A', hasStory:false, storyImage:'',     bio:'داور درجه B پاکت بیلیارد — فعال در مسابقات استانی البرز و تهران',             photo:'' },
-  { id:'8',  name:'کیان نوری',    specialty:'snooker',  city:'تهران',  experience:10, grade:'داور ملی',        gradeColor:GOLD_D,    hasStory:true,  storyImage:img(3), bio:'داور ملی اسنوکر — عضو هیئت داوران کنفدراسیون ACBS با تجربه ۱۰ ساله',        photo:'' },
-]
+/* ⚠️ عمداً خالی — پیش از رونمایی پاک شد.
+
+   این آرایه 8 موجودیتِ ساختگی داشت که روی سایتِ زنده مثل داده‌ی
+   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجودِ
+   خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید.
+
+   جای این‌ها با موجودیت‌های واقعیِ سایت پر می‌شود. اگر چیزی نباشد،
+   بخش خالی می‌ماند — که درست است. آرایه نگه داشته شد (نه حذف) تا
+   امضای ماژول و مصرف‌کننده‌هایش دست‌نخورده بمانند. */
+const REFEREES: Referee[] = []
 
 /* approved referees registered via /referees/dashboard → list cards */
 const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric' }).format(new Date()), 10) || 1404 } catch { return 1404 } })()

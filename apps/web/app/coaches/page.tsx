@@ -35,18 +35,16 @@ interface Coach {
   sessionPrice: number; hasStory: boolean; storyImage: string; bio: string; photo: string; verified?: boolean; disciplines?: string[]
 }
 
-const COACHES: Coach[] = [
-  { id:'1',  name:'احمد رضایی',    specialty:'snooker',  city:'تهران',  experience:15, rating:4.9, students:240, medals:8,  sessionPrice:500000, hasStory:true,  storyImage:img(0), bio:'مربی ملی‌پوش با ۱۵ سال سابقه — پرورش‌دهنده ۳ قهرمان ملی',      photo:'' },
-  { id:'2',  name:'حسین نوری',     specialty:'snooker',  city:'مشهد',   experience:12, rating:4.7, students:180, medals:5,  sessionPrice:350000, hasStory:true,  storyImage:img(1), bio:'قهرمان آسیا ۱۳۹۸ — تکنیک‌های پیشرفته اسنوکر',               photo:'' },
-  { id:'3',  name:'مریم کاظمی',    specialty:'pocket',   city:'اصفهان', experience:8,  rating:4.8, students:95,  medals:4,  sessionPrice:280000, hasStory:false, storyImage:'',     bio:'قهرمان کشوری بانوان ۱۴۰۱ — متخصص پاکت بیلیارد',            photo:'' },
-  { id:'4',  name:'سینا محمدی',    specialty:'pocket',   city:'شیراز',  experience:5,  rating:4.5, students:52,  medals:2,  sessionPrice:200000, hasStory:true,  storyImage:img(3), bio:'قهرمان لیگ برتر جوانان — آموزش با آنالیز ویدیویی',           photo:'' },
-  { id:'5',  name:'علی حسینی',     specialty:'highball', city:'تهران',  experience:10, rating:4.6, students:120, medals:3,  sessionPrice:320000, hasStory:false, storyImage:'',     bio:'مربی تیم ملی جوانان هی‌بال — متخصص تکنیک ضربات',            photo:'' },
-  { id:'6',  name:'رضا ابراهیمی',  specialty:'carom',    city:'تبریز',  experience:18, rating:4.9, students:310, medals:12, sessionPrice:450000, hasStory:true,  storyImage:img(1), bio:'پیشکسوت کارامبول — استاد اول ایران با ۱۸ سال تجربه',         photo:'' },
-  { id:'7',  name:'نیلوفر صادقی',  specialty:'snooker',  city:'تهران',  experience:7,  rating:4.6, students:74,  medals:3,  sessionPrice:260000, hasStory:true,  storyImage:img(2), bio:'مربی تیم بانوان فدراسیون اسنوکر — قهرمان کشوری ۱۴۰۲',       photo:'' },
-  { id:'8',  name:'کامران یوسفی',  specialty:'carom',    city:'تهران',  experience:14, rating:4.8, students:195, medals:7,  sessionPrice:400000, hasStory:true,  storyImage:img(3), bio:'نائب‌قهرمان آسیا کارامبول — مدرس سیستم‌های ضربه‌ای',        photo:'' },
-  { id:'9',  name:'زهرا شریفی',    specialty:'pocket',   city:'کرج',    experience:6,  rating:4.5, students:63,  medals:2,  sessionPrice:220000, hasStory:false, storyImage:'',     bio:'متخصص پاکت بیلیارد بانوان — سیستم آموزشی گام به گام',        photo:'' },
-  { id:'10', name:'محسن طاهری',    specialty:'highball', city:'تهران',  experience:9,  rating:4.7, students:108, medals:4,  sessionPrice:290000, hasStory:true,  storyImage:img(1), bio:'مربی تیم ملی هی‌بال ۱۴۰۳ — متخصص آنالیز بازی',             photo:'' },
-]
+/* ⚠️ عمداً خالی — پیش از رونمایی پاک شد.
+
+   این آرایه 10 موجودیتِ ساختگی داشت که روی سایتِ زنده مثل داده‌ی
+   واقعی دیده می‌شدند: نام، شهر، امتیاز و مشخصاتی که هیچ‌کدام وجودِ
+   خارجی نداشتند و کلیکشان به هیچ‌جا نمی‌رسید.
+
+   جای این‌ها با موجودیت‌های واقعیِ سایت پر می‌شود. اگر چیزی نباشد،
+   بخش خالی می‌ماند — که درست است. آرایه نگه داشته شد (نه حذف) تا
+   امضای ماژول و مصرف‌کننده‌هایش دست‌نخورده بمانند. */
+const COACHES: Coach[] = []
 
 /* ════════ HERO POSTERS — dark, billiard/coach themed (slider) ════════ */
 const COACH_POSTERS = [
