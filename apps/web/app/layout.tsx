@@ -10,15 +10,15 @@ import AppBoot from '../components/AppBoot';
 import PersianDigits from '../components/PersianDigits';
 import AddToHomeScreenGate from '../components/pwa/AddToHomeScreenGate';
 import { FeatureFlagsProvider } from '../components/features/FeatureFlags';
+import { SITE_URL } from '../lib/site-url';
 
 
 export const metadata: Metadata = {
-  /* بدون metadataBase، نشانی‌های نسبی canonical و og:url ناقص می‌مانند */
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL
-    || (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
-    || 'https://billiardhub.net',
-  ),
+  /* بدون metadataBase، نشانی‌های نسبی canonical و og:url ناقص می‌مانند.
+     از `lib/site-url` می‌آید تا با robots.ts و sitemap.ts یکی بماند —
+     پیش‌تر هر سه منطق را جدا تکرار می‌کردند و می‌شد به سه آدرسِ متفاوت
+     برسند. */
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'بیلیارد هاب | پلتفرم جامع و تخصصی بیلیارد',
     template: '%s | بیلیارد هاب',

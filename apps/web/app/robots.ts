@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { SITE_URL } from '../lib/site-url'
 
 /* تا پیش از این هیچ robots.txt وجود نداشت؛ یعنی خزنده‌ها آزاد بودند
    پنل مدیریت، داشبورد، سبد خرید و صفحه‌های خصوصی را هم بخزند. این‌جا
@@ -28,10 +29,11 @@ export default function robots(): MetadataRoute.Robots {
   }
 }
 
+/* همان منبعِ واحدِ `lib/site-url`. پیش‌تر این تابع منطق را برای خودش
+   تکرار می‌کرد و همین باعث می‌شد جابه‌جاییِ دامنه در دو جا جدا جدا
+   اثر بگذارد — نقشه‌ی سایت و canonical می‌توانستند به دو آدرسِ متفاوت
+   اشاره کنند. حالا هر دو یک چیز را می‌خوانند.
+   نامش می‌ماند چون sitemap.ts هم از آن استفاده می‌کند. */
 export function base(): string {
-  const raw =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`) ||
-    'https://billiardhub.net'
-  return raw.replace(/\/+$/, '')
+  return SITE_URL
 }
