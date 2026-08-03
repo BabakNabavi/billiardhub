@@ -168,7 +168,11 @@ export default function AdminRankingsPage() {
                 {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
               </button>
               {gender === g && (
-                <div className="p-1">
+                /* space-y-1: دکمه‌های دسته‌بندی بدونِ فاصله دقیقاً روی هم
+                   می‌نشستند و مرزِ دسته‌ی فعال با دسته‌ی بعدی گم می‌شد.
+                   ⚠️ این‌جا بعدِ «&& (» زمینه‌ی عبارتِ جاوااسکریپت است نه
+                   JSX، پس کامنتِ آکولادیِ JSX این‌جا خطای پارس می‌دهد. */
+                <div className="p-1 space-y-1">
                   {Object.keys(rankings[sport]?.[g] ?? {}).map(cat => (
                     <button key={cat} onClick={() => setCategory(cat)}
                       className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat ? 'bg-green-100 text-green-800 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>

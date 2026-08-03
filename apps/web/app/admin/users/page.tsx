@@ -47,7 +47,10 @@ const verificationLabels: Record<string, string> = {
 
 export default function AdminUsersPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
+     localStorage خوانده می‌شود) و ادمین را پیش از باز شدنِ صفحه به
+     صفحه‌ی اصلی پرت می‌کند — یعنی رفرش یا ورود از بوکمارک کار نمی‌کرد. */
+  const { user, _hydrated } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -62,6 +65,7 @@ export default function AdminUsersPage() {
      می‌شد و صفحه فهرستِ خالی نشان می‌داد، در حالی که کارتِ داشبورد
      همان لحظه ۲۱ کاربر می‌شمرد. */
   useEffect(() => {
+    if (!_hydrated) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
     void (async () => {
       try {
@@ -72,7 +76,7 @@ export default function AdminUsersPage() {
       } catch { setErr('خطا در ارتباط با سرور'); }
       finally { setLoading(false); }
     })();
-  }, [user, router]);
+  }, [_hydrated, user, router]);
 
   const handleVerify = async (userId: string, status: string) => {
     setErr('');
@@ -94,6 +98,7 @@ export default function AdminUsersPage() {
     return true;
   });
 
+  if (!_hydrated) return null;
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (

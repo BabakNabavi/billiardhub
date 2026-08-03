@@ -36,7 +36,10 @@ const categoryLabels: Record<string, string> = {
 
 export default function AdminProductsPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
+     localStorage خوانده می‌شود) و ادمین را پیش از باز شدنِ صفحه به
+     صفحه‌ی اصلی پرت می‌کند — یعنی رفرش یا ورود از بوکمارک کار نمی‌کرد. */
+  const { user, _hydrated } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
@@ -45,6 +48,7 @@ export default function AdminProductsPage() {
   const [filterVerification, setFilterVerification] = useState('all');
 
   useEffect(() => {
+    if (!_hydrated) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
     /* پاسخِ /api/products یک شیء است: { products, total, page, ... }
        نه آرایه. پیش‌تر همان شیء در state می‌نشست و اولین `.filter`
@@ -55,7 +59,7 @@ export default function AdminProductsPage() {
       setErr('');
     }).catch(() => setErr('خواندن محصولات انجام نشد'))
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [_hydrated, user]);
 
   const handleVerify = async (productId: string, verified: boolean) => {
     setErr('');
@@ -91,6 +95,7 @@ export default function AdminProductsPage() {
 
   const pendingCount = products.filter(p => p.requestedVerification && !p.isVerified).length;
 
+  if (!_hydrated) return null;
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (

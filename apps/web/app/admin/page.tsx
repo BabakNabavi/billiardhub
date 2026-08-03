@@ -112,14 +112,13 @@ const STAT_CARDS: { key: string; label: string; link: string }[] = [
 
 export default function AdminPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const [checked, setChecked] = useState(false);
+  /* `_hydrated` جای تایمرِ ۵۰۰ میلی‌ثانیه‌ای را گرفت.
+     استور از localStorage خوانده می‌شود و تا آن لحظه `user` تهی است.
+     تایمر یعنی «امیدواریم تا نیم‌ثانیه خوانده شده باشد» — روی دستگاهِ
+     کند یا شبکه‌ی سنگین نمی‌شد و ادمین به صفحه‌ی ورود پرت می‌شد.
+     خودِ استور دقیقاً می‌گوید کِی خوانده شد؛ حدس لازم نیست. */
+  const { user, _hydrated } = useAuthStore();
   const [stats, setStats] = useState<Record<string, number> | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setChecked(true), 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   /* شمارش واقعی ردیف‌ها؛ تا رسیدنش «—» نشان داده می‌شود */
   useEffect(() => {
@@ -130,12 +129,12 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!checked) return;
+    if (!_hydrated) return;
     if (!user) { router.push('/login'); return; }
     if (user.primaryRole !== 'admin') { router.push('/'); return; }
-  }, [checked, user, router]);
+  }, [_hydrated, user, router]);
 
-  if (!checked) return <div style={{ textAlign: 'center', padding: '80px 0', color: MUT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>در حال بارگذاری…</div>;
+  if (!_hydrated) return <div style={{ textAlign: 'center', padding: '80px 0', color: MUT, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>در حال بارگذاری…</div>;
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (

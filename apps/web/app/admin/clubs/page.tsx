@@ -67,17 +67,21 @@ const STATUS_LABEL: Record<string, { label: string; color: string; bg: string; i
 
 export default function AdminClubsPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  /* بدونِ `_hydrated`، نخستین رندر `user` را تهی می‌بیند (استور از
+     localStorage خوانده می‌شود) و ادمین را به صفحه‌ی ورود پرت می‌کند —
+     یعنی رفرش یا ورود از بوکمارک هرگز به این صفحه نمی‌رسید. */
+  const { user, _hydrated } = useAuthStore();
   const [clubs, setClubs] = useState<ClubRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'approved' | 'rejected' | 'unverified'>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!_hydrated) return;
     if (!user) { router.push('/login'); return; }
     if (user.primaryRole !== 'admin') { router.push('/'); return; }
     fetchClubs().then(data => { setClubs(data); setLoading(false); });
-  }, [user]);
+  }, [_hydrated, user]);
 
   const [err, setErr] = useState('');
 

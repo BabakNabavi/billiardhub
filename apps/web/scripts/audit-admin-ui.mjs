@@ -41,12 +41,18 @@ for (const sg of ['SIGINT', 'SIGTERM', 'SIGPIPE'])
   process.on(sg, () => { setRole(ORIG).finally(() => process.exit(130)) })
 process.on('uncaughtException', e => { console.error(e); setRole(ORIG).finally(() => process.exit(1)) })
 
-const PAGES = ['', 'users', 'roles', 'verifications', 'support', 'access',
+const ALL_PAGES = ['', 'users', 'roles', 'verifications', 'support', 'access',
   'coaches', 'referees', 'rankings', 'players',
   'bookings', 'finance',
   'clubs', 'sellers', 'products', 'manufacturers', 'technicians',
   'news', 'tournaments', 'events',
   'ad-plans', 'story-plans', 'media', 'reports', 'features']
+
+/* با آرگومان می‌شود فقط چند صفحه را سنجید — چرخه‌ی «بسنج، درست کن،
+   دوباره بسنج» روی یک صفحه نباید ۲۵ صفحه را هم اجرا کند:
+       node scripts/audit-admin-ui.mjs verifications rankings
+   بدونِ آرگومان همان رفتارِ قبلی: همه‌ی صفحه‌ها. */
+const PAGES = process.argv.length > 2 ? process.argv.slice(2) : ALL_PAGES
 
 const MIN_EDGE = 12      // کمترین فاصله‌ی محتوا تا لبه
 const MIN_GAP = 8        // کمترین فاصله‌ی عمودی بینِ کارت‌های هم‌سطح
@@ -54,8 +60,13 @@ const MIN_TAP = 36       // کمترین بعدِ هدفِ لمس روی موب�
 
 const measure = page => page.evaluate((MIN_GAP, MIN_TAP) => {
   const de = document.documentElement, vw = de.clientWidth
-  /* دامنه‌ی سنجش: فقط محتوای پنل. فوتر/سربرگِ سایت بیرون‌اند. */
-  const scope = document.querySelector('.admin-scope') || document.body
+  /* دامنه‌ی سنجش: فقط محتوای پنل. فوتر/سربرگِ سایت بیرون‌اند.
+     نبودنِ `.admin-scope` یعنی صفحه اصلاً باز نشده و ما را بیرون
+     انداخته. پیش‌تر این حالت بی‌صدا به `document.body` می‌افتاد و
+     صفحه‌ی اصلیِ سایت را به‌جای پنل اندازه می‌گرفت — عددها معنادار
+     به نظر می‌رسیدند ولی مالِ صفحه‌ی دیگری بودند. */
+  const scope = document.querySelector('.admin-scope')
+  if (!scope) return { bounced: location.pathname }
   const isMobile = vw < 700
   const vis = el => {
     const s = getComputedStyle(el)
@@ -91,11 +102,21 @@ const measure = page => page.evaluate((MIN_GAP, MIN_TAP) => {
     if (parent.className && /divide-y/.test(String(parent.className))) continue
     const kids = [...parent.children].filter(c => {
       if (!vis(c)) return false
+      /* سربرگِ رنگیِ یک کارتِ جدول عمداً به فهرستِ ردیف‌ها می‌چسبد —
+         جدایی از خطِ جداکننده می‌آید، نه از فاصله. فرزندی که خودش
+         فهرستِ `divide-y` است از مقایسه بیرون می‌ماند، درست مثل
+         والدی که `divide-y` دارد. */
+      if (/divide-y/.test(String(c.className ?? ''))) return false
       const r = c.getBoundingClientRect()
       return r.height > 24 && r.width > 60 && r.top < 4000
     })
     if (kids.length < 2) continue
     for (let i = 1; i < kids.length; i++) {
+      /* دو پاراگرافِ متنِ پشتِ‌هم فاصله‌ی تایپوگرافیک دارند، نه فاصله‌ی
+         کارت — ۶ پیکسل بینشان درست است. این سنجه درباره‌ی کارت/ردیفِ
+         چسبیده است؛ مقایسه‌ی متن با متن فقط نوفه تولید می‌کرد و در
+         سیزده صفحه پرچمِ بی‌مورد می‌زد. */
+      if (kids[i - 1].tagName === 'P' && kids[i].tagName === 'P') continue
       const a = kids[i - 1].getBoundingClientRect(), b = kids[i].getBoundingClientRect()
       if (b.top < a.bottom - 2) continue
       const d = b.top - a.bottom
@@ -125,6 +146,14 @@ await browser.setCookie({ name: 'bh_at', value: token, domain: 'localhost', path
 await browser.setCookie({ name: 'bh_csrf', value: 'zz-ui', domain: 'localhost', path: '/' })
 await page.evaluateOnNewDocument(u => {
   localStorage.setItem('auth-storage', JSON.stringify({ state: { user: u }, version: 0 }))
+  /* SessionBridge در هر بارگذاری یک‌بار /api/auth/refresh می‌زند. نشستِ
+     ساختگیِ این تست فقط کوکیِ دسترسی دارد و کوکیِ تمدید ندارد، پس سرور
+     ۴۰۱ می‌دهد و SessionBridge کاربر را بیرون می‌اندازد — نتیجه‌اش این
+     بود که نخستین صفحه‌ی هر اجرا به /login پرت می‌شد و عددهایش دور
+     ریخته می‌شد. این دو کلید همان محافظ‌های خودِ SessionBridge‌اند و
+     تمدید را رد می‌کنند. موضوعِ این تست چیدمان است، نه چرخه‌ی نشست. */
+  localStorage.setItem('bh_last_refresh', String(Date.now()))
+  localStorage.setItem('bh_session_migrated', String(Date.now()))
 }, { id: me.id, phone: me.phone, primaryRole: 'admin', secondaryRoles: ['admin'], firstName: 'ادمین', lastName: 'آزمایش' })
 
 const rows = []
@@ -145,6 +174,10 @@ try {
       await new Promise(z => setTimeout(z, 2200))
       const m = await measure(page).catch(() => null)
       rows.push({ w, p, m })
+      if (m?.bounced) {
+        console.log('  ' + (p || '(داشبورد)').padEnd(20) + '  ✗ پرت شد به ' + m.bounced)
+        continue
+      }
       console.log('  ' + (p || '(داشبورد)').padEnd(20) +
         String(m?.overflow ?? '?').padStart(7) +
         String(m?.edge ?? '—').padStart(7) +

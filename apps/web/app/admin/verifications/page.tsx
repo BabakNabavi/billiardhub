@@ -30,13 +30,19 @@ const roleLabels: Record<string, { label: string; color: string }> = {
 
 export default function AdminVerificationsPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  /* `_hydrated` لازم است: استور از localStorage خوانده می‌شود و در
+     نخستین رندر `user` تهی است. بدونِ این محافظ، هر رفرش یا هر ورود
+     از بوکمارک ادمین را به صفحه‌ی اصلی پرت می‌کرد — صفحه اصلاً باز
+     نمی‌شد. (ابزارِ سنجشِ UI این را لو داد: به‌جای عناصرِ پنل،
+     `section.clubs-section` صفحه‌ی اصلی را اندازه می‌گرفت.) */
+  const { user, _hydrated } = useAuthStore();
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending');
   const [err, setErr] = useState('');
 
   useEffect(() => {
+    if (!_hydrated) return;
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return; }
     /* منبع: `/api/admin/users`. پیش‌تر `/user/all` بود — مسیرِ
        بک‌اندِ حذف‌شده‌ی NestJS که ۴۰۴ می‌داد و `.catch` بی‌صدا
@@ -52,7 +58,7 @@ export default function AdminVerificationsPage() {
       } catch { setErr('خطا در ارتباط با سرور'); }
       finally { setLoading(false); }
     })();
-  }, [user]);
+  }, [_hydrated, user]);
 
   const handleVerify = async (userId: string, status: string) => {
     setErr('');
@@ -75,6 +81,7 @@ export default function AdminVerificationsPage() {
     rejected: requests.filter(r => r.verificationStatus === 'rejected').length,
   };
 
+  if (!_hydrated) return null;
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (
