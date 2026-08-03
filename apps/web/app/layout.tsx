@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL
     || (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
-    || 'https://www.billiardhub.net',
+    || 'https://billiardhub.net',
   ),
   title: {
     default: 'بیلیارد هاب | پلتفرم جامع و تخصصی بیلیارد',

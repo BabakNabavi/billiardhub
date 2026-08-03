@@ -9,11 +9,15 @@
    ترتیبِ اولویت:
    ۱) `NEXT_PUBLIC_SITE_URL` — دامنه‌ی رسمی، روی Vercel تنظیم می‌شود
    ۲) `VERCEL_PROJECT_PRODUCTION_URL` — خودِ Vercel می‌گذارد
-   ۳) دامنه‌ی اصلی به‌عنوان آخرین تکیه‌گاه */
+   ۳) دامنه‌ی اصلی به‌عنوان آخرین تکیه‌گاه
+
+   دامنه‌ی رسمی بدونِ www است و www به آن ۳۰۷ می‌خورد. این باید با
+   تنظیمِ Vercel یکی بماند: اگر canonical به www اشاره کند و www
+   ریدایرکت شود، گوگل دو نسخه از هر صفحه می‌بیند. */
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL
   || (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
-  || 'https://www.billiardhub.net'
+  || 'https://billiardhub.net'
 ).replace(/\/+$/, '')
 
 /** نشانیِ کاملِ یک مسیر — برای canonical و اشتراک‌گذاری.
