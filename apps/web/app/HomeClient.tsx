@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
@@ -13,10 +13,15 @@ import AdSlot, { usePlacementState, type EntitySnapshot, type PlacementKey, type
 import { useHorizontalScroll, scrollSign, getPos, setPos } from '../lib/useHorizontalScroll';
 import { MEDIA_VIDEOS, compactViews } from '../lib/media-data';
 import { getHiddenVideoIds, getFeaturedOverride } from '../lib/media-admin-store';
+import { sharedJson } from '../lib/shared-fetch';
 
 /* ═══════════════════════════════════════════════════════════════
    SCROLL REVEAL
 ═══════════════════════════════════════════════════════════════ */
+/* `useLayoutEffect` روی سرور هشدار می‌دهد و آن‌جا هم بی‌معنی است،
+   چون چیدمانی برای اندازه‌گیری وجود ندارد. این نسخه‌ی امنِ رایج است. */
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 function SR({
   children, delay = 0, direction = 'up',
 }: {
@@ -24,15 +29,54 @@ function SR({
   direction?: 'up' | 'left' | 'right' | 'none';
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [v, setV] = useState(false);
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
+
+  /* ⚠️ مقدار اولیه **مرئی** است، نه نامرئی.
+     ─────────────────────────────────────────────────────────────
+     پیش‌تر این‌جا `useState(false)` بود، یعنی هر بخشِ صفحه با
+     `opacity: 0` روی سرور رندر می‌شد و فقط بعد از اجرای جاوااسکریپت
+     و فعال‌شدنِ IntersectionObserver دیده می‌شد.
+
+     اندازه‌گیری (scripts/perf-audit.mjs، موبایل + 4G کند):
+       زمان      ۲۰۰   ۶۰۰  ۱۰۰۰  ۱۵۰۰  ۲۰۰۰  ۳۰۰۰
+       دیده‌شده   ۱۱    ۱۱    ۱۱    ۱۱    ۱۱    ۲۷
+       کدورتِ ۰   ۱۹    ۱۹    ۱۹    ۱۹    ۱۹     ۳
+
+     یعنی ۱۹ عنصرِ داخلِ قابِ دید — دانلودشده و آماده — نزدیک به سه
+     ثانیه نامرئی می‌ماندند و بعد یک‌باره ظاهر می‌شدند. همان چیزی که
+     کاربر «سکته» و «محتوا می‌آید و می‌رود» می‌نامید. LCP هم عملاً
+     منتظرِ hydration می‌ماند.
+
+     حالا برعکس شد: همه مرئی رندر می‌شوند و فقط آن‌هایی که **پایینِ
+     قابِ دید** هستند، پیش از نخستین رنگ‌آمیزی پنهان می‌شوند تا موقعِ
+     اسکرول انیمیشن بخورند. انیمیشن حذف نشده — فقط دیگر روی محتوایی
+     که کاربر همان لحظه می‌بیند اعمال نمی‌شود.
+
+     `useLayoutEffect` لازم است نه `useEffect`: تصمیم باید *پیش از*
+     رنگ‌آمیزی گرفته شود، وگرنه بخش‌های پایینی یک فریم دیده می‌شوند و
+     بعد پنهان — یعنی همان پرش، این‌بار برعکس. */
+  const [v, setV] = useState(true);
+  const armed = useRef(false);
+
+  useIsoLayoutEffect(() => {
+    const el = ref.current; if (!el || armed.current) return;
+    armed.current = true;
+
+    /* کاربری که حرکت را کم کرده، هیچ‌وقت پنهان نمی‌بیند */
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    const r = el.getBoundingClientRect();
+    /* داخلِ قابِ دید یا بالاترش ⇒ دست‌نخورده و مرئی می‌ماند */
+    if (r.top < window.innerHeight * 0.92) return;
+
+    setV(false);
     const ob = new IntersectionObserver(
       ([e]) => { if (e?.isIntersecting) { setV(true); ob.disconnect(); } },
       { threshold: 0.06, rootMargin: '0px 0px -40px 0px' }
     );
-    ob.observe(el); return () => ob.disconnect();
+    ob.observe(el);
+    return () => ob.disconnect();
   }, []);
+
   const from = {
     up: 'translateY(26px)', left: 'translateX(-26px)',
     right: 'translateX(26px)', none: 'none',
@@ -41,6 +85,9 @@ function SR({
     <div ref={ref} style={{
       opacity: v ? 1 : 0, transform: v ? 'none' : from,
       transition: `opacity 0.85s ${delay}ms cubic-bezier(0.22,1,0.36,1), transform 0.85s ${delay}ms cubic-bezier(0.22,1,0.36,1)`,
+      /* فقط وقتی قرار است حرکت کند به مرورگر لایه بدهیم؛ `will-change`
+         دائمی متن را روی همه‌ی بخش‌ها کدر می‌کند و حافظه‌ی GPU می‌گیرد */
+      willChange: v ? undefined : 'opacity, transform',
     }}>{children}</div>
   );
 }
@@ -1056,12 +1103,11 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
 
   useEffect(() => {
     if (!needClientFetch) return;
+    /* `sharedJson` نه `fetch` خام: نوارِ استوری هم همین دو مسیر را
+       می‌گیرد و اندازه‌گیری هرکدام را دو بار نشان داده بود. */
     const grab = async <T,>(url: string, pick: (j: unknown) => T[]): Promise<T[]> => {
-      try {
-        const r = await fetch(url, { cache: 'no-store' });
-        if (!r.ok) return [];
-        return pick(await r.json()) ?? [];
-      } catch { return []; }
+      try { return pick(await sharedJson<unknown>(url)) ?? []; }
+      catch { return []; }
     };
 
     void (async () => {

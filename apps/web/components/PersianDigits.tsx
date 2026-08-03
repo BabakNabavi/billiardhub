@@ -80,23 +80,63 @@ export default function PersianDigits() {
       try { fn() } finally { writing = false }
     }
 
-    run(() => walk(document.body))
+    /* ── چرا کار دسته‌بندی و به وقتِ بی‌کاری موکول می‌شود ──
+
+       اندازه‌گیریِ صفحه‌ی اصلی (scripts/perf-audit.mjs) نشان داد
+       نخستین ثانیه‌های بارگذاری پر از «کارِ بلند» است — تا ۷۴ تا، و
+       بلندترینشان بیش از یک ثانیه. یکی از منبع‌هایش همین‌جا بود:
+
+       ۱) پیمایشِ کاملِ DOM دقیقاً وسطِ hydration اجرا می‌شد، همان
+          لحظه‌ای که مرورگر بیشترین فشار را دارد.
+       ۲) بدتر: هنگامِ hydration، React هزاران گره اضافه می‌کند و
+          ناظر برای *هر دسته* دوباره پیمایش می‌کرد. یعنی همان درخت
+          چندین بار از نو خوانده می‌شد.
+
+       حالا کارها در یک صف جمع می‌شوند و در نخستین فرصتِ بی‌کاریِ
+       مرورگر یک‌جا انجام می‌شوند. رشته‌ی اصلی دیگر بلوکه نمی‌شود و
+       نتیجه‌ی دیده‌شده همان است — چند میلی‌ثانیه دیرتر، که چشم
+       نمی‌بیند.
+
+       `requestIdleCallback` در سافاری نیست؛ `setTimeout` جایگزینِ
+       امن است و رفتار را عوض نمی‌کند. */
+    const idle: (cb: () => void) => void =
+      typeof (window as unknown as { requestIdleCallback?: unknown }).requestIdleCallback === 'function'
+        ? cb => (window as unknown as { requestIdleCallback: (c: () => void, o?: { timeout: number }) => void })
+            .requestIdleCallback(cb, { timeout: 300 })
+        : cb => { setTimeout(cb, 1) }
+
+    /* صف — گره‌های تکراری یک‌بار پردازش می‌شوند */
+    let queue: Node[] = []
+    let scheduled = false
+    const flush = () => {
+      scheduled = false
+      const batch = queue; queue = []
+      if (!batch.length) return
+      run(() => { for (const n of batch) walk(n) })
+    }
+    const schedule = (n: Node) => {
+      queue.push(n)
+      if (scheduled) return
+      scheduled = true
+      idle(flush)
+    }
+
+    /* پیمایشِ اول هم بی‌درنگ نیست — hydration اولویت دارد */
+    schedule(document.body)
 
     const obs = new MutationObserver(records => {
       if (writing) return
-      run(() => {
-        for (const r of records) {
-          if (r.type === 'characterData') fixNode(r.target as Text)
-          else r.addedNodes.forEach(walk)
-        }
-      })
+      for (const r of records) {
+        if (r.type === 'characterData') schedule(r.target)
+        else r.addedNodes.forEach(schedule)
+      }
     })
 
     obs.observe(document.body, {
       childList: true, subtree: true, characterData: true,
     })
 
-    return () => obs.disconnect()
+    return () => { obs.disconnect(); queue = [] }
   }, [])
 
   return null

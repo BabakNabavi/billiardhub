@@ -81,14 +81,30 @@ export function usePlacementState(key: PlacementKey, initial?: PlacementState): 
   const [state, setState] = useState<PlacementState>(
     initial ?? { status: 'loading', items: null, mode: null },
   )
+
+  /* ⚠️ وقتی سرور داده را رسانده، دوباره از مرورگر پرسیده نمی‌شود.
+     ─────────────────────────────────────────────────────────────
+     پیش‌تر این افکت **همیشه** اجرا می‌شد، حتی وقتی `initial` وجود
+     داشت. نتیجه‌اش سه چیز بود، همه پس از hydration:
+       ۱) یک رفت‌وبرگشتِ شبکه‌ی اضافه در بارگذاریِ اول
+       ۲) `setState` با همان داده ⇒ رندرِ دوباره‌ی سه سکشنِ بزرگِ
+          صفحه‌ی اصلی (محصولات ویژه، باشگاه‌های پیشنهادی، فروشگاه‌ها)
+       ۳) همان حسِ «عناصر ظاهر می‌شوند و دوباره جایگزین می‌شوند»
+
+     حالا فقط وقتی می‌پرسد که سرور چیزی نداده باشد. `initial` در همان
+     رندرِ سرور ساخته می‌شود و تازه است؛ بارِ بعدی که کاربر صفحه را
+     باز کند دوباره از سرور می‌آید. */
+  const seeded = initial != null && initial.status !== 'loading'
+
   useEffect(() => {
+    if (seeded) return
     let alive = true
     void loadPlacements().then(all => {
       if (!alive) return
       setState(toState(all[key]))
     })
     return () => { alive = false }
-  }, [key])
+  }, [key, seeded])
   return state
 }
 

@@ -13,6 +13,7 @@ import { uploadFile } from '../lib/supabase';
 import { fetchStories, postStory, sendDM, fetchSeen, markSeen, type SStory } from '../lib/social';
 import { listSellerProfiles } from '../lib/seller-store';
 import { useVisualViewport } from '../lib/useVisualViewport';
+import { sharedJson } from '../lib/shared-fetch';
 
 interface StoryItem {
   id: string;
@@ -530,13 +531,26 @@ export default function Stories() {
   // Fetch real clubs + sellers with active stories and prepend to groups
   useEffect(() => {
     const fetchAllStories = async () => {
+      /* همان دو مسیر را `HomeClient` هم می‌گیرد و هر دو در بارگذاریِ
+         اول اجرا می‌شوند — اندازه‌گیری هرکدام را دو بار نشان داد.
+         `sharedJson` یک درخواست می‌زند و به هر دو می‌دهد. */
       const [clubsRes, sellersRes] = await Promise.allSettled([
-        fetch('/api/clubs').then(r => r.json()).catch(() => []),
-        fetch('/api/sellers').then(r => r.json()).catch(() => []),
+        sharedJson<any[]>('/api/clubs'),
+        sharedJson<any[]>('/api/sellers'),
       ]);
 
-      const clubs: any[] = clubsRes.status === 'fulfilled' ? (clubsRes.value || []) : [];
+      const allClubs: any[] = clubsRes.status === 'fulfilled' ? (clubsRes.value || []) : [];
       const sellers: any[] = sellersRes.status === 'fulfilled' ? (sellersRes.value || []) : [];
+
+      /* ── آبشارِ N+1 ──
+         پیش‌تر برای *هر* باشگاه و *هر* فروشگاه یک درخواستِ استوری
+         جدا می‌رفت، حتی وقتی معلوم بود استوری ندارد. با ده باشگاه
+         یعنی ده درخواستِ اضافه در همان لحظه‌ی حساسِ بارگذاری.
+
+         خودِ رکوردِ باشگاه پرچمِ `hasActiveStory` دارد، پس فقط از
+         همان‌ها پرسیده می‌شود. فروشگاه چنین پرچمی ندارد و دست‌نخورده
+         می‌ماند تا رفتار عوض نشود. */
+      const clubs = allClubs.filter((c: any) => c?.hasActiveStory);
 
       const [clubResults, sellerResults] = await Promise.all([
         Promise.all(
