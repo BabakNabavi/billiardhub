@@ -24,6 +24,15 @@ const DAY = 24 * 60 * 60 * 1000
 
 /* role → Persian label + color for the story badge/ring */
 export const STORY_ROLES: Record<string, { label: string; color: string }> = {
+  /* ── حسابِ رسمیِ پلتفرم ──
+     تا امروز `admin` این‌جا نبود و در `ROLE_PRIORITY` هم نمی‌آمد، پس
+     استوریِ ادمین به نقشِ بعدی‌اش می‌افتاد و با برچسبِ اشتباه (مثلاً
+     «مربی») نشان داده می‌شد.
+
+     رنگِ سبز عمدی است: در نوارِ استوری، حلقه‌ی دورِ عکس از همین رنگ
+     می‌آید. حسابِ رسمی باید در یک نگاه از بقیه جدا باشد — همان
+     کاری که «دوستانِ نزدیک»ِ اینستاگرام با سبز می‌کند. */
+  admin:        { label: 'بیلیارد هاب', color: '#0E7A38' },
   coach:        { label: 'مربی',        color: '#a78bfa' },
   referee:      { label: 'داور',        color: '#0891b2' },
   club_owner:   { label: 'باشگاه',      color: '#C7A66A' },
@@ -34,7 +43,10 @@ export const STORY_ROLES: Record<string, { label: string; color: string }> = {
 }
 
 /* Order of preference when a user holds several roles. */
-const ROLE_PRIORITY = ['coach', 'referee', 'club_owner', 'seller', 'manufacturer', 'technician', 'player']
+/* `admin` اولِ فهرست است: حسابِ رسمی معمولاً نقش‌های دیگری هم دارد
+   (باشگاه‌دار، مربی…) و بدونِ این، استوریِ رسمی با برچسبِ آن نقش‌ها
+   بیرون می‌آمد. */
+const ROLE_PRIORITY = ['admin', 'coach', 'referee', 'club_owner', 'seller', 'manufacturer', 'technician', 'player']
 
 export function pickStoryRole(roles: string[]): { key: string; label: string; color: string } {
   const key = ROLE_PRIORITY.find(r => roles.includes(r)) ?? 'player'
@@ -45,6 +57,8 @@ export function pickStoryRole(roles: string[]): { key: string; label: string; co
 /* ── سقف روزانه‌ی استوری بر اساس نقش ──
    کاربر عادی (نقش user یا بدون نقش واجد شرایط) اصلاً نمی‌تواند استوری بگذارد. */
 export const STORY_DAILY_LIMIT: Record<string, number> = {
+  /* حسابِ رسمی سقف ندارد؛ اعلان‌های پلتفرم نباید به سهمیه بخورند */
+  admin: 99,
   player: 2,        // بازیکن رنکینگی
   coach: 2,
   referee: 1,

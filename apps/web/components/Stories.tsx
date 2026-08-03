@@ -489,7 +489,16 @@ export default function Stories() {
     } catch { return null; }
   };
 
-  const meName = () => `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کاربر';
+  /* ── نامِ نمایشیِ حسابِ رسمی ──
+     نامِ واقعیِ مالک در پنل و مدارک لازم است، ولی چیزی که بازدیدکننده
+     روی استوری می‌بیند باید نامِ برند باشد، نه نامِ شخص. این تنها جای
+     تفاوت است؛ همه‌جای دیگر همان نامِ واقعی می‌ماند. */
+  const BRAND_NAME = 'Billiard Hub';
+  const isOfficial = user?.primaryRole === 'admin'
+    || (user?.secondaryRoles ?? []).includes('admin');
+  const meName = () => (isOfficial
+    ? BRAND_NAME
+    : `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کاربر');
 
   const publishStory = async () => {
     if (!user || !storyImg || publishing) return;
