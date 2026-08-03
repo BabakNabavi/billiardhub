@@ -1038,6 +1038,18 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  /* منبعِ ویدیو بعد از آرام‌شدنِ مرورگر به DOM اضافه می‌شود، ولی
+     افزودنِ `<source>` به یک `<video>` که یک‌بار رندر شده هیچ
+     بارگذاری‌ای شروع نمی‌کند — مرورگر فقط موقعِ ساختِ عنصر منبع‌ها را
+     می‌خواند. بدونِ این فراخوانی، ویدیو هیچ‌وقت پخش نمی‌شد. */
+  useEffect(() => {
+    if (!spin) return;
+    const v = videoRef.current;
+    if (!v || v.currentSrc) return;
+    v.load();
+    /* بعضی مرورگرها پس از load دوباره خودکار پخش نمی‌کنند */
+    void v.play().catch(() => { /* سیاستِ پخشِ خودکار — پوستر می‌ماند */ });
+  }, [spin]);
 
   const next = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
   const prev = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
@@ -1877,7 +1889,17 @@ useEffect(() => {
             transform: `scale(${heroS})`, transformOrigin: 'center',
             willChange: scrollY > 0 && scrollY < 700 ? 'transform' : 'auto',
           }}>
-          <source src="/images/video/hero.mp4" type="video/mp4" />
+          {/* منبعِ ویدیو تا آرام‌شدنِ مرورگر گذاشته نمی‌شود.
+
+              `preload="metadata"` این‌جا کاری نمی‌کرد: `autoPlay` به
+              مرورگر می‌گوید پخش کن، و برای پخش باید همه‌اش را بگیرد.
+              اندازه‌گیری نشان داد کلِ فایل در همان پنجره‌ای می‌آمد که
+              مرورگر باید متن و تصویرِ LCP را می‌کشید.
+
+              پوستر همان تصویرِ اسلایدِ اول است و از قبل روی صفحه
+              نشسته، پس این یک ثانیه تأخیر چیزی را خالی نمی‌گذارد —
+              فقط ویدیو کمی دیرتر جانِ می‌گیرد. */}
+          {spin && <source src="/images/video/hero.mp4" type="video/mp4" />}
         </video>
 
         {/* ── Layer 2: wallpaper slides crossfading over video ── */}
@@ -1888,16 +1910,32 @@ useEffect(() => {
             transition: 'opacity 3.6s cubic-bezier(0.33,0,0.15,1)',
             pointerEvents: 'none',
           }}>
-            {/* اسلاید اول LCP است ⇒ اولویت صریح. بقیه تا نوبتشان
-                نرسد اصلاً درخواست نمی‌شوند (`lazy` روی عنصر نامرئی). */}
-            <img src={s.bg} alt=""
-              loading={i === 0 ? 'eager' : 'lazy'}
-              fetchPriority={i === 0 ? 'high' : 'low'}
-              decoding="async"
-              style={{ width: '100%', height: '100%', objectFit: 'cover',
-                filter: 'brightness(0.78) saturate(0.85) contrast(1.06) blur(1.5px)',
-                transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            {/* اسلاید اول LCP است ⇒ اولویت صریح.
+
+                بقیه تا آرام‌شدنِ مرورگر اصلاً در DOM نمی‌آیند.
+
+                تا امروز این‌جا `loading="lazy"` بود با این توضیح که
+                «تا نوبتشان نرسد درخواست نمی‌شوند» — ولی این‌طور نبود.
+                هر چهار قاب `position:absolute; inset:0` هستند، یعنی از
+                نظرِ مرورگر داخلِ کادرِ دید. `opacity:0` عنصر را از کادرِ
+                دید بیرون نمی‌برد، پس lazy هیچ چیزی را عقب نمی‌انداخت و
+                هر چهار عکس در همان بارگذاریِ اول می‌آمدند — اندازه‌گیریِ
+                وزنِ صفحه دقیقاً همین را نشان داد.
+
+                تنها چیزی که واقعاً درخواست را عقب می‌اندازد، نبودنِ
+                خودِ عنصر است. سه اسلایدِ بعدی بعد از بی‌کارشدنِ مرورگر
+                سوار می‌شوند — خیلی زودتر از نخستین چرخشِ کاروسل، پس
+                محوشدنِ تصویرها هیچ فرقی نمی‌کند. */}
+            {(i === 0 || spin || i === slide) && (
+              <img src={s.bg} alt=""
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchPriority={i === 0 ? 'high' : 'low'}
+                decoding="async"
+                style={{ width: '100%', height: '100%', objectFit: 'cover',
+                  filter: 'brightness(0.78) saturate(0.85) contrast(1.06) blur(1.5px)',
+                  transform: `scale(${heroS * 1.02})`, transformOrigin: 'center' }}
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            )}
           </div>
         ))}
 
