@@ -169,6 +169,21 @@ export default function AdminEventsPage() {
         </button>
       </div>
 
+      {/* ── هشدارِ «هنوز جایی نمایش داده نمی‌شود» ──
+          صفحه‌ی عمومیِ /events به /tournaments هدایت می‌شود (تصمیمِ
+          قبلی، چون محتوایش ساختگی بود). پس هرچه این‌جا ساخته شود در
+          جدولِ `events` می‌نشیند و هیچ صفحه‌ی عمومی آن را نمی‌خواند.
+          بدونِ این هشدار، ادمین رویداد می‌سازد، «ذخیره شد» می‌بیند و
+          هرگز نمی‌فهمد چرا در سایت پیدا نمی‌شود — همان الگویی که در
+          رنکینگ و اخبار اتفاق افتاد. */}
+      <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold leading-7"
+        style={{ background: 'rgba(199,166,106,0.10)', borderColor: 'rgba(199,166,106,0.34)', color: '#9A6E38' }}>
+        رویدادهایی که این‌جا می‌سازید فعلاً در سایت نمایش داده نمی‌شوند —
+        نشانی <span className="bh-latin">/events</span> به صفحه‌ی «مسابقات»
+        هدایت می‌شود. برای مسابقه‌ای که باید عمومی دیده شود، از
+        «مسابقات باشگاه‌ها» استفاده کنید.
+      </div>
+
       {err && (
         <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
           style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
