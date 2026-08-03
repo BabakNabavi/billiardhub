@@ -38,6 +38,100 @@ function makeSlug(raw: string, kind: string): string {
   return s ? `${s}-${rand}` : `${kind}-${rand}`
 }
 
+/* ── پرکردنِ فیلدهای اجباریِ هر نوع ──
+
+   هر صفحه‌ی عمومی رکورد را با تابعِ نگاشتِ خودش به کارت تبدیل می‌کند و
+   آن توابع روی فیلدهایشان مستقیم متد صدا می‌زنند: `p.ranking.replace`,
+   `p.products.length`, `p.phones.filter`… اگر فیلدی نباشد، همان‌جا
+   خطا می‌دهد و کلِ فهرست خالی می‌ماند — بی‌سروصدا، چون در `.catch`
+   بلعیده می‌شود.
+
+   این‌جا شکلِ کامل ساخته می‌شود تا هر ردیفِ نمایشی، از هر مسیری که
+   ساخته شود، حتماً روی صفحه بنشیند. نامِ نمایشی هم برای هر نوع در
+   فیلدِ درستش تکرار می‌شود (فروشگاه `title` می‌خواهد، بقیه `name`). */
+function withDefaults(kind: ProfileKind, d: Record<string, unknown>): Record<string, unknown> {
+  const s = (v: unknown, fb = '') => (typeof v === 'string' && v.trim() ? v : fb)
+  const arr = (v: unknown) => (Array.isArray(v) ? v : [])
+  const name = s(d.name) || `${s(d.firstNameFa)} ${s(d.lastNameFa)}`.trim() || 'بدون نام'
+  const city = s(d.city, '—')
+  const intro = s(d.shortBio) || s(d.intro) || s(d.description)
+  const photo = s(d.photo) || s(d.logo) || s(d.image)
+
+  const common = {
+    ...d, name, city,
+    province: s(d.province), photo,
+    shortBio: intro, fullBio: s(d.fullBio, intro), description: intro, intro,
+    phone: s(d.phone), whatsapp: s(d.whatsapp),
+    instagram: s(d.instagram), telegram: s(d.telegram),
+    gallery: arr(d.gallery), videos: arr(d.videos),
+    status: 'approved', verified: false,
+    submittedAt: s(d.submittedAt, new Date().toISOString()),
+  }
+
+  switch (kind) {
+    case 'coach':
+    case 'referee':
+      return {
+        ...common,
+        firstNameFa: s(d.firstNameFa, name), lastNameFa: s(d.lastNameFa),
+        firstNameEn: s(d.firstNameEn), lastNameEn: s(d.lastNameEn),
+        disciplines: arr(d.disciplines).length ? arr(d.disciplines) : ['snooker'],
+        grades: arr(d.grades), certificate: null, coverImage: s(d.coverImage),
+        freeCoach: kind === 'coach',
+      }
+
+    case 'seller':
+      /* کارتِ فروشگاه نام را از `title` می‌خواند، نه `name` */
+      return {
+        ...common, title: s(d.title, name),
+        desc: intro, contactPhone: s(d.contactPhone) || s(d.phone),
+        phones: arr(d.phones), brands: arr(d.brands),
+        storyImage: s(d.storyImage) || photo,
+      }
+
+    case 'manufacturer':
+      return {
+        ...common,
+        sinceYear: s(d.sinceYear, '۱۴۰۴'),
+        products: arr(d.products), specialties: arr(d.specialties),
+        bannerImage: s(d.bannerImage) || photo,
+        tagline: s(d.tagline, intro),
+      }
+
+    case 'technician':
+      return {
+        ...common,
+        title: s(d.title, 'خدمات فنی بیلیارد'),
+        coverage: arr(d.coverage).length ? arr(d.coverage) : [city].filter(x => x !== '—'),
+        about: arr(d.about).length ? arr(d.about) : [intro].filter(Boolean),
+        services: arr(d.services), projects: arr(d.projects), albums: arr(d.albums),
+        club: s(d.club),
+      }
+
+    case 'player':
+      return {
+        ...common,
+        nameEn: s(d.nameEn, 'PLAYER'),
+        discipline: s(d.discipline, 'snooker'),
+        disciplines: arr(d.disciplines),
+        country: s(d.country, 'ایران'),
+        /* رشته است، نه عدد — نگاشت روی آن `replace` صدا می‌زند */
+        ranking: s(d.ranking),
+        national: d.national === true, youth: d.youth === true,
+        gender: d.gender === 'f' ? 'f' : 'm',
+        clubName: s(d.clubName), tone: s(d.tone, 'felt'),
+        scene: s(d.scene) || photo,
+        bio: arr(d.bio).length ? arr(d.bio) : [intro].filter(Boolean),
+        careerStart: s(d.careerStart, '—'),
+        highlights: arr(d.highlights), tournaments: arr(d.tournaments),
+        albums: arr(d.albums), tags: arr(d.tags),
+      }
+
+    default:
+      return common
+  }
+}
+
 async function guard(req: NextRequest) {
   const actor = actorFromRequest(req)
   if (!actor) return { err: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) }
@@ -77,9 +171,10 @@ export async function POST(req: NextRequest) {
       kind: b.kind,
       ownerId: g.actor!.id,
       slug,
-      /* `verified` اگر از کلاینت آمده باشد این‌جا دور ریخته می‌شود؛
-         مقدارِ ستون را `createDemoProfile` خودش false می‌گذارد. */
-      data: { ...data, slug, verified: false, status: 'approved' },
+      /* `verified` اگر از کلاینت آمده باشد در `withDefaults` دور ریخته
+         می‌شود؛ مقدارِ ستون را هم `createDemoProfile` خودش false
+         می‌گذارد. یعنی دو لایه، چون این یکی جای اشتباه ندارد. */
+      data: { ...withDefaults(b.kind, data), slug },
     })
 
     void audit({

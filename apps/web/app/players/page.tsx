@@ -15,7 +15,8 @@ import {
   PLAYERS, DISCIPLINE_LABEL, TONES, faDigits,
   type Player,
 } from '../../lib/players-data'
-import { listApprovedPlayers, profileToPlayer } from '../../lib/player-store'
+import { listApprovedPlayers, profileToPlayer, type PlayerProfile } from '../../lib/player-store'
+import { fetchProfiles } from '../../lib/profiles/client'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -88,7 +89,18 @@ export default function PlayersPage() {
 
   /* بازیکنان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Player[]>([])
-  useEffect(() => { setRegistered(listApprovedPlayers().map(profileToPlayer)) }, [])
+
+  /* اول حافظه‌ی همین مرورگر (فوری)، بعد فهرستِ سرور — وگرنه بازیکنی
+     که ثبت می‌شود فقط روی همان دستگاه دیده می‌شود. */
+  useEffect(() => {
+    setRegistered(listApprovedPlayers().map(profileToPlayer))
+    void fetchProfiles<PlayerProfile>('player').then(rows => {
+      const remote = rows
+        .filter(r => r.status === 'approved')
+        .map(r => profileToPlayer({ ...r.data, slug: r.slug } as PlayerProfile))
+      if (remote.length) setRegistered(remote)
+    }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
+  }, [])
 
   const ALL = useMemo(() => {
     const staticOnly = PLAYERS.filter(p => !registered.some(r => r.id === p.id))

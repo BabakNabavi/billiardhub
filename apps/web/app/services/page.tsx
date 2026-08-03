@@ -14,7 +14,8 @@ import {
   TECHNICIANS, TECH_SERVICES, faDigits,
   type Technician, type TechService,
 } from '../../lib/technicians-data'
-import { listApprovedTechnicians, profileToTechnician } from '../../lib/technician-store'
+import { listApprovedTechnicians, profileToTechnician, type TechnicianProfile } from '../../lib/technician-store'
+import { fetchProfiles } from '../../lib/profiles/client'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -79,7 +80,21 @@ export default function ServicesPage() {
 
   /* متخصصان ثبت‌نامی (پنل ⇒ localStorage) بعد از mount خوانده و اول لیست می‌نشینند */
   const [registered, setRegistered] = useState<Technician[]>([])
-  useEffect(() => { setRegistered(listApprovedTechnicians().map(profileToTechnician)) }, [])
+
+  /* اول حافظه‌ی همین مرورگر (فوری)، بعد فهرستِ سرور.
+
+     تا امروز فقط لایه‌ی اول بود، یعنی متخصصی که ثبت می‌شد تنها روی
+     همان دستگاه دیده می‌شد و این صفحه برای هر بازدیدکننده‌ی دیگری
+     خالی بود. همان ایرادی که در صفحه‌های مربیان و داوران هم بود. */
+  useEffect(() => {
+    setRegistered(listApprovedTechnicians().map(profileToTechnician))
+    void fetchProfiles<TechnicianProfile>('technician').then(rows => {
+      const remote = rows
+        .filter(r => r.status === 'approved')
+        .map(r => profileToTechnician({ ...r.data, slug: r.slug } as TechnicianProfile))
+      if (remote.length) setRegistered(remote)
+    }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
+  }, [])
 
   const ALL = useMemo(() => {
     const staticOnly = TECHNICIANS.filter(t => !registered.some(r => r.id === t.id))
