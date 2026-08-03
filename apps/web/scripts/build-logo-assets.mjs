@@ -71,38 +71,26 @@ async function keyWhite(src) {
   return sharp(out, { raw: { width, height, channels: 4 } }).png().toBuffer()
 }
 
-/* لوگوی بریده‌شده از حاشیه — تا در اندازه‌های کوچک ریز به نظر نرسد */
+/* لوگوی بریده‌شده از حاشیه — فقط برای لوگوی سربرگ.
+   آن‌جا لوگو با «ارتفاع» روی کارت جا می‌گیرد و حاشیه‌ی شفاف فقط
+   کوچکش می‌کند. */
 const trimmed = async src => sharp(await keyWhite(src)).trim({ threshold: 1 }).png().toBuffer()
 
-/* مربعِ اندازه‌ی size با حاشیه‌ی padPct درصد.
-   bg = null یعنی شفاف بماند.
+/* ── چرا بقیه بریده نمی‌شوند ──
+   فایلِ اصلی حاشیه‌ی سفیدِ عمدی دارد؛ همان «فضای تنفسِ» استانداردِ
+   لوگوست و بخشی از طراحی است، نه فضای هدررفته.
 
-   ⚠️ دو تله‌ی sharp که هر دو در نسخه‌ی اول این تابع را خراب کرده بودند:
+   نسخه‌ی قبلی این حاشیه را می‌بُرید و بعد خودش ۸٪ می‌گذاشت — نتیجه
+   این شد که لوگو در قابِ مربعِ نوارِ بالا لب‌به‌لب می‌نشست و بدترکیب
+   می‌شد. حالا تصویر همان‌طور که هست فقط اندازه عوض می‌کند، پس نسبتِ
+   لوگو به قاب دقیقاً همانی می‌ماند که طراح خواسته. */
+const square = async (size, bg) =>
+  sharp(await sharp(await keyWhite(SRC)).resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer())
+    .flatten({ background: bg }).png().toBuffer()
 
-   ۱) sharp ترتیبِ عملیات را خودش تعیین می‌کند و `resize` را همیشه پیش
-      از `extend` اجرا می‌کند — هرچند در زنجیره بعدش نوشته شود. پس
-      `.extend(...).resize(size)` اول تصویر را بزرگ می‌کرد و بعد حاشیه
-      را روی همان می‌گذاشت، و خروجی از اندازه‌ی خواسته‌شده بزرگ‌تر
-      درمی‌آمد (۳۰۷ به‌جای ۲۵۶). پس این‌جا هر مرحله جدا انجام می‌شود.
-
-   ۲) پس‌زمینه‌ی `extend` فقط حاشیه را پر می‌کند، نه درونِ تصویر را.
-      خودِ لوگو شفاف است، پس آیکون همچنان شفاف می‌ماند — و iOS پشتِ
-      شفافیت را سیاه می‌کند. `flatten` لازم است، نه `extend` تنها. */
-async function square(logo, size, padPct, bg) {
-  const inner = Math.round(size * (1 - 2 * padPct))
-  const fitted = await sharp(logo)
-    .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .toBuffer()
-
-  const pad = Math.floor((size - inner) / 2)
-  let img = sharp(fitted).extend({
-    top: pad, bottom: size - inner - pad, left: pad, right: size - inner - pad,
-    background: { r: 0, g: 0, b: 0, alpha: 0 },
-  })
-
-  if (bg) img = sharp(await img.png().toBuffer()).flatten({ background: bg })
-  return img.png().toBuffer()
-}
+/* ⚠️ `flatten` لازم است و `extend` کافی نیست: پس‌زمینه‌ی `extend` فقط
+   حاشیه را پر می‌کند نه درونِ تصویر را، و چون خودِ لوگو شفاف شده،
+   آیکون شفاف می‌ماند — و iOS پشتِ شفافیت را سیاه می‌کند. */
 
 /* رمزگذارِ ICO — sharp این قالب را نمی‌نویسد.
    ICO می‌تواند PNG را مستقیم در خود جا دهد و همه‌ی مرورگرهای امروزی
@@ -137,28 +125,32 @@ const put = (rel, buf) => {
 const full = await trimmed(SRC)
 
 /* ── نشانِ مربع — نوارِ بالا، فوتر، صفحه‌ی درباره ──
-   کاشیِ سفید، چون در قابِ گردِ سایه‌دارِ نوارِ بالا می‌نشیند. */
-const m256 = await square(full, 256, 0.08, WHITE)
+   کاشیِ سفید، چون در قابِ گردِ سایه‌دارِ نوارِ بالا می‌نشیند.
+   حاشیه از خودِ فایل می‌آید، نه از این‌جا. */
+const m256 = await square(256, WHITE)
 put(`${DIR}/bh-mark-256-v4.png`, await sharp(m256).png({ quality: 92 }).toBuffer())
 put(`${DIR}/bh-mark-256-v4.webp`, await sharp(m256).webp({ quality: 92 }).toBuffer())
 
-/* ── فاوآیکون ── حاشیه‌ی کم تا در کوچک‌ترین اندازه هم بیشترین
-   فضای ممکن به لوگو برسد */
+/* ── فاوآیکون ── */
 for (const s of [16, 32, 96]) {
-  put(`${DIR}/bh-favicon-${s}-v4.png`, await sharp(await square(full, s, 0.03, WHITE)).png().toBuffer())
+  put(`${DIR}/bh-favicon-${s}-v4.png`, await sharp(await square(s, WHITE)).png().toBuffer())
 }
 
 /* ── آیکونِ اپ ── اپل و اندروید شفاف را سیاه پر می‌کنند، پس سفید */
-put(`${DIR}/bh-apple-180-v4.png`, await sharp(await square(full, 180, 0.08, WHITE)).png().toBuffer())
-put(`${DIR}/bh-icon-192-v4.png`, await sharp(await square(full, 192, 0.08, WHITE)).png().toBuffer())
-/* ۵۱۲ هم به‌عنوان maskable استفاده می‌شود: اندروید تا ۲۰٪ از هر طرف
-   را می‌برد، پس حاشیه‌ی بیشتری لازم دارد وگرنه لوگو بریده می‌شود. */
-put(`${DIR}/bh-icon-512-v4.png`, await sharp(await square(full, 512, 0.18, WHITE)).png().toBuffer())
+put(`${DIR}/bh-apple-180-v4.png`, await sharp(await square(180, WHITE)).png().toBuffer())
+put(`${DIR}/bh-icon-192-v4.png`, await sharp(await square(192, WHITE)).png().toBuffer())
+/* ۵۱۲ به‌عنوان maskable هم استفاده می‌شود و اندروید تا ۲۰٪ از هر طرف
+   را می‌بُرد. حاشیه‌ی خودِ فایل همان نقش را بازی می‌کند، پس چیزی
+   اضافه نمی‌شود — افزودنِ حاشیه‌ی دوم لوگو را بی‌دلیل ریز می‌کرد. */
+put(`${DIR}/bh-icon-512-v4.png`, await sharp(await square(512, WHITE)).png().toBuffer())
 
 /* ── لوگوی سربرگ ── تنها فایلِ شفاف: روی کارتِ سرمه‌ای می‌نشیند */
 put(`${DIR}/bh-header-v4.png`, await sharp(full).resize({ height: 200, fit: 'inside' }).png().toBuffer())
 
-/* ── تصویرِ اشتراک‌گذاری ── ۱۲۰۰×۶۳۰، استانداردِ شبکه‌های اجتماعی */
+/* ── تصویرِ اشتراک‌گذاری ── ۱۲۰۰×۶۳۰، استانداردِ شبکه‌های اجتماعی.
+   این‌جا از نسخه‌ی بریده استفاده می‌شود چون بومِ ۱۲۰۰×۶۳۰ خودش فضای
+   اطراف را می‌سازد؛ حاشیه‌ی خودِ فایل روی آن، حاشیه‌ی دوم می‌شد و
+   لوگو وسطِ یک تصویرِ بزرگ ریز می‌افتاد. */
 const ogInner = await sharp(full).resize({ height: 400, fit: 'inside' }).toBuffer()
 const ogMeta = await sharp(ogInner).metadata()
 put(`${DIR}/bh-og-v4.png`, await sharp({
@@ -176,7 +168,7 @@ put(`${DIR}/bh-og-v4.png`, await sharp({
    مات است — فقط کانالِ چهارم پر از ۲۵۵ اضافه می‌شود. */
 const ico = []
 for (const s of [16, 32, 48, 64, 128, 256]) {
-  ico.push({ size: s, buf: await sharp(await square(full, s, 0.03, WHITE)).ensureAlpha().png().toBuffer() })
+  ico.push({ size: s, buf: await sharp(await square(s, WHITE)).ensureAlpha().png().toBuffer() })
 }
 put('app/favicon.ico', buildIco(ico))
 
