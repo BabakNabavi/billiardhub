@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
 import { listCoachProfiles, type CoachProfile } from '@/lib/coach-store'
+import { fetchProfiles } from '@/lib/profiles/client'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -312,8 +313,27 @@ export default function CoachesPage() {
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [openStory, setOpenStory] = useState<Coach | null>(null)
   const [localCoaches, setLocalCoaches] = useState<Coach[]>([])
+
+  /* ── چرا این‌جا هم از سرور خوانده می‌شود ──
+
+     تا امروز این فهرست *فقط* از localStorage می‌آمد. یعنی مربی‌ای که
+     ثبت می‌شد، تنها روی همان مرورگر دیده می‌شد و برای هر بازدیدکننده‌ی
+     دیگری صفحه‌ی مربیان کاملاً خالی بود — چیزی که از داخلِ همان دستگاه
+     هرگز به چشم نمی‌آمد.
+
+     پروفایل‌ها از قبل سمتِ سرور ذخیره می‌شدند؛ فقط این صفحه آن‌ها را
+     نمی‌خواند. صفحه‌های فروشندگان و تولیدکنندگان همین الگو را دارند.
+
+     ترتیب عمدی است: اول حافظه‌ی همین مرورگر (فوری، بدونِ انتظارِ شبکه)
+     و بعد فهرستِ سرور که جای آن را می‌گیرد. */
   useEffect(() => {
     setLocalCoaches(listCoachProfiles().filter(p => p.status === 'approved').map(mapProfileToListCoach))
+    void fetchProfiles<CoachProfile>('coach').then(rows => {
+      const remote = rows
+        .filter(r => r.status === 'approved')
+        .map(r => mapProfileToListCoach({ ...r.data, slug: r.slug, verified: r.verified } as CoachProfile))
+      if (remote.length) setLocalCoaches(remote)
+    }).catch(() => { /* شبکه قطع بود ⇒ همان فهرستِ محلی می‌ماند */ })
   }, [])
   const q = search.trim()
   const coaches = [...localCoaches, ...COACHES].filter(c =>

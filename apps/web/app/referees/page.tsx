@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ClubStoryModal from '@/components/ClubStoryModal'
 import { listRefereeProfiles, badgeFromGrades, type RefereeProfile } from '../../lib/referee-store'
+import { fetchProfiles } from '../../lib/profiles/client'
 
 /* ─── Tokens ─── */
 const GOLD    = '#C7A66A'
@@ -325,8 +326,18 @@ export default function RefereesPage() {
   const [view,      setView]      = useState<'grid' | 'list'>('grid')
   const [openStory, setOpenStory] = useState<Referee | null>(null)
   const [localRefs, setLocalRefs] = useState<Referee[]>([])
+
+  /* همان ایرادِ صفحه‌ی مربیان: این فهرست فقط از localStorage می‌آمد،
+     پس داوری که ثبت می‌شد برای هیچ بازدیدکننده‌ی دیگری دیده نمی‌شد.
+     اول حافظه‌ی همین مرورگر، بعد فهرستِ سرور. */
   useEffect(() => {
     setLocalRefs(listRefereeProfiles().filter(p => p.status === 'approved').map(mapProfileToListReferee))
+    void fetchProfiles<RefereeProfile>('referee').then(rows => {
+      const remote = rows
+        .filter(r => r.status === 'approved')
+        .map(r => mapProfileToListReferee({ ...r.data, slug: r.slug, verified: r.verified } as RefereeProfile))
+      if (remote.length) setLocalRefs(remote)
+    }).catch(() => { /* شبکه قطع بود ⇒ فهرستِ محلی می‌ماند */ })
   }, [])
   const q = search.trim()
   const referees = [...localRefs, ...REFEREES].filter(r =>
