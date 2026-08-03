@@ -228,3 +228,65 @@ export async function reviewProfile(id: string, patch: {
   if (error || !data) return null
   return toProfile(data as DbRow)
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   محتوای نمایشیِ ادمین
+
+   ── چرا مسیرِ جدا ──
+   `saveProfile` عمداً «یکی به‌ازای هر مالک» است: اول با
+   `getProfileByOwner` می‌گردد و اگر چیزی بود همان را به‌روز می‌کند.
+   این برای کاربرِ واقعی درست است — یک شخص یک مربی است — ولی یعنی
+   ادمین هم از حسابِ خودش بیش از یکی نمی‌تواند بسازد.
+
+   این تابع هرگز جست‌وجو نمی‌کند و همیشه ردیفِ تازه می‌سازد. ایندکسِ
+   یکتایی هم در مهاجرت ۰۴۶ جزئی شد (`WHERE is_demo = false`)، پس
+   کاربرِ عادی همچنان یکی می‌ماند و این ردیف‌ها آزادند.
+
+   ── دو چیز که این‌جا قابلِ‌مذاکره نیست ──
+   ۱) `verified` همیشه false. تیکِ آبی یعنی هویت استعلام شده؛ روی
+      موجودیتی که وجودِ خارجی ندارد این ادعا دروغ است.
+   ۲) `is_demo` همیشه true. بدونِ آن، این ردیف‌ها بعداً از داده‌ی
+      واقعی قابلِ تفکیک نیستند و پاک‌کردنشان به حدس‌زدن می‌افتد.
+   ═══════════════════════════════════════════════════════════════ */
+
+export interface DemoInput {
+  kind: ProfileKind
+  ownerId: string
+  slug: string
+  data: Record<string, unknown>
+}
+
+export async function createDemoProfile(input: DemoInput): Promise<ProfileRow> {
+  const clean = await offloadImages(input.data, `profiles/demo/${input.kind}`) as Record<string, unknown>
+
+  const { data, error } = await sb().from('profiles').insert({
+    kind: input.kind,
+    slug: input.slug,
+    owner_id: input.ownerId,
+    data: clean,
+    /* منتشرشده — کارِ این ردیف‌ها دقیقاً دیده‌شدن است */
+    status: 'approved',
+    verified: false,
+    is_demo: true,
+    updated_at: new Date().toISOString(),
+  }).select().single()
+
+  if (error) throw new Error(error.message)
+  return toProfile(data as DbRow)
+}
+
+export async function listDemoProfiles(kind?: ProfileKind): Promise<ProfileRow[]> {
+  let q = sb().from('profiles').select('*').eq('is_demo', true)
+  if (kind) q = q.eq('kind', kind)
+  const { data, error } = await q.order('created_at', { ascending: false })
+  if (error) return []
+  return (data as DbRow[]).map(toProfile)
+}
+
+/** حذفِ یک ردیفِ نمایشی. شرطِ `is_demo` عمدی است: حتی اگر شناسه‌ی
+    اشتباهی بیاید، پروفایلِ یک کاربرِ واقعی از این مسیر پاک نمی‌شود. */
+export async function deleteDemoProfile(id: string): Promise<boolean> {
+  const { error, count } = await sb().from('profiles')
+    .delete({ count: 'exact' }).eq('id', id).eq('is_demo', true)
+  return !error && (count ?? 0) > 0
+}
