@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* مدیریتِ نرخِ کمیسیون — فقط ادمین.
 
@@ -23,7 +24,7 @@ const TYPES = new Set(['PERCENTAGE', 'FIXED_AMOUNT']);
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'finance'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
 /* تنظیمِ نرخ. بدنه: { context, scope, clubId?, type, value } */
 export async function PUT(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'finance'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -125,7 +126,7 @@ export async function PUT(req: NextRequest) {
    نرخِ سراسری حذف نمی‌شود؛ بدونِ آن کمیسیون صفر می‌شد. */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'finance'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

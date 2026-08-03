@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* فهرستِ کاربران برای پنلِ ادمین.
 
@@ -27,7 +28,7 @@ const VERIFICATION = new Set(['unverified', 'pending', 'verified', 'rejected']);
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) {
+  if (!(await can(actor.id, 'users'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) {
+  if (!(await can(actor.id, 'users'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

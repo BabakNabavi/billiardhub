@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* تیکت‌های پشتیبانی برای ادمین — خواندن و رسیدگی.
 
@@ -19,7 +20,7 @@ interface Ticket {
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'support'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
    بدنه: { id, status?, adminNote?, unlock?: 'postal' | 'bank' } */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'support'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

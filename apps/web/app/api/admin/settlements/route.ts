@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import { getSettlementProvider } from '@/lib/settlement';
 import { notifySettlementPaid } from '@/lib/notify';
 
@@ -11,7 +12,7 @@ import { notifySettlementPaid } from '@/lib/notify';
    POST { action:'complete', id, reference }    → نهایی‌سازی با شماره‌ی پیگیری */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!actor || !(await can(actor.id, 'finance'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const b = await req.json().catch(() => ({}));
   const provider = getSettlementProvider();

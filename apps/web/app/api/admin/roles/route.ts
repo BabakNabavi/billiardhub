@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* بررسیِ درخواست‌های نقش توسطِ ادمین.
 
@@ -24,7 +25,7 @@ const GRANTABLE = new Set([
 async function guard(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return { err: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) };
-  if (!(await isAdmin(actor.id))) {
+  if (!(await can(actor.id, 'roles'))) {
     return { err: NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 }) };
   }
   return { actor };

@@ -120,6 +120,25 @@ export default function AdminPage() {
   const { user, _hydrated } = useAuthStore();
   const [stats, setStats] = useState<Record<string, number> | null>(null);
 
+  /* ── دسترسی‌های تفکیک‌شده ──
+     `null` یعنی هنوز نمی‌دانیم؛ تا آن لحظه هیچ کارتی نشان داده
+     نمی‌شود تا ادمینِ محدود یک‌لحظه کارت‌هایی را نبیند که بعد
+     ناپدید می‌شوند. `['*']` یعنی سوپرادمین. */
+  const [perms, setPerms] = useState<string[] | null>(null);
+  useEffect(() => {
+    void apiFetch('/api/admin/permissions', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => setPerms(j?.permissions ?? []))
+      /* اگر مسیر در دسترس نبود، رفتارِ قبلی: همه‌چیز دیده شود */
+      .catch(() => setPerms(['*']));
+  }, []);
+  /* لینکِ هر کارت `/admin/<کلید>` است، پس کلید مستقیم از آن درمی‌آید */
+  const allowed = (link: string) => {
+    if (!perms) return false;
+    if (perms.includes('*')) return true;
+    return perms.includes(link.replace('/admin/', ''));
+  };
+
   /* شمارش واقعی ردیف‌ها؛ تا رسیدنش «—» نشان داده می‌شود */
   useEffect(() => {
     void apiFetch('/api/admin/stats', { cache: 'no-store' })
@@ -177,9 +196,10 @@ export default function AdminPage() {
           </span>
         </div>
 
-        {/* آمار سریع */}
+        {/* آمار سریع — هر کارت به صفحه‌ای می‌رود، پس همان دسترسی را
+            می‌خواهد. نشان‌دادنِ عددی که با کلیک ۴۰۳ می‌دهد بی‌فایده است. */}
         <div className="ad-stats" style={{ marginBottom: 28 }}>
-          {STAT_CARDS.map((s, i) => (
+          {STAT_CARDS.filter(s => allowed(s.link)).map((s, i) => (
             <Link key={s.key} href={s.link} className="ad-stat" style={{ animation: `adUp .4s ${i * 40}ms ease both` }}>
               <div style={{ fontSize: 20, fontWeight: 900, color: GOLD_D, fontVariantNumeric: 'tabular-nums' }}>
                 {stats ? (stats[s.key] ?? 0).toLocaleString('fa-IR') : '—'}
@@ -189,8 +209,12 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* بخش‌ها */}
-        {SECTIONS.map((sec, si) => (
+        {/* بخش‌ها — فقط آن‌هایی که این ادمین دسترسی دارد.
+            بخشی که هیچ کارتِ مجازی ندارد اصلاً عنوانش هم نمی‌آید،
+            وگرنه ادمینِ محدود ردیفِ عنوانِ خالی می‌دید. */}
+        {SECTIONS.map(sec => ({ ...sec, items: sec.items.filter(i => !i.link || allowed(i.link)) }))
+          .filter(sec => sec.items.length > 0)
+          .map((sec, si) => (
           <section key={sec.en} style={{ marginBottom: 26 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />

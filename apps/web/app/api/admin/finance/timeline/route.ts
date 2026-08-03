@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* داستانِ کاملِ یک تراکنش — از پرداخت تا تسویه.
        /api/admin/finance/timeline?booking=<id>
@@ -15,7 +16,7 @@ interface Ev { at: string; kind: string; label: string; amount?: number; meta?: 
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'finance'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

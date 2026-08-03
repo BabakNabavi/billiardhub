@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* مسابقاتِ باشگاه‌ها برای ادمین.
 
@@ -20,7 +21,7 @@ const FORMATS = new Set(['bo3', 'bo5', 'bo7', 'bo9', 'bo11']);
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'tournaments'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -81,7 +82,7 @@ export async function GET(req: NextRequest) {
    بدنه: { clubId, title, entryFee, maxPlayers, startsAt?, discipline?, status? } */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'tournaments'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
    در آن حالت راهِ درست «لغو» است که سابقه را نگه می‌دارد. */
 export async function DELETE(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'tournaments'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 
@@ -200,7 +201,7 @@ export async function DELETE(req: NextRequest) {
    درست کند؛ ولی هر تغییر در ممیزی ثبت می‌شود. */
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
+  if (!actor || !(await can(actor.id, 'tournaments'))) {
     return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
   }
 

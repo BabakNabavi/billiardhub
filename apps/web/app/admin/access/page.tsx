@@ -6,7 +6,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../lib/http'
-import { ShieldCheck, Loader2, Search, UserPlus, UserMinus, AlertCircle } from 'lucide-react'
+import PermissionsDialog, { type PermGroup } from '../../../components/admin/PermissionsDialog'
+import { ShieldCheck, Loader2, Search, UserPlus, UserMinus, AlertCircle, SlidersHorizontal, Crown } from 'lucide-react'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38'
@@ -36,6 +37,13 @@ export default function AdminAccess() {
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
+  /* دسترسی‌های تفکیک‌شده — از /api/admin/permissions می‌آید و کنارِ
+     فهرستِ ادمین‌ها می‌نشیند. `perm[userId]` فهرستِ کلیدهاست؛
+     `['*']` یعنی سوپرادمین. */
+  const [groups, setGroups] = useState<PermGroup[]>([])
+  const [perm, setPerm] = useState<Record<string, string[]>>({})
+  const [editing, setEditing] = useState<U | null>(null)
+
   const load = useCallback(async (query = '') => {
     setLoading(true)
     try {
@@ -43,6 +51,16 @@ export default function AdminAccess() {
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setMsg({ ok: false, text: j?.message ?? 'دسترسی مجاز نیست' }); return }
       setAdmins(j.admins ?? []); setResults(j.results ?? []); setMe(j.me ?? '')
+
+      /* دسترسی‌ها جدا خوانده می‌شوند تا اگر مهاجرت هنوز اجرا نشده
+         باشد، فهرستِ ادمین‌ها همچنان کار کند و فقط بخشِ تیک‌ها غایب
+         بماند — نه اینکه کلِ صفحه بشکند. */
+      const p = await apiFetch('/api/admin/permissions?all=1', { cache: 'no-store' })
+      if (p.ok) {
+        const pj = await p.json().catch(() => ({}))
+        setGroups(pj.groups ?? [])
+        setPerm(Object.fromEntries((pj.admins ?? []).map((a: { id: string; permissions: string[] }) => [a.id, a.permissions ?? []])))
+      }
     } catch { setMsg({ ok: false, text: 'خطا در ارتباط با سرور' }) }
     finally { setLoading(false) }
   }, [])
@@ -167,16 +185,40 @@ export default function AdminAccess() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: SEC, fontSize: 13, padding: 16 }}>
           <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> در حال بارگذاری…
         </div>
-      ) : admins.map(u => (
+      ) : admins.map(u => {
+        const p = perm[u.id] ?? []
+        const isSuper = p.includes('*')
+        const total = groups.reduce((n, g) => n + g.items.length, 0)
+        return (
         <div key={u.id} style={{ ...card, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <ShieldCheck size={16} style={{ color: GOLD_D, flexShrink: 0 }} />
+          {isSuper
+            ? <Crown size={16} style={{ color: GOLD_D, flexShrink: 0 }} />
+            : <ShieldCheck size={16} style={{ color: GOLD_D, flexShrink: 0 }} />}
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: INK }}>
               {name(u)}
               {u.id === me && <span style={{ fontSize: 11, color: MUT, fontWeight: 600 }}> — شما</span>}
             </div>
-            <div style={{ fontSize: 12, color: SEC, marginTop: 3 }}>{faNum(u.phone)}</div>
+            <div style={{ fontSize: 12, color: SEC, marginTop: 3 }}>
+              {faNum(u.phone)}
+              {groups.length > 0 && (
+                <span style={{ marginInlineStart: 8, color: isSuper ? GOLD_D : MUT, fontWeight: 700 }}>
+                  · {isSuper ? 'سوپرادمین — دسترسیِ کامل' : `${faNum(p.length)} از ${faNum(total)} بخش`}
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* تنظیمِ دسترسی — سوپرادمین از این‌جا تغییر نمی‌کند */}
+          {groups.length > 0 && !isSuper && (
+            <button onClick={() => setEditing(u)} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '7px 13px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+              fontFamily: 'inherit', cursor: 'pointer',
+              border: '1px solid rgba(199,166,106,0.42)', background: 'rgba(199,166,106,0.12)', color: GOLD_D,
+            }}><SlidersHorizontal size={12} /> دسترسی‌ها</button>
+          )}
+
           {u.id !== me && admins.length > 1 && (
             <button disabled={busy === u.id} onClick={() => void toggle(u, false)} style={{
               display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -186,7 +228,20 @@ export default function AdminAccess() {
             }}><UserMinus size={12} /> برداشتن</button>
           )}
         </div>
-      ))}
+        )
+      })}
+
+      {editing && (
+        <PermissionsDialog
+          user={{ id: editing.id, name: name(editing), phone: faNum(editing.phone), permissions: perm[editing.id] ?? [] }}
+          groups={groups}
+          onClose={() => setEditing(null)}
+          onSaved={keys => {
+            setPerm(m => ({ ...m, [editing.id]: keys }))
+            setMsg({ ok: true, text: `دسترسی‌های ${name(editing)} ذخیره شد — ${faNum(keys.length)} بخش` })
+          }}
+        />
+      )}
 
       {!loading && admins.length === 1 && (
         <div style={{

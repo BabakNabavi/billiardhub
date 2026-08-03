@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 const STATUSES = new Set(['OPEN', 'REVIEWING', 'RESOLVED', 'REJECTED']);
 
@@ -8,7 +9,7 @@ const STATUSES = new Set(['OPEN', 'REVIEWING', 'RESOLVED', 'REJECTED']);
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await can(actor.id, 'reports'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
   const status = searchParams.get('status') || '';
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
-  if (!(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!(await can(actor.id, 'reports'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const body = await req.json().catch(() => ({}));
   const id = String(body?.id || '');

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
+import { isSuperAdmin } from '@/lib/admin/permissions';
 
 /* اعطا و لغوِ دسترسیِ ادمین.
 
@@ -21,10 +22,14 @@ interface U {
   primaryRole?: string; secondaryRoles?: string[];
 }
 
+/* ⚠️ این مسیر عمداً فقط برای **سوپرادمین** است، نه هر ادمینی.
+   پیش‌تر هر ادمین می‌توانست ادمینِ تازه بسازد یا ادمینِ دیگری را
+   بردارد — یعنی کسی که فقط برای «تأیید محصولات» ادمین شده بود،
+   می‌توانست مالکِ سایت را از پنل بیرون بیندازد. */
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
-    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!actor || !(await isSuperAdmin(actor.id))) {
+    return NextResponse.json({ message: 'فقط سوپرادمین به این بخش دسترسی دارد' }, { status: 403 });
   }
 
   const q = (req.nextUrl.searchParams.get('q') ?? '').trim();
@@ -58,8 +63,8 @@ export async function GET(req: NextRequest) {
 /* بدنه: { userId, grant: true | false } */
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) {
-    return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!actor || !(await isSuperAdmin(actor.id))) {
+    return NextResponse.json({ message: 'فقط سوپرادمین می‌تواند دسترسی ادمین بدهد یا بگیرد' }, { status: 403 });
   }
 
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;

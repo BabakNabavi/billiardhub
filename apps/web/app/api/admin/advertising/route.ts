@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, rpc, actorFromRequest, isAdmin, audit } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, audit } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 import {
   listPlacements, updatePlacement, getPlacement,
   listCampaigns, createCampaign, updateCampaign, deleteCampaign,
@@ -35,7 +36,7 @@ const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
 async function guard(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return { err: NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 }) };
-  if (!(await isAdmin(actor.id))) return { err: NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 }) };
+  if (!(await can(actor.id, 'advertising'))) return { err: NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 }) };
   return { actor };
 }
 

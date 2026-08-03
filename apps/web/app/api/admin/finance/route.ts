@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, actorFromRequest } from '@/lib/finance/db';
+import { can } from '@/lib/admin/permissions';
 
 /* نمای کلیِ مالیِ پلتفرم — فقط ادمین.
    ارقام از دفتر (منبعِ حقیقت) می‌آیند، نه از کَشِ موجودی.
@@ -25,7 +26,7 @@ interface LedgerRow {
 
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
-  if (!actor || !(await isAdmin(actor.id))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
+  if (!actor || !(await can(actor.id, 'finance'))) return NextResponse.json({ message: 'دسترسی مجاز نیست' }, { status: 403 });
 
   const q = req.nextUrl.searchParams;
   const from = q.get('from') ?? '';
