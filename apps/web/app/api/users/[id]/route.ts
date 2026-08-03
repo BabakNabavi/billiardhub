@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { withPublicName } from '@/lib/public-name';
 
 /* پروفایلِ عمومیِ یک کاربر.
 
@@ -57,7 +58,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   delete u.isActive;
 
-  return NextResponse.json(u, {
+  /* حسابِ رسمی با نامِ برند بیرون می‌رود، نه نامِ شخص. این‌جا مرزِ
+     عمومی است؛ پنلِ ادمین مسیرِ خودش را دارد و نامِ واقعی را می‌بیند. */
+  return NextResponse.json(withPublicName(u), {
     headers: { 'Cache-Control': 'no-store' },
   });
 }

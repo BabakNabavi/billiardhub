@@ -10,6 +10,7 @@ import { useAuthStore } from '../store/auth.store'
 import { uploadFile } from '../lib/supabase'
 import { postUserVideo, fetchMyChannel, saveChannel, type UserChannel } from '../lib/media-user'
 import { MEDIA_CATEGORIES, faDigits, type MediaVideo } from '../lib/media-data'
+import { publicDisplayName } from '../lib/public-name'
 import SelectField from './ui/SelectField'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
@@ -69,7 +70,9 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     fetchMyChannel(ownerKey).then(c => {
       setChannel(c); setChLoaded(true)
       /* نام از پروفایل پیشنهاد می‌شود؛ هندل را خود کاربر انتخاب می‌کند */
-      if (!c) { setChName(`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()); setChHandle('') }
+      /* نامِ پیشنهادی همان نامِ عمومی است — حسابِ رسمی نباید نامِ شخص
+         را روی کانالِ ویدیو ببرد. */
+      if (!c) { setChName(publicDisplayName(user, '')); setChHandle('') }
     })
   }, [open, ownerKey, user])
 

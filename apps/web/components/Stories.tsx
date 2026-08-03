@@ -5,7 +5,8 @@ import { createPortal } from 'react-dom';
 import { X, Plus, Heart, Send, Check, Smile } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import api from '../lib/api';
-import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, OFFICIAL_DISPLAY_NAME, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
+import { getStoredStories, addStoredStory, pickStoryRole, STORY_ROLES, storyLimitFor, countTodayStories, type StoredStory } from '../lib/story-store';
+import { publicDisplayName } from '../lib/public-name';
 import { addStoryReply } from '../lib/story-inbox';
 import { useSocialInteractions } from './features/FeatureFlags';
 import Avatar from './ui/Avatar';
@@ -493,11 +494,7 @@ export default function Stories() {
      نامِ واقعیِ مالک در پنل و مدارک لازم است، ولی چیزی که بازدیدکننده
      روی استوری می‌بیند باید نامِ برند باشد، نه نامِ شخص. این تنها جای
      تفاوت است؛ همه‌جای دیگر همان نامِ واقعی می‌ماند. */
-  const isOfficial = user?.primaryRole === 'admin'
-    || (user?.secondaryRoles ?? []).includes('admin');
-  const meName = () => (isOfficial
-    ? OFFICIAL_DISPLAY_NAME
-    : `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'کاربر');
+  const meName = () => publicDisplayName(user);
 
   /* هویتِ استوریِ خودِ کاربر از نشستِ زنده می‌آید، نه از رکوردِ ذخیره‌شده.
 

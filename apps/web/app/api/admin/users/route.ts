@@ -44,6 +44,53 @@ const DETAIL_COLUMNS = COLUMNS + ',' + [
 
 const VERIFICATION = new Set(['unverified', 'pending', 'verified', 'rejected']);
 
+/* ── ستون‌هایی که ادمین می‌تواند ویرایش کند ──
+
+   تا امروز هیچ راهی برای اصلاحِ مشخصاتِ یک کاربر از پنل نبود؛ حتی
+   خودِ مالکِ سایت برای درست‌کردنِ نامِ خودش باید SQL می‌زد.
+
+   فهرست عمداً بسته است. بیرونِ آن مانده‌اند:
+   · `phone` — کلیدِ ورود است و به استعلامِ شاهکار گره خورده. عوض‌کردنش
+     یعنی دزدیدنِ حساب، نه ویرایشِ پروفایل.
+   · `password`, `otp_*` — از این مسیر اصلاً دیده هم نمی‌شوند.
+   · `primaryRole`, `secondaryRoles` — کارِ /api/admin/grant-admin است
+     که محافظ‌های خودش را دارد (آخرین ادمین، نقشِ خود، بایگانی).
+   · پرچم‌های تأیید — تأیید باید نتیجه‌ی استعلام باشد، نه چیزی که با
+     دست روشن شود. وگرنه نشانِ «تأییدشده» دروغ می‌گوید. */
+const EDITABLE: Record<string, 'text' | 'nid' | 'birth' | 'email' | 'gender'> = {
+  firstName: 'text', lastName: 'text', email: 'email',
+  national_id: 'nid', birth_date: 'birth', gender: 'gender',
+  province: 'text', city: 'text', address: 'text',
+  work_phone: 'text', instagram: 'text', telegram: 'text',
+  bio: 'text', club_name_manual: 'text',
+};
+
+/* پاک‌سازی و اعتبارسنجیِ یک مقدار. `null` یعنی «رد شد». */
+function clean(kind: string, raw: unknown): string | null | undefined {
+  const v = String(raw ?? '').trim();
+  if (v === '') return '';                       // خالی‌کردنِ یک فیلد مجاز است
+  switch (kind) {
+    case 'nid':
+      /* رقمِ فارسی هم پذیرفته می‌شود؛ کاربر از کیبوردِ فارسی تایپ می‌کند */
+      { const d = v.replace(/[۰-۹]/g, c => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c)));
+        return /^\d{10}$/.test(d) ? d : undefined; }
+    case 'birth':
+      /* قالبِ ذخیره‌سازیِ سایت شمسی است — همان چیزی که ثبت‌نام می‌نویسد */
+      { const d = v.replace(/[۰-۹]/g, c => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c))).replace(/[-.]/g, '/');
+        const m = /^(1[234]\d{2})\/(\d{1,2})\/(\d{1,2})$/.exec(d);
+        if (!m) return undefined;
+        const mo = +m[2]!, dy = +m[3]!;
+        if (mo < 1 || mo > 12 || dy < 1 || dy > 31) return undefined;
+        return `${m[1]}/${String(mo).padStart(2, '0')}/${String(dy).padStart(2, '0')}`; }
+    case 'email':
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? v.toLowerCase() : undefined;
+    case 'gender':
+      return v === 'male' || v === 'female' ? v : undefined;
+    default:
+      return v.slice(0, 400);
+  }
+}
+
 export async function GET(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -116,8 +163,75 @@ export async function PATCH(req: NextRequest) {
 
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;
   const userId = String(b.userId ?? '');
-  const next = String(b.verificationStatus ?? '');
   if (!userId) return NextResponse.json({ message: 'کاربر مشخص نیست' }, { status: 400 });
+
+  /* ── شاخه‌ی ویرایشِ مشخصات ──
+     جدا از تغییرِ وضعیتِ احراز نگه داشته شده تا هیچ‌کدام به‌طور جانبی
+     دیگری را عوض نکند. */
+  if (b.fields && typeof b.fields === 'object') {
+    const incoming = b.fields as Record<string, unknown>;
+
+    const patch: Record<string, unknown> = {};
+    const rejected: string[] = [];
+    for (const [k, kind] of Object.entries(EDITABLE)) {
+      if (!(k in incoming)) continue;
+      const v = clean(kind, incoming[k]);
+      if (v === undefined) { rejected.push(k); continue }
+      patch[k] = v === '' ? null : v;
+    }
+    if (rejected.length) {
+      return NextResponse.json({ message: 'مقدارِ نامعتبر: ' + rejected.join('، ') }, { status: 400 });
+    }
+    if (!Object.keys(patch).length) {
+      return NextResponse.json({ message: 'چیزی برای تغییر نیست' }, { status: 400 });
+    }
+
+    const { data: before } = await sb().from('users')
+      .select(DETAIL_COLUMNS).eq('id', userId).maybeSingle();
+    if (!before) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
+    const prev = before as unknown as Record<string, unknown>;
+
+    /* فقط چیزهایی که واقعاً عوض شده‌اند — تا گزارشِ ممیزی پر از
+       «تغییر»هایی نشود که هیچ مقداری را جابه‌جا نکرده‌اند. */
+    const changed: Record<string, { from: unknown; to: unknown }> = {};
+    for (const [k, v] of Object.entries(patch)) {
+      const old = prev[k] ?? null;
+      if (String(old ?? '') !== String(v ?? '')) changed[k] = { from: old, to: v };
+    }
+    if (!Object.keys(changed).length) {
+      return NextResponse.json({ ok: true, user: prev, unchanged: true });
+    }
+
+    /* عوض‌شدنِ کدِ ملی، تأییدِ شاهکار را باطل می‌کند.
+
+       آن استعلام دقیقاً همین کد را به همین شماره گره زده بود؛ با
+       کدِ تازه دیگر چیزی تأیید نشده است. اگر پرچم را دست‌نخورده
+       بگذاریم، نشانِ «تأییدشده» درباره‌ی هویتی حرف می‌زند که هرگز
+       استعلام نشده. اصلاحِ نام یا تاریخ این را باطل نمی‌کند —
+       آن‌ها تصحیحِ نگارشی‌اند، نه ادعای هویتِ دیگر. */
+    if ('national_id' in changed) patch.national_id_verified = false;
+
+    patch.updatedAt = new Date().toISOString();
+    const { data, error } = await sb().from('users')
+      .update(patch).eq('id', userId).select(DETAIL_COLUMNS).single();
+
+    if (error) {
+      console.error('[admin/users] edit', error.message);
+      return NextResponse.json({ message: 'ذخیره‌ی تغییرات انجام نشد' }, { status: 500 });
+    }
+
+    void audit({
+      actorId: actor.id, actorRole: 'admin', action: 'USER_PROFILE_EDITED',
+      entityType: 'user', entityId: userId,
+      oldValue: Object.fromEntries(Object.entries(changed).map(([k, c]) => [k, c.from])),
+      newValue: Object.fromEntries(Object.entries(changed).map(([k, c]) => [k, c.to])),
+      ip: clientIp(req) ?? undefined,
+    });
+
+    return NextResponse.json({ ok: true, user: data, changed: Object.keys(changed) });
+  }
+
+  const next = String(b.verificationStatus ?? '');
   if (!VERIFICATION.has(next)) {
     return NextResponse.json({ message: 'وضعیت نامعتبر است' }, { status: 400 });
   }

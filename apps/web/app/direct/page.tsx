@@ -16,6 +16,7 @@ import { toast } from '../../components/ui/Toast'
 import { ArrowRight, Inbox, Send, Check, CheckCheck, Bell, Trash2 } from 'lucide-react'
 import { useSocialInteractions } from '../../components/features/FeatureFlags'
 import FeatureDisabled from '../../components/features/FeatureDisabled'
+import { publicDisplayName } from '../../lib/public-name'
 
 const GOLD = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -75,7 +76,8 @@ function DirectInner() {
   useEffect(() => { activeRef.current = active }, [active])
 
   const meKey = user ? (user.phone || user.id || (user.firstName ?? 'user')) : ''
-  const meName = user ? (`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'کاربر') : ''
+  /* نامی که روی پیامِ ارسالی می‌نشیند و طرفِ مقابل می‌بیند */
+  const meName = user ? publicDisplayName(user) : ''
 
   useEffect(() => { if (_hydrated && !user) router.replace('/login') }, [_hydrated, user, router])
 

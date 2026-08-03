@@ -5,7 +5,8 @@ import { actorFromRequest } from '@/lib/finance/db'
 import { getStoryQuotaState } from '@/lib/stories/quota'
 import { redactList } from '@/lib/privacy'
 import { getSupabaseServer } from '@/lib/supabase-server'
-import { pickStoryRole, OFFICIAL_DISPLAY_NAME } from '@/lib/story-store'
+import { pickStoryRole } from '@/lib/story-store'
+import { publicDisplayName } from '@/lib/public-name'
 
 /* سقف استوری دیگر هاردکد نیست — از تنظیمات ادمین (به تفکیک نقش) و
    بسته‌ی خریداری‌شده می‌آید. اعداد قبلی به‌عنوان پیش‌فرض در مایگریشن
@@ -70,13 +71,10 @@ export async function GET() {
       const put = (key: string | undefined, u: Row) => {
         if (!key) return
         const roles = [u.primaryRole, ...(u.secondaryRoles ?? [])].filter(Boolean) as string[]
-        const role = pickStoryRole(roles)
-        const real = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
         idOf.set(key, {
           avatar: u.avatar,
-          /* حساب رسمی با نام برند دیده می‌شود، نه نام شخص */
-          name: role.key === 'admin' ? OFFICIAL_DISPLAY_NAME : (real || undefined),
-          role,
+          name: publicDisplayName(u, '') || undefined,
+          role: pickStoryRole(roles),
         })
       }
       for (const u of (byId.data ?? []) as Row[]) put(u.id, u)

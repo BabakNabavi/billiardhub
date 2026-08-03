@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { actorOf, UNAUTHENTICATED } from '@/lib/auth/ownership';
 import { sb, isAdmin, audit, clientIp } from '@/lib/finance/db';
+import { publicDisplayName } from '@/lib/public-name';
 
 /* امتیاز و نظر باشگاه.
 
@@ -48,10 +49,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const ids = [...new Set(rows.map(r => r.user_id))];
   const names = new Map<string, string>();
   if (ids.length) {
-    const { data: us } = await sb().from('users').select('id,"firstName","lastName"').in('id', ids);
-    for (const u of (us ?? []) as { id: string; firstName?: string; lastName?: string }[]) {
-      const full = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
-      names.set(u.id, full || 'کاربر بیلیارد هاب');
+    const { data: us } = await sb().from('users')
+      .select('id,"firstName","lastName","primaryRole","secondaryRoles"').in('id', ids);
+    type U = { id: string; firstName?: string; lastName?: string; primaryRole?: string; secondaryRoles?: string[] };
+    for (const u of (us ?? []) as U[]) {
+      names.set(u.id, publicDisplayName(u, 'کاربر بیلیارد هاب'));
     }
   }
 
