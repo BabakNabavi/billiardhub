@@ -27,6 +27,10 @@ export default function AdminAccess() {
   const [admins, setAdmins] = useState<U[]>([])
   const [results, setResults] = useState<U[]>([])
   const [me, setMe] = useState('')
+  /* دکمه‌ی «دسترسی» در فهرستِ کاربران با ?q=<شماره> به این‌جا
+     می‌آید؛ جست‌وجو پیش‌پر و یک‌بار خودکار اجرا می‌شود.
+     عمداً از `useSearchParams` استفاده نمی‌شود: آن مرزِ
+     Suspense می‌خواهد و prerender این صفحه را می‌شکست. */
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState('')
@@ -42,7 +46,13 @@ export default function AdminAccess() {
     } catch { setMsg({ ok: false, text: 'خطا در ارتباط با سرور' }) }
     finally { setLoading(false) }
   }, [])
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    const pre = typeof window === 'undefined' ? ''
+      : (new URLSearchParams(window.location.search).get('q') ?? '')
+    if (pre) setQ(pre)
+    void load(pre.length >= 3 ? pre : '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [load])
 
   const toggle = async (u: U, grant: boolean) => {
     setBusy(u.id); setMsg(null)

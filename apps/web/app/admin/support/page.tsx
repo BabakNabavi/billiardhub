@@ -1,5 +1,6 @@
 'use client';
 
+import { apiFetch } from '../../../lib/http'
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
@@ -81,7 +82,7 @@ export default function AdminSupportPage() {
   const act = async (id: string, body: Record<string, unknown>) => {
     setBusy(id);
     try {
-      const r = await fetch('/api/admin/support', {
+      const r = await apiFetch('/api/admin/support', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

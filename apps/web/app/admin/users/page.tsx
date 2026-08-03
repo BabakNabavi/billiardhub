@@ -207,7 +207,14 @@ export default function AdminUsersPage() {
                       <XCircle size={15} />
                     </button>
                   )}
-                  <button className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="دسترسی">
+                  {/* این دکمه `onClick` نداشت — یک آیکنِ تزئینی بود که
+                      کلیک‌کردنش هیچ کاری نمی‌کرد. مدیریتِ دسترسیِ ادمین
+                      صفحه‌ی خودش را دارد (با محافظ‌های «آخرین ادمین» و
+                      «نقشِ خود»)، پس این‌جا فقط به همان‌جا می‌بریم و
+                      شماره را برای جست‌وجو پیش‌پر می‌کنیم. */}
+                  <button onClick={() => router.push('/admin/access?q=' + encodeURIComponent(u.phone ?? ''))}
+                    className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                    title="مدیریت دسترسی ادمین">
                     <Shield size={15} />
                   </button>
                 </div>

@@ -247,7 +247,7 @@ export default function GalleryTab({ club, onLogoChange }: {
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         };
         try {
-          await fetch(`/api/clubs/${club.id}/stories`, {
+          await apiFetch(`/api/clubs/${club.id}/stories`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newStory),
@@ -269,7 +269,7 @@ export default function GalleryTab({ club, onLogoChange }: {
     if (!club) return;
     setStoryList(prev => prev.filter(s => s.id !== storyId));
     try {
-      await fetch(`/api/clubs/${club.id}/stories?storyId=${storyId}`, { method: 'DELETE' });
+      await apiFetch(`/api/clubs/${club.id}/stories?storyId=${storyId}`, { method: 'DELETE' });
     } catch {}
   };
 

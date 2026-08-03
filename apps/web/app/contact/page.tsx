@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Mail, MapPin, Handshake, Headphones, Check, Copy, Send, ArrowLeft, Megaphone } from 'lucide-react'
 import Link from 'next/link'
+import { apiFetch } from '../../lib/http'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -217,10 +218,14 @@ export default function ContactPage() {
        تغییرِ کد پستی و اطلاعات بانکی فقط از همین راه ممکن است، آن
        دروغ کاربر را به بن‌بست می‌برد. */
     try {
-      const res = await fetch('/api/contact', {
+      /* `apiFetch` هدرِ CSRF را از کوکیِ خواندنی برمی‌دارد و می‌گذارد.
+         با `fetch` خام، کاربرِ *واردشده* همیشه ۴۰۳ می‌گرفت:
+         «توکن امنیتی درخواست معتبر نیست». مهمان مشکلی نداشت چون
+         بررسیِ CSRF فقط وقتی نشست هست اعمال می‌شود — برای همین در
+         تستِ مهمان دیده نشد. */
+      const res = await apiFetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ ...form, clubId: clubId || undefined }),
       })
       const j = await res.json().catch(() => ({}))

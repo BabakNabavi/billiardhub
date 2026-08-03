@@ -212,7 +212,7 @@ export default function MyShopPage() {
         createdAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       };
-      await fetch(`/api/sellers/${user.id}/stories`, {
+      await apiFetch(`/api/sellers/${user.id}/stories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(story),
@@ -229,7 +229,7 @@ export default function MyShopPage() {
 
   const deleteStory = async (storyId: string) => {
     if (!user) return;
-    await fetch(`/api/sellers/${user.id}/stories?storyId=${storyId}`, { method: 'DELETE' });
+    await apiFetch(`/api/sellers/${user.id}/stories?storyId=${storyId}`, { method: 'DELETE' });
     setStories(prev => prev.filter(s => s.id !== storyId));
   };
 

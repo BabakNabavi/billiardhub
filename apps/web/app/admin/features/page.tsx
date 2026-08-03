@@ -1,4 +1,5 @@
 'use client'
+import { apiFetch } from '../../../lib/http'
 import { useEffect, useState } from 'react'
 import { Power, ShieldCheck, Loader2, Info } from 'lucide-react'
 import { toast } from '../../../components/ui/Toast'
@@ -77,7 +78,7 @@ export default function AdminFeaturesPage() {
     const next = !state[flag.key]
     setBusy(flag.key)
     try {
-      const r = await fetch('/api/admin/settings', {
+      const r = await apiFetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

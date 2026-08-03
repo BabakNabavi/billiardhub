@@ -537,9 +537,20 @@ export default function RolePage() {
                       <span key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: '#9A6E38', background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)', borderRadius: 999, padding: '6px 8px 6px 6px' }}>
                         {ROLE_MAP[r as RoleValue]?.label ?? r}
                         <button
-                          onClick={() => {
-                            updateUser({ secondaryRoles: (user?.secondaryRoles ?? []).filter(x => x !== r) })
-                            showToast('نقش حذف شد')
+                          /* حذف باید *سمتِ سرور* انجام شود. پیش‌تر فقط
+                             `updateUser` صدا زده می‌شد: نقش از استورِ
+                             مرورگر پاک می‌شد، پیام «نقش حذف شد» می‌آمد، و
+                             سرور هیچ خبری نداشت — با اولین بارگذاریِ تازه
+                             نقش برمی‌گشت. سرور هم محافظ دارد: باشگاه‌داری
+                             که باشگاه دارد نمی‌تواند نقشش را بردارد. */
+                          onClick={async () => {
+                            try {
+                              const res = await apiFetch('/api/roles/my?role=' + encodeURIComponent(r), { method: 'DELETE' })
+                              const j = await res.json().catch(() => ({}))
+                              if (!res.ok) { showToast(j?.message ?? 'حذف نقش انجام نشد'); return }
+                              updateUser({ primaryRole: j.primaryRole, secondaryRoles: j.secondaryRoles })
+                              showToast('نقش حذف شد')
+                            } catch { showToast('خطا در ارتباط با سرور') }
                           }}
                           title="حذف نقش"
                           style={{ width: 18, height: 18, borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'rgba(178,59,46,0.12)', color: '#B23B2E', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, lineHeight: 1, fontFamily: 'inherit' }}>

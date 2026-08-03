@@ -1,5 +1,6 @@
 ﻿'use client'
 
+import { apiFetch } from '../../../lib/http'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { csrfToken } from '../../../lib/http';
@@ -160,7 +161,7 @@ export default function VerifyPage() {
 
     setLoading(true); setError(null)
     try {
-      const res = await fetch('/api/auth/verify/national-id', {
+      const res = await apiFetch('/api/auth/verify/national-id', {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ nationalId: enId, firstName, lastName }),
@@ -180,7 +181,7 @@ export default function VerifyPage() {
   const handleSendOtp = async () => {
     setLoading(true); setError(null)
     try {
-      const res = await fetch('/api/auth/verify/otp/send', {
+      const res = await apiFetch('/api/auth/verify/otp/send', {
         method: 'POST',
         headers: authHeader(),
       })
@@ -200,7 +201,7 @@ export default function VerifyPage() {
     if (otp.length !== 6) { setError('کد ۶ رقمی را وارد کنید'); return }
     setLoading(true); setError(null)
     try {
-      const res = await fetch('/api/auth/verify/otp/confirm', {
+      const res = await apiFetch('/api/auth/verify/otp/confirm', {
         method: 'POST',
         headers: { ...authHeader(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: otp }),

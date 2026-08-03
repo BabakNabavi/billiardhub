@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest } from '@/lib/finance/db';
+import { sb, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 
 /* درخواست‌های نقشِ خودِ کاربر.
 
@@ -34,4 +34,75 @@ export async function GET(req: NextRequest) {
     requests: data ?? [],
     current: { primaryRole: row.primaryRole ?? 'user', secondaryRoles: row.secondaryRoles ?? [] },
   }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
+/* DELETE ?role=… — کاربر نقشی را از خودش برمی‌دارد.
+
+   ── چرا این مسیر لازم شد ──
+   صفحه‌ی /profile/role دکمه‌ی «حذف نقش» داشت که فقط `updateUser` را
+   صدا می‌زد: نقش از استورِ zustand پاک می‌شد و رابط «نقش حذف شد»
+   می‌گفت، ولی هیچ‌وقت به سرور گفته نمی‌شد. یعنی حذف نمایشِ محض بود و
+   با اولین بارگذاریِ تازه برمی‌گشت.
+
+   ── محافظ ──
+   نقشی که به یک دارایی گره خورده برداشته نمی‌شود. باشگاه‌داری که
+   باشگاه دارد نمی‌تواند نقشش را حذف کند — وگرنه باشگاه صاحبی دارد که
+   دیگر باشگاه‌دار نیست و از پنل خودش بیرون می‌افتد.
+
+   `admin` هم از این‌جا برداشته نمی‌شود؛ آن محافظ‌های خودش را در
+   /api/admin/grant-admin دارد (آخرین ادمین، نقشِ خود…). */
+export async function DELETE(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
+
+  const role = (req.nextUrl.searchParams.get('role') ?? '').trim();
+  if (!role) return NextResponse.json({ message: 'نقش مشخص نیست' }, { status: 400 });
+
+  if (role === 'admin') {
+    return NextResponse.json(
+      { message: 'دسترسی ادمین از این‌جا برداشته نمی‌شود' }, { status: 403 });
+  }
+
+  const { data: u } = await sb().from('users')
+    .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
+  if (!u) return NextResponse.json({ message: 'کاربر پیدا نشد' }, { status: 404 });
+  const cur = u as { primaryRole?: string; secondaryRoles?: string[] };
+
+  if (role === 'club_owner') {
+    const { count } = await sb().from('clubs')
+      .select('id', { count: 'exact', head: true }).eq('ownerId', actor.id);
+    if ((count ?? 0) > 0) {
+      return NextResponse.json({
+        message: `شما ${count} باشگاه ثبت‌شده دارید و تا وقتی صاحبِ باشگاه هستید نقشِ «باشگاه‌دار» برداشته نمی‌شود.`,
+      }, { status: 409 });
+    }
+  }
+
+  const nextSecondary = (cur.secondaryRoles ?? []).filter(r => r !== role);
+  /* اگر همین نقش، نقشِ اصلی بود، به نخستین نقشِ باقی‌مانده برگرد —
+     وگرنه کاربر بی‌نقش می‌ماند و هیچ داشبوردی برایش باز نمی‌شود. */
+  const nextPrimary = cur.primaryRole === role
+    ? (nextSecondary.find(r => r && r !== 'admin') ?? 'user')
+    : cur.primaryRole;
+
+  const { error } = await sb().from('users').update({
+    secondaryRoles: nextSecondary,
+    primaryRole: nextPrimary,
+    updatedAt: new Date().toISOString(),
+  }).eq('id', actor.id);
+
+  if (error) {
+    console.error('[roles/my] delete', error.message);
+    return NextResponse.json({ message: 'حذف نقش انجام نشد' }, { status: 500 });
+  }
+
+  void audit({
+    actorId: actor.id, actorRole: actor.role, action: 'ROLE_REMOVED_BY_SELF',
+    entityType: 'user', entityId: actor.id,
+    oldValue: { primaryRole: cur.primaryRole, secondaryRoles: cur.secondaryRoles },
+    newValue: { primaryRole: nextPrimary, secondaryRoles: nextSecondary, removed: role },
+    ip: clientIp(req) ?? undefined,
+  });
+
+  return NextResponse.json({ ok: true, primaryRole: nextPrimary, secondaryRoles: nextSecondary });
 }
