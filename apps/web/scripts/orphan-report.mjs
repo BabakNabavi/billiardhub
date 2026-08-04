@@ -76,10 +76,25 @@ for (const t of tables) {
   }
 }
 
-/* ── ۲) فهرستِ استوری‌ها که داخلِ خودِ Storage است ── */
+/* ── ۲) فهرست‌هایی که داخلِ خودِ Storage زندگی می‌کنند ──
+
+   ⚠️ این بخش نخستین بار فقط استوری را می‌خواند و `social/media/*.json`
+   را نه. نتیجه‌اش این شد که دو ویدیوی واقعیِ کاربر «بی‌ارجاع» تشخیص
+   داده و حذف شدند — تنها ارجاعشان در همان فهرستی بود که خوانده
+   نمی‌شد.
+
+   پس به‌جای نامِ ثابت، *هر* فایلِ JSONِ زیرِ `social/` خوانده می‌شود.
+   قاعده‌ی ساختاری با هر فهرستِ تازه‌ای هم درست می‌ماند؛ فهرستِ دستی
+   دوباره همان اشتباه را می‌سازد. */
 const sb = (bucket, p) => `${SU}/storage/v1/object/${bucket}/${p}`
 const H = { apikey: SK, authorization: 'Bearer ' + SK }
-for (const p of ['social/stories.json', 'social/stories/index.json']) {
+
+const stateFiles = (await c.query(`
+  SELECT name FROM storage.objects
+  WHERE bucket_id='club-media' AND name LIKE 'social/%' AND name LIKE '%.json'
+`)).rows.map(r => r.name)
+
+for (const p of stateFiles) {
   try {
     const r = await fetch(sb('club-media', p), { headers: H })
     if (!r.ok) continue
@@ -109,6 +124,20 @@ const INFRA = ['social/dm/', 'social/dm-idx/', 'social/dm-poll/', 'social/notif/
    `social/stories.json` را داشت که اصلاً مسیرِ درستی نبود). قاعده‌ی
    ساختاری امن‌تر است: رسانه‌ی کاربران هیچ‌وقت `.json` نیست. */
 const isStateFile = (n) => n.startsWith('social/') && n.endsWith('.json')
+
+/* ── محافظِ مستقل از درستیِ منطقِ بالا ──
+
+   دو اشتباهِ بالا هر دو از یک جنس بودند: منطق درست اجرا شد ولی روی
+   ورودیِ ناقص. چنین چیزی همیشه ممکن است — یک فهرستِ تازه، یک ستونِ
+   تازه، یک مسیرِ تازه.
+
+   پس یک شرطِ بیرونی هم گذاشته می‌شود که به هیچ‌کدام از آن‌ها وابسته
+   نیست: اگر شمارشِ ارجاع‌ها مشکوک کم باشد در حالی که فایلِ زیاد
+   داریم، یعنی احتمالاً جایی از خواندنِ ارجاع‌ها شکسته — و در آن
+   حالت حذف اصلاً اجرا نمی‌شود.
+
+   عدد سخت‌گیرانه نیست؛ فقط جلوی فاجعه را می‌گیرد. */
+const SANITY_MIN_REF = Number(process.env.SANITY_MIN_REF ?? 0)
 
 const GRACE_DAYS = Number(process.env.GRACE_DAYS ?? 7)
 const cutoff = Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000
@@ -162,6 +191,27 @@ if (orphans.length) {
    بدونِ آن، حذف یک عملیاتِ بی‌ردِ برگشت‌ناپذیر است.
 
    اجرا:  CONFIRM_DELETE=yes node scripts/orphan-report.mjs           */
+const refCount = referenced.size
+const stateRead = stateFiles.length
+console.log('\n  ارجاع‌های یافته‌شده: ' + refCount +
+  '   (از ' + tables.length + ' جدول و ' + stateRead + ' فهرستِ داخلِ Storage)')
+
+/* اگر بیش از نیمی از فایل‌ها نامزدِ حذف‌اند، یا هیچ ارجاعی پیدا نشده
+   در حالی که فایل زیاد است، احتمالاً خواندنِ ارجاع‌ها شکسته. */
+const suspicious =
+  (orphans.length > objects.length * 0.5 && objects.length > 20) ||
+  (refCount <= SANITY_MIN_REF && objects.length > 20)
+
+if (suspicious && process.env.CONFIRM_DELETE === 'yes') {
+  console.log('\n  ⛔ حذف اجرا نشد — نسبتِ نامزدها مشکوک است.')
+  console.log('     ' + orphans.length + ' از ' + objects.length + ' فایل نامزدِ حذف‌اند و ' +
+    refCount + ' ارجاع پیدا شد.')
+  console.log('     این معمولاً یعنی جایی از خواندنِ ارجاع‌ها کار نمی‌کند،')
+  console.log('     نه اینکه واقعاً این‌همه فایلِ مرده داریم.')
+  console.log('     اگر مطمئنی درست است: FORCE_DELETE=yes\n')
+  if (process.env.FORCE_DELETE !== 'yes') { await c.end(); process.exit(2) }
+}
+
 if (orphans.length && process.env.CONFIRM_DELETE === 'yes') {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-')
   const manifest = path.join(ROOT, `orphan-deleted-${stamp}.json`)
