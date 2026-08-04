@@ -454,6 +454,20 @@ export default function RolePage() {
 
     if (queued.has('player')) savePlayerBasics()
 
+    /* ⚠️ باگی که تا امروز بود: این تابع برای *همه‌ی* نقش‌های انتخابی
+       درخواست ثبت می‌کرد، حتی آن‌هایی که مدرک لازم دارند. مرحله‌ی
+       بارگذاریِ مدرک (`DocUploadStep`) نوشته شده بود ولی `setStep`
+       هیچ‌جا صدا زده نمی‌شد، پس آن صفحه کدِ مرده بود.
+
+       نتیجه‌اش این بود که کاربر شش نقش را انتخاب می‌کرد، دکمه را
+       می‌زد، و شش درخواستِ **خالی و بدونِ مدرک** روی میزِ ادمین
+       می‌نشست — ادمین چیزی برای تأیید یا رد کردن نداشت.
+
+       حالا اگر حتی یک نقشِ مدرک‌خواه در فهرست باشد، به مرحله‌ی
+       بارگذاری می‌رویم و ثبت آن‌جا انجام می‌شود. */
+    const needsDoc = queuedArr.some(r => ROLE_MAP[r].requiresDoc)
+    if (needsDoc) { setStep('upload'); return }
+
     for (const roleVal of queuedArr) {
       await apiFetch('/api/roles/request', {
         method: 'POST',
@@ -496,7 +510,7 @@ export default function RolePage() {
   const queuedArr     = Array.from(queued) as RoleValue[]
 
   return (
-    <>
+    <>
       <div style={{
         minHeight: '100vh', background: '#F7F7F5',
         fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
@@ -710,6 +724,16 @@ export default function RolePage() {
                 </button>
               </div>
             </>
+          )}
+
+          {/* مرحله‌ی بارگذاریِ مدرک — تا امروز نوشته شده بود ولی هرگز
+              رندر نمی‌شد، پس نقش‌های مدرک‌خواه بدونِ مدرک ثبت می‌شدند. */}
+          {step === 'upload' && (
+            <DocUploadStep
+              queued={queuedArr}
+              onBack={() => setStep('select')}
+              onDone={handleDone}
+            />
           )}
 
         </div>

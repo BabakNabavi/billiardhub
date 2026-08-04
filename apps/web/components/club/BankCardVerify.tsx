@@ -20,6 +20,7 @@
 import { useState } from 'react'
 import { ShieldCheck, Loader2, AlertCircle, CreditCard } from 'lucide-react'
 import { apiFetch } from '../../lib/http'
+import { useAuthStore } from '../../store/auth.store'
 
 const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6'
 const GOLD_D = '#9A6E38', FELT = '#0E7A38', RED = '#B23B2E'
@@ -34,6 +35,16 @@ export interface BankResult {
 
 const groupCard = (d: string) => d.replace(/(.{4})/g, '$1-').replace(/-$/, '')
 
+/* ── ارقامِ فارسی ──
+   کاربر با کیبوردِ فارسی «۱۲۳۴» تایپ می‌کند و `replace(/\D/g,'')` آن
+   را کامل دور می‌ریخت، پس فیلد خالی می‌ماند. نمایش هم لاتین بود در
+   حالی که همه‌ی اعدادِ سایت فارسی‌اند. */
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹'
+const toEnDigits = (v: string) =>
+  v.replace(/[۰-۹]/g, d => String(FA_DIGITS.indexOf(d)))
+    .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+const toFaDigits = (v: string) => v.replace(/[0-9]/g, d => FA_DIGITS[+d]!)
+
 export default function BankCardVerify({ clubId, value, onChange }: {
   clubId?: string
   value: BankResult | null
@@ -45,6 +56,16 @@ export default function BankCardVerify({ clubId, value, onChange }: {
 
   const digits = card.replace(/\D/g, '')
   const verified = !!value?.iban
+
+  /* نامِ حسابِ کاربر، برای مقایسه‌ی چشمی با نامی که بانک برگردانده.
+     نرمال‌سازی: نیم‌فاصله و فاصله‌های تکراری حذف می‌شوند تا «محمد رضا»
+     و «محمدرضا» بی‌دلیل ناهمخوان به‌نظر نرسند. */
+  const { user: me } = useAuthStore()
+  const norm = (v: string) => v.replace(/[‌\s]+/g, '').trim()
+  const accountName = `${me?.firstName ?? ''} ${me?.lastName ?? ''}`.trim()
+  const nameMismatch =
+    !!value?.ownerName && !!accountName &&
+    norm(value.ownerName) !== norm(accountName)
 
   const verify = async () => {
     setErr('')
@@ -86,18 +107,19 @@ export default function BankCardVerify({ clubId, value, onChange }: {
       </label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <input
-          value={card}
+          value={toFaDigits(card)}
           onChange={e => {
-            const d = e.target.value.replace(/\D/g, '').slice(0, 16)
+            /* ورودی اول به رقمِ لاتین ترجمه می‌شود، وگرنه هر رقمی که
+               کاربر با کیبوردِ فارسی بزند دور ریخته می‌شد. */
+            const d = toEnDigits(e.target.value).replace(/\D/g, '').slice(0, 16)
             setCard(groupCard(d)); setErr(''); if (verified) onChange(null)
           }}
           placeholder="۱۲۳۴-۵۶۷۸-۹۰۱۲-۳۴۵۶"
           dir="ltr" inputMode="numeric" maxLength={19}
-          className="bh-latin"
           style={{
             flex: '1 1 220px', minWidth: 0, border: `1px solid ${LINE}`, borderRadius: 10,
             padding: '11px 13px', fontSize: 16, letterSpacing: '0.08em',
-            background: '#FAFAF7', color: INK, outline: 'none', fontFamily: 'monospace',
+            background: '#FAFAF7', color: INK, outline: 'none', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums',
           }}
         />
         <button type="button" onClick={verify} disabled={busy || digits.length !== 16}
@@ -137,6 +159,26 @@ export default function BankCardVerify({ clubId, value, onChange }: {
             <span style={{ fontSize: 12.5, color: MUT }}>نام صاحب حساب</span>
             <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{value.ownerName || '—'}</span>
           </div>
+
+          {/* ── تطبیقِ نام ──
+              بررسیِ اصلی سمتِ سرور و بر پایه‌ی *کد ملی* انجام می‌شود
+              (matchCard و matchIban)، که از مقایسه‌ی متنیِ نام بسیار
+              محکم‌تر است — «محمدرضا» و «محمد رضا» یک نفرند ولی دو رشته.
+
+              این خط فقط برای اطمینانِ چشمیِ خودِ کاربر است: اگر نامِ
+              برگشته از بانک با نامِ حسابش فرق داشت، بداند و بررسی کند.
+              چون کد ملی از قبل تطبیق داده شده، این هشدار است نه مانع. */}
+          {nameMismatch && (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 8,
+              background: 'rgba(183,121,31,0.06)', border: '1px solid rgba(183,121,31,0.25)',
+              borderRadius: 10, padding: '9px 11px', fontSize: 12, color: '#B7791F', lineHeight: 1.9,
+            }}>
+              <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 2 }} />
+              نام صاحب کارت با نام حساب شما («{accountName}») یکسان نوشته نشده است.
+              کد ملی تطبیق داده شده، ولی اگر این کارت مال شما نیست همین‌جا اصلاحش کنید.
+            </div>
+          )}
           <div style={box}>
             <span style={{ fontSize: 12.5, color: MUT }}>بانک</span>
             <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{value.bankName || '—'}</span>

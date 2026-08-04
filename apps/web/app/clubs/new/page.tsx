@@ -379,12 +379,28 @@ export default function NewClubPage() {
                   </button>
                 )}
               </div>
+              {/* ── پیش‌نمایشِ زنده ──
+                  پیشوندِ کنارِ فیلد کوچک و کم‌رنگ است و کاربر موقعِ تایپ
+                  نمی‌بیند نشانیِ نهایی چه شکلی می‌شود. این خط همان
+                  نشانیِ کامل را همان‌طور که در مرورگر باز خواهد شد نشان
+                  می‌دهد. */}
+              {slug && (
+                <div className="bh-latin" style={{
+                  marginTop: 7, direction: 'ltr', textAlign: 'left',
+                  fontSize: 13, fontWeight: 700, color: '#1C1B17',
+                  background: 'rgba(199,166,106,0.08)', border: '1px solid rgba(199,166,106,0.22)',
+                  borderRadius: 9, padding: '7px 11px', wordBreak: 'break-all',
+                }}>
+                  billiardhub.net/clubs/<span style={{ color: '#9A6E38' }}>{slug}</span>
+                </div>
+              )}
+
               <div style={{ marginTop: 5, fontSize: 12, minHeight: 16 }}>
                 {slugStatus === 'checking' && <span style={{ color: 'rgba(0,0,0,0.40)' }}>در حال بررسی…</span>}
                 {slugStatus === 'ok'       && <span style={{ color: '#0E7A38' }}>✓ این نشانی در دسترس است</span>}
                 {slugStatus === 'taken'    && <span style={{ color: '#B23B2E' }}>✗ این نشانی قبلاً رزرو شده</span>}
                 {slugStatus === 'invalid'  && <span style={{ color: '#B23B2E' }}>فقط حروف انگلیسی کوچک، عدد و خط تیره مجاز است</span>}
-                {slugStatus === 'idle' && slug && <span style={{ color: 'rgba(0,0,0,0.35)' }}>نشانی اختصاصی صفحه‌ی باشگاه شما — مثلاً hafez-shiraz</span>}
+                {slugStatus === 'idle' && !slug && <span style={{ color: 'rgba(0,0,0,0.35)' }}>نشانی اختصاصی صفحه‌ی باشگاه شما — مثلاً hafez-shiraz</span>}
               </div>
             </div>
           </div>
@@ -491,7 +507,7 @@ export default function NewClubPage() {
               {[
                 { key: 'hasCafe',              label: 'کافه'         },
                 { key: 'hasParking',           label: 'پارکینگ'      },
-                { key: 'hasWifi',              label: 'اینترنت بی‌سیم' },
+                { key: 'hasWifi',              label: 'WiFi' },
                 { key: 'hasProfessionalCoach', label: 'مربی' },
               ].map(item => (
                 <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -548,7 +564,7 @@ export default function NewClubPage() {
           {/* ویدیو */}
           <div style={sectionStyle}>
             <h2 style={headingStyle}>ویدیوی باشگاه</h2>
-            <p style={{ fontSize: '13px', color: '#8A8474', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۱۰۰ مگابایت</p>
+            <p style={{ fontSize: '13px', color: '#8A8474', marginBottom: '12px' }}>یک ویدیوی معرفی — حداکثر ۲۵ مگابایت</p>
             <input type="file" accept="video/mp4,video/*" onChange={e => setVideoFile(e.target.files?.[0] ?? null)}
               className="dark-file w-full text-sm" style={{ color: 'rgba(0,0,0,0.45)' }} />
             {videoFile && <p style={{ fontSize: '13px', color: '#0E7A38', marginTop: '8px' }}>{videoFile.name} انتخاب شد</p>}

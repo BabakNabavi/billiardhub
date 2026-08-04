@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR, STATUS_LABEL } from '@/lib/roles'
 import { csrfToken, apiFetch } from '../../../lib/http'
@@ -32,18 +32,19 @@ function timeAgo(iso: string): string {
   return `${toFarsiDigits(Math.floor(h / 24))} روز پیش`
 }
 
-// ─── Request card ─────────────────────────────────────────────
-function RequestCard({
-  req,
-  onAction,
-}: {
+/* ── ردیفِ فشرده ──
+   جایگزینِ کارتِ بزرگ. با شصت درخواست، کارتِ ۱۶۰پیکسلی یعنی ادمین
+   باید ده صفحه اسکرول کند تا یک تصمیم بگیرد. این ردیف همه‌ی چیزهای
+   لازم — نقش، مدرک، زمان، دو دکمه — را در یک خط جا می‌دهد و کادرِ
+   دلیلِ رد فقط وقتی باز می‌شود که لازم باشد. */
+function RequestRow({ req, onAction }: {
   req: RoleRequest
-  onAction: (id: string, action: 'approve' | 'reject', note?: string) => void
+  onAction: (id: string, action: 'approve' | 'reject', note?: string) => Promise<void>
 }) {
+  const meta = ROLE_MAP[req.role] ?? { label: req.role, color: '#64748b', icon: 'user', requiresDoc: false }
   const [rejecting, setRejecting] = useState(false)
-  const [note, setNote]           = useState('')
-  const [busy, setBusy]           = useState(false)
-  const meta = ROLE_MAP[req.role]
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
 
   const act = async (action: 'approve' | 'reject') => {
     setBusy(true)
@@ -52,144 +53,83 @@ function RequestCard({
     setRejecting(false)
   }
 
+  /* نقشی که مدرک می‌خواهد و ندارد، اصلاً قابلِ تأیید نیست — دکمه‌ی
+     تأییدش خاموش می‌ماند تا ادمین ناخواسته چیزی را که ندیده تأیید
+     نکند. (از امروز سرور هم چنین درخواستی را نمی‌پذیرد.) */
+  const missingDoc = meta.requiresDoc && !req.doc_url
+
   return (
-    <div style={{
-      background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.07)',
-      borderRadius: 14, padding: '16px', marginBottom: 12,
-    }}>
-      {/* Row 1: user + role */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: '50%',
-          background: hexToRgba(meta.color, 0.12),
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <Ti name={meta.icon} size={22} color={meta.color} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#111111', marginBottom: 2 }}>
-            {req.users?.name ?? req.users?.mobile ?? req.user_id.slice(0, 8)}
-          </div>
-          <div style={{ fontSize: 13, color: meta.color }}>{meta.label}</div>
-        </div>
-        <div style={{
-          fontSize: 12, color: STATUS_COLOR[req.status],
-          background: hexToRgba(STATUS_COLOR[req.status], 0.1),
-          border: `1px solid ${hexToRgba(STATUS_COLOR[req.status], 0.3)}`,
-          borderRadius: 20, padding: '3px 10px',
+    <div style={{ padding: '9px 14px', borderTop: '1px solid rgba(0,0,0,0.04)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
+        <Ti name={meta.icon} size={16} color={meta.color} />
+        <span style={{ fontSize: 13.5, fontWeight: 700, color: meta.color, minWidth: 78 }}>{meta.label}</span>
+
+        {req.doc_url ? (
+          <a href={req.doc_url} target="_blank" rel="noreferrer"
+            style={{ fontSize: 12, color: '#C7A66A', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            <Ti name="file" size={13} /> مدرک
+          </a>
+        ) : missingDoc ? (
+          <span style={{ fontSize: 11.5, color: '#B7791F' }}>
+            <Ti name="alert-triangle" size={12} style={{ marginLeft: 3 }} /> بدون مدرک
+          </span>
+        ) : (
+          <span style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.3)' }}>مدرک لازم ندارد</span>
+        )}
+
+        <span style={{
+          marginInlineStart: 'auto', fontSize: 11.5, color: STATUS_COLOR[req.status],
+          background: hexToRgba(STATUS_COLOR[req.status], 0.1), borderRadius: 20, padding: '2px 9px',
         }}>
           {STATUS_LABEL[req.status]}
-        </div>
-      </div>
-
-      {/* Time + doc */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>
-          <Ti name="clock" size={13} style={{ marginLeft: 3 }} />
-          {timeAgo(req.requested_at)}
         </span>
-        {req.doc_url && (
-          <a
-            href={req.doc_url}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              fontSize: 12, color: '#C7A66A', textDecoration: 'none',
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-            }}
-          >
-            <Ti name="file" size={13} />
-            مشاهده مدرک
-          </a>
-        )}
-        {meta.requiresDoc && !req.doc_url && (
-          <span style={{ fontSize: 12, color: '#f59e0b' }}>
-            <Ti name="alert-triangle" size={13} style={{ marginLeft: 3 }} />
-            مدرک آپلود نشده
-          </span>
+
+        {req.status === 'pending' && !rejecting && (
+          <>
+            <button onClick={() => act('approve')} disabled={busy || missingDoc}
+              title={missingDoc ? 'بدون مدرک قابل تأیید نیست' : 'تأیید'}
+              style={{
+                padding: '6px 12px', borderRadius: 9, border: 'none', fontSize: 12.5, fontWeight: 700,
+                fontFamily: 'inherit', cursor: (busy || missingDoc) ? 'not-allowed' : 'pointer',
+                background: (busy || missingDoc) ? 'rgba(0,0,0,0.05)' : '#C7A66A',
+                color: (busy || missingDoc) ? 'rgba(0,0,0,0.3)' : '#fff',
+              }}>
+              تأیید
+            </button>
+            <button onClick={() => setRejecting(true)}
+              style={{
+                padding: '6px 12px', borderRadius: 9, fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+                cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)',
+                background: 'rgba(239,68,68,0.08)', color: '#ef4444',
+              }}>
+              رد
+            </button>
+          </>
         )}
       </div>
 
-      {/* Actions (only for pending) */}
-      {req.status === 'pending' && (
-        <>
-          {!rejecting ? (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={() => act('approve')}
-                disabled={busy}
-                style={{
-                  flex: 1, padding: '9px', borderRadius: 10, border: 'none',
-                  background: busy ? 'rgba(0,0,0,0.04)' : '#C7A66A',
-                  color: busy ? 'rgba(0,0,0,0.35)' : '#FFFFFF',
-                  fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: busy ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                }}
-              >
-                <Ti name="check" size={16} />
-                تأیید
-              </button>
-              <button
-                onClick={() => setRejecting(true)}
-                style={{
-                  flex: 1, padding: '9px', borderRadius: 10,
-                  border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)',
-                  color: '#ef4444', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                }}
-              >
-                <Ti name="x" size={16} />
-                رد کردن
-              </button>
-            </div>
-          ) : (
-            <div>
-              <textarea
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                placeholder="دلیل رد (اختیاری)"
-                rows={2}
-                style={{
-                  width: '100%', background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
-                  borderRadius: 10, padding: '8px 12px', color: '#111111', fontSize: 14,
-                  fontFamily: 'inherit', resize: 'none', marginBottom: 8, outline: 'none',
-                }}
-              />
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  onClick={() => act('reject')}
-                  disabled={busy}
-                  style={{
-                    flex: 1, padding: '9px', borderRadius: 10, border: 'none',
-                    background: '#ef4444', color: '#fff',
-                    fontSize: 14, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
-                  }}
-                >
-                  تأیید رد
-                </button>
-                <button
-                  onClick={() => setRejecting(false)}
-                  style={{
-                    flex: 1, padding: '9px', borderRadius: 10,
-                    border: '1px solid rgba(0,0,0,0.08)', background: 'transparent',
-                    color: 'rgba(0,0,0,0.45)', fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
-                  }}
-                >
-                  انصراف
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+      {rejecting && (
+        <div style={{ display: 'flex', gap: 7, marginTop: 8, flexWrap: 'wrap' }}>
+          <input value={note} onChange={e => setNote(e.target.value)}
+            placeholder="دلیل رد — به کاربر نشان داده می‌شود"
+            style={{
+              flex: 1, minWidth: 170, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
+              borderRadius: 9, padding: '7px 11px', fontSize: 12.5, fontFamily: 'inherit', outline: 'none',
+            }} />
+          <button onClick={() => act('reject')} disabled={busy}
+            style={{ padding: '7px 13px', borderRadius: 9, border: 'none', background: '#ef4444', color: '#fff', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+            تأیید رد
+          </button>
+          <button onClick={() => setRejecting(false)}
+            style={{ padding: '7px 13px', borderRadius: 9, border: '1px solid rgba(0,0,0,0.08)', background: 'transparent', color: 'rgba(0,0,0,0.45)', fontSize: 12.5, fontFamily: 'inherit', cursor: 'pointer' }}>
+            انصراف
+          </button>
+        </div>
       )}
 
-      {/* Rejection note */}
       {req.status === 'rejected' && req.rejection_note && (
-        <div style={{
-          background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: 10, padding: '8px 12px', fontSize: 13, color: '#fca5a5',
-        }}>
-          {req.rejection_note}
+        <div style={{ fontSize: 12, color: '#ef4444', marginTop: 6 }}>
+          دلیل: {req.rejection_note}
         </div>
       )}
     </div>
@@ -200,6 +140,20 @@ function RequestCard({
 export default function AdminRolesPage() {
   const router = useRouter()
   const [requests, setRequests] = useState<RoleRequest[]>([])
+
+  /* درخواست‌های یک کاربر کنارِ هم — بیست نفر با سه نقش یعنی شصت
+     ردیفِ پراکنده که ادمین نمی‌فهمد کدامشان مالِ یک نفرند. */
+  const grouped = useMemo(() => {
+    const by = new Map<string, { key: string; name: string; items: RoleRequest[] }>()
+    for (const r of requests) {
+      const key = r.user_id
+      const name = r.users?.name || r.users?.mobile || key.slice(0, 8)
+      if (!by.has(key)) by.set(key, { key, name, items: [] })
+      by.get(key)!.items.push(r)
+    }
+    /* تازه‌ترین درخواست بالا — همان ترتیبی که سرور می‌دهد */
+    return [...by.values()]
+  }, [requests])
   const [filter, setFilter]     = useState<RoleStatus>('pending')
   const [loading, setLoading]   = useState(true)
   const [toast, setToast]       = useState<string | null>(null)
@@ -308,11 +262,37 @@ export default function AdminRolesPage() {
             </div>
           ) : (
             <>
+              {/* ── گروه‌بندی بر اساس کاربر ──
+                  با کارت‌های بزرگ، بیست نفر که هرکدام سه نقش خواسته‌اند
+                  یعنی شصت کارتِ هم‌شکل پشتِ هم — ادمین نمی‌فهمد کدام
+                  درخواست‌ها مالِ یک نفرند و باید با هم بررسی شوند.
+
+                  حالا هر کاربر یک بلوک است و نقش‌هایش زیرش، فشرده. */}
               <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 12 }}>
-                {toFarsiDigits(requests.length)} درخواست
+                {toFarsiDigits(requests.length)} درخواست از {toFarsiDigits(grouped.length)} کاربر
               </div>
-              {requests.map(r => (
-                <RequestCard key={r.id} req={r} onAction={handleAction} />
+              {grouped.map(g => (
+                <div key={g.key} style={{
+                  background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
+                  borderRadius: 14, marginBottom: 10, overflow: 'hidden',
+                }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+                    padding: '10px 14px', background: '#F7F7F5',
+                    borderBottom: '1px solid rgba(0,0,0,0.05)',
+                  }}>
+                    <Ti name="user" size={15} color="rgba(0,0,0,0.45)" />
+                    <span style={{ fontSize: 14, fontWeight: 800, color: '#111' }}>{g.name}</span>
+                    <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>
+                      {toFarsiDigits(g.items.length)} نقش · {timeAgo(g.items[0]!.requested_at)}
+                    </span>
+                  </div>
+                  <div>
+                    {g.items.map(r => (
+                      <RequestRow key={r.id} req={r} onAction={handleAction} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </>
           )}

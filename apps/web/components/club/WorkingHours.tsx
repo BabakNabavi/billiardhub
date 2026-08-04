@@ -9,11 +9,10 @@
    واضح نشان می‌دهد، و ساعت را از دو `select` می‌گیرد تا همه‌ی ارقام
    فارسی بمانند.
 
-   «همه‌ی روزها مثل این روز» هم اضافه شده چون بیشتر باشگاه‌ها هر هفت
-   روز یک ساعت کار می‌کنند و پر کردن هفت ردیف آزاردهنده بود.
+   دکمه‌ی «برای همه‌ی روزها» به‌خواستِ کاربر برداشته شد.
    ───────────────────────────────────────────────────────────── */
 
-import { Copy, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import FaTimeSelect from '../ui/FaTimeSelect'
 
 const INK = '#1C1B17', MUT = '#8A8474', LINE = '#E7E2D6'
@@ -72,13 +71,6 @@ export default function WorkingHours({ value, onChange }: {
   const setDay = (key: string, patch: Partial<DayHours>) =>
     onChange({ ...value, [key]: { ...value[key]!, ...patch } })
 
-  const copyToAll = (key: string) => {
-    const src = value[key]!
-    const next: Hours = { ...value }
-    for (const d of DAYS) next[d.key] = { ...src }
-    onChange(next)
-  }
-
   const openCount = DAYS.filter(d => value[d.key]?.isOpen).length
 
   return (
@@ -95,6 +87,24 @@ export default function WorkingHours({ value, onChange }: {
             : <>{toFa(openCount)} روز از هفته باز است</>}
       </div>
 
+      {/* ── چیدمانِ موبایل ──
+          تا امروز هیچ قاعده‌ی موبایلی نبود: ردیف `flex` با `flexWrap`
+          بود و روی عرضِ کم، دو کشوی ساعت و نشانِ مدت روی هم می‌افتادند
+          و خوانده نمی‌شدند.
+
+          حالا زیر ۵۲۰ پیکسل ردیف دو طبقه می‌شود — نامِ روز بالا، دو
+          کشوی ساعت پایین با عرضِ برابر — و نشانِ «چند ساعت» پنهان
+          می‌شود چون همان اطلاعات از خودِ دو ساعت خوانده می‌شود. */}
+      <style>{`
+        @media (max-width: 520px) {
+          .wh-row { gap: 8px !important; padding: 9px 10px !important; }
+          .wh-row .wh-toggle { width: 100%; }
+          .wh-times { display: flex !important; gap: 8px; width: 100%; }
+          .wh-times > * { flex: 1; min-width: 0; }
+          .wh-span { display: none !important; }
+        }
+      `}</style>
+
       <div style={{ display: 'grid', gap: 8 }}>
         {DAYS.map(d => {
           const v = value[d.key] ?? { open: '09:00', close: '23:00', isOpen: true }
@@ -108,7 +118,7 @@ export default function WorkingHours({ value, onChange }: {
             }}>
               {/* نام روز + کلید باز/تعطیل */}
               <button type="button" onClick={() => setDay(d.key, { isOpen: !v.isOpen })}
-                aria-pressed={v.isOpen}
+                aria-pressed={v.isOpen} className="wh-toggle"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8, flexShrink: 0,
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit',
@@ -130,8 +140,10 @@ export default function WorkingHours({ value, onChange }: {
 
               {v.isOpen ? (
                 <>
-                  <TimeSelect label="از" value={v.open} onChange={x => setDay(d.key, { open: x })} />
-                  <TimeSelect label="تا" value={v.close} onChange={x => setDay(d.key, { close: x })} />
+                  <span className="wh-times" style={{ display: 'contents' }}>
+                    <TimeSelect label="از" value={v.open} onChange={x => setDay(d.key, { open: x })} />
+                    <TimeSelect label="تا" value={v.close} onChange={x => setDay(d.key, { close: x })} />
+                  </span>
 
                   <span className="wh-span" style={{
                     fontSize: 11.5, color: FELT, background: 'rgba(14,122,56,0.08)',
@@ -141,16 +153,6 @@ export default function WorkingHours({ value, onChange }: {
                     {toFa(span(v.open, v.close))} ساعت
                   </span>
 
-                  <button type="button" onClick={() => copyToAll(d.key)} title="همه‌ی روزها مثل این روز"
-                    className="wh-copy"
-                    style={{
-                      marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5,
-                      background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.3)',
-                      color: GOLD_D, borderRadius: 9, padding: '6px 10px', fontSize: 11.5,
-                      fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                    }}>
-                    <Copy size={11} /> <span className="wh-copy-txt">برای همه‌ی روزها</span>
-                  </button>
                 </>
               ) : (
                 <span style={{

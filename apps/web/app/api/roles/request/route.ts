@@ -23,6 +23,20 @@ const REQUESTABLE = new Set([
   'technician', 'seller', 'manufacturer', 'club_owner',
 ]);
 
+/* نقش‌هایی که بدونِ مدرک اصلاً قابل بررسی نیستند.
+
+   ⚠️ تا امروز این بررسی وجود نداشت و صفحه‌ی انتخاب هم مرحله‌ی
+   بارگذاری را رد می‌کرد، پس شش درخواستِ خالی و بی‌مدرک روی میزِ ادمین
+   می‌نشست. ادمین چیزی برای تأیید یا رد کردن نداشت — نه مدرکی، نه
+   اطلاعاتی — و تنها کارِ ممکن حدس‌زدن بود.
+
+   این فهرست عمداً همان `requiresDoc`ِ صفحه‌ی کلاینت است. تکرارش
+   ناخوشایند است ولی لازم: قاعده‌ای که فقط در کلاینت باشد با یک
+   درخواستِ دستی دور زده می‌شود. */
+const DOC_REQUIRED = new Set([
+  'player', 'coach', 'referee', 'seller', 'manufacturer', 'club_owner',
+]);
+
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
   if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
@@ -40,6 +54,12 @@ export async function POST(req: NextRequest) {
   const docUrl = rawDoc && /^(\/|https?:\/\/[^/]*supabase)/i.test(rawDoc) ? rawDoc.slice(0, 500) : null;
   if (rawDoc && !docUrl) {
     return NextResponse.json({ message: 'نشانی مدرک معتبر نیست' }, { status: 400 });
+  }
+  if (DOC_REQUIRED.has(role) && !docUrl) {
+    return NextResponse.json(
+      { message: 'برای این نقش باید مدرک بارگذاری کنید' },
+      { status: 400 },
+    );
   }
 
   /* درخواستِ بازِ همین نقش ⇒ همان را برگردان، ردیفِ تکراری نساز */
