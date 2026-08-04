@@ -15,6 +15,10 @@ import { sb } from '../finance/db'
 
 /* ── جایگاه‌ها ────────────────────────────────────────────────── */
 
+/* کلیدهای *داخلی* — آن‌هایی که کدِ صفحه‌ی اصلی مستقیم به نامشان
+   ارجاع می‌دهد. این فهرست دیگر «همه‌ی جایگاه‌های ممکن» نیست: از
+   مهاجرتِ ۰۵۶ ادمین می‌تواند جایگاهِ تازه بسازد و کلیدش این‌جا نیست.
+   نگه داشتنشان فقط برای نگاشتِ کلیدهای قدیمی و ارجاع‌های تایپ‌شده است. */
 export const PLACEMENT_KEYS = [
   'market_featured_products_homepage',
   'featured_clubs_homepage',
@@ -26,14 +30,21 @@ export const PLACEMENT_KEYS = [
   'equipment_ads_left',
   'homepage_bottom_banner',
 ] as const
-export type PlacementKey = typeof PLACEMENT_KEYS[number]
+export type BuiltinPlacementKey = typeof PLACEMENT_KEYS[number]
+/* جایگاه‌ها ساختنی‌اند، پس کلید یک رشته است نه اتحادِ بسته. اعتبارِ
+   واقعی از وجودِ ردیف در دیتابیس می‌آید؛ این‌جا فقط *شکلِ* کلید
+   بررسی می‌شود. */
+export type PlacementKey = string
 
+/* همان قیدی که در دیتابیس هم هست (مهاجرتِ ۰۵۶). کلیدی با فاصله یا
+   حرفِ فارسی در مسیرها و در `Record`های کد می‌شکند. */
+export const PLACEMENT_KEY_RE = /^[a-z][a-z0-9_]{2,48}$/
 export const isPlacementKey = (v: unknown): v is PlacementKey =>
-  (PLACEMENT_KEYS as readonly string[]).includes(String(v))
+  typeof v === 'string' && PLACEMENT_KEY_RE.test(v)
 
 /* کلیدهای قدیمی ad_slots → معادل تازه؛ برای کلاینت‌های کش‌شده و
    درخواست‌های تبلیغ قبلی */
-export const LEGACY_KEY_MAP: Record<string, PlacementKey> = {
+export const LEGACY_KEY_MAP: Record<string, BuiltinPlacementKey> = {
   market_1: 'equipment_ads_right',
   market_2: 'equipment_ads_left',
   footer: 'homepage_bottom_banner',
@@ -72,6 +83,17 @@ export interface Placement {
   skipAfterSec: number | null
   /** فقط جایگاهِ ویدیویی — سقفِ مدتِ تبلیغ */
   maxDurationSec: number | null
+  /* ── مهاجرتِ ۰۵۶: آنچه پیش‌تر در کد هاردکد بود ── */
+  /** نقش‌های تأییدشده‌ای که اجازه‌ی خریدِ این جایگاه را دارند */
+  advertiserRoles: string[]
+  /** آیا کمپین پیش از نمایش بازبینیِ ادمین می‌خواهد */
+  approvalRequired: boolean
+  /** ابعادِ پیشنهادیِ فایل — فقط راهنمای فرمِ خرید */
+  dimensions: string | null
+  /** سقفِ حجمِ فایلِ همین جایگاه (مگابایت) */
+  maxFileMb: number | null
+  /** قوانینِ ویژه‌ی این جایگاه */
+  terms: string | null
 }
 
 type DbPlacement = {
@@ -82,6 +104,9 @@ type DbPlacement = {
   display_count?: number | null; rotation_mode?: RotationMode | null; priority?: number | null
   /* مخصوصِ جایگاهِ ویدیویی — مهاجرتِ ۰۵۱ */
   skip_after_sec?: number | null; max_duration_sec?: number | null
+  /* مهاجرتِ ۰۵۶ */
+  advertiser_roles?: string[] | null; approval_required?: boolean | null
+  dimensions?: string | null; max_file_mb?: number | null; terms?: string | null
 }
 
 const toPlacement = (r: DbPlacement): Placement => ({
@@ -97,6 +122,14 @@ const toPlacement = (r: DbPlacement): Placement => ({
      ویدیویی یعنی «رد کردن ممکن نیست» / «سقفِ مدت ندارد». */
   skipAfterSec: r.skip_after_sec ?? null,
   maxDurationSec: r.max_duration_sec ?? null,
+  /* ستون‌های ۰۵۶ — پیش از اجرای مهاجرت وجود ندارند، پس پیش‌فرضِ امن:
+     بازبینی لازم است و هیچ نقشی مجاز نیست. «مجاز نیست» یعنی فعلاً
+     خریدنی نیست، که از فروشِ ناخواسته بهتر است. */
+  advertiserRoles: Array.isArray(r.advertiser_roles) ? r.advertiser_roles.map(String) : [],
+  approvalRequired: r.approval_required !== false,
+  dimensions: r.dimensions ?? null,
+  maxFileMb: r.max_file_mb ?? null,
+  terms: r.terms ?? null,
 })
 
 /** عدد صحیح محدودشده — ورودی ادمین نباید از بازه‌ی integer دیتابیس بیرون بزند */
@@ -129,12 +162,83 @@ export async function getPlacement(key: string): Promise<Placement | null> {
   return toPlacement(data as DbPlacement)
 }
 
+/* ── ساختِ جایگاهِ تازه (مهاجرتِ ۰۵۶) ──
+
+   تا امروز هر جایگاهِ تازه یک کامیت و یک دیپلوی می‌خواست، چون کلیدها
+   در کد هاردکد بودند. حالا ادمین از پنل می‌سازد.
+
+   جایگاهِ تازه عمداً **خاموش** و در حالتِ `manual` متولد می‌شود: جایگاهی
+   که همان لحظه‌ی ساخته‌شدن روی سایت ظاهر شود یا فروخته شود، یعنی یک
+   اشتباهِ تایپی مستقیم به کاربر می‌رسد. */
+export async function createPlacement(input: {
+  key: string; title: string; description?: string | null; section?: string
+  contentKind?: ContentKind; entityType?: EntityType | null
+  capacity?: number; displayCount?: number; rotationMode?: RotationMode
+  priority?: number; durationDays?: number
+  advertiserRoles?: string[]; approvalRequired?: boolean
+  dimensions?: string | null; maxFileMb?: number | null; terms?: string | null
+  skipAfterSec?: number | null; maxDurationSec?: number | null
+}): Promise<{ placement: Placement } | { error: string }> {
+  const key = String(input.key ?? '').trim().toLowerCase()
+  if (!isPlacementKey(key)) {
+    return { error: 'کلید جایگاه باید با حرف انگلیسی شروع شود و فقط حرف کوچک، رقم و زیرخط داشته باشد' }
+  }
+  const title = String(input.title ?? '').trim()
+  if (!title) return { error: 'عنوان جایگاه لازم است' }
+
+  const kind: ContentKind =
+    input.contentKind === 'entity' || input.contentKind === 'video' ? input.contentKind : 'banner'
+  /* جایگاهِ موجودیتی بدونِ نوعِ موجودیت بی‌معناست و هنگام سرو ساکت
+     خالی می‌ماند؛ همین‌جا جلویش گرفته می‌شود. */
+  if (kind === 'entity' && !input.entityType) {
+    return { error: 'برای جایگاه موجودیتی، نوع موجودیت را مشخص کنید' }
+  }
+
+  const row: Record<string, unknown> = {
+    key, title,
+    description: input.description ?? null,
+    section: String(input.section ?? 'custom').trim() || 'custom',
+    is_active: false,
+    mode: 'manual',
+    content_kind: kind,
+    entity_type: kind === 'entity' ? input.entityType : null,
+    capacity: clampInt(input.capacity ?? 1, 0, 500),
+    display_count: clampInt(input.displayCount ?? 0, 0, 500),
+    rotation_mode: isRotationMode(input.rotationMode) ? input.rotationMode : 'fair',
+    priority: clampInt(input.priority ?? 0, -10000, 10000),
+    price: 0,
+    duration_days: clampInt(input.durationDays ?? 30, 1, 3650),
+    sort_order: 0,
+    advertiser_roles: Array.isArray(input.advertiserRoles)
+      ? input.advertiserRoles.map(r => String(r).trim()).filter(Boolean).slice(0, 12)
+      : [],
+    approval_required: input.approvalRequired !== false,
+    dimensions: input.dimensions ?? null,
+    max_file_mb: input.maxFileMb == null ? null : clampInt(input.maxFileMb, 1, 200),
+    terms: input.terms ?? null,
+    skip_after_sec: kind === 'video' ? (input.skipAfterSec ?? 5) : null,
+    max_duration_sec: kind === 'video' ? (input.maxDurationSec ?? 15) : null,
+  }
+
+  const { data, error } = await sb().from('placements').insert(row).select().single()
+  if (error) {
+    /* کلید یکتاست؛ پیامِ خام دیتابیس به کاربر نشان داده نمی‌شود */
+    if (String(error.message ?? '').includes('duplicate') || (error as { code?: string }).code === '23505') {
+      return { error: 'جایگاهی با این کلید از قبل وجود دارد' }
+    }
+    return { error: 'ساخت جایگاه انجام نشد' }
+  }
+  return { placement: toPlacement(data as DbPlacement) }
+}
+
 /** تنظیمات مستقل هر جایگاه — is_active و mode جدا از هم (بدون کلید سراسری) */
 export async function updatePlacement(key: string, patch: Partial<{
   isActive: boolean; mode: PlacementMode; capacity: number; price: number
   durationDays: number; title: string; description: string
   displayCount: number; rotationMode: RotationMode; priority: number
   skipAfterSec: number | null; maxDurationSec: number | null
+  advertiserRoles: string[]; approvalRequired: boolean
+  dimensions: string | null; maxFileMb: number | null; terms: string | null
 }>): Promise<Placement | null> {
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (patch.isActive !== undefined) row.is_active = patch.isActive
@@ -157,6 +261,18 @@ export async function updatePlacement(key: string, patch: Partial<{
   if (patch.maxDurationSec !== undefined) {
     row.max_duration_sec = patch.maxDurationSec === null ? null : clampInt(patch.maxDurationSec, 1, 300)
   }
+  /* ── مهاجرتِ ۰۵۶ ── */
+  if (patch.advertiserRoles !== undefined) {
+    row.advertiser_roles = Array.isArray(patch.advertiserRoles)
+      ? patch.advertiserRoles.map(r => String(r).trim()).filter(Boolean).slice(0, 12)
+      : []
+  }
+  if (patch.approvalRequired !== undefined) row.approval_required = !!patch.approvalRequired
+  if (patch.dimensions !== undefined) row.dimensions = patch.dimensions
+  if (patch.maxFileMb !== undefined) {
+    row.max_file_mb = patch.maxFileMb === null ? null : clampInt(patch.maxFileMb, 1, 200)
+  }
+  if (patch.terms !== undefined) row.terms = patch.terms
 
   const { data, error } = await sb().from('placements').update(row).eq('key', key).select().single()
   if (error || !data) return null

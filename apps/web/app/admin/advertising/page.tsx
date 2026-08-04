@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Megaphone, Save, Power, Loader2, AlertCircle, Plus, Trash2, Inbox, Phone, Package, LayoutGrid,
-  BarChart3, Eye, MousePointerClick, Wallet, RotateCw,
+  BarChart3, Eye, MousePointerClick, Wallet, RotateCw, Check,
 } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits, faDateTime, faDate } from '../../../lib/jalali'
@@ -180,6 +180,7 @@ export default function AdminAdvertising() {
                 campaignCount={campaigns.filter(c => c.placementKey === p.key && c.status === 'ACTIVE').length} />
             ))}
           </div>
+          <NewPlacement onDone={load} flash={flash} call={call} />
         </section>
       )}
 
@@ -305,6 +306,175 @@ function StatsSection({ s }: { s: Stats }) {
 }
 
 /* ── ردیف جایگاه — Active و Mode مستقل ─────────────────────── */
+/* ── ساختِ جایگاهِ تازه ──────────────────────────────────────────
+   تا مهاجرتِ ۰۵۶ کلیدِ هر جایگاه در کد هاردکد بود و هر جایگاهِ تازه یک
+   دیپلوی می‌خواست. جایگاهِ ساخته‌شده عمداً خاموش و «دستی» متولد می‌شود:
+   جایگاهی که همان لحظه روی سایت ظاهر شود یعنی اشتباهِ تایپی مستقیم به
+   بازدیدکننده می‌رسد. */
+const ROLE_OPTS = [
+  { key: 'club_owner', fa: 'باشگاه‌دار' },
+  { key: 'seller', fa: 'فروشنده' },
+  { key: 'manufacturer', fa: 'تولیدکننده' },
+  { key: 'coach', fa: 'مربی' },
+  { key: 'referee', fa: 'داور' },
+]
+const KIND_OPTS = [
+  { value: 'banner' as const, label: 'بنر تصویری' },
+  { value: 'video' as const, label: 'ویدیو (پیش‌پخش)' },
+  { value: 'entity' as const, label: 'موجودیت (کارت محصول/باشگاه/فروشگاه)' },
+]
+const ENTITY_OPTS = [
+  { value: 'product' as const, label: 'محصول' },
+  { value: 'club' as const, label: 'باشگاه' },
+  { value: 'seller' as const, label: 'فروشگاه' },
+]
+
+function NewPlacement({ onDone, flash, call }: {
+  onDone: () => Promise<void> | void
+  flash: (m: string) => void
+  call: (m: string, b?: Record<string, unknown>, q?: string) => Promise<Record<string, unknown> | null>
+}) {
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [key, setKey] = useState('')
+  const [title, setTitle] = useState('')
+  const [desc, setDesc] = useState('')
+  const [kind, setKind] = useState<'banner' | 'video' | 'entity'>('banner')
+  const [entity, setEntity] = useState<'product' | 'club' | 'seller'>('product')
+  const [cap, setCap] = useState('1')
+  const [dims, setDims] = useState('')
+  const [roles, setRoles] = useState<string[]>([])
+  const [approval, setApproval] = useState(true)
+  const [err, setErr] = useState('')
+
+  const reset = () => {
+    setKey(''); setTitle(''); setDesc(''); setKind('banner'); setEntity('product')
+    setCap('1'); setDims(''); setRoles([]); setApproval(true); setErr('')
+  }
+
+  const submit = async () => {
+    if (!/^[a-z][a-z0-9_]{2,48}$/.test(key.trim())) {
+      setErr('کلید باید با حرف کوچک انگلیسی شروع شود و فقط حرف کوچک، رقم و زیرخط داشته باشد')
+      return
+    }
+    if (!title.trim()) { setErr('عنوان لازم است'); return }
+    setBusy(true); setErr('')
+    try {
+      const r = await call('POST', {
+        type: 'placement',
+        key: key.trim(), title: title.trim(), description: desc.trim() || null,
+        contentKind: kind, entityType: kind === 'entity' ? entity : null,
+        capacity: Number(cap) || 1,
+        dimensions: dims.trim() || null,
+        advertiserRoles: roles, approvalRequired: approval,
+      })
+      if (r) { flash('جایگاه ساخته شد — خاموش است تا خودتان روشنش کنید'); reset(); setOpen(false); await onDone() }
+    } finally { setBusy(false) }
+  }
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)}
+        style={{ ...BTN, marginTop: 12, alignSelf: 'flex-start' }}>
+        <Plus size={14} /> جایگاه جدید
+      </button>
+    )
+  }
+
+  return (
+    <div style={{ marginTop: 12, border: `1px dashed ${LINE}`, borderRadius: 14, padding: 15, background: '#FAFAF7' }}>
+      <div style={{ fontSize: 13.5, fontWeight: 900, color: INK, marginBottom: 12 }}>جایگاه جدید</div>
+
+      <div style={{ display: 'grid', gap: 11, gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
+        <div>
+          <label style={LABEL}>کلید (لاتین، در URL می‌آید)</label>
+          <input style={{ ...INPUT, background: '#fff', direction: 'ltr', textAlign: 'left' }}
+            value={key} onChange={e => { setKey(e.target.value.toLowerCase()); setErr('') }}
+            placeholder="sponsored_tournament" />
+        </div>
+        <div>
+          <label style={LABEL}>عنوان</label>
+          <input style={{ ...INPUT, background: '#fff' }} value={title}
+            onChange={e => { setTitle(e.target.value); setErr('') }} placeholder="اسپانسر مسابقات" />
+        </div>
+        <div>
+          <label style={LABEL}>نوع محتوا</label>
+          <Select value={kind} options={KIND_OPTS} ariaLabel="نوع محتوا"
+            onChange={v => setKind(v)} />
+        </div>
+        {kind === 'entity' && (
+          <div>
+            <label style={LABEL}>نوع موجودیت</label>
+            <Select value={entity} options={ENTITY_OPTS} ariaLabel="نوع موجودیت"
+              onChange={v => setEntity(v)} />
+          </div>
+        )}
+        <div>
+          <label style={LABEL}>ظرفیت</label>
+          <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric"
+            value={fa(cap)} onChange={e => setCap(digits(e.target.value))} title="۰ = بی‌سقف" />
+        </div>
+        <div>
+          <label style={LABEL}>ابعاد پیشنهادی</label>
+          <input style={{ ...INPUT, background: '#fff' }} value={dims}
+            onChange={e => setDims(e.target.value)} placeholder="۳۰۰×۶۰۰ پیکسل" />
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <label style={LABEL}>توضیح (به خریدار نشان داده می‌شود)</label>
+        <input style={{ ...INPUT, background: '#fff' }} value={desc}
+          onChange={e => setDesc(e.target.value)} placeholder="کجا دیده می‌شود و چه مخاطبی دارد" />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <label style={LABEL}>چه نقشی می‌تواند بخرد</label>
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+          {ROLE_OPTS.map(r => {
+            const on = roles.includes(r.key)
+            return (
+              <button key={r.key} type="button"
+                onClick={() => setRoles(s => on ? s.filter(x => x !== r.key) : [...s, r.key])}
+                style={{
+                  ...BTN, padding: '6px 12px', fontSize: 12,
+                  background: on ? 'rgba(14,122,56,0.10)' : '#fff',
+                  borderColor: on ? 'rgba(14,122,56,0.32)' : LINE,
+                  color: on ? FELT : SEC,
+                }}>
+                {on && <Check size={12} />} {r.fa}
+              </button>
+            )
+          })}
+        </div>
+        {roles.length === 0 && (
+          <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 5, lineHeight: 1.7 }}>
+            بدون نقش، این جایگاه برای هیچ‌کس قابل خرید نیست — فقط خودتان می‌توانید رویش کمپین بگذارید.
+          </div>
+        )}
+      </div>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 12, cursor: 'pointer' }}>
+        <input type="checkbox" checked={approval} onChange={e => setApproval(e.target.checked)}
+          style={{ width: 15, height: 15, accentColor: GOLD_D }} />
+        <span style={{ fontSize: 12, color: SEC }}>کمپین‌های این جایگاه پیش از نمایش بازبینی شوند</span>
+      </label>
+
+      {err && (
+        <div style={{ fontSize: 11.5, color: RED, marginTop: 10, lineHeight: 1.8 }}>{err}</div>
+      )}
+
+      <div style={{ display: 'flex', gap: 9, marginTop: 14 }}>
+        <button type="button" onClick={() => void submit()} disabled={busy} style={BTN}>
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} ساخت
+        </button>
+        <button type="button" onClick={() => { reset(); setOpen(false) }} style={{ ...BTN, background: '#fff' }}>
+          انصراف
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function PlacementRow({ p, busy, campaignCount, onPatch }: {
   p: Placement; busy: boolean; campaignCount: number
   onPatch: (key: string, body: Record<string, unknown>) => Promise<void>

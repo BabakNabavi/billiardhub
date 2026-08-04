@@ -6,7 +6,7 @@ import {
   listPlacements, updatePlacement, getPlacement,
   listCampaigns, createCampaign, updateCampaign, deleteCampaign,
   listPricingPlans, updatePricingPlan, createPricingPlan, deletePricingPlan,
-  validateContent, isPlacementKey, isCampaignStatus, expireCampaigns,
+  validateContent, isPlacementKey, isCampaignStatus, expireCampaigns, createPlacement,
   isRotationMode, adStats,
   type PlacementMode, type RotationMode,
 } from '@/lib/ads/core';
@@ -86,6 +86,40 @@ export async function POST(req: NextRequest) {
     if (!plan) return NextResponse.json({ message: 'ساخت پلن انجام نشد' }, { status: 500 });
     void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'AD_PRICING_PLAN_CREATED', entityType: 'ad_pricing_plan', entityId: plan.id, newValue: { name, price: plan.price } });
     return NextResponse.json({ plan }, { status: 201 });
+  }
+
+  /* ── جایگاهِ تازه (مهاجرتِ ۰۵۶) ──
+     تا امروز هر جایگاه یک کامیت و یک دیپلوی می‌خواست. جایگاهِ تازه
+     خاموش و در حالتِ دستی متولد می‌شود تا اشتباهِ تایپی مستقیم روی
+     سایت ننشیند. */
+  if (b?.type === 'placement') {
+    const made = await createPlacement({
+      key: String(b?.key ?? ''),
+      title: str(b?.title, 120),
+      description: str(b?.description, 400) || null,
+      section: str(b?.section, 40) || 'custom',
+      contentKind: b?.contentKind,
+      entityType: b?.entityType ?? null,
+      capacity: num(b?.capacity, 1),
+      displayCount: num(b?.displayCount),
+      rotationMode: b?.rotationMode,
+      priority: num(b?.priority),
+      durationDays: num(b?.durationDays, 30),
+      advertiserRoles: Array.isArray(b?.advertiserRoles) ? b.advertiserRoles : [],
+      approvalRequired: b?.approvalRequired !== false,
+      dimensions: str(b?.dimensions, 80) || null,
+      maxFileMb: b?.maxFileMb == null ? null : num(b.maxFileMb),
+      terms: str(b?.terms, 2000) || null,
+      skipAfterSec: b?.skipAfterSec == null ? null : num(b.skipAfterSec),
+      maxDurationSec: b?.maxDurationSec == null ? null : num(b.maxDurationSec),
+    });
+    if ('error' in made) return NextResponse.json({ message: made.error }, { status: 400 });
+    void audit({
+      actorId: g.actor!.id, actorRole: g.actor!.role, action: 'PLACEMENT_CREATED',
+      entityType: 'placement', entityId: made.placement.key,
+      newValue: { title: made.placement.title, contentKind: made.placement.contentKind },
+    });
+    return NextResponse.json({ placement: made.placement }, { status: 201 });
   }
 
   /* ── کمپین ── */

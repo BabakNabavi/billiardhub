@@ -20,7 +20,15 @@ import {
    هر جایگاه به نقش‌هایی گره خورده که منطقاً صاحب آن محتوا هستند:
    باشگاه‌دار باشگاهش را برجسته می‌کند، فروشنده فروشگاهش را، تولیدکننده
    محصولش را. بنرهای عمومی برای هر کسب‌وکار تأییدشده باز است. */
-export const PLACEMENT_ROLES: Record<PlacementKey, string[]> = {
+/* ⚠️ این نگاشت دیگر منبعِ حقیقت نیست.
+
+   از مهاجرتِ ۰۵۶ نقش‌های مجازِ هر جایگاه در ستونِ `advertiser_roles`
+   خودِ ردیف است، چون ادمین می‌تواند جایگاه بسازد و کدی که فهرستش را
+   نگه دارد باید برای هر جایگاهِ تازه دوباره دیپلوی شود.
+
+   این ثابت فقط پشتیبانِ ردیف‌هایی است که هنوز ستونشان خالی است — و
+   `rolesFor` اول سراغ ردیف می‌رود. */
+export const PLACEMENT_ROLES: Record<string, string[]> = {
   market_featured_products_homepage: ['manufacturer', 'seller'],
   featured_clubs_homepage: ['club_owner'],
   featured_equipment_stores_homepage: ['seller'],
@@ -30,6 +38,10 @@ export const PLACEMENT_ROLES: Record<PlacementKey, string[]> = {
   equipment_ads_left: ['club_owner', 'seller', 'manufacturer'],
   homepage_bottom_banner: ['club_owner', 'seller', 'manufacturer'],
 }
+
+/** نقش‌های مجازِ یک جایگاه — از خودِ ردیف، و اگر خالی بود از نگاشتِ قدیمی */
+export const rolesFor = (p: Pick<Placement, 'key' | 'advertiserRoles'>): string[] =>
+  (p.advertiserRoles?.length ? p.advertiserRoles : (PLACEMENT_ROLES[p.key] ?? []))
 
 export interface Eligibility {
   /** نقش‌های تأییدشده‌ی شخص (نه نقش‌های خوداظهار) */
@@ -55,10 +67,7 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
   const roles = await verifiedRolesOfPerson(lookup.personId)
   const paid = (await listPlacements()).filter(p => p.mode === 'paid')
 
-  const allowed = paid.filter(p => {
-    const need = PLACEMENT_ROLES[p.key] ?? []
-    return need.some(r => roles.includes(r))
-  })
+  const allowed = paid.filter(p => roles.some(r => rolesFor(p).includes(r)))
 
   const withPlans = await Promise.all(allowed.map(async p => {
     const plans = await plansForPlacement(p.key)
