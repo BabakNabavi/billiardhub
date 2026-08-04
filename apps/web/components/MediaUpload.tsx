@@ -98,7 +98,25 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
     if (!title) setTitle(f.name.replace(/\.[^.]+$/, '').slice(0, 120))
   }
 
-  const onMeta = () => { const v = vref.current; if (v) { setDuration(fmtDur(v.duration)); try { v.currentTime = Math.min(1.2, (v.duration || 3) / 3) } catch { /* */ } } }
+  /* متادیتای واقعیِ فایل، از خودِ مرورگر.
+
+     تا امروز فقط رشته‌ی «۰۴:۱۳» برای نمایش ساخته می‌شد و ثانیه/ابعاد
+     دور ریخته می‌شد. آن اعداد همان چیزی‌اند که `VideoObject` و نقشه‌ی
+     سایتِ ویدیو لازم دارند — و بدونشان یا آن فیلد نمی‌آید یا باید
+     عددِ ساختگی گذاشت، که به گوگل دروغ می‌گوید.
+
+     همه‌جا NULL می‌ماند اگر مرورگر نتوانست بخواند؛ صفر گذاشته نمی‌شود. */
+  const [meta, setMeta] = useState<{ durationSec?: number; width?: number; height?: number }>({})
+  const onMeta = () => {
+    const v = vref.current; if (!v) return
+    setDuration(fmtDur(v.duration))
+    setMeta({
+      durationSec: Number.isFinite(v.duration) && v.duration > 0 ? Math.round(v.duration) : undefined,
+      width: v.videoWidth || undefined,
+      height: v.videoHeight || undefined,
+    })
+    try { v.currentTime = Math.min(1.2, (v.duration || 3) / 3) } catch { /* */ }
+  }
   const onSeeked = async () => {
     const v = vref.current; if (!v || thumbFile) return
     const f = await captureFrame(v)
@@ -124,23 +142,34 @@ export default function MediaUpload({ open, onClose, onUploaded }: { open: boole
       if (thumbFile) { setPhase('در حال آپلود تصویر…'); thumb = (await uploadFile('club-media', thumbFile, `social/media/thumb/${id}.jpg`)) || '' }
       setPhase('در حال انتشار…')
       const res = await postUserVideo({
-        id, title: title.trim(), category, ownerKey,
+        title: title.trim(), category,
         creatorName: channel.name,
         creatorHandle: channel.handle,
-        duration: duration || '۰۰:۰۰', date: todayFa(), thumb, src,
-        description: desc.trim() ? desc.trim().split(/\n+/).filter(Boolean).slice(0, 6) : [],
+        thumb, src,
+        description: desc.trim(),
         tags: tags.split(/[،,]/).map(t => t.trim()).filter(Boolean).slice(0, 8),
+        /* متادیتای واقعیِ فایل — پایه‌ی VideoObject و نقشه‌ی سایت */
+        durationSec: meta.durationSec,
+        width: meta.width,
+        height: meta.height,
+        mime: file.type || undefined,
+        sizeBytes: file.size || undefined,
       })
       if (!res?.ok || !res.video) throw new Error('publish')
+      const v = res.video
       onUploaded({
-        id: res.video.id, title: res.video.title, category: res.video.category as MediaVideo['category'],
-        creator: { id: res.video.ownerKey, name: res.video.creatorName, handle: res.video.creatorHandle },
-        duration: res.video.duration, views: 0, likes: 0, date: res.video.date, ts: res.video.ts,
-        thumb: res.video.thumb, src: res.video.src, description: res.video.description, tags: res.video.tags,
+        /* شناسه‌ی نمایشی حالا همان نشانیِ عمومی است */
+        id: v.slug, title: v.title, category: v.category as MediaVideo['category'],
+        creator: { id: v.creatorHandle, name: v.creatorName, handle: v.creatorHandle },
+        duration: duration || '', views: 0, likes: 0,
+        date: todayFa(), ts: Date.now(),
+        thumb: v.thumb, src: v.src,
+        description: v.description ? v.description.split('\n').filter(Boolean) : [],
+        tags: v.tags ?? [],
       })
       onClose()
       // ریست
-      setFile(null); setVideoUrl(''); setDuration(''); setThumbFile(null); setThumbPrev(''); setTitle(''); setDesc(''); setTags('')
+      setFile(null); setVideoUrl(''); setDuration(''); setMeta({}); setThumbFile(null); setThumbPrev(''); setTitle(''); setDesc(''); setTags('')
     } catch {
       setErr('آپلود ناموفق بود؛ اتصال را بررسی کنید و دوباره تلاش کنید')
     } finally { setBusy(false); setPhase('') }

@@ -27,6 +27,20 @@ const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
 
 export default function WatchClient({ video, related }: { video: MediaVideo; related: MediaVideo[] }) {
+  /* بازدید هنگامِ *شروعِ پخش* ثبت می‌شود، نه بازشدنِ صفحه: بازکردن یعنی
+     کنجکاوی، پخش یعنی تماشا. `sent` جلوی ثبتِ دوباره را در همین صفحه
+     می‌گیرد (هر مکث و ادامه یک رویدادِ play است)؛ تکرارِ بینِ نشست‌ها
+     را خودِ سرور می‌بندد. */
+  const [sent, setSent] = useState(false)
+  const countView = () => {
+    if (sent) return
+    setSent(true)
+    void fetch('/api/media/view', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ slug: video.id }), keepalive: true,
+    }).catch(() => { /* شمارش حیاتی نیست */ })
+  }
+
   const [liked, setLiked]         = useState(false)
   const [saved, setSaved]         = useState(false)
   const [following, setFollowing] = useState(false)
@@ -81,6 +95,8 @@ export default function WatchClient({ video, related }: { video: MediaVideo; rel
             {/* پلیر */}
             <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', background: '#000', boxShadow: '0 30px 70px rgba(28,27,23,0.22)', animation: 'mvUp .45s ease both' }}>
               <video key={video.id} controls playsInline preload="metadata" poster={video.thumb}
+                aria-label={`پخش ویدیو: ${video.title}`}
+                onPlay={countView}
                 style={{ width: '100%', aspectRatio: '16/9', display: 'block', background: '#000' }}>
                 <source src={video.src} type="video/mp4" />
                 مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.

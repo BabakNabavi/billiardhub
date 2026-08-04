@@ -86,9 +86,13 @@ export default async function WatchPage({ params }: Params) {
 
   if (!v) {
     /* شاید نشانیِ قدیمی باشد — عنوان که عوض شود slug هم عوض می‌شود.
-       ریدایرکتِ دائمی یعنی اعتبارِ لینک‌های بیرونی حفظ می‌شود. */
+       ریدایرکتِ دائمی یعنی اعتبارِ لینک‌های بیرونی حفظ می‌شود.
+
+       ⚠️ `encodeURIComponent` لازم است: نشانی‌ها فارسی‌اند و هدرِ HTTP
+       فقط ASCII می‌پذیرد. بدونِ آن پاسخ با «نویسه‌ی نامعتبر در هدر»
+       می‌شکند و کاربر به‌جای ریدایرکت، خطای ۵۰۰ می‌گیرد. */
     const fresh = await slugRedirect(slug)
-    if (fresh) permanentRedirect(`/media/${fresh}`)
+    if (fresh) permanentRedirect(`/media/${encodeURIComponent(fresh)}`)
     notFound()
   }
 

@@ -78,9 +78,24 @@ export async function fetchUserVideos(): Promise<MediaVideo[]> {
   return (await fetchVideos({ limit: 48 })).items
 }
 
-export async function postUserVideo(video: Partial<RawUserVideo>): Promise<{ ok?: boolean; video?: RawUserVideo; message?: string }> {
+/* ورودیِ ثبتِ ویدیو. `durationSec`/`width`/`height` عمداً اختیاری‌اند
+   و اگر مرورگر نتوانست بخواند فرستاده نمی‌شوند — سرور آن‌ها را NULL
+   نگه می‌دارد، نه صفر. صفر در داده‌ی ساختاریافته یعنی «طولش صفر
+   است» که دروغ است. */
+export interface NewVideoInput {
+  title: string; description?: string; category?: string; tags?: string[]
+  creatorName?: string; creatorHandle?: string; clubId?: string
+  src: string; thumb?: string
+  durationSec?: number; width?: number; height?: number
+  mime?: string; sizeBytes?: number
+}
+
+export async function postUserVideo(video: NewVideoInput): Promise<{ ok?: boolean; video?: PublicVideo; message?: string }> {
   try {
-    const r = await apiFetch('/api/media', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ video }) })
+    const r = await apiFetch('/api/media', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ video }),
+    })
     return await r.json()
   } catch { return { ok: false } }
 }
