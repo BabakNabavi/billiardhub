@@ -89,6 +89,15 @@ interface AdRequest {
   id: string; name: string; phone: string; email: string | null; company: string | null
   slot_key: string | null; message: string; status: string; created_at: string
 }
+/* سفارشِ خرید — بدونِ این، ادمین نمی‌داند کدام کمپین اصلاً پولی
+   پرداخت شده و چه چیزی قابلِ بازگرداندن است (مهاجرتِ ۰۵۸) */
+interface AdOrder {
+  id: string; campaign_id: string | null; user_id: string
+  amount: number; status: string
+  paid_at: string | null; refunded_at: string | null
+  refund_amount: number | null; refund_reason: string | null
+  created_at: string
+}
 
 const fa = (n: number | string) => toFaDigits(typeof n === 'number' ? n.toLocaleString('en-US') : String(n))
 const digits = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '')
@@ -99,6 +108,7 @@ export default function AdminAdvertising() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [requests, setRequests] = useState<AdRequest[]>([])
+  const [orders, setOrders] = useState<AdOrder[]>([])
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState('')
   const [toast, setToast] = useState('')
@@ -115,6 +125,7 @@ export default function AdminAdvertising() {
       setPlans(j.plans ?? [])
       setStats(j.stats ?? null)
       setRequests(j.requests ?? [])
+      setOrders(j.orders ?? [])
       setErr('')
     } catch { setErr('خطا در ارتباط با سرور'); setPlacements([]) }
   }, [])
@@ -186,7 +197,7 @@ export default function AdminAdvertising() {
 
       {/* ── کمپین‌ها ── */}
       <CampaignsSection
-        placements={placements ?? []} campaigns={campaigns}
+        placements={placements ?? []} campaigns={campaigns} orders={orders}
         onChanged={load} flash={flash} call={call}
       />
 
@@ -620,12 +631,29 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
 }
 
 /* ── کمپین‌ها: فهرست + ساخت ─────────────────────────────────── */
-function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
-  placements: Placement[]; campaigns: Campaign[]
+function CampaignsSection({ placements, campaigns, orders, onChanged, flash, call }: {
+  placements: Placement[]; campaigns: Campaign[]; orders: AdOrder[]
   onChanged: () => Promise<void>; flash: (m: string) => void
   call: (method: string, body?: Record<string, unknown>, query?: string) => Promise<Record<string, unknown> | null>
 }) {
   const [busy, setBusy] = useState('')
+  /* سفارشِ هر کمپین — برای نشان‌دادنِ مبلغ و امکانِ بازگرداندنش */
+  const orderOf = new Map(orders.filter(o => o.campaign_id).map(o => [String(o.campaign_id), o]))
+
+  const refund = async (order: AdOrder) => {
+    /* بازپرداخت پول را برمی‌گرداند و کمپین را می‌خواباند — برگشت‌ناپذیر
+       است، پس تأییدِ صریح می‌گیریم. */
+    const reason = window.prompt(
+      `بازگرداندن ${fa(order.amount)} تومان و لغو کمپین.\nدلیل بازپرداخت (در گزارش مالی ثبت می‌شود):`,
+    )
+    if (reason === null) return
+    setBusy(order.id)
+    try {
+      const r = await call('PATCH', { type: 'refund', orderId: order.id, reason })
+      if (r) { await onChanged(); flash(r.already ? 'این سفارش قبلاً بازپرداخت شده بود' : 'بازپرداخت ثبت شد') }
+    } finally { setBusy('') }
+  }
+
   const [draft, setDraft] = useState({
     placementKey: '', advertiser: '', title: '', imageUrl: '', linkUrl: '', ref: '', durationDays: '30', status: 'ACTIVE',
   })
@@ -754,6 +782,30 @@ function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
                   <Select compact value={c.status} options={STATUS_OPTS} ariaLabel="تغییر وضعیت"
                     onChange={v => void setStatus(c.id, v)} />
                 </div>
+                {/* بازپرداخت فقط برای سفارشِ واقعاً پرداخت‌شده معنا دارد.
+                    کمپینِ ادمین‌ساخته سفارشی ندارد و دکمه‌ای هم نمی‌گیرد. */}
+                {(() => {
+                  const o = orderOf.get(c.id)
+                  if (!o) return null
+                  if (o.status === 'REFUNDED') {
+                    return (
+                      <span title={o.refund_reason ?? ''} style={{
+                        fontSize: 11, fontWeight: 800, color: MUT, background: 'rgba(0,0,0,0.05)',
+                        borderRadius: 20, padding: '4px 11px', whiteSpace: 'nowrap',
+                      }}>
+                        بازپرداخت {fa(o.refund_amount ?? o.amount)}
+                      </span>
+                    )
+                  }
+                  if (o.status !== 'PAID') return null
+                  return (
+                    <button onClick={() => void refund(o)} disabled={busy === o.id} title="بازگرداندن وجه و لغو کمپین"
+                      style={{ ...BTN, padding: '7px 11px', fontSize: 11.5 }}>
+                      {busy === o.id ? <Loader2 size={13} className="animate-spin" /> : <Wallet size={13} />}
+                      بازپرداخت {fa(o.amount)}
+                    </button>
+                  )
+                })()}
                 <button onClick={() => void remove(c.id)} disabled={busy === c.id} title="حذف"
                   style={{ ...BTN, padding: '7px 11px', background: 'rgba(178,59,46,0.08)', borderColor: 'rgba(178,59,46,0.28)', color: RED }}>
                   <Trash2 size={13} />

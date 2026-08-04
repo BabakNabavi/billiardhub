@@ -66,7 +66,14 @@ export async function GET(req: NextRequest) {
   const accs = withClub(accounts.data);
   const setts = withClub(settlements.data);
 
-  const grossIn = sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT');
+  /* درآمدِ تبلیغات (مهاجرتِ ۰۵۸). برخلافِ رزرو و مسابقه، سهمِ باشگاه
+     ندارد: کلِ مبلغ درآمدِ پلتفرم است، پس هم در ورودیِ ناخالص می‌آید و
+     هم مستقیم در درآمدِ خالص. */
+  const adGross = sum('AD_REVENUE');
+  const adRefunded = -sum('AD_REFUND');               // منفی ذخیره می‌شود
+  const adNet = adGross - adRefunded;
+
+  const grossIn = sum('BOOKING_PAYMENT') + sum('TOURNAMENT_PAYMENT') + adGross;
   const commission = sum('PLATFORM_COMMISSION');
   const cancellationFee = sum('CANCELLATION_FEE');
   const refunded = -sum('REFUND');                    // منفی ذخیره می‌شود
@@ -80,10 +87,15 @@ export async function GET(req: NextRequest) {
       bookingRevenue: sum('BOOKING_PAYMENT'),
       tournamentRevenue: sum('TOURNAMENT_PAYMENT'),
 
+      /* درآمدِ تبلیغات — تا امروز هیچ‌جای گزارشِ مالی نبود */
+      adRevenue: adGross,
+      adRefunds: adRefunded,
+      adNetRevenue: adNet,
+
       /* درآمدِ واقعیِ پلتفرم */
       platformCommission: commission,
       cancellationFee,
-      netPlatformRevenue: commission + cancellationFee,
+      netPlatformRevenue: commission + cancellationFee + adNet,
       commissionFromReservations: sumFrom('PLATFORM_COMMISSION', 'reservation'),
       commissionFromTournaments: sumFrom('PLATFORM_COMMISSION', 'tournament'),
 

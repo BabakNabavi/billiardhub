@@ -23,6 +23,8 @@ interface Data {
     grossIn: number; bookingRevenue: number; tournamentRevenue: number
     /* درآمدِ واقعیِ پلتفرم */
     platformCommission: number; cancellationFee: number; netPlatformRevenue: number
+    /* درآمدِ تبلیغات — مهاجرتِ ۰۵۸ */
+    adRevenue: number; adRefunds: number; adNetRevenue: number
     commissionFromReservations: number; commissionFromTournaments: number
     /* بدهی به باشگاه‌ها */
     clubEarnings: number; payableNow: number; inFlightSettlement: number
@@ -103,7 +105,7 @@ export default function AdminFinance() {
               مالیاتی را غلط می‌کند هم تصمیم‌های کسب‌وکار را. */}
           <div style={{ fontSize: 12, color: SEC, marginBottom: 10, lineHeight: 1.9 }}>
             «وجوه دریافتی» پولی است که به حساب مرکزی آمده — درآمد پلتفرم نیست.
-            درآمد واقعی ما کمیسیون و جریمه‌ی لغو است.
+            درآمد واقعی ما کمیسیون، جریمه‌ی لغو و فروش تبلیغات است.
           </div>
 
           <div className="af-grid">
@@ -115,6 +117,8 @@ export default function AdminFinance() {
           <div className="af-grid" style={{ marginTop: 12 }}>
             <Stat label="از رزرو" value={o.bookingRevenue} icon={<TrendingUp size={15} />} muted />
             <Stat label="از مسابقات" value={o.tournamentRevenue} icon={<TrendingUp size={15} />} muted />
+            {/* تبلیغات سهمِ باشگاه ندارد: کلِ مبلغ درآمدِ پلتفرم است */}
+            <Stat label="از تبلیغات" value={o.adNetRevenue ?? 0} icon={<TrendingUp size={15} />} />
             <Stat label="کمیسیون" value={o.platformCommission} icon={<Wallet size={15} />} />
             <Stat label="جریمه لغو" value={o.cancellationFee} icon={<Wallet size={15} />} />
             <Stat label="در انتظار تسویه" value={o.inFlightSettlement} icon={<ArrowDownToLine size={15} />} />

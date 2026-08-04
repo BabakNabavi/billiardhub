@@ -49,19 +49,25 @@ export async function GET(req: NextRequest) {
        در پنل «ACTIVE» دیده نشود — نقص سیستم قبلی */
     await expireCampaigns();
 
-    const [placements, campaigns, plans, requests] = await Promise.all([
+    const [placements, campaigns, plans, requests, orders] = await Promise.all([
       listPlacements(),
       listCampaigns(),
       listPricingPlans(false),
       sb().from('ad_requests').select('*').order('created_at', { ascending: false }).limit(200)
         .then(r => (r.error ? [] : (r.data ?? []))),
+      /* سفارش‌ها کنارِ کمپین‌ها لازم‌اند: بدونشان ادمین نمی‌داند کدام
+         کمپین اصلاً پولی پرداخت شده و چه چیزی قابلِ بازگرداندن است. */
+      sb().from('campaign_orders')
+        .select('id,campaign_id,user_id,amount,status,paid_at,refunded_at,refund_amount,refund_reason,created_at')
+        .order('created_at', { ascending: false }).limit(500)
+        .then(r => (r.error ? [] : (r.data ?? []))),
     ]);
     /* آمار جداگانه و روی همه‌ی ردیف‌ها حساب می‌شود؛ فهرست بالا برای
        نمایش پنل صفحه‌بندی شده و مبنای درستی برای KPI نیست. */
     const stats = await adStats(placements);
-    return NextResponse.json({ placements, campaigns, plans, requests, stats }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ placements, campaigns, plans, requests, orders, stats }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
-    return NextResponse.json({ placements: [], campaigns: [], plans: [], requests: [], stats: null });
+    return NextResponse.json({ placements: [], campaigns: [], plans: [], requests: [], orders: [], stats: null });
   }
 }
 
@@ -227,6 +233,41 @@ export async function PATCH(req: NextRequest) {
     if (!plan) return NextResponse.json({ message: 'ویرایش پلن انجام نشد' }, { status: 500 });
     void audit({ actorId: g.actor!.id, actorRole: g.actor!.role, action: 'AD_PRICING_PLAN_UPDATED', entityType: 'ad_pricing_plan', entityId: plan.id, newValue: patch });
     return NextResponse.json({ plan });
+  }
+
+  /* ── بازپرداخت ──
+     مبلغ از خودِ سفارش خوانده می‌شود، نه از بدنه‌ی درخواست؛ ادمین فقط
+     تعیین می‌کند کامل باشد یا جزئی. تابعِ دیتابیس اتمیک است: سفارش،
+     کمپین و ردیفِ دفتر در یک تراکنش، و بازپرداختِ دوباره اثری ندارد. */
+  if (b?.type === 'refund') {
+    const orderId = str(b?.orderId, 60);
+    if (!orderId) return NextResponse.json({ message: 'شناسه‌ی سفارش لازم است' }, { status: 400 });
+
+    const { data, error } = await rpc<{ ok: boolean; already?: boolean; reason?: string; amount?: number }>(
+      'bh_refund_campaign_order',
+      {
+        p_order_id: orderId,
+        p_amount: b?.amount == null ? null : num(b.amount),
+        p_reason: str(b?.reason, 500) || null,
+      },
+    );
+    if (error) return NextResponse.json({ message: 'بازپرداخت انجام نشد' }, { status: 500 });
+
+    const res = data ?? { ok: false };
+    if (!res.ok) {
+      const MSG: Record<string, string> = {
+        not_paid: 'این سفارش پرداخت‌شده نیست، پس چیزی برای بازگرداندن ندارد',
+        bad_amount: 'مبلغ بازپرداخت باید بیشتر از صفر و حداکثر برابر مبلغ سفارش باشد',
+      };
+      return NextResponse.json({ message: MSG[res.reason ?? ''] ?? 'بازپرداخت انجام نشد' }, { status: 400 });
+    }
+
+    void audit({
+      actorId: g.actor!.id, actorRole: g.actor!.role, action: 'CAMPAIGN_ORDER_REFUNDED',
+      entityType: 'campaign_order', entityId: orderId,
+      newValue: { amount: res.amount, already: !!res.already, reason: str(b?.reason, 200) },
+    });
+    return NextResponse.json({ ok: true, amount: res.amount, already: !!res.already });
   }
 
   /* ── کمپین (شامل تغییر وضعیت) ── */
