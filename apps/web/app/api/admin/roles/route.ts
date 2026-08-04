@@ -81,7 +81,11 @@ export async function GET(req: NextRequest) {
     { headers: { 'Cache-Control': 'no-store' } });
 }
 
-/* PATCH { id, action: 'approve' | 'reject', note? } */
+/* PATCH { id, action: 'approve' | 'reject', note?, verified? }
+
+   `verified` یعنی «تأیید + تیک آبی». تیک جدا از تأیید است: نقش تأیید
+   می‌شود چه مدرک باشد چه نباشد، ولی تیک فقط با مدرکِ معتبر می‌آید —
+   داوری، مربیگری یا جوازِ کسب بسته به نقش. */
 export async function PATCH(req: NextRequest) {
   const g = await guard(req);
   if (g.err) return g.err;
@@ -91,6 +95,7 @@ export async function PATCH(req: NextRequest) {
   const id = String(b.id ?? '');
   const action = String(b.action ?? '');
   const note = String(b.note ?? '').trim().slice(0, 500);
+  const withTick = b.verified === true;
   if (!id) return NextResponse.json({ message: 'شناسه لازم است' }, { status: 400 });
   if (action !== 'approve' && action !== 'reject') {
     return NextResponse.json({ message: 'عملیات نامعتبر است' }, { status: 400 });
@@ -136,6 +141,47 @@ export async function PATCH(req: NextRequest) {
     if (uErr) {
       console.error('[admin/roles] grant', uErr.message);
       return NextResponse.json({ message: 'اعمال نقش انجام نشد' }, { status: 500 });
+    }
+
+    /* ── تیکِ آبی ──
+       جدا از تأیید است. تأیید یعنی «نقش را دارد و پروفایلش منتشر
+       می‌شود»؛ تیک یعنی «مدرکش را دیدم و درست بود».
+
+       تیک روی *پروفایل* می‌نشیند نه روی کاربر، چون همان‌جاست که
+       صفحه‌های عمومی می‌خوانندش. باشگاه‌دار پروفایل ندارد، پس تیکش
+       روی خودِ باشگاه (`verificationStatus`) می‌رود.
+
+       بدونِ مدرک تیک داده نمی‌شود — حتی اگر ادمین اشتباهاً بزند. */
+    if (withTick) {
+      const { data: fresh } = await sb().from('role_requests')
+        .select('doc_url').eq('id', id).maybeSingle();
+      const hasDoc = !!(fresh as { doc_url?: string } | null)?.doc_url;
+
+      if (!hasDoc) {
+        return NextResponse.json(
+          { message: 'برای تیک آبی باید مدرک بارگذاری شده باشد' }, { status: 400 });
+      }
+
+      if (rr.role === 'club_owner') {
+        await sb().from('clubs')
+          .update({ verificationStatus: 'verified', isActive: true })
+          .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
+      } else {
+        await sb().from('profiles')
+          .update({ verified: true, status: 'approved' })
+          .eq('owner_id', rr.user_id).eq('kind', rr.role);
+      }
+    } else {
+      /* تأیید بدونِ تیک: پروفایل منتشر می‌شود ولی نشانِ تأیید نمی‌گیرد */
+      if (rr.role === 'club_owner') {
+        await sb().from('clubs')
+          .update({ verificationStatus: 'approved', isActive: true })
+          .eq('ownerId', rr.user_id).eq('verificationStatus', 'pending');
+      } else {
+        await sb().from('profiles')
+          .update({ status: 'approved' })
+          .eq('owner_id', rr.user_id).eq('kind', rr.role);
+      }
     }
   }
 

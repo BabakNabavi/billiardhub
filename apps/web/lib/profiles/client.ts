@@ -78,6 +78,23 @@ export async function saveProfileRemote<T extends Record<string, unknown>>(
     })
     const j = await r.json().catch(() => ({})) as { profile?: RemoteProfile<T>; message?: string }
     if (!r.ok) return { ok: false, profile: null, message: j?.message || 'ذخیره روی سرور انجام نشد' }
+
+    /* ── «ثبتِ نهایی» ──
+       ذخیره‌ی پروفایل همان لحظه‌ای است که کاربر کارش را تمام کرده، پس
+       همین‌جا درخواستِ نقشش هم از `draft` به `pending` می‌رود و روی
+       میزِ ادمین می‌نشیند.
+
+       این‌جا انجام می‌شود نه در شش صفحه‌ی داشبورد، چون تنها نقطه‌ی
+       مشترکِ ذخیره‌ی پروفایل همین است؛ تکرارش در هر صفحه یعنی روزی
+       یکی جا می‌ماند و نقشِ آن کاربر هرگز به ادمین نمی‌رسد.
+
+       بی‌صداست: اگر کاربر آن نقش را انتخاب نکرده باشد (۴۰۴) یا شبکه
+       قطع باشد، ذخیره‌ی پروفایل نباید شکست بخورد. */
+    void apiFetch('/api/roles/submit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: kind, docUrl: license?.url }),
+    }).catch(() => { })
+
     return { ok: true, profile: j.profile ?? null }
   } catch {
     return { ok: false, profile: null, message: 'خطا در ارتباط با سرور' }

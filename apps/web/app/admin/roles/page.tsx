@@ -39,23 +39,23 @@ function timeAgo(iso: string): string {
    دلیلِ رد فقط وقتی باز می‌شود که لازم باشد. */
 function RequestRow({ req, onAction }: {
   req: RoleRequest
-  onAction: (id: string, action: 'approve' | 'reject', note?: string) => Promise<void>
+  onAction: (id: string, action: 'approve' | 'reject', note?: string, verified?: boolean) => Promise<void>
 }) {
   const meta = ROLE_MAP[req.role] ?? { label: req.role, color: '#64748b', icon: 'user', requiresDoc: false }
   const [rejecting, setRejecting] = useState(false)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const act = async (action: 'approve' | 'reject') => {
+  const act = async (action: 'approve' | 'reject', verified = false) => {
     setBusy(true)
-    await onAction(req.id, action, action === 'reject' ? note : undefined)
+    await onAction(req.id, action, action === 'reject' ? note : undefined, verified)
     setBusy(false)
     setRejecting(false)
   }
 
-  /* نقشی که مدرک می‌خواهد و ندارد، اصلاً قابلِ تأیید نیست — دکمه‌ی
-     تأییدش خاموش می‌ماند تا ادمین ناخواسته چیزی را که ندیده تأیید
-     نکند. (از امروز سرور هم چنین درخواستی را نمی‌پذیرد.) */
+  /* «مدرک ندارد» یعنی تیکِ آبی نمی‌گیرد، نه اینکه تأیید نمی‌شود.
+     فروشگاه، تولیدکننده، خدمات فنی و بازیکن بدونِ هیچ مدرکی تأیید
+     می‌شوند — فقط نشانِ تأیید نمی‌گیرند. */
   const missingDoc = meta.requiresDoc && !req.doc_url
 
   return (
@@ -86,15 +86,32 @@ function RequestRow({ req, onAction }: {
 
         {req.status === 'pending' && !rejecting && (
           <>
-            <button onClick={() => act('approve')} disabled={busy || missingDoc}
-              title={missingDoc ? 'بدون مدرک قابل تأیید نیست' : 'تأیید'}
+            {/* تأیید همیشه ممکن است — مدرک اجباری نیست. نبودنش فقط
+                یعنی تیک آبی داده نمی‌شود. */}
+            <button onClick={() => act('approve')} disabled={busy}
+              title="تأیید بدون تیک آبی"
+              style={{
+                padding: '6px 12px', borderRadius: 9, border: '1px solid rgba(199,166,106,0.4)',
+                fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+                cursor: busy ? 'not-allowed' : 'pointer',
+                background: busy ? 'rgba(0,0,0,0.05)' : 'rgba(199,166,106,0.12)',
+                color: busy ? 'rgba(0,0,0,0.3)' : '#9A6E38',
+              }}>
+              تأیید
+            </button>
+
+            {/* تیکِ آبی فقط با مدرک. بدونِ مدرک دکمه خاموش است تا ادمین
+                چیزی را که ندیده تأیید نکند — سرور هم همین را رد می‌کند. */}
+            <button onClick={() => act('approve', true)} disabled={busy || missingDoc}
+              title={missingDoc ? `برای تیک آبی، ${meta.docHint || 'مدرک'} لازم است` : 'تأیید همراه با تیک آبی'}
               style={{
                 padding: '6px 12px', borderRadius: 9, border: 'none', fontSize: 12.5, fontWeight: 700,
                 fontFamily: 'inherit', cursor: (busy || missingDoc) ? 'not-allowed' : 'pointer',
-                background: (busy || missingDoc) ? 'rgba(0,0,0,0.05)' : '#C7A66A',
+                background: (busy || missingDoc) ? 'rgba(0,0,0,0.05)' : '#1D4ED8',
                 color: (busy || missingDoc) ? 'rgba(0,0,0,0.3)' : '#fff',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
               }}>
-              تأیید
+              <Ti name="rosette-discount-check" size={13} /> تیک آبی
             </button>
             <button onClick={() => setRejecting(true)}
               style={{
@@ -179,16 +196,16 @@ export default function AdminRolesPage() {
 
   useEffect(() => { load(filter) }, [filter])
 
-  const handleAction = async (id: string, action: 'approve' | 'reject', note?: string) => {
+  const handleAction = async (id: string, action: 'approve' | 'reject', note?: string, verified?: boolean) => {
     await apiFetch('/api/admin/roles', {
       method: 'PATCH',
       headers: {
         ...(authHeader() as Record<string, string>),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id, action, note }),
+      body: JSON.stringify({ id, action, note, verified }),
     })
-    setToast(action === 'approve' ? 'نقش تأیید شد' : 'نقش رد شد')
+    setToast(action === 'reject' ? 'نقش رد شد' : verified ? 'تأیید شد و تیک آبی گرفت' : 'نقش تأیید شد')
     setTimeout(() => setToast(null), 2000)
     load(filter)
   }

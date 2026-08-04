@@ -343,9 +343,14 @@ export default function ProfileMePage() {
   /* حذف عکس = نوشتن رشته‌ی خالی در همان ستون. فایل روی استوریج دست
      نمی‌خورد (ممکن است جای دیگری هم به آن ارجاع باشد) — فقط پیوندش از
      پروفایل برداشته می‌شود. */
+  /* پنجره‌ی خودِ مرورگر (`window.confirm`) جای این‌جا نبود: قالبش با
+     هیچ‌جای سایت نمی‌خواند، فارسی‌اش دستِ مرورگر است و در موبایل
+     بالای صفحه می‌پرد. */
+  const [confirmAvatar, setConfirmAvatar] = useState(false)
+
   const handleRemoveAvatar = async () => {
     if (!profile?.avatar || avatarBusy) return
-    if (!window.confirm('عکس پروفایل حذف شود؟')) return
+    setConfirmAvatar(false)
     setAvatarBusy(true)
     try {
       const res = await apiFetch('/api/users/profile', {
@@ -552,7 +557,7 @@ export default function ProfileMePage() {
                 {profile.avatar && !avatarBusy && (
                   <button
                     type="button"
-                    onClick={handleRemoveAvatar}
+                    onClick={() => setConfirmAvatar(true)}
                     aria-label="حذف عکس پروفایل"
                     title="حذف عکس پروفایل"
                     style={{
@@ -776,6 +781,74 @@ export default function ProfileMePage() {
             </button>
           </div>
         </div>
+
+        {/* ── تأییدِ حذفِ عکس ──
+            جای `window.confirm` را گرفت: آن پنجره قالبِ مرورگر را دارد،
+            با هیچ‌جای سایت نمی‌خواند، و در موبایل بالای صفحه می‌پرد.
+            این‌جا عکسِ فعلی هم نشان داده می‌شود تا کاربر ببیند دقیقاً
+            چه چیزی را پاک می‌کند. */}
+        {confirmAvatar && (
+          <div
+            onClick={() => setConfirmAvatar(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(17,17,17,0.45)', backdropFilter: 'blur(6px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+              animation: 'fadeIn .18s ease both',
+            }}>
+            <div
+              onClick={e => e.stopPropagation()}
+              role="dialog" aria-modal="true"
+              style={{
+                width: '100%', maxWidth: 360, background: '#fff', borderRadius: 20,
+                padding: '24px 22px', textAlign: 'center',
+                boxShadow: '0 24px 70px rgba(0,0,0,0.22)',
+                animation: 'popIn .2s cubic-bezier(0.2,0.9,0.3,1) both',
+              }}>
+              {profile?.avatar && (
+                <img src={profile.avatar} alt="" style={{
+                  width: 84, height: 84, borderRadius: '50%', objectFit: 'cover',
+                  margin: '0 auto 14px', display: 'block',
+                  border: '3px solid rgba(0,0,0,0.06)', filter: 'grayscale(0.35)',
+                }} />
+              )}
+              <div style={{ fontSize: 16.5, fontWeight: 800, color: '#111', marginBottom: 7 }}>
+                عکس پروفایل حذف شود؟
+              </div>
+              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.5)', lineHeight: 2, margin: '0 0 20px' }}>
+                عکس از پروفایل شما برداشته می‌شود. هر وقت خواستید می‌توانید عکس تازه‌ای بگذارید.
+              </p>
+              <div style={{ display: 'flex', gap: 9 }}>
+                <button onClick={() => setConfirmAvatar(false)}
+                  style={{
+                    flex: 1, padding: '11px', borderRadius: 12, cursor: 'pointer',
+                    border: '1px solid rgba(0,0,0,0.10)', background: '#fff',
+                    color: 'rgba(0,0,0,0.55)', fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                  }}>
+                  انصراف
+                </button>
+                <button onClick={handleRemoveAvatar} disabled={avatarBusy}
+                  style={{
+                    flex: 1, padding: '11px', borderRadius: 12, border: 'none',
+                    cursor: avatarBusy ? 'default' : 'pointer',
+                    background: '#ef4444', color: '#fff', fontSize: 14, fontWeight: 800,
+                    fontFamily: 'inherit', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', gap: 6, opacity: avatarBusy ? 0.6 : 1,
+                  }}>
+                  {avatarBusy ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                  حذف عکس
+                </button>
+              </div>
+            </div>
+            <style>{`
+              @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+              @keyframes popIn {
+                from { opacity: 0; transform: translateY(10px) scale(.97) }
+                to   { opacity: 1; transform: none }
+              }
+            `}</style>
+          </div>
+        )}
 
         {/* Toast */}
         {toast && (

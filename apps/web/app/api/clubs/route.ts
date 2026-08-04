@@ -243,6 +243,29 @@ export async function POST(req: NextRequest) {
       console.error('[clubs] granting club_owner failed:', e);
     }
 
+    /* ── «ثبتِ نهایی»ِ نقشِ باشگاه‌دار ──
+       باشگاه‌دار پروفایل ندارد، باشگاه دارد. پس ساختنِ باشگاه همان
+       لحظه‌ای است که کارش را تمام کرده و درخواستش باید روی میزِ ادمین
+       بنشیند — ردیفِ `draft` به `pending` می‌رود.
+
+       بی‌صداست: اگر ردیفی نباشد (کاربر از مسیرِ دیگری آمده) ثبتِ
+       باشگاه نباید شکست بخورد. جوازِ کسب اگر بارگذاری شده باشد همان
+       مدرکِ تیکِ آبی است. */
+    try {
+      const sbs = getSupabaseServer();
+      await sbs.from('role_requests')
+        .update({
+          status: 'pending',
+          submitted_at: new Date().toISOString(),
+          /* جوازِ کسب — اگر همراهِ فرم آمده باشد، همان مدرکِ تیکِ آبی است */
+          ...(typeof rest?.licenseDocumentUrl === 'string' && rest.licenseDocumentUrl
+            ? { doc_url: String(rest.licenseDocumentUrl).slice(0, 500) } : {}),
+        })
+        .eq('user_id', payload.id).eq('role', 'club_owner').eq('status', 'draft');
+    } catch (e) {
+      console.error('[clubs] role submit failed:', e);
+    }
+
     return NextResponse.json(club, { status: 201, headers: CORS_HEADERS });
   } catch {
     return NextResponse.json(
