@@ -59,6 +59,19 @@ function Stars({ r, size = 15 }: { r: number; size?: number }) {
 /* آگهی کاربر روی سرور uuid دارد، محصولات کاتالوگ عدد؛ این صفحه هر دو را نشان می‌دهد */
 type Detail = Omit<ShopProduct, 'id'> & { id: number | string }
 
+/* شکلِ سبکی که مسیرِ «مشابه» برمی‌گرداند — نه کلِ محصول */
+interface RelatedItem {
+  id: string
+  title: string
+  price: number
+  negotiable: boolean
+  category: string
+  condition: string
+  city: string | null
+  brand: string | null
+  image: string
+}
+
 /* رکورد جدول products → شکل ShopProduct تا همین صفحه بتواند نمایشش دهد */
 function normalizeUserProduct(up: Record<string, unknown>): Detail {
   const num = (v: unknown, d = 0) => {
@@ -103,6 +116,9 @@ export default function ProductDetailPage() {
      قدیمی که هنوز در همین مرورگر مانده‌اند، از localStorage).
      تا آمدن پاسخ «در حال بارگذاری» نشان می‌دهیم تا «پیدا نشد» فلش نزند. */
   const [userProduct, setUserProduct] = useState<Detail | null>(null)
+  /* ردیفِ خامِ سرور — فیلدهایی مثل negotiable و status در نگاشتِ
+     نمایشی نیستند و باید از خودِ ردیف خوانده شوند. */
+  const [rawAd, setRawAd] = useState<Record<string, unknown> | null>(null)
   const [checked, setChecked] = useState(false)
   useEffect(() => {
     if (staticProduct) { setChecked(true); return }
@@ -112,7 +128,7 @@ export default function ProductDetailPage() {
         const r = await fetch(`/api/market/ads/${encodeURIComponent(String(id))}`, { cache: 'no-store' })
         if (r.ok) {
           const j = await r.json()
-          if (j?.ad && alive) { setUserProduct(normalizeUserProduct(j.ad)); setChecked(true); return }
+          if (j?.ad && alive) { setRawAd(j.ad); setUserProduct(normalizeUserProduct(j.ad)); setChecked(true); return }
         }
       } catch { /* به مسیر محلی برمی‌گردیم */ }
       if (!alive) return
@@ -127,6 +143,10 @@ export default function ProductDetailPage() {
   }, [id])
 
   const product: Detail | undefined = staticProduct ?? userProduct ?? undefined
+  /* از خودِ ردیفِ سرور خوانده می‌شوند، نه از شکلِ نگاشت‌شده — تا اگر
+     روزی نگاشت عوض شد، این دو بی‌صدا خاموش نشوند. */
+  const negotiable = rawAd?.negotiable === true
+  const sold = String(rawAd?.status ?? '') === 'sold'
 
   /* آیا این محصول به یک فروشگاه ثبت‌شده تعلق دارد؟
      محصولات کاتالوگ همیشه فروشگاه دارند؛ آگهی کاربر عادی فقط وقتی
@@ -136,9 +156,20 @@ export default function ProductDetailPage() {
 
   const [wished, setWished] = useState(false)
 
-  /* «محصولات مشابه» از همان کاتالوگِ ساختگی می‌آمد. تا وقتی از
-     سرور خوانده نشود، نبودنش بهتر از پرکردنش با محصولِ نبوده است. */
-  const related: ShopProduct[] = []
+  /* ── محصولات مشابه ──
+     رتبه‌بندی سمتِ سرور انجام می‌شود: دسته، برند، نوع، شهر، وضعیت و
+     نزدیکیِ قیمت. رتبه‌بندی در مرورگر یعنی همه‌ی آگهی‌ها باید دانلود
+     شوند تا هشت کارت نشان داده شود. */
+  const [related, setRelated] = useState<RelatedItem[]>([])
+  useEffect(() => {
+    if (!id) return
+    let alive = true
+    void fetch(`/api/market/ads/${encodeURIComponent(String(id))}/related`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (alive && Array.isArray(j?.related)) setRelated(j.related) })
+      .catch(() => { })
+    return () => { alive = false }
+  }, [id])
 
   if (!product) {
     if (!checked) {
@@ -241,21 +272,43 @@ export default function ProductDetailPage() {
               <span style={{ fontSize: 12.5, color: '#16803C', fontWeight: 700 }}>موجود در انبار</span>
             </div>
 
-            {/* قیمت */}
+            {/* قیمت — آگهیِ توافقی عدد ندارد، پس عدد هم نشان نمی‌دهیم */}
             <div style={{ ...lqWhite, borderRadius: 18, padding: '16px 18px', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 24, fontWeight: 900, color: '#1A6B3A', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.price)}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>تومان</span>
-                {product.old > 0 && (
-                  <span style={{ marginInlineStart: 'auto', fontSize: 13.5, color: TMUT, textDecoration: 'line-through', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.old)}</span>
-                )}
-              </div>
-              {product.disc > 0 && (
-                <div style={{ marginTop: 6, fontSize: 12, color: '#B23B2E', fontWeight: 700 }}>
-                  {toFa(product.disc)}٪ تخفیف — {fmt(product.old - product.price)} تومان سود شما
+              {negotiable ? (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>قیمت:</span>
+                  <span style={{ fontSize: 22, fontWeight: 900, color: '#1A6B3A' }}>توافقی</span>
+                  <span style={{ marginInlineStart: 'auto', fontSize: 12, color: TMUT }}>با فروشنده تماس بگیرید</span>
                 </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 24, fontWeight: 900, color: '#1A6B3A', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.price)}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: TSEC }}>تومان</span>
+                    {product.disc > 0 && product.old > product.price && (
+                      <span style={{ marginInlineStart: 'auto', fontSize: 13.5, color: TMUT, textDecoration: 'line-through', fontVariantNumeric: 'tabular-nums' }}>{fmt(product.old)}</span>
+                    )}
+                  </div>
+                  {product.disc > 0 && (
+                    <div style={{ marginTop: 6, fontSize: 12, color: '#B23B2E', fontWeight: 700 }}>
+                      {toFa(product.disc)}٪ تخفیف — {fmt(product.old - product.price)} تومان سود شما
+                    </div>
+                  )}
+                </>
               )}
             </div>
+
+            {/* آگهیِ فروخته‌شده باز می‌ماند (لینکش ممکن است جایی باشد)
+                ولی خریدار باید بی‌درنگ بفهمد که دیگر موجود نیست. */}
+            {sold && (
+              <div style={{
+                marginBottom: 16, borderRadius: 14, padding: '12px 16px',
+                background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.24)',
+                fontSize: 13, fontWeight: 800, color: '#B23B2E',
+              }}>
+                این کالا فروخته شده است.
+              </div>
+            )}
 
             {/* توضیحات */}
             <p style={{ fontSize: 13.5, lineHeight: 2, color: TSEC, margin: '0 0 20px' }}>{product.desc}</p>
@@ -334,16 +387,18 @@ export default function ProductDetailPage() {
               {related.map(p => (
                 <Link key={p.id} href={`/shop/${p.id}`} className="pd-card" style={{ textDecoration: 'none', background: '#fff', borderRadius: 14, border: `1.5px solid ${HAIR}`, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ width: '100%', paddingTop: '100%', position: 'relative', background: '#F4F3F1', borderBottom: `1.5px solid ${HAIR}` }}>
-                    <img loading="lazy" decoding="async" src={p.img} alt={p.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {p.disc > 0 && (
-                      <div style={{ position: 'absolute', top: 8, insetInlineEnd: 8, background: '#E53935', color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 7, padding: '2px 7px' }}>{toFa(p.disc)}٪</div>
+                    {p.image && (
+                      <img loading="lazy" decoding="async" src={p.image} alt={p.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     )}
                   </div>
                   <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</span>
-                    <span style={{ fontSize: 10.5, color: TMUT }}>{p.sellerName}</span>
+                    <span style={{ fontSize: 12, color: TEXT, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.title}</span>
+                    <span style={{ fontSize: 10.5, color: TMUT }}>{[p.brand, p.city].filter(Boolean).join(' · ')}</span>
                     <div style={{ marginTop: 'auto', fontSize: 13, fontWeight: 800, color: '#1A6B3A' }}>
-                      {fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span>
+                      {/* آگهیِ توافقی قیمت ندارد؛ «۰ تومان» دروغ است */}
+                      {p.negotiable
+                        ? 'توافقی'
+                        : <>{fmt(p.price)} <span style={{ fontSize: 11, fontWeight: 500 }}>تومان</span></>}
                     </div>
                   </div>
                 </Link>

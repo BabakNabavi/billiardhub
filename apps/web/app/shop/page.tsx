@@ -26,6 +26,10 @@ import {
 import ReportButton from '../../components/ReportButton'
 import { apiFetch } from '../../lib/http'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
+import {
+  MARKET_CATEGORIES, normalizeCategory, categoryLabel,
+  CONDITIONS, conditionLabel,
+} from '../../lib/market/categories'
 
 const GOLD   = '#C7A66A'
 const GOLD_D = '#9A6E38'
@@ -41,32 +45,19 @@ const parsePrice = (v: string) => {
   return Number.isNaN(n) ? null : n
 }
 
-/* آینه‌ی CATS صفحه‌ی /shop — همان idها، لیبل‌ها و آیکون‌های تصویری */
-const CATS_M = [
-  { id: 'cue',       label: 'چوب',      img: '/images/icon/cue/cue-icon-256.png' },
-  { id: 'table',     label: 'میز',      img: '/images/icon/table/wiraka.png' },
-  { id: 'ball',      label: 'توپ',      img: '/images/icon/ball/ballset-icon-256.png' },
-  { id: 'tip',       label: 'تیپ',      img: '/images/icon/tip/tip-icon-256.png' },
-  { id: 'chalk',     label: 'گچ',       img: '/images/icon/chalk/chalk-icon-256.png' },
-  { id: 'extension', label: 'اکستنشن',  img: '/images/icon/ex/shaft-icon-256.png' },
-  { id: 'cue-case',  label: 'کیس چوب',  img: '/images/icon/case/case-icon-256.png' },
-  { id: 'ball-bag',  label: 'کیف توپ',  img: '/images/icon/kif/ballcase-icon-256.png' },
-  { id: 'rest',      label: 'رست',      img: '/images/icon/rest/rest.png' },
-  { id: 'cloth',     label: 'پارچه',    img: '/images/icon/parche/parche.png' },
-  /* تصویر روغن در فایلش چپ‌نشین است — کمی به راست هل داده می‌شود */
-  { id: 'oil',       label: 'روغن',     img: '/images/icon/oil/oil.png', imgStyle: { transform: 'translateX(9%)' } as React.CSSProperties },
-  { id: 'towel',     label: 'حوله',     img: '/images/icon/hole/hole.png' },
-  { id: 'clothing',  label: 'پوشاک',    img: '/images/icon/pooshak/pooshak.png' },
-  { id: 'accessory', label: 'اکسسوری',  img: '/images/icon/accessori/accessori.png' },
-  { id: 'other',     label: 'سایر',     img: '/images/icon/other/other.png' },
-]
-const CAT_IDS = new Set(CATS_M.map(c => c.id))
-/* محصولات نمونه cat=case-bag دارند که در CATS با id=cue-case آمده */
-const normCat = (c?: string) => (c === 'case-bag' ? 'cue-case' : c && CAT_IDS.has(c) ? c : 'other')
-const catLabel = (id: string) => CATS_M.find(c => c.id === id)?.label ?? id
+/* دسته‌ها از منبعِ واحد می‌آیند (lib/market/categories).
 
-type Cond = 'new' | 'like_new' | 'used'
-const COND_LABEL: Record<Cond, string> = { new: 'نو', like_new: 'در حد نو', used: 'کارکرده' }
+   پیش‌تر این‌جا آینه‌ای دستی از فهرستِ فرمِ ثبت آگهی بود و با آن یکی
+   نبود: فرم فقط «کیس و کیف» داشت و این‌جا «کیس چوب» و «کیف توپ» —
+   یعنی فیلترِ «کیف توپ» هرگز هیچ آگهی‌ای نداشت. */
+const CATS_M = MARKET_CATEGORIES
+const normCat = normalizeCategory
+const catLabel = categoryLabel
+
+/* «نیازمند تعمیر» اضافه شد: بدونِ آن فروشنده‌ی صادق مجبور بود
+   «کارکرده» بزند و خریدار سرِ قرار غافلگیر شود. */
+type Cond = typeof CONDITIONS[number]['id']
+const COND_LABEL = Object.fromEntries(CONDITIONS.map(c => [c.id, c.label])) as Record<Cond, string>
 
 interface Listing {
   key: string
@@ -81,6 +72,10 @@ interface Listing {
   city: string
   condition: Cond
   createdAt: number | null   // فقط آگهی‌های کاربر تاریخ دارند
+  /* آگهیِ توافقی قیمتِ قابلِ نمایش ندارد — کارت باید «توافقی» بنویسد،
+     نه «۰ تومان» */
+  negotiable: boolean
+  sold: boolean
   source: 'shop' | 'user'
 }
 
@@ -101,8 +96,10 @@ function serverAdToListing(a: Record<string, any>): Listing {
     price, old: disc > 0 ? Math.round(price / (1 - disc / 100)) : price, disc,
     cat: normCat(a.category),
     city: a.city || '',
-    condition: (['new', 'like_new', 'used'].includes(a.condition) ? a.condition : 'new') as Cond,
+    condition: (COND_LABEL[a.condition as Cond] ? a.condition : 'new') as Cond,
     createdAt: a.createdAt ? new Date(a.createdAt).getTime() : null,
+    negotiable: a.negotiable === true,
+    sold: a.status === 'sold',
     source: 'user',
   }
 }
@@ -183,11 +180,18 @@ function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boo
           <span className="mk-cond">{COND_LABEL[l.condition]}</span>
         </div>
         <div className="mk-priceline">
-          {l.disc > 0 && <span className="mk-pct" dir="ltr">٪{toFa(l.disc)}</span>}
+          {!l.negotiable && l.disc > 0 && <span className="mk-pct" dir="ltr">٪{toFa(l.disc)}</span>}
           <div style={{ marginInlineStart: 'auto', textAlign: 'left' }}>
-            {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل ٪ داشته باشد */}
-            {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))} <span style={{ fontStyle: 'normal' }}>تومان</span></div>}
-            <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</div>
+            {/* آگهیِ توافقی قیمت ندارد؛ «۰ تومان» نوشتن دروغ است */}
+            {l.negotiable ? (
+              <div className="mk-price">توافقی</div>
+            ) : (
+              <>
+                {/* «تومان» روی خط خط‌خورده تا خط قیمت اصلی جا برای مبلغ + پیل ٪ داشته باشد */}
+                {l.disc > 0 && <div className="mk-old">{toFa(l.old.toLocaleString('en-US'))} <span style={{ fontStyle: 'normal' }}>تومان</span></div>}
+                <div className="mk-price">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -204,8 +208,8 @@ function MarketRow({ l, i, saved, onSave }: { l: Listing; i: number; saved: bool
         <span className="cnd">{COND_LABEL[l.condition]}</span>
         {/* «تومان» روی خط خط‌خورده تا خط قیمت جا برای مبلغ + پیل ٪ داشته باشد */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
-          <span className="prc">{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</span>
+          {!l.negotiable && l.disc > 0 && <span className="pctn" dir="ltr">٪{toFa(l.disc)}</span>}
+          <span className="prc">{l.negotiable ? 'توافقی' : <>{toFa(l.price.toLocaleString('en-US'))}{l.disc === 0 && <i> تومان</i>}</>}</span>
         </span>
         {l.disc > 0 && <span className="oldp">{toFa(l.old.toLocaleString('en-US'))} تومان</span>}
         <span className="cty"><MapPin size={10} style={{ color: GOLD }} /> {l.city || 'ایران'}</span>

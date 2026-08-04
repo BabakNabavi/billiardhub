@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
+import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
 
@@ -15,20 +16,44 @@ const num = (v: unknown, d = 0) => {
 };
 const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);
 
+/* ستون‌هایی که فهرستِ عمومی برمی‌گرداند.
+
+   ⚠️ پیش‌تر این‌جا `select('*')` بود، یعنی شماره‌ی تلفن، واتساپ و
+   آدرسِ *همه‌ی* فروشنده‌ها در یک درخواستِ بی‌نام برمی‌گشت — کافی بود
+   کسی `/api/market/ads` را باز کند تا فهرستِ کاملِ شماره‌ها را داشته
+   باشد. کارتِ بازار هیچ‌کدام از این‌ها را نشان نمی‌دهد؛ صفحه‌ی
+   جزئیات آن‌ها را جدا می‌گیرد. */
+const LIST_COLS = [
+  'id', 'title', 'price', 'negotiable', '"discountPercent"', 'category', 'condition',
+  'city', 'province', 'brand', 'images', 'status', 'views',
+  '"createdAt"', '"expiresAt"', '"soldAt"', '"storeSlug"', '"isOfficialStore"',
+].join(',');
+
+/* فهرستِ کاملِ ستون‌ها فقط برای فهرستِ خودِ فروشنده — آگهیِ خودش را
+   با همه‌ی جزئیات می‌بیند. */
+const MINE_COLS = `${LIST_COLS},description,model,type,specs,address,"sellerName","sellerPhone","sellerWhatsapp","sellerId"`;
+
 /* ── فهرست آگهی‌ها ─────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const mine = searchParams.get('mine') === '1';
   const limit = Math.min(200, Math.max(1, num(searchParams.get('limit'), 100)));
 
-  let q = sb().from('products').select('*').order('createdAt', { ascending: false }).limit(limit);
+  let q = sb().from('products')
+    .select(mine ? MINE_COLS : LIST_COLS)
+    .order('createdAt', { ascending: false }).limit(limit);
 
   if (mine) {
     const actor = actorFromRequest(req);
     if (!actor) return NextResponse.json({ message: 'احراز هویت الزامی است' }, { status: 401 });
     q = q.eq('sellerId', actor.id);
   } else {
-    q = q.eq('status', 'active');
+    /* فقط آگهیِ فعال و منقضی‌نشده.
+
+       تا امروز فقط `status` فیلتر می‌شد و `expiresAt` — که از مهاجرتِ
+       ۰۰۶ ستونش وجود داشت — هرگز خوانده نمی‌شد. یعنی آگهیِ دو سال
+       پیش هنوز بالای فهرست بود. */
+    q = q.eq('status', 'active').or(`expiresAt.is.null,expiresAt.gt.${new Date().toISOString()}`);
   }
 
   const { data, error } = await q;
@@ -47,10 +72,24 @@ export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
 
   const title = str(b?.name ?? b?.title, 160);
+  const negotiable = b?.negotiable === true;
   const price = Math.max(0, Math.round(num(b?.price)));
-  const category = str(b?.category, 60);
-  if (!title || !price || !category) {
-    return NextResponse.json({ message: 'نام، قیمت و دسته‌بندی الزامی است' }, { status: 400 });
+  /* دسته از منبعِ واحد نرمال می‌شود، نه هر رشته‌ای که کلاینت بفرستد —
+     وگرنه آگهی با دسته‌ی من‌درآوردی ثبت می‌شد و در هیچ فیلتری پیدا
+     نمی‌شد. */
+  const category = normalizeCategory(str(b?.category, 60));
+
+  if (!title) return NextResponse.json({ message: 'عنوان آگهی الزامی است' }, { status: 400 });
+  /* قیمت فقط وقتی اجباری است که آگهی توافقی نباشد. این قاعده در
+     دیتابیس هم قید دارد (مهاجرتِ ۰۶۰)، چون دو مسیرِ نوشتن روی این
+     جدول هست و قاعده‌ای که در یکی باشد و در دیگری نه، باگِ فرداست. */
+  if (!negotiable && price <= 0) {
+    return NextResponse.json({ message: 'قیمت را وارد کنید یا گزینه‌ی «توافقی» را بزنید' }, { status: 400 });
+  }
+  /* سقفِ عقلانی: عددِ نجومی یعنی اشتباهِ تایپی یا آگهیِ مزاحم، و
+     مرتب‌سازیِ «گران‌ترین» را برای همه خراب می‌کند. */
+  if (price > 100_000_000_000) {
+    return NextResponse.json({ message: 'مبلغ واردشده معتبر نیست' }, { status: 400 });
   }
 
   /* سهمیه — فاز ۳: بررسی و مصرف در یک قدم اتمیک، پیش از درج آگهی.
@@ -69,10 +108,13 @@ export async function POST(req: NextRequest) {
     title,
     description: str(b?.description, 3000),
     price,
-    discountPrice: disc > 0 ? price : null,
-    discountPercent: disc,
+    negotiable,
+    /* آگهیِ توافقی تخفیف ندارد — «۲۰٪ تخفیف روی قیمتی که نگفته‌ام»
+       بی‌معناست و روی کارت هم بد می‌نشیند. */
+    discountPrice: !negotiable && disc > 0 ? price : null,
+    discountPercent: negotiable ? 0 : disc,
     category,
-    condition: str(b?.condition, 20) || 'new',
+    condition: normalizeCondition(str(b?.condition, 20)),
     status: 'active',
     city: str(b?.city, 60),
     province: str(b?.province, 60),

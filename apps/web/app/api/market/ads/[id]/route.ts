@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
@@ -27,6 +28,24 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   const ad = await load(id);
   if (!ad || ad.status === 'deleted') return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
 
+  /* ── چه کسی چه چیزی را می‌بیند ──
+
+     `sold` و `expired` عمداً عمومی می‌مانند: لینکشان ممکن است در
+     نتایج جست‌وجو یا در پیامِ کسی باشد و ۴۰۴ دادن به بازدیدکننده
+     چیزی جز سردرگمی نیست — صفحه با نشانِ «فروخته شد» بازتر است.
+
+     ولی `paused`، `pending` و `rejected` نباید عمومی باشند. تا امروز
+     هر کسی که نشانی را داشت، آگهیِ متوقف‌شده یا ردشده را کامل — با
+     شماره‌ی تماس — می‌دید. */
+  const PUBLIC = ['active', 'sold', 'expired'];
+  if (!PUBLIC.includes(String(ad.status))) {
+    const actor = actorFromRequest(_req);
+    const owner = actor && String(ad.sellerId) === actor.id;
+    if (!owner && !(actor && await isAdmin(actor.id))) {
+      return NextResponse.json({ message: 'آگهی پیدا نشد' }, { status: 404 });
+    }
+  }
+
   /* شمارنده‌ی بازدید — شکست آن نباید صفحه را خراب کند */
   void sb().from('products').update({ views: num(ad.views) + 1 }).eq('id', id).then(() => {}, () => {});
 
@@ -50,8 +69,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   if (b?.name !== undefined || b?.title !== undefined) patch.title = str(b?.name ?? b?.title, 160);
   if (b?.description !== undefined) patch.description = str(b?.description, 3000);
-  if (b?.category !== undefined) patch.category = str(b?.category, 60);
-  if (b?.condition !== undefined) patch.condition = str(b?.condition, 20);
+  if (b?.category !== undefined) patch.category = normalizeCategory(str(b?.category, 60));
+  if (b?.condition !== undefined) patch.condition = normalizeCondition(str(b?.condition, 20));
   if (b?.city !== undefined) patch.city = str(b?.city, 60);
   if (b?.province !== undefined) patch.province = str(b?.province, 60);
   if (b?.address !== undefined) patch.address = str(b?.address, 300);
@@ -63,14 +82,50 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (b?.sellerWhatsapp !== undefined) patch.sellerWhatsapp = str(b?.sellerWhatsapp, 20);
   if (b?.specs !== undefined) patch.specs = b?.specs && typeof b.specs === 'object' ? b.specs : null;
   if (Array.isArray(b?.images)) patch.images = (b.images as string[]).slice(0, 8);
-  if (b?.status !== undefined && ['active', 'paused'].includes(String(b.status))) patch.status = String(b.status);
 
-  if (b?.price !== undefined) {
-    const price = Math.max(0, Math.round(num(b.price)));
+  /* وضعیت‌هایی که خودِ فروشنده می‌تواند بگذارد.
+
+     `sold` تازه است و لازم بود: بدونِ آن، فروشنده‌ای که کالایش رفته
+     یا آگهی را متوقف می‌کرد (و خریدارِ بعدی فکر می‌کرد حذف شده) یا
+     رهایش می‌کرد و تلفنش برای کالای نبوده زنگ می‌خورد.
+
+     `pending`، `rejected` و `deleted` عمداً این‌جا نیستند — آن‌ها
+     تصمیمِ ادمین‌اند و از این مسیر قابلِ گذاشتن نباشند. */
+  const SELLER_STATUSES = ['active', 'paused', 'sold'];
+  if (b?.status !== undefined && SELLER_STATUSES.includes(String(b.status))) {
+    patch.status = String(b.status);
+    /* لحظه‌ی فروش ثبت می‌شود و با فعال‌شدنِ دوباره پاک — وگرنه آگهیِ
+       دوباره‌فعال، تاریخِ فروشِ قدیمی را با خودش می‌کشید. */
+    patch.soldAt = String(b.status) === 'sold' ? new Date().toISOString() : null;
+  }
+
+  /* تمدید: عمرِ آگهی از همین لحظه شصت روز می‌شود.
+
+     آگهیِ منقضی هم تمدید می‌شود و به فعال برمی‌گردد؛ نبودنِ این راه
+     یعنی فروشنده باید آگهی را از نو بسازد و یک سهمیه‌ی دیگر بدهد. */
+  if (b?.renew === true) {
+    patch.expiresAt = new Date(Date.now() + 60 * 86400_000).toISOString();
+    patch.renewedAt = new Date().toISOString();
+    if (['expired', 'paused'].includes(String(ad.status))) patch.status = 'active';
+  }
+
+  if (b?.price !== undefined || b?.negotiable !== undefined) {
+    const negotiable = b?.negotiable !== undefined ? b.negotiable === true : ad.negotiable === true;
+    const price = Math.max(0, Math.round(num(b?.price ?? ad.price)));
+    /* همان قاعده‌ی ثبتِ آگهی — قیمت فقط وقتی اجباری است که توافقی
+       نباشد. تکرارِ قاعده در دو مسیر خطرناک است، پس دیتابیس هم قیدش
+       را دارد (مهاجرتِ ۰۶۰). */
+    if (!negotiable && price <= 0) {
+      return NextResponse.json({ message: 'قیمت را وارد کنید یا گزینه‌ی «توافقی» را بزنید' }, { status: 400 });
+    }
+    if (price > 100_000_000_000) {
+      return NextResponse.json({ message: 'مبلغ واردشده معتبر نیست' }, { status: 400 });
+    }
     const old = Math.max(price, Math.round(num(b?.old, price)));
     patch.price = price;
-    patch.discountPercent = old > price ? Math.round((1 - price / old) * 100) : 0;
-    patch.discountPrice = old > price ? price : null;
+    patch.negotiable = negotiable;
+    patch.discountPercent = !negotiable && old > price ? Math.round((1 - price / old) * 100) : 0;
+    patch.discountPrice = !negotiable && old > price ? price : null;
   }
 
   if (Object.keys(patch).length === 0) return NextResponse.json({ ad });

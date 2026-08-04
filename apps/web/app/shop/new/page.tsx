@@ -9,6 +9,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import { findSellerByOwner } from '../../../lib/seller-store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { apiFetch } from '../../../lib/http'
+import { CATEGORY_OPTIONS } from '../../../lib/market/categories'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -20,22 +21,13 @@ const LQ_BOR   = '1px solid rgba(255,255,255,0.85)'
 const LQ_SHAD  = 'inset 0 1.5px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(0,0,0,0.07)'
 const ERR      = '#EF4444'
 
-const CATEGORIES = [
-  { id: 'cue',       label: 'چوب'        },
-  { id: 'table',     label: 'میز'        },
-  { id: 'ball',      label: 'توپ'        },
-  { id: 'tip',       label: 'تیپ'        },
-  { id: 'chalk',     label: 'گچ'         },
-  { id: 'extension', label: 'اکستنشن'    },
-  { id: 'case-bag',  label: 'کیس و کیف'  },
-  { id: 'rest',      label: 'رست'        },
-  { id: 'cloth',     label: 'پارچه'      },
-  { id: 'oil',       label: 'روغن'       },
-  { id: 'towel',     label: 'حوله'       },
-  { id: 'clothing',  label: 'پوشاک'      },
-  { id: 'accessory', label: 'اکسسوری'    },
-  { id: 'other',     label: 'سایر'       },
-]
+/* دسته‌ها از منبعِ واحد (lib/market/categories).
+
+   پیش‌تر این فهرست دستی بود و با فهرستِ صفحه‌ی بازار یکی نبود: این‌جا
+   فقط «کیس و کیف» (`case-bag`) بود و آن‌جا «کیس چوب» و «کیف توپ» —
+   یعنی فروشنده هرگز نمی‌توانست «کیف توپ» را انتخاب کند و آن فیلتر در
+   بازار همیشه خالی بود. */
+const CATEGORIES = CATEGORY_OPTIONS
 
 // شهر/استان از ProvinceCitySelect می‌آید — لیست هاردکد حذف شد (single source of truth)
 
@@ -629,7 +621,7 @@ export default function NewProductPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
-    category: '', type: '', model: '', modelOther: '', price: '', oldPrice: '',
+    category: '', type: '', model: '', modelOther: '', price: '', oldPrice: '', negotiable: false,
     description: '', brand: '', brandOther: '', condition: 'new',
     shopName: '', ownerName: '', sellerPhone: '', sellerWhatsapp: '',
     province: '', city: '', address: '',
@@ -682,7 +674,9 @@ export default function NewProductPage() {
     }
   }, [user])
 
-  const set = (k: keyof typeof form, v: string) => {
+  /* `boolean` هم پذیرفته می‌شود چون تیکِ «قیمت توافقی» اضافه شد؛
+     همه‌ی فیلدهای دیگر همچنان رشته‌اند. */
+  const set = (k: keyof typeof form, v: string | boolean) => {
     setForm(f => ({ ...f, [k]: v }))
     setErrors(e => { const n = { ...e }; delete n[k]; return n })
   }
@@ -752,7 +746,8 @@ export default function NewProductPage() {
     if (!form.type.trim())        e.type        = 'نوع را مشخص کنید'
     if (!effBrand)                e.brand       = 'برند الزامی است'
     if (!effModel)                e.model       = 'مدل الزامی است'
-    if (!form.price)              e.price       = 'قیمت الزامی است'
+    /* آگهیِ توافقی قیمت نمی‌خواهد — همان قاعده‌ای که سرور هم دارد */
+    if (!form.negotiable && !form.price) e.price = 'قیمت را وارد کنید یا «توافقی» را بزنید'
     if (!form.shopName.trim())    e.shopName    = 'نام فروشگاه | فروشنده الزامی است'
     if (!form.sellerPhone.trim()) e.sellerPhone = 'شماره تماس الزامی است'
     else if (!/^(\+98|0)9\d{9}$/.test(form.sellerPhone.trim()))
@@ -800,7 +795,8 @@ export default function NewProductPage() {
           body: JSON.stringify({
             name: composedName, category: form.category, type: form.type.trim(),
             brand: effBrand, model: effModel,
-            price: rawPrice, old: rawOld,
+            price: form.negotiable ? 0 : rawPrice, old: form.negotiable ? 0 : rawOld,
+            negotiable: form.negotiable,
             description: form.description.trim(), condition: form.condition,
             specs: finalSpecs, images: imgList, section,
             province: form.province, city: form.city, address: form.address.trim(),
@@ -1137,15 +1133,30 @@ export default function NewProductPage() {
                   <div style={{ position: 'relative', zIndex: 1 }}>
                     <SectionTitle>قیمت‌گذاری</SectionTitle>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      {/* ── قیمتِ توافقی ──
+                          بدونِ این گزینه، فروشنده‌ای که نمی‌خواست قیمت بنویسد
+                          مجبور بود صفر بگذارد و کارتِ بازار «۰ تومان» نشان
+                          می‌داد. با روشن‌شدنش فیلدهای قیمت غیرفعال می‌شوند تا
+                          عددی که قرار نیست دیده شود اصلاً وارد نشود. */}
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={form.negotiable}
+                          onChange={e => set('negotiable', e.target.checked)}
+                          style={{ width: 17, height: 17, accentColor: '#9A6E38' }} />
+                        <span style={{ fontSize: 13.5, fontWeight: 700, color: '#1C1B17' }}>قیمت توافقی است</span>
+                        <span style={{ fontSize: 11.5, color: '#8A8474' }}>— روی آگهی «توافقی» نوشته می‌شود</span>
+                      </label>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, opacity: form.negotiable ? 0.45 : 1 }}>
                         <div>
-                          <Label required>قیمت (تومان)</Label>
-                          <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.price} onChange={e => set('price', fmtPrice(e.target.value))} style={inp(errors.price)} />
+                          {form.negotiable ? <Label optional>قیمت (تومان)</Label> : <Label required>قیمت (تومان)</Label>}
+                          <input className="nf" type="text" inputMode="numeric" placeholder="۰" disabled={form.negotiable}
+                            value={form.negotiable ? '' : form.price} onChange={e => set('price', fmtPrice(e.target.value))} style={inp(errors.price)} />
                           <ErrMsg msg={errors.price} />
                         </div>
                         <div>
                           <Label optional>قیمت قبل از تخفیف</Label>
-                          <input className="nf" type="text" inputMode="numeric" placeholder="۰" value={form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp()} />
+                          <input className="nf" type="text" inputMode="numeric" placeholder="۰" disabled={form.negotiable}
+                            value={form.negotiable ? '' : form.oldPrice} onChange={e => set('oldPrice', fmtPrice(e.target.value))} style={inp()} />
                         </div>
                       </div>
                       {form.price && form.oldPrice && (() => {
