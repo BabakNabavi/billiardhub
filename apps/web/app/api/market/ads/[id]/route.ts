@@ -6,8 +6,14 @@ import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
    ویرایش و حذف فقط برای صاحب آگهی یا ادمین. */
 
+/* ورودیِ خالی پیش‌فرض می‌دهد نه صفر — `Number('')` صفر است و همین
+   در مسیرِ فهرست باعث شده بود سقفِ نتایج ۱ شود. */
 const num = (v: unknown, d = 0) => {
-  const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
+  const cleaned = String(v ?? '')
+    .replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)))
+    .replace(/[^0-9.]/g, '');
+  if (!cleaned) return d;
+  const n = Number(cleaned);
   return Number.isFinite(n) ? n : d;
 };
 const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);

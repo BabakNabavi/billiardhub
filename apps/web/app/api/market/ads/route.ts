@@ -10,8 +10,24 @@ import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
    جز خود آگهی‌دهنده نمی‌دید و سرور هم نمی‌دانست چند آگهی ثبت شده،
    پس هیچ سهمیه‌ای قابل اعمال نبود. */
 
+/* ⚠️ ورودیِ خالی باید پیش‌فرض بدهد، نه صفر.
+
+   پیش‌تر این تابع برای رشته‌ی خالی صفر برمی‌گرداند، چون `Number('')`
+   صفر است و `Number.isFinite(0)` درست. نتیجه‌اش این بود:
+
+     num(searchParams.get('limit'), 100)  →  0
+     Math.min(200, Math.max(1, 0))        →  1
+
+   یعنی فهرستِ بازار — که بدونِ پارامترِ limit صدا زده می‌شود — همیشه
+   **فقط یک آگهی** برمی‌گرداند. صفحه پر به‌نظر می‌رسید چون کاتالوگِ
+   ثابتِ ساختگی کنارش می‌نشست؛ با حذفِ آن کاتالوگ، بازار عملاً یک
+   کارت داشت. */
 const num = (v: unknown, d = 0) => {
-  const n = Number(String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x))).replace(/[^0-9.]/g, ''));
+  const cleaned = String(v ?? '')
+    .replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)))
+    .replace(/[^0-9.]/g, '');
+  if (!cleaned) return d;
+  const n = Number(cleaned);
   return Number.isFinite(n) ? n : d;
 };
 const str = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max);

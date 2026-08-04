@@ -53,7 +53,10 @@ export default function AdminProductsPage() {
     /* پاسخِ /api/products یک شیء است: { products, total, page, ... }
        نه آرایه. پیش‌تر همان شیء در state می‌نشست و اولین `.filter`
        صفحه را می‌شکست — یعنی «تأیید محصولات» هرگز چیزی نشان نمی‌داد. */
-    api.get('/products?limit=200').then(res => {
+    /* `all=1` ⇒ همه‌ی وضعیت‌ها، نه فقط فعال‌ها. بدونِ آن، آگهیِ
+       متوقف، فروخته‌شده یا ردشده در پنل اصلاً دیده نمی‌شد و ادمین
+       نمی‌توانست مدیریتش کند. سرور خودش ادمین‌بودن را بررسی می‌کند. */
+    api.get('/products?limit=200&all=1').then(res => {
       const list = Array.isArray(res.data) ? res.data : (res.data?.products ?? []);
       setProducts(list);
       setErr('');
