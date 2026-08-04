@@ -15,8 +15,9 @@
    ───────────────────────────────────────────────────────────── */
 
 import { absoluteUrl } from '../../../lib/site-url'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import PrerollAd, { type PrerollAdData } from '../../../components/media/PrerollAd'
 import {
   ChevronLeft, Eye, ThumbsUp, Bookmark, Link2, Check, Play,
   BellPlus, BellRing, ArrowLeft, Clapperboard,
@@ -27,6 +28,46 @@ const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
 
 export default function WatchClient({ video, related }: { video: MediaVideo; related: MediaVideo[] }) {
+  /* ── تبلیغِ پیش‌پخش ──
+
+     ترتیب عمدی است: تبلیغ *پیش از* اولین پخش گرفته می‌شود ولی نمایش
+     داده نمی‌شود تا کاربر روی play بزند. یعنی
+       · بازکردنِ صفحه هیچ تبلیغی نمی‌شمارد
+       · وقتی کاربر play زد، تبلیغ آماده است و مکثی نیست
+       · و اگر تبلیغی نبود یا درخواست شکست، پلیر عادی می‌ماند
+
+     `adDone` جلوی تکرار را می‌گیرد: مکث و ادامه‌ی ویدیوی اصلی نباید
+     دوباره تبلیغ بیاورد. */
+  const [ad, setAd] = useState<PrerollAdData | null>(null)
+  const [adPlaying, setAdPlaying] = useState(false)
+  const adDone = useRef(false)
+  const mainRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/ads/preroll', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(j => { if (alive && j?.ad?.videoUrl) setAd(j.ad as PrerollAdData) })
+      .catch(() => { /* بی‌تبلیغ ادامه می‌دهیم */ })
+    return () => { alive = false }
+  }, [])
+
+  /* کاربر play زد و تبلیغی هست ⇒ ویدیوی اصلی نگه داشته می‌شود تا
+     تبلیغ تمام شود. */
+  const gateAd = () => {
+    if (adDone.current || !ad) return false
+    adDone.current = true
+    mainRef.current?.pause()
+    setAdPlaying(true)
+    return true
+  }
+
+  const afterAd = () => {
+    setAdPlaying(false)
+    /* سیاستِ پخشِ خودکار این‌جا مانع نیست: کاربر خودش play زده بود. */
+    void mainRef.current?.play().catch(() => { /* دکمه‌ی پلیر هست */ })
+  }
+
   /* بازدید هنگامِ *شروعِ پخش* ثبت می‌شود، نه بازشدنِ صفحه: بازکردن یعنی
      کنجکاوی، پخش یعنی تماشا. `sent` جلوی ثبتِ دوباره را در همین صفحه
      می‌گیرد (هر مکث و ادامه یک رویدادِ play است)؛ تکرارِ بینِ نشست‌ها
@@ -94,9 +135,17 @@ export default function WatchClient({ video, related }: { video: MediaVideo; rel
           <div style={{ minWidth: 0 }}>
             {/* پلیر */}
             <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', background: '#000', boxShadow: '0 30px 70px rgba(28,27,23,0.22)', animation: 'mvUp .45s ease both' }}>
-              <video key={video.id} controls playsInline preload="metadata" poster={video.thumb}
+              {/* تبلیغ روی پلیر می‌نشیند، جای آن را نمی‌گیرد: عنصرِ
+                  ویدیوی اصلی در DOM می‌ماند تا حالت و بافرش نپرد. */}
+              {adPlaying && ad && (
+                <div style={{ position: 'absolute', inset: 0, zIndex: 5 }}>
+                  <PrerollAd ad={ad} onFinish={afterAd} />
+                </div>
+              )}
+
+              <video ref={mainRef} key={video.id} controls playsInline preload="metadata" poster={video.thumb}
                 aria-label={`پخش ویدیو: ${video.title}`}
-                onPlay={countView}
+                onPlay={() => { if (gateAd()) return; countView() }}
                 style={{ width: '100%', aspectRatio: '16/9', display: 'block', background: '#000' }}>
                 <source src={video.src} type="video/mp4" />
                 مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.

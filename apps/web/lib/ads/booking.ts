@@ -243,6 +243,17 @@ export async function myCampaigns(userId: string): Promise<MyCampaign[]> {
       impressions: imp,
       clicks: clk,
       ctr: imp > 0 ? (clk / imp) * 100 : 0,
+      /* شمارنده‌های تبلیغِ ویدیویی (مهاجرتِ ۰۵۱). برای جایگاه‌های
+         بنری همیشه صفرند و داشبورد آن‌ها را نشان نمی‌دهد — بخشی که
+         عددِ بی‌معنی نشان بدهد بدتر از نبودنش است. */
+      completedViews: Number(r.completed_views) || 0,
+      skippedViews: Number(r.skipped_views) || 0,
+      /* نرخِ رد کردن: از مجموعِ *پایان‌یافته‌ها*، نه از کلِ نمایش‌ها.
+         نمایشی که هنوز تمام نشده هنوز نه کامل است نه ردشده. */
+      skipRate: (Number(r.completed_views) || 0) + (Number(r.skipped_views) || 0) > 0
+        ? ((Number(r.skipped_views) || 0) /
+           ((Number(r.completed_views) || 0) + (Number(r.skipped_views) || 0))) * 100
+        : 0,
       amount: o ? Number(o.amount) || 0 : null,
       paymentStatus: o ? String(o.status) : null,
       orderId: o ? String(o.id) : null,

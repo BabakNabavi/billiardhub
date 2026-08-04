@@ -29,6 +29,10 @@ export const MAX_VIDEO = 25 * 1024 * 1024
 
 export const ALLOWED_PREFIXES = [
   'clubs/', 'products/', 'social/stories/', 'social/media/', 'sellers/', 'profiles/',
+  /* ویدیو و بنرِ تبلیغات. مسیر باید زیرِ شناسه‌ی خودِ آگهی‌دهنده باشد
+     (پایین بررسی می‌شود) تا کسی نتواند فایلِ تبلیغِ دیگری را بازنویسی
+     کند — تبلیغی که پول برایش داده شده. */
+  'ads/',
   /* مدارک — جواز کسب و مانند آن. برخلاف بقیه به باکتِ **خصوصی** می‌رود
      و لینک عمومی ندارد: جواز کسب نام، کد ملی و نشانیِ صاحب باشگاه را
      روی خود دارد و نباید با داشتنِ آدرس برای همه باز شود. */
@@ -119,6 +123,15 @@ export async function resolvePath(rawPath: string, actorId: string): Promise<Pat
     const owner = (club as { ownerId?: string } | null)?.ownerId
     if (!club || (owner !== actorId && !(await isAdminUser(actorId)))) {
       return { ok: false, status: 403, message: 'دسترسی به این باشگاه مجاز نیست' }
+    }
+    ownerChecked = true
+  } else if (cleaned.startsWith('ads/')) {
+    /* `ads/<شناسه‌ی خودِ آگهی‌دهنده>/…` — نوشتن زیرِ شناسه‌ی کسِ دیگر
+       مجاز نیست. بدونِ این، هر کاربرِ واردشده می‌توانست ویدیوی تبلیغِ
+       یک کمپینِ فعال را عوض کند. */
+    const owner = cleaned.split('/')[1] ?? ''
+    if (owner !== safeSeg(actorId)) {
+      return { ok: false, status: 403, message: 'مسیر فایل تبلیغ باید زیر شناسه‌ی خودتان باشد' }
     }
     ownerChecked = true
   } else if (cleaned.startsWith('documents/roles/')) {

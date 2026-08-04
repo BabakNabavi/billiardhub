@@ -40,7 +40,8 @@ export const LEGACY_KEY_MAP: Record<string, PlacementKey> = {
 }
 
 export type PlacementMode = 'free' | 'manual' | 'paid'
-export type ContentKind = 'banner' | 'entity'
+/* `video` با مهاجرتِ ۰۵۱ آمد — تبلیغِ پیش‌پخشِ بیلیارد مدیا. */
+export type ContentKind = 'banner' | 'entity' | 'video'
 export type EntityType = 'product' | 'club' | 'seller'
 
 /* حالت چرخش کمپین‌های یک جایگاه (فاز ۴) */
@@ -67,6 +68,10 @@ export interface Placement {
   price: number
   durationDays: number
   sortOrder: number
+  /** فقط جایگاهِ ویدیویی — پس از چند ثانیه «رد کردن» ظاهر شود */
+  skipAfterSec: number | null
+  /** فقط جایگاهِ ویدیویی — سقفِ مدتِ تبلیغ */
+  maxDurationSec: number | null
 }
 
 type DbPlacement = {
@@ -75,6 +80,8 @@ type DbPlacement = {
   entity_type: EntityType | null; capacity: number; price: number
   duration_days: number; sort_order: number
   display_count?: number | null; rotation_mode?: RotationMode | null; priority?: number | null
+  /* مخصوصِ جایگاهِ ویدیویی — مهاجرتِ ۰۵۱ */
+  skip_after_sec?: number | null; max_duration_sec?: number | null
 }
 
 const toPlacement = (r: DbPlacement): Placement => ({
@@ -86,6 +93,10 @@ const toPlacement = (r: DbPlacement): Placement => ({
   displayCount: Number(r.display_count ?? 0) || 0,
   rotationMode: isRotationMode(r.rotation_mode) ? r.rotation_mode : 'fair',
   priority: Number(r.priority ?? 0) || 0,
+  /* `null` معنادار است: برای جایگاهِ غیرِویدیویی بی‌ربط، و برای
+     ویدیویی یعنی «رد کردن ممکن نیست» / «سقفِ مدت ندارد». */
+  skipAfterSec: r.skip_after_sec ?? null,
+  maxDurationSec: r.max_duration_sec ?? null,
 })
 
 /** عدد صحیح محدودشده — ورودی ادمین نباید از بازه‌ی integer دیتابیس بیرون بزند */
@@ -123,6 +134,7 @@ export async function updatePlacement(key: string, patch: Partial<{
   isActive: boolean; mode: PlacementMode; capacity: number; price: number
   durationDays: number; title: string; description: string
   displayCount: number; rotationMode: RotationMode; priority: number
+  skipAfterSec: number | null; maxDurationSec: number | null
 }>): Promise<Placement | null> {
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (patch.isActive !== undefined) row.is_active = patch.isActive
@@ -135,6 +147,16 @@ export async function updatePlacement(key: string, patch: Partial<{
   if (patch.displayCount !== undefined) row.display_count = clampInt(patch.displayCount, 0, 500)
   if (patch.rotationMode !== undefined && isRotationMode(patch.rotationMode)) row.rotation_mode = patch.rotationMode
   if (patch.priority !== undefined) row.priority = clampInt(patch.priority, -10000, 10000)
+  /* تنظیم‌های جایگاهِ ویدیویی. `null` معنادار است — «رد کردن ممکن
+     نیست» و «سقفِ مدت ندارد» — پس صفر نمی‌شود.
+     سقفِ ۳۰۰ ثانیه: تبلیغِ بلندتر از پنج دقیقه پیش از محتوای اصلی،
+     هر عددی هم که ادمین بزند، اشتباه است. */
+  if (patch.skipAfterSec !== undefined) {
+    row.skip_after_sec = patch.skipAfterSec === null ? null : clampInt(patch.skipAfterSec, 0, 60)
+  }
+  if (patch.maxDurationSec !== undefined) {
+    row.max_duration_sec = patch.maxDurationSec === null ? null : clampInt(patch.maxDurationSec, 1, 300)
+  }
 
   const { data, error } = await sb().from('placements').update(row).eq('key', key).select().single()
   if (error || !data) return null
@@ -169,6 +191,9 @@ export interface Campaign {
   sortOrder: number
   impressions: number
   clicks: number
+  /* تبلیغِ ویدیویی — مهاجرتِ ۰۵۱. برای بنر همیشه صفر می‌مانند. */
+  completedViews: number
+  skippedViews: number
   adminNote: string | null
   createdAt: string
 }
@@ -179,6 +204,7 @@ type DbCampaign = {
   status: CampaignStatus; starts_at: string; ends_at: string
   weight: number; sort_order: number; impressions: number; clicks: number
   serves?: number | null
+  completed_views?: number | null; skipped_views?: number | null
   admin_note: string | null; created_at: string
 }
 
@@ -189,6 +215,8 @@ const toCampaign = (r: DbCampaign): Campaign => ({
   startsAt: r.starts_at, endsAt: r.ends_at,
   weight: r.weight, sortOrder: r.sort_order,
   impressions: Number(r.impressions) || 0, clicks: Number(r.clicks) || 0,
+  completedViews: Number(r.completed_views ?? 0) || 0,
+  skippedViews: Number(r.skipped_views ?? 0) || 0,
   adminNote: r.admin_note, createdAt: r.created_at,
 })
 

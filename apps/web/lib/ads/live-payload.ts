@@ -10,7 +10,7 @@
    منطق داشته باشیم که با هم واگرا شوند.
    ───────────────────────────────────────────────────────────── */
 
-import { livePlacements, expireCampaigns, type EntityType } from './core'
+import { livePlacements, expireCampaigns, type EntityType, type ContentKind } from './core'
 import { resolveEntities, type EntitySnapshot } from './resolve'
 import { freeContent } from './free'
 
@@ -24,7 +24,7 @@ export interface LiveCampaignOut {
 }
 
 export interface LivePlacementOut {
-  contentKind: 'banner' | 'entity'
+  contentKind: ContentKind
   rotationMode?: string
   displayCount?: number
   mode?: string

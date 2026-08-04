@@ -39,6 +39,8 @@ interface Campaign {
   id: string; placementKey: string; placementTitle: string; planName: string | null
   title: string; status: string; startsAt: string; endsAt: string
   impressions: number; clicks: number; ctr: number
+  /* تبلیغِ ویدیویی — برای بنر همیشه صفر */
+  completedViews: number; skippedViews: number; skipRate: number
   amount: number | null; paymentStatus: string | null; createdAt: string
 }
 interface Totals {
@@ -187,6 +189,23 @@ export default function AdvertiserDashboard() {
                       <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>نمایش: </span>{fa(c.impressions)}</div>
                       <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>کلیک: </span>{fa(c.clicks)}</div>
                       <div style={{ fontVariantNumeric: 'tabular-nums' }}><span style={{ color: MUT }}>CTR: </span>{toFaDigits(c.ctr.toFixed(2))}٪</div>
+
+                      {/* فقط برای تبلیغِ ویدیویی معنا دارد؛ برای بنر
+                          همیشه صفر است و نشان‌دادنش گمراه‌کننده. */}
+                      {(c.completedViews > 0 || c.skippedViews > 0) && (
+                        <>
+                          <div style={{ fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ color: MUT }}>تماشای کامل: </span>{fa(c.completedViews)}
+                          </div>
+                          <div style={{ fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ color: MUT }}>رد شده: </span>{fa(c.skippedViews)}
+                          </div>
+                          <div style={{ fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ color: MUT }}>نرخ رد کردن: </span>{toFaDigits(c.skipRate.toFixed(1))}٪
+                          </div>
+                        </>
+                      )}
+
                       {c.amount !== null && (
                         <div style={{ fontVariantNumeric: 'tabular-nums' }}>
                           <span style={{ color: MUT }}>مبلغ: </span>{fa(c.amount)} تومان

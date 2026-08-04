@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   livePlacements, trackCampaign, listPlacements, expireCampaigns, listPricingPlans,
-  isPlacementKey, LEGACY_KEY_MAP, type EntityType,
+  isPlacementKey, LEGACY_KEY_MAP, type EntityType, type ContentKind,
 } from '@/lib/ads/core';
 import { resolveEntities, type EntitySnapshot } from '@/lib/ads/resolve';
 import { freeContent } from '@/lib/ads/free';
@@ -14,7 +14,9 @@ import { freeContent } from '@/lib/ads/free';
    کارت تبدیل می‌شوند تا کلاینت به اسکیمای جدول‌ها وابسته نباشد. */
 
 interface LiveOut {
-  contentKind: 'banner' | 'entity';
+  /* `video` با جایگاهِ پیش‌پخش آمد؛ همان نوعِ مشترکِ `core` تا این دو
+     دوباره از هم واگرا نشوند. */
+  contentKind: ContentKind;
   /* ترتیب آرایه همان چرخش سرور است؛ کلاینت نباید دوباره مرتبش کند */
   rotationMode: 'fixed' | 'weighted' | 'fair' | 'random';
   displayCount: number;
@@ -44,6 +46,11 @@ export async function GET(req: NextRequest) {
         placements: paid.map(p => ({
           key: p.key, title: p.title, description: p.description,
           mode: p.mode, price: p.price, durationDays: p.durationDays, isActive: p.isActive,
+          /* جایگاهِ ویدیویی فایل می‌خواهد نه متن؛ فرم باید بداند و
+             سقفِ مدت را هم به کاربر بگوید تا بعد از آپلود رد نشود. */
+          contentKind: p.contentKind,
+          skipAfterSec: p.skipAfterSec ?? null,
+          maxDurationSec: p.maxDurationSec ?? null,
           /* پله‌های مدت/قیمت همان جایگاه — از دیتابیس، نه هاردکد */
           plans: plans
             .filter(pl => pl.placementKey === p.key)

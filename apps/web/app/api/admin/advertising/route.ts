@@ -156,6 +156,15 @@ export async function PATCH(req: NextRequest) {
       patch.rotationMode = b.rotationMode as RotationMode;
     }
     if (b.priority !== undefined) patch.priority = num(b.priority);
+    /* جایگاهِ ویدیویی (پیش‌پخش). `null` را عمداً عبور می‌دهیم چون
+       معنا دارد: skip=null یعنی «رد کردن ممکن نیست». بازه‌ها را
+       `updatePlacement` می‌بندد. */
+    if (b.skipAfterSec !== undefined) {
+      patch.skipAfterSec = b.skipAfterSec === null ? null : num(b.skipAfterSec);
+    }
+    if (b.maxDurationSec !== undefined) {
+      patch.maxDurationSec = b.maxDurationSec === null ? null : num(b.maxDurationSec, 15);
+    }
 
     const placement = await updatePlacement(b.placementKey, patch);
     if (!placement) return NextResponse.json({ message: 'ویرایش جایگاه انجام نشد' }, { status: 500 });

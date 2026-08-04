@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Megaphone, Check, Loader2, Phone, Mail, MapPin, ArrowLeft, Lock } from 'lucide-react'
+import { Megaphone, Check, Loader2, Phone, Mail, MapPin, ArrowLeft, Lock, Film } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import Select from '../../components/ui/Select'
 import { apiFetch } from '../../lib/http'
@@ -34,7 +34,13 @@ const LABEL: React.CSSProperties = {
 }
 
 interface PlanTier { id: string; name: string; price: number; durationDays: number; badge: string | null }
-interface Slot { key: string; title: string; description: string | null; plans?: PlanTier[] }
+interface Slot {
+  key: string; title: string; description: string | null; plans?: PlanTier[]
+  /* جایگاهِ ویدیویی (پیش‌پخش) فایل می‌خواهد، نه فقط متن */
+  contentKind?: string
+  skipAfterSec?: number | null
+  maxDurationSec?: number | null
+}
 
 const toFa = (v: string) => v.replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d] ?? d)
 const digits = (v: string) => v.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^0-9]/g, '')
@@ -50,6 +56,52 @@ export default function AdvertisePage() {
   /* کاربر واردشده هویتش استعلام شده — نام و شماره‌اش از حساب می‌آید
      و دستی عوض نمی‌شود؛ ایمیل ولی آزاد است. */
   const locked = !!user
+
+  /* ── ویدیوی تبلیغ ──
+     جایگاهِ ویدیویی به‌جای متن، فایل می‌خواهد. مدت پیش از آپلود در
+     مرورگر سنجیده می‌شود: فرستادنِ ویدیوی بلند و بعد رد شدنش، هم وقتِ
+     کاربر را می‌گیرد هم پهنای‌باند را. سقفِ نهایی را سرور اعمال می‌کند. */
+  const [adVideo, setAdVideo] = useState('')
+  const [adDuration, setAdDuration] = useState<number | null>(null)
+  const [clickUrl, setClickUrl] = useState('')
+  const [upBusy, setUpBusy] = useState(false)
+  const [upErr, setUpErr] = useState('')
+
+  const videoSlot = slots.find(s => s.key === form.slotKey && s.contentKind === 'video')
+
+  const probeDuration = (f: File) => new Promise<number | null>(res => {
+    const v = document.createElement('video')
+    v.preload = 'metadata'
+    v.onloadedmetadata = () => {
+      URL.revokeObjectURL(v.src)
+      res(Number.isFinite(v.duration) && v.duration > 0 ? Math.round(v.duration) : null)
+    }
+    v.onerror = () => { URL.revokeObjectURL(v.src); res(null) }
+    v.src = URL.createObjectURL(f)
+  })
+
+  const pickVideo = async (f?: File) => {
+    if (!f || !user) return
+    setUpErr(''); setAdVideo(''); setAdDuration(null)
+
+    const dur = await probeDuration(f)
+    const cap = videoSlot?.maxDurationSec ?? null
+    if (dur === null) { setUpErr('این فایل ویدیوی معتبری نیست'); return }
+    if (cap && dur > cap) {
+      setUpErr(`مدت ویدیو ${toFa(String(dur))} ثانیه است؛ حداکثر ${toFa(String(cap))} ثانیه مجاز است`)
+      return
+    }
+    setAdDuration(dur)
+
+    setUpBusy(true)
+    try {
+      const { uploadFile } = await import('../../lib/supabase')
+      /* مسیر زیرِ شناسه‌ی خودِ کاربر — سرور همین را بررسی می‌کند */
+      const url = await uploadFile('club-media', f, `ads/${user.id}/${Date.now()}`)
+      if (!url) { setUpErr('بارگذاری انجام نشد؛ حجم یا فرمت فایل را بررسی کنید'); return }
+      setAdVideo(url)
+    } catch { setUpErr('خطا در بارگذاری') } finally { setUpBusy(false) }
+  }
 
   useEffect(() => {
     /* کاتالوگ از سرور فقط جایگاه‌های «پولی» را برمی‌گرداند — جایگاهی که
@@ -76,12 +128,24 @@ export default function AdvertisePage() {
     e.preventDefault()
     if (!form.name.trim()) { setErr('نام و نام‌خانوادگی لازم است'); return }
     if (!/^(\+98|0)?9\d{9}$/.test(digits(form.phone))) { setErr('شماره موبایل معتبر نیست'); return }
+    if (videoSlot && !adVideo) { setErr('برای این جایگاه، ویدیوی تبلیغ را بارگذاری کنید'); return }
 
     setSending(true)
     try {
+      /* نشانیِ ویدیو و مقصد داخلِ متنِ درخواست می‌روند تا ادمین همه‌ی
+         اطلاعات را یک‌جا ببیند — بدونِ ساختنِ ستونِ تازه برای چیزی که
+         فقط یک جایگاه از آن استفاده می‌کند. */
+      const extra = videoSlot
+        ? `\n\n— ویدیوی تبلیغ: ${adVideo}` +
+          (adDuration ? `\n— مدت: ${adDuration} ثانیه` : '') +
+          (clickUrl.trim() ? `\n— مقصد کلیک: ${clickUrl.trim()}` : '')
+        : ''
       const r = await apiFetch('/api/ads/requests', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, phone: digits(form.phone) }),
+        body: JSON.stringify({
+          ...form, phone: digits(form.phone),
+          message: form.message + extra,
+        }),
       })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message || 'ثبت درخواست انجام نشد'); return }
@@ -192,6 +256,56 @@ export default function AdvertisePage() {
                 value={form.slotKey} ariaLabel="جایگاه تبلیغ"
                 options={slots.map(s => ({ value: s.key, label: s.title }))}
                 onChange={v => set('slotKey', v)} />
+              )}
+
+              {/* ── جایگاهِ ویدیویی ──
+                  فقط وقتی دیده می‌شود که کاربر جایگاهی انتخاب کرده که
+                  واقعاً ویدیو می‌خواهد. فرم برای بقیه‌ی جایگاه‌ها
+                  دست‌نخورده می‌ماند. */}
+              {videoSlot && (
+                <div style={{
+                  marginTop: 12, border: '1px solid rgba(199,166,106,0.30)',
+                  background: 'rgba(199,166,106,0.06)', borderRadius: 12, padding: '13px 15px',
+                }}>
+                  <p style={{ fontSize: 12, color: SEC, lineHeight: 2, margin: '0 0 10px' }}>
+                    تبلیغ پیش از شروع محتوای اصلی پخش می‌شود
+                    {videoSlot.skipAfterSec !== null && videoSlot.skipAfterSec !== undefined
+                      ? ` و پس از ${toFa(String(videoSlot.skipAfterSec))} ثانیه بیننده می‌تواند آن را رد کند`
+                      : ''}.
+                    {videoSlot.maxDurationSec
+                      ? ` حداکثر مدت مجاز: ${toFa(String(videoSlot.maxDurationSec))} ثانیه.`
+                      : ''}
+                  </p>
+
+                  <label style={LABEL}><Film size={13} /> ویدیوی تبلیغ</label>
+                  <input type="file" accept="video/mp4,video/webm,video/quicktime"
+                    disabled={!user || upBusy}
+                    onChange={e => void pickVideo(e.target.files?.[0])}
+                    style={{ fontSize: 12, color: SEC, fontFamily: 'inherit' }} />
+
+                  {!user && (
+                    <p style={{ fontSize: 11.5, color: MUT, margin: '7px 0 0' }}>
+                      برای بارگذاری ویدیو ابتدا وارد شوید.
+                    </p>
+                  )}
+                  {upBusy && (
+                    <p style={{ fontSize: 11.5, color: SEC, margin: '7px 0 0' }}>در حال بارگذاری…</p>
+                  )}
+                  {adVideo && !upBusy && (
+                    <p style={{ fontSize: 11.5, color: '#0E7A38', fontWeight: 700, margin: '7px 0 0' }}>
+                      ✓ ویدیو بارگذاری شد
+                      {adDuration ? ` — ${toFa(String(adDuration))} ثانیه` : ''}
+                    </p>
+                  )}
+                  {upErr && (
+                    <p style={{ fontSize: 11.5, color: '#B23B2E', fontWeight: 700, margin: '7px 0 0' }}>{upErr}</p>
+                  )}
+
+                  <label style={{ ...LABEL, marginTop: 12 }}>نشانی مقصد (اختیاری)</label>
+                  <input value={clickUrl} onChange={e => setClickUrl(e.target.value)}
+                    placeholder="https://…" dir="ltr"
+                    style={{ ...INPUT, textAlign: 'left' }} />
+                </div>
               )}
               {form.slotKey && (() => {
                 const s = slots.find(x => x.key === form.slotKey)

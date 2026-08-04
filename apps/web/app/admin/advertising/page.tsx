@@ -61,14 +61,18 @@ const ROTATION_OPTS = (['fair', 'weighted', 'random', 'fixed'] as Rotation[])
 
 interface Placement {
   key: string; title: string; description: string | null; section: string
-  isActive: boolean; mode: Mode; contentKind: 'banner' | 'entity'
+  isActive: boolean; mode: Mode; contentKind: 'banner' | 'entity' | 'video'
   entityType: string | null; capacity: number; price: number; durationDays: number
   displayCount: number; rotationMode: Rotation; priority: number
+  /* فقط جایگاهِ ویدیویی (پیش‌پخش) — مهاجرتِ ۰۵۱ */
+  skipAfterSec: number | null; maxDurationSec: number | null
 }
 interface Campaign {
   id: string; placementKey: string; advertiser: string; title: string
   content: Record<string, unknown>; status: string
   startsAt: string; endsAt: string; impressions: number; clicks: number
+  /* تبلیغِ ویدیویی — برای بنر همیشه صفر */
+  completedViews?: number; skippedViews?: number
 }
 interface Plan {
   id: string; name: string; description: string | null; placementKey: string | null
@@ -310,13 +314,23 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
   const [days, setDays] = useState(String(p.durationDays))
   const [shown, setShown] = useState(String(p.displayCount))
   const [prio, setPrio] = useState(String(p.priority))
+  /* جایگاهِ ویدیویی: خالی یعنی `null` — «رد کردن ممکن نیست» /
+     «سقفِ مدت ندارد» — که با صفر یکی نیست. */
+  const isVideo = p.contentKind === 'video'
+  const [skip, setSkip] = useState(p.skipAfterSec === null ? '' : String(p.skipAfterSec))
+  const [maxDur, setMaxDur] = useState(p.maxDurationSec === null ? '' : String(p.maxDurationSec))
   useEffect(() => {
     setCap(String(p.capacity)); setPrice(String(p.price)); setDays(String(p.durationDays))
     setShown(String(p.displayCount)); setPrio(String(p.priority))
-  }, [p.capacity, p.price, p.durationDays, p.displayCount, p.priority])
+    setSkip(p.skipAfterSec === null ? '' : String(p.skipAfterSec))
+    setMaxDur(p.maxDurationSec === null ? '' : String(p.maxDurationSec))
+  }, [p.capacity, p.price, p.durationDays, p.displayCount, p.priority, p.skipAfterSec, p.maxDurationSec])
+
+  const numOrNull = (s: string) => (s.trim() === '' ? null : Number(s) || 0)
 
   const changed = Number(cap) !== p.capacity || Number(price) !== p.price || Number(days) !== p.durationDays
     || Number(shown) !== p.displayCount || Number(prio) !== p.priority
+    || (isVideo && (numOrNull(skip) !== p.skipAfterSec || numOrNull(maxDur) !== p.maxDurationSec))
 
   return (
     <div style={{ border: `1px solid ${LINE}`, borderRadius: 14, padding: 15, opacity: p.isActive ? 1 : 0.72, background: '#FAFAF7' }}>
@@ -391,9 +405,29 @@ function PlacementRow({ p, busy, campaignCount, onPatch }: {
           <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(days)}
             onChange={e => setDays(digits(e.target.value))} />
         </div>
+        {isVideo && (
+          <>
+            <div style={{ width: 116 }}>
+              <label style={LABEL}>رد کردن پس از (ثانیه)</label>
+              <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(skip)}
+                onChange={e => setSkip(digits(e.target.value))} title="خالی = بیننده اصلاً نمی‌تواند رد کند" />
+              {skip.trim() !== '' && maxDur.trim() !== '' && Number(skip) >= Number(maxDur) && (
+                <div style={{ fontSize: 10.5, color: '#B7791F', marginTop: 4, lineHeight: 1.6 }}>
+                  از سقف مدت بیشتر است؛ دکمه‌ی رد کردن هرگز فعال نمی‌شود.
+                </div>
+              )}
+            </div>
+            <div style={{ width: 116 }}>
+              <label style={LABEL}>سقف مدت (ثانیه)</label>
+              <input style={{ ...INPUT, background: '#fff', textAlign: 'center' }} inputMode="numeric" value={fa(maxDur)}
+                onChange={e => setMaxDur(digits(e.target.value))} title="ویدیوی بلندتر از این در فرم خرید رد می‌شود" />
+            </div>
+          </>
+        )}
         <button onClick={() => onPatch(p.key, {
           capacity: Number(cap) || 0, price: Number(price) || 0, durationDays: Number(days) || 30,
           displayCount: Number(shown) || 0, priority: Number(prio) || 0,
+          ...(isVideo ? { skipAfterSec: numOrNull(skip), maxDurationSec: numOrNull(maxDur) } : {}),
         })}
           disabled={busy || !changed}
           style={{ ...BTN, opacity: changed ? 1 : 0.45, cursor: changed ? 'pointer' : 'default' }}>
@@ -516,7 +550,9 @@ function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
                   ? /* eslint-disable-next-line @next/next/no-img-element */
                     <img loading="lazy" decoding="async" src={banner} alt="" style={{ width: 68, height: 40, objectFit: 'cover', borderRadius: 8, border: `1px solid ${LINE}`, flexShrink: 0 }} />
                   : <span style={{ width: 68, height: 40, borderRadius: 8, background: 'rgba(199,166,106,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: GOLD_D, flexShrink: 0 }}>
-                      {String(c.content?.ref ?? '').slice(0, 8) || '—'}
+                      {p?.contentKind === 'video'
+                        ? 'ویدیو'
+                        : String(c.content?.ref ?? '').slice(0, 8) || '—'}
                     </span>}
                 <div style={{ flex: 1, minWidth: 170 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: INK }}>
@@ -525,6 +561,18 @@ function CampaignsSection({ placements, campaigns, onChanged, flash, call }: {
                   <div style={{ fontSize: 11, color: MUT, marginTop: 3 }}>
                     {faDate(c.startsAt)} تا {faDate(c.endsAt)} · {fa(c.impressions)} نمایش · {fa(c.clicks)} کلیک
                   </div>
+                  {/* شمارنده‌های پیش‌پخش — فقط وقتی واقعاً عددی هست.
+                      نرخِ رد کردن از مجموعِ پایان‌یافته‌ها حساب می‌شود، نه
+                      از کلِ نمایش‌ها؛ نمایشی که هنوز تمام نشده نه کامل
+                      است نه ردشده. */}
+                  {p?.contentKind === 'video' && ((c.completedViews ?? 0) + (c.skippedViews ?? 0)) > 0 && (
+                    <div style={{ fontSize: 11, color: MUT, marginTop: 3 }}>
+                      {fa(c.completedViews ?? 0)} تماشای کامل · {fa(c.skippedViews ?? 0)} رد شده ·{' '}
+                      نرخ رد کردن {fa(Math.round(
+                        ((c.skippedViews ?? 0) / ((c.completedViews ?? 0) + (c.skippedViews ?? 0))) * 100,
+                      ))}٪
+                    </div>
+                  )}
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 800, color: st.color, background: st.bg, borderRadius: 20, padding: '4px 11px' }}>{st.label}</span>
                 <div style={{ width: 150 }}>
