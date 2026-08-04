@@ -1,18 +1,34 @@
 'use client'
 
-/* درخواست تبلیغ در بیلیارد هاب.
+/* مرکز تبلیغات بیلیارد هاب.
 
-   جایگاه‌ها از پنل ادمین می‌آیند (جدول ad_slots) و در همان کشوی
-   فرم انتخاب می‌شوند. قیمت روی صفحه نوشته نمی‌شود: تعرفه بعد از
-   ثبت درخواست برای متقاضی فرستاده می‌شود. */
+   یک صفحه، سه دستهٔ محصول — نه سه سیستمِ جدا:
+
+     · خرید جایگاه تبلیغاتی — فضای تبلیغ (بنر یا ویدیوی پیش‌پخش).
+       تعرفه همین‌جا دیده می‌شود و پرداخت مستقیم است.
+     · بسته‌های آگهی — سهمیهٔ ثبتِ آگهی در بیلیارد بازار. پیش‌تر فقط
+       در /plans بود و هیچ ربطی به این صفحه نداشت.
+     · درخواست سفارشی — اسپانسری و کمپینِ خارج از جایگاه‌های استاندارد.
+
+   هر سه پشتِ صحنه از یک معماری استفاده می‌کنند: کمپین ← سفارش ←
+   پرداخت ← بازبینی ← فعال‌سازی ← آمار ← انقضا. */
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Megaphone, Check, Loader2, Phone, Mail, MapPin, ArrowLeft, Lock, Film } from 'lucide-react'
+import { Megaphone, Check, Loader2, Phone, Mail, MapPin, ArrowLeft, Lock, Film, Package, Sparkles } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import Select from '../../components/ui/Select'
 import BuyPlacement from '../../components/advertise/BuyPlacement'
+import AdPackages from '../../components/advertise/AdPackages'
 import { apiFetch } from '../../lib/http'
+
+/* سه دستهٔ محصولِ یک مرکز — نه سه سیستمِ جدا */
+const TABS = [
+  { id: 'placements' as const, label: 'خرید جایگاه تبلیغاتی', icon: Megaphone },
+  { id: 'packages' as const, label: 'بسته‌های آگهی', icon: Package },
+  { id: 'custom' as const, label: 'درخواست سفارشی', icon: Sparkles },
+]
+type Tab = typeof TABS[number]['id']
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', FELT = '#0E7A38'
@@ -53,6 +69,7 @@ export default function AdvertisePage() {
   const [sending, setSending] = useState(false)
   const [done, setDone] = useState(false)
   const [err, setErr] = useState('')
+  const [tab, setTab] = useState<Tab>('placements')
 
   /* کاربر واردشده هویتش استعلام شده — نام و شماره‌اش از حساب می‌آید
      و دستی عوض نمی‌شود؛ ایمیل ولی آزاد است. */
@@ -187,11 +204,11 @@ export default function AdvertisePage() {
             <Megaphone size={15} /> تبلیغات
           </span>
           <h1 style={{ fontSize: 'clamp(22px,3.4vw,30px)', fontWeight: 900, margin: '0 0 10px' }}>
-            تبلیغ در بیلیارد هاب
+            در بیلیارد هاب تبلیغ کنید
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
             مخاطب ما دقیقاً همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات.
-            جایگاه را انتخاب کنید، تعرفه را همین‌جا ببینید و مستقیم پرداخت کنید.
+            تعرفه را همین‌جا ببینید و مستقیم پرداخت کنید.
           </p>
 
           {/* کاربر واردشده کمپین‌های خودش را همین‌جا دنبال می‌کند */}
@@ -207,25 +224,57 @@ export default function AdvertisePage() {
           )}
         </div>
 
-        {/* ── خریدِ مستقیمِ جایگاه ──
-            کاربر برای خریدِ یک بنرِ ساده نباید مجبور باشد فرم پر کند و
-            منتظرِ تعرفه بماند. فرمِ پایین برای تبلیغِ سفارشی می‌ماند. */}
-        {user && (
+        {/* ── دو دستهٔ محصول، یک صفحه ──
+            «بسته» سهمیه‌ی ثبتِ آگهی می‌دهد و «جایگاه» فضای تبلیغ
+            می‌فروشد. تا امروز این دو در دو صفحه‌ی بی‌ربط بودند
+            (/plans و /advertise) و کاربر باید خودش می‌فهمید کدام را
+            می‌خواهد. حالا کنارِ همند و متنِ هر تب تفاوتشان را می‌گوید —
+            که مهم‌تر از کنارِ هم بودنشان است. */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 22 }}>
+          {TABS.map(t => {
+            const on = tab === t.id
+            return (
+              <button key={t.id} type="button" onClick={() => setTab(t.id)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', cursor: 'pointer',
+                  background: on ? 'rgba(199,166,106,0.12)' : '#fff',
+                  border: `1px solid ${on ? 'rgba(199,166,106,0.34)' : LINE}`,
+                  color: on ? GOLD_D : SEC, borderRadius: 10, padding: '10px 18px',
+                  fontSize: 13, fontWeight: 800,
+                }}>
+                <t.icon size={14} /> {t.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {tab === 'placements' && (
           <section style={{ marginBottom: 26 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 12px' }}>خرید جایگاه تبلیغاتی</h2>
-            <BuyPlacement userId={user.id} />
+            <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px', textAlign: 'center' }}>
+              فضای تبلیغ در صفحه‌های سایت — بنر، یا ویدیوی پیش‌پخشِ بیلیارد مدیا.
+            </p>
+            {user
+              ? <BuyPlacement userId={user.id} />
+              : (
+                <div style={{ ...CARD, fontSize: 13, color: SEC, lineHeight: 2 }}>
+                  برای دیدن تعرفه‌ها و خرید مستقیم جایگاه،{' '}
+                  <Link href="/login?next=/advertise" style={{ color: GOLD_D, fontWeight: 800 }}>وارد شوید</Link>.
+                  بدون ورود هم می‌توانید درخواست تبلیغ سفارشی ثبت کنید.
+                </div>
+              )}
           </section>
         )}
 
-        {!user && (
-          <div style={{ ...CARD, marginBottom: 26, fontSize: 13, color: SEC, lineHeight: 2 }}>
-            برای دیدن تعرفه‌ها و خرید مستقیم جایگاه،{' '}
-            <Link href="/login" style={{ color: GOLD_D, fontWeight: 800 }}>وارد شوید</Link>.
-            بدون ورود هم می‌توانید درخواست تبلیغ سفارشی ثبت کنید.
-          </div>
+        {tab === 'packages' && (
+          <section style={{ marginBottom: 26 }}>
+            <p style={{ fontSize: 12.5, color: MUT, lineHeight: 2, margin: '0 0 14px', textAlign: 'center' }}>
+              سهمیه‌ی ثبتِ آگهی در بیلیارد بازار — این با خریدِ جایگاه تبلیغاتی فرق دارد.
+            </p>
+            <AdPackages backTo="/advertise" />
+          </section>
         )}
 
-        <form onSubmit={submit} style={CARD}>
+        <form onSubmit={submit} style={{ ...CARD, display: tab === 'custom' ? 'block' : 'none' }}>
           <h2 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 6px' }}>درخواست تبلیغ سفارشی</h2>
           <p style={{ fontSize: 12.5, color: MUT, lineHeight: 1.95, margin: '0 0 16px' }}>
             برای اسپانسری، کمپین ویژه یا تبلیغی خارج از جایگاه‌های استاندارد. تعرفه پس از بررسی برایتان فرستاده می‌شود.
