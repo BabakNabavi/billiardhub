@@ -25,6 +25,8 @@ import Link from 'next/link';
    ببیند یا کاربر بلافاصله لازم دارد. پس کلاً از پاسِ اول بیرون
    می‌رود و بعد از آرام‌شدنِ مرورگر سوار می‌شود. */
 const HomeMediaBand = dynamic(() => import('../components/home/HomeMediaBand'), { ssr: false });
+const BannerSlider = dynamic(() => import('../components/home/BannerSlider'), { ssr: false });
+const BANNER_SLIDER_HEIGHT = 320;
 import {
   Search, ChevronDown, ArrowLeft, ArrowRight,
   MapPin, Star, Heart, Trophy, Users,
@@ -671,144 +673,17 @@ function MktBanner({ slides, label, body, cta, accent, href, initialIdx = 0, lqC
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DISCOVERY PANEL  — iOS 26 Liquid Glass + real dropdowns
-═══════════════════════════════════════════════════════════════ */
-function DiscoveryPanel() {
-  const [tab, setTab]     = useState(0);
-  const [q, setQ]         = useState('');
-  const [openF, setOpenF] = useState<string | null>(null);
-  const [selF, setSelF]   = useState<Record<string, string>>({});
-  const panelRef = useRef<HTMLDivElement>(null);
-  const cur     = DISCOVER_TABS[tab]!;
-  const filters = FILTER_DATA[cur.id] ?? [];
+/* ── `DiscoveryPanel` حذف شد ──
 
-  useEffect(() => {
-    if (!openF) return;
-    const fn = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpenF(null);
-    };
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, [openF]);
+   ۱۳۵ خط کامپوننتِ کامل (تب‌ها، دراپ‌داون‌های فیلتر، جست‌وجو) که در
+   هیچ‌جای پروژه رندر نمی‌شد — جست‌وجو در کلِ `apps/web` فقط به همین
+   تعریف می‌رسید.
 
-  useEffect(() => { setSelF({}); setOpenF(null); setQ(''); }, [tab]);
+   چون در همان ماژولِ صفحه‌ی اصلی بود، بسته‌بند نمی‌توانست حذفش کند و
+   کدش در باندلی می‌نشست که مرورگر باید پیش از پاسخ‌گو شدنِ صفحه
+   می‌خواند و اجرا می‌کرد.
 
-  return (
-    <div ref={panelRef} style={{
-      position: 'relative', maxWidth: '620px', width: '100%',
-      background: 'rgba(255,255,255,0.09)',
-      backdropFilter: 'blur(60px) saturate(280%)',
-      WebkitBackdropFilter: 'blur(60px) saturate(280%)',
-      borderRadius: '28px', overflow: 'visible',
-      border: '1px solid rgba(255,255,255,0.22)',
-      boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.40), inset 0 -1px 0 rgba(0,0,0,0.10), 0 40px 100px rgba(0,0,0,0.42), 0 8px 28px rgba(0,0,0,0.22)',
-    }}>
-      <div style={{ borderRadius: '28px', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '52%', background: 'linear-gradient(180deg,rgba(255,255,255,0.16) 0%,rgba(255,255,255,0) 100%)', pointerEvents: 'none', zIndex: 0 }} />
-
-        {/* Tabs — 4 cols desktop, 2 cols mobile via .dp-tabs */}
-        <div className="dp-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', padding: '10px 10px 0', gap: '3px', position: 'relative', zIndex: 1 }}>
-          {DISCOVER_TABS.map((t, i) => {
-            const active = i === tab;
-            return (
-              <button key={t.id} onClick={() => setTab(i)} style={{
-                padding: '10px 6px', border: 'none', cursor: 'pointer', borderRadius: '18px',
-                fontFamily: 'inherit', fontSize: '14px',
-                fontWeight: active ? 700 : 500,
-                color: active ? '#fff' : 'rgba(255,255,255,0.38)',
-                background: active ? 'rgba(255,255,255,0.18)' : 'transparent',
-                boxShadow: active ? 'inset 0 1px 0 rgba(255,255,255,0.44),0 2px 8px rgba(0,0,0,0.18)' : 'none',
-                transition: 'all 0.28s cubic-bezier(0.4,0,0.2,1)',
-              }}>
-                {t.fa}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Search */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative', zIndex: 1 }}>
-          <Search size={16} style={{ color: 'rgba(255,255,255,0.40)', flexShrink: 0 }} />
-          <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder={cur.ph}
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: '16px', color: '#fff', fontFamily: 'inherit', direction: 'rtl' }} />
-          {q && <button onClick={() => setQ('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', padding: 0, display: 'flex' }}><X size={14} /></button>}
-        </div>
-
-        {/* Filters + CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 14px 14px', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
-          {filters.map(f => {
-            const isOpen = openF === f.label;
-            const chosen = selF[f.label];
-            return (
-              <div key={f.label} style={{ position: 'relative' }}>
-                <button
-                  onClick={() => setOpenF(isOpen ? null : f.label)}
-                  style={{
-                    background: chosen ? 'rgba(199,166,106,0.18)' : 'rgba(255,255,255,0.08)',
-                    border: `1px solid ${chosen ? GOLD_BOR : 'rgba(255,255,255,0.14)'}`,
-                    borderRadius: '22px', padding: '7px 14px', fontSize: '13px', fontWeight: 600,
-                    color: chosen ? GOLD : 'rgba(255,255,255,0.60)',
-                    cursor: 'pointer', fontFamily: 'inherit',
-                    display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.22s', whiteSpace: 'nowrap',
-                  }}
-                >
-                  {chosen || f.label}
-                  {chosen
-                    ? <X size={10} onClick={e => { e.stopPropagation(); setSelF(s => { const n = { ...s }; delete n[f.label]; return n; }); }} />
-                    : <ChevronDown size={9} style={{ transition: 'transform 0.25s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
-                  }
-                </button>
-                {isOpen && (
-                  <div style={{
-                    position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, zIndex: 999,
-                    background: 'rgba(14,10,6,0.92)', backdropFilter: 'blur(44px) saturate(200%)',
-                    WebkitBackdropFilter: 'blur(44px) saturate(200%)',
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '18px', overflow: 'hidden',
-                    boxShadow: '0 24px 64px rgba(0,0,0,0.55),0 4px 16px rgba(0,0,0,0.32)',
-                    minWidth: '155px', animation: 'dropUp 0.22s cubic-bezier(0.22,1,0.36,1) both',
-                  }}>
-                    {f.opts.map((opt, oi) => (
-                      <button key={opt}
-                        onClick={() => { setSelF(s => ({ ...s, [f.label]: opt })); setOpenF(null); }}
-                        style={{
-                          display: 'block', width: '100%', textAlign: 'right', padding: '10px 16px',
-                          background: selF[f.label] === opt ? 'rgba(199,166,106,0.14)' : 'transparent',
-                          border: 'none',
-                          borderBottom: oi < f.opts.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                          color: selF[f.label] === opt ? GOLD : 'rgba(255,255,255,0.68)',
-                          fontSize: '14px', fontWeight: selF[f.label] === opt ? 700 : 400,
-                          cursor: 'pointer', fontFamily: 'inherit', direction: 'rtl',
-                        }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = selF[f.label] === opt ? 'rgba(199,166,106,0.14)' : 'transparent'; }}
-                      >{opt}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          <div style={{ flex: 1 }} />
-
-          <Link href={cur.href} style={{ display: 'contents' }}>
-            <button className="dp-cta" style={{
-              background: 'rgba(199,166,106,0.18)', color: '#fff',
-              border: '1px solid rgba(199,166,106,0.44)', borderRadius: '16px', padding: '11px 24px', fontSize: '15px', fontWeight: 800,
-              cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-              backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)',
-              boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.36), 0 4px 20px rgba(199,166,106,0.16)',
-            }}>
-              <Search size={13} /> جستجو
-            </button>
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+   اگر روزی چنین پنلی خواستیم، از تاریخچه‌ی گیت برمی‌گردد. */
 
 /* ═══════════════════════════════════════════════════════════════
    HOME MEDIA BAND — پوستر سینمایی «بیلیارد مدیا» بین بازار و
@@ -1135,29 +1010,9 @@ export default function HomeClient({ initialPlacements, initialFeatured, service
   }, [spin]);
 
 
-  // ── Banner slider ──
-  const [activeBanner, setActiveBanner] = useState(0);
-  const bannerTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startBannerTimer = () => {
-    if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
-    if (document.hidden) return;
-    bannerTimerRef.current = setInterval(() => setActiveBanner(p => (p + 1) % BANNER_SLIDES.length), 4500);
-  };
-  /* تایمر در تب پنهان می‌ایستد. چرخاندن اسلایدی که کسی نمی‌بیند فقط
-     باتری و نخ اصلی می‌خورد، و هر تیک یک رندر کامل React است. */
-  useEffect(() => {
-    if (!spin) return;
-    startBannerTimer();
-    const onVis = () => {
-      if (document.hidden) { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); bannerTimerRef.current = null; }
-      else startBannerTimer();
-    };
-    document.addEventListener('visibilitychange', onVis);
-    return () => {
-      document.removeEventListener('visibilitychange', onVis);
-      if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
-    };
-  }, [spin]);
+  /* حالت و تایمرِ اسلایدرِ بنر با خودِ کامپوننت به
+     `components/home/BannerSlider.tsx` رفت — تا وقتی سوار نشده،
+     نه تایمری هست نه رندری. */
 
 
   /* تشخیص کارت وسط با rAF (به‌جای رویداد اسکرول) — چون در دسکتاپ ترک با
@@ -2178,62 +2033,10 @@ useEffect(() => {
       {exploreSlot}
 
       {/* §5 BANNER SLIDER ═══════════════════════════════════════ */}
-      <div className="banner-slider" style={{ position: 'relative', width: '100%', height: '320px', overflow: 'hidden', background: '#111' }}>
-        {BANNER_SLIDES.map((slide, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute', inset: 0,
-              opacity: i === activeBanner ? 1 : 0,
-              transition: 'opacity 0.85s cubic-bezier(0.4,0,0.2,1)',
-              pointerEvents: i === activeBanner ? 'auto' : 'none',
-            }}
-          >
-            <img loading="lazy" decoding="async" src={slide.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === activeBanner ? 'scale(1.03)' : 'scale(1)', transition: 'transform 5s ease' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 clamp(20px,5%,80px)' }}>
-              <div style={{ maxWidth: '420px', textAlign: 'right' }}>
-                <h3 style={{ fontSize: 'clamp(22px,3.2vw,42px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '10px' }}>{slide.title}</h3>
-                <p style={{ fontSize: 'clamp(13px,1.4vw,17px)', color: 'rgba(255,255,255,0.65)', marginBottom: '22px', lineHeight: 1.6 }}>{slide.sub}</p>
-                <Link href={slide.link} style={{ textDecoration: 'none' }}>
-                  <button className="banner-cta-btn" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', color: '#fff', border: '1px solid rgba(255,255,255,0.32)', borderRadius: '100px', padding: '11px 28px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.28), 0 4px 20px rgba(0,0,0,0.18)' }}>
-                    {slide.cta} <ArrowLeft size={12} />
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        ))}
-        {/* Dots */}
-        <div style={{ position: 'absolute', bottom: '18px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
-          {/* نقطه‌ی ۷پیکسلی هم بی‌نام بود هم برای انگشت خیلی کوچک.
-              حالا دکمه ۲۴px هدف لمسی دارد و نقطه فقط نشانه‌ی درونش است. */}
-          {BANNER_SLIDES.map((_, i) => (
-            <button key={i} onClick={() => { setActiveBanner(i); startBannerTimer(); }}
-              aria-label={`اسلاید ${i + 1}`}
-              aria-current={i === activeBanner ? 'true' : undefined}
-              style={{
-                width: 24, height: 24, padding: 0, border: 'none', background: 'none',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-              <span style={{
-                display: 'block', width: i === activeBanner ? 22 : 7, height: 7, borderRadius: 4,
-                background: i === activeBanner ? '#fff' : 'rgba(255,255,255,0.35)',
-                transition: 'all 0.3s ease',
-              }} />
-            </button>
-          ))}
-        </div>
-        {/* Arrow prev/next */}
-        <button aria-label="اسلاید قبلی" onClick={() => { setActiveBanner(p => (p - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length); startBannerTimer(); }}
-          style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-          <ArrowRight size={16} />
-        </button>
-        <button aria-label="اسلاید بعدی" onClick={() => { setActiveBanner(p => (p + 1) % BANNER_SLIDES.length); startBannerTimer(); }}
-          style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-          <ArrowLeft size={16} />
-        </button>
-      </div>
+      {/* جای اسلایدر رزرو می‌شود تا وقتی سوار شد صفحه تکان نخورد */}
+      {spin
+        ? <BannerSlider slides={BANNER_SLIDES} />
+        : <div style={{ width: '100%', height: BANNER_SLIDER_HEIGHT, background: '#111' }} />}
 
       {/* §6 بنر بزرگ پایین صفحه — بالای فوتر، فقط همین صفحه.
           جایگاه مستقل: خالی/غیرفعال باشد هیچ فضایی اشغال نمی‌کند
