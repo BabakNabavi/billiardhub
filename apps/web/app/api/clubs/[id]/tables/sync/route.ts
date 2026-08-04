@@ -2,6 +2,61 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { sessionFromRequest } from '@/lib/auth/session';
+import { BUCKET } from '@/lib/social-server';
+
+/* ── عکسِ میز از دیتابیس به Storage منتقل شد ──
+
+   تا امروز `photoDataUrl` یک رشته‌ی base64 بود که تا ۴۰۰ هزار کاراکتر
+   مستقیم در Postgres می‌نشست. یعنی برای هر میز تا ۴۰۰ کیلوبایت در
+   گران‌ترین جای ذخیره‌سازی، و کشیدنِ همان حجم در هر بار خواندنِ فهرستِ
+   میزها — حتی وقتی هیچ عکسی نمایش داده نمی‌شود.
+
+   با ده میز و هزار باشگاه این حدودِ چهار گیگابایت داخلِ دیتابیس بود.
+
+   حالا بایت‌ها به همان باکتی می‌روند که بقیه‌ی عکس‌های باشگاه در آن
+   هستند و در دیتابیس فقط نشانیِ فایل می‌ماند. ستون دست‌نخورده ماند
+   (هنوز `photoDataUrl` نام دارد) تا کلاینت و صفحه‌ی رزرو بدونِ تغییر
+   کار کنند — چون هر دو فقط آن را در `src` می‌گذارند و برایشان فرقی
+   ندارد data-URL باشد یا نشانیِ https.
+
+   رشته‌هایی که از قبل https هستند دست نمی‌خورند، پس ذخیره‌ی دوباره‌ی
+   یک میز عکسش را دوباره آپلود نمی‌کند. */
+
+const DATA_URL = /^data:(image\/(?:jpeg|jpg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/;
+const EXT: Record<string, string> = {
+  'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png',
+  'image/webp': 'webp', 'image/gif': 'gif',
+};
+const MAX_TABLE_PHOTO = 2 * 1024 * 1024;   // ۲ مگابایت — کلاینت به ۹۰۰ پیکسل فشرده می‌کند
+
+/** data-URL → فایل در Storage. خروجی: نشانیِ عمومی، یا null اگر نشد. */
+async function offloadPhoto(value: unknown, clubId: string, idx: number): Promise<string | null> {
+  const s = typeof value === 'string' ? value.trim() : '';
+  if (!s) return null;
+  /* از قبل نشانی است — دست نزن */
+  if (/^https?:\/\//i.test(s)) return s.slice(0, 600);
+
+  const m = DATA_URL.exec(s);
+  if (!m) return null;
+
+  const bytes = Buffer.from(m[2]!, 'base64');
+  if (!bytes.length || bytes.length > MAX_TABLE_PHOTO) return null;
+
+  const ext = EXT[m[1]!] ?? 'jpg';
+  /* نامِ فایل شاملِ زمان است تا عکسِ تازه، نسخه‌ی کش‌شده‌ی قبلی را
+     جای خودش نگذارد. */
+  const path = `clubs/${clubId}/tables/${idx}-${Date.now().toString(36)}.${ext}`;
+
+  const sb = getSupabaseServer();
+  const { error } = await sb.storage.from(BUCKET).upload(path, bytes, {
+    contentType: m[1]!, upsert: true, cacheControl: '31536000',
+  });
+  if (error) {
+    console.error('[tables/sync] photo upload:', error.message);
+    return null;
+  }
+  return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
 
 /* هم‌گام‌سازی میزهای باشگاه با دیتابیس.
    تا امروز میزها فقط در localStorage مرورگر باشگاه‌دار بودند و همین باعث
@@ -43,6 +98,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     vip_pocket: 'VIP پاکت', vipPocket: 'VIP پاکت', airHockey: 'ایرهاکی',
   };
 
+  /* عکس‌ها پیش از ساختِ ردیف‌ها و به‌صورت موازی به Storage می‌روند.
+
+     اگر داخلِ حلقه انجام می‌شد، هر میز یک رفت‌وبرگشتِ اضافه به Storage
+     می‌داشت و ذخیره‌ی ده میز ده برابر طول می‌کشید. */
+  const photoUrls = await Promise.all(
+    incoming.map((t, i) => offloadPhoto(t.photoDataUrl, clubId, i)),
+  );
+
   const row = (t: InTable, i: number) => ({
     clubId,
     /* نام و شماره هیچ‌وقت خالی نمی‌مانند تا با اسکیمای قدیمی هم کار کند */
@@ -54,7 +117,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     pricePerHour: Math.max(0, Math.min(50_000_000, Math.round(Number(t.pricePerHour) || 0))),
     morningDiscount: Math.max(0, Math.min(100, Math.round(Number(t.morningDiscount) || 0))),
     discountRules: Array.isArray(t.discountRules) && t.discountRules.length > 0 ? t.discountRules : null,
-    photoDataUrl: typeof t.photoDataUrl === 'string' ? t.photoDataUrl.slice(0, 400_000) : null,
+    /* نشانیِ فایل، نه خودِ فایل — پیش از حلقه در `photoUrls` حل شده */
+    photoDataUrl: photoUrls[i] ?? null,
     /* هزینه‌ی بازیکن اضافه در سطح میز. NULL معنادار است: یعنی «تنظیم
        باشگاه اعمال شود»، پس نبود مقدار نباید صفر ذخیره شود. */
     playerSurchargeEnabled: t.playerSurchargeEnabled === undefined ? null : !!t.playerSurchargeEnabled,
