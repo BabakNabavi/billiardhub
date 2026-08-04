@@ -1,0 +1,148 @@
+#!/usr/bin/env node
+/* ─────────────────────────────────────────────────────────────
+   گزارشِ فایل‌های بی‌ارجاع در Storage.
+
+   ── چرا لازم است ──
+   هیچ‌جای پروژه فایلی از Storage حذف نمی‌کند. حذفِ باشگاه، محصول یا
+   پروفایل فقط رکورد را می‌برد و فایل تا ابد می‌ماند. استوری هم بعد از
+   ۲۴ ساعت از فهرست بیرون می‌رود ولی عکسش می‌ماند.
+
+   با هزار کاربرِ فعال و روزی یک استوری، سالی صدها هزار فایلِ مرده
+   جمع می‌شود که هیچ‌وقت دیده نمی‌شوند و فقط هزینه می‌برند.
+
+   ── چرا فقط گزارش، بدونِ حذف ──
+   تشخیصِ «بی‌ارجاع» ذاتاً خطرناک است: اگر جایی را برای جست‌وجو از قلم
+   بیندازیم، عکسِ واقعیِ یک کاربر «یتیم» تشخیص داده می‌شود. پس این
+   ابزار هرگز چیزی پاک نمی‌کند — فقط نشان می‌دهد چه چیزی *نامزدِ* حذف
+   است تا با چشم بررسی شود.
+
+   ── روشِ یافتنِ ارجاع‌ها ──
+   به‌جای شمردنِ دستیِ ستون‌ها (که با هر ستونِ تازه کهنه می‌شود)، هر
+   ردیفِ هر جدول به jsonb تبدیل و کلِ متنش دنبالِ مسیرهای Storage
+   گشته می‌شود. یعنی نشانی هرجای دیتابیس باشد — ستونِ ساده، آرایه،
+   JSON تودرتو — پیدا می‌شود.
+
+   فهرستِ استوری‌ها داخلِ خودِ Storage است (یک فایلِ JSON)، پس آن هم
+   جداگانه خوانده می‌شود.
+
+   اجرا:  node scripts/orphan-report.mjs
+   ───────────────────────────────────────────────────────────── */
+
+import fs from 'node:fs'
+import path from 'node:path'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+const ROOT = path.resolve(process.cwd(), process.cwd().endsWith('web') ? '../..' : '.')
+
+function envFrom(file, key) {
+  try {
+    const t = fs.readFileSync(path.join(ROOT, file), 'utf8')
+    return t.match(new RegExp(key + '\\s*=\\s*"?([^"\\r\\n]+)'))?.[1]?.trim()
+  } catch { return undefined }
+}
+
+const DB = process.env.DATABASE_URL ?? envFrom('.env', 'DATABASE_URL')
+const SU = process.env.NEXT_PUBLIC_SUPABASE_URL ?? envFrom('apps/web/.env.local', 'NEXT_PUBLIC_SUPABASE_URL')
+const SK = process.env.SUPABASE_SERVICE_ROLE_KEY ?? envFrom('apps/web/.env.local', 'SUPABASE_SERVICE_ROLE_KEY')
+if (!DB || !SU || !SK) {
+  console.error('DATABASE_URL / NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY لازم است')
+  process.exit(1)
+}
+
+const { Client } = require('pg')
+const c = new Client({ connectionString: DB, ssl: { rejectUnauthorized: false } })
+await c.connect()
+
+/* ── ۱) هر مسیری که در دیتابیس به آن اشاره شده ── */
+const tables = (await c.query(`
+  SELECT c.relname AS t FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname='public' AND c.relkind='r' ORDER BY 1`)).rows.map(r => r.t)
+
+const referenced = new Set()
+/* هم نشانیِ کاملِ عمومی، هم مسیرِ خام (بعضی ستون‌ها فقط مسیر دارند) */
+const URL_RE = /\/storage\/v1\/object\/(?:public|sign|authenticated)\/[a-z0-9-]+\/([^"'\s?)\\]+)/gi
+const BARE_RE = /(?:^|["'\s,:[])((?:clubs|products|profiles|sellers|social|documents)\/[A-Za-z0-9_./-]{4,})/g
+
+for (const t of tables) {
+  let rows
+  try {
+    rows = (await c.query(`SELECT to_jsonb(x)::text AS j FROM "${t}" x`)).rows
+  } catch { continue }
+  for (const r of rows) {
+    const s = r.j ?? ''
+    for (const m of s.matchAll(URL_RE)) referenced.add(decodeURIComponent(m[1]))
+    for (const m of s.matchAll(BARE_RE)) referenced.add(m[1])
+  }
+}
+
+/* ── ۲) فهرستِ استوری‌ها که داخلِ خودِ Storage است ── */
+const sb = (bucket, p) => `${SU}/storage/v1/object/${bucket}/${p}`
+const H = { apikey: SK, authorization: 'Bearer ' + SK }
+for (const p of ['social/stories.json', 'social/stories/index.json']) {
+  try {
+    const r = await fetch(sb('club-media', p), { headers: H })
+    if (!r.ok) continue
+    const txt = await r.text()
+    for (const m of txt.matchAll(URL_RE)) referenced.add(decodeURIComponent(m[1]))
+    for (const m of txt.matchAll(BARE_RE)) referenced.add(m[1])
+  } catch { /* نبود */ }
+}
+
+/* ── ۳) هرچه واقعاً در Storage هست ── */
+const objects = (await c.query(`
+  SELECT bucket_id, name, coalesce((metadata->>'size')::bigint,0) AS size, created_at
+  FROM storage.objects ORDER BY created_at`)).rows
+
+/* فایل‌های زیرِ این پیشوندها زیرساختِ خودِ سایت‌اند و ارجاعِ دیتابیسی
+   ندارند — نباید یتیم شمرده شوند. */
+const INFRA = ['social/dm/', 'social/dm-idx/', 'social/dm-poll/', 'social/notif/',
+  'social/push/', 'social/otp/', 'social/seen/', 'social/stories.json', 'social/live']
+
+const GRACE_DAYS = Number(process.env.GRACE_DAYS ?? 7)
+const cutoff = Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000
+
+const orphans = []
+let infra = 0, young = 0, live = 0
+for (const o of objects) {
+  if (INFRA.some(p => o.name.startsWith(p))) { infra++; continue }
+  if (referenced.has(o.name)) { live++; continue }
+  if (new Date(o.created_at).getTime() > cutoff) { young++; continue }
+  orphans.push(o)
+}
+
+const mb = n => (Number(n) / 1024 / 1024).toFixed(2)
+const total = objects.reduce((s, o) => s + Number(o.size), 0)
+const orphanBytes = orphans.reduce((s, o) => s + Number(o.size), 0)
+
+console.log('\n════ گزارشِ فایل‌های بی‌ارجاع ════\n')
+console.log('  کلِ فایل‌ها      : ' + objects.length + '   (' + mb(total) + ' MB)')
+console.log('  ارجاع دارند     : ' + live)
+console.log('  زیرساختِ سایت   : ' + infra + '   (دایرکت، اعلان، اشتراکِ push…)')
+console.log('  تازه‌تر از ' + GRACE_DAYS + ' روز : ' + young + '   (مهلت — شاید هنوز ذخیره نشده)')
+console.log('  ── نامزدِ حذف   : ' + orphans.length + '   (' + mb(orphanBytes) + ' MB)')
+
+if (orphans.length) {
+  const byPrefix = {}
+  for (const o of orphans) {
+    const k = o.bucket_id + '/' + o.name.split('/').slice(0, 2).join('/')
+    byPrefix[k] = byPrefix[k] ?? { n: 0, b: 0 }
+    byPrefix[k].n++; byPrefix[k].b += Number(o.size)
+  }
+  console.log('\n  به تفکیکِ مسیر:')
+  for (const [k, v] of Object.entries(byPrefix).sort((a, b) => b[1].b - a[1].b))
+    console.log('   ' + k.padEnd(42) + String(v.n).padStart(5) + ' فایل   ' + mb(v.b) + ' MB')
+
+  if (process.env.SHOW_NAMES === '1') {
+    console.log('\n  نمونه (۲۰ مورد):')
+    for (const o of orphans.slice(0, 20)) console.log('   ' + o.bucket_id + '/' + o.name)
+  } else {
+    console.log('\n  (برای دیدنِ نام‌ها: SHOW_NAMES=1)')
+  }
+}
+
+console.log('\n  ⚠ این ابزار هیچ‌چیز حذف نمی‌کند. فهرستِ بالا فقط نامزدِ بررسی است.')
+console.log('    پیش از هر حذفی باید چند مورد را با چشم باز کرد و مطمئن شد')
+console.log('    واقعاً بی‌استفاده‌اند — یک تشخیصِ اشتباه یعنی عکسِ یک کاربرِ واقعی.\n')
+
+await c.end()
