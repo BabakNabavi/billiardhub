@@ -35,8 +35,31 @@
      خدمات فنی، بازیکن، کاربر عادی  → تیک ندارند
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── وضعیتِ draft ── */
-ALTER TABLE public.role_requests DROP CONSTRAINT IF EXISTS role_requests_status_chk;
+/* ── وضعیتِ draft ──
+
+   نامِ قید حدس زده نمی‌شود: بسته به اینکه با `CONSTRAINT ... CHECK` یا
+   با `column text CHECK (...)` ساخته شده باشد، پستگرس نامِ متفاوتی
+   می‌گذارد (`_chk` در برابر `_check`). حذفِ نامِ اشتباه بی‌صدا رد
+   می‌شود و بعد `ADD` با قیدِ قدیمی تصادم می‌کند.
+
+   پس هر قیدِ بررسی‌ای که روی این جدول است و کلمه‌ی `pending` دارد
+   پیدا و حذف می‌شود — همان الگویی که مهاجرتِ ۰۴۰ برای دفترِ مالی
+   به‌کار برد. */
+DO $$
+DECLARE c record;
+BEGIN
+  FOR c IN
+    SELECT con.conname
+      FROM pg_constraint con
+      JOIN pg_class rel ON rel.oid = con.conrelid
+     WHERE rel.relname = 'role_requests'
+       AND con.contype = 'c'
+       AND pg_get_constraintdef(con.oid) ILIKE '%pending%'
+  LOOP
+    EXECUTE format('ALTER TABLE public.role_requests DROP CONSTRAINT %I', c.conname);
+  END LOOP;
+END $$;
+
 ALTER TABLE public.role_requests
   ADD CONSTRAINT role_requests_status_chk
   CHECK (status IN ('draft', 'pending', 'approved', 'rejected'));
