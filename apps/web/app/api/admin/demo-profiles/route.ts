@@ -6,6 +6,9 @@ import {
   createDemoProfile, listDemoProfiles, deleteDemoProfile,
   PROFILE_KINDS, type ProfileKind,
 } from '@/lib/profiles/server'
+/* باشگاه جدولِ خودش را دارد؛ از نگاهِ ادمین ولی همان «محتوای نمایشی»
+   است، پس از همین مسیر می‌گذرد و گاردِ یکسانی دارد. */
+import { createDemoClub, listDemoClubs, deleteDemoClub } from '@/lib/clubs/demo'
 
 /* ─────────────────────────────────────────────────────────────
    محتوای نمایشیِ صفحه‌های عمومی.
@@ -145,8 +148,19 @@ export async function GET(req: NextRequest) {
   const g = await guard(req)
   if (g.err) return g.err
   const kindParam = new URL(req.url).searchParams.get('kind')
+
+  /* باشگاه جدولِ خودش را دارد، پس فهرستش هم از جای دیگری می‌آید — ولی
+     از همین مسیر، چون از نگاهِ ادمین همان «محتوای نمایشی» است. */
+  if (kindParam === 'club') {
+    return NextResponse.json({ profiles: [], clubs: await listDemoClubs() })
+  }
+
   const kind = isKind(kindParam) ? kindParam : undefined
-  return NextResponse.json({ profiles: await listDemoProfiles(kind) })
+  return NextResponse.json({
+    profiles: await listDemoProfiles(kind),
+    /* بدونِ فیلترِ نوع، باشگاه‌ها هم می‌آیند تا پنل یک‌بار بخواند */
+    clubs: kind ? [] : await listDemoClubs(),
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -154,6 +168,51 @@ export async function POST(req: NextRequest) {
   if (g.err) return g.err
 
   const b = await req.json().catch(() => ({})) as Record<string, unknown>
+
+  /* ── باشگاهِ نمایشی ──
+     مهم‌ترین فهرستِ سایت، و تنها فهرستی که ادمین نمی‌توانست پرش کند. */
+  if (b.kind === 'club') {
+    const d = (b.data && typeof b.data === 'object' ? b.data : {}) as Record<string, unknown>
+    const num = (v: unknown) => {
+      const raw = String(v ?? '').replace(/[۰-۹]/g, x => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(x)))
+      return Number(raw.replace(/[^0-9]/g, '')) || 0
+    }
+    try {
+      const club = await createDemoClub({
+        ownerId: g.actor!.id,
+        name: String(d.name ?? ''),
+        province: String(d.province ?? ''),
+        city: String(d.city ?? ''),
+        address: String(d.address ?? ''),
+        phone: String(d.phone ?? ''),
+        description: String(d.description ?? ''),
+        images: Array.isArray(d.images) ? d.images.map(String) : [],
+        logo: String(d.logo ?? '') || undefined,
+        snookerTables: num(d.snookerTables),
+        pocketTables: num(d.pocketTables),
+        highballTables: num(d.highballTables),
+        vipSnookerTables: num(d.vipSnookerTables),
+        hasCafe: !!d.hasCafe,
+        hasParking: !!d.hasParking,
+        hasWifi: !!d.hasWifi,
+        hasProfessionalCoach: !!d.hasProfessionalCoach,
+      })
+      void audit({
+        actorId: g.actor!.id, actorRole: 'admin', action: 'DEMO_CLUB_CREATED',
+        entityType: 'club', entityId: club.id,
+        newValue: { name: club.name, city: club.city },
+        ip: clientIp(req) ?? undefined,
+      })
+      return NextResponse.json({ ok: true, club }, { status: 201 })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'ساخت انجام نشد'
+      console.error('[admin/demo-profiles] club', msg)
+      /* پیامِ اعتبارسنجی به کاربر می‌رسد، خطای دیتابیس نه */
+      const known = /لازم است/.test(msg)
+      return NextResponse.json({ message: known ? msg : 'ساخت باشگاه انجام نشد' }, { status: known ? 400 : 500 })
+    }
+  }
+
   if (!isKind(b.kind)) {
     return NextResponse.json({ message: 'نوعِ نامعتبر' }, { status: 400 })
   }
@@ -196,8 +255,21 @@ export async function DELETE(req: NextRequest) {
   const g = await guard(req)
   if (g.err) return g.err
 
-  const id = new URL(req.url).searchParams.get('id') ?? ''
+  const sp = new URL(req.url).searchParams
+  const id = sp.get('id') ?? ''
   if (!id) return NextResponse.json({ message: 'شناسه مشخص نیست' }, { status: 400 })
+
+  if (sp.get('kind') === 'club') {
+    /* شرطِ is_demo داخلِ خودِ تابع است، پس حتی شناسه‌ی اشتباه هم
+       باشگاهِ یک کاربرِ واقعی را پاک نمی‌کند. */
+    const gone = await deleteDemoClub(id)
+    if (!gone) return NextResponse.json({ message: 'باشگاهِ نمایشی با این شناسه پیدا نشد' }, { status: 404 })
+    void audit({
+      actorId: g.actor!.id, actorRole: 'admin', action: 'DEMO_CLUB_DELETED',
+      entityType: 'club', entityId: id, ip: clientIp(req) ?? undefined,
+    })
+    return NextResponse.json({ ok: true })
+  }
 
   const ok = await deleteDemoProfile(id)
   if (!ok) return NextResponse.json({ message: 'ردیفِ نمایشی با این شناسه پیدا نشد' }, { status: 404 })

@@ -24,7 +24,7 @@ import { Trash2, Plus, Loader2, Users, ExternalLink } from 'lucide-react'
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD_D = '#9A6E38', RED = '#B23B2E'
 
-type Kind = 'coach' | 'referee' | 'seller' | 'manufacturer' | 'technician' | 'player'
+type Kind = 'coach' | 'referee' | 'seller' | 'manufacturer' | 'technician' | 'player' | 'club'
 
 const KINDS: { key: Kind; fa: string; page: string }[] = [
   { key: 'coach',        fa: 'مربی',        page: '/coaches' },
@@ -33,6 +33,17 @@ const KINDS: { key: Kind; fa: string; page: string }[] = [
   { key: 'manufacturer', fa: 'تولیدکننده',  page: '/manufacturers' },
   { key: 'technician',   fa: 'خدمات فنی',   page: '/services' },
   { key: 'player',       fa: 'بازیکن',      page: '/players' },
+  /* باشگاه جدولِ خودش را دارد و فرمِ خودش را می‌خواهد؛ از نگاهِ ادمین
+     ولی همان محتوای نمایشی است، پس همین‌جا می‌ماند. */
+  { key: 'club',         fa: 'باشگاه',      page: '/clubs' },
+]
+
+/* امکاناتِ باشگاه — همان کلیدهایی که کارتِ `/clubs` نشانشان می‌دهد */
+const AMENITIES = [
+  { key: 'hasCafe', fa: 'کافه' },
+  { key: 'hasParking', fa: 'پارکینگ' },
+  { key: 'hasWifi', fa: 'WiFi' },
+  { key: 'hasProfessionalCoach', fa: 'مربی حرفه‌ای' },
 ]
 
 /* رشته‌ها همان کلیدهایی‌اند که صفحه‌های عمومی فیلتر می‌کنند */
@@ -73,6 +84,17 @@ export default function DemoContentPage() {
   const [disc, setDisc] = useState<string[]>(['snooker'])
   const [phone, setPhone] = useState('')
 
+  /* ── فیلدهای مخصوصِ باشگاه ──
+     باشگاه شخص نیست: آدرس و تعدادِ میز دارد و همان‌ها هستند که کارتش
+     را در فهرستِ عمومی می‌سازند. */
+  const [address, setAddress] = useState('')
+  const [snooker, setSnooker] = useState('')
+  const [pocket, setPocket] = useState('')
+  const [highball, setHighball] = useState('')
+  const [vip, setVip] = useState('')
+  const [amen, setAmen] = useState<string[]>([])
+  const isClub = kind === 'club'
+
   useEffect(() => {
     if (!_hydrated) return
     if (!user || user.primaryRole !== 'admin') { router.push('/'); return }
@@ -86,6 +108,20 @@ export default function DemoContentPage() {
       const r = await apiFetch(`/api/admin/demo-profiles?kind=${kind}`, { cache: 'no-store' })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { setErr(j?.message ?? 'خواندن فهرست انجام نشد'); return }
+      /* باشگاه‌ها از جدولِ دیگری می‌آیند؛ به همان شکلِ Row ترجمه
+         می‌شوند تا فهرستِ پایین یک کد داشته باشد نه دو تا. */
+      if (kind === 'club') {
+        setRows((j.clubs ?? []).map((c: Record<string, unknown>) => ({
+          id: String(c.id), kind: 'club' as Kind, slug: String(c.id),
+          data: {
+            name: c.name, city: c.city, province: c.province,
+            address: c.address,
+            photo: Array.isArray(c.images) ? (c.images as string[])[0] ?? '' : '',
+          },
+          createdAt: String(c.createdAt ?? ''),
+        })))
+        return
+      }
       setRows(j.profiles ?? [])
     } catch { setErr('خطا در ارتباط با سرور') } finally { setLoading(false) }
   }
@@ -103,11 +139,50 @@ export default function DemoContentPage() {
   const reset = () => {
     setFirstName(''); setLastName(''); setGeo({ province: '', city: '' })
     setShortBio(''); setPhoto(''); setPhone(''); setDisc(['snooker'])
+    setAddress(''); setSnooker(''); setPocket(''); setHighball(''); setVip(''); setAmen([])
   }
 
   const create = async () => {
     if (saving) return
     if (!firstName.trim()) { setErr('نام الزامی است'); return }
+
+    /* ── باشگاه ──
+       شکلِ داده‌اش با پروفایل‌ها یکی نیست، پس مسیرِ خودش را دارد.
+       شهر و آدرس اجباری‌اند: کارتِ باشگاه بدونِ آن‌ها روی صفحه معنی
+       ندارد و سرور هم ردش می‌کند. */
+    if (isClub) {
+      if (!geo.city) { setErr('استان و شهر را انتخاب کنید'); return }
+      if (!address.trim()) { setErr('آدرس الزامی است'); return }
+      setSaving(true); setErr('')
+      try {
+        const r = await apiFetch('/api/admin/demo-profiles', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'club',
+            data: {
+              name: firstName.trim(),
+              province: geo.province, city: geo.city,
+              address: address.trim(),
+              phone: phone.trim(),
+              description: shortBio.trim(),
+              images: photo ? [photo] : [],
+              logo: photo,
+              snookerTables: snooker, pocketTables: pocket,
+              highballTables: highball, vipSnookerTables: vip,
+              hasCafe: amen.includes('hasCafe'),
+              hasParking: amen.includes('hasParking'),
+              hasWifi: amen.includes('hasWifi'),
+              hasProfessionalCoach: amen.includes('hasProfessionalCoach'),
+            },
+          }),
+        })
+        const j = await r.json().catch(() => ({}))
+        if (!r.ok) { setErr(j?.message ?? 'ساخت انجام نشد'); return }
+        reset(); void load()
+      } catch { setErr('خطا در ارتباط با سرور') } finally { setSaving(false) }
+      return
+    }
+
     setSaving(true); setErr('')
     try {
       /* شکلِ `data` همان چیزی است که صفحه‌ی عمومیِ هر نوع می‌خواند —
@@ -139,7 +214,10 @@ export default function DemoContentPage() {
   const remove = async (id: string, name: string) => {
     if (!confirm(`«${name}» حذف شود؟`)) return
     try {
-      const r = await apiFetch(`/api/admin/demo-profiles?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const r = await apiFetch(
+        `/api/admin/demo-profiles?id=${encodeURIComponent(id)}${isClub ? '&kind=club' : ''}`,
+        { method: 'DELETE' },
+      )
       if (!r.ok) { const j = await r.json().catch(() => ({})); setErr(j?.message ?? 'حذف انجام نشد'); return }
       setRows(rs => rs.filter(x => x.id !== id))
     } catch { setErr('خطا در ارتباط با سرور') }
@@ -188,10 +266,13 @@ export default function DemoContentPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 12 }}>
-          <div><label style={label}>نام</label>
+          <div><label style={label}>{isClub ? 'نام باشگاه' : 'نام'}</label>
             <input style={box} value={firstName} onChange={e => setFirstName(e.target.value)} /></div>
-          <div><label style={label}>نام خانوادگی / نام کسب‌وکار</label>
-            <input style={box} value={lastName} onChange={e => setLastName(e.target.value)} /></div>
+          {/* باشگاه نام خانوادگی ندارد */}
+          {!isClub && (
+            <div><label style={label}>نام خانوادگی / نام کسب‌وکار</label>
+              <input style={box} value={lastName} onChange={e => setLastName(e.target.value)} /></div>
+          )}
           <div><label style={label}>شماره تماس (اختیاری)</label>
             <input style={{ ...box, direction: 'ltr', textAlign: 'left' }} value={phone} onChange={e => setPhone(e.target.value)} /></div>
         </div>
@@ -201,6 +282,54 @@ export default function DemoContentPage() {
           <label style={label}>استان و شهر</label>
           <ProvinceCitySelect value={geo} onChange={setGeo} />
         </div>
+
+        {/* ── فیلدهای باشگاه ──
+            آدرس و تعدادِ میز چیزهایی‌اند که کارتِ باشگاه را در فهرستِ
+            عمومی می‌سازند؛ بدونشان ردیف ساخته می‌شود ولی روی صفحه
+            خالی می‌افتد. */}
+        {isClub && (
+          <>
+            <div style={{ marginTop: 12 }}>
+              <label style={label}>آدرس</label>
+              <input style={box} value={address} onChange={e => setAddress(e.target.value)}
+                placeholder="خیابان، کوچه، پلاک" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 12, marginTop: 12 }}>
+              <div><label style={label}>میز اسنوکر</label>
+                <input style={{ ...box, textAlign: 'center' }} inputMode="numeric" value={snooker}
+                  onChange={e => setSnooker(e.target.value)} /></div>
+              <div><label style={label}>میز پوکت</label>
+                <input style={{ ...box, textAlign: 'center' }} inputMode="numeric" value={pocket}
+                  onChange={e => setPocket(e.target.value)} /></div>
+              <div><label style={label}>میز هی‌بال</label>
+                <input style={{ ...box, textAlign: 'center' }} inputMode="numeric" value={highball}
+                  onChange={e => setHighball(e.target.value)} /></div>
+              <div><label style={label}>میز VIP اسنوکر</label>
+                <input style={{ ...box, textAlign: 'center' }} inputMode="numeric" value={vip}
+                  onChange={e => setVip(e.target.value)} /></div>
+            </div>
+            {/* همان کلیدهایی که کارتِ باشگاه به‌عنوان نشانِ امکانات نشان می‌دهد */}
+            <div style={{ marginTop: 12 }}>
+              <label style={label}>امکانات</label>
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                {AMENITIES.map(a => {
+                  const on = amen.includes(a.key)
+                  return (
+                    <button key={a.key} type="button"
+                      onClick={() => setAmen(s => on ? s.filter(x => x !== a.key) : [...s, a.key])}
+                      style={{
+                        padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                        fontFamily: 'inherit',
+                        background: on ? 'rgba(199,166,106,0.14)' : '#fff',
+                        border: `1px solid ${on ? 'rgba(199,166,106,0.40)' : LINE}`,
+                        color: on ? GOLD_D : SEC,
+                      }}>{a.fa}</button>
+                  )
+                })}
+              </div>
+            </div>
+          </>
+        )}
 
         {(kind === 'coach' || kind === 'referee' || kind === 'player') && (
           <div style={{ marginTop: 12 }}>
