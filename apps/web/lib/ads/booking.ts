@@ -9,7 +9,7 @@
      ۳) کاربر فقط جایگاه‌هایی را می‌بیند که نقش تأییدشده‌اش اجازه می‌دهد.
    ───────────────────────────────────────────────────────────── */
 
-import { sb } from '../finance/db'
+import { sb, rpc } from '../finance/db'
 import { lookupPersonForUser, verifiedRolesOfPerson } from '../identity'
 import {
   getPlacement, plansForPlacement, listPlacements, validateContent,
@@ -35,7 +35,7 @@ export interface Eligibility {
   /** نقش‌های تأییدشده‌ی شخص (نه نقش‌های خوداظهار) */
   roles: string[]
   identityRequired: boolean
-  placements: (Placement & { plans: PricingPlan[] })[]
+  placements: (Placement & { plans: PricingPlan[]; avail: Availability | null })[]
 }
 
 /**
@@ -60,13 +60,62 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
     return need.some(r => roles.includes(r))
   })
 
-  const withPlans = await Promise.all(allowed.map(async p => ({
-    ...p,
-    plans: await plansForPlacement(p.key),
-  })))
+  const withPlans = await Promise.all(allowed.map(async p => {
+    const plans = await plansForPlacement(p.key)
+    /* ظرفیت برای کوتاه‌ترین پله سنجیده می‌شود: اگر برای کمترین مدت هم
+       جا نباشد، برای مدت‌های بلندتر قطعاً نیست. */
+    const shortest = plans.reduce((m, x) => Math.min(m, x.durationDays), Infinity)
+    return {
+      ...p,
+      plans,
+      avail: plans.length ? await availability(p.key, Number.isFinite(shortest) ? shortest : 30) : null,
+    }
+  }))
 
   /* جایگاهی که هیچ پله‌ی قیمتی ندارد قابل خرید نیست */
   return { roles, identityRequired: false, placements: withPlans.filter(p => p.plans.length > 0) }
+}
+
+/* ── ظرفیت ────────────────────────────────────────────────────
+
+   ظرفیت تا امروز فقط سقفِ *نمایش* بود و هیچ‌جا هنگام خرید بررسی
+   نمی‌شد؛ روی جایگاهِ یک‌ظرفیتی می‌شد بی‌نهایت کمپین فروخت. شمارش و
+   رزرو حالا هر دو در دیتابیس و زیرِ قفلِ ردیفِ جایگاه انجام می‌شوند
+   (مهاجرتِ ۰۵۵) — بررسی و درج در دو رفت‌وبرگشتِ جدا یعنی دو خریدارِ
+   هم‌زمان هر دو «جا هست» می‌بینند. */
+
+export interface Availability {
+  capacity: number
+  used: number
+  /** ‎-1 یعنی جایگاه سقفی ندارد */
+  free: number
+  isActive: boolean
+  unlimited: boolean
+}
+
+/** چند جا روی این جایگاه، در این بازه، آزاد است؟ */
+export async function availability(
+  placementKey: string,
+  durationDays = 30,
+  from: Date = new Date(),
+): Promise<Availability | null> {
+  const end = new Date(from.getTime() + Math.max(1, durationDays) * 86400_000)
+  const { data, error } = await rpc<{
+    capacity: number; used: number; free: number; is_active: boolean
+  }[]>('placement_availability', {
+    p_key: placementKey,
+    p_start: from.toISOString(),
+    p_end: end.toISOString(),
+  })
+  if (error || !Array.isArray(data) || data.length === 0) return null
+  const r = data[0]!
+  return {
+    capacity: Number(r.capacity) || 0,
+    used: Number(r.used) || 0,
+    free: Number(r.free),
+    isActive: r.is_active === true,
+    unlimited: Number(r.capacity) <= 0,
+  }
 }
 
 /* ── قیمت‌گذاری ───────────────────────────────────────────────── */
@@ -139,21 +188,36 @@ export async function createOrder(
   if (invalid) return { error: invalid }
 
   const now = Date.now()
-  const { data: camp, error: campErr } = await sb().from('campaigns').insert({
-    placement_key: q.placement.key,
-    user_id: userId,
-    advertiser: advertiser.slice(0, 160),
-    title: title.slice(0, 160),
-    content,
-    status: 'PENDING_PAYMENT',
-    starts_at: new Date(now).toISOString(),
-    ends_at: new Date(now + q.durationDays * 86400_000).toISOString(),
-    weight: 1,
-    sort_order: 0,
-  }).select('id').single()
 
-  if (campErr || !camp) return { error: 'ساخت کمپین انجام نشد' }
-  const campaignId = String((camp as { id: string }).id)
+  /* رزروِ اتمیک: شمردنِ ظرفیت و ساختِ کمپین در یک تراکنش، زیرِ قفلِ
+     ردیفِ جایگاه. اگر این‌جا اول می‌شمردیم و بعد درج می‌کردیم، دو
+     خریدارِ هم‌زمان هر دو «جا هست» می‌دیدند و هر دو پول می‌دادند. */
+  const { data: reserved, error: resErr } = await rpc<string>('reserve_campaign_slot', {
+    p_placement: q.placement.key,
+    p_user: userId,
+    p_advertiser: advertiser.slice(0, 160),
+    p_title: title.slice(0, 160),
+    p_content: content,
+    p_starts: new Date(now).toISOString(),
+    p_ends: new Date(now + q.durationDays * 86400_000).toISOString(),
+  })
+
+  if (resErr || !reserved) {
+    /* کدهای کوتاهِ تابع به پیامِ فارسی. متنِ خام دیتابیس هرگز به
+       کاربر نشان داده نمی‌شود. */
+    const raw = String(resErr?.message ?? '')
+    if (raw.includes('PLACEMENT_FULL')) {
+      return { error: 'ظرفیت این جایگاه در این بازه تکمیل است' }
+    }
+    if (raw.includes('PLACEMENT_INACTIVE')) {
+      return { error: 'این جایگاه فعلاً فعال نیست' }
+    }
+    if (raw.includes('PLACEMENT_NOT_FOUND')) {
+      return { error: 'جایگاه پیدا نشد' }
+    }
+    return { error: 'ساخت کمپین انجام نشد' }
+  }
+  const campaignId = String(reserved)
 
   const { data: order, error: orderErr } = await sb().from('campaign_orders').insert({
     user_id: userId,

@@ -4,6 +4,7 @@ import {
   livePlacements, trackCampaign, listPlacements, expireCampaigns, listPricingPlans,
   isPlacementKey, LEGACY_KEY_MAP, type EntityType, type ContentKind,
 } from '@/lib/ads/core';
+import { availability } from '@/lib/ads/booking';
 import { resolveEntities, type EntitySnapshot } from '@/lib/ads/resolve';
 import { freeContent } from '@/lib/ads/free';
 
@@ -42,8 +43,18 @@ export async function GET(req: NextRequest) {
     try {
       const paid = (await listPlacements()).filter(p => p.mode === 'paid');
       const plans = paid.length ? await listPricingPlans(true) : [];
+      /* ظرفیتِ آزاد کنارِ قیمت می‌آید تا کارتِ خرید بتواند «پر شده» را
+         پیش از کلیک نشان دهد. `free = -1` یعنی جایگاه سقفی ندارد. */
+      const avail = new Map<string, number>();
+      await Promise.all(paid.map(async p => {
+        const shortest = plans.filter(pl => pl.placementKey === p.key)
+          .reduce((m, x) => Math.min(m, x.durationDays), Infinity);
+        const a = await availability(p.key, Number.isFinite(shortest) ? shortest : p.durationDays);
+        avail.set(p.key, a ? a.free : -1);
+      }));
       return NextResponse.json({
         placements: paid.map(p => ({
+          free: avail.get(p.key) ?? -1,
           key: p.key, title: p.title, description: p.description,
           mode: p.mode, price: p.price, durationDays: p.durationDays, isActive: p.isActive,
           /* جایگاهِ ویدیویی فایل می‌خواهد نه متن؛ فرم باید بداند و

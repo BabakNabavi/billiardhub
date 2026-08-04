@@ -18,7 +18,14 @@ export async function GET(req: NextRequest) {
       placements: e.placements.map(p => ({
         key: p.key, title: p.title, description: p.description,
         contentKind: p.contentKind, entityType: p.entityType,
+        skipAfterSec: p.skipAfterSec ?? null,
+        maxDurationSec: p.maxDurationSec ?? null,
         requiredRoles: PLACEMENT_ROLES[p.key] ?? [],
+        /* ظرفیتِ آزاد پیش از خرید — کاربر باید بداند جا هست یا نه،
+           نه اینکه بعد از پرداخت بفهمد. `free = -1` یعنی بی‌سقف. */
+        capacity: p.avail?.capacity ?? p.capacity,
+        used: p.avail?.used ?? 0,
+        free: p.avail ? p.avail.free : -1,
         plans: p.plans.map(pl => ({
           id: pl.id, name: pl.name, description: pl.description,
           price: pl.price, durationDays: pl.durationDays, badge: pl.badge,

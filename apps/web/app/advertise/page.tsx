@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { Megaphone, Check, Loader2, Phone, Mail, MapPin, ArrowLeft, Lock, Film } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import Select from '../../components/ui/Select'
+import BuyPlacement from '../../components/advertise/BuyPlacement'
 import { apiFetch } from '../../lib/http'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#E7E2D6'
@@ -190,7 +191,7 @@ export default function AdvertisePage() {
           </h1>
           <p style={{ fontSize: 14, color: SEC, lineHeight: 2, margin: 0, maxWidth: 560, marginInline: 'auto' }}>
             مخاطب ما دقیقاً همان‌هایی هستند که دنبال بیلیاردند: بازیکن، باشگاه‌دار، مربی و خریدار تجهیزات.
-            جایگاه مورد نظرتان را انتخاب کنید تا تعرفه را برایتان بفرستیم.
+            جایگاه را انتخاب کنید، تعرفه را همین‌جا ببینید و مستقیم پرداخت کنید.
           </p>
 
           {/* کاربر واردشده کمپین‌های خودش را همین‌جا دنبال می‌کند */}
@@ -206,8 +207,29 @@ export default function AdvertisePage() {
           )}
         </div>
 
+        {/* ── خریدِ مستقیمِ جایگاه ──
+            کاربر برای خریدِ یک بنرِ ساده نباید مجبور باشد فرم پر کند و
+            منتظرِ تعرفه بماند. فرمِ پایین برای تبلیغِ سفارشی می‌ماند. */}
+        {user && (
+          <section style={{ marginBottom: 26 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 12px' }}>خرید جایگاه تبلیغاتی</h2>
+            <BuyPlacement userId={user.id} />
+          </section>
+        )}
+
+        {!user && (
+          <div style={{ ...CARD, marginBottom: 26, fontSize: 13, color: SEC, lineHeight: 2 }}>
+            برای دیدن تعرفه‌ها و خرید مستقیم جایگاه،{' '}
+            <Link href="/login" style={{ color: GOLD_D, fontWeight: 800 }}>وارد شوید</Link>.
+            بدون ورود هم می‌توانید درخواست تبلیغ سفارشی ثبت کنید.
+          </div>
+        )}
+
         <form onSubmit={submit} style={CARD}>
-          <h2 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 16px' }}>درخواست تبلیغات</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 900, margin: '0 0 6px' }}>درخواست تبلیغ سفارشی</h2>
+          <p style={{ fontSize: 12.5, color: MUT, lineHeight: 1.95, margin: '0 0 16px' }}>
+            برای اسپانسری، کمپین ویژه یا تبلیغی خارج از جایگاه‌های استاندارد. تعرفه پس از بررسی برایتان فرستاده می‌شود.
+          </p>
 
           <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
             <div>
