@@ -23,19 +23,6 @@ const REQUESTABLE = new Set([
   'technician', 'seller', 'manufacturer', 'club_owner',
 ]);
 
-/* نقش‌هایی که بدونِ مدرک اصلاً قابل بررسی نیستند.
-
-   ⚠️ تا امروز این بررسی وجود نداشت و صفحه‌ی انتخاب هم مرحله‌ی
-   بارگذاری را رد می‌کرد، پس شش درخواستِ خالی و بی‌مدرک روی میزِ ادمین
-   می‌نشست. ادمین چیزی برای تأیید یا رد کردن نداشت — نه مدرکی، نه
-   اطلاعاتی — و تنها کارِ ممکن حدس‌زدن بود.
-
-   این فهرست عمداً همان `requiresDoc`ِ صفحه‌ی کلاینت است. تکرارش
-   ناخوشایند است ولی لازم: قاعده‌ای که فقط در کلاینت باشد با یک
-   درخواستِ دستی دور زده می‌شود. */
-const DOC_REQUIRED = new Set([
-  'player', 'coach', 'referee', 'seller', 'manufacturer', 'club_owner',
-]);
 
 export async function POST(req: NextRequest) {
   const actor = actorFromRequest(req);
@@ -55,23 +42,26 @@ export async function POST(req: NextRequest) {
   if (rawDoc && !docUrl) {
     return NextResponse.json({ message: 'نشانی مدرک معتبر نیست' }, { status: 400 });
   }
-  if (DOC_REQUIRED.has(role) && !docUrl) {
-    return NextResponse.json(
-      { message: 'برای این نقش باید مدرک بارگذاری کنید' },
-      { status: 400 },
-    );
-  }
 
-  /* درخواستِ بازِ همین نقش ⇒ همان را برگردان، ردیفِ تکراری نساز */
+  /* ردیفِ بازِ همین نقش ⇒ همان را برگردان، ردیفِ تکراری نساز */
   const { data: open } = await sb().from('role_requests')
     .select('id,role,status').eq('user_id', actor.id).eq('role', role)
-    .eq('status', 'pending').maybeSingle();
+    .in('status', ['draft', 'pending']).maybeSingle();
   if (open) {
     return NextResponse.json({ ok: true, duplicate: true, request: open });
   }
 
+  /* ── وضعیتِ draft ──
+     انتخابِ نقش خودش کاری نمی‌خواهد و روی میزِ ادمین نمی‌نشیند. کاربر
+     نقش را می‌گیرد و می‌تواند شروع کند — باشگاه‌دار باشگاهش را بسازد.
+     تا وقتی پروفایلش را تکمیل نکرده، عملاً کاربرِ عادی است.
+
+     ردیف وقتی `pending` می‌شود که پروفایل تکمیل و «ثبت نهایی» شود
+     (مسیرِ `/api/roles/submit`). تا آن موقع نگهبانِ ۷۲ ساعت مراقبش
+     است: نقشِ رهاشده پس گرفته می‌شود و کاربر می‌تواند دوباره انتخابش
+     کند. */
   const { data, error } = await sb().from('role_requests').insert({
-    user_id: actor.id, role, status: 'pending',
+    user_id: actor.id, role, status: 'draft',
     doc_url: docUrl, requested_at: new Date().toISOString(),
   }).select().single();
 
@@ -80,8 +70,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'ثبت درخواست انجام نشد' }, { status: 500 });
   }
 
+  /* ── نقش همین‌جا داده می‌شود ──
+     تا کاربر بتواند شروع کند: باشگاه‌دار باشگاهش را بسازد، فروشنده
+     فروشگاهش را. این امن است چون هر چیزی که می‌سازد **صفِ تأییدِ
+     خودش** را دارد — باشگاه با `isActive=false` متولد می‌شود و تا
+     تأییدِ ادمین روی سایت نمی‌آید.
+
+     `primaryRole` فقط وقتی جابه‌جا می‌شود که کاربر هنوز نقشِ معناداری
+     ندارد؛ وگرنه انتخابِ «داور» برای یک باشگاه‌دار، باشگاهش را از
+     دستش درمی‌آورد. */
+  if (role !== 'user') {
+    const { data: u } = await sb().from('users')
+      .select('"primaryRole","secondaryRoles"').eq('id', actor.id).maybeSingle();
+    const cur = (u ?? {}) as { primaryRole?: string; secondaryRoles?: string[] };
+    const roles = [...new Set([...(cur.secondaryRoles ?? []), role])].filter(Boolean);
+    const promote = !cur.primaryRole || cur.primaryRole === 'user';
+    await sb().from('users').update({
+      secondaryRoles: roles,
+      ...(promote ? { primaryRole: role } : {}),
+      updatedAt: new Date().toISOString(),
+    }).eq('id', actor.id);
+  }
+
   void audit({
-    actorId: actor.id, actorRole: actor.role, action: 'ROLE_REQUESTED',
+    actorId: actor.id, actorRole: actor.role, action: 'ROLE_SELECTED',
     entityType: 'role_request', entityId: String((data as { id: string }).id),
     newValue: { role, hasDoc: !!docUrl }, ip: clientIp(req) ?? undefined,
   });

@@ -48,8 +48,9 @@ export const ROLES: RoleMeta[] = [
   },
   {
     value: 'player', label: 'بازیکن رنکینگی', icon: 'ti-chart-bar', color: '#C7A66A',
-    description: 'رنکینگ ملی بیلیارد', requiresDoc: true,
-    docHint: 'کارت عضویت فدراسیون یا گواهی رتبه‌بندی ملی',
+    /* بازیکن فعلاً مدرک نمی‌خواهد — سازوکارِ رنکینگ هنوز تعیین نشده. */
+    description: 'رنکینگ ملی بیلیارد', requiresDoc: false,
+    docHint: '',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'specialty', label: 'تخصص', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'هندیکپ'], required: true },
@@ -63,7 +64,7 @@ export const ROLES: RoleMeta[] = [
   {
     value: 'coach', label: 'مربی', icon: 'ti-school', color: '#a78bfa',
     description: 'تدریس و آموزش بیلیارد', requiresDoc: true,
-    docHint: 'مدرک مربیگری فدراسیون یا سابقه تدریس معتبر',
+    docHint: 'آخرین مدرک مربیگری — برای تیک آبی',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'specialty', label: 'رشته تدریس', type: 'select', placeholder: '', options: ['اسنوکر', 'پول', 'کارامبول', 'همه رشته‌ها'], required: true },
@@ -77,7 +78,7 @@ export const ROLES: RoleMeta[] = [
   {
     value: 'referee', label: 'داور', icon: 'ti-scale', color: '#f59e0b',
     description: 'داوری مسابقات رسمی', requiresDoc: true,
-    docHint: 'کارت داوری فدراسیون بیلیارد و اسنوکر',
+    docHint: 'آخرین مدرک داوری — برای تیک آبی',
     profileFields: [
       { key: 'displayName', label: 'نام کامل', type: 'text', placeholder: 'نام و نام‌خانوادگی', required: true },
       { key: 'licenseLevel', label: 'درجه داوری', type: 'select', placeholder: '', options: ['درجه ۳', 'درجه ۲', 'درجه ۱', 'بین‌المللی'], required: true },
@@ -101,7 +102,7 @@ export const ROLES: RoleMeta[] = [
   {
     value: 'seller', label: 'فروشنده', icon: 'ti-shopping-bag', color: '#f97316',
     description: 'فروش تجهیزات بیلیارد', requiresDoc: true,
-    docHint: 'جواز کسب یا صفحه فروشگاه رسمی',
+    docHint: 'جواز کسب — برای تیک آبی',
     profileFields: [
       { key: 'displayName', label: 'نام فروشگاه', type: 'text', placeholder: 'نام برند یا فروشگاه', required: true },
       { key: 'location', label: 'آدرس / شهر', type: 'text', placeholder: 'تهران، بازار بزرگ...', required: true },
@@ -113,7 +114,7 @@ export const ROLES: RoleMeta[] = [
   {
     value: 'manufacturer', label: 'تولیدکننده', icon: 'ti-building-factory', color: '#ef4444',
     description: 'تولید تجهیزات بیلیارد', requiresDoc: true,
-    docHint: 'جواز تولید یا گواهی ثبت برند',
+    docHint: 'جواز کسب — برای تیک آبی',
     profileFields: [
       { key: 'displayName', label: 'نام برند / کارخانه', type: 'text', placeholder: 'نام رسمی', required: true },
       { key: 'founded', label: 'سال تأسیس', type: 'number', placeholder: 'مثلاً ۱۳۸۵', required: false },
