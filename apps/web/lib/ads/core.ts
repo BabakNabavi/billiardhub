@@ -53,7 +53,13 @@ export const LEGACY_KEY_MAP: Record<string, BuiltinPlacementKey> = {
 export type PlacementMode = 'free' | 'manual' | 'paid'
 /* `video` با مهاجرتِ ۰۵۱ آمد — تبلیغِ پیش‌پخشِ بیلیارد مدیا. */
 export type ContentKind = 'banner' | 'entity' | 'video'
-export type EntityType = 'product' | 'club' | 'seller'
+/* «محتوای اسپانسری» نوعِ سومِ محتوا نیست — همان جایگاهِ موجودیتی است
+   با موجودیت‌های بیشتر. اضافه‌کردنِ `contentKind` تازه یعنی تکرارِ کلِ
+   مسیرِ سرو و اعتبارسنجی برای چیزی که فقط جدولِ منبعش فرق دارد. */
+export const ENTITY_TYPES = ['product', 'club', 'seller', 'tournament', 'video'] as const
+export type EntityType = typeof ENTITY_TYPES[number]
+export const isEntityType = (v: unknown): v is EntityType =>
+  (ENTITY_TYPES as readonly string[]).includes(String(v))
 
 /* حالت چرخش کمپین‌های یک جایگاه (فاز ۴) */
 export const ROTATION_MODES = ['fixed', 'weighted', 'fair', 'random'] as const
@@ -378,8 +384,23 @@ export function validateContent(placement: Placement, content: Record<string, un
     if (link && !/^(https?:\/\/|\/)/i.test(link)) return 'لینک مقصد باید با https یا / شروع شود'
     return null
   }
+
+  /* ⚠️ جایگاهِ ویدیویی شاخه‌ی خودش را نداشت و به شاخه‌ی «موجودیت»
+     می‌افتاد — یعنی از تبلیغِ پیش‌پخش `entity_type` می‌خواست و هر
+     خریدی روی آن با «نوع موجودیت نامعتبر است» رد می‌شد. تا امروز
+     دیده نشده بود چون کمپین‌های پیش‌پخش فقط دستی ساخته می‌شدند و از
+     این مسیر نمی‌گذشتند. */
+  if (placement.contentKind === 'video') {
+    const v = String(content.videoUrl ?? '').trim()
+    if (!v) return 'ویدیوی تبلیغ لازم است'
+    if (!/^https?:\/\//i.test(v)) return 'نشانی ویدیو باید با https شروع شود'
+    const dest = String(content.clickUrl ?? '').trim()
+    if (dest && !/^(https?:\/\/|\/)/i.test(dest)) return 'مقصد کلیک باید با https یا / شروع شود'
+    return null
+  }
+
   const t = String(content.entity_type ?? placement.entityType ?? '')
-  if (!['product', 'club', 'seller'].includes(t)) return 'نوع موجودیت نامعتبر است'
+  if (!isEntityType(t)) return 'نوع موجودیت نامعتبر است'
   if (!String(content.ref ?? '').trim()) return 'شناسه‌ی موجودیت (ref) لازم است'
   return null
 }

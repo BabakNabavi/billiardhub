@@ -116,6 +116,48 @@ async function freeSellers(limit: number): Promise<EntitySnapshot[]> {
   })
 }
 
+/* ── محتوای اسپانسری در حالتِ رایگان ──
+   جایگاهِ اسپانسری هم مثل بقیه می‌تواند «رایگان» باشد؛ آن‌وقت به‌جای
+   کمپین، تازه‌ترین‌های واقعیِ سایت را نشان می‌دهد. بدونِ این دو تابع،
+   `freeContent` برای مسابقه و ویدیو به شاخه‌ی فروشگاه‌ها می‌افتاد و
+   یک جایگاهِ «مسابقات» بی‌صدا فروشگاه نشان می‌داد. */
+async function freeTournaments(limit: number): Promise<EntitySnapshot[]> {
+  const { data, error } = await sb().from('tournaments')
+    .select('id,slug,title,city,cover_url,status,starts_at,entry_fee')
+    .in('status', ['published', 'registration_open', 'registration_closed', 'ongoing'])
+    /* نزدیک‌ترین مسابقه اول — «تازه‌ترین ساخته‌شده» این‌جا بی‌معناست */
+    .order('starts_at', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(limit)
+  if (error || !data) return []
+  return (data as Record<string, unknown>[]).map(r => ({
+    entityType: 'tournament' as const, ref: s(r.id),
+    title: s(r.title, 'مسابقه'),
+    image: s(r.cover_url) || '/images/shop/snooker-table.webp',
+    subtitle: s(r.city),
+    href: `/tournaments/${s(r.slug) || s(r.id)}`,
+    city: s(r.city),
+    badge: n(r.entry_fee) === 0 ? 'ورود رایگان' : null,
+  }))
+}
+
+async function freeVideos(limit: number): Promise<EntitySnapshot[]> {
+  const { data, error } = await sb().from('videos')
+    .select('id,slug,title,thumb,creator_name,status,visibility,created_at')
+    .eq('status', 'published').eq('visibility', 'public')
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: true })
+    .limit(limit)
+  if (error || !data) return []
+  return (data as Record<string, unknown>[]).map(r => ({
+    entityType: 'video' as const, ref: s(r.id),
+    title: s(r.title, 'ویدیو'),
+    image: s(r.thumb),
+    subtitle: s(r.creator_name),
+    href: `/media/${encodeURIComponent(s(r.slug) || s(r.id))}`,
+  }))
+}
+
 /** محتوای پیش‌فرض یک جایگاه رایگان */
 export async function freeContent(entityType: EntityType, limit: number): Promise<EntitySnapshot[]> {
   const take = Math.max(0, Math.min(60, Math.round(limit) || 0))
@@ -123,6 +165,8 @@ export async function freeContent(entityType: EntityType, limit: number): Promis
   try {
     if (entityType === 'product') return await freeProducts(take)
     if (entityType === 'club') return await freeClubs(take)
+    if (entityType === 'tournament') return await freeTournaments(take)
+    if (entityType === 'video') return await freeVideos(take)
     return await freeSellers(take)
   } catch (e) {
     /* خطا را بی‌صدا رد نکن: بدون لاگ، یک کوئری خراب دائمی از بیرون

@@ -323,11 +323,16 @@ const KIND_OPTS = [
   { value: 'video' as const, label: 'ویدیو (پیش‌پخش)' },
   { value: 'entity' as const, label: 'موجودیت (کارت محصول/باشگاه/فروشگاه)' },
 ]
+/* مسابقه و ویدیو برای «محتوای اسپانسری» — نوعِ تازه‌ی تبلیغ نیستند،
+   همان جایگاهِ موجودیتی‌اند با جدولِ منبعِ متفاوت. */
 const ENTITY_OPTS = [
   { value: 'product' as const, label: 'محصول' },
   { value: 'club' as const, label: 'باشگاه' },
   { value: 'seller' as const, label: 'فروشگاه' },
+  { value: 'tournament' as const, label: 'مسابقه (اسپانسری)' },
+  { value: 'video' as const, label: 'ویدیو (اسپانسری)' },
 ]
+type EntityOpt = typeof ENTITY_OPTS[number]['value']
 
 function NewPlacement({ onDone, flash, call }: {
   onDone: () => Promise<void> | void
@@ -340,7 +345,7 @@ function NewPlacement({ onDone, flash, call }: {
   const [title, setTitle] = useState('')
   const [desc, setDesc] = useState('')
   const [kind, setKind] = useState<'banner' | 'video' | 'entity'>('banner')
-  const [entity, setEntity] = useState<'product' | 'club' | 'seller'>('product')
+  const [entity, setEntity] = useState<EntityOpt>('product')
   const [cap, setCap] = useState('1')
   const [dims, setDims] = useState('')
   const [roles, setRoles] = useState<string[]>([])

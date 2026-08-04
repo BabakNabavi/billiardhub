@@ -109,9 +109,66 @@ async function resolveSellers(refs: string[]): Promise<Map<string, EntitySnapsho
 }
 
 /** یک دسته ارجاع هم‌نوع → اسنپ‌شات‌ها، با حفظ ترتیب ورودی */
+/* ── محتوای اسپانسری ──
+
+   «مسابقهٔ اسپانسری» و «ویدیوی اسپانسری» نوعِ تازه‌ای از تبلیغ نیستند؛
+   همان جایگاهِ موجودیتی‌اند با جدولِ منبعِ متفاوت. به همین دلیل به‌جای
+   ساختنِ `contentKind` تازه — که کلِ مسیرِ سرو، اعتبارسنجی و پنل ادمین
+   را تکرار می‌کرد — فقط دو resolver اضافه شد.
+
+   هر دو همان قاعده‌ی بقیه را دارند: چیزی که منتشر نشده یا خصوصی است
+   هرگز به‌عنوان محتوای اسپانسری سرو نمی‌شود، حتی اگر ادمین کمپینش را
+   فعال کرده باشد. تبلیغ نباید درِ پشتیِ دیدنِ محتوای منتشرنشده باشد. */
+async function resolveTournaments(rawRefs: string[]): Promise<Map<string, EntitySnapshot>> {
+  const out = new Map<string, EntitySnapshot>()
+  const refs = rawRefs.filter(x => UUID.test(x))
+  if (!refs.length) return out
+  const { data } = await sb().from('tournaments')
+    .select('id,slug,title,city,cover_url,status,starts_at,entry_fee')
+    .in('id', refs)
+  /* پیش‌نویس و لغوشده سرو نمی‌شوند */
+  const LIVE = ['published', 'registration_open', 'registration_closed', 'ongoing']
+  for (const r of (data as Record<string, unknown>[] ?? [])) {
+    if (!LIVE.includes(s(r.status))) continue
+    out.set(s(r.id), {
+      entityType: 'tournament', ref: s(r.id),
+      title: s(r.title, 'مسابقه'),
+      image: s(r.cover_url) || '/images/shop/snooker-table.webp',
+      subtitle: s(r.city),
+      href: `/tournaments/${s(r.slug) || s(r.id)}`,
+      city: s(r.city),
+      /* ورودیِ رایگان خودش یک مزیتِ گفتنی است */
+      badge: n(r.entry_fee) === 0 ? 'ورود رایگان' : null,
+    })
+  }
+  return out
+}
+
+async function resolveVideos(rawRefs: string[]): Promise<Map<string, EntitySnapshot>> {
+  const out = new Map<string, EntitySnapshot>()
+  const refs = rawRefs.filter(x => UUID.test(x))
+  if (!refs.length) return out
+  const { data } = await sb().from('videos')
+    .select('id,slug,title,thumb,creator_name,status,visibility')
+    .in('id', refs)
+  for (const r of (data as Record<string, unknown>[] ?? [])) {
+    if (s(r.status) !== 'published' || s(r.visibility) !== 'public') continue
+    out.set(s(r.id), {
+      entityType: 'video', ref: s(r.id),
+      title: s(r.title, 'ویدیو'),
+      image: s(r.thumb),
+      subtitle: s(r.creator_name),
+      href: `/media/${encodeURIComponent(s(r.slug) || s(r.id))}`,
+    })
+  }
+  return out
+}
+
 export async function resolveEntities(entityType: EntityType, refs: string[]): Promise<EntitySnapshot[]> {
   const map = entityType === 'product' ? await resolveProducts(refs)
     : entityType === 'club' ? await resolveClubs(refs)
+    : entityType === 'tournament' ? await resolveTournaments(refs)
+    : entityType === 'video' ? await resolveVideos(refs)
     : await resolveSellers(refs)
   return refs.map(r => map.get(r)).filter(Boolean) as EntitySnapshot[]
 }
