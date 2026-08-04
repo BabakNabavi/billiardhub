@@ -2,8 +2,10 @@ import { createHmac } from 'crypto'
 import { writeJson, readJsonFresh, safeKey } from './social-server'
 import { hasAssignedPrefix, INVALID_MOBILE_MESSAGE } from './auth/phone'
 
-const SUPA = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
-/* کد را هش‌شده ذخیره می‌کنیم (باکت عمومی است) تا حتی با خواندن فایل هم کد لو نرود.
+/* (ثابتِ نشانیِ پروژه از این‌جا برداشته شد: در هیچ‌جای این فایل
+   استفاده نمی‌شد. منبعِ واحدش `lib/supabase-config.ts` است.) */
+
+/* کد را هش‌شده ذخیره می‌کنیم تا حتی با خواندن فایل هم کد لو نرود.
 
    کلید عمداً fallback ندارد: پیش‌تر اگر JWT_SECRET تنظیم نبود، کدها با
    رشته‌ی ثابت داخل همین فایل هش می‌شدند — یعنی هر کسی که مخزن را

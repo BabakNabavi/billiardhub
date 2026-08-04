@@ -11,9 +11,10 @@
 
 import { getSupabaseServer } from './supabase-server'
 
-export const BUCKET = 'club-media'
+import { SUPABASE_URL, PUBLIC_BUCKET, PRIVATE_BUCKET as PRIV } from './supabase-config'
+
+export const BUCKET = PUBLIC_BUCKET
 export const DAY = 24 * 60 * 60 * 1000
-const SUPABASE_URL = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
 
 /* ── تفکیک محتوای خصوصی از عمومی ─────────────────────────────
 
@@ -27,7 +28,7 @@ const SUPABASE_URL = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co'
 
    این‌ها حالا به یک باکت **خصوصی** می‌روند. مسیرها عوض نمی‌شوند،
    فقط باکت — پس همه‌ی فراخوان‌های موجود بدون تغییر کار می‌کنند. */
-export const PRIVATE_BUCKET = 'bh-private'
+export const PRIVATE_BUCKET = PRIV
 
 const PRIVATE_PREFIXES = [
   'social/dm/', 'social/dm-idx/', 'social/dm-poll/',

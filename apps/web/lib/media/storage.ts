@@ -18,10 +18,9 @@
    لحظه است که اگر لازم بود، انتزاعِ کامل ساخته می‌شود.
    ───────────────────────────────────────────────────────────── */
 
-export type StorageProvider = 'supabase'
+import { SUPABASE_URL, PUBLIC_BUCKET } from '../supabase-config'
 
-const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/+$/, '')
-const PUBLIC_BUCKET = 'club-media'
+export type StorageProvider = 'supabase'
 
 /** مسیرِ داخلِ باکت → نشانیِ قابلِ خواندن در مرورگر. */
 export function publicUrlFor(key: string | null | undefined, provider: StorageProvider = 'supabase'): string {

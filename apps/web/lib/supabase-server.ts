@@ -1,6 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = 'https://bxnomfjjvhdtbnqvgjmh.supabase.co';
+import { SUPABASE_URL } from './supabase-config';
 
 let _client: SupabaseClient | null = null;
 
