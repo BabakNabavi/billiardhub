@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { CORS, DAY, P, readJson, writeJson } from '@/lib/social-server'
+import { CORS, DAY, P, readJson, writeJson, removeStoryMedia } from '@/lib/social-server'
 import { actorFromRequest } from '@/lib/finance/db'
 import { getStoryQuotaState } from '@/lib/stories/quota'
 import { redactList } from '@/lib/privacy'
@@ -25,7 +25,21 @@ export async function GET() {
   const all = await readJson<SStory[]>(P.stories, [])
   const now = Date.now()
   const live = all.filter(s => now - s.createdAt < DAY)
-  if (live.length !== all.length) writeJson(P.stories, live).catch(() => {})
+  if (live.length !== all.length) {
+    writeJson(P.stories, live).catch(() => {})
+    /* عکس/ویدیوی استوریِ منقضی هم پاک می‌شود.
+
+       تا امروز فقط ردیف از فهرست بیرون می‌رفت و فایل تا ابد در باکت
+       می‌ماند. با یک استوری در روز برای هر کاربرِ فعال، این تنها
+       منبعِ *تکرارشونده*ی فایلِ مرده است: هزار کاربر یعنی سالی حدودِ
+       سیصدوشصت هزار فایلی که هیچ‌کس دیگر نمی‌بیندشان.
+
+       فقط فایل‌های زیرِ `social/stories/` پاک می‌شوند. اگر `mediaUrl`
+       به جای دیگری اشاره کند — مثلاً عکسی که کاربر جای دیگری هم از
+       آن استفاده می‌کند — دست نمی‌خورد. */
+    const gone = all.filter(s => now - s.createdAt >= DAY)
+    void removeStoryMedia(gone.map(s => s.mediaUrl))
+  }
 
   /* عکس پروفایل *زنده* به هر استوری وصل می‌شود.
 
@@ -117,6 +131,13 @@ export async function POST(req: NextRequest) {
   const all = await readJson<SStory[]>(P.stories, [])
   const now = Date.now()
   const live = all.filter(x => now - x.createdAt < DAY)
+
+  /* این مسیر هم منقضی‌ها را از فهرست بیرون می‌ریزد، پس فایلشان هم
+     باید برود — وگرنه بسته به اینکه کدام مسیر زودتر صدا زده شود،
+     گاهی پاک می‌شد و گاهی نه. */
+  if (live.length !== all.length) {
+    void removeStoryMedia(all.filter(x => now - x.createdAt >= DAY).map(x => x.mediaUrl))
+  }
 
   /* سقف از تنظیمات ادمین و بسته‌ی خریداری‌شده می‌آید، نه از عدد هاردکد.
      کلید قدیمی ارسالی هم شمرده می‌شود تا استوری‌های قبلی همین کاربر

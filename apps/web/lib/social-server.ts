@@ -92,6 +92,38 @@ export async function writeJson(path: string, obj: unknown): Promise<void> {
   })
 }
 
+/* ── حذفِ فایلِ استوریِ منقضی ─────────────────────────────────
+
+   تا امروز هیچ‌جای پروژه فایلی از Storage پاک نمی‌کرد. استوری بعد از
+   ۲۴ ساعت از فهرست بیرون می‌رفت ولی عکس/ویدیویش می‌ماند — و این تنها
+   منبعِ *تکرارشونده*ی فایلِ مرده است، چون هر روز تکرار می‌شود.
+
+   ── دو محافظ ──
+   ۱) فقط مسیرهای زیرِ `social/stories/` پاک می‌شوند. اگر `mediaUrl`
+      جای دیگری اشاره کند — مثلاً عکسی که کاربر در پروفایلش هم دارد —
+      دست‌نخورده می‌ماند.
+   ۲) نشانی باید واقعاً به همین پروژه و همین باکت باشد. رشته‌ی دلخواهی
+      که از جای دیگری آمده باشد نادیده گرفته می‌شود.
+
+   شکستِ حذف عمداً بلعیده می‌شود: نبودِ فایل نباید پاسخِ فهرستِ استوری
+   را خراب کند. فایلی که این‌جا جا بماند بعداً در گزارشِ بی‌ارجاع
+   (`scripts/orphan-report.mjs`) دیده می‌شود. */
+export async function removeStoryMedia(urls: (string | undefined)[]): Promise<number> {
+  const prefix = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/`
+  const paths = [...new Set(
+    urls
+      .filter((u): u is string => typeof u === 'string' && u.startsWith(prefix))
+      .map(u => decodeURIComponent(u.slice(prefix.length).split('?')[0]!))
+      .filter(p => p.startsWith('social/stories/')),
+  )]
+  if (!paths.length) return 0
+  try {
+    const { error } = await getSupabaseServer().storage.from(BUCKET).remove(paths)
+    if (error) { console.error('[stories] cleanup:', error.message); return 0 }
+    return paths.length
+  } catch { return 0 }
+}
+
 /* ── Realtime Broadcast (سرور → کلاینت‌ها) ── */
 export async function broadcast(topic: string, event: string, payload: unknown): Promise<void> {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
