@@ -29,13 +29,34 @@ const ROUTES: { path: string; priority: number; freq: MetadataRoute.Sitemap[numb
   { path: '/privacy',       priority: 0.3, freq: 'yearly' },
 ]
 
+/* صفحه‌های دسته‌بندیِ مدیا.
+
+   خودِ ویدیوها در `/video-sitemap.xml` هستند، ولی خزنده باید از راهِ
+   لینک هم به آن‌ها برسد، نه فقط از راهِ نقشه. این صفحه‌ها همان پلِ
+   میانی‌اند: از `/media` به دسته، و از دسته به صفحه‌ی هر ویدیو.
+
+   فهرست ثابت است و به دیتابیس دست نمی‌زند — همان قاعده‌ی بالای فایل. */
+const MEDIA_CATEGORY_KEYS = [
+  'snooker-training', 'pool-training', 'highball-training', 'techniques',
+  'trick-shots', 'referee-rules', 'highlights', 'interviews',
+  'gear', 'technical-services', 'clubs-events',
+]
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const root = base()
   const now = new Date()
-  return ROUTES.map(r => ({
-    url: `${root}${r.path}`,
-    lastModified: now,
-    changeFrequency: r.freq,
-    priority: r.priority,
-  }))
+  return [
+    ...ROUTES.map(r => ({
+      url: `${root}${r.path}`,
+      lastModified: now,
+      changeFrequency: r.freq,
+      priority: r.priority,
+    })),
+    ...MEDIA_CATEGORY_KEYS.map(k => ({
+      url: `${root}/media?category=${k}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    })),
+  ]
 }

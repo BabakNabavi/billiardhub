@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Play, ArrowLeft, ChevronLeft, BellPlus, BellRing, Clapperboard, Loader2 } from 'lucide-react'
 import { MEDIA_VIDEOS, channelsFrom, compactViews, faDigits, mediaCategoryOf, type MediaVideo } from '../../../../lib/media-data'
-import { fetchUserVideos } from '../../../../lib/media-user'
+import { fetchVideos } from '../../../../lib/media-user'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
 const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
@@ -20,7 +20,17 @@ export default function ChannelPage() {
   const handle = (Array.isArray(params?.handle) ? params.handle[0] : params?.handle) ?? ''
   const [userVids, setUserVids] = useState<MediaVideo[]>([])
   const [uLoaded, setULoaded]   = useState(false)
-  useEffect(() => { fetchUserVideos().then(v => { setUserVids(v); setULoaded(true) }) }, [])
+
+  /* فقط ویدیوهای همین کانال از سرور خواسته می‌شود.
+
+     پیش‌تر کلِ فهرست گرفته می‌شد و بعد در مرورگر فیلتر — یعنی برای
+     نشان‌دادنِ ویدیوهای یک سازنده، ویدیوی همه‌ی سازنده‌ها دانلود
+     می‌شد. ستونِ `creator_handle` ایندکس دارد، پس این کار روی سرور
+     ارزان است. */
+  useEffect(() => {
+    if (!handle) { setULoaded(true); return }
+    fetchVideos({ handle, limit: 48 }).then(r => { setUserVids(r.items); setULoaded(true) })
+  }, [handle])
   const merged  = useMemo(() => [...MEDIA_VIDEOS, ...userVids], [userVids])
   const channel = useMemo(() => channelsFrom(merged).find(c => c.creator.handle === handle) ?? null, [merged, handle])
   const videos  = useMemo(() => merged.filter(v => v.creator.handle === handle).sort((a, b) => b.ts - a.ts), [merged, handle])

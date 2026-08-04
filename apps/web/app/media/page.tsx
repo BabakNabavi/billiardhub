@@ -51,6 +51,25 @@ export default function MediaPage() {
   const [cat, setCat] = useState<'all' | MediaCategoryKey>('all')
   const [q, setQ] = useState('')
   const [term, setTerm] = useState('')
+
+  /* `?category=` از نشانی خوانده می‌شود.
+
+     نقشه‌ی سایت و breadcrumbِ صفحه‌ی تماشا هر دو به همین شکل لینک
+     می‌دهند؛ بدونِ این، آن لینک‌ها همیشه «همه» را نشان می‌دادند و
+     خزنده هیچ‌وقت به صفحه‌ی دسته نمی‌رسید. */
+  useEffect(() => {
+    const k = new URLSearchParams(window.location.search).get('category')
+    if (k && MEDIA_CATEGORIES.some(c => c.key === k)) setCat(k as MediaCategoryKey)
+  }, [])
+
+  /* نشانی با انتخابِ کاربر هم‌گام می‌ماند تا اشتراک‌گذاری و دکمه‌ی
+     «بازگشت» درست کار کنند — بدونِ بارگذاریِ دوباره‌ی صفحه. */
+  useEffect(() => {
+    const u = new URL(window.location.href)
+    if (cat === 'all') u.searchParams.delete('category')
+    else u.searchParams.set('category', cat)
+    window.history.replaceState(null, '', u.pathname + u.search)
+  }, [cat])
   const [loading, setLoading] = useState(true)
   const [more, setMore] = useState(false)
   const [upOpen, setUpOpen] = useState(false)
