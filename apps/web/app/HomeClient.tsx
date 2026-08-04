@@ -196,13 +196,7 @@ const IMG = {
   bg1: '/images/background/8_Ball_Pool.jpg',
   bg2: '/images/background/billiadr-club-5.jpg',
 
-  // Coaches
-  coach1: '/images/coaches/IMG_0969.png',
-  coach2: '/images/coaches/IMG_0971 (1).png',
-
   // Services
-  svc1: '/images/services/IMG_0961.png',
-  svc2: '/images/services/IMG_0962.png',
   svc3: '/images/services/IMG_0963.png',
 
   // Stores
@@ -210,7 +204,6 @@ const IMG = {
   store2: '/images/stores/IMG_0975.png',
 
   // Manufactures
-  mfr1: '/images/manufactures/IMG_0965.png',
   mfr2: '/images/manufactures/IMG_0966.png',
 };
 
