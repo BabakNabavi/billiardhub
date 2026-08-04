@@ -97,7 +97,18 @@ const objects = (await c.query(`
 /* فایل‌های زیرِ این پیشوندها زیرساختِ خودِ سایت‌اند و ارجاعِ دیتابیسی
    ندارند — نباید یتیم شمرده شوند. */
 const INFRA = ['social/dm/', 'social/dm-idx/', 'social/dm-poll/', 'social/notif/',
-  'social/push/', 'social/otp/', 'social/seen/', 'social/stories.json', 'social/live']
+  'social/push/', 'social/otp/', 'social/seen/', 'social/live']
+
+/* ⚠️ هر فایلِ حالتِ زیرِ `social/` هم زیرساخت است، نه رسانه.
+
+   نخستین اجرا این را نداشت و `social/stories/index.json` — یعنی خودِ
+   فهرستِ استوری‌ها — «بی‌ارجاع» تشخیص داده و حذف شد. منطقی هم بود:
+   هیچ رکوردی به آن اشاره نمی‌کند، چون خودش فهرست است.
+
+   نامِ تک‌تکِ فایل‌ها را شمردن همین اشتباه را دوباره می‌سازد (فهرست
+   `social/stories.json` را داشت که اصلاً مسیرِ درستی نبود). قاعده‌ی
+   ساختاری امن‌تر است: رسانه‌ی کاربران هیچ‌وقت `.json` نیست. */
+const isStateFile = (n) => n.startsWith('social/') && n.endsWith('.json')
 
 const GRACE_DAYS = Number(process.env.GRACE_DAYS ?? 7)
 const cutoff = Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000
@@ -105,7 +116,7 @@ const cutoff = Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000
 const orphans = []
 let infra = 0, young = 0, live = 0
 for (const o of objects) {
-  if (INFRA.some(p => o.name.startsWith(p))) { infra++; continue }
+  if (INFRA.some(p => o.name.startsWith(p)) || isStateFile(o.name)) { infra++; continue }
   if (referenced.has(o.name)) { live++; continue }
   if (new Date(o.created_at).getTime() > cutoff) { young++; continue }
   orphans.push(o)
@@ -141,8 +152,54 @@ if (orphans.length) {
   }
 }
 
-console.log('\n  ⚠ این ابزار هیچ‌چیز حذف نمی‌کند. فهرستِ بالا فقط نامزدِ بررسی است.')
-console.log('    پیش از هر حذفی باید چند مورد را با چشم باز کرد و مطمئن شد')
-console.log('    واقعاً بی‌استفاده‌اند — یک تشخیصِ اشتباه یعنی عکسِ یک کاربرِ واقعی.\n')
+/* ── حذف ──
+
+   عمداً پشتِ یک متغیرِ صریح است و پیش‌فرضش خاموش. اجرای بی‌پرچمِ این
+   اسکریپت هرگز چیزی پاک نمی‌کند.
+
+   پیش از حذف، فهرستِ کاملِ نام‌ها در یک فایل نوشته می‌شود. اگر بعداً
+   معلوم شد چیزی اشتباه پاک شده، دستِ‌کم می‌دانیم دقیقاً چه بود —
+   بدونِ آن، حذف یک عملیاتِ بی‌ردِ برگشت‌ناپذیر است.
+
+   اجرا:  CONFIRM_DELETE=yes node scripts/orphan-report.mjs           */
+if (orphans.length && process.env.CONFIRM_DELETE === 'yes') {
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const manifest = path.join(ROOT, `orphan-deleted-${stamp}.json`)
+  fs.writeFileSync(manifest, JSON.stringify(
+    orphans.map(o => ({ bucket: o.bucket_id, name: o.name, size: Number(o.size), created: o.created_at })),
+    null, 1,
+  ))
+  console.log('  فهرستِ حذف‌شونده ثبت شد: ' + path.basename(manifest))
+
+  /* دسته‌دسته: درخواستِ حذفِ صدها مسیر در یک تماس گاهی timeout می‌دهد
+     و آن‌وقت معلوم نیست چه مقدارش انجام شده. */
+  const byBucket = {}
+  for (const o of orphans) (byBucket[o.bucket_id] ??= []).push(o.name)
+
+  let removed = 0, failed = 0
+  for (const [bucket, names] of Object.entries(byBucket)) {
+    for (let i = 0; i < names.length; i += 50) {
+      const batch = names.slice(i, i + 50)
+      const r = await fetch(`${SU}/storage/v1/object/${bucket}`, {
+        method: 'DELETE',
+        headers: { ...H, 'content-type': 'application/json' },
+        body: JSON.stringify({ prefixes: batch }),
+      })
+      if (r.ok) removed += batch.length
+      else { failed += batch.length; console.error('  ✗ دسته ناموفق: ' + r.status + ' ' + (await r.text()).slice(0, 120)) }
+    }
+  }
+  console.log('\n  حذف شد: ' + removed + '   ناموفق: ' + failed)
+
+  const after = (await c.query(`
+    SELECT count(*)::int AS n, coalesce(sum((metadata->>'size')::bigint),0) AS b FROM storage.objects`)).rows[0]
+  console.log('  وضعیتِ Storage پس از حذف: ' + after.n + ' فایل   ' + mb(after.b) + ' MB')
+} else {
+  console.log('\n  ⚠ این اجرا چیزی حذف نکرد. فهرستِ بالا فقط نامزدِ بررسی است.')
+  console.log('    پیش از هر حذفی باید چند مورد را با چشم باز کرد و مطمئن شد')
+  console.log('    واقعاً بی‌استفاده‌اند — یک تشخیصِ اشتباه یعنی عکسِ یک کاربرِ واقعی.')
+  if (orphans.length) console.log('    برای حذف: CONFIRM_DELETE=yes node scripts/orphan-report.mjs')
+}
+console.log('')
 
 await c.end()
