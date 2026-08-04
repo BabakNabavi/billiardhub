@@ -1,199 +1,166 @@
-'use client'
+import type { Metadata } from 'next'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { SITE_URL, absoluteUrl } from '../../../lib/site-url'
+import { mediaCategoryOf, type MediaVideo, type MediaCategoryKey } from '../../../lib/media-data'
+import { getPublicBySlug, relatedTo, slugRedirect, toPublic, type VideoRow } from '../../../lib/media/server'
+import WatchClient from './WatchClient'
 
 /* ─────────────────────────────────────────────────────────────
-   صفحهٔ پخش — تم روشن پرمیوم، هم‌هویت با «خانهٔ محتوای بیلیارد».
-   منطق همان نسخهٔ قبل: پلیر واقعی، لایک/ذخیره/دنبال، اشتراک با URL
-   کانونیکال، توضیحات بازشونده و «ادامهٔ تماشا».
+   صفحه‌ی تماشا — سرور-کامپوننت.
+
+   ── چرا سرور ──
+   نسخه‌ی قبلی کلاً کلاینتی بود: فهرستِ ویدیوها را می‌گرفت و بعد در
+   مرورگر دنبالِ ویدیو می‌گشت. یعنی HTMLِ اولیه نه عنوان داشت، نه
+   توضیح، نه canonical و نه داده‌ی ساختاریافته — و این همان صفحه‌ای
+   است که قرار است ویدیو از راهش پیدا شود.
+
+   حالا داده روی سرور خوانده می‌شود، پس:
+     · عنوان و توضیحِ اختصاصی در خودِ HTML است
+     · ویدیوی نبوده ۴۰۴ واقعی می‌دهد، نه صفحه‌ی ۲۰۰ با متنِ «پیدا نشد»
+     · نشانیِ قدیمی ریدایرکتِ دائمی می‌گیرد، نه ۴۰۴
+     · `VideoObject` فقط با داده‌ی واقعی ساخته می‌شود
    ───────────────────────────────────────────────────────────── */
 
-import { absoluteUrl } from '../../../lib/site-url'
-import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import {
-  ChevronLeft, Eye, ThumbsUp, Bookmark, Link2, Check, Play,
-  BellPlus, BellRing, ArrowLeft, Clapperboard, Loader2,
-} from 'lucide-react'
-import { MEDIA_VIDEOS, mediaCategoryOf, compactViews, faNum, type MediaVideo } from '../../../lib/media-data'
-import { fetchUserVideos } from '../../../lib/media-user'
+/* پارامتر عمداً `id` مانده — نامِ پوشه است و عوض‌کردنش یعنی شکستنِ
+   لینک‌های موجود. مقدارش حالا slug است. */
+type Params = { params: Promise<{ id: string }> }
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#8A8474', LINE = '#EAE5DA'
-const GOLD = '#C7A66A', GOLD_D = '#9A6E38', GROUND = '#FAF8F3'
+const plain = (s: string, max = 160) =>
+  String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, max)
 
-export default function MediaVideoPage() {
-  const params = useParams()
-  const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? ''
-  const [userVids, setUserVids] = useState<MediaVideo[]>([])
-  const [uLoaded, setULoaded]   = useState(false)
-  useEffect(() => { fetchUserVideos().then(v => { setUserVids(v); setULoaded(true) }) }, [])
-  const merged  = useMemo(() => [...MEDIA_VIDEOS, ...userVids], [userVids])
-  const video   = useMemo(() => merged.find(v => v.id === id) ?? null, [merged, id])
-  const related = useMemo(() => {
-    if (!video) return []
-    const same = merged.filter(x => x.id !== video.id && x.category === video.category)
-    const rest = merged.filter(x => x.id !== video.id && x.category !== video.category)
-    return [...same, ...rest].slice(0, 6)
-  }, [merged, video])
+/** ثانیه → ISO 8601 (`PT4M13S`) — قالبی که schema.org می‌خواهد */
+const iso8601 = (sec: number | null): string | undefined => {
+  if (!sec || sec <= 0) return undefined
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = Math.floor(sec % 60)
+  return 'PT' + (h ? `${h}H` : '') + (m ? `${m}M` : '') + (s || (!h && !m) ? `${s}S` : '')
+}
 
-  const [liked, setLiked]         = useState(false)
-  const [saved, setSaved]         = useState(false)
-  const [following, setFollowing] = useState(false)
-  const [copied, setCopied]       = useState(false)
-  const [descOpen, setDescOpen]   = useState(false)
+async function load(slug: string): Promise<VideoRow | null> {
+  return getPublicBySlug(decodeURIComponent(slug))
+}
 
-  /* ویدیوی کاربر هنوز از سرور نیامده ⇒ به‌جای «پیدا نشد»، لودینگ نشان بده */
-  if (!video && !uLoaded) {
-    return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: GROUND, display: 'flex', alignItems: 'center', justifyContent: 'center', color: MUT }}>
-        <Loader2 size={30} style={{ animation: 'mvspin 1s linear infinite' }} />
-        <style>{`@keyframes mvspin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    )
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { id } = await params
+  const v = await load(id)
+  if (!v) return { title: 'ویدیو پیدا نشد | بیلیارد هاب', robots: { index: false, follow: true } }
+
+  const cat = mediaCategoryOf(v.category as MediaCategoryKey)
+  const url = absoluteUrl(`/media/${v.slug}`)
+  /* توضیحِ متا از توضیحِ خودِ ویدیو می‌آید. اگر کاربر توضیحی ننوشته
+     باشد، جمله‌ای از روی داده‌ی واقعی ساخته می‌شود — نه متنِ پرکننده‌ی
+     بی‌معنی برای موتورِ جست‌وجو. */
+  const desc = plain(v.description) ||
+    `${v.title} — ${cat?.label ?? 'ویدیو'} در بیلیارد مدیا${v.creator_name ? '، از ' + v.creator_name : ''}.`
+
+  return {
+    title: `${v.title} | بیلیارد مدیا`,
+    description: desc,
+    alternates: { canonical: url },
+    /* `unlisted` با نشانی باز می‌شود ولی نباید ایندکس شود */
+    robots: v.visibility === 'unlisted'
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
+    openGraph: {
+      type: 'video.other',
+      title: v.title,
+      description: desc,
+      url,
+      siteName: 'بیلیارد هاب',
+      locale: 'fa_IR',
+      images: v.thumb ? [{ url: v.thumb }] : undefined,
+      videos: v.src ? [{ url: v.src, type: v.mime ?? 'video/mp4' }] : undefined,
+    },
+    twitter: {
+      card: 'player',
+      title: v.title,
+      description: desc,
+      images: v.thumb ? [v.thumb] : undefined,
+    },
   }
-  if (!video) {
-    return (
-      <div dir="rtl" style={{ minHeight: '70vh', background: GROUND, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn,Tahoma,sans-serif', padding: 20 }}>
-        <div style={{ textAlign: 'center', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 20, padding: '40px 34px', maxWidth: 380, boxShadow: '0 20px 50px rgba(28,27,23,0.08)' }}>
-          <span style={{ display: 'inline-flex', width: 56, height: 56, borderRadius: 16, background: 'rgba(199,166,106,0.1)', color: GOLD_D, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}><Clapperboard size={26} /></span>
-          <p style={{ fontSize: 17, fontWeight: 900, color: INK, margin: '0 0 8px' }}>ویدیو پیدا نشد</p>
-          <p style={{ fontSize: 13, color: MUT, margin: '0 0 20px', lineHeight: 1.8 }}>ممکن است این ویدیو حذف شده یا نشانی تغییر کرده باشد.</p>
-          <Link href="/media" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '11px 22px', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 800, background: GOLD, color: '#241B08' }}>
-            بازگشت به بیلیارد مدیا <ArrowLeft size={14} />
-          </Link>
-        </div>
-      </div>
-    )
+}
+
+export default async function WatchPage({ params }: Params) {
+  const { id } = await params
+  const slug = decodeURIComponent(id)
+  const v = await load(slug)
+
+  if (!v) {
+    /* شاید نشانیِ قدیمی باشد — عنوان که عوض شود slug هم عوض می‌شود.
+       ریدایرکتِ دائمی یعنی اعتبارِ لینک‌های بیرونی حفظ می‌شود. */
+    const fresh = await slugRedirect(slug)
+    if (fresh) permanentRedirect(`/media/${fresh}`)
+    notFound()
   }
 
-  const cat = mediaCategoryOf(video.category)
-  const pageUrl = absoluteUrl(`/media/${video.id}`)
-  const shareText = encodeURIComponent(video.title)
-  const copyLink = async () => { try { await navigator.clipboard.writeText(pageUrl); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { /* */ } }
+  const related = await relatedTo(v, 8)
+  const cat = mediaCategoryOf(v.category as MediaCategoryKey)
+
+  /* شکلی که کامپوننتِ نمایش می‌فهمد */
+  const asMedia = (p: ReturnType<typeof toPublic>): MediaVideo => ({
+    id: p.slug, title: p.title, category: p.category as MediaCategoryKey,
+    creator: { id: p.creatorHandle, name: p.creatorName, handle: p.creatorHandle },
+    duration: p.durationSec
+      ? `${String(Math.floor(p.durationSec / 60)).padStart(2, '0')}:${String(p.durationSec % 60).padStart(2, '0')}`
+        .replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
+      : '',
+    views: p.views, likes: 0,
+    date: p.publishedAt ?? '', ts: p.publishedAt ? Date.parse(p.publishedAt) : 0,
+    thumb: p.thumb, src: p.src,
+    description: p.description ? p.description.split('\n').filter(Boolean) : [],
+    tags: p.tags ?? [],
+  })
+
+  const url = absoluteUrl(`/media/${v.slug}`)
+
+  /* ── VideoObject ──
+     فقط فیلدهایی که *واقعاً* داده دارند. مدت، بندانگشتی و تاریخ اگر
+     نباشند اصلاً نمی‌آیند؛ مقدارِ ساختگی هم به گوگل دروغ می‌گوید و هم
+     بعداً باعثِ اخطارِ داده‌ی نامعتبر می‌شود. */
+  const videoLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: v.title,
+    description: plain(v.description, 500) || v.title,
+    url,
+    contentUrl: v.src,
+    publisher: {
+      '@type': 'Organization',
+      name: 'بیلیارد هاب',
+      url: SITE_URL,
+    },
+  }
+  if (v.thumb) videoLd.thumbnailUrl = [v.thumb]
+  if (v.published_at) videoLd.uploadDate = v.published_at
+  const dur = iso8601(v.duration_sec)
+  if (dur) videoLd.duration = dur
+  if (v.width && v.height) { videoLd.width = v.width; videoLd.height = v.height }
+  if (v.creator_name) videoLd.creator = { '@type': 'Person', name: v.creator_name }
+  if (v.views > 0) {
+    videoLd.interactionStatistic = {
+      '@type': 'InteractionCounter',
+      interactionType: { '@type': 'WatchAction' },
+      userInteractionCount: v.views,
+    }
+  }
+
+  const crumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'خانه', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'بیلیارد مدیا', item: absoluteUrl('/media') },
+      ...(cat ? [{ '@type': 'ListItem', position: 3, name: cat.label, item: absoluteUrl(`/media?category=${v.category}`) }] : []),
+      { '@type': 'ListItem', position: cat ? 4 : 3, name: v.title, item: url },
+    ],
+  }
 
   return (
-    <div dir="rtl" style={{ minHeight: '100vh', background: GROUND, color: INK, fontFamily: 'Vazirmatn,Tahoma,sans-serif' }}>
-      <style>{`
-        @keyframes mvUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
-        .mv-wrap { max-width: 1260px; margin: 0 auto; padding: 0 clamp(16px,3vw,30px); }
-        .mv-layout { display:grid; grid-template-columns: minmax(0,1fr) 360px; gap:26px; align-items:start; }
-        .mv-card { background:#fff; border:1px solid ${LINE}; border-radius:16px; }
-        .mv-act { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:40px; border-radius:11px; cursor:pointer; text-decoration:none;
-          font-family:inherit; font-size:12.5px; font-weight:800; background:#fff; border:1px solid ${LINE}; color:${SEC}; padding:0 15px; transition: all .22s cubic-bezier(.22,1,.36,1); }
-        .mv-act:hover { border-color: rgba(199,166,106,0.55); color:${GOLD_D}; transform: translateY(-2px); }
-        .mv-act.on { background: rgba(199,166,106,0.14); border-color: rgba(199,166,106,0.45); color:${GOLD_D}; }
-        .mv-follow { background:${INK}; color:#fff; border-color:${INK}; }
-        .mv-follow:hover { background:#000; color:#fff; }
-        .mv-follow.on { background:#fff; color:${INK}; border-color:${LINE}; }
-        .mv-rel { display:flex; gap:12px; padding:9px; border-radius:14px; text-decoration:none; transition: background .2s; }
-        .mv-rel:hover { background:#fff; box-shadow: 0 8px 22px rgba(28,27,23,0.06); }
-        .mv-rel .tn { position:relative; width:150px; flex-shrink:0; aspect-ratio:16/9; border-radius:11px; overflow:hidden; background:#EDE9E1; }
-        .mv-rel .tn img { width:100%; height:100%; object-fit:cover; transition: transform .5s cubic-bezier(.22,1,.36,1); }
-        .mv-rel:hover .tn img { transform: scale(1.06); }
-        .mv-rel-dur { position:absolute; bottom:5px; inset-inline-start:5px; font-size:9.5px; font-weight:800; color:#fff; background:rgba(20,18,14,0.72); border-radius:6px; padding:1px 6px; font-variant-numeric:tabular-nums; }
-        .mv-rel-title { font-size:12.5px; font-weight:800; color:${INK}; line-height:1.55; margin:0 0 4px; letter-spacing:-0.01em;
-          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; transition: color .2s; }
-        .mv-rel:hover .mv-rel-title { color:${GOLD_D}; }
-        @media (max-width: 940px) { .mv-layout { grid-template-columns: 1fr; } }
-      `}</style>
-
-      <div className="mv-wrap" style={{ paddingTop: 18, paddingBottom: 76 }}>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: MUT, marginBottom: 16, animation: 'mvUp .4s ease both' }}>
-          <Link href="/" style={{ color: MUT, textDecoration: 'none' }}>خانه</Link><ChevronLeft size={12} />
-          <Link href="/media" style={{ color: MUT, textDecoration: 'none' }}>بیلیارد مدیا</Link><ChevronLeft size={12} />
-          <span style={{ color: SEC, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240 }}>{video.title}</span>
-        </nav>
-
-        <div className="mv-layout">
-          <div style={{ minWidth: 0 }}>
-            {/* پلیر */}
-            <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', background: '#000', boxShadow: '0 30px 70px rgba(28,27,23,0.22)', animation: 'mvUp .45s ease both' }}>
-              <video key={video.id} controls playsInline preload="metadata" poster={video.thumb}
-                style={{ width: '100%', aspectRatio: '16/9', display: 'block', background: '#000' }}>
-                <source src={video.src} type="video/mp4" />
-                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
-              </video>
-            </div>
-
-            {/* عنوان + متا */}
-            <div style={{ marginTop: 18, animation: 'mvUp .45s .06s ease both' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 11 }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '4px 12px', borderRadius: 999, background: '#fff', border: `1px solid ${LINE}`, color: GOLD_D }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: cat.dot }} />{cat.label}
-                </span>
-                <span style={{ fontSize: 11.5, color: MUT, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={12} /> {compactViews(video.views)} بازدید</span>
-                <span style={{ fontSize: 11.5, color: MUT }}>{video.date}</span>
-              </div>
-              <h1 style={{ fontSize: 'clamp(18px,2.6vw,26px)', fontWeight: 900, lineHeight: 1.6, margin: 0, letterSpacing: '-0.02em' }}>{video.title}</h1>
-            </div>
-
-            {/* سازنده + اکشن‌ها */}
-            <div className="mv-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px 16px', flexWrap: 'wrap', marginTop: 16, padding: '14px 16px', animation: 'mvUp .45s .1s ease both' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-                <span style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, color: '#241B08', background: `linear-gradient(135deg,#E8CE96,#8A6020)` }}>{video.creator.name.slice(0, 1)}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: INK }}>{video.creator.name}</div>
-                  <Link href={`/media/channel/${video.creator.handle}`} style={{ fontSize: 11, color: MUT, direction: 'ltr', textAlign: 'right', display: 'block', textDecoration: 'none' }}>@{video.creator.handle}</Link>
-                </div>
-                <button className={`mv-act mv-follow${following ? ' on' : ''}`} onClick={() => setFollowing(f => !f)} style={{ marginInlineStart: 8 }}>
-                  {following ? <BellRing size={14} /> : <BellPlus size={14} />}{following ? 'دنبال می‌کنید' : 'دنبال کردن'}
-                </button>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <button className={`mv-act${liked ? ' on' : ''}`} onClick={() => setLiked(l => !l)}><ThumbsUp size={14} />{faNum(video.likes + (liked ? 1 : 0))}</button>
-                <button className={`mv-act${saved ? ' on' : ''}`} onClick={() => setSaved(s => !s)}><Bookmark size={14} fill={saved ? 'currentColor' : 'none'} />{saved ? 'ذخیره شد' : 'تماشای بعداً'}</button>
-                <a className="mv-act" href={`https://wa.me/?text=${shareText}%0A${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener noreferrer">واتساپ</a>
-                <a className="mv-act" href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${shareText}`} target="_blank" rel="noopener noreferrer">تلگرام</a>
-                <button className="mv-act" onClick={copyLink}>{copied ? <Check size={14} /> : <Link2 size={14} />}{copied ? 'کپی شد' : 'کپی لینک'}</button>
-              </div>
-            </div>
-
-            {/* توضیحات */}
-            <div className="mv-card" style={{ marginTop: 14, padding: '16px 18px', animation: 'mvUp .45s .14s ease both' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-                <span style={{ width: 3, height: 15, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-                <h2 style={{ fontSize: 13.5, fontWeight: 900, margin: 0, color: INK }}>توضیحات ویدیو</h2>
-                <span style={{ fontSize: 11, color: MUT }}>مدت: {video.duration}</span>
-              </div>
-              {(descOpen ? video.description : video.description.slice(0, 1)).map((p, i) => (
-                <p key={i} style={{ fontSize: 13.5, lineHeight: 2.1, color: SEC, margin: '0 0 10px' }}>{p}</p>
-              ))}
-              {video.description.length > 1 && (
-                <button onClick={() => setDescOpen(o => !o)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, color: GOLD_D, padding: 0 }}>
-                  {descOpen ? 'نمایش کمتر' : 'نمایش بیشتر…'}
-                </button>
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${LINE}` }}>
-                {video.tags.map(t => (
-                  <Link key={t} href={`/media`} style={{ fontSize: 11.5, fontWeight: 700, color: SEC, background: GROUND, border: `1px solid ${LINE}`, borderRadius: 999, padding: '5px 12px', textDecoration: 'none' }}>#{t}</Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ادامهٔ تماشا */}
-          <aside style={{ animation: 'mvUp .5s .18s ease both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9, margin: '0 4px 12px' }}>
-              <span style={{ width: 3, height: 16, borderRadius: 2, background: `linear-gradient(180deg,${GOLD},#8A6020)` }} />
-              <h2 style={{ fontSize: 14.5, fontWeight: 900, margin: 0, color: INK }}>ادامهٔ تماشا</h2>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {related.map(r => (
-                <Link key={r.id} href={`/media/${r.id}`} className="mv-rel">
-                  <span className="tn"><img src={r.thumb} alt={r.title} loading="lazy" /><span className="mv-rel-dur">{r.duration}</span></span>
-                  <span style={{ minWidth: 0 }}>
-                    <p className="mv-rel-title">{r.title}</p>
-                    <span style={{ fontSize: 10.5, color: MUT, display: 'block' }}>{r.creator.name}</span>
-                    <span style={{ fontSize: 10.5, color: MUT }}>{compactViews(r.views)} بازدید · {r.date}</span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <Link href="/media" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '12px 4px 0', padding: '11px 0', borderRadius: 12, textDecoration: 'none', fontSize: 12.5, fontWeight: 800, background: '#fff', border: `1px solid ${LINE}`, color: GOLD_D }}>
-              مشاهدهٔ همهٔ ویدیوها <ArrowLeft size={13} />
-            </Link>
-          </aside>
-        </div>
-      </div>
-    </div>
+    <>
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
+      <WatchClient video={asMedia(toPublic(v))} related={related.map(asMedia)} />
+    </>
   )
 }

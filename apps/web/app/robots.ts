@@ -24,7 +24,10 @@ const PRIVATE = [
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [{ userAgent: '*', allow: '/', disallow: PRIVATE }],
-    sitemap: `${base()}/sitemap.xml`,
+    /* نقشه‌ی ویدیو جداست چون در زمانِ درخواست از دیتابیس ساخته می‌شود؛
+       نقشه‌ی اصلی عمداً ثابت است تا شکستنِ دیتابیس ساختِ سایت را
+       نشکند. اعلامِ هر دو در robots یعنی خزنده هر دو را می‌بیند. */
+    sitemap: [`${base()}/sitemap.xml`, `${base()}/video-sitemap.xml`],
     host: base(),
   }
 }
