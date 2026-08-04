@@ -53,7 +53,12 @@ export async function GET(req: NextRequest) {
        بدونِ آنکه ادمین بداند چیزی منتظر است. */
     countOf('role_requests', { col: 'status', val: 'pending' }),
     countOf('profiles', { col: 'status', val: 'pending' }),
-    countOf('reports', { col: 'status', val: 'open' }),
+    /* ⚠️ `'OPEN'` با حروفِ بزرگ — همان مقداری که جدول ذخیره می‌کند
+       (مهاجرتِ ۰۰۳: `DEFAULT 'OPEN'` با قیدِ چهارمقداریِ بزرگ‌حرف).
+       این‌جا `'open'` بود، پس شمارش همیشه صفر می‌داد و نشانِ «گزارش
+       باز» روی داشبورد هرگز روشن نمی‌شد — یعنی گزارشِ تخلف ثبت
+       می‌شد و ادمین هیچ‌وقت خبردار نمی‌شد. */
+    countOf('reports', { col: 'status', val: 'OPEN' }),
   ]);
 
   return NextResponse.json(

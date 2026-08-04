@@ -89,6 +89,26 @@ async function applyPatch(req: NextRequest, id: string) {
   for (const k of ADMIN_FIELDS) {
     if (Object.prototype.hasOwnProperty.call(body, k)) patch[k] = !!body[k]
   }
+
+  /* ── بازبینیِ آگهی ──
+     ادمین می‌تواند وضعیت را عوض کند، ولی فقط میانِ همین چهار مقدار.
+     `deleted` این‌جا نیست چون حذف مسیرِ خودش را دارد و قاطی‌شدنشان
+     یعنی «رد کردن» و «حذف» یک دکمه می‌شوند.
+
+     دلیلِ رد در `adminNote` می‌نشیند تا فروشنده بداند چرا. */
+  const ADMIN_STATUSES = ['active', 'pending', 'rejected', 'paused']
+  if (typeof body.status === 'string' && ADMIN_STATUSES.includes(body.status)) {
+    patch.status = body.status
+    /* تأییدِ آگهیِ منقضی‌شده بدونِ تمدید بی‌فایده است — همان لحظه از
+       فهرست بیرون می‌ماند. */
+    if (body.status === 'active') {
+      patch.expiresAt = new Date(Date.now() + 60 * 86400_000).toISOString()
+    }
+  }
+  if (typeof body.adminNote === 'string') {
+    patch.adminNote = body.adminNote.trim().slice(0, 500) || null
+  }
+
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'تغییرِ مجازی فرستاده نشد' }, { status: 400 })
   }

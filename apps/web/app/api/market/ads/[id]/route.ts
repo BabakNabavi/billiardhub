@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { sb, actorFromRequest, isAdmin } from '@/lib/finance/db';
+import { sb, rpc, actorFromRequest, isAdmin, clientIp } from '@/lib/finance/db';
+import { viewerHash } from '@/lib/ads/preroll';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
 
 /* یک آگهی بیلیارد بازار — خواندن، ویرایش و حذف.
@@ -52,8 +53,20 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     }
   }
 
-  /* شمارنده‌ی بازدید — شکست آن نباید صفحه را خراب کند */
-  void sb().from('products').update({ views: num(ad.views) + 1 }).eq('id', id).then(() => {}, () => {});
+  /* ── شمارنده‌ی بازدید ──
+     پیش‌تر هر بارگذاریِ صفحه یکی بالا می‌برد، یعنی فروشنده با ده بار
+     رفرش آگهی‌اش را «پربازدید» می‌کرد و مرتب‌سازیِ محبوب‌ترین بی‌معنی
+     می‌شد.
+
+     حالا هر بیننده در هر ساعت یک‌بار شمرده می‌شود. بیننده با هشِ
+     برگشت‌ناپذیرِ IP+UA شناخته می‌شود — نه کوکی، نه شناسه‌ی کاربر —
+     پس چیزی درباره‌ی هویتِ کسی ذخیره نمی‌شود. شمارش داخلِ دیتابیس و
+     اتمیک است. شکستش نباید صفحه را خراب کند. */
+  const viewer = viewerHash(clientIp(_req), _req.headers.get('user-agent'));
+  if (viewer) {
+    void rpc('count_product_view', { p_product: id, p_viewer: viewer })
+      .then(() => { }, () => { });
+  }
 
   return NextResponse.json({ ad }, { headers: { 'Cache-Control': 'no-store' } });
 }

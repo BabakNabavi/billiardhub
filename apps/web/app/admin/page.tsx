@@ -112,6 +112,10 @@ const STAT_CARDS: { key: string; label: string; link: string }[] = [
   /* این دو صف تا امروز هیچ‌جای پنل دیده نمی‌شدند */
   { key: 'pendingRoles',    label: 'درخواست نقش',     link: '/admin/roles' },
   { key: 'pendingProfiles', label: 'پروفایل در انتظار', link: '/admin/coaches' },
+  /* گزارشِ تخلف از `/api/admin/stats` می‌آمد ولی هیچ کارتی نداشت —
+     یعنی گزارش ثبت می‌شد و ادمین تا وقتی خودش سراغِ صفحه‌ی گزارش‌ها
+     نمی‌رفت خبردار نمی‌شد. */
+  { key: 'openReports',     label: 'گزارش تخلف باز',   link: '/admin/reports' },
 ];
 
 export default function AdminPage() {

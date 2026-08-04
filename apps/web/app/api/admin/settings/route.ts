@@ -10,6 +10,15 @@ import { invalidateFeatureCache } from '@/lib/features';
 
 const WRITABLE: Record<string, 'bool' | 'json'> = {
   ads_quota_enabled: 'bool',   // محدودیت تعداد آگهی
+
+  /* شماره‌ای که هشدارِ گزارشِ تخلف به آن پیامک می‌شود. در کد نیست چون
+     شماره‌ی ادمین عوض می‌شود و نباید دیپلوی بخواهد؛ خالی بودنش یعنی
+     «پیامک نفرست» و فقط نشانِ داشبورد می‌ماند. */
+  report_alert_phone: 'json',
+
+  /* آیا آگهیِ تازه پیش از انتشار بازبینی می‌شود؟
+     پیش‌فرض خاموش است — همان رفتارِ امروز، یعنی انتشارِ بی‌درنگ. */
+  market_approval_required: 'bool',
   ads_free_quota: 'json',      // { quota, period }
   /* ad_slots_enabled حذف شد (فاز ۲): هیچ کلید سراسری‌ای برای جایگاه‌ها
      وجود ندارد — نمایش هر جایگاه فقط با is_active خودش. */

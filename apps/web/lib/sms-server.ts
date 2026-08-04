@@ -81,6 +81,14 @@ export const SMS = {
   bookingConfirmed: (club: string, date: string, time: string, ref: string) =>
     `بیلیارد هاب\nرزرو شما در ${club} برای ${date} ساعت ${time} قطعی شد.\nکد پیگیری: ${ref}`,
 
+  /* هشدارِ گزارشِ تخلف به ادمین. عنوانِ آگهی داخلش می‌آید تا ادمین
+     بدونِ بازکردنِ پنل بداند موضوع چیست و فوریتش را بسنجد. */
+  reportCreated: (kind: string, title: string, reason: string) =>
+    `بیلیارد هاب\n`
+    + `گزارش تخلف تازه روی ${kind}${title ? ` «${title.slice(0, 60)}»` : ''}\n`
+    + `دلیل: ${reason}\n`
+    + `بررسی: /admin/reports`,
+
   bookingCancelled: (club: string, date: string, refund: number) =>
     refund > 0
       ? `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.\nمبلغ ${fa(refund)} تومان تا ۷۲ ساعت آینده بازمی‌گردد.`

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest } from '@/lib/finance/db';
 import { consumeAdQuota, releaseConsumption, attachConsumptionRef } from '@/lib/ads/quota';
 import { normalizeCategory, normalizeCondition } from '@/lib/market/categories';
+import { getSetting } from '@/lib/ads/quota';
 
 /* آگهی‌های بیلیارد بازار — روی سرور، نه در مرورگر کاربر.
 
@@ -120,6 +121,8 @@ export async function POST(req: NextRequest) {
   const disc = old > price ? Math.round((1 - price / old) * 100) : 0;
   const images = Array.isArray(b?.images) ? (b.images as string[]).slice(0, 8) : [];
 
+  const approvalRequired = await getSetting<boolean>('market_approval_required', false);
+
   const { data, error } = await sb().from('products').insert({
     title,
     description: str(b?.description, 3000),
@@ -131,12 +134,21 @@ export async function POST(req: NextRequest) {
     discountPercent: negotiable ? 0 : disc,
     category,
     condition: normalizeCondition(str(b?.condition, 20)),
-    status: 'active',
+    /* ── بازبینیِ پیش از انتشار ──
+       پیش‌فرض خاموش است و آگهی مثل امروز بی‌درنگ منتشر می‌شود.
+       با روشن‌شدنِ `market_approval_required` هر آگهیِ تازه `pending`
+       می‌ماند تا ادمین تأییدش کند.
+
+       کلید در دیتابیس است نه در کد، چون این تصمیمِ کسب‌وکاری است و
+       عوض‌کردنش نباید دیپلوی بخواهد. */
+    status: approvalRequired ? 'pending' : 'active',
     city: str(b?.city, 60),
     province: str(b?.province, 60),
     stock: 1,
     images,
     video: str(b?.video, 500) || null,
+    /* برند تمیز می‌شود ولی به فهرست اجبار نمی‌شود: بازارِ دستِ‌دوم
+       پر از برندِ محلی است و اجبار یعنی همه «متفرقه» می‌زنند. */
     brand: str(b?.brand, 80),
     model: str(b?.model, 80),
     type: str(b?.type, 80),
@@ -168,5 +180,12 @@ export async function POST(req: NextRequest) {
 
   if (gate.consumptionId && data?.id) await attachConsumptionRef(gate.consumptionId, String(data.id));
 
-  return NextResponse.json({ ad: data, quota: { used: gate.used, limit: gate.limit } }, { status: 201 });
+  return NextResponse.json({
+    ad: data,
+    pending: approvalRequired,
+    message: approvalRequired
+      ? 'آگهی شما ثبت شد و پس از بررسی منتشر می‌شود.'
+      : 'آگهی شما منتشر شد.',
+    quota: { used: gate.used, limit: gate.limit },
+  }, { status: 201 });
 }

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, actorFromRequest, clientIp } from '@/lib/finance/db';
+import { notifyReportCreated } from '@/lib/notify';
 
 /* ثبت گزارش تخلف — مثل دیوار: هر کاربر می‌تواند یک آگهی/محتوا را
    با دلیل مشخص گزارش کند و ادمین در پنل خودش بررسی می‌کند. */
@@ -66,6 +67,15 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ message: 'ثبت گزارش انجام نشد' }, { status: 500 });
   }
+
+  /* ادمین بی‌درنگ خبردار می‌شود. `await` عمدی است: روی سرورلسِ
+     Vercel کارِ رهاشده بعد از پاسخ ممکن است هرگز اجرا نشود، و خودِ
+     تابع هر خطایی را می‌بلعد پس تأخیرش ناچیز و بی‌خطر است. */
+  await notifyReportCreated({
+    targetType,
+    targetTitle: String(body?.targetTitle || '').slice(0, 300) || null,
+    reasonLabel: reason.label,
+  });
 
   return NextResponse.json({ ok: true, message: 'گزارش شما ثبت شد و بررسی خواهد شد.' }, { status: 201 });
 }

@@ -50,6 +50,37 @@ async function nameOf(userId: string): Promise<string> {
   return `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
 }
 
+/* ── گزارشِ تخلف ────────────────────────────────────────────────
+   تا امروز گزارش فقط در جدول می‌نشست و ادمین تنها وقتی خبردار می‌شد
+   که خودش سراغِ صفحه‌ی گزارش‌ها می‌رفت. برای آگهیِ کلاهبرداری، آن
+   فاصله همان مدتی است که آگهی روی سایت می‌ماند.
+
+   شماره از تنظیماتِ `report_alert_phone` خوانده می‌شود، نه از کد:
+   شماره‌ی ادمین عوض می‌شود و نباید دیپلوی بخواهد. خالی بودنش یعنی
+   «پیامک نفرست» و هیچ خطایی نمی‌دهد. */
+export async function notifyReportCreated(input: {
+  targetType: string
+  targetTitle: string | null
+  reasonLabel: string
+}): Promise<void> {
+  try {
+    const { data } = await sb().from('app_settings')
+      .select('value').eq('key', 'report_alert_phone').maybeSingle()
+    const raw = (data as { value?: unknown } | null)?.value
+    const phone = typeof raw === 'string' ? raw.trim() : ''
+    if (!phone) return
+
+    const KIND: Record<string, string> = {
+      product: 'آگهی', club: 'باشگاه', user: 'کاربر', media: 'ویدیو', ad: 'تبلیغ',
+    }
+    notify(phone, SMS.reportCreated(
+      KIND[input.targetType] ?? 'محتوا',
+      input.targetTitle ?? '',
+      input.reasonLabel,
+    ))
+  } catch { /* اطلاع‌رسانی هرگز نباید ثبتِ گزارش را بشکند */ }
+}
+
 /** رزرو قطعی شد — به کاربر، و خبر رزرو جدید به باشگاه‌دار */
 export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   const b = await loadBooking(bookingId)
