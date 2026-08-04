@@ -41,6 +41,35 @@ export default function AdminReports() {
   const [busy, setBusy] = useState('')
   const [note, setNote] = useState<Record<string, string>>({})
 
+  /* شماره‌ی هشدار — در تنظیماتِ سرور، نه در کد: شماره‌ی ادمین عوض
+     می‌شود و نباید دیپلوی بخواهد. */
+  const [alertPhone, setAlertPhone] = useState('')
+  const [phoneDraft, setPhoneDraft] = useState('')
+  const [savingPhone, setSavingPhone] = useState(false)
+
+  useEffect(() => {
+    void apiFetch('/api/admin/settings', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        const v = j?.settings?.report_alert_phone
+        const s = typeof v === 'string' ? v : ''
+        setAlertPhone(s); setPhoneDraft(s)
+      })
+      .catch(() => { })
+  }, [])
+
+  const savePhone = async () => {
+    setSavingPhone(true); setErr('')
+    try {
+      const r = await apiFetch('/api/admin/settings', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report_alert_phone: phoneDraft.trim() }),
+      })
+      if (!r.ok) { setErr('ذخیره‌ی شماره انجام نشد'); return }
+      setAlertPhone(phoneDraft.trim())
+    } catch { setErr('خطا در ارتباط با سرور') } finally { setSavingPhone(false) }
+  }
+
   const load = useCallback(async () => {
     try {
       const r = await apiFetch(`/api/admin/reports?status=${encodeURIComponent(status)}`, {
@@ -76,6 +105,42 @@ export default function AdminReports() {
             {toFaDigits(counts.OPEN)} گزارش بررسی‌نشده
           </span>
         ) : null}
+      </div>
+
+      {/* ── هشدارِ پیامکی ──
+          بدونِ شماره، ادمین فقط وقتی خبردار می‌شود که خودش این صفحه را
+          باز کند. برای آگهیِ کلاهبرداری، آن فاصله همان مدتی است که
+          آگهی روی سایت می‌ماند. */}
+      <div style={{
+        display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap',
+        border: `1px solid ${LINE}`, borderRadius: 14, padding: '12px 15px', marginBottom: 16,
+        background: alertPhone ? 'rgba(14,122,56,0.04)' : '#FAFAF7',
+      }}>
+        <span style={{ fontSize: 12.5, fontWeight: 800, color: SEC, whiteSpace: 'nowrap' }}>
+          پیامک هشدار به:
+        </span>
+        <input value={phoneDraft} onChange={e => setPhoneDraft(e.target.value.replace(/[^0-9]/g, '').slice(0, 15))}
+          placeholder="۰۹۱۲۳۴۵۶۷۸۹ — خالی یعنی پیامک نفرست"
+          style={{
+            flex: 1, minWidth: 190, border: `1px solid ${LINE}`, borderRadius: 10,
+            padding: '8px 12px', fontSize: 13, fontFamily: 'inherit', background: '#fff',
+            direction: 'ltr', textAlign: 'left', color: INK,
+          }} />
+        {phoneDraft !== alertPhone && (
+          <button onClick={() => void savePhone()} disabled={savingPhone}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 10, cursor: 'pointer',
+              border: '1px solid rgba(199,166,106,0.34)', background: 'rgba(199,166,106,0.12)',
+              color: GOLD_D, fontSize: 12.5, fontWeight: 800, fontFamily: 'inherit', padding: '8px 14px',
+            }}>
+            {savingPhone ? <Loader2 size={13} className="animate-spin" /> : null} ذخیره
+          </button>
+        )}
+        {!alertPhone && (
+          <span style={{ fontSize: 11, color: MUT, lineHeight: 1.8 }}>
+            الان فقط نشانِ داشبورد کار می‌کند.
+          </span>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 4, marginBottom: 16 }}>

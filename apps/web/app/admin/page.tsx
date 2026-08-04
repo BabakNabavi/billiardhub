@@ -16,7 +16,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
-  CalendarDays, Flag, Package, LifeBuoy, UserPlus,
+  CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -73,7 +73,8 @@ const SECTIONS: AdminSection[] = [
     items: [
       { title: 'تأیید باشگاه‌ها', desc: 'بررسی جواز کسب و صدور تأیید رسمی', icon: <Building2 size={20} />, link: '/admin/clubs' },
       { title: 'تأیید فروشگاه‌ها', desc: 'بررسی و انتشار فروشگاه‌های ثبت‌شده', icon: <Store size={20} />, link: '/admin/sellers' },
-      { title: 'تأیید محصولات', desc: 'بررسی محصولات بیلیارد بازار', icon: <ShoppingBag size={20} />, link: '/admin/products' },
+      { title: 'آگهی‌های بیلیارد بازار', desc: 'بررسی، انتشار، رد و توقف آگهی‌ها', icon: <ShoppingBag size={20} />, link: '/admin/products' },
+      { title: 'برندهای بازار', desc: 'برندهای مجاز و پیشنهادهای تازه‌ی فروشنده‌ها', icon: <Tag size={20} />, link: '/admin/brands' },
       { title: 'تولیدکنندگان', desc: 'مدیریت پروفایل تولیدکنندگان', icon: <Factory size={20} />, link: '/admin/manufacturers' },
       { title: 'متخصصان فنی', desc: 'تأیید متخصصان خدمات فنی', icon: <Wrench size={20} />, link: '/admin/technicians' },
       /* این صفحه از قبل ساخته شده بود ولی هیچ‌جا لینک نداشت، پس عملاً
