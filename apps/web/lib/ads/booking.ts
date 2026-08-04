@@ -65,7 +65,12 @@ export async function eligibleFor(userId: string): Promise<Eligibility> {
   }
 
   const roles = await verifiedRolesOfPerson(lookup.personId)
-  const paid = (await listPlacements()).filter(p => p.mode === 'paid')
+  /* فقط جایگاهی که هم پولی است و هم روشن، خریدنی است.
+
+     `isActive` تا امروز این‌جا بررسی نمی‌شد: جایگاهِ خاموش در فهرستِ
+     خرید می‌آمد، کاربر تا درگاه می‌رفت و آن‌جا `reserve_campaign_slot`
+     با PLACEMENT_INACTIVE ردش می‌کرد — یعنی خطا در بدترین لحظه. */
+  const paid = (await listPlacements()).filter(p => p.mode === 'paid' && p.isActive)
 
   const allowed = paid.filter(p => roles.some(r => rolesFor(p).includes(r)))
 

@@ -41,7 +41,20 @@ export async function GET(req: NextRequest) {
      پولی‌شدن یک جایگاه هیچ جایگاه دیگری را قابل خرید نمی‌کند. */
   if (sp.get('catalog') === '1') {
     try {
-      const paid = (await listPlacements()).filter(p => p.mode === 'paid');
+      /* ── چه چیزی در کاتالوگ می‌آید ──
+         تا امروز فقط جایگاه‌های `paid` برمی‌گشتند. نتیجه‌اش این بود که
+         «تبلیغِ پیش‌پخشِ بیلیارد مدیا» — که حالتش `manual` است — نه در
+         فهرستِ خرید دیده می‌شد و نه حتی در کشوی «درخواست تبلیغ
+         سفارشی». یعنی کاربری که می‌خواست برای کلیپ‌ها تبلیغ بگذارد،
+         هیچ راهی برای گفتنش نداشت.
+
+         حالا همه‌ی جایگاه‌ها برمی‌گردند با نشانِ `sellable`:
+           · تبِ «خرید جایگاه» فقط فروختنی‌ها را نشان می‌دهد
+           · کشوی «درخواست سفارشی» همه را نشان می‌دهد
+         جایگاهِ رایگان بیرون می‌ماند — محتوایش از خودِ سایت می‌آید و
+         فروختنی نیست. */
+      const all = (await listPlacements()).filter(p => p.mode !== 'free');
+      const paid = all;
       const plans = paid.length ? await listPricingPlans(true) : [];
       /* ظرفیتِ آزاد کنارِ قیمت می‌آید تا کارتِ خرید بتواند «پر شده» را
          پیش از کلیک نشان دهد. `free = -1` یعنی جایگاه سقفی ندارد. */
@@ -57,6 +70,9 @@ export async function GET(req: NextRequest) {
           free: avail.get(p.key) ?? -1,
           key: p.key, title: p.title, description: p.description,
           mode: p.mode, price: p.price, durationDays: p.durationDays, isActive: p.isActive,
+          /* فروختنی = پولی و روشن. جایگاهی که هنوز باز نشده در کشوی
+             «درخواست سفارشی» می‌ماند تا کاربر بتواند بخواهدش. */
+          sellable: p.mode === 'paid' && p.isActive,
           /* جایگاهِ ویدیویی فایل می‌خواهد نه متن؛ فرم باید بداند و
              سقفِ مدت را هم به کاربر بگوید تا بعد از آپلود رد نشود. */
           contentKind: p.contentKind,

@@ -55,6 +55,9 @@ interface Slot {
   key: string; title: string; description: string | null; plans?: PlanTier[]
   /* جایگاهِ ویدیویی (پیش‌پخش) فایل می‌خواهد، نه فقط متن */
   contentKind?: string
+  /* فروختنی = پولی و روشن. جایگاهی که هنوز باز نشده فقط در کشوی
+     درخواستِ سفارشی می‌آید. */
+  sellable?: boolean
   skipAfterSec?: number | null
   maxDurationSec?: number | null
 }
