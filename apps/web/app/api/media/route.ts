@@ -5,6 +5,7 @@ import { actorOf, UNAUTHENTICATED, FORBIDDEN } from '@/lib/auth/ownership'
 import { hitRateLimit, tooMany } from '@/lib/auth/rate-limit'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { listPublic, makeSlug, toPublic, type VideoRow } from '@/lib/media/server'
+import { keyFromUrl } from '@/lib/media/storage'
 
 /* ─────────────────────────────────────────────────────────────
    ویدیوهای بیلیارد مدیا.
@@ -83,6 +84,14 @@ export async function POST(req: NextRequest) {
     club_id: v.clubId ? String(v.clubId) : null,
     src,
     thumb: String(v.thumb ?? ''),
+    /* کلیدِ فایل جدا از نشانی ذخیره می‌شود.
+
+       نشانیِ مطلق نامِ ارائه‌دهنده و باکت را در ردیف می‌پزد؛ با کلید،
+       جابه‌جاییِ آینده‌ی فایل‌ها یک تغییرِ تابع است نه جراحی روی رشته‌ی
+       هر ردیف. `null` اگر نشانی از این پروژه نباشد. */
+    storage_provider: 'supabase',
+    storage_key: keyFromUrl(src),
+    thumb_key: keyFromUrl(String(v.thumb ?? '')),
     /* متادیتای واقعی اگر کلاینت استخراج کرده باشد؛ وگرنه NULL.
        صفر گذاشته نمی‌شود — در داده‌ی ساختاریافته‌ی گوگل، «۰ ثانیه»
        دروغ است ولی «نداریم» فقط یک فیلدِ نیامده. */
@@ -118,9 +127,12 @@ export async function DELETE(req: NextRequest) {
   if (!slug && !id) return NextResponse.json({ ok: false }, { status: 400, headers: CORS })
 
   const sb = getSupabaseServer()
-  const sel = sb.from('videos').select('id,owner_id,src,thumb')
+  const sel = sb.from('videos').select('id,owner_id,src,thumb,storage_key,thumb_key')
   const { data } = await (slug ? sel.eq('slug', slug) : sel.eq('id', id)).maybeSingle()
-  const target = data as { id: string; owner_id: string | null; src: string; thumb: string } | null
+  const target = data as {
+    id: string; owner_id: string | null; src: string; thumb: string
+    storage_key: string | null; thumb_key: string | null
+  } | null
   if (!target) return NextResponse.json({ ok: true }, { headers: CORS })   // چیزی برای حذف نیست
 
   if (target.owner_id !== actor.id && !actor.isAdmin) {
@@ -136,17 +148,19 @@ export async function DELETE(req: NextRequest) {
   /* فایل‌ها هم می‌روند — وگرنه انبارِ فایلِ مرده دوباره پر می‌شود.
      شکستش پاسخ را خراب نمی‌کند؛ `scripts/orphan-report.mjs` بعداً
      هرچه جا مانده را نشان می‌دهد. */
-  void removeFiles([target.src, target.thumb])
+  /* کلید ترجیح دارد بر تجزیه‌ی نشانی: نشانی می‌تواند پارامترِ اضافه یا
+     رمزگذاریِ متفاوت داشته باشد، کلید همان چیزی است که در باکت نشسته. */
+  void removeFiles([
+    target.storage_key ?? keyFromUrl(target.src),
+    target.thumb_key ?? keyFromUrl(target.thumb),
+  ])
 
   return NextResponse.json({ ok: true }, { headers: CORS })
 }
 
-const PUB = '/storage/v1/object/public/club-media/'
-async function removeFiles(urls: (string | undefined)[]) {
+async function removeFiles(keys: (string | null | undefined)[]) {
   const paths = [...new Set(
-    urls.filter((u): u is string => typeof u === 'string' && u.includes(PUB))
-      .map(u => decodeURIComponent(u.slice(u.indexOf(PUB) + PUB.length).split('?')[0]!))
-      .filter(p => p.startsWith('social/media/')),
+    keys.filter((k): k is string => typeof k === 'string' && k.startsWith('social/media/')),
   )]
   if (!paths.length) return
   try { await getSupabaseServer().storage.from('club-media').remove(paths) }

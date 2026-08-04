@@ -1,4 +1,5 @@
 import { getSupabaseServer } from '../supabase-server'
+import { resolveUrl, type StorageProvider } from './storage'
 
 /* ─────────────────────────────────────────────────────────────
    بیلیارد مدیا — لایه‌ی داده.
@@ -38,6 +39,11 @@ export interface VideoRow {
   created_at: string
   updated_at: string
   published_at: string | null
+  /* از مهاجرتِ ۰۵۰ — کلیدِ فایل بدونِ دامنه. `src`/`thumb` برای
+     ردیف‌های قدیمی می‌مانند. */
+  storage_provider?: StorageProvider
+  storage_key?: string | null
+  thumb_key?: string | null
 }
 
 /** شکلی که به مرورگر می‌رود — بدونِ شناسه‌ی مالک و یادداشتِ داخلی. */
@@ -61,11 +67,18 @@ export interface PublicVideo {
 }
 
 export function toPublic(r: VideoRow): PublicVideo {
+  /* نشانی از کلید ساخته می‌شود، نه از ستونِ نشانی. یعنی جابه‌جاییِ
+     آینده‌ی فایل‌ها فقط یک تغییر در `publicUrlFor` است، نه دست‌کاریِ
+     رشته در همه‌ی ردیف‌ها. ردیف‌های بدونِ کلید همان نشانیِ قدیمی را
+     می‌گیرند. */
+  const provider = r.storage_provider ?? 'supabase'
   return {
     slug: r.slug, title: r.title, description: r.description,
     category: r.category, tags: r.tags ?? [],
     creatorName: r.creator_name, creatorHandle: r.creator_handle,
-    clubId: r.club_id, src: r.src, thumb: r.thumb,
+    clubId: r.club_id,
+    src: resolveUrl(r.storage_key, r.src, provider),
+    thumb: resolveUrl(r.thumb_key, r.thumb, provider),
     durationSec: r.duration_sec, width: r.width, height: r.height,
     views: r.views, publishedAt: r.published_at, featured: r.featured,
   }
@@ -101,6 +114,7 @@ const sb = () => getSupabaseServer()
    بیست کارت. صفحه‌ی تماشا خودش کاملش را می‌گیرد. */
 const LIST_COLS =
   'slug,title,category,tags,creator_name,creator_handle,club_id,thumb,src,' +
+  'storage_provider,storage_key,thumb_key,' +
   'duration_sec,width,height,views,published_at,featured'
 
 export interface ListOpts {

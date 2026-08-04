@@ -46,6 +46,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   const cat = mediaCategoryOf(v.category as MediaCategoryKey)
   const url = absoluteUrl(`/media/${v.slug}`)
+  /* از کلید، نه از ستونِ نشانی — همان دلیلِ بالا */
+  const p = toPublic(v)
   /* توضیحِ متا از توضیحِ خودِ ویدیو می‌آید. اگر کاربر توضیحی ننوشته
      باشد، جمله‌ای از روی داده‌ی واقعی ساخته می‌شود — نه متنِ پرکننده‌ی
      بی‌معنی برای موتورِ جست‌وجو. */
@@ -67,14 +69,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url,
       siteName: 'بیلیارد هاب',
       locale: 'fa_IR',
-      images: v.thumb ? [{ url: v.thumb }] : undefined,
-      videos: v.src ? [{ url: v.src, type: v.mime ?? 'video/mp4' }] : undefined,
+      images: p.thumb ? [{ url: p.thumb }] : undefined,
+      videos: p.src ? [{ url: p.src, type: v.mime ?? 'video/mp4' }] : undefined,
     },
     twitter: {
       card: 'player',
       title: v.title,
       description: desc,
-      images: v.thumb ? [v.thumb] : undefined,
+      images: p.thumb ? [p.thumb] : undefined,
     },
   }
 }
@@ -98,6 +100,13 @@ export default async function WatchPage({ params }: Params) {
 
   const related = await relatedTo(v, 8)
   const cat = mediaCategoryOf(v.category as MediaCategoryKey)
+
+  /* نشانی‌ها همه‌جا از کلید ساخته می‌شوند — هم در متادیتا، هم در
+     داده‌ی ساختاریافته، هم در پلیر. یعنی جابه‌جاییِ آینده‌ی فایل‌ها
+     هیچ‌کدام را نمی‌شکند. */
+  const pub = toPublic(v)
+  const srcUrl = pub.src
+  const thumbUrl = pub.thumb
 
   /* شکلی که کامپوننتِ نمایش می‌فهمد */
   const asMedia = (p: ReturnType<typeof toPublic>): MediaVideo => ({
@@ -126,14 +135,14 @@ export default async function WatchPage({ params }: Params) {
     name: v.title,
     description: plain(v.description, 500) || v.title,
     url,
-    contentUrl: v.src,
+    contentUrl: srcUrl,
     publisher: {
       '@type': 'Organization',
       name: 'بیلیارد هاب',
       url: SITE_URL,
     },
   }
-  if (v.thumb) videoLd.thumbnailUrl = [v.thumb]
+  if (thumbUrl) videoLd.thumbnailUrl = [thumbUrl]
   if (v.published_at) videoLd.uploadDate = v.published_at
   const dur = iso8601(v.duration_sec)
   if (dur) videoLd.duration = dur

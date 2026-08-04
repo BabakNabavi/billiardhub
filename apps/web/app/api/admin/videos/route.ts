@@ -4,6 +4,7 @@ import { actorFromRequest, audit, clientIp } from '@/lib/finance/db'
 import { can } from '@/lib/admin/permissions'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { makeSlug, type VideoRow } from '@/lib/media/server'
+import { keyFromUrl } from '@/lib/media/storage'
 
 /* ─────────────────────────────────────────────────────────────
    مدیریتِ ویدیوها — پنلِ ادمین.
@@ -152,8 +153,12 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ message: 'ویدیو مشخص نیست' }, { status: 400 })
 
   const sb = getSupabaseServer()
-  const { data } = await sb.from('videos').select('id,slug,title,src,thumb').eq('id', id).maybeSingle()
-  const v = data as { id: string; slug: string; title: string; src: string; thumb: string } | null
+  const { data } = await sb.from('videos')
+    .select('id,slug,title,src,thumb,storage_key,thumb_key').eq('id', id).maybeSingle()
+  const v = data as {
+    id: string; slug: string; title: string; src: string; thumb: string
+    storage_key: string | null; thumb_key: string | null
+  } | null
   if (!v) return NextResponse.json({ message: 'ویدیو پیدا نشد' }, { status: 404 })
 
   const { error } = await sb.from('videos').delete().eq('id', id)
@@ -162,12 +167,10 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ message: 'حذف انجام نشد' }, { status: 500 })
   }
 
-  /* فایل‌ها هم می‌روند — وگرنه انبارِ فایلِ مرده دوباره پر می‌شود */
-  const PUB = '/storage/v1/object/public/club-media/'
-  const paths = [v.src, v.thumb]
-    .filter(u => typeof u === 'string' && u.includes(PUB))
-    .map(u => decodeURIComponent(u.slice(u.indexOf(PUB) + PUB.length).split('?')[0]!))
-    .filter(p => p.startsWith('social/media/'))
+  /* فایل‌ها هم می‌روند — وگرنه انبارِ فایلِ مرده دوباره پر می‌شود.
+     کلید ترجیح دارد بر تجزیه‌ی نشانی. */
+  const paths = [v.storage_key ?? keyFromUrl(v.src), v.thumb_key ?? keyFromUrl(v.thumb)]
+    .filter((p): p is string => !!p && p.startsWith('social/media/'))
   if (paths.length) { try { await sb.storage.from('club-media').remove(paths) } catch { /* بی‌اهمیت */ } }
 
   void audit({
