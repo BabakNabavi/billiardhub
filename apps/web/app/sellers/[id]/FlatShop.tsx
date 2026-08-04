@@ -3,7 +3,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { toFa, faNum, MONO, toggleSet, Icon, LQ, LQ_NEUTRAL, LQ_FELT_ON } from './shared'
-import { productsBySeller } from '../../shop/products'
+import { fetchProductsBySeller, type ShopProduct } from '../../shop/products'
 import ClubStoryModal from '../../../components/ClubStoryModal'
 import { getSellerProfile, type SellerProfile } from '../../../lib/seller-store'
 import { fetchProfile } from '../../../lib/profiles/client'
@@ -66,8 +66,8 @@ const STORE = {
 }
 
 /* محصولات یک فروشنده (به شکل کارت) — بر اساس id همان فروشگاه */
-function productsForSeller(sellerId: string): Product[] {
-  return productsBySeller(sellerId).map(sp => ({
+function productsForSeller(rows: ShopProduct[]): Product[] {
+  return rows.map(sp => ({
     id: String(sp.id),
     name: sp.name,
     cat: sp.cat as CatKey,
@@ -286,13 +286,18 @@ export default function FlatShop() {
 
   /* محصولات همین فروشگاه؛ فروشگاه نمونه که محصول اختصاصی ندارد، کاتالوگ دمو را نشان می‌دهد
      تا storefront خالی نماند. */
-  const PRODUCTS = useMemo(() => {
-    /* پیش‌تر فروشگاهِ بی‌محصول، محصولاتِ فروشگاهِ «۱» را نشان می‌داد.
-       یعنی کالای یک فروشنده زیر نامِ فروشنده‌ی دیگری فهرست می‌شد —
-       نسبت‌دادنِ نادرستِ کالا، نه صرفاً یک پیش‌فرضِ ظاهری. فروشگاهِ
-       بی‌محصول باید خالی بماند. */
-    return productsForSeller(sellerId)
+  /* محصولات از سرور می‌آیند، نه از کاتالوگِ ساختگی.
+
+     پیش‌تر فروشگاهِ بی‌محصول، محصولاتِ فروشگاهِ «۱» را نشان می‌داد —
+     کالای یک فروشنده زیر نامِ فروشنده‌ی دیگر. فروشگاهِ بی‌محصول باید
+     خالی بماند، و حالا واقعاً می‌ماند. */
+  const [rows, setRows] = useState<ShopProduct[]>([])
+  useEffect(() => {
+    let alive = true
+    void fetchProductsBySeller(sellerId).then(r => { if (alive) setRows(r) })
+    return () => { alive = false }
   }, [sellerId])
+  const PRODUCTS = useMemo(() => productsForSeller(rows), [rows])
 
   /* فقط فیلدهای پرشده جای پیش‌فرض را می‌گیرند — یک فیلد خالی نباید صفحه را خالی کند */
   const store = useMemo(() => {

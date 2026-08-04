@@ -9,9 +9,7 @@
      دسته‌ها/فیلترها، قیمت از-تا، زمان انتشار) ولی با هویت بصری
      بیلیارد هاب و کارت‌های «عمودی» همان فرمت فعلی بازار.
    ● دیتا از منابع موجود:
-     - محصولات: SHOP_PRODUCTS از app/shop/products.ts (منبع واحد)
-       + آگهی‌های کاربر از localStorage «userProducts»
-     - شهر فروشنده‌های نمونه: MOCK_SELLERS از lib/sellers-data
+     - محصولات: فقط از سرور (/api/market/ads) — هیچ کاتالوگ ثابتی نیست
      - شهرها: lib/iran-geo (getProvinceNames/getCities) — طبق قانون پروژه
    ● CATS_M آینه‌ی دقیق CATS صفحه‌ی /shop است (آن‌جا local است و
      export نشده؛ برای دست‌نزدن به صفحه‌ی فعلی این‌جا تکرار شده —
@@ -27,8 +25,6 @@ import {
 } from 'lucide-react'
 import ReportButton from '../../components/ReportButton'
 import { apiFetch } from '../../lib/http'
-import { SHOP_PRODUCTS } from './products'
-import { MOCK_SELLERS } from '../../lib/sellers-data'
 import { getProvinceNames, getCities } from '../../lib/iran-geo'
 
 const GOLD   = '#C7A66A'
@@ -89,7 +85,6 @@ interface Listing {
 }
 
 /* شهر فروشنده‌های نمونه از lib/sellers-data (id → city) */
-const sellerCity = (sellerId: string) => MOCK_SELLERS.find(s => s.id === sellerId)?.city ?? ''
 
 /* ── آگهی‌های واقعی از سرور ────────────────────────────────────────
    تا پیش از این، آگهی‌ها فقط در localStorage مرورگر خود آگهی‌دهنده
@@ -163,35 +158,6 @@ async function migrateLocalAds(): Promise<void> {
   } catch { /* ignore */ }
 }
 
-function catalogListings(): Listing[] {
-  return SHOP_PRODUCTS.map(p => ({
-    key: `s-${p.id}`, id: p.id, name: p.name, img: p.img, brand: p.brand,
-    price: p.price, old: p.old, disc: p.disc, cat: normCat(p.cat),
-    city: sellerCity(p.sellerId), condition: 'new' as Cond, createdAt: null, source: 'shop' as const,
-  }))
-}
-
-function loadListings(): Listing[] {
-  const base: Listing[] = SHOP_PRODUCTS.map(p => ({
-    key: `s-${p.id}`, id: p.id, name: p.name, img: p.img, brand: p.brand,
-    price: p.price, old: p.old, disc: p.disc, cat: normCat(p.cat),
-    city: sellerCity(p.sellerId), condition: 'new', createdAt: null, source: 'shop',
-  }))
-  let user: Listing[] = []
-  try {
-    const stored = JSON.parse(localStorage.getItem('userProducts') ?? '[]')
-    if (Array.isArray(stored)) {
-      user = stored.map((p: any) => ({
-        key: `u-${p.id}`, id: p.id, name: p.name || 'محصول', img: p.img || (Array.isArray(p.images) ? p.images[0] : ''),
-        brand: p.brand || '', price: Number(p.price) || 0, old: Number(p.old) || Number(p.price) || 0,
-        disc: Number(p.disc) || 0, cat: normCat(p.category),
-        city: p.sellerCity || '', condition: (['new', 'like_new', 'used'].includes(p.condition) ? p.condition : 'new') as Cond,
-        createdAt: typeof p.id === 'number' && p.id > 1e12 ? p.id : null, source: 'user',
-      }))
-    }
-  } catch { /* ignore */ }
-  return [...user, ...base]
-}
 
 /* ── کارت محصول — همان فرمت عمودی کارت‌های فعلی بازار (ایزوله) ── */
 function MarketCard({ l, i, saved, onSave }: { l: Listing; i: number; saved: boolean; onSave: () => void }) {
@@ -368,16 +334,20 @@ export default function MarketNewPage() {
   const mCityRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    /* کاتالوگ نمونه فوراً نمایش داده می‌شود تا صفحه خالی نماند،
-       بعد آگهی‌های واقعی سرور جایگزین بخش کاربران می‌شوند. */
-    setListings(loadListings())
+    /* فهرست فقط از سرور می‌آید.
+
+       پیش‌تر این‌جا یک کاتالوگِ ثابتِ ساختگی فوراً نشان داده می‌شد تا
+       «صفحه خالی نماند» و بعد آگهی‌های واقعی کنارش می‌نشستند. نتیجه
+       این بود که بازدیدکننده محصولی می‌دید که وجود نداشت و روی کارتش
+       که کلیک می‌کرد به فروشنده‌ای می‌رسید که ثبت نشده بود. فهرستِ
+       خالی صادق‌تر از فهرستِ دروغین است. */
     try { setSavedKeys(new Set(JSON.parse(localStorage.getItem('bh_market_saved') ?? '[]'))) } catch {}
-    setReady(true)
 
     void (async () => {
       await migrateLocalAds()
       const server = await fetchServerAds()
-      if (server) setListings([...server, ...catalogListings()])
+      setListings(server ?? [])
+      setReady(true)
     })()
   }, [])
   useEffect(() => {
@@ -626,7 +596,8 @@ export default function MarketNewPage() {
         .mk-mcat .ic img { width: 78%; height: 78%; object-fit: contain; }
         .mk-mcat.on .ic { border-color: rgba(199,166,106,0.55); box-shadow: 0 0 0 3px rgba(199,166,106,0.14); background: rgba(199,166,106,0.08); }
         .mk-mcat:active .ic { transform: scale(0.93); }
-        .mk-mcat .lb { font-size: 11px; font-weight: 700; color: ${SEC}; }
+        /* ۵٪ بزرگ‌تر از ۱۱px به‌خواستِ کاربر — ۱۱٫۵۵ گرد شده به ۱۱٫۶ */
+        .mk-mcat .lb { font-size: 11.6px; font-weight: 700; color: ${SEC}; }
         .mk-mcat.on .lb { color: ${GOLD_D}; font-weight: 800; }
 
         /* ── ردیف افقی موبایل (به سبک دیوار، با هویت بازار) ── */

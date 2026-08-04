@@ -77,6 +77,26 @@ export default async function HomePage() {
         type="image/webp"
         fetchPriority="high"
       />
+      {/* پس‌زمینه‌ی تیره‌ی زیرِ نوار بالا.
+
+          نوار بالا در صفحه‌ی اصلی عمداً شفاف است و متنش سفید، چون
+          قرار است روی هیروی تیره بنشیند. ولی پس‌زمینه‌ی <body> کرم
+          (#F7F7F5) است و بلوکِ هیرو در HTML خیلی پایین‌تر از نوار
+          می‌آید؛ تا وقتی هیرو رنگ نگرفته، آنچه از پشتِ نوارِ شفاف
+          دیده می‌شود همان کرم است — یعنی نوار یک لحظه سفید می‌شود و
+          بعد رنگِ هیرو را می‌گیرد.
+
+          این لایه همان رنگِ بومِ هیرو را از همان اولِ <main> روی
+          بالای صفحه می‌نشاند. `z-index:-1` یعنی بالای پس‌زمینه‌ی
+          body ولی زیرِ همه‌ی محتوا، پس به‌محضِ رسیدنِ خودِ هیرو
+          کاملاً پوشانده می‌شود و هیچ‌جای دیگری را تغییر نمی‌دهد. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, height: '100dvh',
+          background: '#04020A', zIndex: -1, pointerEvents: 'none',
+        }}
+      />
       <HomeClient
         initialPlacements={initialPlacements}
         initialFeatured={featured.status === 'fulfilled' ? featured.value : EMPTY_FEATURED}

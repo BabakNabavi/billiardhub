@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { listApprovedSellers, type SellerProfile } from '../../lib/seller-store'
 import { fetchProfiles } from '../../lib/profiles/client'
 import type { MockSeller } from '../../lib/sellers-data'
-import { productsBySeller } from '../shop/products'
 
 const GOLD     = '#C7A66A'
 const GOLD_D   = '#9A6E38'
@@ -147,7 +146,10 @@ function profileToSeller(p: SellerProfile): typeof SELLERS[0] {
     elite: false,
     rating: 5,
     reviewCount: 0,
-    productCount: productsBySeller(p.slug).length,
+    /* شمارِ محصول پیش‌تر از کاتالوگِ ساختگی می‌آمد و برای هر فروشگاهِ
+       واقعی عددِ فروشگاهِ نمونه را نشان می‌داد. تا وقتی شمارِ واقعی از
+       سرور نیامده، عددی نشان داده نمی‌شود. */
+    productCount: 0,
     since: '۱۴۰۴',
     sinceYear: 1404,
     brands: (p.brands ?? []).filter(b => b.trim()),

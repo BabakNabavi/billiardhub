@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Store, Phone, Heart, ShieldCheck, Truck, ArrowLeftRight } from 'lucide-react'
-import { SHOP_PRODUCTS, CAT_LABELS, type ShopProduct } from '../products'
+import { CAT_LABELS, type ShopProduct } from '../products'
 import ReportButton from '../../../components/ReportButton'
 
 /* ─── tokens (تم بازار: طلایی/برنزی روی کاغذ روشن) ─── */
@@ -88,15 +88,16 @@ function normalizeUserProduct(up: Record<string, unknown>): Detail {
     sellerName:     str(up.sellerName),
     sellerPhone:    str(up.sellerPhone),
     sellerWhatsapp: str(up.sellerWhatsapp),
+    city:           str(up.city),
+    condition:      str(up.condition, 'new'),
+    createdAt:      up.createdAt ? (Date.parse(String(up.createdAt)) || null) : null,
   }
 }
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const staticProduct: ShopProduct | undefined = useMemo(
-    () => SHOP_PRODUCTS.find(p => String(p.id) === String(id)),
-    [id]
-  )
+  /* کاتالوگِ ثابتِ ساختگی برداشته شد؛ هر محصول از سرور می‌آید. */
+  const staticProduct: ShopProduct | undefined = undefined
 
   /* اگر در کاتالوگ نمونه نبود، آگهی را از سرور بخوان (و برای آگهی‌های
      قدیمی که هنوز در همین مرورگر مانده‌اند، از localStorage).
@@ -123,7 +124,7 @@ export default function ProductDetailPage() {
       setChecked(true)
     })()
     return () => { alive = false }
-  }, [id, staticProduct])
+  }, [id])
 
   const product: Detail | undefined = staticProduct ?? userProduct ?? undefined
 
@@ -135,10 +136,9 @@ export default function ProductDetailPage() {
 
   const [wished, setWished] = useState(false)
 
-  const related = useMemo(
-    () => product ? SHOP_PRODUCTS.filter(p => p.cat === product.cat && p.id !== product.id).slice(0, 5) : [],
-    [product]
-  )
+  /* «محصولات مشابه» از همان کاتالوگِ ساختگی می‌آمد. تا وقتی از
+     سرور خوانده نشود، نبودنش بهتر از پرکردنش با محصولِ نبوده است. */
+  const related: ShopProduct[] = []
 
   if (!product) {
     if (!checked) {

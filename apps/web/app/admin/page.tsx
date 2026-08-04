@@ -16,7 +16,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
-  CalendarDays, Flag, Package, LifeBuoy,
+  CalendarDays, Flag, Package, LifeBuoy, UserPlus,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -76,6 +76,10 @@ const SECTIONS: AdminSection[] = [
       { title: 'تأیید محصولات', desc: 'بررسی محصولات بیلیارد بازار', icon: <ShoppingBag size={20} />, link: '/admin/products' },
       { title: 'تولیدکنندگان', desc: 'مدیریت پروفایل تولیدکنندگان', icon: <Factory size={20} />, link: '/admin/manufacturers' },
       { title: 'متخصصان فنی', desc: 'تأیید متخصصان خدمات فنی', icon: <Wrench size={20} />, link: '/admin/technicians' },
+      /* این صفحه از قبل ساخته شده بود ولی هیچ‌جا لینک نداشت، پس عملاً
+         پیدا نمی‌شد. جای درستش همین‌جاست: تنها راهِ افزودنِ مستقیمِ
+         مربی/داور/فروشگاه/تولیدکننده/خدمات فنی/بازیکن توسط ادمین. */
+      { title: 'افزودن محتوای نمایشی', desc: 'ساخت مستقیم مربی، داور، فروشگاه، تولیدکننده، خدمات فنی و بازیکن — با نشان «نمایشی»', icon: <UserPlus size={20} />, link: '/admin/demo-content' },
     ],
   },
   {

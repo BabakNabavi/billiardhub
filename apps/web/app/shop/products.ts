@@ -1,7 +1,19 @@
-/* منبع واحد محصولات بیلیارد بازار — مشترک بین کاتالوگ (/shop)، جزئیات محصول (/shop/[id]) و صفحه‌ی فروشگاه (/sellers/[id]) */
+/* منبع واحد محصولات بیلیارد بازار — مشترک بین کاتالوگ (/shop)،
+   جزئیات محصول (/shop/[id]) و صفحه‌ی فروشگاه (/sellers/[id]).
+
+   تا امروز این فایل یک آرایه‌ی ثابت از محصولاتِ ساختگی بود: چوب
+   Predator، میز Rasson، توپ Aramith… با فروشنده‌های «پروکیو» و
+   «بیلیارد سنتر» که هیچ‌کدام وجودِ خارجی نداشتند. بازدیدکننده روی
+   کارت کلیک می‌کرد و به فروشنده‌ای می‌رسید که نبود.
+
+   حالا محصولات از دیتابیس خوانده می‌شوند — همان مسیری که خودِ
+   فروشنده‌ها با آن آگهی ثبت می‌کنند. اگر فهرست خالی باشد یعنی هنوز
+   محصولی ثبت نشده، و همان درست است؛ محصولِ ساختگی جایش را پر نمی‌کند.
+   برای پرکردنِ فهرست پیش از رونمایی، از پنل ادمین ← «افزودن محتوای
+   نمایشی» استفاده کنید. */
 
 export interface ShopProduct {
-  id: number
+  id: string | number
   cat: string
   img: string
   name: string
@@ -17,26 +29,10 @@ export interface ShopProduct {
   sellerName: string
   sellerPhone: string
   sellerWhatsapp: string
+  city: string
+  condition: string
+  createdAt: number | null
 }
-
-/* دو فروشنده‌ی اصلی — هم‌راستا با صفحات /sellers/1 و /sellers/2 */
-const S1 = { sellerId: '1', sellerName: 'پروکیو',        sellerPhone: '021-88221100', sellerWhatsapp: '989121234567' }
-const S2 = { sellerId: '2', sellerName: 'بیلیارد سنتر', sellerPhone: '021-88997766', sellerWhatsapp: '989361234567' }
-
-export const SHOP_PRODUCTS: ShopProduct[] = [
-  { id: 1,  cat: 'cue',      img: '/images/shop/cue_billiard_2.webp',  name: 'چوب حرفه‌ای Predator 314³',            brand: 'Predator', desc: 'شفت سه‌تکه‌ی افرای کانادایی با فناوری کاهش انحراف Predator. مناسب بازیکنان جدی پاکت بیلیارد که کنترل اسپین برایشان اولویت است. همراه کاور و گارانتی اصالت.', price: 2800000,  old: 3300000,  disc: 15, rating: 4.8, reviews: 124, sales: 480,  ...S1 },
-  { id: 2,  cat: 'table',    img: '/images/shop/snooker-table.webp',   name: 'میز اسنوکر Dynamo Tournament',          brand: 'Rasson',   desc: 'میز مسابقات ۱۲ فوت با سنگ اسلیت سه‌تکه و کوشن استاندارد مسابقات. نصب و تراز تخصصی در محل توسط تیم فنی فروشنده انجام می‌شود.', price: 45000000, old: 50000000, disc: 10, rating: 5.0, reviews: 38,  sales: 65,   ...S1 },
-  { id: 3,  cat: 'ball',     img: '/images/shop/Ball-1.webp',          name: 'توپ Aramith Pro Cup استاندارد WPBSA',   brand: 'Aramith',  desc: 'ست توپ رزین فنولیک بلژیکی با سریال اصالت کارخانه. استاندارد رسمی مسابقات WPBSA با دوام تا ۸ برابر توپ‌های معمولی.', price: 1200000,  old: 1500000,  disc: 20, rating: 4.7, reviews: 66,  sales: 210,  ...S1 },
-  { id: 4,  cat: 'chalk',    img: '/images/shop/pool_chalk_1.jpg',    name: 'گچ Master Blue Square — ۱۴۴ عددی',     brand: 'Master',   desc: 'کارتن کامل گچ مسترز آبی، انتخاب اول باشگاه‌ها. پوشش یکنواخت و ماندگاری بالا روی تیپ، مناسب مصرف حرفه‌ای و باشگاهی.', price: 180000,   old: 260000,   disc: 31, rating: 4.6, reviews: 210, sales: 1250, ...S1 },
-  { id: 5,  cat: 'rest',     img: '/images/shop/rest-pool.webp',      name: 'رست اسنوکر حرفه‌ای پیچ استنلس',        brand: 'Peradon',  desc: 'رست سر استیل ضدزنگ با اتصال پیچی استاندارد. سازگار با اکثر دسته‌رست‌های موجود در باشگاه‌ها.', price: 450000,   old: 480000,   disc: 6,  rating: 4.5, reviews: 44,  sales: 290,  ...S1 },
-  { id: 6,  cat: 'case-bag', img: '/images/shop/accessori.png',       name: 'کیف چوب بیلیارد دو قسمتی چرم',         brand: 'Predator', desc: 'کیف چرم طبیعی با دو محفظه‌ی مجزا برای شفت و بات، آستر مخملی ضدخش و بند دوشی قابل تنظیم.', price: 850000,   old: 970000,   disc: 12, rating: 4.5, reviews: 33,  sales: 520,  ...S1 },
-  { id: 7,  cat: 'cue',      img: '/images/shop/cue_billiard.webp',    name: 'چوب کربن فایبر Mezz EC7-CF',           brand: 'Mezz',     desc: 'شفت تمام‌کربن با تیپ کامویی اورجینال. سختی و دقت ضربه در کنار وزن ایده‌آل ۱۹ اونس، انتخاب بازیکنان حرفه‌ای.', price: 6500000,  old: 7100000,  disc: 8,  rating: 4.6, reviews: 71,  sales: 260,  ...S1 },
-  { id: 8,  cat: 'ball',     img: '/images/shop/Ball.jpg',            name: 'توپ Cyclop Omega Pool Set',             brand: 'Aramith',  desc: 'ست کامل توپ پاکت بیلیارد Cyclop با رنگ‌بندی شفاف و مقاوم در برابر زردشدگی. مناسب باشگاه و منزل.', price: 950000,   old: 1120000,  disc: 15, rating: 4.4, reviews: 58,  sales: 190,  ...S1 },
-  { id: 9,  cat: 'table',    img: '/images/shop/Home_table.webp',      name: 'میز بیلیارد خانگی — پایه چوب ماسیو',  brand: 'Rasson',   desc: 'میز ۸ فوت خانگی با بدنه‌ی چوب راش و ماهوت ضدآب. طراحی کلاسیک مناسب فضای منزل و دفتر کار، همراه ست کامل بازی.', price: 18000000, old: 19000000, disc: 5,  rating: 4.9, reviews: 27,  sales: 42,   ...S1 },
-  { id: 10, cat: 'chalk',    img: '/images/shop/pool_chalk_2.jpg',    name: 'گچ Predator 1080 Pure — ۵ عددی',       brand: 'Predator', desc: 'گچ سیلیکونی خالص ۱۰۸۰ با چسبندگی فوق‌العاده به تیپ و کمترین پخش گرد. بسته‌ی ۵ عددی اورجینال.', price: 220000,   old: 245000,   disc: 10, rating: 4.5, reviews: 39,  sales: 610,  ...S1 },
-  { id: 11, cat: 'table',    img: '/images/shop/snooker-table-2.webp', name: 'میز اسنوکر Pro-Line ۱۲ فوتی',          brand: 'Rasson',   desc: 'میز اسنوکر سایز کامل مسابقات با فریم فولادی و اسلیت ۴۵ میلی‌متری. مناسب باشگاه‌های حرفه‌ای، با خدمات نصب سراسری.', price: 68000000, old: 75000000, disc: 9,  rating: 4.8, reviews: 46,  sales: 175,  ...S1 },
-  { id: 12, cat: 'table',    img: '/images/shop/Pro_table.webp',       name: 'میز بیلیارد حرفه‌ای پارچه ایتالیایی', brand: 'BCE',      desc: 'میز ۹ فوت پاکت با ماهوت ایتالیایی سرعت‌بالا و جیب‌های چرمی دست‌دوز. تعادل بی‌نقص برای بازی حرفه‌ای و نمایشی.', price: 32000000, old: 36000000, disc: 11, rating: 4.7, reviews: 52,  sales: 88,   ...S1 },
-]
 
 export const CAT_LABELS: Record<string, string> = {
   cue: 'چوب', table: 'میز', ball: 'توپ', tip: 'تیپ', chalk: 'گچ', extension: 'اکستنشن',
@@ -44,4 +40,66 @@ export const CAT_LABELS: Record<string, string> = {
   clothing: 'پوشاک', accessory: 'اکسسوری', other: 'سایر',
 }
 
-export const productsBySeller = (sellerId: string) => SHOP_PRODUCTS.filter(p => p.sellerId === sellerId)
+/* ── نگاشتِ ردیفِ دیتابیس به شکلی که صفحه‌ها می‌شناسند ──
+
+   ستون‌های جدول با نام‌های صفحه یکی نیستند (`title` در برابر `name`،
+   `images[]` در برابر `img`، `discountPrice` در برابر `old`). این نگاشت
+   تنها جایی است که این تفاوت را می‌داند، تا سه صفحه‌ی مصرف‌کننده به
+   اسکیمای جدول گره نخورند.
+
+   قیمتِ نمایشی: اگر تخفیفی هست، `price` قیمتِ خط‌خورده است و
+   `discountPrice` قیمتِ پرداختی. اگر نیست، هر دو یکی‌اند. */
+export function toShopProduct(r: Record<string, unknown>): ShopProduct {
+  const n = (v: unknown) => Number(v) || 0
+  const s = (v: unknown, d = '') => (typeof v === 'string' && v.trim() ? v.trim() : d)
+  const images = Array.isArray(r.images) ? (r.images as unknown[]).map(x => String(x)) : []
+
+  const listed = n(r.price)
+  const off = n(r.discountPrice)
+  const hasDisc = off > 0 && off < listed
+  const pct = n(r.discountPercent) || (hasDisc ? Math.round(((listed - off) / listed) * 100) : 0)
+
+  const created = r.createdAt ? Date.parse(String(r.createdAt)) : NaN
+
+  return {
+    id: String(r.id ?? ''),
+    cat: s(r.category, 'other'),
+    img: images[0] ?? '',
+    name: s(r.title, 'محصول'),
+    desc: s(r.description),
+    brand: s(r.brand),
+    price: hasDisc ? off : listed,
+    old: hasDisc ? listed : listed,
+    disc: hasDisc ? pct : 0,
+    rating: n(r.rating),
+    reviews: n(r.reviewCount),
+    sales: n(r.views),
+    sellerId: s(r.sellerId),
+    sellerName: s(r.sellerName),
+    sellerPhone: s(r.sellerPhone),
+    sellerWhatsapp: s(r.sellerWhatsapp),
+    city: s(r.city),
+    condition: s(r.condition, 'new'),
+    createdAt: Number.isFinite(created) ? created : null,
+  }
+}
+
+/* یک صفحه‌ی بزرگ کافی است: فهرستِ بازار سمتِ کلاینت فیلتر و مرتب
+   می‌شود، پس صفحه‌بندیِ سرور این‌جا فقط سقفِ ایمنی است. */
+export async function fetchShopProducts(limit = 200): Promise<ShopProduct[]> {
+  try {
+    const r = await fetch(`/api/products?limit=${limit}`, { cache: 'no-store' })
+    if (!r.ok) return []
+    const j = await r.json()
+    const rows = Array.isArray(j?.products) ? j.products : []
+    return rows.map((x: Record<string, unknown>) => toShopProduct(x))
+  } catch {
+    return []
+  }
+}
+
+export async function fetchProductsBySeller(sellerId: string): Promise<ShopProduct[]> {
+  if (!sellerId) return []
+  const all = await fetchShopProducts()
+  return all.filter(p => p.sellerId === sellerId)
+}
