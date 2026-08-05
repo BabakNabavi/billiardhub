@@ -14,6 +14,7 @@ import {
 } from '../../../lib/seller-store'
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ClubPicker from '../../../components/ClubPicker'
 import VerificationPrompt from '../../../components/VerificationPrompt'
 import VerificationBadges from '../../../components/VerificationBadges'
 
@@ -303,6 +304,9 @@ export default function SellerDashboard() {
                   onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
                 />
                 <p className={HINT}>شهر کنار آیکون لوکیشن، زیر نام فروشگاه نمایش داده می‌شود.</p>
+              </div>
+              <div className="sm:col-span-2">
+                <ClubPicker />
               </div>
               <div>
                 <label className={LABEL} htmlFor="f-phone">شماره تماس</label>

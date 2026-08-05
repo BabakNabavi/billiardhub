@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
 import type { MfrProduct } from '../../../lib/manufacturers-data'
 import {
@@ -224,6 +225,9 @@ export default function ManufacturerDashboard() {
                   onChange={v => { set('province', v.province); set('city', v.city) }}
                   required
                 />
+              </div>
+              <div className="sm:col-span-2">
+                <ClubPicker />
               </div>
               <div className="sm:col-span-2">
                 <label className={LABEL}>تخصص‌ها (روی کارت نمایش داده می‌شود)</label>

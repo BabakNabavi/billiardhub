@@ -16,6 +16,8 @@ import api from '@/lib/api';
 import { sendOtp as apiSendOtp, verifyOtp as apiVerifyOtp, verifyIdentity as apiVerifyIdentity } from '@/lib/otp-client';
 import { Phone, Lock, User, AlertCircle, ArrowLeft, ArrowRight, Check, Fingerprint, Eye, EyeOff, MessageSquare, ShieldCheck, CalendarDays } from 'lucide-react';
 import { toAuthError } from '../../lib/auth/error-message';
+import { apiFetch } from '@/lib/http';
+import ClubPicker, { type ClubPickerValue } from '@/components/ClubPicker';
 
 type Step = 1 | 2;
 
@@ -72,6 +74,8 @@ export default function RegisterPage() {
   const { setAuth } = useAuthStore();
 
   const [step, setStep] = useState<Step>(1);
+  /* باشگاهِ انتخابی — تا ساخته‌شدنِ حساب فقط این‌جا نگه داشته می‌شود */
+  const [club, setClub] = useState<ClubPickerValue | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [focusKey, setFocusKey] = useState('');
@@ -265,6 +269,21 @@ export default function RegisterPage() {
 
       /* شماره در مرحله‌ی OTP تأیید شده ⇒ کاربر verified است */
       setAuth({ ...data.user, verified: true }, data.token);
+
+      /* عضویت در باشگاه نمی‌تواند همراه فرم برود: پیش از این لحظه
+         حسابی وجود ندارد که عضو شود. پس انتخاب نگه داشته می‌شود و
+         همین‌جا — درست بعد از ساخت حساب و نشست — ثبت می‌شود.
+
+         بی‌صداست و منتظرش نمی‌مانیم: اگر ثبت عضویت شکست بخورد،
+         ثبت‌نام که موفق بوده نباید خطا نشان دهد. کاربر همیشه
+         می‌تواند از پروفایلش انتخاب کند. */
+      if (club?.id) {
+        void apiFetch('/api/clubs/membership', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clubId: club.id }),
+        }).catch(() => { });
+      }
+
       router.push('/dashboard');
     } catch (err: any) {
       /* خطای شبکه دیگر «خطا در ثبت‌نام» گزارش نمی‌شود؛ کاربر می‌فهمد
@@ -533,6 +552,17 @@ export default function RegisterPage() {
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: GOLD, flexShrink: 0, marginTop: 7 }} />
                 نام، نام خانوادگی، کد ملی، تاریخ تولد و شماره موبایل باید متعلق به یک نفر باشد.
               </p>
+
+              {/* باشگاه — اختیاری و بدون ذخیره‌ی آنی: هنوز حسابی وجود
+                  ندارد که عضو شود. انتخاب نگه داشته می‌شود و بعد از
+                  ساخت حساب ثبت می‌گردد. */}
+              <div style={{ marginBottom: 16 }}>
+                <ClubPicker
+                  value={club} onChange={setClub} autoSave={false}
+                  label="باشگاهی که در آن فعالیت می‌کنید (اختیاری)"
+                  hint="می‌توانید بعداً از پروفایلتان انتخاب یا تغییرش دهید."
+                />
+              </div>
               {field('password', 'رمز عبور', <Lock size={16} />, { placeholder: 'حداقل ۸ کاراکتر', reveal: { shown: showPw, toggle: () => setShowPw(p => !p) } })}
               {pwWarn && (
                 <p style={{ fontSize: 11.5, fontWeight: 700, color: '#B23B2E', margin: '-6px 0 12px', display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.8 }}>

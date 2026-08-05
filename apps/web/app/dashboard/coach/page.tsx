@@ -10,6 +10,7 @@ import { useAuthStore } from '../../../store/auth.store'
 import { isValidSlug } from '../../../lib/slug'
 import { fetchMyProfile, saveProfileRemote } from '../../../lib/profiles/client'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ClubPicker from '../../../components/ClubPicker'
 import {
   GRADES, DISCIPLINES, getCoachProfiles, saveCoachProfile, findCoachByOwner, findUnclaimedCoach,
   type CoachProfile, type CoachGrade, type CoachMedia, type CoachVideo,
@@ -450,6 +451,9 @@ export default function CoachDashboardPage() {
                   onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
                   required cityError={errors.city} provinceError={errors.province}
                 />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <ClubPicker />
               </div>
               <div>
                 <label style={lbl}>نشانی اختصاصی پروفایل (URL){star}</label>

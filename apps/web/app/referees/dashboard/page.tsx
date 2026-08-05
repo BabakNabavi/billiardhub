@@ -8,6 +8,7 @@ import VerificationBadges from '../../../components/VerificationBadges'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ClubPicker from '../../../components/ClubPicker'
 import AuthGuard from '../../../components/AuthGuard'
 import {
   GRADES, DISCIPLINES, getRefereeProfiles, saveRefereeProfile, findRefereeByOwner, findUnclaimedReferee,
@@ -447,6 +448,9 @@ function RefereeDashboardInner() {
                   onChange={v => setForm(f => ({ ...f, province: v.province, city: v.city }))}
                   required cityError={errors.city} provinceError={errors.province}
                 />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <ClubPicker />
               </div>
               <div>
                 <label style={lbl}>نشانی اختصاصی پروفایل (URL){star}</label>

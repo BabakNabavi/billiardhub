@@ -16,9 +16,33 @@ async function countMembers(clubId: string): Promise<number> {
   return error ? 0 : (count ?? 0);
 }
 
-/** تعداد اعضای یک باشگاه — عمومی */
+/** تعداد اعضای یک باشگاه — عمومی. با `?mine=1` عضویتِ خودِ کاربر. */
 export async function GET(req: NextRequest) {
-  const clubId = new URL(req.url).searchParams.get('clubId') ?? '';
+  const sp = new URL(req.url).searchParams;
+
+  /* عضویتِ خودِ کاربر — تا فرم‌های پروفایل بتوانند وضعیت فعلی را
+     نشان دهند. بدون این، کاربری که قبلاً باشگاه انتخاب کرده هر بار
+     کادر را خالی می‌بیند و فکر می‌کند ثبت نشده. */
+  if (sp.get('mine') === '1') {
+    const actor = actorFromRequest(req);
+    if (!actor) return NextResponse.json({ club: null });
+
+    const { data } = await sb().from('club_members')
+      .select('club_id').eq('user_id', actor.id).limit(1).maybeSingle();
+    const clubId = (data as { club_id?: string } | null)?.club_id;
+    if (!clubId) return NextResponse.json({ club: null }, { headers: { 'Cache-Control': 'no-store' } });
+
+    const { data: club } = await sb().from('clubs').select('id,name').eq('id', clubId).maybeSingle();
+    /* باشگاه ممکن است حذف شده باشد ولی ردیفِ عضویت مانده باشد */
+    if (!club) return NextResponse.json({ club: null }, { headers: { 'Cache-Control': 'no-store' } });
+
+    return NextResponse.json({
+      club: { id: clubId, name: (club as { name?: string }).name ?? '' },
+      members: await countMembers(clubId),
+    }, { headers: { 'Cache-Control': 'no-store' } });
+  }
+
+  const clubId = sp.get('clubId') ?? '';
   if (!UUID.test(clubId)) return NextResponse.json({ members: 0 });
   return NextResponse.json({ members: await countMembers(clubId) }, { headers: { 'Cache-Control': 'no-store' } });
 }

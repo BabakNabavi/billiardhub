@@ -12,6 +12,7 @@ import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ClubPicker from '../../../components/ClubPicker'
 import { compressImage } from '../../../lib/seller-store'
 import { TECH_SERVICES, type TechService, type TechProject, type TechAlbum } from '../../../lib/technicians-data'
 import {
@@ -243,8 +244,11 @@ export default function TechnicianDashboard() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">باشگاه / مجموعه‌ی همکار</label>
-                <input className={INPUT} value={form.club} onChange={e => set('club', e.target.value)} placeholder="مثال: باشگاه پلاتینیوم" />
+                {/* ورودیِ متنیِ آزاد جای خود را به انتخاب از باشگاه‌های
+                    ثبت‌شده داد: عضویت روی `club_members` می‌نشیند و
+                    شمارشِ اعضای باشگاه از همان‌جا می‌آید. با نامِ دستی،
+                    آن عدد هیچ‌وقت درست نمی‌شد. */}
+                <ClubPicker label="باشگاه / مجموعه‌ی همکار" />
               </div>
               <div>
                 <label className="mb-1.5 block text-[12.5px] font-bold text-[#5B564B]">شهرهای تحت پوشش</label>

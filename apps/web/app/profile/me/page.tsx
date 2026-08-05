@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
 import { useAuthStore } from '../../../store/auth.store'
-import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
+import ClubPicker from '../../../components/ClubPicker'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import VerificationBadges from '../../../components/VerificationBadges'
 import ChangePhone from '../../../components/auth/ChangePhone'
@@ -14,7 +14,7 @@ import Avatar from '../../../components/ui/Avatar'
 import { uploadFile } from '../../../lib/supabase'
 import { bankOfIban, bankOfCard, prettyIban } from '../../../lib/bank'
 import {
-  ArrowRight, Camera, Loader2, Search, ShieldCheck, Check, CreditCard, Save,
+  ArrowRight, Camera, Loader2, ShieldCheck, CreditCard, Save,
   User, Contact, Store, Trash2,
 } from 'lucide-react'
 
@@ -123,56 +123,8 @@ const inputStyle: React.CSSProperties = {
   fontSize: 15, fontFamily: 'inherit', outline: 'none',
 }
 
-// ─── Club Search ──────────────────────────────────────────────
-/* فقط باشگاه‌های ثبت‌شده (همان لیست صفحه‌ی /clubs) — ورودی دستی مجاز نیست */
-function ClubSearch({ onSelect }: { onSelect: (clubId: string, name: string) => void }) {
-  const [q, setQ]         = useState('')
-  const [clubs, setClubs] = useState<ClubOption[]>([])
-  const [open, setOpen]   = useState(false)
-  const wrapRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => { fetchClubOptions().then(setClubs) }, [])
-  useEffect(() => {
-    const fn = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', fn)
-    return () => document.removeEventListener('mousedown', fn)
-  }, [])
-
-  const filtered = clubs.filter(c => !q.trim() || c.name.includes(q.trim()) || c.city.includes(q.trim()))
-
-  return (
-    <div ref={wrapRef} style={{ position: 'relative' }}>
-      <div style={{ position: 'relative' }}>
-        <Search size={17} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(0,0,0,0.38)' }} />
-        <input
-          value={q}
-          onChange={e => { setQ(e.target.value); setOpen(true) }}
-          onFocus={() => setOpen(true)}
-          placeholder="جستجو در باشگاه‌های ثبت‌شده..."
-          style={{ ...inputStyle, paddingRight: 34 }}
-        />
-      </div>
-
-      {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: 12, marginTop: 4, maxHeight: 220, overflowY: 'auto' }}>
-          {filtered.map(c => (
-            <button key={c.id} onClick={() => { onSelect(c.id, c.name); setQ(''); setOpen(false) }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111111', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span>{c.name}</span>
-              <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>{c.city}</span>
-            </button>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ padding: '12px 14px', fontSize: 13, color: 'rgba(0,0,0,0.4)', lineHeight: 1.8 }}>
-              باشگاهی با این نام ثبت نشده — فقط باشگاه‌های ثبت‌شده در «باشگاه‌ها» قابل انتخاب‌اند.
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
+/* ClubSearch حذف شد — کارش را ClubPicker می‌کند، همان که در
+   پروفایلِ شش نقشِ دیگر هم هست. */
 
 // ─── Bank card formatter ──────────────────────────────────────
 function formatCard(v: string) {
@@ -205,9 +157,9 @@ export default function ProfileMePage() {
      اعتبارِ سرویس بی‌دلیل مصرف نشود. «تغییر کارت» بازش می‌کند. */
   const [cardLocked, setCardLocked] = useState(false)
   const [clubName, setClubName] = useState('')
+  const [clubId, setClubId]     = useState('')
   const [address, setAddress]   = useState('')
   const [workPhone, setWorkPhone] = useState('')
-  const [clubMembers, setClubMembers] = useState<number | null>(null)
 
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -446,35 +398,8 @@ export default function ProfileMePage() {
     }
   }
 
-  /* انتخاب باشگاه = عضویت در آن. شمارش اعضا از روی همین ردیف‌هاست،
-     پس انتخاب دوباره‌ی همان باشگاه عدد را بالا نمی‌برد و جابه‌جایی
-     بین دو باشگاه هم خودبه‌خود درست حساب می‌شود. */
-  const handleClub = async (clubId: string, name: string) => {
-    setClubName(name)
-    try { localStorage.setItem('bh_my_club', JSON.stringify({ id: clubId, name })) } catch {}
-    try {
-      const r = await apiFetch('/api/clubs/membership', {
-        method: 'POST',
-        headers: { ...authHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clubId }),
-      })
-      const j = await r.json().catch(() => ({}))
-      if (!r.ok) { showToast(j?.message || 'ثبت عضویت انجام نشد', 'error'); return }
-      setClubMembers(typeof j.members === 'number' ? j.members : null)
-      showToast(`عضو باشگاه ${name} شدید`)
-    } catch {
-      showToast('خطا در ارتباط با سرور', 'error')
-    }
-  }
-
-  const leaveClub = async () => {
-    try {
-      await apiFetch('/api/clubs/membership', { method: 'DELETE', headers: authHeader() })
-      setClubName(''); setClubMembers(null)
-      try { localStorage.removeItem('bh_my_club') } catch {}
-      showToast('عضویت شما لغو شد')
-    } catch { showToast('خطا در ارتباط با سرور', 'error') }
-  }
+  /* عضویت در باشگاه حالا داخلِ ClubPicker انجام می‌شود — همان
+     کامپوننتی که در پروفایلِ شش نقشِ دیگر هم به کار می‌رود. */
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F7F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Vazirmatn, Tahoma, sans-serif' }}>
@@ -680,27 +605,23 @@ export default function ProfileMePage() {
               </Field>
             </Section>
 
-            {/* ── باشگاه ── */}
+            {/* ── باشگاه ──
+                کامپوننتِ مشترک، همان که در پروفایلِ شش نقشِ دیگر هم
+                هست. پیش‌تر این صفحه نسخه‌ی خودش را داشت؛ دو پیاده‌سازی
+                یعنی روزی یکی از قلم می‌افتد. */}
             <Section title="باشگاه" icon={<Store size={18} />} color="#a78bfa">
-              <p style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)', margin: '0 0 12px', lineHeight: 1.6 }}>
-                باشگاهی که در آن بازی می‌کنید را از میان باشگاه‌های ثبت‌شده انتخاب کنید
-              </p>
-              {clubName && (
-                <div style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <Check size={15} style={{ color: '#a78bfa' }} />
-                  <span style={{ fontSize: 15, color: '#a78bfa', fontWeight: 700 }}>{clubName}</span>
-                  {clubMembers !== null && (
-                    <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
-                      · {toFa(clubMembers)} عضو
-                    </span>
-                  )}
-                  <button onClick={leaveClub}
-                    style={{ marginInlineStart: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, color: '#B23B2E' }}>
-                    لغو عضویت
-                  </button>
-                </div>
-              )}
-              <ClubSearch onSelect={handleClub} />
+              <ClubPicker
+                value={clubName && clubId ? { id: clubId, name: clubName } : null}
+                onChange={v => {
+                  setClubId(v?.id ?? '')
+                  setClubName(v?.name ?? '')
+                  try {
+                    if (v) localStorage.setItem('bh_my_club', JSON.stringify({ id: v.id, name: v.name }))
+                    else localStorage.removeItem('bh_my_club')
+                  } catch { }
+                }}
+                label="باشگاهی که در آن بازی می‌کنید"
+              />
             </Section>
 
             {/* ── کارت بانکی ── */}

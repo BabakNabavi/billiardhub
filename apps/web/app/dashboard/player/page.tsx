@@ -13,6 +13,7 @@ import Select from '../../../components/ui/Select'
 import Link from 'next/link'
 import { useAuthStore } from '../../../store/auth.store'
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect'
+import ClubPicker from '../../../components/ClubPicker'
 import { provinceOfCity } from '../../../lib/iran-geo'
 import { fetchClubOptions, type ClubOption } from '../../../lib/clubs-data'
 import { compressImage } from '../../../lib/seller-store'
@@ -223,6 +224,9 @@ export default function PlayerDashboard() {
                   onChange={v => { setForm(f => ({ ...f, province: v.province, city: v.city })); setSaved(false); setErr('') }}
                   required cityLabel="شهر" provinceLabel="استان"
                 />
+              </div>
+              <div className="sm:col-span-2">
+                <ClubPicker />
               </div>
               <div>
                 <label className={LABEL}>کشور</label>
