@@ -16,7 +16,7 @@ import {
   Users, ShoppingBag, Trophy, Newspaper, Crown, UserCheck,
   CheckCircle, TrendingUp, Building2, Star, Megaphone, Scale, Store,
   Clapperboard, Factory, Wrench, ShieldCheck, KeyRound, Wallet,
-  CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare,
+  CalendarDays, Flag, Package, LifeBuoy, UserPlus, Tag, MessageSquare, Percent,
 } from 'lucide-react';
 
 const GOLD   = '#C7A66A';
@@ -100,6 +100,9 @@ const SECTIONS: AdminSection[] = [
       /* تا پیش از این، کدِ متنِ هر الگو فقط با نوشتنِ مستقیم در
          دیتابیس وارد می‌شد — یعنی عملاً هیچ راهی نبود. */
       { title: 'پیامک‌های سایت', desc: 'کد متن هر الگوی پیامک و ارسال آزمایشی برای اطمینان از درستی', icon: <MessageSquare size={20} />, link: '/admin/sms' },
+      /* API از قبل بود ولی هیچ صفحه‌ای به آن وصل نبود، پس تنها راهِ
+         دیدن یا عوض‌کردنِ نرخ، نوشتنِ مستقیم در دیتابیس بود. */
+      { title: 'نرخ کمیسیون', desc: 'سهم پلتفرم از رزرو باشگاه و ثبت‌نام مسابقه — سراسری یا برای یک باشگاه', icon: <Percent size={20} />, link: '/admin/commission' },
     ],
   },
 ];

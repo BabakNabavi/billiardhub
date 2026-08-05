@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, actorFromRequest, audit, clientIp } from '@/lib/finance/db';
 import { priceBooking, hoursBetween, bookingReference, surchargeOf, type PricedTable } from '@/lib/finance/pricing';
 import { bookingStartsAt } from '@/lib/finance/cancellation';
-import { closureState, isDateClosed, closedHours } from '@/lib/booking/closure';
+import { closureState, isDateClosed, closedHours, BOOKING_HORIZON_DAYS } from '@/lib/booking/closure';
 
 const HOLD_MINUTES = 10;   // رزرو پرداخت‌نشده پس از ۱۰ دقیقه آزاد می‌شود
 
@@ -31,6 +31,19 @@ export async function POST(req: NextRequest) {
   /* ساعت‌ها به وقت ایران تفسیر می‌شوند — همان مبنایی که سیاست لغو با آن کار می‌کند */
   if (bookingStartsAt(bookingDate, hours.join(',')).getTime() < Date.now() - 60_000) {
     return NextResponse.json({ message: 'امکان رزرو در گذشته وجود ندارد' }, { status: 400 });
+  }
+
+  /* ── افقِ رزرو: دو هفته ──
+     بدونِ سقف، کسی می‌توانست ساعتی را شش ماه بعد بگیرد و آن ساعت تا
+     آن روز برای بقیه بسته می‌ماند — در حالی که نه باشگاه می‌داند
+     شش ماه بعد باز است، نه قیمتش همان است.
+
+     دو هفته با تقویمِ پنلِ باشگاه‌دار هم یکی است، پس چیزی که آن‌جا
+     دیده می‌شود دقیقاً همان چیزی است که قابلِ رزرو است. */
+  if (bookingStartsAt(bookingDate, hours.join(',')).getTime() > Date.now() + BOOKING_HORIZON_DAYS * 86_400_000) {
+    return NextResponse.json({
+      message: `رزرو حداکثر تا ${BOOKING_HORIZON_DAYS} روز آینده ممکن است`,
+    }, { status: 400 });
   }
 
   /* ── «رزرو امروز بسته است» ──

@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/auth.store';
 import AuthGuard from '../../../components/AuthGuard';
 import CancellationPolicy from '../../../components/booking/CancellationPolicy';
 import AlertDialog from '../../../components/ui/AlertDialog';
+import { BOOKING_HORIZON_DAYS } from '../../../lib/booking/closure';
 import { surchargeOf, extraPlayers, playerMultiplier } from '../../../lib/finance/pricing';
 import { sortTables, tableTypeRank } from '../../../lib/tables/order';
 import { closureState, isDateClosed, closedHours, closureLabel, type ClosureState } from '../../../lib/booking/closure';
@@ -241,7 +242,10 @@ function BookingContent() {
   const today = new Date();
   const [tJY,tJM,tJD] = toJalali(today.getFullYear(), today.getMonth()+1, today.getDate());
 
-  const maxDateG = new Date(today); maxDateG.setDate(today.getDate()+28);
+  /* تقویم دقیقاً تا همان روزی باز است که سرور می‌پذیرد. پیش‌تر ۲۸ روز
+     نشان می‌داد ولی سرور بیش از ۱۴ را رد می‌کرد — یعنی کاربر روزی را
+     انتخاب می‌کرد که رزروش همان‌جا شکست می‌خورد. */
+  const maxDateG = new Date(today); maxDateG.setDate(today.getDate()+BOOKING_HORIZON_DAYS);
   const [mJY,mJM,mJD] = toJalali(maxDateG.getFullYear(), maxDateG.getMonth()+1, maxDateG.getDate());
 
   const [jYear,  setJYear]  = useState(tJY);

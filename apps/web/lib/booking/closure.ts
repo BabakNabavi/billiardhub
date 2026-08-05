@@ -155,6 +155,19 @@ export function isOptionDisabled(opt: ClosureOption | 'today', s: ClosureState, 
   return activeRank(s, now) > optionRank(opt)
 }
 
+/* ── افقِ رزرو ──
+   تا چند روزِ آینده می‌شود رزرو کرد. یک منبعِ واحد تا صفحه‌ی رزرو،
+   سرور، و تقویمِ پنلِ باشگاه‌دار هیچ‌وقت از هم جدا نیفتند: اگر تقویم
+   چهارده روز نشان دهد ولی سرور ده روز بپذیرد، کاربر روزی را انتخاب
+   می‌کند که رزروش رد می‌شود. */
+export const BOOKING_HORIZON_DAYS = 14
+
+/** آخرین تاریخِ قابلِ رزرو — `YYYY-MM-DD` */
+export function lastBookableDate(from: Date = new Date()): string {
+  const d = new Date(from.getTime() + BOOKING_HORIZON_DAYS * 86_400_000)
+  return d.toISOString().slice(0, 10)
+}
+
 /** متنِ خوانا برای نشان‌دادن وضعیت */
 export function closureLabel(s: ClosureState): string {
   if (s.always) return 'رزرو آنلاین همیشه بسته است'
