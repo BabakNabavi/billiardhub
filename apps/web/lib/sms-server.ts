@@ -75,33 +75,53 @@ export function notify(mobile: string | null | undefined, message: string): void
 
 const fa = (n: unknown) => Math.round(Number(n) || 0).toLocaleString('fa-IR')
 
+/* ── قالبِ مشترک ──────────────────────────────────────────────
+   هر پیامک سه بخش دارد:
+
+     خطِ اول   «{نام} گرامی» — یا اگر نام نداشتیم، نامِ برند
+     بدنه      خودِ خبر
+     خطِ آخر   www.billiardhub.net
+
+   نشانیِ سایت جای سرصفحه‌ی «بیلیارد هاب» را گرفت: هم برند را
+   می‌رساند، هم گیرنده می‌تواند مستقیم برود و ببیند. دو خط برای یک
+   کار لازم نیست، و پیامکِ فارسی هر ۷۰ کاراکتر یک بخش هزینه دارد.
+
+   نامِ خالی حالتِ عادی است — کاربری که نامش را ثبت نکرده باید همان
+   پیامک را بگیرد، فقط بی‌خطاب. */
+const SITE = 'www.billiardhub.net'
+
+const wrap = (name: string, body: string) =>
+  `${name.trim() ? `${name.trim()} گرامی` : 'بیلیارد هاب'}\n${body}\n${SITE}`
+
 export const SMS = {
-  /* سرصفحه‌ی همه‌ی پیامک‌ها — تا نام برند در یک جا بماند */
+  /* سرصفحه‌ی پیام‌هایی که گیرنده‌ی نام‌دار ندارند */
   brand: 'بیلیارد هاب',
-  bookingConfirmed: (club: string, date: string, time: string, ref: string) =>
-    `بیلیارد هاب\nرزرو شما در ${club} برای ${date} ساعت ${time} قطعی شد.\nکد پیگیری: ${ref}`,
+
+  /** پوششِ عمومی — برای پیام‌هایی که قالبِ اختصاصی ندارند */
+  wrap,
+
+  bookingConfirmed: (name: string, club: string, date: string, time: string, ref: string) =>
+    wrap(name, `رزرو شما در ${club} برای ${date} ساعت ${time} قطعی شد.\nکد پیگیری: ${ref}`),
+
+  bookingCancelled: (name: string, club: string, date: string, refund: number) =>
+    wrap(name, refund > 0
+      ? `رزرو شما در ${club} برای ${date} لغو شد.\nمبلغ ${fa(refund)} تومان تا ۷۲ ساعت آینده بازمی‌گردد.`
+      : `رزرو شما در ${club} برای ${date} لغو شد.`),
+
+  /* پیام باشگاه‌دار عمداً کامل است: مدیر باید بدون بازکردن سایت
+     بداند کدام میز، چه ساعتی، چه روزی و به نام چه کسی رزرو شده. */
+  newBookingForOwner: (owner: string, club: string, date: string, time: string, table: string, by: string) =>
+    wrap(owner, `${table || 'یک میز'} در باشگاه ${club}\n`
+      + `تاریخ ${date} از ساعت ${time}`
+      + `${by ? ` توسط ${by}` : ''} رزرو شد.`),
+
+  settlementPaid: (name: string, amount: number) =>
+    wrap(name, `تسویه به مبلغ ${fa(amount)} تومان به حساب شما واریز شد.`),
 
   /* هشدارِ گزارشِ تخلف به ادمین. عنوانِ آگهی داخلش می‌آید تا ادمین
      بدونِ بازکردنِ پنل بداند موضوع چیست و فوریتش را بسنجد. */
   reportCreated: (kind: string, title: string, reason: string) =>
-    `بیلیارد هاب\n`
-    + `گزارش تخلف تازه روی ${kind}${title ? ` «${title.slice(0, 60)}»` : ''}\n`
-    + `دلیل: ${reason}\n`
-    + `بررسی: /admin/reports`,
-
-  bookingCancelled: (club: string, date: string, refund: number) =>
-    refund > 0
-      ? `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.\nمبلغ ${fa(refund)} تومان تا ۷۲ ساعت آینده بازمی‌گردد.`
-      : `بیلیارد هاب\nرزرو شما در ${club} برای ${date} لغو شد.`,
-
-  /* پیام باشگاه‌دار عمداً کامل است: مدیر باید بدون بازکردن سایت
-     بداند کدام میز، چه ساعتی، چه روزی و به نام چه کسی رزرو شده. */
-  newBookingForOwner: (club: string, date: string, time: string, table: string, by: string) =>
-    `بیلیارد هاب\n`
-    + `مدیریت محترم باشگاه ${club}\n`
-    + `${table || 'یک میز'} در تاریخ ${date} از ساعت ${time}`
-    + `${by ? ` توسط ${by}` : ''} رزرو شد.`,
-
-  settlementPaid: (amount: number) =>
-    `بیلیارد هاب\nتسویه به مبلغ ${fa(amount)} تومان به حساب شما واریز شد.`,
+    wrap('', `گزارش تخلف تازه روی ${kind}${title ? ` «${title.slice(0, 40)}»` : ''}\n`
+      + `دلیل: ${reason}\n`
+      + `بررسی: /admin/reports`),
 }

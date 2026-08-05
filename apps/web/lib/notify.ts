@@ -90,7 +90,8 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   const time = faTimeRange(b.timeSlots)
 
   const userPhone = await phoneOf(b.userId)
-  notify(userPhone, SMS.bookingConfirmed(club?.name ?? 'باشگاه', date, time, b.booking_reference ?? '—'))
+  const userName = await nameOf(b.userId)
+  notify(userPhone, SMS.bookingConfirmed(userName, club?.name ?? 'باشگاه', date, time, b.booking_reference ?? '—'))
 
   /* باشگاه‌دار هم باید بداند میزش پر شده.
 
@@ -108,7 +109,9 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
         || ''
     }
     const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
-    notify(target, SMS.newBookingForOwner(club.name, date, time, tableName, await nameOf(b.userId)))
+    /* نامِ خودِ مالک برای خطاب، و نامِ رزروکننده داخلِ متن */
+    const ownerName = club.ownerId ? await nameOf(club.ownerId) : ''
+    notify(target, SMS.newBookingForOwner(ownerName, club.name, date, time, tableName, userName))
   }
 }
 
@@ -117,14 +120,14 @@ export async function notifyBookingCancelled(bookingId: string, refund: number):
   const b = await loadBooking(bookingId)
   if (!b) return
   const club = await clubOf(b.clubId)
-  notify(await phoneOf(b.userId), SMS.bookingCancelled(club?.name ?? 'باشگاه', faDate(b.bookingDate), refund))
+  notify(await phoneOf(b.userId), SMS.bookingCancelled(await nameOf(b.userId), club?.name ?? 'باشگاه', faDate(b.bookingDate), refund))
 }
 
 /** تسویه به حساب باشگاه‌دار واریز شد */
 export async function notifySettlementPaid(clubId: string, amount: number): Promise<void> {
   const club = await clubOf(clubId)
   if (!club?.ownerId) return
-  notify(await phoneOf(club.ownerId), SMS.settlementPaid(amount))
+  notify(await phoneOf(club.ownerId), SMS.settlementPaid(await nameOf(club.ownerId), amount))
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -135,35 +138,37 @@ export async function notifySettlementPaid(clubId: string, amount: number): Prom
    وضعیت را می‌دید — آن‌هم بدون علت.
    ───────────────────────────────────────────────────────────── */
 
-async function ownerPhoneOf(clubId: string): Promise<{ phone: string | null; name: string }> {
+async function ownerPhoneOf(clubId: string): Promise<{ phone: string | null; name: string; owner: string }> {
   const c = await clubOf(clubId)
-  if (!c) return { phone: null, name: 'باشگاه' }
-  /* شماره‌ی اعلان باشگاه اگر ثبت شده، وگرنه موبایل مالک */
-  if (c.notifyPhone) return { phone: c.notifyPhone, name: c.name }
+  if (!c) return { phone: null, name: 'باشگاه', owner: '' }
+  /* نامِ مالک برای خطابِ پیامک؛ شماره‌ی اعلانِ باشگاه اگر ثبت شده،
+     وگرنه موبایلِ مالک. */
+  const owner = c.ownerId ? await nameOf(c.ownerId) : ''
+  if (c.notifyPhone) return { phone: c.notifyPhone, name: c.name, owner }
   const phone = c.ownerId ? await phoneOf(c.ownerId) : null
-  return { phone, name: c.name }
+  return { phone, name: c.name, owner }
 }
 
 /** باشگاه تأیید و منتشر شد */
 export async function notifyClubApproved(clubId: string): Promise<void> {
-  const { phone, name } = await ownerPhoneOf(clubId)
+  const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  notify(phone, `${SMS.brand}\nباشگاه «${name}» تأیید شد و از این پس در سایت نمایش داده می‌شود.`)
+  notify(phone, SMS.wrap(owner, `باشگاه «${name}» تأیید شد و از این پس در سایت نمایش داده می‌شود.`))
 }
 
 /** باشگاه رد شد — علت حتماً گفته می‌شود، وگرنه مالک نمی‌داند چه را اصلاح کند */
 export async function notifyClubRejected(clubId: string, reason: string): Promise<void> {
-  const { phone, name } = await ownerPhoneOf(clubId)
+  const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
   const why = reason?.trim() ? `\nعلت: ${reason.trim()}` : ''
-  notify(phone, `${SMS.brand}\nثبت باشگاه «${name}» تأیید نشد.${why}\nپس از اصلاح، از داشبورد دوباره ارسال کنید.`)
+  notify(phone, SMS.wrap(owner, `ثبت باشگاه «${name}» تأیید نشد.${why}\nپس از اصلاح، از داشبورد دوباره ارسال کنید.`))
 }
 
 /** مسابقه‌ی تازه‌ای در باشگاه ثبت شد — به مالک، به‌عنوان رسید ثبت */
 export async function notifyTournamentCreated(clubId: string, title: string): Promise<void> {
-  const { phone, name } = await ownerPhoneOf(clubId)
+  const { phone, name, owner } = await ownerPhoneOf(clubId)
   if (!phone) return
-  notify(phone, `${SMS.brand}\nمسابقه «${title}» در باشگاه ${name} ثبت شد.`)
+  notify(phone, SMS.wrap(owner, `مسابقه «${title}» در باشگاه ${name} ثبت شد.`))
 }
 
 /** مسابقه لغو شد — به همه‌ی ثبت‌نام‌کننده‌های قطعی */
@@ -179,7 +184,7 @@ export async function notifyTournamentCancelled(tournamentId: string): Promise<v
     if (!phone) continue
     const money = r.payment_status === 'PAID'
       ? '\nمبلغ پرداختی طی روزهای آینده بازگردانده می‌شود.' : ''
-    notify(phone, `${SMS.brand}\nمسابقه «${title}» لغو شد.${money}`)
+    notify(phone, SMS.wrap(await nameOf(r.user_id), `مسابقه «${title}» لغو شد.${money}`))
   }
 }
 
@@ -197,7 +202,7 @@ export async function notifyTournamentRegistered(registrationId: string): Promis
   const phone = await phoneOf(reg.user_id)
   if (!phone) return
   const when = tt.starts_at ? `\nتاریخ: ${faDate(tt.starts_at)}` : ''
-  notify(phone, `${SMS.brand}\nثبت‌نام شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`)
+  notify(phone, SMS.wrap(await nameOf(reg.user_id), `ثبت‌نام شما در «${tt.title ?? 'مسابقه'}» قطعی شد.${when}`))
 }
 
 /** نوبت کسی که در لیست انتظار بود رسید */
@@ -220,5 +225,5 @@ export async function notifyWaitlistPromoted(registrationId: string, needsPaymen
     ? `جا در «${title}» برای شما باز شد.\nبرای قطعی‌شدن، هزینه‌ی ثبت‌نام را از داشبورد پرداخت کنید.`
     : `جا در «${title}» برای شما باز شد و ثبت‌نامتان قطعی شد.`
 
-  notify(phone, `${SMS.brand}\n${body}`)
+  notify(phone, SMS.wrap(await nameOf(reg.user_id), body))
 }
