@@ -25,6 +25,11 @@ export interface VerifyPaymentInput {
   paymentId: string
   authority: string
   amount: number         // مبلغ مورد انتظار (تومان) — باید با پرداخت واقعی یکی باشد
+  /* کدِ رهگیریِ درگاه، اگر هنگام بازگشت داده شده باشد.
+     زرین‌پال با `authority` تنهایی تأیید می‌کند، ولی پی‌پینگ هم
+     `paymentCode` می‌خواهد هم `paymentRefId`. اختیاری است تا
+     آداپتورهای موجود دست نخورند. */
+  refId?: string
 }
 
 export interface VerifyPaymentResult {

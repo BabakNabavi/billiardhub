@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
+import { readGatewayReturn } from '@/lib/payments/return';
 import { notifyBookingConfirmed } from '@/lib/notify';
 
 /* بازگشت از درگاه — هرگز به گفته‌ی کلاینت اعتماد نمی‌شود:
@@ -12,9 +13,15 @@ import { notifyBookingConfirmed } from '@/lib/notify';
 
 async function handle(req: NextRequest, providerName: string) {
   const url = req.nextUrl;
-  const paymentId = url.searchParams.get('payment') || '';
-  const authority = url.searchParams.get('Authority') || url.searchParams.get('authority') || '';
-  const status = url.searchParams.get('Status') || url.searchParams.get('status') || '';
+  /* درگاه‌ها یک‌شکل برنمی‌گردند — بعضی GET با کوئری، پی‌پینگ POST با
+     فرم. `readGatewayReturn` تفاوت را می‌خورد. */
+  const ret = await readGatewayReturn(req);
+  const authority = ret.authority;
+
+  /* شناسه‌ی سفارش معمولاً در کوئریِ returnUrl است؛ اگر درگاهی آن را
+     نگه ندارد، `clientRefId` که خودمان هنگام ساخت فرستادیم جایش را
+     می‌گیرد. */
+  const paymentId = url.searchParams.get('payment') || ret.clientRefId || '';
 
   const fail = (msg: string) => NextResponse.redirect(new URL(`/booking/result?ok=0&reason=${encodeURIComponent(msg)}`, url.origin));
   if (!paymentId) return fail('پرداخت نامعتبر');
@@ -30,7 +37,7 @@ async function handle(req: NextRequest, providerName: string) {
   }
 
   /* کاربر پرداخت را لغو کرده است */
-  if (status && /nok|cancel/i.test(status)) {
+  if (ret.canceled) {
     await sb().from('payments').update({ status: 'CANCELED', updated_at: new Date().toISOString() }).eq('id', pay.id);
     return fail('پرداخت توسط شما لغو شد');
   }
@@ -50,7 +57,9 @@ async function handle(req: NextRequest, providerName: string) {
     return fail('شناسه‌ی پرداخت با درخواست اولیه هم‌خوانی ندارد');
   }
 
-  const v = await provider.verifyPayment({ paymentId: pay.id, authority: auth, amount: pay.amount });
+  const v = await provider.verifyPayment({
+    paymentId: pay.id, authority: auth, amount: pay.amount, refId: ret.refId,
+  });
   if (!v.ok || !v.paid) {
     await sb().from('payments').update({
       status: 'FAILED', raw_response: (v.raw ?? { message: v.message }) as object, updated_at: new Date().toISOString(),

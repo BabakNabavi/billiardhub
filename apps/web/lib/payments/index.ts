@@ -1,12 +1,14 @@
 import type { PaymentProvider } from './provider'
 import { MockPaymentProvider } from './mock'
 import { ZarinPalProvider } from './zarinpal'
+import { PayPingProvider } from './payping'
 
 /* رجیستری درگاه‌ها — افزودن درگاه جدید فقط همین‌جا ثبت می‌شود.
-   انتخاب درگاه فعال با env: PAYMENT_PROVIDER=mock | zarinpal */
+   انتخاب درگاه فعال با env: PAYMENT_PROVIDER=mock | zarinpal | payping */
 const registry: Record<string, () => PaymentProvider> = {
   mock: () => new MockPaymentProvider(),
   zarinpal: () => new ZarinPalProvider(),
+  payping: () => new PayPingProvider(),
 }
 
 export function getPaymentProvider(name?: string): PaymentProvider {

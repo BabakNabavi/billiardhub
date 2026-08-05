@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, rpc, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
+import { readGatewayReturn } from '@/lib/payments/return';
 
 /* بازگشت از درگاه خرید بسته‌ی آگهی.
    مثل مسیر رزرو: هرگز به گفته‌ی کلاینت اعتماد نمی‌شود — پرداخت سمت
@@ -10,9 +11,10 @@ import { getPaymentProvider } from '@/lib/payments';
 
 async function handle(req: NextRequest, providerName: string) {
   const url = req.nextUrl;
-  const orderId = url.searchParams.get('order') || '';
-  const authority = url.searchParams.get('Authority') || url.searchParams.get('authority') || '';
-  const status = url.searchParams.get('Status') || url.searchParams.get('status') || '';
+  /* پی‌پینگ با POST و فرم برمی‌گردد، نه با کوئری */
+  const ret = await readGatewayReturn(req);
+  const authority = ret.authority;
+  const orderId = url.searchParams.get('order') || ret.clientRefId || '';
 
   const done = (ok: boolean, extra = '') =>
     NextResponse.redirect(new URL(`/plans/result?ok=${ok ? 1 : 0}${extra}`, url.origin));
@@ -31,7 +33,7 @@ async function handle(req: NextRequest, providerName: string) {
   /* قبلاً پرداخت شده ⇒ فقط نتیجه، بدون اثر دوباره */
   if (o.status === 'PAID') return done(true, `&order=${o.id}`);
 
-  if (status && /nok|cancel/i.test(status)) {
+  if (ret.canceled) {
     await sb().from('ad_plan_orders').update({ status: 'CANCELED' }).eq('id', o.id);
     return fail('پرداخت توسط شما لغو شد');
   }
@@ -40,7 +42,9 @@ async function handle(req: NextRequest, providerName: string) {
   const auth = authority || o.provider_authority || '';
   if (!auth) return fail('شناسه‌ی پرداخت نامعتبر است');
 
-  const v = await provider.verifyPayment({ paymentId: o.id, authority: auth, amount: o.amount });
+  const v = await provider.verifyPayment({
+    paymentId: o.id, authority: auth, amount: o.amount, refId: ret.refId,
+  });
   if (!v.ok || !v.paid) {
     await sb().from('ad_plan_orders').update({ status: 'FAILED' }).eq('id', o.id);
     return fail(v.message || 'پرداخت تأیید نشد');

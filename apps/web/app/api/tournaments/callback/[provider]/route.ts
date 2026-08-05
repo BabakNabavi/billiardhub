@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { notifyTournamentRegistered } from '@/lib/notify';
 import { getPaymentProvider, hasRealGateway } from '@/lib/payments';
+import { readGatewayReturn } from '@/lib/payments/return';
 import { confirmRegistrationPayment } from '@/lib/tournaments/server';
 
 /* بازگشت از درگاه برای ثبت‌نام مسابقه.
@@ -33,10 +34,13 @@ async function handle(req: NextRequest, providerName: string) {
   const url = new URL(req.url);
   const q = url.searchParams;
 
+  /* درگاه‌ها یک‌شکل برنمی‌گردند — پی‌پینگ با POST و فرم می‌آید، نه با
+     کوئری. `readGatewayReturn` هر دو را می‌خواند. */
+  const ret = await readGatewayReturn(req);
+
   /* شناسه‌ی سفارش را خودمان هنگام ساخت پرداخت داده‌ایم */
-  const registrationId = q.get('paymentId') || q.get('registrationId') || '';
-  const authority = q.get('Authority') || q.get('authority') || q.get('token') || '';
-  const result = (q.get('Status') || q.get('status') || '').toLowerCase();
+  const registrationId = q.get('paymentId') || q.get('registrationId') || ret.clientRefId || '';
+  const authority = ret.authority || q.get('token') || '';
 
   const back = (state: string, extra = '') =>
     NextResponse.redirect(`${url.origin}/tournaments/result?state=${state}${extra}`, { status: 303 });
@@ -70,7 +74,7 @@ async function handle(req: NextRequest, providerName: string) {
   }
 
   /* کاربر در درگاه انصراف داد */
-  if (result && result !== 'ok' && result !== 'success') {
+  if (ret.canceled) {
     await sb().from('tournament_registrations')
       .update({ payment_status: 'FAILED', updated_at: new Date().toISOString() })
       .eq('id', reg.id);
@@ -82,6 +86,7 @@ async function handle(req: NextRequest, providerName: string) {
     paymentId: reg.id,
     authority: authority || reg.provider_authority || '',
     amount: reg.amount,          // مبلغ مورد انتظار از سفارش، نه از درخواست
+    refId: ret.refId,
   });
 
   if (!v.ok || !v.paid) {

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { sb, audit, clientIp } from '@/lib/finance/db';
 import { getPaymentProvider } from '@/lib/payments';
+import { readGatewayReturn } from '@/lib/payments/return';
 import { sendCampaign } from '@/lib/sms/club-campaign';
 
 /* بازگشت از درگاه — پیامک باشگاه به اعضا.
@@ -15,9 +16,10 @@ import { sendCampaign } from '@/lib/sms/club-campaign';
 
 async function handle(req: NextRequest, providerName: string) {
   const url = req.nextUrl;
-  const campaignId = url.searchParams.get('campaign') || '';
-  const authority = url.searchParams.get('Authority') || url.searchParams.get('authority') || '';
-  const status = url.searchParams.get('Status') || url.searchParams.get('status') || '';
+  /* پی‌پینگ با POST و فرم برمی‌گردد، نه با کوئری */
+  const ret = await readGatewayReturn(req);
+  const authority = ret.authority;
+  const campaignId = url.searchParams.get('campaign') || ret.clientRefId || '';
 
   const done = (ok: boolean, extra = '') =>
     NextResponse.redirect(new URL(`/dashboard/club?sms=${ok ? 'ok' : 'fail'}${extra}`, url.origin));
@@ -38,7 +40,7 @@ async function handle(req: NextRequest, providerName: string) {
     return done(true, `&campaign=${c.id}`);
   }
 
-  if (status && /nok|cancel/i.test(status)) {
+  if (ret.canceled) {
     await sb().from('club_sms_campaigns')
       .update({ status: 'CANCELED', updated_at: new Date().toISOString() }).eq('id', c.id);
     return fail('پرداخت توسط شما لغو شد');
@@ -48,7 +50,9 @@ async function handle(req: NextRequest, providerName: string) {
   const auth = authority || c.provider_ref || '';
   if (!auth) return fail('شناسه‌ی پرداخت نامعتبر است');
 
-  const v = await provider.verifyPayment({ paymentId: c.id, authority: auth, amount: c.total_amount });
+  const v = await provider.verifyPayment({
+    paymentId: c.id, authority: auth, amount: c.total_amount, refId: ret.refId,
+  });
   if (!v.ok || !v.paid) {
     await sb().from('club_sms_campaigns')
       .update({ status: 'FAILED', error_note: v.message ?? null, updated_at: new Date().toISOString() })
