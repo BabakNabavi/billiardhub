@@ -10,9 +10,10 @@ import {
   LayoutDashboard, FileText, Grid3X3, Clock, CalendarDays, Trophy,
   Camera, GraduationCap, AlertTriangle, Trash2, Building2, Phone,
   Plus, Pencil, Eye, Upload, CheckCircle, XCircle, ImageIcon, Settings,
-  Loader2, Wallet, Radio, MapPin,
+  Loader2, Wallet, Radio, MapPin, MessageSquare,
 } from 'lucide-react';
 import ClubFinance from '../../../components/club/ClubFinance';
+import SmsToMembers from '../../../components/club/SmsToMembers';
 import GoLive from '../../../components/club/GoLive';
 import api from '../../../lib/api';
 import ProvinceCitySelect from '../../../components/ProvinceCitySelect';
@@ -213,7 +214,7 @@ function compressImage(file: File): Promise<string> {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'finance' | 'live' | 'tournaments' | 'gallery' | 'coaches';
+type TabKey = 'dashboard' | 'info' | 'tables' | 'hours' | 'bookings' | 'finance' | 'live' | 'tournaments' | 'gallery' | 'coaches' | 'sms';
 
 /* ردیف مسابقه در دیتابیس (snake_case) — جدول tournaments، مهاجرت ۰۲۶ */
 interface DbTournament {
@@ -1415,6 +1416,7 @@ export default function ClubDashboardPage() {
     { key: 'tournaments', label: 'مسابقات',    Icon: Trophy },
     { key: 'gallery',     label: 'گالری',      Icon: ImageIcon },
     { key: 'coaches',     label: 'مربیان',     Icon: GraduationCap },
+    { key: 'sms',         label: 'پیامک به اعضا', Icon: MessageSquare },
   ];
 
   const inputStyle: React.CSSProperties = {
@@ -3227,6 +3229,13 @@ export default function ClubDashboardPage() {
       {activeTab === 'gallery' && (
         <GalleryTab club={selectedClub}
           onLogoChange={url => setSelectedClub(prev => prev ? { ...prev, logo: url } : prev)} />
+      )}
+
+      {/* ════ Tab: پیامک به اعضا ════ */}
+      {activeTab === 'sms' && selectedClub && (
+        <div style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #F0EDE8' }}>
+          <SmsToMembers clubId={selectedClub.id} />
+        </div>
       )}
 
       {/* ════ Tab: Coaches ════ */}

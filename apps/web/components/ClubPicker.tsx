@@ -97,6 +97,29 @@ export default function ClubPicker({
       .then(j => setMembers(typeof j?.members === 'number' ? j.members : null))
       .catch(() => { })
   }, [])
+
+  /* دریافتِ پیامکِ باشگاه — عضو باید بتواند خاموشش کند */
+  const [optOut, setOptOut] = useState(false)
+  const [optBusy, setOptBusy] = useState(false)
+  useEffect(() => {
+    if (!value?.id || !autoSave) return
+    void apiFetch('/api/clubs/membership?mine=1', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => setOptOut(j?.smsOptOut === true))
+      .catch(() => { })
+  }, [value?.id, autoSave])
+
+  const toggleSms = async () => {
+    const next = !optOut
+    setOptOut(next); setOptBusy(true)          // خوش‌بینانه — برگشتش ارزان است
+    try {
+      const r = await apiFetch('/api/clubs/membership', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ smsOptOut: next }),
+      })
+      if (!r.ok) setOptOut(!next)
+    } catch { setOptOut(!next) } finally { setOptBusy(false) }
+  }
   useEffect(() => { if (value?.id) loadMembers(value.id); else setMembers(null) }, [value?.id, loadMembers])
 
   /* بدنه هنگام باز بودنِ پنجره قفل می‌شود — روی موبایل بدون این،
@@ -185,6 +208,22 @@ export default function ClubPicker({
           <button type="button" onClick={() => void clear()} disabled={busy} style={{ ...ghostBtn, color: MUT }}>
             {busy ? <Loader2 size={13} className="animate-spin" /> : 'حذف'}
           </button>
+
+          {/* اجازه‌ی پیامکِ باشگاه — بدونِ این، تنها راهِ نگرفتنِ پیامک
+              ترکِ باشگاه بود. */}
+          {autoSave ? (
+            <label style={{
+              flex: '1 1 100%', display: 'flex', alignItems: 'center', gap: 8,
+              borderTop: `1px solid rgba(14,122,56,0.14)`, paddingTop: 10, marginTop: 2,
+              fontSize: 11.5, color: SEC, cursor: optBusy ? 'wait' : 'pointer', lineHeight: 1.8,
+            }}>
+              <input
+                type="checkbox" checked={!optOut} disabled={optBusy}
+                onChange={() => void toggleSms()}
+                style={{ width: 15, height: 15, accentColor: FELT, cursor: 'inherit', flexShrink: 0 }} />
+              اطلاعیه‌های باشگاه (مسابقه، دوره، تخفیف) برایم پیامک شود
+            </label>
+          ) : null}
         </div>
       ) : (
         /* ── هنوز انتخاب نشده ── */

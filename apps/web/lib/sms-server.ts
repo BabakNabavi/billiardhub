@@ -89,6 +89,16 @@ export const PATTERNS = [
   'tournament_cancelled',
   'waitlist_promoted',
   'report_created',
+
+  /* ── پیامکِ باشگاه به اعضا ──
+     این چهارتا با بقیه یک فرق مهم دارند: بقیه اطلاع‌رسانیِ تراکنشِ
+     خودِ کاربرند، این‌ها دعوت و اطلاعیه‌اند. متنشان در
+     `lib/sms/club-templates.ts` است و باشگاه‌دار بابتشان پول
+     می‌دهد. */
+  'club_tournament',
+  'club_class',
+  'club_offer',
+  'club_notice',
 ] as const
 export type PatternKey = typeof PATTERNS[number]
 

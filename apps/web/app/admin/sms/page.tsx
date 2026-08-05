@@ -36,6 +36,12 @@ const LABEL: Record<string, { fa: string; when: string }> = {
   tournament_cancelled:     { fa: '۱۲) لغو مسابقه', when: 'به همه‌ی ثبت‌نام‌کننده‌ها' },
   waitlist_promoted:        { fa: '۱۳) باز شدن جا', when: 'وقتی از لیستِ انتظار جا باز شود' },
   report_created:           { fa: '۱۴) گزارش تخلف', when: 'به شماره‌ی هشدارِ ادمین' },
+
+  /* این چهارتا را باشگاه‌دار می‌خرد و به اعضای باشگاهش می‌فرستد */
+  club_tournament:          { fa: '۱۶) باشگاه — برگزاری مسابقه', when: 'باشگاه‌دار خریداری می‌کند — به اعضای باشگاه' },
+  club_class:               { fa: '۱۷) باشگاه — دوره آموزشی', when: 'باشگاه‌دار خریداری می‌کند — به اعضای باشگاه' },
+  club_offer:               { fa: '۱۸) باشگاه — تخفیف ویژه', when: 'باشگاه‌دار خریداری می‌کند — به اعضای باشگاه' },
+  club_notice:              { fa: '۱۹) باشگاه — اطلاعیه ساعت کاری', when: 'باشگاه‌دار خریداری می‌کند — به اعضای باشگاه' },
 }
 
 interface KeyInfo { len: number; guid: boolean; dashed: boolean; wasUrl: boolean; quoted: boolean; padded: boolean }

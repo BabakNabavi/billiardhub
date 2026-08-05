@@ -28,8 +28,9 @@ export async function GET(req: NextRequest) {
     if (!actor) return NextResponse.json({ club: null });
 
     const { data } = await sb().from('club_members')
-      .select('club_id').eq('user_id', actor.id).limit(1).maybeSingle();
-    const clubId = (data as { club_id?: string } | null)?.club_id;
+      .select('club_id,sms_opt_out').eq('user_id', actor.id).limit(1).maybeSingle();
+    const row = data as { club_id?: string; sms_opt_out?: boolean } | null;
+    const clubId = row?.club_id;
     if (!clubId) return NextResponse.json({ club: null }, { headers: { 'Cache-Control': 'no-store' } });
 
     const { data: club } = await sb().from('clubs').select('id,name').eq('id', clubId).maybeSingle();
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       club: { id: clubId, name: (club as { name?: string }).name ?? '' },
       members: await countMembers(clubId),
+      smsOptOut: row?.sms_opt_out === true,
     }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
@@ -81,6 +83,22 @@ export async function POST(req: NextRequest) {
     clubName: (club as { name?: string }).name ?? '',
     members: await countMembers(id),
   });
+}
+
+/* ── روشن/خاموش کردنِ پیامکِ باشگاه ──
+   عضو باید بتواند نه بگوید. بدونِ این، تنها راهِ نگرفتنِ پیامک ترکِ
+   باشگاه است — که یعنی عددِ اعضای باشگاه هم می‌پرد و عضو برای یک
+   ترجیحِ کوچک، عضویتش را از دست می‌دهد. */
+export async function PATCH(req: NextRequest) {
+  const actor = actorFromRequest(req);
+  if (!actor) return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
+
+  const { smsOptOut } = await req.json().catch(() => ({}));
+  const { error } = await sb().from('club_members')
+    .update({ sms_opt_out: !!smsOptOut }).eq('user_id', actor.id);
+  if (error) return NextResponse.json({ message: 'ذخیره‌ی تنظیم انجام نشد' }, { status: 500 });
+
+  return NextResponse.json({ ok: true, smsOptOut: !!smsOptOut });
 }
 
 /** ترک باشگاه */
