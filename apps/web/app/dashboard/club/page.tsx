@@ -25,6 +25,7 @@ import { apiFetch } from '../../../lib/http';
 import { sortTables } from '../../../lib/tables/order';
 import { closureState, closureLabel, activeOption, isOptionDisabled } from '../../../lib/booking/closure';
 import type { ClosureOption } from '../../../lib/booking/closure';
+import { bookingStartsAt } from '../../../lib/finance/cancellation';
 import FaTimeSelect from '../../../components/ui/FaTimeSelect';
 import ClubLogo from '../../../components/club/ClubLogo';
 import { Card, SectionTitle, InputField, SelectField, ClosedToggle, SaveBtn } from '../../../components/dashboard/club/fields';
@@ -661,6 +662,14 @@ export default function ClubDashboardPage() {
      `catch` خالیِ قبلی هم برداشته شد: مسیرِ وضعیت اصلاً وجود نداشت و
      ۴۰۴ بی‌صدا بلعیده می‌شد، در حالی که UI خوش‌بینانه وضعیت را
      عوض‌شده نشان می‌داد. */
+  /* ── مهلتِ لغو توسط باشگاه ──
+     همان قاعده‌ای که سرور اجرا می‌کند، فقط زودتر گفته می‌شود: بدونِ
+     این، دکمه دیده می‌شود، زده می‌شود، و خطا می‌گیرد. */
+  const OWNER_CANCEL_HOURS = 4;
+  const hoursToStart = (b: Booking) =>
+    (bookingStartsAt(b.bookingDate, b.timeSlots ?? null).getTime() - Date.now()) / 3_600_000;
+  const canOwnerCancel = (b: Booking) => hoursToStart(b) >= OWNER_CANCEL_HOURS;
+
   const updateBookingStatus = async (id: string, status: string) => {
     setBookingsError('');
     try {
@@ -1523,7 +1532,12 @@ export default function ClubDashboardPage() {
           مالک باید بداند باشگاهش منتشر شده یا نه، و اگر رد شده چرا.
           پیش‌تر هیچ‌کدام نمایش داده نمی‌شد: باشگاه ثبت می‌شد، در سایت
           دیده نمی‌شد، و مالک دلیلش را نمی‌دانست. */}
-      {selectedClub && selectedClub.verificationStatus !== 'verified' && (
+      {/* ⚠️ ادمین دو نوع تأیید دارد: «تأیید و اعطای تیک» که
+          `verified` می‌شود، و «تأیید بدون تیک آبی» که `approved`.
+          این نوار فقط اولی را می‌شناخت، پس باشگاهی که با دومی تأیید
+          شده بود همچنان «در انتظار بررسی» می‌دید — در حالی که در سایت
+          منتشر شده بود. */}
+      {selectedClub && !['verified', 'approved'].includes(selectedClub.verificationStatus ?? '') && (
         <div style={{
           marginBottom: 16, padding: '13px 16px', borderRadius: 14, lineHeight: 2,
           fontSize: 12.5, fontWeight: 600,
@@ -1659,11 +1673,11 @@ export default function ClubDashboardPage() {
                         border: '1px solid rgba(48,197,90,0.28)', borderRadius: 20,
                         padding: '6px 13px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
                       }}><CheckCircle size={12} /> تأیید</button>
-                      <button onClick={() => updateBookingStatus(b.id, 'cancelled')} style={{
+                      <button onClick={() => updateBookingStatus(b.id, 'cancelled')} disabled={!canOwnerCancel(b)} title={canOwnerCancel(b) ? '' : 'لغو تنها تا ۴ ساعت پیش از شروع رزرو ممکن است'} style={{ opacity: canOwnerCancel(b) ? 1 : 0.45, cursor: canOwnerCancel(b) ? 'pointer' : 'not-allowed',
                         display: 'inline-flex', alignItems: 'center', gap: 4,
                         background: 'rgba(239,68,68,0.09)', color: '#dc2626',
                         border: '1px solid rgba(239,68,68,0.28)', borderRadius: 20,
-                        padding: '6px 13px', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
+                        padding: '6px 13px', fontSize: 12, fontFamily: 'var(--font-base)', fontWeight: 700,
                       }}><XCircle size={12} /> رد</button>
                     </div>
                   </div>
@@ -2867,11 +2881,11 @@ export default function ClubDashboardPage() {
                         border: '1px solid rgba(48,197,90,0.28)', borderRadius: 20,
                         padding: '9px 0', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
                       }}><CheckCircle size={14} /> تأیید</button>
-                      <button onClick={() => updateBookingStatus(b.id, 'cancelled')} style={{
+                      <button onClick={() => updateBookingStatus(b.id, 'cancelled')} disabled={!canOwnerCancel(b)} title={canOwnerCancel(b) ? '' : 'لغو تنها تا ۴ ساعت پیش از شروع رزرو ممکن است'} style={{ opacity: canOwnerCancel(b) ? 1 : 0.45, cursor: canOwnerCancel(b) ? 'pointer' : 'not-allowed',
                         flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                         background: 'rgba(239,68,68,0.09)', color: '#dc2626',
                         border: '1px solid rgba(239,68,68,0.28)', borderRadius: 20,
-                        padding: '9px 0', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-base)', fontWeight: 700,
+                        padding: '9px 0', fontSize: 13, fontFamily: 'var(--font-base)', fontWeight: 700,
                       }}><XCircle size={14} /> رد</button>
                     </div>
                   )}

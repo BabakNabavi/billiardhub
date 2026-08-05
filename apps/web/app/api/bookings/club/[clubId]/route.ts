@@ -32,7 +32,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ club
     return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } });
   }
 
-  const rows = (data ?? []) as Record<string, unknown>[];
+  /* ── رزروِ پرداخت‌نشده رزرو نیست ──
+     تا امروز همه‌ی ردیف‌ها برمی‌گشتند، از جمله آن‌هایی که کاربر شروع
+     کرده و به درگاه نرفته یا پرداختش نگرفته. باشگاه‌دار آن‌ها را در
+     فهرست می‌دید و می‌توانست «تأیید» یا «لغو» بزند — یعنی رزروی را
+     قطعی کند که هیچ پولی بابتش نیامده، یا رزروی را «لغو» کند که
+     اصلاً وجود نداشت.
+
+     این ردیف‌ها خودشان بعد از ده دقیقه منقضی می‌شوند و ساعتشان آزاد
+     می‌گردد؛ تا آن لحظه هم کارِ باشگاه‌دار نیستند.
+
+     ردیف‌های قدیمی این ستون‌ها را ندارند و نباید ناپدید شوند، پس شرط
+     فقط وقتی اعمال می‌شود که ستون مقداری داشته باشد. */
+  const rows = ((data ?? []) as Record<string, unknown>[]).filter(r => {
+    const bs = String(r.booking_status ?? '');
+    const ps = String(r.payment_status ?? '');
+    if (bs === 'PENDING_PAYMENT') return false;
+    if (ps === 'UNPAID' && bs !== 'CANCELLED') return false;
+    return true;
+  });
 
   /* نام و شماره‌ی رزروکننده — باشگاه‌دار باید بداند چه کسی می‌آید.
      در یک کوئری، نه یکی به‌ازای هر رزرو. */

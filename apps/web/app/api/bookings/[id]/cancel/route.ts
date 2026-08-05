@@ -30,11 +30,29 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (b.booking_status === 'CANCELLED') return NextResponse.json({ message: 'این رزرو قبلاً کنسل شده است' }, { status: 409 });
   if (b.booking_status === 'COMPLETED') return NextResponse.json({ message: 'رزرو انجام‌شده قابل کنسل نیست' }, { status: 409 });
 
-  /* طبق قوانین: لغو فقط تا ۲ ساعت پیش از شروع. مالک باشگاه و ادمین مستثنا هستند
-     (لغو از سوی باشگاه، طبق همان بند، با بازگشت وجه انجام می‌شود). */
+  /* طبق قوانین: لغو فقط تا ۲ ساعت پیش از شروع. ادمین مستثناست. */
   const startsAt = bookingStartsAt(b.bookingDate, b.timeSlots);
   if (!admin && !owner && !canCancelAt(startsAt)) {
     return NextResponse.json({ message: 'مهلت لغو گذشته است؛ رزرو تنها تا ۲ ساعت پیش از زمان شروع قابل لغو است' }, { status: 409 });
+  }
+
+  /* ── مهلتِ باشگاه‌دار ──
+     مالک تا امروز هیچ محدودیتی نداشت و می‌توانست رزروِ پرداخت‌شده را
+     حتی یک دقیقه پیش از شروع لغو کند. برای مشتری‌ای که پول داده و
+     خودش را رسانده، آن یعنی از دست دادنِ کلِ برنامه‌اش.
+
+     چهار ساعت مرزِ منطقی است: باشگاه‌دار زودتر می‌داند میزش خراب شده
+     یا مشکلی هست، و مشتری هنوز فرصتِ برنامه‌ریزیِ دوباره دارد. */
+  const OWNER_CANCEL_HOURS = 4;
+  if (owner && !admin) {
+    const hoursLeft = (startsAt.getTime() - Date.now()) / 3_600_000;
+    if (hoursLeft < OWNER_CANCEL_HOURS) {
+      return NextResponse.json({
+        message: hoursLeft < 0
+          ? 'زمان این رزرو گذشته است و دیگر قابل لغو نیست.'
+          : 'لغو از سوی باشگاه تنها تا ۴ ساعت پیش از شروع رزرو ممکن است. برای موارد اضطراری با پشتیبانی تماس بگیرید.',
+      }, { status: 409 });
+    }
   }
 
   const body = await req.json().catch(() => ({}));

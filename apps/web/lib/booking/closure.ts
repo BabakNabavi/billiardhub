@@ -159,13 +159,20 @@ export function isOptionDisabled(opt: ClosureOption | 'today', s: ClosureState, 
 export function closureLabel(s: ClosureState): string {
   if (s.always) return 'رزرو آنلاین همیشه بسته است'
   if (s.untilMs !== null) {
-    const until = new Date(s.untilMs).toLocaleString('fa-IR', {
-      timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit',
+    /* ── چرا فقط تاریخ، نه ساعت ──
+       قفل تا **پایانِ** آن روز ادامه دارد، ولی ساعتِ نمایش‌داده‌شده
+       لحظه‌ی پایانِ بازه بود — مثلاً «۱۴/۰۵ ۲۰:۳۰». کاربر آن را
+       «ساعت ۲۰:۳۰ باز می‌شود» می‌خواند، که درست نیست.
+
+       تاریخ تنها، به‌علاوه‌ی «تا پایان شب»، همان چیزی است که واقعاً
+       رخ می‌دهد. */
+    const until = new Date(s.untilMs).toLocaleDateString('fa-IR', {
+      timeZone: 'Asia/Tehran', day: '2-digit', month: 'long',
     })
     return s.closeToday
-      ? `رزرو تا ${until} بسته است — و امروز همیشه بسته می‌ماند`
-      : `رزرو تا ${until} بسته است`
+      ? `رزرو تا پایان ${until} (ساعت ۱۲ شب) بسته است — و امروز همیشه بسته می‌ماند`
+      : `رزرو تا پایان ${until} (ساعت ۱۲ شب) بسته است`
   }
-  if (s.closeToday) return 'رزرو امروز بسته است — روزهای آینده باز'
+  if (s.closeToday) return 'رزرو امروز تا ساعت ۱۲ شب بسته است — روزهای آینده باز'
   return 'رزرو آنلاین باز است'
 }
